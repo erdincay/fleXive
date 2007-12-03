@@ -575,49 +575,6 @@ database.password=a
 
     <!-- ============================= Plugin targets ================================ -->
 
-    <macrodef name="buildPluginJar">
-        <attribute name="name"/>
-        <attribute name="srcdir"/>
-        <attribute name="jarfile"/>
-        <sequential>
-            <makeMessages srcdir="@{srcdir}/resources/messages" dest="${build.ui.components.dir}/@{name}/PluginMessages"/>
-            <jar jarfile="@{jarfile}">
-                <fileset dir="@{srcdir}/resources" includes="META-INF/**/*,templates/**/*"/>
-                <fileset dir="${build.ui.components.dir}/@{name}" includes="*.properties"/>
-                <fileset dir="${build.ui.components.dir}/@{name}/classes"/>
-                <fileset dir="@{srcdir}/resources/weblets" includes="**/*"/>
-                <fileset dir="@{srcdir}/web" includes="**/*"/>
-            </jar>
-        </sequential>
-    </macrodef>
-
-    <macrodef name="compilePlugin">
-        <attribute name="name"/>
-        <attribute name="srcdir"/>
-        <sequential>
-            <mkdir dir="${build.ui.components.dir}/@{name}"/>
-            <javac-call
-                srcdir="@{srcdir}/src/java"
-                destdir="${build.ui.components.dir}/@{name}/classes">
-                <classpath>
-                    <path path="${build.framework.classes.dir}"/>
-                    <path path="${build.ui.shared.classes.dir}"/>
-                    <path path="${build.ui.components.dir}/jsf-core/classes"/>
-                </classpath>
-                <classpath refid="classpath.build.framework"/>
-            </javac-call>
-        </sequential>
-    </macrodef>
-
-    <macrodef name="buildPlugin">
-        <attribute name="name"/>
-        <attribute name="srcdir"/>
-        <sequential>
-            <compilePlugin name="@{name}" srcdir="@{srcdir}"/>
-            <buildPluginJar name="@{name}" jarfile="${build.ui.jar.dir}/flexive-plugin-@{name}.jar" srcdir="@{srcdir}"/>
-        </sequential>
-    </macrodef>
-
     <target name="jar.jsf.components" depends="compile.ui.shared">
         <buildPlugin name="jsf-core" srcdir="${flexive.base.ui.components.dir}"/>
         <buildPlugin name="jsf-testrunner" srcdir="${flexive.base.ui.dir}/jsf-testrunner"/>
