@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE facelet-taglib PUBLIC
+  "-//Sun Microsystems, Inc.//DTD Facelet Taglib 1.0//EN"
+  "http://java.sun.com/dtd/facelet-taglib_1_0.dtd">
+<facelet-taglib xmlns="http://java.sun.com/JSF/Facelet">
+	<namespace>https://ajax4jsf.dev.java.net/ajax</namespace>
+ 		  <tag>
+  <tag-name>ajaxListener</tag-name>
+		    <handler-class>
+				org.ajax4jsf.tag.AjaxListenerHandler
+			</handler-class>
+	
+ </tag>
+ <tag>
+  <tag-name>facet</tag-name>
+		    <handler-class>
+				org.ajax4jsf.tag.FacetHandler
+			</handler-class>
+	
+ </tag>
+ 	 <tag>
+  <tag-name>region</tag-name>
+  <component>
+			<component-type>org.ajax4jsf.ajax.AjaxRegion</component-type>
+			<renderer-type>
+				org.ajax4jsf.components.AjaxRegionRenderer
+			</renderer-type>
+  </component>
+	
+ </tag>
+ <tag>
+  <tag-name>page</tag-name>
+  <component>
+			<component-type>org.ajax4jsf.components.Page</component-type>
+			<renderer-type>
+				org.ajax4jsf.components.AjaxPageRenderer
+			</renderer-type>
+  </component>
+	
+ </tag>
+ <tag>
+  <tag-name>support</tag-name>
+  <component>
+			<component-type>org.ajax4jsf.ajax.Support</component-type>
+			<renderer-type>
+				org.ajax4jsf.components.AjaxSupportRenderer
+			</renderer-type>
+		    <handler-class>
+				org.ajax4jsf.tag.AjaxSupportHandler
+			</handler-class>
+  </component>
+	
+ </tag>
+ <tag>
+  <tag-name>commandLink</tag-name>
+  <component>
+			<component-type>org.ajax4jsf.ajax.CommandLink</component-type>
+			<renderer-type>
+				org.ajax4jsf.components.AjaxCommandLinkRenderer
+			</renderer-type>
+		    <handler-class>
+				org.ajax4jsf.tag.AjaxComponentHandler
+			</handler-class>
+  </component>
+	
+ </tag>
+ <tag>
+  <tag-name>commandButton</tag-name>
+  <component>
+			<component-type>org.ajax4jsf.ajax.CommandButton</component-type>
+			<renderer-type>
+				org.ajax4jsf.components.AjaxCommandButtonRenderer
+			</renderer-type>
+		    <handler-class>
+				org.ajax4jsf.tag.AjaxComponentHandler
+			</handler-class>
+  </component>
+	
+ </tag>
+ <tag>
+  <tag-name>outputPanel</tag-name>
+  <component>
+			<component-type>org.ajax4jsf.ajax.OutputPanel</component-type>
+			<renderer-type>
+				org.ajax4jsf.components.AjaxOutputPanelRenderer
+			</renderer-type>
+  </component>
+	
+ </tag>
+ <tag>
+  <tag-name>actionparam</tag-name>
+  <component>
+			<component-type>org.ajax4jsf.ajax.ActionParameter</component-type>
+		    <handler-class>
+				org.ajax4jsf.tag.ActionParamHandler
+			</handler-class>
+  </component>
+	
+ </tag>
+ <tag>
+  <tag-name>status</tag-name>
+  <component>
+			<component-type>org.ajax4jsf.ajax.Status</component-type>
+			<renderer-type>
+				org.ajax4jsf.components.AjaxStatusRenderer
+			</renderer-type>
+  </component>
+	
+ </tag>
+ <tag>
+  <tag-name>loadBundle</tag-name>
+  <component>
+			<component-type>org.ajax4jsf.ajax.Bundle</component-type>
+  </component>
+	
+ </tag>
+ <tag>
+  <tag-name>mediaOutput</tag-name>
+  <component>
+			<component-type>org.ajax4jsf.MediaOutput</component-type>
+			<renderer-type>
+				org.ajax4jsf.MediaOutputRenderer
+			</renderer-type>
+		    <handler-class>
+				org.ajax4jsf.tag.MediaOutputHandler
+			</handler-class>
+  </component>
+	
+ </tag>
+ <tag>
+  <tag-name>log</tag-name>
+  <component>
+			<component-type>org.ajax4jsf.Log</component-type>
+			<renderer-type>
+				org.ajax4jsf.LogRenderer
+			</renderer-type>
+  </component>
+	
+ </tag>
+ <tag>
+  <tag-name>form</tag-name>
+  <component>
+			<component-type>org.ajax4jsf.Form</component-type>
+			<renderer-type>
+				org.ajax4jsf.FormRenderer
+			</renderer-type>
+  </component>
+	
+ </tag>
+ <tag>
+  <tag-name>htmlCommandLink</tag-name>
+  <component>
+			<component-type>javax.faces.HtmlCommandLink</component-type>
+			<renderer-type>
+				org.ajax4jsf.HtmlCommandLinkRenderer
+			</renderer-type>
+  </component>
+	
+ </tag>
+</facelet-taglib>

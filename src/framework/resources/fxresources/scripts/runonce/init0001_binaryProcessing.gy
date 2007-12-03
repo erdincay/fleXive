@@ -1,0 +1,12 @@
+import com.flexive.shared.scripting.FxScriptType
+import com.flexive.shared.EJBLookup
+
+EJBLookup.getScriptingEngine().createScriptFromLibrary(FxScriptType.BinaryPreviewProcess,
+    "BinaryProcessor_Images.gy",
+    "BinaryProcessor_Images.gy",
+    "Binary processing for images")
+
+EJBLookup.getScriptingEngine().createScriptFromLibrary(FxScriptType.BinaryPreviewProcess,
+    "BinaryProcessor_Documents.gy",
+    "BinaryProcessor_Documents.gy",
+    "Binary processing for documents")

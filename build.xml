@@ -1,0 +1,626 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="flexive" default="all" basedir=".">
+
+	<!-- ========================== properties ========================== -->
+
+	<property name="product" value="flexive3"/>
+
+	<property file="build.properties"/>
+	<property file="flexive.properties"/>
+
+    <property name="flexive.basedir" value="${basedir}"/>
+    <import file="build.shared-properties.xml"/>
+
+	<property name="resources.ui.jsf.dir" value="${flexive.base.ui.jsf.dir}/resources"/>
+	<property name="resources.ui.shared.dir" value="${flexive.base.ui.shared.dir}/resources"/>
+	<property name="build.framework.classes.dir" value="${flexive.base.build.dir}/framework/classes"/>
+	<property name="build.ui.classes.dir" value="${flexive.base.build.dir}/ui/classes"/>
+    <property name="build.ui.shared.classes.dir" value="${flexive.base.build.dir}/ui/sharedclasses"/>
+    <property name="build.ui.components.dir" value="${flexive.base.build.dir}/ui-components"/>
+    <property name="build.ui.jar.dir" value="${flexive.base.build.dir}/ui/jar"/>
+	<property name="build.ui.meta.dir" value="${flexive.base.build.dir}/ui/jar/WEB-INF"/>
+    <property name="build.ui.components.meta.dir" value="${flexive.base.build.dir}/ui/jar/components/WEB-INF"/>
+    <property name="shared.meta.dir" value="${flexive.build.framework.jar.dir}/shared.meta"/>
+    <property name="mysql.src.dir" value="${flexive.resources.framework.dir}/sql/MySQL"/>
+    <property name="mysql.classpathref" value="classpath.build.framework"/>
+
+    <property name="web.ui.dojo.baseName" value="dojo-flexive"/>
+
+	<property name="invalid.path" value="${flexive.base.build.dir}/temp"/>
+
+    <property name="merge.ui.jsf.dir" value="${flexive.base.ui.jsf.dir}/resources/merge"/>
+
+	<property name="sqlparser.jar" value="flexive-sqlParser.jar"/>
+	<property name="extractor.jar" value="flexive-extractor.jar"/>
+
+    <!-- check if sqlParser has been run -->
+	<available file="${flexive.lib.dir}/${sqlparser.jar}" property="missing.parsers"/>
+
+	<!-- javac options -->
+	<property name="compiler.deprecation" value="on"/>
+	<property name="compiler.optimize" value="on"/>
+	<property name="compiler.debug" value="on"/>
+	<property name="compiler.source" value="1.5"/>
+	<property name="compiler.target" value="1.5"/>
+
+
+	<!-- ========================== paths =============================== -->
+
+	<!-- classpath needed to compile the core framework -->
+	<path id="classpath.build.framework">
+        <fileset dir="${flexive.lib.dir}/jsf" includes="*.jar"/>
+		<fileset dir="${flexive.lib.dir}" includes="*.jar" excludes="qdox.jar"/>
+		<fileset dir="${flexive.lib.dir}/text_extraction" includes="*.jar"/>
+        <fileset dir="${flexive.lib.dir}/ajax4jsf" includes="*.jar"/>
+        <fileset dir="${flexive.lib.dir}/xstream" includes="*.jar"/>
+        <fileset dir="${flexive.lib.dir}/groovy" includes="*.jar"/>
+        <fileset dir="${flexive.lib.dir}/mail" includes="*.jar"/>
+    </path>
+
+	<fileset id="jar.ejb.classes" dir="${build.framework.classes.dir}">
+		<include name="com/flexive/core/**"/>
+		<include name="com/flexive/ejb/**"/>
+		<include name="*.properties"/>
+        <include name="**/*.flexive"/>
+    </fileset>
+    <fileset id="jar.ejb.resources" dir="${flexive.resources.framework.dir}">
+		<include name="embeddedJBossCacheConfig.xml"/>
+        <include name="fxresources/**"/>
+    </fileset>
+
+	<!-- ========================== tasks / macros ====================== -->
+    <taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc" classpathref="classpath.build.framework"/>
+    <taskdef name="groovy" classname="org.codehaus.groovy.ant.Groovy" classpathref="classpath.build.framework"/>
+
+    <macrodef name="javac-call">
+		<attribute name="srcdir"/>
+		<attribute name="destdir"/>
+		<attribute name="excludes" default="NONE"/>
+		<attribute name="includes" default="**/*.java"/>
+		<element name="args" optional="true" implicit="true"/>
+		<sequential>
+			<mkdir dir="@{destdir}"/>
+			<javac  srcdir="@{srcdir}"
+                    destdir="@{destdir}"
+                    debug="${compiler.debug}"
+                    deprecation="${compiler.deprecation}"
+                    optimize="${compiler.optimize}"
+                    includes="@{includes}"
+                    excludes="@{excludes}"
+                    source="${compiler.source}"
+                    target="${compiler.target}">
+				<args/>
+				<!--compilerarg value="-Xlint"/-->
+			</javac>
+		</sequential>
+	</macrodef>
+
+    <!-- ========================== imports ============================= -->
+	<import file="build.tests.xml"/>
+    <import file="build.javadoc.xml"/>
+    <import file="build.macros.xml"/>
+
+    <!-- ========================== targets ============================= -->
+
+    <target name="init" unless="init.done">
+        <groovy src="buildTasks.groovy"/>
+        <!-- Ensure init is called only once because the groovy task cannot be redefined -->
+        <property name="init.done" value="true"/>
+    </target>
+
+    <target name="clean" description="Clean everything but parsers">
+		<delete dir="${flexive.base.build.dir}"/>
+		<delete dir="${base.reports.dir}"/>
+		<delete dir="${flexive.dist.dir}"/>
+	</target>
+
+	<target name="clean.all" depends="clean.parsers" description="Clean everything">
+		<delete dir="${flexive.base.build.dir}"/>
+		<delete dir="${base.reports.dir}"/>
+	</target>
+
+	<target name="prepare" description="Prepare build directory structures" depends="init" unless="prepare.done">
+        <groovy>
+            def file = properties.basedir+File.separatorChar+"build.properties"
+            if( !new File(file).exists() ) {
+                ant.fail(message:"Please create a customized ${file} file from build.properties.sample.")
+            }
+        </groovy>
+		<mkdir dir="${build.framework.classes.dir}"/>
+		<mkdir dir="${build.ui.classes.dir}"/>
+        <mkdir dir="${build.ui.shared.classes.dir}"/>
+        <mkdir dir="${flexive.build.framework.jar.dir}"/>
+		<mkdir dir="${build.ui.jar.dir}"/>
+		<mkdir dir="${invalid.path}"/>
+        <javac-call srcdir="${flexive.src.framework.dir}"
+                    destdir="${build.framework.classes.dir}"
+                    includes="com/flexive/tools/**/*.java"/>
+        <jar jarfile="${flexive.build.framework.jar.dir}/flexive-ant.jar">
+            <fileset dir="${build.framework.classes.dir}">
+                <include name="com/flexive/tools/**/*"/>
+            </fileset>
+        </jar>
+        <taskdef name="applicationDescriptorBuilder"
+                 classname="com.flexive.tools.ant.ApplicationDescriptorBuilderTask"
+                 classpath="${flexive.build.framework.jar.dir}/flexive-ant.jar"/>
+        <taskdef name="scriptIndexBuilder"
+                 classname="com.flexive.tools.ant.ScriptIndexBuilderTask"
+                 classpath="${flexive.build.framework.jar.dir}/flexive-ant.jar"/>
+        <taskdef name="makeMessages"
+                 classname="com.flexive.tools.ant.MakeMessagesTask"
+                 classpath="${flexive.build.framework.jar.dir}/flexive-ant.jar"/>
+        <!-- Ensure prepare is called only once -->
+        <property name="prepare.done" value="true"/>
+    </target>
+
+
+	<target name="all" description="Clean and rebuild everything" depends="jar.all,jar.ear">
+	</target>
+
+	<!-- safety fallback that generates the parsers if they are missing -->
+	<target name="check.parsers" unless="missing.parsers" description="Check if SQL and HTML parsers have been built yet">
+		<echo message="Compiling and packaging SQL/HTML parser..."/>
+		<antcall target="gen.parsers"/>
+	</target>
+
+	<target name="clean.parsers" depends="init">
+		<delete dir="${build.framework.classes.dir}/com/flexive/sqlParser"/>
+		<delete file="${flexive.src.framework.dir}/com/flexive/sqlParser/ParseException.java"/>
+		<delete file="${flexive.src.framework.dir}/com/flexive/sqlParser/SimpleCharStream.java"/>
+		<delete file="${flexive.src.framework.dir}/com/flexive/sqlParser/SQL.java"/>
+		<delete file="${flexive.src.framework.dir}/com/flexive/sqlParser/SQLConstants.java"/>
+		<delete file="${flexive.src.framework.dir}/com/flexive/sqlParser/SQLTokenManager.java"/>
+		<delete file="${flexive.src.framework.dir}/com/flexive/sqlParser/Token.java"/>
+
+		<delete file="${flexive.src.framework.dir}/com/flexive/extractor/htmlExtractor/HtmlExtractorParser.java"/>
+		<delete file="${flexive.src.framework.dir}/com/flexive/extractor/htmlExtractor/HtmlExtractorParserConstants.java"/>
+		<delete file="${flexive.src.framework.dir}/com/flexive/extractor/htmlExtractor/HtmlExtractorParserTokenManager.java"/>
+		<delete file="${flexive.src.framework.dir}/com/flexive/extractor/htmlExtractor/ParseException.java"/>
+		<delete file="${flexive.src.framework.dir}/com/flexive/extractor/htmlExtractor/SimpleCharStream.java"/>
+		<delete file="${flexive.src.framework.dir}/com/flexive/extractor/htmlExtractor/Token.java"/>
+		<delete file="${flexive.src.framework.dir}/com/flexive/extractor/htmlExtractor/TokenMgrError.java"/>
+
+		<safeDelete file="${flexive.lib.dir}/${sqlparser.jar}"/>
+		<safeDelete file="${flexive.lib.dir}/${extractor.jar}"/>
+	</target>
+
+	<target name="gen.parsers" depends="clean.parsers, prepare" description="Generate SQL and HTML parsers">
+		<javacc
+                target="${flexive.src.framework.dir}/com/flexive/sqlParser/Parser.jj"
+                javacchome="${flexive.lib.dir}"
+                outputdirectory="${flexive.src.framework.dir}/com/flexive/sqlParser"
+        />
+		<javacc
+                target="${flexive.src.framework.dir}/com/flexive/extractor/htmlExtractor/htmlParser.jj"
+                javacchome="${flexive.lib.dir}"
+                outputdirectory="${flexive.src.framework.dir}/com/flexive/extractor/htmlExtractor"
+        />
+		<javac-call srcdir="${flexive.src.framework.dir}" destdir="${build.framework.classes.dir}">
+			<classpath refid="classpath.build.framework"/>
+		</javac-call>
+		<jar jarfile="${flexive.lib.dir}/${sqlparser.jar}">
+			<fileset dir="${build.framework.classes.dir}">
+				<include name="com/flexive/sqlParser/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Main-Class" value="com.flexive.sqlParser.consoleTest"/>
+			</manifest>
+		</jar>
+		<jar jarfile="${flexive.lib.dir}/${extractor.jar}">
+			<manifest>
+				<attribute name="Main-Class" value="com.flexive.extractor.htmlExtractor.consoleTest"/>
+			</manifest>
+            <fileset dir="${build.framework.classes.dir}">
+				<include name="com/flexive/extractor/**"/>
+			</fileset>
+        </jar>
+	</target>
+
+
+    <target name="htmlParserStandalone" depends="clean.parsers, prepare">
+		<javacc
+                target="${flexive.src.framework.dir}/com/flexive/extractor/htmlExtractor/htmlParser.jj"
+                javacchome="${flexive.lib.dir}"
+                outputdirectory="flexive.src.framework.dirwork.dir}/com/flexive/extractor/htmlExtractor"
+        />
+		<javac-call
+                srcdir="${flexive.src.framework.dir}"
+                includes="**/htmlExtractor/**"
+                destdir="${build.framework.classes.dir}">
+			<classpath refid="classpath.build.framework"/>
+        </javac-call>
+		<jar jarfile="${flexive.lib.dir}/${extractor.jar}">
+			<fileset dir="${build.framework.classes.dir}">
+				<include name="com/flexive/extractor/htmlExtractor/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Main-Class" value="com.flexive.extractor.htmlExtractor.consoleTest"/>
+			</manifest>
+		</jar>
+	</target>
+
+    <target name="compile.framework" depends="prepare, check.parsers" description="Compile the complete core framework">
+		<javac-call
+                srcdir="${flexive.src.framework.dir}"
+                destdir="${build.framework.classes.dir}"
+                excludes="**/sqlParser/**,**/extractor/**">
+			<classpath refid="classpath.build.framework"/>
+		</javac-call>
+	</target>
+
+	<target name="jar.framework" depends="jar.framework.shared, jar.ejb" description="Package the complete core framework">
+	</target>
+	
+	<target name="jar.framework.shared.prepare">
+		<uptodate property="jar.framework.shared.skip" targetfile="${flexive.build.framework.jar.dir}/flexive-shared.jar">
+			<srcfiles dir="${shared.meta.dir}" includes="**/*"/>
+			<srcfiles dir="${basedir}" includes="flexive.properties"/>
+			<srcfiles dir="${build.framework.classes.dir}" includes="com/flexive/shared/**"/>
+		</uptodate>
+	</target>
+	
+	<target name="jar.framework.shared" depends="compile.framework,jar.framework.shared.prepare" unless="jar.framework.shared.skip" description="Package the shared part of the framework">
+		<tstamp>
+			<format property="build.time" pattern="yyyy/MM/dd HH:mm" unit="hour"/>
+		</tstamp>
+        <svnVersion property="build.number"/>
+
+        <delete dir="${shared.meta.dir}"/>
+		<mkdir dir="${shared.meta.dir}"/>
+
+		<copy file="${basedir}/flexive.properties" tofile="${shared.meta.dir}/flexive.properties" overwrite="true"/>
+        <replaceBuildProperties file="${shared.meta.dir}/flexive.properties" buildNumber="${build.number}" buildTime="${build.time}"/>
+        <makeMessages srcDir="${flexive.resources.framework.dir}/messages" dest="${shared.meta.dir}/FxExceptionMessages" srcPrefix="Ex"/>
+        <makeMessages srcDir="${flexive.resources.framework.dir}/messages" dest="${shared.meta.dir}/FxSharedMessages" srcPrefix="FxSharedMessages"/>
+        <makeMessages srcDir="${flexive.resources.framework.dir}/messages" dest="${shared.meta.dir}/Enum" srcPrefix="Enum"/>
+        <makeMessages srcDir="${flexive.resources.framework.dir}/messages" dest="${shared.meta.dir}/History" srcPrefix="History"/>
+
+		<emma enabled="${emma.enabled}">
+			<instr instrpath="${build.framework.classes.dir}"
+                   mode="overwrite"
+                   merge="false"
+                   metadatafile="${coverage.dir}/coverage.em">
+				<filter value="+com.flexive.shared.*"/>
+			</instr>
+		</emma>
+		<jar jarfile="${flexive.build.framework.jar.dir}/flexive-shared.jar" keepcompression="true">
+			<fileset dir="${build.framework.classes.dir}">
+				<include name="com/flexive/shared/**"/>
+			</fileset>
+			<zipfileset dir="${shared.meta.dir}" includes="FxExceptionMessages*.properties, FxSharedMessages*.properties, Enum*.properties, History*.properties, flexive.properties"/>
+        </jar>
+	</target>
+
+	<target name="compile.ui.shared" depends="jar.framework.shared" description="Compile the shared UI classes">
+		<javac-call
+                srcdir="${flexive.src.ui.shared.dir}"
+                destdir="${build.ui.shared.classes.dir}"
+                >
+			<classpath refid="classpath.build.framework"/>
+			<classpath>
+				<path path="${build.framework.classes.dir}"/>
+			</classpath>
+		</javac-call>
+        <makeMessages srcDir="${resources.ui.shared.dir}/messages" dest="${build.ui.meta.dir}/ApplicationMessages"/>
+	</target>
+
+    <target name="compile.ui" depends="compile.ui.shared,jar.jsf.components">
+        <property name="merge.ui.dir" value="${build.ui.jar.dir}/merge"/>
+		<delete dir="${merge.ui.dir}"/>
+
+        <echo message="Compiling JSF"/>
+        <javac-call
+                srcdir="${flexive.src.ui.jsf.dir}"
+                destdir="${build.ui.classes.dir}"
+                >
+            <classpath>
+                <path path="${build.framework.classes.dir}"/>
+                <path path="${build.ui.shared.classes.dir}"/>
+                <fileset dir="${build.ui.jar.dir}" includes="*.jar"/>
+            </classpath>
+            <classpath refid="classpath.build.framework"/>
+        </javac-call>
+    </target>
+
+	<target name="jar.ui" depends="compile.ui,jar.jsf.components">
+		<jar jarfile="${build.ui.jar.dir}/flexive-ui.jar">
+			<fileset dir="${build.ui.classes.dir}">
+                <include name="com/flexive/war/**/*"/>
+                <include name="org/apache/myfaces/webapp/filter/**/*"/>
+                <exclude name="com/flexive/war/webdav/**"/>
+			</fileset>
+            <fileset dir="${build.ui.meta.dir}">
+                <include name="ApplicationMessages*.properties"/>
+            </fileset>
+        </jar>
+        <jar jarfile="${build.ui.jar.dir}/flexive-ui-shared.jar">
+			<fileset dir="${build.ui.shared.classes.dir}">
+			</fileset>
+		</jar>
+        <emma enabled="${emma.enabled}">
+			<instr
+				instrpath="${build.ui.jar.dir}/flexive-ui.jar"
+				mode="overwrite"
+				merge="true"
+				metadatafile="${coverage.dir}/coverage.em">
+				<filter value="+com.flexive.war.*" />
+			</instr>
+		</emma>
+		<!-- assemble the flexive-webdav jar -->
+		<jar jarfile="${build.ui.jar.dir}/flexive-webdav.jar">
+			<fileset dir="${build.ui.shared.classes.dir}">
+				<include name="com/flexive/war/webdav/**"/>
+			</fileset>
+		</jar>
+		<war warfile="${flexive.base.build.dir}/ui/flexive.war" webxml="${resources.ui.jsf.dir}/web.xml" keepcompression="yes">
+			<!-- jsp,html,.. files -->
+			<fileset dir="${flexive.web.ui.shared.dir}">
+				<include name="**/*"/>
+			</fileset>
+            <fileset dir="${flexive.web.ui.jsf.dir}">
+                <include name="**/*"/>
+            </fileset>
+
+			<!-- JSF resources -->
+			<zipfileset dir="${resources.ui.jsf.dir}/WEB-INF" prefix="WEB-INF">
+	            <include name="faces-config.xml"/>
+	            <include name="flexive-admin.taglib.xml"/>
+                <include name="cms.taglib.xml"/>
+                <include name="flexive_jsf.tld"/>
+	            <include name="templates/**/*"/>
+                <include name="cmsTemplates/**/*"/>
+            </zipfileset>
+
+		    <!-- include dojo from ZIP file, install in /pub/js/dojo -->
+		    <zipfileset src="${flexive.base.ui.shared.dir}/resources/lib/dojo/${web.ui.dojo.baseName}.zip" prefix="pub/js/dojo">
+		        <include name="*"/>
+		        <include name="src/**/*"/>
+	        </zipfileset>
+            <zipfileset src="${flexive.base.ui.shared.dir}/resources/lib/dojo/${web.ui.dojo.baseName}Navigation.zip" prefix="pub/js/dojoNavigation">
+                <include name="*"/>
+                <include name="src/**/*"/>
+            </zipfileset>
+            <!-- explode TinyMCE editor files in /pub/js/tiny_mce -->
+            <zipfileset src="${flexive.base.ui.shared.dir}/resources/lib/tiny_mce.zip" prefix="pub/js">
+                <include name="**/*"/>
+            </zipfileset>
+        </war>
+	</target>
+
+	<target name="jar.ejb.prepare">
+		<uptodate targetfile="${flexive.build.framework.jar.dir}/flexive-ejb.jar" property="jar.ejb.skip">
+			<srcfiles refid="jar.ejb.classes"/>
+			<srcfiles refid="jar.ejb.resources"/>
+        </uptodate>
+	</target>
+		
+	<target name="jar.ejb" depends="compile.framework, jar.ejb.prepare" unless="jar.ejb.skip">
+        <scriptIndexBuilder indexFile="${build.framework.classes.dir}/fxresources/scripts/runonce/scriptindex.flexive"
+                            scriptDir="${flexive.resources.framework.dir}/fxresources/scripts/runonce"/>
+        <scriptIndexBuilder indexFile="${build.framework.classes.dir}/fxresources/scripts/startup/scriptindex.flexive"
+                            scriptDir="${flexive.resources.framework.dir}/fxresources/scripts/startup"/>
+        <scriptIndexBuilder indexFile="${build.framework.classes.dir}/fxresources/scripts/library/scriptindex.flexive"
+                            scriptDir="${flexive.resources.framework.dir}/fxresources/scripts/library"/>
+        <scriptIndexBuilder indexFile="${build.framework.classes.dir}/fxresources/binaries/thumbs/resourceindex.flexive"
+                            scriptDir="${flexive.resources.framework.dir}/fxresources/binaries/thumbs"/>
+        <jar jarfile="${flexive.build.framework.jar.dir}/flexive-ejb.jar">
+			<fileset refid="jar.ejb.classes"/>
+			<fileset refid="jar.ejb.resources"/>
+        </jar>
+		<emma enabled="${emma.enabled}">
+			<instr
+				instrpath="${flexive.build.framework.jar.dir}/flexive-ejb.jar"
+				mode="overwrite"
+				merge="true"
+				metadatafile="${coverage.dir}/coverage.em">
+				<filter excludes="*Test*" />
+				<filter value="+com.flexive.core.*, +com.flexive.ejb.beans.*" />
+			</instr>
+		</emma>
+	</target>
+
+    <target name="jar.tests" depends="tests.compile.all">
+        <jar file="${flexive.build.framework.jar.dir}/flexive-tests.jar">
+            <fileset dir="${tests.classes.dir}" includes="com/flexive/tests/**/*"/>
+        </jar>
+    </target>
+
+    <!--<target name="jar.all" depends="jar.framework, jar.ui, jar.tests"/>-->
+    <target name="jar.all" depends="jar.framework, jar.ui"/>
+    
+    <target name="jar.ear" depends="prepare" description="Assemble flexive.ear">
+        <applicationDescriptorBuilder dropDir="${flexive.drop.dir}" destFile="${flexive.base.build.dir}/application.xml" srcFile="${resources.ui.shared.dir}/application.xml"/>
+        <jar jarfile="${flexive.build.framework.jar.dir}/flexive-drop-resources.jar">
+            <fileset file="${flexive.drop.dir}/drops.archives"/>
+        </jar>
+        <jar jarfile="${flexive.base.build.dir}/flexive.ear" keepcompression="true">
+			<metainf dir="${flexive.base.build.dir}">
+				<include name="application.xml"/>
+			</metainf>
+			<fileset dir="${flexive.build.framework.jar.dir}" includes="*-ejb.jar,*.par"/>
+            <zipfileset prefix="lib" dir="${flexive.build.framework.jar.dir}" includes="*.jar" excludes="${sqlparser.jar},${htmlparser.jar},*-ejb.jar"/>
+            <fileset dir="${flexive.base.build.dir}/ui" includes="*.war"/>
+            <fileset dir="${flexive.drop.dir}" includes="*.war,*-ejb.jar,*.par"/>
+            <zipfileset prefix="lib" dir="${flexive.drop.dir}" includes="*.jar" excludes="*-ejb.jar"/>
+
+            <!-- Shared libraries -->
+            <zipfileset prefix="lib" dir="${flexive.lib.dir}" includes="${sqlparser.jar},${extractor.jar},fxStream.jar,fxTree.jar,commons-io-1.1.jar"/>
+            <zipfileset prefix="lib" dir="${flexive.lib.dir}/groovy" includes="*.jar"/>
+            <zipfileset prefix="lib" dir="${build.ui.jar.dir}" includes="*.jar"/>
+            <zipfileset prefix="lib" dir="${flexive.lib.dir}/xstream" includes="*.jar"/>
+            <zipfileset prefix="lib" file="${flexive.lib.dir}/fxStream.jar" includes="fxTree.jar,jsf173_1.0_api.jar,jtidy.jar"/>
+            <zipfileset prefix="lib" dir="${flexive.lib.dir}/mail" includes="*.jar"/>
+            <zipfileset prefix="lib" dir="${flexive.lib.dir}/text_extraction" includes="*.jar"/>
+            
+            <zipfileset prefix="lib" dir="${flexive.lib.dir}/jsf" includes="*.jar" excludes="jsf-api.jar, jsf-impl.jar"/>
+            <zipfileset prefix="lib" refid="flexive.lib.ui.ajax4jsf"/>
+            
+            <!-- uncomment to create lib folder in ear -->
+            <!--<zipfileset dir="${lib.dir}" prefix="lib">
+				<include name="${sqlparser.jar}"/>
+                <include name="${htmlparser.jar}"/>
+            </zipfileset>
+            <zipfileset dir="${lib.dir}/groovy" prefix="lib">
+				<include name="*.jar"/>
+			</zipfileset>
+            <zipfileset dir="${build.ui.jar.dir}" prefix="lib">
+				<include name="flexive-webdav.jar"/>
+                <include name="flexive-ui-shared.jar"/>
+            </zipfileset>-->
+        </jar>
+	</target>
+
+    <target name="build-deploy" depends="jar.all,jar.ear,deploy" description="Build the application and deploy flexive to an application server"/>
+
+	<target name="deploy" depends="jar.ear" description="Build a current EAR and deploy flexive to an application server">
+		<echo message="Deploying ${flexive.edition} ${flexive.version} ..."/>
+		<echo message="Warning: if you did run tests previously, call target 'clean' first or the applicationserver will fail due to EMMA dependencies!"/>
+		<copy file="${flexive.base.build.dir}/flexive.ear" toDir="${deploy.ear.path}" overwrite="true" failonerror="true"/>
+	</target>
+
+    <target name="db.noupdate" description="Skip db updates">
+        <property name="db.noupdate" value="1"/>
+        <echo message="Skipping database update!"/>
+    </target>
+
+    <target name="db.update" description="Update database (currently only MySQL)" depends="init" unless="db.noupdate">
+        <input taskname="flexive" addproperty="schema.name" defaultvalue="flexive"
+               message="Please enter the database schema you want to create or reset:"/>
+        <division-setup database="${schema.name}"/>
+        <globalconfig-setup />
+    </target>
+
+    <target name="db.update.test" description="Update test database (currently only MySQL)" depends="init" unless="db.noupdate">
+        <division-setup database="flexiveTest"/>
+    </target>
+
+    <target name="dist.prepare">
+        <delete dir="${flexive.dist.dir}"/>
+        <mkdir dir="${flexive.dist.dir}"/>
+    </target>
+
+    <target name="dist" depends="jar.all,dist.prepare,tests.dist" description="Build a distribution of all jars, wars and ears">
+        <!-- Create flexive distribution -->
+        <copy file="${flexive.lib.dir}/${sqlparser.jar}" tofile="${flexive.dist.lib.dir}/${sqlparser.jar}"/>
+		<copy file="${flexive.lib.dir}/${extractor.jar}" tofile="${flexive.dist.lib.dir}/${extractor.jar}"/>
+		<copy file="${flexive.build.framework.jar.dir}/flexive-ant.jar" tofile="${flexive.dist.lib.dir}/flexive-ant.jar"/>
+        <copy file="${flexive.build.framework.jar.dir}/flexive-shared.jar" tofile="${flexive.dist.lib.dir}/flexive-shared.jar"/>
+        <copy todir="${flexive.dist.lib.dir}">
+            <fileset dir="${build.ui.jar.dir}" includes="*.jar"/>
+        </copy>
+        <copy file="${flexive.build.framework.jar.dir}/flexive-ejb.jar" tofile="${flexive.dist.lib.dir}/flexive-ejb.jar"/>
+		<copy file="${flexive.base.build.dir}/ui/flexive.war" tofile="${flexive.dist.dir}/flexive.war"/>
+
+        <!-- Copy build environment to root dist folder -->
+        <copy todir="${flexive.dist.dir}">
+            <fileset dir="${basedir}/disttools" includes="*"/>
+            <fileset file="${basedir}/build.macros.xml"/>
+        </copy>
+
+        <!-- Copy template projects to templates/ -->
+        <copy todir="${flexive.dist.templates.dir}/template-component">
+            <fileset dir="${flexive.base.ui.dir}/template-component" includes="**/*" excludes=".svn,.SVN"/>
+        </copy>
+        <copy todir="${flexive.dist.templates.dir}/template-project">
+            <fileset dir="${flexive.basedir}/src/template-project" includes="**/*" excludes=".svn,.SVN"/>
+        </copy>
+
+        <!-- Copy third-party libraries to extlib/ -->
+        <copy todir="${flexive.dist.extlib.dir}">
+            <path refid="flexive.shared-libs.path"/>
+            <mapper type="flatten"/>
+        </copy>
+
+        <!-- Copy global deployment descriptots -->
+        <copy todir="${flexive.dist.meta.dir}">
+            <fileset file="${flexive.base.ui.shared.dir}/resources/application.xml"/>
+        </copy>
+        <!--<copy file="${flexive.base.build.dir}/flexive.ear" tofile="${flexive.dist.dir}/flexive.ear" overwrite="true"/>-->
+
+        <!-- Copy database setup scripts -->
+        <copy todir="${flexive.dist.sql.dir}">
+            <fileset dir="${mysql.src.dir}" includes="**/*"/>
+        </copy>
+        
+        <!-- Create a sample database.properties file -->
+        <echo file="${flexive.dist.dir}/database.properties">
+# This is the database configuration file used by the flexive setup tasks.
+#
+# Enter the settings for your database server connection to be used for development.
+
+# The server host or IP
+database.host=localhost
+# The server port
+database.port=3306
+# The user name and password to be used for creating flexive database structures
+database.username=root
+database.password=a
+        </echo>
+    </target>
+    
+    <target name="jar.webdavOnly">
+        <javac-call
+                srcdir="${flexive.src.ui.shared.dir}/com/flexive/war/webdav"
+                destdir="${build.framework.classes.dir}">
+            <classpath refid="classpath.build.framework"/>
+		</javac-call>
+        <mkdir dir="${build.ui.jar.dir}"/>
+        <jar jarfile="${build.ui.jar.dir}/flexive-webdav.jar">
+            <fileset dir="${build.ui.shared.classes.dir}">
+				<include name="com/flexive/war/webdav/**"/>
+			</fileset>
+        </jar>
+        <delete dir="${build.framework.classes.dir}/com/flexive/war/webdav"/>
+    </target>
+
+    <!-- ============================= Plugin targets ================================ -->
+
+    <macrodef name="buildPluginJar">
+        <attribute name="name"/>
+        <attribute name="srcdir"/>
+        <attribute name="jarfile"/>
+        <sequential>
+            <makeMessages srcdir="@{srcdir}/resources/messages" dest="${build.ui.components.dir}/@{name}/PluginMessages"/>
+            <jar jarfile="@{jarfile}">
+                <fileset dir="@{srcdir}/resources" includes="META-INF/**/*,templates/**/*"/>
+                <fileset dir="${build.ui.components.dir}/@{name}" includes="*.properties"/>
+                <fileset dir="${build.ui.components.dir}/@{name}/classes"/>
+                <fileset dir="@{srcdir}/resources/weblets" includes="**/*"/>
+                <fileset dir="@{srcdir}/web" includes="**/*"/>
+            </jar>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="compilePlugin">
+        <attribute name="name"/>
+        <attribute name="srcdir"/>
+        <sequential>
+            <mkdir dir="${build.ui.components.dir}/@{name}"/>
+            <javac-call
+                srcdir="@{srcdir}/src/java"
+                destdir="${build.ui.components.dir}/@{name}/classes">
+                <classpath>
+                    <path path="${build.framework.classes.dir}"/>
+                    <path path="${build.ui.shared.classes.dir}"/>
+                    <path path="${build.ui.components.dir}/jsf-core/classes"/>
+                </classpath>
+                <classpath refid="classpath.build.framework"/>
+            </javac-call>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="buildPlugin">
+        <attribute name="name"/>
+        <attribute name="srcdir"/>
+        <sequential>
+            <compilePlugin name="@{name}" srcdir="@{srcdir}"/>
+            <buildPluginJar name="@{name}" jarfile="${build.ui.jar.dir}/flexive-plugin-@{name}.jar" srcdir="@{srcdir}"/>
+        </sequential>
+    </macrodef>
+
+    <target name="jar.jsf.components" depends="compile.ui.shared">
+        <buildPlugin name="jsf-core" srcdir="${flexive.base.ui.components.dir}"/>
+        <buildPlugin name="jsf-testrunner" srcdir="${flexive.base.ui.dir}/jsf-testrunner"/>
+        <buildPlugin name="jsf-globalconfig" srcdir="${flexive.base.ui.dir}/jsf-globalconfig"/>
+    </target>
+</project>

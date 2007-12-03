@@ -1,0 +1,42 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:t="http://myfaces.apache.org/tomahawk">
+
+Adds a dynamic TAB to the [fleXive] backend tab-bar.
+The content of a dynamic tab is hidden when it is not active - no reload takes place when it gets the focus.
+
+<ui:composition>
+    <c:if test="${empty active}">
+        <c:set var="active" value="false" />
+    </c:if>
+    <c:if test="${empty label}">
+        <c:set var="label" value="&nbsp;" />
+    </c:if>
+    <c:set var="dstyle" value="display:inline" />
+    <c:if test="${active==false}">
+         <c:set var="dstyle" value="display:none" />
+    </c:if>
+
+    <h:commandLink style="display:none" id="#{id}" action="#{bean[action]}" onclick="parent.lockScreen();">
+    	<h:outputFormat value="#{label}">
+    		<ui:insert name="dynTabContent"/>
+    	</h:outputFormat>
+   	</h:commandLink>
+
+
+    <div id="#{id}_content" style="${dstyle}"><ui:insert/></div>
+
+    <script type="text/javascript" language="javascript">
+        parent.addDynTab('#{fxSystemBean.response.id}',this,'#{id}','<h:outputFormat value="#{label}"/>',#{active});
+        function tabClickFct#{id}() { eval(tabClickScript#{id}); }
+    </script>
+
+</ui:composition>
+
+</html>

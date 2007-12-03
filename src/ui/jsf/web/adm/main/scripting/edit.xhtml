@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:s="http://myfaces.apache.org/sandbox"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+    <ui:define name="head">
+
+        <script type="text/javascript">
+            dojo.require("dojo.widget.SortableTable");
+        </script>
+
+    </ui:define>
+
+    <ui:define name="body">
+        <h:form id="frm">
+            <adm:tab label="#{fxMessageBean['Script.tabtitle.edit,#{scriptBean.sinfo.name}']}" active="true" id="tab1"/>
+
+
+                <fx:formRow labelKey="Script.field.name" id="name">
+                    <h:inputText id="name" value="#{scriptBean.sinfo.name}" size="30"/>
+                    <!-- remember the script id -->
+                    <h:inputHidden value="#{scriptBean.id}"/>
+                </fx:formRow>
+
+
+                <fx:formRow labelKey="Script.field.type" id="type">
+                    <h:selectOneListbox id="type" value="#{scriptBean.sinfo.type}" size="1">
+                        <f:selectItems value="#{fxSelectBean.scriptTypes}"/>
+                    </h:selectOneListbox>
+                </fx:formRow>
+
+                <fx:formRow labelKey="Script.field.desc" id="desc">
+                    <h:inputText id="desc" value="#{scriptBean.sinfo.description}" size="50"/>
+                </fx:formRow>
+
+                <fx:formRow labelKey="Script.field.code" id="code">
+                    <h:inputTextarea id="code" value="#{scriptBean.sinfo.code}" cols="100" rows="25"/>
+                </fx:formRow>
+
+                <fx:formRow labelKey="Script.field.typeLinks">
+                    <c:forEach items="#{scriptBean.typeMappingNames}" var="mapTypes">
+                        <h:commandLink value="#{mapTypes.value}" actionListener="#{structureTreeControllerBean.structureOpener}"
+                                        action="#{typeEditorBean.showTypeEd}">
+                            <f:param name="oid" value="#{mapTypes.key}"/>
+                            <f:param name="action" value="RELOAD_EXPAND_TYPE"/>
+                        </h:commandLink>
+                        <br/>
+                    </c:forEach>
+                </fx:formRow>
+
+                <fx:formRow labelKey="Script.field.assLinks">
+                    <c:forEach items="#{scriptBean.mapping.mappedAssignments}" var="mapAss">
+                        <h:commandLink value="#{mapAss.scriptType}" actionListener="#{structureTreeControllerBean.structureOpener}"
+                                        action="#{typeEditorBean.showTypeEd}">
+                            <f:param name="oid" value="#{mapAss.id}"/>
+                            <f:param name="action" value="RELOAD_EXPAND_ASSIGNMENT"/>
+                        </h:commandLink>
+                        <br/>
+                    </c:forEach>
+                </fx:formRow>
+
+            <adm:commandButton id="saveButton" labelKey="Script.button.save"
+                               icon="save"  bean="#{scriptBean}" action="saveScript"/>
+
+            <adm:commandButton id="refreshButton" labelKey="Script.button.refresh"
+                               icon="reload"  bean="#{scriptBean}" action="editScript"/>
+
+            <adm:commandButton id="deleteButton" labelKey="Script.button.delete" confirm="Script.confirm.delete"
+                               icon="delete"  bean="#{scriptBean}" action="deleteScript"/>
+
+            <adm:commandButton id="cancelButton" labelKey="Script.button.cancel"
+                               icon="cancel" action="scriptOverview"/>
+            <adm:toolbarPluginButtons/>
+
+        </h:form>
+    </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

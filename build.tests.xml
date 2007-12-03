@@ -1,0 +1,438 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="flexive-tests" basedir=".">
+
+    <import file="build.shared-properties.xml"/>
+
+    <!-- ========================== properties ========================== -->
+
+    <property name="tests.framework.dir" value="${flexive.base.framework.dir}/tests/java"/>
+    <property name="tests.framework.groovy.dir" value="${flexive.base.framework.dir}/tests/groovy"/>
+
+    <property name="tests.jsf.dir" value="${flexive.base.ui.jsf.dir}/tests/java"/>
+    <property name="tests.jsf.groovy.dir" value="${flexive.base.ui.jsf.dir}/tests/groovy"/>
+
+    <property name="tests.jar.dir" value="${flexive.base.build.dir}/framework/testjar"/>
+    <property name="tests.resources.dir" value="${flexive.base.framework.dir}/testresources"/>
+    <property name="tests.classes.dir" value="${flexive.base.build.dir}/framework/testclasses"/>
+    <property name="base.reports.dir" value="${basedir}/reports"/>
+    <property name="emma.dir" value="${flexive.lib.dir}/emma"/>
+    <property name="coverage.dir" value="${base.reports.dir}/coverage"/>
+    <property name="testng.report.dir" value="${base.reports.dir}/testNG"/>
+    <property name="testng.suite.dir" value="Command line suite"/>
+    <property name="tests.users" value=""/>	<!-- set to "all" to enable all test users by default -->
+
+    <property name="debug.settings" value="-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=6006"/>
+    <property name="run.debug.settings" value=""/>
+    <property name="run.profile.settings" value=""/>
+
+    <property name="findbugs.dir" value="${flexive.lib.dir}/findbugs"/>
+    <property name="findbugs.xsl" value="${findbugs.dir}/src/xsl/fancy.xsl"/>
+    <property name="findbugs.report.dir" value="${base.reports.dir}/findbugs"/>
+
+    <property name="checkstyle.dir" value="${flexive.resources.framework.dir}/checkstyle"/>
+	<property name="checkstyle.config"	value="${checkstyle.dir}/flexive_checks.xml"/>
+	<property name="checkstyle.xsl" 	value="${checkstyle.dir}/checkstyle-frames.xsl"/>
+    <property name="checkstyle.report.dir" value="${base.reports.dir}/checkstyle"/>
+	
+	<property name="pmd.dir" value="${flexive.lib.dir}/pmd"/>
+	<property name="pmd.report.dir" value="${base.reports.dir}/pmd"/>
+
+    <!-- ========================== paths =============================== -->
+
+    <!-- paths -->
+    <path id="emma.lib">
+        <fileset dir="${emma.dir}" includes="*.jar"/>
+    </path>
+	
+	<path id="pmd.lib">
+		<fileset dir="${pmd.dir}" includes="*.jar"/>
+	</path>
+
+    <path id="build.classpath.testng">
+        <fileset dir="${flexive.lib.dir}" includes="*.jar" excludes="qdox.jar"/>
+        <fileset dir="${flexive.lib.dir}/testNG" includes="*.jar"/>
+        <fileset dir="${flexive.lib.dir}/xstream" includes="*.jar"/>
+        <path refid="emma.lib"/>
+    	<path path="${build.ui.classes.dir}"/>
+        <path path="${build.ui.shared.classes.dir}"/>
+        <fileset dir="${flexive.lib.dir}" includes="**/*.jar" excludes="pmd/*"/>
+    </path>
+
+    <path id="ejb3-embedded.classpath">
+        <path refid="flexive.ejb3-embedded.classpath"/>
+        <fileset dir="${flexive.lib.dir}/jsf" includes="*.jar"/>
+        <path refid="build.classpath.testng"/>
+        <path path="${build.ui.classes.dir}"/>
+    </path>
+
+    <!-- ========================== tasks / macros ====================== -->
+
+    <!-- tasks -->
+    <taskdef resource="emma_ant.properties" classpathref="emma.lib"/>
+    <taskdef resource="testngtasks" classpathref="build.classpath.testng"/>
+    <taskdef resource="checkstyletask.properties" classpath="${flexive.lib.dir}/checkstyle/checkstyle-all-4.1.jar"/>
+	<taskdef name="pmd"  classname="net.sourceforge.pmd.ant.PMDTask" classpathref="pmd.lib"/>
+    <taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask">
+        <classpath>
+            <fileset dir="${findbugs.dir}/lib" includes="*.jar"/>
+        </classpath>
+    </taskdef>
+
+    <macrodef name="runTests">
+        <attribute name="containerClasspathRef" default="build.classpath.testng"/>
+        <element name="body" optional="false" implicit="true"/>
+        
+        <sequential>
+            <copy file="${tests.resources.dir}/testlog4j.xml" todir="${tests.classes.dir}"/>
+            <testng classpathref="@{containerClasspathRef}"
+	                outputDir="${testng.report.dir}">
+	            <classpath>
+	                <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar, *.ejb3"/>
+	                <fileset dir="${build.ui.jar.dir}" includes="*.jar"/>
+                    <path path="${tests.classes.dir}"/>
+                </classpath>
+	            <jvmarg value="-Dtests.users=${tests.users}"/>
+                <jvmarg value="-Djava.net.preferIPv4Stack=true"/>
+                <jvmarg value="-Demma.coverage.out.file=${coverage.dir}/coverage.ec"/>
+	            <jvmarg value="-Demma.coverage.out.merge=true"/>
+                <!-- JDK6 classloader policy issue w/jboss embedded workaround -->
+                <jvmarg value="-Dsun.lang.ClassLoader.allowArraySyntax=true"/>
+                <jvmarg line="${run.debug.settings}"/>
+	            <jvmarg line="${run.profile.settings}"/>
+	            <!--Enable the following line for log output-->
+                <jvmarg value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
+                <jvmarg value="-Dlog4j.configuration=testlog4j.xml"/>
+	            <body/>
+	        </testng>
+            <junitreport todir="${testng.report.dir}">
+                <fileset dir="${testng.report.dir}/flexive">
+                    <include name="*.xml"/>
+                </fileset>
+                <report format="noframes" todir="${testng.report.dir}"/>
+            </junitreport>
+            <move file="${testng.report.dir}/junit-noframes.html" tofile="${testng.report.dir}/flexive/reporter-output.html" overwrite="true"/>
+        </sequential>
+    </macrodef>
+
+    <!-- Compile the groovy test folder for the given files -->
+    <macrodef name="groovyc-tests">
+        <attribute name="srcdir"/>
+        <attribute name="includes"/>
+
+        <sequential>
+            <groovyc srcdir="@{srcdir}" destdir="${tests.classes.dir}" classpathref="build.classpath.testng" includes="@{includes}">
+                <classpath>
+                    <path path="${build.framework.classes.dir}"/>
+                    <path path="${build.ui.classes.dir}"/>
+                    <path path="${build.ui.shared.classes.dir}"/>
+                    <path path="${tests.classes.dir}"/>
+                    <fileset dir="${build.ui.jar.dir}" includes="*.jar"/>
+                </classpath>
+            </groovyc>
+        </sequential>
+    </macrodef>
+
+    <!-- ========================== targets ============================= -->
+    <target name="emma.enable" if="tests.emma.enabled">
+        <groovy>
+            properties.'emma.enabled' = true
+        </groovy>
+        <delete file="${coverage.dir}/coverage.ec"/>
+        <mkdir dir="${coverage.dir}"/>
+        <echo message="EMMA coverage instrumentation will only be enabled"/>
+        <echo message="if target 'clean' has been called previously or on first-time builds!"/>
+    </target>
+    
+    <target name="profile.netbeans.enable" if="profile.netbeans.enabled">
+        <groovy>
+            properties.'run.profile.settings' = "-agentpath:${properties.'profile.netbeans.root'}/${properties.'profile.netbeans.agent'}=${properties.'profile.netbeans.root'}/lib,5140"
+        </groovy>
+        <echo message="Run settings: ${run.profile.settings}"/>
+    </target>
+
+	<target name="tests.compile.all" depends="tests.compile.shared,tests.compile.ejb,tests.compile.jsf,tests.compile.browser"/>
+
+    <target name="tests.dist" depends="tests.compile.all" description="Builds flexive-tests.jar in the distribution directory, including all testcases">
+        <mkdir dir="${flexive.dist.lib.dir}"/>
+        <jar destfile="${flexive.dist.lib.dir}/flexive-tests.jar">
+            <fileset dir="${tests.classes.dir}">
+                <include name="com/flexive/tests/**/*"/>
+                <include name="*.properties"/>
+            </fileset>
+        </jar>
+    </target>
+	
+    <target name="tests.prepare" depends="emma.enable, compile.ui.shared, profile.netbeans.enable">
+        <echo message="Preparing for tests ..."/>
+        <mkdir dir="${tests.classes.dir}"/>
+        <mkdir dir="${tests.jar.dir}"/>
+    </target>
+
+    <target name="tests.compile.shared" depends="tests.prepare, jar.framework.shared, compile.ui.shared">
+        <javac-call srcdir="${tests.framework.dir}/"
+               destdir="${tests.classes.dir}"
+	       	   includes="com/flexive/tests/shared/*.java">
+            <src path="${flexive.src.framework.dir}"/>
+<!--            <src path="${src.ui.shared.dir}"/>-->
+            <classpath refid="build.classpath.testng"/>
+        </javac-call>
+        <groovyc-tests srcdir="${tests.framework.groovy.dir}" includes="com/flexive/tests/shared/**/*"/>
+    </target>
+    
+    <target name="tests.compile.browser" depends="tests.prepare, jar.framework.shared, compile.ui.shared">
+        <javac-call srcdir="${tests.framework.dir}/"
+               destdir="${tests.classes.dir}"
+	       	   includes="com/flexive/tests/browser/*.java">
+            <src path="${flexive.src.framework.dir}"/>
+<!--            <src path="${src.ui.shared.dir}"/>-->
+            <classpath refid="build.classpath.testng"/>
+        </javac-call>
+        <copy todir="${tests.classes.dir}">
+            <fileset dir="${tests.framework.dir}/com/flexive/tests/browser">
+                <include name="*.properties"/>
+            </fileset>
+        </copy>
+        <!--<groovyc-tests srcdir="${tests.framework.groovy.dir}" includes="com/flexive/tests/shared/**/*"/>-->
+    </target>
+
+    <target name="tests.compile.ejb" depends="tests.prepare, jar.framework">
+        <javac-call srcdir="${tests.framework.dir}/"
+               destdir="${tests.classes.dir}"
+               includes="com/flexive/tests/embedded/**/*.java, com/flexive/tests/shared/*.java, com/flexive/tutorial/**/*.java"
+	       excludes="com/flexive/tests/embedded/jsf/**">
+            <classpath refid="ejb3-embedded.classpath"/>
+            <src path="${flexive.src.framework.dir}"/>
+<!--            <src path="${src.ui.shared.dir}"/>-->
+        </javac-call>
+        <groovyc-tests srcdir="${tests.framework.groovy.dir}" includes="com/flexive/tests/embedded/**/*, com/flexive/tests/shared/**/*"/>
+    </target>
+	
+	<target name="tests.compile.jsf" depends="tests.prepare,jar.ui,tests.compile.ejb">
+        <javac-call srcdir="${tests.jsf.dir}/"
+               destdir="${tests.classes.dir}"
+               includes="com/flexive/tests/**/jsf/**/*.java">
+            <classpath refid="ejb3-embedded.classpath"/>
+            <src path="${flexive.src.framework.dir}"/>
+            <src path="${flexive.src.ui.shared.dir}"/>
+            <classpath>
+                <fileset dir="${build.ui.jar.dir}" includes="*.jar"/>
+            </classpath>
+        </javac-call>
+        <groovyc-tests srcdir="${tests.jsf.groovy.dir}" includes="com/flexive/tests/**/jsf/**/*"/>
+    </target>
+
+	<!-- run all tests -->
+	<target name="tests.all" depends="tests.all.init, tests.groups.run, emma.report"/>
+	<target name="tests.all.init">
+        <groovy>
+            properties.'tests.groups' = "shared,ejb,jsf,tree"
+        </groovy>
+    </target>
+		
+    <!-- shared tests that don't need an EJB3 container -->
+    <target name="tests.shared" depends="tests.shared.run, emma.report"/>
+    <target name="tests.shared.run" depends="tests.compile.shared">
+        <runTests>
+            <xmlfileset dir="${tests.resources.dir}" includes="shared-tests.xml"/>
+        </runTests>
+    </target>
+
+    <target name="tests.ejb" depends="tests.ejb.run, emma.report"/>
+    <target name="tests.ejb.run" depends="tests.compile.ejb">
+        <runTests containerClasspathRef="ejb3-embedded.classpath">
+            <xmlfileset dir="${tests.resources.dir}" includes="ejb-tests.xml"/>
+		</runTests>            
+    </target>
+	
+	<target name="tests.jsf" depends="tests.jsf.run, emma.report"/>
+	<target name="tests.jsf.run" depends="tests.jsf.init, tests.groups.run"/>
+	<target name="tests.jsf.init" depends="tests.prepare,jar.ui, tests.compile.jsf">
+        <groovy>
+            properties.'tests.groups' = "jsf"
+        </groovy>
+    </target>
+    
+    <target name="tests.groups" depends="tests.groups.run,emma.report"/>
+    <target name="tests.groups.run" depends="tests.compile.all, db.update.test">
+    	<!-- Run a given test group (set via the tests.groups property, e.g. via -Dtests.groups=...) -->
+        <echo>Test groups can be specified in the tests.groups property,</echo>
+        <echo>e.g. "ant tests.groups -Dtests.groups=shared,configuration"</echo>
+        <echo>Running tests in group(s): ${tests.groups}</echo>
+        <copy file="${tests.resources.dir}/testlog4j.xml" todir="${tests.classes.dir}"/>
+        <testng classpathref="ejb3-embedded.classpath"
+                outputDir="${testng.report.dir}"
+                groups="${tests.groups}">
+            <classpath>
+                <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar, *.ejb3"/>
+                <fileset dir="${build.ui.jar.dir}" includes="*.jar"/>
+                <!--<fileset dir="${flexive.lib.dir}" includes="**/*.jar"/>-->
+                <!-- include .properties -->
+            	<path path="${build.ui.jar.dir}/WEB-INF"/>
+            	<path path="${tests.classes.dir}"/>
+            </classpath>
+            <jvmarg value="-Dtests.users=${tests.users}"/>
+            <jvmarg value="-Demma.coverage.out.file=${coverage.dir}/coverage.ec"/>
+            <jvmarg value="-Demma.coverage.out.merge=true"/>
+            <jvmarg line="${run.debug.settings}"/>
+            <jvmarg line="${run.profile.settings}"/>
+            <jvmarg value="-Djava.net.preferIPv4Stack=true"/>
+            <!-- JDK6 classloader policy issue w/jboss5 workaround -->
+            <jvmarg value="-Dsun.lang.ClassLoader.allowArraySyntax=true"/>
+            <jvmarg value="-Xmx512m"/>
+            <!--Enable the following line for log output-->
+            <jvmarg value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
+            <jvmarg value="-Dlog4j.configuration=testlog4j.xml"/>
+            <classfileset dir="${tests.classes.dir}" includes="com/flexive/tests/**/*.class"/>
+        </testng>
+        <junitreport todir="${testng.report.dir}">
+            <fileset dir="${testng.report.dir}/${testng.suite.dir}">
+                <include name="*.xml"/>
+            </fileset>
+            <report format="noframes" todir="${testng.report.dir}"/>
+        </junitreport>
+        <move file="${testng.report.dir}/junit-noframes.html" tofile="${testng.report.dir}/${testng.suite.dir}/reporter-output.html" overwrite="true"/>
+    </target>
+	
+	<target name="tests.debug.enable">
+        <groovy>
+            properties.'run.debug.settings' = properties.'debug.settings'
+        </groovy>
+    </target>
+    
+    <target name="tests.ejb.debug" depends="tests.compile.ejb,tests.debug.enable">
+        <antcall target="tests.ejb"/>
+    </target>
+
+    <!--
+    <target name="tests.disttools" depends="dist" description="Tests the disttool by creating a sample project">
+        <property name="flexive.test.disttools.dir" value="${flexive.base.build.dir}/disttools"/>
+        <delete dir="${flexive.test.disttools.dir}" failonerror="false"/>
+        <mkdir dir="${flexive.test.disttools.dir}"/>
+
+        <copy todir="${flexive.test.disttools.dir}/dist">
+            <fileset dir="${flexive.dist.dir}"/>
+        </copy>
+    </target>
+    -->
+
+     <target name="emma.report" description="Generate a coverage report" if="tests.emma.enabled">
+        <emma>
+            <report sourcepath="${flexive.src.framework.dir},${flexive.src.ui.shared.dir},${flexive.src.ui.jsf.dir}"
+                    sort="+block,+name,+method,+class"
+                    metrics="method:70,block:70,line:70,class:100"
+                    >
+                <infileset dir="${coverage.dir}" includes="*.em, *.ec"/>
+
+                <!-- for every type of report desired, configure a nested
+                     element; various report parameters
+                     can be inherited from the parent <report>
+                     and individually overridden for each report type:
+                -->
+                <txt outfile="${coverage.dir}/coverage.txt"
+                     depth="package"
+                     columns="class,method,block,line,name"
+                        />
+                <xml outfile="${coverage.dir}/coverage.xml"
+                     depth="package"
+                        />
+                <html outfile="${coverage.dir}/coverage.html"
+                      depth="method"
+                      columns="name,class,method,block,line"
+                        />
+            </report>
+        </emma>
+    </target>
+
+    <target name="emma.fetch">
+        <echo message="Fetching EMMA coverage information from application server..."/>
+        <emma>
+            <ctl connect="localhost:47653">
+                <command name="coverage.get" args="${coverage.dir}/coverage.ec,true,true"/>
+            </ctl>
+        </emma>
+    </target>
+
+    <target name="emma.reset">
+        <echo message="Resetting EMMA coverage information on application server..."/>
+        <delete dir="${coverage.dir}/_files"/>
+        <delete file="${coverage.dir}/coverage.html"/>
+        <delete file="${coverage.dir}/coverage.txt"/>
+        <delete file="${coverage.dir}/coverage.xml"/>
+        <delete file="${coverage.dir}/coverage.ec"/>
+        <emma>
+            <ctl connect="localhost:47653">
+                <command name="coverage.reset"/>
+            </ctl>
+        </emma>
+    </target>
+
+    <target name="checkstyle">
+		<delete dir="${checkstyle.report.dir}"/>
+        <mkdir dir="${checkstyle.report.dir}"/>
+        <checkstyle config="${checkstyle.config}" failonviolation="false" failureproperty="checkstyle.failed"
+                >
+			<fileset dir="${flexive.src.framework.dir}" includes="**/*.java" excludes="**/sqlParser/**"/>
+            <classpath>
+                <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar"/>
+                <fileset dir="${build.ui.jar.dir}" includes="*.jar"/>
+            </classpath>
+            <!--formatter type="plain"/-->
+			<formatter type="xml" toFile="${checkstyle.report.dir}/checkstyle_errors.xml"/>
+		</checkstyle>
+		<style in="${checkstyle.report.dir}/checkstyle_errors.xml" style="${checkstyle.xsl}" destdir="${checkstyle.report.dir}" out="${checkstyle.report.dir}/out">
+			<param name="output.dir" expression="${checkstyle.report.dir}"/>
+		</style>
+	</target>
+
+    <target name="findbugs" depends="jar.framework">
+        <delete dir="${findbugs.report.dir}"/>
+        <mkdir dir="${findbugs.report.dir}"/>
+		<findbugs output="xml:withMessages" home="${findbugs.dir}"
+		    outputFile="${findbugs.report.dir}/out.xml"
+		    jvmargs="-Xmx128M">
+        	<sourcePath path="${flexive.src.framework.dir}"/>
+		    <class location="${build.framework.classes.dir}"/>
+            <class location="${build.ui.classes.dir}"/>
+            <auxClasspath refid="classpath.build.framework"/>
+	    </findbugs>
+		<style in="${findbugs.report.dir}/out.xml" style="${findbugs.xsl}" destdir="${findbugs.report.dir}"
+		    out="${findbugs.report.dir}/report.html">
+			<param name="output.dir" expression="${findbugs.report.dir}"/>
+		</style>
+	</target>
+
+    <macrodef name="runPmd">
+        <attribute name="reportDir"/>
+        <attribute name="filesetId"/>
+        <sequential>
+            <mkdir dir="@{reportDir}"/>
+            <pmd targetjdk="1.5" shortFilenames="true" minimumPriority="3" rulesetfiles="${pmd.dir}/rules/flexive-common.xml">
+                <!-- Plain HTML formatter -->
+                <!--formatter type="html" toFile="@{reportDir}/pmd_report.html" linkPrefix="http://pmd.sourceforge.net/xref/"/-->
+			    <fileset refid="@{filesetId}"/>
+                <!-- XML formatter for XSLT processing -->
+                <formatter type="xml" toFile="@{reportDir}/out.xml"/>
+            </pmd>
+
+            <xslt in="@{reportDir}/out.xml" style="${pmd.dir}/xslt/corley-pmd-report.xslt" out="@{reportDir}/report.html" />
+            <xslt in="@{reportDir}/out.xml" style="${pmd.dir}/xslt/wz-pmd-report.xslt" out="@{reportDir}/report2.html" />
+            <copy todir="@{reportDir}">
+                <fileset dir="${pmd.dir}/xslt">
+                    <include name="*.js"/>
+                    <include name="*.css"/>
+                </fileset>
+            </copy>
+        </sequential>
+    </macrodef>
+
+    <target name="pmd">
+        <fileset id="framework" dir="${flexive.src.framework.dir}" includes="**/*.java" excludes="**/sqlParser/** **/extractor/htmlExtractor/**"/>
+        <fileset id="ui.shared" dir="${flexive.src.ui.shared.dir}" includes="**/*.java"/>
+        <fileset id="ui.jsf" dir="${flexive.src.ui.jsf.dir}" includes="**/*.java"/>
+        <runPmd reportDir="${pmd.report.dir}/framework" filesetId="framework"/>
+        <runPmd reportDir="${pmd.report.dir}/ui.shared" filesetId="ui.shared"/>
+        <runPmd reportDir="${pmd.report.dir}/ui.jsf" filesetId="ui.jsf"/>
+    </target>
+
+
+</project>

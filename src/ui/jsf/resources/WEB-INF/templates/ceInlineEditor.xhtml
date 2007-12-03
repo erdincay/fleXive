@@ -1,0 +1,213 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<ui:composition>
+<c:if test="#{page.ticket.guest==false}">
+<c:if test="#{inlineContentEditorBean.pageIsInitialized==false}">
+<script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/shared.js"></script>
+<script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/commandElement.js"></script>
+<script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/contentEditorInline.js"></script>
+<c:if test="#{fxSystemBean.browserAsString=='IE'}">
+    <script type="text/javascript">
+        fxIsIE = true;
+    </script>
+</c:if>
+<script type="text/javascript">
+    fxContext = '#{fxSystemBean.contextPath}';
+    fxNodeId  = '#{page.nodeId}';
+</script>
+<STYLE type="text/css">
+    #flexiveCmsMenu {
+    position:absolute;
+    top:0;
+    left:0;
+    background-color:#F9FCF1;
+    border:1px solid #444444;
+    padding:5px;
+    display:none
+    }
+    #flexiveCmsMenu a {
+    text-decoration:none;
+    }
+    #flexiveOptions {
+    vertical-align:middle;
+    text-align:center;
+    margin-top:0;
+    position:absolute;
+    top:5px;
+    right:10px;
+    padding-top:5px;
+    padding-bottom:5px;
+    width: 156px;
+    height: 16px;
+    background-image:url('#{fxSystemBean.contextPath}/adm/images/contentEditor/button.png');
+    border:0;
+    display:inline;
+    color:white;
+    font-size:11px;
+    }
+</STYLE>
+
+
+<div id="flexiveOptions">
+    <a href="#" onclick="toggleCmsElements()">
+        <t:graphicImage url="/adm/images/contentEditor/cmsMenu.png"
+                        alt="toggle CMS Menus"
+                        style="border:0;margin-right:10px;margin-left:10px;display:inline"/>
+
+    </a>
+    <a href="#{fxSystemBean.contextPath}/adm/main.jsf">
+        <t:graphicImage url="/adm/images/contentEditor/gotoBackend.png"
+                        alt="toggle CMS Menus"
+                        style="border:0;display:inline"/>
+    </a>
+    <span style="margin-left:10px;color:#333333;font:11px;display:inline;position:relative;top:-4px">User: #{page.ticket.userName}</span>
+</div>
+
+
+<div id="flexiveCmsMenu" cmsElement="true" style="color:#333333;font-size:11px;background-color:#F9FCF1;z-index:9999">
+<table cellpadding="0" cellspacing="0" style="font-size:12px;width:150px;border:0">
+<tr>
+    <td colspan="2" style="border:0;">
+        <span style="float:left">[fleXive] Editor</span>
+        <a href="#" onclick="return closeCmsMenu(event);" style="float:right;">x</a>
+    </td>
+</tr>
+<tr>
+    <td colspan="2" style="border-bottom:1px solid #444444;height:1px"><!-- __ --></td>
+</tr>
+<tr>
+    <td colspan="2" style="height:2px;border:0"><!-- __ --></td>
+</tr>
+<tr onclick="editInstance()"  style="cursor:pointer;" id="flexiveCmsMenu_edit"
+    onmouseover="highlight(this,true)" onmouseout="highlight(this,false)">
+    <td style="border:0">
+        <t:graphicImage url="/adm/images/contentEditor/edit.png"
+                        alt="edit"
+                        style="border:0;display:inline;padding:0;margin:0;"/>
+    </td>
+    <td style="border:0">Edit</td>
+</tr>
+<tr onclick="newInstance('ARTICLE',true)"  style="cursor:pointer;" id="flexiveCmsMenu_newBefore"
+    onmouseover="highlight(this,true)" onmouseout="highlight(this,false)">
+    <td style="border:0">
+        <t:graphicImage url="/adm/images/contentEditor/newBefore.png"
+                        alt="new before"
+                        style="border:0;display:inline;padding:0;margin:0;margin-left:3px"/>
+    </td>
+    <td style="border:0">New Before</td>
+</tr>
+<tr onclick="newInstance('ARTICLE',false)" style="cursor:pointer;" id="flexiveCmsMenu_newAfter"
+    onmouseover="highlight(this,true)" onmouseout="highlight(this,false)">
+    <td style="border:0">
+        <t:graphicImage url="/adm/images/contentEditor/newAfter.png"
+                        alt="new before"
+                        style="border:0;display:inline;padding:0;margin:0;margin-left:3px"/>
+    </td>
+    <td style="border:0">New After</td>
+</tr>
+<tr onclick="newInstance('ARTICLE',false)" style="cursor:pointer;" id="flexiveCmsMenu_new"
+    onmouseover="highlight(this,true)" onmouseout="highlight(this,false)">
+    <td style="border:0">
+        <t:graphicImage url="/adm/images/contentEditor/new.png"
+                        alt="new"
+                        style="border:0;display:inline;padding:0;margin:0;margin-left:3px"/>
+    </td>
+    <td style="border:0">New</td>
+</tr>
+
+<tr onclick="cutInstance()" style="cursor:pointer;" id="flexiveCmsMenu_cut"
+    onmouseover="highlight(this,true)" onmouseout="highlight(this,false)">
+    <td style="border:0">
+        <t:graphicImage url="/adm/images/contentEditor/cut.png"
+                        alt="Cut"
+                        style="border:0;display:inline;padding:0;margin:0;margin-left:3px"/>
+    </td>
+    <td style="border:0">Cut</td>
+</tr>
+
+<tr onclick="copyInstance()" style="cursor:pointer;" id="flexiveCmsMenu_copy"
+    onmouseover="highlight(this,true)" onmouseout="highlight(this,false)">
+    <td style="border:0">
+        <t:graphicImage url="/adm/images/contentEditor/copy.png"
+                        alt="Copy"
+                        style="border:0;display:inline;padding:0;margin:0;margin-left:3px"/>
+    </td>
+    <td style="border:0">Copy</td>
+</tr>
+
+
+<c:if test="#{inlineContentEditorBean.pasteEnabled}">
+    <tr>
+        <td colspan="2" style="height:1px;border:0"><!-- __ --></td>
+    </tr>
+    <tr>
+        <td colspan="2" style="border-bottom:1px solid #444444;height:1px"><!-- __ --></td>
+    </tr>
+    <tr>
+        <td colspan="2" style="height:1px;border:0"><!-- __ --></td>
+    </tr>
+    <tr onclick="pasteInstance(true)" style="cursor:pointer;"
+        onmouseover="highlight(this,true)" onmouseout="highlight(this,false)">
+        <td style="border:0">
+            <t:graphicImage url="/adm/images/contentEditor/pasteBefore.png"
+                            alt="Past Before"
+                            style="border:0;display:inline;padding:0;margin:0;margin-left:3px"/>
+        </td>
+        <td style="border:0">Paste Before</td>
+    </tr>
+
+    <tr onclick="pasteInstance(false)" style="cursor:pointer;"
+        onmouseover="highlight(this,true)" onmouseout="highlight(this,false)">
+        <td style="border:0">
+            <t:graphicImage url="/adm/images/contentEditor/pasteAfter.png"
+                            alt="Paste After"
+                            style="border:0;display:inline;padding:0;margin:0;margin-left:3px"/>
+        </td>
+        <td style="border:0">Paste After</td>
+    </tr>
+</c:if>
+
+
+</table>
+</div>
+</c:if>
+<c:set var="pk" value="${fn:trim(pk)}"/>
+<c:set var="node" value="${fn:trim(node)}"/>
+<c:set var="image" value="arrow_green16x16" />
+
+<c:set var="delim" value="\\."/>
+<c:set var="array" value="${fn:split(pk,delim)}" />
+<c:set var="pkId" value="${array[0]}" />
+
+
+<c:if test="#{page.nodeId==inlineContentEditorBean.clipboardPage}">
+    <c:if test="#{pkId==inlineContentEditorBean.clipboardContentId}">
+          <c:set var="image" value="#{image}_clipboard" />
+    </c:if>
+</c:if>
+
+
+<div style="#{style};" cmsElement="true" >
+    <t:graphicImage url="/adm/images/contentEditor/#{image}.png"
+                    onclick="return showCmsMenu(this,event,'#{pk}','ARTICLE','#{node}')" alt="options"
+                    style="cursor:pointer;border:0;display:inline;
+                        padding:0;margin:0;"/>
+</div>
+
+
+</c:if>
+</ui:composition>
+
+
+</html>

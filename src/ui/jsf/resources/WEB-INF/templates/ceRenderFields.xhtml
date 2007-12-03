@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:fx="http://www.flexive.com/jsf/core"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<ui:composition>
+    <c:forEach items="#{data}" var="element">
+        <c:if test="#{element.systemInternal==false}">
+            <c:if test="#{element.property==false}">
+                <a4j:outputPanel>
+                    <div class="group" onmouseover='closeMenu(event,false)'>
+                        <div class="header">
+                            <adm:ceRenderFieldMenu group="#{element}" icon="group" srcEditor="#{srcEditor}"/>
+                            <span class="display">#{srcEditor.display[element.assignmentId]}</span>
+                        </div>
+                        <adm:ceRenderFields data="#{element.children}" icon="group"/>
+                        <div class="end">&nbsp;</div>
+                    </div>
+                </a4j:outputPanel>
+            </c:if>
+            <c:if test="#{element.property==true}">
+                <div class="property">
+                    <adm:ceRenderFieldMenu group="#{element}" icon="property" srcEditor="#{srcEditor}"/>
+                    <div class="display">
+                        #{srcEditor.display[element.assignmentId]}
+                    </div>
+                    <div class="value" readonly="#{srcEditor.readOnly}">
+                        <c:if test="#{element.value.class=='class com.flexive.shared.value.FxBinary'}">
+                            <c:if test="#{srcEditor.data[element.XPathFull].isEmpty==true}">
+                                <t:inputFileUpload id="fileUpload#{srcEditor.idGenerator[element]}"
+                                        onchange="fileInputChanged()"/>
+                            </c:if>
+                            <c:if test="#{srcEditor.data[element.XPathFull].isEmpty==false}">
+                                <c:set var="binDesc" value="#{srcEditor.data[element.XPathFull].defaultTranslation}" />
+
+                                <span style="padding-left:3px;border:1px solid #d3dcb7;background-color:white">
+                                #{binDesc.name},
+                                #{binDesc.size} byte
+                                <c:if test="#{binDesc.image}">
+                                    (#{binDesc.width}x#{binDesc.height} pixel)
+                                </c:if>
+                                </span>
+
+                                <c:if test="#{binDesc.newBinary==false}">
+                                    <c:set var="find" value="/" />
+                                    <c:set var="replace" value="|" />
+                                    <c:set var="url" value="xpath:#{fn:replace(element.XPathFull,find,replace)}" />
+                                    <a href="#{fxSystemBean.documentBase}cefiledownload/#{url}/#{binDesc.name}">
+                                        <t:graphicImage alt="download" url="/adm/images/contentEditor/download.png"
+                                            style="padding:0;margin-left:5px;border:0;height:16px;width:16px;vertical-align:middle;"/>
+                                    </a>
+                                    <c:if test="#{binDesc.image}">
+                                        <a target="_blank" href="#{fxSystemBean.documentBase}adm/content/ceDisplayImage.jsf?src=cefiledownload/#{url}/#{binDesc.name}">
+                                            <t:graphicImage alt="view" url="/adm/images/contentEditor/viewImage.png"
+                                                            style="padding:0;margin-left:2px;border:0;height:16px;width:16px;vertical-align:middle;"/>
+                                        </a>
+                                    </c:if>
+                                </c:if>
+                            </c:if>
+                        </c:if>
+                        <c:if test="#{element.value.class!='class com.flexive.shared.value.FxBinary'}">
+                           <fx:fxValueInput value="#{srcEditor.data[element.XPathFull]}"
+                                             readOnly="#{srcEditor.readOnly}" />
+                        </c:if>
+                    </div>
+                </div>
+                <br clear="all"/>
+            </c:if>
+        </c:if>
+    </c:forEach>
+
+</ui:composition>
+
+</html>

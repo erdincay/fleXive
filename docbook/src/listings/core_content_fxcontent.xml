@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="groovy" xml:id="core_contents_fxcontent"  xmlns="http://docbook.org/ns/docbook">import com.flexive.shared.value.*
+import com.flexive.shared.content.*
+import com.flexive.shared.*
+
+def ce = EJBLookup.contentEngine
+def person = CacheAdmin.environment.getType("Person")
+FxContent co = ce.initialize(person.id) //<co xml:id="cc_fxco_1"/>
+co.setValue("/Name", new FxString(false, "John Doe"))
+co.setValue("/Phone", new FxString(false, "+43 1 12345")) //<co xml:id="cc_fxco_2"/>
+co.setValue("/Phone[2]", new FxString(false, "+43 1 800 FLEXIVE")) //<co xml:id="cc_fxco_3"/>
+co.setValue("/Address/Street", new FxString(false, "Private road")) //<co xml:id="cc_fxco_4"/>
+co.setValue("/Address[2]/Street", new FxString(false, "Ofice lane")) //<co xml:id="cc_fxco_5"/>
+FxPK pk = ce.save(co) //<co xml:id="cc_fxco_6"/>
+
+FxContent loaded = ce.load(pk) //<co xml:id="cc_fxco_7"/>
+FxString street = (FxString)loaded.getValue("/Address[2]/Street") //<co xml:id="cc_fxco_8"/>
+println "Loaded street: ${loaded.getValue("/Address[2]/Street")}"
+street.setValue("Office lane") //<co xml:id="cc_fxco_9"/>
+println "New street: ${loaded.getValue("/Address[2]/Street")}"
+ce.save(loaded)
+
+ce.remove(pk) //<co xml:id="cc_fxco_10"/></programlisting>

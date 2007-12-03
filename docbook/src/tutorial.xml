@@ -1,0 +1,519 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE chapter [
+        <!ENTITY % global_entities SYSTEM "global.ent">
+        %global_entities;
+        ]>
+<chapter xml:id="tutorial" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude">
+
+    <title>The &flexive; Tutorial
+    </title>
+
+    <xi:include href="includes/author_hbacher.xml"/>
+    <xi:include href="includes/author_dlichtenberger.xml"/>
+
+    <section xml:id="first_flexive_application">
+        <title>Your first flexive application</title>
+        <para>In this Tutorial we assume you have a flexive installation up and running on your local or on a remote
+            machine.
+            If not, follow the installation guide according to your application server type.
+            Download the source code of the tutorial application, if you have downloaded and installed the blank flexive
+            source code.
+        </para>
+        <para>
+            The application we build in this tutorial implements a simple blogging system
+            with an input mask and a view for the submitted entries.
+
+            The directory structure of the tutorial example application looks like this
+            <xi:include href="listings/tutorial_directory_structure.xml"/>
+        </para>
+
+        <section xml:id="data_model">
+            <title>Defining the data model</title>
+            <para>To set up the data model when deploying the application, we use the groovy script hello001.groovy
+                located
+                in the resources/scripts/runonce/ folder.
+            </para>
+
+            <xi:include href="listings/tutorial_blog_entry.xml"/>
+
+            <calloutlist>
+                <callout arearefs="BlogEntry_1">The method call blogEntry(...) will create an FxType titled "Blog
+                    Entry".
+                    For the first tutorial, we will disable &flexive; security completely for this type by setting
+                    usePermissions to false.
+                </callout>
+                <callout arearefs="BlogEntry_2">An FxPropertyAssignment is an instanciated FxProperty. In this case it's
+                    named "entryTitle". Its
+                    multiplicity is 1:1, meaning that it is a required field. Its description/title is "Title".
+                </callout>
+                <callout arearefs="BlogEntry_3">The option "multiline" means this FxPropertyAssignment is shown as
+                    multiple
+                    lines in editors.
+                </callout>
+            </calloutlist>
+            <para>We now have a setup script for our data model.</para>
+        </section>
+        <section xml:id="retrieving_data">
+            <title>Retrieving data from the database</title>
+            <para>The next step will be to define the managed bean HelloWorldBean, which builds a database query and
+                returns the result set as FxResultSetDataModel, which will be used in the user interface.
+            </para>
+            <programlisting language="java"><xi:include href="../../src/examples/helloworld/java/com/flexive/examples/helloworld/war/HelloWorldBean.java" parse="text"/></programlisting>
+        </section>
+        <section xml:id="building_the_gui">
+            <title>Building the graphical user interface</title>
+            <para>If you are not familiar with JSF tag libraries please refer to the
+                <link href="http://java.sun.com/javaee/javaserverfaces/1.1_01/docs/tlddocs/index.html">Tag Library
+                    Documentation
+                </link>
+                or
+                try the
+                <link href="http://java.sun.com/javaee/5/docs/tutorial/doc/bnaph.html">JSF section of the Java EE 5
+                    Tutorial.
+                </link>
+            </para>
+            <para>Further resources can be found at
+                <itemizedlist>
+                    <listitem>
+                        <link href="https://facelets.dev.java.net/nonav/docs/dev/docbook.html">Facelets - JavaServer
+                            Faces
+                            View Definition Framework
+                        </link>
+                    </listitem>
+                    <listitem>
+                        <link href="http://java.sun.com/products/jsp/jstl/1.1/docs/tlddocs/index.html">JSTL - JavaServer
+                            Pages Standard Tag Library 1.1 Tag Reference
+                        </link>
+                    </listitem>
+                </itemizedlist>
+            </para>
+            <programlisting language="xhtml"><xi:include href="../../src/examples/helloworld/web/index.xhtml" parse="text"/></programlisting>
+            <para>The input mask is represented by the create.xhtml file:</para>
+            <programlisting language="xhtml"><xi:include href="../../src/examples/helloworld/web/create.xhtml" parse="text"/></programlisting>
+        </section>
+        <section xml:id="configuration">
+            <title>Deployment descriptor and JSF configuration</title>
+            <para>
+                In the /helloworld/web/WEB-INF/ directory there are two files:
+                <itemizedlist>
+                    <listitem>The deployment descriptor web.xml</listitem>
+                    <listitem>The JSF configuration file faces-config.xml</listitem>
+                </itemizedlist>
+                Mind the filter-mapping for the FlexFilter.
+            </para>
+            <programlisting language="xml"><xi:include href="../../src/examples/helloworld/web/WEB-INF/web.xml" parse="text"/></programlisting>
+            <para>In the faces-config.xml configuration file you can define managed beans, navigation rules and more.
+            </para>
+            <para>Please refer to the
+                <link href="http://java.sun.com/javaee/5/docs/tutorial/doc/bnapl.html#bnapz">JSF section of the Java EE
+                    5
+                    Tutorial
+                </link>
+                for further information on JSF configuration issues.
+            </para>
+            <programlisting language="xml"><xi:include href="../../src/examples/helloworld/web/WEB-INF/faces-config.xml" parse="text"/></programlisting>
+        </section>
+        <section xml:id="deployment">
+            <title>Compiling and deploying the application</title>
+            <para>
+                To compile and deploy the framework and the example application run the following ant tasks in the given
+                order:
+                <orderedlist>
+                    <listitem>
+                        <para>
+                            <command>ant dist</command>
+                            in your
+                            <filename>${flexive.home}</filename>
+                            directory where the
+                            <filename>build.xml</filename>
+                            file resides if you don't
+                            already have a dist/ directory
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            <command>ant</command>
+                            in the
+                            <filename>${flexive.home}/src/examples/helloworld/</filename>
+                            directory
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            <command>ant deploy</command>
+                            in your
+                            <filename>${flexive.home}</filename>
+                            directory
+                        </para>
+                    </listitem>
+                </orderedlist>
+                Start your application server and point your browser to
+                <link href="http://localhost:8080/helloworld/index.xhtml">http://localhost:8080/helloworld/index.xhtml
+                </link>
+
+                Congratulations! You should see a link to the input mask.
+            </para>
+        </section>
+        <section xml:id="be_adm">
+            <title>Preview of the Backend Administration</title>
+            <para>
+                After the successful deployment of the application you can find the created datastructure in the backend
+                administration's structure editor. Log on to the backend administration and expand the tab named
+                "Structure".
+                You should be able to see the type Blog Entry in the tree. Expand it and click on one of the properties.
+
+                In the "Edit Property Assignment" tab in the right frame you can see the properties originally set in
+                the
+                hello001.groovy script.
+            </para>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/be_structure_editor.png" format="PNG" scalefit="1" width="100%" contentdepth="66%"/>
+                </imageobject>
+            </mediaobject>
+        </section>
+    </section>
+
+    <section xml:id="tutorial01">
+        <title>Tutorial 1: The Document Store Application</title>
+
+        <para>
+            Now that you are familiar with some basic concepts of &flexive;,
+            we are ready to explore more features. The first tutorial application
+            introduces
+            <itemizedlist>
+                <listitem>
+                    <para>
+                        binary support in &flexive; contents,
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        combined create/edit forms, as well as
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        a more sophisticated way of rendering results, like automatic preview images of contents.
+                    </para>
+                </listitem>
+            </itemizedlist>
+        </para>
+
+        <para>
+            Our task for this tutorial is to create a centralized document store
+            that allows us to store documents, images or videos and provides a web-based user interface for it.
+            In the first tutorial we will implement the basic functionality, and then further refine
+            and extend the features in following tutorials.
+            <xref linkend="tutorial01_overview_screenshot"/>
+            shows the end result of the first tutorial,
+            with the help of some stylesheets that can be found in the tutorial source tree.
+        </para>
+
+        <figure xml:id="tutorial01_overview_screenshot">
+            <title>The document store application, version 1</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/tutorial/tutorial01_mediastore.png" format="PNG" scalefit="1" width="100%" contentdepth="66%"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+
+        <section xml:id="tutorial01_model">
+            <title>Defining the data model</title>
+
+            <para>
+                As in the
+                <application>helloworld</application>
+                example we start by defining our data model used for storing documents.
+                We assign the standard caption property
+                <property>/caption</property>
+                for document captions, and add a
+                <type>Binary</type>
+                property. We create the type in a
+                <glossterm>run-once script</glossterm>,
+                found in
+                <filename>resources/scripts/runonce/tutorial001.groovy</filename>:
+
+                <programlisting language="groovy"><xi:include href="../../src/examples/tutorial01-documentstore/resources/scripts/runonce/tutorial001.groovy" parse="text"/></programlisting>
+            </para>
+        </section>
+
+        <section xml:id="tutorial01_html">
+            <title>The document browser and upload pages</title>
+
+            <para>
+                The most interesting parts of this tutorial are the overview and upload pages.
+                On the first we display all uploaded document objects, the latter allows the user to
+                upload new files or edit existing ones.
+            </para>
+
+            <para>
+                The index page of the application renders a link to an empty upload form for uploading
+                new document, and also renders all document objects already uploaded. Note that in the first
+                version of the tutorial, security is completely disabled, thus every user can see
+                and edit all document objects in the system.
+            </para>
+
+            <section xml:id="tutorial01_html_results">
+                <title>
+                    Using
+                    <code>&lt;fx:resultValue&gt;</code>
+                </title>
+                <para>
+                    Similar to the
+                    <application>helloworld</application>
+                    example application, we iterate over the rows of the result data model using
+                    <code>&lt;ui:repeat&gt;</code>.
+                    But this time, we render the result using the
+                    <link linkend="jcl_fx_resultvalue">
+                        <code>&lt;fx:resultValue&gt;</code>
+                    </link>
+                    tag, which essentially renders read-only
+                    <link linkend="jcl_fx_value_input">
+                        <code>&lt;fx:valueInput&gt;</code>
+                    </link>
+                    components for more sophisticated output formatting.
+                    For the document browser, we select four columns in our content query:
+                    <orderedlist>
+                        <listitem>
+                            <para><code>@pk</code>,
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para><code>document01/file</code>,
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para><code>caption</code>, and
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para><code>created_at</code>.
+                            </para>
+                        </listitem>
+                    </orderedlist>
+                    When we pass a value of the second column (<code>document01/file</code>) to the
+                    <code>&lt;fx:resultValue&gt;</code>
+                    component,
+                    it actually renders an inline image that displays a preview of the uploaded file. For image
+                    data types, this is a thumbnail, for other types like documents or presentations, it is
+                    an icon corresponding to the document type.
+                    So to render a list of thumbnail preview images, we write the following:
+                    <programlisting language="xhtml"><![CDATA[<ui:repeat var="row" value="#{tutorialBean.documents}">
+    <fx:resultValue value="#{row[1]}"/>
+</ui:repeat>]]></programlisting>
+
+                    We can still write the result values as literal JSF-EL expressions when necessary, so for example to
+                    add the caption after each image it would be sufficient to write
+                    <code language="jsfel">#{row[2]}</code>. However, the
+                    <code>&lt;fx:resultValue&gt;</code>
+                    tag adds extra functionality like date formatting or support for inline HTML
+                    properties (otherwise HTML contained in an
+                    <classname>FxHTML</classname>
+                    would be escaped by Facelets), so it's generally a good idea to use
+                    <code>&lt;fx:resultValue&gt;</code>
+                    for any result value rendered in the response.
+                </para>
+            </section>
+
+            <section xml:id="tutorial01_html_openedit">
+                <title>Passing content instances to the editor form</title>
+
+                <para>
+                    Below each document object, we want to provide a link that opens the object in the
+                    edit form. We could either pass the primary key selected in the first column through
+                    a bean property, or pass
+                    the content instance itself through the &contentViewBean; and supply it to the
+                    <code>&lt;fx:content&gt;</code>
+                    component.
+                </para>
+
+                <para>
+                    JSF's
+                    <code>setPropertyActionListener</code>
+                    is a convenient way of setting bean properties when a command link or button is triggered.
+                    The Edit link looks like this:
+                    <programlisting language="xhtml"><![CDATA[<h:commandLink action="edit" styleClass="editButton">
+    <f:setPropertyActionListener target="#{fxContentViewBean.content}"
+                                 value="#{fxSystemBean.content[row[0]]}"/>
+    Edit...
+</h:commandLink>]]></programlisting>
+
+                    <code>#{fxSystemBean.content[row[0]]}</code>
+                    returns the
+                    <classname>FxContent</classname>
+                    instance for the given primary key. Note that the JSF listener will only be fired
+                    when the user actually clicks on the commandLink, thus the rather expensive load operation
+                    will only be performed if the user clicks on the edit link.
+                </para>
+            </section>
+
+            <para>
+                The following listing includes the whole page including the main menu entry and the document browser.
+                It can be found in the tutorial01 directory under
+                <filename>web/index.xhtml</filename>.
+
+                <programlisting language="xhtml"><xi:include href="../../src/examples/tutorial01-documentstore/web/index.xhtml" parse="text"/></programlisting>
+            </para>
+
+            <section xml:id="tutorial01_uploadform">
+                <title>The upload form</title>
+                <para>
+                    The upload form allows both to create new document objects by uploading files
+                    and editing existing ones. It works exactly as the form for entering new blog
+                    posts in the
+                    <application>helloworld</application>
+                    tutorial, except that we specify an explicit content instance that may be set
+                    from an edit link on the overview page:
+
+                    <programlisting language="xhtml">&lt;fx:content typeName="document01"
+                        <emphasis>content="#{&contentViewBean;.content}"</emphasis>
+                        var="document">
+                    </programlisting>
+
+                    When this page is opened through the "Upload" link on the front page (or by entering the URL to
+                    <uri>/upload.xhtml</uri>
+                    in the browser location bar),
+                    <code language="jsfel">#{&contentViewBean;.content}</code>
+                    evaluates to
+                    <code>null</code>
+                    and a new content instance of type
+                    <code>document01</code>
+                    will be initialized. Otherwise, the content instance from retrieved from the
+                    &contentViewBean; will be edited. A call to
+                    <code>&contentViewBean;.save</code>
+                    creates or updates the content instance in the database.
+                </para>
+
+                <para>
+                    The upload form renders two new input components:
+                    <itemizedlist>
+                        <listitem>
+                            <para>
+                                a file upload form, and
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                a multilanguage input for the caption property.
+                            </para>
+                        </listitem>
+                    </itemizedlist>
+                    For file uploads to work, you need to set the
+                    <code>enctype</code>
+                    attribute of the HTML form to
+                    <code>multipart/form-data</code>:
+
+                    <programlisting language="xhtml">&lt;h:form enctype="multipart/form-data"&gt;</programlisting>
+
+                </para>
+
+                <para>
+                    The following listing includes the whole edit page and can be found in the tutorial01 source
+                    directory under
+                    <filename>web/upload.xhtml</filename>.
+
+                    <programlisting language="xhtml"><xi:include href="../../src/examples/tutorial01-documentstore/web/upload.xhtml" parse="text"/></programlisting>
+                </para>
+            </section>
+
+        </section>
+
+        <section xml:id="tutorial01_bean">
+            <title>Retrieving data from the database</title>
+
+            <para>
+                Like in the previous tutorial, we add a simple JSF managed bean that provides
+                our search results.
+            </para>
+
+            <programlisting language="java"><xi:include href="../../src/examples/tutorial01-documentstore/src/java/war/com/flexive/examples/tutorial01/Tutorial01Bean.java" parse="text"/></programlisting>
+        </section>
+
+        <section xml:id="tutorial01_thumbnails">
+            <title>Rendering previews: the &thumbnailServlet;</title>
+
+            <para>
+                To serve the image URLs rendered by
+                <code>&lt;fx:resultValue&gt;</code>
+                to the browser, we need a servlet providing those images. For this purpose, you have to
+                add the &flexive; thumbnail servlet to your
+                <filename>web.xml</filename>.
+
+                <programlisting language="xml"><![CDATA[<servlet>
+    <servlet-name>Thumbnail</servlet-name>
+    <servlet-class>com.flexive.war.servlet.ThumbnailServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>Thumbnail</servlet-name>
+    <url-pattern>/thumbnail/*</url-pattern>
+</servlet-mapping>
+]]></programlisting>
+
+                The &templateProject;'s
+                <filename>web.xml</filename>
+                already includes this mapping.
+            </para>
+        </section>
+
+        <section xml:id="tutorial01_facesconfig">
+            <title>Wiring up the faces configuration</title>
+
+            <para>
+                Finally, we have to register the data provider bean and provide navigation routes for
+                our buttons and links in the
+                <code>faces-config.xml</code>:
+
+                <programlisting language="xml"><xi:include href="../../src/examples/tutorial01-documentstore/resources/META-INF/faces-config.xml" parse="text"/></programlisting>
+            </para>
+        </section>
+
+        <section xml:id="tutorial01_deployment">
+            <title>Compiling and deploying the application</title>
+            <para>
+                To compile and deploy the framework and the example application run the following ant tasks in the given
+                order:
+                <orderedlist>
+                    <listitem>
+                        <para>
+                            <command>ant dist</command>
+                            in your
+                            <filename>${flexive.home}</filename>
+                            directory where the
+                            <filename>build.xml</filename>
+                            file resides if you don't
+                            already have a dist/ directory
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            <command>ant</command>
+                            in the
+                            <filename>${flexive.home}/src/examples/tutorial01-documentstore/</filename>
+                            directory
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            <command>ant deploy</command>
+                            in your
+                            <filename>${flexive.home}</filename>
+                            directory
+                        </para>
+                    </listitem>
+                </orderedlist>
+                Start your application server and point your browser to
+                <link href="http://localhost:8080/tutorial01-documentstore/">
+                    http://localhost:8080/tutorial01-documentstore/
+                </link>
+                You should see the document browser page with the upload link.
+            </para>
+        </section>
+
+    </section>
+
+</chapter>

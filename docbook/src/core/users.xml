@@ -1,0 +1,250 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE section [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<section xml:id="core_users" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude">
+    <title>User Management</title>
+    <xi:include href="../includes/author_jwernigp.xml"/>
+
+    <para>Handling users and user information is a basic business of virtually every major software system in use today. At this juncture fleXive is no exception.
+        User management in fleXive is based on accounts – that is a user and its basic information (name, login name, contact data, e-mail addresss, ...) are stored in accounts.
+    </para>
+    <para>
+        In the table below you see the listing of all attributes an account in fleXive owns.
+    </para>
+
+
+    <table xml:id="ex.calstable" frame='all'>
+        <title>Account Attributes</title>
+        <tgroup cols='2' align='left' colsep='1' rowsep='1'>
+            <thead>
+                <row>
+                    <entry align="center">Attribute</entry>
+                    <entry align="center">Description</entry>
+                </row>
+            </thead>
+            <tbody>
+                <row>
+                    <entry>id, name, login name, e-mail, description, contactDataId</entry>
+                    <entry>Some basic attributes. The Id uniquely identifies the account. The description allows you to characterize the account while the contactDataId identifies the contact data (e.g. postal address, telephon number) linked to this user. Name and login name stand for themselves.</entry>
+
+                </row>
+
+                <row>
+                    <entry>mandatorId</entry>
+                    <entry>The mandator the account belongs to. Note that every account has to be assigned to exactly one mandator.</entry>
+
+                </row>
+
+
+                <row>
+                    <entry>language</entry>
+                    <entry>Identifies the preferred language for the account. Whenever there are available user interface translations or contents in several languages the system will select to display the ones in the language specified here, if available.</entry>
+
+                </row>
+
+
+                <row>
+                    <entry>active</entry>
+                    <entry>An account can be set to status inactive. Thus no login is possible while it is not activated again. Note: both flags, active and validated, have to be set to true for the login to work.</entry>
+
+                </row>
+
+
+                <row>
+                    <entry>validated</entry>
+                    <entry>Flags for admins indicating that the user data was audited and are no fake. Setting this flag to false prevents a login for the corresponding account until the flag is set to true. This setting can be used when auto-creating accounts to force validation of the account data. Note: both flags, active and validated, have to be set to true for the log in to work.</entry>
+
+                </row>
+
+
+                <row>
+                    <entry>validFrom, validTo</entry>
+                    <entry>The valid from/to dates may be used to define a timeperiode in which the user may log in.</entry>
+
+                </row>
+
+
+                <row>
+                    <entry>defaultNodeId</entry>
+                    <entry></entry>
+
+                </row>
+
+
+                <row>
+                    <entry>allowMultiLogin</entry>
+                    <entry>True if the account may be active more than once at the same time.
+                    </entry>
+
+                </row>
+
+                <row>
+                    <entry>updateToken</entry>
+                    <entry>The update token may be used in external API calls modifying this account to improve security.</entry>
+
+                </row>
+
+            </tbody>
+        </tgroup>
+    </table>
+
+    <para>
+
+        There are two system defined accounts:
+
+        <itemizedlist mark='bullet'>
+
+            <listitem>
+                <para>the guest user. Everyone who is not logged in is treated as GUEST.
+                </para>
+            </listitem>
+
+            <listitem>
+                <para>the supervisor. This user is in all roles and may operate on all mandators.
+                </para>
+            </listitem>
+
+        </itemizedlist>
+
+        These two accounts can not be removed.
+
+    </para>
+
+    <para>In the following we will look at how to create, update and remove accounts.</para>
+
+
+    <section>
+        <title>Creating an user</title>
+        <para>
+            Creating an user requires special rights. More precisely only callers in role ACCOUNT MANAGEMENT may create users, and only for their mandator. An exception is a user with the role GLOBAL_SUPERVISOR who may create users for all mandators.
+            Following you see an example of how to create an user.
+        </para>
+
+        <para>
+            <code>
+<literallayout>
+private AccountEngine ae = EJBLookup.getAccountEngine();
+ae.create(“Administrator”, “admin”, “pw123”, “admin@flexive.org”, 1, 1, true, true, SYSDATE, “”, -1, “Administrator account”, false, false);
+</literallayout>
+            </code>
+        </para>
+
+        <para>
+
+            After the account creation one can assign the roles the account is in and the groups it belongs to. For a detailed explanation of the meaning and functioning of roles and groups please go to the <xref linkend="core_security"/>.
+
+        </para>
+
+
+        <para>
+
+            For assigning a role to an account the following rules apply:
+
+            <itemizedlist mark='bullet'>
+
+                <listitem>
+                    <para>the caller must be in role ACCOUNT MANAGEMENT
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>the account/user has to belong to the callers mandator
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>the caller may only assign roles that he is assigned to himself
+                    </para>
+                </listitem>
+
+            </itemizedlist>
+
+            GROUP_GLOBAL_SUPERVISOR may set the roles for all users in the system.
+
+        </para>
+
+        <para>
+            Assigning a group to an account presumes the following prerequisites:
+
+            <itemizedlist mark='bullet'>
+
+                <listitem>
+                    <para>the caller must be in role ACCOUNT MANAGEMENT
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>the account/user has to belong to the callers mandator
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>the caller may only assign groups that also belong to his mandator, plus GROUP_EVERYONE and GROUP_OWNER
+                    </para>
+                </listitem>
+
+            </itemizedlist>
+
+            GROUP_GLOBAL_SUPERVISOR may set all groups for all users. Note that by default a newly created account is assigned to the group EVERYONE. To get more information about groups go to the <xref linkend="core_security"/>.
+
+        </para>
+
+    </section>
+
+    <section>
+        <title>Updating an user</title>
+        <para>
+            &flexive; provides two methods for updating an account. One is for updating only some personal data of the specified user (name, login name, password, e-mail address, and language). The other one lets you update all attributes of the user. For both methods applies: setting one parameter to null in the method call means keeping its original value (i.e. the value of the corresponding account attribute is not changed).
+        </para>
+        <para>
+            The following code updates the previously created administrator account (ID 1) by setting its name to “System administrator” and its e-mail address to “sysadmin@flexive.org”. Note that by setting the parameters password, login name and language to null the original values (“pw123”, “admin”, 1) are preserved.
+        </para>
+        <para>
+            <code>
+<literallayout>
+private AccountEngine ae = EJBLookup.getAccountEngine();
+ae.update(1, null, “System administrator”, null, sysadmin@flexive.org, null);
+</literallayout>
+            </code>
+        </para>
+    </section>
+
+
+    <section>
+        <title>Removing an user</title>
+        <para>
+            There are two prerequisites for the caller to remove an account:
+
+            <itemizedlist mark='bullet'>
+
+                <listitem>
+                    <para>the caller must be in role ACCOUNT MANAGEMENT
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>the account/user has to belong to the callers mandator
+                    </para>
+                </listitem>
+
+            </itemizedlist>
+
+            GlobalSupervisor may remove users belonging to any mandator. The accounts USER_GUEST and USER_GLOBAL_SUPERVISOR may not be removed in any case.
+
+        </para>
+        <para>For removing an account one only needs to know the account ID. Thus removing the previously created and updated administrator account works as follows:</para>
+        <para>
+            <code>
+<literallayout>
+private AccountEngine ae = EJBLookup.getAccountEngine();
+ae.remove(admin_id);
+</literallayout>
+            </code>
+        </para>
+
+    </section>
+
+</section>

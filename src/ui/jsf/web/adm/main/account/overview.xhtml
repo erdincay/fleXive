@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:s="http://myfaces.apache.org/sandbox"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+    <ui:define name="head">
+        <!-- empty -->
+    </ui:define>
+
+	<ui:define name="searchIds">"listForm"</ui:define>
+	
+    <ui:define name="body">
+
+        <h:form id="listForm">
+
+            <adm:tab label="#{fxMessageBean['Account.label.overview']}" active="true" id="tab1"/>
+
+            <!-- Mandator select is only shown for global supervisors -->
+            <c:if test="${fxSystemBean.userTicket.globalSupervisor}">
+                <t:saveState value="#{accountBean.mandator}"/>
+                <t:saveState value="#{accountBean.activeFilterCheckbox}"/>
+                <t:saveState value="#{accountBean.validatedFilterCheckbox}"/>
+                <h:panelGrid columns="2">
+                    Mandator:&nbsp;
+                    <h:selectOneListbox id="acct_mandator" value="#{accountBean.mandator}" size="1"
+                                        converter="SelectableConverter" onchange="document.listForm.submit();">
+                        <f:selectItems value="#{fxSelectBean.mandatorsForEdit}" />
+                    </h:selectOneListbox>
+                </h:panelGrid>
+            </c:if>
+            <!-- End of Mandator select -->
+
+            <!-- Active/valid accounts filter -->
+            <h:selectBooleanCheckbox id="activeFilter" binding="#{accountBean.activeFilterCheckbox}" value="#{accountBean.activeFilter}" onchange="document.listForm.submit();"/>
+            <h:outputLabel for="activeFilter">#{fxMessageBean['User.button.filter.active']}</h:outputLabel>
+
+            <h:selectBooleanCheckbox id="validatedFilter" binding="#{accountBean.validatedFilterCheckbox}" value="#{accountBean.validatedFilter}" onchange="document.listForm.submit();"/>
+            <h:outputLabel for="validatedFilter">#{fxMessageBean['User.button.filter.validated']}</h:outputLabel>
+
+            <br/><br/>
+            
+            <table dojoType="FilteringTable" widgetId="acctTable" multiple="true"
+                   alternateRows="true" maxSortable="1" class="dojoTable">
+                <thead>
+                    <tr>
+                        <!--th class="tblHeader" field="id" dataType="String" sort="asc">Id</th-->
+                        <th class="tblHeader" field="loginName" dataType="String" align="left">
+                            #{fxMessageBean['Account.field.loginName']}
+                        </th>
+                        <th class="tblHeader" field="name" dataType="String" align="left">
+                            #{fxMessageBean['Account.field.userName']}
+                        </th>
+                        <th class="tblHeader" field="email" dataType="String" align="left">
+                            #{fxMessageBean['Account.field.email']}
+                        </th>
+                        <th class="tblHeader" field="active" dataType="String" align="left" noSort="true">
+                            #{fxMessageBean['Account.field.active']}
+                        </th>
+                        <th class="tblHeader" field="validated" dataType="String" align="left" noSort="true">
+                            #{fxMessageBean['Account.field.validated']}
+                        </th>
+                        <c:if test="${fxSystemBean.userTicket.globalSupervisor}" align="left">
+                            <th class="tblHeader" field="mandator" dataType="String" align="left">
+                                #{fxMessageBean['Account.field.mandator']}
+                            </th>
+                        </c:if>
+                        <th class="tblHeader" dataType="html" align="left" noSort="true">
+                            #{fxMessageBean['Account.field.actions']}
+                        </th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    <ui:repeat value="#{accountBean.list}" var="item">
+                        <tr value="#{item.id}"> 
+                            <!--td><h:outputText value="#{item.id}" /></td-->
+                            <td align="left"><h:outputText value="#{item.loginName}" /></td>
+                            <td align="left"><h:outputText value="#{item.name}" /></td>
+                            <td align="left"><h:outputText value="#{item.email}" /></td>
+                            <td align="left"><h:outputText value="#{item.active}" /></td>
+                            <td align="left"><h:outputText value="#{item.validated}" /></td>
+                            <c:if test="${fxSystemBean.userTicket.globalSupervisor}">
+                                <td align="left">
+                                    <ui:fragment rendered="#{!item.systemInternalAccount}">
+                                        <h:outputText value="#{mandatorBean.mandatorsById[item.mandatorId].name}" />
+                                    </ui:fragment>
+                                </td>
+                            </c:if>
+                            <td align="left">
+                                <adm:commandIcon labelKey="User.button.edit" location="content"
+                                                icon="edit"  action="editUser"  bean="#{accountBean}"
+                                                id="editButton_#{item.id}">
+                                    <f:setPropertyActionListener target="#{accountBean.accountIdFiler}" value="#{item.id}"/>
+                                </adm:commandIcon>
+                                <ui:fragment rendered="#{!item.systemInternalAccount}">
+                                    <adm:commandIcon labelKey="User.button.delete" location="content"
+                                                     icon="delete" action="deleteUser" bean="#{accountBean}"
+                                                     id="deleteButton_#{item.id}" confirm="User.confirm.delete">
+                                        <f:setPropertyActionListener target="#{accountBean.accountIdFiler}"
+                                                                     value="#{item.id}"/>
+                                    </adm:commandIcon>
+                                </ui:fragment>
+                            </td>
+                        </tr>
+                    </ui:repeat>
+                </tbody>
+            </table>
+
+            <br/>
+            <adm:commandButton labelKey="User.button.create" location="both"
+                              icon="new" action="accountCreate" id="createAccountButton"/>
+            <adm:toolbarPluginButtons/>
+        </h:form>
+        <br/>
+    </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

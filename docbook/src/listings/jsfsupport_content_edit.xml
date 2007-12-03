@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="xhtml" xml:id="jsfsupport_content_edit"
+                xmlns="http://docbook.org/ns/docbook"><![CDATA[<a4j:form id="frm">
+    <fx:content pk="#{myBean.pk}" var="component">
+
+        <!-- Render an input row for the "name" property of the enclosing content tag  -->
+        <fx:value property="name"/>
+
+        <!-- Save content using the FxContentViewBean, pass the content instance
+             stored in component_content" via f:setPropertyActionListener -->
+        <h:commandLink action="#{fxContentViewBean.save}">
+            <f:setPropertyActionListener target="#{fxContentViewBean.content}" value="#{component_content}"/>
+            Create component
+        </h:commandLink>
+    </fx:content>
+</a4j:form>
+]]>
+</programlisting>

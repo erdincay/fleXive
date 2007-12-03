@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="java" xml:id="jsfsupport_plugin_factory"
+                xmlns="http://docbook.org/ns/docbook"><![CDATA[public class TestPluginFactory implements PluginFactory {
+    public void initialize(PluginRegistryBean registry) {
+        registry.registerPlugin(EXTENSIONPOINT, new TestPlugin());
+    }
+}
+]]></programlisting>

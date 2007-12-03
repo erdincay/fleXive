@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE chapter [
+        <!ENTITY % global_entities SYSTEM "global.ent">
+        %global_entities;
+        ]>
+<chapter xml:id="core" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink/namespace"
+         xmlns:xi="http://www.w3.org/2001/XInclude">
+    <info>
+        <title>The &flexive; core components</title>
+    </info>
+
+    <para>
+        If you remove all eyecandy created by more or less sophisticated user interfaces you will discover the
+        driving force behind &flexive;: the <glossterm><firstterm>core layer</firstterm></glossterm>.
+        It is implemented at the EJB layer and is provided by stateless session beans.
+        These <quote>engines</quote> serve as abstractions to concrete implementations (usually using some form of
+        singleton pattern) for different databases or algorithms used.
+    </para>
+    <para>
+        The areas covered are <link linkend="core_structure">structure definition</link>,
+        <link linkend="core_contents">content manipulation</link>, <link linkend="core_search">SQL like queries</link>,
+        <link linkend="core_tree">organizing contents in trees</link>, <link linkend="core_scripting">scripting</link>,
+        <link linkend="core_workflow">workflow</link>, <link linkend="core_users">user management</link> and how
+        <link linkend="core_security">security</link> is handled.
+    </para>
+
+    <xi:include href="core/users.xml"/>
+    <xi:include href="core/security.xml"/>
+    <xi:include href="core/structure.xml"/>
+    <xi:include href="core/contents.xml"/>
+    <xi:include href="core/search.xml"/>
+    <xi:include href="core/tree.xml"/>
+    <xi:include href="core/scripting.xml"/>
+    <xi:include href="core/workflow.xml"/>
+
+</chapter>

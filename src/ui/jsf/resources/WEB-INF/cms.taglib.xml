@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<!DOCTYPE facelet-taglib PUBLIC
+        "-//Sun Microsystems, Inc.//DTD Facelet Taglib 1.0//EN"
+        "http://java.sun.com/dtd/facelet-taglib_1_0.dtd">
+<facelet-taglib>
+    <namespace>http://www.flexive.com/cms</namespace>
+    <tag>
+        <tag-name>tag0</tag-name>
+        <source>cmsTemplates/tag0.xhtml</source>
+    </tag>
+    <tag>
+        <tag-name>tag1</tag-name>
+        <source>cmsTemplates/tag1.xhtml</source>
+    </tag>
+    <tag>
+        <tag-name>tag2</tag-name>
+        <source>cmsTemplates/tag2.xhtml</source>
+    </tag>
+    <tag>
+        <tag-name>tag3</tag-name>
+        <source>cmsTemplates/tag3.xhtml</source>
+    </tag>
+    <tag>
+        <tag-name>tag4</tag-name>
+        <source>cmsTemplates/tag4.xhtml</source>
+    </tag>
+    <tag>
+        <tag-name>tag5</tag-name>
+        <source>cmsTemplates/tag5.xhtml</source>
+    </tag>
+    <tag>
+        <tag-name>tag6</tag-name>
+        <source>cmsTemplates/tag6.xhtml</source>
+    </tag>
+    <tag>
+        <tag-name>tag7</tag-name>
+        <source>cmsTemplates/tag7.xhtml</source>
+    </tag>
+    <tag>
+        <tag-name>tag8</tag-name>
+        <source>cmsTemplates/tag8.xhtml</source>
+    </tag>
+</facelet-taglib>

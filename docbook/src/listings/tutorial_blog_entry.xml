@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="groovy" id="TutorialBlogEntry"
+                xmlns="http://docbook.org/ns/docbook">import com.flexive.shared.scripting.groovy.*
+import com.flexive.shared.value.*
+import com.flexive.shared.structure.*
+
+new FxTypeBuilder().blogEntry(description: new FxString(true, "Blog Entry"), usePermissions: false) { <co id="BlogEntry_1"/>
+
+    caption(assignment: "ROOT/CAPTION")
+    entryTitle(multiplicity: FxMultiplicity.MULT_1_1, description: new FxString(true, "Title")) <co id="BlogEntry_2"/>
+    entryText(multiplicity: FxMultiplicity.MULT_1_1, description: new FxString(true, "Text"),
+         multiline: true) <co id="BlogEntry_3"/>
+
+}
+</programlisting>

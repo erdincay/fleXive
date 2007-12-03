@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="flexive-shared-dist" basedir=".">
+
+    <!-- Database setup tasks -->
+    <target name="db.create" description="(Re-)Initialize a new flexive database with the given name. The database connection properties are retrieved from database.properties.">
+        <echo taskname="flexive">Warning: this tool does not check if a schema of the given name
+already exists. When you enter an existing database schema name,
+you will lose all data stored in the schema.
+
+If you reset the database of a running flexive application,
+you must shutdown flexive before the update and then restart flexive.
+
+        </echo>
+        <input taskname="flexive" addproperty="schema.name" defaultvalue="flexive"
+               message="Please enter the database schema you want to create or reset:"/>
+        <division-setup database="${schema.name}"/>
+    </target>
+
+    <target name="db.config.create" description="(Re-)Initialize the global division configuration database. The database connection properties are retrieved from database.properties.">
+        <globalconfig-setup/>
+    </target>
+</project>

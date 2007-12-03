@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:c="http://java.sun.com/jstl/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+    xmlns:fx="http://www.flexive.com/jsf/core">
+
+[fleXive3] search query editor. 
+
+Parameters: 
+	nodes = list of nodes of the (sub-)tree to be rendered
+	addAssignmentNode = form element where the selected node for adding an assignment should be stored 
+		(e.g. a hidden input field)
+    addAssignmentNodeValue = id of the preselected node (no node will be selected for -1 or empty values)
+    selectionNode = form element for storing the current selection (a comma-separated list of node IDs)
+    emptyMessageKey = message key of the message to be displayed when the current query is empty
+
+<ui:composition>
+
+    <c:if test="#{empty emptyMessageKey}">
+        <c:set var="emptyMessageKey" value="QueryEditor.label.emptyQuery"/>
+    </c:if>
+
+    <!-- Editor context menu -->
+    <fx:menu name="contextMenu" contextMenuTarget="queryEditorContainer">
+        <fx:menuItem label="#{fxMessageBean['QueryEditor.label.contextMenu.and']}" clickHandler="function() { document.getElementById('frm:createAndSubquery').onclick(); }"/>
+        <fx:menuItem label="#{fxMessageBean['QueryEditor.label.contextMenu.or']}" clickHandler="function() { document.getElementById('frm:createOrSubquery').onclick(); }"/>
+    </fx:menu>
+
+    <!-- Popup dialog that shows the current SQL query -->
+    <div id="sqlPopupContainer">
+        <fx:popupDialog jsVar="sqlPopupDialog" closeControl="closeSqlPopup">
+            <a4j:outputPanel id="sqlPopupPanel">
+                <c:choose>
+                    #{fxMessageBean['QueryEditor.label.sqlQuery']}:<br/>
+                    <c:when test="#{fxQueryEditorBean.rootNode.valid}">
+                        <textarea readonly="true" cols="70" rows="10">#{fxQueryEditorBean.rootNode.sqlQuery}</textarea>
+                    </c:when>
+                    <c:otherwise>
+                        #{fxMessageBean['QueryEditor.label.wng.sql.invalidInput']}
+                    </c:otherwise>
+                </c:choose>
+            </a4j:outputPanel>
+            <br/>
+            <a href="javascript:void(0)" id="closeSqlPopup">Close</a>
+        </fx:popupDialog>
+    </div>
+    <!-- Button used to update the SQL query via Ajax  -->
+    <div style="display:none">
+        <a4j:commandButton id="refreshSqlButton" reRender="sqlPopupPanel" value="Refresh" eventsQueue="queryEditor"/>
+    </div>
+
+
+    <!-- Render the query editor table -->
+
+    <c:set var="nestedTableCounter" value="0"/>
+    <div id="queryEditorContainer">
+        <a4j:outputPanel id="queryEditor">
+            <script type="text/javascript">
+
+                var rowSelection = new QueryRowSelection(document, #{addAssignmentNode}, #{selectionNode}, "queryEditorRow_");
+
+            </script>
+
+            <table class="queryRoot" id="queryEditorRoot">
+                    <fx:queryEditorChild id="#{id}"
+                        nodes="#{nodes}"
+                        addAssignmentNode="#{addAssignmentNode}"
+                        addAssignmentNodeValue="#{addAssignmentNodeValue}"
+                        nestedTableCounter="#{1 - nestedTableCounter}"/>
+            </table>
+
+            <ui:fragment rendered="#{empty nodes}">
+                <div class="emptyMessage">
+                    #{fxMessageBean[emptyMessageKey]}
+                </div>
+            </ui:fragment>
+
+            <script type="text/javascript">
+
+                rowSelection.updateActiveRow(#{addAssignmentNodeValue});
+
+            </script>
+        </a4j:outputPanel>
+    </div>
+
+
+    <div style="display:none">
+        <!-- Add property command link -->
+        <a4j:commandButton id="addPropertyButton"
+                       reRender="queryEditor"
+                       actionListener="#{fxQueryEditorBean.addProperty}"
+                       eventsQueue="queryEditor"
+                       value="Add property"/>
+        <a4j:commandButton id="addTreeNodeButton"
+                       reRender="queryEditor"
+                       actionListener="#{fxQueryEditorBean.addTreeNode}"
+                       eventsQueue="queryEditor"
+                       value="Add tree node"/>
+        <a4j:commandButton id="addTypeButton"
+                       reRender="queryEditor"
+                       actionListener="#{fxQueryEditorBean.addTypeQuery}"
+                       eventsQueue="queryEditor"
+                       value="Add type"/>
+        <a4j:commandButton id="createAndSubquery"
+                        reRender="queryEditor"
+                        actionListener="#{fxQueryEditorBean.createAndSubquery}"
+                        eventsQueue="queryEditor"
+                        value="Join selected nodes with and"/>
+        <a4j:commandButton id="createOrSubquery"
+                        reRender="queryEditor"
+                        actionListener="#{fxQueryEditorBean.createOrSubquery}"
+                        eventsQueue="queryEditor"
+                        value="Join selected nodes with or"/>
+        <!-- include a dummy date picker to trigger loading of the myfaces scripts at page load time -->
+        <t:inputDate popupCalendar="true"/>
+    </div>
+
+    <c:if test="#{fxSystemBean.userTicket.globalSupervisor}">
+        <a href="javascript:document.getElementById('frm:refreshSqlButton').onclick();sqlPopupDialog.show();">#{fxMessageBean['QueryEditor.button.sql']}</a>
+    </c:if>
+
+</ui:composition>
+
+
+</html>

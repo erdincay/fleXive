@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="xhtml" xml:id="jsfsupport_content_addgroups"
+                xmlns="http://docbook.org/ns/docbook"><![CDATA[<!-- Specify preserveContent="true" to keep structural changes made to the content instance -->
+<fx:content pk="#{myBean.pk}" var="data" preserveContent="true">
+
+    <!-- Show editors for all existing contact person groups stored under the XPath /contactPerson -->
+    <ui:repeat var="contactPerson" value="#{data.contactPerson$listAll}">
+        <fx:fieldSet legend="Contact Person">
+            <fx:value var="contactPerson" property="name"/>
+            <fx:value var="contactPerson" property="email"/>
+        </fx:fieldSet>
+    </ui:repeat>
+
+    <!-- Render a button to add a new contact person group to the "data" content instance -->
+    <h:commandLink action="#{fxContentViewBean.add}">
+        <!-- Pass the content instance to the JSF bean -->
+        <f:setPropertyActionListener value="#{data_content}" target="#{fxContentViewBean.content}"/>
+
+        <!-- Specify the XPath of the element to be added -->
+        <f:setPropertyActionListener value="/CONTACTPERSON" target="#{fxContentViewBean.xpath}"/>
+
+        Add another person
+    </h:commandLink>
+
+</fx:content>
+]]></programlisting>        

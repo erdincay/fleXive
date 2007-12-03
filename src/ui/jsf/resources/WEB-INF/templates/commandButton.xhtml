@@ -1,0 +1,34 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:t="http://myfaces.apache.org/tomahawk">
+
+Basic [fleXive3] submit button.
+
+See commandElement template for the parameter documentation
+
+<ui:composition template="/adm/templates/commandElement.xhtml">
+
+    <ui:define name="content">
+        <c:if test="#{!empty labelKey}">
+            <c:set var="label" value="#{fxMessageBean[labelKey]}"/>
+        </c:if>
+        <table border="0" cellpadding="0" cellspacing="0" class="commandButton">
+            <tr>
+                <td class="commandButtonIcon"><t:graphicImage id="#{id}_icon" url="/adm/images/commandButton/${icon}.png"
+                                                              styleClass="pngSupport" border="0"/></td>
+                <td class="commandButtonLabel" nowrap="true">#{label}</td>
+                <td class="commandButtonRight"> </td>
+            </tr>
+        </table>
+    </ui:define>
+
+</ui:composition>
+
+
+</html>

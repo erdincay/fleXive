@@ -1,0 +1,155 @@
+/**
+ * Test fixture: content data
+ *
+ * @author Daniel Lichtenberger, UCS
+ * @author Markus Plesser, UCS
+ * @version $Rev$
+ */
+import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
+import com.flexive.shared.structure.*
+import com.flexive.shared.*
+import com.flexive.shared.content.FxContent
+import com.flexive.shared.security.ACL
+import com.flexive.shared.value.*
+
+if (!FxContext.get().testDivision) {
+    println "Not creating test fixture..."
+    return
+}
+println "Creating test fixture - content..."
+
+// create 25 folder instances with single-language caption and comment
+25.times { i ->
+    def FxContent co = EJBLookup.contentEngine.initialize(CacheAdmin.environment.getType("folder").id)
+    co.setValue("/fqn", new FxString(false, "test fqn " + i))
+    co.setValue("/caption", new FxString(true, "test caption " + i))
+    co.setValue("/comment", new FxString("folder comment " + i))
+    EJBLookup.contentEngine.save(co)
+}
+
+// create SelectLists
+ACL aclList = CacheAdmin.getEnvironment().getDefaultACL(ACL.Category.SELECTLIST);
+ACL aclItem = CacheAdmin.getEnvironment().getDefaultACL(ACL.Category.SELECTLISTITEM);
+FxSelectListEdit searchTestList = FxSelectListEdit.createNew("SearchTest SelectList", new FxString("SearchTest SelectList"), new FxString("SelectList used for search testcases"),
+        false, aclList, aclItem);
+10.times {i ->
+    new FxSelectListItemEdit(aclItem, searchTestList, new FxString("Label_$i"), "ListItem$i", "#FFFFFF");
+}
+EJBLookup.getSelectListEngine().save(searchTestList);
+
+//TODO: update once inline reference is implemented!
+
+// create a type that contains all data types to test the search engine(s)
+new GroovyTypeBuilder().SearchTest {
+    stringSearchProp(FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_N)
+    textSearchProp(FxDataType.Text, multiplicity: FxMultiplicity.MULT_0_N)
+    htmlSearchProp(FxDataType.HTML, multiplicity: FxMultiplicity.MULT_0_N)
+    numberSearchProp(FxDataType.Number, multiplicity: FxMultiplicity.MULT_0_N)
+    largeNumberSearchProp(FxDataType.LargeNumber, multiplicity: FxMultiplicity.MULT_0_N)
+    floatSearchProp(FxDataType.Float, multiplicity: FxMultiplicity.MULT_0_N)
+    doubleSearchProp(FxDataType.Double, multiplicity: FxMultiplicity.MULT_0_N)
+    dateSearchProp(FxDataType.Date, multiplicity: FxMultiplicity.MULT_0_N)
+    dateTimeSearchProp(FxDataType.DateTime, multiplicity: FxMultiplicity.MULT_0_N)
+    dateRangeSearchProp(FxDataType.DateRange, multiplicity: FxMultiplicity.MULT_0_N)
+    dateTimeRangeSearchProp(FxDataType.DateTimeRange, multiplicity: FxMultiplicity.MULT_0_N)
+    booleanSearchProp(FxDataType.Boolean, multiplicity: FxMultiplicity.MULT_0_N)
+    binarySearchProp(FxDataType.Binary, multiplicity: FxMultiplicity.MULT_0_N)
+    referenceSearchProp(FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_N, referencedType: CacheAdmin.environment.getType("FOLDER"))
+//    inlineReferenceSearchProp(FxDataType.InlineReference, multiplicity: FxMultiplicity.MULT_0_N, referencedType: CacheAdmin.environment.getType("FOLDER"))
+    selectOneSearchProp(FxDataType.SelectOne, multiplicity: FxMultiplicity.MULT_0_N, referencedList: CacheAdmin.environment.getSelectList("SearchTest SelectList"))
+    selectManySearchProp(FxDataType.SelectMany, multiplicity: FxMultiplicity.MULT_0_1, referencedList: CacheAdmin.environment.getSelectList("SearchTest SelectList"))
+
+    // create a new group
+    GroupTop(description: new FxString("Group at top level"), multiplicity: FxMultiplicity.MULT_0_N) {
+        stringSearchProp(assignment: "SearchTest/stringSearchProp")
+        textSearchProp(assignment: "SearchTest/textSearchProp")
+        htmlSearchProp(assignment: "SearchTest/htmlSearchProp")
+        numberSearchProp(assignment: "SearchTest/numberSearchProp")
+        largeNumberSearchProp(assignment: "SearchTest/largeNumberSearchProp")
+        floatSearchProp(assignment: "SearchTest/floatSearchProp")
+        doubleSearchProp(assignment: "SearchTest/doubleSearchProp")
+        dateSearchProp(assignment: "SearchTest/dateSearchProp")
+        dateTimeSearchProp(assignment: "SearchTest/dateTimeSearchProp")
+        dateRangeSearchProp(assignment: "SearchTest/dateRangeSearchProp")
+        dateTimeRangeSearchProp(assignment: "SearchTest/dateTimeRangeSearchProp")
+        booleanSearchProp(assignment: "SearchTest/booleanSearchProp")
+        binarySearchProp(assignment: "SearchTest/binarySearchProp")
+        referenceSearchProp(assignment: "SearchTest/referenceSearchProp")
+//        inlineReferenceSearchProp(assignment: "SearchTest/inlineReferenceSearchProp")
+        selectOneSearchProp(assignment: "SearchTest/selectOneSearchProp")
+        selectManySearchProp(assignment: "SearchTest/selectManySearchProp")
+
+        GroupNested(description: new FxString("Nested group"), multiplicity: FxMultiplicity.MULT_0_N) {
+            stringSearchProp(assignment: "SearchTest/stringSearchProp")
+            textSearchProp(assignment: "SearchTest/textSearchProp")
+            htmlSearchProp(assignment: "SearchTest/htmlSearchProp")
+            numberSearchProp(assignment: "SearchTest/numberSearchProp")
+            largeNumberSearchProp(assignment: "SearchTest/largeNumberSearchProp")
+            floatSearchProp(assignment: "SearchTest/floatSearchProp")
+            doubleSearchProp(assignment: "SearchTest/doubleSearchProp")
+            dateSearchProp(assignment: "SearchTest/dateSearchProp")
+            dateTimeSearchProp(assignment: "SearchTest/dateTimeSearchProp")
+            dateRangeSearchProp(assignment: "SearchTest/dateRangeSearchProp")
+            dateTimeRangeSearchProp(assignment: "SearchTest/dateTimeRangeSearchProp")
+            booleanSearchProp(assignment: "SearchTest/booleanSearchProp")
+            binarySearchProp(assignment: "SearchTest/binarySearchProp")
+            referenceSearchProp(assignment: "SearchTest/referenceSearchProp")
+//            inlineReferenceSearchProp(assignment: "SearchTest/inlineReferenceSearchProp")
+            selectOneSearchProp(assignment: "SearchTest/selectOneSearchProp")
+            selectManySearchProp(assignment: "SearchTest/selectManySearchProp")
+        }
+    }
+}
+
+//create test data
+
+int instanceCount = 100
+
+Date buildDate(int counter) {
+    return new Date(100 + counter, 10, 20, 12, 13, 14)
+}
+
+DateRange buildDateRange(int counter) {
+    return new DateRange(buildDate(counter), buildDate(counter+1))
+}
+
+FxSelectListItem buildSelectOneSearchProp(int counter) {
+    FxSelectList list = CacheAdmin.environment.getSelectList("SearchTest SelectList")
+    return list.items[counter % list.items.size()]
+}
+
+SelectMany buildSelectManySearchProp(int counter) {
+    FxSelectList list = CacheAdmin.environment.getSelectList("SearchTest SelectList")
+    SelectMany sm = new SelectMany(list)
+    sm.select(list.items[0].id)
+    sm.select(list.items[counter % list.items.size()].id)
+    return sm
+}
+
+void buildGroupData(String prefix, FxContent co, int counter) {
+    co.setValue("$prefix/stringSearchProp", new FxString(false, "StringValue$counter"))
+    co.setValue("$prefix/textSearchProp", new FxString(false, "TextValue$counter"))
+    co.setValue("$prefix/htmlSearchProp", new FxHTML(false, "HTMLValue$counter"))
+    co.setValue("$prefix/numberSearchProp", new FxNumber(false, counter))
+    co.setValue("$prefix/largeNumberSearchProp", new FxLargeNumber(false, counter))
+    co.setValue("$prefix/floatSearchProp", new FxFloat(false, counter))
+    co.setValue("$prefix/doubleSearchProp", new FxDouble(false, counter))
+    co.setValue("$prefix/dateSearchProp", new FxDate(false, buildDate(counter)))
+    co.setValue("$prefix/dateTimeSearchProp", new FxDateTime(false, buildDate(counter)))
+    co.setValue("$prefix/dateRangeSearchProp", new FxDateRange(false, buildDateRange(counter)))
+    co.setValue("$prefix/dateTimeRangeSearchProp", new FxDateTimeRange(false, buildDateRange(counter)))
+    co.setValue("$prefix/booleanSearchProp", new FxBoolean(false, counter % 2 == 0))
+//    co.setValue("$prefix/binarySearchProp", new FxBinary(false, buildBinarySearchProp(counter)))
+//    co.setValue("$prefix/referenceSearchProp", new FxReference(false, buildReferenceSearchProp(counter)))
+//    co.setValue("$prefix/inlineReferenceSearchProp", new FxReference(false, buildReferenceSearchProp(counter)))
+    co.setValue("$prefix/selectOneSearchProp", new FxSelectOne(false, buildSelectOneSearchProp(counter)))
+    co.setValue("$prefix/selectManySearchProp", new FxSelectMany(false, buildSelectManySearchProp(counter)))
+}
+
+instanceCount.times { int counter ->
+    FxContent co = EJBLookup.contentEngine.initialize(CacheAdmin.environment.getType("SearchTest").id)
+    buildGroupData("", co, counter)
+    buildGroupData("/GroupTop", co, counter)
+    buildGroupData("/GroupTop/GroupNested", co, counter)
+    EJBLookup.contentEngine.save(co)
+}

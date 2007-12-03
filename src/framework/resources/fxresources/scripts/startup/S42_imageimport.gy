@@ -1,0 +1,68 @@
+import com.flexive.shared.CacheAdmin
+import com.flexive.shared.EJBLookup
+import com.flexive.shared.FxContext
+import com.flexive.shared.content.FxContent
+import com.flexive.shared.content.FxPK
+import com.flexive.shared.interfaces.ContentEngine
+import com.flexive.shared.security.UserTicket
+import com.flexive.shared.structure.FxType
+import com.flexive.shared.tree.FxTreeMode
+import com.flexive.shared.tree.FxTreeNodeEdit
+import com.flexive.shared.value.*
+
+String startFolder = "C:\\flexiveimport"
+println "Scanning folder $startFolder for jpg, gif and png files ..."
+
+def importImage(rootNode, file) {
+    println "Importing ${file.name}"
+    EJBLookup.getTransactionManager().begin();
+    ContentEngine co = EJBLookup.getContentEngine();
+    FxType type = CacheAdmin.getEnvironment().getType("Image");
+    FileInputStream fis = new FileInputStream(file);
+    BinaryDescriptor binary = new BinaryDescriptor(file.getName(), file.length(), fis);
+    fis.close();
+    FxBinary fxBin = new FxBinary(false, binary);
+
+    UserTicket ticket = FxContext.get().getTicket();
+    FxContent img = co.initialize(type.getId(), type.getMandator().getId(),
+            CacheAdmin.getEnvironment().getACL("Image Content ACL").getId(),
+            type.getWorkflow().getSteps().get(0).getId(), ticket.getLanguage().getId());
+    img.setValue("/ImageBinary", fxBin);
+    img.setValue("/Filename", new FxString(false, file.name));
+    FxPK pk = co.save(img);
+    // Tree update disabled due to transactional issues
+    //EJBLookup.getTreeInterface().createNode(rootNode, file.name, pk.getId());
+    EJBLookup.getTransactionManager().commit();
+}
+
+def folder = new File(startFolder)
+if (!folder.exists()) {
+    println "Folder $startFolder does not exist. Nothing found to import."
+    println "Will create $startFolder for next runs ..."
+    folder.mkdirs()
+    return
+}
+
+long rootNode = EJBLookup.getTreeEngine().getIdByPath(FxTreeMode.Edit, "/Images");
+if (rootNode == -1)
+    rootNode = EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("Images"));
+
+// if we don't commit on the first startup here, the images cannot be attached to the image folder
+// EJBLookup.getTransactionManager().commit();
+def trans = EJBLookup.getTransactionManager().suspend();
+try {
+    folder.eachFileMatch(~/.*\.(JPG|jpg|jpeg|png|gif)/) {file ->
+        try {
+            importImage(rootNode, file)
+            println "Removing ${file.name}"
+            if (!file.remove()) {
+                println "Failed to delete ${file.name}, will remove on VM shutdown!"
+                file.deleteOnExit()
+            }
+        } catch (Exception e) {
+            println "Failed to import file: " + e
+        }
+    }
+} finally {
+    EJBLookup.getTransactionManager().resume(trans);
+}

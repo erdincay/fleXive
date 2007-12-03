@@ -1,0 +1,190 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:s="http://myfaces.apache.org/sandbox"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+      <ui:define name="head">
+        <t:stylesheet path="/adm/css/content.css"/>
+        <t:stylesheet path="/adm/css/structureEditor.css"/>
+        <script type="text/javascript">
+           dojo.require("dojo.widget.FilteringTable");
+        </script>
+      </ui:define>
+
+    <ui:define name="body">
+        <h:form id="frm" enctype="multipart/form-data">
+        <c:if test="#{empty propertyEditorBean.parseRequestParameters}"> </c:if>
+        <c:if test="#{structureTreeControllerBean.doAction}">
+            <script type="text/javascript">
+                var treeframe=parent.getNavFrameWnd();
+                treeframe.doTreeAction('#{structureTreeControllerBean.action}',#{structureTreeControllerBean.id}, '#{structureTreeControllerBean.value}');
+            </script>
+        </c:if>
+        <c:if test="#{not propertyEditorBean.property.new}">
+            <adm:tab label="#{fxMessageBean['PropertyEditor.tab.propertyAssignment']}" active="false" id="tab1"
+                     bean="#{propertyEditorBean}" action="showPropertyAssignmentEditor"/>
+            <adm:tab label="#{fxMessageBean['PropertyEditor.tab.property']}" active="true" id="tab2"/>
+            <adm:tab label="#{fxMessageBean['PropertyEditor.tab.option']}" active="false" id="tab3"
+            	bean="#{propertyEditorBean}" action="showPropertyOptionEditor"/>
+        </c:if>
+        <c:if test="#{propertyEditorBean.property.new}">
+            <adm:tab label="#{fxMessageBean['PropertyEditor.tab.createProperty']}" active="true" id="tab1"/>
+            <adm:tab label="#{fxMessageBean['PropertyEditor.tab.option']}" active="false" id="tab2"
+            	bean="#{propertyEditorBean}" action="showPropertyOptionEditor"/>
+        </c:if>
+            <fx:formRow labelKey="PropertyEditor.label.name" id="name">
+                    <h:inputText id="name" value="#{propertyEditorBean.propertyName}"
+                             disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}">
+                        <f:validator validatorId="flexive.FxNameForXPathValidator"/>
+                    </h:inputText>
+            </fx:formRow>
+            <fx:formRow labelKey="PropertyEditor.label.label" id="label">
+					<fx:fxValueInput id="label" value="#{propertyEditorBean.propertyLabel}"
+                         readOnly="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"/>
+			</fx:formRow>
+            <fx:formRow labelKey="PropertyEditor.label.hint" id="hint">
+					<fx:fxValueInput id="hint" value="#{propertyEditorBean.propertyHint}"
+                         readOnly="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"/>
+			</fx:formRow>
+             <fx:formRow labelKey="PropertyEditor.label.fulltextIndexed" id="fulltextIndexed">
+                    <h:selectBooleanCheckbox id="fulltextIndexed" value="#{propertyEditorBean.propertyFulltextIndexed}"
+                         disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"/>
+            </fx:formRow>
+            <c:if test="#{propertyEditorBean.property.new}">
+                <fx:formRow labelKey="PropertyEditor.label.autoUniquePropertyName" id="autoUniquePropertyName">
+                    <h:selectBooleanCheckbox id="autoUniquePropertyName" value="#{propertyEditorBean.propertyAutoUniquePropertyName}"/>    
+                </fx:formRow>
+            </c:if>
+            <fx:formRow labelKey="PropertyEditor.label.uniqueMode" id="uniqueMode">
+                <t:selectOneListbox size="1" id="uniqueMode" value="#{propertyEditorBean.propertyUniqueMode}"
+                     disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}">
+                    <f:selectItems value="#{fxSelectBean.uniqueModes}" />
+                </t:selectOneListbox>
+            </fx:formRow>
+            <fx:formRow labelKey="PropertyEditor.label.dataType" id="dataType">
+                <t:selectOneListbox size="1" id="dataType" value="#{propertyEditorBean.propertyDataType}"
+                     disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"
+                     onchange="submit();">
+                    <f:selectItems value="#{fxSelectBean.dataTypes}" />
+                </t:selectOneListbox>
+            </fx:formRow>
+            <div style="padding-left:17px">
+                <ui:fragment rendered="#{propertyEditorBean.propertyReference}">
+                    <fx:formRow labelKey="PropertyEditor.label.referencedType" id="referencedType">
+                        <t:selectOneListbox size="1" id="referencedType" value="#{propertyEditorBean.propertyReferencedType}"
+                             disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}">
+                            <f:selectItems value="#{propertyEditorBean.types}" />
+                        </t:selectOneListbox>
+                    </fx:formRow>
+                </ui:fragment>
+                <ui:fragment rendered="#{propertyEditorBean.propertySelectList}">
+                    <fx:formRow labelKey="PropertyEditor.label.referencedList" id="referencedList">
+                        <t:selectOneListbox size="1" id="referencedList" value="#{propertyEditorBean.propertyReferencedList}"
+                                 disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}">
+                            <f:selectItems value="#{fxSelectBean.selectListsWithEmpty}" />
+                        </t:selectOneListbox>
+                    </fx:formRow>
+                </ui:fragment>
+            </div>
+            <fx:formRow labelKey="PropertyEditor.label.multiplicity" id="multiplicity">
+                <h:inputText id="multiplicity" value="#{propertyEditorBean.propertyMinMultiplicity}"
+                         disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"
+                         required="true" style="width:40px"/>
+                <h:inputText value="#{propertyEditorBean.propertyMaxMultiplicity}"
+                                disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"
+                                required="true" style="width:40px"/>
+            </fx:formRow>
+            <fx:formRow labelKey="PropertyEditor.label.acl" id="acl">
+                <t:selectOneListbox size="1" id="acl" value="#{propertyEditorBean.propertyAcl}"
+                        disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}">
+                    <f:selectItems value="#{fxSelectBean.structureACLs}" />
+                </t:selectOneListbox>
+            </fx:formRow>
+            <fx:fieldSet legend="#{fxMessageBean['PropertyEditor.label.propertyOverrideOptions']}">
+                <fx:formRow labelKey="PropertyEditor.label.mayOverrideBaseMultiplicity" id="propertyMayOverrideBaseMultiplicity">
+                    <h:selectBooleanCheckbox id="propertyMayOverrideBaseMultiplicity" value="#{propertyEditorBean.propertyMayOverrideBaseMultiplicity}"
+                         disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"/>
+                </fx:formRow>
+                <fx:formRow labelKey="PropertyEditor.label.mayOverrideACL" id="propertyMayOverrideACL">
+                    <h:selectBooleanCheckbox id="propertyMayOverrideACL" value="#{propertyEditorBean.propertyMayOverrideACL}"
+                         disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"/>
+                </fx:formRow>
+           </fx:fieldSet>
+           <fx:fieldSet legend="#{fxMessageBean['PropertyEditor.label.referencingPropertyAssignments']}">
+             <table dojoType="FilteringTable" widgetId="referencingPropertyAssignments" enableMultipleSelect="true"
+                               alternateRows="true" maxSortable="1" class="dojoTable">
+                <thead>
+                    <tr>
+                        <th class="tblHeader" field="xpath" dataType="String" align="left">
+                            #{fxMessageBean['PropertyEditor.table.id']}
+                        </th>
+                        <th class="tblHeader" field="xpath" dataType="String" align="left">
+                            #{fxMessageBean['PropertyEditor.table.xPath']}
+                        </th>
+                        <th>
+                           #{fxMessageBean['PropertyEditor.table.actions']}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <ui:repeat value="#{propertyEditorBean.referencingPropertyAssignments}" var="pa">
+                        <tr value="#{pa.XPath}">
+                            <td align="left"><h:outputText value="#{pa.id}"/></td>
+                            <td align="left"><h:outputText value="#{pa.XPath}"/></td>
+                            <td align="left">
+                                <h:commandLink id="gotoPropertyAssignmentButton_#{pa.id}" action="#{propertyEditorBean.showPropertyAssignmentEditor}"
+                                     onclick="var treeframe=parent.getNavFrameWnd(); treeframe.selectNode(#{pa.id});">
+                                    <h:graphicImage border="0px" value="/adm/images/commandButton/edit.png"/>
+                                    <h:outputText value="#{fxMessageBean['PropertyEditor.table.button.goto']}"/>
+                                </h:commandLink>
+                            </td>
+                        </tr>
+                    </ui:repeat>
+                </tbody>
+              </table>
+           </fx:fieldSet>
+
+            <ui:fragment rendered="#{not propertyEditorBean.property.new and not propertyEditorBean.editMode and propertyEditorBean.mayEdit}">
+                <adm:commandButton labelKey="PropertyEditor.button.editMode" location="both"
+                icon="edit"  action="toggleEditMode"  bean="#{propertyEditorBean}" id="editModeButton"/>
+            </ui:fragment>
+
+            <ui:fragment rendered="#{not propertyEditorBean.property.new and propertyEditorBean.editMode}">
+                 <adm:commandButton labelKey="PropertyEditor.button.cancel" location="both"
+                        icon="cancel" id="cancelButton" lockscreen="false"
+                        onclick="parent.getNavFrameWnd().openNode(#{propertyEditorBean.assignment.id}, false);return false;"/>
+            </ui:fragment>
+
+           <ui:fragment rendered="#{not propertyEditorBean.property.new and propertyEditorBean.mayEdit and propertyEditorBean.editMode}">
+                <adm:commandButton labelKey="PropertyEditor.button.save" location="both"
+                    icon="save"  action="saveChanges"  bean="#{propertyEditorBean}" id="saveChangesButton">
+                </adm:commandButton>
+            </ui:fragment>
+            <ui:fragment rendered="#{propertyEditorBean.property.new}">
+                <adm:commandButton labelKey="PropertyEditor.button.property.createNew" location="both"
+                    icon="new"  action="createProperty"  bean="#{propertyEditorBean}" id="createPropertyButton">
+                </adm:commandButton>
+            </ui:fragment>
+        <adm:toolbarPluginButtons/>
+        </h:form>
+
+
+
+
+        <script type="text/javascript">
+
+        </script>
+
+    </ui:define>
+</ui:composition>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:jstl="http://java.sun.com/jsp/jstl/functions"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+
+
+<head>
+    <t:stylesheet path="/adm/css/navigation.css"/>
+    <t:stylesheet path="/adm/css/treeDocIcons.css"/>
+
+    <base href="#{fxSystemBean.documentBase}"/>
+    <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/admin.js"/>
+    <script type="text/javascript">
+        djConfig.baseRelativePath = "pub/js/dojoNavigation/";
+    </script>
+    <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/dojoNavigation/dojo.js"></script>
+    <fx:includes/>
+    <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/jsonrpc.js"> </script>
+    <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/flexiveRpc.js"></script>
+
+
+    <script type="text/javascript">
+        dojoInit();
+        djConfig.searchIds.push("menuButton");
+
+        var heightOffset = 12;
+        var widthOffset = 11;
+                
+        function getMenuItemCount() {
+            return #{jstl:length(navigationMenuBean.items)};
+        }
+    </script>
+    <c:if test="#{fxSystemBean.browserAsString=='IE'}">
+    <script type="text/javascript">
+        heightOffset = 0;
+        widthOffset = 1;
+    </script>
+    </c:if>
+
+    <script type="text/javascript">
+    <!--
+        function windowResize() {
+            var newHeight = parent.getWindowHeight();
+            var newWidth = document.body.clientWidth;
+            var navDiv = document.getElementById('navTreeContent');
+            var contentOffset = document.all ? 40 : 30; // IE7 doesn't account for #navTreeContent's padding, firefox does
+            navDiv.style.height=(newHeight-(contentOffset+heightOffset)-(getMenuItemCount()*21))+"px";
+            navDiv.style.width=(newWidth-widthOffset)+"px";
+        }
+
+        function changeTab(id) {
+            document.getElementById("mainNavForm:menu_" + id).onclick();
+        }
+
+        function goto(id) {
+            parent.gotoNavMenu(id);
+        }
+
+        function getBase() {
+            return "#{fxSystemBean.documentBase}";
+        }
+
+        function clickMenuButton() {
+            dojo.widget.byId("menuButton")._toggleMenu("mainMenu");
+        }
+
+        function setBackgroundImage(url) {
+            var style = document.getElementById("navTreeContent").style;
+            style.backgroundImage = "url(" + url + ")";
+            style.backgroundPosition = "center center";
+            style.backgroundRepeat = "no-repeat";
+            style.backgroundAttachment = "fixed";
+        }
+
+        function removeBackgroundImage() {
+            document.getElementById("navTreeContent").style.backgroundImage = "none";
+        }
+
+    //-->
+    </script>
+    <ui:insert name="head" />
+</head>
+    <body onload="windowResize()">
+    <h:form id="mainNavForm">
+        <c:forEach items="#{navigationMenuBean.topItems}" var="item">
+            <a href="javascript:goto(#{item.id})">
+                <div id="menuItem#{item.id+1}" class="menuItem">
+                    <span class="menuItemSpan">#{item.display}</span>
+                    <t:graphicImage url="/adm/images/layout/RightMenuInactive.gif" alt="menu_right" height="21"
+                                    style="position:absolute;right:0;border:0"/>
+                </div>
+            </a>
+        </c:forEach>
+
+        <div id="menuItem#{navigationMenuBean.activeItem.id+1}" class="menuItemActive">
+            <!-- Insert menu. The menu has to be defined by the page including this template in "mainMenu" -->
+            <div style="float:left">
+                <a href="javascript:clickMenuButton();" class="menuItemSpan">
+                    #{navigationMenuBean.activeItem.display}
+                     <t:graphicImage url="/adm/images/layout/dropDownIcon.gif" alt="dropDownMenu" border="0"
+                             style="margin-left:3px;margin-bottom:2px"/>
+                </a>
+                <div style="display:inline;position:relative;left:-200px">
+                    <button dojoType="comboButton" menuId="mainMenu" widgetId="menuButton" id="menuButton">Dojo button</button>
+                </div>
+            </div>
+
+            <c:if test="#{navigationMenuBean.activeItem.renderReloadButton==true}">
+                <ui:insert name="reloadButton">
+                    <a href="javascript:document.location.reload()">
+                        <t:graphicImage url="/adm/images/layout/reload.png" alt="reload" style="position:absolute;right:15px;margin-top:2px;border:0;"/>
+                    </a>
+                </ui:insert>
+            </c:if>
+
+            <t:graphicImage url="/adm/images/layout/RightMenuActive.gif" alt="menu_right" height="21" style="position:absolute;right:0"/>
+        </div>
+
+        <div id="navTreeContent">
+            <t:inputHidden value="#{navigationMenuBean.activeIdx}" id="menuId"/>
+            <ui:insert name="content">[Navigation goes here]</ui:insert></div>
+
+        <c:forEach items="#{navigationMenuBean.bottomItems}" var="itemBottom">
+            <a href="javascript:goto(#{itemBottom.id})">
+                <div id="menuItem#{itemBottom.id+1}" class="menuItem">
+                    <span class="menuItemSpan">#{itemBottom.display}</span>
+                    <t:graphicImage url="/adm/images/layout/RightMenuInactive.gif" alt="menu_right" height="21"
+                                    style="position:absolute;right:0;border:0"/>
+                </div>
+            </a>
+        </c:forEach>
+    </h:form>
+
+    <ui:insert name="mainMenu">
+        <!-- Default menu -->
+        <fx:menu name="mainMenu">
+            <ui:include src="/adm/templates/navigation.menu.tabs.xhtml"/>
+        </fx:menu>
+    </ui:insert>
+
+    </body>
+
+</html>

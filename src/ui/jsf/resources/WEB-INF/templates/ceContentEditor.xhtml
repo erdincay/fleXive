@@ -1,0 +1,189 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:fx="http://www.flexive.com/jsf/core"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<ui:composition>
+       <c:if test="#{empty srcEditor.parseRequestParameters}"> </c:if>
+
+            <t:inputHidden id="editorType" value="#{srcEditor.editorType}" />
+
+            <!-- Content select screen -->
+            <c:if test="#{srcEditor.initialized==false}">
+                <adm:tab label="Choose Content Type" active="true" id="tabChoose"/>
+                <t:selectOneListbox size="1" id="type" value="#{srcEditor.type}">
+                    <f:selectItems value="#{srcEditor.editableTypes}" />
+                </t:selectOneListbox>
+                <br/><br/>
+                <adm:commandButton labelKey="Content.button.create" location="both"
+                                  bean="#{srcEditor}"
+                                  icon="save" action="initNew" id="initButton"/>
+            </c:if>
+
+            <!-- Content editor screen -->
+            <c:if test="#{srcEditor.initialized==true}">
+
+                <c:if test="#{srcEditor.new}">
+                    <adm:tab label="Content Editor [New]" active="true" id="tabEditNew"/>
+                </c:if>
+                <c:if test="#{srcEditor.new==false}">
+                    <c:if test="#{srcEditor.readOnly==true}">
+                      <adm:tab label="Content Editor ##{srcEditor.id}.#{srcEditor.version} [readonly]" active="true" id="tabEditInit"/>
+                    </c:if>
+                    <c:if test="#{srcEditor.readOnly==false}">
+                      <adm:tab label="Content Editor ##{srcEditor.id}.#{srcEditor.version}" active="true" id="tabEditInit"/>
+                    </c:if>
+                </c:if>
+
+
+                    <a4j:outputPanel id="all">
+
+                        <script type="text/javascript">
+                            <!--
+
+                            function startUpload(id) {
+                                var _iframe = window.frames['fileupload'+id].document;
+                                if (_iframe.getElementById('theFile').value=='') {
+                                    alert('Please select a file first');
+                                } else {
+                                    parent.lockScreen();
+                                    _iframe.getElementById('myForm').submit();
+                                    document.getElementById("uploadInfo"+id).innerHTML='upload laeuft';
+                                }
+                            }
+
+                            function uploadFinished() {
+                                document.getElementById("frm:storeButton").onclick();
+                            }
+
+                            // to identify the content editor from other frames
+                            var isContentEditor = true;
+                            var isReadOnly = #{srcEditor.readOnly};
+                            var form = document.forms["frm"];
+
+                            function addTreeNode(nodeId) {
+                                form["frm:treeNodeParent"].value = nodeId;
+                                document.getElementById("frm:addTreeNodeButton").onclick();
+                            }
+                            //-->
+                        </script>
+
+
+                        <!-- General fields -->
+
+                        <div style="width:40px;float:left;padding-top:2px">Acl</div>
+                        <div style="width:180px;float:left;">
+                            <c:if test="#{srcEditor.readOnly==false}">
+                                <t:selectOneListbox size="1" id="acl" value="#{srcEditor.acl}"
+                                                    converter="SelectableConverter">
+                                    <f:selectItems value="#{fxSelectBean.contentACLs}" />
+                                </t:selectOneListbox>
+                            </c:if>
+                            <c:if test="#{srcEditor.readOnly==true}">
+                                <span class="readonlyValue">#{srcEditor.acl.name}</span>
+                            </c:if>
+                        </div>
+                        <div style="width:40px;float:left;padding-top:2px">Step</div>
+                        <div style="float:left;">
+                            <c:if test="#{srcEditor.readOnly==false}">
+                                <t:selectOneListbox size="1" id="step" value="#{srcEditor.step}">
+                                    <f:selectItems value="#{srcEditor.possibleWorkflowSteps}" />
+                                </t:selectOneListbox>
+                            </c:if>
+                            <c:if test="#{srcEditor.readOnly==true}">
+                                <span class="readonlyValue">#{srcEditor.stepDescription}</span>
+                            </c:if>
+                        </div>
+                        <br clear="both"/><br/>
+
+                        <!-- Tree -->
+                        <adm:ceRenderTreeNodes srcEditor="#{srcEditor}"/>
+
+                        <!-- PREVIEW -->
+                        <c:if test="#{srcEditor.content.previewAvailable}">
+                            <img src="thumbnail/pk#{srcEditor.id}.1/s2" alt="image" title="image" border="0"
+                                 style="border:1px solid gray"/>
+                        </c:if>
+
+                        <!-- binary support hack -->
+                        <t:inputHidden value="#{srcEditor.editorActionName}"  id="editorActionName"/>
+                        <t:inputHidden value="#{srcEditor.editorActionXpath}" id="editorActionXpath"/>
+
+
+                        <!-- Properties and Groups -->
+                        <t:inputHidden value="#{srcEditor.elements}" id="elements"/>
+                        <div style="position:relative;left:-10px">
+                            <div class="property">
+                                <adm:ceRenderFieldMenu group="#{srcEditor.content.rootGroup}" icon="root"
+                                        srcEditor="#{srcEditor}"/>
+                                <div class="display" style="padding-top:2px;width:400px">
+                                    #{srcEditor.typeDisplay}
+                                    <c:if test="#{srcEditor.new}"> [new]</c:if>
+                                    <c:if test="#{srcEditor.new==false}"> [#{srcEditor.id}.#{srcEditor.version}]</c:if>
+                                </div>
+                            </div>
+                            <br style="clear:both;margin-bottom:7px"/>
+                            <adm:ceRenderFields data="#{srcEditor.content.rootGroup.children}" srcEditor="#{srcEditor}"/>
+                        </div>
+                    </a4j:outputPanel>
+
+                <div style="clear:both;height:20px"><!-- __ --></div>
+
+                <c:if test="#{srcEditor.readOnly==true}">
+                    <adm:commandButton labelKey="Content.button.edit" location="both"
+                                      bean="#{srcEditor}"
+                                      icon="edit" action="enableEdit" id="enableEditButton"/>
+                </c:if>
+                <c:if test="#{srcEditor.readOnly==false}">
+                    <!--
+                    <adm:commandButton label="Content.button.saveInSession" location="both"
+                                      bean="#{srcEditor}"
+                                      icon="saveInSession" action="saveInSession" id="storeButton"/>
+                                      -->
+
+                    <c:if test="#{srcEditor.new}">
+                        <adm:commandButton labelKey="Content.button.create" location="both"
+                                          bean="#{srcEditor}"
+                                          icon="new" action="save" id="createButton"/>
+                    </c:if>
+
+                    <c:if test="#{srcEditor.new==false}">
+                        <adm:commandButton labelKey="Content.button.save" location="both"
+                                          bean="#{srcEditor}"
+                                          icon="save" action="save" id="saveButton"/>
+
+                        <adm:commandButton labelKey="Content.button.saveInNewVersion" location="both"
+                                          bean="#{srcEditor}"
+                                          icon="newVersion" action="saveInNewVersion" id="saveInNewVersionButton"/>
+
+                        <adm:commandButton labelKey="Content.button.refresh" location="both"
+                                          bean="#{srcEditor}" confirm="Content.confirm.refresh"
+                                          icon="reload" action="reload" id="reloadButton"/>
+
+                        <adm:commandButton labelKey="Content.button.delete" location="both"
+                                          bean="#{srcEditor}" confirm="Content.confirm.delete"
+                                          icon="delete" action="delete" id="deleteButton"/>
+                    </c:if>
+
+
+                    <adm:commandButton labelKey="Content.button.compact" location="toolbar"
+                                      bean="#{srcEditor}"
+                                      icon="compact" action="compact" id="compactButton"/>
+
+                    <adm:commandButton labelKey="Content.button.cancel" location="both"
+                                      bean="#{srcEditor}" confirm="Content.confirm.abort"
+                                      icon="cancel" action="cancel" id="cancelButton"/>
+                </c:if>
+            </c:if>
+</ui:composition>
+
+
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:c="http://java.sun.com/jstl/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+    xmlns:adm="http://www.flexive.com/jsf/admin"
+    xmlns:fx="http://www.flexive.com/jsf/core">
+
+[fleXive3] modular Dojo popup. The dialog content is specified in the
+component body. Add 
+
+dojo.require("dojo.widget.Dialog");
+
+to your page if use use this component.
+
+Parameters: 
+	jsVar = javascript variable name that should be initialized with this
+		dialog. Execute jsVar.show() to show the dialog.
+	closeControl = element ID that should be used for closing the dialog
+	
+<ui:composition>
+
+	<script type="text/javascript">
+	<!--
+		var #{jsVar};
+		dojo.addOnLoad(function() {
+			#{jsVar} = dojo.widget.byId("#{jsVar}_dialog");
+			#{jsVar}.setCloseControl(document.getElementById("#{closeControl}"));
+		});
+	//-->
+	</script>
+	<div dojoType="dialog" id="#{jsVar}_dialog" bgColor="white" bgOpacity="0" style="display:none">
+		<ui:insert/>
+	</div>
+	
+</ui:composition>
+
+
+</html>

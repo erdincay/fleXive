@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:s="http://myfaces.apache.org/sandbox"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+    <ui:define name="head">
+
+        <script type="text/javascript">
+            dojo.require("dojo.widget.FilteringTable");
+        </script>
+
+    </ui:define>
+
+    <ui:define name="searchIds">"listForm"</ui:define>
+
+    <ui:define name="body">
+
+        <h:form id="listForm">
+
+            <adm:tab label="Mandator Overview" active="true" id="tab1"/>
+
+            <!-- Mandator select is only shown for global supervisors -->
+            <!--      <c:if test="${fxSystemBean.userTicket.globalSupervisor}"> -->
+            <table dojoType="FilteringTable" widgetId="testTable" enableMultipleSelect="true"
+                   alternateRows="true" maxSortable="1" class="dojoTable">
+                <thead>
+                    <tr>
+                        <th class="tblHeader" field="name" dataType="String" align="left">
+                            #{fxMessageBean['Mandator.field.name']}
+                        </th>
+                        <th class="tblHeader" field="active" dataType="boolean" align="left">
+                            #{fxMessageBean['Mandator.field.active']}
+                        </th>
+                        <th class="tblHeader" dataType="html" align="left">
+                            #{fxMessageBean['Mandator.field.actions']}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <ui:repeat value="#{mandatorBean.mandators}" var="item">
+                        <tr value="#{item.id}">
+                            <td align="left"><h:outputText value="#{item.name}" /></td>
+                            <td align="left"><h:selectBooleanCheckbox value="#{item.active}" disabled="true"/></td>
+                            <td align="left">
+                                <adm:commandIcon labelKey="Mandator.button.edit" location="content"
+                                                 icon="edit"  action="editMandator"  bean="#{mandatorBean}"
+                                                 id="editButton_#{item.id}">
+                                    <f:setPropertyActionListener target="#{mandatorBean.id}" value="#{item.id}"/>
+                                </adm:commandIcon>
+                                <adm:commandIcon labelKey="Mandator.button.delete" location="content"
+                                                 icon="delete"  action="deleteMandator"  bean="#{mandatorBean}"
+                                                 id="deleteButton_#{item.id}" confirm="Mandator.confirm.delete">
+                                    <f:setPropertyActionListener target="#{mandatorBean.id}" value="#{item.id}"/>
+                                </adm:commandIcon>
+                            </td>
+                        </tr>
+                    </ui:repeat>
+                </tbody>
+            </table>
+
+            <!--     </c:if>   -->
+            <br/>
+            <adm:commandButton labelKey="Mandator.button.create" location="both"
+                               icon="new" action="mandatorCreate" id="createMandatorButton"/>
+            <adm:toolbarPluginButtons/>
+        </h:form>
+        <br/>
+    </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

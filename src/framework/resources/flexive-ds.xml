@@ -1,0 +1,78 @@
+<datasources>
+
+    <xa-datasource>
+        <jndi-name>jdbc/flexiveDivision1</jndi-name>
+        <xa-datasource-class>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</xa-datasource-class>
+        <!-- Note: "&amp;" has to be used instead of "&" for parameters -->
+        <xa-datasource-property name="URL">jdbc:mysql://localhost:3306/flexive?useUnicode=true&amp;characterEncoding=utf8&amp;characterResultSets=utf8</xa-datasource-property>
+        <user-name>root</user-name>
+        <password>a</password>
+
+        <transaction-isolation>TRANSACTION_READ_COMMITTED</transaction-isolation>
+        <no-tx-separate-pools/>
+        <!-- This disables transaction interleaving (which BTW, most DB vendors don't support) -->
+        <track-connection-by-tx/>
+        <isSameRM-override-value>false</isSameRM-override-value>
+
+        <!--pooling parameters-->
+        <min-pool-size>5</min-pool-size>
+        <max-pool-size>20</max-pool-size>
+        <blocking-timeout-millis>5000</blocking-timeout-millis>
+        <idle-timeout-minutes>15</idle-timeout-minutes>
+
+        <!-- pooling criteria.  USE AT MOST ONE-->
+        <!--  If you don't use JAAS login modules or explicit login
+    getConnection(usr,pw) but rely on user/pw specified above,
+    don't specify anything here -->
+
+        <!-- If you supply the usr/pw from a JAAS login module -->
+        <security-domain/>
+
+        <!-- if your app supplies the usr/pw explicitly getConnection(usr, pw) -->
+        <application-managed-security/>
+        <exception-sorter-class-name>org.jboss.resource.adapter.jdbc.vendor.MySQLExceptionSorter
+        </exception-sorter-class-name>
+        <metadata>
+            <type-mapping>mySQL</type-mapping>
+        </metadata>
+    </xa-datasource>
+
+
+    <xa-datasource>
+        <jndi-name>jdbc/flexiveConfiguration</jndi-name>
+        <xa-datasource-class>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</xa-datasource-class>
+        <!-- Note: "&amp;" has to be used instead of "&" for parameters -->
+        <xa-datasource-property name="URL">jdbc:mysql://localhost:3306/flexiveConfiguration?useUnicode=true&amp;characterEncoding=utf8&amp;characterResultSets=utf8</xa-datasource-property>
+        <user-name>root</user-name>
+        <password>a</password>
+
+        <transaction-isolation>TRANSACTION_READ_COMMITTED</transaction-isolation>
+        <no-tx-separate-pools/>
+        <!-- This disables transaction interleaving (which BTW, most DB vendors don't support) -->
+        <track-connection-by-tx/>
+        <isSameRM-override-value>false</isSameRM-override-value>
+
+        <!--pooling parameters-->
+        <min-pool-size>5</min-pool-size>
+        <max-pool-size>20</max-pool-size>
+        <blocking-timeout-millis>5000</blocking-timeout-millis>
+        <idle-timeout-minutes>15</idle-timeout-minutes>
+
+        <!-- pooling criteria.  USE AT MOST ONE-->
+        <!--  If you don't use JAAS login modules or explicit login
+    getConnection(usr,pw) but rely on user/pw specified above,
+    don't specify anything here -->
+
+        <!-- If you supply the usr/pw from a JAAS login module -->
+        <security-domain/>
+
+        <!-- if your app supplies the usr/pw explicitly getConnection(usr, pw) -->
+        <application-managed-security/>
+        <exception-sorter-class-name>org.jboss.resource.adapter.jdbc.vendor.MySQLExceptionSorter
+        </exception-sorter-class-name>
+        <metadata>
+            <type-mapping>mySQL</type-mapping>
+        </metadata>
+    </xa-datasource>
+
+</datasources> 

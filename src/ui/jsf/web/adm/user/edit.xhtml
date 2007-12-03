@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:s="http://myfaces.apache.org/sandbox"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+<ui:define name="head">
+
+    <script type="text/javascript">
+        dojo.require("dojo.widget.SortableTable");
+    </script>
+
+</ui:define>
+
+<ui:define name="body">
+    <c:if test="#{empty accountBean.parseRequestParameters}"> </c:if>
+    <h:form id="frm">
+        <adm:tab label="Edit User Preferences" active="true" id="tab1"/>
+        
+        <fx:formRow label="Account Name" id="name" newLine="false">
+            <h:inputText id="name" value="#{accountBean.account.name}" readonly="true"/>
+            <h:inputHidden value="#{accountBean.accountIdFiler}"/>
+        </fx:formRow>
+        <fx:formRow label="Login Name" id="loginName">
+            <h:inputText id="loginName" value="#{accountBean.account.loginName}" readonly="true"/>
+        </fx:formRow>
+
+        <!-- ============================================ -->
+        <fx:formRow label="Password" id="password" newLine="false">
+            <h:inputSecret id="password" value="#{accountBean.password}"/>
+        </fx:formRow>
+        <fx:formRow label="Confirm Password" id="passwordConfirm">
+            <h:inputSecret id="passwordConfirm" value="#{accountBean.passwordConfirm}"/>
+        </fx:formRow>
+
+        <!-- ============================================ -->
+        <fx:formRow label="Language" id="language">
+            <h:selectOneListbox id="language" value="#{accountBean.account.language}" size="1"
+                                converter="FxLanguageConverter">
+                <f:selectItems value="#{fxSelectBean.languages}" />
+            </h:selectOneListbox>
+        </fx:formRow>
+
+        <!-- ============================================ -->
+        <fx:formRow label="Email" id="email">
+            <h:inputText id="email" value="#{accountBean.account.email}"/>
+        </fx:formRow>
+
+        <fx:formRow label="Groups" id="groups" height="85"  newLine="false">
+            <ui:repeat value="#{accountBean.groups}" var="group">
+                <h:outputText value="#{group.name}"/>
+                <br/>
+            </ui:repeat>    
+        </fx:formRow>
+        
+        <fx:formRow label="Roles" id="roles" height="85" readonly="true">
+            <ui:repeat value="#{accountBean.roles}" var="role">
+                <h:outputText value="#{role.name}"/>
+                <br/>
+            </ui:repeat>
+        </fx:formRow>
+        
+        <c:if test="${fxSystemBean.userTicket.globalSupervisor}">
+            <fx:formRow label="Mandator" id="mand"><h:outputText value="#{mandatorBean.mandatorsById[accountBean.account.mandatorId].name}"/></fx:formRow>
+        </c:if>
+
+        <br />
+
+        <adm:commandButton id="saveButton" labelKey="User.button.save"
+                          icon="save"  bean="#{accountBean}" action="saveUserPref"/>
+        <adm:commandButton id="refreshButton" labelKey="User.button.refresh"
+                          icon="reload"  bean="#{accountBean}" action="editUserPref"/>
+        <adm:commandButton id="cancelButton" labelKey="User.button.cancel"
+                          icon="cancel" action="contentPage"/>
+        <adm:toolbarPluginButtons/>
+    </h:form>
+    <br/>
+</ui:define>
+
+</ui:composition>
+
+</body>
+</html>

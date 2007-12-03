@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app version="2.5"
+         xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
+    <!-- Use Documents Saved as *.xhtml -->
+    <context-param>
+        <param-name>javax.faces.DEFAULT_SUFFIX</param-name>
+        <param-value>.xhtml</param-value>
+    </context-param>
+
+    <!-- Special Debug Output for Development -->
+    <context-param>
+        <param-name>facelets.DEVELOPMENT</param-name>
+        <param-value>true</param-value>
+    </context-param>
+    <!--
+        Facelets refresh period in seconds (-1 to disable automatic refresh of facelets pages).
+     -->
+    <context-param>
+        <param-name>facelets.REFRESH_PERIOD</param-name>
+        <param-value>2</param-value>
+    </context-param>
+
+    <!-- Use a classpath resource resolver for plugins -->
+    <context-param>
+        <param-name>facelets.RESOURCE_RESOLVER</param-name>
+        <param-value>com.flexive.faces.ClasspathResourceResolver</param-value>
+    </context-param>
+
+    <!-- Reduce server viewstate size. Currently causes troubles with ajax4jsf pages -->
+    <context-param>
+        <param-name>facelets.BUILD_BEFORE_RESTORE</param-name>
+        <param-value>false</param-value>
+    </context-param>
+
+    <!-- Facelets libraries that are not loaded through the classloader -->
+    <context-param>
+        <param-name>facelets.LIBRARIES</param-name>
+        <param-value>/WEB-INF/cms.taglib.xml;/WEB-INF/flexive-admin.taglib.xml</param-value>
+    </context-param>
+
+
+    <!-- Myfaces viewstate tuning -->
+    <context-param>
+        <param-name>org.apache.myfaces.SERIALIZE_STATE_IN_SESSION</param-name>
+        <param-value>false</param-value>
+    </context-param>
+
+    <context-param>
+        <param-name>org.apache.myfaces.COMPRESS_STATE_IN_SESSION</param-name>
+        <param-value>false</param-value>
+    </context-param>
+
+    <context-param>
+        <param-name>org.apache.myfaces.PRETTY_HTML</param-name>
+        <param-value>true</param-value>
+    </context-param>
+
+    <!--
+        The extensionsfilter does not need to cache every response if all documents use t:documentHead and
+        the following context parameter is used.
+        See http://wiki.apache.org/myfaces/Performance
+    -->
+    <context-param>
+        <param-name>org.apache.myfaces.ADD_RESOURCE_CLASS</param-name>
+        <param-value>org.apache.myfaces.component.html.util.StreamingAddResource</param-value>
+     </context-param>
+
+    <!-- Optional JSF-RI Parameters to Help Debug -->
+    <context-param>
+        <param-name>com.sun.faces.validateXml</param-name>
+        <param-value>true</param-value>
+    </context-param>
+    <context-param>
+        <param-name>com.sun.faces.verifyObjects</param-name>
+        <param-value>true</param-value>
+    </context-param>
+
+    <!-- Ajax4Jsf Filter (place before all other filters (except the FlexFilter) -->
+    <context-param>
+        <param-name>org.ajax4jsf.VIEW_HANDLERS</param-name>
+        <param-value>com.sun.facelets.FaceletViewHandler</param-value>
+    </context-param>
+
+    <filter>
+        <display-name>Ajax4jsf Filter</display-name>
+        <filter-name>ajax4jsf</filter-name>
+        <!--filter-class>org.ajax4jsf.Filter</filter-class-->
+        <filter-class>com.flexive.faces.filter.Ajax4jsfFilter</filter-class>
+        <init-param>
+            <param-name>forceparser</param-name>
+            <param-value>false</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>ajax4jsf</filter-name>
+        <url-pattern>*.jsf</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>ajax4jsf</filter-name>
+        <url-pattern>*.xhtml</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>ajax4jsf</filter-name>
+        <url-pattern>*.faces</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>FlexFilter</filter-name>
+        <filter-class>com.flexive.war.filter.FxFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>FlexFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>MyFacesExtensionsFilter</filter-name>
+        <filter-class>org.apache.myfaces.webapp.filter.ExtensionsFilter</filter-class>
+        <init-param>
+            <param-name>maxFileSize</param-name>
+            <param-value>20m</param-value>
+        </init-param>
+        <init-param>
+            <param-name>uploadThresholdSize</param-name>
+            <param-value>512m</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>MyFacesExtensionsFilter</filter-name>
+        <url-pattern>*.jsf</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>MyFacesExtensionsFilter</filter-name>
+        <url-pattern>*.xhtml</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>MyFacesExtensionsFilter</filter-name>
+        <url-pattern>*.faces</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>MyFacesExtensionsFilter</filter-name>
+        <url-pattern>/faces/myFacesExtensionResource/*</url-pattern>
+    </filter-mapping>
+
+    <servlet>
+        <servlet-name>CeFileUpload</servlet-name>
+        <servlet-class>com.flexive.war.servlet.CeFileUpload</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>CeFileDownload</servlet-name>
+        <servlet-class>com.flexive.war.servlet.CeFileDownload</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>Thumbnail</servlet-name>
+        <servlet-class>com.flexive.war.servlet.ThumbnailServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>Download</servlet-name>
+        <servlet-class>com.flexive.war.servlet.DownloadServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+
+    <servlet>
+        <servlet-name>FlexiveWebDav</servlet-name>
+        <servlet-class>com.flexive.war.servlet.WebDavCfgServlet</servlet-class>
+        <init-param>
+            <param-name>debug</param-name>
+            <param-value>1</param-value>
+        </init-param>
+        <init-param>
+            <param-name>listings</param-name>
+            <param-value>true</param-value>
+        </init-param>
+        <init-param>
+            <param-name>readonly</param-name>
+            <param-value>false</param-value>
+        </init-param>
+        <init-param>
+            <param-name>FxDavContext</param-name>
+            <param-value>com.flexive.war.webdav.FxDavFileSystemContext</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>FacesServlet</servlet-name>
+        <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <!-- ATTENTION: Custom servlets must be defined in the class FlexRequestWrapper,
+         variable servlets in order to be called by the FlexFilter -->
+    <servlet-mapping>
+        <servlet-name>CeFileUpload</servlet-name>
+        <url-pattern>/cefileupload/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CeFileDownload</servlet-name>
+        <url-pattern>/cefiledownload/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Thumbnail</servlet-name>
+        <url-pattern>/thumbnail/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Download</servlet-name>
+        <url-pattern>/download/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- WebDav -->
+    <servlet-mapping>
+        <servlet-name>FlexiveWebDav</servlet-name>
+        <url-pattern>/webdav/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- JSF Mappings -->
+    <servlet-mapping>
+        <servlet-name>FacesServlet</servlet-name>
+        <url-pattern>*.jsf</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>FacesServlet</servlet-name>
+        <url-pattern>*.xhtml</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>FacesServlet</servlet-name>
+        <url-pattern>*.faces</url-pattern>
+    </servlet-mapping>
+    <!--
+        /faces/* (or another suffix pattern) should always be the last url-pattern for the FacesServlet, 
+        otherwise the flexive Weblets includes won't work
+    -->
+    <servlet-mapping>
+        <servlet-name>FacesServlet</servlet-name>
+        <url-pattern>/faces/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- JSON-RPC-Java servlet -->
+    <servlet>
+        <servlet-name>com.metaparadigm.jsonrpc.JSONRPCServlet</servlet-name>
+        <servlet-class>com.metaparadigm.jsonrpc.JSONRPCServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>com.metaparadigm.jsonrpc.JSONRPCServlet</servlet-name>
+        <url-pattern>/adm/JSON-RPC</url-pattern>
+    </servlet-mapping>
+
+    <!-- JSON-RPC-Java filter -->
+    <filter>
+        <display-name>JSON-RPC Filter</display-name>
+        <filter-name>jsonrpc</filter-name>
+        <filter-class>com.flexive.war.filter.JsonRpcFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>jsonrpc</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <welcome-file-list>
+        <welcome-file>index.xhtml</welcome-file>
+        <welcome-file>main.xhtml</welcome-file>
+    </welcome-file-list>
+
+</web-app>

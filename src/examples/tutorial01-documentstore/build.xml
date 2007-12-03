@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+    Basic flexive project buildfile.
+
+    @author Daniel Lichtenberger, UCS
+    @version $Rev$
+-->
+<project name="tutorial01-documentstore" basedir="." default="package">
+    <property name="fxProject" value="tutorial01-documentstore"/>
+    <property name="flexive.dist.dir" value="${basedir}/../../../dist"/>
+
+    <!-- Copy output packages to shared flexive drop dir-->
+    <property name="build.dist.dir" value="${basedir}/../../../drop"/>
+
+    <!-- Don't build the EAR -->
+    <property name="tutorial01-documentstore.ear.disabled" value="true"/>
+
+    <import file="${flexive.dist.dir}/build.project.xml"/>
+</project>

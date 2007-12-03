@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="xhtml" xml:id="jsfsupport_content_display"
+                xmlns="http://docbook.org/ns/docbook"><![CDATA[<fx:content pk="#{myBean.pk}" var="component">
+    Component: #{component.name} <br/>
+
+    <!-- Resolve a content reference to a project content with $ -->
+    Assigned project: #{component.project$.name} (PK = #{component.project})<br/>
+
+    <!-- Iterate over all elements of the "comment" group with $list -->
+    <ui:repeat var="comment" value="#{component.comment$list}">
+        <h5>Comment by #{comment.author$.caption} on #{comment.created_at}:</h5>
+        <p>#{comment.text}</p>
+    </ui:repeat>
+
+    <!-- Access via full XPath -->
+    #{component['/comment[5]/author$.caption']}
+</fx:content>
+]]>
+</programlisting>

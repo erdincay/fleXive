@@ -1,0 +1,650 @@
+/***************************************************************
+ *  This file is part of the [fleXive](R) project.
+ *
+ *  Copyright (c) 1999-2007
+ *  UCS - unique computing solutions gmbh (http://www.ucs.at)
+ *  All rights reserved
+ *
+ *  The [fleXive](R) project is free software; you can redistribute
+ *  it and/or modify it under the terms of the GNU General Public
+ *  License as published by the Free Software Foundation;
+ *  either version 2 of the License, or (at your option) any
+ *  later version.
+ *
+ *  The GNU General Public License can be found at
+ *  http://www.gnu.org/copyleft/gpl.html.
+ *  A copy is found in the textfile GPL.txt and important notices to the
+ *  license from the author are found in LICENSE.txt distributed with
+ *  these libraries.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  For further information about UCS - unique computing solutions gmbh,
+ *  please see the company website: http://www.ucs.at
+ *
+ *  For further information about [fleXive](R), please see the
+ *  project website: http://www.flexive.org
+ *
+ *
+ *  This copyright notice MUST APPEAR in all copies of the file!
+ ***************************************************************/
+
+/**
+ * Sql Parser Engine.
+ *
+ * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @version $Rev$
+ */
+options {
+  STATIC = false;
+  UNICODE_INPUT=true;  
+}
+
+
+PARSER_BEGIN(SQL)
+
+package com.flexive.sqlParser;
+import com.flexive.sqlParser.*;
+import java.io.Serializable;
+import java.util.ArrayList;
+
+public class SQL {
+	boolean insideforcedBrace=false;
+}
+
+PARSER_END(SQL)
+
+SKIP : {
+	"/*" : WithinComment |
+	"-- " : WithinLineComment |
+    " " |
+	"\t" |
+	"\n" |
+	"\r"
+}
+
+<WithinComment> SKIP : { "*/" : DEFAULT }
+<WithinComment> MORE : { <~[]> }
+
+<WithinLineComment> SKIP : { "\n" : DEFAULT }
+<WithinLineComment> MORE : { <~[]> }
+
+
+TOKEN [IGNORE_CASE] :
+{
+  < BRACE_CI_O  : "{"(["{"," ","\t","\n","\r"])* >
+| < BRACE_CI_C  : "}"(["}"," ","\t","\n","\r"])* >
+| < BRACE_OPEN  : "(" >
+| < BRACE_CLOSE : ")" >
+| < GROUP_BY    : "GROUP BY" >
+| < AND_OR      : ("AND"|"OR") >
+| < ASC_DESC    : ("ASC"|"DESC"|"ASCENDING"|"DESCENDING") >
+| < FROM        : "FROM " >
+| < WHERE       : "WHERE" >
+| < FILTER      : "FILTER" >
+| < NOT         : "NOT" >
+| < UNION       : "UNION" >
+| < COMBINE_OR_INTERSECT     : ("COMBINE" | "INTERSECT") >
+| < EQUALS    : "=" >
+| < NEAR    : "~=" >
+| < MORE_THAN : ">" >
+| < LESS_THAN : "<" >
+| < GEQ       : ">=" >
+| < LEQ       : "<=" >
+| < NOT_GTR   : "!>" >
+| < IS_CHILD_OF   : "IS"(" ")+"CHILD"(" ")+"OF" >
+| < IS_DIRECT_CHILD_OF   : "IS"(" ")+"DIRECT"(" ")+"CHILD"(" ")+"OF" >
+| < NOT_LSS   : "!<" >
+| < NEQ       : "!=" >
+| < NEQ2      : "<>" >
+| < IS        : "IS" >
+| < IS_NOT    : "IS NOT" >
+| < NULL      : "NULL" >
+| < LIKE      : "LIKE" >
+| < COUNT     : "COUNT" >
+| < SUM       : "SUM" >
+| < AVG       : "AVG" >
+| < MINIMUM   : "MIN" >
+| < MAXIMUM   : "MAX" >
+| < SUBSTRING : "SUBSTRING" >
+| < CONTAINS : "CONTAINS" >
+| < VAR_FUNCTION : "VAR_FUNCTION" >
+| < UPPER     : "UPPER" >
+| < LOWER     : "LOWER" >
+| < ORDER_BY  : "ORDER"(" ")*"BY" >
+| < IN_OR_NOTIN: ("IN"|"NOT IN") >
+| < SELECT    : "SELECT " >
+| < DISTINCT    : "DISTINCT " >
+| < RELATION    : "RELATION" >
+| < RECURSIVE    : "RECURSIVE" >
+| < FROM_ID   : "FROM_ID" >
+| < END_STMT  : ";"([" ","\n"])* >
+| < FUNCTION  : (["a"-"z","A"-"Z"])+"(">
+| < WILDCARD  : "*" >
+| < INTEGER   : ("-"|"")["0"-"9"] (["0"-"9"])* >
+| < FLOAT     : ("-"|"")(["0"-"9"])*(".")(["0"-"9"])+>
+| < STRING:    ("'"(~["'"]|"''")*"'" | "\""(~["\""]|"\"\"")*"\"") >
+| < LIST_SEPERATOR : "," >
+| < IDENTIFIER: ["@","a"-"z","A"-"Z","_"] ( ["!","a"-"z","A"-"Z","_","0"-"9"] )* >
+| < SYM_SELECT_ITEM: ["a"-"z","A"-"Z","_"] ( ["a"-"z","A"-"Z","_","0"-"9"] )*"."((["*","@","#","a"-"z","A"-"Z","_"] ( [".","a"-"z","A"-"Z","_","0"-"9"] )*)|(((["a"-"z","A"-"Z"])(["a"-"z","_","A"-"Z","0"-"9"])*)+("/"["a"-"z","A"-"Z"])(["a"-"z","_","A"-"Z","0"-"9"])*)+) >
+}
+
+
+
+/**
+ * Entry point of the parser.
+ */
+FxStatement statement() throws SqlParserException:
+{
+	FxStatement PI = new FxStatement();
+}{	
+	select(PI) [<END_STMT>] <EOF>
+	{
+		PI.cleanup();
+		return PI;
+	}
+}
+
+
+/**
+ *  Select expression.
+ */
+FxStatement select(final FxStatement PI) throws SqlParserException :  {
+	String grp;
+	String finalQuery = null;
+}{
+	<SELECT>
+	[<DISTINCT>
+	{
+	    PI.setDistinct(true);
+	}
+	]
+	selectedValues(PI) from_clause(PI) [ <FILTER> filterList(PI) ]
+	[ <WHERE> where(PI) ]
+	grp=group_by_clause(PI)
+	[ order_by(PI) ]
+	[<UNION>
+	{
+		throw new SqlParserException("ex.sqlSearch.unionNotSupported");
+	}
+	select(PI)]  
+	{
+		return PI;
+	}
+}
+
+
+/**
+ * Order by.
+ * eg. ORDER BY ct.COL1,ct.COL2 ASC
+ */
+void order_by(final FxStatement PI) throws SqlParserException :{
+}{
+	<ORDER_BY> symItemListOrder(PI)
+}
+
+
+/**
+ * Group by.
+ * eg. GROUP BY ct.COL1,ct.COL2
+ */
+String group_by_clause(final FxStatement PI) : {
+	String grp="";
+}{
+	<GROUP_BY> grp=symItemList(PI)
+	{ 
+		return "GROUP BY "+grp;
+	} | { 
+		return ""; 
+	}
+}
+
+/**
+ * Sym item list order.
+ * For example "<alias.colum> ASC, <alias.colum> DESC, ..."
+ */
+void symItemListOrder(final FxStatement PI) throws SqlParserException :
+{
+	Token tk;
+	Token ascDesc = null;
+}
+{
+	tk=<SYM_SELECT_ITEM> [ascDesc=<ASC_DESC>] [ <LIST_SEPERATOR> symItemListOrder(PI) ]
+	{
+		String _sAsc = (ascDesc==null)?null:ascDesc.image.toUpperCase();
+		final boolean asc = (_sAsc==null || _sAsc.indexOf("ASC")!=-1)?true:false;
+		PI.addOrderByValue(new OrderByValue(tk.image,asc));
+	}
+}
+
+
+/**
+ * Sym item list.
+ * For example "<alias.column>, <alias.column>, ..."
+ */
+String symItemList(final FxStatement PI) :
+{
+  Token tk;
+  Token sep=null;
+  String list="";
+}
+{
+	tk=<SYM_SELECT_ITEM> [ sep=<LIST_SEPERATOR> list=symItemList(PI) ]
+	{ 
+		return tk.image+((sep!=null)?sep.image:"")+list; 
+	}
+}
+
+
+
+/**
+ * Select list.
+ * <value>, <value>, ...
+ */
+void selectedValues(final FxStatement PI) throws SqlParserException :
+{ Value vi; }
+{
+	<WILDCARD>
+	{
+		throw new SqlParserException("ex.sqlSearch.selectAllNotSupported");
+	}
+	|
+	vi=selectedValue(PI) [ <LIST_SEPERATOR> selectedValues(PI) ]
+}
+
+
+/**
+ * Value may be a property, number, or string with our without enclosing functions
+ */
+Value selectedValue(final FxStatement PI)  throws SqlParserException  :
+{ 
+	Value vi;
+	Token t1; 
+	Token alias=null;
+	Constant con;
+}{
+	t1=<FUNCTION> vi=selectedValue(PI) <BRACE_CLOSE>
+	{
+		return vi.addFunction(t1.image);
+	}
+	| t1=<SYM_SELECT_ITEM> [alias=<IDENTIFIER>]
+	{
+		// A property with table alias is referenced
+		java.util.StringTokenizer st = new java.util.StringTokenizer(t1.image,".",false);
+		String table = st.nextToken();
+		String property = st.nextToken();
+		String field = null;
+		if (st.hasMoreTokens()) {
+		  field = st.nextToken();
+		}
+		Property p = new Property(table,property,field);
+		PI.addSelectedValue(p,alias==null?null:alias.image);
+		return p;
+	}
+	| con=constantValue() [alias=<IDENTIFIER>]
+	{
+		PI.addSelectedValue(con,alias==null?null:alias.image);
+		return con;
+	}
+}
+
+/**
+ * List of all tables to select from.
+ * Every table must be specified with an alias.
+ */
+void from_clause(final FxStatement PI) throws SqlParserException : {
+}{
+	<FROM> table_list(PI)
+}
+
+
+/**
+ * List of tables.
+ * Every table must specify an alias. The list is comma seperated
+ */
+void table_list(final FxStatement PI) throws SqlParserException : {
+	String list="";
+	Token table;
+	Token alias=null;
+	Token sep=null;
+}{
+	table=<IDENTIFIER> [  LOOKAHEAD(2) alias=<IDENTIFIER> ] [ sep=<LIST_SEPERATOR> table_list(PI) ]
+	{
+		PI.addTable(new Table(table.image,alias.image));		
+	}
+}
+
+
+/**
+ * FleXive FILTER clause.
+ */
+void filterList(final FxStatement PI) throws SqlParserException :{
+	Token itemId; 
+	String itemValue;
+}{
+	LOOKAHEAD(3)
+	itemId=<SYM_SELECT_ITEM> <EQUALS> itemValue=filterItem() [ <LIST_SEPERATOR> filterList(PI) ]
+	{
+		new Filter(PI,itemId.image,itemValue);
+	}	
+	|
+	itemId=<IDENTIFIER> <EQUALS> itemValue=filterItem() [ <LIST_SEPERATOR> filterList(PI) ]	
+	{
+		new Filter(PI,itemId.image,itemValue);
+	}	
+}
+
+/**
+ * Item within the filter
+ */
+String filterItem() :{
+	Token item;
+	String val=null;
+}{
+	item = <STRING> ["|" val=filterItem()]
+	{
+		// Discard starting and ending "'"
+		return item.image.substring(1,item.image.length()-1)+((val!=null)?"|"+val:"");
+	}
+	|
+	item = <IDENTIFIER> ["|" val=filterItem()]
+	{return item.image+((val!=null)?"|"+val:"");}
+	|
+	item = <INTEGER> ["|" val=filterItem()]
+	{return item.image+((val!=null)?"|"+val:"");}
+}
+
+
+
+
+/**
+ * Where clause.
+ */
+void where(final FxStatement PI) throws SqlParserException : {
+  String searchc;
+  Token braceC= null;
+  Token braceO= null;
+  Token comOrInt = null;
+  FxStatement combine = null;
+}{
+
+    [ braceO=<BRACE_CI_O> ] search_condition(PI) [ braceC=<BRACE_CI_C> ] {
+        //PI.setStartingBraces(braceO);
+        //PI.setSearchConditions(searchc);
+        //PI.setEndingBraces(braceC);
+    }
+    [
+    comOrInt=<COMBINE_OR_INTERSECT> {
+      //FxStatement p = PI;
+      //while (p.getParent()!=null) {
+      //  p = p.getParent();
+      //}
+      //combine = p.newSubParsedInfo(comOrInt.image);
+    }
+    where(combine)
+    ]
+}
+
+
+
+
+
+
+/**
+ * Search condition
+ */
+void search_condition(final FxStatement PI) throws SqlParserException: {
+  String pred=null;
+  String sc="";
+  Token andOr=null;
+  String ret = null;
+  String sAndOr  = null;
+  Token braceO1 = null;
+  Token braceO2 = null;
+  Token braceC = null;
+	Condition cond;
+}{
+	/* ( search_condition ) [ and search_condition ] */
+	LOOKAHEAD(2) <BRACE_OPEN> 
+	{
+		PI.startSubBrace();
+	}
+	search_condition(PI) 
+	<BRACE_CLOSE>
+	{
+		PI.endSubBrace();
+	} 
+	[
+		andOr=<AND_OR>
+		{
+			Brace br = PI.getCurrentBrace();
+			if (insideforcedBrace) {
+				Brace parent = br.getParent();
+				if ( parent.getType()==null || parent.getType().equals(andOr.image)) {
+				    parent.setType(andOr.image);
+					insideforcedBrace=false;
+					PI.endSubBrace();
+				} else {
+				    //
+				}
+
+			} else {
+			    insideforcedBrace=br.processAndOr(andOr.image,insideforcedBrace);
+			}
+			PI.getCurrentBrace().setType(andOr.image);
+		}
+		search_condition(PI) 
+	]
+
+	|
+
+	cond =condition(PI)  
+	{
+	    Brace br = PI.getCurrentBrace();
+		br.addElement(cond);
+		//System.out.println(cond+": type="+br.getType()+" fi="+insideforcedBrace);
+	}
+	[
+		andOr=<AND_OR> 
+		{
+		    insideforcedBrace=br.processAndOr(andOr.image,insideforcedBrace);
+		}
+		search_condition(PI) 
+	]
+
+}
+
+
+
+
+/**
+ * Eg. a=b,ct.ID=1,fct(a=b),fct(fct(a))=b,...
+ */
+Condition condition(final FxStatement PI) throws SqlParserException: {
+	ConstantArray arr = null;
+	Value vi1 = null;
+	Value vi2 = null;
+	Condition.COMPERATOR fct = null;
+	Token inNotIn = null;
+	Token symSel = null;
+	Token nullToken = null;
+	Token varFctName= null;
+	String params = null;	
+	String relationNames = null;
+	String relationFroms = null;
+}{
+	LOOKAHEAD(3)
+	vi1=value() fct=comperator(PI) vi2=valueOrSubselect(PI)
+	{
+		return new Condition(PI,vi1,fct,vi2);
+	}
+        |
+        <IS_CHILD_OF>  vi1=valueOrSubselect(PI) {
+		return new Condition(PI,vi1,Condition.COMPERATOR.IS_CHILD_OF,null);
+        }
+        |
+        <IS_DIRECT_CHILD_OF>  vi1=valueOrSubselect(PI) {
+		return new Condition(PI,vi1,Condition.COMPERATOR.IS_DIRECT_CHILD_OF,null);
+        }
+	|
+	vi1=value() inNotIn=<IN_OR_NOTIN> <BRACE_OPEN> arr=constantArray(PI) <BRACE_CLOSE>
+	{
+		return new Condition(PI,vi1,
+		inNotIn.image.equalsIgnoreCase("IN")?Condition.COMPERATOR.IN:Condition.COMPERATOR.NOT_IN,
+		arr);
+	}
+}
+
+
+
+Condition.COMPERATOR comperator(final FxStatement PI) throws SqlParserException:
+{ String id;String id2=null;Token sep=null; }
+{
+  <LIKE>
+  { return Condition.COMPERATOR.LIKE; }
+  | <NOT> <LIKE>
+  { return Condition.COMPERATOR.NOT_LIKE; }
+  | <EQUALS>
+  { return Condition.COMPERATOR.EQUAL; }
+  | <MORE_THAN>
+  { return Condition.COMPERATOR.GREATER; }
+  | <LESS_THAN>
+  { return Condition.COMPERATOR.LESS; }
+  | <GEQ>
+  { return Condition.COMPERATOR.GREATER_OR_EQUAL; }
+  | <LEQ>
+  { return Condition.COMPERATOR.LESS_OR_EQUAL; }
+  | <NOT_GTR>
+  { return Condition.COMPERATOR.NOT_GREATER; }
+  | <NOT_LSS>
+  { return Condition.COMPERATOR.NOT_LESS; }
+  | <NEQ>
+  { return Condition.COMPERATOR.NOT_EQUAL; }
+  | <NEQ2>
+  { return Condition.COMPERATOR.NOT_EQUAL; }
+  | <NEAR>
+  { return Condition.COMPERATOR.NEAR;}
+  | <IS>
+  { return Condition.COMPERATOR.IS;}
+  | <IS_NOT>
+  { return Condition.COMPERATOR.IS_NOT;}
+}
+
+
+/**
+ * Returns a value list as array
+ */
+ConstantArray constantArray(final FxStatement PI) throws SqlParserException :
+{ 
+	Constant con;
+	ConstantArray arr = null;
+}{
+	con=constantValue() [ <LIST_SEPERATOR> arr=constantArray(PI) ]	
+	{ 
+		if (arr!=null) {
+			return arr.add(con);
+		} else {
+			return new ConstantArray(new Constant[]{con});
+		}
+	}
+}
+
+
+
+Value valueOrSubselect(final FxStatement PI) throws SqlParserException :
+{ 
+	Value vi;
+}{
+	vi=value ()
+	{ 
+		return vi; 
+	}
+	/*
+	| 
+	<BRACE_OPEN> select(PI.newSubParsedInfo())<BRACE_CLOSE>
+	{ 
+		throw new SqlParserException("ex.sqlSearch.subselectsNotSupported");
+		//return new Value("("+val+")",true); 
+	}
+	*/
+}
+
+/**
+ * Value may be a property, number, or string with our without enclosing functions
+ */
+Value value()  throws SqlParserException  :
+{ 
+	Value vi;
+	Token t1,nr1,nr2; 
+	String sel;
+	Constant con;
+}{
+	t1=<FUNCTION> vi=value() <BRACE_CLOSE>
+	{
+		return vi.addFunction(t1.image);
+	}
+	|
+	<SUBSTRING> <BRACE_OPEN> vi=value() <LIST_SEPERATOR> nr1=<INTEGER> <LIST_SEPERATOR> nr2=<INTEGER> <BRACE_CLOSE>
+	{
+		throw new SqlParserException("ex.sqlSearch.substringNotSupported");
+	}
+	|
+	t1=<IDENTIFIER>
+	{
+		// A property with NO table alias is referenced
+		throw new SqlParserException("ex.sqlSearch.identifierIsNotAllowedHere",t1.image);
+	}
+	| t1=<SYM_SELECT_ITEM> 
+	{
+		// A property with table alias is referenced
+		java.util.StringTokenizer st = new java.util.StringTokenizer(t1.image,".",false);
+		String table = st.nextToken();
+		String property = st.nextToken();
+		String field = null;
+		if (st.hasMoreTokens()) {
+		  field = st.nextToken();
+		}
+		return new Property(table,property,field);
+	}
+	| con=constantValue()
+	{
+		return con;
+	}
+}
+
+/**
+ * Constant value: number string or null
+ */
+Constant constantValue() :
+{ Token t1=null;}
+{
+    <BRACE_OPEN> constantValue() <BRACE_CLOSE>
+    |
+	t1=<STRING>
+	{	
+		// Remove quotes: return new Constant(t1.image.substring(1,t1.image.length()-1));
+		return new Constant(t1.image);
+	}
+	| 
+	t1=<INTEGER>
+	{
+		return new Constant(t1.image);
+	}
+	|
+	t1=<FLOAT>
+	{
+		return new Constant(t1.image);
+	}
+	|
+	<NULL> 
+	{
+		return new Constant(null);
+	}
+
+}
+
+
+

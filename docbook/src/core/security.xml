@@ -1,0 +1,237 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE section [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<section xml:id="core_security" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude">
+    <title>Security</title>
+    <xi:include href="../includes/author_mplesser.xml"/>
+
+    <section xml:id="core_security_overview">
+        <title>Overview</title>
+        <para>
+            &Flexive; implements an access control list based approach to security combined wit
+            <link linkend="core_security_roles">roles</link>. Since handling
+            access permissions on a per user user basis would result in tremendous amounts of data, &flexive; checks
+            permissions based on access control lists on a per user group basis. User accounts can be assigned to any
+            number of user groups and if in rare cases an explicit user based security is needed, the use of one group
+            for each user is recommended.
+        </para>
+        <para>
+            User accounts are stored in the database and consist basically of the login name, a hashed password of the
+            assigned groups and roles. For more information about accounts see
+            <xref linkend="core_users"/>.
+        </para>
+    </section>
+
+    <section xml:id="core_security_auth">
+        <title>Authentication / FxContext / UserTickets</title>
+        <para>
+            Authentication is currently performed against the database by calling
+            <code>FxContext.login(..)</code>
+            (or as an alternative directly using
+            <code>AccountEngine.login(..)</code>).
+            JAAS based login can be implemented very easily by uncommenting some code in
+            <classname>LoginLogoutHandler</classname>. It is planned to make this configurable in future versions
+            of &flexive;.
+        </para>
+        <para>
+            &Flexive; provides at the core and web layer (provided they run in the same virtual machine) a context which
+            is stored in a
+            <classname>ThreadLocal</classname>
+            called
+            <classname>FxContext</classname>
+            which provides amongst others the following information:
+            <itemizedlist>
+                <listitem>
+                    <para>
+                        <methodname>getDivisionId()</methodname>: number of the current division
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <methodname>getLanguage()</methodname>: the current users preferred language
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <methodname>getLanguage()</methodname>: the current users preferred language
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <methodname>getTicket()</methodname>: the current users
+                        <classname>UserTicket</classname>
+                        instance
+                    </para>
+                </listitem>
+            </itemizedlist>
+        </para>
+        <para>
+            The
+            <classname>UserTicket</classname>
+            is the central class providing information about the current user ranging from the user name, mandator, user
+            group memberships, assigned roles to all access control lists the user belongs to indirectly. Hence it
+            serves as the central authorization data provider for any security check performed.
+        </para>
+    </section>
+
+    <section xml:id="core_security_divisions">
+        <title>Divisions</title>
+        <para>
+            &Flexive; was designed to be used by application service providers (ASP) with only one deployed enterprise
+            application instance using multiple databases. These database instances are called
+            <emphasis>Division</emphasis>
+            and contain their own accounts, structures and
+            content - totally separated from other users of &flexive;.
+        </para>
+        <para>
+            Divisions are mapped to server names using regular expressions. A web based user interface can be reached
+            using the the URL
+            <uri>http://ip-address/flexive/globalconfig/index.faces</uri>
+            using the username
+            <constant>administrator</constant>
+            and default password
+            <constant>abc</constant>
+            (which should be changed immediatly!). This configuration is stored in its own database called
+            <constant>flexiveConfiguration</constant>.
+        </para>
+    </section>
+
+    <section xml:id="core_security_mandators">
+        <title>Mandators</title>
+        <para>
+            Mandators are - contrary to
+            <link linkend="core_security_divisions">divisions</link>
+            - not transparent to the user but a mean to separate accounts and data. Data can be shared between mandators
+            by assigning user groups from multiple mandators to access control lists. Transfer of data between mandators
+            is a planned upcoming feature of &flexive;. An example when mandators should be used is e.g. to model
+            different departments of a larger company.
+        </para>
+    </section>
+
+    <section xml:id="core_security_acl">
+        <title>ACL's - Access Control Lists</title>
+        <para>
+            Access control lists - which are assigned to user groups - define a list of permissions attached to an
+            arbitrary object like content instances, types, properties (and property assignments) or select lists. See
+            <link href="http://en.wikipedia.org/wiki/Access_control_list">this</link>
+            article on Wikipedia for more information about access control lists.
+            For the purpose of easier organization and logical grouping &flexive; categorizes ACL's in the following
+            groups:
+            <itemizedlist>
+                <listitem>
+                    <para>
+                        <constant>Instance</constant>: Attached to
+                        <link linkend="core_contents">content instances</link>.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <constant>Structure</constant>: Attached to
+                        <link linkend="core_structure_types">types</link>,
+                        <link linkend="core_structure_properties">properties and property assignments</link>.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <constant>Workflow</constant>: Attached to workflow steps.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <constant>Briefcase</constant>: Attached to briefcases, to allow sharing them among different
+                        users.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <constant>Selectlist</constant>: Attached to select lists, the only relevant permission is
+                        <constant>Create</constant>
+                        to allow users to create new items for that list.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <constant>Selectlist Item</constant>: Attached to selectlist items, to restrict visibility.
+                    </para>
+                </listitem>
+            </itemizedlist>
+        </para>
+        <para>
+            Each access control list allows setting the following permissions independently: Read, Edit, Create, Delete,
+            Relate and Export.
+        </para>
+    </section>
+
+    <section xml:id="core_security_roles">
+        <title>Role Based Security</title>
+        <para>
+            Roles can be assigned individually to users and groups. Every user (or account) is eligible to use any role
+            assigned to the user or any group he belongs to. Best practise is to assign roles to groups and only in very
+            rare cases (like flagging someone as global supervisor) should be assigned individually.
+        </para>
+        <para>
+            &Flexive; provides the following roles:
+            <itemizedlist>
+                <listitem>
+                    <para>
+                        <constant>GlobalSupervisor</constant>: no restrictions at all.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <constant>MandatorSupervisor</constant>: may do everything for "his" mandator
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <constant>ACLManagement</constant>: create/update/delete ACL's for "his" mandator
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <constant>AccountManagement</constant>: create/update/delete users, groups and roles (may only
+                        add roles he is assigned himself, may not alter assigned roles that he has not assigned himself)
+                        for "his" mandator
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <constant>SelectListEditor</constant>: may see the user interface to edit selectlist items (role
+                        entitles to no CRUD rights!), actual permissions are taken from the select lists createItemACL
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <constant>WorkflowManagement</constant>: create/update/delete steps and workflows for "his"
+                        mandator
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <constant>StructureManagement</constant>: create/update/delete types, relations, groups,
+                        properties, assignments and selectlists and assign scripts to structures for "his" mandator
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <constant>ScriptManagement</constant>: create/update/delete scripts
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <constant>ScriptExecution</constant>: execute scripts that can be run "standalone" (i.e. not
+                        triggered by events)
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <constant>BackendAccess</constant>: may login to the backend (does not imply any rights)
+                    </para>
+                </listitem>
+            </itemizedlist>
+        </para>
+    </section>
+</section>

@@ -1,0 +1,1 @@
+Place your message resources in this directory.

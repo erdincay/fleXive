@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="java" xml:id="core_structure_reuseprop"  xmlns="http://docbook.org/ns/docbook"><co xml:id="cst_reuseprop_1"/>    assignmentEngine.save(
+<co xml:id="cst_reuseprop_2"/>          FxPropertyAssignmentEdit.reuse(
+<co xml:id="cst_reuseprop_3"/>                  "ROOT/CAPTION",
+<co xml:id="cst_reuseprop_4"/>                  "Customer",
+<co xml:id="cst_reuseprop_5"/>                  "/",
+<co xml:id="cst_reuseprop_6"/>                  "AnotherCaption"),
+<co xml:id="cst_reuseprop_7"/>    false);
+</programlisting>

@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="xhtml" xml:id="core_search_intro" xmlns="http://docbook.org/ns/docbook"><co xml:id="csq_intro_select"/> SELECT co.@pk, co.caption
+<co xml:id="csq_intro_from"/> FROM content co
+<co xml:id="csq_intro_filter"/> FILTER co.version=[live|highest]
+<co xml:id="csq_intro_where"/> WHERE co.caption LIKE 'test%'
+</programlisting>

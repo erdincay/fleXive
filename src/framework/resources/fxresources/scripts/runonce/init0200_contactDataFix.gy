@@ -1,0 +1,3 @@
+//create contact data for initial accounts that were created with DB scripts
+println "Fixing contact data for system accounts ..."
+com.flexive.shared.EJBLookup.getAccountEngine().fixContactData()

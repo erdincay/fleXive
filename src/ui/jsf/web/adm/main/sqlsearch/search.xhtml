@@ -1,0 +1,116 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:s="http://myfaces.apache.org/sandbox"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+
+<ui:define name="head">
+    <script type="text/javascript">
+        dojo.require("dojo.widget.FilteringTable");
+    </script>
+    <script type="text/javascript">
+            dojo.require("dojo.widget.SortableTable");
+            function toggleBriefcase(element) {
+            var bd = document.getElementById("frm:briefcaseData");
+            if (element.checked) {
+            bd.style.display='inline';
+            } else {
+            bd.style.display='none';
+            }
+            }
+    </script>
+</ui:define>
+
+<ui:define name="searchIds">"frm"</ui:define>
+
+<ui:define name="body">
+
+<h:form id="frm">
+
+    <adm:tab label="SQL Search" active="true" id="tab1"/>
+
+    <h:inputTextarea id="query" value="#{sqlSearchBean.query}" style="width:98%" rows="10"/>
+    <br/>
+
+    <h:panelGroup id="briefcaseSettings">
+
+        <fx:formRow label="Cache Mode" id="cacheMode">
+            <h:selectOneListbox id="cacheMode" value="#{sqlSearchBean.cacheMode}" size="1" required="true">
+                <f:selectItems value="#{sqlSearchBean.cacheModes}" />
+            </h:selectOneListbox>
+        </fx:formRow>
+
+        <fx:formRow label="Create Briefcase" id="createBriefcase">
+            <t:selectBooleanCheckbox id="createBriefcase" value="#{sqlSearchBean.createBriefcase}"
+                                     onchange="toggleBriefcase(this)"/>
+        </fx:formRow>
+
+        <h:panelGroup id="briefcaseData" style="display:none">
+            <fx:formRow label="Briefcase Name" id="briefcaseName" >
+                <t:inputText id="briefcaseName" value="#{sqlSearchBean.briefcaseName}"/>
+            </fx:formRow>
+            <fx:formRow label="Description" id="briefcaseDescription" width="500">
+                <t:inputText id="briefcaseDescription" value="#{sqlSearchBean.briefcaseDescription}"
+                             style="width:350px"/>
+            </fx:formRow>
+            <fx:formRow label="Shared" id="briefcaseACL" width="500" heigth="100">
+                <h:selectOneListbox id="briefcaseACL" value="#{sqlSearchBean.briefcaseAclId}" size="1">
+                    <f:selectItem itemValue="-1" itemLabel=""/>
+                    <f:selectItems value="#{fxSelectBean.briefcaseACLs}" />
+                </h:selectOneListbox>
+            </fx:formRow>
+        </h:panelGroup>
+
+    </h:panelGroup>
+
+    <span style="clear:both;"/>
+
+    <adm:commandButton labelKey="SqlSearch.button.start" location="both" icon="new"
+                      bean="#{sqlSearchBean}" action="executeSearch" id="sqlSearchButton"/>
+
+    <br/><br/><br/><br/>
+    <c:if test="#{sqlSearchBean.queryResult!=null}">
+                <span style="color:#bdbdbd">
+                Entries: #{sqlSearchBean.queryResult.rowCount} /
+                Total Found: #{sqlSearchBean.queryResult.totalRowCount},
+                Truncated: #{sqlSearchBean.queryResult.truncated},
+                Parser Execution Time: #{sqlSearchBean.queryResult.parserExecutionTime},
+                Db Search Time: #{sqlSearchBean.queryResult.dbSearchTime},
+                Fetch Time: #{sqlSearchBean.queryResult.fetchTime},
+                Total Time: #{sqlSearchBean.queryResult.totalTime}<br/>
+                </span>
+
+
+        <t:dataTable id="resultSetTable" value="#{sqlSearchBean.dataModel}" rows="9999999" var="row"
+                rowClasses="tblRowEven, tblRowOdd" styleClass="tblResult">
+            <c:forEach items="#{sqlSearchBean.queryResult.columnNames}" var="columnName" varStatus="status">
+                <t:column headerstyleClass="tblHeader" styleClass="tblColumn">
+                    <f:facet name="header">
+                        #{columnName}
+                    </f:facet>
+                    <fx:resultValue value="#{row[status.index]}"/>
+                </t:column>
+            </c:forEach>
+        </t:dataTable>
+
+
+    </c:if>
+
+    <adm:toolbarPluginButtons/>
+</h:form>
+<br/>
+</ui:define>
+
+</ui:composition>
+
+</body>
+</html>

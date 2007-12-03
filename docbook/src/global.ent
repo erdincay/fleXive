@@ -1,0 +1,32 @@
+<!ENTITY flexive "<trademark class='trade'>[fleXive]</trademark>">
+<!ENTITY Flexive "<trademark class='trade'>[fleXive]</trademark>">
+<!ENTITY backendGui "backend administration application">
+<!ENTITY xpath "XPath">
+<!ENTITY messagekey "message key">
+<!ENTITY flexiveJavadoc "&flexive; Javadoc">
+<!ENTITY flexiveApi "&flexive; API">
+<!ENTITY weblets "<ulink url='https://weblets.dev.java.net/'><glossterm>Weblets</glossterm></ulink>">
+<!ENTITY jee5 "JavaEE 5">
+<!ENTITY fxsql "FxSQL">
+<!ENTITY contentTree "content tree">
+<!ENTITY list_yes "X">
+<!ENTITY list_yes_restrictions "(X)">
+<!ENTITY list_no "-">
+<!ENTITY templateProject "&flexive; template project">
+<!ENTITY jdk6 "<ulink url='http://java.sun.com/javase/downloads/index.jsp'>JDK 6</ulink>">
+<!ENTITY ant "<ulink url='http://ant.apache.org/'>Apache Ant</ulink>">
+<!ENTITY eclipse "<ulink url='http://www.eclipse.org/'>Eclipse</ulink>">
+<!ENTITY idea "<ulink url='http://www.jetbrains.com/idea/'>IntelliJ IDEA</ulink>">
+
+<!-- Website references -->
+<!ENTITY downloadsPage "<ulink url='http://www.flexive.org/downloads'>download page</ulink>">
+
+<!-- JSF beans -->
+<!ENTITY contentViewBean "fxContentViewBean">
+<!ENTITY authenticationBean "fxAuthenticationBean">
+<!ENTITY messageBean "fxMessageBean">
+<!ENTITY pluginRegistryBean "fxPluginRegistryBean">
+
+<!-- Servlets -->
+<!ENTITY thumbnailServlet "ThumbnailServlet">
+<!ENTITY downloadServlet "DownloadServlet"><!ENTITY fxStream "fxStream">

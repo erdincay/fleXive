@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:c="http://java.sun.com/jstl/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+    xmlns:fx="http://www.flexive.com/jsf/core">
+
+Search query editor table. Used by queryEditor.xhtml for rendering the actual query editor.
+
+Parameters:
+	nodes = list of nodes of the (sub-)tree to be rendered
+	addAssignmentNode = form element where the selected node for adding an assignment should be stored
+		(e.g. a hidden input field)
+    addAssignmentNodeValue = id of the preselected node (no node will be selected for -1 or empty values)
+    selectionNode = form element for storing the current selection (a comma-separated list of node IDs)
+
+<ui:composition>
+
+    <c:forEach var="node" varStatus="status" items="#{nodes}">
+        <tr>
+            <c:if test="${status.first}">
+                <td rowspan="999" class="queryOperator">
+                    <!-- The operator node for the current query level -->
+                    <h:selectOneListbox value="#{node.parent.operator}" size="1" converter="QueryOperatorConverter">
+                        <f:selectItems value="#{fxSelectBean.queryNodeOperators}"/>
+                    </h:selectOneListbox>
+                </td>
+            </c:if>
+            <c:if test="#{node.valueNode == true}">
+                <!-- Leaf node -->
+                <td id="queryEditorRow_#{node.id}" class="editorRow #{fxSystemBean.containsErrorId[node.id] == true ? 'invalidNodeValue' : ''}" nowrap="true" onclick="rowSelection.handleRowClick(event, #{node.id})">
+                    <div class="queryInputContainer">
+                        <div class="queryRowElement">
+                            <h:selectOneListbox value="#{node.comparator}" size="1" styleClass="queryValueComparator" converter="EnumConverter">
+                                <f:selectItems value="#{fxSelectBean.enumSelect[node.availableComparators]}"/>
+                            </h:selectOneListbox>
+                        </div>
+                        <c:if test="#{!node.wideInput}">
+                            <!-- "Normal" input row -->
+                            <div class="queryRowElement fxValueInputElementWidth">
+                                <fx:fxValueInput value="#{node.value}" inputMapper="#{node.inputMapper}"
+                                                 disableMultiLanguage="true" forceLineInput="true"
+                                                 readOnly="#{node.readOnly}"
+                                                 valueFormatter="#{node.valueFormatter}"
+                                                 required="false" externalId="#{node.id}"/>
+                            </div>
+                        </c:if>
+                        <div class="queryRowElement queryRemoveNode"><a4j:commandLink reRender="queryEditor" actionListener="#{fxQueryEditorBean.removeNode}" eventsQueue="queryEditor">
+                                <f:setPropertyActionListener target="#{fxQueryEditorBean.removeNodeId}"
+                                    value="#{node.id}"/><t:graphicImage url="/pub/images/queryEditor/remove.png" border="0"/></a4j:commandLink></div>
+                        <c:if test="#{node.wideInput}">
+                            <!-- Wide input row, e.g. for date inputs -->
+                            <br/>
+                            <div class="queryWideRowElement">
+                                <fx:fxValueInput value="#{node.value}" inputMapper="#{node.inputMapper}"
+                                                 disableMultiLanguage="true" forceLineInput="true"
+                                                 readOnly="#{node.readOnly}"
+                                                 required="false" externalId="#{node.id}"/>
+                            </div>
+                        </c:if>
+                    </div>
+                    <div class="queryRowLabel">
+                        <label for="_#{node.path}_value">#{node.label}</label>
+                    </div>
+                </td>
+            </c:if>
+            <c:if test="#{node.valueNode == false}">
+                <c:if test="#{!empty node.children}">
+                <td class="nestedTable">
+                    <!-- Recurse -->
+                    <table class="queryChild#{nestedTableCounter}" onselectstart="return false;">
+                        <fx:queryEditorChild
+                            nodes="#{node.children}" 
+                            addAssignmentNode="#{addAssignmentNode}"
+                            addAssignmentNodeValue="#{addAssignmentNodeValue}"
+                            nestedTableCounter="#{1 - nestedTableCounter}"/>
+                    </table>
+                </td>
+                </c:if>
+            </c:if>
+        </tr>
+    </c:forEach>
+
+</ui:composition>
+</html>

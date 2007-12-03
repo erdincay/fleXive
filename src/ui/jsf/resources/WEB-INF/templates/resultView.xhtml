@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:c="http://java.sun.com/jstl/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+    xmlns:adm="http://www.flexive.com/jsf/admin"
+    xmlns:fx="http://www.flexive.com/jsf/core">
+
+Composite widget with a result table, a javascript datascroller and a
+JSON callback for lazy-loaded results.
+
+Parameters:
+	id - unique ID for this component (required)
+	resultModel - the FxResultSetDataModel to be displayed (required)
+	location - result location (of type com.flexive.shared.search.ResultLocation) (required for lazy-loading)
+    viewType - LIST or THUMBNAILS
+<ui:composition>
+
+    <script type="text/javascript" src="adm/js/resultView.js"/>
+    <script type="text/javascript">
+        dojo.require("dojo.widget.Dialog");
+        function #{id}_gotoRow(jsDataScroller) {
+            getJsonRpc().SearchResultWriter.getCurrentResultRows(
+                            function(response, exception) { #{id}_resultView.renderResultCallback(response, exception) },
+                            "#{location}", jsDataScroller.startRow,
+		        			document.getElementById("frm:#{id}_fetchRows") != null
+                                    ? document.getElementById("frm:#{id}_fetchRows").value : #{resultModel.fetchRows},
+		        			#{resultModel.gridColumns}, "#{viewType}",
+                            document.getElementById("frm:#{id}_typeId").value);
+       	}
+
+        function #{id}_listView() {
+            document.getElementById("frm:#{id}_viewType").value = "com.flexive.shared.search.ResultViewType::LIST";
+            #{id}_scroller.refresh();
+        }
+
+        function #{id}_thumbnailView() {
+            document.getElementById("frm:#{id}_viewType").value = "com.flexive.shared.search.ResultViewType::THUMBNAILS";
+            #{id}_scroller.refresh();
+        }
+    </script>
+
+    <table border="0" width="90%">
+    <tr>
+        <td align="left">
+            <h:selectOneListbox id="#{id}_typeId" value="#{fxSearchResultBean.typeId}" size="1" onchange="#{id}_scroller.refresh()">
+                <f:selectItems value="#{fxSearchResultBean.contentTypeItems}"/>
+            </h:selectOneListbox>
+            <h:selectOneListbox id="#{id}_fetchRows" value="#{fxSearchResultBean.fetchRows}" size="1"
+                                onchange="#{id}_scroller.refresh()" rendered="#{fxSearchResultBean.listView}">
+                <f:selectItems value="#{fxSearchResultBean.fetchRowItems}"/>
+            </h:selectOneListbox>
+        </td>
+    </tr>
+    <tr>
+		<td align="left">
+			<adm:jsDataScroller id="#{id}_scroller"
+				startRow="#{resultModel.startRow}" totalRows="#{resultModel.rowCount}"
+				fetchRows="#{resultModel.fetchRows}" onUpdate="#{id}_gotoRow" />
+		</td>
+	</tr>
+    <tr>
+		<td>
+            <c:choose>
+                <c:when test="#{'THUMBNAILS' == viewType}">
+                    <table id="#{id}">
+                        <tr> <!-- empty header row --> </tr>
+                    </table>
+                </c:when>
+                <c:otherwise>
+                    <table class="dojoResultTable" id="#{id}" width="100%"> </table>
+                </c:otherwise>
+            </c:choose>
+
+			<adm:resultSetTable name="#{id}" dataScroller="#{id}_scroller"
+				value="#{resultModel}" showEditButton="true"
+				formName="frm" refreshHandler="function() { #{id}_gotoRow(#{id}_scroller) }"
+                briefcaseId="#{fxSearchResultBean.briefcaseId}"/>
+		</td>
+	</tr>
+	</table>
+
+</ui:composition>
+
+</html>

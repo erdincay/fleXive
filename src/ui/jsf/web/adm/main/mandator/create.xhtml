@@ -1,0 +1,47 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:s="http://myfaces.apache.org/sandbox"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+    <ui:define name="head">
+
+        <script type="text/javascript">
+            dojo.require("dojo.widget.SortableTable");
+        </script>
+
+    </ui:define>
+
+    <ui:define name="body">
+        <h:form id="frm">
+            <adm:tab label="Create Mandator" active="true" id="tab1"/>
+
+                <fx:formRow labelKey="Mandator.field.name" id="name">
+                    <h:inputText id="name" value="#{mandatorBean.mandator.name}" required="true"/>
+                </fx:formRow>
+
+                <fx:formRow labelKey="Mandator.field.active" id="active">
+                    <h:selectBooleanCheckbox id="active" value="#{mandatorBean.mandator.active}" />
+                </fx:formRow>
+
+
+            <adm:commandButton id="createButton" labelKey="Mandator.button.create" icon="new"
+                               bean="#{mandatorBean}" action="createMandator"/>
+            <adm:commandButton id="cancelButton" labelKey="Mandator.button.cancel"
+                               icon="cancel" action="mandatorOverview" immediate="true"/>
+
+            <adm:toolbarPluginButtons/>
+        </h:form>
+    </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk">
+<head>
+    <base href="#{fxSystemBean.documentBase}"/>
+    <t:stylesheet path="/adm/css/main.css"/>
+    <c:if test="#{fxSystemBean.browserAsString=='IE'}">
+        <t:stylesheet path="/adm/css/mainIE.css"/>
+    </c:if>
+    <script type="text/javascript" src="adm/js/main.js"> </script>
+    <script type="text/javascript" src="adm/js/shared.js"> </script>
+    <script type="text/javascript" src="adm/js/commandElement.js"> </script>
+    <script type="text/javascript" src="adm/js/admin.js"> </script>
+
+    <script type="text/javascript">
+        parent.beginPage();
+        function getBase() {
+            return "#{fxSystemBean.documentBase}";
+        }
+
+        function editUserSettings(){
+            invokeContentAction("adm/user/edit.jsf", "editUserPref", {});
+        }
+
+        function submitSearch() {
+            invokeContentAction("adm/search/searchResult.jsf", "fulltextSearch", {query: document.searchForm.query.value});
+        }
+    </script>
+    <link rel="shortcut icon" href="#{fxSystemBean.contextPath}/pub/images/favicon.ico" type="image/vnd.microsoft.icon" />
+    <title>#{fxSystemBean.header}</title>
+</head>
+
+
+<body onload="init();" onmouseup="endDrag();">
+
+
+
+<div id="loading"><br/><br/>
+    <center>&nbsp;&nbsp;&nbsp;#{fxSystemBean.newInstallation ? fxMessageBean['Global.banner.initializing'] : fxMessageBean['Global.banner.loading']}</center>
+</div>
+<div id='lock'>
+    <iframe id="lockFrame" src="adm/lockScreen.jsf"
+            frameborder="0" width="100%" scrolling="no" height="100%">lockFrame</iframe>
+</div>
+<table id="mainTbl" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="header1">
+            <div id="header1Div"><a href="http://www.flexive.org" target="flexive.org"><t:graphicImage
+                style="cursor:uri;" border="none" url="adm/images/layout/Logo_Flexive.gif" alt="[fleXive] Logo"/></a></div>
+        </td>
+        <td id="header2"/>
+        <td id="fxToolbarTd">
+            <div id="fxToolbar"><!-- rendered with javascript --></div>
+            <div style="position:absolute;right:15px;top:3px;" id="fxFastSearch">
+                <h:form id="searchForm">
+                    <input type="text" name="query" onkeypress="return onReturnEval(event, 'submitSearch();')" style="margin-right:3px;width:120px;padding-left:2px;height:16px;border:1px solid #d4d9c4;"/>
+                    <t:graphicImage id="submitQueryButton" styleClass="pngSupport" style="position:relative;top:3px;cursor:pointer;" alt="search" url="/adm/images/toolbar/search.png" onclick="submitSearch();"/>
+                    <t:graphicImage id="editUserSettingsButton" styleClass="pngSupport" style="position:relative;margin-left:10px;top:3px;cursor:pointer;" alt="search" url="/adm/images/layout/user_settings.png" onclick="editUserSettings();"/>
+                    <h:commandLink id="logoutButton" action="#{fxAuthenticationBean.logout}">
+                        <t:graphicImage id="logoutImage" styleClass="pngSupport" style="position:relative;margin-left:10px;top:3px;"
+                                        alt="logout" url="/adm/images/layout/exit.png" />
+                    </h:commandLink>
+                </h:form>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td id="leftArea" valign="top" align="right">
+            <div id="leftAreaContent" onmouseup="endDrag();">
+                <ui:repeat var="item" value="${navigationMenuBean.items}">
+                    <iframe id="treeNavFrame_#{item.id}" name="treeNavFrame_#{item.id}" frameborder="0"
+                            loaded="#{item.id == navigationMenuBean.activeIdx}"
+                            src="#{item.id == navigationMenuBean.activeIdx ? item.navigation : 'adm/empty.html'}"
+                            navigationSrc="#{item.navigation}"
+                            scrolling="no"
+                            style="display:#{item.id == navigationMenuBean.activeIdx ? 'block' : 'none'};position:relative;left:-1px;border:0;width:100%">treeNavFrame</iframe>
+                </ui:repeat>
+            </div>
+        </td>
+        <td id="dragArea" valign="bottom" onmousedown="beginDrag(event);" style="background-color:white;">
+            <t:graphicImage url="adm/images/layout/DragButton.gif" id="dragButton" alt="dragButton"/>
+            <!--<div id="dragAreaBottomLinie">--><!--t:graphicImage url="images/layout/Linie.gif" /--><!--</div>-->
+            <div id="dragAreaTopLinie">_</div>
+        </td>
+        <td id="rightArea" valign="top">
+            <div id="contentHeader">
+                <!-- rendered with javascript -->
+            </div>
+            <div id="info" style="position:absolute;top:35px;color:gray;">
+                <!-- rendered with javascript -->
+            </div>
+            <iframe id="contentFrame" name="contentFrame" frameborder="0" src="#{navigationMenuBean.activeItem.target}"
+                    width="100%" scrolling="yes"/>
+        </td>
+    </tr>
+</table>
+
+<div id="slbg" onmouseup="endDrag();" onmousemove="doDrag(event);" > </div>
+<div id="slbgLine" onmouseup="endDrag();" onmousemove="doDrag(event);" > </div>
+
+</body>
+
+</html>

@@ -1,0 +1,51 @@
+/**
+ * Initializes the COUNTRIES select list. Based on the Unicode territories retrieved
+ * from http://www.unicode.org/cldr/repository_access.html.
+ * Remove the DTD at the top of the XML files to avoid DTD lookups by the XML parser.
+ *
+ * @author Daniel Lichtenberger, UCS
+ * @version $Rev$
+ */
+
+import com.flexive.shared.*
+import com.flexive.shared.structure.*
+import com.flexive.shared.security.ACL
+import com.flexive.shared.value.FxString
+
+def cl = Thread.currentThread().getContextClassLoader()
+def final environment = CacheAdmin.getEnvironment()
+def final ACL itemAcl = environment.getACL(ACL.Category.SELECTLISTITEM.getDefaultId())
+final translations = [:]
+
+["de", "en"].each { languageIso ->
+    final FxLanguage language = EJBLookup.languageEngine.load(languageIso)
+    final xml = com.flexive.shared.FxSharedUtils.loadFromInputStream(cl.getResourceAsStream("fxresources/scripts/runonce/countries/${languageIso}.xml"), -1)
+    final countries = new XmlSlurper().parseText(xml)   // don't validate to avoid errors when unicode.org is offline
+    final rows = countries.localeDisplayNames.territories.territory.list()
+    rows.each {
+        final String cc = it."@type".toString().toLowerCase()    // get country code
+        if (org.apache.commons.lang.StringUtils.isAlpha(cc)) {  // skip world regions and continents (europe, north america, ...)
+            if (translations[cc] == null) {     // initialize
+                translations[cc] = new FxString(true, cc)
+            }
+            translations[cc].setTranslation(language, it.toString())    // store translation
+        }
+    }
+}
+
+FxSelectListEdit selectList = FxSelectListEdit.createNew("COUNTRIES",
+        new FxString(true, FxLanguage.ENGLISH, "Countries").setTranslation(FxLanguage.GERMAN, "L\u00e4nder"),
+        new FxString(true, FxLanguage.ENGLISH, "Countries").setTranslation(FxLanguage.GERMAN, "L\u00e4nder"),
+        true, itemAcl, itemAcl)
+def createItem = { trans ->
+    new FxSelectListItemEdit(itemAcl, selectList, trans.value, trans.key, "#000000")
+}
+// put preferred countries first
+/*["de", "at", "ch"].each { cc ->
+    createItem([key: cc, value: translations.remove(cc)])
+} */
+// now store other countries
+translations.each(createItem)
+
+EJBLookup.selectListEngine.save(selectList)
+

@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="groovy" xml:id="core_structure_newtype_groovy"  xmlns="http://docbook.org/ns/docbook">import com.flexive.shared.scripting.groovy.*
+import com.flexive.shared.value.*
+import com.flexive.shared.security.*
+import com.flexive.shared.*
+
+def typeDesc = new FxString("A generic customer")
+typeDesc.setTranslation(FxLanguage.GERMAN, "Ein generischer Kunde")
+new GroovyTypeBuilder().customer(description: typeDesc, acl: CacheAdmin.environment.getACL(ACL.Category.STRUCTURE.defaultId)) {
+}
+def type = CacheAdmin.environment.getType("Customer")
+return type.name
+</programlisting>

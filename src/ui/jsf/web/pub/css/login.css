@@ -1,0 +1,108 @@
+body {
+    font-family: Verdana, sans-serif;
+    font-size: 11px;
+    color: #494949;
+    margin: 0;
+    padding:0;
+}
+
+#LoginTable {
+    background-image: url(../images/LoginBG.gif);
+    background-repeat: no-repeat;
+    background-position: center top;
+    background-color: #EBF5CC;
+    width: 100%;
+    margin-top: 90px;
+    height: 229px;
+}
+
+
+.inputs {
+    width: 150px;
+    border: solid 1px #333;
+    margin-left: 5px;
+}
+
+#title {
+    font-size: 18px;
+    color: #FFF;
+    font-weight: bolder;
+    height: 25px;
+    letter-spacing: 0.3mm;
+    width:185px;
+}
+
+#password {
+    font-weight:bolder;
+    padding-right:10px;
+    width:185px;
+}
+#username {
+    font-weight:bolder;
+    padding-right:10px;
+    width:185px;
+}
+
+#takeOver {
+    font-weight:normal;
+    padding-left:5px;
+}
+
+#UcsLogo {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    border:0;
+    width:91;
+    height:40
+}
+
+.content {
+    width: 426px;
+    margin-top: 0px;
+}
+
+
+#Footer {
+    width: 429px;
+    font-size: 10px;
+    text-align: left;
+
+}
+
+
+.checkbox {
+
+    margin-left: 1px;
+
+}
+
+.button {
+
+    margin-left: 5px;
+
+}
+
+.msgIcon {
+    height:20px;
+    width:20px;
+    vertical-align:middle;
+    border:0;
+}
+
+.errorMessage {
+    color:red;
+}
+
+.infoMessage {
+    color:blue;
+}
+
+.warnMessage {
+    color:red;
+}
+
+a {
+  color:#494949;
+  text-decoration:none;
+}

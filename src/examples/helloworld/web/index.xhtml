@@ -1,0 +1,34 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<head>
+    <fx:includes/>
+</head>
+
+<body>
+
+<h:outputLink value="create.xhtml">Create a new entry</h:outputLink>
+
+<!-- Render available blog postings, as returned by helloWorldBean.blogEntries -->
+
+<!-- The Facelets ui:repeat tag is used to iterate over content with JSF -->
+<ui:repeat value="#{helloWorldBean.blogEntries}" var="column">
+    <h3>
+        <!-- Entry title. Access the values of each column through the expression language
+         and the column's index -->
+        #{column[1]}
+    </h3>
+        <pre>#{column[2]} <!-- Entry text -->
+
+            <i>#{column[3]}</i> <!-- Creation date -->
+        </pre>
+</ui:repeat>
+
+</body>
+
+</html>

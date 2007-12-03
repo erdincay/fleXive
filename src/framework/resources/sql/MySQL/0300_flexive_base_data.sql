@@ -1,0 +1,10 @@
+-- Optional data for a working base 
+
+-- Test user "s"
+INSERT INTO FXS_ACCOUNTS VALUES
+(4,0,'s','03c7c0ace395d80182db07ae2c30f034','dummy@dummy.com',null,
+SYSDATE(),'3000-01-01 00:00:00','',
+1,SYSDATE(),1,SYSDATE(),TRUE,TRUE,1,'s',TRUE,null,null);
+INSERT INTO FXS_USERGROUPMEMBERS VALUES(4,1);
+
+INSERT INTO FXS_ROLEMAPPING VALUES (4,3,1);

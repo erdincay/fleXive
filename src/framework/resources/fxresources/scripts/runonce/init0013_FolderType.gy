@@ -1,0 +1,49 @@
+import com.flexive.shared.CacheAdmin
+import com.flexive.shared.EJBLookup
+import com.flexive.shared.FxLanguage
+import com.flexive.shared.configuration.SystemParameters
+import com.flexive.shared.exceptions.FxRuntimeException
+import com.flexive.shared.interfaces.*
+import com.flexive.shared.security.ACL
+import com.flexive.shared.structure.*
+import com.flexive.shared.tree.FxTreeMode
+import com.flexive.shared.value.FxString
+import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
+
+//file: init0013_folder.gy
+//description: Create the "Folder" FxType needed for all flexive installations
+//expected bindings:
+//  ticket ... UserTicket
+//  scriptname ... name of this script
+//author: Markus Plesser, Unique Computing Solutions GmbH
+//author: Gregor Schober, Unique Computing Solutions GmbH
+def String FOLDER_TYPE = "Folder";
+
+def ContentEngine co = EJBLookup.getContentEngine();
+def ACLEngine acl = EJBLookup.getACLEngine();
+def TypeEngine type = EJBLookup.getTypeEngine();
+def AssignmentEngine ass = EJBLookup.getAssignmentEngine();
+def ScriptingEngine se = EJBLookup.getScriptingEngine();
+
+try {
+    if (CacheAdmin.getEnvironment().getType(FOLDER_TYPE) != null) {
+        println "Folder type '${FOLDER_TYPE}' already exists! Skipping creation!";
+        return;
+    }
+} catch (FxRuntimeException nf) {
+    //ok, ignore
+}
+
+
+//def ACL typeACL = CacheAdmin.getEnvironment().getACL(TYPE_ACL);
+def ACL typeACL = CacheAdmin.getEnvironment().getACL(ACL.Category.STRUCTURE.defaultId)
+def long typeId = type.save(FxTypeEdit.createNew(FOLDER_TYPE, new FxString(FxLanguage.ENGLISH, "Folder").setTranslation(FxLanguage.GERMAN, "Ordner"), typeACL, null));
+def builder = new GroovyTypeBuilder(typeId)
+builder {
+    fqn(assignment: CacheAdmin.getEnvironment().getAssignment((Long) EJBLookup.configurationEngine.get(SystemParameters.TREE_FQN_ROOTASSIGNMENT)).getXPath())
+    caption(assignment: CacheAdmin.getEnvironment().getAssignment((Long) EJBLookup.configurationEngine.get(SystemParameters.TREE_CAPTION_ROOTASSIGNMENT)).getXPath())
+    comment(FxDataType.Text, multilang: true, multiplicity: FxMultiplicity.MULT_0_1)
+}
+
+EJBLookup.treeEngine.clear FxTreeMode.Live
+EJBLookup.treeEngine.clear FxTreeMode.Edit

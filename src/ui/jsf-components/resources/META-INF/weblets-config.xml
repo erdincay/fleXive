@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<weblets-config xmlns="http://weblets.dev.java.net/config">
+    <weblet>
+        <weblet-name>com.flexive.faces.weblets</weblet-name>
+        <weblet-class>
+            net.java.dev.weblets.packaged.PackagedWeblet
+        </weblet-class>
+        <weblet-version>3.0-SNAPSHOT</weblet-version>
+        <init-param>
+            <param-name>package</param-name>
+            <param-value>
+                com.flexive.faces.weblets
+            </param-value>
+        </init-param>
+    </weblet>
+    <weblet-mapping>
+        <weblet-name>com.flexive.faces.weblets</weblet-name>
+        <url-pattern>/flexive-web-resources/*</url-pattern>
+    </weblet-mapping>
+</weblets-config>

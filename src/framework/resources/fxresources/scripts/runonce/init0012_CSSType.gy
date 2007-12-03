@@ -1,0 +1,80 @@
+//file: init0012_csse.gy
+//description: Create the "CSS" FxType needed for all flexive installations
+//expected bindings:
+//  ticket ... UserTicket
+//  scriptname ... name of this script
+//author: Gregor Schober, Unique Computing Solutions GmbH
+
+import com.flexive.shared.*;
+import com.flexive.shared.exceptions.*;
+import com.flexive.shared.interfaces.ACLEngine;
+import com.flexive.shared.interfaces.ContentEngine;
+import com.flexive.shared.interfaces.ScriptingEngine;
+import com.flexive.shared.interfaces.AssignmentEngine;
+import com.flexive.shared.interfaces.TypeEngine;
+import com.flexive.shared.structure.*;
+import com.flexive.shared.security.ACL;
+import com.flexive.shared.FxLanguage
+import com.flexive.shared.configuration.SystemParameters
+import com.flexive.shared.value.FxString
+
+
+if( true ) {
+    println "Skipping creation of CSS type ..."
+    return
+}
+
+//def String TYPE_ACL = "CSS Type ACL";
+//def String CONTENT_ACL = "CSS Content ACL";
+//def String WF_ACL = "CSS Workflow ACL";
+def String CSS_TYPE = "CSS";
+
+def ContentEngine co = EJBLookup.getContentEngine();
+def ACLEngine acl = EJBLookup.getACLEngine();
+def TypeEngine type = EJBLookup.getTypeEngine();
+def AssignmentEngine ass = EJBLookup.getAssignmentEngine();
+def ScriptingEngine se = EJBLookup.getScriptingEngine();
+
+try {
+    if (CacheAdmin.getEnvironment().getType(CSS_TYPE) != null) {
+        println "Image type '${CSS_TYPE}' already exists! exiting!";
+        return;
+    }
+} catch(FxRuntimeException nf) {
+    //ok, ignore
+}
+//try {
+//    CacheAdmin.getEnvironment().getACL(TYPE_ACL);
+//} catch (FxRuntimeException e) {
+//    long aclId = acl.create(TYPE_ACL, new FxString("ACL for the CSS Type"), Mandator.MANDATOR_FLEXIVE, "#00CCDD", "", ACL.Category.STRUCTURE);
+//    acl.assign(aclId, UserGroup.GROUP_EVERYONE, true, true, true, true, true, true)
+//}
+//try {
+//    CacheAdmin.getEnvironment().getACL(CONTENT_ACL);
+//} catch (FxRuntimeException e) {
+//    long coACL = acl.create(CONTENT_ACL, new FxString("ACL for contents of the CSS Type"), Mandator.MANDATOR_FLEXIVE, "#00CCDD", "", ACL.Category.INSTANCE);
+//    acl.assign(coACL, UserGroup.GROUP_EVERYONE, true, true, true, true, true, true)
+//}
+//try {
+//    CacheAdmin.getEnvironment().getACL(WF_ACL);
+//} catch (FxRuntimeException e) {
+//    long wfACL = acl.create(WF_ACL, new FxString("ACL for the workflow of the CSS Type"), Mandator.MANDATOR_FLEXIVE, "#00CCDD", "", ACL.Category.WORKFLOW);
+//    acl.assign(wfACL, UserGroup.GROUP_EVERYONE, true, true, true, true, true, true)
+//}
+
+//def ACL typeACL = CacheAdmin.getEnvironment().getACL(TYPE_ACL);
+def ACL typeACL = CacheAdmin.getEnvironment().getACL(ACL.Category.STRUCTURE.defaultId)
+def long typeId = type.save(FxTypeEdit.createNew(CSS_TYPE, new FxString(FxLanguage.ENGLISH, "CSS").setTranslation(FxLanguage.GERMAN, "CSS"), typeACL, null));
+
+ass.save(FxPropertyAssignmentEdit.createNew(CacheAdmin.getEnvironment().getAssignment((Long)EJBLookup.configurationEngine.get(SystemParameters.TREE_CAPTION_ROOTASSIGNMENT)),
+            CacheAdmin.getEnvironment().getType(CSS_TYPE),
+            "CAPTION", "/").setEnabled(true), false);
+
+def FxPropertyEdit pe = FxPropertyEdit.createNew("Content", new FxString("Content"), new FxString(""),
+                true, FxMultiplicity.MULT_1_1,
+                true, typeACL, FxDataType.Text, new FxString(FxString.EMPTY),
+                true, null, null, null).setAutoUniquePropertyName(true);
+pe.setMultiLang(false);
+pe.setMultiplicity(FxMultiplicity.MULT_1_1);
+ass.createProperty(typeId, pe, "/");
+ass.save(((FxPropertyAssignment)CacheAdmin.getEnvironment().getAssignment(CSS_TYPE+"/Content")).asEditable().setDefaultMultiplicity(1), false)

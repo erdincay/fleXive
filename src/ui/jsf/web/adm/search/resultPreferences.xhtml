@@ -1,0 +1,160 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+
+    <ui:define name="body">
+        <a4j:form id="frm">
+            <adm:resultTabs activeTab=""/>
+            <adm:tab label="#{fxMessageBean['ResultPreferences.tabtitle.edit']}" active="true" id="resultPreferences"/>
+
+            <a4j:region>
+                <t:saveState value="#{resultPreferencesBean.type}"/>
+                <h:selectOneListbox value="#{resultPreferencesBean.type}" size="1" onchange="document.getElementById('frm:reloadButton').onclick();">
+                    <f:selectItems value="#{resultPreferencesBean.types}"/>
+                </h:selectOneListbox>
+                <h:selectOneListbox value="#{resultPreferencesBean.viewType}" size="1" onchange="document.getElementById('frm:reloadButton').onclick();">
+                    <f:selectItems value="#{fxSelectBean.resultViewTypes}"/>
+                </h:selectOneListbox>
+
+                <h:selectOneListbox value="#{resultPreferencesBean.location}" size="1" onchange="document.getElementById('frm:reloadButton').onclick();" converter="EnumConverter">
+                    <f:selectItems value="#{fxSelectBean.resultLocations}"/>
+                </h:selectOneListbox>
+
+                <br/>
+                
+                <a4j:outputPanel id="preferencesPanel">
+                    <ui:fragment rendered="#{resultPreferencesBean.type != -1 &amp;&amp; !resultPreferencesBean.customized}">
+                        <div class="warnMessage" style="margin-top: 10px">#{fxMessageBean['ResultPreferences.wng.usingDefaultPreferences']}</div>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{resultPreferencesBean.thumbnails}">
+                        <div class="infoMessage" style="margin-top: 10px">#{fxMessageBean['ResultPreferences.nfo.thumbnails']}</div>
+                    </ui:fragment>
+                    
+                    <fx:fieldSet legend="#{fxMessageBean['ResultPreferences.legend.selectColumns']}">
+                        <t:dataTable id="selectedColumns"
+                                binding="#{resultPreferencesBean.selectedColumnsTable}"
+                                value="#{resultPreferencesBean.resultPreferences.selectedColumns}"
+                                var="info" rowIndexVar="rowIndex" preserveDataModel="true"
+                                headerClass="tblHeader" rowClasses="tblRowEven, tblRowOdd" width="100%">
+                            <t:column>
+                                <f:facet name="header">
+                                    #{fxMessageBean['ResultPreferences.label.property']}
+                                </f:facet>
+                                #{resultPreferencesBean.propertyLabelMap[info.propertyName]}
+                            </t:column>
+                            <t:column width="70">
+                                <!-- Move column up -->
+                                <a4j:commandLink reRender="preferencesPanel" actionListener="#{resultPreferencesBean.moveColumnPropertyUp}">
+                                    <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}" value="#{rowIndex}"/>
+                                    <t:graphicImage alt="#{fxMessageBean['ResultPreferences.button.info.up']}" url="/adm/images/commandButton/up.png" border="0"/>
+                                </a4j:commandLink>
+                                <!-- Move column down -->
+                                <a4j:commandLink reRender="preferencesPanel" actionListener="#{resultPreferencesBean.moveColumnPropertyDown}">
+                                    <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}" value="#{rowIndex}"/>
+                                    <t:graphicImage alt="#{fxMessageBean['ResultPreferences.button.info.down']}" url="/adm/images/commandButton/down.png" border="0"/>
+                                </a4j:commandLink>
+                                <!-- Delete column -->
+                                <a4j:commandLink reRender="preferencesPanel" actionListener="#{resultPreferencesBean.removeColumnProperty}">
+                                    <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}" value="#{rowIndex}"/>
+                                    <t:graphicImage alt="#{fxMessageBean['ResultPreferences.button.info.delete']}" url="/adm/images/commandButton/delete.png" border="0"/>
+                                </a4j:commandLink>
+                            </t:column>
+                        </t:dataTable>
+
+                        <table>
+                            <tr>
+                                <td>
+                                    <h:selectOneListbox id="addPropertyNameSelect" value="#{resultPreferencesBean.addPropertyName}" size="1">
+                                        <f:selectItems value="#{resultPreferencesBean.properties}"/>
+                                    </h:selectOneListbox>
+                                </td>
+                                <td>
+                                    <a4j:commandButton id="addColumnButton" actionListener="#{resultPreferencesBean.addColumnProperty}" reRender="preferencesPanel" value="#{fxMessageBean['ResultPreferences.button.info.add']}"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </fx:fieldSet>
+                    <br/>
+                    <fx:fieldSet legend="#{fxMessageBean['ResultPreferences.legend.orderBy']}">
+                        <t:dataTable
+                                value="#{resultPreferencesBean.resultPreferences.orderByColumns}"
+                                var="info" rowIndexVar="rowIndex" preserveDataModel="true"
+                                headerClass="tblHeader" rowClasses="tblRowEven, tblRowOdd" width="100%">
+                            <t:column>
+                                <f:facet name="header">
+                                    #{fxMessageBean['ResultPreferences.label.property']}
+                                </f:facet>
+                                #{resultPreferencesBean.propertyLabelMap[info.propertyName]}
+                            </t:column>
+                            <t:column>
+                                <f:facet name="header">
+                                    #{fxMessageBean['ResultPreferences.label.direction']}
+                                </f:facet>
+                                #{info.direction}
+                            </t:column>
+                            <t:column width="70">
+                                <!-- Move column up -->
+                                <a4j:commandLink reRender="preferencesPanel" actionListener="#{resultPreferencesBean.moveOrderByPropertyUp}">
+                                    <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}" value="#{rowIndex}"/>
+                                    <t:graphicImage alt="#{fxMessageBean['ResultPreferences.button.info.up']}" url="/adm/images/commandButton/up.png" border="0"/>
+                                </a4j:commandLink>
+                                <!-- Move column down -->
+                                <a4j:commandLink reRender="preferencesPanel" actionListener="#{resultPreferencesBean.moveOrderByPropertyDown}">
+                                    <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}" value="#{rowIndex}"/>
+                                    <t:graphicImage alt="#{fxMessageBean['ResultPreferences.button.info.down']}" url="/adm/images/commandButton/down.png" border="0"/>
+                                </a4j:commandLink>
+                                <a4j:commandLink reRender="preferencesPanel" actionListener="#{resultPreferencesBean.removeOrderByProperty}">
+                                    <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}" value="#{rowIndex}"/>
+                                    <t:graphicImage alt="#{fxMessageBean['ResultPreferences.button.info.delete']}" url="/adm/images/commandButton/delete.png" border="0"/>
+                                </a4j:commandLink>
+                            </t:column>
+                        </t:dataTable>
+
+                        <c:if test="#{!empty resultPreferencesBean.selectedProperties}">
+                            <table>
+                                <tr>
+                                    <td>
+                                        <h:selectOneListbox id="addOrderByName" value="#{resultPreferencesBean.addOrderByName}" size="1">
+                                            <f:selectItems value="#{resultPreferencesBean.selectedProperties}"/>
+                                        </h:selectOneListbox>
+                                    </td>
+                                    <td>
+                                        <h:selectOneListbox value="#{resultPreferencesBean.addOrderByDirection}" size="1">
+                                            <f:selectItems value="#{fxSelectBean.resultDirections}"/>
+                                        </h:selectOneListbox>
+                                    </td>
+                                    <td>
+                                        <a4j:commandButton id="addOrderByButton" actionListener="#{resultPreferencesBean.addOrderByProperty}" reRender="preferencesPanel" value="#{fxMessageBean['ResultPreferences.button.info.add']}"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </c:if>
+                    </fx:fieldSet>
+                </a4j:outputPanel>
+
+                <adm:commandButton id="saveButton" icon="save" labelKey="ResultPreferences.button.save" bean="#{resultPreferencesBean}" action="save" location="both"/>
+                <adm:commandButton id="cancelButton" icon="cancel" labelKey="ResultPreferences.button.cancel" bean="#{resultPreferencesBean}" action="cancel" location="both"/>
+
+                <div style="display:none">
+                    <a4j:commandButton id="reloadButton" actionListener="#{resultPreferencesBean.reloadPreferences}" reRender="preferencesPanel"/>
+                </div>
+            </a4j:region>
+
+            <adm:toolbarPluginButtons/>
+        </a4j:form>
+    </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

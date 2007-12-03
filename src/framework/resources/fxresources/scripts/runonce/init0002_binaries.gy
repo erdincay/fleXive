@@ -1,0 +1,21 @@
+import com.flexive.shared.interfaces.DivisionConfigurationEngine
+import com.flexive.shared.value.BinaryDescriptor
+
+void installThumbnails() {
+    DivisionConfigurationEngine dc = com.flexive.shared.EJBLookup.getDivisionConfigurationEngine()
+    println("Installing thumbnails ...")
+    dc.installBinary(BinaryDescriptor.SYS_SELECTLIST_DEFAULT, "thumbs/selectlist-default.png");
+    dc.installBinary(BinaryDescriptor.SYS_UNKNOWN, "thumbs/unknown.png");
+    dc.installBinary(BinaryDescriptor.SYS_NOACCESS, "thumbs/noaccess.png");
+    dc.installBinary(BinaryDescriptor.SYS_AUDIO, "thumbs/mime-audio.png");
+    dc.installBinary(BinaryDescriptor.SYS_DOC, "thumbs/mime-doc.png");
+    dc.installBinary(BinaryDescriptor.SYS_ICAL, "thumbs/mime-ical.png");
+    dc.installBinary(BinaryDescriptor.SYS_INFO, "thumbs/mime-info.png");
+    dc.installBinary(BinaryDescriptor.SYS_PDF, "thumbs/mime-pdf.png");
+    dc.installBinary(BinaryDescriptor.SYS_TXT, "thumbs/mime-txt.png");
+    dc.installBinary(BinaryDescriptor.SYS_VIDEO, "thumbs/mime-video.png");
+    dc.installBinary(BinaryDescriptor.SYS_XLS, "thumbs/mime-xls.png");
+}
+
+
+installThumbnails()

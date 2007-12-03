@@ -1,0 +1,598 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE faces-config
+        PUBLIC "-//Sun Microsystems, Inc.//DTD JavaServer Faces Config 1.0//EN"
+        "http://java.sun.com/dtd/web-facesconfig_1_0.dtd">
+<faces-config>
+
+    <validator>
+        <validator-id>flexive.NullValidator</validator-id>
+        <validator-class>com.flexive.war.validator.NullValidator</validator-class>
+    </validator>
+
+    <validator>
+        <validator-id>flexive.FxNameForXPathValidator</validator-id>
+        <validator-class>com.flexive.war.validator.FxNameForXPathValidator</validator-class>
+    </validator>
+
+    <managed-bean>
+        <managed-bean-name>structureTreeBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.javascript.tree.StructureTreeWriter
+        </managed-bean-class>
+        <managed-bean-scope>application</managed-bean-scope>
+    </managed-bean>
+    
+    <managed-bean>
+        <managed-bean-name>navigationMenuBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.NavigationMenuBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+        <managed-property>
+            <property-name>activeIdx</property-name>
+            <value>#{!empty param.activeIdx ? param.activeIdx : 0}</value>
+        </managed-property>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>contentEditorBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.admin.content.ContentEditorBean
+        </managed-bean-class>
+        <managed-bean-scope>session</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>propertyEditorBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.admin.structure.PropertyEditorBean
+        </managed-bean-class>
+        <managed-bean-scope>session</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+            <managed-bean-name>typeEditorBean</managed-bean-name>
+            <managed-bean-class>
+                com.flexive.war.beans.admin.structure.TypeEditorBean
+            </managed-bean-class>
+            <managed-bean-scope>session</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+            <managed-bean-name>groupEditorBean</managed-bean-name>
+            <managed-bean-class>
+                com.flexive.war.beans.admin.structure.GroupEditorBean
+            </managed-bean-class>
+            <managed-bean-scope>session</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+            <managed-bean-name>structureTreeControllerBean</managed-bean-name>
+            <managed-bean-class>
+                com.flexive.war.beans.admin.structure.StructureTreeControllerBean
+            </managed-bean-class>
+            <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>inlineContentEditorBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.admin.content.InlineContentEditorBean
+        </managed-bean-class>
+        <managed-bean-scope>session</managed-bean-scope>
+    </managed-bean>
+
+
+    <managed-bean>
+        <managed-bean-name>contentTemplateBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.admin.main.ContentTemplateBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>masterTemplateBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.admin.main.MasterTemplateBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+      <managed-bean>
+        <managed-bean-name>tagBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.admin.main.TagBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+
+    <managed-bean>
+        <managed-bean-name>content</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.cms.ContentProviderBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+     <managed-bean>
+        <managed-bean-name>search</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.cms.SearchProviderBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>page</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.cms.PageProviderBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>navigation</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.cms.TreeProviderBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+
+    <managed-bean>
+        <managed-bean-name>treeNodeEditorBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.admin.tree.TreeNodeEditorBean
+        </managed-bean-class>
+        <managed-bean-scope>session</managed-bean-scope>
+    </managed-bean>
+
+
+    <managed-bean>
+        <managed-bean-name>userGroupBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.admin.main.UserGroupBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>accountBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.admin.main.AccountBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>scriptBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.admin.main.ScriptBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>briefcaseBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.admin.briefcase.BriefcaseBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>mandatorBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.admin.main.MandatorBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>aclBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.admin.main.AclBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>sqlSearchBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.admin.main.SqlSearchBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+
+    <managed-bean>
+        <managed-bean-name>workflowBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.admin.main.WorkflowBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>systemInfoBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.admin.main.SystemInfoBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>stepDefinitionBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.admin.main.StepDefinitionBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>groovyConsoleBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.admin.main.GroovyConsoleBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>searchResultWriter</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.javascript.search.SearchResultWriter
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>resultPreferencesBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.admin.search.ResultPreferencesBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>contentGeneratorBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.admin.content.ContentGeneratorBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>browseReferencesBean</managed-bean-name>
+        <managed-bean-class>com.flexive.war.beans.admin.search.BrowseReferencesBean</managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>selectListBean</managed-bean-name>
+        <managed-bean-class>com.flexive.war.beans.admin.main.SelectListBean</managed-bean-class>
+        <managed-bean-scope>session</managed-bean-scope>
+    </managed-bean>
+
+    <navigation-rule>
+        <from-view-id>*</from-view-id>
+
+        <navigation-case>
+            <from-outcome>home</from-outcome>
+            <to-view-id>/adm/main.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>loginSuccess</from-outcome>
+            <to-view-id>/adm/loginSuccess.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>login</from-outcome>
+            <to-view-id>/pub/login.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>mainNavigation</from-outcome>
+            <to-view-id>/adm/main/navigation.xhtml</to-view-id>
+        </navigation-case>
+
+
+        <navigation-case>
+            <from-outcome>briefcaseDetail</from-outcome>
+            <to-view-id>/adm/briefcase/detail.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>briefcaseNotLoaded</from-outcome>
+            <to-view-id>/adm/briefcase/briefcaseNotLoaded.xhtml</to-view-id>
+        </navigation-case>
+
+
+        <navigation-case>
+            <from-outcome>briefcaseNavigation</from-outcome>
+            <to-view-id>/adm/briefcase/navigation.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>contentEditor</from-outcome>
+            <to-view-id>/adm/content/contentEditor.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>inlineContentEditor</from-outcome>
+            <to-view-id>/adm/content/inlineContentEditor.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>iceCutCopyPaste</from-outcome>
+            <to-view-id>/adm/content/iceCutCopyPaste.xhtml</to-view-id>
+        </navigation-case>
+
+          <navigation-case>
+            <from-outcome>iceClose</from-outcome>
+            <to-view-id>/adm/content/iceClose.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>treeNodeEditor</from-outcome>
+            <to-view-id>/adm/content/treeNodeEditor.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>contentNavigation</from-outcome>
+            <to-view-id>/adm/content/navigation.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>structureNavigation</from-outcome>
+            <to-view-id>/adm/structure/navigation.xhtml</to-view-id>
+        </navigation-case>
+
+
+        <navigation-case>
+            <from-outcome>briefcaseOverview</from-outcome>
+            <to-view-id>/adm/main/briefcase/bcOverview.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>accountOverview</from-outcome>
+            <to-view-id>/adm/main/account/overview.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>accountCreate</from-outcome>
+            <to-view-id>/adm/main/account/create.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>accountEdit</from-outcome>
+            <to-view-id>/adm/main/account/edit.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>userEdit</from-outcome>
+            <to-view-id>/adm/user/edit.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>editUserPref</from-outcome>
+            <to-view-id>/adm/user/edit.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>contentPage</from-outcome>
+            <to-view-id>/adm/content.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>scriptEdit</from-outcome>
+            <to-view-id>/adm/main/scripting/edit.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>scriptOverview</from-outcome>
+            <to-view-id>/adm/main/scripting/overview.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>scriptCreate</from-outcome>
+            <to-view-id>/adm/main/scripting/create.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>aclOverview</from-outcome>
+            <to-view-id>/adm/main/acl/aclOverview.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>aclEdit</from-outcome>
+            <to-view-id>/adm/main/acl/aclEdit.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>aclCreate</from-outcome>
+            <to-view-id>/adm/main/acl/aclCreate.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>mandatorCreate</from-outcome>
+            <to-view-id>/adm/main/mandator/create.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>mandatorEdit</from-outcome>
+            <to-view-id>/adm/main/mandator/edit.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>mandatorOverview</from-outcome>
+            <to-view-id>/adm/main/mandator/overview.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>userGroupOverview</from-outcome>
+            <to-view-id>/adm/main/userGroup/overview.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>userGroupNew</from-outcome>
+            <to-view-id>/adm/main/userGroup/new.xhtml</to-view-id>
+        </navigation-case>
+
+
+        <navigation-case>
+            <from-outcome>userGroupEdit</from-outcome>
+            <to-view-id>/adm/main/userGroup/edit.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>contentTemplateOverview</from-outcome>
+            <to-view-id>/adm/main/template/contentTemplateOverview.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>contentTemplateEdit</from-outcome>
+            <to-view-id>/adm/main/template/contentTemplateEdit.xhtml</to-view-id>
+        </navigation-case>
+
+          <navigation-case>
+            <from-outcome>masterTemplateOverview</from-outcome>
+            <to-view-id>/adm/main/template/masterTemplateOverview.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>masterTemplateEdit</from-outcome>
+            <to-view-id>/adm/main/template/masterTemplateEdit.xhtml</to-view-id>
+        </navigation-case>
+
+
+        <navigation-case>
+            <from-outcome>tagEdit</from-outcome>
+            <to-view-id>/adm/main/template/tagEdit.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>workflowOverview</from-outcome>
+            <to-view-id>/adm/main/workflow/overview.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>workflowCreate</from-outcome>
+            <to-view-id>/adm/main/workflow/create.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>workflowEdit</from-outcome>
+            <to-view-id>/adm/main/workflow/edit.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>sqlSearch</from-outcome>
+            <to-view-id>/adm/main/sqlsearch/search.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>stepDefinitionOverview</from-outcome>
+            <to-view-id>/adm/main/workflow/stepDefinition/overview.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>stepDefinitionEdit</from-outcome>
+            <to-view-id>/adm/main/workflow/stepDefinition/edit.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>stepDefinitionCreate</from-outcome>
+            <to-view-id>/adm/main/workflow/stepDefinition/edit.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>ajaxTestOverview</from-outcome>
+            <to-view-id>/adm/ajax4jsfTest.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>contentQuery</from-outcome>
+            <to-view-id>/adm/search/query.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>contentResult</from-outcome>
+            <to-view-id>/adm/search/searchResult.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>resultPreferences</from-outcome>
+            <to-view-id>/adm/search/resultPreferences.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>contentTestData</from-outcome>
+            <to-view-id>/adm/content/createTestData.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>systemInfo</from-outcome>
+            <to-view-id>/adm/main/systemInfo.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>propertyAssignmentEditor</from-outcome>
+            <to-view-id>/adm/structure/propertyAssignmentEditor.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>propertyEditor</from-outcome>
+            <to-view-id>/adm/structure/propertyEditor.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>propertyOptionEditor</from-outcome>
+            <to-view-id>/adm/structure/propertyOptionEditor.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>groupAssignmentEditor</from-outcome>
+            <to-view-id>/adm/structure/groupAssignmentEditor.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>groupEditor</from-outcome>
+            <to-view-id>/adm/structure/groupEditor.xhtml</to-view-id>
+        </navigation-case>
+        
+        <navigation-case>
+            <from-outcome>groupOptionEditor</from-outcome>
+            <to-view-id>/adm/structure/groupOptionEditor.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>typeEditor</from-outcome>
+            <to-view-id>/adm/structure/typeEditor.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>typeScriptEditor</from-outcome>
+            <to-view-id>/adm/structure/typeScriptEditor.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>selectListOverview</from-outcome>
+            <to-view-id>/adm/main/selectList/overview.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>createSelectList</from-outcome>
+            <to-view-id>/adm/main/selectList/create.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>editSelectList</from-outcome>
+            <to-view-id>/adm/main/selectList/edit.xhtml</to-view-id>
+        </navigation-case>
+
+    </navigation-rule>
+
+</faces-config>

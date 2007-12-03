@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://myfaces.apache.org/sandbox"
+      xmlns:fx="http://www.flexive.com/jsf/core"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:jsp="http://java.sun.com/JSP/Page"
+      xmlns:t="http://myfaces.apache.org/tomahawk">
+<t:document>
+<t:documentHead>
+    <base href="#{fxSystemBean.documentBase}"/>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <t:stylesheet path="/adm/css/content.css"/>
+    <fx:includes/>
+
+    <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/shared.js"/>
+    <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/admin.js"/>
+    <script type="text/javascript">
+        if (parent.beginPage) {
+            parent.beginPage();
+        }
+        djConfig.searchIds = [<ui:insert name="searchIds"/>];
+        djConfig.searchIds.push("fxMessagesTmp");
+
+        function getBase() {
+            return "#{fxSystemBean.documentBase}";
+        }
+    </script>
+    <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/dojo/dojo.js"> </script>
+
+    <script type="text/javascript">
+        dojoInit();
+        dojo.require("dojo.widget.Tooltip");
+    </script>
+
+    <style type="text/css">
+
+        .pngSupport {
+            behavior: url("#{fxSystemBean.contextPath}/adm/css/pngbehavior.htc");
+            width:16px;
+            height:16px;
+            border:0;
+        }
+
+    </style>
+
+    <ui:insert name="head"/>
+</t:documentHead>
+
+<t:documentBody>
+<div id="fxMessages" style="display:none;"></div>
+<ui:insert name="body">Default Body</ui:insert>
+<div id="fxMessagesTmp" style="display:none"><ui:insert name="messages"><adm:messages/></ui:insert></div>
+
+
+<script type="text/javascript">
+    // Copy the messages from the bottom of the page to the top
+    if ("#{fxSystemBean.hasGroupedFxMessages}") {
+        var messagesTmp = document.getElementById("fxMessagesTmp");
+        var messages = document.getElementById("fxMessages");
+        var content = messagesTmp.innerHTML;
+        if (content.length>0) {
+            messages.style.display="inline";
+            messages.innerHTML=content+"&lt;br>";
+        }
+    }
+    if (parent &amp;&amp; parent.pageLoaded) {
+        parent.pageLoaded(#{fxSystemBean.pageId}, #{fxSystemBean.pageRenderTime}, #{fxSystemBean.treeModified});
+    }
+</script>
+
+<ui:debug hotkey="d" rendered="#{initParam.debugMode}"/>
+</t:documentBody>
+</t:document>
+</html>

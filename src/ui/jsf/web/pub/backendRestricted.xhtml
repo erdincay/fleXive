@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:s="http://myfaces.apache.org/sandbox"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<head>
+    <link rel="shortcut icon" href="#{fxSystemBean.contextPath}/pub/images/favicon.ico" type="image/vnd.microsoft.icon" />
+    <title>#{fxSystemBean.header}</title>
+    <link rel="stylesheet" type="text/css" href="/flexive/pub/css/login.css" />
+    <script language='JavaScript' type='text/javascript'>
+        if (this.parent.frames[1]) {
+            this.parent.location.href=this.location.href;
+        }
+    </script>
+</head>
+<body style="margin:0">
+<!-- +++++++++ UCS Logo ++++++++++ -->
+<a href="http://www.ucs.at" target="ucs">
+  <h:graphicImage alt="Login" url="/pub/images/LogoUcs.gif" id="UcsLogo"/>
+</a>
+<!-- ++++++++++ Login Table ++++++++++ -->
+<table cellpadding="0" border="0" cellspacing="0" width="100%" id="LoginTable">
+    <tr><td align="center" valign="top">
+        <h:form id="loginForm">
+            <table cellspacing="0" cellpadding="0" border="0" class="content">
+                <tr>
+                    <td align="center" id="title">#{fxSystemBean.edition}</td>
+                    <td colspan="2" width="241"></td>
+                </tr>
+                <tr><td colspan="3" height="45">
+                    <div style="padding-left:20px;padding-right:20px;padding-top:5px">#{fxMessageBean['Login.message.backendRestricted']}</div>
+                </td></tr>
+                <tr>
+                    <td align="right" id="username"><label for="loginForm:username">#{fxMessageBean['Login.field.name']}</label></td>
+                    <td align="left" colspan="2" width="241">
+                        <h:inputText id="username" styleClass="inputs" value="#{fxAuthenticationBean.username}"/>
+                    </td>
+                </tr>
+                <tr><td colspan="3" height="11"></td></tr>
+                <tr>
+                    <td align="right" id="password"><label for="loginForm:password">#{fxMessageBean['Login.field.password']}</label></td>
+                    <td align="left" colspan="2">
+                        <h:inputSecret id="password" styleClass="inputs" value="#{fxAuthenticationBean.password}"/>
+                    </td>
+                </tr>
+                <tr><td colspan="3" height="11"></td></tr>
+                <tr>
+                    <td align="right"></td>
+                    <td align="left" >
+                        <h:selectBooleanCheckbox type="text" id="takeOver" value="#{fxAuthenticationBean.takeover}"/>
+                    </td>
+                    <td valign="middle" width="220"><label for="loginForm:takeOver">#{fxMessageBean['Login.field.takeOver']}</label></td>
+                </tr>
+                <tr><td colspan="3" height="11"></td></tr>
+                <tr>
+                    <td align="right"></td>
+                    <td align="left" colspan="2">
+                        <h:commandLink id="loginButton" action="#{fxAuthenticationBean.login}">
+                            <h:graphicImage id="loginImage" alt="Login" styleClass="button" url="/pub/images/LoginButton.gif" style="border:0;"/>
+                        </h:commandLink>
+                    </td>
+                </tr>
+            </table>
+        </h:form>
+        <!-- ++++++++++ /Login Form ++++++++++ -->
+    </td></tr>
+</table>
+<!-- ++++++++++ Footer ++++++++++ -->
+<table cellpadding="0" cellspacing="0" width="100%" border="0">
+    <tr><td align="center" nowrap="true">
+        <div id="Footer">
+            <a href="http://www.flexive.org" target="flexive.org">
+                #{fxSystemBean.buildInfoVerbose}
+            </a>
+        </div>
+    </td></tr>
+</table>
+
+</body></html>
+

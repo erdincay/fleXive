@@ -1,0 +1,296 @@
+/**
+ * Styles for flexive components
+ */
+
+/* FxValueInput */
+
+/* Container of a fxValueInput element */
+div.fxValueInput {
+    width: 300px;
+}
+
+/* An input row containing the input element and the default language checkbox */
+div.fxValueInputRow {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 200px;
+}
+
+input.fxValueTextInput, textarea.fxValueTextArea, select.fxValueSelectInput, .fxValueInputElementWidth {
+    width: 170px;
+}
+
+input.fxValueTextInput, textarea.fxValueTextArea, select.fxValueSelectInput {
+    border: 1px solid gray;
+}
+
+textarea.fxValueTextArea, textarea.fxValueTextAreaHtml {
+    height: 150px;
+}
+
+textarea.fxValueTextAreaHtml {
+    width: 400px;
+}
+
+input.fxValueTextInput {
+    float: left;
+}
+
+div.fxValueInputWidth, div.fxValueInput {
+    width: 260px;
+}
+
+div.fxValueInput {
+    position: relative;
+    display: block;
+}
+
+div.fxValueInput select {
+    width: 60px;
+}
+
+/* Query editor */
+
+table.queryRoot {
+    border-collapse: separate;
+    border: 1px solid #A0A0A0;
+    background-color: #EAF1D6;
+    width: 600px;
+    -moz-user-select: none;
+}
+
+table.queryRoot td.nestedTable {
+    border: 1px solid #A0A0A0;
+    border-right: 0;
+    margin-right: 0;
+}
+
+table.queryRoot td.queryOperator {
+    padding-left: 5px;
+}
+
+table.queryRoot td.editorRow {
+    border: 1px solid #EAF1D6;
+}
+
+table.queryRoot tr {
+    height: 2.5em;
+}
+
+table.queryChild0, table.queryChild1 {
+    border-collapse: separate;
+    width: 100%;
+}
+
+table.queryChild0 {
+    background-color: #EAF1D6;
+}
+
+table.queryChild0 td.editorRow {
+    border: 1px solid #EAF1D6;
+}
+
+table.queryChild1 {
+    background-color: #F9FCF1;
+}
+
+table.queryChild1 td.editorRow {
+    border: 1px solid #F9FCF1;
+}
+
+table.queryRoot td.invalidNodeValue {
+    background-color: #FFF691;
+}
+
+table.queryRoot td.selection {
+    background-color: #D2E4FD;
+}
+
+div.queryRowElement {
+    float: left;
+    white-space: nowrap;
+    padding-right: 3px;
+}
+
+div.queryWideRowElement {
+    float: right;
+    padding-top: 5px;
+    margin-right: 20px;
+}
+
+div.queryRemoveNode {
+    position: absolute;
+    right: 0;
+    padding-left: 5px;
+}
+
+div.queryRowLabel {
+    float: right;
+    padding-right: 5px;
+}
+
+div.queryInputContainer {
+    position: relative;
+    float: right;
+    width: 260px;
+}
+
+select.queryValueComparator {
+    width: 100px;
+}
+
+#queryEditorContainer .emptyMessage {
+    width: 580px;
+    outline: 1px solid #A0A0A0;
+    background-color: #EAF1D6;
+    padding: 10px;
+}
+
+/* input styles for the query editor */
+
+.queryRoot div.fxValueInputRow {
+    width: 150px;
+}
+
+.queryRoot input.fxValueTextInput, .queryRoot .fxValueInputElementWidth {
+    width: 120px;
+}
+
+.queryRoot textarea.fxValueTextArea, .queryRoot textarea.fxValueTextAreaHtml {
+    height: 100px;
+}
+
+.queryRoot textarea.fxValueTextAreaHtml {
+    width: 350px;
+}
+
+.queryRoot input.fxValueTextInput {
+    float: left;
+}
+
+.queryRoot div.fxValueInputWidth, .queryRoot div.fxValueInput {
+    width: 210px;
+}
+
+/** FxPopup - a static dojo popup, e.g. for displaying some text */
+div.dojoDialog {
+    background-color: #F9FCF1;
+    border: 1px solid black;
+    -moz-border-radius: 4px;
+    padding: 4px;
+}
+
+/** jsDataScroller */
+
+table.dataScroller {
+    width: 180px;
+}
+
+table.dataScroller td.button {
+    padding: 2px;
+    width: 20px;
+}
+
+td.button a {
+    outline: none;
+}
+
+td.button img {
+    opacity: 0.8;
+}
+
+td.button:hover img {
+    opacity: 1;
+}
+
+table.dataScroller td.scrollPosition {
+    width: 100px;
+    padding: 2px;
+}
+
+td.scrollPosition input {
+    width: 96px;
+    text-align: center;
+}
+
+/* form input styles */
+
+fieldset.formFields {
+    width: 400px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #bdbdbd;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: 5px;
+    margin-top: 5px;
+}
+
+fieldset.formFields legend {
+    margin-left: 8px;
+    padding-left: 2px;
+}
+
+div.formRow {
+    float: left;
+    display: block;
+    padding: 2px;
+}
+
+div.formLabel {
+    float: left;
+    margin-top: 2px;
+    width: 120px;
+    height: 25px;
+    padding: 2px;
+    white-space: nowrap;
+}
+
+div.formInputElement {
+    float: left;
+    width: 170px;
+    margin-top: 2px;
+    padding: 2px;
+}
+
+div.formError {
+    float: left;
+    height: 25px;
+    padding: 2px;
+    width: 80px;
+}
+
+.dataTableHeader {
+    text-align: left;
+    font-family: Arial, Helvetica, sans-serif;
+    color: gray;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+/* Pure CSS tooltips, based on http://www.webbe.de/index.shtml?CONTENT=script_css_tooltip */
+
+div.tooltip {
+    position: relative;
+}
+
+div.tooltip:hover {
+    color: #0000ff;
+    background: transparent;
+}
+
+div.tooltip div.tooltipContent {
+    display: none;
+}
+
+div.tooltip:hover div.tooltipContent {
+    display: block;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+    color: #000000;
+    border: 1px solid #000000;
+    background-color: #FFFFCC;
+}

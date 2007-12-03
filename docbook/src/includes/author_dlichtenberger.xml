@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE info [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<info xmlns="http://docbook.org/ns/docbook">
+    <author>
+        <email>daniel.lichtenberger AT ucs.at</email>
+        <!--<orgname>UCS</orgname>-->
+        <personname>Daniel Lichtenberger</personname>
+    </author>
+</info>

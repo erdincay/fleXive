@@ -1,0 +1,68 @@
+//file: init0020_DocumentType.gy
+//description: Create the "Document" FxType needed for all flexive installations
+//expected bindings:
+//  ticket ... UserTicket
+//  scriptname ... name of this script
+//author: Markus Plesser, Unique Computing Solutions GmbH
+import com.flexive.shared.*
+import com.flexive.shared.structure.*
+import com.flexive.shared.scripting.*
+import com.flexive.shared.security.ACL
+import com.flexive.shared.value.FxString
+
+class DocumentType {
+    def typeEngine = EJBLookup.getTypeEngine();
+    def assignmentEngine = EJBLookup.getAssignmentEngine()
+    def name = "Document"
+    def typeDesc = new FxString(FxLanguage.ENGLISH, "Document")
+    ACL documentACL = CacheAdmin.environment.getACL(ACL.Category.STRUCTURE.defaultId)
+    FxType type
+
+    void createType() {
+        typeDesc.setTranslation(FxLanguage.GERMAN, "Dokument")
+        type = FxTypeEdit.createNew(name, typeDesc, documentACL)
+        typeEngine.save(type)
+        type = CacheAdmin.environment.getType(type.name)
+    }
+
+    void addProperty(name, description, descriptionDe, hint, multiplicity, dataType, multiline=false) {
+        assignmentEngine.createProperty(type.id, FxPropertyEdit.createNew(name,
+                        new FxString(true, FxLanguage.ENGLISH, description).setTranslation(FxLanguage.GERMAN, descriptionDe),
+                        new FxString(hint),
+                        multiplicity,
+                        documentACL,
+                        dataType).setAutoUniquePropertyName(true).setMultiLine(multiline), "/")
+    }
+
+    void createProperties() {
+        addProperty("Document", "The document file", "Datei", "", FxMultiplicity.MULT_1_1, FxDataType.Binary)
+        addProperty("Author", "Author", "Autor", "", FxMultiplicity.MULT_0_1, FxDataType.String1024)
+        addProperty("Application", "Application", "Applikation", "Application that created the document", FxMultiplicity.MULT_0_1, FxDataType.String1024)
+        addProperty("Characters", "Count of characters", "Anzahl Buchstaben", "", FxMultiplicity.MULT_0_1, FxDataType.Number)
+        addProperty("Comments", "Comments", "Kommentare", "", FxMultiplicity.MULT_0_1, FxDataType.Text, true)
+        addProperty("CreateDate", "Creation Date", "Erstellungsdatum", "", FxMultiplicity.MULT_0_1, FxDataType.DateTime)
+        addProperty("EditDate", "Last Edit Date", "Letzte Editierung", "", FxMultiplicity.MULT_0_1, FxDataType.DateTime)
+        addProperty("Keywords", "Keywords", "Schl\u00fcsselw\u00f6rter", "", FxMultiplicity.MULT_0_1, FxDataType.Text, true)
+        addProperty("LastEditor", "Last editor", "Letzter Bearbeiter", "", FxMultiplicity.MULT_0_1, FxDataType.String1024)
+        addProperty("LastPrinted", "Last printed", "Zuletzt gedruckt", "", FxMultiplicity.MULT_0_1, FxDataType.DateTime)
+        addProperty("Title", "Document title", "Dokumenttitel", "", FxMultiplicity.MULT_0_1, FxDataType.String1024)
+        addProperty("LastModified", "Last modification", "Letzte \u00c4nderung", "", FxMultiplicity.MULT_0_1, FxDataType.DateTime)
+        addProperty("Pages", "Number of pages", "Seitenanzahl", "", FxMultiplicity.MULT_0_1, FxDataType.Number)
+        addProperty("RevNumber", "Revision number", "Revisionsnummer", "", FxMultiplicity.MULT_0_1, FxDataType.String1024)
+        addProperty("Words", "Count of words", "Wortanzahl", "", FxMultiplicity.MULT_0_1, FxDataType.Number)
+        addProperty("Encrypted", "Encrypted", "Verschl\u00fcsselt", "", FxMultiplicity.MULT_1_1, FxDataType.Boolean)
+        addProperty("AdditionalText", "Additional text", "Zus\u00e4tzlicher Text", "", FxMultiplicity.MULT_0_1, FxDataType.Text, true)
+        addProperty("Description", "Description", "Beschreibung", "", FxMultiplicity.MULT_0_1, FxDataType.Text, true)
+    }
+
+    void createScriptMappings() {
+        long scriptId = EJBLookup.scriptingEngine.createScriptFromLibrary(FxScriptType.BeforeContentCreate,
+            "DocumentMetaParser.gy", "DocumentMetaParser.gy", "Script filling document properties").id;
+        EJBLookup.scriptingEngine.createTypeScriptMapping(scriptId, type.id, true, true)
+    }
+}
+
+DocumentType dt = new DocumentType()
+dt.createType()
+dt.createProperties()
+dt.createScriptMappings()

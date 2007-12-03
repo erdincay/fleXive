@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:t="http://myfaces.apache.org/tomahawk">
+
+Basic [fleXive3] command element template.
+It will lock the screen when the data is submitted, unless the lockscreen attribute is set to false.
+
+Parameters:
+- label: the button label
+- labelKey: message key for the button label (overrides label when specified)
+- confirm: [optional] message key for a confirm dialog that will be displayed before the action is called
+- bean: the bean that the action belongs to
+- action: the action to call
+- immediate: [optional] the jsf immediate flag
+- page: [optional] the page to render when the button is clicked
+- location: [optional] The location where the icon is displayed [content|toolbar|both]. The default is content
+- onclick: [optional] the onClick event of the action link
+- lockscreen: [optional] if false, the screen will not be locked when clicking this button
+
+<ui:composition>
+
+    <c:if test="#{!empty labelKey}">
+        <c:set var="label" value="#{fxMessageBean[labelKey]}"/>
+    </c:if>
+    <c:if test="${empty label}">
+        <c:set var="label" value="CommandButton.err.missingLabel" />
+    </c:if>
+
+
+
+    <c:if test="${empty location}">
+        <c:set var="location" value="both" />
+    </c:if>
+
+    <c:if test="#{bean == null}">
+        <c:set var="page" value="#{action}" />
+        <c:set var="action" value="gotoPage" />
+        <c:set var="bean" value="#{fxSystemBean}" />
+    </c:if>
+
+    <c:if test="#{immediate == null}">
+        <c:set var="immediate" value="false"/>
+    </c:if>
+
+    <c:if test="#{lockscreen == null}">
+        <c:set var="lockscreen" value="true"/>
+    </c:if>
+
+    <div id="commandElement_#{id}" style="display:none">
+        <h:commandLink id="#{id}" action="#{bean[action]}" onclick="#{onclick}" immediate="#{immediate}">
+            <c:if test="#{page!=null}"><f:param name="page" value="#{page}"/></c:if>
+            <ui:insert/>
+        </h:commandLink>
+    </div>
+
+    <script type="text/javascript" language="javascript">
+        parent.registerCommandElement(this,'#{id}','#{fxMessageBean[confirm]}',#{lockscreen});
+        function triggerCommandElement_#{id}() {
+            eval(parent.getCommandElementScript(self,'#{id}'))
+       }
+    </script>
+
+    <c:if test="${location=='both' || location=='content'}">
+        <a href="javascript:void(0)" onclick="triggerCommandElement_#{id}();return false" ><ui:insert name="content">Content</ui:insert></a>
+    </c:if>
+
+
+    <c:if test="${location=='both' || location=='toolbar'}">
+        <script type="text/javascript" language="javascript">
+            parent.addToolbarItem('#{fxSystemBean.response.id}',this,'#{id}','#{label}','','#{icon}');
+        </script>
+    </c:if>
+
+</ui:composition>
+
+
+</html>

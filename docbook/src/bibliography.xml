@@ -1,0 +1,65 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE bibliography [
+        <!ENTITY % global_entities SYSTEM "global.ent">
+        %global_entities;
+        ]>
+<bibliography xmlns="http://docbook.org/ns/docbook" xml:id="bibliography" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Bibliography</title>
+
+    <biblioentry xml:id="bib_ejb3inaction">
+        <abbrev>EJB3 in Action</abbrev>
+        <biblioid class="isbn">1-933988-34-7</biblioid>
+        <authorgroup>
+            <author>
+                <personname>
+                    <firstname>Debu</firstname>
+                    <surname>Panda</surname>
+                </personname>
+            </author>
+            <author>
+                <personname>
+                    <firstname>Reza</firstname>
+                    <surname>Rahman</surname>
+                </personname>
+            </author>
+            <author>
+                <personname>
+                    <firstname>Derek</firstname>
+                    <surname>Lane</surname>
+                </personname>
+            </author>
+        </authorgroup>
+        <title>EJB3 in Action</title>
+        <copyright>
+            <year>
+                2007
+            </year>
+            <holder>Manning Publications</holder>
+        </copyright>
+    </biblioentry>
+
+    <biblioentry xml:id="bib_packagingejb3">
+        <abbrev>Packaging EJB3 applications</abbrev>
+        <title><link xlink:href="http://www.developer.com/java/ejb/article.php/10931_3670496_1">Packaging EJB3 applications</link></title>
+        <authorgroup>
+            <author>
+                <personname>
+                    <firstname>Debu</firstname>
+                    <surname>Panda</surname>
+                </personname>
+            </author>
+            <author>
+                <personname>
+                    <firstname>Reza</firstname>
+                    <surname>Rahman</surname>
+                </personname>
+            </author>
+            <author>
+                <personname>
+                    <firstname>Derek</firstname>
+                    <surname>Lane</surname>
+                </personname>
+            </author>
+        </authorgroup>
+    </biblioentry>
+</bibliography>

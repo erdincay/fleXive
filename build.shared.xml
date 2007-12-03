@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+    <!-- Container file that includes all shared build files -->
+
+    <import file="build.shared-properties.xml"/>
+    <import file="build.shared-tests.xml"/>
+    <import file="build.macros.xml"/>
+
+</project>

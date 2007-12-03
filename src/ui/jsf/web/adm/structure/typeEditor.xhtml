@@ -1,0 +1,414 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:s="http://myfaces.apache.org/sandbox"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+      <ui:define name="head">
+        <t:stylesheet path="/adm/css/content.css"/>
+        <t:stylesheet path="/adm/css/structureEditor.css"/>
+        <script type="text/javascript">
+           dojo.require("dojo.widget.FilteringTable");
+        </script>
+      </ui:define>
+
+    <ui:define name="body">
+        <h:form id="frm" enctype="multipart/form-data">
+            <c:if test="#{structureTreeControllerBean.doAction}">
+                <script type="text/javascript">
+                    var treeframe=parent.getNavFrameWnd();
+                    treeframe.doTreeAction('#{structureTreeControllerBean.action}',#{structureTreeControllerBean.id}, '#{structureTreeControllerBean.value}');
+                </script>
+            </c:if>
+            <c:if test="#{empty typeEditorBean.parseRequestParameters}"> </c:if>
+
+            <adm:tab label="#{fxMessageBean['TypeEditor.tab.typeEditor']}" active="true" id="tab1"/>
+            <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor']} [#{typeEditorBean.typeScriptCount}]" active="false" id="tab2"
+                    bean="#{typeEditorBean}" action="showTypeScriptEditor"/>
+
+             <fx:formRow labelKey="TypeEditor.label.name" id="name">
+                <h:inputText id="name" value="#{typeEditorBean.name}" disabled="#{not typeEditorBean.editMode}">
+                    <f:validator validatorId="flexive.FxNameForXPathValidator"/>
+                </h:inputText>
+            </fx:formRow>
+
+           <fx:formRow labelKey="TypeEditor.label.description" id="description">
+                    <fx:fxValueInput id="description" value="#{typeEditorBean.description}" readOnly="#{not typeEditorBean.editMode}"/>
+            </fx:formRow>
+
+            <fx:formRow labelKey="TypeEditor.label.languageMode" id="languageMode">
+                <t:selectOneListbox size="1" id="languageMode" value="#{typeEditorBean.languageMode}"
+                        disabled="#{not typeEditorBean.type.new or not typeEditorBean.editMode}">
+                    <f:selectItems value="#{fxSelectBean.languageModes}" />
+                </t:selectOneListbox>
+            </fx:formRow>
+
+            <!-- not to be set via gui anymore, a special context menu entry exists
+
+            <fx:formRow labelKey="TypeEditor.label.typeMode" id="typeMode">
+                <t:selectOneListbox size="1" id="typeMode" value="#{typeEditorBean.typeMode}"
+                        disabled="#{not typeEditorBean.type.new}" onchange="submit();">
+                    <f:selectItems value="#{fxSelectBean.restrictedTypeModes}" />
+                </t:selectOneListbox>
+            </fx:formRow>
+            -->
+
+            <ui:fragment rendered="#{typeEditorBean.type.relation}">
+                <fx:fieldSet legend="#{fxMessageBean['TypeEditor.label.editRelations']}">
+                    <table dojoType="FilteringTable" widgetId="relationsTable" enableMultipleSelect="true"
+                                       alternateRows="true" maxSortable="1" class="dojoTable">
+                        <thead>
+                            <tr>
+                                <th class="tblHeader" field="source" dataType="html" align="left">
+                                    #{fxMessageBean['TypeEditor.table.relation.source']}
+                                </th>
+                                <th class="tblHeader" field="dest" dataType="html" align="left">
+                                    #{fxMessageBean['TypeEditor.table.relation.destination']}
+                                </th>
+                                <th class="tblHeader" field="maxSourceUnlimited" dataType="html" align="left">
+                                    #{fxMessageBean['TypeEditor.table.relation.maxSourceUnlimited']}
+                                </th>
+                                <th class="tblHeader" field="maxDest" dataType="html" align="left">
+                                    #{fxMessageBean['TypeEditor.table.relation.maxDestUnlimited']}
+                                </th>
+                                <th class="tblHeader" dataType="html" align="left">
+                                    #{fxMessageBean['TypeEditor.table.mandator.actions']}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <ui:repeat value="#{typeEditorBean.wrappedRelations}" var="wr">
+                                <tr>
+                                    <td align="left">
+                                         <t:selectOneListbox size="1" id="sourceType" value="#{wr.sourceId}"
+                                                 disabled="#{not typeEditorBean.editMode}">
+                                            <f:selectItems value="#{fxSelectBean.types}" />
+                                        </t:selectOneListbox>
+                                    </td>
+                                    <td align="left">
+                                         <t:selectOneListbox size="1" id="destType" value="#{wr.destId}"
+                                                 disabled="#{not typeEditorBean.editMode}">
+                                            <f:selectItems value="#{fxSelectBean.types}" />
+                                        </t:selectOneListbox>
+                                    </td>
+                                    <td rowspan="2"><h:selectBooleanCheckbox id="maxSourceUnlimited" value="#{wr.maxSourceUnlimited}"
+                                            onchange="submit();" disabled="#{not typeEditorBean.editMode}"/></td>
+                                    <td rowspan="2">
+                                        <h:selectBooleanCheckbox id="maxDestUnlimited" value="#{wr.maxDestUnlimited}"
+                                            onchange="submit();" disabled="#{not typeEditorBean.editMode}"/>
+                                    </td>
+                                    <td align="left" rowspan="2">
+                                        <ui:fragment rendered="#{typeEditorBean.editMode}">
+                                            <adm:commandButton labelKey="TypeEditor.table.relation.button.remove" location="content"
+                                                            icon="delete"  action="removeRelation"  bean="#{typeEditorBean}"
+                                                            id="removeRelationButton">
+                                                <f:setPropertyActionListener target="#{typeEditorBean.wrappedRelationFiler}" value="#{wr}"/>
+                                            </adm:commandButton>
+                                        </ui:fragment>
+                                    </td>
+                                </tr>
+                                <tr>
+                                     <td align="left">
+                                        <h:inputText id="maxSource" value="#{wr.maxSource}" rendered="#{not wr.maxSourceUnlimited}" style="width:40px"
+                                                disabled="#{not typeEditorBean.editMode}"/>
+                                    </td>
+                                    <td align="left">
+                                        <h:inputText id="maxDest" value="#{wr.maxDest}" rendered="#{not wr.maxDestUnlimited}" style="width:40px"
+                                                disabled="#{not typeEditorBean.editMode}"/>
+                                    </td>
+                                </tr>
+                            </ui:repeat>
+                            <ui:fragment rendered="#{typeEditorBean.editMode}">
+                                <tr>
+                                    <td align="left">
+                                         <t:selectOneListbox size="1" id="addRelationSourceType" value="#{typeEditorBean.relSourceIdFiler}">
+                                            <f:selectItems value="#{fxSelectBean.types}" />
+                                        </t:selectOneListbox>
+                                    </td>
+                                    <td align="left">
+                                         <t:selectOneListbox size="1" id="addRelationDestType" value="#{typeEditorBean.relDestIdFiler}">
+                                            <f:selectItems value="#{fxSelectBean.types}" />
+                                        </t:selectOneListbox>
+                                    </td>
+                                    <td rowspan="2">
+                                        <h:selectBooleanCheckbox id="addRelationMaxSourceUnlimited" value="#{typeEditorBean.relSourceUnlimitedFiler}"
+                                                onchange="submit();"/>
+                                    </td>
+                                    <td rowspan="2">
+                                         <h:selectBooleanCheckbox id="addRelationMaxDestUnlimited" value="#{typeEditorBean.relDestUnlimitedFiler}"
+                                                onchange="submit();"/>
+                                    </td>
+                                    <td align="left" rowspan="2">
+                                        <adm:commandButton labelKey="TypeEditor.table.relation.button.add" location="content"
+                                                        icon="new"  action="addRelation"  bean="#{typeEditorBean}"
+                                                        id="addRelationButton">
+                                        </adm:commandButton>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="left">
+                                        <h:inputText id="addRelationMaxSource" value="#{typeEditorBean.relMaxSourceFiler}"
+                                                     rendered="#{not typeEditorBean.relSourceUnlimitedFiler}" style="width:40px"/>
+                                    </td>
+                                     <td align="left">
+                                        <h:inputText id="addRelationMaxDest" value="#{typeEditorBean.relMaxDestFiler}"
+                                                     rendered="#{not typeEditorBean.relDestUnlimitedFiler}" style="width:40px"/>
+                                    </td>
+                                </tr>
+                           </ui:fragment>
+                        </tbody>
+                    </table>
+                </fx:fieldSet>
+
+                <fx:formRow labelKey="TypeEditor.label.maxRelSource" id="maxRelSource">
+                    <h:outputText value="#{fxMessageBean['TypeEditor.relation.unlimited']}"/>
+                    <h:selectBooleanCheckbox id="maxRelSource" value="#{typeEditorBean.maxRelSourceUnlimited}"
+                            disabled="#{not typeEditorBean.editMode}"
+                         onchange="submit();"/>
+                    <ui:fragment rendered="#{not typeEditorBean.maxRelSourceUnlimited}">
+                        <h:inputText id="maxRelSourceInput" value="#{typeEditorBean.maxRelSource}" style="width:40px"
+                                disabled="#{not typeEditorBean.editMode}">
+                            <f:validateLongRange/>
+                        </h:inputText>
+                    </ui:fragment>
+                </fx:formRow>
+
+            <fx:formRow labelKey="TypeEditor.label.maxRelDestination" id="maxRelDestination">
+                <h:outputText value="#{fxMessageBean['TypeEditor.relation.unlimited']}"/>
+                    <h:selectBooleanCheckbox id="maxRelDestination" value="#{typeEditorBean.maxRelDestUnlimited}"
+                         onchange="submit();" disabled="#{not typeEditorBean.editMode}"/>
+                    <ui:fragment rendered="#{not typeEditorBean.maxRelDestUnlimited}">
+                    <h:inputText id="maxRelDestinationInput" value="#{typeEditorBean.maxRelDestination}"
+                                 disabled="#{not typeEditorBean.editMode}" style="width:40px">
+                        <f:validateLongRange/>
+                    </h:inputText>
+                </ui:fragment>
+            </fx:formRow>
+
+             <fx:formRow labelKey="TypeEditor.label.removeInstancesWithRelationTypes" id="removeInstancesWithRelationTypes">
+                    <h:selectBooleanCheckbox id="removeInstancesWithRelationTypes" value="#{typeEditorBean.removeInstancesWithRelationTypes}"
+                            disabled="#{not typeEditorBean.editMode}"/>
+            </fx:formRow>
+            </ui:fragment>
+
+            <fx:formRow labelKey="TypeEditor.label.typeState" id="typeState">
+                <t:selectOneListbox size="1" id="typeState" value="#{typeEditorBean.typeState}"
+                        disabled="#{not typeEditorBean.editMode}">
+                    <f:selectItems value="#{fxSelectBean.typeStates}" />
+                </t:selectOneListbox>
+            </fx:formRow>
+
+            <fx:formRow labelKey="TypeEditor.label.workflow" id="workflow">
+                <t:selectOneListbox size="1" id="workflow" value="#{typeEditorBean.workflow}"
+                        disabled="#{not typeEditorBean.editMode}">
+                    <f:selectItems value="#{fxSelectBean.workflows}" />
+                </t:selectOneListbox>
+            </fx:formRow>
+
+            <fx:formRow labelKey="TypeEditor.label.category" id="category">
+                <t:selectOneListbox size="1" id="category" value="#{typeEditorBean.category}"
+                                    disabled="#{not typeEditorBean.editMode}">
+                    <f:selectItems value="#{fxSelectBean.restrictedTypeCategories}" />
+                </t:selectOneListbox>
+            </fx:formRow>
+
+            <fx:formRow labelKey="TypeEditor.label.ACL" id="ACL">
+                <t:selectOneListbox size="1" id="ACL" value="#{typeEditorBean.ACL}"
+                        disabled="#{not typeEditorBean.editMode}">
+                    <f:selectItems value="#{fxSelectBean.structureACLs}" />
+                </t:selectOneListbox>
+            </fx:formRow>
+
+            <!-- not needed atm, probably will be taken out completely
+
+            <fx:fieldSet legend="#{fxMessageBean['TypeEditor.label.editAllowedMandators']}">
+                <fx:formRow labelKey="TypeEditor.label.mandator" id="mandator">
+                    <t:selectOneListbox size="1" id="mandator" value="#{typeEditorBean.mandator}"
+                        converter="SelectableConverter" onchange="submit();">
+                        <f:selectItems value="#{fxSelectBean.mandators}" />
+                    </t:selectOneListbox>
+                </fx:formRow>
+
+                <fx:fieldSet legend="#{fxMessageBean['TypeEditor.label.allowedMandators']}">
+                    <table dojoType="FilteringTable" widgetId="allowedMandatorsTable" enableMultipleSelect="true"
+                                       alternateRows="true" maxSortable="1" class="dojoTable">
+                        <thead>
+                            <tr>
+                                <th class="tblHeader" field="mandator" dataType="String" align="left">
+                                    #{fxMessageBean['TypeEditor.table.mandator.mandator']}
+                                </th>
+                                <th class="tblHeader" dataType="html" align="left">
+                                    #{fxMessageBean['TypeEditor.table.mandator.actions']}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <ui:repeat value="#{typeEditorBean.selectedMandators}" var="man">
+                                <tr>
+                                    <td align="left"><h:outputText value="#{man.label}" /></td>
+                                    <td align="left">
+                                        <adm:commandButton labelKey="TypeEditor.table.mandator.button.remove" location="content"
+                                                        icon="cancel"  action="removeAllowedMandator"  bean="#{typeEditorBean}"
+                                                        id="removeMandatorButton_#{man.label}">
+                                            <f:setPropertyActionListener target="#{typeEditorBean.mandatorFiler}" value="#{man}"/>
+                                        </adm:commandButton>
+                                    </td>
+                                </tr>
+                            </ui:repeat>
+                        </tbody>
+                    </table>
+                </fx:fieldSet>
+
+                <fx:fieldSet legend="#{fxMessageBean['TypeEditor.label.forbiddenMandators']}">
+                    <table dojoType="FilteringTable" widgetId="forbiddenMandatorsTable" enableMultipleSelect="true"
+                                       alternateRows="true" maxSortable="1" class="dojoTable">
+                        <thead>
+                            <tr>
+                                <th class="tblHeader" field="mandator" dataType="String" align="left">
+                                    #{fxMessageBean['TypeEditor.table.mandator.mandator']}
+                                </th>
+                                <th class="tblHeader" dataType="html" align="left">
+                                    #{fxMessageBean['TypeEditor.table.mandator.actions']}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <ui:repeat value="#{typeEditorBean.deselectedMandators}" var="man">
+                                <tr>
+                                    <td align="left"><h:outputText value="#{man.label}" /></td>
+                                    <td align="left">
+                                        <adm:commandButton labelKey="TypeEditor.table.mandator.button.add" location="content"
+                                                        icon="ok"  action="addAllowedMandator"  bean="#{typeEditorBean}"
+                                                        id="addMandatorButton_#{man.label}">
+                                            <f:setPropertyActionListener target="#{typeEditorBean.mandatorFiler}" value="#{man}"/>
+                                        </adm:commandButton>
+                                    </td>
+                                </tr>
+                            </ui:repeat>
+                        </tbody>
+                    </table>
+                </fx:fieldSet>
+            </fx:fieldSet>
+             -->
+
+            <fx:fieldSet legend="#{fxMessageBean['TypeEditor.label.historyTracking']}">
+                <fx:formRow labelKey="TypeEditor.label.trackHistory" id="trackHistory">
+                        <h:selectBooleanCheckbox id="trackHistory" value="#{typeEditorBean.trackHistory}"
+                                disabled="#{not typeEditorBean.editMode}" onchange="submit();"/>
+                </fx:formRow>
+
+                <ui:fragment rendered="#{typeEditorBean.trackHistory}">
+                    <div style="padding-left:17px">
+                         <fx:formRow labelKey="TypeEditor.label.historyAge" id="historyAge">
+                                <h:inputText id="historyAge" value="#{typeEditorBean.historyAge}" style="width:40px"
+                                        disabled="#{not typeEditorBean.editMode}">
+                                    <f:validateLongRange/>
+                                </h:inputText>
+                                 <t:selectOneListbox size="1" id="timeRangeSelectBox" value="#{typeEditorBean.timeRange}"
+                                         disabled="#{not typeEditorBean.editMode}">
+                                <f:selectItems value="#{typeEditorBean.timeRanges}" />
+                            </t:selectOneListbox>
+                        </fx:formRow>
+                   </div>
+                </ui:fragment>
+            </fx:fieldSet>
+
+            <fx:fieldSet legend="#{fxMessageBean['TypeEditor.label.versioning']}">
+                 <fx:formRow labelKey="TypeEditor.label.unlimitedVersions" id="unlimitedVersions">
+                    <h:selectBooleanCheckbox id="unlimitedVersions" value="#{typeEditorBean.unlimitedVersions}"
+                         disabled="#{not typeEditorBean.editMode}" onchange="submit();"/>
+                </fx:formRow>
+
+               <ui:fragment rendered="#{not typeEditorBean.unlimitedVersions}"> 
+                    <div style="padding-left:17px">
+                        <fx:formRow labelKey="TypeEditor.label.maxVersions" id="maxVersions">
+                            <h:inputText id="maxVersions" value="#{typeEditorBean.maxVersions}" style="width:40px"
+                                    disabled="#{not typeEditorBean.editMode}">
+                                <f:validateLongRange/>
+                            </h:inputText>
+                        </fx:formRow>
+                    </div>
+                </ui:fragment>
+            </fx:fieldSet>
+
+            <fx:fieldSet legend="#{fxMessageBean['TypeEditor.label.permissions']}">
+
+                <fx:formRow labelKey="TypeEditor.label.useInstancePermissions" id="useInstancePermissions">
+                        <h:selectBooleanCheckbox id="useInstancePermissions" value="#{typeEditorBean.useInstancePermissions}"
+                                disabled="#{not typeEditorBean.editMode}"/>
+                </fx:formRow>
+
+                <fx:formRow labelKey="TypeEditor.label.usePropertyPermissions" id="usePropertyPermissions">
+                    <h:selectBooleanCheckbox id="usePropertyPermissions" value="#{typeEditorBean.usePropertyPermissions}"
+                                 disabled="#{not typeEditorBean.editMode}"/>
+                </fx:formRow>
+
+                 <fx:formRow labelKey="TypeEditor.label.useStepPermissions" id="useStepPermissions">
+                        <h:selectBooleanCheckbox id="useStepPermissions" value="#{typeEditorBean.useStepPermissions}"
+                                disabled="#{not typeEditorBean.editMode}"/>
+                </fx:formRow>
+
+                <fx:formRow labelKey="TypeEditor.label.useTypePermissions" id="useTypePermissions">
+                        <h:selectBooleanCheckbox id="useTypePermissions" value="#{typeEditorBean.useTypePermissions}"
+                                disabled="#{not typeEditorBean.editMode}"/>
+                </fx:formRow>
+
+            </fx:fieldSet>
+
+            <fx:formRow labelKey="TypeEditor.label.storageMode" id="storageMode">
+                <fx:resultValue id="storageMode" value="#{typeEditorBean.type.storageMode.label}"/>
+            </fx:formRow>
+
+
+            <fx:formRow labelKey="TypeEditor.label.checkValidity" id="checkValidity">
+                    <h:selectBooleanCheckbox id="checkValidity" value="#{typeEditorBean.checkValidity}"
+                            disabled="#{not typeEditorBean.editMode}"/>
+            </fx:formRow>
+            <ui:fragment rendered="#{not typeEditorBean.type.new and not typeEditorBean.editMode and typeEditorBean.mayEdit}">
+                <adm:commandButton labelKey="TypeEditor.button.editMode" location="both"
+                        icon="edit"  action="toggleEditMode"  bean="#{typeEditorBean}" id="editModeButton"/>
+            </ui:fragment>
+
+            <ui:fragment rendered="#{not typeEditorBean.type.new and typeEditorBean.editMode}">
+                <adm:commandButton labelKey="TypeEditor.button.cancel" location="both" lockscreen="false"
+                        icon="cancel" id="cancelButton"
+                        onclick="parent.getNavFrameWnd().openNode(#{typeEditorBean.type.id}, true);return false;"/>
+            </ui:fragment>
+
+            <ui:fragment rendered="#{not typeEditorBean.type.new and typeEditorBean.mayEdit and typeEditorBean.editMode}">
+                <adm:commandButton labelKey="TypeEditor.button.save" location="both" 
+                                icon="save"  action="saveChanges"  bean="#{typeEditorBean}" id="saveChangesButton">
+                </adm:commandButton>
+            </ui:fragment>
+             <ui:fragment rendered="#{typeEditorBean.type.new}">
+                <adm:commandButton labelKey="TypeEditor.button.createNew" location="both"
+                                icon="new"  action="saveChanges"  bean="#{typeEditorBean}" id="createTypeButton">
+                </adm:commandButton>
+            </ui:fragment>
+            <ui:fragment rendered="#{typeEditorBean.mayDelete and not typeEditorBean.type.new and typeEditorBean.editMode}">
+                <adm:commandButton labelKey="TypeEditor.button.delete" location="both" lockscreen="false"
+                                icon="delete" onclick="parent.getNavFrameWnd()._deleteType(#{typeEditorBean.type.id});return false;"
+                                id="deleteTypeButton">
+                </adm:commandButton>
+            </ui:fragment>
+            <adm:toolbarPluginButtons/>
+        </h:form>
+
+
+        <script type="text/javascript">
+
+
+        </script>
+
+    </ui:define>
+</ui:composition>
+</body>
+</html>

@@ -1,0 +1,174 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color:#F9FCF1;
+    overflow:hidden;
+    font-family: Arial, Helvetica, sans-serif;
+    color: black;
+    font-size: 11px;
+}
+
+
+body a {
+    text-decoration:none;
+    color:black;
+}
+
+#navigation {
+    background-color:#F9FCF1;
+    border-right:1px solid #BDBDBD;
+    padding:10px 0 0 10px;
+    height:100%;
+}
+
+
+/* navTree */
+
+/* Content/structure tree emphasized node */
+.TreeNodeEmphasized {
+    background-color: #e1ebc3 !important;
+    color: black !important;
+}
+
+/* Admin tree emphasized node */
+.adminTree .TreeNodeEmphasized {
+    background-color: #F9FCF1 !important;
+    color: black !important;
+    border: none !important;
+}
+
+.adminTree .TreeNodeEmphasized .treeNodeV3Node, .adminTree .TreeNodeEmphasized .treeNodeV3Child {
+    background-color: #e1ebc3;
+    outline: 1px invert dotted;
+}
+
+/* Admin tree focused node */
+.adminTree .TreeLabelFocused {
+      outline: none;
+}
+
+
+.TreeNode .dirty {
+    color: blue;
+}
+
+.TreeNode .readonly {
+    font-style: italic;
+}
+
+.treeitem,.treeitem-selected,.treeitem-move {
+	 background-color:transparent;
+	 border-width:0;
+	 border-style:dotted;
+	 border-color:red;
+	 white-space:nowrap;
+	 vertical-align:middle;
+}
+
+.treeitem {
+	margin: 0;
+	padding:0;
+	font-size: 1pt;
+	line-height: 0.1pt;
+}
+
+.briefcaseItem {
+    position: relative;
+    border:0;
+    width:40px;
+    height:47px;
+    overflow:hidden;
+    float:left;
+    margin-right:7px;
+    font-size:9px;
+    font-family: Arial, Helvetica, sans-serif;
+    white-space:nowrap;
+    text-align:center;
+}
+
+.briefcaseSize {
+    position: absolute;
+    right: 21px;
+    top: 15px;
+    font-size:9px;
+    font-family: Arial, Helvetica, sans-serif;
+    /*background-color:#F9FCF1;*/
+}
+
+.briefcaseIcon {
+    height:32px;
+    width:32px;
+    background-image:url('../images/briefcaseIcons/green.png');
+    background-repeat:no-repeat;
+}
+
+.menuItem {
+    width:100%;
+    background-color:white;
+    height:21px;
+    background-image:url('../images/layout/BGMenuInactive.gif');
+    cursor:pointer;
+    overflow:hidden;
+}
+
+.menuItemActive {
+    width:100%;
+    background-color:white;
+    height:21px;
+    background-image:url('../images/layout/BGMenuActive.gif');
+    overflow:hidden;
+}
+
+.menuItemSpan {
+    position:absolute;
+    left:10px;
+    padding:0;
+    margin-bottom:0;
+    margin-left:0;
+    margin-right:0;
+    margin-top:4px;
+    color:black;
+    font-style:normal;
+    font-weight:bold;
+    font-size:11px;
+    display:inline;
+}
+
+#navTreeContent {
+    padding-left:10px;
+    padding-top:10px;
+    border-right:1px solid #bdbdbd;
+    height:1500px;
+    width:1000px;
+    overflow-y:auto;
+    overflow-x:auto;
+    white-space:nowrap;
+}
+
+.treeNodeV3Icon {
+    display:inline;
+    margin-right:2px;
+    margin-left:0;
+	cursor: pointer;
+}
+
+
+.treeNodeV3Node {
+    display:inline;
+    position:relative;
+    top:-3px;
+	cursor: pointer;
+}
+
+.treeNodeV3Child {
+    display:inline;
+    position:relative;
+    top:2px;
+    margin-left:3px;
+	cursor: pointer;
+}
+
+/* Tree node */
+div.TreeNode {
+}
+

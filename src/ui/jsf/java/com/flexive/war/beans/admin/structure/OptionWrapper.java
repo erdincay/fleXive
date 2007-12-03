@@ -1,0 +1,501 @@
+/***************************************************************
+ *  This file is part of the [fleXive](R) project.
+ *
+ *  Copyright (c) 1999-2007
+ *  UCS - unique computing solutions gmbh (http://www.ucs.at)
+ *  All rights reserved
+ *
+ *  The [fleXive](R) project is free software; you can redistribute
+ *  it and/or modify it under the terms of the GNU General Public
+ *  License as published by the Free Software Foundation;
+ *  either version 2 of the License, or (at your option) any
+ *  later version.
+ *
+ *  The GNU General Public License can be found at
+ *  http://www.gnu.org/copyleft/gpl.html.
+ *  A copy is found in the textfile GPL.txt and important notices to the
+ *  license from the author are found in LICENSE.txt distributed with
+ *  these libraries.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  For further information about UCS - unique computing solutions gmbh,
+ *  please see the company website: http://www.ucs.at
+ *
+ *  For further information about [fleXive](R), please see the
+ *  project website: http://www.flexive.org
+ *
+ *
+ *  This copyright notice MUST APPEAR in all copies of the file!
+ ***************************************************************/
+package com.flexive.war.beans.admin.structure;
+
+import com.flexive.faces.messages.FxFacesMsgErr;
+import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.structure.FxStructureOption;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Conveniently wrapps FxStructureOptions to simplify GUI Manipulaiton.
+ * The OptionWrapper wraps the options of a structure element (group or property) and
+ * its assignment. Options of the structure element override those of the assignment.
+ * Provides Maps to verify if an option is valid or may be overwritten to enhance GUI
+ * presentaiton.
+ *
+ * @author Gerhard Glos (gerhard.glos@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ */
+
+public class OptionWrapper {
+    private static String[] standardOptionKeys = {FxStructureOption.OPTION_HTML_EDITOR,
+            FxStructureOption.OPTION_MULTILANG,
+            FxStructureOption.OPTION_MULTILINE,
+            FxStructureOption.OPTION_SEARCHABLE,
+            FxStructureOption.OPTION_SHOW_OVERVIEW};
+
+    private List<WrappedOption> structureOptions = null;
+    private List<WrappedOption> assignmentOptions = null;
+    private Map<String, Boolean> assignmentOptionValidMap = null;
+    private Map<String, Boolean> assignmentOptionOverridableMap = null;
+    private Map<String, Boolean> structureOptionValidMap = null;
+
+    /**
+     * Creates the OptionWrapper
+     *
+     * @param structureOptions      optionlist of the structure element (e.g. group or property)
+     * @param assignmentOptions     optionlist of the according assignment (e.g. groupassignment or propertyassignment)
+     * @param addStandardOptions    if the standard options (FxStructureOption.OPTION_...) should be added to the
+     *                              structureOptions, if not alaready present
+     */
+    public OptionWrapper(List<FxStructureOption> structureOptions, List<FxStructureOption> assignmentOptions, boolean addStandardOptions) {
+        this.structureOptions = new ArrayList<WrappedOption>();
+        this.assignmentOptions = new ArrayList<WrappedOption>();
+
+        if (structureOptions != null)
+            for (FxStructureOption o : structureOptions) {
+                this.structureOptions.add(new WrappedOption(o));
+            }
+        if (assignmentOptions != null)
+            for (FxStructureOption o : assignmentOptions) {
+                this.assignmentOptions.add(new WrappedOption(o));
+            }
+
+        if (addStandardOptions) {
+            List<WrappedOption> standardOptions = new ArrayList<WrappedOption>();
+            for (int i = 0; i < standardOptionKeys.length; i++) {
+                standardOptions.add(new WrappedOption(standardOptionKeys[i], FxStructureOption.VALUE_FALSE, true, true));
+            }
+            for (WrappedOption o : standardOptions) {
+                if (!this.structureOptions.contains(o))
+                    this.structureOptions.add(o);
+            }
+        }
+    }
+
+    /**
+    * Creates the OptionWrapper
+    *
+    * @param structureOptions          optionlist of the structure element (e.g. group or property)
+    * @param assignmentOptions         optionlist of the according assignment (e.g. groupassignment or propertyassignment)
+    * @param standardOptionKeyList    a List of option keys from which new options will be created and added,
+    *                                  if not alaready present
+    */
+    public OptionWrapper(List<FxStructureOption> structureOptions, List<FxStructureOption> assignmentOptions, List<String> standardOptionKeyList) {
+        new OptionWrapper(structureOptions, assignmentOptions, false);
+        List<WrappedOption> standardOptions = new ArrayList<WrappedOption>();
+        for (String key : standardOptionKeyList) {
+            standardOptions.add(new WrappedOption(key, FxStructureOption.VALUE_FALSE, false, true));
+        }
+        for (WrappedOption o : standardOptions) {
+            if (!this.structureOptions.contains(o))
+                this.structureOptions.add(o);
+        }
+    }
+
+    /**
+     * Sets an option with Key key to Value value.
+     * If the option is not present a new option will be created and set accordingly
+     *
+     * @param structureOption       if the option should be set/created in the structureOptions list
+     * @param assignmentOption      if the option should be set/created in the assignmentOptions list
+     * @param key                   the Key
+     * @param value                 the Value as String
+     */
+    public void setOption(boolean structureOption, boolean assignmentOption, String key, String value) {
+        WrappedOption o = new WrappedOption(key, value, false, true);
+        if (structureOption) {
+            if (!structureOptions.contains(o))
+                structureOptions.add(new WrappedOption(key, value, false, true));
+            else {
+                List<WrappedOption> options = getAll(structureOptions, key);
+                for (WrappedOption wo : options)
+                    wo.setValue(value);
+            }
+        }
+        if (assignmentOption) {
+            if (!assignmentOptions.contains(o))
+                assignmentOptions.add(new WrappedOption(key, value, false, true));
+            else {
+                List<WrappedOption> options = getAll(assignmentOptions, key);
+                for (WrappedOption wo : options)
+                    wo.setValue(value);
+            }
+        }
+    }
+
+    /**
+     * Sets an option with Key key to Value value.
+     * If the option is not present a new option will be created and set accordingly
+     *
+     * @param structureOption       if the option should be set/created in the structureOptions list
+     * @param assignmentOption      if the option should be set/created in the assignmentOptions list
+     * @param key                   the Key
+     * @param value                 the Value as boolean
+     */
+    public void setOption(boolean structureOption, boolean assignmentOption, String key, boolean value) {
+        WrappedOption o = new WrappedOption(key, value, false, true);
+        if (structureOption) {
+            if (!structureOptions.contains(o))
+                structureOptions.add(new WrappedOption(key, value, false, true));
+            else {
+                List<WrappedOption> options = getAll(structureOptions, key);
+                for (WrappedOption wo : options)
+                    wo.setValue(value);
+            }
+        }
+        if (assignmentOption) {
+            if (!assignmentOptions.contains(o))
+                assignmentOptions.add(new WrappedOption(key, value, false, true));
+            else {
+                List<WrappedOption> options = getAll(assignmentOptions, key);
+                for (WrappedOption wo : options)
+                    wo.setValue(value);
+            }
+        }
+    }
+
+    /**
+     * Gets an option with Key key.
+     * If the option is not present a new option will be created and set with default values.
+     *
+     * @param structureOption       if the option should be gotten from/created in the structureOptions list
+     * @param assignmentOption      if the option should be gotten/created in the assignmentOptions list
+     * @param key                   the Key
+     */
+    public WrappedOption getOption(boolean structureOption, boolean assignmentOption, String key) {
+        WrappedOption o = new WrappedOption(key, FxStructureOption.VALUE_FALSE, false, true);
+        if (structureOption) {
+            if (!structureOptions.contains(o)) {
+                WrappedOption newOption = new WrappedOption(key, FxStructureOption.VALUE_FALSE, false, true);
+                structureOptions.add(newOption);
+                return newOption;
+            } else
+                return getFirst(structureOptions, key);
+        }
+        if (assignmentOption) {
+            if (!assignmentOptions.contains(o)) {
+                WrappedOption newOption = new WrappedOption(key, FxStructureOption.VALUE_FALSE, false, true);
+                assignmentOptions.add(newOption);
+                return newOption;
+            } else
+                return getFirst(assignmentOptions, key);
+        }
+        return null;
+    }
+
+    /**
+     * Gets an option with Key key.
+     * If the option is not present, null will be returned.
+     *
+     * @param structureOption       if the option should be gotten from the structureOptions list
+     * @param assignmentOption      if the option should be gotten from the assignmentOptions list
+     * @param key                   the Key
+     */
+    public WrappedOption getOptionNoCreate(boolean structureOption, boolean assignmentOption, String key) {
+        WrappedOption o = new WrappedOption(key, FxStructureOption.VALUE_FALSE, false, true);
+        if (structureOption) {
+            if (!structureOptions.contains(o)) {
+                return null;
+            } else
+                return getFirst(structureOptions, key);
+        }
+        if (assignmentOption) {
+            if (!assignmentOptions.contains(o)) {
+                return null;
+            } else
+                return getFirst(assignmentOptions, key);
+        }
+        return null;
+    }
+
+    //returns true if an option was added, false otherwise
+    public boolean addOption(List<WrappedOption> options, String key, String value, boolean overridable) {
+        if (key != null && !"".equals(key.trim())) {
+            if (value != null && !"".equals(value.trim())) {
+                options.add(new WrappedOption(key, value, overridable, true));
+                return true;
+            } else
+                new FxFacesMsgErr("OptionWrapper.noValue").addToContext();
+        } else
+            new FxFacesMsgErr("OptionWrapper.noKey").addToContext();
+        return false;
+    }
+
+    public void deleteOption(List<WrappedOption> options, WrappedOption o) {
+        int deleteIndex = -1;
+        for (int i = 0; i < options.size(); i++) {
+            if (options.get(i).equalsCompletely(o)) {
+                deleteIndex = i;
+                break;
+            }
+        }
+        if (deleteIndex != -1)
+            options.remove(deleteIndex);
+        else
+            options.remove(o);
+    }
+
+    public List<WrappedOption> getStructureOptions() {
+        return structureOptions;
+    }
+
+    public List<WrappedOption> getAssignmentOptions() {
+        return assignmentOptions;
+    }
+
+    public List<FxStructureOption> asFxStructureOptionList(List<WrappedOption> options) {
+        List<FxStructureOption> converted = new ArrayList<FxStructureOption>(options.size());
+        for (WrappedOption o : options) {
+            converted.add(o.asFxStructureOption());
+        }
+        return converted;
+    }
+
+    private boolean mayOverrideOption(String key) {
+        for (WrappedOption o : structureOptions) {
+            if (o.key.equals(key) && !o.isOverridable())
+                return false;
+        }
+        return true;
+    }
+
+    private boolean isRedundant(String key) {
+        WrappedOption o = getFirst(structureOptions, key);
+        if (o != null) {
+            return o.equalsKeyAndValue(getFirst(assignmentOptions, key));
+        } else return false;
+    }
+
+    private WrappedOption getFirst(List<WrappedOption> options, String key) {
+        WrappedOption result = null;
+        for (WrappedOption o : options) {
+            if (o.key.equals(key))
+                return o;
+        }
+        return result;
+    }
+
+    //returns all options with Key key
+    private List<WrappedOption> getAll(List<WrappedOption> options, String key) {
+        List<WrappedOption> result = new ArrayList<WrappedOption>();
+        for (WrappedOption o : options) {
+            if (o.key.equals(key))
+                result.add(o);
+        }
+        return result;
+    }
+
+    public boolean hasOption(List<WrappedOption> options, String key) {
+        return countKeyOccurence(options, key) > 0;
+    }
+
+    private int countKeyOccurence(List<WrappedOption> options, String key) {
+        int c = 0;
+        for (WrappedOption o : options) {
+            if (o.getKey().toUpperCase().equals(key.toUpperCase()))
+                c++;
+        }
+        return c;
+    }
+
+    /**
+     * A Map to indicate if an assignment option for a given key is valid.
+     *
+     * @return a Map for JSF pages which indicates if an assignment option for a given key is valid.
+     */
+    public Map<String, Boolean> getIsAssignmentOptionValidMap() {
+        if (assignmentOptionValidMap == null) {
+            assignmentOptionValidMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<String, Boolean>() {
+                public Boolean get(Object key) {
+                    if (key == null || "".equals(key) || countKeyOccurence(assignmentOptions, (String) key) > 1
+                            || isRedundant((String) key))
+                        return false;
+                    else {
+                        return true;
+                    }
+                }
+            });
+        }
+        return assignmentOptionValidMap;
+    }
+
+    /**
+     * A Map to indicate if an assignment option for a given key may be overrwritten.
+     *
+     * @return a Map for JSF pages which indicates if an assignment option for a given key may be overwritten.
+     */
+    public Map<String, Boolean> getIsAssignmentOptionOverridableMap() {
+        if (assignmentOptionOverridableMap == null) {
+            assignmentOptionOverridableMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<String, Boolean>() {
+                public Boolean get(Object key) {
+                    return mayOverrideOption((String) key);
+                }
+            });
+        }
+        return assignmentOptionOverridableMap;
+    }
+
+    /**
+     * A Map to indicate if a structure option for a given key is valid.
+     *
+     * @return a Map for JSF pages which indicates if a structure option for a given key is valid.
+     */
+    public Map<String, Boolean> getIsStructureOptionValidMap() {
+        if (structureOptionValidMap == null) {
+            structureOptionValidMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<String, Boolean>() {
+                public Boolean get(Object key) {
+                    if (key == null || "".equals(key) || countKeyOccurence(structureOptions, (String) key) > 1)
+                        return false;
+                    else {
+                        return true;
+                    }
+                }
+            });
+        }
+        return structureOptionValidMap;
+    }
+
+    //wraps the GUI relevant information of FxStructureOption Objects and provides convenient setters and getters
+    public class WrappedOption {
+
+        private String key;
+        private String value;
+        private boolean overridable;
+        private boolean set;
+
+        public WrappedOption(String key, String value, boolean overridable, boolean set) {
+            setKey(key);
+            this.value = value;
+            this.overridable = overridable;
+            this.set = set;
+        }
+
+        public WrappedOption(String key, boolean value, boolean overridable, boolean set) {
+            setKey(key);
+            this.value = asStringValue(value);
+            this.overridable = overridable;
+            this.set = set;
+        }
+
+        public WrappedOption(FxStructureOption option) {
+            this.key = option.getKey().toUpperCase();
+            this.value = option.getValue();
+            this.overridable = option.isOverrideable();
+            this.set = option.isSet();
+        }
+
+        private String asStringValue(boolean value) {
+            if (value)
+                return FxStructureOption.VALUE_TRUE;
+            else return FxStructureOption.VALUE_FALSE;
+        }
+
+        public FxStructureOption asFxStructureOption() {
+            return new FxStructureOption(this.key, this.overridable, this.set, this.value);
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
+
+        public void setValue(boolean value) {
+            this.value = asStringValue(value);
+        }
+
+        public void setKey(String k) {
+            if (k == null)
+                k = "";
+            this.key = k.toUpperCase();
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        //hack used for commandButtons to concatenate id's and gain "unique" id's for buttons in
+        //<repeat> tags
+        public String getId() {
+            return String.valueOf(this.hashCode());
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public boolean getBooleanValue() {
+            if (FxStructureOption.VALUE_TRUE.equals(value))
+                return true;
+            else return false;
+        }
+
+        public boolean isOverridable() {
+            return overridable;
+        }
+
+        public void setOverridable(boolean b) {
+            this.overridable = b;
+        }
+
+        public boolean isSet() {
+            return set;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == null || !(o instanceof WrappedOption))
+                return false;
+            if (this.key.equals(((WrappedOption) o).getKey().toUpperCase()))
+                return true;
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return key.hashCode();
+        }
+
+        public boolean equalsCompletely(WrappedOption o) {
+            if (o == null)
+                return false;
+            if (this.key.equals(o.key) && this.set == o.set && this.overridable == o.overridable)
+                if (this.value != null && this.value.equals(o.value) || this.value == null && o.value == null)
+                    return true;
+            return false;
+        }
+
+        public boolean equalsKeyAndValue(WrappedOption o) {
+            if (o == null)
+                return false;
+            if (this.key.equals(o.key))
+                if (this.value != null && this.value.equals(o.value) || this.value == null && o.value == null)
+                    return true;
+            return false;
+        }
+    }
+}
+

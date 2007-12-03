@@ -1,0 +1,1686 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE chapter [
+        <!ENTITY % global_entities SYSTEM "global.ent">
+        %global_entities;
+        <!ENTITY pkParameter "May be supplied as an FxPK object, a long ID, a String with an FxPK in string notation (e.g. &quot;5&quot;, &quot;5.1&quot;, &quot;5.MAX&quot;), a FxReference, or a FxSelectListItem whose ID will be interpreted as a content ID.">
+        ]>
+<chapter xml:id="jsfsupport" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude">
+
+    <title>JSF Support</title>
+
+    <xi:include href="includes/author_dlichtenberger.xml"/>
+
+    <para>
+        &Flexive; offers a set of JSF components for working with &flexive; contents and data structures.
+        This includes components to render and edit FxContent instances,
+        submit search queries and show their results, and create custom content queries.
+        To make your own reusable components, &flexive; provides a simple-to-use plugin API
+        for wiring your own reusable JSF and EJB components to other &flexive; applications.
+    </para>
+
+    <para>
+        &Flexive; JSF support consists of two major modules:
+        <itemizedlist>
+            <listitem>
+                <para>
+                    The
+                    <link linkend="jsf_component_library">JSF component library</link>
+                    contains a set
+                    of JSF components for working with &flexive; structures in any JSF application
+                </para>
+            </listitem>
+            <listitem>
+                <para>
+                    The
+                    <link linkend="jsf_plugin_api">JSF plugin API</link>
+                    allows applications or
+                    plugins to extend the &backendGui; and make themselves extensible.
+                </para>
+            </listitem>
+        </itemizedlist>
+        A comprehensive guide on extending &flexive; functionality is
+        <xref linkend="reusable_components"/>.
+    </para>
+
+    <section xml:id="jsf_component_library">
+        <title>The &flexive; component library</title>
+
+        <section xml:id="jcl_using">
+            <title>
+                Using the component library
+            </title>
+            <para>
+                To use the &flexive; component library, you have to
+                <orderedlist>
+                    <listitem>
+                        <para>
+                            Add flexive-plugin-jsf-core.jar to your application's classpath
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Add the namespace declaration
+                            <code>xmlns:fx="http://www.flexive.com/jsf/core"</code>
+                            to the top of your XHTML documents.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            On every page using &flexive; components, you have to add
+                            <code>&lt;fx:includes/></code>
+                            somewhere in the HTML
+                            head section. This tag includes javascript files and CSS stylesheets
+                            needed by the components via &weblets;.
+                        </para>
+                    </listitem>
+                </orderedlist>
+            </para>
+        </section>
+
+        <section xml:id="jcl_contents">
+            <title>
+                Content manipulation
+            </title>
+            <para>
+                The &flexive; components for displaying and editing contents are most crucial
+                for any application that works with &flexive; contents.
+            </para>
+
+            <section xml:id="jcl_fx_content">
+                <title>
+                    <code language="xhtml">&lt;fx:content></code>
+                </title>
+                <para>
+                    The
+                    <code language="xhtml">&lt;fx:content></code>
+                    component offers direct access to FxContent values through the property &xpath;.
+                    It also supports groups and multiplicities, i.e. iteration over properties and groups that
+                    may exist more than once in an instance.
+                    When no content ID is specified, a FxType name or ID is passed to create a fresh instance
+                    of the given property type. Instances can then be saved through the
+                    <link linkend="jcl_fx_content_view_bean">&contentViewBean;</link>,
+                    or any other JSF managed bean that has a FxContent property.
+                </para>
+                <section xml:id="jcl_fx_content_synopsis">
+                    <title>Synopsis</title>
+                    <programlisting language="xhtml"><![CDATA[<fx:content var="varname" (pk="pkexpr" | type="typeId" | typeName="typeName") [preserveContent="true|false"]>
+...
+</fx:content>
+]]></programlisting>
+                </section>
+                <section xml:id="jcl_fx_content_parameters">
+                    <title>Parameters</title>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>var</term>
+                                <listitem>
+                                    <para>
+                                        The name of the variable that provides the content. The actual FxContent
+                                        instance
+                                        itself
+                                        is provided in "#{var}_content", i.e. if var="project",
+                                        then the FxContent is supplied in "project_content".
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                            <varlistentry>
+                                <term>pk</term>
+                                <listitem>
+                                    <para>
+                                        A primary key. &pkParameter;
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                            <varlistentry>
+                                <term>type</term>
+                                <listitem>
+                                    <para>
+                                        The new content type ID (if no PK was specified)
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                            <varlistentry>
+                                <term>typeName</term>
+                                <listitem>
+                                    <para>
+                                        The new content type name (if no PK was specified)
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                            <varlistentry>
+                                <term>preserveContent</term>
+                                <listitem>
+                                    <para>
+                                        If set to true, the content instance will be stored in the JSF viewstate. This
+                                        is
+                                        memory-expensive, but is necessary for editor pages that modify the content
+                                        structure, e.g. pages that allow to add or remove groups or properties. By
+                                        default,
+                                        this option is set to false.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                </section>
+
+                <section xml:id="jcl_fx_content_jsfel">
+                    <title>Accessing property values with JSF-EL</title>
+                    <para>
+                        A main service of the
+                        <code>&lt;fx:content></code>
+                        component is to
+                        provide direct access to the property values stored in FxContent instances
+                        through JSF-EL expressions. Inside the body of
+                        <code>&lt;fx:content var="content"></code>,
+                        the following expressions may be used:
+                    </para>
+
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <code language="jsfel">#{content.name}</code>
+                            </term>
+                            <term>
+                                <code language="jsfel">#{content['name']}</code>
+                            </term>
+                            <term>
+                                <code language="jsfel">#{content['/name']</code>
+                            </term>
+                            <listitem>
+                                <para>
+                                    Return the FxValue of the property identified by the &xpath; "/name[1]".
+                                    For properties like "/name" that are attached directly to the content root node, the
+                                    notations
+                                    <code language="jsfel">#{content.name}</code>,
+                                    <code language="jsfel">#{content['name']}</code>, and
+                                    <code language="jsfel">#{content['/name']}</code>
+                                    are
+                                    equivalent. The following examples won't always specify all possible notations.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>
+                                <code language="jsfel">#{content.name$label}</code>
+                            </term>
+                            <listitem>
+                                <para>
+                                    Return the assignment label of type FxString for the given &xpath;.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>
+                                <code language="jsfel">#{content['group/text']}</code>
+                            </term>
+                            <listitem>
+                                <para>
+                                    Return the given group property. Note that
+                                    <code language="jsfel">#{content.group.text}</code>
+                                    currently does not work.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>
+                                <code language="jsfel">#{content.element$list}</code>
+                            </term>
+                            <listitem>
+                                <para>
+                                    Provide a list for all entries of the group (or property) "element". If "element" is a
+                                    property, the iterator returns FxValue objects, otherwise it returns a
+                                    list of virtual fx:content instances with a prefix for the current group element
+                                    (
+                                    <xref linkend="jcl_fx_content_ex_display"/>
+                                    illustrates how this feature
+                                    can be used for looping over groups with
+                                    <code lang="xhtml">&lt;ui:repeat></code>).
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>
+                                <code language="jsfel">#{content.element$listAll}</code>
+                            </term>
+                            <listitem>
+                                <para>
+                                    Like
+                                    <code language="jsfel">#{content.element$list}</code>, but includes empty elements.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>
+                                <code language="jsfel">#{content.reference$.property}</code>
+                            </term>
+                            <listitem>
+                                <para>
+                                    Resolve the given reference property and provides a content for its properties. An
+                                    expression can also use several nested resolving operations, e.g.
+                                    <code language="jsfel">#{content.reference$.owner$.email}</code>.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>
+                                <code language="jsfel">#{content['group/text$new']}</code>
+                            </term>
+                            <listitem>
+                                <para>
+                                    Create a new instance of "group" and return its text property. Note: the current
+                                    implementation is a hack and works only for simple cases.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </section>
+
+                <section xml:id="jcl_fx_content_ex">
+                    <title>Examples</title>
+
+                    <warning>
+                        <title>Render-time Components</title>
+                        <para>
+                            Be aware that
+                            <code language="xhtml">&lt;fx:content></code>
+                            is a render-time component. That is, the content instance is
+                            provided during view rendering (i.e. between encodeBegin and encodeEnd), but not during view
+                            creation. This means, unfortunately, that it is not possible to use Facelets' compile-time
+                            tags like
+                            <code language="xhtml">&lt;c:forEach></code>
+                            or
+                            <code language="xhtml">&lt;c:if></code>
+                            with EL expressions that contain content instances provided by
+                            <code language="xhtml">&lt;fx:content></code>.
+
+                            Instead, render-time components must be used to achieve similar results - for example,
+                            <code language="xhtml">&lt;ui:repeat></code>
+                            to iterate over lists or
+                            <code language="xhtml">&lt;h:panelGroup rendered="..."></code>
+                            for conditional page rendering.
+                        </para>
+                    </warning>
+
+                    <example xml:id="jcl_fx_content_ex_display">
+                        <title>Render FxContent property values</title>
+                        <para>
+                            Here the primary key is provided by the managed bean "myBean". The content is stored in the
+                            request variable "component".
+                        </para>
+                        <xi:include href="listings/jsfsupport_content_display.xml"/>
+                    </example>
+
+                    <example xml:id="jcl_fx_content_ex_edit">
+                        <title>Edit an existing FxContent instance</title>
+                        <para>
+                            We use the
+                            <link linkend="jcl_fx_value">
+                                <code language="xhtml">&lt;fx:value></code>
+                            </link>
+                            component to create an input field for the "name" property of a given instance.
+                        </para>
+                        <xi:include href="listings/jsfsupport_content_edit.xml"/>
+                    </example>
+
+                    <example xml:id="jcl_fx_content_ex_create">
+                        <title>Create a new FxContent instance</title>
+                        <para>
+                            This page provides a basic input form for creating new instances
+                            of the "Component" type. Note
+                            that a new content instance contains empty values for all basic properties - that's why this
+                            example works. For creating a more complex instance that actually creates new properties,
+                            see the next example. Note that this code is basically the same as
+                            <xref linkend="jcl_fx_content_ex_edit"/>, except
+                            that a typename is passed instead of a PK - there's no difference in code
+                            between editing an existing or a new instance (provided that the latter has been
+                            properly initialized with empty values).
+                        </para>
+                        <xi:include href="listings/jsfsupport_content_create.xml"/>
+                    </example>
+
+                    <example xml:id="jcl_fx_content_ex_multiplicities">
+                        <title>Add values to properties with multiplicities</title>
+                        <para>
+                            Assume type "issue" has a group "comment" with multiplicity 1..n. In order to edit existing
+                            instances, you could iterate over the existing using the $list suffix. For creating a new
+                            "comment" group, you specify the XPath without multiplicities and set the "new" attribute.
+                        </para>
+                        <xi:include href="listings/jsfsupport_content_multiplicities.xml"/>
+                    </example>
+
+                    <example xml:id="jcl_fx_content_ex_addgroups">
+                        <title>Add a new empty group to a content instance</title>
+                        <para>
+                            Assume you're editing a contact data type with a group named ContactPerson.
+                            You want to render editors for all existing contact persons, as well as
+                            an empty one for adding new contacts. This is accomplished with the
+                            <link linkend="jcl_fx_content_view_bean">&contentViewBean;</link>
+                            which has a method for creating new empty elements or groups called "add".
+                        </para>
+                        <xi:include href="listings/jsfsupport_content_addgroups.xml"/>
+                    </example>
+
+                    <example xml:id="jcl_fx_content_ex_inputmappers">
+                        <title>Use InputMappers for application-specific properties</title>
+                        <para>
+                            Some content properties cannot be populated in a generic way. InputMappers wrap the FxValue
+                            provided by the content instance in another FxValue, usually a FxSelectOne select item
+                            value.
+                        </para>
+                        <xi:include href="listings/jsfsupport_content_inputmappers1.xml"/>
+                        <para>
+                            In this very basic implementation the input mapper is constructed from a collection of PKs
+                            returned by our business method "someOtherBean.getAccountPks()". There already exists an
+                            input mapper for FxPK objects in the flexive framework that takes a select list and
+                            interprets the item IDs as PK IDs. A "real" input mapper would probably use less generic
+                            labels and use e.g. the account caption instead.
+                        </para>
+                        <xi:include href="listings/jsfsupport_content_inputmappers2.xml"/>
+                    </example>
+                </section>
+            </section>
+
+
+            <section xml:id="jcl_fx_value">
+                <title>
+                    <code language="xhtml">&lt;fx:value></code>
+                </title>
+                <para>
+                    For writing FxContent editors, the
+                    <code language="xhtml">&lt;fx:value></code>
+                    component provides a complete property value input row consisting of
+                    <itemizedlist>
+                        <listitem>
+                            <para>
+                                the assignment label, translated in the current user's locale, and
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                a
+                                <link linkend="jcl_fx_value_input">
+                                    <code language="xhtml">&lt;fx:valueInput></code>
+                                </link>
+                                instance that renders suitable input tags for all supported data
+                                types, including multilanguage and binary support.
+                            </para>
+                        </listitem>
+                    </itemizedlist>
+                    The output is controlled by the
+                    <link linkend="jcl_fx_formrow">
+                        <code language="xhtml">&lt;fx:formRow></code>
+                    </link>
+                    component.
+                    All parameters of
+                    <link linkend="jcl_fx_formrow">
+                        <code language="xhtml">&lt;fx:formRow></code>
+                    </link>
+                    can also be set for
+                    <code language="xhtml">&lt;fx:value></code>, except those that control the actual value being
+                    rendered.
+                </para>
+
+                <section xml:id="jcl_fx_value_synopsis">
+                    <title>Synopsis</title>
+                    <programlisting language="xhtml"><![CDATA[<fx:value property="xpath" [var="varname"] [labelKey="messagekey"] [any attribute for fx:formRow]/>]]></programlisting>
+                </section>
+
+                <section xml:id="jcl_fx_value_parameters">
+                    <title>Parameters</title>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>property</term>
+                                <listitem>
+                                    <para>
+                                        The &xpath; of the property.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+
+                            <varlistentry>
+                                <term>var</term>
+                                <listitem>
+                                    <para>
+                                        The value of the "var" attribute of the
+                                        <link linkend="jcl_fx_content">
+                                            <code language="xhtml">&lt;fx:content></code>
+                                        </link>
+                                        component whose content should be edited. If nested directly in a
+                                        fx:content tag, this attribute can be omitted.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+
+                            <varlistentry>
+                                <term>labelKey</term>
+                                <listitem>
+                                    <para>
+                                        An optional &messagekey; that overrides the assignment label.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                </section>
+
+                <section xml:id="jcl_fx_value_ex">
+                    <title>Examples</title>
+                    <para>
+                        For basic usage examples, look at the
+                        <xref linkend="jcl_fx_content_ex"/>
+                        in the
+                        <code language="xhtml">&lt;fx:content></code>
+                        documentation.
+                        For examples on controlling the output of the
+                        <code language="xhtml">&lt;fx:formRow></code>
+                        component, see
+                        <xref linkend="jcl_fx_formrow_ex"/>
+                        of that component.
+                    </para>
+                </section>
+            </section>
+
+            <section xml:id="jcl_fx_value_input">
+                <title>
+                    <code language="xhtml">&lt;fx:valueInput></code>
+                </title>
+                <para>
+                    The
+                    <code language="xhtml">&lt;fx:valueInput></code>
+                    component is an universal
+                    component for editing FxValue objects. It supports every datatype of FxValue,
+                    for example plain text, numbers, dates, or even binaries. It is used in the
+                    &backendGui; content and search query editors and in every other place
+                    where a FxValue needs to be edited. It also includes multilanguage support
+                    by providing a language select list next to the input elements.
+                </para>
+                <section xml:id="jcl_fx_value_input_synopsis">
+                    <title>Synopsis</title>
+                    <programlisting language="xhtml"><![CDATA[<fx:fxValueInput value="fxvalue" [id="clientid"] [externalId="externalId"] [readOnly="true|false"]
+                 [forceLineInput="true|false"] [inputMapper="inputMapper"] [filter="true|false"]
+                 [onchange="onchange"] [disableMultiLanguage="true|false"]/>
+]]></programlisting>
+                </section>
+
+                <section xml:id="jcl_fx_value_input_parameters">
+                    <title>Parameters</title>
+                    <variablelist>
+                        <varlistentry>
+                            <term>value</term>
+                            <listitem>
+                                <para>
+                                    An expression of type FxValue of the value to be edited. Note that the
+                                    value must not be null, otherwise the input component cannot determine
+                                    the actual FxValue type.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>id</term>
+                            <listitem>
+                                <para>
+                                    An optional client ID of the input component.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>externalId</term>
+                            <listitem>
+                                <para>
+                                    An optional external ID that overrides the clientId in JSF validation error messages
+                                    -
+                                    may be necessary in complex, generic forms, but usually you won't need this.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>readOnly</term>
+                            <listitem>
+                                <para>
+                                    If true, only the value itself will be rendered.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>forceLineInput</term>
+                            <listitem>
+                                <para>
+                                    For multiline and HTML properties, force to render a single-line input field (e.g.
+                                    for search query forms).
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>inputMapper</term>
+                            <listitem>
+                                <para>
+                                    An optional input mapper for rendering the input control. For example, properties
+                                    referencing other content may need a custom input mapper that provides a select list
+                                    of content instances. For more information take a look at the InputMapper
+                                    documentation.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>valueFormatter</term>
+                            <listitem>
+                                <para>
+                                    A
+                                    <interfacename>FxValueFormatter</interfacename>
+                                    to be used for rendering the value (in read-only mode only). If not specified,
+                                    the JSF renderer will choose the appropriate default formatter for
+                                    the actual value class.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>filter</term>
+
+                            <listitem>
+                                <para>
+                                    If set to false, HTML output will not be filtered. If set to true (the default),
+                                    HTML entities will be used for sensitive characters (e.g. "&amp;lt;"
+                                    instead of "&lt;").
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>disableMultiLanguage</term>
+                            <listitem>
+                                <para>
+                                    Disables multi language support even if the FxValue object is multilingual.
+                                    Only the default translation will be displayed and updated.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+
+                        <varlistentry>
+                            <term>onchange</term>
+                            <listitem>
+                                <para>
+                                    An optional javascript expression to be called when an input element
+                                    changed its value.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </section>
+
+                <section xml:id="jcl_fx_value_input_ex">
+                    <example xml:id="jcl_fx_value_input_ex_groupname">
+                        <title>An input row for editing a FxString value</title>
+                        <xi:include href="listings/jsfsupport_valueinput_groupname.xml"/>
+                    </example>
+                </section>
+            </section>
+
+            <section xml:id="jcl_fx_resultvalue">
+                <title>
+                    <code language="xhtml">&lt;fx:resultValue></code>
+                </title>
+                <para>
+                    The resultValue tag is a specialized wrapper for the
+                    <code>&lt;fx:valueInput&gt;</code>
+                    to be used for rendering a column value of a search result row.
+                    If the value passed is an instance of
+                    <classname>FxValue</classname>, a read-only instance
+                    of
+                    <code>&lt;fx:valueInput&gt;</code>
+                    is created which then renders the given value.
+                    Otherwise (e.g. for
+                    <classname>FxPK</classname>
+                    primary keys or primitive values)
+                    a generic formatter is used, which can be customized e.g. for formatting
+                    of tree paths with a link formatter.
+                </para>
+
+                <section xml:id="jcl_fx_resultvalue_synopsis">
+                    <title>Synopsis</title>
+                    <programlisting language="xhtml"><![CDATA[<fx:resultValue value="value" [linkFormatter="formatter"] [itemLinkFormat="format"] [contentLinkFormat="format"]/>]]></programlisting>
+                </section>
+
+                <section xml:id="jcl_fx_resultvalue_parameters">
+                    <title>Parameters</title>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>value</term>
+                                <listitem>
+                                    <para>
+                                        The value to be rendered. Can be of any type.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+
+                            <varlistentry>
+                                <term>linkFormatter</term>
+                                <listitem>
+                                    <para>
+                                        A
+                                        <classname>ContentLinkFormatter</classname>
+                                        instance that will be used for rendering links to contents.
+                                        This applies to the rendering of the virtual properties
+                                        <code>@pk</code>
+                                        and
+                                        <code>@path</code>, as described in
+                                        <xref linkend="css_tree"/>.
+                                        If not specified, the default
+                                        <classname>ContentLinkFormatter</classname>
+                                        will be used.  For a description of the supported link format,
+                                        please refer to the &flexiveJavadoc; of this class.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+
+                            <varlistentry>
+                                <term>contentLinkFormat</term>
+                                <listitem>
+                                    <para>
+                                        The format string passed to the linkFormatter for content links, i.e.
+                                        <classname>FxPK</classname>
+                                        values. For a description of the supported link format of the default formatter,
+                                        please refer to the &flexiveJavadoc; of this class.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+
+                            <varlistentry>
+                                <term>itemLinkFormat</term>
+                                <listitem>
+                                    <para>
+                                        The format string used for
+                                        <classname>FxPaths</classname>
+                                        values as returned by the virtual
+                                        <code>@path</code>
+                                        property. For a description of the supported link format of the default formatter,
+                                        please refer to the &flexiveJavadoc; of this class.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                </section>
+
+                <section xml:id="jcl_fx_resultvalue_ex">
+                    <title>Examples</title>
+                    <para>
+                        A basic example of using
+                        <code>&lt;fx:resultValue&gt;</code>
+                        can be found in
+                        <xref linkend="tutorial01"/>.
+                    </para>
+                </section>
+            </section>
+
+            <section xml:id="jcl_fx_content_list">
+                <title>
+                    <code language="xhtml">&lt;fx:contentList></code>
+                </title>
+                <para>
+                    Iterates over a collection of content instances.
+
+                    This component is essentially an iterator wrapping a fx:content component. The content instances can
+                    be specified through nested Groovy queries or a SqlQueryBuilder instance.
+                </para>
+
+                <section xml:id="jcl_fx_content_list_synopsis">
+                    <title>
+                        Synopsis
+                    </title>
+                    <programlisting language="xhtml"><![CDATA[<fx:contentList var="varname" [indexVar="indexVarName"] [queryBuilder="queryBuilderExpr"] [explode="true|false"]>
+  [<f:facet name="groovyQuery"> ... </f:facet>]
+  [<f:facet name="header"> ... </f:facet>]
+  [<f:facet name="empty"> ... </f:facet>]
+  ...
+</fx:contentList>
+]]></programlisting>
+                </section>
+
+                <section xml:id="jcl_fx_content_list_parameters">
+                    <title>
+                        Parameters
+                    </title>
+                    <variablelist>
+                        <varlistentry>
+                            <term>var</term>
+                            <listitem>
+                                <para>
+                                    Name of the variable that provides the content. The actual FxContent instance itself
+                                    is provided in "#{var}_content", i.e. if var="project", then the FxContent is
+                                    supplied in "project_content".
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>indexVar</term>
+                            <listitem>
+                                <para>
+                                    Optional name for a variable that exposes the current iteration index.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>queryBuilder</term>
+                            <listitem>
+                                <para>
+                                    An expression of type SqlQueryBuilder that is used for selecting the contents.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>explode</term>
+                            <listitem>
+                                <para>
+                                    Indicates whether the content instances should be "exploded",
+                                    i.e. whether empty properties
+                                    should be initialized. Useful for content editors. Defaults to false.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </section>
+
+                <section xml:id="jcl_fx_content_list_facets">
+                    <title>
+                        Facets
+                    </title>
+                    <variablelist>
+                        <varlistentry>
+                            <term>groovyQuery</term>
+                            <listitem>
+                                <para>
+                                    Embeds a query using FxQueryBuilder directly in the HTML page. For example:
+                                    <programlisting language="xhtml"><![CDATA[<f:facet name="groovyQuery">
+    like("caption", "A%")
+    type("myArticleType")
+</f:facet>
+]]></programlisting>
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>header</term>
+                            <listitem>
+                                <para>
+                                    An optional header row. Rendered only if at least one content instance is available.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>empty</term>
+                            <listitem>
+                                <para>
+                                    An optional empty message. This is the only output that is rendered if the query
+                                    returns no contents, and if no "empty" facet is specified, nothing is rendered at
+                                    all.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </section>
+            </section>
+        </section>
+
+        <section xml:id="jcl_search">
+            <!--
+                TODO: result datatable example when the search query tutorial is done
+            -->
+        </section>
+
+        <section xml:id="jcl_forms">
+            <title>
+                Form utility components
+            </title>
+
+
+            <section xml:id="jcl_fx_formrow">
+                <title>
+                    <code language="xhtml">&lt;fx:formRow></code>
+                </title>
+
+                <para>
+                    Renders a row container for a single input field,
+                    and renders a label for the input element. The input field(s) are stored in the tag body.
+                </para>
+
+                <section xml:id="jcl_fx_formrow_synopsis">
+                    <title>Synopsis</title>
+                    <para>
+                        <programlisting language="xhtml"><![CDATA[<fx:formRow id="inputid" [label="label"] [labelKey="messagekey"] [newLine="true|false"] [width="widthInPx"] [height="heightInPx"]>
+    [input element]
+</fx:formRow>
+]]></programlisting>
+                    </para>
+                </section>
+
+                <section xml:id="jcl_fx_formrow_parameters">
+                    <title>Parameters</title>
+                    <variablelist>
+                        <varlistentry>
+                            <term>id</term>
+                            <listitem>
+                                <para>
+                                    The client ID of the input element contained in the body.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>label</term>
+                            <listitem>
+                                <para>
+                                    The input element label.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>labelKey</term>
+                            <listitem>
+                                <para>
+                                    The input element label key (overrides label).
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>tooltipKey</term>
+                            <listitem>
+                                <para>
+                                    Message key of the tooltip (if not specified and labelKey is set,
+                                    it defaults to <code language="jsfel">#{labelKey}.tooltip</code>)
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>newLine</term>
+                            <listitem>
+                                <para>
+                                    Specifies whether a newline should be rendered after the input row (default: true).
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>width</term>
+                            <listitem>
+                                <para>
+                                    Sets a fixed width on the row div (in pixels).
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>height</term>
+                            <listitem>
+                                <para>
+                                    Sets a fixed height on the row div (in pixels).
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </section>
+
+                <section xml:id="jcl_fx_formrow_ex">
+                    <title>Examples</title>
+
+                    <example xml:id="jcl_fx_formrow_ex_text">
+                        <title>
+                            Rendering a plain text input row
+                        </title>
+                        <xi:include href="listings/jsfsupport_formrow_text.xml"/>
+                    </example>
+                </section>
+            </section>
+
+            <section xml:id="jcl_fx_fieldset">
+                <title>
+                    <code language="xhtml">&lt;fx:fieldSet></code>
+                </title>
+
+                <para>
+                    Renders a HTML fieldset container for a group of formRow elements.
+                </para>
+
+                <section xml:id="jcl_fx_fieldset_synopsis">
+                    <title>
+                        Synopsis
+                    </title>
+                    <para>
+                        <programlisting language="xhtml"><![CDATA[<fx:fieldSet [(legend="legend" | legendKey="legendKey")] [width="widthInPx"]>
+...
+</fx:fieldSet>
+]]></programlisting>
+                    </para>
+                </section>
+
+                <section xml:id="jcl_fx_fieldset_parameters">
+                    <title>
+                        Parameters
+                    </title>
+                    <variablelist>
+                        <varlistentry>
+                            <term>legend</term>
+                            <listitem>
+                                <para>
+                                    The legend to be displayed in the fieldset header.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>legendKey</term>
+                            <listitem>
+                                <para>
+                                    The message key of the localized message for the legend (overrides legend).
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>width</term>
+                            <listitem>
+                                <para>
+                                    An optional attribute to specify a fixed width in pixels.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </section>
+
+                <section xml:id="jcl_fx_fieldset_ex">
+                    <title>
+                        Examples
+                    </title>
+
+                    <example xml:id="jcl_fx_fieldset_ex_text">
+                        <title>
+                            A fieldset with two formrow elements
+                        </title>
+                        <xi:include href="listings/jsfsupport_fieldset_text.xml"/>
+                    </example>
+                </section>
+            </section>
+        </section>
+
+        <section xml:id="jcl_beans">
+            <title>
+                JSF managed beans
+            </title>
+
+            <para>
+                &Flexive; provides a set of JSF managed beans for working with &flexive; in JSF
+                applications. Some of them are mostly internal, some will probably be used
+                in every &flexive; application. For a complete reference consult the
+                &flexiveJavadoc;.
+            </para>
+
+            <section xml:id="jcl_fx_content_view_bean">
+                <title>&contentViewBean;</title>
+                <para>
+                    The &contentViewBean; provides a basic wrapper for the EJB content engine.
+                    It is used to create and update instances, usually provided by the
+                    <link linkend="jcl_fx_content">
+                        <code language="xhtml">&lt;fx:content></code>
+                    </link>
+                    component.
+                </para>
+
+                <section xml:id="jcl_fx_content_view_bean_save">
+                    <title>Saving content</title>
+
+                    <para>
+                        To save a FxContent instance, you have to set the
+                        <code>content</code>
+                        property
+                        of &contentViewBean;. Usually this is done with a JSF setPropertyActionListener,
+                        take a look at
+                        <xref linkend="jcl_fx_content_ex_edit"/>.
+                    </para>
+
+                    <para>
+                        You can also specify an optional success message that will be added
+                        to the current JSF context after the content has been saved, using the
+                        <code>successMessage</code>
+                        property of &contentViewBean;.
+                    </para>
+
+                    <para>
+                        When a content instance is created or saved, &contentViewBean; stores the
+                        primary key in the request, which can be used for URI rewriting
+                        as demonstrated in
+                        <xref linkend="jcl_uri_rewriting"/>.
+                    </para>
+                </section>
+
+                <section xml:id="jcl_fx_content_view_bean_addelements">
+                    <title>Adding empty values to a content instance</title>
+
+                    <para>
+                        You can also add empty values to an existing content instance. This
+                        is especially useful for adding empty group elements for generic
+                        editors, as demonstrated in
+                        <xref linkend="jcl_fx_content_ex_addgroups"/>.
+                    </para>
+                </section>
+            </section>
+
+            <section xml:id="jcl_fx_authentication_bean">
+                <title>&authenticationBean;</title>
+                <para>
+                    The &authenticationBean; provides a simple wrapper for signing users
+                    on and off using &flexive; security.
+                </para>
+                <para>
+                    To create a login form, you have to
+                    <itemizedlist>
+                        <listitem>
+                            <para>
+                                bind form inputs to the
+                                <code>username</code>
+                                and
+                                <code>password</code>
+                                properties
+                                of &authenticationBean;,
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                add a JSF commandButton or commandLink that invokes the
+                                <code>&authenticationBean;.login</code>
+                                action, and
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                add a navigation case for the
+                                <code>loginSuccess</code>
+                                result.
+                                If login fails,
+                                <code>login</code>
+                                is returned instead.
+                            </para>
+                        </listitem>
+                    </itemizedlist>
+                </para>
+                <para>
+                    A logout link calls the
+                    <code>&authenticationBean;.logout</code>
+                    action method. The logout method returns
+                    <code>login</code>
+                    as a result.
+                    Logging out always succeeds (except for internal errors), so no other navigation
+                    case is necessary.
+                </para>
+
+            </section>
+
+            <section xml:id="jcl_fx_message_bean">
+                <title>&messageBean;</title>
+                <para>
+                    The &messageBean; is an application-scoped bean that provides a localized message lookup service for
+                    JSF. Instead of a single resource bundle as provided by JSF's loadBundle, the &messageBean;
+                    provides centralized access to the messages of all &flexive; applications
+                    and plugins available in the current context.
+                </para>
+
+                <section xml:id="jcl_fx_message_bean_usage">
+                    <title>Looking up messages</title>
+                    <para>
+                        The &messageBean; implements the map interface and returns localized
+                        messages for resource keys. For example,
+                        <code language="jsfel">#{&messageBean;['Global.welcome']}</code>
+                        returns the message defined for the key
+                        <code>Global.welcome</code>
+                        for the current user's locale.
+                    </para>
+                    <para>
+                        Message texts can include positional arguments that will be replaced
+                        when the message is rendered. You can add a comma-separated
+                        list of literal replacements or JSF-EL expressions to the resource key.
+                        For example, the message
+                        <code>Global.welcome=Welcome, {0}</code>
+                        could be formatted using
+                        <code language="jsfel">#{&messageBean;['Global.welcome,#{myBean.userName}']}</code>.
+                    </para>
+                </section>
+
+                <section xml:id="jcl_fx_message_bean_files">
+                    <title>Providing messages for applications and plugins</title>
+                    <para>
+                        &Flexive; relies on fixed filenames for application and plugin messages.
+                        If you place a file with the given name in your application or plugin package,
+                        it will be automatically detected on startup by the &messageBean; and
+                        will be available to all clients.
+                    </para>
+                    <para>
+                        The &flexive; resource bundle base names are:
+                        <variablelist>
+                            <varlistentry>
+                                <term>ApplicationMessages</term>
+                                <listitem>
+                                    <para>
+                                        For applications like the &backendGui;, for example
+                                        <filename>ApplicationMessages.properties</filename>
+                                        or
+                                        <filename>ApplicationMessages_de.properties</filename>.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+
+                            <varlistentry>
+                                <term>PluginMessages</term>
+                                <listitem>
+                                    <para>
+                                        For plugin packages, for example
+                                        <filename>PluginMessages.properties</filename>
+                                        or
+                                        <filename>PluginMessages_de.properties</filename>.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                </section>
+            </section>
+        </section>
+
+        <section xml:id="jcl_classpath_resources">
+            <title>Delivering XHTML pages from the classpath</title>
+            <para>
+                &Flexive; includes a classpath resource resolver for Facelets that allows any
+                Facelets resources (especially XHTML pages) to be included directly from JAR files
+                in the classpath, instead of storing them in a web application archive (WAR).
+            </para>
+            <para>
+                The classpath resource resolver is declared in the &flexive; components'
+                <filename>faces-config.xml</filename>,
+                so no further steps are necessary for enabling it. The classpath resolver acts
+                as a fallback for the common Facelets resource resolver, i.e. if a resource
+                cannot be found using the default Facelets lookup, it attempts to load the same
+                path using the context class loader.
+            </para>
+            <para>
+                For example, if you store
+                <filename>/mywebdir/mypage.xhtml</filename>
+                in one of your JAR files, you can reference it just with this path in any of your
+                JSF config files, like the
+                <filename>faces-config.xml</filename>.
+                It will then be delivered directly from your JAR file.
+            </para>
+        </section>
+
+        <section xml:id="jcl_uri_rewriting">
+            <title>URI rewriting for contents</title>
+            <para>
+                TODO
+                <!-- TODO describe the ContentURIRoute infrastructure -->
+            </para>
+        </section>
+
+    </section>
+
+    <section xml:id="reusable_components">
+        <title>Writing reusable &flexive; components</title>
+        <para>
+            While &flexive; builds on existing &jee5; infrastructure,
+            it integrates additional services that make writing components for &flexive; applications even easier.
+            <itemizedlist>
+                <listitem>
+                    <para>
+                        Full EJB3 support in your applications and plugins, you can use existing EJBs or create new ones,
+                        and call your EJBs from &flexive; via scripting.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Easy integration of JSF components and beans through JSF infrastructure, i.e.
+                        using a packaged
+                        <filename>faces-config.xml</filename>.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Serve Facelets templates directly from the JAR archive or any other location
+                        in the classpath.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        &weblets; can be used for serving content that is not handled
+                        by Facelets, like additional JavaScript files or stylesheets.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        A compact plugin system allows to extend the &backendGui; and
+                        make your own application or plugin extensible in a typesafe manner.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Setup your plugin or application using startup scripts that have
+                        full access to the &flexiveApi;.
+                    </para>
+                </listitem>
+            </itemizedlist>
+        </para>
+
+        <section xml:id="components_jsf">
+            <title>JSF components</title>
+
+            <para>
+                JSF components provide a simple and powerful way of providing additional functionality
+                to existing applications, for example a forum or comment sections.
+                A component packages all Java code and web resources into a single JAR file that can
+                be dropped into the
+                <filename>lib/</filename> directory of an existing
+                <filename>flexive.ear</filename>
+                file. After the next &flexive; startup it is available to all applications contained
+                in the &flexive; archive.
+            </para>
+
+            <section xml:id="components_jsf_package">
+                <title>Packaging</title>
+
+                <para>
+                    A JSF component is a JAR file that may contain the following elements:
+                    <variablelist>
+                        <varlistentry>
+                            <term><filename>META-INF/faces-config.xml</filename></term>
+                            <listitem>
+                                <para>
+                                    Registers JSF beans, components, validators, and navigation rules.
+                                    Note that you can reference XHTML pages from within your JAR file
+                                    thanks to the classpath resource resolver as described in
+                                    <xref linkend="jcl_classpath_resources"/>.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term><filename>META-INF/*.taglib.xml</filename></term>
+                            <listitem>
+                                <para>
+                                    Register your own Facelets templates. The templates are stored directly
+                                    in the JAR file and are referenced relative to the META-INF directory.
+                                    For example, consider the following JAR contents:
+                                    <programlisting><![CDATA[./META-INF/mycomponents.taglib.xml
+./templates/button.xhtml
+]]></programlisting>
+                                    To register your button tag, the
+                                    <filename>mycomponents.taglib.xml</filename>
+                                    might look like the following:
+                                    <programlisting language="xml"><![CDATA[<?xml version="1.0"?>
+<!DOCTYPE facelet-taglib PUBLIC
+        "-//Sun Microsystems, Inc.//DTD Facelet Taglib 1.0//EN"
+        "http://java.sun.com/dtd/facelet-taglib_1_0.dtd">
+
+<facelet-taglib>
+    <namespace>http://www.mycompany.com/jsf/components</namespace>
+
+    <tag>
+        <tag-name>button</tag-name>
+        <source>../templates/button.xhtml</source>
+    </tag>
+</facelet-taglib>
+]]></programlisting>
+                                    Facelets scans the classpath for
+                                    <filename>*.taglib.xml</filename> files and will automatically provide the
+                                    registered templates and components under the given namespace.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term><filename>META-INF/flexive-plugins-config.xml</filename></term>
+                            <listitem>
+                                <para>
+                                    Defines &flexive; JSF plugins, as described in
+                                    <xref linkend="jsf_plugin_api"/>.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term><filename>META-INF/weblets-config.xml</filename></term>
+                            <listitem>
+                                <para>
+                                    Contains the &weblets; configuration if you want to deliver
+                                    additional web resources like images or stylesheets. The weblets resources
+                                    are stored in the JAR file like Facelets templates, but their base directory
+                                    may be any package in the JAR file. For example, the following config file
+                                    sets the weblets root directory of the &flexive; components package to
+                                    <package>com/flexive/faces/weblets</package> and registers the weblet
+                                    provider for the URI
+                                    <uri>/flexive-web-resources/</uri>:
+
+                                    <programlisting language="xml"><xi:include href="../../src/ui/jsf-components/resources/META-INF/weblets-config.xml" parse="text"/></programlisting>
+
+                                    If you attach
+                                    <code>-SNAPSHOT</code>
+                                    to the
+                                    <code>weblet-version</code>
+                                    number, you can disable browser caching for development builds. Otherwise
+                                    Weblets will add caching information and you have to change the
+                                    version number to ensure that all clients will use the most recent version.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </para>
+
+            </section>
+
+            <section xml:id="components_jsf_building">
+                <title>Compiling and packaging</title>
+
+                <para>
+                    TODO
+                </para>
+            </section>
+        </section>
+
+        <section xml:id="components_ejb">
+            <title>EJB components</title>
+
+            <para>
+                EJB3 components can be packaged in any JAR file and should be deployed automatically
+                if included in the
+                <filename>flexive.ear</filename>
+                file. At the time of this writing, this mechanism was not working in current versions
+                of Glassfish and JBoss unless you included an explicit
+                <filename>ejb-ref.xml</filename>,
+                so you have to add an explicit reference to the EJB JAR file in
+                <filename>flexive.ear!/META-INF/application.xml</filename> if you use only EJB3 annotations.
+                When you develop &flexive; applications as described in
+                <xref linkend="writing_applications"/>,
+                this is done automatically by the &flexive; build system.
+            </para>
+            <para>
+                For further information on EJB packaging rules please refer to
+                <biblioref linkend="bib_packagingejb3"/>,
+                which is also a chapter in the great
+                <biblioref linkend="bib_ejb3inaction"/>.
+            </para>
+        </section>
+
+    </section>
+
+    <section xml:id="jsf_plugin_api">
+        <title>The JSF plugin API</title>
+        <para>
+            One of the main JSF features is its component-centric design. It allows developers
+            to create component packages as JAR files that can be deployed in existing applications with
+            little or no additional configuration. Prominent examples in the free software world are
+            <link xlink:href="http://myfaces.apache.org/tomahawk/">MyFaces Tomahawk</link>,
+            <link xlink:href="http://www.icefaces.org">ICEfaces</link>,
+            or
+            <link xlink:href="http://labs.jboss.com/jbossrichfaces/">JBoss RichFaces</link>.
+        </para>
+        <para>
+            &Flexive; encourages the use of all JSF and Facelets features for writing reusable components,
+            and adds its own plugin API to the mix for modifying existing &flexive; applications, most
+            notably the &backendGui;. For example, a plugin developer may extend main menu entries,
+            add new buttons or create whole new administration areas inside the &backendGui;.
+        </para>
+        <para>
+            Currently the plugin API is only available in the JSF layer, although it is
+            not specifically tied to JSF. It is a pure Java solution that may be used for
+            adding plugins to any Java application, it's just that inside &flexive; most
+            sensible extension points for plugins are in the JSF layer.
+        </para>
+        <para>
+            The plugin API chapter covers only a small set of features needed for extending
+            &flexive;, for information on writing reusable components see
+            <xref linkend="reusable_components"/>.
+        </para>
+
+        <section xml:id="jpa_overview">
+            <title>Overview</title>
+            <para>
+                The plugin API is based on three core interfaces and a JSF managed bean:
+
+                <itemizedlist>
+                    <listitem>
+                        <para>
+                            An
+                            <glossterm>
+                                <firstterm>extension point</firstterm>
+                            </glossterm>
+                            defines "points" where existing Java code can be extended.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Extension points are parameterized with a concrete sub-interface of a
+                            <glossterm>
+                                <firstterm>plugin executor</firstterm>
+                            </glossterm>
+                            .
+                            A plugin executor interface exposes the methods which plugins may
+                            call to modify application behaviour. For example, a plugin executor
+                            for a tree may specify methods for adding or removing tree nodes.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            A
+                            <glossterm>
+                                <firstterm>plugin</firstterm>
+                            </glossterm>
+                            implements an
+                            interface which is parameterized with the type of an
+                            <glossterm>extension point</glossterm>,
+                            which in turn is parameterized with a
+                            <glossterm>plugin executor</glossterm>
+                            interface which will be used by the plugin.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            The &pluginRegistryBean; acts as a global plugin registry for
+                            the application. Plugins can be registered at application startup using
+                            the PluginFactory interface.
+                        </para>
+                    </listitem>
+                </itemizedlist>
+
+                Extension points and plugin executors are provided by the application developer,
+                the plugin developer only needs to implement a properly parameterized interface.
+            </para>
+        </section>
+
+        <example xml:id="jpa_example_app">
+            <title>Making a &flexive; application extensible</title>
+
+            <para>
+                The intent of the next two examples is to create an extension point which can handle arbitrary
+                plugins attached to it, and then write a plugin for it. The first part is
+                the responsibility of the original application developer, the second one applies
+                to any plugin developer for that application.
+            </para>
+
+            <para>
+                The first step for the application developer is to create a
+                <interfacename>PluginExecutor</interfacename>
+                interface that defines the methods available to plugins.
+                In this example, we want to accumulate numbers generated by plugins.
+                We define the following interface:
+                <programlisting language="java"><![CDATA[public interface TestExecutor extends PluginExecutor {
+    void pushResult(int result);
+}
+]]></programlisting>
+                The executor takes a result (generated by the plugin), and stores it in an
+                internal data structure. Why do we specify an interface instead
+                of a concrete implementation class? The actual plugin executor implementation depends
+                on the code being extended, and may contain private classes that are not
+                (or should not) be visible to the plugin developer. Also, sometimes it is convenient to
+                implement the executor as an anonymous inner class that has access to the
+                surrounding method's variables, without publishing the actual implementation
+                to somebody else.
+            </para>
+
+            <para>
+                Next we declare an extension point, for example in a public shared class:
+                <programlisting language="java"><![CDATA[public static final ExtensionPoint<TestExecutor> EXTENSIONPOINT =
+        new ExtensionPoint<TestExecutor>("ourapp.extensionpoint") { };
+]]></programlisting>
+                We bind the extension point to our executor interface, and specify an unique identifier
+                (<literal>ourapp.extensionpoint</literal>).
+                When a plugin developer does not want to or cannot reference the
+                <constant>EXTENSIONPOINT</constant>
+                constant in his code, he can create a new extension point with the same identifier (and the same
+                executor interface).
+            </para>
+
+            <para>
+                Finally we create the executor implementation:
+                <xi:include href="listings/jsfsupport_plugin_executor.xml"/>
+                The class implements the
+                <interfacename>TestExecutor</interfacename>
+                interface, and adds an implementation-specific method to obtain the results. The executor
+                implementation does not have to be visible to the client, but its interface has to.
+            </para>
+
+            <para>
+                Extending our application is the last step. We instantiate a new executor, and
+                ask the &pluginRegistryBean; to execute all registered plugins. Then we collect
+                the result and show it to the user.
+                <xi:include href="listings/jsfsupport_plugin_app.xml"/>
+                Take a look at the next example to see how to write a plugin for our application.
+            </para>
+        </example>
+
+        <example xml:id="jpa_example_client">
+            <title>Writing a plugin for a &flexive; application</title>
+
+            <para>
+                Now that our application supports plugins as described in
+                <link linkend="jpa_example_app">the previous example</link>, we'll show how to write a plugin
+                for it. Remember that the executor interface allows us to send numbers to
+                the application. We'll create a very simple plugin that always sends
+                the number 42.
+                <xi:include href="listings/jsfsupport_plugin_pluginimpl.xml"/>
+                The executor is passed to the plugin, which then calls the method defined in the
+                executor's interface.
+            </para>
+
+            <para>
+                If we're distributing the plugin as (part of) a &flexive; component,
+                we can add a
+                <interfacename>PluginFactory</interfacename>
+                to register the plugin during &flexive; startup.
+                <xi:include href="listings/jsfsupport_plugin_factory.xml"/>
+                Finally we register the factory with its fully qualified classname as shown in
+                <xref linkend="jpa_pluginconfig"/>.
+            </para>
+
+        </example>
+
+        <section xml:id="jpa_registry">
+            <title>The plugin registry</title>
+            <para>
+                The &pluginRegistryBean; is an application-scoped JSF bean that acts as a central
+                registry for all &flexive; plugins. It is initialized on application startup and
+                scans the classpath for available plugins. An application can retrieve a list
+                of registered plugins for a extension point or execute a plugin executor
+                on all plugins of an extension point.
+            </para>
+
+            <section xml:id="jpa_registry_register">
+                <title>Registering plugins at extension points</title>
+                <para>
+                    The plugin registry has a
+                    <code>registerPlugin</code>
+                    method for registering
+                    plugins at extension points. You can call this method at any time, for example
+                    from the constructor of an application-scoped JSF bean, or use the
+                    <interfacename>PluginFactory</interfacename>
+                    interface to be called by &flexive; on startup.
+                </para>
+                <para>
+                    To register your plugin automatically during the startup of &flexive;, you have to
+                    <orderedlist>
+                        <listitem>
+                            <para>
+                                implement the
+                                <interfacename>PluginFactory</interfacename>
+                                interface,
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                set the factory name in
+                                <filename>META-INF/flexive-plugins-config.xml</filename>
+                                of your package, and
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                register your plugins in the
+                                <interfacename>PluginFactory</interfacename>'s
+                                <methodname>initialize</methodname>
+                                method.
+                            </para>
+                        </listitem>
+                    </orderedlist>
+                </para>
+                <para>
+                    The
+                    <interfacename>PluginFactory</interfacename>
+                    specifies a simple callback
+                    interface that lets you register plugins with a
+                    <classname>&pluginRegistryBean;</classname>. You have to specify the fully
+                    qualified classname of your implementation in a file called
+                    <filename>META-INF/flexive-plugins-config.xml</filename>,
+                    for example:
+                    <example xml:id="jpa_pluginconfig">
+                        <title>Specifying a
+                            <interfacename>PluginFactory</interfacename>
+                            in
+                            <filename>flexive-plugins-config.xml</filename>
+                        </title>
+                        <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8" ?>
+<plugins-config xmlns="http://www.flexive.com/plugins-config">
+    <plugin-factory>
+        com.flexive.faces.plugin.DemoPluginFactory
+    </plugin-factory>
+</plugins-config>]]></programlisting>
+                    </example>
+                    For an example of a concrete
+                    <interfacename>PluginFactory</interfacename>
+                    implementation, refer to
+                    <xref linkend="jpa_example_client"/>.
+                </para>
+            </section>
+        </section>
+    </section>
+
+
+</chapter>

@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+    
+-->
+<project name="flexive-disttool" default="info" basedir=".">
+    <property name="template-component.dir" value="${basedir}/templates/template-component"/>
+    <property name="template-project.dir" value="${basedir}/templates/template-project"/>
+
+    <property name="mysql.src.dir" value="lib/resources/sql/mysql"/>
+    <property name="mysql.classpathref" value="lib.path"/>
+
+    <property file="database.properties"/>
+    <import file="build.macros.xml"/>
+    <import file="build.shared-dist.xml"/>
+
+    <path id="lib.path">
+        <fileset dir="lib" includes="**/*.jar"/>
+        <fileset dir="extlib" includes="**/*.jar"/>
+    </path>
+
+    <target name="check" description="Checks if the distribution contains all required files">
+        <checkAvailable file="${template-component.dir}"/>
+    </target>
+
+    <target name="info">
+        <echo taskname="flexive">
+Welcome to the flexive build tool. Feel free to use the following build targets:
+
+project.create
+    Creates an empty flexive project.
+
+db.create
+        Create or reset the database schema of a flexive division.
+        Warning: if the schema already exists, it will be dropped (i.e. you will lose all data
+        stored in the schema).
+
+db.config.create
+        Create or reset the global flexive configuration schema.
+        </echo>
+
+        <input message="Please enter a target name, or quit to exit:" addproperty="info.targetname"/>
+        <antcall target="${info.targetname}"/>
+    </target>
+
+    <!--
+        New component creation.
+    -->
+    <target name="component.create" description="Creates a new component." depends="check">
+        <input message="Name of the component you want to create: "
+            addproperty="component.name"/>
+        <input message="Base directory of the component sources: "
+            addproperty="component.basedir"
+            defaultvalue="./${component.name}"/>
+
+        <!-- Check if directory already exists -->
+        <available file="${component.basedir}" property="component.basedir.exists"/>
+        <fail if="component.basedir.exists" message="Directory ${component.basedir} already exists."/>
+
+        <!-- Get user confirmation -->
+        <echo taskname="flexive">
+Please confirm your input:
+Component name:      ${component.name}
+Base directory:      ${component.basedir}
+        </echo>
+        <userConfirmation message="Are these settings correct?" propertyName="component.create.confirm.answer"/>
+
+        <!-- Create directory and copy template files -->
+        <mkdir dir="${component.basedir}"/>
+
+        <!-- Copy files from template -->
+        <copy todir="${component.basedir}" includeemptydirs="true">
+            <!-- Copy the whole template dir, exclude only the root readme.txt file -->
+            <fileset dir="${template-component.dir}" includes="**/*" excludes="readme.txt,*.iml"/>
+        </copy>
+        <!-- Copy project files -->
+        <copy todir="${component.basedir}">
+            <fileset dir="${template-component.dir}" includes="template-component.iml"/>
+            <!-- Rename project files -->
+            <mapper type="glob" from="template-component.iml" to="${component.name}.iml"/>
+        </copy>
+
+        <!-- Show success message -->
+        <echo>Component ${component.name} created successfully. The module root is</echo>
+        <echo>${component.basedir}</echo>
+    </target>
+
+    <!--
+        New project creation.
+        Creates a new project directory in the parent directory of the flexive distribution.
+    -->
+    <target name="project.create" description="Creates a new project." depends="check">
+        <input message="Name of the project you want to create: "
+            addproperty="project.name"/>
+        <property name="project.basedir" value="../${project.name}"/>
+
+        <!-- Check if directory already exists -->
+        <available file="${project.basedir}" property="project.basedir.exists"/>
+        <fail if="project.basedir.exists" message="Directory ${project.basedir} already exists."/>
+
+        <!-- Get user confirmation -->
+        <echo taskname="flexive">
+Please confirm your input:
+Project name:        ${project.name}
+Base directory:      ${project.basedir}
+        </echo>
+        <userConfirmation message="Are these settings correct?" propertyName="project.create.confirm.answer"/>
+
+        <!-- Create directory and copy template files -->
+        <mkdir dir="${project.basedir}"/>
+
+        <!-- Copy files from template -->
+        <copy todir="${project.basedir}" includeemptydirs="true">
+            <!-- Copy the whole template dir, exclude only the root readme.txt file -->
+            <fileset dir="${template-project.dir}" includes="**/*" excludes="readme.txt,*.iml,build.xml"/>
+            <!-- Copy eclipse builder directory -->
+            <fileset dir="${template-project.dir}/.externalToolBuilders" includes="**/*"/>
+            <!-- Copy dist database setup -->
+            <fileset file="${basedir}/database.properties"/>
+        </copy>
+
+        <!-- Copy build files, substitute project name -->
+        <copy todir="${project.basedir}" file="${template-project.dir}/build.xml">
+            <filterset begintoken='"' endtoken='"'>
+                <filter token="template-project" value='"${project.name}"'/>
+            </filterset>
+        </copy>
+
+        <!-- Copy and rename IDEA module file -->
+        <copy todir="${project.basedir}">
+            <fileset dir="${template-project.dir}" includes="template-project.iml"/>
+            <!-- Rename project files -->
+            <mapper type="glob" from="template-project.iml" to="${project.name}.iml"/>
+        </copy>
+
+        <!-- Add flexive-dist library to IDEA module file -->
+        <replace file="${project.basedir}/${project.name}.iml">
+            <replacetoken><![CDATA[<orderEntry type="inheritedJdk" />]]></replacetoken>
+            <replacevalue><![CDATA[<orderEntry type="inheritedJdk" />
+    <orderEntry type="library" name="flexive-dist" level="application" />]]></replacevalue>
+        </replace>
+
+        <!-- Set project name in project files -->
+        <replace dir="${project.basedir}" includes="*.iml,.project,.classpath"
+                token="template-project" value="${project.name}"/>
+        <replace dir="${project.basedir}/.externalToolBuilders" includes="*"
+                token="template-project" value="${project.name}"/>
+
+        <!-- Show success message -->
+        <echo>Project ${project.name} created successfully. The project root directory is</echo>
+        <echo>${project.basedir}</echo>
+    </target>
+
+    <!-- Empty no-op target -->
+    <target name="quit"/>
+
+    <macrodef name="checkAvailable" description="Checks if the given file or directory exists and fails if it does not.">
+        <attribute name="file"/>
+
+        <sequential>
+            <available file="@{file}" property="@{file}.exists"/>
+            <fail unless="@{file}.exists" message="File or directory @{file} not found."/>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="userConfirmation" description="Asks the user to confirm the previous input">
+        <attribute name="message"/>
+        <attribute name="propertyName"/>
+        <sequential>
+            <input message="@{message}" defaultvalue="y" validargs="y,n" addproperty="@{propertyName}"/>
+            <fail>
+                <condition>
+                    <not>
+                        <equals arg1="${@{propertyName}}" arg2="y"/>
+                    </not>
+                </condition>
+            </fail>
+        </sequential>
+    </macrodef>
+</project>

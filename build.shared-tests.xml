@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+<!--
+    Shared macros and definitions for running flexive-based tests in external applications,
+    using the JBoss embedded EJB container.
+
+    @author Daniel Lichtenberger, UCS
+    @version $Rev$
+ -->
+    <import file="build.shared-properties.xml"/>
+
+    <!-- Define TestNG tasks -->
+    <taskdef resource="testngtasks" classpathref="flexive.shared-environment.path"/>
+
+    <macrodef name="run-tests">
+        <attribute name="groups" description="Comma-separated list of TestNG groups to be executed"/>
+        <attribute name="outputdir" description="The output directory for the test reports."/>
+        <attribute name="loglevel" description="Sets the log level for the test cases" default="info"/>
+        <attribute name="classpathref" default="flexive.shared-environment.path"
+                description="The classpath for the testNG container. Additional elements may be specified in the body using classpath elements."/>
+        <element name="body" optional="false" implicit="true"/>
+
+        <sequential>
+            <testng classpathref="@{classpathref}" outputdir="@{outputdir}" groups="@{groups}">
+                
+                <!-- Workaround for IPv6 issues on Linux -->
+                <jvmarg value="-Djava.net.preferIPv4Stack=true"/>
+                <!-- Enable logging -->
+                <!-- Log4j -->
+                <!--jvmarg value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
+                <jvmarg value="-Dlog4j.configuration=testlog4j.xml"/-->
+                <!-- Simple (console) logging -->
+                <jvmarg value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.SimpleLog"/>
+                <jvmarg value="-Dorg.apache.commons.logging.simplelog.defaultlog=@{loglevel}"/>
+                <body/>
+            </testng>
+        </sequential>
+    </macrodef>
+</project>

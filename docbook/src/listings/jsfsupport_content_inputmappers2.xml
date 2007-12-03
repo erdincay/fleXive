@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="java" xml:id="jsfsupport_content_inputmappers2"
+                xmlns="http://docbook.org/ns/docbook"><![CDATA[public class MyBean {
+    public InputMapper getAccountMapper() {
+        FxSelectListEdit selectList = new FxSelectList("Accounts").asEditable();
+        for (FxPK pk: someOtherBean.getAccountPks()) {
+            new FxSelectListItem(pk.getId(), selectList, -1, "Account " + pk);
+        }
+        return new FxPkSelectOneInputMapper(selectList);
+    }
+}]]>
+</programlisting>

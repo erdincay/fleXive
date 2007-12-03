@@ -1,0 +1,150 @@
+<?xml version="1.0"?>
+<!DOCTYPE facelet-taglib PUBLIC
+        "-//Sun Microsystems, Inc.//DTD Facelet Taglib 1.0//EN"
+        "http://java.sun.com/dtd/facelet-taglib_1_0.dtd">
+
+<facelet-taglib>
+    <namespace>http://www.flexive.com/jsf/admin</namespace>
+    <tag>
+        <tag-name>commandButton</tag-name>
+        <source>templates/commandButton.xhtml</source>
+    </tag>
+    <tag>
+        <tag-name>commandIcon</tag-name>
+        <source>templates/commandIcon.xhtml</source>
+    </tag>
+    <tag>
+        <tag-name>mandatorSelect</tag-name>
+        <source>templates/mandatorSelect.xhtml</source>
+    </tag>
+
+    <tag>
+        <tag-name>tab</tag-name>
+        <source>templates/tab.xhtml</source>
+    </tag>
+
+    <tag>
+        <tag-name>dynTab</tag-name>
+        <source>templates/dynTab.xhtml</source>
+    </tag>
+
+    <tag>
+        <tag-name>ceRenderFields</tag-name>
+        <source>templates/ceRenderFields.xhtml</source>
+    </tag>
+
+    <tag>
+        <tag-name>ceInlineEditor</tag-name>
+        <source>templates/ceInlineEditor.xhtml</source>
+    </tag>
+
+    <tag>
+        <tag-name>contentEditor</tag-name>
+        <source>templates/ceContentEditor.xhtml</source>
+    </tag>
+
+    <tag>
+        <tag-name>ceRenderFieldMenu</tag-name>
+        <source>templates/ceRenderFieldMenu.xhtml</source>
+    </tag>
+
+    <tag>
+        <tag-name>ceRenderTreeNodes</tag-name>
+        <source>templates/ceRenderTreeNodes.xhtml</source>
+    </tag>
+
+    <tag>
+        <tag-name>nodeLink</tag-name>
+        <source>templates/nodeLink.xhtml</source>
+    </tag>
+
+    <tag>
+        <tag-name>messages</tag-name>
+        <source>templates/messages.xhtml</source>
+    </tag>
+    <tag>
+        <tag-name>fxValueInput</tag-name>
+        <component>
+            <component-type>flexive.FxValueInput</component-type>
+            <renderer-type>flexive.FxValueInput</renderer-type>
+        </component>
+    </tag>
+    <tag>
+        <tag-name>tree</tag-name>
+        <component>
+            <component-type>flexive.Tree</component-type>
+            <renderer-type>flexive.Tree</renderer-type>
+        </component>
+    </tag>
+    <tag>
+        <tag-name>treeNode</tag-name>
+        <component>
+            <component-type>flexive.TreeNode</component-type>
+        </component>
+    </tag>
+    <tag>
+        <tag-name>dateInput</tag-name>
+        <source>templates/dateInput.xhtml</source>
+    </tag>
+    <tag>
+        <tag-name>resultSetTable</tag-name>
+        <source>templates/resultSetTable.xhtml</source>
+    </tag>
+    <tag>
+        <tag-name>jsDataScroller</tag-name>
+        <source>templates/jsDataScroller.xhtml</source>
+    </tag>
+    <tag>
+        <tag-name>resultView</tag-name>
+        <source>templates/resultView.xhtml</source>
+    </tag>
+    <tag>
+        <tag-name>resultThumbnailsTable</tag-name>
+        <source>templates/resultThumbnailsTable.xhtml</source>
+    </tag>
+    <tag>
+        <tag-name>resultThumbnail</tag-name>
+        <source>templates/resultThumbnail.xhtml</source>
+    </tag>
+    <tag>
+        <tag-name>resultTabs</tag-name>
+        <source>templates/resultTabs.xhtml</source>
+    </tag>
+
+    <tag>
+        <tag-name>tree</tag-name>
+        <component>
+            <component-type>flexive.Tree</component-type>
+            <renderer-type>flexive.Tree</renderer-type>
+        </component>
+    </tag>
+    <tag>
+        <tag-name>treeNode</tag-name>
+        <component>
+            <component-type>flexive.TreeNode</component-type>
+        </component>
+    </tag>
+    <tag>
+        <tag-name>jsonRpcCall</tag-name>
+        <component>
+            <component-type>flexive.JsonRpcCall</component-type>
+            <renderer-type>flexive.JsonRpcCall</renderer-type>
+        </component>
+    </tag>
+    <tag>
+        <tag-name>treeContextMenu</tag-name>
+        <component>
+            <component-type>flexive.TreeContextMenu</component-type>
+        </component>
+    </tag>
+    <tag>
+        <tag-name>treeContextMenuItem</tag-name>
+        <component>
+            <component-type>flexive.TreeContextMenuItem</component-type>
+        </component>
+    </tag>
+    <tag>
+        <tag-name>toolbarPluginButtons</tag-name>
+        <handler-class>com.flexive.faces.components.ToolbarPluginHandler</handler-class>
+    </tag>
+</facelet-taglib>

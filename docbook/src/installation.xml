@@ -1,0 +1,994 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE chapter [
+        <!ENTITY % global_entities SYSTEM "global.ent">
+        %global_entities;
+        ]>
+<chapter xml:id="installation" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude">
+
+    <title>Installing &Flexive;
+    </title>
+
+    <xi:include href="includes/author_hbacher.xml"/>
+
+    <section xml:id="prerequisites">
+        <title>Prerequisites</title>
+        <section xml:id="run_flexive">
+            <title>To run &Flexive; you need
+            </title>
+            <para>
+                <orderedlist>
+                    <listitem>
+                        <para>
+                            A modern computer (1024 MB RAM, 2+ Ghz CPU or higher, 150 MB free hard disk space)
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>An operating system
+                            <orderedlist>
+                                <listitem>Supported Linux Distributions: Debian, Ubuntu, Suse</listitem>
+                                <listitem>Windows XP</listitem>
+                            </orderedlist>
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>The
+                            <link href="http://www.sun.com/download/">Sun Java 6 Application Platform SDK</link>
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>A &Flexive; binary distribution or the &Flexive; source code</para>
+                    </listitem>
+                    <listitem>
+                        <para>An application server (<link href="http://labs.jboss.com/">JBoss</link> or <link href="http://glassfish.dev.java.net/">Glassfish</link>)
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>A database (at the moment only
+                            <link href="http://www.mysql.com/">MySql</link>
+                            is supported by default)
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>Administrator privileges on your machine</para>
+                    </listitem>
+                </orderedlist>
+            </para>
+        </section>
+        <section xml:id="develop_flexive">
+            <title>To develop &Flexive; you need</title>
+            <para>
+                If you are interested in developing &Flexive;, you will need the &Flexive; source code
+                and an IDE like
+                <link href="http://www.eclipse.org/">Eclipse</link>
+                or a proprietary solution.
+                Eclipse 3.2 Setup
+            </para>
+        </section>
+    </section>
+    <section xml:id="jboss_linux_installation">
+        <title>Linux Installation for JBoss 4.2</title>
+        <section xml:id="jboss_linux_installation_prerequisites">
+            <title>Prerequisites</title>
+            <para>
+                <orderedlist>
+                    <listitem>Set your
+                        <code>JAVA_HOME</code>
+                        environment variable to your JDK root directory (e.g.
+                        <code>JAVA_HOME=/usr/lib/jvm/java-6-sun</code>)
+                    </listitem>
+                    <listitem>If you simply want to deploy the EAR file to your JBoss installation
+                        <orderedlist>
+                            <listitem>&Flexive; binary distribution (<filename>flexive.ear</filename>)
+                            </listitem>
+                            <listitem>&Flexive; database setup SQL script</listitem>
+                        </orderedlist>
+                    </listitem>
+                    <listitem>If you want to build &Flexive; by your own with the ant build file
+                        <orderedlist>
+                            <listitem>&Flexive; source code</listitem>
+                        </orderedlist>
+                    </listitem>
+                    <listitem>
+                        <link href="http://www.jboss.org/">JBoss Applicationserver</link>
+                        (with EJB 3 support!)
+                    </listitem>
+                    <listitem>
+                        <link href="http://www.mysql.com/">MySQL 5.0 or later</link>
+                    </listitem>
+                    <listitem>latest stable
+                        <link href="http://dev.mysql.com/downloads/connector/j/5.0.html">MySQL JDBC driver</link>
+                    </listitem>
+                    <listitem>
+                        <link href="http://www.imagemagick.org/script/binary-releases.php">ImageMagick</link>
+                        version 6.3.4 or later
+                    </listitem>
+                </orderedlist>
+            </para>
+        </section>
+        <section xml:id="jboss_linux_installation_installation">
+            <title>Installation</title>
+            <para>
+                <itemizedlist>
+                    <listitem>Download and install JBoss 4.2.0.GA or later
+                        <code>${jboss.home}</code>
+                        denotes your JBoss installation
+                        directory)
+                    </listitem>
+                    <listitem>Download and install MySql 5.0 or later
+                        <para>
+                            Currently, choosing UTF-8 as the default charset causes issues with the database setup
+                            scripts. Use the default setting (Latin1) instead.
+                        </para>
+                    </listitem>
+                    <listitem>Download and install ImageMagick version 6.3.4 or later</listitem>
+                    <listitem>Download the latest stable MySQL JDBC driver (<filename>
+                        mysql-connector-java-5.0.6.zip</filename>) and copy it
+                        to
+                        <filename>${jboss.home}/server/all/lib/</filename>
+                    </listitem>
+                    <listitem>Create and copy the datasource config file
+                        <filename>flexive-ds.xml</filename>
+                        to
+                        <filename>${jboss.home}/server/all/deploy/</filename>
+                        and adapt to your datasource(s)
+                        or simply copy it from your &Flexive; source (if you are going to build &Flexive; by your own)
+                        <programlisting language="xml">
+                            <![CDATA[
+<datasources>
+    <xa-datasource>
+        <jndi-name>jdbc/flexiveDivision1</jndi-name>
+        <xa-datasource-class>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</xa-datasource-class>
+        <!-- Note: "&amp;" has to be used instead of "&" for parameters -->
+        <xa-datasource-property name="URL">jdbc:mysql://localhost:3306/flexive?useUnicode=true&amp;characterEncoding=utf8&amp;characterResultSets=utf8</xa-datasource-property>
+        <user-name>root</user-name>
+        <password>a</password>
+
+        <transaction-isolation>TRANSACTION_READ_COMMITTED</transaction-isolation>
+        <no-tx-separate-pools/>
+        <!-- This disables transaction interleaving (which BTW, most DB vendors don't support) -->
+        <track-connection-by-tx/>
+        <isSameRM-override-value>false</isSameRM-override-value>
+
+        <!--pooling parameters-->
+        <min-pool-size>5</min-pool-size>
+        <max-pool-size>20</max-pool-size>
+        <blocking-timeout-millis>5000</blocking-timeout-millis>
+        <idle-timeout-minutes>15</idle-timeout-minutes>
+
+        <!-- pooling criteria.  USE AT MOST ONE-->
+        <!--  If you don't use JAAS login modules or explicit login
+    getConnection(usr,pw) but rely on user/pw specified above,
+    don't specify anything here -->
+
+        <!-- If you supply the usr/pw from a JAAS login module -->
+        <security-domain/>
+
+        <!-- if your app supplies the usr/pw explicitly getConnection(usr, pw) -->
+        <application-managed-security/>
+        <exception-sorter-class-name>org.jboss.resource.adapter.jdbc.vendor.MySQLExceptionSorter
+        </exception-sorter-class-name>
+        <metadata>
+            <type-mapping>mySQL</type-mapping>
+        </metadata>
+    </xa-datasource>
+
+
+    <xa-datasource>
+        <jndi-name>jdbc/flexiveConfiguration</jndi-name>
+        <xa-datasource-class>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</xa-datasource-class>
+        <!-- Note: "&amp;" has to be used instead of "&" for parameters -->
+        <xa-datasource-property name="URL">jdbc:mysql://localhost:3306/flexiveConfiguration?useUnicode=true&amp;characterEncoding=utf8&amp;characterResultSets=utf8</xa-datasource-property>
+        <user-name>root</user-name>
+        <password>a</password>
+
+        <transaction-isolation>TRANSACTION_READ_COMMITTED</transaction-isolation>
+        <no-tx-separate-pools/>
+        <!-- This disables transaction interleaving (which BTW, most DB vendors don't support) -->
+        <track-connection-by-tx/>
+        <isSameRM-override-value>false</isSameRM-override-value>
+
+        <!--pooling parameters-->
+        <min-pool-size>5</min-pool-size>
+        <max-pool-size>20</max-pool-size>
+        <blocking-timeout-millis>5000</blocking-timeout-millis>
+        <idle-timeout-minutes>15</idle-timeout-minutes>
+
+        <!-- pooling criteria.  USE AT MOST ONE-->
+        <!--  If you don't use JAAS login modules or explicit login
+    getConnection(usr,pw) but rely on user/pw specified above,
+    don't specify anything here -->
+
+        <!-- If you supply the usr/pw from a JAAS login module -->
+        <security-domain/>
+
+        <!-- if your app supplies the usr/pw explicitly getConnection(usr, pw) -->
+        <application-managed-security/>
+        <exception-sorter-class-name>org.jboss.resource.adapter.jdbc.vendor.MySQLExceptionSorter
+        </exception-sorter-class-name>
+        <metadata>
+            <type-mapping>mySQL</type-mapping>
+        </metadata>
+    </xa-datasource>
+
+</datasources>
+]]>
+                        </programlisting>
+                    </listitem>
+                    <listitem>
+                        <para>Extend
+                            <filename>${jboss.home}\server\all\conf\login-config.xml</filename>
+                            with the following entry:
+                            <programlisting language="xml">
+                                <![CDATA[
+<application-policy name = "FxLogin">
+     <authentication>
+       <login-module code="com.flexive.core.security.FxDefaultLogin" flag="required"></login-module>
+     </authentication>
+</application-policy>
+]]>
+                            </programlisting>
+                        </para>
+                    </listitem>
+                    <listitem>Extend
+                        <filename>${jboss.home}\server\all\conf\jboss-log4j.xml</filename>
+                        to configure logging:
+                        <programlisting language="xml">
+                            <![CDATA[
+<!-- Limit flexive -->
+<category name="com.flexive">
+    <priority value="INFO"/>
+</category>
+
+<!-- Limit ajax4jsf -->
+<category name="org.ajax4jsf">
+    <priority value="WARN"/>
+</category>
+
+
+                                    ]]></programlisting>
+                    </listitem>
+                    <listitem>Create and copy the cache service file JBossCacheJNDI42-service.xml to
+                        ${jboss.home}/server/all/deploy/
+                        or simply copy it from your &Flexive; source if you are going to build flexive by your own)
+                        <programlisting language="xml">
+                            <![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+<server>
+
+   <!-- ========================================================== -->
+   <!-- Clustered SFSB cache config for use with JBoss Cache 1.4.x -->
+   <!-- ========================================================== -->
+   <mbean code="org.jboss.cache.TreeCache"
+          name="jboss.cache:service=JNDITreeCache">
+      <depends>jboss:service=Naming</depends>
+      <depends>jboss:service=TransactionManager</depends>
+
+      <attribute name="TransactionManagerLookupClass">org.jboss.cache.GenericTransactionManagerLookup</attribute>
+
+      <attribute name="ClusterName">[fleXive]-Cache-JNDI</attribute>
+
+      <!--
+              Node locking level : SERIALIZABLE
+                                   REPEATABLE_READ (default)
+                                   READ_COMMITTED
+                                   READ_UNCOMMITTED
+                                   NONE
+      -->
+      <attribute name="IsolationLevel">REPEATABLE_READ</attribute>
+
+      <!--     Valid modes are LOCAL
+                               REPL_ASYNC
+                               REPL_SYNC
+      -->
+      <attribute name="CacheMode">REPL_ASYNC</attribute>
+
+	  <!-- We want to activate/inactivate regions as beans are deployed -->
+      <attribute name="UseRegionBasedMarshalling">true</attribute>
+      <!-- Must match the value of "useRegionBasedMarshalling" -->
+      <attribute name="InactiveOnStartup">true</attribute>
+
+	  <!--
+	       JGroups protocol stack config in XML format.
+		   If your CacheMode is set to REPL_SYNC we recommend you comment
+           out the FC (flow control) protocol
+
+           On Windows machines, because of the media sense feature
+           being broken with multicast (even after disabling media sense)
+           set the UDP.loopback attribute to true
+	  -->
+      <attribute name="ClusterConfig">
+         <config>
+            <UDP mcast_addr="${flexive.cluster.udpGroup:229.1.2.5}"
+             mcast_port="${jboss.ejb3sfsbpartition.mcast_port:45557}"
+             tos="8"
+             ucast_recv_buf_size="20000000"
+             ucast_send_buf_size="640000"
+             mcast_recv_buf_size="25000000"
+             mcast_send_buf_size="640000"
+             loopback="false"
+             discard_incompatible_packets="true"
+             enable_bundling="false"
+             max_bundle_size="64000"
+             max_bundle_timeout="30"
+             use_incoming_packet_handler="true"
+             use_outgoing_packet_handler="false"
+             ip_ttl="${jgroups.udp.ip_ttl:2}"
+             down_thread="false" up_thread="false"/>
+          <PING timeout="2000"
+             down_thread="false" up_thread="false" num_initial_members="3"/>
+          <MERGE2 max_interval="100000"
+             down_thread="false" up_thread="false" min_interval="20000"/>
+          <FD_SOCK down_thread="false" up_thread="false"/>
+          <FD timeout="10000" max_tries="5" down_thread="false" up_thread="false" shun="true"/>
+          <VERIFY_SUSPECT timeout="1500" down_thread="false" up_thread="false"/>
+          <pbcast.NAKACK max_xmit_size="60000"
+                   use_mcast_xmit="false" gc_lag="0"
+                   retransmit_timeout="300,600,1200,2400,4800"
+                   down_thread="false" up_thread="false"
+                   discard_delivered_msgs="true"/>
+          <UNICAST timeout="300,600,1200,2400,3600"
+             down_thread="false" up_thread="false"/>
+          <pbcast.STABLE stability_delay="1000" desired_avg_gossip="50000"
+                   down_thread="false" up_thread="false"
+                   max_bytes="400000"/>
+          <pbcast.GMS print_local_addr="true" join_timeout="3000"
+                   down_thread="false" up_thread="false"
+                   join_retry_timeout="2000" shun="true"
+                   view_bundling="true"
+                   view_ack_collection_timeout="5000"/>
+          <FC max_credits="2000000" down_thread="false" up_thread="false"
+              min_threshold="0.10"/>
+          <FRAG2 frag_size="60000" down_thread="false" up_thread="false"/>
+          <pbcast.STATE_TRANSFER down_thread="false" up_thread="false" use_flush="false"/>
+        </config>
+      </attribute>
+
+      <!--    The max amount of time (in milliseconds) we wait until the
+            initial state (ie. the contents of the cache) are retrieved from
+            existing members.
+      -->
+      <attribute name="InitialStateRetrievalTimeout">17500</attribute>
+
+      <!--    Number of milliseconds to wait until all responses for a
+              synchronous call have been received.
+      -->
+      <attribute name="SyncReplTimeout">17500</attribute>
+
+      <!--  Max number of milliseconds to wait for a lock acquisition -->
+      <attribute name="LockAcquisitionTimeout">15000</attribute>
+
+      <!--  Name of the eviction policy class. -->
+      <attribute name="EvictionPolicyClass">org.jboss.cache.eviction.LRUPolicy</attribute>
+
+      <!--  Specific eviction policy configurations. -->
+      <attribute name="EvictionPolicyConfig">
+         <config>
+            <attribute name="wakeUpIntervalSeconds">5</attribute>
+            <name>flexiveMain</name>
+            <!-- So default region would never timeout -->
+            <region name="/_default_">
+               <attribute name="maxNodes">0</attribute>
+               <attribute name="timeToIdleSeconds">0</attribute>
+            </region>
+            <!-- cache region for contents -->
+            <region name="/Division1/FxContent">
+                <attribute name="maxNodes">20000</attribute>
+                <attribute name="timeToIdleSeconds">300</attribute>
+                <attribute name="timeToLiveSeconds">1000</attribute>
+            </region>
+             <!-- cache region for user configuration -->
+             <region name="/Division1/userConfig">
+                 <attribute name="maxNodes">0</attribute>
+                 <attribute name="timeToIdleSeconds">300</attribute>
+                 <attribute name="timeToLiveSeconds">1000</attribute>
+             </region>
+         </config>
+      </attribute>
+   </mbean>
+
+    <mbean code="org.jboss.invocation.jrmp.server.JRMPProxyFactory"
+           name="jboss.jmx:service=proxyFactory,type=jrmp,target=factory">
+        <attribute name="InvokerName">jboss:service=invoker,type=jrmp</attribute>
+        <attribute name="TargetName">jboss.cache:service=JNDITreeCache</attribute>
+        <attribute name="JndiName">FxJBossJNDICache</attribute>
+        <attribute name="InvokeTargetMethod">true</attribute>
+        <attribute name="ExportedInterface">org.jboss.cache.TreeCacheMBean</attribute>
+        <attribute name="ClientInterceptors">
+            <iterceptors>
+                <interceptor>org.jboss.proxy.ClientMethodInterceptor</interceptor>
+                <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
+                <interceptor>org.jboss.invocation.InvokerInterceptor</interceptor>
+            </iterceptors>
+        </attribute>
+        <depends>jboss:service=invoker,type=jrmp</depends>
+        <depends>jboss.cache:service=JNDITreeCache</depends>
+    </mbean>
+</server>]]>
+                        </programlisting>
+                    </listitem>
+                </itemizedlist>
+            </para>
+        </section>
+        <section xml:id="jboss_linux_installation_building_from_source">
+            <title>Building from source</title>
+            <para>
+                This procedure is for those building &Flexive; from the downloaded source code
+                <itemizedlist>
+                    <listitem>Copy the build.properties.sample file to build.properties
+                        <programlisting language="xml">
+                            <![CDATA[
+jboss.home=/path/to/jboss
+
+# path to deploy the ear
+deploy.ear.path=${jboss.home}/server/all/deploy
+
+# path to deploy needed runtime libs like emma.jar
+deploy.lib.path=${jboss.home}/server/all/lib
+
+# path to the embedded jboss ejb3 container neededfor unit testing
+jboss.embedded.path=${jboss.home}/jboss-embeddable/
+
+# (...)]]></programlisting>
+                    </listitem>
+                    <listitem>Execute ant db.update before ant all in your &Flexive; directory where the build.xml file
+                        resides.
+                        This will recreate all configured databases and destroy existing data.
+                        <para>If ant fails: If you get the following warning: Problem: failed to create task or type
+                            javacc when executing
+                            ant make sure you install the ant-optional package.
+                        </para>
+                    </listitem>
+                    <listitem>To deploy the ear execute ant deploy
+                        <para>Don't forget to set your
+                            <code>${jboss.home}</code>
+                            variable in the
+                            build.properties properly!
+                        </para>
+                        <itemizedlist>
+                            <listitem>Note: to successfully compile &Flexive; JAVA 1.6 is needed</listitem>
+                            <listitem>Be also sure to set the
+                                <code>JDK_HOME</code>
+                                and
+                                <code>JAVA_HOME</code>
+                                variables accordingly
+                            </listitem>
+                        </itemizedlist>
+                    </listitem>
+                </itemizedlist>
+            </para>
+        </section>
+        <section xml:id="jboss_linux_installation_sql_script">
+            <title>Setting up the database with the SQL script</title>
+            <para>This procedure is for those having downloaded the EAR file</para>
+            <para>Make sure no databases named flexive or flexiveConfiguration exist in your
+                MySql Server Installation - otherwise the setup SQL script will fail.
+            </para>
+            <para>To delete a database log on to your MySql command line interface</para>
+            <programlisting><![CDATA[
+:~$ mysql -u root -p
+You will be prompted for the password.]]></programlisting>
+            <para>To delete the databases execute</para>
+            <programlisting><![CDATA[
+mysql> DROP DATABASE flexive;
+mysql> DROP DATABASE flexiveConfiguration;
+mysql> exit;]]></programlisting>
+            <para>Download the &Flexive; database setup SQL script if you haven't already.
+                Create the two needed databases for &Flexive; as follows.
+                In the command line type:
+                <programlisting>
+                    <![CDATA[
+:~$ mysql -u root -p -h localhost < "C:\flexive.sql"]]>
+                </programlisting>
+                You will be prompted to enter the root password for the mysql server.
+                Your databases should now be set up.
+            </para>
+        </section>
+        <section xml:id="jboss_linux_installation_deployment">
+            <title>Deployment</title>
+            <para>If you were building from source
+                <itemizedlist>
+                    <listitem>run ant deploy in your &Flexive; directory where the build.xml file resides</listitem>
+                </itemizedlist>
+                If you have downloaded the EAR file
+                <itemizedlist>
+                    <listitem>Copy the
+                        <filename>flexive3.ear</filename>
+                        to
+                        <filename>${jboss.home}/server/all/deploy</filename>
+                    </listitem>
+                </itemizedlist>
+            </para>
+        </section>
+        <section xml:id="jboss_linux_installation_taking_off">
+            <title>Starting &Flexive;
+            </title>
+            <para>
+                <itemizedlist>
+                    <listitem>
+                        Launch JBoss using
+                        <programlisting><![CDATA[sh run.sh -c all -Djboss.bind.address=0.0.0.0]]></programlisting>
+                    </listitem>
+                    <para>Important - If there are multiple JBoss installations running in your local network you need
+                        to assign a different partition UDP group to each cluster! This can be done by adding
+                        <code>-Djboss.partition.udpGroup=230.2.3.4</code>
+                        (or any other multicast address you choose thats available)
+                        to the start script/command shown above
+                    </para>
+                    <listitem>To access the backend point your browser to
+                        <link href="http://localhost:8080/flexive/adm/">http://localhost:8080/flexive/adm/</link>
+                        <para>Alternatively you can specify your server's IP address, which is supported by default, too.</para>
+                    </listitem>
+                    <para>
+                        The default superuser's username and password for the Backend Administration are:
+                        username: s password: s
+                    </para>
+                </itemizedlist>
+            </para>
+        </section>
+    </section>
+
+    <section xml:id="jboss_windows_installation">
+        <title>Windows Installation for JBoss 4.2</title>
+        <section xml:id="jboss_windows_installation_prerequisites">
+            <title>Prerequisites</title>
+            <para>
+                <orderedlist>
+                    <listitem>Set your
+                        <code>JAVA_HOME</code>
+                        environment variable to your JDK root directory (e.g.
+                        <code>C:\Java\jdk1.6.0_03</code>)
+                    </listitem>
+                    <listitem>If you simply want to deploy the EAR file to your JBoss installation
+                        <orderedlist>
+                            <listitem>&Flexive; binary distribution (<filename>flexive.ear</filename>)
+                            </listitem>
+                            <listitem>&Flexive; database setup SQL script</listitem>
+                        </orderedlist>
+                    </listitem>
+                    <listitem>If you want to build &Flexive; by your own with the ant build file
+                        <orderedlist>
+                            <listitem>&Flexive; source code</listitem>
+                        </orderedlist>
+                    </listitem>
+                    <listitem>
+                        <link href="http://www.jboss.org/">JBoss Applicationserver</link>
+                        (with EJB 3 support!)
+                    </listitem>
+                    <listitem>
+                        <link href="http://www.mysql.com/">MySQL 5.0 or later</link>
+                    </listitem>
+                    <listitem>latest stable
+                        <link href="http://dev.mysql.com/downloads/connector/j/5.0.html">MySQL JDBC driver</link>
+                    </listitem>
+                    <listitem>
+                        <link href="http://www.imagemagick.org/script/binary-releases.php">ImageMagick</link>
+                        version 6.3.4 or later
+                    </listitem>
+                </orderedlist>
+            </para>
+        </section>
+        <section xml:id="jboss_windows_installation_installation">
+            <title>Installation</title>
+            <para>
+                <itemizedlist>
+                    <listitem>Download and install JBoss 4.2.0.GA or later
+                        <code>${jboss.home}</code>
+                        denotes your JBoss installation
+                        directory)
+                    </listitem>
+                    <listitem>Download and install MySql 5.0 or later
+                        <para>
+                            Currently, choosing UTF-8 as the default charset causes issues with the database setup
+                            scripts. Use the default setting (Latin1) instead.
+                        </para>
+                    </listitem>
+                    <listitem>Download and install ImageMagick version 6.3.4 or later</listitem>
+                    <listitem>Download the latest stable MySQL JDBC driver (<filename>
+                        mysql-connector-java-5.0.6.zip</filename>) and copy it
+                        to
+                        <filename>${jboss.home}\server\all\lib\</filename>
+                    </listitem>
+                    <listitem>Create and copy the datasource config file
+                        <filename>flexive-ds.xml</filename>
+                        to
+                        <filename>${jboss.home}\server\all\deploy\</filename>
+                        and adapt to your datasource(s)
+                        or simply copy it from your &Flexive; source (if you are going to build &Flexive; by your own)
+                        <programlisting language="xml">
+                            <![CDATA[
+<datasources>
+    <xa-datasource>
+        <jndi-name>jdbc/flexiveDivision1</jndi-name>
+        <xa-datasource-class>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</xa-datasource-class>
+        <!-- Note: "&amp;" has to be used instead of "&" for parameters -->
+        <xa-datasource-property name="URL">jdbc:mysql://localhost:3306/flexive?useUnicode=true&amp;characterEncoding=utf8&amp;characterResultSets=utf8</xa-datasource-property>
+        <user-name>root</user-name>
+        <password>a</password>
+
+        <transaction-isolation>TRANSACTION_READ_COMMITTED</transaction-isolation>
+        <no-tx-separate-pools/>
+        <!-- This disables transaction interleaving (which BTW, most DB vendors don't support) -->
+        <track-connection-by-tx/>
+        <isSameRM-override-value>false</isSameRM-override-value>
+
+        <!--pooling parameters-->
+        <min-pool-size>5</min-pool-size>
+        <max-pool-size>20</max-pool-size>
+        <blocking-timeout-millis>5000</blocking-timeout-millis>
+        <idle-timeout-minutes>15</idle-timeout-minutes>
+
+        <!-- pooling criteria.  USE AT MOST ONE-->
+        <!--  If you don't use JAAS login modules or explicit login
+    getConnection(usr,pw) but rely on user/pw specified above,
+    don't specify anything here -->
+
+        <!-- If you supply the usr/pw from a JAAS login module -->
+        <security-domain/>
+
+        <!-- if your app supplies the usr/pw explicitly getConnection(usr, pw) -->
+        <application-managed-security/>
+        <exception-sorter-class-name>org.jboss.resource.adapter.jdbc.vendor.MySQLExceptionSorter
+        </exception-sorter-class-name>
+        <metadata>
+            <type-mapping>mySQL</type-mapping>
+        </metadata>
+    </xa-datasource>
+
+
+    <xa-datasource>
+        <jndi-name>jdbc/flexiveConfiguration</jndi-name>
+        <xa-datasource-class>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</xa-datasource-class>
+        <!-- Note: "&amp;" has to be used instead of "&" for parameters -->
+        <xa-datasource-property name="URL">jdbc:mysql://localhost:3306/flexiveConfiguration?useUnicode=true&amp;characterEncoding=utf8&amp;characterResultSets=utf8</xa-datasource-property>
+        <user-name>root</user-name>
+        <password>a</password>
+
+        <transaction-isolation>TRANSACTION_READ_COMMITTED</transaction-isolation>
+        <no-tx-separate-pools/>
+        <!-- This disables transaction interleaving (which BTW, most DB vendors don't support) -->
+        <track-connection-by-tx/>
+        <isSameRM-override-value>false</isSameRM-override-value>
+
+        <!--pooling parameters-->
+        <min-pool-size>5</min-pool-size>
+        <max-pool-size>20</max-pool-size>
+        <blocking-timeout-millis>5000</blocking-timeout-millis>
+        <idle-timeout-minutes>15</idle-timeout-minutes>
+
+        <!-- pooling criteria.  USE AT MOST ONE-->
+        <!--  If you don't use JAAS login modules or explicit login
+    getConnection(usr,pw) but rely on user/pw specified above,
+    don't specify anything here -->
+
+        <!-- If you supply the usr/pw from a JAAS login module -->
+        <security-domain/>
+
+        <!-- if your app supplies the usr/pw explicitly getConnection(usr, pw) -->
+        <application-managed-security/>
+        <exception-sorter-class-name>org.jboss.resource.adapter.jdbc.vendor.MySQLExceptionSorter
+        </exception-sorter-class-name>
+        <metadata>
+            <type-mapping>mySQL</type-mapping>
+        </metadata>
+    </xa-datasource>
+
+</datasources>
+]]>
+                        </programlisting>
+                    </listitem>
+                    <listitem>
+                        <para>Extend
+                            <filename>${jboss.home}\server\all\conf\login-config.xml</filename>
+                            with the following entry:
+                            <programlisting language="xml">
+                                <![CDATA[
+<application-policy name = "FxLogin">
+     <authentication>
+       <login-module code="com.flexive.core.security.FxDefaultLogin" flag="required"></login-module>
+     </authentication>
+</application-policy>
+]]>
+                            </programlisting>
+                        </para>
+                    </listitem>
+                    <listitem>Extend
+                        <filename>${jboss.home}\server\all\conf\jboss-log4j.xml</filename>
+                        to configure logging:
+                        <programlisting language="xml">
+                            <![CDATA[
+<!-- Limit flexive -->
+<category name="com.flexive">
+    <priority value="INFO"/>
+</category>
+
+<!-- Limit ajax4jsf -->
+<category name="org.ajax4jsf">
+    <priority value="WARN"/>
+</category>
+
+
+                                    ]]></programlisting>
+                    </listitem>
+                    <listitem>Create and copy the cache service file JBossCacheJNDI42-service.xml to
+                        ${jboss.home}\server\all\deploy\
+                        or simply copy it from your &Flexive; source if you are going to build &Flexive; by your own)
+                        <programlisting language="xml">
+                            <![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+<server>
+
+   <!-- ========================================================== -->
+   <!-- Clustered SFSB cache config for use with JBoss Cache 1.4.x -->
+   <!-- ========================================================== -->
+   <mbean code="org.jboss.cache.TreeCache"
+          name="jboss.cache:service=JNDITreeCache">
+      <depends>jboss:service=Naming</depends>
+      <depends>jboss:service=TransactionManager</depends>
+
+      <attribute name="TransactionManagerLookupClass">org.jboss.cache.GenericTransactionManagerLookup</attribute>
+
+      <attribute name="ClusterName">[fleXive]-Cache-JNDI</attribute>
+
+      <!--
+              Node locking level : SERIALIZABLE
+                                   REPEATABLE_READ (default)
+                                   READ_COMMITTED
+                                   READ_UNCOMMITTED
+                                   NONE
+      -->
+      <attribute name="IsolationLevel">REPEATABLE_READ</attribute>
+
+      <!--     Valid modes are LOCAL
+                               REPL_ASYNC
+                               REPL_SYNC
+      -->
+      <attribute name="CacheMode">REPL_ASYNC</attribute>
+
+	  <!-- We want to activate/inactivate regions as beans are deployed -->
+      <attribute name="UseRegionBasedMarshalling">true</attribute>
+      <!-- Must match the value of "useRegionBasedMarshalling" -->
+      <attribute name="InactiveOnStartup">true</attribute>
+
+	  <!--
+	       JGroups protocol stack config in XML format.
+		   If your CacheMode is set to REPL_SYNC we recommend you comment
+           out the FC (flow control) protocol
+
+           On Windows machines, because of the media sense feature
+           being broken with multicast (even after disabling media sense)
+           set the UDP.loopback attribute to true
+	  -->
+      <attribute name="ClusterConfig">
+         <config>
+            <UDP mcast_addr="${flexive.cluster.udpGroup:229.1.2.5}"
+             mcast_port="${jboss.ejb3sfsbpartition.mcast_port:45557}"
+             tos="8"
+             ucast_recv_buf_size="20000000"
+             ucast_send_buf_size="640000"
+             mcast_recv_buf_size="25000000"
+             mcast_send_buf_size="640000"
+             loopback="false"
+             discard_incompatible_packets="true"
+             enable_bundling="false"
+             max_bundle_size="64000"
+             max_bundle_timeout="30"
+             use_incoming_packet_handler="true"
+             use_outgoing_packet_handler="false"
+             ip_ttl="${jgroups.udp.ip_ttl:2}"
+             down_thread="false" up_thread="false"/>
+          <PING timeout="2000"
+             down_thread="false" up_thread="false" num_initial_members="3"/>
+          <MERGE2 max_interval="100000"
+             down_thread="false" up_thread="false" min_interval="20000"/>
+          <FD_SOCK down_thread="false" up_thread="false"/>
+          <FD timeout="10000" max_tries="5" down_thread="false" up_thread="false" shun="true"/>
+          <VERIFY_SUSPECT timeout="1500" down_thread="false" up_thread="false"/>
+          <pbcast.NAKACK max_xmit_size="60000"
+                   use_mcast_xmit="false" gc_lag="0"
+                   retransmit_timeout="300,600,1200,2400,4800"
+                   down_thread="false" up_thread="false"
+                   discard_delivered_msgs="true"/>
+          <UNICAST timeout="300,600,1200,2400,3600"
+             down_thread="false" up_thread="false"/>
+          <pbcast.STABLE stability_delay="1000" desired_avg_gossip="50000"
+                   down_thread="false" up_thread="false"
+                   max_bytes="400000"/>
+          <pbcast.GMS print_local_addr="true" join_timeout="3000"
+                   down_thread="false" up_thread="false"
+                   join_retry_timeout="2000" shun="true"
+                   view_bundling="true"
+                   view_ack_collection_timeout="5000"/>
+          <FC max_credits="2000000" down_thread="false" up_thread="false"
+              min_threshold="0.10"/>
+          <FRAG2 frag_size="60000" down_thread="false" up_thread="false"/>
+          <pbcast.STATE_TRANSFER down_thread="false" up_thread="false" use_flush="false"/>
+        </config>
+      </attribute>
+
+      <!--    The max amount of time (in milliseconds) we wait until the
+            initial state (ie. the contents of the cache) are retrieved from
+            existing members.
+      -->
+      <attribute name="InitialStateRetrievalTimeout">17500</attribute>
+
+      <!--    Number of milliseconds to wait until all responses for a
+              synchronous call have been received.
+      -->
+      <attribute name="SyncReplTimeout">17500</attribute>
+
+      <!--  Max number of milliseconds to wait for a lock acquisition -->
+      <attribute name="LockAcquisitionTimeout">15000</attribute>
+
+      <!--  Name of the eviction policy class. -->
+      <attribute name="EvictionPolicyClass">org.jboss.cache.eviction.LRUPolicy</attribute>
+
+      <!--  Specific eviction policy configurations. -->
+      <attribute name="EvictionPolicyConfig">
+         <config>
+            <attribute name="wakeUpIntervalSeconds">5</attribute>
+            <name>flexiveMain</name>
+            <!-- So default region would never timeout -->
+            <region name="/_default_">
+               <attribute name="maxNodes">0</attribute>
+               <attribute name="timeToIdleSeconds">0</attribute>
+            </region>
+            <!-- cache region for contents -->
+            <region name="/Division1/FxContent">
+                <attribute name="maxNodes">20000</attribute>
+                <attribute name="timeToIdleSeconds">300</attribute>
+                <attribute name="timeToLiveSeconds">1000</attribute>
+            </region>
+             <!-- cache region for user configuration -->
+             <region name="/Division1/userConfig">
+                 <attribute name="maxNodes">0</attribute>
+                 <attribute name="timeToIdleSeconds">300</attribute>
+                 <attribute name="timeToLiveSeconds">1000</attribute>
+             </region>
+         </config>
+      </attribute>
+   </mbean>
+
+    <mbean code="org.jboss.invocation.jrmp.server.JRMPProxyFactory"
+           name="jboss.jmx:service=proxyFactory,type=jrmp,target=factory">
+        <attribute name="InvokerName">jboss:service=invoker,type=jrmp</attribute>
+        <attribute name="TargetName">jboss.cache:service=JNDITreeCache</attribute>
+        <attribute name="JndiName">FxJBossJNDICache</attribute>
+        <attribute name="InvokeTargetMethod">true</attribute>
+        <attribute name="ExportedInterface">org.jboss.cache.TreeCacheMBean</attribute>
+        <attribute name="ClientInterceptors">
+            <iterceptors>
+                <interceptor>org.jboss.proxy.ClientMethodInterceptor</interceptor>
+                <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
+                <interceptor>org.jboss.invocation.InvokerInterceptor</interceptor>
+            </iterceptors>
+        </attribute>
+        <depends>jboss:service=invoker,type=jrmp</depends>
+        <depends>jboss.cache:service=JNDITreeCache</depends>
+    </mbean>
+</server>]]>
+                        </programlisting>
+                    </listitem>
+                </itemizedlist>
+            </para>
+        </section>
+        <section xml:id="jboss_windows_installation_building_from_source">
+            <title>Building from source</title>
+            <para>
+                This procedure is for those building &Flexive; from the downloaded source code
+                <itemizedlist>
+                    <listitem>Copy the build.properties.sample file to build.properties
+                        <programlisting language="xml">
+                            <![CDATA[
+jboss.home=/path/to/jboss
+
+# path to deploy the ear
+deploy.ear.path=${jboss.home}/server/all/deploy
+
+# path to deploy needed runtime libs like emma.jar
+deploy.lib.path=${jboss.home}/server/all/lib
+
+# path to the embedded jboss ejb3 container neededfor unit testing
+jboss.embedded.path=${jboss.home}/jboss-embeddable/
+
+# (...)]]></programlisting>
+                    </listitem>
+                    <listitem>Execute ant db.update before ant all in your &Flexive; directory where the build.xml file
+                        resides.
+                        This will recreate all configured databases and destroy existing data.
+                        <para>If ant fails: If you get the following warning: Problem: failed to create task or type
+                            javacc when executing
+                            ant make sure you install the ant-optional package.
+                        </para>
+                    </listitem>
+                    <listitem>To deploy the ear execute ant deploy
+                        <para>Don't forget to set your
+                            <code>${jboss.home}</code>
+                            variable in the
+                            build.properties properly!
+                        </para>
+                        <itemizedlist>
+                            <listitem>Note: to successfully compile &Flexive; JAVA 1.6 is needed</listitem>
+                            <listitem>Be also sure to set the
+                                <code>JDK_HOME</code>
+                                and
+                                <code>JAVA_HOME</code>
+                                variables accordingly
+                            </listitem>
+                        </itemizedlist>
+                    </listitem>
+                </itemizedlist>
+            </para>
+        </section>
+        <section xml:id="jboss_windows_installation_sql_script">
+            <title>Setting up the database with the SQL script</title>
+            <para>This procedure is for those having downloaded the EAR file</para>
+            <para>Make sure no databases named flexive or flexiveConfiguration exist in your
+                MySql Server Installation - otherwise the setup SQL script will fail.
+            </para>
+            <para>To delete a database log on to your MySql command line interface</para>
+            <programlisting><![CDATA[
+C:\MySQL\MySQL Server 5.0\bin>mysql -u root -p
+You will be prompted for the password.]]></programlisting>
+            <para>To delete the databases execute</para>
+            <programlisting><![CDATA[
+mysql> DROP DATABASE flexive;
+mysql> DROP DATABASE flexiveConfiguration;
+mysql> exit;]]></programlisting>
+            <para>Download the &Flexive; database setup SQL script if you haven't already.
+                Create the two needed databases for &Flexive; as follows.
+                In the command line type:
+                <programlisting>
+                    <![CDATA[
+C:\MySQL\MySQL Server 5.0\bin>mysql -u root -p -h localhost < "C:\flexive.sql"]]>
+                </programlisting>
+                You will be prompted to enter the root password for the mysql server.
+                Your databases should now be set up.
+            </para>
+        </section>
+        <section xml:id="jboss_windows_installation_deployment">
+            <title>Deployment</title>
+            <para>If you were building from source
+                <itemizedlist>
+                    <listitem>run ant deploy in your &Flexive; directory where the build.xml file resides</listitem>
+                </itemizedlist>
+                If you have downloaded the EAR file
+                <itemizedlist>
+                    <listitem>Copy the
+                        <filename>flexive3.ear</filename>
+                        to
+                        <filename>${jboss.home}\server\all\deploy</filename>
+                    </listitem>
+                </itemizedlist>
+            </para>
+        </section>
+        <section xml:id="jboss_windows_installation_taking_off">
+            <title>Starting &Flexive;
+            </title>
+            <para>
+                <itemizedlist>
+                    <listitem>
+                        Launch JBoss using
+                        <programlisting><![CDATA[start run.bat -c all -Djboss.bind.address=0.0.0.0]]></programlisting>
+                    </listitem>
+                    <para>Important - If there are multiple JBoss installations running in your local network you need
+                        to assign a different partition UDP group to each cluster! This can be done by adding
+                        <code>-Djboss.partition.udpGroup=230.2.3.4</code>
+                        (or any other multicast address you choose thats available)
+                        to the start script/command shown above
+                    </para>
+                    <listitem>To access the backend point your browser to
+                        <link href="http://localhost:8080/flexive/adm/">http://localhost:8080/flexive/adm/</link>
+                        <para>Alternatively you can specify your server's IP address which is supported by default, too.</para>
+                    </listitem>
+                    <para>
+                        The default superuser's username and password for the Backend Administration are:
+                        username: s password: s
+                    </para>
+                </itemizedlist>
+            </para>
+        </section>
+    </section>
+
+</chapter>
+        

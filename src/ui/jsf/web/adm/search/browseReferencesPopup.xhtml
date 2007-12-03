@@ -1,0 +1,84 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:s="http://myfaces.apache.org/sandbox"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+
+    <ui:define name="head">
+        <style type="text/css">
+        <!--
+            body {
+                /* Disable default content style */
+                overflow: scroll;
+            }
+        //-->
+        </style>
+    </ui:define>
+    <ui:define name="body">
+        <a4j:form id="frm">
+            <c:if test="#{empty browseReferencesBean.parseRequestParameters}"> </c:if>
+
+            <script type="text/javascript">
+            <!--
+                var formId = "#{browseReferencesBean.formName}";
+                var inputId = "#{browseReferencesBean.inputName}";
+                function selectReference(pk) {
+                    try {
+                        window.opener.document.forms[formId][inputId].value = pk;
+                        window.opener.document.getElementById(inputId + "_preview").innerHTML =
+                            "<img border=\"0\" src=\"" + getThumbnailURI(pk) + "\">";
+                        window.close();
+                    } catch (e) {
+                        alert(e);
+                    }
+                    return false;
+                }
+            //-->
+            </script>
+
+            <a4j:region>
+                <h:inputHidden value="#{browseReferencesBean.inputName}"/>
+                <h:inputHidden value="#{browseReferencesBean.formName}"/>
+                <h:inputHidden value="#{browseReferencesBean.XPath}"/>
+
+                <table>
+                    <tr>
+                        <td>
+                            <h:inputText value="#{browseReferencesBean.query}">
+                                <a4j:support event="onchange" reRender="results" eventsQueue="updateResults"/>
+                            </h:inputText>
+                        </td>
+                        <td>
+                            <a4j:commandLink id="submitSearchButton" reRender="results" eventsQueue="updateResults">
+                                <t:graphicImage url="/adm/images/toolbar/search.png" border="0"/>
+                            </a4j:commandLink>
+                        </td>
+                    </tr>
+                </table>
+
+                <a4j:outputPanel id="results">
+                    <c:forEach var="row" items="#{browseReferencesBean.resultSet.rows}">
+                        <div style="padding:5px;float:left">
+                            <adm:resultThumbnail row="#{row}" resultSet="#{browseReferencesBean.resultSet}"
+                                    onclick="return selectReference('#{row[0]}')"/>
+                        </div>
+                    </c:forEach>
+                </a4j:outputPanel>
+            </a4j:region>
+
+        </a4j:form>
+    </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,168 @@
+/***************************************************************
+ *  This file is part of the [fleXive](R) project.
+ *
+ *  Copyright (c) 1999-2007
+ *  UCS - unique computing solutions gmbh (http://www.ucs.at)
+ *  All rights reserved
+ *
+ *  The [fleXive](R) project is free software; you can redistribute
+ *  it and/or modify it under the terms of the GNU General Public
+ *  License as published by the Free Software Foundation;
+ *  either version 2 of the License, or (at your option) any
+ *  later version.
+ *
+ *  The GNU General Public License can be found at
+ *  http://www.gnu.org/copyleft/gpl.html.
+ *  A copy is found in the textfile GPL.txt and important notices to the
+ *  license from the author are found in LICENSE.txt distributed with
+ *  these libraries.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  For further information about UCS - unique computing solutions gmbh,
+ *  please see the company website: http://www.ucs.at
+ *
+ *  For further information about [fleXive](R), please see the
+ *  project website: http://www.flexive.org
+ *
+ *
+ *  This copyright notice MUST APPEAR in all copies of the file!
+ ***************************************************************/
+package com.flexive.tests.embedded;
+
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxContext;
+import com.flexive.shared.exceptions.FxAccountInUseException;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxLoginFailedException;
+import com.flexive.shared.exceptions.FxLogoutFailedException;
+import com.flexive.shared.interfaces.ACLEngine;
+import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.value.FxString;
+
+/**
+ * Helper base class to provide user login/logout and UserTicket information for tests
+ *
+ * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ */
+public class FxTestUtils {
+    /**
+     * Login the given user/password.
+     *
+     * @param username the user name
+     * @param password the password
+     * @throws FxLoginFailedException  if the login failed
+     * @throws FxAccountInUseException if the user is already logged in (and not multilogin-capable)
+     */
+    public static void login(String username, String password) throws FxLoginFailedException, FxAccountInUseException {
+        try {
+            FxContext.get().login(username, password, true);
+        } catch (FxLoginFailedException e) {
+            System.err.println("Login failed: " + e.getMessage());
+        } catch (FxAccountInUseException e) {
+            System.err.println("Account for [" + username + "] is in use: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Login a TestUser
+     *
+     * @param user TestUser
+     * @throws FxLoginFailedException
+     * @throws FxAccountInUseException
+     */
+    public static void login(TestUser user) throws FxLoginFailedException, FxAccountInUseException {
+        try {
+            FxContext.get().login(user.getUserName(), user.getPassword(), true);
+        } catch (FxLoginFailedException e) {
+            System.err.println("Login failed: " + e.getMessage());
+        } catch (FxAccountInUseException e) {
+            System.err.println("Account for [" + user.getUserName() + "] is in use: " + e.getMessage());
+        }
+    }
+
+    /**
+     * The ticket of the user.
+     * <p/>
+     *
+     * @return The ticket of the user
+     */
+    public static UserTicket getUserTicket() {
+        return FxContext.get().getTicket();
+    }
+
+    /**
+     * Change the current user for the test
+     *
+     * @param userName the test user name
+     * @param password the test user password
+     * @throws FxLoginFailedException
+     * @throws FxAccountInUseException
+     * @throws com.flexive.shared.exceptions.FxLogoutFailedException
+     *
+     */
+    public static void changeUser(String userName, String password) throws FxLoginFailedException, FxAccountInUseException, FxLogoutFailedException {
+        FxContext.get().logout();
+        FxContext.get().login(userName, password, true);
+    }
+
+    /**
+     * Perform logout of the current user.
+     *
+     * @throws FxLogoutFailedException if the logout failed
+     */
+    public static void logout() throws FxLogoutFailedException {
+        FxContext.get().logout();
+    }
+
+    /**
+     * Create a set of ACL's
+     *
+     * @param name     array with the names of the ACL's
+     * @param category CATEGORY's
+     * @param mandator the mandator
+     * @return created ACL's
+     * @throws FxApplicationException
+     */
+    public static ACL[] createACLs(String[] name, ACL.Category[] category, long mandator) throws FxApplicationException {
+        assert name != null && category != null && name.length == category.length : "Invalid parameter(s) for createACL!";
+        ACL[] acls = new ACL[name.length];
+        ACLEngine acl = EJBLookup.getACLEngine();
+        FxString label = new FxString("Unit Test ACL Label");
+        for (int i = 0; i < name.length; i++) {
+            long tmpId = acl.create(name[i], label, mandator, "#AABBCC", "UnitTest ACL", category[i]);
+            acls[i] = CacheAdmin.getEnvironment().getACL(tmpId);
+        }
+        return acls;
+    }
+
+    /**
+     * Create a new ACL.
+     *
+     * @param name
+     * @param category
+     * @param mandator
+     * @return
+     * @throws FxApplicationException
+     */
+    public static ACL createACL(String name, ACL.Category category, long mandator) throws FxApplicationException {
+        return createACLs(new String[]{name}, new ACL.Category[]{category}, mandator)[0];
+    }
+
+    /**
+     * Remove a set of ACL's
+     *
+     * @param acls the ACL's to remove
+     * @throws FxApplicationException
+     */
+    public static void removeACL(ACL... acls) throws FxApplicationException {
+        ACLEngine aclEngine = EJBLookup.getACLEngine();
+        for (ACL acl : acls)
+            aclEngine.remove(acl.getId());
+    }
+}

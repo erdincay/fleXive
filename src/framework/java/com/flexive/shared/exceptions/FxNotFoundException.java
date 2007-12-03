@@ -1,0 +1,168 @@
+/***************************************************************
+ *  This file is part of the [fleXive](R) project.
+ *
+ *  Copyright (c) 1999-2007
+ *  UCS - unique computing solutions gmbh (http://www.ucs.at)
+ *  All rights reserved
+ *
+ *  The [fleXive](R) project is free software; you can redistribute
+ *  it and/or modify it under the terms of the GNU General Public
+ *  License as published by the Free Software Foundation;
+ *  either version 2 of the License, or (at your option) any
+ *  later version.
+ *
+ *  The GNU General Public License can be found at
+ *  http://www.gnu.org/copyleft/gpl.html.
+ *  A copy is found in the textfile GPL.txt and important notices to the
+ *  license from the author are found in LICENSE.txt distributed with
+ *  these libraries.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  For further information about UCS - unique computing solutions gmbh,
+ *  please see the company website: http://www.ucs.at
+ *
+ *  For further information about [fleXive](R), please see the
+ *  project website: http://www.flexive.org
+ *
+ *
+ *  This copyright notice MUST APPEAR in all copies of the file!
+ ***************************************************************/
+package com.flexive.shared.exceptions;
+
+import org.apache.commons.logging.Log;
+
+/**
+ * Exception thrown if "something" was not found (localized)
+ *
+ * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ */
+public class FxNotFoundException extends FxApplicationException {
+    private static final long serialVersionUID = 5492873586950129638L;
+
+    /**
+     * Localized exception constructor
+     *
+     * @param converted
+     */
+    public FxNotFoundException (FxApplicationException converted) {
+        super(converted);
+    }
+
+    /**
+     * Localized exception constructor
+     *
+     * @param log
+     * @param converted
+     */
+    public FxNotFoundException(Log log, FxApplicationException converted) {
+        super(log, converted);
+    }
+
+    /**
+     * Localized exception constructor
+     *
+     * @param key
+     * @param values
+     */
+    public FxNotFoundException(String key, Object... values) {
+        super(key, values);
+    }
+
+    /**
+     * Localized exception constructor
+     *
+     * @param log
+     * @param key
+     * @param values
+     */
+    public FxNotFoundException(Log log, String key, Object... values) {
+        super(log, key, values);
+    }
+
+    /**
+     * Localized exception constructor
+     *
+     * @param cause
+     * @param key
+     * @param values
+     */
+    public FxNotFoundException(Throwable cause, String key, Object... values) {
+        super(cause, key, values);
+    }
+
+    /**
+     * Localized exception constructor
+     *
+     * @param log
+     * @param cause
+     * @param key
+     * @param values
+     */
+    public FxNotFoundException(Log log, Throwable cause, String key, Object... values) {
+        super(log, cause, key, values);
+    }
+
+    /**
+     * Localized exception constructor
+     *
+     * @param key
+     */
+    public FxNotFoundException(String key) {
+        super(key);
+    }
+
+    /**
+     * Localized exception constructor
+     *
+     * @param log
+     * @param key
+     */
+    public FxNotFoundException(Log log, String key) {
+        super(log, key);
+    }
+
+    /**
+     * Localized exception constructor
+     *
+     * @param message
+     * @param cause
+     */
+    public FxNotFoundException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    /**
+     * Localized exception constructor
+     *
+     * @param log
+     * @param message
+     * @param cause
+     */
+    public FxNotFoundException(Log log, String message, Throwable cause) {
+        super(log, message, cause);
+    }
+
+    /**
+     * Localized exception constructor
+     *
+     * @param cause
+     */
+    public FxNotFoundException(Throwable cause) {
+        super(cause);
+    }
+
+    /**
+     * Localized exception constructor
+     *
+     * @param log
+     * @param cause
+     */
+    public FxNotFoundException(Log log, Throwable cause) {
+        super(log, cause);
+    }
+
+}

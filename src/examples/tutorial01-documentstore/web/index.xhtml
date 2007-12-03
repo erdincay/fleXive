@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<head>
+    <!-- Add flexive includes -->
+    <fx:includes/>
+
+    <!-- Add our own stylesheet for the result page -->
+    <link rel="stylesheet" type="text/css" href="css/tutorial01.css"/>
+</head>
+
+<body>
+    <!-- Output JSF error or info messages here -->
+    <h:messages globalOnly="true"/>
+    
+    <p class="message">
+        Welcome to tutorial 1 - the first version of our document data store.
+    </p>
+
+    <!-- The main menu -->
+    <ul id="mainmenu">
+        <li>
+            <h:outputLink value="upload.xhtml">Upload document</h:outputLink>
+        </li>
+    </ul>
+
+    <!-- Render all available document objects, provided by #{tutorialBean.documents} -->
+    <h:form>
+        <ul class="documents">
+
+            <!-- Iterate over all document objects -->
+            <ui:repeat var="row" value="#{tutorialBean.documents}">
+                <li>
+                    <!-- Render the file (preview image) -->
+                    <fx:resultValue value="#{row[1]}"/>
+
+                    <!-- Render the document caption -->
+                    <span class="caption">
+                        <fx:resultValue value="#{row[2]}"/>
+                    </span>
+
+                    <!-- Add an edit button below the image -->
+                    <h:commandLink action="edit" styleClass="editButton">
+                        <!--
+                            Load the content instance of the current row and store it in
+                            #{fxContentViewBean.content}. The edit page will then use this
+                            content instance.
+                            Note that this listener will only be fired when the user actually
+                            clicks on the commandLink.
+                        -->
+                        <f:setPropertyActionListener target="#{fxContentViewBean.content}"
+                                                     value="#{fxSystemBean.content[row[0]]}"/>
+                        Edit...
+                    </h:commandLink>
+                </li>
+            </ui:repeat>
+        </ul>
+    </h:form>
+
+</body>
+</html>

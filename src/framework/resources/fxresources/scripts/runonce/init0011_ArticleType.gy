@@ -1,0 +1,205 @@
+//file: init0011_article.gy
+//description: Create the "Article" FxType needed for all flexive installations
+//expected bindings:
+//  ticket ... UserTicket
+//  scriptname ... name of this script
+//author: Gregor Schober, Unique Computing Solutions GmbH
+import com.flexive.shared.CacheAdmin
+import com.flexive.shared.EJBLookup
+import com.flexive.shared.FxLanguage
+import com.flexive.shared.configuration.SystemParameters
+import com.flexive.shared.exceptions.FxRuntimeException
+import com.flexive.shared.interfaces.*
+import com.flexive.shared.security.ACL
+import com.flexive.shared.security.Mandator
+import com.flexive.shared.security.UserGroup
+import com.flexive.shared.structure.*
+import com.flexive.shared.value.FxString
+
+// uncomment commented code to create distinct access control lists
+//def String TYPE_ACL = "Article Type ACL";
+//def String CONTENT_ACL = "Article Content ACL";
+//def String WF_ACL = "Article Workflow ACL";
+def String ARTICLE_TYPE = "Article";
+
+def ContentEngine co = EJBLookup.getContentEngine();
+def ACLEngine acl = EJBLookup.getACLEngine();
+def TypeEngine type = EJBLookup.getTypeEngine();
+def AssignmentEngine ass = EJBLookup.getAssignmentEngine();
+def ScriptingEngine se = EJBLookup.getScriptingEngine();
+
+try {
+    if (CacheAdmin.getEnvironment().getType(ARTICLE_TYPE) != null) {
+        println "Article type '${ARTICLE_TYPE}' already exists! exiting!";
+        return;
+    }
+} catch (FxRuntimeException nf) {
+    //ok, ignore
+}
+//try {
+//    CacheAdmin.getEnvironment().getACL(TYPE_ACL);
+//} catch (FxRuntimeException e) {
+//    long typeACL = acl.create(TYPE_ACL, new FxString("ACL for the Article Type"), Mandator.MANDATOR_FLEXIVE, "#00CCDD", "", ACL.Category.STRUCTURE);
+//    acl.assign(typeACL, UserGroup.GROUP_EVERYONE, true, true, true, true, true, true)
+//}
+//try {
+//    CacheAdmin.getEnvironment().getACL(CONTENT_ACL);
+//} catch (FxRuntimeException e) {
+//    long coACL = acl.create(CONTENT_ACL, new FxString("ACL for contents of the Article Type"), Mandator.MANDATOR_FLEXIVE, "#00CCDD", "", ACL.Category.INSTANCE);
+//    acl.assign(coACL, UserGroup.GROUP_EVERYONE, true, true, true, true, true, true)
+//}
+//try {
+//    CacheAdmin.getEnvironment().getACL(WF_ACL);
+//} catch (FxRuntimeException e) {
+//    long wfACL = acl.create(WF_ACL, new FxString("ACL for the workflow of the Article Type"), Mandator.MANDATOR_FLEXIVE, "#00CCDD", "", ACL.Category.WORKFLOW);
+//    acl.assign(wfACL, UserGroup.GROUP_EVERYONE, true, true, true, true, true, true)
+//}
+
+//def ACL typeACL = CacheAdmin.getEnvironment().getACL(TYPE_ACL);
+def ACL typeACL = CacheAdmin.getEnvironment().getACL(ACL.Category.STRUCTURE.defaultId)
+def long typeId = type.save(FxTypeEdit.createNew(ARTICLE_TYPE, new FxString(FxLanguage.ENGLISH, "Article").setTranslation(FxLanguage.GERMAN, "Artikel"), typeACL, null));
+
+ass.save(FxPropertyAssignmentEdit.createNew(CacheAdmin.getEnvironment().getAssignment((Long) EJBLookup.configurationEngine.get(SystemParameters.TREE_CAPTION_ROOTASSIGNMENT)),
+        CacheAdmin.getEnvironment().getType(ARTICLE_TYPE),
+        "CAPTION", "/").setEnabled(true), false);
+
+
+def FxPropertyEdit pe = FxPropertyEdit.createNew("Title", new FxString("Title"), new FxString(""),
+        true, FxMultiplicity.MULT_1_1,
+        true, typeACL, FxDataType.String1024, new FxString(FxString.EMPTY),
+        true, null, null, null).setAutoUniquePropertyName(true);
+pe.setMultiLang(false);
+pe.setMultiLine(false);
+pe.setOverrideMultiLine(true);
+pe.setMultiplicity(FxMultiplicity.MULT_1_1);
+ass.createProperty(typeId, pe, "/");
+ass.save(((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(ARTICLE_TYPE + "/Title")).asEditable().setDefaultMultiplicity(1), false)
+
+
+pe.setDataType(FxDataType.Text);
+pe.setName("Abstract");
+pe.setLabel(new FxString("Abstract"));
+pe.setMultiLang(false);
+pe.setMultiLine(true);
+pe.setOverrideMultiLine(true);
+pe.setMultiplicity(FxMultiplicity.MULT_0_1);
+ass.createProperty(typeId, pe, "/");
+ass.save(((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(ARTICLE_TYPE + "/Abstract")).asEditable().setDefaultMultiplicity(1), false)
+
+pe.setDataType(FxDataType.HTML);
+pe.setName("LongtextHtml");
+pe.setLabel(new FxString("HTML"));
+pe.setMultiLang(false);
+pe.setMultiplicity(FxMultiplicity.MULT_0_1);
+ass.createProperty(typeId, pe, "/");
+ass.save(((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(ARTICLE_TYPE + "/LongtextHtml")).asEditable().setDefaultMultiplicity(0), false)
+
+pe.setDataType(FxDataType.Text);
+pe.setName("Longtext");
+pe.setLabel(new FxString("Text"));
+pe.setMultiLang(false);
+pe.setMultiplicity(FxMultiplicity.MULT_0_1);
+ass.createProperty(typeId, pe, "/");
+ass.save(((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(ARTICLE_TYPE + "/Longtext")).asEditable().setDefaultMultiplicity(1), false)
+
+pe.setDataType(FxDataType.Binary);
+pe.setName("Image");
+pe.setLabel(new FxString("Image"));
+pe.setMultiLang(false);
+pe.setMultiplicity(FxMultiplicity.MULT_0_N);
+pe.setMultiLine(false);
+pe.setOverrideMultiLine(false);
+ass.createProperty(typeId, pe, "/");
+ass.save(((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(ARTICLE_TYPE + "/Image")).asEditable().setDefaultMultiplicity(0), false)
+
+pe.setDataType(FxDataType.String1024);
+pe.setName("Listitem");
+pe.setLabel(new FxString("Listitem"));
+pe.setMultiLang(false);
+pe.setMultiplicity(FxMultiplicity.MULT_0_N);
+pe.setMultiLine(false);
+pe.setOverrideMultiLine(false);
+ass.createProperty(typeId, pe, "/");
+ass.save(((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(ARTICLE_TYPE + "/Listitem")).asEditable().setDefaultMultiplicity(0), false)
+
+// property for testing reference input fields
+pe.setDataType(FxDataType.Reference).setName("ImageLink").setLabel(new FxString("Linked Image")).setMultiLang(false).setMultiplicity(FxMultiplicity.MULT_0_N).setReferencedType(CacheAdmin.environment.getType("IMAGE"))
+pe.setMultiLine(false);
+pe.setOverrideMultiLine(false);
+ass.createProperty(typeId, pe, "/")
+ass.save(((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(ARTICLE_TYPE + "/ImageLink")).asEditable().setDefaultMultiplicity(0), false)
+
+// xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+// xx ARTICLE TEASER GROUP
+// xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+def FxGroupEdit ge = FxGroupEdit.createNew("Teaser", new FxString("Teaser"),
+        new FxString(""), true, FxMultiplicity.MULT_0_1);
+ass.createGroup(typeId, ge, "/");
+ass.save(((FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(ARTICLE_TYPE + "/Teaser")).asEditable().setDefaultMultiplicity(0), false)
+
+pe.setName("TEASER_TITLE");
+pe.setMultiLang(false);
+pe.setLabel(new FxString("Title"));
+pe.setMultiplicity(FxMultiplicity.MULT_1_1);
+pe.setDataType(FxDataType.String1024);
+pe.setMultiLine(true);
+pe.setOverrideMultiLine(true);
+ass.createProperty(typeId, pe, "/Teaser");
+
+pe.setName("TEASER_TEXT");
+pe.setMultiLang(false);
+pe.setLabel(new FxString("Text"));
+pe.setMultiplicity(FxMultiplicity.MULT_0_1);
+pe.setDataType(FxDataType.Text);
+pe.setMultiLine(true);
+pe.setOverrideMultiLine(true);
+ass.createProperty(typeId, pe, "/Teaser");
+
+
+pe.setName("TEASER_IMAGE");
+pe.setMultiLang(false);
+pe.setLabel(new FxString("Linked Image"));
+pe.setMultiplicity(FxMultiplicity.MULT_0_1);
+pe.setDataType(FxDataType.Reference);
+pe.setReferencedType(CacheAdmin.environment.getType("IMAGE"))
+pe.setMultiLine(false);
+pe.setOverrideMultiLine(false);
+ass.createProperty(typeId, pe, "/Teaser");
+
+
+// xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+// xx ARTICLE "BOX" GROUP
+// xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ge = FxGroupEdit.createNew("Box", new FxString("Box"),
+        new FxString(""), true, FxMultiplicity.MULT_0_N);
+ass.createGroup(typeId, ge, "/");
+ass.save(((FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(ARTICLE_TYPE + "/Box")).asEditable().setDefaultMultiplicity(0), false)
+
+pe.setName("BOX_TITLE");
+pe.setMultiLang(false);
+pe.setLabel(new FxString("Title"));
+pe.setMultiplicity(FxMultiplicity.MULT_1_1);
+pe.setDataType(FxDataType.String1024);
+pe.setMultiLine(false);
+pe.setOverrideMultiLine(false);
+ass.createProperty(typeId, pe, "/Box");
+
+pe.setName("BOX_TEXT");
+pe.setMultiLang(false);
+pe.setLabel(new FxString("Text"));
+pe.setMultiplicity(FxMultiplicity.MULT_0_1);
+pe.setDataType(FxDataType.Text);
+pe.setMultiLine(true);
+pe.setOverrideMultiLine(true);
+ass.createProperty(typeId, pe, "/Box");
+
+
+pe.setName("BOX_IMAGE");
+pe.setMultiLang(false);
+pe.setLabel(new FxString("Linked Image"));
+pe.setMultiplicity(FxMultiplicity.MULT_0_1);
+pe.setDataType(FxDataType.Reference);
+pe.setReferencedType(CacheAdmin.environment.getType("IMAGE"))
+pe.setMultiLine(false);
+pe.setOverrideMultiLine(false);
+ass.createProperty(typeId, pe, "/Box");

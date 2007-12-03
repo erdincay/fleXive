@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:s="http://myfaces.apache.org/sandbox"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+    <ui:define name="head">
+
+        <script type="text/javascript">
+            dojo.require("dojo.widget.SortableTable");
+            dojo.addOnLoad(function() {
+                if (parent.getNavFrameWnd().briefcasePanel) {
+                    parent.getNavFrameWnd().briefcasePanel.reload();
+                }
+            });
+        </script>
+
+    </ui:define>
+
+    <ui:define name="body">
+        <c:if test="#{empty fxSearchResultBean.parseRequestParameters}"> </c:if>
+        <a4j:form id="frm">
+            <adm:resultTabs activeTab="briefcase"/>
+
+            <t:inputHidden id="briefcaseId" value="#{briefcaseBean.id}"/>
+            <fx:formRow label="Briefcase Name" id="briefcaseName" >
+                <t:inputText id="briefcaseName" value="#{briefcaseBean.briefcase.name}"/>
+            </fx:formRow>
+            <fx:formRow label="Description" id="briefcaseDescription" width="500">
+                <t:inputText id="briefcaseDescription" value="#{briefcaseBean.briefcase.description}"
+                             style="width:350px"/>
+            </fx:formRow>
+            <fx:formRow label="Shared" id="briefcaseACL" width="500">
+                <h:selectOneListbox id="briefcaseACL" value="#{briefcaseBean.aclId}" size="1">
+                    <f:selectItem itemLabel="" itemValue="-1"/>
+                    <f:selectItems value="#{fxSelectBean.briefcaseACLs}" />
+                </h:selectOneListbox>
+            </fx:formRow>
+            <adm:commandButton id="saveButton" labelKey="Briefcase.button.save" location="content"
+                              icon="save"  bean="#{briefcaseBean}" action="save"/>
+            <adm:commandButton id="deleteButton" labelKey="Briefcase.button.delete"  location="content"
+                              confirm="Briefcase.confirm.delete,#{briefcaseBean.briefcase.name}"
+                              icon="delete"  bean="#{briefcaseBean}" action="delete" immediate="true"/>
+            <adm:toolbarPluginButtons/>
+        </a4j:form>
+        <br/>
+    </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

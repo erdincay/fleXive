@@ -1,0 +1,7 @@
+import com.flexive.shared.*
+
+println "This is the first run-once script for [fleXive] (${scriptname})"
+println "run-once scripts are scripts that are executed exactly once for a division"
+println "execution order is determined by filename. ie init0001.gy will be run before init0002.gy and so on..."
+
+println "Number of types registered: "+CacheAdmin.getEnvironment().getTypes(true,true,true,true).size()

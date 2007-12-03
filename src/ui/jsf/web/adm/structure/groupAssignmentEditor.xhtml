@@ -1,0 +1,134 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:s="http://myfaces.apache.org/sandbox"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+      <ui:define name="head">
+        <t:stylesheet path="/adm/css/content.css"/>
+        <t:stylesheet path="/adm/css/structureEditor.css"/>
+        <script type="text/javascript">
+           dojo.require("dojo.widget.FilteringTable");
+        </script>
+      </ui:define>
+
+    <ui:define name="body">
+        <h:form id="frm" enctype="multipart/form-data">
+            <c:if test="#{empty groupEditorBean.parseRequestParameters}"> </c:if>
+            <c:if test="#{structureTreeControllerBean.doAction}">
+                <script type="text/javascript">
+                    var treeframe=parent.getNavFrameWnd();
+                    treeframe.doTreeAction('#{structureTreeControllerBean.action}',#{structureTreeControllerBean.id}, '#{structureTreeControllerBean.value}');
+                </script>
+            </c:if>
+            <adm:tab label="#{fxMessageBean['GroupEditor.tab.groupAssignment']}" active="true" id="tab1"/>
+            <adm:tab label="#{fxMessageBean['GroupEditor.tab.group']}" active="false" id="tab2"
+            	bean="#{groupEditorBean}" action="showGroupEditor"/>
+            <adm:tab label="#{fxMessageBean['GroupEditor.tab.option']}" active="false" id="tab3"
+            	bean="#{groupEditorBean}" action="showGroupOptionEditor"/>
+
+            <fx:formRow labelKey="GroupEditor.label.xPath" id="xPath">
+                    <h:outputText id="xPath" value="#{groupEditorBean.assignment.XPath}"/>
+            </fx:formRow>
+
+            <fx:formRow labelKey="GroupEditor.label.label" id="label">
+                    <fx:fxValueInput id="label" value="#{groupEditorBean.assignmentLabel}"
+                         readOnly="#{groupEditorBean.systemInternal or not groupEditorBean.editMode}"/>
+            </fx:formRow>
+
+            <fx:formRow labelKey="GroupEditor.label.alias" id="alias">
+                    <h:inputText id="alias" value="#{groupEditorBean.assignmentAlias}"
+                         disabled="#{groupEditorBean.systemInternal or not groupEditorBean.editMode}"/>
+            </fx:formRow>
+
+            <fx:formRow labelKey="GroupEditor.label.hint" id="hint">
+                    <fx:fxValueInput id="hint" value="#{groupEditorBean.assignmentHint}"
+                             readOnly="#{groupEditorBean.systemInternal or not groupEditorBean.editMode}"/>
+            </fx:formRow>
+
+            <fx:formRow labelKey="GroupEditor.label.mode" id="mode">
+                <t:selectOneListbox size="1" id="mode" value="#{groupEditorBean.assignmentMode}"
+                        disabled="#{(groupEditorBean.systemInternal or not groupEditorBean.mayChangeGroupMode)
+                            or not groupEditorBean.editMode}">
+                    <f:selectItems value="#{fxSelectBean.groupModes}" />
+                </t:selectOneListbox>
+            </fx:formRow>
+
+            <fx:formRow labelKey="GroupEditor.label.defaultMultiplicity" id="defaultMultiplicity">
+                <h:inputText id="defaultMultiplicity" value="#{groupEditorBean.assignmentDefaultMultiplicity}"
+                     disabled="#{groupEditorBean.systemInternal or not groupEditorBean.editMode}"
+                     required="true" style="width:40px"/>
+            </fx:formRow>
+
+            <fx:formRow labelKey="GroupEditor.label.enabled" id="enabled">
+                <h:selectBooleanCheckbox id="enabled" value="#{groupEditorBean.assignmentEnabled}"
+                        disabled="#{groupEditorBean.systemInternal or not groupEditorBean.editMode}"/>
+            </fx:formRow>
+
+            <fx:fieldSet legend="#{fxMessageBean['GroupEditor.label.overrideGroupOptions']}">
+                <fx:formRow labelKey="GroupEditor.label.overrideBaseMultiplicity" id="overrideBaseMultiplicity">
+                    <h:selectBooleanCheckbox id="overrideBaseMultiplicity" value="#{groupEditorBean.groupOverrideBaseMultiplicity}"
+                            disabled="#{groupEditorBean.systemInternal or not groupEditorBean.editMode}"
+                            onclick="confirmOverrideBaseMultiplicity(#{groupEditorBean.groupOverrideBaseMultiplicity});"/>
+                </fx:formRow>
+                 <ui:fragment rendered="#{groupEditorBean.groupOverrideBaseMultiplicity}">
+                    <div style="padding-left:17px">
+                        <fx:formRow labelKey="GroupEditor.label.multiplicity" id="multiplicity">
+                            <h:inputText id="multiplicity" value="#{groupEditorBean.assignmentMinMul}"
+                                     disabled="#{groupEditorBean.systemInternal or not groupEditorBean.editMode}"
+                                     required="true" style="width:40px"/>
+                            <h:inputText value="#{groupEditorBean.assignmentMaxMul}"
+                                     disabled="#{groupEditorBean.systemInternal or not groupEditorBean.editMode}"
+                                     required="true" style="width:40px"/>
+                        </fx:formRow>
+                    </div>
+                </ui:fragment>
+            </fx:fieldSet>
+
+            <ui:fragment rendered="#{not groupEditorBean.editMode}">
+               <adm:commandButton labelKey="GroupEditor.button.editMode" location="both"
+                        icon="edit"  action="toggleEditMode"  bean="#{groupEditorBean}" id="editModeButton"/>
+            </ui:fragment>
+
+           <ui:fragment rendered="#{groupEditorBean.editMode}">
+                 <adm:commandButton labelKey="GroupEditor.button.cancel" location="both" lockscreen="false"
+                        icon="cancel" id="cancelButton"
+                        onclick="parent.getNavFrameWnd().openNode(#{groupEditorBean.assignment.id}, false);return false;"/>
+
+                <adm:commandButton labelKey="GroupEditor.button.save" location="both"
+                                icon="save"  action="saveChanges"  bean="#{groupEditorBean}" id="saveChangesButton">
+                </adm:commandButton>
+
+                <adm:commandButton labelKey="GroupEditor.button.delete.assignment" location="both" lockscreen="false"
+                                    icon="delete" onclick="parent.getNavFrameWnd()._deleteAssignment(#{groupEditorBean.assignment.id});return false;"
+                                    id="deleteAssignmentButton">
+                </adm:commandButton>
+           </ui:fragment>
+
+            <adm:toolbarPluginButtons/>
+        </h:form>
+        <script type="text/javascript">
+            function confirmOverrideBaseMultiplicity(value) {
+                choice = confirm("#{fxMessageBean['GroupEditor.message.confirmOverrideBaseMultiplicity']}");
+                if (choice) {
+                    document.forms["frm"].submit();
+                }
+                else {
+                    document.getElementById("frm:overrideBaseMultiplicity").checked = value;
+                }
+            }
+
+        </script>
+
+    </ui:define>
+</ui:composition>
+</body>
+</html>

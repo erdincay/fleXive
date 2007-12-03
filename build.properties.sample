@@ -1,0 +1,28 @@
+# path to deploy the ear 
+deploy.ear.path=${user.home}/as/jboss/server/default/deploy
+
+# path to deploy needed runtime libs like emma.jar 
+deploy.lib.path=${user.home}/as/jboss/server/default/lib
+
+# path to the embedded jboss ejb3 container neededfor unit testing
+jboss.embedded.path=${user.home}/as/jboss-embeddable/
+
+# Remove comment to enable emma profiling (needs emma.jar in your application server /lib directory)
+# tests.emma.enabled=true
+
+# Netbeans profiler root directory (optional)
+# To enable the netbeans profiler, set -Dprofile.netbeans.enabled=true and call one of the tests.* targets
+profile.netbeans.root=/opt/netbeans-5.0/profiler1
+profile.netbeans.agent=lib/deployed/jdk15/linux/libprofilerinterface.so
+
+# This is the database configuration file used by the flexive setup tasks.
+#
+# Enter the settings for your database server connection to be used for development.
+
+# The server host or IP
+database.host=localhost
+# The server port
+database.port=3306
+# The user name and password to be used for creating flexive database structures
+database.username=root
+database.password=a

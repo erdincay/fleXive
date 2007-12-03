@@ -1,0 +1,5 @@
+# Browser tests - Selenium connection properties
+
+tests.browser.selenium.host=localhost
+tests.browser.selenium.port=7983
+tests.browser.selenium.baseUrl=http://www.flexive-develop1.com:8080

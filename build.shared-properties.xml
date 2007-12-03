@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+    <property name="flexive.lib.dir" value="${flexive.basedir}/lib"/>
+
+    <property name="flexive.base.framework.dir" value="${flexive.basedir}/src/framework"/>
+    <property name="flexive.base.ui.dir" value="${flexive.basedir}/src/ui"/>
+    <property name="flexive.base.ui.shared.dir" value="${flexive.base.ui.dir}/shared"/>
+    <property name="flexive.base.ui.jsf.dir" value="${flexive.base.ui.dir}/jsf"/>
+    <property name="flexive.base.ui.components.dir" value="${flexive.base.ui.dir}/jsf-components"/>
+
+    <property name="flexive.base.build.dir" value="${flexive.basedir}/build"/>
+    <property name="flexive.build.framework.jar.dir" value="${flexive.base.build.dir}/framework/jar"/>
+
+    <property name="flexive.dist.dir" value="${flexive.basedir}/flexive-dist"/>
+    <property name="flexive.dist.lib.dir" value="${flexive.dist.dir}/lib"/>
+    <property name="flexive.dist.extlib.dir" value="${flexive.dist.dir}/extlib"/>
+    <property name="flexive.dist.meta.dir" value="${flexive.dist.dir}/META-INF"/>
+    <property name="flexive.dist.templates.dir" value="${flexive.dist.dir}/templates"/>
+    <property name="flexive.dist.sql.dir" value="${flexive.dist.dir}/lib/resources/sql/mysql"/>
+
+    <property name="flexive.drop.dir" value="${flexive.basedir}/drop"/>
+
+    <property name="flexive.src.framework.dir" value="${flexive.base.framework.dir}/java"/>
+    <property name="flexive.resources.framework.dir" value="${flexive.base.framework.dir}/resources"/>
+    <property name="flexive.src.ui.shared.dir" value="${flexive.base.ui.shared.dir}/java"/>
+    <property name="flexive.web.ui.shared.dir" value="${flexive.base.ui.shared.dir}/web"/>
+    <property name="flexive.src.ui.tags.dir" value="${flexive.src.ui.shared.dir}/com/flexive/war/tags"/>
+    <property name="flexive.src.ui.jsf.dir" value="${flexive.base.ui.jsf.dir}/java"/>
+    <property name="flexive.src.ui.components.dir" value="${flexive.base.ui.components.dir}/src/java"/>
+    <property name="flexive.web.ui.jsf.dir" value="${flexive.base.ui.jsf.dir}/web"/>
+
+    <property name="flexive.ant.jar" value="${flexive.build.framework.jar.dir}/flexive-ant.jar"/>
+
+    <fileset id="flexive.lib.ui.jsf" dir="${flexive.lib.dir}/jsf" includes="*.jar"/>
+	<fileset id="flexive.lib.ui.ajax4jsf" dir="${flexive.lib.dir}/ajax4jsf" includes="*.jar"/>
+
+    <fileset id="flexive.dist.jar.all" dir="${flexive.dist.dir}/lib" includes="flexive-*.jar"/>
+    <fileset id="flexive.dist.jar.libs" dir="${flexive.lib.dir}"
+        includes="fxTree.jar, fxStream.jar, jboss-cache.jar, javaee.jar, testNG/*.jar, mail/*.jar, xstream/*.jar, groovy/*.jar, selenium-java-client-driver.jar, text_extraction/*.jar, mysql-*.jar"/>
+
+    <path id="flexive.shared-libs.path">
+        <fileset refid="flexive.lib.ui.jsf"/>
+        <fileset refid="flexive.lib.ui.ajax4jsf"/>
+        <fileset refid="flexive.dist.jar.libs"/>
+    </path>
+
+    <path id="flexive.shared-environment.path">
+        <fileset refid="flexive.dist.jar.all"/>
+        <path refid="flexive.shared-libs.path"/>
+    </path>
+
+    <!-- classpath containing the jboss EJB3 embedded server, if available -->
+    <path id="flexive.ejb3-embedded.classpath">
+        <path path="${jboss.embedded.path}/bootstrap"/>
+        <fileset dir="${jboss.embedded.path}/lib" includes="*.jar"/>
+        <fileset dir="${jboss.embedded.path}/optional-lib" includes="*.jar"/>
+        <fileset dir="${flexive.lib.dir}" includes="*.jar">
+            <present targetdir="${jboss.embedded.path}/lib" present="srconly"/>
+        </fileset>
+        <path path="${jboss.embedded.path}/conf"/>
+    </path>
+
+
+</project>
+        

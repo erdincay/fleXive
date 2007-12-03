@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:s="http://myfaces.apache.org/sandbox"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+
+    <ui:define name="head">
+        <script type="text/javascript">
+            dojo.require("dojo.widget.FilteringTable");
+        </script>
+    </ui:define>
+
+    <ui:define name="searchIds">"frm"</ui:define>
+
+    <ui:define name="body">
+        <h:form id="frm" enctype="multipart/form-data">
+           <adm:tab label="#{fxMessageBean['SelectList.tab.overview']}" active="true" id="tab1"/>
+
+            <table dojoType="FilteringTable" widgetId="testTable" enableMultipleSelect="true"
+                   alternateRows="true" maxSortable="1"
+                    class="dojoTable">
+
+                <thead>
+                    <tr>
+                        <th class="tblHeader" dataType="String">
+                            #{fxMessageBean["SelectList.table.name"]}
+                        </th>
+                        <th class="tblHeader" dataType="String">
+                            #{fxMessageBean["SelectList.table.label"]}
+                        </th>
+                        <th class="tblHeader" dataType="String">
+                            #{fxMessageBean["SelectList.table.description"]}
+                        </th>
+                        <th class="tblHeader" dataType="html">
+                            #{fxMessageBean["SelectList.table.actions"]}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <c:forEach var="list" items="#{selectListBean.selectLists}">
+                        <tr value="#{list.id}">
+                            <td class="tblColumn">#{list.name}</td>
+                            <td class="tblColumn">#{list.label}</td>
+                            <td class="tblColumn">#{list.description}</td>
+                            <td class="tblColumn">
+                            <adm:commandIcon labelKey="SelectList.button.edit" location="content"
+                                                icon="edit"  bean="#{selectListBean}" action="initEditing" id="editButton_#{list.id}">
+                                    <f:setPropertyActionListener target="#{selectListBean.selectListId}" value="#{list.id}"/>
+                            </adm:commandIcon>
+                            <adm:commandIcon labelKey="SelectList.button.delete" location="content"
+                                                icon="delete"  bean="#{selectListBean}" action="deleteSelectList" id="deleteButton_#{list.id}">
+                                    <f:setPropertyActionListener target="#{selectListBean.selectListId}" value="#{list.id}"/>
+                            </adm:commandIcon>
+                            </td>
+                        </tr>
+                    </c:forEach>
+                </tbody>
+            </table>
+            <br/>
+            <adm:commandButton labelKey="SelectList.button.selectList.createNew" location="both"
+                            icon="new"  bean="#{selectListBean}" action="showCreateSelectList" id="createNewButton">
+            </adm:commandButton>
+
+        </h:form>
+    </ui:define>
+</ui:composition>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:s="http://myfaces.apache.org/sandbox"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+    <ui:define name="head">
+        <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/flexiveRpc.js"> </script>
+        <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/jsonrpc.js"> </script>
+        <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/selection.js"> </script>
+    </ui:define>
+
+    <ui:define name="searchIds">"searchResults_screenviewContainer"</ui:define>
+
+    <ui:define name="body">
+        <c:if test="#{empty fxSearchResultBean.parseRequestParameters}"> </c:if>
+        <a4j:form id="frm">
+            <h:inputHidden value="#{fxSearchResultBean.viewType}"/>
+            <h:inputHidden id="clientSizeX" value="#{fxSearchResultBean.clientSizeX}"/>
+            <h:inputHidden id="clientSizeY" value="#{fxSearchResultBean.clientSizeY}"/>
+
+            <adm:resultTabs activeTab="results"/>
+
+            <adm:commandButton id="listButton" labelKey="SearchResult.button.view.list" bean="#{fxSearchResultBean}" action="listView" icon="view_list" location="toolbar"/>
+            <adm:commandButton id="thumbsButton" labelKey="SearchResult.button.view.thumbs" bean="#{fxSearchResultBean}" action="thumbView" icon="view_thumbs" location="toolbar"/>
+            <adm:commandButton id="preferencesButton" location="toolbar" labelKey="ResultPreferences.button.open" bean="#{resultPreferencesBean}" action="show" icon="configure"/>
+
+            <c:if test="#{fxSearchResultBean.queryBuilder != null}">
+                <h:inputHidden id="rowCount" value="#{fxSearchResultBean.rowCount}"/>
+
+                <adm:resultView id="searchResults" resultModel="#{fxSearchResultBean.resultModel}"
+                    location="#{fxSearchResultBean.location}" viewType="#{fxSearchResultBean.viewType}"/>
+
+<!--                <c:choose>
+                    <c:when test="#{'LIST' == fxSearchResultBean.viewType}">
+                        <fx:resultView id="searchResults" resultModel="#{fxSearchResultBean.resultModel}"
+                            location="#{fxSearchResultBean.location}"/>
+                    </c:when>
+                    <c:otherwise>
+                        <fx:resultThumbnailsTable id="searchResults" gridModel="#{fxSearchResultBean.gridModel}" formName="frm"
+                                dataTable="#{fxSearchResultBean.resultDataTable}" tableRows="#{fxSearchResultBean.gridRows}"
+                                resultSet="#{fxSearchResultBean.result}" previewSize="#{fxSearchResultBean.previewSize}"
+                            />
+                    </c:otherwise>
+                </c:choose>
+-->
+                <!--
+                <ui:repeat var="foundContentType" value="#{fxSearchResultBean.result.contentTypes}">
+                    #{foundContentType.description}<br/>
+                </ui:repeat>
+                -->
+                
+            <!-- Example using JSF datatables -->
+    
+<!--
+				 <t:dataTable id="resultSetTable" value="#{fxSearchResultBean.resultModel}" rows="10" var="row">
+				 	<c:forEach items="#{fxSearchResultBean.columnNames}" var="columnName" varStatus="status">
+					 	<t:column>
+					 		<f:facet name="header">
+					 			#{columnName}
+					 		</f:facet>
+					 		#{row[status.index]}
+					 	</t:column>
+				 	</c:forEach>
+				 </t:dataTable>
+	
+                <t:dataScroller for="resultSetTable">
+                    <f:facet name="previous">
+                        &lt;
+                    </f:facet>
+                    <f:facet name="next">
+                        &gt;
+                    </f:facet>
+                    <f:facet name="first">
+                        |&lt;
+                    </f:facet>
+                    <f:facet name="last">
+                        &gt;|
+                    </f:facet>
+                </t:dataScroller>
+ -->
+            </c:if>
+            <adm:toolbarPluginButtons/>
+        </a4j:form>
+
+        <script type="text/javascript">
+            updateClientSize(document.forms["frm"]["frm:clientSizeX"], document.forms["frm"]["frm:clientSizeY"]);
+            if (parent.reloadBriefcases) {
+                parent.reloadBriefcases();
+            }
+        </script>
+    </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

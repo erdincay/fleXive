@@ -1,0 +1,230 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE section [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<section xml:id="core_contents" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude">
+    <title>Content Engine</title>
+    <xi:include href="../includes/author_mplesser.xml"/>
+
+    <section xml:id="core_contents_overview">
+        <title>Overview</title>
+        <para>
+            When the perisistence engines (structure and content) of &flexive; were designed we tried not to walk the
+            path
+            of other frameworks like hibernate and access data instances with (auto)generated classes but use a generic
+            approach. Since we wanted to use hierarchical data structures which are quite like XML in nature the weapon
+            of
+            choice was an XPath-like approach: Values are accessed using their XPath.
+        </para>
+        <para>
+            As a simple example lets consider the following XML file:
+            <programlisting xml:id="core_content_xml_intro" language="XML"><![CDATA[<?xml version=“1.0“ standalone=“yes“?>
+<Person>
+    <Name>Max Muster</Name>
+    <Phone>+43 1 12345</Phone>
+    <Phone>+43 1 800 FLEXIVE</Phone>
+    <Address>
+        <Street>Private road</Street>
+    </Address>
+    <Address>
+        <Street>Office lane</Street>
+    </Address>
+</Person>]]></programlisting>
+            With &flexive; we would create a type () called
+            <emphasis>Person</emphasis>. Using the
+            <classname>GroovyTypeBuilder</classname>
+            we would execute the following code in the groovy console:
+            <programlisting xml:id="core_content_groovy_intro" language="groovy"><![CDATA[import com.flexive.shared.scripting.groovy.*
+import com.flexive.shared.value.*
+import com.flexive.shared.security.*
+import com.flexive.shared.structure.*
+import com.flexive.shared.*
+
+
+new GroovyTypeBuilder().Person {
+  name(FxDataType.String1024)
+  phone(FxDataType.String1024, multiplicity: new FxMultiplicity(1,2))
+  Address(multiplicity: FxMultiplicity.MULT_1_N) {
+    street(FxDataType.String1024)
+  }
+}
+def person = CacheAdmin.environment.getType("Person")]]></programlisting>
+            The groovy above is pretty self-explanatory thanks to the concept of groovy builders. By convention property
+            names are lowercase while groupnames are uppercase. See
+            <xref linkend="core_structure"/>
+            for more information about structures.
+        </para>
+        <para>
+            Lets have a loot at the following table, which based on the XML data example, to visualize the mapping of
+            XPath's to values:
+            <table xml:id="cc_xpathmapping_table" class="flexive">
+                <caption>XPath to value mapping</caption>
+                <thead>
+                    <tr>
+                        <th>XPath</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>PERSON/NAME[1]</td>
+                        <td>Max Muster</td>
+                    </tr>
+                    <tr>
+                        <td>PERSON/PHONE[1]</td>
+                        <td>+43 1 12345</td>
+                    </tr>
+                    <tr>
+                        <td>PERSON/PHONE[2]</td>
+                        <td>+43 1 800 FLEXIVE</td>
+                    </tr>
+                    <tr>
+                        <td>PERSON/ADDRESS[1]/STREET[1]</td>
+                        <td>Private road</td>
+                    </tr>
+                    <tr>
+                        <td>PERSON/ADDRESS[2]/STREET[1]</td>
+                        <td>Office lane</td>
+                    </tr>
+                </tbody>
+            </table>
+            The XPath starts with the name of the type (which is optional if addressing in a
+            <classname>FxContent</classname>
+            instance, since there the type if obviously known but is needed for example in query results) and the path
+            to
+            address the property. Please note that XPaths are not case-sensitive and that an index of 1 is optional:
+            <code>PERSON/ADDRESS[2]/STREET[1]</code>
+            for example is identical to
+            <code>PERSON/ADDRESS[2]/STREET</code>.
+        </para>
+    </section>
+
+    <section xml:id="core_contents_using_fxcontent">
+        <title>Using FxContent</title>
+        <para>
+            <classname>FxContent</classname>
+            serves as a container for groups, properties and general information about a content instance. It is used to
+            initialize (create an empty content instance), create, save and load content instances
+            <footnote xml:id="ftn_content_instance">
+                <para>The term
+                    <emphasis>content instance</emphasis>
+                    is used to describe all data related to a concrete instance of a
+                    <classname>FxType</classname>
+                    where values are assigned to properties. A good analogy would be the instantiation (
+                    <classname>FxContent</classname>
+                    ) of a class (
+                    <xref linkend="core_structure"/>
+                    <classname>FxType</classname>
+                    ).
+                </para>
+            </footnote>
+            .
+        </para>
+        <para>
+            <xi:include href="../listings/core_content_fxcontent.xml"/>
+            Copy and pasting the groovy code above into the groovy console will yield the following result on the
+            application servers stdout after execution:
+            <programlisting><![CDATA[11:13:48,898 INFO  [STDOUT] Loaded street: Ofice lane
+11:13:48,899 INFO  [STDOUT] New street: Office lane]]></programlisting>
+        </para>
+        <para>
+            The purpose of this example is to demonstrate how easy it is to create, update and remove content instances.
+            Since a content instance is tied to a type (See
+            <xref linkend="core_structure_types"/>
+            for more information) the first thing that needs to be done is to initialize a new (empty) content instance
+            <coref linkend="cc_fxco_1"/>. Initializing a content instance creates as many property or group entries as
+            defined in the respective
+            assignments
+            <emphasis>default multiplicity</emphasis>. Setting a value to a property assignment
+            <coref linkend="cc_fxco_2"/>
+            is done by creating a new
+            <classname>FxValue</classname>
+            instance corresponding to the properties
+            <link linkend="core_structure_properties_datatypes">data type</link>
+            for the &xpath; of the assignment. The same applies if a group is involved, like shown in
+            <coref linkend="cc_fxco_4"/>
+            for the street properts of the first address group. Adding a new index is done by simply setting the &xpath;
+            to the desired value like in
+            <coref linkend="cc_fxco_3"/>
+            or
+            <coref linkend="cc_fxco_5"/>. Please note that using an index of 3 would be illegal if no index of 2
+            exists.
+        </para>
+        <para>
+            Removing an &xpath; is as simple as calling
+            <code>co.remove("/Address[2]")</code>
+            if the second address group should be removed.
+        </para>
+        <para>
+            A content is created
+            <coref linkend="cc_fxco_6"/>
+            and updated by calling the
+            <interfacename>ContentEngine</interfacename>'s
+            <methodname>FxPK save(FxContent content)</methodname>
+            method which returns the
+            <link linkend="core_contents_pk">primary key</link>
+            of a content instance. Loading is done by providing the primary key to the
+            <interfacename>ContentEngine</interfacename>'s
+            <methodname>load(FxPK pk)</methodname>-method.
+            <coref linkend="cc_fxco_7"/>.
+        </para>
+        <para>
+            Changing a value can be done by assigning a new
+            <classname>FxValue</classname>
+            instance (like in
+            <coref linkend="cc_fxco_5"/>) or by reading the current value
+            <coref linkend="cc_fxco_8"/>,
+            and changing it
+            <coref linkend="cc_fxco_9"/>
+            which is updated in the content instance as can be seen from the
+            <code>println</code>
+            command on the application servers console.
+        </para>
+        <para>
+            To remove a content instance (<coref linkend="cc_fxco_10"/>) only the primary key - and all required
+            permissions - is needed.
+        </para>
+    </section>
+
+    <section xml:id="core_contents_pk">
+        <title>Primary keys and versions</title>
+        <para>
+            To be able to identify a content, a primary key (implemented in
+            <classname>FxPK</classname>) is needed. This primary key consists of the unique identifier (usually
+            equivalent to the id the content is stored in the database with) and the version. Depending on the
+            <link linkend="cs_type_maxver">configuration</link>
+            of the
+            <link linkend="core_structure_types">type</link>
+            the content belongs to it is possible to create different versions of a content.
+        </para>
+        <para>
+            A primary key can consist of a distinct version (a numerical value) or a predefined constant:
+            <itemizedlist>
+                <listitem>
+                    <para><constant>MAX</constant>: Constant to select the maximum (highest) available version
+                    </para>
+                </listitem>
+                <listitem>
+                    <para><constant>LIVE</constant>: Constant to select the version whose workflow step is flagged as
+                        live
+                    </para>
+                </listitem>
+            </itemizedlist>
+            To create a new version simply call the
+            <interfacename>ContentEngine</interfacename>'s
+            <methodname>createNewVersion(FxContent co)</methodname>
+            method.
+        </para>
+        <para>
+            Information about all versions of a content can be retrieved using the
+            <interfacename>ContentEngine</interfacename>'s
+            <methodname>FxContentVersionInfo getContentVersionInfo(FxPK id)</methodname>
+            method.
+            <classname>FxContentVersionInfo</classname>
+            contains information about the minimum-, maximum- and most recently modified version numbers as well as
+            information which user was the last to update each version and if a live version exists.
+        </para>
+    </section>
+</section>

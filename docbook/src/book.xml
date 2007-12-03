@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE book [
+        <!ENTITY % global_entities SYSTEM "global.ent">
+        %global_entities;
+        ]>
+
+<book xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xi="http://www.w3.org/2001/XInclude">
+    <title>&Flexive; Reference Documentation</title>
+    <xi:include href="includes/author_dlichtenberger.xml"/>
+    <xi:include href="includes/author_mplesser.xml"/>
+    <xi:include href="includes/author_hbacher.xml"/>
+
+    <!-- <xi:include href="intro.xml"/> -->
+    <xi:include href="installation.xml"/>
+    <xi:include href="tutorial.xml"/>
+    <xi:include href="writing_applications.xml"/>
+    <xi:include href="core.xml"/>
+    <xi:include href="jsfsupport.xml"/>
+    <xi:include href="admin_gui.xml"/>
+    <xi:include href="glossary.xml"/>
+    <xi:include href="bibliography.xml"/>
+</book>

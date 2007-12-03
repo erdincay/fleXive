@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+
+A flexive form input row with a single fxValueInput field.
+
+Parameters:
+id = element input ID
+
+Label parameters - set exactly one of them to specify the label:
+labelKey = Label key (possibly including parameters, e.g. my.property.message,#{myBean.value}
+label = Label text to be displayed
+
+Parameter passed through to the FxValueInput component:
+value = the FxValue object to be displayed (mandatory, must not be null)
+inputMapper = an (optional) InputMapper
+onchange = a javascript onchange handler
+readOnly = true to enable read-only mode
+decorate = if false, no label/input div will be rendered, only the output of the fxValueInput component
+filter = filter HTML output?
+
+<ui:composition>
+
+    <c:if test="#{!empty labelKey}">
+        <c:set var="label" value="#{fxMessageBean[labelKey]}"/>
+    </c:if>
+    <c:if test="#{empty readOnly}">
+        <c:set var="readOnly" value="false"/>
+    </c:if>
+    <c:if test="#{empty decorate}">
+        <c:set var="decorate" value="true"/>
+    </c:if>
+    <c:if test="#{empty filter}">
+        <c:set var="filter" value="true"/>
+    </c:if>
+    <c:if test="#{decorate}">
+        <fx:formRow id="#{id}" label="#{label}">
+            <fx:fxValueInput id="#{id}" value="#{value}" inputMapper="#{inputMapper}" onchange="#{onchange}" readOnly="#{readOnly}" filter="#{filter}"/>
+        </fx:formRow>
+    </c:if>
+    <c:if test="#{!decorate}"><fx:fxValueInput id="#{id}" value="#{value}" inputMapper="#{inputMapper}" onchange="#{onchange}" readOnly="#{readOnly}" filter="#{filter}"/></c:if>
+</ui:composition>
+
+
+</html>

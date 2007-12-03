@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:s="http://myfaces.apache.org/sandbox"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+
+    <ui:define name="head">
+        <script type="text/javascript">
+            dojo.require("dojo.widget.FilteringTable");
+        </script>
+    </ui:define>
+
+    <ui:define name="body">
+
+        <h:form id="frm" enctype="multipart/form-data">
+            <adm:tab label="#{fxMessageBean['SelectList.tab.createSelectList']}" active="true" id="tab1"/>
+
+            <fx:formRow labelKey="SelectList.label.selectList.name" id="name">
+                <h:inputText id="name" value="#{selectListBean.selectListName}"/>
+            </fx:formRow>
+             <fx:formRow labelKey="SelectList.label.selectList.label" id="label">
+                <fx:fxValueInput id="label" value="#{selectListBean.selectListLabel}"/>
+			</fx:formRow>
+            <fx:formRow labelKey="SelectList.label.selectList.description" id="description">
+                <fx:fxValueInput id="description" value="#{selectListBean.selectListDescription}"/>
+			</fx:formRow>
+            <fx:formRow labelKey="SelectList.label.selectList.allowDynamicCreation" id="allowDynamicCreation">
+                <h:selectBooleanCheckbox id="allowDynamicCreation" value="#{selectListBean.selectListAllowDynamicCreation}"/>
+            </fx:formRow>
+            <fx:formRow labelKey="SelectList.label.selectList.createItemACL" id="createItemACL">
+                <t:selectOneListbox size="1" id="createItemACL" value="#{selectListBean.selectListCreateItemACLId}">
+                    <f:selectItems value="#{fxSelectBean.selectListACLs}" />
+                </t:selectOneListbox>
+            </fx:formRow>
+            <fx:formRow labelKey="SelectList.label.selectList.defaultItemACL" id="defaultItemACL">
+                <t:selectOneListbox size="1" id="defaultItemACL" value="#{selectListBean.selectListDefaultItemACL}"
+                                    converter="SelectableConverter">
+                    <f:selectItems value="#{fxSelectBean.selectListItemACLs}" />
+                </t:selectOneListbox>
+            </fx:formRow>
+
+
+            <adm:commandButton labelKey="SelectList.button.selectList.createNew" location="both"
+                icon="new"  action="createSelectList"  bean="#{selectListBean}" id="createSelectListButton">
+            </adm:commandButton>
+
+
+        </h:form>
+
+    </ui:define>
+</ui:composition>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<faces-config xmlns="http://java.sun.com/xml/ns/javaee"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_1_2.xsd"
+              version="1.2">
+
+    <!-- Facelets View Handler Definition -->
+    <application>
+        <view-handler>
+            com.sun.facelets.FaceletViewHandler
+        </view-handler>
+    </application>
+
+    <!-- Definition of the managed bean which retrieves the data from database -->
+    <managed-bean>
+        <managed-bean-name>helloWorldBean</managed-bean-name>
+        <managed-bean-class>com.flexive.examples.helloworld.war.HelloWorldBean</managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <!--  A navigation rule for our input mask, if everything goes right,
+     "success" is returned, which leads to a direct rendering and response
+     of the index.xhtml view. The entries made via the input mask are shown
+     in this view. -->
+    <navigation-rule>
+        <from-view-id>/create.xhtml</from-view-id>
+        <navigation-case>
+            <display-name>success</display-name>
+            <from-outcome>success</from-outcome>
+            <to-view-id>/index.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+</faces-config>

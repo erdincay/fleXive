@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:s="http://myfaces.apache.org/sandbox"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+<ui:define name="head">
+
+    <script type="text/javascript">
+        dojo.require("dojo.widget.SortableTable");
+    </script>
+
+</ui:define>
+
+<ui:define name="body">
+
+    <a4j:form id="frm">
+
+
+        <adm:tab label="#{fxMessageBean['ACL.label.edit,#{aclBean.acl.name}']}" active="true" id="tab1"/>
+
+        <fx:formRow label="#{fxMessageBean['ACL.field.mandator']}" id="mandator" >
+            <h:inputText id="mandator" value="#{mandatorBean.mandatorsById[aclBean.acl.mandatorId].name}"
+                         readonly="true"/>
+            <h:inputHidden id="id" value="#{aclBean.id}"/>
+        </fx:formRow>
+
+        <fx:formRow label="#{fxMessageBean['ACL.field.name']}" id="name" >
+            <h:inputText id="name" value="#{aclBean.acl.name}" required="true"/>
+        </fx:formRow>
+
+        <fx:formRow label="#{fxMessageBean['ACL.field.label']}" id="label" >
+            <fx:fxValueInput id="label" value="#{aclBean.acl.label}" required="true"/>
+        </fx:formRow>
+
+        <fx:formRow label="#{fxMessageBean['ACL.field.color']}" id="color" >
+            <h:inputText id="color" value="#{aclBean.acl.color}"/>
+        </fx:formRow>
+
+        <fx:formRow label="#{fxMessageBean['ACL.field.category']}" id="category">
+            <h:inputText id="category" value="#{aclBean.acl.category.label}" readonly="true"/>
+        </fx:formRow>
+
+        <fx:formRow label="#{fxMessageBean['ACL.field.description']}" id="description" width="400" height="50">
+            <h:inputTextarea id="description" value="#{aclBean.acl.description}" cols="55"/>
+        </fx:formRow>
+
+
+        <fx:fieldSet legend="#{fxMessageBean['ACL.label.permissionMatrix']}">
+            <t:dataTable id="assignmentTbl" value="#{aclBean.assignments}" preserveDataModel="true" var="row"
+                         rowClasses="tblRowEven, tblRowOdd" width="300" headerClass="dataTableHeader">
+                <h:column>
+                    <f:facet name="header">#{fxMessageBean['ACL.label.group']}</f:facet>
+                    <h:selectOneListbox id="grou" value="#{row.group}" size="1" required="true"
+                                        converter="SelectableConverter">
+                        <f:selectItems value="#{fxSelectBean.globalUserGroups}" />
+                    </h:selectOneListbox>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">#{fxMessageBean['ACL.field.assignment.read']}</f:facet>
+                    <t:selectBooleanCheckbox value="#{row.mayRead}" rendered="#{aclBean.acl.category!='SELECTLIST'}" />
+                </h:column>
+                <h:column>
+                    <f:facet name="header">#{fxMessageBean['ACL.field.assignment.edit']}</f:facet>
+                    <t:selectBooleanCheckbox value="#{row.mayEdit}" rendered="#{aclBean.acl.category!='SELECTLIST'}" />
+                </h:column>
+                <h:column>
+                    <f:facet name="header">#{fxMessageBean['ACL.field.assignment.relate']}</f:facet>
+                    <t:selectBooleanCheckbox value="#{row.mayRelate}" rendered="#{aclBean.acl.category!='SELECTLIST' and aclBean.acl.category!='SELECTLISTITEM'}" />
+                </h:column>
+                <h:column>
+                    <f:facet name="header">#{fxMessageBean['ACL.field.assignment.create']}</f:facet>
+                    <t:selectBooleanCheckbox value="#{row.mayCreate}" rendered="#{aclBean.acl.category!='SELECTLISTITEM'}" />
+                </h:column>
+                <h:column>
+                    <f:facet name="header">#{fxMessageBean['ACL.field.assignment.delete']}</f:facet>
+                    <t:selectBooleanCheckbox value="#{row.mayDelete}" rendered="#{aclBean.acl.category!='SELECTLIST'}" />
+                </h:column>
+                <h:column>
+                    <f:facet name="header">#{fxMessageBean['ACL.field.assignment.export']}</f:facet>
+                    <t:selectBooleanCheckbox value="#{row.mayExport}" rendered="#{aclBean.acl.category!='SELECTLIST' and aclBean.acl.category!='SELECTLISTITEM'}" />
+                </h:column>
+                <h:column>
+                    <f:facet name="header">#{fxMessageBean['ACL.label.action']}</f:facet>
+                    <a4j:commandLink id="removeAssignmentButton" reRender="assignmentTbl"
+                                     actionListener="#{aclBean.removeAssignment}">
+                        <f:setPropertyActionListener target="#{aclBean.assignmentId}" value="#{row.id}"/>
+                        <t:graphicImage alt="remove" url="/adm/images/commandButton/delete.png" border="0"/>
+                    </a4j:commandLink>
+                </h:column>
+            </t:dataTable>
+
+            <div style="margin:3px;padding-bottom:5px;">
+                <a4j:commandButton id="addValueRowButton" reRender="assignmentTbl"
+                                   actionListener="#{aclBean.addAssignment}"
+                                   value="#{fxMessageBean['ACL.button.addRow']}"/>
+            </div>
+
+        </fx:fieldSet>
+
+        <br />
+
+        <adm:commandButton id="saveButton" labelKey="ACL.button.save" icon="save"
+                          bean="#{aclBean}" action="save"/>
+        <adm:commandButton id="reloadButton" labelKey="ACL.button.reload" icon="reload"
+                          bean="#{aclBean}" action="edit" immediate="true"/>
+        <adm:commandButton id="deleteButton" labelKey="ACL.button.delete" icon="delete" immediate="true"
+                          bean="#{aclBean}" action="delete" confirm="ACL.confirm.delete"/>
+        <adm:commandButton id="cancelButton" labelKey="ACL.button.cancel" icon="cancel"
+                          action="aclOverview" immediate="true"/>
+
+        <adm:toolbarPluginButtons/>
+    </a4j:form>
+    <br/>
+</ui:define>
+
+</ui:composition>
+
+</body>
+</html>

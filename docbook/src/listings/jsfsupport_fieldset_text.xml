@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="xhtml" xml:id="jsfsupport_fieldset_text"
+                xmlns="http://docbook.org/ns/docbook"><![CDATA[<fx:fieldSet legend="Demo fieldset">
+
+    <fx:formRow label="Group Name" id="groupname">
+        <h:inputText id="groupname" value="#{userGroupBean.name}" required="true"/>
+    </fx:formRow>
+
+    <fx:formRow label="Color" id="color">
+        <h:inputText id="color" value="#{userGroupBean.color}"/>
+    </fx:formRow>
+
+</fx:fieldSet>
+]]></programlisting>

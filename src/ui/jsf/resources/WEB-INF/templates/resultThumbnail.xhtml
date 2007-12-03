@@ -1,0 +1,34 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:c="http://java.sun.com/jstl/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+    xmlns:adm="http://www.flexive.com/jsf/admin"
+    xmlns:fx="http://www.flexive.com/jsf/core">
+
+Renders a single thumbnail from a result row.
+
+Parameters:
+    row - result row object
+    resultSet - the FxSQL result set
+    onclick - an optional onclick handler
+    index - the current row index (if available)
+
+<ui:composition>
+    <h:panelGroup rendered="#{row != null}">
+        <c:set var="pk" value="#{row[0]}"/>
+        <c:set var="boxSize" value="#{fxSearchResultBean.previewSize.size}"/>
+        <div  style="border:1px solid #AAAAAA; width: #{boxSize+4}px; height: #{boxSize+4}px; line-height: #{boxSize+2}px; vertical-align: middle; text-align: center; display: table">
+            <div  style="display: table-cell;vertical-align: middle">
+                <img id="loadrow#{index}" src="thumbnail/pk#{pk}/s#{fxSearchResultBean.previewSize.blobIndex}" alt="#{pk}" title="#{pk}" border="0"/>
+            </div>
+        </div>
+    </h:panelGroup>
+</ui:composition>
+
+</html>

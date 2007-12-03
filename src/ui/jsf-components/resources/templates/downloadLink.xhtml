@@ -1,0 +1,27 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:c="http://java.sun.com/jstl/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+    xmlns:fx="http://www.flexive.com/jsf/core">
+
+Renders a download link for the given object/xpath. The passed body content is rendered inside the link.
+
+Parameters:
+    pk - the primary key of the object
+    xpath - the xpath of the binary value to be download, e.g. /document
+    filename - the filename to be rendered. If not specified, the primary key is used (without extension).
+
+<ui:composition>
+    <c:if test="#{empty filename}">
+        <c:set var="filename" value="#{pk}"/>
+    </c:if>
+    <h:outputLink value="download/pk#{pk}/#{xpath}/#{filename}"><ui:insert/></h:outputLink>
+</ui:composition>
+
+</html>

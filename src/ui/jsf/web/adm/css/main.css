@@ -1,0 +1,313 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color:#F9FCF1;
+    overflow:hidden;
+    font-family: Arial, Helvetica, sans-serif;
+    color: black;
+    font-size: 11px;
+}
+
+body a {
+    color: black;
+    text-decoration:none;
+}
+
+#toolbarMessage {
+    margin-left:10px;
+    height:10px;
+    position:absolute;
+    top:10px;
+    font-weight:bold;
+}
+
+.pngSupport {
+/*behavior: url("css/pngbehavior.htc");*/
+    width:16px;
+    height:16px;
+    border:0;
+}
+
+
+#slbg {
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:1000px;
+    background-color:#F9FCF1;
+    display:none;
+    z-index:9999;
+}
+
+#slbgLine {
+    position:absolute;
+    top:0;
+    left:0;
+    width:1px;
+    background-color:#bdbdbd;
+    display:none;
+    z-index:99999;
+}
+
+#loading {
+    z-index:999;
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:1000px;
+    background-color:#F9FCF1;
+    color:black;
+    font-family:Arial, Verdana, Helvetica, Geneva, sans-serif;
+    font-size:14px;
+}
+
+#lock {
+    background-image:url('../images/layout/screenLockBg.gif');
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background-color:transparent;
+    z-index:999;
+    display:none;
+}
+
+#lockFrame {
+    position:absolute;
+    top:0;
+    left:0;
+    width:402px;
+    height:50px;
+    display:block;
+    z-index:999;
+}
+
+
+#dragArea {
+    cursor:e-resize;
+    width:10px;
+    background-repeat:repeat-y;
+}
+
+#leftArea {
+    width:235px;
+    height:100%;
+}
+
+#header {
+    height:30px;
+    background-color:#eeeeee;
+    color:#336699;
+    font-weight:bold;
+    font-size:11px;
+    padding-left:5px;
+}
+
+#pageName {
+    float:left;
+    color:#336699;
+    padding-top:4px;
+    font-weight:bold;
+    font-size:11px
+}
+
+#pageTime {
+    float:right;
+    margin-right:10px;
+    color:#a4a4a4;
+    padding-top:4px;
+    padding-left:10px;
+    font-weight:normal;
+    font-size:11px
+}
+
+#mainTbl {
+    width:100%;
+}
+
+#treeNavFrame {
+    background-color:#eeeeee;
+    width:100%;
+}
+
+.header {
+    color:#376ca2;
+    white-space:nowrap;
+    text-decoration:none;
+    font-weight:bold;
+    font-size:11px;
+    padding-right:5px;
+    padding-left:5px;
+    padding-top:8px;
+    float:left;
+    border:none;
+    cursor:
+}
+
+.headerSmall {
+    color:#376ca2;
+    white-space:nowrap;
+    text-decoration:none;
+    font-weight:normal;
+    font-size:11px;
+    padding-right:10px;
+}
+
+.mytxt {
+    color:#376ca2;
+    font-family:Arial, Verdana, Helvetica, Geneva, sans-serif;
+    font-size:12px;
+    white-space:nowrap;
+    text-decoration:none;
+}
+
+
+.searchOption {
+    white-space:nowrap;
+    color:black;
+    font-size:11px;
+    text-decoration:none;
+}
+
+#searchTypeTxt {
+    font-size:11px;
+    padding-left:3px;
+    padding-top:2px;
+    width:70px;
+    white-space:nowrap;
+    overflow:hidden;
+    cursor:pointer;
+}
+
+#header1 {
+    height:30px;
+    background-image:url("../images/layout/topBg.gif");
+}
+
+#header1Div {
+    height:21px;
+    padding-top:7px;
+    padding-left:5px;
+    position:relative;
+    right:1px;
+    top:-1px;
+    border-right:1px solid #bdbdbd
+}
+
+#header2 {
+    height:30px;
+    background-image:url("../images/layout/topBg.gif");
+}
+#fxToolbar {
+    height:30px;
+    background-image:url("../images/layout/topBg.gif");
+}
+
+.fxToolbarIcon {
+    margin-top:7px;
+    margin-left:3px;
+    cursor:pointer;
+}
+
+.menuItem {
+    width:100%;
+    background-color:white;
+    height:21px;
+    background-image:url('../images/layout/BGMenuInactive.gif');
+    cursor:pointer;
+    overflow:hidden;
+}
+
+.menuItemActive {
+    width:100%;
+    background-color:white;
+    height:21px;
+    background-image:url('../images/layout/BGMenuActive.gif');
+    cursor:pointer;
+    overflow:hidden;
+}
+
+
+
+.menuItemSpan {
+    position:absolute;
+    left:10px;
+    margin-left:0;
+    margin-right:0;
+    margin-bottom:0;
+    margin-top:4px;
+    padding:0;
+    color:black;
+    font-style:normal;
+    font-weight:bold;
+    font-size:11px;
+    display:inline;
+}
+
+#contentHeader {
+    border:0;
+    overflow:hidden;
+    margin-top:5px;
+    height:21px;
+}
+
+#contentFooter {
+    height:25px;
+    background-image:url('../images/layout/Linie.gif');
+    background-repeat:repeat-x;
+    padding-top:5px;
+    border:0 solid black;
+}
+
+#dragAreaBottomLinie {
+    position:absolute;
+    top:0;
+    left:235px;
+    height:30px;
+    background-color:white;
+    width:10px;
+    overflow:hidden;
+}
+
+#dragAreaTopLinie{
+    position:absolute;
+    top:30px;
+    color:white;
+    width:10px;
+    height:24px;
+    background-color:#F9FCF1;
+    border-bottom:1px solid #bdbdbd;
+}
+
+#dragButton {
+    position:absolute;
+    top:100px;
+    z-index:0;
+}
+
+.tabText {
+    color: #AFAFAC;
+    padding: 2px 8px 0 5px;
+    letter-spacing: 0.7mm;
+    white-space: nowrap;
+    background-image:url('../images/layout/tabs/TabBG.gif');
+    cursor:pointer;
+}
+
+.tabTextActive {
+    color: #3D3D3D;
+    padding: 2px 8px 0 5px;
+    letter-spacing: 0.7mm;
+    white-space: nowrap;
+    background-image:url('../images/layout/tabs/TabBGActive.gif');
+}
+
+#contentHeaderTabTbl {
+    margin:0;
+    padding:0;
+    border:0;
+    width:100%;
+}

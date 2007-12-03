@@ -1,0 +1,171 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<head>
+    <title>#{fxMessageBean['GlobalConfig.title']}</title>
+    <fx:includes/>
+    <style type="text/css">
+        table.divisions {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+
+        table.divisions thead th {
+            background-color: #ebf5cc;
+            padding: 0.5em;
+            border-bottom: 1px solid black;
+            border-right: 1px solid black;
+        }
+
+        table.divisions tbody td {
+            padding: 3px;
+        }
+
+        table.divisions tbody {
+            background-color: #f9fcf1;
+        }
+
+        table.divisions input[type=text] {
+            width: 95%;
+            border: 1px solid gray;
+        }
+
+        span.regex, span.datasource, span.database {
+            font-family: monospace;
+        }
+
+        fieldset {
+            margin-top: 25px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h:form>
+    <h:messages/>
+    
+    <h4>#{fxMessageBean['GlobalConfig.label.legend.divisions']}</h4>
+
+    <p>
+        <h:outputText value="#{fxMessageBean['GlobalConfig.label.info.divisions']}" escape="false"/>
+    </p>
+
+    <t:dataTable var="division" value="#{globalConfigBean.divisions}" rowIndexVar="index" styleClass="divisions">
+        <h:column>
+            <f:facet name="header">
+                #{fxMessageBean['GlobalConfig.label.divisionId']}
+            </f:facet>
+
+            #{division.id}
+        </h:column>
+
+        <h:column>
+            <f:facet name="header">
+                #{fxMessageBean['GlobalConfig.label.regexp']}
+            </f:facet>
+
+            <ui:fragment rendered="#{index != globalConfigBean.editIndex}">
+                <span class="regex">#{division.domainRegEx}</span>
+            </ui:fragment>
+            <h:inputText id="domain" value="#{division.domainRegEx}" rendered="#{index == globalConfigBean.editIndex}">
+                <fx:regularExpressionValidator/>
+            </h:inputText>
+        </h:column>
+
+        <h:column>
+            <f:facet name="header">
+                #{fxMessageBean['GlobalConfig.label.dataSource']}
+            </f:facet>
+
+            <ui:fragment rendered="#{index != globalConfigBean.editIndex}">
+                <span class="datasource">#{division.dataSource}</span>
+            </ui:fragment>
+            <h:inputText id="datasource" value="#{division.dataSource}" rendered="#{index == globalConfigBean.editIndex}"/>
+        </h:column>
+
+        <h:column>
+            <f:facet name="header">
+                #{fxMessageBean['GlobalConfig.label.database']}
+            </f:facet>
+
+            <ui:fragment rendered="#{division.available}">
+                <span class="database">#{division.dbVendor} #{division.dbVersion}</span>
+            </ui:fragment>
+            <ui:fragment rendered="#{!division.available}">
+                #{fxMessageBean['GlobalConfig.label.inactive']}
+            </ui:fragment>
+        </h:column>
+
+        <h:column>
+            <f:facet name="header">
+                #{fxMessageBean['GlobalConfig.label.actions']}
+            </f:facet>
+
+            <h:commandButton value="#{fxMessageBean['GlobalConfig.button.division.edit']}"
+                             rendered="#{globalConfigBean.editIndex == -1}">
+                <f:setPropertyActionListener value="#{index}" target="#{globalConfigBean.editIndex}"/>
+            </h:commandButton>
+
+            <h:commandButton action="#{globalConfigBean.removeDivision}"
+                             value="#{fxMessageBean['GlobalConfig.button.division.remove']}"
+                             rendered="#{globalConfigBean.editIndex == -1}">
+                <f:setPropertyActionListener value="#{index}" target="#{globalConfigBean.editIndex}"/>
+            </h:commandButton>
+
+            <h:commandButton action="#{globalConfigBean.testConnection}"
+                             value="#{fxMessageBean['GlobalConfig.button.division.testConnection']}"
+                             rendered="#{globalConfigBean.editIndex == -1}">
+                <f:setPropertyActionListener value="#{index}" target="#{globalConfigBean.editIndex}"/>
+            </h:commandButton>
+
+            <h:commandButton action="#{globalConfigBean.leaveEditMode}" value="#{fxMessageBean['GlobalConfig.button.division.update']}" rendered="#{globalConfigBean.editIndex == index}"/>
+            <h:commandButton action="#{globalConfigBean.leaveEditMode}" value="#{fxMessageBean['GlobalConfig.button.division.cancel']}" immediate="true" rendered="#{globalConfigBean.editIndex == index}"/>
+        </h:column>
+    </t:dataTable>
+
+    <h:commandButton action="#{globalConfigBean.addDivision}" value="#{fxMessageBean['GlobalConfig.button.addDivision']}"/>
+
+    <br/>
+    
+    <fx:fieldSet legendKey="GlobalConfig.label.legend.domainCheck">
+        <fx:formRow id="checkUrl" labelKey="GlobalConfig.field.checkDivisionUrl">
+            <h:inputText id="checkUrl" value="#{globalConfigBean.checkUrl}"/>
+        </fx:formRow>
+
+        <h:commandButton action="#{globalConfigBean.checkUrl}" value="#{fxMessageBean['GlobalConfig.button.checkUrl']}"/>
+    </fx:fieldSet>
+
+    <br/>
+
+    <fx:fieldSet legendKey="GlobalConfig.label.legend.changePassword">
+        <fx:formRow id="oldPassword" labelKey="GlobalConfig.field.oldPassword">
+            <h:inputSecret id="oldPassword" value="#{globalConfigBean.oldPassword}"/>
+        </fx:formRow>
+        <fx:formRow id="newPassword" labelKey="GlobalConfig.field.newPassword">
+            <h:inputSecret id="newPassword" value="#{globalConfigBean.newPassword}"/>
+        </fx:formRow>
+        <fx:formRow id="repeatNewPassword" labelKey="GlobalConfig.field.repeatNewPassword">
+            <h:inputSecret id="repeatNewPassword" value="#{globalConfigBean.repeatNewPassword}"/>
+        </fx:formRow>
+
+        <h:commandButton action="#{globalConfigBean.updatePassword}" value="#{fxMessageBean['GlobalConfig.button.updatePassword']}"/>
+    </fx:fieldSet>
+
+    <br/>
+    
+    <h:panelGrid columns="3">
+        <h:commandButton action="#{globalConfigBean.updateDivisions}" value="#{fxMessageBean['GlobalConfig.button.updateDivisions']}"/>
+        <h:commandButton action="#{globalConfigBean.resetDivisions}" value="#{fxMessageBean['GlobalConfig.button.resetDivisions']}"/>
+        <h:commandButton action="#{globalConfigBean.logout}" value="#{fxMessageBean['GlobalConfig.button.logout']}"/>
+    </h:panelGrid>
+
+</h:form>
+</body>
+</html>

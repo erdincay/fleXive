@@ -1,0 +1,53 @@
+import com.flexive.extractor.ExtractedData
+import com.flexive.extractor.Extractor
+import com.flexive.shared.value.BinaryDescriptor
+
+if (processed) {
+    println "already processed in documents ..."
+    return
+}
+
+boolean isDocument = true
+int doc_previewId = BinaryDescriptor.SYS_UNKNOWN
+//Extractor.DOC_TYPE docType = Extractor.DOC_TYPE.WORD
+switch (mimeType) {
+    case "application/msword":
+        doc_previewId = BinaryDescriptor.SYS_DOC
+        docType = Extractor.DocumentType.Word
+        break
+    case "application/mspowerpoint":
+        doc_previewId = BinaryDescriptor.SYS_PPT
+        docType = Extractor.DocumentType.Powerpoint
+        break
+    case "application/msexcel":
+        doc_previewId = BinaryDescriptor.SYS_XLS
+        docType = Extractor.DocumentType.Excel
+        break
+    case "application/pdf":
+        doc_previewId = BinaryDescriptor.SYS_PDF
+        docType = Extractor.DocumentType.PDF
+        break
+    case "text/html":
+        doc_previewId = BinaryDescriptor.SYS_HTML
+        docType = Extractor.DocumentType.HTML
+        break
+    default:
+        isDocument = false
+}
+
+if (!isDocument) {
+    println "no document!"
+    return
+}
+println "processing a document!"
+try {
+    metaData = Extractor.extractData(binaryFile, docType).toXML()
+} catch (Throwable t) {
+    println "Failed to extract data, returning empty set: " + t.message
+    metaData = ExtractedData.toEmptyXML()
+}
+
+processed = true
+useDefaultPreview = true
+defaultId = doc_previewId
+println "Processed document ok"

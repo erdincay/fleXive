@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="java" xml:id="core_structure_binaries"  xmlns="http://docbook.org/ns/docbook">
+    File testFile = new File("src/framework/testresources/image/Exif.JPG");
+    FxType type = CacheAdmin.getEnvironment().getType(IMAGE_TYPE);
+
+    FileInputStream fis = new FileInputStream(testFile);
+<co xml:id="cs_bin_1"/>  BinaryDescriptor binary = new BinaryDescriptor(testFile.getName(), testFile.length(), fis);
+
+    FxContent img = co.initialize(type.getId());
+<co xml:id="cs_bin_2"/>  img.setValue("/ImageBinary", new FxBinary(false, binary));
+    img.setValue("/Filename", new FxString(false, "Exif.JPG"));
+    FxPK pk = co.save(img);
+
+    FxContent loaded = co.load(pk);
+    FxBinary bin = (FxBinary)loaded.getValue("/ImageBinary");
+    File comp = File.createTempFile("Exif","JPG");
+    FileOutputStream fos = new FileOutputStream(comp);
+<co xml:id="cs_bin_3"/>  bin.getBestTranslation().download(fos);
+    fos.close();
+</programlisting>

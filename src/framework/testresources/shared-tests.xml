@@ -1,0 +1,16 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="flexive" verbose="1">
+    <test name="shared">
+        <groups>
+            <run>
+                <exclude name="ejb"/>
+                <include name="shared"/>
+            </run>
+        </groups>
+        <packages>
+            <package name="com.flexive.tests.shared"/>
+        </packages>
+    </test>
+</suite>
+

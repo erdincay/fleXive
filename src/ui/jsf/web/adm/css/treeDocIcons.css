@@ -1,0 +1,147 @@
+/** Tree document icons */
+
+/** Plain tree nodes */
+
+/* Open folder */
+.TreeStateChildrenYes-ExpandOpen .TreeIconContentNode {
+    background-image: url("../images/tree/folderOpen.png");
+}
+
+/* Closed folder, children loaded */
+.TreeStateChildrenYes-ExpandClosed .TreeIconContentNode {
+    background-image: url("../images/tree/folderClosed.png");
+}
+
+/* Closed folder, children not loaded but available */
+.TreeStateChildrenNo-ExpandClosed .TreeIconContentNode {
+    background-image: url("../images/tree/folderClosed.png");
+}
+
+/* Leaf node */
+.TreeStateChildrenNo-ExpandLeaf .TreeIconContentNode {
+    background-image: url("../images/tree/folderClosed.png");
+}
+
+/** Content nodes (i.e. nodes with references) */
+
+/* Open folder */
+.TreeStateChildrenYes-ExpandOpen .TreeIconContentObject {
+    background-image: url("../images/tree/contentFolderOpen.png");
+}
+
+/* Closed folder, children loaded */
+.TreeStateChildrenYes-ExpandClosed  .TreeIconContentObject {
+    background-image: url("../images/tree/contentFolderClosed.png");
+}
+
+/* Closed folder, children not loaded but available */
+.TreeStateChildrenNo-ExpandClosed  .TreeIconContentObject {
+    background-image: url("../images/tree/contentFolderClosed.png");
+}
+
+/* Leaf node */
+.TreeStateChildrenNo-ExpandLeaf  .TreeIconContentObject {
+    background-image: url("../images/tree/content.png");
+}
+
+/* Dojo bug workaround */
+.TreeStateChildrenYes-ExpandClosed .TreeIconContent {
+    background-image : none !important;
+}
+
+.TreeStateChildrenNo-ExpandLeaf .TreeIconContent {
+    background-image : none !important;
+}
+
+.TreeStateChildrenNo-ExpandClosed .TreeIconContent {
+    background-image : none !important;
+}
+
+.TreeStateChildrenNo-ExpandOpen .TreeIconContent {
+    background-image : none !important;
+}
+
+/*Structure Tree */
+.TreeStateChildrenYes-ExpandOpen .TreeIconAssignment {
+    background-image: url("../images/tree/fxAssignedProperty.png");
+}
+
+.TreeStateChildrenYes-ExpandClosed .TreeIconAssignment {
+    background-image: url("../images/tree/fxAssignedProperty.png");
+}
+
+.TreeStateChildrenNo-ExpandClosed .TreeIconAssignment {
+    background-image: url("../images/tree/fxAssignedProperty.png");
+}
+
+.TreeStateChildrenNo-ExpandLeaf .TreeIconAssignment {
+    background-image: url("../images/tree/fxAssignedProperty.png");
+}
+
+
+.TreeStateChildrenYes-ExpandOpen .TreeIconAssignmentSystemInternal {
+    background-image: url("../images/tree/fxAssignedPropertySystemInternal.png");
+}
+
+.TreeStateChildrenYes-ExpandClosed .TreeIconAssignmentSystemInternal {
+    background-image: url("../images/tree/fxAssignedPropertySystemInternal.png");
+}
+
+.TreeStateChildrenNo-ExpandClosed .TreeIconAssignmentSystemInternal {
+    background-image: url("../images/tree/fxAssignedPropertySystemInternal.png");
+}
+
+.TreeStateChildrenNo-ExpandLeaf .TreeIconAssignmentSystemInternal {
+    background-image: url("../images/tree/fxAssignedPropertySystemInternal.png");
+}
+
+
+.TreeStateChildrenYes-ExpandOpen .TreeIconGroup {
+    background-image: url("../images/tree/fxGroup.png");
+}
+
+.TreeStateChildrenYes-ExpandClosed .TreeIconGroup {
+    background-image: url("../images/tree/fxGroup.png");
+}
+
+.TreeStateChildrenNo-ExpandClosed .TreeIconGroup {
+    background-image: url("../images/tree/fxGroup.png");
+}
+
+.TreeStateChildrenNo-ExpandLeaf .TreeIconGroup {
+    background-image: url("../images/tree/fxGroup.png");
+}
+
+
+.TreeStateChildrenYes-ExpandOpen .TreeIconType {
+    background-image: url("../images/tree/fxType.png");
+}
+
+.TreeStateChildrenYes-ExpandClosed .TreeIconType {
+    background-image: url("../images/tree/fxType.png");
+}
+
+.TreeStateChildrenNo-ExpandClosed .TreeIconType {
+    background-image: url("../images/tree/fxType.png");
+}
+
+.TreeStateChildrenNo-ExpandLeaf .TreeIconType {
+    background-image: url("../images/tree/fxType.png");
+}
+
+
+.TreeStateChildrenYes-ExpandOpen .TreeIconTypeRelation {
+    background-image: url("../images/tree/fxTypeRelation.png");
+}
+
+.TreeStateChildrenYes-ExpandClosed .TreeIconTypeRelation {
+    background-image: url("../images/tree/fxTypeRelation.png");
+}
+
+.TreeStateChildrenNo-ExpandClosed .TreeIconTypeRelation {
+    background-image: url("../images/tree/fxTypeRelation.png");
+}
+
+.TreeStateChildrenNo-ExpandLeaf .TreeIconTypeRelation {
+    background-image: url("../images/tree/fxTypeRelation.png");
+}

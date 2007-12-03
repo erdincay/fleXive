@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:t="http://myfaces.apache.org/tomahawk">
+
+Adds a TAB to the [fleXive] backend tab-bar.
+This is done by creating a invisible jsf command link, and then copying and usingthe the onclick even of this command
+link on the tab bar.
+
+<ui:composition>
+    <c:if test="#{empty rendered}">
+        <c:set var="rendered" value="true"/>
+    </c:if>
+    <c:if test="#{rendered}"> 
+        <c:if test="${empty active}">
+            <c:set var="active" value="false" />
+        </c:if>
+        <c:if test="${empty label}">
+            <c:set var="label" value="&nbsp;" />
+        </c:if>
+
+        <h:commandLink style="display:none" id="#{id}" action="#{bean[action]}" onclick="parent.lockScreen();">
+           #{label}
+        </h:commandLink>
+
+        <script type="text/javascript" language="javascript">
+            parent.addTab('#{fxSystemBean.response.id}',this,'#{id}','#{fxSystemBean.escapeForJavaScript[label]}','',#{active});
+            function tabClickFct#{id}() { eval(tabClickScript#{id}); }
+        </script>
+    </c:if>
+</ui:composition>
+
+</html>

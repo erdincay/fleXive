@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<head>
+    <!-- Add flexive includes -->
+    <fx:includes/>
+
+    <!-- Add our own stylesheet for the result page -->
+    <link rel="stylesheet" type="text/css" href="css/tutorial01.css"/>
+</head>
+
+<body>
+
+    <h:messages globalOnly="true"/>
+        
+    <h:form enctype="multipart/form-data">
+
+        <ul id="mainmenu">
+            <li>
+                <h:outputLink value="index.xhtml">Return to overview</h:outputLink>
+            </li>
+        </ul>
+
+
+        <!--
+             Create a new content of type document01 or edit an existing content instance if set in fxContentViewBean.
+        -->
+        <fx:content typeName="document01" content="#{fxContentViewBean.content}" var="document">
+
+            <fx:fieldSet legend="Document Upload">
+                <!-- Render the input form -->
+                <fx:value property="file"/>
+                <fx:value property="caption"/>
+
+                <!-- Render the submit button -->
+                <fx:formRow>
+                    <h:commandButton action="#{fxContentViewBean.save}" value="Save">
+                        <f:setPropertyActionListener target="#{fxContentViewBean.content}" value="#{document_content}"/>
+                        <f:setPropertyActionListener target="#{fxContentViewBean.successMessage}"
+                                                     value="Successfully saved the document."/>
+                    </h:commandButton>
+                </fx:formRow>
+
+            </fx:fieldSet>
+
+        </fx:content>
+
+    </h:form>
+</body>
+</html>

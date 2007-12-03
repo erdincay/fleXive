@@ -1,0 +1,123 @@
+//file: DocumentMetaParser.gy
+//description:
+// Parser for Document meta information. Sets Document type fields.
+// To be called for Document type create and update dynamic scripting
+//expected bindings:
+//  ticket ... UserTicket
+//  content ... the FxContent being processed
+//author: Markus Plesser, Unique Computing Solutions GmbH
+import com.flexive.shared.value.*
+
+if( content.getPropertyData("/Document").isEmpty() ) {
+    println "No document present to parse!"
+    return content
+}
+
+def binValue = content.getPropertyData("/Document").value.defaultTranslation
+if( binValue.metadata == null || binValue.metadata.length() < 20) {
+    println "No metadata present for document to process!"
+    if( content.getValue("/TITLE").isEmpty() )
+        content.setValue("/TITLE", new FxString(false, binValue.name))
+    if( content.getValue("/ENCRYPTED").isEmpty() )
+        content.setValue("/ENCRYPTED", new FxBoolean(false, false))
+    return content
+}
+println "Meta data (first 20 chars): ${binValue.metadata.substring(0,20)}...";
+def meta = new XmlSlurper().parseText(binValue.metadata);
+def cmap = [:]
+
+void process(cmap,key,rawvalue)  {
+  if( rawvalue==null || rawvalue.toString().trim().length() == 0 )
+    return
+  def value = rawvalue.toString()
+  if(value.endsWith('.'))
+    value = value.substring(0, value.length()-1);
+  if( !cmap.containsKey(key) )
+    cmap[key] = value
+  else
+    cmap[key] += ' '+value
+}
+
+println "Document name: "+binValue.name
+def java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy:MM:dd HH:mm:ss")
+//println "Text: $meta.text"
+//println "Meta: $meta"
+//println "Summary: $meta.summary"
+
+if( meta.summary ) {
+    if( meta.summary.author )
+        process(cmap, 'String|Author', meta.summary.author)
+    if( meta.summary.applicationName )
+        process(cmap, 'String|Application', meta.summary.applicationName)
+    if( meta.summary.charCount )
+        process(cmap, 'Number|Characters', meta.summary.charCount)
+    if( meta.summary.comments )
+        process(cmap, 'String|Comments', meta.summary.comments)
+    if( meta.summary.createdAt )
+        process(cmap, 'DateTime|CreateDate', meta.summary.createAt)
+    if( meta.summary.editTime )
+        process(cmap, 'DateTime|EditDate', meta.summary.editTime)
+    if( meta.summary.keywords )
+        process(cmap, 'String|Keywords', meta.summary.keywords)
+    if( meta.summary.lastModifiedBy )
+        process(cmap, 'String|LastEditor', meta.summary.lastModifiedBy)
+    if( meta.summary.lastPrintedAt )
+        process(cmap, 'DateTime|LastPrinted', meta.summary.lastPrintedAt)
+    if( meta.summary.title )
+        process(cmap, 'String|Title', meta.summary.title)
+    if( meta.summary.lastModifiedAt )
+        process(cmap, 'DateTime|LastModified', meta.summary.lastModifiedAt)
+    if( meta.summary.pageCount )
+        process(cmap, 'Number|Pages', meta.summary.pageCount)
+    if( meta.summary.revNumber )
+        process(cmap, 'String|RevNumber', meta.summary.revNumber)
+    if( meta.summary.wordCount )
+        process(cmap, 'Number|Words', meta.summary.wordCount)
+    if( meta.summary.encrypted )
+        process(cmap, 'Boolean|Encrypted', meta.summary.encrypted)
+    if( meta.summary.additionalText )
+        process(cmap, 'String|AdditionalText', meta.summary.additionalText)                
+} else {
+    println "No summary information!"
+}
+
+cmap.each() {key, value ->
+    def _type = key.split('\\|')[0]
+    def fxvalue
+    key = key.split("\\|")[1]
+//      println "${key} -> ${value} (${_type})"
+    switch (_type) {
+        case "String": fxvalue = new FxString(false, value); break
+        case "Boolean": fxvalue = new FxBoolean(false, Boolean.valueOf(value)); break
+        case "Number":
+            if (value.endsWith("+0+0"))
+                value = value.substring(0, value.indexOf("+0+0"))
+            int _int = Integer.valueOf(value);
+            if (_int == -1 || _int == 0) {
+                fxvalue = null
+                break
+            }
+            fxvalue = new FxNumber(false, _int); break
+        case "DateTime":
+        fxvalue = new FxDateTime(false, new java.util.Date(Long.valueOf(value)))
+//        println "Time is " + content.getValue("/$key").bestTranslation.time + " empty:" + content.getValue("/$key").isEmpty()
+        if (content.getValue("/$key").isEmpty()) {
+            content.getValue("/$key").setEmpty()
+        }
+        break
+    }
+    if (fxvalue != null) {
+//        println "fxValue=" + fxvalue
+        if (content.getValue("/" + key).isEmpty()) {
+            content.setValue("/" + key, fxvalue);
+//            println "/$key -> $fxvalue"
+        }
+    }
+}
+
+
+if( content.getValue("/TITLE").isEmpty() )
+    content.setValue("/TITLE", new FxString(false, binValue.name))
+if( content.getValue("/ENCRYPTED").isEmpty() )
+    content.setValue("/ENCRYPTED", new FxBoolean(false, false))
+return content

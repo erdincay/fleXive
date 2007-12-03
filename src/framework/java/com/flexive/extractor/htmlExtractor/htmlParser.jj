@@ -1,0 +1,199 @@
+/***************************************************************
+ *  This file is part of the [fleXive](R) project.
+ *
+ *  Copyright (c) 1999-2007
+ *  UCS - unique computing solutions gmbh (http://www.ucs.at)
+ *  All rights reserved
+ *
+ *  The [fleXive](R) project is free software; you can redistribute
+ *  it and/or modify it under the terms of the GNU General Public
+ *  License as published by the Free Software Foundation;
+ *  either version 2 of the License, or (at your option) any
+ *  later version.
+ *
+ *  The GNU General Public License can be found at
+ *  http://www.gnu.org/copyleft/gpl.html.
+ *  A copy is found in the textfile GPL.txt and important notices to the
+ *  license from the author are found in LICENSE.txt distributed with
+ *  these libraries.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  For further information about UCS - unique computing solutions gmbh,
+ *  please see the company website: http://www.ucs.at
+ *
+ *  For further information about [fleXive](R), please see the
+ *  project website: http://www.flexive.org
+ *
+ *
+ *  This copyright notice MUST APPEAR in all copies of the file!
+ ***************************************************************/
+
+/**
+ * HTML Text Extractor.
+ *
+ * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @version $Rev$
+ */
+options {
+  STATIC = false; 
+  UNICODE_INPUT=true;  
+}
+
+
+PARSER_BEGIN(HtmlExtractorParser)
+
+package com.flexive.extractor.htmlExtractor;
+import java.io.Serializable;
+import java.util.ArrayList;
+
+public class HtmlExtractorParser {
+  HtmlExtractor extractor = null;
+  boolean debug = true;
+}
+
+PARSER_END(HtmlExtractorParser)
+
+SKIP : {
+	"\t" |
+	"\n" |
+	"\r" |
+	"<script " : WithinScript |
+	"<!--" : WithinComment |
+	"<!DOCTYPE " : WithinDoctype
+}
+
+<WithinDoctype> SKIP : { ">" : DEFAULT }
+<WithinDoctype> MORE : { <~[]> }
+
+<WithinComment> SKIP : { "-->" : DEFAULT }
+<WithinComment> MORE : { <~[]> }
+
+<WithinScript> SKIP : { "</script>" : DEFAULT }
+<WithinScript> MORE : { <~[]> }
+
+
+
+
+
+
+TOKEN [IGNORE_CASE] :
+{
+  < QUOTE: (" ")* "\"" (" ")*>
+| < EQUALS: (" ")*"="(" ")*>
+| < TITLE: "<title>" (~[">"])* "</title>" >
+| < OPEN_TAG   : "<" (["/","%","!","a"-"z","A"-"Z","1"-"9"])+ (" ")*   >
+| < CLOSE_TAG   :(" ")* ">" >
+| < STRING : (~["<","\"",">","="] | "\\\"")+(" ")* >
+}
+
+/**
+ * Entry point of the parser.
+ */
+void extract(HtmlExtractor e) :
+{
+  this.extractor = e;
+}
+{
+  readText()
+}
+
+
+
+
+void readText() :
+{
+  Token str = null;
+} {
+    textElement() readText()
+    |
+    tagElement() readText()
+    |
+    str=<TITLE> { extractor.setTitle(str); } readText()
+    |
+    <EOF>
+}
+
+void tagElement() : 
+{
+  Token str = null;
+  htmlTag tag = null;
+}{
+  str = <OPEN_TAG> 
+  [
+    { tag = new htmlTag(extractor,str.image.substring(1)); }
+    tagBody(tag)
+  ] 
+  <CLOSE_TAG> 
+  { if (tag!=null) tag.close(); }
+}
+
+void tagBody(htmlTag tag) : {
+  Token str = null;
+}{
+  str = <STRING> [ <EQUALS> tagBodyValue(tag,str) ] [ LOOKAHEAD(2) tagBody(tag)]
+}
+
+void tagBodyValue(htmlTag tag,Token attrName) : {
+  StringBuffer body = new StringBuffer(256);
+  Token str = null;
+}{
+  str = <STRING> 
+  { tag.add(attrName,new StringBuffer(str.image)); }
+  |
+  <QUOTE> [quoteBody(body) { tag.add(attrName,body); } ] <QUOTE>  {
+}
+}
+
+void quoteBody(StringBuffer body) :
+{
+Token str;
+}{
+  str=quoteBodyElement() {
+    body.append(str.image);
+  }
+  [quoteBody(body)]
+}
+
+Token quoteBodyElement() :
+{
+  Token str = null;
+}{
+   str=<STRING>  
+   {return str;}
+   |
+   str=<CLOSE_TAG>
+   {return str;}
+   |
+   str=<EQUALS>
+   {return str;}
+   |
+   str=<OPEN_TAG>
+   {return str;}
+   |
+   str="<"
+   {return str;}
+}
+
+
+
+void textElement() :
+{
+  Token str = null;
+} {
+
+   str=<STRING> 
+   { extractor.append(str); }
+   |
+   str = <QUOTE> 
+   { extractor.append(str); }
+   |
+   str = <CLOSE_TAG>
+   { extractor.append(str); }
+   |
+   str = <EQUALS>
+   { extractor.append(str); }
+}

@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<ruleset name="mybraces"
+    xmlns="http://pmd.sf.net/ruleset/1.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://pmd.sf.net/ruleset/1.0.0 http://pmd.sf.net/ruleset_xml_schema.xsd"
+    xsi:noNamespaceSchemaLocation="http://pmd.sf.net/ruleset_xml_schema.xsd">
+  <description>Common flexive code rules</description>
+    <rule ref="rulesets/basic.xml"/>
+    <rule ref="rulesets/design.xml">
+        <!-- Connections are usually closed with Database#close -->
+        <exclude name="CloseResource"/>
+    </rule>
+    <!-- Some prefer short if/loops without braces --> 
+    <!--rule ref="rulesets/braces.xml"/-->
+    <rule ref="rulesets/javabeans.xml">
+        <exclude name="BeanMembersShouldSerialize"/>
+    </rule>
+    <rule ref="rulesets/coupling.xml"/>
+    <rule ref="rulesets/imports.xml"/>
+    <rule ref="rulesets/codesize.xml"/>
+    <rule ref="rulesets/clone.xml"/>
+    <rule ref="rulesets/finalizers.xml"/>
+    <rule ref="rulesets/logging-jakarta-commons.xml"/>
+    <rule ref="rulesets/naming.xml">
+        <!-- Sometimes we need them -->
+        <exclude name="LongVariable"/>
+        <exclude name="ShortVariable"/>
+    </rule>
+    <rule ref="rulesets/optimizations.xml">
+        <!-- It's true but we're too sloppy for that -->
+        <exclude name="LocalVariableCouldBeFinal"/>
+        <exclude name="MethodArgumentCouldBeFinal"/>
+        <!-- Premature optimization is the root of all evil -->
+        <exclude name="AvoidInstantiatingObjectsInLoops"/>
+    </rule>
+    <rule ref="rulesets/strings.xml"/>
+    <rule ref="rulesets/unusedcode.xml"/>
+    <rule ref="rulesets/sunsecure.xml"/>
+    <rule ref="rulesets/strictexception.xml"/>
+</ruleset>

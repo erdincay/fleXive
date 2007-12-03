@@ -1,0 +1,156 @@
+/***************************************************************
+ *  This file is part of the [fleXive](R) project.
+ *
+ *  Copyright (c) 1999-2007
+ *  UCS - unique computing solutions gmbh (http://www.ucs.at)
+ *  All rights reserved
+ *
+ *  The [fleXive](R) project is free software; you can redistribute
+ *  it and/or modify it under the terms of the GNU General Public
+ *  License as published by the Free Software Foundation;
+ *  either version 2 of the License, or (at your option) any
+ *  later version.
+ *
+ *  The GNU General Public License can be found at
+ *  http://www.gnu.org/copyleft/gpl.html.
+ *  A copy is found in the textfile GPL.txt and important notices to the
+ *  license from the author are found in LICENSE.txt distributed with
+ *  these libraries.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  For further information about UCS - unique computing solutions gmbh,
+ *  please see the company website: http://www.ucs.at
+ *
+ *  For further information about [fleXive](R), please see the
+ *  project website: http://www.flexive.org
+ *
+ *
+ *  This copyright notice MUST APPEAR in all copies of the file!
+ ***************************************************************/
+package com.flexive.shared.workflow;
+
+import com.flexive.shared.AbstractSelectableObjectWithLabel;
+import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.flexive.shared.value.FxString;
+
+import java.io.Serializable;
+
+/**
+ * Definition of a workflow step.
+ * 
+ * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ */
+public class StepDefinition extends AbstractSelectableObjectWithLabel implements Serializable{
+    private static final long serialVersionUID = 7468501311030816400L;
+
+    /**
+     * The id of the LIVE step.
+     */
+    public static final long LIVE_STEP_ID = 1;
+
+    /**
+     * The id of the EDIT step.
+     */
+    public static final long EDIT_STEP_ID = 2;
+
+    protected FxString label = null;
+    protected String description = null;
+    protected long uniqueTargetId = -1;
+    protected long id = -1;
+
+    /**
+     * StepDefinition Constructor.
+     *
+     * @param name        the unique name of the step
+     * @param description the description of the step
+     * @param id          the unique id of the step
+     * @param uniqueTargetId  the unique target id (-1 if it there is no unique target)
+     */
+    public StepDefinition(long id, FxString name, String description, long uniqueTargetId) {
+        this.label = name;
+        this.description = description;
+        this.id = id;
+        if (uniqueTargetId >= 0 && id == uniqueTargetId) {
+            throw new FxInvalidParameterException("UNIQUETARGET", "ex.stepdefinition.uniqueTarget.circular.self",
+                    this.id).asRuntimeException();
+        }
+        this.uniqueTargetId = (uniqueTargetId < 0) ? -1 : uniqueTargetId;
+    }
+
+
+    /**
+     * Default constructor.
+     */
+    protected StepDefinition() {
+    }
+
+
+
+    /**
+     * Returns the name of the step definition.
+     *
+     * @return the name of the step definition.
+     */
+    public FxString getLabel() {
+        return this.label;
+    }
+
+    /**
+     * Returns the description of the step definition.
+     *
+     * @return the description of the step definition.
+     */
+    public String getDescription() {
+        return this.description;
+    }
+
+
+    /**
+     * Returns the id of the step definition
+     *
+     * @return the id of the step definition
+     */
+    public long getId() {
+        return this.id;
+    }
+
+    /**
+     * Returns true if only one version of a entry may be in a step using this step definition.
+     *
+     * @return true if only one version of a entry may be in a step using this step definition.
+     */
+    public boolean isUnique() {
+        return (this.uniqueTargetId != -1);
+    }
+
+    /**
+     * Returns the stepDefinition used as target by the unique flag.
+     *
+     * @return the stepDefinition used as target by the unique flag.
+     */
+    public long getUniqueTargetId() {
+        return this.uniqueTargetId;
+    }
+
+    /**
+     * Returns true if the step definition is needed by the system and can not be deleted.
+     *
+     * @return true if the step definition is needed by the system and can not be deleted.
+     */
+    public boolean isSystemStepDefinition() {
+        return (id==LIVE_STEP_ID || id==EDIT_STEP_ID);
+    }
+
+
+    /** {@inheritDoc} */
+	@Override
+	public String toString() {
+		return "StepDefinition[id=" + id + "]";
+	}
+
+
+}

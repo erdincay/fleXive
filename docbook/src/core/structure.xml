@@ -1,0 +1,894 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE section [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<section xml:id="core_structure" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude">
+    <title>Structure Engine</title>
+
+    <xi:include href="../includes/author_mplesser.xml"/>
+
+    <para>
+        One of the core tasks of &Flexive; is to store and query data. Like in relational databases or well-formed XML
+        files,
+        data needs to match a predefined structure. When &flexive; was designed the requirements were as follows:
+        <itemizedlist>
+            <listitem>Simplicity: a very simple, intuitive and slim API</listitem>
+            <listitem>Hierarchical: the possibility to group properties together and nest them within subgroups
+            </listitem>
+            <listitem>Reusability: if you define how a postal address looks like, you want to be able to reuse that
+                definition
+            </listitem>
+            <listitem>Inheritance: inheritance works like reusing a type to refine it</listitem>
+            <listitem>Multilingualism:
+                <emphasis>every</emphasis>
+                supported datatype should be able to store different data for different languages
+            </listitem>
+            <listitem>Versioning: a user should have the possibility to create a new version of an instance</listitem>
+            <listitem>Security: if enabled, access control lists should restrict access to the type, properties,
+                workflow steps and/or certain instances
+            </listitem>
+            <listitem>Workflow: a content instance should always be assigned to a workflow step like "edit" or "live".
+                Controlled by access control lists users may change the state following defined routes between states
+            </listitem>
+            <listitem>Scripting: At predefined trigger points (like before or after creating a new data instance)
+                scripts can be executed that have the possibility to alter data of the affected instance or perform
+                arbitrary actions like sending emails
+            </listitem>
+        </itemizedlist>
+    </para>
+
+    <section xml:id="core_structure_overview">
+        <title>Overview</title>
+        <para>
+            A good analogy to explain how structures in &flexive; are organised are classes and object instances: a
+            class in
+            an object oriented programming language describes which attributes (in &flexive; called<emphasis>
+            properties</emphasis>) are available.
+            If an attribute itself acts like a container for other attributes we call it a<emphasis>group</emphasis>.
+            We call the class analogon
+            <emphasis>Type</emphasis>
+            (implemented in the class<classname>FxType</classname>), attributes
+            <emphasis>property</emphasis>
+            (implemented in<classname>FxProperty</classname>) and a collection of attributes
+            <emphasis>Group</emphasis>
+            (implemented in<classname>FxGroup</classname>).
+        </para>
+        <para>
+            To enable reuse of properties and groups these entities are independent of types and need to be
+            <emphasis>assigned</emphasis>
+            to types (and respectively groups). The benefit of this system - although it might sound a bit confusing at
+            first look - is
+            that different types and assignments can share the same property which can be a big advantage for query
+            operations
+            <footnote>
+                <para>Imagine an online-shop scenario with different kinds of articles, each implemented using their own
+                    type. Something they have in
+                    common is their name. Instead of having to build a query for searching the name property that is an
+                    OR-construct including all involved types it would be easier to assign to all types a property
+                    called
+                    "name" and query this property instead of the assignments.
+                </para>
+            </footnote>
+            .
+        </para>
+        <para>
+            A special extension to types are relations (implemented in<classname>FxType</classname>, mode:<constant>
+            Relation</constant>) which mimics the behaviour of attributed n:m relations known from SQL.
+        </para>
+        <para>
+            <table xml:id="cso_table" class="flexive">
+                <caption>&Flexive; structure elements
+                </caption>
+                <thead>
+                    <tr>
+                        <th>Element</th>
+                        <th>Class</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Type</td>
+                        <td>
+                            <classname>FxType</classname>
+                        </td>
+                        <td>A type, identified by its name, defines behaviour (what kind of permissions may be applied,
+                            storage model or language mode is to be used, etc.) and structure (properties and groups are
+                            assigned to types).
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Relation</td>
+                        <td>
+                            <classname>FxType</classname>
+                            (mode:<constant>Relation</constant>)
+                        </td>
+                        <td>A relation is basically a type that relates (or links) two other types together. A good
+                            analogy is an attributed relation known from SQL. It is possible to define how many times a
+                            specific instance may be used as a relation source or destination and which types my be
+                            related.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Property</td>
+                        <td>
+                            <classname>FxProperty</classname>
+                        </td>
+                        <td>A property defines a name and a datatype (and some options). Thats all there is to it! It
+                            can only exist (and is of relevance) if it is assigned to a type or group. The purpose of
+                            keeping properties and their assignments separate is the ability to share them and query
+                            across multiple types with a single properties.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Group</td>
+                        <td>
+                            <classname>FxGroup</classname>
+                        </td>
+                        <td>A group serves as a container for properties and combines them to an entity. Groups - just
+                            like properties can not exist without assignments to types (<classname>
+                            FxGroupAssignment</classname>). The purpose for their existance is like for properties: the
+                            ability to share and query across multiple types.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Assignment</td>
+                        <td>
+                            <classname>FxAssignment</classname>
+                        </td>
+                        <td>An assignment is the correlation of groups and properties to types. A group or property can
+                            only be used in instances if it has been assigned to a group assignment or a type.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Property assignment</td>
+                        <td>
+                            <classname>FxPropertyAssignment</classname>
+                        </td>
+                        <td>The assignment of a property to a group assignment or a type. If the property that is being
+                            assigned permits, settings like the access control list or options may be overridden.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Group assignment</td>
+                        <td>
+                            <classname>FxGroupAssignment</classname>
+                        </td>
+                        <td>The assignment of a group to a group assignment or a type. If the group that is being
+                            assigned permits, settings like the access control list or options may be overridden.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            Following the convention on how to update or create new instances of classes in &flexive;, for every class
+            exists (or should at least ;-) ) an editable class. These editable classes can either be instantiated with
+            <code>ClassName.createNew(..)</code>
+            or
+            <code>classInstance.asEditable()</code>
+            depending on if you want to create a new instance or edit an existing.
+        </para>
+    </section>
+
+    <section xml:id="core_structure_types">
+        <title>Types</title>
+        <para>A type, identified by its name, defines behaviour (what kind of permissions may be applied,
+            storage model or language mode is to be used, etc.) and structure (properties and groups are
+            assigned to types).
+        </para>
+
+        <section xml:id="core_structure_root_type">
+            <title>Root Type</title>
+            <para>A system internal and somewhat special type is called the "Root" type: It serves as virtual that can
+                be used to assign groups or properties to. These can be reused in other types or assignments without the
+                need of inheritance but rather "pure" reuse and thus serves as some kind of repository.
+            </para>
+        </section>
+
+        <section xml:id="core_structures_types_parameters">
+            <title>Type parameters</title>
+            <para>
+                The following is a list of parameters that can be passed as arguments to
+                <classname>FxTypeEdit</classname>
+                when editing or creating a new type:
+                <table xml:id="cst_table" class="flexive">
+                    <caption>FxTypeEdit parameters</caption>
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Method</th>
+                            <th>Create</th>
+                            <th>Edit</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>ACL</td>
+                            <td>
+                                <methodname>setACL(ACL acl)</methodname>
+                            </td>
+                            <td>&list_yes;</td>
+                            <td>&list_yes;</td>
+                            <td>The ACL which is checked when new instances of this type are created. Will only be
+                                checked if the type is configured to check permissions.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Category</td>
+                            <td>
+                                <methodname>setCategory(TypeCategory category)</methodname>
+                            </td>
+                            <td>&list_yes;</td>
+                            <td>&list_yes;</td>
+                            <td>A type can be assigned the categories
+                                <emphasis>User</emphasis>
+                                or<emphasis>System</emphasis>. A User categorized type can be edited by anyone with
+                                proper roles (<code>StructureManagement</code>), whereas System categorized types are
+                                ment to be &flexive; internal and only to be changed by users with the role<code>
+                                GlobalSupervisor</code>. The mode may only be changed by users with the role
+                                <code>GlobalSupervisor</code>
+                                (under ordinary circumstances changing the category of a type should never be
+                                necessary).
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Check validity</td>
+                            <td>
+                                <methodname>setCheckValidity(boolean checkValidity)</methodname>
+                            </td>
+                            <td>&list_yes;</td>
+                            <td>&list_yes;</td>
+                            <td>If set to<code>true</code>, content instances can be assigned a
+                                <code>validFrom</code>
+                                and
+                                <code>validUntil</code>
+                                Date.
+                                <classname>FxContent</classname>
+                                instances provide an<methodname>isValid(long time)</methodname>-Method to check if they
+                                are valid at the requested time. This feature is particularly useful in queries since
+                                only valid content instances will be returned. Using this features allows for instance
+                                time triggered publication (and removal) of articles.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Description</td>
+                            <td>
+                                <methodname>setDescription(String description)</methodname>
+                            </td>
+                            <td>&list_yes;</td>
+                            <td>&list_yes;</td>
+                            <td>Set a description for the type. Of relevance only to user interfaces.</td>
+                        </tr>
+                        <tr>
+                            <td>Enable parent assignments</td>
+                            <td>
+                                <methodname>setEnableParentAssignments(boolean enableParentAssignments)</methodname>
+                            </td>
+                            <td>&list_yes;</td>
+                            <td>&list_no;</td>
+                            <td>If a type is derived from another type, this flag decides if the derived assignments
+                                should be enabled. This is by default enabled when creating a derived type:
+                                <code>FxTypeEdit.createNew(String name, FxString description, ACL acl, FxType parent)
+                                </code>
+                                and can be disabled using this method before the derived type is saved.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>History age</td>
+                            <td>
+                                <methodname>setHistoryAge(long historyAge)</methodname>
+                            </td>
+                            <td>&list_yes;</td>
+                            <td>&list_yes;</td>
+                            <td>If
+                                <code>trackHistory</code>
+                                is enabled for this type, the
+                                <code>historyAge</code>
+                                determines the timeframe history entries exist. All entries older than
+                                this time (in milliseconds) will be removed. History entries are changes to the type or
+                                instances and are not fully implemented yet.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Language mode</td>
+                            <td>
+                                <methodname>setLanguage(LanguageMode language)</methodname>
+                            </td>
+                            <td>&list_yes;</td>
+                            <td>&list_yes_restrictions;</td>
+                            <td>Set one of the supported language modes:
+                                <itemizedlist>
+                                    <listitem><code>None</code>: Content is not language dependent
+                                    </listitem>
+                                    <listitem><code>Single</code>: One language per content may be defined
+                                    </listitem>
+                                    <listitem><code>Multiple</code>: Every property may exist in different languages
+                                    </listitem>
+                                </itemizedlist>
+                                The language mode of existing types can only be changed if no content instances exist.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Maximum destination count (Relation)</td>
+                            <td>
+                                <methodname>setMaxRelDestination(int maxRelDestination)</methodname>
+                            </td>
+                            <td>&list_yes_restrictions;</td>
+                            <td>&list_yes_restrictions;</td>
+                            <td>Restrict the total number of instances that may be related to a source instance using
+                                this relation type. The value
+                                <code>0</code>
+                                means unlimited. This value can only be set if the type is a relation and no instances
+                                would invalidate this restriction.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Maximum source count (Relation)</td>
+                            <td>
+                                <methodname>setMaxRelSource(int maxRelSource)</methodname>
+                            </td>
+                            <td>&list_yes_restrictions;</td>
+                            <td>&list_yes_restrictions;</td>
+                            <td>Restrict the total number of instances that may be related to a destination instance
+                                using
+                                this relation type. The value
+                                <code>0</code>
+                                means unlimited. This value can only be set if the type is a relation and no instances
+                                would invalidate this restriction.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td xml:id="cs_type_maxver">Maximum versions</td>
+                            <td>
+                                <methodname>setMaxVersions(long maxVersions)</methodname>
+                            </td>
+                            <td>&list_yes;</td>
+                            <td>&list_yes;</td>
+                            <td>Set the max. number of instance versions to keep, if negative unlimited,
+                                <code>0</code>
+                                does not keep any versions.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Mode</td>
+                            <td>
+                                <methodname>setMode(TypeMode mode)</methodname>
+                            </td>
+                            <td>&list_yes;</td>
+                            <td>&list_yes_restrictions;</td>
+                            <td>Set if this type is to be used as a regular type or as a relation. Changing the mode is
+                                currently only allowed if no content instance exist.
+                                Possible modes are:
+                                <itemizedlist>
+                                    <listitem><code>Content</code>: The "regular" type
+                                    </listitem>
+                                    <listitem><code>Relation</code>: Type used as relation
+                                    </listitem>
+                                </itemizedlist>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Name</td>
+                            <td>
+                                <methodname>setName(String name)</methodname>
+                            </td>
+                            <td>&list_yes;</td>
+                            <td>&list_yes;</td>
+                            <td>The name of the type. Has to be unique.</td>
+                        </tr>
+                        <tr>
+                            <td>Permissions</td>
+                            <td>
+                                <methodname>setPermissions(byte permissions)</methodname>
+                            </td>
+                            <td>&list_yes;</td>
+                            <td>&list_yes;</td>
+                            <td>Set the permissions to check. The parameter contains the bitcoded types of permissions
+                                that
+                                should be checked. Please use the
+                                <methodname>setUseXXXPermission()</methodname>-convenience methods, where XXX is Type,
+                                Property, Step or Instance. If you want to use bit coded permissions, use these
+                                constants:
+                                <itemizedlist>
+                                    <listitem>
+                                        <constant>FxPermissionUtils.PERM_MASK_TYPE</constant>
+                                    </listitem>
+                                    <listitem>
+                                        <constant>FxPermissionUtils.PERM_MASK_PROPERTY</constant>
+                                    </listitem>
+                                    <listitem>
+                                        <constant>FxPermissionUtils.PERM_MASK_STEP</constant>
+                                    </listitem>
+                                    <listitem>
+                                        <constant>FxPermissionUtils.PERM_MASK_INSTANCE</constant>
+                                    </listitem>
+                                </itemizedlist>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Remove instances with relation types</td>
+                            <td>
+                                <methodname>setRemoveInstancesWithRelationTypes(boolean
+                                    removeInstancesWithRelationTypes)
+                                </methodname>
+                            </td>
+                            <td>&list_no;</td>
+                            <td>&list_yes_restrictions;</td>
+                            <td>Only applies to relations: If relation entries are removed (for example you dont want to
+                                be able any longer to relate Type A and B with this relation), should all instances of
+                                this relation type that relate the removed
+                                <classname>FxTypeRelation</classname>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>State</td>
+                            <td>
+                                <methodname>setState(TypeState state)</methodname>
+                            </td>
+                            <td>&list_yes;</td>
+                            <td>&list_yes;</td>
+                            <td>Changing the state allows to (de-)activate a type.
+                                <itemizedlist>
+                                    <listitem>
+                                        <constant>Available</constant>
+                                    </listitem>
+                                    <listitem>
+                                        <constant>Locked</constant>
+                                        - temporary unavailabilty, should only be set from &flexive; internally to allow
+                                        for timeconsuming processing.
+                                    </listitem>
+                                    <listitem>
+                                        <constant>Unvailable</constant>
+                                    </listitem>
+                                </itemizedlist>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Track history</td>
+                            <td>
+                                <methodname>setTrackHistory(boolean trackHistory)</methodname>
+                            </td>
+                            <td>&list_yes;</td>
+                            <td>&list_yes;</td>
+                            <td>Enables history tracking (will log changes to the type itself or instances). How long
+                                history entries are kept can be set with
+                                <methodname>setHistoryAge(long)</methodname>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Use instance permissions</td>
+                            <td>
+                                <methodname>setUseInstancePermissions(boolean use)</methodname>
+                            </td>
+                            <td>&list_yes;</td>
+                            <td>&list_yes;</td>
+                            <td>Should instance permissions be checked? If enabled, the ACL assigned to instances will
+                                be checked.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Use property permissions</td>
+                            <td>
+                                <methodname>setUsePropertyPermissions(boolean use)</methodname>
+                            </td>
+                            <td>&list_yes;</td>
+                            <td>&list_yes;</td>
+                            <td>Should property (assignment) permissions be checked? If enabled, the ACL assigned to
+                                property assignments will be checked. Property permission checks are disabled by default
+                                and should only be used if really necessary (i.e. if you want to hide specific company
+                                or department internal properties from users that under normal circumstances should be
+                                allowed to read the instance).
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Use step permissions</td>
+                            <td>
+                                <methodname>setUseStepPermissions(boolean use)</methodname>
+                            </td>
+                            <td>&list_yes;</td>
+                            <td>&list_yes;</td>
+                            <td>Should step permissions be checked? If enabled, the ACL assigned to workflow steps will
+                                be checked. Enable these checks if you want to prevent users from seeing/using instances
+                                in certain steps (i.e. an editor should not be allowed to edit already published
+                                articles - this is something only users from the quality assurance department should be
+                                allowed to).
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Use type permissions</td>
+                            <td>
+                                <methodname>setUseTypePermissions(boolean use)</methodname>
+                            </td>
+                            <td>&list_yes;</td>
+                            <td>&list_yes;</td>
+                            <td>Should type permissions be checked? If enabled, the ACL assigned to this type will
+                                be checked. Disabling this check, will allow everyone to create or remove instances of
+                                this type (if instance permission checks are enabled, they will of course still be
+                                checked in the case of a removal).
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Workflow</td>
+                            <td>
+                                <methodname>setWorkflow(Workflow workflow)</methodname>
+                            </td>
+                            <td>&list_yes;</td>
+                            <td>&list_yes_restrictions;</td>
+                            <td>Assign a workflow to this type. For existing types the workflow can only be changed if
+                                no instances exist.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </para>
+        </section>
+
+        <section xml:id="core_structures_types_creating">
+            <title>Creating a new type</title>
+            <para>
+                In the following example we create a new type "Customer", provide a multilingual description and assign
+                an access control list:
+                <xi:include href="../listings/core_structure_newtype.xml"/>
+                <calloutlist>
+                    <callout arearefs="cst_newtype_1">
+                        <para>We use the utility class
+                            <classname>EJBLookup</classname>
+                            to retrieve a reference to the type engine enterprise bean.
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_newtype_2">
+                        <para>The multilingual
+                            <classname>FxString</classname>
+                            <varname>typeDesc</varname>
+                            is initialized with support for multilingual values (first parameter set to
+                            <code>true</code>
+                            ) and is assigned the default translation. The default translation is by convention english.
+                            It would have been the same effect if we wrote
+                            <code>FxString typeDesc = new FxString(true, FxLanguage.ENGLISH, "A generic customer");
+                            </code>
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_newtype_3">
+                        <para>The german translation is assigned.
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_newtype_4">
+                        <para>We don't want to create a new ACL and use the default ACL for structures
+                            (<code>Category.STRUCTURE.getDefaultId()</code>)
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_newtype_5">
+                        <para>A new type instance is created with most settings using default values, only setting the
+                            name, description and ACL.
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_newtype_6">
+                        <para>The
+                            <interfacename>TypeEngine</interfacename>
+                            takes care of persisting our new type. Using the<methodname>save(FxTypeEdit
+                            type)</methodname>-method we can create new or save existing types.
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_newtype_7">
+                        <para>This line just serves as an example how to retrieve the a reference to the new type.
+                            Saving the instance automatically forced a reload of the cached environment, that why we can
+                            retrieve it from the cache here.
+                        </para>
+                    </callout>
+                </calloutlist>
+            </para>
+            <para>
+                Another way to create a new type would be to use the
+                <classname>GroovyTypeBuilder</classname>:
+                <xi:include href="../listings/core_structure_newtype_groovy.xml"/>
+                If executed in the Groovy-Console the code above would return
+                <emphasis>CUSTOMER</emphasis>.
+            </para>
+        </section>
+    </section>
+
+    <section xml:id="core_structure_properties_datatypes">
+        <title>Data types</title>
+        <para>
+            Every data type can potentially support values for different languages - depending on the properties and
+            property assignments multilingual support settings.
+            <table xml:id="csdt_table" class="flexive">
+                <caption>&Flexive; data types
+                </caption>
+                <thead>
+                    <tr>
+                        <th>Data type</th>
+                        <th>FxValue class</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>HTML</td>
+                        <td>
+                            <classname>FxHTML</classname>
+                        </td>
+                        <td>HTML markup. Unlimited in length. Offers the ability to use HTML editors in user
+                            interfaces.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>String1024</td>
+                        <td>
+                            <classname>FxString</classname>
+                        </td>
+                        <td>A String with a maximum length of 1024 characters. Use this data type in favor of
+                            <constant>Text</constant>
+                            if you don't need more than 1024 characters, since usually
+                            <constant>Text</constant>
+                            is stored in
+                            <literal>CLOB</literal>
+                            Database columns while
+                            <constant>String1024</constant>
+                            uses
+                            <literal>VARCHAR</literal>
+                            columns.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Text</td>
+                        <td>
+                            <classname>FxString</classname>
+                        </td>
+                        <td>Like
+                            <constant>String1024</constant>
+                            but unlimited in length.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Number</td>
+                        <td>
+                            <classname>FxNumber</classname>
+                        </td>
+                        <td>Numerical type corresponding to the Java
+                            <classname>Integer</classname>
+                            class.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>LargeNumber</td>
+                        <td>
+                            <classname>FxLargeNumber</classname>
+                        </td>
+                        <td>Numerical type corresponding to the Java
+                            <classname>Long</classname>
+                            class.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Float</td>
+                        <td>
+                            <classname>FxFloat</classname>
+                        </td>
+                        <td>Numerical type corresponding to the Java
+                            <classname>Float</classname>
+                            class.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Double</td>
+                        <td>
+                            <classname>FxDouble</classname>
+                        </td>
+                        <td>Numerical type corresponding to the Java
+                            <classname>Double</classname>
+                            class.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Date</td>
+                        <td>
+                            <classname>FxDate</classname>
+                        </td>
+                        <td>A date corresponding to the Java
+                            <classname>Date</classname>
+                            class. Note that there is no time information saved!
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>DateTime</td>
+                        <td>
+                            <classname>FxDate</classname>
+                        </td>
+                        <td>A date corresponding to the Java
+                            <classname>Date</classname>
+                            class. This data type stores date and time information.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>DateRange</td>
+                        <td>
+                            <classname>FxDateRange</classname>
+                        </td>
+                        <td>A date range corresponding to two Java
+                            <classname>Date</classname>
+                            class instances with a start- and enddate.
+                            Note that there is no time information saved!
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>DateTimeRange</td>
+                        <td>
+                            <classname>FxDateTimeRange</classname>
+                        </td>
+                        <td>A date range corresponding to two Java
+                            <classname>Date</classname>
+                            class instances with a start- and enddate.
+                            Time information is saved as well using this data type.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Boolean</td>
+                        <td>
+                            <classname>FxBoolean</classname>
+                        </td>
+                        <td>A boolean value corresponding to the Java
+                            <classname>Boolean</classname>
+                            class.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Binary</td>
+                        <td>
+                            <classname>FxBinary</classname>
+                        </td>
+                        <td>This data type stores information about a binary content and allows streaming of that
+                            content. For more information please refer to
+                            <xref linkend="core_structure_properties_binaries"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Reference</td>
+                        <td>
+                            <classname>FxReference</classname>
+                        </td>
+                        <td>A reference to a content instance, identified by its primary key
+                            (<classname>FxPK</classname>).
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>InlineReference</td>
+                        <td>
+                            <classname>-</classname>
+                        </td>
+                        <td>This data type is only planned but not implemented. It will allow to create contents
+                            that
+                            do not exist on their own (and can not be loaded on their own or queried for) but
+                            <emphasis>embedded</emphasis>
+                            in another content instance. Their XPath addressing will be relative to their parent
+                            group in the embedding content.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>SelectOne</td>
+                        <td>
+                            <classname>FxSelectOne</classname>
+                        </td>
+                        <td>This data type allows the selection of one entry of a SelectList. See
+                            <xref linkend="core_structure_selectlists"/>
+                            for further information about select lists.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>SelectMany</td>
+                        <td>
+                            <classname>FxSelectMany</classname>
+                        </td>
+                        <td>This data type allows the selection of many entries of a SelectList. See
+                            <xref linkend="core_structure_selectlists"/>
+                            for further information about select lists.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </para>
+    </section>
+
+    <section xml:id="core_structure_properties_binaries">
+        <title>Handling binary content</title>
+        <para>
+            Working with binary content is like working with ordinary input- and outputstreams in Java. To upload a
+            binary an
+            <classname>InputStream</classname>
+            has to be passed and downloading is as simple as passing an
+            <classname>OutputStream</classname>. Transfer of binaries is handled by &flexive;'s own streaming
+            framework &fxStream;. It uses nonblocking tcp sockets as transport medium if the client and server part
+            exist in different virtual machines and is able to detect if they run within the same VM for optimal
+            performance.
+        </para>
+        <xi:include href="../listings/core_structure_binaries.xml"/>
+        <para>
+            Above example show how easy it is to upload a binary programatically to the
+            <interfacename>ContentEngine</interfacename>
+            and download it from the saved instance.
+            <calloutlist>
+                <callout arearefs="cs_bin_1">
+                    <para>A
+                        <classname>BinaryDescriptor</classname>
+                        (the value class used in the value object
+                        <classname>FxBinary</classname>
+                        for the binary data type - See
+                        <xref linkend="core_structure_properties_datatypes"/>
+                        for more information) is created with the file name, size and an
+                        <classname>InputStream</classname>
+                        pointing to the actual binary data.
+                    </para>
+                </callout>
+                <callout arearefs="cs_bin_2">
+                    <para>Simply set a
+                        <classname>FxBinary</classname>
+                        with the created
+                        <code>BinaryDescriptor</code>
+                        as value for a property assignment
+                    </para>
+                </callout>
+                <callout arearefs="cs_bin_3">
+                    <para>Downloading binary content is as simple as providing an
+                        <classname>OutputStream</classname>.
+                        Please note that the stream will not be closed automatically to allow use with<classname>
+                        ServletOutputStream</classname>'s
+                        and the like.
+                    </para>
+                </callout>
+            </calloutlist>
+        </para>
+    </section>
+
+    <section xml:id="core_structure_selectlists">
+        <title>Select lists</title>
+        <!-- TODO -->
+    </section>
+
+    <section xml:id="core_structure_multiplicity">
+        <title>Multiplicity</title>
+        <para>
+            Multiplicity - or often referred to as
+            <emphasis>cardinality</emphasis>
+            - defines the minimum and maximum occurance of an assignment. An assignment in the context of &flexive; is a
+            group- or a property assignment. Multiplictiy is implemented in the class
+            <classname>FxMultiplicity</classname>
+            which contains some predefined and often used constants:
+            <itemizedlist>
+                <listitem><constant>FxMultiplicity.MULT_0_1</constant>: zero or one occurances (optional)
+                </listitem>
+                <listitem><constant>FxMultiplicity.MULT_1_1</constant>: exactly one occurance (required)
+                </listitem>
+                <listitem><constant>FxMultiplicity.MULT_0_N</constant>: zero or more occurances (optional)
+                </listitem>
+                <listitem><constant>FxMultiplicity.MULT_1_N</constant>: one or more occurances (required)
+                </listitem>
+            </itemizedlist>
+            The value
+            <constant>N</constant>
+            means any number of occurances.
+        </para>
+        <para>
+            A multiplicity of 1 to 5 elements would be coded like this:
+            <code>new FxMultiplicity(1,5)</code>
+        </para>
+    </section>
+
+    <xi:include href="structure_properties.xml"/>
+    <xi:include href="structure_groups.xml"/>
+
+    <section xml:id="core_structures_options">
+        <title>Property and group options</title>
+        <para>
+            Both properties and groups allow the definition of options. These options can hold any arbitrary
+            <classname>String</classname>
+            or
+            <classname>Boolean</classname>
+            value and if define if assignments to the property or group may override the value. The name of an option
+            must be unique.
+            See the API documentation of class <classname>FxStructureOption</classname> for more details.
+        </para>
+    </section>
+
+</section>

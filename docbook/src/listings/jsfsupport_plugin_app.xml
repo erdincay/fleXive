@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="java" xml:id="jsfsupport_plugin_app"
+                xmlns="http://docbook.org/ns/docbook"><![CDATA[final TestExecutorImpl exec = new TestExecutorImpl();
+PluginRegistryBean.getInstance().execute(EXTENSIONPOINT, exec);
+System.out.println("Plugin results: " + exec.getResults());
+]]></programlisting>

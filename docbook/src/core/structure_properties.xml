@@ -1,0 +1,610 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE section [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<section xml:id="core_structure_properties" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude">
+    <title>Properties and property assignments</title>
+    <para>A property defines a name and a datatype (and some options). It can only exist (and is of relevance) if it
+        is assigned to a type or group. The purpose of keeping properties and their assignments separate is the
+        ability to share them and query across multiple types with a single properties.
+    </para>
+    <para>
+        There are two ways to assign a property to an existing type or group:
+        Either by calling
+        <code>FxPropertyEdit.createNew(..)</code>
+        method which can clone existing or create entirely
+        new properties or by reusing an existing property assignment by calling<code>
+        FxPropertyAssignmentEdit.createNew(..)</code>.
+    </para>
+    <para>
+        <xi:include href="../listings/core_structure_newprop.xml"/>
+        <calloutlist>
+            <callout arearefs="cst_newprop_1">
+                <para>Obtain a reference to the assignment engine bean which is responsible for manipulating
+                    assignments
+                </para>
+            </callout>
+            <callout arearefs="cst_newprop_2">
+                <para>Get the default ACL used for structures
+                </para>
+            </callout>
+            <callout arearefs="cst_newprop_3">
+                <para>Create a new property with the alias "Name"
+                </para>
+            </callout>
+            <callout arearefs="cst_newprop_4">
+                <para>Description
+                </para>
+            </callout>
+            <callout arearefs="cst_newprop_5">
+                <para>Hint for user interfaces
+                </para>
+            </callout>
+            <callout arearefs="cst_newprop_6">
+                <para>Configure this property to be required (See
+                    <xref linkend="core_structure_multiplicity"/>
+                    for more information)
+                </para>
+            </callout>
+            <callout arearefs="cst_newprop_7">
+                <para>Assign the ACL to be used. This ACL will only be checked if the type this property will be
+                    assigned to has property permission checks enabled
+                </para>
+            </callout>
+            <callout arearefs="cst_newprop_8">
+                <para>The data type will be a String with a maximum length of 1024 characters. See
+                    <xref linkend="core_structure_properties_datatypes"/>
+                    for an overview of available data types.
+                </para>
+            </callout>
+            <callout arearefs="cst_newprop_9">
+                <para>Since properties can not exist if they are not assigned to a type, we assign them to the type
+                    with the id
+                    <varname>typeId</varname>
+                    to the root group ("/" - for an example how to assign it to a group of choice see <xref linkend="core_structure_groups"/>). Property names have to be unique but since "Name" is very likely to be
+                    used by another property already we allow &flexive; to auto-generate a unique property name (in
+                    the form of "propertyname_"+running number) and make use of the feature that most setters return
+                    the object itself (in this case the FxPropertyEdit object) which we pass to the<methodname>
+                    createProperty(..)</methodname>-method. This method will create the property and assign it to
+                    the type we passed as first argument - creating a new property and property-assignment entry.
+                </para>
+            </callout>
+        </calloutlist>
+    </para>
+    <para>
+        To reuse an existing property-assignment is even simpler:
+        <xi:include href="../listings/core_structure_reuseprop.xml"/>
+        <calloutlist>
+            <callout arearefs="cst_reuseprop_1">
+                <para>Obtaining a reference to the assignment engine bean is omitted in this example. We use the
+                    <methodname>save(..)</methodname>-method for creating or updating assignments.
+                </para>
+            </callout>
+            <callout arearefs="cst_reuseprop_2">
+                <para>The convenience factory method
+                    <methodname>reuse(..)</methodname>
+                    in
+                    <classname>FxPropertyAssignmentEdit</classname>
+                    allows us to reuse an existing property assignment with the least possible overhead
+                </para>
+            </callout>
+            <callout arearefs="cst_reuseprop_3">
+                <para>The XPath of the assignment that is to be reused in, preceeded by the type. Here we reuse the
+                    "Caption" property that is assigned to the virtual Root-Type which acts as a repository (see
+                    <xref linkend="core_structure_root_type"/>
+                    for more information about the virtual root type)
+                </para>
+            </callout>
+            <callout arearefs="cst_reuseprop_4">
+                <para>The type we want to assign it to. Please note that the type name is not case sensitive.
+                </para>
+            </callout>
+            <callout arearefs="cst_reuseprop_5">
+                <para>The new parent XPath relative to the type. Since want to assign it to the root group we use
+                    "/". Would we want to assign the property to a group called "Info" which is a subgroup of a
+                    group named "About", we'd use the XPath "/About/Info".
+                </para>
+            </callout>
+            <callout arearefs="cst_reuseprop_6">
+                <para>The
+                    <parameter>alias</parameter>
+                    parameter is optional. It allows us to use a different alias for the new assignment than the
+                    original. If omitted we'd create the alias "Caption" but in this case we use "AnotherCaption" to
+                    later adress the property assignment using XPaths.
+                </para>
+            </callout>
+            <callout arearefs="cst_reuseprop_7">
+                <para>This boolean parameter is used if the assignment is a group assignment. If set to<code>
+                    true</code>, all assignments that are assigned to the "source" group will be re-created for the
+                    "target" group.
+                </para>
+            </callout>
+        </calloutlist>
+    </para>
+
+    <section xml:id="core_structures_property_parameters">
+        <title>Property parameters</title>
+        <para>
+            The following is a list of parameters that can be passed as arguments to
+            <classname>FxPropertyEdit</classname>
+            and
+            <classname>FxPropertyAssignmentEdit</classname>
+            when editing or creating a new propery/assignment:
+            <table xml:id="csp_table" class="flexive">
+                <caption>FxPropertyEdit/FxPropertyAssignmentEdit shared parameters</caption>
+                <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Method</th>
+                        <th>Create</th>
+                        <th>Edit</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>ACL</td>
+                        <td>
+                            <methodname>setACL(ACL acl)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_yes;</td>
+                        <td>The ACL which is checked when the type using this property or assignment is configured
+                            to check property permissions. Setting this value for
+                            <classname>FxPropertyAssignmentEdit</classname>
+                            is only allowed if the referenced property allows to override its ACL.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Hint</td>
+                        <td>
+                            <methodname>setHint(FxString hint)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_yes;</td>
+                        <td>Set a hint text to be displayed in user interfaces.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>In overview</td>
+                        <td>
+                            <methodname>setInOverview(boolean inOverview)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_yes;</td>
+                        <td>Display in overviews. This is an option for user interfaces and a convenience method to
+                            set an option (See
+                            <xref linkend="core_structures_options"/>). The constant
+                            <constant>FxStructureOption.OPTION_SHOW_OVERVIEW</constant>
+                            (<constant>"SHOW.OVERVIEW"</constant>) is used. The property can restrict this setting
+                            from being overwritten in an assignment.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Label</td>
+                        <td>
+                            <methodname>setLabel(FxString label)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_yes;</td>
+                        <td>Set a label text to be displayed in user interfaces.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Multilingual</td>
+                        <td>
+                            <methodname>setMultiLang(boolean multiLang)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_yes;</td>
+                        <td>Allow multilingual values for this property? This is a convenience method to
+                            set an option (See
+                            <xref linkend="core_structures_options"/>). The constant
+                            <constant>FxStructureOption.OPTION_MULTILANG</constant>
+                            (<constant>"MULTILANG"</constant>) is used. The property can restrict this setting
+                            from being overwritten in an assignment.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Multiline</td>
+                        <td>
+                            <methodname>setMultiLine(boolean multiLine)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_yes;</td>
+                        <td>A hint for user interfaces if this property should be rendered using input elements with
+                            multiple lines. Useful for String/Text based properties (See
+                            <xref linkend="core_structure_properties_datatypes"/>) which should be displayed in a
+                            textarea instead of a single input field. Decision how to render the component is up to
+                            the user interface. This is a convenience method to
+                            set an option (See
+                            <xref linkend="core_structures_options"/>). The constant
+                            <constant>FxStructureOption.OPTION_MULTILINE</constant>
+                            (<constant>"MULTILINE"</constant>) is used. The property can restrict this setting
+                            from being overwritten in an assignment.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Multiplicity</td>
+                        <td>
+                            <methodname>setMultiplicity(FxMultiplicity multiplicity)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_yes_restrictions;</td>
+                        <td>Set the multiplicity of this property. Can only be changed if no instances exist that
+                            would violate the new setting. (See
+                            <xref linkend="core_structure_multiplicity"/>
+                            for more information). The property can restrict this setting
+                            from being overwritten in an assignment.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Options</td>
+                        <td>
+                            <methodname>setOption(..)</methodname>
+                            <methodname>setOptionOverrideable(..)</methodname>
+                            <methodname>clearOption(..)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_yes;</td>
+                        <td>
+                            Option related operations. See<xref linkend="core_structures_options"/>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Searchable</td>
+                        <td>
+                            <methodname>setSearchable(boolean searchable)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_yes;</td>
+                        <td>Allow user interfaces to use this propery/assignment in visual query editors.
+                            This is a convenience method to set an option (See
+                            <xref linkend="core_structures_options"/>). The constant
+                            <constant>FxStructureOption.OPTION_SEARCHABLE</constant>
+                            (<constant>"SEARCHABLE"</constant>) is used.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Use HTML editor</td>
+                        <td>
+                            <methodname>setUseHTMLEditor(boolean useHTMLEditor)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_yes;</td>
+                        <td>Hint for user interfaces to use a HTML editor when editing values of this property. Only
+                            makes sense for String/Text based data types.
+                            This is a convenience method to set an option (See
+                            <xref linkend="core_structures_options"/>). The constant
+                            <constant>FxStructureOption.OPTION_HTML_EDITOR</constant>
+                            (<constant>"HTML.EDITOR"</constant>) is used.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </para>
+        <para>
+            <table xml:id="cspe_table" class="flexive">
+                <caption>FxPropertyEdit exclusive parameters</caption>
+                <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Method</th>
+                        <th>Create</th>
+                        <th>Edit</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Auto unique property name</td>
+                        <td>
+                            <methodname>setAutoUniquePropertyName(boolean autoUniquePropertyName)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_no;</td>
+                        <td>
+                            Property names have to be unique to allow querying them. Setting this option to
+                            <code>true</code>
+                            will automatically choose a name that has not been used for a propery by adding an
+                            underscore and a running number to property names until it is unique. Set this option
+                            only if you do not plan on "sharing" a property between different types or dont need
+                            to query based on properties but rather property assignments.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Data type</td>
+                        <td>
+                            <methodname>setDataType(FxDataType dataType)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_no;</td>
+                        <td>
+                            Set the data type of this property. Please see
+                            <xref linkend="core_structure_properties_datatypes"/>
+                            for more information.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Fulltext indexed</td>
+                        <td>
+                            <methodname>setFulltextIndexed(boolean fulltextIndexed)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_yes;</td>
+                        <td>
+                            Enable fulltext indexing and queries for a property. See
+                            <xref linkend="css_feature_fulltext"/>
+                            for more information.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Name</td>
+                        <td>
+                            <methodname>setName(String name)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_no;</td>
+                        <td>Set the name of this property. This name is used in assignments as a proposal for the
+                            XPath alias (unless a different one is requested). Currently the name can not be changed
+                            for existing properties. To query across assignments using the same property, this name
+                            is used.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Overrideable ACL</td>
+                        <td>
+                            <methodname>setOverrideACL(boolean overrideACL)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_yes;</td>
+                        <td>Restrict if assignments may use an ACL different from the one defined for the property.
+                            If set to
+                            <code>false</code>
+                            an assignment may still set an ACL but the ACL of the property is used and the
+                            assignments is ignored.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Overrideable HTML editor</td>
+                        <td>
+                            <methodname>setOverrideHTMLEditor(boolean overrideHTMLEditor)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_yes;</td>
+                        <td>Restrict assignment to override the HTML editor option (User interface hint).
+                            This is a convenience method to set an option (See
+                            <xref linkend="core_structures_options"/>). The constant
+                            <constant>FxStructureOption.OPTION_HTML_EDITOR</constant>
+                            (<constant>"HTML.EDITOR"</constant>) is used.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Overrideable Multilinguality</td>
+                        <td>
+                            <methodname>setOverrideMultiLang(boolean overrideMultiLang)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_yes;</td>
+                        <td>Restrict assignment to override the multilinguality option (allow multilingual values).
+                            This is a convenience method to set an option (See
+                            <xref linkend="core_structures_options"/>). The constant
+                            <constant>FxStructureOption.OPTION_MULTILANG</constant>
+                            (<constant>"MULTILANG"</constant>) is used.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Overrideable Multiline</td>
+                        <td>
+                            <methodname>setOverrideMultiLine(boolean overrideMultiLine)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_yes;</td>
+                        <td>Restrict assignment to override the multiline option (User interface hint).
+                            This is a convenience method to set an option (See
+                            <xref linkend="core_structures_options"/>). The constant
+                            <constant>FxStructureOption.OPTION_MULTILINE</constant>
+                            (<constant>"MULTILINE"</constant>) is used.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Overrideable multiplicity</td>
+                        <td>
+                            <methodname>setOverrideMultiplicity(boolean overrideMultiplicity)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_yes;</td>
+                        <td>Restrict if assignments may override the multiplicity of this property. (See
+                            <xref linkend="core_structure_multiplicity"/>
+                            for more information).
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Overrideable Overview</td>
+                        <td>
+                            <methodname>setOverrideOverview(boolean overrideOverview)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_yes;</td>
+                        <td>Restrict assignment to override the overview option (User interface hint).
+                            This is a convenience method to set an option (See
+                            <xref linkend="core_structures_options"/>). The constant
+                            <constant>FxStructureOption.OPTION_SHOW_OVERVIEW</constant>
+                            (<constant>"SHOW.OVERVIEW"</constant>) is used.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Overrideable Searchable</td>
+                        <td>
+                            <methodname>setOverrideSearchable(boolean overrideSearchable)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_yes;</td>
+                        <td>Restrict assignment to override the searchable option (User interface hint).
+                            This is a convenience method to set an option (See
+                            <xref linkend="core_structures_options"/>). The constant
+                            <constant>FxStructureOption.OPTION_SEARCHABLE</constant>
+                            (<constant>"SEARCHABLE"</constant>) is used.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Referenced list</td>
+                        <td>
+                            <methodname>setReferencedList(FxSelectList referencedList)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_yes_restrictions;</td>
+                        <td>If the properties data type is
+                            <constant>SelectOne</constant>
+                            or
+                            <constant>SelectMany</constant>
+                            (See
+                            <xref linkend="core_structure_properties_datatypes"/>
+                            for more information) the referenced selectlist (See
+                            <xref linkend="core_structure_selectlists"/>) can be assigned. Updating an existing
+                            property is only allowed if no data instances using the original selectlist exist.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Referenced type</td>
+                        <td>
+                            <methodname>setReferencedType(FxType referencedType)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_yes_restrictions;</td>
+                        <td>If the properties data type is
+                            <constant>Referemce</constant>
+                            (See
+                            <xref linkend="core_structure_properties_datatypes"/>
+                            for more information) the referenced type (See
+                            <xref linkend="core_structure_types"/>) can be assigned. Updating an existing
+                            property is only allowed if no data instances using the original type exist.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Unique mode</td>
+                        <td>
+                            <methodname>setUniqueMode(UniqueMode uniqueMode)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_yes_restrictions;</td>
+                        <td>Set the uniqueness level of this property. May only be changed if no content instances
+                            using this property exit. (See
+                            <xref linkend="core_structure_properties_uniqueness"/>
+                            for more information).
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </para>
+        <para>
+            <table xml:id="cspae_table" class="flexive">
+                <caption>FxPropertyAssignmentEdit exclusive parameters</caption>
+                <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Method</th>
+                        <th>Create</th>
+                        <th>Edit</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Alias</td>
+                        <td>
+                            <methodname>setAlias(String alias)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_no;</td>
+                        <td>Set the alias of a property assignment. Property assignments may define an alias to
+                            allow multiple use of the same property but using a different name. The alias is the
+                            rightmost part of the XPath used to address an assignment. Changing an alias for
+                            existing assignments is not supported (yet).
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Default language</td>
+                        <td>
+                            <methodname>setDefaultLanguage(int language)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_yes;</td>
+                        <td>Defining a (optional) default language preselects this language in multilingual values
+                            as the default language.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Default multiplicity</td>
+                        <td>
+                            <methodname>setDefaultMultiplicity(int defaultMultiplicity)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_yes;</td>
+                        <td>The default multiplicity determines how many values will be initialized for an
+                            assignment. Useful in user interfaces to pre-create a set of entries instead of one.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Enabled</td>
+                        <td>
+                            <methodname>setEnabled(boolean enabled)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_yes_restrictions;</td>
+                        <td>Enables or disables a property assignment - making it unavailable to editors, etc.
+                            Updating an existing assignment is currently experimental and might have side-effects
+                            ...
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Parent group assignment</td>
+                        <td>
+                            <methodname>setParentGroupAssignment(FxGroupAssignment parent)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_no;</td>
+                        <td>If this assignment is assigned to a group, the assignment of the parent group (in the
+                            context of the current type)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Position</td>
+                        <td>
+                            <methodname>setPosition(int position)</methodname>
+                        </td>
+                        <td>&list_yes;</td>
+                        <td>&list_yes;</td>
+                        <td>Set the position of the assignment (within the same parent group). Changing an
+                            assignments position will be upate all affected other assignments within the
+                            same group. Invalid values will be adjusted (to 0 or the max. possible position)
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </para>
+    </section>
+
+    <section xml:id="core_structure_properties_uniqueness">
+        <title>Uniqueness of values</title>
+        <para>
+            &Flexive; supports the following modes to enforce that a value is unique:
+            <itemizedlist>
+                <listitem><constant>None</constant>: No uniqueness is enforced
+                </listitem>
+                <listitem><constant>Global</constant>: Globally unique across all usages of a property
+                </listitem>
+                <listitem><constant>Type</constant>: Unique within all instances of a type
+                </listitem>
+                <listitem><constant>DerivedTypes</constant>: Unique within all instances of a type, its parents and
+                    types derived from it
+                </listitem>
+                <listitem><constant>Instance</constant>: Unique within a content instance
+                </listitem>
+            </itemizedlist>
+        </para>
+    </section>
+</section>

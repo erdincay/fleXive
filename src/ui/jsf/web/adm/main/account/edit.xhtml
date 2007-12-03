@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:s="http://myfaces.apache.org/sandbox"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+<ui:define name="head">
+
+    <script type="text/javascript">
+        dojo.require("dojo.widget.SortableTable");
+    </script>
+
+</ui:define>
+
+<ui:define name="body">
+
+    <a4j:form id="frm">
+        <adm:tab label="#{fxMessageBean['Account.label.edit,#{accountBean.account.name}']}" active="true" id="tab1"/>
+        <t:saveState value="#{accountBean.account}"/>
+        <t:saveState value="#{accountBean.groups}"/>
+        <!-- ============================================ -->
+        <fx:formRow label="#{fxMessageBean['Account.field.mandator']}" id="mandator"  newLine="false">
+            <ui:fragment rendered="#{!accountBean.account.systemInternalAccount}">
+                <h:outputText id="mandator" value="#{mandatorBean.mandatorsById[accountBean.account.mandatorId].name}" />
+            </ui:fragment>
+            <h:inputHidden value="#{accountBean.accountIdFiler}"/>
+            <h:inputHidden value="#{accountBean.account.contactDataId}"/>
+            <h:inputHidden value="#{accountBean.validatedFilter}"/>
+            <h:inputHidden value="#{accountBean.activeFilter}"/>
+        </fx:formRow>
+
+        <fx:formRow label="#{fxMessageBean['Account.field.multilogin']}" id="multilogin">
+            <h:selectBooleanCheckbox id="multilogin" value="#{accountBean.account.allowMultiLogin}" />
+        </fx:formRow>
+
+        <!-- ============================================ -->
+        <fx:formRow label="#{fxMessageBean['Account.field.loginName']}" id="loginName" newLine="false">
+            <h:inputText id="loginName" value="#{accountBean.account.loginName}" readonly="true"/>
+        </fx:formRow>
+        <fx:formRow label="#{fxMessageBean['Account.field.userName']}" id="name">
+            <h:inputText id="name" value="#{accountBean.account.name}" readonly="true"/>
+        </fx:formRow>
+
+        <!-- ============================================ -->
+        <fx:formRow label="#{fxMessageBean['Account.field.password']}" id="password" newLine="false">
+            <h:inputSecret id="password" value="#{accountBean.password}"/>
+        </fx:formRow>
+        <fx:formRow label="#{fxMessageBean['Account.field.retypePassword']}" id="passwordConfirm">
+            <h:inputSecret id="passwordConfirm" value="#{accountBean.passwordConfirm}"/>
+        </fx:formRow>
+
+        <!-- ============================================ -->
+        <fx:formRow label="#{fxMessageBean['Account.field.email']}" id="email">
+            <h:inputText id="email" value="#{accountBean.account.email}"/>
+        </fx:formRow>
+
+        <!-- ============================================ -->
+        <fx:formRow label="#{fxMessageBean['Account.field.validFrom']}" id="validfrom" newLine="false">
+            <adm:dateInput form="frm" inputDateId="validfrom">
+                <t:inputDate popupCalendar="false" required="true" id="validfrom" value="#{accountBean.account.validFrom}"/>
+            </adm:dateInput>
+        </fx:formRow>
+        <fx:formRow label="#{fxMessageBean['Account.field.validTo']}" id="validto">
+            <adm:dateInput form="frm" inputDateId="validto">
+                <t:inputDate popupCalendar="false" required="true" id="validto" value="#{accountBean.account.validTo}"/>
+            </adm:dateInput>
+        </fx:formRow>
+
+        <!-- ============================================ -->
+        <fx:formRow label="#{fxMessageBean['Account.field.active']} / #{fxMessageBean['Account.field.validated']}" id="active" newLine="false">
+            <h:selectBooleanCheckbox id="active" value="#{accountBean.account.active}" />
+            <h:outputText value=" - " />
+            <h:selectBooleanCheckbox id="validated" value="#{accountBean.account.validated}" />
+        </fx:formRow>
+        <fx:formRow label="#{fxMessageBean['Account.field.language']}" id="language">
+            <h:selectOneListbox id="language" value="#{accountBean.account.language}" size="1"
+                                converter="FxLanguageConverter">
+                <f:selectItems value="#{fxSelectBean.languages}" />
+            </h:selectOneListbox>
+        </fx:formRow>
+
+
+        <fx:formRow label="#{fxMessageBean['Account.field.groups']}" id="groups" height="85" newLine="false">
+            <h:selectManyListbox id="groups" value="#{accountBean.groups}" size="6" converter="SelectableConverter">
+                <f:selectItems value="#{accountBean.filteredUserGroups}" />
+                <a4j:support ajaxSingle="true" event="onchange" reRender="rolesGroups" eventsQueue="updateResults"/>
+            </h:selectManyListbox>
+        </fx:formRow>
+        <fx:formRow label="#{fxMessageBean['Account.field.roles']}" id="roles" height="85">
+            <h:selectManyListbox id="roles" value="#{accountBean.roles}" size="6" converter="SelectableConverter">
+                <f:selectItems value="#{fxSelectBean.roles}" />
+            </h:selectManyListbox>
+        </fx:formRow>
+
+        <!-- ============================================ -->
+        <a4j:outputPanel id="rolesGroups">
+            <fx:formRow label="#{fxMessageBean['Account.field.rolesGroups']}" id="rolesGroups" >
+                <ui:repeat value="#{accountBean.rolesGroups}" var="role">
+                    <font color="#{role.color}"><h:outputText value="#{role.name}"/></font>
+                    <br/>
+                </ui:repeat>
+            </fx:formRow>
+        </a4j:outputPanel>
+
+        <!-- ============================================ -->
+        <fx:formRow label="#{fxMessageBean['Account.field.description']}" id="description" width="500" height="50">
+            <h:inputTextarea id="description" value="#{accountBean.account.description}"
+                             cols="50"/>
+        </fx:formRow>
+
+        <br />
+
+        <adm:commandButton id="saveButton" labelKey="User.button.save"
+                          icon="save"  bean="#{accountBean}" action="saveUser"/>
+        <adm:commandButton id="refreshButton" labelKey="User.button.refresh"
+                          icon="reload"  bean="#{accountBean}" action="editUser"/>
+        <adm:commandButton id="deleteButton" labelKey="User.button.delete" confirm="User.confirm.delete"
+                          icon="delete"  bean="#{accountBean}" action="deleteUser"/>
+        <adm:commandButton id="cancelButton" labelKey="User.button.cancel"
+                          icon="cancel" bean="#{accountBean}" action="overview" immediate="true"/>
+        <adm:toolbarPluginButtons/>
+    </a4j:form>
+    <br/>
+</ui:define>
+
+</ui:composition>
+
+</body>
+</html>

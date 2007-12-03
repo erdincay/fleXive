@@ -1,0 +1,94 @@
+/***************************************************************
+ *  This file is part of the [fleXive](R) project.
+ *
+ *  Copyright (c) 1999-2007
+ *  UCS - unique computing solutions gmbh (http://www.ucs.at)
+ *  All rights reserved
+ *
+ *  The [fleXive](R) project is free software; you can redistribute
+ *  it and/or modify it under the terms of the GNU General Public
+ *  License as published by the Free Software Foundation;
+ *  either version 2 of the License, or (at your option) any
+ *  later version.
+ *
+ *  The GNU General Public License can be found at
+ *  http://www.gnu.org/copyleft/gpl.html.
+ *  A copy is found in the textfile GPL.txt and important notices to the
+ *  license from the author are found in LICENSE.txt distributed with
+ *  these libraries.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  For further information about UCS - unique computing solutions gmbh,
+ *  please see the company website: http://www.ucs.at
+ *
+ *  For further information about [fleXive](R), please see the
+ *  project website: http://www.flexive.org
+ *
+ *
+ *  This copyright notice MUST APPEAR in all copies of the file!
+ ***************************************************************/
+package com.flexive.shared.configuration;
+
+import com.flexive.shared.search.ResultPreferences;
+import com.flexive.shared.search.query.QueryRootNode;
+
+/**
+ * Flexive system parameter definitions.
+ *
+ * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @version $Rev$
+ */
+public class SystemParameters {
+    /**
+     * Boolean parameter to determine if run-once scripts have been executed
+     */
+    public static final Parameter<Boolean> DIVISION_RUNONCE = ParameterFactory.newInstance(Boolean.class, SystemParameterPaths.DIVISION_RUNONCE_CONFIG, "run.once", false);
+    /**
+     * Configuration parameter for storing user content queries assembled in the GUI.
+     */
+    public static final Parameter<QueryRootNode> USER_QUERIES_CONTENT = ParameterFactory.newInstance(QueryRootNode.class,
+            SystemParameterPaths.USER_QUERIES_CONTENT, "", null);
+    public static final Parameter<ResultPreferences> USER_RESULT_PREFERENCES = ParameterFactory.newInstance(ResultPreferences.class,
+            SystemParameterPaths.USER_RESULT_PREFERENCES, null);
+    // global parameters
+    /**
+     * Root login parameter
+     */
+    public static final Parameter<String> GLOBAL_ROOT_LOGIN = ParameterFactory.newInstance(String.class, SystemParameterPaths.GLOBAL_CONFIG, "root_login", "admin");
+    /**
+     * Root password parameter
+     */
+    public static final Parameter<String> GLOBAL_ROOT_PASSWORD = ParameterFactory.newInstance(String.class, SystemParameterPaths.GLOBAL_CONFIG, "root_password", "123456");
+    /**
+     * Division datasource parameter
+     */
+    public static final Parameter<String> GLOBAL_DATASOURCES = ParameterFactory.newInstance(String.class, SystemParameterPaths.GLOBAL_DIVISIONS_DS, "", "");
+    /**
+     * Divison domain matcher parameter
+     */
+    public static final Parameter<String> GLOBAL_DIVISIONS_DOMAINS = ParameterFactory.newInstance(String.class, SystemParameterPaths.GLOBAL_DIVISIONS_DOMAINS, "", "");
+    /**
+     * Tree Caption property id
+     */
+    public static final Parameter<Long> TREE_CAPTION_PROPERTY = ParameterFactory.newInstance(Long.class, SystemParameterPaths.DIVISION_TREE, "caption", -1L);
+    /**
+     * Tree Caption root assignment id
+     */
+    public static final Parameter<Long> TREE_CAPTION_ROOTASSIGNMENT = ParameterFactory.newInstance(Long.class, SystemParameterPaths.DIVISION_TREE, "caption", -1L);
+    /**
+     * Tree checks enabled
+     */
+    public static final Parameter<Boolean> TREE_CHECKS_ENABLED = ParameterFactory.newInstance(Boolean.class, SystemParameterPaths.DIVISION_TREE, "treeChecks", false);
+    /**
+     * Tree FQN property
+     */
+    public static final Parameter<Long> TREE_FQN_PROPERTY = ParameterFactory.newInstance(Long.class, SystemParameterPaths.DIVISION_TREE, "fqn", -1L);
+    /**
+     * Tree FQN root assignment id
+     */
+    public static final Parameter<Long> TREE_FQN_ROOTASSIGNMENT = ParameterFactory.newInstance(Long.class, SystemParameterPaths.DIVISION_TREE, "fqn", -1L);
+}

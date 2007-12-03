@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application xmlns="http://java.sun.com/xml/ns/javaee" version="5"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/application_5.xsd">
+    <display-name>[fleXive](tm) v3</display-name>
+
+    <module>
+      <ejb>flexive-ejb.jar</ejb>
+    </module>
+
+    <module>
+        <web>
+            <web-uri>flexive.war</web-uri>
+            <context-root>/flexive</context-root>
+        </web>
+    </module>
+
+    <!--<library-directory>lib</library-directory>-->
+
+    <!-- drop in modules start   -->
+    <!--DROP_IN_PLACEHOLDER-->
+    <!-- drop in modules end   -->
+
+</application>

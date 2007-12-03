@@ -1,0 +1,127 @@
+/***************************************************************
+ *  This file is part of the [fleXive](R) project.
+ *
+ *  Copyright (c) 1999-2007
+ *  UCS - unique computing solutions gmbh (http://www.ucs.at)
+ *  All rights reserved
+ *
+ *  The [fleXive](R) project is free software; you can redistribute
+ *  it and/or modify it under the terms of the GNU General Public
+ *  License as published by the Free Software Foundation;
+ *  either version 2 of the License, or (at your option) any
+ *  later version.
+ *
+ *  The GNU General Public License can be found at
+ *  http://www.gnu.org/copyleft/gpl.html.
+ *  A copy is found in the textfile GPL.txt and important notices to the
+ *  license from the author are found in LICENSE.txt distributed with
+ *  these libraries.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  For further information about UCS - unique computing solutions gmbh,
+ *  please see the company website: http://www.ucs.at
+ *
+ *  For further information about [fleXive](R), please see the
+ *  project website: http://www.flexive.org
+ *
+ *
+ *  This copyright notice MUST APPEAR in all copies of the file!
+ ***************************************************************/
+package com.flexive.tests.embedded;
+
+import com.flexive.shared.EJBLookup;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.interfaces.AccountEngine;
+import com.flexive.shared.security.Role;
+import org.apache.commons.lang.RandomStringUtils;
+
+import java.util.Date;
+
+/**
+ * Interface for test user management.
+ *
+ * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ */
+
+public class TestUser {
+
+    private String userName;
+    private String password;
+    private String email;
+    /**
+     * Every user gets its own group to simplify security testing
+     */
+    private String userGroup;
+    private Role[] roles = null;
+    private long userId = -1;
+    private int userGroupId = -1;
+
+    public TestUser(String informalName) {
+        this.userName = informalName + "_" + RandomStringUtils.random(16, true, true);
+        this.userGroup = informalName + "_GROUP_" + RandomStringUtils.random(16, true, true);
+        this.password = RandomStringUtils.random(32, true, true);
+        this.email = "TESTEMAIL_" + RandomStringUtils.random(5, true, true) + "@" + RandomStringUtils.random(5, true, true) + ".com";
+    }
+
+    /**
+     * Create the configured test user.
+     *
+     * @param mandatorId the test user mandator ID
+     * @param languageId the test user language
+     * @throws FxApplicationException if the account could not be created
+     */
+    public void createUser(long mandatorId, int languageId) throws FxApplicationException {
+        AccountEngine accounts = EJBLookup.getAccountEngine();
+        if (userId != -1) {
+            throw new RuntimeException("Account already exists");
+        }
+        userId = accounts.create(this.userName, this.userName, this.password, this.email,
+                languageId, mandatorId, true, true, new Date(), new Date(new Date().getTime() + 60 * 60 * 1000),
+                -1, null, false, true);
+        if (roles != null) {
+            // set user-defined roles
+            accounts.setRoles(userId, Role.toIdArray(roles));
+        }
+        this.userGroupId = EJBLookup.getUserGroupEngine().create(this.userGroup, "#112233", mandatorId);
+        accounts.setGroups(this.userId, new long[]{this.userGroupId});
+    }
+
+    /**
+     * Remove the test user from the database.
+     *
+     * @throws FxApplicationException if the user could not be deleted
+     */
+    public void deleteUser() throws FxApplicationException {
+        if (userId == -1) {
+            return;
+        }
+        EJBLookup.getUserGroupEngine().remove(userGroupId);
+        EJBLookup.getAccountEngine().remove(userId);
+    }
+
+    public String getUserName() {
+        return this.userName;
+    }
+
+    public String getPassword() {
+        return this.password;
+    }
+
+    public long getUserId() {
+        return userId;
+    }
+
+    public int getUserGroupId() {
+        return userGroupId;
+    }
+
+    public void setRoles(Role[] roles) {
+        this.roles = roles;
+    }
+
+
+}

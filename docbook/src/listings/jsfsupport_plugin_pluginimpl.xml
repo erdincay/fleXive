@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="java" xml:id="jsfsupport_plugin_pluginimpl"
+                xmlns="http://docbook.org/ns/docbook"><![CDATA[public class TestPlugin implements Plugin<TestExecutor> {
+    public void apply(TestExecutor executor) {
+        executor.pushResult(42);
+    }
+}
+]]></programlisting>

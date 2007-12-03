@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]><programlisting language="java" xml:id="core_structure_newgroup" xmlns="http://docbook.org/ns/docbook"><co xml:id="cst_newgroup_1"/>        AssignmentEngine assignmentEngine = EJBLookup.getAssignmentEngine();
+
+<co xml:id="cst_newgroup_2"/>        assignmentEngine.createGroup(
+<co xml:id="cst_newgroup_3"/>                typeId,
+<co xml:id="cst_newgroup_4"/>                FxGroupEdit.createNew(
+<co xml:id="cst_newgroup_5"/>                        "Address",
+<co xml:id="cst_newgroup_6"/>                        new FxString("The customers address"),
+<co xml:id="cst_newgroup_7"/>                        new FxString("Enter the customers address here"),
+<co xml:id="cst_newgroup_8"/>                        true,
+<co xml:id="cst_newgroup_9"/>                        FxMultiplicity.MULT_1_1).
+<co xml:id="cst_newgroup_10"/>                        setAssignmentGroupMode(GroupMode.AnyOf),
+<co xml:id="cst_newgroup_11"/>                "/");
+
+<co xml:id="cst_newgroup_12"/>        FxPropertyEdit street = FxPropertyEdit.createNew(...);
+<co xml:id="cst_newgroup_13"/>        FxPropertyEdit zip = FxPropertyEdit.createNew(...);
+<co xml:id="cst_newgroup_14"/>        assignmentEngine.createProperty(typeId, street, "/Address");
+<co xml:id="cst_newgroup_15"/>        assignmentEngine.createProperty(typeId, zip, "/Address");
+</programlisting>

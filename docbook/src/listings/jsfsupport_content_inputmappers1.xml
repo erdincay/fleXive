@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="xhtml" xml:id="jsfsupport_content_inputmappers1"
+                xmlns="http://docbook.org/ns/docbook"><![CDATA[<a4j:form id="frm">
+    <fx:content pk="#{myBean.pk}" var="issue">
+        <!-- Provide a list of contents for this reference property -->
+        <fx:value property="owner" inputMapper="#{myBean.accountMapper}"/>
+
+        <!-- Save button etc... -->
+    </fx:content>
+</a4j:form>
+]]>
+</programlisting>

@@ -1,0 +1,189 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:fx="http://www.flexive.com/jsf/core"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<ui:composition template="/adm/templates/navigation.xhtml">
+    <ui:define name="head">
+        <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/briefcasePanel.js"/>
+        <script type="text/javascript">
+            var activeItem = null;
+            function selectBriefcase(caller) {
+                if (activeItem!=null) {
+                    if (activeItem.src.indexOf("shared")==-1) {
+                        activeItem.src=document.getElementById("mainNavForm:normal").src;
+                    } else {
+                        activeItem.src=document.getElementById("mainNavForm:normalShared").src;
+                    }
+                }
+                activeItem = parent.getFirstMatchingElement(caller,"IMG");
+                if (activeItem.src.indexOf("shared")==-1) {
+                    activeItem.src=document.getElementById("mainNavForm:active").src;
+                } else {
+                    activeItem.src=document.getElementById("mainNavForm:activeShared").src;
+                }                                           
+            }
+
+            function showBriefcase(id) {
+                invokeContentAction('adm/search/searchResult.jsf', 'openBriefcase', {briefcaseId: id});
+            }
+
+
+            function createBriefcase() {
+                var name = prompt("#{fxMessageBean['Briefcase.dialog.prompt.briefcaseName']}", "#{fxMessageBean['Briefcase.dialog.prompt.briefcaseName.default']}");
+                if (name == null || name.length == 0) {
+                    return;
+                }
+                try {
+                    getJsonRpc().BriefcaseEditor.create(name);
+                    briefcasePanel.reload();
+                } catch (e) {
+                    alert(e.message);
+                }
+            }
+
+            // ----------- context menu functions -----------------
+
+            function showContextMenu() {
+                var selectionAvailable = getContentFrame().rowSelection != null &amp;&amp; getContentFrame().rowSelection.getSelected &amp;&amp; getContentFrame().rowSelection.getSelected().length > 0;
+                findMenuItem(getContextMenu(), "open").setDisabled(getContextBriefcaseId() == -1);
+                findMenuItem(getContextMenu(), "delete").setDisabled(getContextBriefcaseId() == -1);
+                findMenuItem(getContextMenu(), "addSelection").setDisabled(!selectionAvailable);
+                getContextMenu().show_();
+            }
+
+            function openBriefcase(menuItem) {
+                showBriefcase(getContextBriefcaseId());
+            }
+
+            function openBriefcaseDetails(menuItem) {
+                invokeContentAction("adm/briefcase/detail.jsf", "openBriefcaseDetails", {briefcaseId: getContextBriefcaseId()});
+            }
+
+            function deleteBriefcase(menuItem) {
+                if (!confirm("#{fxMessageBean['Briefcase.dialog.confirm.delete']}")) {
+                    return;
+                }
+                try {
+                    getJsonRpc().BriefcaseEditor.remove(getContextBriefcaseId());
+                    briefcasePanel.reload();
+                } catch (e) {
+                    alert(e.message);
+                }
+            }
+
+            function addSelection(menuItem) {
+                try {
+                    getJsonRpc().BriefcaseEditor.add(getContextBriefcaseId(), extractPkIds(getContentFrame().rowSelection.getSelected()));
+                    briefcasePanel.reload();
+                } catch (e) {
+                    alert(e.message);
+                }
+            }
+
+            function renameBriefcase(menuItem) {
+                var newName = prompt("#{fxMessageBean['Briefcase.dialog.prompt.briefcaseName']}");
+                if (newName == null || newName.length == 0) {
+                    return;
+                }
+                try {
+                    getJsonRpc().BriefcaseEditor.rename(getContextBriefcaseId(), newName);
+                    briefcasePanel.reload();
+                } catch (e) {
+                    alert(e.message);
+                }
+            }
+
+            function shareBriefcase(menuItem, aclId) {
+                try {
+                    getJsonRpc().BriefcaseEditor.share(getContextBriefcaseId(), aclId);
+                    briefcasePanel.reload();
+                } catch (e) {
+                    alert(e.message);
+                }
+            }
+                    
+            function getContextMenu() {
+                return dojo.widget.byId("contextMenu");
+            }
+
+            // Returns the briefcase ID where the context menu was opened
+            function getContextBriefcaseId() {
+                var parent = findParentWithAttribute(getContextMenu().openEvent, "briefcaseId");
+                return parent != null ? parent.getAttribute("briefcaseId") : -1;
+            }
+
+            // ------------ initialize the briefcase panel ---------------------
+
+            var briefcasePanel;
+            dojo.addOnLoad(function() {
+                briefcasePanel = new BriefcasePanel(document.getElementById("briefcaseContainer"), "showBriefcase");
+                briefcasePanel.reload();
+            });
+
+            function reloadBriefcases() {
+                briefcasePanel.reload();
+            }
+
+        </script>
+    </ui:define>
+    <ui:define name="content">
+        <adm:messages disableErrorRegistration="true"/>
+        <div id="briefcaseContainer">
+
+        </div>
+
+        <fx:menu name="contextMenu" contextMenuTarget="briefcaseContainer" showHandler="showContextMenu">
+            <fx:menuItem id="addSelection" icon="add" labelKey="Briefcase.contextMenu.addSelection" clickHandler="addSelection"/>
+            <fx:menuItem id="open" icon="open" labelKey="Briefcase.contextMenu.open" clickHandler="openBriefcase"/>
+            <fx:menuItem id="openDetails" icon="openDetails" labelKey="Briefcase.contextMenu.openDetails" clickHandler="openBriefcaseDetails"/>
+            <fx:menuItem id="rename" icon="rename" labelKey="Briefcase.contextMenu.rename" clickHandler="renameBriefcase"/>
+            <fx:menuItem id="delete" icon="remove" labelKey="Briefcase.contextMenu.delete" clickHandler="deleteBriefcase"/>
+            <fx:menuSeparator/>
+            <fx:menuItem id="share" icon="share" labelKey="Briefcase.contextMenu.share" clickHandler="shareBriefcase">
+                <fx:menuItem id="unshare" labelKey="Briefcase.contextMenu.private" clickHandler="function(menuItem) { shareBriefcase(menuItem, -1); }"/>
+                <c:forEach var="item" items="#{fxSelectBean.briefcaseACLs}">
+                    <fx:menuItem id="share#{item.value}" label="#{item.label}"
+                             clickHandler="function(menuItem) { shareBriefcase(menuItem, #{item.value}); }"/>
+                </c:forEach>
+            </fx:menuItem>
+            <fx:menuSeparator/>
+            <fx:menuItem id="createBriefcase" icon="createBriefcase" labelKey="Briefcase.menu.create" clickHandler="createBriefcase"/>
+        </fx:menu>
+
+        <div style="display:none">
+            <t:graphicImage url="/adm/images/briefcaseIcons/normal_shared.gif" id="normalShared"/>
+            <t:graphicImage url="/adm/images/briefcaseIcons/normal.gif" id="normal"/>
+            <t:graphicImage url="/adm/images/briefcaseIcons/active_shared.gif" id="activeShared"/>
+            <t:graphicImage url="/adm/images/briefcaseIcons/active.gif" id="active"/>
+        </div>
+    </ui:define>
+
+    <ui:define name="mainMenu">
+        <div class="menu">
+        <fx:menu name="mainMenu">
+            <fx:menuItem id="createBriefcase" icon="createBriefcase" labelKey="Briefcase.menu.create" clickHandler="createBriefcase"/>
+
+            <fx:menuSeparator/>
+
+            <ui:include src="/adm/templates/navigation.menu.tabs.xhtml"/>
+        </fx:menu>
+
+
+        </div>
+    </ui:define>
+
+    <ui:define name="reloadButton">
+        <a href="javascript:briefcasePanel.reload()"><t:graphicImage url="/adm/images/layout/reload.png" alt="reload" style="position:absolute;right:15px;margin-top:2px;border:0;"/></a>
+    </ui:define>
+</ui:composition>
+
+
+</html>

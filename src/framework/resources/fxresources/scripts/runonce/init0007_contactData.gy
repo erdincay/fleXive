@@ -1,0 +1,86 @@
+//Create contact data type
+import com.flexive.shared.CacheAdmin
+import com.flexive.shared.EJBLookup
+import com.flexive.shared.FxLanguage
+import com.flexive.shared.configuration.SystemParameters
+import com.flexive.shared.interfaces.AssignmentEngine
+import com.flexive.shared.scripting.FxScriptInfo
+import com.flexive.shared.scripting.FxScriptType
+import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
+import com.flexive.shared.security.ACL
+import com.flexive.shared.structure.*
+import com.flexive.shared.value.FxString
+
+//Create contact data type
+def countries = """
+
+"""
+
+def label(labelEn, labelDe) {
+    return new FxString(true, FxLanguage.ENGLISH, (String)labelEn).setTranslation(FxLanguage.GERMAN, labelDe);
+}
+
+def AssignmentEngine ae = EJBLookup.getAssignmentEngine()
+
+def long typeId = EJBLookup.getTypeEngine().save(FxTypeEdit.createNew(FxType.CONTACTDATA, new FxString(FxLanguage.ENGLISH, "Contact Data").setTranslation(FxLanguage.GERMAN, "Kontaktdaten"),
+        CacheAdmin.getEnvironment().getACL(ACL.Category.STRUCTURE.defaultId), null).setAllowedMandators(CacheAdmin.getEnvironment().getMandators(true, true)))
+def builder = new GroovyTypeBuilder(typeId)
+builder {
+    fqn(assignment: CacheAdmin.getEnvironment().getAssignment((Long) EJBLookup.configurationEngine.get(SystemParameters.TREE_FQN_ROOTASSIGNMENT)).getXPath())
+    name(description: label("First Name", "Vorname"))
+    surname(description: label("Surname", "Nachname"))
+    title(description: label("Title", "Titel"))
+    displayName(description: label("Display Name", "Dargestellter Name"))
+    email(description: label("email", "email"))
+    Address(description: label("Address", "Adresse"), multiplicity: FxMultiplicity.MULT_0_1) {
+        street(description: label("Street", "Strasse"))
+        zipCode(description: label("ZIP Code", "PLZ"))
+        city(description: label("City", "Ort"))
+        country(description: label("Country", "Land"), dataType: FxDataType.SelectOne,
+                referencedList: CacheAdmin.environment.getSelectList(FxSelectList.COUNTRIES))
+    }
+}
+
+//create a before-save script to verify e-mail and build display name and caption
+FxScriptInfo si = EJBLookup.getScriptingEngine().createScript(FxScriptType.BeforeContentSave, "ContactDataVerify.gy", "Verification for contact data",
+        '''
+import com.flexive.shared.value.*
+//println "in contactdata create/save script ..."
+String display = content.getValue("/SURNAME").defaultTranslation
+if( content.containsValue("/NAME") ) {
+    display = content.getValue("/NAME").defaultTranslation+" "+display
+}
+if( content.containsValue("/TITLE") )
+    display = content.getValue("/TITLE").defaultTranslation+" "+display
+if( display.length() > 1024 )
+    display = display.substring(0,1024)
+// TODO: get multilang info from content value    
+content.setValue("/FQN", new FxString(false, display))
+content.setValue("/DISPLAYNAME", new FxString(false, display))
+return content
+''')
+EJBLookup.getScriptingEngine().createTypeScriptMapping(si.id, typeId, true, true)
+EJBLookup.getScriptingEngine().createTypeScriptMapping(FxScriptType.BeforeContentCreate, si.id, typeId, true, true)
+
+
+//remove-script that prevents removal if assigned to an account
+FxScriptInfo siRm = EJBLookup.getScriptingEngine().createScript(FxScriptType.BeforeContentRemove, "ContactDataRemove.gy", "Remove check for contact data",
+        '''
+import com.flexive.shared.*
+import com.flexive.shared.value.*
+import com.flexive.shared.exceptions.*
+//println "in contactdata remove script ..."
+boolean exists=false;
+try {
+    EJBLookup.getAccountInterface().loadForContactData(pk)
+    //println "account found, preventing remove!"
+    exists = true;
+    throw new FxRemoveException("ex.account.contactdata.remove.inUse")
+} catch(Exception e) {
+    if( exists )
+        throw e
+    //ok to remove
+    //println "ok to remove. exception: "+e.message
+}
+''')
+EJBLookup.getScriptingEngine().createTypeScriptMapping(siRm.id, typeId, true, true)

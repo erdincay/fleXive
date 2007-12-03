@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:s="http://myfaces.apache.org/sandbox"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+
+    <ui:define name="body">
+        <a4j:form id="frm">
+            <adm:tab label="#{fxMessageBean['SystemInfo.tabtitle.main']}" active="true" id="tab1"/>
+
+            <a4j:outputPanel id="systemInfos">
+                <!-- General system/runtime information -->
+                <fx:fieldSet legend="#{fxMessageBean['SystemInfo.group.general']}" width="450">
+                    <fx:formRow label="#{fxMessageBean['SystemInfo.field.dateTime']}">
+                        #{systemInfoBean.dateTime}
+                    </fx:formRow>
+                    <fx:formRow label="#{fxMessageBean['SystemInfo.field.os']}">
+                        #{systemInfoBean.operatingSystem}
+                    </fx:formRow>
+                    <fx:formRow label="#{fxMessageBean['SystemInfo.field.javaVersion']}">
+                        #{systemInfoBean.javaVersion}
+                    </fx:formRow>
+                    <fx:formRow label="#{fxMessageBean['SystemInfo.field.processors']}">
+                        #{systemInfoBean.processors}
+                    </fx:formRow>
+                    <fx:formRow label="#{fxMessageBean['SystemInfo.field.memory']}">
+                        #{systemInfoBean.freeMemoryMB}
+                    </fx:formRow>
+                </fx:fieldSet>
+
+                <a4j:commandButton id="refreshButton" reRender="systemInfos"
+                                   value="#{fxMessageBean['SystemInfo.button.refresh']}"/>
+            </a4j:outputPanel>
+
+            <adm:toolbarPluginButtons> xx </adm:toolbarPluginButtons>
+        </a4j:form>
+    </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

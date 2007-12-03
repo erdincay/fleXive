@@ -1,0 +1,122 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:s="http://myfaces.apache.org/sandbox"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+
+    <ui:define name="head">
+        <t:stylesheet path="/adm/css/content.css"/>
+        <script type="text/javascript">
+            dojo.require("dojo.widget.FilteringTable");
+        </script>
+    </ui:define>
+
+    <ui:define name="body">
+        <h:form id="frm" enctype="multipart/form-data">
+            <adm:tab label="#{fxMessageBean['SelectList.tab.editSelectList,#{selectListBean.selectListName}']}" active="true" id="tab1"/>
+
+            <fx:formRow labelKey="SelectList.label.selectList.name" id="name">
+                <h:inputText id="name" value="#{selectListBean.selectListName}"/>
+            </fx:formRow>
+             <fx:formRow labelKey="SelectList.label.selectList.label" id="label">
+                <fx:fxValueInput id="label" value="#{selectListBean.selectListLabel}"/>
+			</fx:formRow>
+            <fx:formRow labelKey="SelectList.label.selectList.description" id="description">
+                <fx:fxValueInput id="description" value="#{selectListBean.selectListDescription}"/>
+			</fx:formRow>
+            <fx:formRow labelKey="SelectList.label.selectList.allowDynamicCreation" id="allowDynamicCreation">
+                <h:selectBooleanCheckbox id="allowDynamicCreation" value="#{selectListBean.selectListAllowDynamicCreation}"/>
+            </fx:formRow>
+            <fx:formRow labelKey="SelectList.label.selectList.createItemACL" id="createItemACL">
+                <t:selectOneListbox size="1" id="createItemACL" value="#{selectListBean.selectListCreateItemACLId}">
+                    <f:selectItems value="#{fxSelectBean.selectListACLs}" />
+                </t:selectOneListbox>
+            </fx:formRow>
+            <fx:formRow labelKey="SelectList.label.selectList.defaultItemACL" id="defaultItemACL">
+                <t:selectOneListbox size="1" id="defaultItemACL" value="#{selectListBean.selectListDefaultItemACL}"
+                                    onchange="submit();" converter="SelectableConverter">
+                    <f:selectItems value="#{fxSelectBean.selectListItemACLs}" />
+                </t:selectOneListbox>
+            </fx:formRow>
+
+            <table dojoType="FilteringTable" widgetId="selectListTable" enableMultipleSelect="true"
+                   alternateRows="true" maxSortable="1"
+                    class="dojoTable">
+
+                <thead>
+                    <tr>
+                        <th class="tblHeader" dataType="String">
+                            #{fxMessageBean["SelectList.table.label"]}
+                        </th>
+                        <th class="tblHeader" dataType="String">
+                            #{fxMessageBean["SelectList.table.data"]}
+                        </th>
+                        <th class="tblHeader" dataType="html">
+                            #{fxMessageBean["SelectList.table.acl"]}
+                        </th>
+                        <th class="tblHeader" dataType="String">
+                            #{fxMessageBean["SelectList.table.color"]}
+                        </th>
+                        <th class="tblHeader" dataType="html">
+                            #{fxMessageBean["SelectList.table.actions"]}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <ui:repeat var="item" value="#{selectListBean.selectList.editableItems}">
+                        <tr value="#{item.id}">
+                            <td class="tblColumn"><fx:fxValueInput value="#{item.label}"/></td>
+                            <td class="tblColumn"><h:inputText value="#{item.data}"/></td>
+                            <td class="tblColumn">
+                                <t:selectOneListbox size="1" id="itemACL" value="#{item.acl}" converter="SelectableConverter">
+                                    <f:selectItems value="#{fxSelectBean.selectListItemACLs}" />
+                                </t:selectOneListbox>
+                            </td>
+                            <td class="tblColumn"><h:inputText value="#{item.color}"/></td>
+                            <td class="tblColumn">
+                                <adm:commandButton labelKey="SelectList.button.delete" location="content"
+                                                icon="delete"  bean="#{selectListBean}" action="deleteListItem" id="deleteButton_#{selectListBean.idMap[item.id]}">
+                                    <f:setPropertyActionListener target="#{selectListBean.listItemId}" value="#{item.id}"/>
+                                </adm:commandButton>
+                            </td>
+                        </tr>
+                    </ui:repeat>
+                    <tr>
+                        <td class="tblColumn"><fx:fxValueInput value="#{selectListBean.itemLabel}"/></td>
+                        <td class="tblColumn"><h:inputText value="#{selectListBean.itemData}"/></td>
+                        <td class="tblColumn">
+                            <t:selectOneListbox size="1" id="newItemACL" value="#{selectListBean.itemACL}" 
+                                                converter="SelectableConverter">
+                                <f:selectItems value="#{fxSelectBean.selectListItemACLs}" />
+                            </t:selectOneListbox>
+                        </td>
+                        <td class="tblColumn"><h:inputText value="#{selectListBean.itemColor}"/></td>
+                        <td class="tblColumn">
+                            <adm:commandButton labelKey="SelectList.button.add" location="content"
+                                            icon="new"  bean="#{selectListBean}" action="addListItem" id="addButton">
+                            </adm:commandButton>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+
+            <adm:commandButton labelKey="SelectList.button.selectList.save" location="both"
+                icon="save"  action="saveSelectList"  bean="#{selectListBean}" id="saveSelectListButton">
+            </adm:commandButton>
+
+        </h:form>
+
+    </ui:define>
+</ui:composition>
+</body>
+</html>

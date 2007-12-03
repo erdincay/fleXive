@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting id="TutorialDirectoryStructure"
+                xmlns="http://docbook.org/ns/docbook">/helloworld/
+|
++--build.xml
+
+/helloworld/java/
+/helloworld/java/com.flexive.examples.helloworld.war
+|
++--HelloWorldBean.java
+
+/helloworld/resources/
+/helloworld/resources/scripts/
+/helloworld/resources/scripts/library/
+/helloworld/resources/scripts/startup/
+/helloworld/resources/scripts/runonce/
+|
++--hello001.groovy
+
+
+/helloworld/web/
+|
++--create.xhtml
++--index.xhtml
+
+/helloworld/web/WEB-INF/
+|
++--faces-config.xml
++--web.xml    
+</programlisting>

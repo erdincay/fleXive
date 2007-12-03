@@ -1,0 +1,123 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:s="http://myfaces.apache.org/sandbox"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+<ui:define name="head">
+    <t:stylesheet path="/adm/css/content.css"/>
+    <t:stylesheet path="/adm/css/structureEditor.css"/>
+    <script type="text/javascript">
+        dojo.require("dojo.widget.FilteringTable");
+    </script>
+</ui:define>
+
+<ui:define name="body">
+    <h:form id="frm" enctype="multipart/form-data">
+        <adm:tab label="#{fxMessageBean['TypeEditor.tab.typeEditor']}" active="false" id="tab1"
+                 bean="#{typeEditorBean}" action="showTypeEditor"/>
+        <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor']} [#{typeEditorBean.typeScriptCount}]" active="true" id="tab2"/>
+
+        <fx:formRow label="#{fxMessageBean['ScriptEditor.label.scriptType']}" id="scriptTypes" height="85">
+            <h:selectOneListbox id="scriptTypes" value="#{typeEditorBean.scriptTypeId}" size="#{typeEditorBean.typeScriptCount + 1}">
+                <f:selectItems value="#{typeEditorBean.scriptTypes}" />
+                <a4j:support event="onchange" reRender="scripts" />
+            </h:selectOneListbox>
+        </fx:formRow>
+
+        <a4j:outputPanel id="scripts">
+            <fx:formRow label="#{fxMessageBean['ScriptEditor.label.scripts']}" id="scripts">
+                <ui:repeat var="scriptInfo" value="#{typeEditorBean.scripts}">
+                    <h:commandLink id="editScripts_#{scriptInfo.id}" action="#{scriptBean.editScript}"
+                                   value="#{scriptInfo.name}" actionListener="#{scriptBean.structureListen}">
+                        <f:param name="oid" value="#{scriptInfo.id}"/>
+                    </h:commandLink>
+                    <br/>
+                </ui:repeat>
+            </fx:formRow>
+        </a4j:outputPanel>
+
+
+        <br/>
+        <br/>
+        <br/>
+
+        <fx:formRow label="#{fxMessageBean['ScriptEditor.label.scriptType']}" id="scriptTypes2" height="85">
+            <h:selectOneListbox id="scriptTypes2" value="#{typeEditorBean.scriptType}" size="7">
+                <f:selectItems value="#{fxSelectBean.scriptTypes}" />
+                <a4j:support event="onchange" reRender="scripts2, scripts3" actionListener="#{typeEditorBean.clearSelectedScript}"/>
+            </h:selectOneListbox>
+        </fx:formRow>
+
+        <br/>
+        <br/>
+
+        <a4j:outputPanel id="scripts2">
+            <fx:formRow label="#{fxMessageBean['ScriptEditor.label.scripts']}" id="scripts2">
+                <h:selectOneListbox id="scriptTypes3" value="#{typeEditorBean.selectedScriptId}" size="5">
+                    <f:selectItems value="#{typeEditorBean.scriptsAsId}" />
+                    <a4j:support event="onchange" reRender="scripts3" />
+                </h:selectOneListbox>
+            </fx:formRow>
+        </a4j:outputPanel>
+
+        <br/>
+        <br/>
+        <br/>
+        <a4j:outputPanel id="scripts3">
+            <fx:formRow label="#{fxMessageBean['ScriptEditor.label.scripts']}" id="scripts3">
+                #{typeEditorBean.selectedScriptName}
+                <h:selectOneListbox id="scriptTypes4" value="#{typeEditorBean.selectedType}" size="1">
+                    <f:selectItems value="#{fxSelectBean.scriptTypes}" />
+                </h:selectOneListbox>
+                <h:commandButton id="addScript" action="#{typeEditorBean.addScript}" value="AddScript"/>
+            </fx:formRow>
+        </a4j:outputPanel>
+
+        <br/>
+        <br/>
+        <br/>
+
+        <h:dataTable value="#{typeEditorBean.selectedScripts}" var="itm">
+            <h:column>
+                <f:facet name="header">
+                    <h:outputText value="Script name"/>
+                </f:facet>
+                <h:outputText value="#{itm.name}"/>
+            </h:column>
+            <h:column>
+                <f:facet name="header">
+                    <h:outputText value="Type"/>
+                </f:facet>
+                <h:outputText value="#{itm.type.name}"/>
+            </h:column>
+        </h:dataTable>
+
+        <br/>
+        <br/>
+        <h:commandButton id="assignScripts" action="#{typeEditorBean.assignScripts}" value="AssignScripts"/>
+        <h:commandButton id="clearTable" action="#{typeEditorBean.clearTable}" value="ClearTable"/>
+        <br/>
+        <br/>
+
+        <adm:toolbarPluginButtons/>
+    </h:form>
+
+
+    <script type="text/javascript">
+
+
+    </script>
+
+</ui:define>
+</ui:composition>
+</body>
+</html>

@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="xhtml" xml:id="jsfsupport_formrow_text"
+                xmlns="http://docbook.org/ns/docbook"><![CDATA[<fx:formRow label="Group Name" id="groupname">
+    <h:inputText id="groupname" value="#{userGroupBean.name}" required="true"/>
+</fx:formRow>
+]]></programlisting>

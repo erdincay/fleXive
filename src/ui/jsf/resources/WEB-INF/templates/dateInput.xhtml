@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:t="http://myfaces.apache.org/tomahawk">
+
+
+<ui:composition>
+<!--
+    <style type="text/css">
+        ##{form}_#{inputDateId}_div {
+            border: 0px solid #bdbdbd;
+            padding:1px;
+            width:135px;
+            white-space:nowrap;
+        }
+        ##{form}_#{inputDateId}_div input {
+            background-color:#FFFFFF;
+        }
+        input[id="#{form}:#{inputDateId}.day"]   {
+            width:14px;
+            padding-left:2px;
+            margin-right:2px;
+            border: 1px solid #bdbdbd;
+            padding-top:3px;
+        }
+        input[id="#{form}:#{inputDateId}.year"]   {
+            width:30px;
+            margin-right:4px;
+            padding-left:2px;
+            padding-top:3px;
+        }
+        input[value="..."]   {
+            width:10px;
+            border:0;
+        }
+        select[id="#{form}:#{inputDateId}.month"] {
+            padding-top:2px;
+            width:70px;
+            border:0;
+            padding-left:2px;
+            border: 1px solid #bdbdbd;
+            margin-right:2px;
+        }
+    </style>
+-->    
+    <div id="#{form}_#{inputDateId}_div">
+        <ui:insert/>
+    </div>
+</ui:composition>
+</html>

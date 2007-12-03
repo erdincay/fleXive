@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:s="http://myfaces.apache.org/sandbox"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+
+    <ui:define name="head">
+    </ui:define>
+
+    <ui:define name="body">
+        <h:form id="frm">
+            <h:inputHidden value="#{stepDefinitionBean.stepDefinition.id}"/>
+
+            <ui:fragment rendered="#{stepDefinitionBean.stepDefinitionId == -1}">
+                <adm:tab label="#{fxMessageBean['StepDefinition.tabtitle.create']}" active="true" id="tab1"/>
+            </ui:fragment>
+            <ui:fragment rendered="#{stepDefinitionBean.stepDefinitionId != -1}">
+                <adm:tab label="#{fxMessageBean['StepDefinition.tabtitle.edit,#{stepDefinitionBean.stepDefinition.label}']}" active="true" id="tab2">
+                    <f:param value="#{stepDefinition.label}"/>
+                </adm:tab>
+            </ui:fragment>
+
+            <fx:formRow label="#{fxMessageBean['StepDefinition.field.name']}" id="stepName">
+                <fx:fxValueInput id="stepName" value="#{stepDefinitionBean.stepDefinition.label}"/>
+            </fx:formRow>
+
+            <fx:formRow label="#{fxMessageBean['StepDefinition.field.description']}" id="stepDescription">
+                <h:inputText id="stepDescription" value="#{stepDefinitionBean.stepDefinition.description}"/>
+            </fx:formRow>
+
+            <fx:formRow label="#{fxMessageBean['StepDefinition.field.unique']}" id="uniqueTarget">
+                <h:selectOneListbox id="uniqueTarget" value="#{stepDefinitionBean.stepDefinition.uniqueTargetId}" size="1">
+                    <f:selectItem itemLabel="" itemValue="#{-1}"/>
+                    <f:selectItems value="#{stepDefinitionBean.stepDefinitions}"/>
+                </h:selectOneListbox>
+            </fx:formRow>
+
+            <c:if test="#{stepDefinitionBean.stepDefinitionId == -1}">
+                <adm:commandButton id="createButton" labelKey="StepDefinition.button.create" icon="new"  bean="#{stepDefinitionBean}" action="create"/>
+            </c:if>    
+            <c:if test="#{stepDefinitionBean.stepDefinitionId != -1}">
+                <adm:commandButton id="saveButton" labelKey="StepDefinition.button.save" icon="save"  bean="#{stepDefinitionBean}" action="save"/>
+            </c:if>
+
+            <adm:commandButton labelKey="StepDefinition.button.cancel" location="both"
+                icon="cancel"  action="stepDefinitionOverview" id="cancelButton" immediate="true"/>
+
+            <adm:toolbarPluginButtons/>
+        </h:form>
+
+        <br/>
+
+
+    </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:t="http://myfaces.apache.org/tomahawk">
+
+Display a dropdownlist of mandators, or a readonly input field with the mandator.
+
+Parameters:
+- mode: The display mode
+  * auto: Displays a drowdown list if the user is a global supervisor, or a readonly inptut field
+  * readonly: Always displays a readonly input field with the mandator that the user belongs to
+  * dropdown: Always display a drop down list with all mandators
+- bean: the bean to read the value from
+- property: the property to read the value from
+
+
+
+<ui:composition>
+
+    <c:if test="${empty mode}">
+        <c:set var="mode" value="auto" />
+    </c:if>
+
+    <!-- MODE AUTO: Display a dropdown list or a readonly view depending on the users permissions -->
+    <c:if test="${mode=='auto'}">
+        <c:if test="${fxSystemBean.userTicket.globalSupervisor}">
+            <h:selectOneListbox id="mandator" value="#{bean[property]}" size="1"
+                                converter="SelectableConverter" required="true">
+                <f:selectItems value="#{fxSelectBean.mandatorsForEdit}" />
+            </h:selectOneListbox>
+        </c:if>
+        <c:if test="${fxSystemBean.userTicket.globalSupervisor==false}">
+            <h:inputText readonly="true" id="mandator"
+                         value="#{mandatorBean.mandatorsById[fxSystemBean.userTicket.mandatorId].name}" />
+        </c:if>
+    </c:if>
+
+    <!-- MODE READONLY: Always display the mandator as a readonly input -->
+    <c:if test="${mode=='readonly'}">
+        <c:if test="${fxSystemBean.userTicket.globalSupervisor==false}">
+            <h:inputText readonly="true" id="mandator"
+                         value="#{mandatorBean.mandatorsById[fxSystemBean.userTicket.mandatorId].name}" />
+        </c:if>
+    </c:if>
+
+    <!-- MODE DROPDOWN: Always display all mandators as a dropdwn list -->
+    <c:if test="${mode=='dropdown'}">
+        <c:if test="${fxSystemBean.userTicket.globalSupervisor}">
+            <h:selectOneListbox id="mandator" value="#{bean[property]}" size="1"
+                                converter="SelectableConverter" required="true">
+                <f:selectItems value="#{fxSelectBean.mandatorsForEdit}" />
+            </h:selectOneListbox>
+        </c:if>
+    </c:if>
+
+</ui:composition>
+
+</html>

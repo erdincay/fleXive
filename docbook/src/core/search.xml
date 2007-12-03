@@ -1,0 +1,827 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE section [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<section xml:id="core_search" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude">
+
+    <title>Search Engine</title>
+
+    <xi:include href="../includes/author_dlichtenberger.xml"/>
+
+    <para>
+        &Flexive; contents can be queried using a SQL-like dialect called
+        <glossterm>&fxsql;</glossterm>.
+        The core idea of &fxsql; is to provide a flat virtual table that contains all content instances
+        visible to the current user, with full support for &flexive; data types and multilinguality.
+    </para>
+    <para>
+        While it is possible to submit queries in plain &fxsql;, there are alternatives
+        for Java and Groovy developers in the form of query builders. They handle proper
+        formatting of values and are the preferred way of formulating queries unless you need
+        some of the more esoteric features of &fxsql;.
+    </para>
+
+    <section xml:id="core_search_sqlintro">
+        <title>An introduction to &fxsql;</title>
+
+        <para>
+            The overall query layout is similar to SQL. Currently queries are always on
+            the virtual table "content" that provides a flat view on all content instances.
+
+            <xi:include href="../listings/core_search_intro.xml"/>
+
+            <calloutlist>
+                <callout arearefs="csq_intro_select">
+                    <para>
+                        We select the
+                        <glossterm>virtual property</glossterm>
+                        <code>@pk</code>
+                        (the content primary key) and the standard property
+                        <code>caption</code>.
+                    </para>
+                </callout>
+
+                <callout arearefs="csq_intro_from">
+                    <para>
+                        Here we specify the (virtual) source table. Currently, this is always
+                        <code>content</code>. The alias is
+                        mandatory and is usually
+                        "<code>co</code>",
+                        although you can choose any identifier you like.
+                    </para>
+                </callout>
+
+                <callout arearefs="csq_intro_filter">
+                    <para>
+                        Filters work similar to the SQL having clause by providing a post-processing filter mechanism on
+                        the results of the actual query. That is, filters are applied every time the search query is
+                        executed, and are not stored in the cached result tables. This means that changing filters
+                        usually does not invalidate the query cache, whereas changing the WHERE clause always does.
+                        In this example, we might want to select only live versions. If you do not specify
+                        a version filter, the search uses the maximum version of contents for matching
+                        conditions and selecting properties.
+                    </para>
+                </callout>
+
+                <callout arearefs="csq_intro_where">
+                    <para>
+                        The where clause support most standard SQL operators for string and numerical comparisons. Here
+                        we select all contents whose caption starts with "test". Note that string comparisons are case
+                        insensitive.
+                    </para>
+                </callout>
+            </calloutlist>
+
+            The rest of this section contains an enumeration of &fxsql; features along with
+            example queries demonstrating that feature.
+        </para>
+
+        <section xml:id="css_feature_userdefined">
+            <title>Select user-defined columns</title>
+            <para>
+                When search results are displayed to the user, it is often desirable to let the user choose the
+                displayed columns. For this purpose, the
+                <interfacename>ResultPreferencesEngine</interfacename>
+                provides a simple API for retrieving
+                and setting the preferred column layout based on the result type (e.g. Articles or Images). For
+                selecting these user-defined column layouts, select the
+                <code>co.*</code>
+                virtual property:
+                <programlisting language="sql"><![CDATA[SELECT co.caption, co.*
+FROM content co]]></programlisting>
+                This is the only virtual property that actually expands to multiple columns, so it should
+                appear at the end of the select clause.
+            </para>
+        </section>
+
+        <section xml:id="css_feature_fulltext">
+            <title>Fulltext search</title>
+
+            <para>
+                A main feature of the &flexive; search engine is full-text indexing. By specifying the "*" property in
+                the where clause, you will search across all indexed properties of a content.
+                <programlisting language="sql"><![CDATA[SELECT co.@pk, co.caption
+FROM content co
+WHERE co.* = 'test']]></programlisting>
+                Note that the only supported operator for full-text queries is "=" (equals) and that properties have to
+                be enabled for fulltext indexing (See
+                <xref linkend="core_structures_property_parameters"/>).
+            </para>
+        </section>
+
+        <section xml:id="css_feature_assignments">
+            <title>Properties versus assignments</title>
+            <para>
+                When specifying a search property by name, you search across all properties of the given name. If you
+                want to search in specific assignments, i.e. only in the address assignment of your contact data type,
+                you have to either specify the assignment ID (prefixed by a # character) or the &xpath; prefixed by the
+                type and without cardinalities instead of the property name.
+            </para>
+
+            <para>
+                Select the
+                <emphasis>property</emphasis>
+                <code>caption</code>
+                and search in the assignment with ID=25 for main street:
+                <programlisting language="sql"><![CDATA[SELECT co.@pk, co.caption
+FROM content co
+WHERE co.#25 like 'main street']]></programlisting>
+            </para>
+
+            <para>
+                Select the
+                <emphasis>assignment</emphasis>
+                <code>ARTICLE/TEASER/TEASER_TITLE</code>
+                where the assignment
+                <code>ARTICLE/TITLE</code>
+                starts with Earthquake:
+
+                <programlisting language="sql"><![CDATA[SELECT co.@pk, co.ARTICLE/TEASER/TEASER_TITLE
+FROM content co
+WHERE co.ARTICLE/TITLE LIKE 'Earthquake%']]></programlisting>
+            </para>
+        </section>
+
+        <section xml:id="css_tree">
+            <title>Tree Search</title>
+
+            <para>
+                &Flexive; also supports searching inside the &contentTree; and returns tree paths of contents
+                linked in the tree.
+            </para>
+
+            <section xml:id="csst_children">
+                <title>Select all children of a node</title>
+                <para>
+                    To select all contents attached to a node or its children, use the
+                    <code>IS CHILD OF</code>
+                    condition and specify
+                    the tree node ID (the root node is always 1).
+
+                    <programlisting language="sql"><![CDATA[SELECT co.@pk
+FROM content co
+WHERE IS CHILD OF 1]]></programlisting>
+                </para>
+            </section>
+
+            <section xml:id="csst_directchildren">
+                <title>Select all direct children of a node</title>
+                <para>
+                    To include only contents attached directly to a given tree node, use
+                    <code>IS DIRECT CHILD OF</code>.
+
+                    <programlisting language="sql"><![CDATA[SELECT co.@pk
+FROM content co
+WHERE IS DIRECT CHILD OF 1]]></programlisting>
+                </para>
+            </section>
+
+            <section xml:id="csst_treepaths">
+                <title>Select the tree paths of a content instance</title>
+                <para>
+                    To select all tree paths of a content in the tree, use the
+                    <glossterm>virtual property</glossterm>
+                    <code>@path</code>. The column then
+                    returns a
+                    <interfacename>FxPaths</interfacename>
+                    object that contains all tree paths
+                    including their content captions. The standard search result table renders these objects as
+                    <glossterm>breadcrumbs</glossterm>.
+
+                    <programlisting language="sql"><![CDATA[SELECT co.@path
+FROM content co]]></programlisting>
+
+                    Note that this also returns contents not linked in the tree, so you may want to limit your search to
+                    children of the root node:
+
+                    <programlisting language="sql"><![CDATA[SELECT co.@path
+FROM content co
+WHERE IS CHILD OF 1]]></programlisting>
+                </para>
+            </section>
+        </section>
+
+        <section xml:id="css_username">
+            <title>Select the user name in created_by and modified_by</title>
+            <para>
+                To select the user name instead of the user ID in the
+                <code>created_by</code>
+                and
+                <code>created_at</code>
+                columns, use the
+                <code>.username</code>
+                suffix.
+
+                <programlisting language="sql"><![CDATA[SELECT co.created_by.username
+FROM content co]]></programlisting>
+            </para>
+        </section>
+
+        <section xml:id="css_filters">
+            <title>Filters</title>
+            <para>
+                Filters work similar to the SQL having clause by providing a post-processing filter mechanism on the
+                results of the actual query. That is, filters are applied every time the search query is executed, and
+                are not stored in the cached result tables. This means that changing filters usually does not invalidate
+                the query cache, whereas changing the WHERE clause always does.
+            </para>
+            <para>
+                Filters applicable to table aliases:
+                <variablelist>
+                    <varlistentry>
+                        <term>
+                            <code>alias.CTYPE=type</code>
+                        </term>
+                        <listitem>
+                            <para>
+                                Return only contents of the given type. You may specify either the type name (e.g.
+                                "ARTICLE") or the type ID (e.g. "2").
+                            </para>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term>
+                            <code>alias.VERSION=AUTO|HIGHEST|LIVE|ALL</code>
+                        </term>
+                        <listitem>
+                            <para>
+                                Restricts the Version, AUTO defaults to HIGHEST. If co.version=live is selected and an
+                                object has no live version, it is omitted.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term>
+                            <code>alias.SEARCH_LANGUAGES=languageId[,languageId]?</code>
+                        </term>
+                        <listitem>
+                            <para>
+                                Restrict results to languages contained in the comma separated list of language IDs.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </para>
+            <para>
+                General filters:
+                <variablelist>
+                    <varlistentry>
+                        <term>
+                            <code>BRIEFCASE=briefcaseId[,briefcaseId]?</code>
+                        </term>
+                        <listitem>
+                            <para>
+                                Results have to be contained in the briefcases
+                            </para>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term>
+                            <code>IGNORE_CASE=[true|false]</code>
+                        </term>
+                        <listitem>
+                            <para>
+                                Query case sensitive?
+                            </para>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term>
+                            <code>MAX_RESULTROWS=number</code>
+                        </term>
+                        <listitem>
+                            <para>
+                                Limit number of rows returned.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </para>
+        </section>
+
+        <section xml:id="css_operators">
+            <title>Operator table</title>
+            <para>
+                The following operators are supported by &fxsql;. Note that not all data types
+                support all operators.
+            </para>
+
+            <table xml:id="csso_table" class="flexive">
+                <caption>&fxsql; operator table</caption>
+                <thead>
+                    <tr>
+                        <th>Operator</th>
+                        <th>Short name</th>
+                        <th>Description</th>
+                        <th>&Flexive; Datatypes
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>=</td>
+                        <td>equals</td>
+                        <td>Checks for equality</td>
+                        <td>All except FxBinary</td>
+                    </tr>
+                    <tr>
+                        <td>!=</td>
+                        <td>not equals</td>
+                        <td>Checks for inequality</td>
+                        <td>All except FxBinary</td>
+                    </tr>
+                    <tr>
+                        <td>&lt;=</td>
+                        <td>
+                            less than
+                        </td>
+                        <td>Compares a property or assignment to a given constant value</td>
+                        <td>All numerical and time types</td>
+                    </tr>
+                    <tr>
+                        <td>&gt;</td>
+                        <td>
+                            greater than
+                        </td>
+                        <td>Compares a property or assignment to a given constant value</td>
+                        <td>All numerical and time types</td>
+                    </tr>
+                    <tr>
+                        <td>&lt;=</td>
+                        <td>
+                            less or equal
+                        </td>
+                        <td>Compares a property or assignment to a given constant value</td>
+                        <td>All numerical and time types</td>
+                    </tr>
+                    <tr>
+                        <td>&gt;=</td>
+                        <td>
+                            greater or equal
+                        </td>
+                        <td>Compares a property or assignment to a given constant value</td>
+                        <td>All numerical and time types</td>
+                    </tr>
+                    <tr>
+                        <td>LIKE</td>
+                        <td>
+                            string match with wildcards
+                        </td>
+                        <td>
+                            Like string equality, but allows the use of the
+                            <code>%</code>
+                            wildcard which matches any string, including the empty string. For example,
+                            <code>"LIKE 'Test%'"</code>
+                            matches all string values that
+                            begin with "Test".
+                        </td>
+                        <td>
+                            FxString
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </section>
+
+    <section xml:id="core_search_java">
+        <title>SqlQueryBuilder: Building queries in Java</title>
+
+        <para>
+            To ease the pain of having to learn yet another query language, the
+            <classname>SqlQueryBuilder</classname>
+            provides a thin builder interface for &fxsql; queries. The query is created
+            using chained calls to the builder and results in a &fxsql; query.
+            For example:
+            <xi:include href="../listings/core_search_querybuilder.xml"/>
+            <calloutlist>
+                <callout arearefs="csq_builder_1">
+                    <para>
+                        A new query builder is created.
+                    </para>
+                </callout>
+                <callout arearefs="csq_builder_2">
+                    <para>
+                        We select three columns, the
+                        <glossterm>virtual property</glossterm>
+                        <code>@pk</code>, the content creation date,
+                        and the article caption.
+                    </para>
+                </callout>
+                <callout arearefs="csq_builder_3">
+                    <para>
+                        We want to search only for contents of type
+                        <code>Article</code>.
+                    </para>
+                </callout>
+                <callout arearefs="csq_builder_4">
+                    <para>
+                        Order the result by creation date, return newest articles first
+                        (<constant>SortDirection.DESCENDING</constant>). You can issue multiple calls to
+                        <methodname>orderBy</methodname>
+                        for sorting by multiple columns. You can also specify the column index
+                        instead of the column name. If you specify the property name, you must ensure that
+                        this property is selected, otherwise the query builder throws a
+                        <exceptionname>FxRuntimeException</exceptionname>.
+                    </para>
+                </callout>
+                <callout arearefs="csq_builder_5">
+                    <para>
+                        The
+                        <methodname>getResult()</methodname>
+                        call submits the search query to the search engine EJB and returns a
+                        <interfacename>FxResultSet</interfacename>.
+                    </para>
+                </callout>
+            </calloutlist>
+            A call to
+            <methodname>SqlQueryBuilder#getQuery()</methodname>
+            returns the actual &fxsql; query, for example, the code snippet above built this &fxsql; query:
+            <programlisting language="sql"><![CDATA[SELECT co.@pk, co.created_at, co.caption
+FROM content co
+WHERE (co.typedef = 3)
+ORDER BY co.created_at DESC]]></programlisting>
+        </para>
+
+        <section xml:id="csj_conditions">
+            <title>Conditions</title>
+
+            <para>
+                The basic query condition specifies
+                <orderedlist>
+                    <listitem>
+                        <para>
+                            a property or assignment whose value will be compared,
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            a
+                            <classname>PropertyValueComparator</classname>
+                            specifying the compare
+                            operator (like equals or greater), and
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            a constant value to compare the content value against, like "5" or "Test".
+                            Comparisons between content values are not supported.
+                        </para>
+                    </listitem>
+                </orderedlist>
+
+                <classname>SqlQueryBuilder</classname>
+                offers an overloaded, general-purpose
+                <methodname>condition()</methodname>
+                method for specifying arbitrary conditions,
+                and custom condition methods for tree queries and content type constraints:
+
+                <variablelist>
+                    <varlistentry>
+                        <term>
+                            <methodname>condition(...)</methodname>
+                        </term>
+                        <listitem>
+                            <para>
+                                Add a condition to the query. This method is overloaded to support both
+                                assignment and property queries, for the actual method signatures please refer
+                                to the &flexiveJavadoc;.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term>
+                            <methodname>isChild(nodeId)</methodname>
+                        </term>
+                        <listitem>
+                            <para>
+                                Adds a tree search condition to the query that limits the search to
+                                children (direct and indirect) of the given tree node ID. See
+                                <xref linkend="css_tree"/>.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term>
+                            <methodname>isDirectChild(nodeId)</methodname>
+                        </term>
+                        <listitem>
+                            <para>
+                                Like
+                                <methodname>isChild</methodname>, but includes only direct
+                                children of the given node.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term>
+                            <methodname>type(contentType)</methodname>
+                        </term>
+                        <listitem>
+                            <para>
+                                Adds a content type constraint to the query, i.e. the expression
+                                will match only contents of the given type. Note that this is semantically
+                                different from a content type filter, which will be covered in the next section.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </para>
+        </section>
+
+        <section xml:id="csj_filters">
+            <title>Filters</title>
+
+            <para>
+                Query filters provide filtering capabilities on top of the search result. Currently
+                only the type and briefcase filters are supported.
+
+                <variablelist>
+                    <varlistentry>
+                        <term>
+                            <methodname>filterType(contentType)</methodname>
+                        </term>
+                        <listitem>
+                            <para>
+                                Applies a content type filter on the result. The query conditions are
+                                not modified by this statement, so it can be called after the query building
+                                has been finished, which is not the case for the
+                                <methodname>type()</methodname>
+                                condition.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+
+                    <varlistentry>
+                        <term>
+                            <methodname>filterBriefcase(briefcaseId)</methodname>
+                        </term>
+                        <listitem>
+                            <para>
+                                Searches only inside the contents of the given briefcase. When no
+                                query conditions are specified, the briefcase contents are returned.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </para>
+        </section>
+
+        <section xml:id="csj_nested">
+            <title>Nested conditions</title>
+
+            <para>
+                The
+                <interfacename>SqlQueryBuilder</interfacename>
+                provides support for building nested conditions like
+                <code>co.caption LIKE 'Test%' AND (co.created_by = 21 OR co.created_by = 22)</code>.
+            </para>
+
+            <variablelist>
+                <varlistentry>
+                    <term><methodname>andSub()</methodname>,
+                        <methodname>orSub()</methodname>
+                    </term>
+                    <listitem>
+                        <para>
+                            Creates a new sub-query whose conditions will be joined with the
+                            <code>AND</code>
+                            or
+                            <code>OR</code>
+                            operator respectively. After creating a sub-query, you can
+                            issue condition builder calls exactly like in the top level.
+                            The top-level query is opened implicitly and uses the
+                            <code>AND</code>
+                            operator.
+                        </para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term>
+                        <methodname>closeSub()</methodname>
+                    </term>
+                    <listitem>
+                        <para>
+                            Closes a sub-query. The implicitly opened top-level query does not have
+                            to be closed.
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+
+            <example xml:id="csj_nested_ex">
+                <title>Creating a nested query</title>
+                <programlisting language="java"><![CDATA[new SqlQueryBuilder()
+    .select("@pk")
+    .type("article")
+    .orSub()
+        .condition("caption", PropertyValueComparator.EQ, "Test caption")
+        .condition("caption", PropertyValueComparator.EQ, "Another test caption")
+    .closeSub()
+    .getQuery();]]></programlisting>
+
+                Result:
+                <programlisting language="sql"><![CDATA[SELECT co.@pk
+FROM content co
+WHERE (co.typedef = 3 AND (co.caption = 'Test caption' OR co.caption = 'Another test caption'))]]>
+                </programlisting>
+            </example>
+        </section>
+
+        <section xml:id="csj_params">
+            <title>Search parameters</title>
+
+            <para>
+                When submitting a query directly with the
+                <classname>SqlQueryBuilder</classname>,
+                miscellaneous search parameters can be set. Note that these parameters are not
+                part of the &fxsql; query, so if you submit the search by yourself, you cannot use
+                these methods.
+            </para>
+
+            <variablelist>
+                <varlistentry>
+                    <term>
+                        <methodname>setMaxRows(int)</methodname>
+                    </term>
+                    <listitem>
+                        <para>
+                            Sets the maximum number of rows returned by the search query.
+                            Useful mostly for paged result tables.
+                        </para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term>
+                        <methodname>setStartRow(int)</methodname>
+                    </term>
+                    <listitem>
+                        <para>
+                            Sets the first row of the search result that should be included in the
+                            result set. The first row has index 0.
+                        </para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term>
+                        <methodname>setViewType(ResultViewType)</methodname>
+                    </term>
+                    <listitem>
+                        <para>
+                            Sets the view type (list or thumbnails) when displaying the results to the
+                            user. This is only relevant when you select the
+                            <code>co.*</code>
+                            property, which will select the user's predefined result columns
+                            and sort settings based on this view type. The view type as well as the
+                            location can also be specified in the constructor.
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+
+        </section>
+    </section>
+
+    <section xml:id="core_search_groovy">
+        <title>The Groovy query builder</title>
+        <para>
+            For Groovy developers, the
+            <classname>GroovyQueryBuilder</classname>
+            offers an even more convenient way of formulating &fxsql; queries. Note that this class
+            (like the rest of Groovy support classes) is still experimental, so not all features may
+            work as intended.
+        </para>
+        <para>
+            Currently the Groovy builder supports defining the column selection, nested
+            property conditions and briefcase filtering. The query builder actually builds
+            a query tree similar to the JSF search query editor, so the result object is of type
+            <classname>QueryRootNode</classname>. From this class you can get either the final
+            &fxsql; query from the
+            <property>sqlQuery</property>
+            property, or the
+            <interfacename>SqlQueryBuilder</interfacename>
+            which has been used for building the query from the
+            <property>queryBuilder</property>
+            property.
+        </para>
+        <example xml:id="csg_ex">
+            <title>Specifying a query with the
+                <classname>GroovyQueryBuilder</classname>
+            </title>
+            <programlisting language="groovy"><![CDATA[new GroovyQueryBuilder().select(["@pk", "caption", "*"]) {
+    filterBriefcase(21)
+    eq("caption", "test")
+    not_empty("filename")
+    or {
+        gt("id", 0)
+        lt("id", 100)
+    }
+    lt("created_at", new Date())
+}.sqlQuery
+]]></programlisting>
+            Result:
+            <programlisting language="sql"><![CDATA[SELECT co.@pk, co.caption, co.*
+FROM content co
+FILTER briefcase=21
+WHERE (co.CAPTION = 'test' AND co.FILENAME IS NOT NULL AND
+       (co.ID > 0 OR co.ID < 100) 
+       AND co.CREATED_AT < '2007-11-13')
+]]></programlisting>
+            <para>
+                The method names (except
+                <code>select</code>
+                and
+                <code>filterBriefcase</code>
+                )
+                are the enumeration values of
+                <classname>PropertyValueComparator</classname>, so any comparison supported by the
+                <classname>SqlQueryBuilder</classname>
+                is also supported by the Groovy builder.
+            </para>
+        </example>
+    </section>
+
+    <section xml:id="core_search_results">
+        <title>Working with search results</title>
+
+        <para>
+            When a &fxsql; query is submitted to the database, all rows are fetched at once and
+            returned in a
+            <interfacename>FxResultSet</interfacename>
+            object. It contains all result rows within the user-defined limits
+            (unlike the cursor-approach of JDBC), including miscellaneous
+            information like the selected column names, or row count information.
+        </para>
+
+        <section xml:id="csr_rows">
+            <title>Accessing result rows</title>
+
+            <para>
+                There are two ways of accessing the result rows:
+                <orderedlist>
+                    <listitem>
+                        <para>
+                            The
+                            <methodname>FxResultSet#getResultRows()</methodname>
+                            returns an iterable object that returns
+                            <classname>FxResultRow</classname>
+                            objects
+                            for each row in the resultset. Take a look at the example demonstrating accessing
+                            the row columns both by index and column name.
+
+                            <example xml:id="csrr_ex">
+                                <title>Iterating over a
+                                    <interfacename>FxResultSet</interfacename>
+                                </title>
+                                <programlisting language="java"><![CDATA[FxResultSet result = new SqlQueryBuilder().select("@pk", "caption")
+        .condition("caption", PropertyValueComparator.LIKE, "test caption%")
+        .getResult();
+for (FxResultRow row: result.getResultRows()) {
+    assert row.getPk(1).equals(row.getPk("@pk"));
+    assert row.getFxValue(2).equals(row.getFxValue("caption"));
+}
+]]></programlisting>
+                            </example>
+                        </para>
+                    </listitem>
+
+                    <listitem>
+                        <para>
+                            The result row table can be accessed with
+                            <methodname>FxResultSet#getRows()</methodname>, which returns a
+                            <type>List&lt;Object[]&gt;</type>. This is best when you need indexed
+                            access in constant time and need only the raw result values (usually
+                            <classname>FxValue</classname>
+                            objects).
+                            The following code iterates over all rows of a result set:
+                            <example xml:id="csrr_direct_ex">
+                                <title>
+                                    Directly accessing the search results using
+                                    <methodname>getRows()</methodname>
+                                </title>
+                                <programlisting language="java"><![CDATA[for (int i = 0; i < result.getRowCount(); i++) {
+    for (int j = 0; j < result.getColumnCount(); j++) {
+        System.out.print(result.getRows().get(i)[j] + ' ');
+    }
+    System.out.println();
+}]]></programlisting>
+                            </example>
+                        </para>
+                    </listitem>
+                </orderedlist>
+            </para>
+        </section>
+    </section>
+</section>

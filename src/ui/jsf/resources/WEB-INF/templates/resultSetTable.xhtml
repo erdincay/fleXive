@@ -1,0 +1,196 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:c="http://java.sun.com/jstl/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+    xmlns:adm="http://www.flexive.com/jsf/admin"
+    xmlns:fx="http://www.flexive.com/jsf/core">
+
+Dojo table initializer for a FxResultSet. A table element with id=#{name} 
+will contain the rendered output. It must be declared before this template is used.
+
+Parameters: 
+	name - name of the table (equal to the JS global variable for the table widget and 
+			the id of a table element on the page)
+	value - the FxResultSet (or FxResultSetModel) to be displayed
+	showEditButton - show edit button in every row?
+	showDeleteButton - show delete button in every row?
+	formName - form name enclosing the table (needed if edit/delete buttons are used)
+    refreshHandler - JS method to be called to refresh the current table view
+    viewType - LIST or THUMBNAILS
+    dataScroller - id of the JsDataScroller associated with this table
+    briefcaseId - if not -1, enable briefcase mode
+<ui:composition>
+
+<c:if test="#{showEditButton || showDeleteButton}">
+	<h:inputHidden id="contentEditorId" value="#{contentEditorBean.id}"/>
+	<h:inputHidden id="contentEditorVersion" value="#{contentEditorBean.version}"/>
+</c:if>
+<c:if test="#{showEditButton}">
+	<div style="display:none">
+		<h:commandLink id="#{name}_editButton" action="#{contentEditorBean.load}">
+            <f:setPropertyActionListener value="#{false}" target="#{contentEditorBean.readOnly}"/>
+        </h:commandLink>
+        <h:commandLink id="#{name}_showButton" action="#{contentEditorBean.load}">
+            <f:setPropertyActionListener value="#{true}" target="#{contentEditorBean.readOnly}"/>
+        </h:commandLink>
+	</div>
+</c:if>
+<c:if test="#{empty briefcaseId}">
+    <c:set var="briefcaseId" value="-1"/>
+</c:if>
+<!-- Screenview popup -->
+<div id="#{name}_screenviewContainer">
+    <fx:popupDialog jsVar="#{name}_screenviewDialog" closeControl="#{name}_closeButton">
+        <a4j:outputPanel id="#{name}_screenviewPanel">
+            <h:panelGroup rendered="#{param['screenviewRequest'] == 'true'}">
+                <img id="#{name}_screenview" src="thumbnail/pk#{contentEditorBean.id}/s0" alt="#{contentEditorBean.id}" title="#{contentEditorBean.id}" border="0"
+                        style="visibility:hidden;cursor:pointer"
+                        onload="#{name}_onScreenviewLoaded(this);"
+                        onclick="#{name}_hideScreenview();"/>
+            </h:panelGroup>
+        </a4j:outputPanel>
+        <br/>
+        <a href="javascript:#{name}_hideScreenview()" id="#{name}_closeButton">#{fxMessageBean['SearchResult.button.screenview.close']}</a>
+    </fx:popupDialog>
+</div>
+<div style="display:none">
+    <a4j:commandButton id="#{name}_refreshScreenviewButton" reRender="#{name}_screenviewPanel" value="Refresh">
+        <f:param name="screenviewRequest" value="true"/>
+   </a4j:commandButton>
+</div>
+
+<fx:menu name="#{name}_resultMenu" contextMenuTarget="#{name}" showHandler="function() { #{name}.fxTableHandler.onShowContextMenu(dojo.widget.byId('#{name}_resultMenu')); }">
+    <fx:menuItem id="show" labelKey="SearchResult.menu.show" icon="open" clickHandler="function() { #{name}.fxTableHandler.showRow(); }"/>
+    <fx:menuItem id="showScreenview" labelKey="SearchResult.menu.showScreenview" icon="open" clickHandler="function() { #{name}.fxTableHandler.showScreenview(); }"/>
+    <fx:menuItem id="edit" labelKey="SearchResult.menu.edit" icon="edit" clickHandler="function() { #{name}.fxTableHandler.editRow(); }"/>
+    <fx:menuSeparator/>
+    <fx:menuItem id="deleteBriefcase" labelKey="SearchResult.menu.deleteBriefcase" icon="removeBriefcaseItems" clickHandler="function() { #{name}.fxTableHandler.deleteRowBriefcase(); }"/>
+    <fx:menuItem id="deleteBriefcaseSelected" labelKey="SearchResult.menu.deleteBriefcaseSelected" icon="removeBriefcaseItems" clickHandler="function() { #{name}.fxTableHandler.deleteSelectedRowsBriefcase(); }"/>
+    <fx:menuItem id="delete" labelKey="SearchResult.menu.delete" icon="remove" clickHandler="function() { #{name}.fxTableHandler.deleteRow(); }"/>
+    <fx:menuItem id="deleteSelected" labelKey="SearchResult.menu.deleteSelected" icon="remove" clickHandler="function() { #{name}.fxTableHandler.deleteSelectedRows(); }"/>
+</fx:menu>
+
+
+<script type="text/javascript">
+<!--
+	dojo.require("dojo.widget.FilteringTable");
+    dojo.require("dojo.dnd.*");
+        
+    var #{name};
+    var rowSelection;
+    var #{name}_resultView;
+
+    function #{name}_hideScreenview() {
+        document.getElementById('#{name}_screenview').style.display='none';
+        #{name}_screenviewDialog.hide(); 
+    }
+
+    function #{name}_onScreenviewLoaded(img) {
+        #{name}_screenviewDialog.show();        // got to show the dialog before scaling the image for IE7
+        //#{name}_resultView.onScreenviewLoaded(img);
+        scaleImage(img, getWindowWidth() - 50, getWindowHeight() - 100);
+        #{name}_screenviewDialog.checkSize();
+        img.style.visibility = "visible";
+    }
+
+    dojo.addOnLoad(function() {
+		#{name} = dojo.widget.createWidget("FilteringTable", 
+			{ valueField: "rowId", 
+			  maxSortable: 0,
+              // sort first column, ascending by default
+			  sortInformation: [ { index: 0, direction: 1 } ],
+              multiple: false,
+              maxSelect: 0
+             },
+			dojo.byId("#{name}"));
+        #{name}.createSorter = function() { return null; }; // disable client-side sorting the hard way
+        if ("#{viewType}" == "LIST") {
+            #{name}.createRow_ = #{name}.createRow;
+            #{name}.createRow = function(obj) {
+                var row = this.createRow_(obj);
+                var passthruAttributes = ["positionId", "rowNum", "id", "colorSet"];
+                for (var i = 0; i < passthruAttributes.length; i++) {
+                    var attribute = passthruAttributes[i];
+                    row.setAttribute(attribute, obj.src[attribute]);
+                }
+                row.onmouseover = function(e) { #{name}.rowSelection.onMouseOver(e); }
+                row.onmouseout = function(e) { #{name}.rowSelection.onMouseOut(e); }
+                row.onclick = function(e) { #{name}.rowSelection.onRowClicked(e); } 
+                return row;
+            };
+        }
+        var columns = #{searchResultWriter.columns[value]};
+		var showEditButton = "#{showEditButton}" == "true";
+		var showDeleteButton = "#{showDeleteButton}" == "true";
+		var showActionButtons = ("#{viewType}" == "LIST") && (showEditButton || showEditButton);
+		if (showActionButtons) {
+			columns.push({"field": ResultSetTableHandler.COL_ACTIONS,
+				"label": "#{fxMessageBean['SearchResult.label.column.actions']}",
+				"dataType": "html"});
+		}
+		for (var i = 0; i < columns.length; i++) {
+			#{name}.columns.push(#{name}.createMetaData(columns[i]));
+		}
+		var dataRows = #{searchResultWriter.rows[value]};
+
+        var menuHandler = new ResultMenuHandler("#{formName}", "#{name}", "#{name}_resultMenu");
+        menuHandler.messages.editButton = "#{fxMessageBean['SearchResult.button.edit']}";
+        menuHandler.messages.deleteButton = "#{fxMessageBean['SearchResult.button.delete']}";
+        menuHandler.messages.confirmDeleteRow = "#{fxMessageBean['SearchResult.dialog.confirm.deleteRow']}";
+        menuHandler.messages.confirmDeleteSelection = "#{fxMessageBean['SearchResult.dialog.confirm.deleteSelection']}";
+
+        var tableHandler = new ResultSetTableHandler("#{name}", #{name}, menuHandler, "#{viewType}");
+		tableHandler.showEditButton = showEditButton;
+		tableHandler.showDeleteButton = showDeleteButton;
+		tableHandler.formName = "#{formName}";
+        tableHandler.addActionLinks(dataRows);
+        tableHandler.refresh = #{refreshHandler};
+        tableHandler.briefcaseId = #{briefcaseId};
+		#{name}.fxTableHandler = tableHandler;
+		#{name}.store.setData(dataRows);
+		
+		// override FilteringTable's sort function
+		#{name}.originalSortFunction = #{name}.onSort;
+		#{name}.originalRenderFunction = #{name}.render;
+		#{name}.onSort = function(e) {
+			this.disableRender = true;
+			this.originalSortFunction(e);
+        };
+		#{name}.render = function() {
+			if (!this.disableRender) {
+				this.originalRenderFunction();
+			} else {
+				// skip rendering only once
+				this.disableRender = false;
+			}
+		};
+
+        var colorSet1 = new Array("#FFFFFF", "#d3dcb7", "#ebf5cc", "#ebf5cc");
+        var colorSets = new Array(colorSet1, colorSet1);
+
+        rowSelection = new RowSelectionContainer("positionId", "rowNum", colorSets, true);
+        // TODO add parameters instead of fxSearchResultBean reference
+        rowSelection.rowOffset = #{fxSearchResultBean.startRow};
+        rowSelection.numRows = #{fxSearchResultBean.fetchRows};
+        rowSelection.onMultiPageSelect = function() { };
+        rowSelection.keepRowBorder = #{viewType == 'THUMBNAILS'};
+        rowSelection.init();
+
+        tableHandler.rowSelection = rowSelection;
+        #{name}.rowSelection = rowSelection;
+
+        #{name}_resultView = new ResultView("#{name}", "#{formName}", #{name}, #{dataScroller}, rowSelection, "#{viewType}");
+    });
+//-->
+</script>
+
+</ui:composition>
+
+
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<head>
+    <fx:includes/>
+</head>
+
+<body>
+
+    <p>
+        Welcome to your flexive application.
+    </p>
+
+    <p>
+        <c:if test="#{empty fxSystemBean.buildInfoVerbose}">
+            Build information could not be retrieved. Something may be wrong with your installation,
+            please check the log files.
+        </c:if>
+        <c:if test="#{!empty fxSystemBean.buildInfoVerbose}">
+            <pre>#{fxSystemBean.buildInfoVerbose}</pre>
+            <p>
+                This request is using division
+                #{fxSystemBean.context.divisionId}.
+            </p>
+
+            <!-- Render instance counts as returned by the EJBExample engine using the JSF ManagedExampleBean -->
+            <table>
+                <caption>Flexive content instances (visible to the guest user)</caption>
+                <c:forEach items="#{exampleBean.instanceCounts}" var="instanceCount">
+                    <tr>
+                        <td>#{instanceCount.value}</td>
+                        <td>#{instanceCount.key.label}</td>
+                    </tr>
+                </c:forEach>
+            </table>
+        </c:if>
+    </p>
+
+</body>
+
+</html>

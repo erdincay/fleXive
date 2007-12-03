@@ -1,0 +1,475 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+
+<ui:composition template="/adm/templates/navigation.xhtml">
+
+    <ui:define name="content">
+
+		<script type="text/javascript">
+		<!--
+            //tracks which page is shown in the contentFrame, must be updated manually!!    
+            var contentPage=null;
+            var copyNode=null;
+
+                //actions defined in StructureTreeControllerBean
+            function doTreeAction(action, id, value) {
+                if (action =="RENAME_ASSIGNMENT") {
+                    setTitle(id,value, false);
+                }
+                if (action =="RENAME_TYPE") {
+                    setTitle(id,value, true);
+                }
+                if (action =="RENAME_SELECT_TYPE") {
+                    setTitle(id,value, true);
+                    selectNode(id, true);
+                }
+                if (action =="RENAME_SELECT_ASSIGNMENT") {
+                    setTitle(id,value, false);
+                    selectNode(id, false);
+                }
+                if (action=="RELOAD_SELECT_TYPE") {
+                    reloadAndKeepExpanded();
+                    selectNode(id, true);
+                }
+                if (action=="RELOAD_SELECT_ASSIGNMENT") {
+                    reloadAndKeepExpanded();
+                    selectNode(id, false);
+                }
+                if (action=="RELOAD_EXPAND_TYPE") {
+                    reloadStructureTree();
+                    expandToNodeWithId(id, true);
+                }
+                if (action=="RELOAD_EXPAND_ASSIGNMENT") {
+                    reloadStructureTree();
+                    expandToNodeWithId(id, false);
+                }
+            }
+
+            /* expands the tree and selects the node with ID id
+                returns the node object
+                typeOrAssignment controls if the node is an assignment or type
+                true for type, false for assignment
+             */
+             function selectNode(id, typeOrAssignment) {
+                var node = expandToNodeWithId(id, typeOrAssignment);
+                getFxSelector().deselectAll();
+                getFxSelector().select(node);
+                return node;
+            }
+
+            /* expands the tree, selects node and performs click operation
+             */
+            function openNode(id, typeOrAssignment) {
+                structureTreeClickHandler(selectNode(id,typeOrAssignment));    
+            }
+
+            /*
+                typeOrAssignment controls if the node is an assignment or type
+                true for type, false for assignment
+            */
+            function setTitle(id, title, typeOrAssignment) {
+                var node= expandToNodeWithId(id, typeOrAssignment);
+                if (node.title != title)
+                    node.setTitle(title);
+            }
+
+            function reloadStructureTree() {
+                var newChildren = eval("(" + getJsonRpc().StructureTreeWriter.renderStructureTree(-1) + ")");
+                dojo.widget.byId('structureTree').setChildren(newChildren);
+                contentPage=null;
+            }
+                
+            function getFxSelector() {
+                return dojo.widget.byId('structureTree').fxSelector;
+            }
+
+            function getFxController() {
+                return dojo.widget.byId('structureTree').fxController;
+            }
+
+            /*expands all parents upto the node with ID id
+            the node objects are lazily initialized, altough they are searchable via the propertyId,
+            the actual node object is initialized when the parent node is expanded, so it is necessarry to
+            obtain the possibly uninitialized children anew after the parent was expanded
+            typeOrAssignment controls if the node is an assignment or type
+            true for type, false for assignment
+            @ return the initialized node object with the ID id
+            */
+            function expandToNodeWithId(id, typeOrAssignment) {
+                var nodePath =getNodePath(id, typeOrAssignment);
+                var childNodeToExpand=dojo.widget.byId('structureTree');
+                for (var i=0;i<nodePath.length-1;i++) {
+                    var childIndex=nodePath[i][1];
+                    childNodeToExpand=childNodeToExpand.children[childIndex];
+                    getFxController().expandToNode(childNodeToExpand,true);
+                }
+                return childNodeToExpand.children[nodePath[nodePath.length-1][1]];
+             }
+
+            function arraycopy(source) {
+                dest = new Array(source.length);
+                for (var i=0;i<source.length;i++) {
+                    dest[i]=source[i];
+                }
+                return dest;
+            }
+
+           /*Returns a 2dim array of nodes which are currently expanded, first array entry is id,
+            *second is node doc type.
+            *
+            */
+            function getExpandedNodes() {
+                return _buildExpandedArray(dojo.widget.byId('structureTree').children, new Array());
+            }
+
+            function _buildExpandedArray(childArray, expandedArray) {
+                var harray=arraycopy(expandedArray);
+                for (var i=0;i<childArray.length;i++) {
+                    var node = childArray[i];
+                    if (node.isExpanded) {
+                       harray.push(new Array(node.propertyId, node.nodeDocType));
+                       harray = _buildExpandedArray(node.children, harray)
+                    }
+                }
+                return harray;
+            }
+
+            /* saves expanded state of the tree, reloads the tree and
+             * restores the expanded state. !!not to be used after
+             * nodes were deleted!!
+             */
+            function reloadAndKeepExpanded() {
+                var ea = getExpandedNodes();
+                reloadStructureTree();
+                for (var i=0;i<ea.length;i++) {
+                    var node = expandToNodeWithId(ea[i][0], getTypeOrAssignment(ea[i][1]));
+                    node.expand();
+                }
+            }
+
+            /*returns the nodepath as an 2-dim array of nodes and indices, starting from root's
+             children upto the node with id ID. The node objects are stored in a 2-dim array,
+             where [0] represents the actual node and [1] represents it's index in the parent nodes
+             typeOrAssignment controls if the node is an assignment or type
+             true for type, false for assignment
+             */
+            function getNodePath(id, typeOrAssignment) {
+                var children = dojo.widget.byId('structureTree').children;
+                return searchNode(children,new Array() ,id, typeOrAssignment);
+            }
+
+            /*
+             * recursively searches for a node with the given id
+             * typeOrAssignment controls if the node is an assignment or type
+             * true for type, false for assignment
+             */
+            function searchNode(searcharray, historyarray, id, typeOrAssignment) {
+                var foundnode =null;
+                for (var i=0;i<searcharray.length && foundnode==null;i++) {
+                    var node = searcharray[i];
+                    if (node.children) {
+                        if (node.children.length >0) {
+                           harray = arraycopy(historyarray);
+                           harray.push(new Array(node,i));
+                           foundnode=searchNode(node.children, harray, id, typeOrAssignment);
+                        }
+                    }
+                    if(node["propertyId"]== id) {
+                        if ( (typeOrAssignment && ("Type" == node.nodeDocType || "TypeRelation" == node.nodeDocType)) ||
+                             (!typeOrAssignment && ("Assignment" == node.nodeDocType || "AssignmentSystemInternal" == node.nodeDocType || "Group" == node.nodeDocType))
+                           ) {
+                                foundnode=node;
+                                historyarray.push(new Array(node,i));
+                                return historyarray;
+                            }
+                    }
+                }
+                return foundnode;
+            }
+
+            function structureTreeClickHandler(node) {
+                doContentAction(node, "openInstance");
+            }
+
+            function doContentAction(node, defaultAction) {
+                var propertyId = node["propertyId"];
+                if (propertyId != null && propertyId != -1 && parent.frames["contentFrame"].addQueryNode) {
+                    // add to search query
+                    parent.frames["contentFrame"].addQueryNode(propertyId, node.nodeDocType);
+                    //alert("sturctureTreeClickHandler, addProperty branch");
+                }
+                else if ("Assignment" == node.nodeDocType || "AssignmentSystemInternal" == node.nodeDocType) {
+                    invokeContentAction("adm/structure/propertyAssignmentEditor.jsf", defaultAction, {id: propertyId, mayEdit: node.mayEdit, mayDelete: node.mayDelete});
+                }
+                else if ("Type" == node.nodeDocType || "TypeRelation" == node.nodeDocType) {
+                    invokeContentAction("adm/structure/typeEditor.jsf", defaultAction, {id: propertyId, mayEdit: node.mayEdit, mayDelete: node.mayDelete});
+                }
+                else if ("Group" == node.nodeDocType) {
+                    invokeContentAction("adm/structure/groupAssignmentEditor.jsf", defaultAction, {id: propertyId});
+                }
+                contentPage=node.nodeDocType;
+            }
+
+            function showNode(menuItem) {
+                var menu = dojo.widget.byId("structureTreeMenu");
+                doContentAction(menu.getTreeNode(), "openInstance");
+            }
+
+            function editNode(menuItem) {
+                var menu = dojo.widget.byId("structureTreeMenu");
+                doContentAction(menu.getTreeNode(), "editInstance");
+            }
+
+            // create a new property as child of the current node
+            function createProperty(menuItem) {
+                var menu = dojo.widget.byId("structureTreeMenu");
+                var parentId = menu.getTreeNode().propertyId;
+
+                invokeContentAction("adm/structure/propertyEditor.jsf", "createProperty", {id: parentId, nodeType: menu.getTreeNode().nodeDocType});
+                contentPage=null;
+            }
+
+             // create a new group as child of the current node
+            function createGroup(menuItem) {
+                var menu = dojo.widget.byId("structureTreeMenu");
+                var parentId = menu.getTreeNode().propertyId;
+
+                invokeContentAction("adm/structure/groupEditor.jsf", "createGroup", {id: parentId, nodeType: menu.getTreeNode().nodeDocType});
+                contentPage=null;
+            }
+
+            // create a new type
+            function createType(menuItem) {
+                invokeContentAction("adm/structure/typeEditor.jsf", "createType", {});
+                contentPage=null;
+            }
+
+            function createTypeRelation(menuItem) {
+                invokeContentAction("adm/structure/typeEditor.jsf", "createTypeRelation", {});
+                contentPage=null;
+            }
+
+            function assignGroup(menuItem) {
+                var menu = dojo.widget.byId("structureTreeMenu");
+                var parentId = menu.getTreeNode().propertyId;
+
+                invokeContentAction("adm/structure/groupAssignmentEditor.jsf", "assignGroup", {id: parentId, nodeType: menu.getTreeNode().nodeDocType});
+                contentPage=null;
+            }
+
+            function assignProperty(menuItem) {
+                var menu = dojo.widget.byId("structureTreeMenu");
+                var parentId = menu.getTreeNode().propertyId;
+
+                invokeContentAction("adm/structure/propertyAssignmentEditor.jsf", "assignProperty", {id: parentId, nodeType: menu.getTreeNode().nodeDocType});
+                contentPage=null;
+            }
+
+            function pasteAssignment(menuItem) {
+                var menu = dojo.widget.byId("structureTreeMenu");
+                var parentId = menu.getTreeNode().propertyId;
+                var parentType= menu.getTreeNode().nodeDocType;
+                try {
+                    var newAssignmentId = getJsonRpc().StructureTreeEditor.pasteAssignment(copyNode.propertyId, copyNode.nodeDocType , parentId, parentType, null);
+                    reloadAndKeepExpanded();
+                    expandToNodeWithId(newAssignmentId, false);
+                }
+                catch (e) {
+                        alert(e.message);
+                }
+            }
+
+            function pasteAssignmentAs(menuItem) {
+                var valid = false;
+                var alias="dummy";
+                while (!valid && alias!=null && alias!="") {
+                    alias =prompt("#{fxMessageBean['StructureTree.message.enterAlias']}");
+                    valid = getJsonRpc().StructureTreeEditor.validateAlias(alias);
+                    if (!valid)
+                        alert("#{fxMessageBean['StructureTree.message.err.invalidAlias']}");
+                }
+                if (alias!=null && alias!="") {
+                    var menu = dojo.widget.byId("structureTreeMenu");
+                    var parentId = menu.getTreeNode().propertyId;
+                    var parentType= menu.getTreeNode().nodeDocType;
+                    try {
+                        var newAssignmentId = getJsonRpc().StructureTreeEditor.pasteAssignment(copyNode.propertyId, copyNode.nodeDocType , parentId, parentType, alias);
+                        reloadAndKeepExpanded();
+                        expandToNodeWithId(newAssignmentId, false);
+                    }
+                    catch (e) {
+                            alert(e.message);
+                    }
+                }
+            }
+
+            function deleteAssignment(menuItem) {
+                var menu = dojo.widget.byId("structureTreeMenu");
+                var id = menu.getTreeNode().propertyId;
+                _deleteAssignment(id);
+            }
+
+            function _deleteAssignment(id) {
+                var doDelete = confirm("#{fxMessageBean['StructureTree.message.delete.assignment']}");
+                if (doDelete) {
+                    try {
+                        getJsonRpc().StructureTreeEditor.deleteAssignment(id);
+                        if (copyNode!=null && copyNode.propertyId ==id && (copyNode.nodeDocType=="Group" || copyNode.nodeDocType=="Assignment"))
+                            copyNode=null;
+                        reloadStructureTree();
+                        loadContentPage("adm/content.jsf");
+                    }
+                    catch (e) {
+                        alert(e.message);
+                        reloadStructureTree();
+                        loadContentPage("adm/content.jsf");
+                    }
+                }
+            }
+
+            function deleteType(menuItem) {
+                var menu = dojo.widget.byId("structureTreeMenu");
+                var id = menu.getTreeNode().propertyId;
+                _deleteType(id);
+            }
+
+            function _deleteType(id) {
+                var doDelete = confirm("#{fxMessageBean['StructureTree.message.delete.type']}");
+                if (doDelete) {
+                    try {
+                        getJsonRpc().StructureTreeEditor.deleteType(id);
+                        reloadStructureTree();
+                        loadContentPage("adm/content.jsf");
+                    }
+                    catch (e) {
+                        alert(e.message);
+                        reloadStructureTree();
+                        loadContentPage("adm/content.jsf");
+                    }
+                }
+            }
+
+            function copyAssignment(menuItem) {
+                var menu = dojo.widget.byId("structureTreeMenu");
+                copyNode = menu.getTreeNode();
+            }
+
+            function createContent(menuItem) {
+                var menu = dojo.widget.byId("structureTreeMenu");
+                var parentId = menu.getTreeNode().propertyId;
+
+                invokeContentAction("adm/content/contentEditor.jsf", "newInstance", {typeId: parentId});
+                contentPage=null;
+            }
+
+            function searchContents(menuItem) {
+                var menu = dojo.widget.byId("structureTreeMenu");
+                var nodeId = menu.getTreeNode().propertyId;
+                var docType = menu.getTreeNode().nodeDocType;
+
+                if (parent.frames["contentFrame"].isQueryEditor) {
+                    // add node to query
+                    parent.frames["contentFrame"].addQueryNode(nodeId, docType);
+                } else {
+                    // submit query
+                    invokeContentAction("adm/search/searchResult.jsf", "nodeSearch", {nodeId: nodeId});
+                }
+
+                contentPage=null;
+            }
+
+            function showTreeMenu() {
+                var menu = dojo.widget.byId("structureTreeMenu");
+                if (menu.getTreeNode() == null) {
+                    return;
+                }
+                var node = menu.getTreeNode();
+                setActionDisabled(menu.getTreeNode(), "createContent", node.nodeDocType!="Type");
+                setActionDisabled(menu.getTreeNode(), "createProperty", node.nodeDocType!="Group" && node.nodeDocType!="Type" && node.nodeDocType!="TypeRelation");
+                setActionDisabled(menu.getTreeNode(), "createGroup", node.nodeDocType!="Group" && node.nodeDocType!="Type" && node.nodeDocType!="TypeRelation");
+                setActionDisabled(menu.getTreeNode(), "assignProperty", contentPage !="Assignment" || node.nodeDocType!="Group" && node.nodeDocType!="Type" && node.nodeDocType!="TypeRelation");
+                setActionDisabled(menu.getTreeNode(), "assignGroup", contentPage !="Group" || node.nodeDocType!="Group" && node.nodeDocType!="Type" && node.nodeDocType!="TypeRelation");
+                setActionDisabled(menu.getTreeNode(), "deleteAssignment", node.nodeDocType!="Group" && (node.nodeDocType!="Assignment" || node.mayDelete!="true"));
+                setActionDisabled(menu.getTreeNode(), "deleteType", (node.nodeDocType!="Type" && node.nodeDocType!="TypeRelation") || node.mayDelete!="true");
+                setActionDisabled(menu.getTreeNode(), "copyAssignment", node.nodeDocType!="Group" && node.nodeDocType!="Assignment");
+                setActionDisabled(menu.getTreeNode(), "pasteAssignment", copyNode==null || (node.nodeDocType!="Type" && node.nodeDocType!="TypeRelation" && node.nodeDocType!="Group"));
+                setActionDisabled(menu.getTreeNode(), "pasteAssignmentAs", copyNode==null || (node.nodeDocType!="Type" && node.nodeDocType!="TypeRelation" && node.nodeDocType!="Group"));
+                setActionDisabled(menu.getTreeNode(), "searchContents", node.nodeDocType!="Type" && node.nodeDocType!="TypeRelation");
+                menu.show_();
+            }
+
+            function getTypeOrAssignment(docType) {
+                if (docType=="Type" || docType=="TypeRelation")
+                    return true;
+                return false;
+            }
+
+            function enableSearchMode() {
+                setBackgroundImage("adm/images/tree/background_search.png");
+            }
+
+            function disableSearchMode() {
+                removeBackgroundImage();
+            }
+                
+            dojo.addOnLoad(function() {
+                if (getContentFrame().isQueryEditor) {
+                    enableSearchMode();
+                }
+            });
+        //-->
+		</script>
+        
+        <adm:tree name="structureTree" targetId="structureTreeContainer"  extensionPoint="/tree/adm/structure"
+                  clickHandler="structureTreeClickHandler" docIcons="true" expandFirstNode="false">
+
+            <adm:treeContextMenu showHandler="showTreeMenu">
+               <adm:treeContextMenuItem icon="open" treeActions="showNode" labelKey="StructureTree.menu.open" clickHandler="showNode"/>
+               <adm:treeContextMenuItem icon="edit" treeActions="editNode" labelKey="StructureTree.menu.edit" clickHandler="editNode"/>
+               <adm:treeContextMenuItem icon="new" treeActions="createProperty" labelKey="StructureTree.menu.createProperty" clickHandler="createProperty"/>
+               <adm:treeContextMenuItem icon="createFolder" treeActions="createGroup" labelKey="StructureTree.menu.createGroup" clickHandler="createGroup" />
+               <adm:treeContextMenuItem icon="add" treeActions="assignProperty" labelKey="StructureTree.menu.assignProperty" clickHandler="assignProperty"/>
+               <adm:treeContextMenuItem icon="add" treeActions="assignGroup" labelKey="StructureTree.menu.assignGroup" clickHandler="assignGroup"/>
+               <adm:treeContextMenuItem icon="new" treeActions="createContent" labelKey="ContentTree.menu.create" clickHandler="createContent"/>
+               <adm:treeContextMenuItem icon="search" treeActions="searchContents" labelKey="StructureTree.menu.searchContents" clickHandler="searchContents"/>
+                <fx:menuSeparator/>
+               <adm:treeContextMenuItem treeActions="copyAssignment" icon="copy" labelKey="StructureTree.menu.copyAssignment" clickHandler="copyAssignment"/>
+               <adm:treeContextMenuItem treeActions="pasteAssignment" icon="paste" labelKey="StructureTree.menu.pasteAssignment" clickHandler="pasteAssignment"/>
+                <adm:treeContextMenuItem treeActions="pasteAssignmentAs" icon="paste" labelKey="StructureTree.menu.pasteAssignmentAs" clickHandler="pasteAssignmentAs"/>
+               <adm:treeContextMenuItem icon="delete" treeActions="deleteAssignment" labelKey="StructureTree.menu.delete.assignment" clickHandler="deleteAssignment"/>
+               <adm:treeContextMenuItem icon="delete" treeActions="deleteType" labelKey="StructureTree.menu.delete.type" clickHandler="deleteType"/>
+            </adm:treeContextMenu>
+            <adm:jsonRpcCall method="StructureTreeWriter.renderStructureTree" args="-1"/>
+    	</adm:tree>
+    	
+        <div id="structureTreeContainer">
+        </div>
+    </ui:define>
+
+    <ui:define name="mainMenu">
+        <div class="menu">
+            <fx:menu name="mainMenu">
+
+                <fx:menuItem labelKey="StructureTree.menu.createType" icon="windowNew" clickHandler="function(menuItem) { createType(menuItem); }"/>
+              <!-- not part of RC1  
+                <fx:menuItem labelKey="StructureTree.menu.createTypeRelation" icon="fxTypeRelation" clickHandler="function(menuItem) { createTypeRelation(menuItem); }"/>
+                -->
+                <ui:include src="/adm/templates/navigation.menu.tabs.xhtml"/>
+            </fx:menu>
+        </div>
+    </ui:define>
+
+</ui:composition>
+
+
+</html>
+        

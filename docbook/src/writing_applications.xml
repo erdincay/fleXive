@@ -1,0 +1,926 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE chapter [
+        <!ENTITY % global_entities SYSTEM "global.ent">
+        %global_entities;
+        ]>
+<chapter xml:id="writing_applications" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude">
+
+    <title>Writing &flexive; applications
+    </title>
+
+    <xi:include href="includes/author_dlichtenberger.xml"/>
+
+    <para>
+        The easiest way to get started with &flexive; is to grab a distribution package from the
+        &downloadsPage;, unzip it to a local development directory, and create a new project
+        from scratch. In this chapter we will concentrate on creating new &flexive; applications.<!--,
+        although you can also read about embedding &flexive; in existing applications in
+        <xref linkend="writing_applications_embed"/>.-->
+    </para>
+
+    <section xml:id="writing_applications_directory">
+        <title>The &flexive; distribution
+        </title>
+        <para>
+            Looking at your local &flexive; distribution directory, you will find the following directory layout:
+            <programlisting><![CDATA[.
+|-- META-INF/
+|-- build.xml
+|-- extlib/
+|-- lib/
+|-- templates/]]></programlisting>
+
+            <variablelist>
+                <varlistentry>
+                    <term>
+                        <filename>build.xml</filename>
+                    </term>
+                    <listitem>
+                        <para>
+                            Contains the build file for creating new projects and components.
+                            To get started, simply execute
+                            <command>ant</command>
+                            in your
+                            <filename>flexive-dist/</filename>
+                            directory.
+                        </para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term>
+                        <filename>lib/</filename>
+                    </term>
+                    <listitem>
+                        <para>
+                            Contains all &flexive; libraries packaged as JAR files.
+                        </para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term>
+                        <filename>extlib/</filename>
+                    </term>
+                    <listitem>
+                        <para>
+                            Contains all third-party libraries required for compiling and running
+                            &flexive; applications. Note that not all libraries in this directory will
+                            be packaged into the final application archive, for example the
+                            JSF API package is only required for compiling JSF applications.
+                        </para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term>
+                        <filename>templates/</filename>
+                    </term>
+                    <listitem>
+                        <para>
+                            Contains project and component templates used by the build system.
+                        </para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term>
+                        <filename>META-INF/</filename>
+                    </term>
+                    <listitem>
+                        <para>
+                            Currently this directory only holds a template application descriptor
+                            for &flexive; applications.
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </para>
+    </section>
+
+    <section xml:id="writing_applications_gettingstarted">
+        <title>Getting started</title>
+        <para>
+            Before proceeding to create a new &flexive; application,
+            make sure you have a working build system, i.e. at least
+            <itemizedlist>
+                <listitem>
+                    <para>
+                        &jdk6; or higher, and
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        &ant; 1.7.0 or higher.
+                    </para>
+                </listitem>
+            </itemizedlist>
+            For running the application you need a working environment including MySQL
+            as described in the <!-- TODO --> installation chapter.
+        </para>
+        <para>
+            To get started with your first &flexive; application, open a command shell
+            and change to the directory containing the &flexive; distribution. Type
+            <command>ant</command>. You should be greeted by the welcome page of
+            the &flexive; build system:
+            <screen><![CDATA[Buildfile: build.xml
+
+info:
+  [flexive]
+  [flexive] Welcome to the flexive build tool. Feel free to use the following build targets:
+  [flexive]
+  [flexive] project.create
+  [flexive]     Creates an empty flexive project.
+  [flexive]
+    [input] Please enter a target name, or quit to exit:
+]]></screen>
+        </para>
+
+        <para>
+            Let's create a new project. Type
+            <userinput>project.create</userinput>
+            and hit return. You will be asked for a project name. This name will be used as the
+            root directory name for the project, so be careful to include only characters that
+            may appear in filenames and URLs. For a start, enter
+            <userinput>flexive-test</userinput>.
+        </para>
+        <para>&Flexive; will create the project folder in the
+            same directory where the &flexive; distribution is stored, i.e. in the current parent directory.
+            The major reason for this is that the project references the distribution directory, i.e.
+            it includes all the libraries from the distribution directory and does not use its own copies.
+            Thus new &flexive; projects use little disk space, and you have to maintain only one &flexive;
+            directory for all your projects.
+        </para>
+        <para>
+            After confirming your selection, the root directory layout for flexive-test will be created.
+            Your screen should look approximately like this:
+            <screen><![CDATA[    [input] Please enter a target name, or quit to exit:
+project.create
+
+check:
+
+project.create:
+    [input] Name of the project you want to create:
+flexive-test
+  [flexive]
+  [flexive] Please confirm your input:
+  [flexive] Project name:        flexive-test
+  [flexive] Base directory:      ../flexive-test
+  [flexive]
+    [input] Are these settings correct? ([y], n)
+y
+    [mkdir] Created dir: /home/daniel/dev/idea-workspace/flexive/flexive-test
+     [copy] Copying 4 files to /home/daniel/dev/idea-workspace/flexive/flexive-test
+     [copy] Copied 14 empty directories to 9 empty directories under /home/daniel/dev/idea-workspace/flexive/flexive-test
+     [copy] Copying 1 file to /home/daniel/dev/idea-workspace/flexive/flexive-test
+     [copy] Copying 1 file to /home/daniel/dev/idea-workspace/flexive/flexive-test
+     [echo] Project flexive-test created successfully. The project root directory is
+     [echo] ../flexive-test
+
+BUILD SUCCESSFUL]]></screen>
+        </para>
+
+        <para>
+            When the build tool has finished successfully, go to the newly created directory, e.g.
+            <command>cd ../flexive-test</command>. The directory structure contains a blank project structure,
+            which looks like the following:
+
+            <screen><![CDATA[.
+|-- build.xml
+|-- resources
+|   |-- META-INF
+|   |   |-- faces-config.xml
+|   |   |-- template.taglib.xml.sample
+|   |   `-- web.xml
+|   |-- messages
+|   |-- scripts
+|   |   |-- library
+|   |   |-- runonce
+|   |   `-- startup
+|   `-- templates
+|-- src
+|   `-- java
+|       |-- ejb
+|       |-- shared
+|       `-- war
+`-- web
+    `-- index.xhtml
+]]></screen>
+
+            Before examining the directory structure, let's do a quick test if the the environment
+            is working. Type
+            <command>ant</command>. The build should complete successfully, leaving you with
+            some artifacts in the
+            <filename>dist/</filename>
+            subdirectory:
+            <itemizedlist>
+                <listitem>
+                    <para><filename>flexive-test.ear</filename>,
+                    </para>
+                </listitem>
+                <listitem>
+                    <para><filename>flexive-test-shared.jar</filename>, and
+                    </para>
+                </listitem>
+                <listitem>
+                    <para><filename>flexive-test.war</filename>.
+                    </para>
+                </listitem>
+            </itemizedlist>
+        </para>
+
+        <para>
+            To deploy the application, first you need to setup the database schemas. Type
+            <command>ant db.create db.config.create</command>
+            and when prompted for the database schema use the default name,
+            <code>flexive.</code>
+            When the command completed successfully, your can deploy
+            <filename>flexive-test.ear</filename>
+            and have a working (albeit empty) &flexive; application, including the &backendGui;.
+        </para>
+
+        <para>
+            The project root directory contains a build file,
+            <filename>build.xml</filename>,
+            that can be customized for the project. By default, it builds JAR files for all layers,
+            including an EAR archive. The major subdirectories are:
+            <variablelist>
+                <varlistentry>
+                    <term>
+                        <filename>src/java</filename>
+                    </term>
+                    <listitem>
+                        <para>
+                            contains the Java sources of the project. They are split up by layer,
+                            i.e. there are three distinct source trees for the EJB, web, and
+                            shared classes. This is especially useful for IDEs with support for multiple
+                            project modules, where you can also specify wanted (and forbidden) relationships
+                            between the layers.
+                        </para>
+                    </listitem>
+                </varlistentry>
+
+
+                <varlistentry>
+                    <term>
+                        <filename>web/</filename>
+                    </term>
+                    <listitem>
+                        <para>
+                            contains the documents for the web application (if any).
+                        </para>
+                    </listitem>
+                </varlistentry>
+
+
+                <varlistentry>
+                    <term>
+                        <filename>resources/</filename>
+                    </term>
+                    <listitem>
+                        <para>
+                            is the root folder for various project resources:
+
+                            <variablelist>
+                                <varlistentry>
+                                    <term>
+                                        <filename>resources/scripts</filename>
+                                    </term>
+                                    <listitem>
+                                        <para>
+                                            contains the run-once, startup and library scripts of the application,
+                                        </para>
+                                    </listitem>
+                                </varlistentry>
+
+                                <varlistentry>
+                                    <term>
+                                        <filename>resources/messages</filename>
+                                    </term>
+                                    <listitem>
+                                        <para>
+                                            contains the application's localized message resources that can
+                                            be accessed with the &messageBean;,
+                                        </para>
+                                    </listitem>
+                                </varlistentry>
+
+                                <varlistentry>
+                                    <term>
+                                        <filename>resources/META-INF</filename>
+                                    </term>
+                                    <listitem>
+                                        <para>
+                                            contains the application's configuration files, mostly for
+                                            the web layer,
+                                        </para>
+                                    </listitem>
+                                </varlistentry>
+
+                                <varlistentry>
+                                    <term>
+                                        <filename>resources/templates</filename>
+                                    </term>
+                                    <listitem>
+                                        <para>
+                                            is the standard folder for Facelets templates. You can choose any
+                                            folder of course if you like, but then you'd have to modify the
+                                            build script.
+                                        </para>
+                                    </listitem>
+                                </varlistentry>
+                            </variablelist>
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </para>
+    </section>
+
+    <section xml:id="writing_applications_ide">
+        <title>IDE integration</title>
+
+        <para>
+            Your &flexive; project comes with basic project files for the &eclipse; and &idea;
+            Java IDEs.
+        </para>
+
+        <section xml:id="writing_applications_ide_eclipse">
+            <title>Eclipse</title>
+            <para>
+                If this is your first &eclipse; project with &flexive;, first you have to define a new
+                <emphasis>user library</emphasis>
+                that includes the JAR files of your &flexive; distribution. We also could include these
+                files in the individual project classpath, but this way is much cleaner and easier to
+                work with especially for multiple projects.
+
+                <orderedlist>
+                    <listitem>
+                        <para>
+                            Please go to
+                            <menuchoice>
+                                <guimenu>Window</guimenu>
+                                <guimenuitem>Preferences</guimenuitem>
+                                <guisubmenu>Java</guisubmenu>
+                                <guisubmenu>Build Path</guisubmenu>
+                                <guimenuitem>User Libraries.</guimenuitem>
+                            </menuchoice>
+                        </para>
+                    </listitem>
+
+                    <listitem>
+                        <para>
+                            Click
+                            <menuchoice>
+                                <guibutton>New...</guibutton>
+                            </menuchoice>
+                            and enter
+                            <userinput>flexive</userinput>
+                            for the library name. Press
+                            <menuchoice>
+                                <guibutton>OK.</guibutton>
+                            </menuchoice>
+                        </para>
+                    </listitem>
+
+                    <listitem>
+                        <para>
+                            Select the created library entry, and press the
+                            <menuchoice>
+                                <guibutton>Add JARs...</guibutton>
+                            </menuchoice>
+                            button.
+                        </para>
+                    </listitem>
+
+                    <listitem>
+                        <para>
+                            Go to your &flexive; distribution directory, and select all JAR files
+                            in the
+                            <filename>lib/</filename>
+                            folder (you can use shift-select here).
+                        </para>
+                    </listitem>
+
+                    <listitem>
+                        <para>
+                            Repeat the last two steps and add all JAR files of the
+                            <filename>extlib/</filename>
+                            folder to the user library.
+                        </para>
+                    </listitem>
+
+                    <listitem>
+                        <para>
+                            In the User Libraries page, click OK. You have now defined a global flexive library
+                            that includes all required JAR files for a &flexive; application.
+                            Note that this is only available within the IDE, the actual build files do not use
+                            the IDE-specific library definitions.
+                        </para>
+                    </listitem>
+                </orderedlist>
+            </para>
+
+            <para>
+                Assuming that both your
+                <filename>flexive-dist</filename>
+                directory and the newly created project reside in your current Eclipse workspace directory,
+                you can add the project following these steps:
+                <orderedlist>
+                    <listitem>
+                        <para>
+                            Open
+                            <menuchoice>
+                                <guimenu>File</guimenu>
+                                <guimenuitem>Import...</guimenuitem>
+                                <guimenu>General</guimenu>
+                                <guimenuitem>Existing Projects into Workspace</guimenuitem>
+                            </menuchoice>
+                        </para>
+                    </listitem>
+
+                    <listitem>
+                        <para>
+                            Select the project root directory.
+                        </para>
+                    </listitem>
+
+                    <listitem>
+                        <para>
+                            Press
+                            <menuchoice>
+                                <guibutton>Finish.</guibutton>
+                            </menuchoice>
+                            Eclipse should now open the project in the workspace. Currently an error message
+                            about a missing external builder is displayed by Eclipse. However, when you execute
+                            <menuchoice>
+                                <guimenu>Project</guimenu>
+                                <guimenuitem>Build all,</guimenuitem>
+                            </menuchoice>
+                            it builds the project using Ant without problems.
+                        </para>
+                        <para>
+                            To check if the project and library has been loaded correctly, try to open
+                            the
+                            <classname>EJBExampleBean</classname>
+                            class using
+                            <menuchoice>
+                                <guimenu>Navigation</guimenu>
+                                <guimenuitem>Open Type...</guimenuitem>
+                                <shortcut>
+                                    <keycombo>
+                                        <keycap>Shift</keycap>
+                                        <keycap>Ctrl</keycap>
+                                        <keycap>T</keycap>
+                                    </keycombo>
+                                </shortcut>
+                            </menuchoice>
+                            Eclipse should display the source code without errors.
+                        </para>
+                    </listitem>
+                </orderedlist>
+            </para>
+        </section>
+
+        <section xml:id="writing_applications_ide_idea">
+            <title>IntelliJ IDEA</title>
+            <para>
+                We start with creating a new project for the
+                <filename>flexive-test</filename>
+                application directory.
+
+                <orderedlist>
+                    <listitem>
+                        <para>
+                            Open
+                            <menuchoice>
+                                <guimenu>File</guimenu>
+                                <guimenuitem>New Project...</guimenuitem>
+                            </menuchoice>
+                        </para>
+                    </listitem>
+
+                    <listitem>
+                        <para>
+                            Select
+                            <menuchoice>
+                                <guimenuitem>Create project from scratch</guimenuitem>
+                            </menuchoice>
+                            and press
+                            <menuchoice>
+                                <guibutton>Next.</guibutton>
+                            </menuchoice>
+                        </para>
+                    </listitem>
+
+                    <listitem>
+                        <para>
+                            Choose your &flexive; project directory in
+                            <menuchoice>
+                                <guilabel>Project file location.</guilabel>
+                            </menuchoice>
+                        </para>
+                    </listitem>
+
+                    <listitem>
+                        <para>
+                            Click
+                            <menuchoice>
+                                <guibutton>Next.</guibutton>
+                            </menuchoice>
+                        </para>
+                    </listitem>
+
+                    <listitem>
+                        <para>
+                            Uncheck
+                            <menuchoice>
+                                <guilabel>Create module</guilabel>
+                            </menuchoice>
+                            and click
+                            <menuchoice>
+                                <guibutton>Finish.</guibutton>
+                            </menuchoice>
+                        </para>
+                    </listitem>
+                </orderedlist>
+            </para>
+
+            <para>
+                Let IDEA open the project. Next we add the template module file in the IDEA project settings dialog:
+
+                <orderedlist>
+                    <listitem>
+                        <para>
+                            Add a new module by clicking on the "+" button at the top of the screen.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Choose
+                            <menuchoice>
+                                <guilabel>Import existing module</guilabel>
+                            </menuchoice>
+                            and select the IDEA module file
+                            (<filename>flexive-test.iml</filename>) in your project directory.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Press
+                            <menuchoice>
+                                <guilabel>Finish.</guilabel>
+                            </menuchoice>
+                        </para>
+                    </listitem>
+                </orderedlist>
+            </para>
+
+            <para>
+                If this is your first &idea; project with &flexive;, please perform the following setup steps.
+                Similar to Eclipse, we use a shared library definition to include &flexive; in the project classpath.
+
+                <orderedlist>
+                    <listitem>
+                        <para>
+                            Open
+                            <menuchoice>
+                                <guimenu>File</guimenu>
+                                <guimenuitem>Settings</guimenuitem>
+                            </menuchoice>
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Click on
+                            <menuchoice>
+                                <guibutton>Project settings.</guibutton>
+                            </menuchoice>
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            On the left-hand-side, click on
+                            <menuchoice>
+                                <guimenu>Platform settings</guimenu>
+                                <guimenuitem>Global Libraries</guimenuitem>
+                            </menuchoice>
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Add a new library by clicking on the "+" button at the top of the screen.
+                            Enter
+                            <userinput>flexive-dist</userinput>
+                            as the library name.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Select your project module in the next screen and press
+                            <menuchoice>
+                                <guibutton>OK.</guibutton>
+                            </menuchoice>
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            In the library overview screen, select the flexive-dist library and add the
+                            <filename>flexive-dist/lib</filename>
+                            and
+                            <filename>flexive-dist/extlib</filename>
+                            directories using the
+                            <menuchoice>
+                                <guibutton>Attach JAR directories</guibutton>
+                            </menuchoice>
+                            button.
+                        </para>
+                    </listitem>
+                </orderedlist>
+                Now you should have all &flexive; classes available in your project. You can
+                test this by opening the example EJB (
+                <classname>EJBExampleBean</classname>)
+                using
+                <menuchoice>
+                    <guimenu>Go To</guimenu>
+                    <guimenuitem>Class...</guimenuitem>
+                    <shortcut>
+                        <keycombo>
+                            <keycap>Ctrl</keycap>
+                            <keycap>N</keycap>
+                        </keycombo>
+                    </shortcut>
+                </menuchoice>
+                IDEA should not display any errors like missing classes.
+            </para>
+
+        </section>
+    </section>
+
+    <section xml:id="writing_applications_start">
+        <title>Programming &flexive;
+        </title>
+
+        <para>
+            The blank &flexive; application includes an example EJB and JSF bean that shows
+            the intended use of the package structure,
+            <package>cfe</package>
+            stands for
+            <package>com.flexive.example</package>:
+
+            <variablelist>
+                <varlistentry>
+                    <term>
+                        <filename>src/java/shared/cfe.shared.interfaces.EJBExample</filename>
+                    </term>
+                    <listitem>
+                        <para>
+                            Defines the (remote) interface of an EJB.
+                        </para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term>
+                        <filename>src/java/ejb/cfe.ejb.EJBExampleBean</filename>
+                    </term>
+                    <listitem>
+                        <para>
+                            Contains the EJB implementation of the
+                            <interfacename>EJBExample</interfacename>
+                            interface.
+                        </para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term>
+                        <filename>src/java/war/cfe.war.ManagedExampleBean</filename>
+                    </term>
+                    <listitem>
+                        <para>
+                            A sample implementation of a JSF wrapper bean that invokes
+                            an EJB business method. Note the use of flexive's
+                            <classname>EJBLookup</classname>
+                            class to retrieve the EJB wrapper bean, since the
+                            <code>@EJB</code>
+                            annotation isn't supported by all application servers at the time
+                            of this writing.
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+
+            You can remove the example beans if you like, or rename them and use them as
+            a start for your own beans (if any).
+        </para>
+    </section>
+
+    <section xml:id="writing_applications_package">
+        <title>Package for distribution</title>
+        <para>
+            A &flexive; application is a collection of JAR files that follow a few naming conventions
+            that will be packaged into an EAR archive. Note
+            that each file is optional, so if you for example don't provide EJB3 beans, you don't need
+            to provide a
+            <filename>-ejb.jar</filename>
+            file.
+            <variablelist>
+                <varlistentry>
+                    <term>
+                        <filename>[basename]-ejb.jar</filename>
+                    </term>
+                    <listitem>
+                        <para>
+                            Contains the EJB3 implementations for your component.
+                        </para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term>
+                        <filename>[basename]-shared.jar</filename>
+                    </term>
+                    <listitem>
+                        <para>
+                            Contains shared classes of your application that are not tied
+                            to either the JSF or the EJB layer. This contains the EJB interface
+                            definitions, data transfer objects or general utility classes.
+                        </para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term>
+                        <filename>[basename].war</filename>
+                    </term>
+                    <listitem>
+                        <para>
+                            Contains the actual web application frontend, consisting of HTML pages,
+                            JSF components and Facelets templates, as well as JSF managed beans and
+                            deployment descriptors.
+                        </para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term>
+                        <filename>*.jar</filename>
+                    </term>
+                    <listitem>
+                        <para>
+                            Of course you can also package any additional JAR files containing
+                            libraries or even JSF plugins. They will be stored in the
+                            <filename>lib/</filename>
+                            folder of the EAR file and will be available
+                            to every &flexive; application in the EAR file.
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </para>
+    </section>
+
+    <section xml:id="writing_applications_build">
+        <title>Build file support</title>
+        <para>
+            If you created a new &flexive; application with the tools of this chapter,
+            it will include a buildfile for &ant; that compiles and packages the application into
+            JAR and EAR files as described in the previous section. It uses a shared generic
+            build file from the
+            <filename>flexive-dist</filename>
+            directory that is customized by setting a few
+            <productname>Ant</productname>
+            properties:
+        </para>
+        <variablelist>
+            <varlistentry>
+                <term>
+                    <code>fxProject</code>
+                </term>
+                <listitem>
+                    <para>
+                        The project name, in our example
+                        <emphasis>flexive-test.</emphasis>
+                    </para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>
+                    <code>flexive.dist.dir</code>
+                </term>
+                <listitem>
+                    <para>
+                        The &flexive; distribution directory. By default this is a relative location. Keep
+                        this and do not alter the directory name
+                        if you want to keep the build environment independent from the actual workspace location.
+                    </para>
+                </listitem>
+            </varlistentry>
+
+            <varlistentry>
+                <term>
+                    <code>[basename].shared.disabled</code>
+                </term>
+                <term>
+                    <code>[basename].ejb.disabled</code>
+                </term>
+                <term>
+                    <code>[basename].war.disabled</code>
+                </term>
+                <term>
+                    <code>[basename].ear.disabled</code>
+                </term>
+                <listitem>
+                    <para>
+                        If any of these properties is set, the corresponding archive file will not
+                        be generated.
+                        <code>[basename]</code>
+                        is the project name as set in the
+                        <code>fxProject</code>
+                        property, in our example application we would skip the EAR file generation using
+                        <code language="xml"><![CDATA[<property name="flexive-test.ear.disabled" value="1"/>.]]></code>
+                    </para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
+
+        <para>
+            The resulting JAR and EAR files will be stored in the
+            <filename>dist/</filename>
+            directory of the project. If you deploy the EAR file into your application server,
+            please make sure that no other &flexive; EAR is deployed to prevent conflicts.
+        </para>
+
+        <section xml:id="writing_applications_build_targets">
+            <title>Build targets</title>
+
+            <para>
+                The default &ant; target builds the entire application, including an EAR file
+                that can be deployed into your application server. Additional tasks
+                are provided for setting up the database schemas.
+            </para>
+
+            <variablelist>
+                <varlistentry>
+                    <term>
+                        <code>package</code>
+                        (default)
+                    </term>
+                    <listitem>
+                        <para>
+                            Build all archives, unless disabled ones as described in the previous section.
+                        </para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term>
+                        <code>help</code>
+                    </term>
+                    <listitem>
+                        <para>
+                            Display a short help message and offer documentation of the
+                            most relevant tasks.
+                        </para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term>
+                        <code>db.create</code>
+                    </term>
+                    <listitem>
+                        <para>
+                            Create or reset a &flexive; division database schema. By default,
+                            the first division uses the schema
+                            <code>flexive.</code>
+
+                        </para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term>
+                        <code>db.config.create</code>
+                    </term>
+                    <listitem>
+                        <para>
+                            Create or reset the global &flexive; configuration schema,
+                            <code>flexiveConfig.</code>
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+
+    <!-- TODO POSTLAUNCH 
+    <section xml:id="writing_applications_embed">
+        <title>Embedding &flexive; in existing applications
+        </title>
+    </section>
+    -->
+</chapter>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="flexive-javadoc" basedir=".">
+
+    <import file="build.shared-properties.xml"/>
+
+    <!-- ========================== properties ========================== -->
+    <property name="base.jdoc.dir" value="${basedir}/javadoc"/>
+    <property name="javadoc.index.file" value="${base.jdoc.dir}/index.html"/>
+
+    <!-- ========================== paths =============================== -->
+
+
+    <!-- ========================== tasks / macros ====================== -->
+
+    <!-- Execute javadoc on the given packages. name and packagenames are mandatory parameters. -->
+    <macrodef name="jdoc-call">
+        <attribute name="name"
+                   description="Name of the API being documented. The name is used as the subdirectory name in ${base.jdoc.dir}."/>
+        <attribute name="packagenames"/>
+        <attribute name="srcdir"/>
+        <attribute name="excludepackagenames" default=""/>
+        <attribute name="windowtitle" default="@{name} JavaDoc"/>
+        <attribute name="destdir" default="${base.jdoc.dir}/@{name}" description="Target Javadoc directory"/>
+        <sequential>
+            <delete dir="@{destdir}"/>
+            <mkdir dir="@{destdir}"/>
+            <javadoc
+                    packagenames="@{packagenames}"
+                    excludepackagenames="@{excludepackagenames}"
+                    destdir="@{destdir}"
+                    author="true"
+                    version="true"
+                    use="true"
+                    package="true"
+                    windowtitle="@{windowtitle}"
+                    doctitle="javadoc"
+                    extdirs="${flexive.lib.dir}"
+                    >
+                <sourcepath>
+                    <pathelement path="@{srcdir}"/>
+                </sourcepath>
+                <classpath>
+                    <!--<pathelement path="${build.jar.dir}/${jar_prepend}Shared.jar"/>-->
+                    <fileset dir="${flexive.lib.dir}">
+                        <include name="**/*.jar"/>
+                    </fileset>
+                </classpath>
+            </javadoc>
+            <!-- Append entry to index file -->
+            <echo file="${javadoc.index.file}" append="true">
+                &lt;p>
+                &lt;a href="@{name}/index.html">@{windowtitle}&lt;/a>
+                &lt;/p>
+            </echo>
+        </sequential>
+    </macrodef>
+
+    <target name="javadoc" depends="javadoc.clean,javadoc.shared,javadoc.ejb,javadoc.core,javadoc.ui.jsf,javadoc.ui.jsf-components"/>
+
+    <target name="javadoc.clean">
+        <echo file="${javadoc.index.file}">
+            &lt;h3>flexive JavaDoc&lt;/h3>
+        </echo>
+    </target>
+    
+    <target name="javadoc.shared">
+        <jdoc-call
+                name="shared"
+                packagenames="com.flexive.shared.*"
+                srcdir="${flexive.src.framework.dir}"/>
+    </target>
+
+    <target name="javadoc.ejb">
+        <jdoc-call
+                name="ejb"
+                packagenames="com.flexive.shared.interfaces.*"
+                srcdir="${flexive.src.framework.dir}"/>
+    </target>
+
+    <target name="javadoc.core">
+        <jdoc-call
+                name="core"
+                packagenames="com.flexive.core.*"
+                srcdir="${flexive.src.framework.dir}"/>
+    </target>
+
+    <target name="javadoc.ui.jsf">
+        <jdoc-call
+                name="jsf"
+                packagenames="com.flexive.war.*"
+                srcdir="${flexive.src.framework.dir};${flexive.src.ui.jsf.dir};${flexive.src.ui.shared.dir};${flexive.src.ui.components.dir}"/>
+    </target>
+
+    <target name="javadoc.ui.jsf-components">
+        <jdoc-call
+                name="jsf-components"
+                packagenames="com.flexive.faces.*"
+                srcdir="${flexive.src.framework.dir};${flexive.src.ui.shared.dir};${flexive.src.ui.components.dir}"/>
+    </target>
+
+
+</project>

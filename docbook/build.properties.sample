@@ -1,0 +1,2 @@
+# The xsltproc command (including the path, if necessary)
+xsltproc=xsltproc

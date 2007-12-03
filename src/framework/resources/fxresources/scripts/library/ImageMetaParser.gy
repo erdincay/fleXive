@@ -1,0 +1,116 @@
+//file: ImageMetaParser.gy
+//description:
+// Parser for Image meta information. Sets Image type fields.
+// To be called for Image type create and update dynamic scripting
+//expected bindings:
+//  ticket ... UserTicket
+//  content ... the FxContent being processed
+//author: Markus Plesser, Unique Computing Solutions GmbH
+
+import com.flexive.shared.CacheAdmin
+import com.flexive.shared.value.*
+
+def binValue = content.getPropertyData("/ImageBinary").value.defaultTranslation
+if (binValue.metadata == null || binValue.metadata.length() < 20) {
+    println "No metadata present for image to process!"
+    return
+}
+
+
+void process(cmap, key, rawvalue) {
+    if (rawvalue == null || rawvalue.toString().trim().length() == 0)
+        return
+    def value = rawvalue.toString()
+    if (value.endsWith('.'))
+        value = value.substring(0, value.length() - 1);
+    if (!cmap.containsKey(key))
+        cmap[key] = value
+    else
+        cmap[key] += ' ' + value
+}
+
+try {
+    if (binValue.isNewBinary()) {
+        println "Processing a new descriptor (got to load meta/mime from transit)..."
+    }
+    println "Meta data (first 20 chars): ${binValue.metadata.substring(0, 20)}...";
+
+    println "Image name: " + binValue.name
+    if (content.getValue("/FILENAME").isEmpty())
+        content.setValue("/FILENAME", new FxString(false, binValue.name))
+
+
+    def meta = new XmlSlurper().parseText(binValue.metadata);
+    def cmap = [:]
+    def geometry = ((String) meta.Geometry).split('x')
+    def res = ((String) meta.Resolution).split('x')
+    def java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy:MM:dd HH:mm:ss")
+
+    def compList = CacheAdmin.environment.getSelectList("Image Compression")
+
+    //process(cmap, 'String|Title', meta.@source)
+    process(cmap, 'String|Caption', binValue.name)
+    //process(cmap, 'String|Title', binValue.name)
+    process(cmap, 'Number|PixelXDimension', geometry[0])
+    process(cmap, 'Number|PixelYDimension', geometry[1])
+    process(cmap, 'Double|xResolution', res[0])
+    process(cmap, 'Double|yResolution', res[1])
+    if (cmap['DateCreated'] == null)
+        process(cmap, 'DateTime|DateCreated', meta['Exif-DateTime'])
+    if (cmap['DateCreated'] == null)
+        process(cmap, 'DateTime|DateCreated', sdf.format(new java.util.Date(System.currentTimeMillis())))
+
+    process(cmap, 'SelectList|Compression', binValue.mimeType);
+    process(cmap, 'String|MetaData/Manufacturer', meta['Exif-Make']);
+    process(cmap, 'String|MetaData/Model', meta['Exif-Model']);
+    process(cmap, 'String|MetaData/Orientation', meta['Orientation']);
+
+
+    cmap.each() {key, value ->
+        def _type = key.split('\\|')[0]
+        def fxvalue
+        key = key.split("\\|")[1]
+        //  println "${key} -> ${value} (${_type})"
+        switch (_type) {
+            case "String": fxvalue = new FxString(false, value); break
+            case "Number":
+                if (value.endsWith("+0+0"))
+                    value = value.substring(0, value.indexOf("+0+0"))
+                fxvalue = new FxNumber(false, Integer.parseInt(value)); break
+            case "Double": fxvalue = new FxDouble(false, Double.parseDouble(value)); break
+            case "DateTime": fxvalue = new FxDateTime(false, sdf.parse(value)); break
+            case "SelectList":
+                if (key == "Compression") {
+                    try {
+                        def sm = new SelectMany(compList)
+                        sm.selectItem(compList.getItemByData(value.split("\\/")[1].toUpperCase()))
+                        fxvalue = new FxSelectMany(false, sm)
+                    } catch (Throwable t) {
+                        println "Error setting select list item: " + t.message
+                        fxvalue = null
+                    }
+                }
+        }
+        println "fxValue=" + fxvalue
+        content.setValue("/" + key, fxvalue);
+    }
+
+    return content
+} catch (Exception e) {
+    System.err.println("Failed to process metadata (ignored): " + e.getMessage())
+}
+
+/*
+println meta.@source
+
+//cmap['MetaData/Manufacturer'] = meta['Profile-exif'].Make
+println meta['Profile-exif'].Model
+println meta.Colorspace
+println cmap
+*/
+
+//println "XML:  "+((FxBinary)((FxPropertyData)content.getPropertyData("/ImageBinary")).getValue())
+//.getBestTranslation().getMetadata()
+
+//println sdf.parse(cmap['DateCreated'])
+//println "finished!"

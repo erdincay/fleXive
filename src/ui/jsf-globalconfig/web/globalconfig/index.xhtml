@@ -1,0 +1,35 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<head>
+    <title>#{fxMessageBean['GlobalConfig.title']}</title>
+    <fx:includes/>
+</head>
+
+<body>
+
+    <h:form id="frm">
+        <h:messages globalOnly="true"/>
+
+        <h:panelGrid columns="3">
+            
+            <h:outputLabel for="username" value="#{fxMessageBean['GlobalConfig.field.username']}"/>
+            <h:inputText id="username" value="#{globalConfigBean.username}" required="true"/>
+            <h:message for="username"/>
+
+            <h:outputLabel for="password" value="#{fxMessageBean['GlobalConfig.field.password']}"/>
+            <h:inputSecret id="password" value="#{globalConfigBean.password}" required="true"/>
+            <h:message for="password"/>
+
+            <f:facet name="footer">
+                <h:commandButton action="#{globalConfigBean.login}" value="#{fxMessageBean['GlobalConfig.button.login']}"/>
+            </f:facet>
+        </h:panelGrid>
+    </h:form>
+</body>
+</html>

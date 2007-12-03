@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk">
+
+<ui:composition>
+
+    <ui:repeat value="#{fxSystemBean.groupedFxMessages}" var="msg">
+
+        <ui:repeat value="#{msg.messages}" var="item">
+            <c:if test="#{disableErrorRegistration==null}">
+                <script type="text/javascript">
+                    parent.addClientIdWithError(this, '#{item.clientId}', '#{item.detailForJavascript}');
+                </script>
+            </c:if>
+        </ui:repeat>
+
+        <div class="#{fxSystemBean.severityName[msg.severity]}Message" id="errorMsg#{msg.id}">
+            <table border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td><t:graphicImage url="/pub/images/messages/#{fxSystemBean.severityName[msg.severity]}Icon.png"
+                                        style="padding-right:5px;"/></td>
+                    <td>#{msg.summary}</td>
+                </tr>
+            </table>
+        </div>
+
+        <ui:fragment rendered="#{msg.containsDetailMessages}">
+            <span dojoType="tooltip" connectId="errorMsg#{msg.id}" style="display:none">
+                <ui:repeat value="#{msg.messages}" var="msgDetail">
+                    #{msgDetail.detail}<br/>
+                </ui:repeat>
+            </span>
+        </ui:fragment>
+
+    </ui:repeat>
+
+</ui:composition>
+
+
+</html>

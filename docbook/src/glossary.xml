@@ -1,0 +1,117 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE glossary [
+        <!ENTITY % global_entities SYSTEM "global.ent">
+        %global_entities;
+        ]>
+<glossary xmlns="http://docbook.org/ns/docbook" xml:id="glossary">
+    <title>Glossary</title>
+
+    <glossentry xml:id="gloss_extension_point">
+        <glossterm>extension point</glossterm>
+        <glossdef>
+            <para>
+                identifies a point where an existing &flexive; application can be extended
+                with a
+                <glossterm>plugin</glossterm>.
+            </para>
+            <glossseealso otherterm="gloss_plugin"/>
+            <glossseealso otherterm="gloss_plugin_executor"/>
+        </glossdef>
+    </glossentry>
+
+    <glossentry xml:id="gloss_plugin">
+        <glossterm>plugin</glossterm>
+        <glossdef>
+            <para>
+                A concrete implementation of a plugin interface that interacts with a
+                <glossterm>plugin executor</glossterm>
+                interface.
+            </para>
+            <glossseealso otherterm="gloss_extension_point"/>
+            <glossseealso otherterm="gloss_plugin_executor"/>
+        </glossdef>
+    </glossentry>
+
+    <glossentry xml:id="gloss_plugin_executor">
+        <glossterm>plugin executor</glossterm>
+        <glossdef>
+            <para>
+                An interface that exposes methods available at a given
+                <glossterm>extension point</glossterm>.
+            </para>
+            <glossseealso otherterm="gloss_extension_point"/>
+            <glossseealso otherterm="gloss_plugin"/>
+        </glossdef>
+    </glossentry>
+
+    <glossentry xml:id="gloss_fx_type">
+        <glossterm>FxType</glossterm>
+        <glossdef>
+            <para>
+                A &flexive; content type definition, for example an article or image type.
+            </para>
+        </glossdef>
+    </glossentry>
+
+    <glossentry xml:id="gloss_weblet">
+        <glossterm>Weblets</glossterm>
+        <glossdef>
+            <para>
+                An open-source framework for delivering web resources like images or stylesheets
+                stored in the classpath, e.g. in a JAR file, instead of the WAR file system.
+            </para>
+        </glossdef>
+    </glossentry>
+
+    <glossentry xml:id="gloss_fxsql">
+        <glossterm>&fxsql;</glossterm>
+        <glossdef>
+            <para>
+                A SQL-like query language for &flexive; contents.
+            </para>
+        </glossdef>
+    </glossentry>
+
+    <glossentry xml:id="gloss_virtual_property">
+        <glossterm>virtual property</glossterm>
+        <glossdef>
+            <para>
+                A special property available in search queries. It accumulates miscellaneous
+                information about a result row that may not be available in an actual
+                property, like permission flags or the primary key.  
+            </para>
+        </glossdef>
+    </glossentry>
+
+    <glossentry xml:id="gloss_breadcrumbs">
+        <glossterm>breadcrumbs</glossterm>
+        <glossdef>
+            <para>
+                chained hyperlinks that show the tree path of the current object
+            </para>
+        </glossdef>
+    </glossentry>
+
+    <glossentry xml:id="gloss_runoncescript">
+        <glossterm>run-once script</glossterm>
+        <glossdef>
+            <para>
+                A script in a supported Java scripting language that will be executed
+                exactly once for a division datasource. A common usecase is to create the
+                data model used by an application or plugin.
+            </para>
+        </glossdef>
+    </glossentry>
+
+    <glossentry xml:id="gloss_startupscript">
+        <glossterm>start-up script</glossterm>
+        <glossdef>
+            <para>
+                A script in a supported Java scripting language that will be executed
+                at application startup. A common usecase is to initialize application-scoped
+                data structures or to validate the installation.
+            </para>
+        </glossdef>
+    </glossentry>
+
+</glossary>

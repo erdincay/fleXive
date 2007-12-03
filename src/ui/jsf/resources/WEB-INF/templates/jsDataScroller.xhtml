@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:t="http://myfaces.apache.org/tomahawk">
+
+A client-side data scroller.
+Parameters:
+id - the unique component ID (required)
+startRow - first row currently displayed
+totalRows - number of rows in the dataset (required)
+fetchRows - number of rows per page (required)
+onUpdate - JS function to be called when the position is updated. Takes the JsDataScroller
+           as first parameter (required)
+<ui:composition>
+
+<c:if test="#{empty id}">
+	[jsDataScroller: no ID specified]
+</c:if>
+<c:if test="#{!empty id}">
+	<table id="#{id}" class="dataScroller" cellspacing="0" cellpadding="0">
+		<tr>
+			<td class="button" id="#{id}_first">
+				<a href="javascript:#{id}.first()"><t:graphicImage url="/pub/images/jsDataScroller/first.png" width="16" height="16" border="0"/></a>
+			</td>
+			<td class="button" id="#{id}_previous">
+				<a href="javascript:#{id}.previous()"><t:graphicImage url="/pub/images/jsDataScroller/previous.png" width="16" height="16" border="0"/></a>
+			</td>
+			<td class="scrollPosition">
+				<input type="text" id="#{id}_position" name="#{id}_position"/>
+			</td>
+			<td class="button" id="#{id}_next">
+				<a href="javascript:#{id}.next()"><t:graphicImage url="/pub/images/jsDataScroller/next.png" width="16" height="16" border="0"/></a>
+			</td>
+			<td class="button" id="#{id}_last">
+				<a href="javascript:#{id}.last()"><t:graphicImage url="/pub/images/jsDataScroller/last.png" width="16" height="16" border="0"/></a>
+			</td>
+		</tr>
+	</table>
+	<script type="text/javascript">
+		var #{id} = new JsDataScroller("#{id}", #{startRow}, #{totalRows}, #{fetchRows}, #{onUpdate});
+		#{id}.updateDisplay();
+	</script>
+</c:if>
+
+</ui:composition>
+
+
+</html>

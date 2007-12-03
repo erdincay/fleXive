@@ -1,0 +1,129 @@
+
+.dojoPopupMenu2 {
+	position: absolute;
+	border: 1px solid #90bc0c;
+	/*background:#ebf5cc url(../../js/dojo/src/widget/templates/images/soriaMenuBg.gif) repeat-x bottom left !important;*/
+    background:#ebf5cc !important;
+    padding: 1px;
+	margin-top: 1px;
+	margin-bottom: 1px;
+}
+
+.dojoMenuItem2{
+	white-space: nowrap;
+	font: menu;
+	margin: 0;
+}
+
+.dojoMenuItem2Hover {
+	background-color: #D2E4FD;
+	cursor:pointer;
+	cursor:hand;
+}
+
+.dojoMenuItem2Icon {
+	position: relative;
+	background-position: center center;
+	background-repeat: no-repeat;
+	width: 16px;
+	height: 16px;
+	padding-right: 5px;
+}
+
+.dojoMenuItem2Label {
+	position: relative;
+	vertical-align: middle;
+}
+
+/* main label text */
+.dojoMenuItem2Label {
+	position: relative;
+	vertical-align: middle;
+}
+
+.dojoMenuItem2Accel {
+	position: relative;
+	vertical-align: middle;
+	padding-left: 3px;
+}
+
+/* Disable the rule below to show disabled menu items greyed out instead of removing them completely */
+.dojoMenuItem2Disabled {
+    display: none;
+}
+
+.dojoMenuItem2Disabled .dojoMenuItem2Label,
+.dojoMenuItem2Disabled .dojoMenuItem2Accel {
+	color: #607a9e;
+}
+
+.dojoMenuItem2Submenu {
+	position: relative;
+	background-position: center center;
+	background-repeat: no-repeat;
+	background-image: url(../../js/dojo/src/widget/templates/images/submenu_off.gif);
+	width: 5px;
+	height: 9px;
+	padding-left: 3px;
+}
+.dojoMenuItem2Hover .dojoMenuItem2Submenu {
+	background-image: url(../../js/dojo/src/widget/templates/images/submenu_on.gif);
+}
+
+.dojoMenuItem2Disabled .dojoMenuItem2Submenu {
+	background-image: url(../../js/dojo/src/widget/templates/images/submenu_disabled.gif);
+}
+
+.dojoMenuSeparator2 { 
+	font-size: 1px;
+	margin: 0;
+}
+
+.dojoMenuSeparator2Top {
+	border-bottom: 1px solid #bdbdbd;
+	margin: 5px 5px 5px 5px;
+	font-size: 1px;
+}
+
+.dojoMenuSeparator2Bottom {
+	height: 0;
+	border: 0;/*border-top: 1px solid #90bc0c;*/
+	font-size: 1px;
+}
+
+.dojoMenuBar2 {
+	/*position: relative;*/
+	background:#85aeec url(../../js/dojo/src/widget/templates/images/soriaBarBg.gif) repeat-x top left;
+	border-bottom:1px solid #6b9fec;
+
+}
+
+.dojoMenuBar2Client {
+	padding: 1px;
+}
+
+.dojoMenuBarItem2 {
+	white-space: nowrap;
+	font: menu;
+	margin: 0;
+	position: relative;
+	vertical-align: middle;
+	z-index: 1;
+	padding: 3px 8px;
+}
+
+.dojoMenuBarItem2 span {
+	margin: 0;
+	position: relative;
+	z-index: 2;
+	cursor:pointer;
+	cursor:hand;
+}
+
+.dojoMenuBarItem2Hover {
+	background-color:#d2e4fd;
+}
+
+.dojoMenuBarItem2Disabled span {
+	color: #4f6582;
+}

@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="java" xml:id="jsfsupport_plugin_executor"
+                xmlns="http://docbook.org/ns/docbook"><![CDATA[public class TestExecutorImpl implements TestExecutor {
+    private final List<Integer> results = new ArrayList<Integer>();
+
+    public void pushResult(int result) {
+        results.add(result);
+    }
+
+    public List<Integer> getResults() {
+        return results;
+    }
+}]]></programlisting>

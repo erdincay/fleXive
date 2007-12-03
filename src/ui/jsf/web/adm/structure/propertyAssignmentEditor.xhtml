@@ -1,0 +1,196 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:s="http://myfaces.apache.org/sandbox"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+      <ui:define name="head">
+        <t:stylesheet path="/adm/css/content.css"/>
+        <t:stylesheet path="/adm/css/structureEditor.css"/>
+        <script type="text/javascript">
+           dojo.require("dojo.widget.FilteringTable");
+        </script>
+      </ui:define>
+
+    <ui:define name="body">
+        <h:form id="frm" enctype="multipart/form-data">
+            <c:if test="#{empty propertyEditorBean.parseRequestParameters}"> </c:if>
+            <h:panelGroup rendered="#{structureTreeControllerBean.doAction}">
+                <script type="text/javascript">
+                    var treeframe=parent.getNavFrameWnd();
+                    treeframe.doTreeAction('#{structureTreeControllerBean.action}',#{structureTreeControllerBean.id}, '#{structureTreeControllerBean.value}');
+                </script>
+            </h:panelGroup>
+            <adm:tab label="#{fxMessageBean['PropertyEditor.tab.propertyAssignment']}" active="true" id="tab1"/>
+            <adm:tab label="#{fxMessageBean['PropertyEditor.tab.property']}" active="false" id="tab2"
+            	bean="#{propertyEditorBean}" action="showPropertyEditor"/>
+            <adm:tab label="#{fxMessageBean['PropertyEditor.tab.option']}" active="false" id="tab3"
+            	bean="#{propertyEditorBean}" action="showPropertyOptionEditor"/>
+
+            <fx:formRow labelKey="PropertyEditor.label.xPath" id="xPath">
+                    <h:outputText id="xPath" value="#{propertyEditorBean.assignment.XPath}"/>
+            </fx:formRow>
+
+            <fx:formRow labelKey="PropertyEditor.label.label" id="label">
+                    <fx:fxValueInput id="label" value="#{propertyEditorBean.label}"
+                         readOnly="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"/>
+            </fx:formRow>
+            <fx:formRow labelKey="PropertyEditor.label.alias" id="alias">
+                    <h:inputText id="alias" value="#{propertyEditorBean.alias}"
+                         disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"/>
+            </fx:formRow>
+            <fx:formRow labelKey="PropertyEditor.label.hint" id="hint">
+                    <fx:fxValueInput id="hint" value="#{propertyEditorBean.hint}"
+                             readOnly="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"/>
+            </fx:formRow>
+
+             <fx:formRow labelKey="PropertyEditor.label.defaultValue" id="defaultValue">
+                <fx:fxValueInput id="defaultValue" value="#{propertyEditorBean.defaultValue}"
+                         readOnly="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"/>
+            </fx:formRow>
+
+            <fx:formRow labelKey="PropertyEditor.label.defaultMultiplicity" id="defaultMultiplicity">
+                <h:inputText id="defaultMultiplicity" value="#{propertyEditorBean.defaultMultiplicity}"
+                     disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"
+                     required="true" style="width:40px"/>
+            </fx:formRow>
+
+             <fx:formRow labelKey="PropertyEditor.label.enabled" id="enabled">
+                <h:selectBooleanCheckbox id="enabled" value="#{propertyEditorBean.enabled}"
+                        disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"/>
+            </fx:formRow>
+
+            <fx:fieldSet legend="#{fxMessageBean['PropertyEditor.label.overridePropertyOptions']}">
+                <fx:formRow labelKey="PropertyEditor.label.multiLang" id="multiLang">
+                        <h:selectBooleanCheckbox id="multiLang" value="#{propertyEditorBean.multiLang}"
+                             disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"
+                             onclick="confirmMultiLang(#{propertyEditorBean.multiLang});"/>
+                </fx:formRow>
+
+                <ui:fragment rendered="#{propertyEditorBean.multiLang}">
+                    <div style="padding-left:17px">
+                        <fx:formRow labelKey="PropertyEditor.label.defaultLanguage" id="defaultLanguage">
+                         <t:selectOneListbox size="1" id="defaultLanguage" value="#{propertyEditorBean.defaultLanguage}"
+                                converter="FxLanguageConverter"
+                                disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}">
+                                <f:selectItems value="#{fxSelectBean.languages}" />
+                            </t:selectOneListbox>
+                        </fx:formRow>
+                    </div>
+                </ui:fragment>
+
+                <fx:formRow labelKey="PropertyEditor.label.mayOverrideBaseMultiplicity" id="mayOverrideBaseMultiplicity">
+                        <h:selectBooleanCheckbox id="mayOverrideBaseMultiplicity" value="#{propertyEditorBean.propertyMayOverrideBaseMultiplicity}"
+                             disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"
+                             onclick="confirmOverrideBaseMultiplicity(#{propertyEditorBean.propertyMayOverrideBaseMultiplicity});"/>
+                </fx:formRow>
+
+                <ui:fragment rendered="#{propertyEditorBean.propertyMayOverrideBaseMultiplicity}">
+                    <div style="padding-left:17px">
+                        <fx:formRow labelKey="PropertyEditor.label.multiplicity" id="multiplicity">
+                            <h:inputText id="multiplicity" value="#{propertyEditorBean.minMultiplicity}"
+                                     disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"
+                                     required="true" style="width:40px"/>
+                            <h:inputText value="#{propertyEditorBean.maxMultiplicity}"
+                                            disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"
+                                            required="true" style="width:40px"/>
+                        </fx:formRow>
+                    </div>
+                </ui:fragment>
+
+                <fx:formRow labelKey="PropertyEditor.label.mayOverrideACL" id="mayOverrideACL">
+                        <h:selectBooleanCheckbox id="mayOverrideACL" value="#{propertyEditorBean.propertyMayOverrideACL}"
+                             disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"
+                             onclick="confirmOverrideAcl(#{propertyEditorBean.propertyMayOverrideACL});"/>
+                </fx:formRow>
+
+                <ui:fragment rendered="#{propertyEditorBean.propertyMayOverrideACL}">
+                     <div style="padding-left:17px">
+                        <fx:formRow labelKey="PropertyEditor.label.acl" id="acl">
+                            <t:selectOneListbox size="1" id="acl" value="#{propertyEditorBean.acl}"
+                                    disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}">
+                                <f:selectItems value="#{fxSelectBean.structureACLs}" />
+                            </t:selectOneListbox>
+                        </fx:formRow>
+                    </div>
+                </ui:fragment>
+            </fx:fieldSet>
+
+            <ui:fragment rendered="#{propertyEditorBean.mayEdit and not propertyEditorBean.editMode}">
+                <adm:commandButton labelKey="PropertyEditor.button.editMode" location="both"
+                        icon="edit"  action="toggleEditMode"  bean="#{propertyEditorBean}" id="editModeButton"/>
+            </ui:fragment>
+
+            <ui:fragment rendered="#{propertyEditorBean.editMode}">
+                <adm:commandButton labelKey="PropertyEditor.button.cancel" location="both"
+                        icon="cancel" id="cancelButton" lockscreen="false"
+                        onclick="parent.getNavFrameWnd().openNode(#{propertyEditorBean.assignment.id}, false);return false;"/>
+            </ui:fragment>
+
+            <ui:fragment rendered="#{propertyEditorBean.mayEdit and propertyEditorBean.editMode}">
+                <adm:commandButton labelKey="PropertyEditor.button.save" location="both" 
+                                icon="save"  action="saveChanges"  bean="#{propertyEditorBean}" id="saveChangesButton">
+                </adm:commandButton>
+           </ui:fragment>
+             <ui:fragment rendered="#{propertyEditorBean.mayDelete and not propertyEditorBean.systemInternal and propertyEditorBean.editMode}">
+                <adm:commandButton labelKey="PropertyEditor.button.delete.assignment" location="both" lockscreen="false"
+                                icon="delete" onclick="parent.getNavFrameWnd()._deleteAssignment(#{propertyEditorBean.assignment.id});return false;"
+                                id="deleteAssignmentButton">
+                </adm:commandButton>
+           </ui:fragment>
+
+
+            <adm:toolbarPluginButtons/>
+        </h:form>
+
+
+        <script type="text/javascript">
+            function confirmOverrideBaseMultiplicity(value) {
+                choice = confirm("#{fxMessageBean['PropertyEditor.message.confirmOverrideBaseMultiplicity']}");
+                if (choice) {
+                    document.forms["frm"].submit();
+                }
+                else {
+                    document.getElementById("frm:mayOverrideBaseMultiplicity").checked = value;
+                }
+            }
+
+            function confirmMultiLang(value) {
+                choice = confirm("#{fxMessageBean['PropertyEditor.message.confirmMultiLang']}");
+                if (choice) {
+                    document.forms["frm"].submit();
+                }
+                else {
+                    document.getElementById("frm:multiLang").checked = value;
+                }
+            }
+
+            function confirmOverrideAcl(value) {
+                choice = confirm("#{fxMessageBean['PropertyEditor.message.confirmOverrideACL']}");
+                if (choice) {
+                    document.forms["frm"].submit();
+                }
+                else {
+                    document.getElementById("frm:mayOverrideACL").checked = value;
+                }
+            }
+
+            function getNewLabel() {
+                alert(document.getElementById("frm:label"));
+                return document.getElementById("frm:label").value;
+            }
+            
+        </script>
+
+    </ui:define>
+</ui:composition>
+</body>
+</html>

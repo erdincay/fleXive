@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+
+The common tabs displayed on search result/briefcase pages.
+
+Parameters:
+* activeTab - name of the active tab. The tab names are:
+    # query - search query editor
+    # results - search results / briefcase results
+    # content - the content editor (or readonly view)
+    # briefcase - briefcase details
+
+<ui:composition>
+    <c:set var="isBriefcase" value="#{fxSearchResultBean.sessionData.briefcaseId != -1}"/>
+
+    <!-- Query editor tab -->
+    <adm:tab active="#{activeTab == 'query'}" label="#{fxMessageBean['QueryEditor.tabtitle.query']}" id="tab1" bean="#{fxQueryEditorBean}"
+            action="show"/>
+    <!-- Search result tab (if !isBriefcase) -->
+    <adm:tab active="#{activeTab == 'results'}" label="#{fxMessageBean['SearchResult.tabtitle.results']}" id="tab2" bean="#{fxSearchResultBean}" action="show" rendered="#{!isBriefcase}"/>
+    <!-- Briefcase result tab (if isBriefcase) -->
+    <adm:tab active="#{activeTab == 'results'}" label="#{fxMessageBean['SearchResult.tabtitle.briefcase,#{fxSearchResultBean.briefcase.name}']}" id="tab2" bean="#{fxSearchResultBean}" action="show" rendered="#{isBriefcase}"/>
+    <!-- Briefcase details tab -->
+    <adm:tab active="#{activeTab == 'briefcase'}" label="#{fxMessageBean['SearchResult.tabtitle.briefcase.details']}" id="tab3"
+            bean="#{briefcaseBean}" action="load" rendered="#{isBriefcase}"/>
+    <!-- Content editor tab -->
+    <adm:tab  active="#{activeTab == 'content'}" label="#{fxMessageBean['Content.tabtitle.editor,#{contentEditorBean.id},#{contentEditorBean.version}']}" id="tab4"
+            bean="#{contentEditorBean}" action="load" rendered="#{contentEditorBean.id != -1 and activeTab != 'content'}"/>
+</ui:composition>
+
+
+</html>

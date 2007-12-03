@@ -1,0 +1,46 @@
+/**
+ * basic settings for user-defined configuration parameters
+ *
+ * @author Daniel Lichtenberger, UCS
+ * @version $Rev$
+ */
+
+import com.flexive.shared.*;
+import com.flexive.shared.search.*;
+
+void setupResultPreferences() {
+    // default list view
+    EJBLookup.getResultPreferencesEngine().saveDefaultPreferences(
+            new ResultPreferences(
+                [new ResultColumnInfo(Table.CONTENT, "@pk", null),
+                 new ResultColumnInfo(Table.CONTENT, "caption", null)],
+                [new ResultOrderByInfo(Table.CONTENT, "@pk", null, SortDirection.DESCENDING)],
+                25, 0
+            ), -1,
+            ResultViewType.LIST, AdminResultLocations.DEFAULT);
+    EJBLookup.getResultPreferencesEngine().saveDefaultPreferences(
+            new ResultPreferences(
+                [new ResultColumnInfo(Table.CONTENT, "@pk", null),
+                 new ResultColumnInfo(Table.CONTENT, "caption", null)],
+                [new ResultOrderByInfo(Table.CONTENT, "@pk", null, SortDirection.DESCENDING)],
+                25, 0
+            ), -1,
+            ResultViewType.LIST, AdminResultLocations.ADMIN);
+    // default thumbnail view
+    EJBLookup.getResultPreferencesEngine().saveDefaultPreferences(
+            new ResultPreferences(
+                [new ResultColumnInfo(Table.CONTENT, "@pk", null)],
+                [new ResultOrderByInfo(Table.CONTENT, "@pk", null, SortDirection.DESCENDING)],
+                25, 0
+            ), -1,
+            ResultViewType.THUMBNAILS, AdminResultLocations.DEFAULT);
+    EJBLookup.getResultPreferencesEngine().saveDefaultPreferences(
+            new ResultPreferences(
+                [new ResultColumnInfo(Table.CONTENT, "@pk", null)],
+                [new ResultOrderByInfo(Table.CONTENT, "@pk", null, SortDirection.DESCENDING)],
+                25, 0
+            ), -1,
+            ResultViewType.THUMBNAILS, AdminResultLocations.ADMIN);
+}
+
+setupResultPreferences();

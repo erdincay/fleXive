@@ -1,0 +1,357 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+
+<ui:composition template="/adm/templates/navigation.xhtml">
+    <ui:define name="content">
+
+		<script type="text/javascript">
+		<!--
+            var treeLiveMode = false;
+            var treePathMode = false;
+            var cutNodeId = -1;
+            var copyNodeId = -1;
+
+            function toggleLiveMode() {
+                treeLiveMode = !treeLiveMode;
+                setImage("mainNavForm:imgTreeLive", "adm/images/layout/" + (treeLiveMode ? "tree_live.png" : "tree_edit.png"));
+                getFxController().liveMode = treeLiveMode;
+                reloadContentTree();
+            }
+
+            function toggleLabelMode() {
+                treePathMode = !treePathMode;
+                setImage("mainNavForm:imgTreeLabel", "adm/images/layout/tree_label_" + (treePathMode ? "path" : "caption") + ".png");
+                getFxController().pathMode = treePathMode;
+                reloadContentTree();
+            }
+
+            function contentTreeClickHandler(node, doubleClick) {
+                if (doubleClick) {
+                    if (node.referenceId && node.referenceId != -1) {
+                        // open content editor
+                        invokeContentAction("adm/content/contentEditor.jsf", "editInstance", {id: node.referenceId, readOnly: true});
+                    } else {
+                        // open node editor
+                        invokeContentAction("adm/content/treeNodeEditor.jsf", "editNode", {id: node.objectId});
+                    }
+                } else if (parent.frames["contentFrame"].addTreeNode) {
+                    // add to query
+                    parent.frames["contentFrame"].addTreeNode(node.objectId, treeLiveMode);
+                }
+            }
+
+            // open the content editor for the current node
+            function editContent(menuItem) {
+                invokeContentAction("adm/content/contentEditor.jsf", "editInstance", {id: getReferenceId(menuItem)});
+            }
+
+            // open the content editor for the current node
+            function showContent(menuItem) {
+                invokeContentAction("adm/content/contentEditor.jsf", "editInstance", {id: getReferenceId(menuItem), readOnly: true});
+            }
+
+            // open the tree node editor for the current node
+            function editNode(menuItem) {
+                invokeContentAction("adm/content/treeNodeEditor.jsf", "editNode", {id: getObjectId(menuItem) });
+            }
+
+            // create new content below the current node
+            function createContent(menuItem, typeId) {
+                invokeContentAction("adm/content/contentEditor.jsf", "newInstance", {typeId: typeId, nodeId: getObjectId(menuItem)});
+            }
+
+            // attach node in the content editor
+            function attachNode(menuItem) {
+                if (!getContentFrame().isContentEditor) {
+                    alert("#{fxMessageBean['ContentTree.dialog.noEditor']}");
+                    return;
+                }
+                getContentFrame().addTreeNode(getObjectId(menuItem));
+            }
+
+            // remove the tree node
+            function removeNode(menuItem) {
+                if (!confirm("#{fxMessageBean['ContentTree.dialog.confirm.removeNode']}")) {
+                    return;
+                }
+                //getFxController().removeContent = false;
+                //getFxController().destroyChild(menuItem.getTreeNode());
+                try {
+                    getJsonRpc().ContentTreeEditor.remove(getObjectId(menuItem), false, treeLiveMode, false);
+                    reloadContentTree();
+                } catch (e) {
+                    alert(e.message);
+                }
+            }
+
+            // remove the tree node and the attached content instance
+            function removeContent(menuItem) {
+                if (!confirm("#{fxMessageBean['ContentTree.dialog.confirm.removeContent']}")) {
+                    return;
+                }
+                //getFxController().removeContent = true;
+                //getFxController().destroyChild(menuItem.getTreeNode());
+                try {
+                    getJsonRpc().ContentTreeEditor.remove(getObjectId(menuItem), true, treeLiveMode, false);
+                    reloadContentTree();
+                } catch (e) {
+                    alert(e.message);
+                }
+            }
+
+            // create a subnode for the current node
+            function createFolder(menuItem) {
+                var name = prompt("#{fxMessageBean['ContentTree.dialog.prompt.createFolder']}", "#{fxMessageBean['ContentTree.dialog.prompt.createFolder.default']}");
+                if (name != null && name.length > 0) {
+                    try {
+                        getJsonRpc().ContentTreeEditor.createFolder(getObjectId(menuItem), name);
+                        reloadContentTree();
+                    } catch (e) {
+                        alert(e.message);
+                    }
+                }
+            }
+
+           function querySubTree(menuItem) {
+                var nodeId = getObjectId(menuItem);
+                if (parent.frames["contentFrame"].isQueryEditor) {
+                    // add node to query
+                    parent.frames["contentFrame"].addTreeNode(nodeId);
+                } else {
+                    // open query editor
+                    invokeContentAction("adm/search/query.jsf", "nodeSearch", {nodeId: getObjectId(menuItem), liveMode: treeLiveMode});
+                }
+            }
+
+            function querySubTreeImmediate(menuItem) {
+                // submit query
+                invokeContentAction("adm/search/searchResult.jsf", "nodeSearch", {nodeId: getObjectId(menuItem)});
+            }
+
+            // attach the selected rows from the content frame
+            function attachContentSelection(menuItem) {
+                try {
+                    getJsonRpc().ContentTreeEditor.addReferences(getObjectId(menuItem), extractPkIds(getContentFrame().rowSelection.getSelected()));
+                    reloadContentTree();
+                } catch (e) {
+                    alert(e.message);
+                }
+            }
+
+            // start inline editing of a tree node
+            function editStart(menuItem) {
+                getFxController().editLabelStart(menuItem.getTreeNode());
+            }
+
+            // activate the tree node
+            function activateNode(menuItem) {
+                try {
+                    getJsonRpc().ContentTreeEditor.activate(getObjectId(menuItem), false);
+                    reloadContentTree();
+                } catch (e) {
+                    alert(e.message);
+                }
+            }
+
+            // activate the tree node and its children
+            function activateNodeAndChildren(menuItem) {
+                try {
+                    getJsonRpc().ContentTreeEditor.activate(getObjectId(menuItem), true);
+                    reloadContentTree();
+                } catch (e) {
+                    alert(e.message);
+                }
+            }
+
+            // deactivate a subtree
+            function deactivateNodeAndChildren(menuItem) {
+                if (!confirm("#{fxMessageBean['ContentTree.dialog.confirm.deactivateNodeWithChildren']}")) {
+                    return;
+                }
+                getFxController().removeContent = false;
+                getFxController().destroyChild(menuItem.getTreeNode());
+            }
+
+
+            // deactivate a single folder, its children should be reattached to this tree node
+            function deactivateNode(menuItem) {
+                if (!confirm("#{fxMessageBean['ContentTree.dialog.confirm.deactivateNode']}")) {
+                    return;
+                }
+                try {
+                    getJsonRpc().ContentTreeEditor.remove(getObjectId(menuItem), /* remove content */ false,
+                            /* live tree */ true, /* delete children */ false);
+                    reloadContentTree();
+                } catch (e) {
+                    alert(e.message);
+                }
+            }
+
+
+            // Cut the current tree node
+            function cutNode(menuItem) {
+                cutNodeId = getObjectId(menuItem);
+                copyNodeId = -1;
+            }
+
+            // Copy the current tree node
+            function copyNode(menuItem) {
+                copyNodeId = getObjectId(menuItem);
+                cutNodeId = -1;
+            }
+
+            // Paste a previously copied or cut tree node
+            function pasteNode(menuItem) {
+                if (cutNodeId == -1 && copyNodeId == -1) {
+                    alert("#{fxMessageBean['ContentTree.dialog.noNodeSelected']}");
+                    return;
+                }
+                try {
+                    if (cutNodeId != -1) {
+                        getJsonRpc().ContentTreeEditor.move(cutNodeId, getObjectId(menuItem), 0, treeLiveMode);
+                    } else if (copyNodeId != -1) {
+                        getJsonRpc().ContentTreeEditor.copy(copyNodeId, getObjectId(menuItem), 0, treeLiveMode);
+                    }
+                    reloadContentTree();
+                } catch (e) {
+                    alert(e.message);
+                }
+                cutNodeId = copyNodeId = -1;
+            }
+
+
+        function menuHandler(menuItem) {
+                alert("Menu handler called: " + menuItem);
+            }
+
+            function getObjectId(menuItem) {
+                return menuItem.getTreeNode ? menuItem.getTreeNode().objectId : -1;
+            }
+
+            function getReferenceId(menuItem) {
+                return menuItem.getTreeNode ? menuItem.getTreeNode().referenceId : -1;
+            }
+
+            function reloadContentTree() {
+                getFxController().reloadAndKeepExpanded()
+            }
+
+            function getFxController() {
+                return dojo.widget.byId('contentTree').fxController;
+            }
+
+            function showTreeMenu() {
+                var menu = dojo.widget.byId("contentTreeMenu");
+                if (menu.getTreeNode() == null) {
+                    return;
+                }
+                var contentAvailable = getContentFrame().rowSelection != null && getContentFrame().rowSelection.getSelected && getContentFrame().rowSelection.getSelected().length > 0;
+                setActionDisabled(menu.getTreeNode(), "attachContentSelection", !contentAvailable);
+                setActionDisabled(menu.getTreeNode(), "attachNode", !(getContentFrame().isContentEditor && !getContentFrame().isReadOnly));
+                setActionDisabled(menu.getTreeNode(), "pasteNode", cutNodeId == -1 && copyNodeId == -1);
+                menu.show_();
+            }
+
+            function enableSearchMode() {
+                setBackgroundImage("adm/images/tree/background_search.png");
+            }
+
+            function disableSearchMode() {
+                removeBackgroundImage();
+            }
+
+            dojo.addOnLoad(function() {
+                if (getContentFrame().isQueryEditor) {
+                    enableSearchMode();
+                }
+            });
+        //-->
+		</script>
+
+        <adm:tree name="contentTree" targetId="contentTreeContainer"  extensionPoint="/tree/adm/content"
+                 clickHandler="contentTreeClickHandler"
+                 menuHandler="menuHandler"
+                 contentTree="true"
+                 expandFirstNode="true"
+                 dragAndDrop="true"
+                 docIcons="true"
+                 editor="true"
+                 selector="true">
+
+            <adm:treeContextMenu showHandler="showTreeMenu">
+                <adm:treeContextMenuItem treeActions="attachContentSelection" icon="add" labelKey="ContentTree.menu.attachContentSelection" clickHandler="attachContentSelection"/>
+                <adm:treeContextMenuItem treeActions="attachNode" icon="attach" labelKey="ContentTree.menu.attachNode" clickHandler="attachNode"/>
+                <adm:treeContextMenuItem treeActions="showContent" icon="open" labelKey="ContentTree.menu.show" clickHandler="showContent"/>
+                <adm:treeContextMenuItem treeActions="editContent" icon="edit" labelKey="ContentTree.menu.edit" clickHandler="editContent"/>
+                <adm:treeContextMenuItem treeActions="rename" icon="rename" labelKey="ContentTree.menu.rename" clickHandler="editStart"/>
+                <adm:treeContextMenuItem treeActions="searchSubtree" icon="search" labelKey="ContentTree.menu.querySubTree" clickHandler="querySubTree"/>
+                <adm:treeContextMenuItem treeActions="searchSubtree" icon="search" labelKey="ContentTree.menu.querySubTreeImmediate" clickHandler="querySubTreeImmediate"/>
+                <fx:menuSeparator/>
+                <adm:treeContextMenuItem icon="createFolder" treeActions="createFolder" labelKey="ContentTree.menu.createNode" clickHandler="createFolder"/>
+                <fx:menuSeparator/>
+                <adm:treeContextMenuItem icon="new" treeActions="createContent" labelKey="ContentTree.menu.create">
+                    <c:forEach var="selectItem" items="#{fxSelectBean.types}">
+                        <c:if test="#{selectItem.value > 0}">
+                            <adm:treeContextMenuItem label="#{selectItem.label}" clickHandler="function(menuItem) { createContent(menuItem, #{selectItem.value}); }"/>
+                        </c:if>
+                    </c:forEach>
+                </adm:treeContextMenuItem>
+                <fx:menuSeparator/>
+                <adm:treeContextMenuItem treeActions="activateNode" icon="activate" labelKey="ContentTree.menu.activateNode" clickHandler="activateNode"/>
+                <adm:treeContextMenuItem treeActions="activateNodeAndChildren" icon="activateWithChildren" labelKey="ContentTree.menu.activateWithChildren" clickHandler="activateNodeAndChildren"/>
+                <adm:treeContextMenuItem treeActions="deactivateNode" icon="deactivate" labelKey="ContentTree.menu.deactivateNode" clickHandler="deactivateNode"/>
+                <adm:treeContextMenuItem treeActions="deactivateNodeAndChildren" icon="deactivateWithChildren" labelKey="ContentTree.menu.deactivateWithChildren" clickHandler="deactivateNodeAndChildren"/>
+                <adm:treeContextMenuItem treeActions="editNode" icon="editNode" labelKey="ContentTree.menu.editNode" clickHandler="editNode"/>
+                <fx:menuSeparator/>
+                <adm:treeContextMenuItem treeActions="pasteNode" icon="paste" labelKey="ContentTree.menu.pasteNode" clickHandler="pasteNode"/>
+                <adm:treeContextMenuItem treeActions="cutNode" icon="cut" labelKey="ContentTree.menu.cutNode" clickHandler="cutNode"/>
+                <adm:treeContextMenuItem treeActions="copyNode" icon="copy" labelKey="ContentTree.menu.copyNode" clickHandler="copyNode"/>
+                <adm:treeContextMenuItem treeActions="removeNode" icon="detach" labelKey="ContentTree.menu.removeNode" clickHandler="removeNode"/>
+                <adm:treeContextMenuItem treeActions="removeContent" icon="remove" labelKey="ContentTree.menu.remove" clickHandler="removeContent"/>
+            </adm:treeContextMenu>
+            
+            <adm:jsonRpcCall method="ContentTreeWriter.renderContentTree" args="1, 2, false, false"/>
+        </adm:tree>
+
+        <div id="contentTreeContainer" style="-moz-user-select:none">
+        </div>
+    </ui:define>
+
+    <ui:define name="mainMenu">
+        <div class="menu">
+        <fx:menu name="mainMenu">
+
+            <fx:menuItem labelKey="Content.menu.new.content">
+                <c:forEach var="selectItem" items="#{fxSelectBean.types}">
+                    <c:if test="#{selectItem.value > 0}">
+                        <fx:menuItem label="#{selectItem.label}" clickHandler="function(menuItem) { createContent(menuItem, #{selectItem.value}); }"/>
+                    </c:if>
+                </c:forEach>
+            </fx:menuItem>
+
+            <ui:include src="/adm/templates/navigation.menu.tabs.xhtml"/>
+        </fx:menu>
+
+            
+        </div>
+    </ui:define>
+
+    <ui:define name="reloadButton">
+        <a href="javascript:toggleLabelMode()"><t:graphicImage id="imgTreeLabel" url="/adm/images/layout/tree_label_caption.png" alt="#{fxMessageBean['Content.button.toggleLabelMode']}" title="#{fxMessageBean['Content.button.toggleLabelMode']}" style="position:absolute;right:55px;margin-top:2px;border:0;"/></a>
+        <a href="javascript:toggleLiveMode()"><t:graphicImage id="imgTreeLive" url="/adm/images/layout/tree_edit.png" alt="#{fxMessageBean['Content.button.toggleLiveMode']}" title="#{fxMessageBean['Content.button.toggleLiveMode']}" style="position:absolute;right:35px;margin-top:2px;border:0;"/></a>
+        <a href="javascript:reloadContentTree()"><t:graphicImage url="/adm/images/layout/reload.png" alt="reload" style="position:absolute;right:15px;margin-top:2px;border:0;"/></a>
+    </ui:define>
+</ui:composition>
+
+
+</html>
+        

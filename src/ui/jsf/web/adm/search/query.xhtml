@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:s="http://myfaces.apache.org/sandbox"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+
+	<ui:define name="head">
+		<script type="text/javascript">
+		<!--
+			dojo.require("dojo.widget.Dialog");
+		//-->
+		</script>
+        <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/queryEditor.js"> </script>
+    </ui:define>
+	
+	<ui:define name="searchIds">"sqlPopupContainer"</ui:define>
+
+    <ui:define name="messages">
+        <adm:messages disableErrorRegistration="true"/>
+    </ui:define>
+	
+    <ui:define name="body">
+        <a4j:form id="frm">
+            <adm:resultTabs activeTab="query"/>
+
+            <script type="text/javascript">
+            <!--
+            	var form = document.frm;
+                var isQueryEditor = true;
+
+                // Add a query for a structure element of the given type (see StructureTreeWriter for possible values)
+                function addQueryNode(id, nodeDocType) {
+                    if (nodeDocType.indexOf("Assignment") == 0) {
+                        addProperty(id);
+                    } else if (nodeDocType == "Type") {
+                        addTypeQuery(id);
+                    } else {
+                        // do nothing
+                    }
+                }
+
+                function addProperty(propertyId) {
+					var button = document.getElementById("frm:addPropertyButton");
+					form["frm:addAssignmentId"].value = propertyId;
+					button.onclick();
+            	}
+            	
+                function addTreeNode(nodeId, liveMode) {
+                    var button = document.getElementById("frm:addTreeNodeButton");
+                    form["frm:addAssignmentId"].value = nodeId;
+                    form["frm:addNodeLive"].value = liveMode;
+                    button.onclick();
+                }
+
+                function addTypeQuery(typeId) {
+                    var button = document.getElementById("frm:addTypeButton");
+                    form["frm:addAssignmentId"].value = typeId;
+                    button.onclick();
+                }
+
+                function toggleBriefcase(element) {
+                    var bd = document.getElementById("frm:briefcaseData");
+                    bd.style.display = element.checked ? 'inline' : 'none';
+                }
+
+                dojo.addOnLoad(function() {
+                    // toggle search mode in content/structure frames
+                    if (parent.getContentNavFrame().enableSearchMode) {
+                        parent.getContentNavFrame().enableSearchMode();
+                    }
+                    if (parent.getStructureNavFrame().enableSearchMode) {
+                        parent.getStructureNavFrame().enableSearchMode();
+                    }
+                });
+                    
+                dojo.addOnUnload(function() {
+                    // toggle search mode in content/structure frames
+                    if (parent.getContentNavFrame().disableSearchMode) {
+                        parent.getContentNavFrame().disableSearchMode();
+                    }
+                    if (parent.getStructureNavFrame().disableSearchMode) {
+                        parent.getStructureNavFrame().disableSearchMode();
+                    }
+                });
+            //-->
+            </script>
+
+            <a4j:region>
+	            <h:inputHidden id="addAssignmentId" value="#{fxQueryEditorBean.addAssignmentId}"/>
+	            <h:inputHidden id="addAssignmentNodeId" value="#{fxQueryEditorBean.addAssignmentNodeId}"/>
+                <h:inputHidden id="nodeSelection" value="#{fxQueryEditorBean.nodeSelection}"/>
+                <h:inputHidden id="addNodeLive" value="#{fxQueryEditorBean.addNodeLive}"/>
+
+
+                <!-- The actual query editor -->
+
+                <fx:queryEditor nodes="#{fxQueryEditorBean.rootNode.children}"
+                                addAssignmentNode="form['frm:addAssignmentNodeId']"
+                                addAssignmentNodeValue="#{fxQueryEditorBean.addAssignmentNodeId}"
+                                selectionNode="form['frm:nodeSelection']"
+                                emptyMessageKey="QueryEditor.label.emptyQuery.backend"/>
+			</a4j:region>
+
+            <br/>
+            <fx:fieldSet legend="#{fxMessageBean['QueryEditor.label.legend.parameters']}">
+                <!-- Cache options -->
+                <fx:formRow labelKey="QueryEditor.label.cacheMode" id="cacheMode">
+                    <h:selectOneListbox id="cacheMode" value="#{fxSearchResultBean.cacheMode}" size="1" required="true">
+                        <f:selectItems value="#{fxSelectBean.cacheModes}" />
+                    </h:selectOneListbox>
+                </fx:formRow>
+
+                <!-- Briefcase options -->
+
+                <fx:formRow labelKey="QueryEditor.label.briefcase.create" id="createBriefcase">
+                    <t:selectBooleanCheckbox id="createBriefcase" value="#{fxSearchResultBean.createBriefcase}"
+                                             onchange="toggleBriefcase(this)"/>
+                </fx:formRow>
+
+                <h:panelGroup id="briefcaseData" style="display:none">
+                    <fx:formRow labelKey="QueryEditor.label.briefcase.name" id="briefcaseName" >
+                        <t:inputText id="briefcaseName" value="#{fxSearchResultBean.briefcaseName}" styleClass="fxValueTextInput"/>
+                    </fx:formRow>
+                    <fx:formRow labelKey="QueryEditor.label.briefcase.description" id="briefcaseDescription">
+                        <t:inputText id="briefcaseDescription" value="#{fxSearchResultBean.briefcaseDescription}" styleClass="fxValueTextInput"/>
+                    </fx:formRow>
+                    <fx:formRow labelKey="QueryEditor.label.briefcase.shared" id="briefcaseACL">
+                        <h:selectOneListbox id="briefcaseACL" value="#{fxSearchResultBean.briefcaseAclId}" size="1" styleClass="fxValueSelectInput">
+                            <f:selectItem itemValue="-1" itemLabel=""/>
+                            <f:selectItems value="#{fxSelectBean.briefcaseACLs}" />
+                        </h:selectOneListbox>
+                    </fx:formRow>
+                </h:panelGroup>
+            </fx:fieldSet>
+
+            <br/><br/>
+			
+			<adm:commandButton id="searchButton" location="both" bean="#{fxQueryEditorBean}" action="executeSearch" labelKey="QueryEditor.button.submit" icon="search">
+                <f:setPropertyActionListener target="#{fxQueryEditorBean.location}" value="#{fxSystemBean.adminResultLocation}"/>
+            </adm:commandButton>
+            <adm:commandButton id="preferencesButton" location="toolbar" labelKey="ResultPreferences.button.open" bean="#{resultPreferencesBean}" action="show" icon="configure"/>
+
+			
+			
+            <adm:toolbarPluginButtons/>
+        </a4j:form>
+    </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

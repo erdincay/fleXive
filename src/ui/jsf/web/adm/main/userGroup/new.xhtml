@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:s="http://myfaces.apache.org/sandbox"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+
+    <ui:define name="body">        
+        <h:form id="frm">
+            <adm:tab label="#{fxMessageBean['UserGroup.tabtitle.create']}" active="true" id="createGroupTable"/>
+            <fx:formRow label="#{fxMessageBean['UserGroup.field.mandator']}" id="mandator">
+                <c:if test="${fxSystemBean.userTicket.globalSupervisor}">
+                    <h:selectOneListbox id="mandator" value="#{userGroupBean.mandator}" size="1"
+                                        converter="SelectableConverter" required="true">
+                        <f:selectItems value="#{fxSelectBean.mandatorsForEdit}" />
+                    </h:selectOneListbox>
+                </c:if>
+                <c:if test="${fxSystemBean.userTicket.globalSupervisor==false}">
+                    <h:inputText readonly="true" id="mandator"
+                                 value="#{mandatorBean.mandatorsById[fxSystemBean.userTicket.mandatorId].name}" />
+                </c:if>
+            </fx:formRow>
+
+            <fx:formRow label="#{fxMessageBean['UserGroup.field.name']}" id="groupname">
+                <h:inputText id="groupname" value="#{userGroupBean.name}" required="true"/>
+            </fx:formRow>
+
+            <fx:formRow label="#{fxMessageBean['UserGroup.field.color']}" id="color">
+                <h:inputText id="color" value="#{userGroupBean.color}" />
+            </fx:formRow>
+
+            <fx:formRow label="#{fxMessageBean['UserGroup.field.roles']}" id="roles" height="95">
+                <h:selectManyListbox id="roles" value="#{userGroupBean.roles}" size="6" converter="SelectableConverter">
+                    <f:selectItems value="#{fxSelectBean.roles}" />
+                </h:selectManyListbox>
+            </fx:formRow>
+
+            <adm:commandButton id="myButton" labelKey="UserGroup.button.create"
+                              icon="new"  bean="#{userGroupBean}" action="create"/>
+            <adm:commandButton id="cancelButton" labelKey="UserGroup.button.cancel"
+                              icon="cancel" action="userGroupOverview" immediate="true"/>
+
+            <adm:toolbarPluginButtons/>
+        </h:form>
+    </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

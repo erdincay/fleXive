@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="flexive-docbook" basedir="." default="book">
+    <!-- Declare base paths -->
+    <property file="build.properties"/>
+    <property name="build.dir" value="${basedir}/../build"/>
+    <property name="build.doc.dir" value="${basedir}/../build/book"/>
+    <property name="book.html.file" value="${build.doc.dir}/xhtml/index.xhtml"/>
+    <property name="book.website.dir" value="${build.doc.dir}/website/"/>
+    <property name="book.fo.dir" value="${build.doc.dir}/fo/"/>
+    <property name="book.fo.file" value="${build.doc.dir}/fo/flexive-book.fo"/>
+    <property name="book.pdf.file" value="${build.doc.dir}/flexive-book.pdf"/>
+
+    <property name="docbook.resources.dir" value="${basedir}/resources"/>
+    <property name="docbook.stylesheets.zip" value="${docbook.resources.dir}/docbook-xsl.zip"/>
+    <property name="docbook.styles.dir" value="${build.dir}/styles"/>
+    <property name="docbook.fop.zip" value="${docbook.resources.dir}/fop.zip"/>
+
+    <property name="flexive.lib.dir" value="${basedir}/../lib"/>
+    <property name="flexive.dist.dir" value="${basedir}/../flexive-dist"/>
+
+    <!-- Include groovy -->
+    <path id="classpath.groovy">
+        <fileset dir="${flexive.lib.dir}/groovy" includes="*.jar"/>
+    </path>
+
+    <!-- Define the groovy task -->
+    <taskdef name="groovy" classname="org.codehaus.groovy.ant.Groovy" classpathref="classpath.groovy"/>
+
+    <target name="book" depends="clean, compile.book, compile.book.pdf, compile.book.website, dist" description="Compile and package the book using the Saxon XSL engine. This target should always work, but is considerably slower than using book-xsltproc."/>
+    <target name="book-xsltproc" depends="clean, compile.book-xsltproc, dist" description="Compile and package the book using xsltproc, which is a lot faster than using Saxon. You need to install xsltproc and update your build.properties for using this target."/>
+
+    <target name="clean" description="Cleans the docbook output directory">
+        <delete dir="${build.doc.dir}"/>
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${build.doc.dir}"/>
+    </target>
+
+    <target name="prepare" description="General setup for docbook processing">
+        <groovy>
+            def file = properties.basedir+File.separatorChar+"build.properties"
+            if( !new File(file).exists() ) {
+                ant.fail(message:"Please create a customized ${file} file from build.properties.sample.")
+            }
+        </groovy>
+
+        <!-- Unzip docbook stylesheets -->
+        <unzip src="${docbook.stylesheets.zip}" dest="${docbook.styles.dir}">
+            <!-- remove docbook root directory in zip file -->
+            <regexpmapper from="^docbook-xsl-[^/]*/(.*)" to="\1" handledirsep="true"/>
+        </unzip>
+
+        <!-- Copy customization layers -->
+        <copy todir="${docbook.styles.dir}">
+            <fileset dir="resources" includes="custom-*.xsl"/>
+        </copy>
+
+    </target>
+
+    <target name="prepare.java" description="Setup for docbook processing via Java" depends="prepare">
+    </target>
+
+    <!--
+        Compile the book as a single HTML file
+    -->
+    <target name="compile.book" depends="prepare.java" description="Compile the book using the Saxon XSL engine.">
+        <!--<echo>You might want to use the book-xsltproc target if you have xsltproc installed for faster XML processing.</echo>-->
+        <xslt-docbook out="${book.html.file}" destdir="${build.doc.dir}/xhtml" style="xhtml/docbook.xsl">
+            <!-- Ignore image scaling for HTML output -->
+            <param name="ignore.image.scaling" expression="1"/>
+        </xslt-docbook>
+        <fixEmptyNamespaces file="${book.html.file}"/>
+        <copy-html-resources todir="${build.doc.dir}/xhtml/"/>
+        <echo>Wrote documentation to file://${book.html.file}</echo>
+    </target>
+
+    <!--
+        Compile the book chunked by chapters and main sections
+    -->
+    <target name="compile.book.website" depends="prepare.java" description="Assembles the website-like chunked HTML documentation.">
+        <delete dir="${book.website.dir}"/>
+        <mkdir dir="${book.website.dir}"/>
+        <xslt-docbook out="${book.website.dir}/index.html" destdir="${book.website.dir}" style="xhtml/chunk.xsl">
+            <!-- Ignore image scaling for HTML output -->
+            <param name="ignore.image.scaling" expression="1"/>
+            <!-- Use section IDs as filenames -->
+            <param name="use.id.as.filename" expression="1"/>
+        </xslt-docbook>
+        <copy-html-resources todir="${book.website.dir}"/>
+    </target>
+
+    <!--
+        Compile the PDF version using XSL-FO and FOP
+    -->
+    <target name="compile.book.pdf" depends="prepare.java" description="Compiles the flexive PDF book.">
+        <mkdir dir="${book.fo.dir}"/>
+
+        <!-- Create XSL-FO from docbook -->
+        <xslt-docbook out="${book.fo.file}" destdir="${book.fo.dir}" style="custom-fo.xsl">
+            <param name="fop1.extensions" expression="1"/>
+            <param name="paper.type" expression="A4"/>
+            <param name="page.margin.inner" expression="20mm"/>
+            <param name="page.margin.outer" expression="20mm"/>
+        </xslt-docbook>
+        
+        <copy-html-resources todir="${book.fo.dir}/"/>
+
+        <!-- Unzip the Apache FOP installation to the build directory -->
+        <unzip src="${docbook.fop.zip}" dest="${build.doc.dir}/fop">
+            <!-- remove root directory in zip file -->
+            <regexpmapper from="^fop-[^/]*/(.*)" to="\1" handledirsep="true"/>
+        </unzip>
+
+        <!-- Setup ant task -->
+        <property name="fop.home" value="${build.doc.dir}/fop"/>
+
+        <taskdef name="fop"
+                classname="org.apache.fop.tools.anttasks.Fop">
+            <classpath>
+                <pathelement location="${fop.home}/build/fop.jar"/>
+                <fileset dir="${fop.home}/lib" includes="*.jar"/>
+            </classpath>
+        </taskdef>
+
+
+        <!-- Process XSL-FO with FOP -->
+        <fop format="application/pdf" fofile="${book.fo.file}" outfile="${book.pdf.file}" basedir="${docbook.styles.dir}"/>
+
+    </target>
+
+    <!--
+        Compile the single-page HTML file using xsltproc.
+        Used only for development, since it's a lot faster than Saxon.
+    -->
+    <target name="compile.book-xsltproc" depends="prepare" description="Compile the book using xsltproc, which is a lot faster than using Saxon. You need to install xsltproc and update your build.properties for using this target.">
+        <exec executable="${xsltproc}" taskname="xsltproc">
+            <!-- Resolve xincludes before processing -->
+            <arg value="--xinclude"/>
+
+            <!-- Docbook stylesheet parameters -->
+            <arg line="--stringparam html.stylesheet 'css/flexive_docbook.css'"/>
+            <!--arg line="-stringparam chapter.autolabel 1"/-->
+
+            <!--arg line="-stringparam section.autolabel 1"/-->
+            <!-- Ignore image scaling for HTML output -->
+            <arg line="--stringparam ignore.image.scaling 1"/>
+
+            <arg line="--stringparam linenumbering.extension 1"/>
+
+            <!-- Set the output file -->
+            <arg value="-o"/>
+            <arg path="${book.html.file}"/>
+
+            <!-- Specify the stylesheet to use -->
+            <arg path="${docbook.styles.dir}/xhtml/docbook.xsl"/>
+
+            <!-- Set the input file -->
+            <arg path="${basedir}/src/book.xml"/>
+        </exec>
+        <fixEmptyNamespaces file="${book.html.file}"/>
+        <copy-html-resources todir="${build.doc.dir}/xhtml/"/>
+        <echo>Wrote documentation to file://${build.doc.dir}/xhtml/index.xhtml</echo>
+    </target>
+
+    <!--
+        Create the flexive document distribution, including all generated files
+    -->
+    <target name="dist">
+        <mkdir dir="${flexive.dist.dir}"/>
+        <zip file="${flexive.dist.dir}/flexive-docs.zip">
+            <zipfileset dir="${build.doc.dir}" includes="website/**, xhtml/**, *.pdf"/>
+        </zip>
+    </target>
+
+    <macrodef name="fixEmptyNamespaces" description="Replaces empty xmlns= elements generated by some XSLT processor/stylesheet combinations">
+        <attribute name="file" description="The file to be filtered"/>
+        <sequential>
+            <replace file="@{file}" token='xmlns=""' value=""/>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="xslt-docbook">
+        <attribute name="out" description="The output file name"/>
+        <attribute name="destdir" description="The output base directory (if additional files will be generated)"/>
+        <attribute name="style" description="The style relative to docbook.styles.dir"/>
+        <element name="args" optional="true" implicit="true"/>
+        <sequential>
+            <groovy>
+                // Use the Saxon XSLT processor
+                // Saxon 8
+                //System.setProperty("javax.xml.transform.TransformerFactory", "net.sf.saxon.TransformerFactoryImpl");
+                // Saxon 6.5
+                System.setProperty("javax.xml.transform.TransformerFactory", "com.icl.saxon.TransformerFactoryImpl");
+
+                // Tell Saxon to use Xerces for resolving XIncludes
+                System.setProperty("javax.xml.parsers.DocumentBuilderFactory", "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
+                System.setProperty("javax.xml.parsers.SAXParserFactory", "org.apache.xerces.jaxp.SAXParserFactoryImpl");
+                System.setProperty("org.apache.xerces.xni.parser.XMLParserConfiguration", "org.apache.xerces.parsers.XIncludeParserConfiguration");
+            </groovy>
+            <xslt style="${docbook.styles.dir}/@{style}" in="src/book.xml"
+                out="@{out}" force="true" >
+                <classpath path="${docbook.resources.dir}/saxon.jar"/>
+                <classpath path="${docbook.resources.dir}/xercesImpl.jar"/>
+                <!--<classpath>-->
+                    <!--<fileset dir="${docbook.styles.dir}/extensions" includes="saxon65.jar"/>-->
+                <!--</classpath>-->
+                
+                <!--<param name="use.extensions" expression="1"/> -->
+                <!--param name="chapter.autolabel" expression="1"/-->
+                <!--param name="section.autolabel" expression="1"/-->
+                <!--<param name="linenumbering.extension" expression="1"/>-->
+                <param name="html.stylesheet" expression="css/flexive_docbook.css"/>
+                <param name="base.dir" expression="@{destdir}"/>
+                <args/>
+            </xslt>
+            <groovy>
+                // Remove the Saxon transformer factory 
+                System.clearProperty("javax.xml.transform.TransformerFactory")
+            </groovy>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="copy-html-resources">
+        <attribute name="todir"/>
+        <sequential >
+            <copy todir="@{todir}">
+                <fileset dir="src" includes="css/**/*,images/**/*"/>
+            </copy>
+        </sequential>
+    </macrodef>
+</project>

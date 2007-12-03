@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+    A generic project build file that can be included to build flexive projects.
+
+    Required properties:
+    fxProject - name of the project, basename of the generated files
+
+    Optional properties:
+
+    @author Daniel Lichtenberger, UCS
+    @version $Rev$
+-->
+<project name="flexive-project" default="war" basedir=".">
+    <!-- Get our directory (basedir references to the project base directory) -->
+    <dirname property="dist.basedir" file="${ant.file.flexive-project}"/>
+
+    <property name="dist.dir" value="${dist.basedir}"/>
+    <property name="dist.lib.dir" value="${dist.basedir}/lib"/>
+    <property name="dist.extlib.dir" value="${dist.basedir}/extlib"/>
+
+    <property name="flexive.ant.jar" value="${dist.lib.dir}/flexive-ant.jar"/>
+
+    <property name="package.ear" value="${fxProject}.ear"/>
+    <property name="package.war" value="${fxProject}.war"/>
+    <property name="package.shared" value="${fxProject}-shared.jar"/>
+    <property name="package.ejb" value="${fxProject}-ejb.jar"/>
+
+    <property name="build.dir" value="${basedir}/build"/>
+    <property name="build.dist.dir" value="${basedir}/dist"/>
+    <property name="src.java.dir" value="${basedir}/src/java"/>
+    <property name="web.dir" value="${basedir}/web"/>
+    <property name="resources.dir" value="${basedir}/resources"/>
+    <property name="meta.dir" value="${resources.dir}/META-INF"/>
+    <property name="mysql.src.dir" value="${dist.dir}/lib/resources/sql/mysql"/>
+    <property name="mysql.classpathref" value="dist.path"/>
+
+    <!-- javac options -->
+	<property name="compiler.deprecation" value="on"/>
+	<property name="compiler.optimize" value="on"/>
+	<property name="compiler.debug" value="on"/>
+	<property name="compiler.source" value="1.5"/>
+	<property name="compiler.target" value="1.5"/>
+
+    <taskdef name="applicationDescriptorBuilder"
+             classname="com.flexive.tools.ant.ApplicationDescriptorBuilderTask"
+             classpath="${flexive.ant.jar}"/>
+
+    <taskdef name="scriptIndexBuilder"
+                 classname="com.flexive.tools.ant.ScriptIndexBuilderTask"
+                 classpath="${flexive.ant.jar}"/>
+
+    <path id="dist.path">
+        <fileset dir="${dist.lib.dir}" includes="*"/>
+        <fileset dir="${dist.extlib.dir}" includes="*"/>
+    </path>
+
+    <import file="${dist.basedir}/build.macros.xml"/>
+    <import file="${dist.basedir}/build.shared-dist.xml"/>
+    <property file="${basedir}/database.properties"/>
+
+    <macrodef name="javac-call">
+		<attribute name="srcdir"/>
+		<attribute name="destdir"/>
+		<attribute name="excludes" default="NONE"/>
+		<attribute name="includes" default="**/*.java"/>
+		<element name="args" optional="true" implicit="true"/>
+		<sequential>
+			<mkdir dir="@{destdir}"/>
+			<javac  srcdir="@{srcdir}"
+                    destdir="@{destdir}"
+                    debug="${compiler.debug}"
+                    deprecation="${compiler.deprecation}"
+                    optimize="${compiler.optimize}"
+                    includes="@{includes}"
+                    excludes="@{excludes}"
+                    source="${compiler.source}"
+                    target="${compiler.target}">
+				<args/>
+			</javac>
+		</sequential>
+	</macrodef>
+
+    <target name="help" description="Shows brief overview of the most relevant end-user tasks and shows a prompt to select one">
+        <echo taskname="flexive">
+Welcome to the flexive build file of the ${fxProject} project.
+
+To build and maintain your project, please use the following tasks:
+
+package
+        Creates the packaged distribution of your project,
+        based on your buildfile settings.
+
+package.shared, package.ejb, package.war, package.ear
+        Manually build parts of the distribution.
+                    
+db.create
+        Create or reset the database schema of a flexive division.
+        Warning: if the schema already exists, it will be dropped (i.e. you will lose all data
+        stored in the schema).
+
+db.config.create
+        Create or reset the global flexive configuration schema.
+        </echo>
+        <input message="Please enter a target name, or quit to exit:" addproperty="info.targetname"/>
+        <antcall target="${info.targetname}"/>
+    </target>
+
+    <!-- Empty no-op target -->
+    <target name="quit"/>
+
+    <target name="clean">
+        <delete dir="${build.dir}" failonerror="false"/>
+        <delete failonerror="false">
+            <fileset dir="${build.dist.dir}" includes="${package.ear},${package.war},${package.ejb},${package.shared}"/>
+        </delete>
+        <delete >
+            <fileset dir="${basedir}/resources" includes="**/scriptindex.flexive"/>
+        </delete>
+    </target>
+
+    <target name="prepare" depends="clean">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${build.dist.dir}"/>
+    </target>
+
+    <target name="compile" depends="prepare" description="Compile all java sources">
+        <javac-call
+                srcdir="${src.java.dir}/shared"
+                destdir="${build.dir}/shared">
+			<classpath refid="dist.path"/>
+        </javac-call>
+        <javac-call
+                srcdir="${src.java.dir}/ejb"
+                destdir="${build.dir}/ejb">
+			<classpath refid="dist.path"/>
+            <classpath>
+                <path path="${build.dir}/shared"/>
+            </classpath>
+        </javac-call>
+        <javac-call
+                srcdir="${src.java.dir}/war"
+                destdir="${build.dir}/war">
+			<classpath refid="dist.path"/>
+            <classpath>
+                <path path="${build.dir}/shared"/>
+            </classpath>
+        </javac-call>
+    </target>
+
+    <target name="package.shared" unless="${fxProject}.shared.disabled">
+        <buildScriptIndex dir="${resources.dir}/scripts"/>
+        <!-- Create shared JAR -->
+        <jar jarfile="${build.dist.dir}/${package.shared}" whenmanifestonly="skip">
+            <!-- Include scripts -->
+            <zipfileset dir="${resources.dir}/scripts" prefix="${fxProject}Resources/scripts" includes="**/*"/>
+            <fileset dir="${build.dir}/shared" includes="**/*"/>
+        </jar>
+    </target>
+
+    <target name="package.ejb" unless="${fxProject}.ejb.disabled">
+        <!-- Create EJB -->
+        <jar jarfile="${build.dist.dir}/${package.ejb}" whenmanifestonly="skip">
+            <fileset dir="${build.dir}/ejb" includes="**/*"/>
+        </jar>
+    </target>
+
+    <target name="package.war" unless="${fxProject}.war.disabled">
+        <!-- Create WAR -->
+        <war warfile="${build.dist.dir}/${package.war}" webxml="${meta.dir}/web.xml" keepcompression="yes">
+            <zipfileset prefix="WEB-INF" dir="${meta.dir}" includes="*.xml" excludes="web.xml"/>
+            <fileset dir="${web.dir}" includes="**/*"/>
+            <zipfileset dir="${build.dir}/war" includes="**/*" prefix="WEB-INF/classes"/>
+        </war>
+    </target>
+
+    <target name="package.ear" unless="${fxProject}.ear.disabled">
+        <!-- Create a standalone EAR -->
+        <applicationDescriptorBuilder dropDir="${build.dist.dir}"
+                                      destFile="${build.dir}/application.xml"
+                                      srcFile="${dist.basedir}/META-INF/application.xml"/>
+        <ear earfile="${build.dist.dir}/${package.ear}" appxml="${build.dir}/application.xml">
+            <zipfileset prefix="lib" dir="${dist.lib.dir}" includes="**/*" excludes="flexive-ejb.jar"/>
+            <zipfileset prefix="lib" dir="${dist.extlib.dir}" includes="**/*" excludes="jsf-api.jar,jsf-impl.jar,javaee.jar,jboss-*.jar,selenium-*,testng-*"/>
+            <zipfileset prefix="lib" dir="${build.dist.dir}" includes="**/*.jar" excludes="${package.ejb}"/>
+            <fileset file="${dist.basedir}/*.war"/>
+            <fileset file="${dist.lib.dir}/flexive-ejb.jar"/>
+            <fileset file="${build.dist.dir}/${package.war}"/>
+            <fileset file="${build.dist.dir}/${package.ejb}"/>
+        </ear>
+    </target>
+
+    <target name="package" depends="compile,package.shared,package.ejb,package.war,package.ear"/>
+</project>

@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:s="http://myfaces.apache.org/sandbox"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+
+    <ui:define name="head">
+        <script type="text/javascript">
+            dojo.require("dojo.widget.SortableTable");
+        </script>
+    </ui:define>
+
+    <ui:define name="body">
+        <h:form id="frm">
+        	<h:inputHidden value="#{workflowBean.workflow.id}"/>
+        	
+            <adm:tab label="#{fxMessageBean['Workflow.tabtitle.edit,#{workflowBean.workflow.name}']}" active="true" id="tab1"/>
+
+			<fx:fieldSet legend="#{fxMessageBean['Workflow.group.basicData']}">
+				<fx:formRow label="#{fxMessageBean['Workflow.field.name']}" id="workflowName">
+					<h:inputText id="workflowName" value="#{workflowBean.workflow.name}" required="true"/>
+				</fx:formRow>
+
+				<fx:formRow label="#{fxMessageBean['Workflow.field.description']}" id="workflowDescription">
+					<h:inputText id="workflowDescription" value="#{workflowBean.workflow.description}" required="false"/>
+				</fx:formRow>
+			</fx:fieldSet>
+			
+			<fx:fieldSet legend="#{fxMessageBean['Workflow.group.steps']}">
+
+            <c:if test="#{!(empty workflowBean.stepsForAdding)}">
+                <table width="500" style="margin-top:10px;">
+                    <!-- insert row -->
+                    <tr>
+                        <td>
+                            <h:selectOneListbox id="workflowStep" value="#{workflowBean.stepDefinitionId}" size="1">
+                                <f:selectItems value="#{workflowBean.stepsForAdding}" />
+                            </h:selectOneListbox>
+                        </td>
+                        <td> </td>
+                        <td>
+                            <h:selectOneListbox id="stepAcl" value="#{workflowBean.stepACL}" size="1">
+                                <f:selectItems value="#{fxSelectBean.workflowACLs}"/>
+                            </h:selectOneListbox>
+                        </td>
+                        <td>
+                            <adm:commandButton labelKey="Workflow.button.step.add" location="content"
+                                icon="new" bean="#{workflowBean}" action="addStep" id="addStepButton"/>
+                        </td>
+                    </tr>
+                </table>
+            </c:if>
+
+			<t:dataTable value="#{workflowBean.steps}" var="step" rowIndexVar="rowIndex"
+				preserveDataModel="true" headerClass="tblHeader" rowClasses="tblRowEven, tblRowOdd" width="500">
+				<h:column>
+					<f:facet name="header">
+						#{fxMessageBean["Workflow.field.step.definition"]}
+					</f:facet>
+					<h:inputHidden value="#{step.id}"/>
+					<h:inputHidden value="#{step.workflowId}"/>
+					<h:inputHidden value="#{step.stepDefinitionId}"/>
+					<h:inputHidden value="#{step.aclId}"/>
+                    <nobr>
+                        #{fxMapBean.stepDefinitions[step.stepDefinitionId].label}
+                        <ui:fragment rendered="#{fxMapBean.stepDefinitions[step.stepDefinitionId].uniqueTargetId != -1}">
+                            #{fxMessageBean['Workflow.field.step.target,#{fxMapBean.stepDefinitions[fxMapBean.stepDefinitions[step.stepDefinitionId].uniqueTargetId].label}']}
+                        </ui:fragment>
+                    </nobr>
+                </h:column>
+				<h:column>
+					<f:facet name="header">
+						#{fxMessageBean["Workflow.field.step.acl"]}
+					</f:facet>
+					<h:selectOneListbox id="stepListAcl" value="#{step.aclId}" size="1">
+						<f:selectItems value="#{fxSelectBean.workflowACLs}"/>
+					</h:selectOneListbox>
+				</h:column>
+				<h:column>
+					<f:facet name="header">
+						#{fxMessageBean["Workflow.field.step.description"]}
+					</f:facet>
+					#{fxMapBean.stepDefinitions[step.stepDefinitionId].description}
+				</h:column>
+				<h:column>
+                    <f:facet name="header">
+                        #{fxMessageBean['Workflow.field.step.actions']}
+                    </f:facet>
+                    <adm:commandIcon labelKey="Workflow.button.step.remove" location="content"
+						icon="delete" bean="#{workflowBean}" action="removeStep" id="stepDeleteButton#{step.id}">
+						<f:setPropertyActionListener target="#{workflowBean.stepIndex}" value="#{rowIndex}"/>
+					</adm:commandIcon>
+				</h:column>
+			</t:dataTable>
+			
+			</fx:fieldSet>
+
+			<fx:fieldSet legend="#{fxMessageBean['Workflow.group.routes']}">
+
+			<t:dataTable value="#{workflowBean.routes}" var="route" rowIndexVar="rowIndex"
+				preserveDataModel="true" headerClass="tblHeader" rowClasses="tblRowEven, tblRowOdd" width="500">
+				<h:column>
+					<f:facet name="header">
+						#{fxMessageBean["Workflow.field.route.from"]}
+					</f:facet>
+					<h:inputHidden value="#{route.id}"/>
+					<h:inputHidden value="#{route.fromStepId}"/>
+					<h:inputHidden value="#{route.toStepId}"/>
+					<h:inputHidden value="#{route.groupId}"/>
+					#{fxMapBean.stepDefinitions[workflowBean.stepsById[route.fromStepId].stepDefinitionId].label}
+				</h:column>
+				<h:column>
+					<f:facet name="header">
+						#{fxMessageBean["Workflow.field.route.to"]}
+					</f:facet>
+					#{fxMapBean.stepDefinitions[workflowBean.stepsById[route.toStepId].stepDefinitionId].label}
+				</h:column>
+				<h:column>
+					<f:facet name="header">
+						#{fxMessageBean["Workflow.field.route.group"]}
+					</f:facet>
+                    #{fxMapBean.mandators[fxMapBean.userGroups[route.groupId].mandatorId].name}:
+                    #{fxMapBean.userGroups[route.groupId].name}
+				</h:column>
+				<h:column>
+                    <f:facet name="header">
+                        #{fxMessageBean['Workflow.field.route.actions']}
+                    </f:facet>
+                    <adm:commandIcon labelKey="Workflow.button.route.remove" location="content"
+						icon="delete" bean="#{workflowBean}" action="removeRoute" id="routeDeleteButton#{step.id}">
+						<f:setPropertyActionListener target="#{workflowBean.routeIndex}" value="#{rowIndex}"/>
+					</adm:commandIcon>
+				</h:column>
+			</t:dataTable>
+			
+			<c:if test="#{!(empty workflowBean.stepsForRoutes)}">
+	            <table width="500" style="margin-top:10px;">
+					<!-- insert row -->
+					<tr>
+						<td>
+			                <h:selectOneListbox id="fromStepId" value="#{workflowBean.fromStepId}" size="1">
+								<f:selectItems value="#{workflowBean.stepsForRoutes}"/>
+			                </h:selectOneListbox>
+						</td>
+						<td>
+							<h:selectOneListbox id="toStepId" value="${workflowBean.toStepId}" size="1">
+								<f:selectItems value="#{workflowBean.stepsForRoutes}"/>
+							</h:selectOneListbox>
+						</td>
+						<td> 
+							<h:selectOneListbox id="userGroup" value="#{workflowBean.userGroup}" size="1" converter="SelectableConverter">
+								<f:selectItems value="#{fxSystemBean.userTicket.globalSupervisor ? fxSelectBean.globalUserGroups : fxSelectBean.userGroups}"/>
+							</h:selectOneListbox>
+						</td>
+						<td>
+							<adm:commandButton labelKey="Workflow.button.route.add" location="content"
+								icon="new" bean="#{workflowBean}" action="addRoute" id="addRouteButton"/>
+						</td>
+					</tr>
+				</table>
+			</c:if>
+			
+			</fx:fieldSet>
+
+            <adm:commandButton labelKey="Workflow.button.save" location="both"
+                icon="save"  bean="#{workflowBean}" action="save" id="saveButton"/>
+
+            <adm:commandButton labelKey="Workflow.button.cancel" location="both"
+                icon="cancel"  action="workflowOverview" id="cancelButton" immediate="true"/>
+
+            <adm:toolbarPluginButtons/>
+        </h:form>
+    </ui:define>
+
+</ui:composition>
+
+</body>
+</html>
