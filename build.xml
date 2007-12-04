@@ -57,7 +57,14 @@
         <fileset dir="${flexive.lib.dir}/mail" includes="*.jar"/>
     </path>
 
-	<fileset id="jar.ejb.classes" dir="${build.framework.classes.dir}">
+    <path id="classpath.build.plugin">
+        <path path="${build.framework.classes.dir}"/>
+        <path path="${build.ui.shared.classes.dir}"/>
+        <path path="${build.ui.components.dir}/jsf-core/classes"/>
+        <path refid="classpath.build.framework"/>
+    </path>
+
+    <fileset id="jar.ejb.classes" dir="${build.framework.classes.dir}">
 		<include name="com/flexive/core/**"/>
 		<include name="com/flexive/ejb/**"/>
 		<include name="*.properties"/>
@@ -71,29 +78,6 @@
 	<!-- ========================== tasks / macros ====================== -->
     <taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc" classpathref="classpath.build.framework"/>
     <taskdef name="groovy" classname="org.codehaus.groovy.ant.Groovy" classpathref="classpath.build.framework"/>
-
-    <macrodef name="javac-call">
-		<attribute name="srcdir"/>
-		<attribute name="destdir"/>
-		<attribute name="excludes" default="NONE"/>
-		<attribute name="includes" default="**/*.java"/>
-		<element name="args" optional="true" implicit="true"/>
-		<sequential>
-			<mkdir dir="@{destdir}"/>
-			<javac  srcdir="@{srcdir}"
-                    destdir="@{destdir}"
-                    debug="${compiler.debug}"
-                    deprecation="${compiler.deprecation}"
-                    optimize="${compiler.optimize}"
-                    includes="@{includes}"
-                    excludes="@{excludes}"
-                    source="${compiler.source}"
-                    target="${compiler.target}">
-				<args/>
-				<!--compilerarg value="-Xlint"/-->
-			</javac>
-		</sequential>
-	</macrodef>
 
     <!-- ========================== imports ============================= -->
 	<import file="build.tests.xml"/>
@@ -580,4 +564,16 @@ database.password=a
         <buildPlugin name="jsf-testrunner" srcdir="${flexive.base.ui.dir}/jsf-testrunner"/>
         <buildPlugin name="jsf-globalconfig" srcdir="${flexive.base.ui.dir}/jsf-globalconfig"/>
     </target>
+
+    <macrodef name="buildPlugin">
+        <attribute name="name"/>
+        <attribute name="srcdir"/>
+        <sequential>
+            <compilePlugin srcdir="@{srcdir}" builddir="${build.ui.components.dir}/@{name}"
+                           classpathref="classpath.build.plugin"/>
+            <buildPluginJar name="@{name}" srcdir="@{srcdir}" builddir="${build.ui.components.dir}/@{name}"
+                            jarfile="${build.ui.jar.dir}/flexive-plugin-@{name}.jar"/>
+        </sequential>
+    </macrodef>
+
 </project>

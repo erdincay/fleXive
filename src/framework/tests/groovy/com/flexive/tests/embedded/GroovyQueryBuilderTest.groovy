@@ -39,7 +39,7 @@ import org.testng.annotations.Test
 
 /**
  * Test scripts for the query builder test bean
- * @author Daniel Lichtenberger, UCS
+ * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 class GroovyQueryBuilderTest {
 

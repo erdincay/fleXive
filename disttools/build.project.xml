@@ -7,81 +7,30 @@
 
     Optional properties:
 
-    @author Daniel Lichtenberger, UCS
+    @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
     @version $Rev$
 -->
-<project name="flexive-project" default="war" basedir=".">
+<project name="flexive-project" basedir=".">
     <!-- Get our directory (basedir references to the project base directory) -->
     <dirname property="dist.basedir" file="${ant.file.flexive-project}"/>
 
-    <property name="dist.dir" value="${dist.basedir}"/>
-    <property name="dist.lib.dir" value="${dist.basedir}/lib"/>
-    <property name="dist.extlib.dir" value="${dist.basedir}/extlib"/>
-
-    <property name="flexive.ant.jar" value="${dist.lib.dir}/flexive-ant.jar"/>
+    <import file="${dist.basedir}/build.properties-dist.xml"/>
 
     <property name="package.ear" value="${fxProject}.ear"/>
     <property name="package.war" value="${fxProject}.war"/>
     <property name="package.shared" value="${fxProject}-shared.jar"/>
     <property name="package.ejb" value="${fxProject}-ejb.jar"/>
 
-    <property name="build.dir" value="${basedir}/build"/>
-    <property name="build.dist.dir" value="${basedir}/dist"/>
-    <property name="src.java.dir" value="${basedir}/src/java"/>
-    <property name="web.dir" value="${basedir}/web"/>
-    <property name="resources.dir" value="${basedir}/resources"/>
-    <property name="meta.dir" value="${resources.dir}/META-INF"/>
-    <property name="mysql.src.dir" value="${dist.dir}/lib/resources/sql/mysql"/>
-    <property name="mysql.classpathref" value="dist.path"/>
-
-    <!-- javac options -->
-	<property name="compiler.deprecation" value="on"/>
-	<property name="compiler.optimize" value="on"/>
-	<property name="compiler.debug" value="on"/>
-	<property name="compiler.source" value="1.5"/>
-	<property name="compiler.target" value="1.5"/>
-
     <taskdef name="applicationDescriptorBuilder"
              classname="com.flexive.tools.ant.ApplicationDescriptorBuilderTask"
              classpath="${flexive.ant.jar}"/>
-
-    <taskdef name="scriptIndexBuilder"
-                 classname="com.flexive.tools.ant.ScriptIndexBuilderTask"
-                 classpath="${flexive.ant.jar}"/>
-
-    <path id="dist.path">
-        <fileset dir="${dist.lib.dir}" includes="*"/>
-        <fileset dir="${dist.extlib.dir}" includes="*"/>
-    </path>
 
     <import file="${dist.basedir}/build.macros.xml"/>
     <import file="${dist.basedir}/build.shared-dist.xml"/>
     <property file="${basedir}/database.properties"/>
 
-    <macrodef name="javac-call">
-		<attribute name="srcdir"/>
-		<attribute name="destdir"/>
-		<attribute name="excludes" default="NONE"/>
-		<attribute name="includes" default="**/*.java"/>
-		<element name="args" optional="true" implicit="true"/>
-		<sequential>
-			<mkdir dir="@{destdir}"/>
-			<javac  srcdir="@{srcdir}"
-                    destdir="@{destdir}"
-                    debug="${compiler.debug}"
-                    deprecation="${compiler.deprecation}"
-                    optimize="${compiler.optimize}"
-                    includes="@{includes}"
-                    excludes="@{excludes}"
-                    source="${compiler.source}"
-                    target="${compiler.target}">
-				<args/>
-			</javac>
-		</sequential>
-	</macrodef>
-
     <target name="help" description="Shows brief overview of the most relevant end-user tasks and shows a prompt to select one">
-        <echo taskname="flexive">
+        <echo taskname="flexive"><![CDATA[
 Welcome to the flexive build file of the ${fxProject} project.
 
 To build and maintain your project, please use the following tasks:
@@ -99,7 +48,7 @@ db.create
         stored in the schema).
 
 db.config.create
-        Create or reset the global flexive configuration schema.
+        Create or reset the global flexive configuration schema.]]>
         </echo>
         <input message="Please enter a target name, or quit to exit:" addproperty="info.targetname"/>
         <antcall target="${info.targetname}"/>

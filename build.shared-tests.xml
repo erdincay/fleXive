@@ -4,7 +4,7 @@
     Shared macros and definitions for running flexive-based tests in external applications,
     using the JBoss embedded EJB container.
 
-    @author Daniel Lichtenberger, UCS
+    @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
     @version $Rev$
  -->
     <import file="build.shared-properties.xml"/>

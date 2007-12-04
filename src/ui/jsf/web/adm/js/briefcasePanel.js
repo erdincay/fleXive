@@ -7,7 +7,7 @@
  *      size: the number of items in the briefcase
  *      aclId: the ACL assigned to the briefcase (-1 for private briefcases)
  *
- * @author Daniel Lichtenberger, UCS
+ * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
 

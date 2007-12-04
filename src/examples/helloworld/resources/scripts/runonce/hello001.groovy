@@ -1,7 +1,7 @@
 /**
  * Initialization script for the hello world application.
  *
- * @author Daniel Lichtenberger, UCS
+ * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
 

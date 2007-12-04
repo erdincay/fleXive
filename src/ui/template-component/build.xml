@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!--
-    Basic flexive project buildfile.
+    Basic flexive component buildfile.
 
     @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
-    @version $Rev$
+    @version $Rev: 1418 $
 -->
-<project name="template-project" basedir="." default="package">
-    <property name="fxProject" value="template-project"/>
+<project name="template-component" basedir="." default="package">
+    <property name="fxComponent" value="template-component"/>
     <property name="flexive.dist.dir" value="${basedir}/../flexive-dist"/>
 
-    <import file="${flexive.dist.dir}/build.project.xml"/>
+    <import file="${flexive.dist.dir}/build.component.xml"/>
 </project>

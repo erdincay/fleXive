@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+    A generic component build file that can be included to build flexive components.
+
+    Required properties:
+    fxComponent - name of the component, basename of the generated files
+
+    @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+    @version $Rev: 1422 $
+-->
+<project name="flexive-component" basedir=".">
+    <!-- Get our directory (basedir references to the project base directory) -->
+    <dirname property="dist.basedir" file="${ant.file.flexive-component}"/>
+
+    <import file="${dist.basedir}/build.properties-dist.xml"/>
+
+    <property name="package.jar" value="${fxComponent}.jar"/>
+
+    <import file="${dist.basedir}/build.macros.xml"/>
+    <import file="${dist.basedir}/build.shared-dist.xml"/>
+    <property file="${basedir}/database.properties"/>
+
+    <target name="help"
+            description="Shows brief overview of the most relevant end-user tasks and shows a prompt to select one">
+        <echo taskname="flexive"><![CDATA[
+Welcome to the flexive build file of the ${fxComponent} component.
+
+To build and maintain your component, please use the following tasks:
+
+package
+        Creates the packaged JAR distribution of your component.
+        ]]></echo>
+        <input message="Please enter a target name, or quit to exit:" addproperty="info.targetname"/>
+        <antcall target="${info.targetname}"/>
+    </target>
+
+    <!-- Empty no-op target -->
+    <target name="quit"/>
+
+    <target name="clean">
+        <delete dir="${build.dir}" failonerror="false"/>
+        <delete failonerror="false">
+            <fileset dir="${build.dist.dir}" includes="${package.jar}"/>
+        </delete>
+        <delete>
+            <fileset dir="${basedir}/resources" includes="**/scriptindex.flexive"/>
+        </delete>
+    </target>
+
+    <target name="prepare" depends="clean">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${build.dist.dir}"/>
+    </target>
+
+    <target name="compile" depends="prepare" description="Compile all java sources">
+        <compilePlugin srcdir="${basedir}" builddir="${build.dir}" classpathref="dist.path"/>
+    </target>
+
+    <target name="package.jar">
+        <!-- Create component JAR -->
+        <buildPluginJar name="${fxComponent}" srcdir="${basedir}" builddir="${build.dir}"
+                        jarfile="${build.dist.dir}/${package.jar}"/>
+    </target>
+
+    <target name="package" depends="compile,package.jar"/>
+</project>

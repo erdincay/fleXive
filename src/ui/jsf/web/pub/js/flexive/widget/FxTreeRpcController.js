@@ -1,6 +1,6 @@
 /*
  * Flexive RPC tree controller. Based on DOJO's RPC controller
- * @author Daniel Lichtenberger, UCS
+ * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
 */
 

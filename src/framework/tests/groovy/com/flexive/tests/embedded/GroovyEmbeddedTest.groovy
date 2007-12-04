@@ -37,10 +37,10 @@ import com.flexive.shared.EJBLookup
 import org.testng.annotations.Test
 
 /**
-* Sample embedded groovy test.
-* @author Daniel Lichtenberger, UCS
-* @version $Rev$
-*/
+ * Sample embedded groovy test.
+ * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @version $Rev$
+ */
 class GroovyEmbeddedTest {
     @Test (groups = ["ejb"])
     void groovyEmbeddedTest() {

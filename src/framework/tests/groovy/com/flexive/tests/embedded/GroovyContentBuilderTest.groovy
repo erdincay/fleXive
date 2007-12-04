@@ -41,7 +41,7 @@ import org.testng.annotations.Test
 /**
 * GroovyContentBuilder test cases.
 
-* @author Daniel Lichtenberger, UCS
+* @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
 * @version $Rev$
 */
 class GroovyContentBuilderTest {

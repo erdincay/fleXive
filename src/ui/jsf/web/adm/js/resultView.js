@@ -1,5 +1,5 @@
 // Javascript methods for the JSON-RPC-based resultView template
-// @author Daniel Lichtenberger, UCS
+// @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
 // @version $Rev$
 
 var ResultView = function(id, formName, tableWidget, dataScroller, rowSelection, viewType) {

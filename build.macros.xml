@@ -1,6 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
 
+    <macrodef name="javac-call" description="Invokes the Java compiler for flexive sources. The classpath can be set with nested classpath elements.">
+		<attribute name="srcdir"/>
+		<attribute name="destdir"/>
+		<attribute name="excludes" default="NONE"/>
+		<attribute name="includes" default="**/*.java"/>
+		<element name="args" optional="true" implicit="true"/>
+		<sequential>
+			<mkdir dir="@{destdir}"/>
+			<javac  srcdir="@{srcdir}"
+                    destdir="@{destdir}"
+                    debug="${compiler.debug}"
+                    deprecation="${compiler.deprecation}"
+                    optimize="${compiler.optimize}"
+                    includes="@{includes}"
+                    excludes="@{excludes}"
+                    source="${compiler.source}"
+                    target="${compiler.target}">
+				<args/>
+			</javac>
+		</sequential>
+	</macrodef>
+
+
     <!-- ==================== Some common macros ==================== -->
     <macrodef name="replaceBuildProperties" description="Replaces build properties of the current build (subversion number, build user, timestamp) in a text file.">
         <attribute name="file" description="The text file to be processed."/>
@@ -78,48 +101,38 @@
 
     <!-- ==================== UI plugin/component macros ==================== -->
 
-    <macrodef name="buildPluginJar">
+    <macrodef name="buildPluginJar" description="Package a plugin JAR file">
         <attribute name="name"/>
         <attribute name="srcdir"/>
+        <attribute name="builddir"/>
         <attribute name="jarfile"/>
         <sequential>
-            <makeMessages srcdir="@{srcdir}/resources/messages" dest="${build.ui.components.dir}/@{name}/PluginMessages"/>
+            <makeMessages srcdir="@{srcdir}/resources/messages" dest="@{builddir}/PluginMessages"/>
+            <buildScriptIndex dir="@{srcdir}/resources/scripts"/>
             <jar jarfile="@{jarfile}">
                 <fileset dir="@{srcdir}/resources" includes="META-INF/**/*,templates/**/*"/>
-                <fileset dir="${build.ui.components.dir}/@{name}" includes="*.properties"/>
-                <fileset dir="${build.ui.components.dir}/@{name}/classes"/>
+                <fileset dir="@{builddir}" includes="*.properties"/>
+                <fileset dir="@{builddir}/classes"/>
                 <fileset dir="@{srcdir}/resources/weblets" includes="**/*"/>
                 <fileset dir="@{srcdir}/web" includes="**/*"/>
+
+                <zipfileset dir="@{srcdir}/resources/scripts" prefix="@{name}Resources/scripts" includes="**/*"/>
             </jar>
         </sequential>
     </macrodef>
 
-    <macrodef name="compilePlugin">
-        <attribute name="name"/>
+    <macrodef name="compilePlugin" description="Compile the plugin sources">
         <attribute name="srcdir"/>
+        <attribute name="builddir"/>
+        <attribute name="classpathref"/>
         <sequential>
-            <mkdir dir="${build.ui.components.dir}/@{name}"/>
+            <mkdir dir="@{builddir}/classes"/>
             <javac-call
                 srcdir="@{srcdir}/src/java"
-                destdir="${build.ui.components.dir}/@{name}/classes">
-                <classpath>
-                    <path path="${build.framework.classes.dir}"/>
-                    <path path="${build.ui.shared.classes.dir}"/>
-                    <path path="${build.ui.components.dir}/jsf-core/classes"/>
-                </classpath>
-                <classpath refid="classpath.build.framework"/>
+                destdir="@{builddir}/classes">
+                <classpath refid="@{classpathref}"/>
             </javac-call>
         </sequential>
     </macrodef>
-
-    <macrodef name="buildPlugin">
-        <attribute name="name"/>
-        <attribute name="srcdir"/>
-        <sequential>
-            <compilePlugin name="@{name}" srcdir="@{srcdir}"/>
-            <buildPluginJar name="@{name}" jarfile="${build.ui.jar.dir}/flexive-plugin-@{name}.jar" srcdir="@{srcdir}"/>
-        </sequential>
-    </macrodef>
-
 
 </project>

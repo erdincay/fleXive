@@ -38,7 +38,7 @@
  * from http://www.unicode.org/cldr/repository_access.html.
  * Remove the DTD at the top of the XML files to avoid DTD lookups by the XML parser.
  *
- * @author Daniel Lichtenberger, UCS
+ * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
 

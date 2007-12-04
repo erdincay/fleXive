@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 <!--
      Customized docbook stylesheet for print output
-     @author Daniel Lichtenberger, UCS
+     @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
      @version $Rev$
 -->
 <xsl:stylesheet

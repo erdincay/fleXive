@@ -2,7 +2,7 @@
 <!--
     Basic flexive project buildfile.
 
-    @author Daniel Lichtenberger, UCS
+    @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
     @version $Rev$
 -->
 <project name="tutorial01-documentstore" basedir="." default="package">
