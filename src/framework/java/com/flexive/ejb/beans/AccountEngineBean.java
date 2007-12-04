@@ -235,33 +235,36 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
 
             // Obtain a database connection
             con = Database.getDbConnection();
-            //               1-4 5      6          7             8                   9          10       11
-            curSql = "select d.*,a.ID,a.IS_ACTIVE,a.IS_VALIDATED,a.ALLOW_MULTILOGIN,valid_from,valid_to,NOW() " +
+            //               1-4 5      6          7             8                   9          10       11    12
+            curSql = "select d.*,a.ID,a.IS_ACTIVE,a.IS_VALIDATED,a.ALLOW_MULTILOGIN,valid_from,valid_to,NOW(),a.password " +
                     "from " + TBL_USER + " a " +
                     "LEFT JOIN " +
                     " (select ID,ISLOGGEDIN,LAST_LOGIN,LAST_LOGIN_FROM from " + TBL_USER_DETAILS +
                     " where application=?) d " +
                     "ON a.ID=d.ID " +
                     "where " +
-                    "a.LOGIN_NAME=? AND a.PASSWORD=?";
+                    "a.LOGIN_NAME=?";
             ps = con.prepareStatement(curSql);
             ps.setString(1, inf.getApplicationId());
             ps.setString(2, username);
-            ps.setString(3, FxSharedUtils.hashPassword(password));
-            ResultSet rs = ps.executeQuery();
+            final ResultSet rs = ps.executeQuery();
 
             // Anything found?
             if (rs == null || !rs.next()) {
-                if (LOG.isDebugEnabled()) LOG.debug("Login for user [" + username +
-                        "] failed, not matching active entry found in database");
-                throw new FxLoginFailedException("Login failed", FxLoginFailedException.TYPE_USER_OR_PASSWORD_NOT_DEFINED);
+                throw new FxLoginFailedException("Login failed (invalid user or password)", FxLoginFailedException.TYPE_USER_OR_PASSWORD_NOT_DEFINED);
+            }
+            
+            // check if the hashed password matches the hash stored in the database
+            final long id = rs.getLong(5);
+            final boolean passwordMatches = FxSharedUtils.hashPassword(id, password).equals(rs.getString(12));
+            if (!passwordMatches) {
+                throw new FxLoginFailedException("Login failed (invalid user or password)", FxLoginFailedException.TYPE_USER_OR_PASSWORD_NOT_DEFINED);
             }
 
             // Read data
             final boolean loggedIn = rs.getBoolean(2);
             final Date lastLogin = rs.getTimestamp(3);
             final String lastLoginFrom = rs.getString(4);
-            final long id = rs.getLong(5);
             final boolean active = rs.getBoolean(6);
             final boolean validated = rs.getBoolean(7);
             final boolean allowMultiLogin = rs.getBoolean(8);
@@ -568,8 +571,6 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             userName = checkUserName(userName);
             checkDates(validFrom, validTo);
             if (description == null) description = "";
-            password = (password == null) ? "" : password.trim();
-            password = FxFormatUtils.encodePassword(password);
             email = FxFormatUtils.isEmail(email);
             if (!language.isValid(lang))
                 throw new FxInvalidParameterException("language", "ex.account.languageInvalid", lang);
@@ -607,6 +608,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             // Get a new Id
             long newId = seq.getId(SequencerEngine.System.ACCOUNT);
 
+            password = password == null ? "" : FxFormatUtils.encodePassword(newId, password);
             curSql = "INSERT INTO " + TBL_USER + "(" +
                     //1 2        3        4          5        6     7          8    9
                     "ID,MANDATOR,USERNAME,LOGIN_NAME,PASSWORD,EMAIL,CONTACT_ID,LANG,VALID_FROM," +
@@ -1288,7 +1290,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             if (loginName != null) loginName = checkLoginName(loginName);
             if (email != null) email = FxFormatUtils.isEmail(email);
             if (password != null) {
-                password = FxFormatUtils.encodePassword(password.trim());
+                password = FxFormatUtils.encodePassword(userId, password.trim());
             }
 
 
@@ -1398,7 +1400,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             if (loginName != null) loginName = checkLoginName(loginName);
             if (email != null) email = FxFormatUtils.isEmail(email);
             if (password != null) {
-                password = FxFormatUtils.encodePassword(password.trim());
+                password = FxFormatUtils.encodePassword(userId, password.trim());
             }
 
 

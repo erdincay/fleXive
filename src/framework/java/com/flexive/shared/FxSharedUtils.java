@@ -34,6 +34,7 @@
 package com.flexive.shared;
 
 import com.flexive.shared.content.FxPK;
+import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.search.FxPaths;
@@ -70,6 +71,7 @@ public final class FxSharedUtils {
      * TODO: security?
      */
     public static final String COOKIE_FORCE_TEST_DIVISION = "ForceTestDivision";
+    private static final String PW_SALT = "FX-SALT-";
 
     private static List<String> drops = null;
     public static MessageDigest digest = null;
@@ -132,38 +134,18 @@ public final class FxSharedUtils {
     }
 
     /**
-     * Hashes a password, making it almost impossible to read it.
-     * <p/>
-     * Hashes a String using the Md5 algorithm and returns the result as a
-     * String of hexadecimal numbers. This method is synchronized to avoid
-     * excessive MessageDigest object creation. If calling this method becomes
-     * a bottleneck in your code, you may wish to maintain a pool of MessageDigest objects instead of using this method. <p>
-     * A hash is a one-way function -- that is, given an input, an output is easily computed. However, given the output, the
-     * input is almost impossible to compute. This is useful for passwords
-     * since we can store the hash and a hacker will then have a very hard time determining the original password. <p>
-     * In the CMS, every time a user logs in, we simply take their plain text password, compute the hash, and compare the
-     * generated hash to the stored hash. Since it is almost impossible that
-     * two passwords will generate the same hash, we know if the user gave us
-     * the correct password or not. The only negative to this system is that
-     * password recovery is basically impossible. Therefore, a reset password method is used instead.
+     * Compute the hash of the given flexive password.
      *
-     * @param password the password
-     * @return a hashed version of the passed-in String
+     * @param accountId the user account ID
+     * @param password the cleartext password
+     * @return a hashed password
      */
-    public synchronized static final String hashPassword(String password) {
-        if (digest == null) {
-            try {
-                digest = MessageDigest.getInstance("MD5");
-            } catch (NoSuchAlgorithmException nsae) {
-                System.err.println("Failed to load the MD5 MessageDigest. " + "CMS will be unable to function normally.");
-                nsae.printStackTrace();
-            }
+    public synchronized static String hashPassword(long accountId, String password) {
+        try {
+            return sha1Hash(getBytes("FX-SALT" + accountId + password));
+        } catch (NoSuchAlgorithmException e) {
+            throw new FxCreateException("Failed to load the SHA1 algorithm.").asRuntimeException();
         }
-        //Now, compute hash.
-        digest.update(getBytes(password));
-        String result = FxFormatUtils.encodeHex(digest.digest());
-        // Avoid SQL problems
-        return result.replaceAll("'", "_");
     }
 
     /**

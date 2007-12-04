@@ -404,11 +404,7 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public boolean isMatchingRootPassword(String userPassword) throws FxApplicationException {
         String hashedPassword = getRootPassword();
-        try {
-            return FxSharedUtils.sha1Hash(FxSharedUtils.getBytes(userPassword)).matches(hashedPassword);
-        } catch (NoSuchAlgorithmException e) {
-            throw new FxLoadException(LOG, e, "ex.configuration.noSha1");
-        }
+        return getHashedPassword(userPassword).matches(hashedPassword);
     }
 
     /**
@@ -424,11 +420,7 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void setRootPassword(String value) throws FxApplicationException {
-        try {
-            put(SystemParameters.GLOBAL_ROOT_PASSWORD, FxSharedUtils.sha1Hash(FxSharedUtils.getBytes(value)));
-        } catch (NoSuchAlgorithmException e) {
-            throw new FxUpdateException(LOG, e, "ex.configuration.noSha1");
-        }
+        put(SystemParameters.GLOBAL_ROOT_PASSWORD, getHashedPassword(value));
     }
 
     /**
@@ -540,4 +532,16 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
     private boolean isAuthorized() {
         return FxContext.get().isGlobalAuthenticated();
     }
+
+    /**
+     * Compute the hashed password for the given input.
+     *
+     * @param userPassword  the password to be hashed
+     * @return  the hashed password for the given input.
+     */
+    private String getHashedPassword(String userPassword) {
+        return FxSharedUtils.hashPassword(31289, userPassword);
+    }
+
+
 }

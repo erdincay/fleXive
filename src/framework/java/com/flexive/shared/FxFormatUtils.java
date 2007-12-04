@@ -162,14 +162,15 @@ public final class FxFormatUtils {
     /**
      * Checks the password and encodes it.
      *
+     * @param accountId the account ID (needed for computing the hash)
      * @param password unencoded the password
      * @return the encoded password
      * @throws FxInvalidParameterException if the password is invalid (too short, too simple, ..)
      */
-    public static String encodePassword(final String password) throws FxInvalidParameterException {
+    public static String encodePassword(long accountId, final String password) throws FxInvalidParameterException {
         if (password.length() < 6)
             throw new FxInvalidParameterException("PASSWORD", "ex.account.password.tooShort");
-        return FxSharedUtils.hashPassword(password);
+        return FxSharedUtils.hashPassword(accountId, password);
     }
 
     /**
