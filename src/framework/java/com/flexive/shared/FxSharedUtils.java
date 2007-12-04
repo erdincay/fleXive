@@ -71,7 +71,6 @@ public final class FxSharedUtils {
      * TODO: security?
      */
     public static final String COOKIE_FORCE_TEST_DIVISION = "ForceTestDivision";
-    private static final String PW_SALT = "FX-SALT-";
 
     private static List<String> drops = null;
     public static MessageDigest digest = null;
