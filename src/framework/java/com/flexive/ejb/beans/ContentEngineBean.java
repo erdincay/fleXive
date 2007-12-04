@@ -46,7 +46,7 @@ import com.flexive.shared.content.*;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.scripting.FxScriptBinding;
-import com.flexive.shared.scripting.FxScriptType;
+import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.UserTicket;
@@ -151,7 +151,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                 LifeCycleInfoImpl.createNew(ticket), type.createEmptyData(type.buildXPathPrefix(FxPK.createNewPK())), BinaryDescriptor.SYS_UNKNOWN, 1).initSystemProperties();
         //scripting after start
         FxScriptBinding binding = null;
-        long[] scripts = type.getScriptMapping(FxScriptType.AfterContentInitialize);
+        long[] scripts = type.getScriptMapping(FxScriptEvent.AfterContentInitialize);
         if (scripts != null)
             for (long script : scripts) {
                 if (binding == null)
@@ -224,7 +224,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             //security check end
             //scripting after start
             FxScriptBinding binding = null;
-            long[] scripts = env.getType(content.getTypeId()).getScriptMapping(FxScriptType.AfterContentLoad);
+            long[] scripts = env.getType(content.getTypeId()).getScriptMapping(FxScriptEvent.AfterContentLoad);
             if (scripts != null)
                 for (long script : scripts) {
                     if (binding == null)
@@ -252,7 +252,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
         Connection con = null;
         PreparedStatement ps = null;
         FxPK pk;
-        FxScriptType beforeAssignmentScript, afterAssignmentScript;
+        FxScriptEvent beforeAssignmentScript, afterAssignmentScript;
 
         try {
             FxEnvironment env = CacheAdmin.getEnvironment();
@@ -265,12 +265,12 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             UserTicket ticket = FxContext.get().getTicket();
             if (content.getPk().isNew()) {
                 FxPermissionUtils.checkPermission(ticket, ACL.Permission.CREATE, type, step.getAclId(), content.getAclId(), true);
-                beforeAssignmentScript = FxScriptType.BeforeAssignmentDataCreate;
-                afterAssignmentScript = FxScriptType.AfterAssignmentDataCreate;
+                beforeAssignmentScript = FxScriptEvent.BeforeAssignmentDataCreate;
+                afterAssignmentScript = FxScriptEvent.AfterAssignmentDataCreate;
             } else {
                 FxPermissionUtils.checkPermission(ticket, ACL.Permission.EDIT, type, step.getAclId(), content.getAclId(), true);
-                beforeAssignmentScript = FxScriptType.BeforeAssignmentDataSave;
-                afterAssignmentScript = FxScriptType.AfterAssignmentDataSave;
+                beforeAssignmentScript = FxScriptEvent.BeforeAssignmentDataSave;
+                afterAssignmentScript = FxScriptEvent.AfterAssignmentDataSave;
             }
             //security check end
 
@@ -282,8 +282,8 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             //type scripting
             typeScripts = type.getScriptMapping(
                     content.getPk().isNew()
-                            ? FxScriptType.BeforeContentCreate
-                            : FxScriptType.BeforeContentSave);
+                            ? FxScriptEvent.BeforeContentCreate
+                            : FxScriptEvent.BeforeContentSave);
             if (typeScripts != null)
                 for (long script : typeScripts) {
                     if (binding == null)
@@ -339,8 +339,8 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             //type scripting
             typeScripts = env.getType(content.getTypeId()).getScriptMapping(
                     content.getPk().isNew()
-                            ? FxScriptType.AfterContentCreate
-                            : FxScriptType.AfterContentSave);
+                            ? FxScriptEvent.AfterContentCreate
+                            : FxScriptEvent.AfterContentSave);
             if (typeScripts != null)
                 for (long script : typeScripts) {
                     if (binding == null)
@@ -419,8 +419,8 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             //scripting before start
             scripts = CacheAdmin.getEnvironment().getType(content.getTypeId()).getScriptMapping(
                     content.getPk().isNew()
-                            ? FxScriptType.PrepareContentCreate
-                            : FxScriptType.PrepareContentSave);
+                            ? FxScriptEvent.PrepareContentCreate
+                            : FxScriptEvent.PrepareContentSave);
             if (scripts != null)
                 for (long script : scripts) {
                     if (binding == null)
@@ -481,7 +481,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
 
             //scripting before start
             //type scripting
-            scripts = CacheAdmin.getEnvironment().getType(typeId).getScriptMapping(FxScriptType.BeforeContentRemove);
+            scripts = CacheAdmin.getEnvironment().getType(typeId).getScriptMapping(FxScriptEvent.BeforeContentRemove);
             if (scripts != null)
                 for (long script : scripts) {
                     if (binding == null)
@@ -495,9 +495,9 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             if (type.hasScriptedAssignments()) {
                 binding = new FxScriptBinding();
                 binding.setVariable("pk", pk);
-                for (FxAssignment as : type.getScriptedAssignments(FxScriptType.BeforeAssignmentDataDelete)) {
+                for (FxAssignment as : type.getScriptedAssignments(FxScriptEvent.BeforeAssignmentDataDelete)) {
                     binding.setVariable("assignment", as);
-                    for (long script : as.getScriptMapping(FxScriptType.BeforeAssignmentDataDelete)) {
+                    for (long script : as.getScriptMapping(FxScriptEvent.BeforeAssignmentDataDelete)) {
                         scripting.runScript(script, binding);
                     }
                 }
@@ -509,15 +509,15 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             if (type.hasScriptedAssignments()) {
                 binding = new FxScriptBinding();
                 binding.setVariable("pk", pk);
-                for (FxAssignment as : type.getScriptedAssignments(FxScriptType.AfterAssignmentDataDelete)) {
+                for (FxAssignment as : type.getScriptedAssignments(FxScriptEvent.AfterAssignmentDataDelete)) {
                     binding.setVariable("assignment", as);
-                    for (long script : as.getScriptMapping(FxScriptType.AfterAssignmentDataDelete)) {
+                    for (long script : as.getScriptMapping(FxScriptEvent.AfterAssignmentDataDelete)) {
                         scripting.runScript(script, binding);
                     }
                 }
             }
             //type scripting
-            scripts = CacheAdmin.getEnvironment().getType(typeId).getScriptMapping(FxScriptType.AfterContentRemove);
+            scripts = CacheAdmin.getEnvironment().getType(typeId).getScriptMapping(FxScriptEvent.AfterContentRemove);
             if (scripts != null)
                 for (long script : scripts) {
                     if (binding == null)
@@ -585,10 +585,10 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
 
             FxScriptBinding binding = null;
             UserTicket ticket = FxContext.get().getTicket();
-            if (CacheAdmin.getEnvironment().getType(typeId).getScriptMapping(FxScriptType.BeforeContentRemove) != null)
-                scriptsBefore = CacheAdmin.getEnvironment().getType(typeId).getScriptMapping(FxScriptType.BeforeContentRemove);
-            if (CacheAdmin.getEnvironment().getType(typeId).getScriptMapping(FxScriptType.AfterContentRemove) != null)
-                scriptsAfter = CacheAdmin.getEnvironment().getType(typeId).getScriptMapping(FxScriptType.AfterContentRemove);
+            if (CacheAdmin.getEnvironment().getType(typeId).getScriptMapping(FxScriptEvent.BeforeContentRemove) != null)
+                scriptsBefore = CacheAdmin.getEnvironment().getType(typeId).getScriptMapping(FxScriptEvent.BeforeContentRemove);
+            if (CacheAdmin.getEnvironment().getType(typeId).getScriptMapping(FxScriptEvent.AfterContentRemove) != null)
+                scriptsAfter = CacheAdmin.getEnvironment().getType(typeId).getScriptMapping(FxScriptEvent.AfterContentRemove);
             List<FxPK> pks = null;
             if (scriptsBefore != null || scriptsAfter != null || !ticket.isGlobalSupervisor()) {
                 binding = new FxScriptBinding();
@@ -612,9 +612,9 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                         if (type.hasScriptedAssignments()) {
                             binding = new FxScriptBinding();
                             binding.setVariable("pk", pk);
-                            for (FxAssignment as : type.getScriptedAssignments(FxScriptType.BeforeAssignmentDataDelete)) {
+                            for (FxAssignment as : type.getScriptedAssignments(FxScriptEvent.BeforeAssignmentDataDelete)) {
                                 binding.setVariable("assignment", as);
-                                for (long script : as.getScriptMapping(FxScriptType.BeforeAssignmentDataDelete)) {
+                                for (long script : as.getScriptMapping(FxScriptEvent.BeforeAssignmentDataDelete)) {
                                     scripting.runScript(script, binding);
                                 }
                             }
@@ -634,9 +634,9 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                     if (type.hasScriptedAssignments()) {
                         binding = new FxScriptBinding();
                         binding.setVariable("pk", pk);
-                        for (FxAssignment as : type.getScriptedAssignments(FxScriptType.AfterAssignmentDataDelete)) {
+                        for (FxAssignment as : type.getScriptedAssignments(FxScriptEvent.AfterAssignmentDataDelete)) {
                             binding.setVariable("assignment", as);
-                            for (long script : as.getScriptMapping(FxScriptType.AfterAssignmentDataDelete)) {
+                            for (long script : as.getScriptMapping(FxScriptEvent.AfterAssignmentDataDelete)) {
                                 scripting.runScript(script, binding);
                             }
                         }

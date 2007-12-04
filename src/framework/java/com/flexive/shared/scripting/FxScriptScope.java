@@ -34,7 +34,7 @@
 package com.flexive.shared.scripting;
 
 /**
- * Scope of Scripts - the "area" where FxScriptType's are applicable
+ * Scope of Scripts - the "area" where FxScriptEvent's are applicable
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */

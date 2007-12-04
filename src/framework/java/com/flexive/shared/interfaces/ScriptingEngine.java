@@ -88,9 +88,9 @@ public interface ScriptingEngine {
      * @param description new description (or <code>null</code> if unchanged)
      * @param code        the code
      * @throws FxApplicationException on errors
-     * @see FxScriptType
+     * @see com.flexive.shared.scripting.FxScriptEvent
      */
-    void updateScriptInfo(long scriptId, FxScriptType type, String name, String description, String code) throws FxApplicationException;
+    void updateScriptInfo(long scriptId, FxScriptEvent event, String name, String description, String code) throws FxApplicationException;
 
     /**
      * Convenience method to update a scripts code
@@ -98,7 +98,7 @@ public interface ScriptingEngine {
      * @param scriptId requested script id
      * @param code     the code
      * @throws FxApplicationException on errors
-     * @see #updateScriptInfo(long, com.flexive.shared.scripting.FxScriptType, String, String, String) 
+     * @see #updateScriptInfo(long, com.flexive.shared.scripting.FxScriptEvent , String, String, String)
      */
     void updateScriptCode(long scriptId, String code) throws FxApplicationException;
 
@@ -108,7 +108,7 @@ public interface ScriptingEngine {
      * @param scriptType requested type
      * @return array of id's by type
      */
-    List<Long> getByScriptType(FxScriptType scriptType);
+    List<Long> getByScriptType(FxScriptEvent scriptEvent);
 
     /**
      * Create a new script
@@ -119,9 +119,9 @@ public interface ScriptingEngine {
      * @param code        code
      * @return FxScriptInfo for the new created script
      * @throws FxApplicationException on errors
-     * @see FxScriptType
+     * @see com.flexive.shared.scripting.FxScriptEvent
      */
-    FxScriptInfo createScript(FxScriptType type, String name, String description, String code) throws FxApplicationException;
+    FxScriptInfo createScript(FxScriptEvent event, String name, String description, String code) throws FxApplicationException;
 
     /**
      * Create a new script based on a script from the library
@@ -132,9 +132,9 @@ public interface ScriptingEngine {
      * @param description description
      * @return FxScriptInfo for the new created script
      * @throws FxApplicationException on errors
-     * @see FxScriptType
+     * @see com.flexive.shared.scripting.FxScriptEvent
      */
-    FxScriptInfo createScriptFromLibrary(FxScriptType type, String libraryname, String name, String description) throws FxApplicationException;
+    FxScriptInfo createScriptFromLibrary(FxScriptEvent event, String libraryname, String name, String description) throws FxApplicationException;
 
     /**
      * Create a new script based on a script from the library
@@ -146,9 +146,9 @@ public interface ScriptingEngine {
      * @param description description
      * @return FxScriptInfo for the new created script
      * @throws FxApplicationException on errors
-     * @see FxScriptType
+     * @see com.flexive.shared.scripting.FxScriptEvent
      */
-    FxScriptInfo createScriptFromDropLibrary(String dropName, FxScriptType type, String libraryname, String name, String description) throws FxApplicationException;
+    FxScriptInfo createScriptFromDropLibrary(String dropName, FxScriptEvent event, String libraryname, String name, String description) throws FxApplicationException;
 
     /**
      * Remove a script (will remove all mappings for this script as well)
@@ -212,7 +212,7 @@ public interface ScriptingEngine {
     FxScriptMapping loadScriptMapping(Connection _con, long scriptId) throws FxLoadException, SQLException;
 
     /**
-     * Create a new mapping for types with the default FxScriptType the script was created with
+     * Create a new mapping for types with the default FxScriptEvent the script was created with
      *
      * @param scriptId     id of the script
      * @param typeId       id of the type
@@ -224,9 +224,9 @@ public interface ScriptingEngine {
     FxScriptMappingEntry createTypeScriptMapping(long scriptId, long typeId, boolean active, boolean derivedUsage) throws FxApplicationException;
 
     /**
-     * Create a new mapping for types with a given FxScriptType
+     * Create a new mapping for types with a given FxScriptEvent
      *
-     * @param scriptType   FxScriptType for this mapping (on create, save, remove, etc.)
+     * @param scriptType   FxScriptEvent for this mapping (on create, save, remove, etc.)
      * @param scriptId     id of the script
      * @param typeId       id of the type
      * @param active       mapping is active?
@@ -234,7 +234,7 @@ public interface ScriptingEngine {
      * @return the created entry
      * @throws FxApplicationException on errors
      */
-    FxScriptMappingEntry createTypeScriptMapping(FxScriptType scriptType, long scriptId, long typeId, boolean active, boolean derivedUsage) throws FxApplicationException;
+    FxScriptMappingEntry createTypeScriptMapping(FxScriptEvent scriptEvent, long scriptId, long typeId, boolean active, boolean derivedUsage) throws FxApplicationException;
 
     /**
      * Remove a mapping from a script to an assignment (directly mapped, not via inheritance!)

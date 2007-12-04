@@ -149,7 +149,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             ResultSet rs = ps.executeQuery();
             if (rs == null || !rs.next())
                 throw new FxNotFoundException("ex.scripting.notFound", scriptId);
-            si = new FxScriptInfo(scriptId, FxScriptType.getById(rs.getInt(4)), rs.getString(1), rs.getString(2),
+            si = new FxScriptInfo(scriptId, FxScriptEvent.getById(rs.getInt(4)), rs.getString(1), rs.getString(2),
                     rs.getString(3));
         } catch (SQLException exc) {
             ctx.setRollbackOnly();
@@ -174,9 +174,9 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             ps = con.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
 
-            while(rs != null && rs.next()){
-                slist.add(new FxScriptInfo(rs.getInt(1), FxScriptType.getById(rs.getInt(5)), rs.getString(2), rs.getString(3),
-                    rs.getString(4)));
+            while (rs != null && rs.next()) {
+                slist.add(new FxScriptInfo(rs.getInt(1), FxScriptEvent.getById(rs.getInt(5)), rs.getString(2), rs.getString(3),
+                        rs.getString(4)));
             }
 
         } catch (SQLException exc) {
@@ -193,7 +193,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void updateScriptInfo(long scriptId, FxScriptType type, String name, String description, String code) throws FxApplicationException {
+    public void updateScriptInfo(long scriptId, FxScriptEvent event, String name, String description, String code) throws FxApplicationException {
         Connection con = null;
         PreparedStatement ps = null;
         String sql;
@@ -209,7 +209,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             ps.setString(1, name);
             ps.setString(2, description);
             ps.setString(3, code);
-            ps.setInt(4, type.getId());
+            ps.setInt(4, event.getId());
             ps.setLong(5, scriptId);
             ps.executeUpdate();
             success = true;
@@ -230,14 +230,14 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void updateScriptCode(long scriptId, String code) throws FxApplicationException {
         FxScriptInfo si = getScriptInfo(scriptId);
-        updateScriptInfo(si.getId(), si.getType(), si.getName(), si.getDescription(), code);
+        updateScriptInfo(si.getId(), si.getEvent(), si.getName(), si.getDescription(), code);
     }
 
     /**
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public List<Long> getByScriptType(FxScriptType scriptType) {
+    public List<Long> getByScriptType(FxScriptEvent scriptEvent) {
         Connection con = null;
         PreparedStatement ps = null;
         String sql;
@@ -248,7 +248,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             //                                                              1
             sql = "SELECT DISTINCT ID FROM " + TBL_SCRIPTS + " WHERE STYPE=? ORDER BY ID";
             ps = con.prepareStatement(sql);
-            ps.setLong(1, scriptType.getId());
+            ps.setLong(1, scriptEvent.getId());
             ResultSet rs = ps.executeQuery();
             while (rs != null && rs.next())
                 ret.add(rs.getLong(1));
@@ -265,14 +265,14 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public FxScriptInfo createScript(FxScriptType type, String name, String description, String code) throws FxApplicationException {
+    public FxScriptInfo createScript(FxScriptEvent event, String name, String description, String code) throws FxApplicationException {
         FxScriptInfo si;
         Connection con = null;
         PreparedStatement ps = null;
         String sql;
         boolean success = false;
         try {
-            si = new FxScriptInfo(seq.getId(SequencerEngine.System.SCRIPTS), type, name, description, code);
+            si = new FxScriptInfo(seq.getId(SequencerEngine.System.SCRIPTS), event, name, description, code);
             if (code == null)
                 code = "";
             // Obtain a database connection
@@ -284,7 +284,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             ps.setString(2, si.getName());
             ps.setString(3, si.getDescription());
             ps.setString(4, code);
-            ps.setInt(5, si.getType().getId());
+            ps.setInt(5, si.getEvent().getId());
             ps.executeUpdate();
             success = true;
         } catch (SQLException exc) {
@@ -305,24 +305,24 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public FxScriptInfo createScriptFromLibrary(FxScriptType type, String libraryname, String name, String description) throws FxApplicationException {
+    public FxScriptInfo createScriptFromLibrary(FxScriptEvent event, String libraryname, String name, String description) throws FxApplicationException {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         String code = FxSharedUtils.loadFromInputStream(cl.getResourceAsStream("fxresources/scripts/library/" + libraryname), -1);
         if (code == null || code.length() == 0)
             throw new FxNotFoundException("ex.scripting.load.library.failed", libraryname);
-        return createScript(type, name, description, code);
+        return createScript(event, name, description, code);
     }
 
     /**
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public FxScriptInfo createScriptFromDropLibrary(String dropName, FxScriptType type, String libraryname, String name, String description) throws FxApplicationException {
+    public FxScriptInfo createScriptFromDropLibrary(String dropName, FxScriptEvent event, String libraryname, String name, String description) throws FxApplicationException {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         String code = FxSharedUtils.loadFromInputStream(cl.getResourceAsStream(dropName + "Resources/scripts/library/" + libraryname), -1);
         if (code == null || code.length() == 0)
             throw new FxNotFoundException("ex.scripting.load.library.failed", libraryname);
-        return createScript(type, name, description, code);
+        return createScript(event, name, description, code);
     }
 
     /**
@@ -390,7 +390,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                 throw new FxInvalidParameterException(si.getName(), "ex.general.scripting.exception", si.getName(), t.getMessage());
             }
             groovyScriptCache.putIfAbsent(scriptId, script);
-        } 
+        }
 
         if (binding == null)
             binding = new FxScriptBinding();
@@ -464,7 +464,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                 for (int i = 0; i < ass.size(); i++)
                     derived[i] = ass.get(i).getId();
             }
-            sm = new FxScriptMappingEntry(si.getType(), scriptId, active, derivedUsage, assignmentId, derived);
+            sm = new FxScriptMappingEntry(si.getEvent(), scriptId, active, derivedUsage, assignmentId, derived);
             // Obtain a database connection
             con = Database.getDbConnection();
             sql = "INSERT INTO " + TBL_SCRIPT_MAPPING_ASSIGN + " (ASSIGNMENT,SCRIPT,DERIVED_USAGE,ACTIVE,STYPE) VALUES " +
@@ -475,7 +475,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             ps.setLong(2, sm.getScriptId());
             ps.setBoolean(3, sm.isDerivedUsage());
             ps.setBoolean(4, sm.isActive());
-            ps.setInt(5, sm.getScriptType().getId());
+            ps.setInt(5, sm.getScriptEvent().getId());
             ps.executeUpdate();
             success = true;
         } catch (SQLException exc) {
@@ -496,7 +496,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public FxScriptMappingEntry createTypeScriptMapping(FxScriptType scriptType, long scriptId, long typeId, boolean active, boolean derivedUsage) throws FxApplicationException {
+    public FxScriptMappingEntry createTypeScriptMapping(FxScriptEvent scriptEvent, long scriptId, long typeId, boolean active, boolean derivedUsage) throws FxApplicationException {
         FxScriptMappingEntry sm;
         Connection con = null;
         PreparedStatement ps = null;
@@ -514,7 +514,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                 for (int i = 0; i < types.size(); i++)
                     derived[i] = types.get(i).getId();
             }
-            sm = new FxScriptMappingEntry(si.getType(), scriptId, active, derivedUsage, typeId, derived);
+            sm = new FxScriptMappingEntry(si.getEvent(), scriptId, active, derivedUsage, typeId, derived);
             // Obtain a database connection
             con = Database.getDbConnection();
             sql = "INSERT INTO " + TBL_SCRIPT_MAPPING_TYPES + " (TYPEDEF,SCRIPT,DERIVED_USAGE,ACTIVE,STYPE) VALUES " +
@@ -525,7 +525,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             ps.setLong(2, sm.getScriptId());
             ps.setBoolean(3, sm.isDerivedUsage());
             ps.setBoolean(4, sm.isActive());
-            ps.setInt(5, scriptType.getId());
+            ps.setInt(5, scriptEvent.getId());
             ps.executeUpdate();
             success = true;
         } catch (SQLException exc) {
@@ -548,7 +548,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxScriptMappingEntry createTypeScriptMapping(long scriptId, long typeId, boolean active, boolean derivedUsage) throws FxApplicationException {
         FxScriptInfo si = getScriptInfo(scriptId);
-        return createTypeScriptMapping(si.getType(), scriptId, typeId, active, derivedUsage);
+        return createTypeScriptMapping(si.getEvent(), scriptId, typeId, active, derivedUsage);
     }
 
     /**
@@ -633,7 +633,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                     derived[i] = ass.get(i).getId();
             }
             //TODO: dont overwrite type info, use xxEdit objects!!
-            sm = new FxScriptMappingEntry(si.getType(), scriptId, active, derivedUsage, assignmentId, derived);
+            sm = new FxScriptMappingEntry(si.getEvent(), scriptId, active, derivedUsage, assignmentId, derived);
             // Obtain a database connection
             con = Database.getDbConnection();
             //                                                                1        2                  3            4
@@ -681,7 +681,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                     derived[i] = types.get(i).getId();
             }
             //TODO: dont overwrite type info, use xxEdit objects!!
-            sm = new FxScriptMappingEntry(si.getType(), scriptId, active, derivedUsage, typeId, derived);
+            sm = new FxScriptMappingEntry(si.getEvent(), scriptId, active, derivedUsage, typeId, derived);
             // Obtain a database connection
             con = Database.getDbConnection();
             //                                                               1        2                  3            4
@@ -718,9 +718,9 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
     /**
      * Execute all runOnce scripts in the resource denoted by prefix if param is "false"
      *
-     * @param param  boolean parameter that will be flagged as "true" once the scripts are run
-     * @param prefix resource directory prefix
-     * @param applicationName   the corresponding application name (for debug messages)
+     * @param param           boolean parameter that will be flagged as "true" once the scripts are run
+     * @param prefix          resource directory prefix
+     * @param applicationName the corresponding application name (for debug messages)
      */
     private void runOnce(Parameter<Boolean> param, String prefix, String applicationName) {
         try {
@@ -810,8 +810,8 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
     /**
      * Eexecute startup scripts within the given subfolder identified by prefix
      *
-     * @param prefix subfolder for scripts
-     * @param applicationName   the corresponding application name (for debug messages)
+     * @param prefix          subfolder for scripts
+     * @param applicationName the corresponding application name (for debug messages)
      */
     private void executeStartupScripts(String prefix, String applicationName) {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
@@ -964,7 +964,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                     for (int i = 0; i < ass.size(); i++)
                         derived[i] = ass.get(i).getId();
                 }
-                e_ass.add(new FxScriptMappingEntry(FxScriptType.getById(rs.getInt(4)), scriptId, rs.getBoolean(3), rs.getBoolean(2), rs.getLong(1), derived));
+                e_ass.add(new FxScriptMappingEntry(FxScriptEvent.getById(rs.getInt(4)), scriptId, rs.getBoolean(3), rs.getBoolean(2), rs.getLong(1), derived));
             }
             rs = ps_t.executeQuery();
             while (rs != null && rs.next()) {
@@ -977,7 +977,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                     for (int i = 0; i < types.size(); i++)
                         derived[i] = types.get(i).getId();
                 }
-                e_types.add(new FxScriptMappingEntry(FxScriptType.getById(rs.getInt(4)), scriptId, rs.getBoolean(3), rs.getBoolean(2), rs.getLong(1), derived));
+                e_types.add(new FxScriptMappingEntry(FxScriptEvent.getById(rs.getInt(4)), scriptId, rs.getBoolean(3), rs.getBoolean(2), rs.getLong(1), derived));
             }
             mapping = new FxScriptMapping(scriptId, e_types, e_ass);
 

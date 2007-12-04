@@ -42,8 +42,8 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.ScriptingEngine;
 import com.flexive.shared.scripting.FxScriptBinding;
+import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.scripting.FxScriptInfo;
-import com.flexive.shared.scripting.FxScriptType;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
@@ -73,8 +73,8 @@ public class ScriptingTest {
     public void suiteSetup() throws FxApplicationException {
         String codeLoad = "println \"[Groovy script]=== Loading Content \"+content.pk+\"(\"+environment.getType(content.getTypeId()).getName()+\") ===\"";
         String codeRemove = "println \"[Groovy script]=== Before removal of content \"+pk+\"(\"+environment.getType(securityInfo.getTypeId()).getName()+\") ===\"";
-        loadScript = EJBLookup.getScriptingEngine().createScript(FxScriptType.AfterContentLoad, "afterLoadTest.gy", "Test script", codeLoad);
-        removeScript = EJBLookup.getScriptingEngine().createScript(FxScriptType.BeforeContentRemove, "beforeRemoveTest.gy", "Test script", codeRemove);
+        loadScript = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.AfterContentLoad, "afterLoadTest.gy", "Test script", codeLoad);
+        removeScript = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.BeforeContentRemove, "beforeRemoveTest.gy", "Test script", codeRemove);
     }
 
     public static void suiteShutDown() throws FxApplicationException {
@@ -102,12 +102,12 @@ public class ScriptingTest {
         String code = "return \"hello world\";";
         Object result = "hello world";
 
-        FxScriptInfo si = se.createScript(FxScriptType.Independent, name, desc, code);
+        FxScriptInfo si = se.createScript(FxScriptEvent.Manual, name, desc, code);
         assert si != null : "No FxScriptInfo returned!";
         assert si.getId() > 0 : "Invalid script id";
         assert si.getName().equals(name) : "Invalid name";
         assert si.getDescription().equals(desc) : "Invalid description";
-        assert si.getType().equals(FxScriptType.Independent) : "Invalid script type";
+        assert si.getEvent().equals(FxScriptEvent.Manual) : "Invalid script type";
         assert se.runScript(si.getId(), new FxScriptBinding()).getResult().equals(result) : "Invalid result from script!";
         se.removeScript(si.getId());
     }
@@ -139,16 +139,16 @@ public class ScriptingTest {
         FxType type = CacheAdmin.getEnvironment().getType(typeId);
         List<FxScriptInfo> scripts = new ArrayList<FxScriptInfo>(10);
         try {
-            scripts.add(createScript(type.getAssignment("/A"), FxScriptType.BeforeAssignmentDataCreate));
-            scripts.add(createScript(type.getAssignment("/A"), FxScriptType.AfterAssignmentDataCreate));
-            scripts.add(createScript(type.getAssignment("/A"), FxScriptType.BeforeAssignmentDataDelete));
-            scripts.add(createScript(type.getAssignment("/A"), FxScriptType.AfterAssignmentDataDelete));
-            scripts.add(createScript(type.getAssignment("/B"), FxScriptType.BeforeDataChangeAdd));
-            scripts.add(createScript(type.getAssignment("/B"), FxScriptType.BeforeDataChangeUpdate));
-            scripts.add(createScript(type.getAssignment("/B"), FxScriptType.BeforeDataChangeDelete));
-            scripts.add(createScript(type.getAssignment("/B"), FxScriptType.AfterDataChangeAdd));
-            scripts.add(createScript(type.getAssignment("/B"), FxScriptType.AfterDataChangeUpdate));
-            scripts.add(createScript(type.getAssignment("/B"), FxScriptType.AfterDataChangeDelete));
+            scripts.add(createScript(type.getAssignment("/A"), FxScriptEvent.BeforeAssignmentDataCreate));
+            scripts.add(createScript(type.getAssignment("/A"), FxScriptEvent.AfterAssignmentDataCreate));
+            scripts.add(createScript(type.getAssignment("/A"), FxScriptEvent.BeforeAssignmentDataDelete));
+            scripts.add(createScript(type.getAssignment("/A"), FxScriptEvent.AfterAssignmentDataDelete));
+            scripts.add(createScript(type.getAssignment("/B"), FxScriptEvent.BeforeDataChangeAdd));
+            scripts.add(createScript(type.getAssignment("/B"), FxScriptEvent.BeforeDataChangeUpdate));
+            scripts.add(createScript(type.getAssignment("/B"), FxScriptEvent.BeforeDataChangeDelete));
+            scripts.add(createScript(type.getAssignment("/B"), FxScriptEvent.AfterDataChangeAdd));
+            scripts.add(createScript(type.getAssignment("/B"), FxScriptEvent.AfterDataChangeUpdate));
+            scripts.add(createScript(type.getAssignment("/B"), FxScriptEvent.AfterDataChangeDelete));
 
             FxString data = new FxString(false, "data");
             FxString data2 = new FxString(false, "data2");
@@ -181,19 +181,19 @@ public class ScriptingTest {
 
     }
 
-    private FxScriptInfo createScript(FxAssignment asssignment, FxScriptType type) throws FxApplicationException {
+    private FxScriptInfo createScript(FxAssignment asssignment, FxScriptEvent event) throws FxApplicationException {
         String data = "unknown";
-        if (type.name().startsWith("BeforeAssignment"))
+        if (event.name().startsWith("BeforeAssignment"))
             data = "assignment";
-        else if (type.name().startsWith("AfterAssignment"))
+        else if (event.name().startsWith("AfterAssignment"))
             data = "assignment";
-        else if (type.name().startsWith("BeforeDataChange"))
+        else if (event.name().startsWith("BeforeDataChange"))
             data = "change";
-        else if (type.name().startsWith("AfterDataChange"))
+        else if (event.name().startsWith("AfterDataChange"))
             data = "change";
-        FxScriptInfo si = se.createScript(type, "Test" + type.name() + ".gy",
+        FxScriptInfo si = se.createScript(event, "Test" + event.name() + ".gy",
                 "",
-                "println \"This is [" + type.name() + "] registered for Assignment [" + asssignment.getXPath() + "] - I am called for ${" + data + "}\"");
+                "println \"This is [" + event.name() + "] registered for Assignment [" + asssignment.getXPath() + "] - I am called for ${" + data + "}\"");
         se.createAssignmentScriptMapping(si.getId(), asssignment.getId(), true, true);
         return si;
     }

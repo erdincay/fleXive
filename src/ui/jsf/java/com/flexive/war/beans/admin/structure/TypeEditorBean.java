@@ -41,7 +41,7 @@ import com.flexive.shared.EJBLookup;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.scripting.FxScriptInfo;
-import com.flexive.shared.scripting.FxScriptType;
+import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.structure.*;
@@ -93,11 +93,11 @@ public class TypeEditorBean {
     private boolean mayDelete = false;
 
     //type script editor tab
-    private int scriptTypeId = -1;
+    private int scriptEventId = -1;
     private int selectedScriptId = -1;
-    private FxScriptType scriptType;
+    private FxScriptEvent scriptEvent;
     private long scriptId = -1;
-    private FxScriptType selectedType;
+    private FxScriptEvent selectedEvent;
     // the script/scripttype combinations for which the mappings for the currently specified type should be created
     private ArrayList<FxScriptInfo> selectedScripts = new ArrayList<FxScriptInfo>();
 
@@ -181,21 +181,9 @@ public class TypeEditorBean {
         for (FxTypeRelation r : type.getRelations()) {
             wrappedRelations.add(new WrappedRelation(r));
         }
-        if (type.getMaxVersions() != -1)
-            unlimitedVersions = false;
-        else
-            unlimitedVersions = true;
-
-        if (type.getMaxRelSource() == 0)
-            maxRelSourceUnlimited = true;
-        else
-            maxRelSourceUnlimited = false;
-
-        if (type.getMaxRelDestination() == 0)
-            maxRelDestUnlimited = true;
-        else
-            maxRelDestUnlimited = false;
-
+        unlimitedVersions = type.getMaxVersions() == -1;
+        maxRelSourceUnlimited = type.getMaxRelSource() == 0;
+        maxRelDestUnlimited = type.getMaxRelDestination() == 0;
         timeRange = initTimeRange();
     }
 
@@ -320,11 +308,11 @@ public class TypeEditorBean {
         if (timeRanges == null) {
             timeRanges = new ArrayList<SelectItem>();
             MessageBean messageBean = (MessageBean) FxJsfUtils.getManagedBean("fxMessageBean");
-            timeRanges.add(new SelectItem(new Integer(0), messageBean.getMessage("TypeEditor.selectlist.timeRanges.label.forever")));
-            timeRanges.add(new SelectItem(new Integer(1), messageBean.getMessage("TypeEditor.selectlist.timeRanges.label.ms")));
-            timeRanges.add(new SelectItem(new Integer(2), messageBean.getMessage("TypeEditor.selectlist.timeRanges.label.sec")));
-            timeRanges.add(new SelectItem(new Integer(3), messageBean.getMessage("TypeEditor.selectlist.timeRanges.label.min")));
-            timeRanges.add(new SelectItem(new Integer(4), messageBean.getMessage("TypeEditor.selectlist.timeRanges.label.days")));
+            timeRanges.add(new SelectItem(0, messageBean.getMessage("TypeEditor.selectlist.timeRanges.label.forever")));
+            timeRanges.add(new SelectItem(1, messageBean.getMessage("TypeEditor.selectlist.timeRanges.label.ms")));
+            timeRanges.add(new SelectItem(2, messageBean.getMessage("TypeEditor.selectlist.timeRanges.label.sec")));
+            timeRanges.add(new SelectItem(3, messageBean.getMessage("TypeEditor.selectlist.timeRanges.label.min")));
+            timeRanges.add(new SelectItem(4, messageBean.getMessage("TypeEditor.selectlist.timeRanges.label.days")));
         }
         return timeRanges;
     }
@@ -785,7 +773,7 @@ public class TypeEditorBean {
         }
     }
 
-    public int getTypeScriptCount() {
+    public int getEventScriptCount() {
         Map scriptMapping = type.getScriptMapping();
         int count = 0;
         Collection<long[]> scriptIds = scriptMapping.values();
@@ -815,15 +803,15 @@ public class TypeEditorBean {
         return "typeScriptEditor";
     }
 
-    /**
-     * *script editor tab**********
+    /*
+     * script editor tab
      */
 
     //get script types for this type
-    public List<SelectItem> getScriptTypes() {
+    public List<SelectItem> getScriptEvents() {
         ArrayList<SelectItem> scriptTypes = new ArrayList<SelectItem>(type.getScriptMapping().keySet().size() + 1);
-        for (FxScriptType scriptType : (Set<FxScriptType>) type.getScriptMapping().keySet()) {
-            scriptTypes.add(new SelectItem(scriptType.getId(), scriptType.getName()));
+        for (FxScriptEvent scriptEvent : (Set<FxScriptEvent>) type.getScriptMapping().keySet()) {
+            scriptTypes.add(new SelectItem(scriptEvent.getId(), scriptEvent.getName()));
         }
         Collections.sort(scriptTypes, new FxJsfUtils.SelectItemSorter());
         scriptTypes.add(0, new SelectItem(-1,
@@ -831,12 +819,12 @@ public class TypeEditorBean {
         return scriptTypes;
     }
 
-    public int getScriptTypeId() {
-        return scriptTypeId;
+    public int getScriptEventId() {
+        return scriptEventId;
     }
 
-    public void setScriptTypeId(int scriptTypeId) {
-        this.scriptTypeId = scriptTypeId;
+    public void setScriptEventId(int scriptEventId) {
+        this.scriptEventId = scriptEventId;
     }
 
     public long getScriptId() {
@@ -851,7 +839,7 @@ public class TypeEditorBean {
         long[] scriptIds = new long[0];
         ArrayList<FxScriptInfo> scripts = new ArrayList<FxScriptInfo>();
         //-1: show ALL scripts
-        if (scriptTypeId == -1) {
+        if (scriptEventId == -1) {
             HashSet idSet = new HashSet<Long>();
             for (long[] sids : (Collection<long[]>) type.getScriptMapping().values()) {
                 for (long l : sids) {
@@ -865,15 +853,15 @@ public class TypeEditorBean {
             }
         } else {
             try {
-                scriptIds = type.getScriptMapping(FxScriptType.getById(scriptTypeId));
+                scriptIds = type.getScriptMapping(FxScriptEvent.getById(scriptEventId));
             }
             catch (Throwable t) {
                 new FxFacesMsgErr(t).addToContext();
             }
         }
-
-        for (long l : scriptIds) {
-            scripts.add(CacheAdmin.getEnvironment().getScript(l));
+        if (scriptIds != null) {
+            for (long l : scriptIds)
+                scripts.add(CacheAdmin.getEnvironment().getScript(l));
         }
         Collections.sort(scripts, new FxJsfUtils.ScriptInfoSorter());
 
@@ -885,8 +873,8 @@ public class TypeEditorBean {
         ArrayList<SelectItem> scripts = new ArrayList<SelectItem>();
         // list starts with an empty entry (for the user interface)
         scripts.add(new SelectItem(-1, ""));
-        if (this.scriptType != null) {
-            List<Long> scriptIds = EJBLookup.getScriptingEngine().getByScriptType(this.scriptType);
+        if (this.scriptEvent != null) {
+            List<Long> scriptIds = EJBLookup.getScriptingEngine().getByScriptType(this.scriptEvent);
             for (long l : scriptIds) {
                 scripts.add(new SelectItem(l, CacheAdmin.getEnvironment().getScript(l).getName()));
             }
@@ -912,34 +900,34 @@ public class TypeEditorBean {
     }
 
 
-    public FxScriptType getScriptType() {
-        return scriptType;
+    public FxScriptEvent getScriptEvent() {
+        return scriptEvent;
     }
 
-    public void setScriptType(FxScriptType scriptType) {
-        this.scriptType = scriptType;
+    public void setScriptEvent(FxScriptEvent scriptEvent) {
+        this.scriptEvent = scriptEvent;
     }
 
-    public FxScriptType getSelectedType() {
-        return selectedType;
+    public FxScriptEvent getSelectedEvent() {
+        return selectedEvent;
     }
 
-    public void setSelectedType(FxScriptType selectedType) {
-        this.selectedType = selectedType;
+    public void setSelectedEvent(FxScriptEvent selectedEvent) {
+        this.selectedEvent = selectedEvent;
     }
 
 
     // adds a script/type-combination to the list of scripts for which mappings shall be created
     public String addScript() {
 
-        if (this.selectedScriptId != -1 && this.selectedType != null) {
+        if (this.selectedScriptId != -1 && this.selectedEvent != null) {
             try {
-                this.selectedScripts.add(new FxScriptInfo(this.selectedScriptId, this.selectedType, CacheAdmin.getEnvironment().getScript(this.selectedScriptId).getName(), "", ""));
+                this.selectedScripts.add(new FxScriptInfo(this.selectedScriptId, this.selectedEvent, CacheAdmin.getEnvironment().getScript(this.selectedScriptId).getName(), "", ""));
                 // reset values...
                 this.selectedScriptId = -1;
-                this.selectedType = null;
+                this.selectedEvent = null;
             } catch (FxInvalidParameterException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                throw e.asRuntimeException();
             }
         }
 
@@ -952,10 +940,10 @@ public class TypeEditorBean {
         try {
             // 1: script type, 2: id of the script, 3: id of the type
             for (FxScriptInfo info : this.selectedScripts) {           //      1              2               3
-                EJBLookup.getScriptingEngine().createTypeScriptMapping(info.getType(), info.getId(), this.type.getId(), true, false);
+                EJBLookup.getScriptingEngine().createTypeScriptMapping(info.getEvent(), info.getId(), this.type.getId(), true, false);
             }
         } catch (FxApplicationException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            throw e.asRuntimeException();
         }
 
         this.selectedScripts = new ArrayList<FxScriptInfo>();
@@ -969,7 +957,7 @@ public class TypeEditorBean {
     // reset values ...
     public void clearSelectedScript(ActionEvent e) {
         this.selectedScriptId = -1;
-        this.selectedType = null;
+        this.selectedEvent = null;
     }
 
     // clear table of type mapping assignments (the ones to add)

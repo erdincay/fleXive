@@ -40,7 +40,7 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.scripting.FxScriptInfo;
-import com.flexive.shared.scripting.FxScriptType;
+import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxString;
 import static org.testng.Assert.assertEquals;
@@ -64,9 +64,9 @@ public class ContentBenchmark {
 
     public void createContactDataBenchmark() throws FxApplicationException {
         // register some scripts
-        final FxScriptInfo script1 = EJBLookup.getScriptingEngine().createScript(FxScriptType.AfterContentCreate, SCRIPT1, "",
+        final FxScriptInfo script1 = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.AfterContentCreate, SCRIPT1, "",
                 "com.flexive.tests.embedded.benchmark.ContentBenchmark.scriptCtr1++");
-        final FxScriptInfo script2 = EJBLookup.getScriptingEngine().createScript(FxScriptType.AfterContentCreate, SCRIPT2, "",
+        final FxScriptInfo script2 = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.AfterContentCreate, SCRIPT2, "",
                 "com.flexive.tests.embedded.benchmark.ContentBenchmark.scriptCtr2++");
         final long contactDataId = CacheAdmin.getEnvironment().getType(FxType.CONTACTDATA).getId();
         EJBLookup.getScriptingEngine().createTypeScriptMapping(script1.getId(), contactDataId, true, true);

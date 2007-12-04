@@ -42,10 +42,10 @@ import com.flexive.shared.FxContext;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLoadException;
 import com.flexive.shared.interfaces.ScriptingEngine;
+import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.scripting.FxScriptMappingEntry;
-import com.flexive.shared.scripting.FxScriptType;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
 
@@ -56,6 +56,8 @@ import java.sql.SQLException;
 import java.util.*;
 
 /**
+ * JSF scripting bean
+ *
  * @author Johannes Wernig-Pichler (johannes.wernig-pichler@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
@@ -68,7 +70,7 @@ public class ScriptBean {
     private FxScriptInfo[] scripts;
     private FxScriptInfo sinfo;
     private ScriptingEngine scriptInterface;
-    private FxScriptType scriptType;
+    private FxScriptEvent scriptEvent;
     private FxScriptMapping mapping;
     private Map<Long, String> typeMappingNames;
 
@@ -127,11 +129,11 @@ public class ScriptBean {
     // gets all scripts belonging to the type defined in the "scriptType" member
     public FxScriptInfo[] getList() {
         // if no filtering needs to be done return the whole script list..
-        if (scriptType == null) {
+        if (scriptEvent == null) {
             return getScripts();
         } else {
             // get all scripts (only the IDs) belonging to the defined type
-            List<Long> scriptList = scriptInterface.getByScriptType(scriptType);
+            List<Long> scriptList = scriptInterface.getByScriptType(scriptEvent);
             ArrayList<FxScriptInfo> result = new ArrayList<FxScriptInfo>(scriptList.size());
             // get the info to every script
             for (Long l : scriptList) {
@@ -197,12 +199,12 @@ public class ScriptBean {
         return mapping;
     }
 
-    public FxScriptType getScriptType() {
-        return scriptType;
+    public FxScriptEvent getScriptEvent() {
+        return scriptEvent;
     }
 
-    public void setScriptType(FxScriptType scriptType) {
-        this.scriptType = scriptType;
+    public void setScriptEvent(FxScriptEvent scriptEvent) {
+        this.scriptEvent = scriptEvent;
     }
 
     public FxScriptInfo getSinfo() {
@@ -314,7 +316,7 @@ public class ScriptBean {
         ensureScriptIdSet();
 
         try {
-            scriptInterface.updateScriptInfo(id, sinfo.getType(), sinfo.getName(), sinfo.getDescription(), sinfo.getCode());
+            scriptInterface.updateScriptInfo(id, sinfo.getEvent(), sinfo.getName(), sinfo.getDescription(), sinfo.getCode());
             //updateScriptList(); needed (see mandators) ???
             new FxFacesMsgInfo("Script.nfo.updated").addToContext();
             return "scriptOverview";
@@ -337,13 +339,13 @@ public class ScriptBean {
             return "scriptOverview";
         }
 
-        if (sinfo.getName().length() < 1 || sinfo.getType() == null) {
+        if (sinfo.getName().length() < 1 || sinfo.getEvent() == null) {
             new FxFacesMsgErr("Script.err.createMiss").addToContext();
             return "scriptCreate";
         }
 
         try {
-            setId(scriptInterface.createScript(sinfo.getType(), sinfo.getName(), sinfo.getDescription(), sinfo.getCode()).getId());
+            setId(scriptInterface.createScript(sinfo.getEvent(), sinfo.getName(), sinfo.getDescription(), sinfo.getCode()).getId());
             setSinfo(CacheAdmin.getEnvironment().getScript(id));
             // display updated script list
             updateScriptList();

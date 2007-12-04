@@ -31,9 +31,9 @@
                 </fx:formRow>
 
 
-                <fx:formRow labelKey="Script.field.type" id="type">
-                    <h:selectOneListbox id="type" value="#{scriptBean.sinfo.type}" size="1">
-                        <f:selectItems value="#{fxSelectBean.scriptTypes}"/>
+                <fx:formRow labelKey="Script.field.event" id="event">
+                    <h:selectOneListbox id="event" value="#{scriptBean.sinfo.event}" size="1">
+                        <f:selectItems value="#{fxSelectBean.scriptEvents}"/>
                     </h:selectOneListbox>
                 </fx:formRow>
 
@@ -58,7 +58,7 @@
 
                 <fx:formRow labelKey="Script.field.assLinks">
                     <c:forEach items="#{scriptBean.mapping.mappedAssignments}" var="mapAss">
-                        <h:commandLink value="#{mapAss.scriptType}" actionListener="#{structureTreeControllerBean.structureOpener}"
+                        <h:commandLink value="#{mapAss.scriptEvent}" actionListener="#{structureTreeControllerBean.structureOpener}"
                                         action="#{typeEditorBean.showTypeEd}">
                             <f:param name="oid" value="#{mapAss.id}"/>
                             <f:param name="action" value="RELOAD_EXPAND_ASSIGNMENT"/>

@@ -47,29 +47,29 @@ import java.io.Serializable;
 public class FxScriptInfo extends AbstractSelectableObject implements Serializable {
     private static final long serialVersionUID = -2845241882558637595L;
     private long id;
-    private FxScriptType type;
+    private FxScriptEvent event;
     private String name;
     private String description;
     private String code;
 
-    public FxScriptInfo(){
-         /* empty constructor */
+    public FxScriptInfo() {
+        /* empty constructor */
     }
 
     /**
      * Constructor
      *
      * @param id          script id
-     * @param type        script type
+     * @param event       script type
      * @param name        (unique) name of the script
      * @param description description
      * @param code        the script code
      * @throws FxInvalidParameterException on errors
-     * @see FxScriptType
+     * @see FxScriptEvent
      */
-    public FxScriptInfo(long id, FxScriptType type, String name, String description, String code) throws FxInvalidParameterException {
+    public FxScriptInfo(long id, FxScriptEvent event, String name, String description, String code) throws FxInvalidParameterException {
         this.id = id;
-        this.type = type;
+        this.event = event;
         this.name = name;
         this.description = (description == null ? "" : description);
         this.code = (code == null ? "" : code);
@@ -88,13 +88,13 @@ public class FxScriptInfo extends AbstractSelectableObject implements Serializab
     }
 
     /**
-     * Get the type of this script
+     * Get the event type of this script
      *
-     * @return type of this script
-     * @see FxScriptType
+     * @return event type of this script
+     * @see FxScriptEvent
      */
-    public FxScriptType getType() {
-        return type;
+    public FxScriptEvent getEvent() {
+        return event;
     }
 
     /**
@@ -128,8 +128,8 @@ public class FxScriptInfo extends AbstractSelectableObject implements Serializab
         this.id = id;
     }
 
-    public void setType(FxScriptType type) {
-        this.type = type;
+    public void setEvent(FxScriptEvent event) {
+        this.event = event;
     }
 
     public void setName(String name) {

@@ -37,9 +37,9 @@ import com.flexive.shared.content.FxData;
 import com.flexive.shared.content.FxGroupData;
 import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxNotFoundException;
+import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.scripting.FxScriptMappingEntry;
-import com.flexive.shared.scripting.FxScriptType;
 import com.flexive.shared.value.FxString;
 
 import java.io.Serializable;
@@ -54,7 +54,7 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
     private static final long serialVersionUID = -6127833297182838935L;
 
     /**
-     * Empty list returned if no script mapping is defined for a FxScriptType
+     * Empty list returned if no script mapping is defined for a FxScriptEvent
      */
     private final static long[] EMPTY_SCRIPTMAPPING = new long[0];
 
@@ -143,7 +143,7 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
     /**
      * Script mapping, is resolved while loading the environment
      */
-    protected Map<FxScriptType, long[]> scriptMapping;
+    protected Map<FxScriptEvent, long[]> scriptMapping;
 
     private boolean systemInternal;
     List<FxStructureOption> options;
@@ -390,13 +390,13 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
     }
 
     /**
-     * Does this assignment have mappings for the requested script type?
+     * Does this assignment have mappings for the requested script event?
      *
-     * @param type requested script type
+     * @param event requested script event
      * @return if mappings exist
      */
-    public boolean hasScriptMapping(FxScriptType type) {
-        return scriptMapping.get(type) != null && scriptMapping.get(type).length > 0;
+    public boolean hasScriptMapping(FxScriptEvent event) {
+        return scriptMapping.get(event) != null && scriptMapping.get(event).length > 0;
     }
 
     /**
@@ -412,11 +412,11 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
     /**
      * Get the mapped script ids for the requested script type
      *
-     * @param type requested script type
+     * @param event requested script event
      * @return mapped script ids or <code>null</code> if mappings do not exist for this assignment
      */
-    public long[] getScriptMapping(FxScriptType type) {
-        long[] ret = scriptMapping.get(type);
+    public long[] getScriptMapping(FxScriptEvent event) {
+        long[] ret = scriptMapping.get(event);
         return ret != null ? ret : EMPTY_SCRIPTMAPPING;
     }
 
@@ -488,17 +488,17 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
         if (this.scriptMapping != null)
             this.scriptMapping.clear();
         else
-            this.scriptMapping = new HashMap<FxScriptType, long[]>(5);
+            this.scriptMapping = new HashMap<FxScriptEvent, long[]>(5);
         for (long scriptId : scripts) {
-            FxScriptType type = environment.getScript(scriptId).getType();
-            if (this.scriptMapping.get(type) == null)
-                this.scriptMapping.put(type, new long[]{scriptId});
+            FxScriptEvent event = environment.getScript(scriptId).getEvent();
+            if (this.scriptMapping.get(event) == null)
+                this.scriptMapping.put(event, new long[]{scriptId});
             else {
-                long[] types = this.scriptMapping.get(type);
+                long[] types = this.scriptMapping.get(event);
                 long[] ntypes = new long[types.length + 1];
                 System.arraycopy(types, 0, ntypes, 0, types.length);
                 ntypes[ntypes.length - 1] = scriptId;
-                this.scriptMapping.put(type, ntypes);
+                this.scriptMapping.put(event, ntypes);
             }
         }
     }

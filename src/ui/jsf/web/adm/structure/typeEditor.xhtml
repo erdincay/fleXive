@@ -31,7 +31,7 @@
             <c:if test="#{empty typeEditorBean.parseRequestParameters}"> </c:if>
 
             <adm:tab label="#{fxMessageBean['TypeEditor.tab.typeEditor']}" active="true" id="tab1"/>
-            <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor']} [#{typeEditorBean.typeScriptCount}]" active="false" id="tab2"
+            <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor']} [#{typeEditorBean.eventScriptCount}]" active="false" id="tab2"
                     bean="#{typeEditorBean}" action="showTypeScriptEditor"/>
 
              <fx:formRow labelKey="TypeEditor.label.name" id="name">

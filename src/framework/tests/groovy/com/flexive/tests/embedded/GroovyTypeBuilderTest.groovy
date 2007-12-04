@@ -1,9 +1,43 @@
+/***************************************************************
+ *  This file is part of the [fleXive](R) project.
+ *
+ *  Copyright (c) 1999-2007
+ *  UCS - unique computing solutions gmbh (http://www.ucs.at)
+ *  All rights reserved
+ *
+ *  The [fleXive](R) project is free software; you can redistribute
+ *  it and/or modify it under the terms of the GNU General Public
+ *  License as published by the Free Software Foundation;
+ *  either version 2 of the License, or (at your option) any
+ *  later version.
+ *
+ *  The GNU General Public License can be found at
+ *  http://www.gnu.org/copyleft/gpl.html.
+ *  A copy is found in the textfile GPL.txt and important notices to the
+ *  license from the author are found in LICENSE.txt distributed with
+ *  these libraries.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  For further information about UCS - unique computing solutions gmbh,
+ *  please see the company website: http://www.ucs.at
+ *
+ *  For further information about [fleXive](R), please see the
+ *  project website: http://www.flexive.org
+ *
+ *
+ *  This copyright notice MUST APPEAR in all copies of the file!
+ ***************************************************************/
 package com.flexive.tests.embedded
 
 import com.flexive.shared.CacheAdmin
 import com.flexive.shared.EJBLookup
 import com.flexive.shared.exceptions.FxInvalidParameterException
 import com.flexive.shared.exceptions.FxRuntimeException
+import com.flexive.shared.scripting.groovy.GroovyContentBuilder
 import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
 import com.flexive.shared.structure.*
 import com.flexive.shared.value.FxString
@@ -12,7 +46,6 @@ import static org.testng.Assert.assertEquals
 import org.testng.annotations.AfterClass
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
-import com.flexive.shared.scripting.groovy.GroovyContentBuilder
 
 /**
 * Tests for the {@link com.flexive.shared.scripting.groovy.FxTypeBuilder FxTypeBuilder} class.
@@ -21,12 +54,12 @@ import com.flexive.shared.scripting.groovy.GroovyContentBuilder
 * @version $Rev$
 */
 class GroovyTypeBuilderTest {
-    @BeforeClass(groups = ["ejb", "scripting", "structure"])
+    @BeforeClass (groups = ["ejb", "scripting", "structure"])
     def beforeClass() {
         com.flexive.tests.embedded.FxTestUtils.login(TestUsers.SUPERVISOR);
     }
 
-    @AfterClass(groups = ["ejb", "scripting", "structure"])
+    @AfterClass (groups = ["ejb", "scripting", "structure"])
     def afterClass() {
         com.flexive.tests.embedded.FxTestUtils.logout()
     }
@@ -43,7 +76,7 @@ class GroovyTypeBuilderTest {
         return CacheAdmin.environment
     }
 
-    @Test(groups = ["ejb", "scripting", "structure"])
+    @Test (groups = ["ejb", "scripting", "structure"])
     def simpleStructureBuilder() {
         try {
             // create the type "builderTest"
@@ -102,7 +135,7 @@ class GroovyTypeBuilderTest {
             assertEquals(getProperty(type, "/multigroup/nestedGroup/nestedProperty").getDataType(), FxDataType.String1024)
             assertEquals(type.getAssignment("/multigroup/nestedGroup").getMultiplicity(), FxMultiplicity.MULT_1_N)
             assertEquals(type.getAssignment("/testAddress").getBaseAssignmentId(), CacheAdmin.environment.getAssignment("CONTACTDATA/ADDRESS").id)
-            assertEquals(getProperty(type, "/myProperty").getDataType(), FxDataType.String1024);    // check aliased assignment
+            assertEquals(getProperty(type, "/myProperty").getDataType(), FxDataType.String1024); // check aliased assignment
 
             // extend type using builder
             def extBuilder = new GroovyTypeBuilder("builderTest")
@@ -126,7 +159,7 @@ class GroovyTypeBuilderTest {
         }
     }
 
-    @Test(groups = ["ejb", "scripting", "structure"])
+    @Test (groups = ["ejb", "scripting", "structure"])
     def typeConstructorArguments() {
         // test miscellaneous arguments to the type constructor
         try {
@@ -191,17 +224,17 @@ class GroovyTypeBuilderTest {
 
     }
 
-    @Test(groups = ["ejb", "scripting", "structure"])
+    @Test (groups = ["ejb", "scripting", "structure"])
     def invalidPropertyAssignmentBuilder() {
         // try to create a property assignment using a group assignment
         try {
             new GroovyTypeBuilder().builderTest {
                 invalidCaption(assignment: "CONTACTDATA/ADDRESS")
             }
-            assert false : "Successfully created a property assignment referencing to a group"
+            assert false: "Successfully created a property assignment referencing to a group"
         } catch (FxRuntimeException e) {
-            if (!(e.converted != null && e.converted instanceof FxInvalidParameterException \
-                && ("assignment".equalsIgnoreCase(((FxInvalidParameterException) e.converted).parameter)))) {
+            if (!(e.converted != null && e.converted instanceof FxInvalidParameterException  \
+                 && ("assignment".equalsIgnoreCase(((FxInvalidParameterException) e.converted).parameter)))) {
                 throw e;
             }
             // else: success
@@ -210,17 +243,17 @@ class GroovyTypeBuilderTest {
         }
     }
 
-    @Test(groups = ["ejb", "scripting", "structure"])
+    @Test (groups = ["ejb", "scripting", "structure"])
     def invalidGroupAssignmentBuilder() {
         // try to create a group assignment using a property assignment
         try {
             new GroovyTypeBuilder().builderTest {
                 InvalidAddress(assignment: "ROOT/CAPTION")
             }
-            assert false : "Successfully created a group assignment referencing to a property"
+            assert false: "Successfully created a group assignment referencing to a property"
         } catch (FxRuntimeException e) {
-            if (!(e.converted != null && e.converted instanceof FxInvalidParameterException \
-                && ("assignment".equalsIgnoreCase(((FxInvalidParameterException) e.converted).parameter)))) {
+            if (!(e.converted != null && e.converted instanceof FxInvalidParameterException  \
+                 && ("assignment".equalsIgnoreCase(((FxInvalidParameterException) e.converted).parameter)))) {
                 throw e;
             }
             // else: success

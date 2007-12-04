@@ -39,7 +39,7 @@ import com.flexive.shared.*;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.TemplateEngine;
 import com.flexive.shared.interfaces.UserGroupEngine;
-import com.flexive.shared.scripting.FxScriptType;
+import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.search.AdminResultLocations;
 import com.flexive.shared.search.FxSQLSearchParams;
 import com.flexive.shared.search.ResultViewType;
@@ -104,7 +104,7 @@ public class SelectBean implements Serializable {
     private List<SelectItem> groupModes = null;
     private List<SelectItem> restrictedTypeModes = null;
     private List<SelectItem> restrictedTypeCategories = null;
-    private List<SelectItem> scriptTypes = null;
+    private List<SelectItem> scriptEvents = null;
     private List<SelectItem> aclCategories = null;
     private List<SelectItem> selectListACLs = null;
     private List<SelectItem> selectListItemACLs = null;
@@ -697,17 +697,17 @@ public class SelectBean implements Serializable {
     }
 
     /**
-     * Return the enum FxScriptType as SelectList.
+     * Return the enum FxScriptEvent as SelectList.
      *
-     * @return the enum FxScriptType as SelectList
+     * @return the enum FxScriptEvent as SelectList
      */
-    public List<SelectItem> getScriptTypes() {
-        if (scriptTypes == null) {
-            scriptTypes = FxJsfUtils.enumsAsSelectList(FxScriptType.values());
+    public List<SelectItem> getScriptEvents() {
+        if (scriptEvents == null) {
+            scriptEvents = FxJsfUtils.enumsAsSelectList(FxScriptEvent.values());
             // to have an empty element on first position (index 0) in the select list...
-            scriptTypes.add(0, new SelectItem("", ""));
+            scriptEvents.add(0, new SelectItem("", ""));
         }
-        return scriptTypes;
+        return scriptEvents;
     }
 
     /**

@@ -29,9 +29,9 @@
 
             <h:panelGrid columns="2">
                 Script type:&nbsp;
-                <h:selectOneListbox id="scriptTypeSel" value="#{scriptBean.scriptType}" size="1"
+                <h:selectOneListbox id="scriptTypeSel" value="#{scriptBean.scriptEvent}" size="1"
                                     onchange="document.listForm.submit();">
-                    <f:selectItems value="#{fxSelectBean.scriptTypes}" />
+                    <f:selectItems value="#{fxSelectBean.scriptEvents}" />
                 </h:selectOneListbox>
             </h:panelGrid>
 
@@ -47,8 +47,8 @@
                         <th class="tblHeader" field="desc" dataType="String" align="left">
                             #{fxMessageBean['Script.field.desc']}
                         </th>
-                        <th class="tblHeader" field="type" dataType="FxScriptType" align="left">
-                            #{fxMessageBean['Script.field.type']}
+                        <th class="tblHeader" field="type" dataType="String" align="left">
+                            #{fxMessageBean['Script.field.event']}
                         </th>
                         <th class="tblHeader" dataType="html" align="left">
                             #{fxMessageBean['Script.field.actions']}
@@ -60,7 +60,7 @@
                         <tr value="#{item.id}">
                             <td align="left"><h:outputText value="#{item.name}" /></td>
                             <td align="left"><h:outputText value="#{item.description}" /></td>
-                            <td align="left"><h:outputText value="#{item.type.name}" /></td>
+                            <td align="left"><h:outputText value="#{item.event.name}" /></td>
                             <td align="left">
                                 <adm:commandIcon labelKey="Script.button.edit" location="content"
                                                  icon="edit"  action="editScript"  bean="#{scriptBean}"
@@ -73,10 +73,9 @@
                                     <f:setPropertyActionListener target="#{scriptBean.id}" value="#{item.id}"/>
                                 </adm:commandIcon>
                                 <!-- show run icon only if the script is an independent one (i.e. a not-triggered script) -->
-                                <h:panelGroup rendered="#{item.type.scope=='All' and fxSystemBean.isInRole['ScriptExecution']}">
+                                <h:panelGroup rendered="#{item.event.name=='Manual' and fxSystemBean.isInRole['ScriptExecution']}">
                                     <adm:commandIcon labelKey="Script.button.run" location="content" icon="run"
-                                                     action="runScript" bean="#{scriptBean}" id="runButton_#{item.id}"
-                                                     rendered="#{item.type.indpdt}">
+                                                     action="runScript" bean="#{scriptBean}" id="runButton_#{item.id}">
                                         <f:setPropertyActionListener value="#{item.id}" target="#{scriptBean.id}"/>
                                     </adm:commandIcon>
                                 </h:panelGroup>

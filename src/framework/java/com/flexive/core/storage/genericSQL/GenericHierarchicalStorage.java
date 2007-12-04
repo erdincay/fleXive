@@ -47,7 +47,7 @@ import com.flexive.shared.interfaces.ScriptingEngine;
 import com.flexive.shared.interfaces.SequencerEngine;
 import com.flexive.shared.scripting.FxScriptBinding;
 import com.flexive.shared.scripting.FxScriptResult;
-import com.flexive.shared.scripting.FxScriptType;
+import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.security.Mandator;
@@ -1723,7 +1723,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             for (FxDelta.FxDeltaChange change : delta.getDeletes()) {
                 if (checkScripting)
                     for (long scriptId : change.getOriginalData().getAssignment().
-                            getScriptMapping(FxScriptType.BeforeDataChangeDelete)) {
+                            getScriptMapping(FxScriptEvent.BeforeDataChangeDelete)) {
                         binding.setVariable("change", change);
                         scripting.runScript(scriptId, binding);
                     }
@@ -1731,7 +1731,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     deleteDetailData(con, sql, pk, change.getOriginalData());
                 if (checkScripting)
                     for (long scriptId : change.getOriginalData().getAssignment().
-                            getScriptMapping(FxScriptType.AfterDataChangeDelete)) {
+                            getScriptMapping(FxScriptEvent.AfterDataChangeDelete)) {
                         binding.setVariable("change", change);
                         scripting.runScript(scriptId, binding);
                     }
@@ -1746,7 +1746,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 try {
                     if (checkScripting)
                         for (long scriptId : change.getOriginalData().getAssignment().
-                                getScriptMapping(FxScriptType.BeforeDataChangeUpdate)) {
+                                getScriptMapping(FxScriptEvent.BeforeDataChangeUpdate)) {
                             binding.setVariable("change", change);
                             scripting.runScript(scriptId, binding);
                         }
@@ -1777,7 +1777,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     }
                     if (checkScripting)
                         for (long scriptId : change.getOriginalData().getAssignment().
-                                getScriptMapping(FxScriptType.AfterDataChangeUpdate)) {
+                                getScriptMapping(FxScriptEvent.AfterDataChangeUpdate)) {
                             binding.setVariable("change", change);
                             scripting.runScript(scriptId, binding);
                         }
@@ -1795,7 +1795,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             for (FxDelta.FxDeltaChange change : delta.getAdds()) {
                 if (checkScripting)
                     for (long scriptId : change.getNewData().getAssignment().
-                            getScriptMapping(FxScriptType.BeforeDataChangeAdd)) {
+                            getScriptMapping(FxScriptEvent.BeforeDataChangeAdd)) {
                         binding.setVariable("change", change);
                         scripting.runScript(scriptId, binding);
                     }
@@ -1809,7 +1809,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 }
                 if (checkScripting)
                     for (long scriptId : change.getNewData().getAssignment().
-                            getScriptMapping(FxScriptType.AfterDataChangeAdd)) {
+                            getScriptMapping(FxScriptEvent.AfterDataChangeAdd)) {
                         binding.setVariable("change", change);
                         scripting.runScript(scriptId, binding);
                     }
@@ -2360,7 +2360,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
             FxScriptBinding binding;
             ScriptingEngine scripting = EJBLookup.getScriptingEngine();
-            for (long script : scripting.getByScriptType(FxScriptType.BinaryPreviewProcess)) {
+            for (long script : scripting.getByScriptType(FxScriptEvent.BinaryPreviewProcess)) {
                 binding = new FxScriptBinding();
                 binding.setVariable("processed", processed);
                 binding.setVariable("useDefaultPreview", useDefaultPreview);

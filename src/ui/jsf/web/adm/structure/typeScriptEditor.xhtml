@@ -24,11 +24,11 @@
     <h:form id="frm" enctype="multipart/form-data">
         <adm:tab label="#{fxMessageBean['TypeEditor.tab.typeEditor']}" active="false" id="tab1"
                  bean="#{typeEditorBean}" action="showTypeEditor"/>
-        <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor']} [#{typeEditorBean.typeScriptCount}]" active="true" id="tab2"/>
+        <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor']} [#{typeEditorBean.eventScriptCount}]" active="true" id="tab2"/>
 
-        <fx:formRow label="#{fxMessageBean['ScriptEditor.label.scriptType']}" id="scriptTypes" height="85">
-            <h:selectOneListbox id="scriptTypes" value="#{typeEditorBean.scriptTypeId}" size="#{typeEditorBean.typeScriptCount + 1}">
-                <f:selectItems value="#{typeEditorBean.scriptTypes}" />
+        <fx:formRow label="#{fxMessageBean['ScriptEditor.label.scriptEvent']}" id="scriptEvents" height="85">
+            <h:selectOneListbox id="scriptEvents" value="#{typeEditorBean.scriptEventId}" size="#{typeEditorBean.eventScriptCount + 1}">
+                <f:selectItems value="#{typeEditorBean.scriptEvents}" />
                 <a4j:support event="onchange" reRender="scripts" />
             </h:selectOneListbox>
         </fx:formRow>
@@ -50,9 +50,9 @@
         <br/>
         <br/>
 
-        <fx:formRow label="#{fxMessageBean['ScriptEditor.label.scriptType']}" id="scriptTypes2" height="85">
-            <h:selectOneListbox id="scriptTypes2" value="#{typeEditorBean.scriptType}" size="7">
-                <f:selectItems value="#{fxSelectBean.scriptTypes}" />
+        <fx:formRow label="#{fxMessageBean['ScriptEditor.label.scriptEvent']}" id="scriptTypes2" height="85">
+            <h:selectOneListbox id="scriptTypes2" value="#{typeEditorBean.scriptEvent}" size="7">
+                <f:selectItems value="#{fxSelectBean.scriptEvents}" />
                 <a4j:support event="onchange" reRender="scripts2, scripts3" actionListener="#{typeEditorBean.clearSelectedScript}"/>
             </h:selectOneListbox>
         </fx:formRow>
@@ -75,8 +75,8 @@
         <a4j:outputPanel id="scripts3">
             <fx:formRow label="#{fxMessageBean['ScriptEditor.label.scripts']}" id="scripts3">
                 #{typeEditorBean.selectedScriptName}
-                <h:selectOneListbox id="scriptTypes4" value="#{typeEditorBean.selectedType}" size="1">
-                    <f:selectItems value="#{fxSelectBean.scriptTypes}" />
+                <h:selectOneListbox id="scriptTypes4" value="#{typeEditorBean.selectedEvent}" size="1">
+                    <f:selectItems value="#{fxSelectBean.scriptEvents}" />
                 </h:selectOneListbox>
                 <h:commandButton id="addScript" action="#{typeEditorBean.addScript}" value="AddScript"/>
             </fx:formRow>
@@ -97,7 +97,7 @@
                 <f:facet name="header">
                     <h:outputText value="Type"/>
                 </f:facet>
-                <h:outputText value="#{itm.type.name}"/>
+                <h:outputText value="#{itm.event.name}"/>
             </h:column>
         </h:dataTable>
 

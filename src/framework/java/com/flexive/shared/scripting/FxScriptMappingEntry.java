@@ -48,20 +48,20 @@ public class FxScriptMappingEntry implements Serializable {
     private boolean derivedUsage;
     private long id;
     private long[] derivedIds;
-    private FxScriptType scriptType;
+    private FxScriptEvent scriptEvent;
 
     /**
      * Constructor
      *
-     * @param scriptType   type of the script
+     * @param scriptEvent  event of the script
      * @param scriptId     id of the script
      * @param active       is this mapping active?
      * @param derivedUsage should this mapping be used for derived objects as well?
      * @param id           object id of the mapping (type, assignment, ...)
      * @param derivedIds   object id's of derived objects
      */
-    public FxScriptMappingEntry(FxScriptType scriptType, long scriptId, boolean active, boolean derivedUsage, long id, long[] derivedIds) {
-        this.scriptType = scriptType;
+    public FxScriptMappingEntry(FxScriptEvent scriptEvent, long scriptId, boolean active, boolean derivedUsage, long id, long[] derivedIds) {
+        this.scriptEvent = scriptEvent;
         this.scriptId = scriptId;
         this.active = active;
         this.derivedUsage = derivedUsage;
@@ -115,11 +115,11 @@ public class FxScriptMappingEntry implements Serializable {
     }
 
     /**
-     * Get the type of the script
+     * Get the event type of the script
      *
-     * @return FxScriptType
+     * @return FxScriptEvent
      */
-    public FxScriptType getScriptType() {
-        return scriptType;
+    public FxScriptEvent getScriptEvent() {
+        return scriptEvent;
     }
 }

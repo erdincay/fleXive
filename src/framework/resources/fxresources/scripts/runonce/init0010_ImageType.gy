@@ -13,7 +13,7 @@ import com.flexive.shared.interfaces.ScriptingEngine;
 import com.flexive.shared.interfaces.AssignmentEngine;
 import com.flexive.shared.interfaces.TypeEngine;
 import com.flexive.shared.scripting.FxScriptInfo;
-import com.flexive.shared.scripting.FxScriptType;
+import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.FxLanguage
@@ -99,5 +99,5 @@ builder {
     }
 }
 
-FxScriptInfo si = se.createScriptFromLibrary(FxScriptType.BeforeContentCreate, "ImageMetaParser.gy", "ImageMetaParser.gy", "Script filling image properties");
+FxScriptInfo si = se.createScriptFromLibrary(FxScriptEvent.BeforeContentCreate, "ImageMetaParser.gy", "ImageMetaParser.gy", "Script filling image properties");
 se.createTypeScriptMapping(si.getId(), typeId, true, true);

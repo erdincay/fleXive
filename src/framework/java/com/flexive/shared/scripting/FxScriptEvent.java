@@ -41,12 +41,12 @@ import com.flexive.shared.exceptions.FxNotFoundException;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public enum FxScriptType {
+public enum FxScriptEvent {
 
     /**
-     * Independent script, not dependent on any 'trigger point' - will be executed on demand manually
+     * Manually execute script, not dependent on any 'trigger point' - will be executed on demand
      */
-    Independent(1, FxScriptScope.All),
+    Manual(1, FxScriptScope.All),
 
     /**
      * Fired before an existing content is saved
@@ -216,7 +216,7 @@ public enum FxScriptType {
      * @param scope       script scope
      * @param bindingInfo provided variable bindings
      */
-    FxScriptType(int id, FxScriptScope scope, String... bindingInfo) {
+    FxScriptEvent(int id, FxScriptScope scope, String... bindingInfo) {
         this.id = id;
         this.scope = scope;
         this.bindingInfo = bindingInfo;
@@ -262,16 +262,16 @@ public enum FxScriptType {
     }
 
     /**
-     * Get a FxScriptType by its id
+     * Get a FxScriptEvent by its id
      *
      * @param id requested id
-     * @return FxScriptType
+     * @return FxScriptEvent
      * @throws FxNotFoundException on errors
      */
-    public static FxScriptType getById(int id) throws FxNotFoundException {
-        for (FxScriptType type : FxScriptType.values())
-            if (type.id == id)
-                return type;
+    public static FxScriptEvent getById(int id) throws FxNotFoundException {
+        for (FxScriptEvent event : FxScriptEvent.values())
+            if (event.id == id)
+                return event;
         throw new FxNotFoundException("ex.scripting.type.notFound", id);
     }
 }

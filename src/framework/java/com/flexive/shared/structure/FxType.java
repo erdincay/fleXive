@@ -43,9 +43,9 @@ import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
+import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.scripting.FxScriptMappingEntry;
-import com.flexive.shared.scripting.FxScriptType;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.security.Mandator;
@@ -105,7 +105,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     protected List<FxProperty> uniqueProperties;
     protected List<FxGroupAssignment> assignedGroups;
     protected List<FxAssignment> scriptedAssignments;
-    protected Map<FxScriptType, long[]> scriptMapping;
+    protected Map<FxScriptEvent, long[]> scriptMapping;
 
     public FxType(long id, ACL acl, Workflow workflow, Mandator mandator, List<Mandator> allowedMandators, String name, FxString description, FxType parent, TypeStorageMode storageMode,
                   TypeCategory category, TypeMode mode, boolean checkValidity, LanguageMode language, TypeState state, byte permissions,
@@ -134,7 +134,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
         this.lifeCycleInfo = lifeCycleInfo;
         this.derivedTypes = derivedTypes;
         this.relations = relations;
-        this.scriptMapping = new HashMap<FxScriptType, long[]>(10);
+        this.scriptMapping = new HashMap<FxScriptEvent, long[]>(10);
 
         //make sure the owner is included in allowedMandators
         boolean foundOwner = false;
@@ -475,13 +475,13 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     }
 
     /**
-     * Does this type have mappings for the requested script type?
+     * Does this type have mappings for the requested script event  type?
      *
-     * @param type requested script type
+     * @param event requested script event type
      * @return if mappings exist
      */
-    public boolean hasScriptMapping(FxScriptType type) {
-        return scriptMapping.get(type) != null;
+    public boolean hasScriptMapping(FxScriptEvent event) {
+        return scriptMapping.get(event) != null;
     }
 
     /**
@@ -496,15 +496,15 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     /**
      * Get a list with all assignments that have scripts assigned for the given script type
      *
-     * @param type script type
+     * @param event script event
      * @return list with all assignments that have scripts assigned for the given script type
      */
-    public synchronized List<FxAssignment> getScriptedAssignments(FxScriptType type) {
+    public synchronized List<FxAssignment> getScriptedAssignments(FxScriptEvent event) {
         List<FxAssignment> scripts = new ArrayList<FxAssignment>(5);
         if (!hasScriptedAssignments())
             return scripts;
         for (FxAssignment a : scriptedAssignments)
-            if (a.getScriptMapping(type) != null && !scripts.contains(a))
+            if (a.getScriptMapping(event) != null && !scripts.contains(a))
                 scripts.add(a);
         return scripts;
     }
@@ -512,11 +512,11 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     /**
      * Get the script id's that are mapped to this type for the requested script type
      *
-     * @param type requested script type
+     * @param event requested script event
      * @return mappings or <code>null</code> if mapping does not exist for this type
      */
-    public long[] getScriptMapping(FxScriptType type) {
-        return scriptMapping.get(type);
+    public long[] getScriptMapping(FxScriptEvent event) {
+        return scriptMapping.get(event);
     }
 
     /**
@@ -599,28 +599,28 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
                 if (!sme.isActive())
                     continue;
                 if (sme.getId() == this.getId()) {
-                    addScriptMapping(this.scriptMapping, sme.getScriptType(), sm.getScriptId());
+                    addScriptMapping(this.scriptMapping, sme.getScriptEvent(), sm.getScriptId());
                 } else if (sme.isDerivedUsage()) {
                     for (long l : sme.getDerivedIds())
                         if (l == this.getId())
-                            addScriptMapping(this.scriptMapping, sme.getScriptType(), sm.getScriptId());
+                            addScriptMapping(this.scriptMapping, sme.getScriptEvent(), sm.getScriptId());
 
                 }
             }
         }
     }
 
-    private synchronized void addScriptMapping(Map<FxScriptType, long[]> scriptMapping, FxScriptType scriptType, long scriptId) {
-        if (scriptMapping.get(scriptType) == null)
-            scriptMapping.put(scriptType, new long[]{scriptId});
+    private synchronized void addScriptMapping(Map<FxScriptEvent, long[]> scriptMapping, FxScriptEvent scriptEvent, long scriptId) {
+        if (scriptMapping.get(scriptEvent) == null)
+            scriptMapping.put(scriptEvent, new long[]{scriptId});
         else {
-            long[] scripts = scriptMapping.get(scriptType);
+            long[] scripts = scriptMapping.get(scriptEvent);
             if (FxArrayUtils.containsElement(scripts, scriptId))
                 return;
             long[] new_scripts = new long[scripts.length + 1];
             System.arraycopy(scripts, 0, new_scripts, 0, scripts.length);
             new_scripts[new_scripts.length - 1] = scriptId;
-            scriptMapping.put(scriptType, new_scripts);
+            scriptMapping.put(scriptEvent, new_scripts);
         }
     }
 
@@ -781,7 +781,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * Get a list of all FxPropertyAssignments connected to this type that are of the given
      * {@link FxDataType}.
      *
-     * @param dataType  the data type
+     * @param dataType the data type
      * @return list of all FxPropertyAssignments connected to this type that are of the given data type
      */
     public List<FxPropertyAssignment> getAssignmentsForDataType(FxDataType dataType) {

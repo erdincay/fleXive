@@ -44,7 +44,7 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.scripting.FxScriptBinding;
-import com.flexive.shared.scripting.FxScriptType;
+import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.security.*;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxString;
@@ -642,7 +642,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             stmt.executeUpdate();
 
             // call scripts
-            final List<Long> scriptIds = scripting.getByScriptType(FxScriptType.AfterAccountCreate);
+            final List<Long> scriptIds = scripting.getByScriptType(FxScriptEvent.AfterAccountCreate);
             final FxScriptBinding binding = new FxScriptBinding();
             binding.setVariable("accountId", newId);
             binding.setVariable("pk", contactDataPK);
