@@ -414,16 +414,16 @@ public class PropertyEditorBean implements ActionBean {
         } else return -1;
     }
 
-    /* Returns a all available Types as List<SelectItem> and adds an empty element for null.
+    /**
+     * Returns a all available Types as List&lt;SelectItem&gt; and adds an empty element for null.
      *
-     * @return  available Types including a dummy value for null.
+     * @return available Types including a dummy value for null.
      */
-
     public List<SelectItem> getTypes() {
         List<FxType> typesList = CacheAdmin.getFilteredEnvironment().getTypes(true, true, true, false);
         final List<SelectItem> result = new ArrayList<SelectItem>(typesList.size() + 1);
         final UserTicket ticket = FxContext.get().getTicket();
-        result.add(new SelectItem(new Long(-1), ""));
+        result.add(new SelectItem((long) -1, ""));
         for (SelectableObjectWithLabel item : typesList) {
             result.add(new SelectItem(item.getId(), item.getLabel().getBestTranslation(ticket)));
         }
@@ -529,6 +529,18 @@ public class PropertyEditorBean implements ActionBean {
             }
         }
         return result;
+    }
+
+    /**
+     * If the assignment is derived, return the base assignments XPath
+     *
+     * @return the base assignments XPath if derived
+     */
+    public String getBaseAssignmentXPath() {
+        if (assignment.isDerivedAssignment())
+            return CacheAdmin.getEnvironment().getAssignment(assignment.getBaseAssignmentId()).getXPath();
+        else
+            return "";
     }
 
     public boolean isPropertyMayOverrideMultiLang() {

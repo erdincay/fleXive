@@ -184,6 +184,18 @@ public class GroupEditorBean {
         }
     }
 
+    /**
+     * If the assignment is derived, return the base assignments XPath
+     *
+     * @return the base assignments XPath if derived
+     */
+    public String getBaseAssignmentXPath() {
+        if (assignment.isDerivedAssignment())
+            return CacheAdmin.getEnvironment().getAssignment(assignment.getBaseAssignmentId()).getXPath();
+        else
+            return "";
+    }
+
     public String getAssignmentAlias() {
         return assignment.getAlias();
     }

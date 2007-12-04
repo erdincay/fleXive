@@ -120,34 +120,27 @@
                 </fx:formRow>
            </fx:fieldSet>
            <fx:fieldSet legend="#{fxMessageBean['PropertyEditor.label.referencingPropertyAssignments']}">
-             <table dojoType="FilteringTable" widgetId="referencingPropertyAssignments" enableMultipleSelect="true"
+             <table dojoType="SortableTable" widgetId="referencingPropertyAssignments" enableMultipleSelect="true"
                                alternateRows="true" maxSortable="1" class="dojoTable">
-                <thead>
+            <!--    <thead>
                     <tr>
-                        <th class="tblHeader" field="xpath" dataType="String" align="left">
-                            #{fxMessageBean['PropertyEditor.table.id']}
-                        </th>
                         <th class="tblHeader" field="xpath" dataType="String" align="left">
                             #{fxMessageBean['PropertyEditor.table.xPath']}
                         </th>
-                        <th>
-                           #{fxMessageBean['PropertyEditor.table.actions']}
-                        </th>
                     </tr>
                 </thead>
-                <tbody>
+            -->    <tbody>
                     <ui:repeat value="#{propertyEditorBean.referencingPropertyAssignments}" var="pa">
-                        <tr value="#{pa.XPath}">
-                            <td align="left"><h:outputText value="#{pa.id}"/></td>
-                            <td align="left"><h:outputText value="#{pa.XPath}"/></td>
-                            <td align="left">
+                <!--        <tr value="#{pa.id}">
+                            <td align="left">-->
+                                <!-- #{pa.XPath} -->
                                 <h:commandLink id="gotoPropertyAssignmentButton_#{pa.id}" action="#{propertyEditorBean.showPropertyAssignmentEditor}"
                                      onclick="var treeframe=parent.getNavFrameWnd(); treeframe.selectNode(#{pa.id});">
-                                    <h:graphicImage border="0px" value="/adm/images/commandButton/edit.png"/>
-                                    <h:outputText value="#{fxMessageBean['PropertyEditor.table.button.goto']}"/>
+                                    <h:outputText value="#{pa.XPath}"/>
                                 </h:commandLink>
-                            </td>
-                        </tr>
+                                <br/>
+                            <!--</td>
+                        </tr>-->
                     </ui:repeat>
                 </tbody>
               </table>

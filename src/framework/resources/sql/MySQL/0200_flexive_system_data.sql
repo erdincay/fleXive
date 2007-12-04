@@ -178,9 +178,9 @@ INSERT INTO FXS_ASSIGNMENTS (ID, ATYPE, ENABLED, TYPEDEF, MINMULT, MAXMULT, DEFM
    0/*ID*/, 1, TRUE, 0, 1, 1, 1, 0/*POS*/, 'ROOT/ID', 'ID',
    null, 0, null, 0/*PropertyId*/, 1, TRUE, TRUE, FALSE, FALSE, TRUE);
 INSERT INTO FXS_TYPEPROPS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   0/*ID*/, 1, 'Unique identifier', null, 'Unique identifier');
+   0/*ID*/, 1, 'Unique Identifier', null, 'Unique Identifier');
 INSERT INTO FXS_ASSIGNMENTS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   0/*ID*/, 1, 'Unique identifier', null, 'Unique identifier');
+   0/*ID*/, 1, 'Unique Identifier', null, 'Unique Identifier');
 
 -- ROOT/VERSION
 INSERT INTO FXS_TYPEPROPS (ID, NAME, SYSINTERNAL, DEFMINMULT, DEFMAXMULT, MAYOVERRIDEMULT, ACL, MAYOVERRIDEACL,
@@ -216,9 +216,9 @@ INSERT INTO FXS_ASSIGNMENTS (ID, ATYPE, ENABLED, TYPEDEF, MINMULT, MAXMULT, DEFM
    2/*ID*/, 1, TRUE, 0, 1, 1, 1, 2/*POS*/, 'ROOT/TYPEDEF', 'TYPEDEF',
    null, 0, null, 2/*PropertyId*/, 1, TRUE, TRUE, FALSE, FALSE, TRUE);
 INSERT INTO FXS_TYPEPROPS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   2/*ID*/, 1, 'Type', null, 'FxType identifier');
+   2/*ID*/, 1, 'Type', null, 'FxType Identifier');
 INSERT INTO FXS_ASSIGNMENTS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   2/*ID*/, 1, 'Type', null, 'FxType identifier');
+   2/*ID*/, 1, 'Type', null, 'FxType Identifier');
 
 
 -- ROOT/MANDATOR
@@ -236,9 +236,9 @@ INSERT INTO FXS_ASSIGNMENTS (ID, ATYPE, ENABLED, TYPEDEF, MINMULT, MAXMULT, DEFM
    3/*ID*/, 1, TRUE, 0, 1, 1, 1, 3/*POS*/, 'ROOT/MANDATOR', 'MANDATOR',
    null, 0, null, 3/*PropertyId*/, 1, TRUE, TRUE, FALSE, FALSE, TRUE);
 INSERT INTO FXS_TYPEPROPS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   3/*ID*/, 1, 'Mandator', null, 'Mandator identifier');
+   3/*ID*/, 1, 'Mandator', null, 'Mandator Identifier');
 INSERT INTO FXS_ASSIGNMENTS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   3/*ID*/, 1, 'Mandator', null, 'Mandator identifier');
+   3/*ID*/, 1, 'Mandator', null, 'Mandator Identifier');
 
 -- ROOT/ACL
 INSERT INTO FXS_TYPEPROPS (ID, NAME, SYSINTERNAL, DEFMINMULT, DEFMAXMULT, MAYOVERRIDEMULT, ACL, MAYOVERRIDEACL,
@@ -255,9 +255,9 @@ INSERT INTO FXS_ASSIGNMENTS (ID, ATYPE, ENABLED, TYPEDEF, MINMULT, MAXMULT, DEFM
    4/*ID*/, 1, TRUE, 0, 1, 1, 1, 4/*POS*/, 'ROOT/ACL', 'ACL',
    null, 0, null, 4/*PropertyId*/, 1, TRUE, TRUE, FALSE, FALSE, TRUE);
 INSERT INTO FXS_TYPEPROPS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   4/*ID*/, 1, 'ACL', null, 'Access control list identifier');
+   4/*ID*/, 1, 'ACL', null, 'Access Control List Identifier');
 INSERT INTO FXS_ASSIGNMENTS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   4/*ID*/, 1, 'ACL', null, 'Access control list identifier');
+   4/*ID*/, 1, 'ACL', null, 'Access Control List Identifier');
 
 -- ROOT/STEP
 INSERT INTO FXS_TYPEPROPS (ID, NAME, SYSINTERNAL, DEFMINMULT, DEFMAXMULT, MAYOVERRIDEMULT, ACL, MAYOVERRIDEACL,
@@ -274,9 +274,9 @@ INSERT INTO FXS_ASSIGNMENTS (ID, ATYPE, ENABLED, TYPEDEF, MINMULT, MAXMULT, DEFM
    5/*ID*/, 1, TRUE, 0, 1, 1, 1, 5/*POS*/, 'ROOT/STEP', 'STEP',
    null, 0, null, 5/*PropertyId*/, 1, TRUE, TRUE, FALSE, FALSE, TRUE);
 INSERT INTO FXS_TYPEPROPS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   5/*ID*/, 1, 'Workflow step', null, 'Workflow step identifier');
+   5/*ID*/, 1, 'Workflow Step', null, 'Workflow Step Identifier');
 INSERT INTO FXS_ASSIGNMENTS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   5/*ID*/, 1, 'Workflow step', null, 'Workflow step identifier');
+   5/*ID*/, 1, 'Workflow Step', null, 'Workflow Step Identifier');
 
 -- ROOT/MAX_VER
 INSERT INTO FXS_TYPEPROPS (ID, NAME, SYSINTERNAL, DEFMINMULT, DEFMAXMULT, MAYOVERRIDEMULT, ACL, MAYOVERRIDEACL,
@@ -293,9 +293,9 @@ INSERT INTO FXS_ASSIGNMENTS (ID, ATYPE, ENABLED, TYPEDEF, MINMULT, MAXMULT, DEFM
    6/*ID*/, 1, TRUE, 0, 1, 1, 1, 6/*POS*/, 'ROOT/MAX_VER', 'MAX_VER',
    null, 0, null, 6/*PropertyId*/, 1, TRUE, TRUE, FALSE, FALSE, TRUE);
 INSERT INTO FXS_TYPEPROPS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   6/*ID*/, 1, 'Maximum version', null, 'The highest (maximum) version that exists for this instance');
+   6/*ID*/, 1, 'Maximum Version', null, 'The highest (maximum) version that exists of an instance');
 INSERT INTO FXS_ASSIGNMENTS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   6/*ID*/, 1, 'Maximum version', null, 'The highest (maximum) version that exists for this instance');
+   6/*ID*/, 1, 'Maximum Version', null, 'The highest (maximum) version that exists of an instance');
 
 -- ROOT/LIVE_VER
 INSERT INTO FXS_TYPEPROPS (ID, NAME, SYSINTERNAL, DEFMINMULT, DEFMAXMULT, MAYOVERRIDEMULT, ACL, MAYOVERRIDEACL,
@@ -312,9 +312,9 @@ INSERT INTO FXS_ASSIGNMENTS (ID, ATYPE, ENABLED, TYPEDEF, MINMULT, MAXMULT, DEFM
    7/*ID*/, 1, TRUE, 0, 1, 1, 1, 7/*POS*/, 'ROOT/LIVE_VER', 'LIVE_VER',
    null, 0, null, 7/*PropertyId*/, 1, TRUE, TRUE, FALSE, FALSE, TRUE);
 INSERT INTO FXS_TYPEPROPS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   7/*ID*/, 1, 'Live version', null, 'The version of this instance whose step is set to LIVE or 0 if no such version exists');
+   7/*ID*/, 1, 'Live Version', null, 'The version of this instance whose workflow step is set to LIVE or 0 if no such version exists');
 INSERT INTO FXS_ASSIGNMENTS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   7/*ID*/, 1, 'Live version', null, 'The version of this instance whose step is set to LIVE or 0 if no such version exists');
+   7/*ID*/, 1, 'Live Version', null, 'The version of this instance whose workflow step is set to LIVE or 0 if no such version exists');
 
 -- ROOT/ISMAX_VER
 INSERT INTO FXS_TYPEPROPS (ID, NAME, SYSINTERNAL, DEFMINMULT, DEFMAXMULT, MAYOVERRIDEMULT, ACL, MAYOVERRIDEACL,
@@ -331,9 +331,9 @@ INSERT INTO FXS_ASSIGNMENTS (ID, ATYPE, ENABLED, TYPEDEF, MINMULT, MAXMULT, DEFM
    8/*ID*/, 1, TRUE, 0, 1, 1, 1, 8/*POS*/, 'ROOT/ISMAX_VER', 'ISMAX_VER',
    null, 0, null, 8/*PropertyId*/, 1, TRUE, TRUE, FALSE, FALSE, TRUE);
 INSERT INTO FXS_TYPEPROPS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   8/*ID*/, 1, 'Is maximum version', null, 'Is this version the maximum version of the instance?');
+   8/*ID*/, 1, 'Is Maximum Version', null, 'Is this version the maximum version of the instance?');
 INSERT INTO FXS_ASSIGNMENTS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   8/*ID*/, 1, 'Is maximum version', null, 'Is this version the maximum version of the instance?');
+   8/*ID*/, 1, 'Is Maximum Version', null, 'Is this version the maximum version of the instance?');
 
 -- ROOT/ISLIVE_VER
 INSERT INTO FXS_TYPEPROPS (ID, NAME, SYSINTERNAL, DEFMINMULT, DEFMAXMULT, MAYOVERRIDEMULT, ACL, MAYOVERRIDEACL,
@@ -350,9 +350,9 @@ INSERT INTO FXS_ASSIGNMENTS (ID, ATYPE, ENABLED, TYPEDEF, MINMULT, MAXMULT, DEFM
    9/*ID*/, 1, TRUE, 0, 1, 1, 1, 9/*POS*/, 'ROOT/ISLIVE_VER', 'ISLIVE_VER',
    null, 0, null, 9/*PropertyId*/, 1, TRUE, TRUE, FALSE, FALSE, TRUE);
 INSERT INTO FXS_TYPEPROPS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   9/*ID*/, 1, 'Live Version', null, 'Is this version the live version of the instance?');
+   9/*ID*/, 1, 'Is Live Version', null, 'Is this version the live version of the instance?');
 INSERT INTO FXS_ASSIGNMENTS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   9/*ID*/, 1, 'Live version', null, 'Is this version the live version of the instance?');
+   9/*ID*/, 1, 'Is Live version', null, 'Is this version the live version of the instance?');
 
 -- ROOT/ISACTIVE
 INSERT INTO FXS_TYPEPROPS (ID, NAME, SYSINTERNAL, DEFMINMULT, DEFMAXMULT, MAYOVERRIDEMULT, ACL, MAYOVERRIDEACL,
@@ -388,9 +388,9 @@ INSERT INTO FXS_ASSIGNMENTS (ID, ATYPE, ENABLED, TYPEDEF, MINMULT, MAXMULT, DEFM
    11/*ID*/, 1, TRUE, 0, 1, 1, 1, 11/*POS*/, 'ROOT/MAINLANG', 'MAINLANG',
    null, 0, null, 11/*PropertyId*/, 1, TRUE, TRUE, FALSE, FALSE, TRUE);
 INSERT INTO FXS_TYPEPROPS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   11/*ID*/, 1, 'Main language', null, 'The main (primary) language');
+   11/*ID*/, 1, 'Main Language', null, 'The main (primary) language');
 INSERT INTO FXS_ASSIGNMENTS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   11/*ID*/, 1, 'Main language', null, 'The main (primary) language');
+   11/*ID*/, 1, 'Main Language', null, 'The main (primary) language');
 
 
 -- ROOT/RELSRC
@@ -408,9 +408,9 @@ INSERT INTO FXS_ASSIGNMENTS (ID, ATYPE, ENABLED, TYPEDEF, MINMULT, MAXMULT, DEFM
    12/*ID*/, 1, TRUE, 0, 0, 1, 1, 12/*POS*/, 'ROOT/RELSRC', 'RELSRC',
    null, 0, null, 12/*PropertyId*/, 1, TRUE, TRUE, FALSE, FALSE, TRUE);
 INSERT INTO FXS_TYPEPROPS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   12/*ID*/, 1, 'Related source', null, 'Source related instance');
+   12/*ID*/, 1, 'Related Source', null, 'Source related instance');
 INSERT INTO FXS_ASSIGNMENTS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   12/*ID*/, 1, 'Related source', null, 'Source related instance');
+   12/*ID*/, 1, 'Related Source', null, 'Source related instance');
 
 -- ROOT/RELDST
 INSERT INTO FXS_TYPEPROPS (ID, NAME, SYSINTERNAL, DEFMINMULT, DEFMAXMULT, MAYOVERRIDEMULT, ACL, MAYOVERRIDEACL,
@@ -427,9 +427,9 @@ INSERT INTO FXS_ASSIGNMENTS (ID, ATYPE, ENABLED, TYPEDEF, MINMULT, MAXMULT, DEFM
    13/*ID*/, 1, TRUE, 0, 0, 1, 1, 13/*POS*/, 'ROOT/RELDST', 'RELDST',
    null, 0, null, 13/*PropertyId*/, 1, TRUE, TRUE, FALSE, FALSE, TRUE);
 INSERT INTO FXS_TYPEPROPS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   13/*ID*/, 1, 'Related destination', null, 'Destination related instance');
+   13/*ID*/, 1, 'Related Destination', null, 'Destination related instance');
 INSERT INTO FXS_ASSIGNMENTS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   13/*ID*/, 1, 'Related destination', null, 'Destination related instance');
+   13/*ID*/, 1, 'Related Destination', null, 'Destination related instance');
 
 -- ROOT/RELPOS_SRC
 INSERT INTO FXS_TYPEPROPS (ID, NAME, SYSINTERNAL, DEFMINMULT, DEFMAXMULT, MAYOVERRIDEMULT, ACL, MAYOVERRIDEACL,
@@ -446,9 +446,9 @@ INSERT INTO FXS_ASSIGNMENTS (ID, ATYPE, ENABLED, TYPEDEF, MINMULT, MAXMULT, DEFM
    14/*ID*/, 1, TRUE, 0, 0, 1, 1, 14/*POS*/, 'ROOT/RELPOS_SRC', 'RELPOS_SRC',
    null, 0, null, 14/*PropertyId*/, 1, TRUE, TRUE, FALSE, FALSE, TRUE);
 INSERT INTO FXS_TYPEPROPS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   14/*ID*/, 1, 'Relation source position', null, 'Source position');
+   14/*ID*/, 1, 'Related Source Position', null, 'Source position');
 INSERT INTO FXS_ASSIGNMENTS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   14/*ID*/, 1, 'Relation source position', null, 'Source position');
+   14/*ID*/, 1, 'Related Source Position', null, 'Source position');
 
 -- ROOT/RELPOS_DST
 INSERT INTO FXS_TYPEPROPS (ID, NAME, SYSINTERNAL, DEFMINMULT, DEFMAXMULT, MAYOVERRIDEMULT, ACL, MAYOVERRIDEACL,
@@ -465,9 +465,9 @@ INSERT INTO FXS_ASSIGNMENTS (ID, ATYPE, ENABLED, TYPEDEF, MINMULT, MAXMULT, DEFM
    15/*ID*/, 1, TRUE, 0, 0, 1, 1, 15/*POS*/, 'ROOT/RELPOS_DST', 'RELPOS_DST',
    null, 0, null, 15/*PropertyId*/, 1, TRUE, TRUE, FALSE, FALSE, TRUE);
 INSERT INTO FXS_TYPEPROPS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   15/*ID*/, 1, 'Relation destination position', null, 'Destination position');
+   15/*ID*/, 1, 'Related Destination Position', null, 'Destination position');
 INSERT INTO FXS_ASSIGNMENTS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   15/*ID*/, 1, 'Relation destination position', null, 'Destination position');
+   15/*ID*/, 1, 'Related Destination Position', null, 'Destination position');
 
 
 -- ROOT/CREATED_BY
@@ -485,9 +485,9 @@ INSERT INTO FXS_ASSIGNMENTS (ID, ATYPE, ENABLED, TYPEDEF, MINMULT, MAXMULT, DEFM
    16/*ID*/, 1, TRUE, 0, 1, 1, 1, 16/*POS*/, 'ROOT/CREATED_BY', 'CREATED_BY',
    null, 0, null, 16/*PropertyId*/, 1, TRUE, TRUE, FALSE, FALSE, TRUE);
 INSERT INTO FXS_TYPEPROPS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   16/*ID*/, 1, 'Created By', null, 'Id of the user who created this instance');
+   16/*ID*/, 1, 'Created By', null, 'Id of the account who created the instance');
 INSERT INTO FXS_ASSIGNMENTS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   16/*ID*/, 1, 'Created By', null, 'Id of the user who created this instance');
+   16/*ID*/, 1, 'Created By', null, 'Id of the account who created the instance');
 
 
 -- ROOT/CREATED_AT
@@ -505,9 +505,9 @@ INSERT INTO FXS_ASSIGNMENTS (ID, ATYPE, ENABLED, TYPEDEF, MINMULT, MAXMULT, DEFM
    17/*ID*/, 1, TRUE, 0, 1, 1, 1, 17/*POS*/, 'ROOT/CREATED_AT', 'CREATED_AT',
    null, 0, null, 17/*PropertyId*/, 1, TRUE, TRUE, FALSE, FALSE, TRUE);
 INSERT INTO FXS_TYPEPROPS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   17/*ID*/, 1, 'Created at', null, 'Date and time when this instance was created');
+   17/*ID*/, 1, 'Created At', null, 'Date and time when this instance was created');
 INSERT INTO FXS_ASSIGNMENTS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   17/*ID*/, 1, 'Created at', null, 'Date and time when this instance was created');
+   17/*ID*/, 1, 'Created At', null, 'Date and time when this instance was created');
 
 
 -- ROOT/MODIFIED_BY
@@ -525,10 +525,9 @@ INSERT INTO FXS_ASSIGNMENTS (ID, ATYPE, ENABLED, TYPEDEF, MINMULT, MAXMULT, DEFM
    18/*ID*/, 1, TRUE, 0, 1, 1, 1, 18/*POS*/, 'ROOT/MODIFIED_BY', 'MODIFIED_BY',
    null, 0, null, 17/*PropertyId*/, 1, TRUE, TRUE, FALSE, FALSE, TRUE);
 INSERT INTO FXS_TYPEPROPS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   18/*ID*/, 1, 'Modified by', null, 'Id of the user who last modified this instance');
+   18/*ID*/, 1, 'Modified By', null, 'Id of the account who last modified this instance');
 INSERT INTO FXS_ASSIGNMENTS_T (ID, LANG, DESCRIPTION, DEFAULT_VALUE, HINT ) VALUES (
-   18/*ID*/, 1, 'Modified by', null, 'Id of the user who last modified this instance');
-
+   18/*ID*/, 1, 'Modified By', null, 'Id of the account who last modified this instance');
 
 -- ROOT/MODIFIED_AT
 INSERT INTO FXS_TYPEPROPS (ID, NAME, SYSINTERNAL, DEFMINMULT, DEFMAXMULT, MAYOVERRIDEMULT, ACL, MAYOVERRIDEACL,

@@ -39,6 +39,16 @@
                     <h:outputText id="xPath" value="#{groupEditorBean.assignment.XPath}"/>
             </fx:formRow>
 
+            <ui:fragment rendered="#{groupEditorBean.assignment.derivedAssignment}">
+                <fx:formRow labelKey="GroupEditor.label.xPathBase" id="xPathBase">
+                    <h:commandLink id="gotoGroupAssignmentButton_#{groupEditorBean.assignment.baseAssignmentId}"
+                                   action="#{groupEditorBean.showGroupAssignmentEditor}"
+                                   onclick="var treeframe=parent.getNavFrameWnd(); treeframe.selectNode(#{groupEditorBean.assignment.baseAssignmentId});">
+                        <h:outputText id="xPathBase" value="#{groupEditorBean.baseAssignmentXPath}"/>
+                    </h:commandLink>
+                </fx:formRow>
+            </ui:fragment>
+
             <fx:formRow labelKey="GroupEditor.label.label" id="label">
                     <fx:fxValueInput id="label" value="#{groupEditorBean.assignmentLabel}"
                          readOnly="#{groupEditorBean.systemInternal or not groupEditorBean.editMode}"/>
