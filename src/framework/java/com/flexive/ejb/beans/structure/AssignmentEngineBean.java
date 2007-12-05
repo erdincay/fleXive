@@ -122,14 +122,11 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             con = Database.getDbConnection();
             //create property, no checks for existing names are performed as this is handled with unique keys
             sql.append("INSERT INTO ").append(TBL_STRUCT_PROPERTIES).
-                    //               1  2    3          4          5               6        7       8
-                            append("(ID,NAME,DEFMINMULT,DEFMAXMULT,MAYOVERRIDEMULT,DATATYPE,REFTYPE,ISMULTILANG," +
-                            //9                   10           11                12           13
-                            "MAYOVERRIDEMULTILANG,ISSEARCHABLE,MAYOVERRIDESEARCH,ISINOVERVIEW,MAYOVERRIDEOVERVIEW," +
-                            //14           15                    16                17  18             19      20
-                            "USEHTMLEDITOR,MAYOVERRIDEHTMLEDITOR,ISFULLTEXTINDEXED,ACL,MAYOVERRIDEACL,REFLIST,UNIQUEMODE," +
+                    //               1  2    3          4          5               6        7
+                            append("(ID,NAME,DEFMINMULT,DEFMAXMULT,MAYOVERRIDEMULT,DATATYPE,REFTYPE," +
+                            //8                9   10             11      12
+                            "ISFULLTEXTINDEXED,ACL,MAYOVERRIDEACL,REFLIST,UNIQUEMODE," +
                             "SYSINTERNAL)VALUES(" +
-                            "?,?,?,?,?,?,?,?," +
                             "?,?,?,?,?," +
                             "?,?,?,?,?,?,?,FALSE)");
             ps = con.prepareStatement(sql.toString());
@@ -143,22 +140,14 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 ps.setLong(7, property.getReferencedType().getId());
             else
                 ps.setNull(7, java.sql.Types.NUMERIC);
-            ps.setBoolean(8, property.isMultiLang());
-            ps.setBoolean(9, property.mayOverrideMultiLang());
-            ps.setBoolean(10, property.isSearchable());
-            ps.setBoolean(11, property.mayOverrideSearchable());
-            ps.setBoolean(12, property.isInOverview());
-            ps.setBoolean(13, property.mayOverrideInOverview());
-            ps.setBoolean(14, property.isUseHTMLEditor());
-            ps.setBoolean(15, property.mayOverrideUseHTMLEditor());
-            ps.setBoolean(16, property.isFulltextIndexed());
-            ps.setLong(17, property.getACL().getId());
-            ps.setBoolean(18, property.mayOverrideACL());
+            ps.setBoolean(8, property.isFulltextIndexed());
+            ps.setLong(9, property.getACL().getId());
+            ps.setBoolean(10, property.mayOverrideACL());
             if (property.hasReferencedList())
-                ps.setLong(19, property.getReferencedList().getId());
+                ps.setLong(11, property.getReferencedList().getId());
             else
-                ps.setNull(19, java.sql.Types.NUMERIC);
-            ps.setInt(20, property.getUniqueMode().getId());
+                ps.setNull(11, java.sql.Types.NUMERIC);
+            ps.setInt(12, property.getUniqueMode().getId());
             if (!property.isAutoUniquePropertyName())
                 ps.executeUpdate();
             else {
@@ -203,9 +192,9 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             sql.append("INSERT INTO ").append(TBL_STRUCT_ASSIGNMENTS).
                     //               1  2     3       4       5       6       7       8   9     10    11    12          13
                             append("(ID,ATYPE,ENABLED,TYPEDEF,MINMULT,MAXMULT,DEFMULT,POS,XPATH,XALIAS,BASE,PARENTGROUP,APROPERTY," +
-                            //14 15          16         17           18
-                            "ACL,ISMULTILANG,INOVERVIEW,ISSEARCHABLE,USEHTMLEDITOR)" +
-                            "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                            //14
+                            "ACL)" +
+                            "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
             ps = con.prepareStatement(sql.toString());
             newAssignmentId = seq.getId(SequencerEngine.System.ASSIGNMENT);
             ps.setLong(1, newAssignmentId);
@@ -232,10 +221,6 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 ps.setLong(12, tmp.getId());
             ps.setLong(13, newPropertyId);
             ps.setLong(14, property.getACL().getId());
-            ps.setBoolean(15, property.isMultiLang());
-            ps.setBoolean(16, property.isInOverview());
-            ps.setBoolean(17, property.isSearchable());
-            ps.setBoolean(18, property.isUseHTMLEditor());
             ps.executeUpdate();
             Database.storeFxString(new FxString[]{property.getLabel(), property.getHint(), property.getDefaultValue()}, con,
                     TBL_STRUCT_ASSIGNMENTS, new String[]{"DESCRIPTION", "HINT", "DEFAULT_VALUE"}, "ID", newAssignmentId);
@@ -1738,9 +1723,9 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             sql.append("INSERT INTO ").append(TBL_STRUCT_ASSIGNMENTS).
                     //               1  2     3       4       5       6       7       8   9     10     11   12          13
                             append("(ID,ATYPE,ENABLED,TYPEDEF,MINMULT,MAXMULT,DEFMULT,POS,XPATH,XALIAS,BASE,PARENTGROUP,APROPERTY," +
-                            //14 15          16         17           18            19      20
-                            "ACL,ISMULTILANG,INOVERVIEW,ISSEARCHABLE,USEHTMLEDITOR,DEFLANG,SYSINTERNAL)" +
-                            "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                            //14 15      16
+                            "ACL,DEFLANG,SYSINTERNAL)" +
+                            "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
             if (ps != null)
                 ps.close();
             ps = con.prepareStatement(sql.toString());
@@ -1765,12 +1750,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             ps.setLong(12, prop.getParentGroupAssignment() == null ? FxAssignment.NO_PARENT : prop.getParentGroupAssignment().getId());
             ps.setLong(13, prop.getProperty().getId());
             ps.setLong(14, prop.getACL().getId());
-            ps.setBoolean(15, prop.isMultiLang());
-            ps.setBoolean(16, prop.isInOverview());
-            ps.setBoolean(17, prop.isSearchable());
-            ps.setBoolean(18, prop.isUseHTMLEditor());
-            ps.setInt(19, prop.hasDefaultLanguage() ? prop.getDefaultLanguage() : FxLanguage.SYSTEM_ID);
-            ps.setBoolean(20, prop.isSystemInternal());
+            ps.setInt(15, prop.hasDefaultLanguage() ? prop.getDefaultLanguage() : FxLanguage.SYSTEM_ID);
+            ps.setBoolean(16, prop.isSystemInternal());
             ps.executeUpdate();
             Database.storeFxString(new FxString[]{prop.getLabel(), prop.getHint(), (FxString) prop.getDefaultValue()}, con,
                     TBL_STRUCT_ASSIGNMENTS, new String[]{"DESCRIPTION", "HINT", "DEFAULT_VALUE"}, "ID", newAssignmentId);

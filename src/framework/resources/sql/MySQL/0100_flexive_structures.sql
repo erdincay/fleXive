@@ -1,14 +1,3 @@
--- TODO:
--- + .. done
--- - .. won't happen
--- ~ .. in progress
---
---      +languages as table?
---      -trigger to sync positions of properties and groups
---      +actual data fields
---      indices and foreign/unique keys
---      ~inheritance and positioning
-
 -- -------------------------
 -- Languages
 -- -------------------------
@@ -634,15 +623,7 @@ CREATE TABLE FXS_TYPEPROPS (
   DATATYPE INTEGER UNSIGNED NOT NULL COMMENT 'Data type like integer, string, numeric, etc.',
   REFTYPE INTEGER UNSIGNED COMMENT 'For referenced data types the referenced type',
   REFLIST INTEGER UNSIGNED COMMENT 'For select list data types the referenced select list',
-  ISMULTILANG BOOLEAN NOT NULL COMMENT 'Is this property multilingual?',
-  MAYOVERRIDEMULTILANG BOOLEAN NOT NULL COMMENT 'if true, assignments of this property may override multiLang',
-  ISSEARCHABLE BOOLEAN NOT NULL,
-  MAYOVERRIDESEARCH BOOLEAN NOT NULL COMMENT 'if true, assignments of this property may override isSearchable',
-  ISINOVERVIEW BOOLEAN NOT NULL,
-  MAYOVERRIDEOVERVIEW BOOLEAN NOT NULL COMMENT 'if true, assignments of this property may override isInOverview',
-  USEHTMLEDITOR BOOLEAN NOT NULL,
-  MAYOVERRIDEHTMLEDITOR BOOLEAN NOT NULL COMMENT 'if true, assignments of this property may override useHTMLEditor',
-  ISFULLTEXTINDEXED BOOLEAN NOT NULL COMMENT 'For MySQL: copy value to a myISAM table for fulltext searches',
+  ISFULLTEXTINDEXED BOOLEAN NOT NULL COMMENT 'For MySQL: copy value to a MyISAM table for fulltext queries',
   UNIQUEMODE SMALLINT UNSIGNED NOT NULL DEFAULT 0,
   PRIMARY KEY PK_TYPEPROPS_ID(ID),
   UNIQUE KEY UK_TYPEPROPS_NAME(NAME),
@@ -718,11 +699,7 @@ CREATE TABLE FXS_ASSIGNMENTS (
 -- Property (ATYPE==1) fields:
   APROPERTY INTEGER UNSIGNED COMMENT 'assigned property',
   ACL INTEGER UNSIGNED,
-  ISMULTILANG BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'Is this assignment multilingual?',
   DEFLANG SMALLINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Default language if multilingual, 0 (system) if no default set',
-  INOVERVIEW BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'Displayed in GUI editor',
-  ISSEARCHABLE BOOLEAN NOT NULL DEFAULT FALSE,
-  USEHTMLEDITOR BOOLEAN NOT NULL DEFAULT FALSE,
   SYSINTERNAL BOOLEAN NOT NULL DEFAULT FALSE,
   PRIMARY KEY (ID),
   UNIQUE KEY UK_PROPPOSITIONING(TYPEDEF,POS,PARENTGROUP),
@@ -774,6 +751,8 @@ CREATE TABLE FXS_PROP_OPT (
   MAYOVERRIDE BOOLEAN,
   OPTVALUE TEXT,
   FOREIGN KEY FK_PROPERTY_ID(ID) REFERENCES FXS_TYPEPROPS(ID)
+  	ON DELETE RESTRICT ON UPDATE RESTRICT,
+  FOREIGN KEY FK_ASSIGNMENT_ID(ASSID) REFERENCES FXS_ASSIGNMENTS(ID)
   	ON DELETE RESTRICT ON UPDATE RESTRICT
 )
 ENGINE = InnoDB

@@ -240,13 +240,11 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
 
             //                     1     2       3             4             5                  6       7
             String sql = "SELECT p.ID, p.NAME, p.DEFMINMULT, p.DEFMAXMULT, p.MAYOVERRIDEMULT, t.LANG, t.DESCRIPTION, " +
-                    // 8      9                 10          11         12              13
-                    "p.ACL, p.MAYOVERRIDEACL, p.DATATYPE, p.REFTYPE, p.ISSEARCHABLE, p.MAYOVERRIDESEARCH, " +
-                    // 14              15                     16               17
-                    "p.ISINOVERVIEW, p.MAYOVERRIDEOVERVIEW, p.USEHTMLEDITOR, p.MAYOVERRIDEHTMLEDITOR, " +
-                    // 18                   19                      20             21               22     23
-                    "p.ISFULLTEXTINDEXED, p.MAYOVERRIDEMULTILANG, p.ISMULTILANG, t.DEFAULT_VALUE, t.HINT, p.SYSINTERNAL, " +
-                    //24          25
+                    // 8      9                 10          11
+                    "p.ACL, p.MAYOVERRIDEACL, p.DATATYPE, p.REFTYPE, "+
+                    // 12                   13               14     15
+                    "p.ISFULLTEXTINDEXED, t.DEFAULT_VALUE, t.HINT, p.SYSINTERNAL, " +
+                    //16          17
                     "p.REFLIST, p.UNIQUEMODE FROM " +
                     TBL_STRUCT_PROPERTIES + " p, " + TBL_STRUCT_PROPERTIES + ML + " t WHERE t.ID=p.ID ORDER BY p.ID, t.LANG ASC";
             stmt = con.createStatement();
@@ -260,16 +258,8 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
             int maxMult = -1;
             boolean mayOverrideMult = false;
             boolean mayOverrideACL = false;
-            boolean mayOverrideMultiLang = false;
-            boolean mayOverrideSearchable = false;
-            boolean mayOverrideOverview = false;
-            boolean mayOverrideHTMLEditor = false;
             ACL acl = null;
             FxDataType dataType = null;
-            boolean multiLang = false;
-            boolean searchable = false;
-            boolean overview = false;
-            boolean useHTMLEditor = false;
             boolean fulltextIndexed = false;
             long refTypeId = -1;
             long refListId = -1;
@@ -302,24 +292,16 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                     refTypeId = rs.getLong(11);
                     if (rs.wasNull())
                         refTypeId = -1;
-                    refListId = rs.getLong(24);
+                    refListId = rs.getLong(16);
                     if (rs.wasNull())
                         refListId = -1;
-                    searchable = rs.getBoolean(12);
-                    mayOverrideSearchable = rs.getBoolean(13);
-                    overview = rs.getBoolean(14);
-                    mayOverrideOverview = rs.getBoolean(15);
-                    useHTMLEditor = rs.getBoolean(16);
-                    mayOverrideHTMLEditor = rs.getBoolean(17);
-                    fulltextIndexed = rs.getBoolean(18);
-                    mayOverrideMultiLang = rs.getBoolean(19);
-                    multiLang = rs.getBoolean(20);
-                    systemInternal = rs.getBoolean(23);
-                    uniqueMode = UniqueMode.getById(rs.getInt(25));
+                    fulltextIndexed = rs.getBoolean(12);
+                    systemInternal = rs.getBoolean(15);
+                    uniqueMode = UniqueMode.getById(rs.getInt(17));
                 }
                 hmDesc.put(rs.getInt(6), rs.getString(7));
-                hmDefault.put(rs.getInt(6), rs.getString(21));
-                hmHint.put(rs.getInt(6), rs.getString(22));
+                hmDefault.put(rs.getInt(6), rs.getString(13));
+                hmHint.put(rs.getInt(6), rs.getString(14));
             }
             if (hmDesc.size() > 0) {
 //                if( !name.startsWith("TEST"))
@@ -423,16 +405,16 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
         String curSql;
         ArrayList<FxType> result = new ArrayList<FxType>(20);
         try {
-            ps = con.prepareStatement("select mandatorid from " + TBL_STRUCT_TYPES2MANDATORS + " where typeid=?");
+            ps = con.prepareStatement("SELECT MANDATORID FROM " + TBL_STRUCT_TYPES2MANDATORS + " WHERE TYPEID=?");
             //                                 1         2       3        4
-            ps2 = con.prepareStatement("select typesrc, typedst, maxsrc, maxdst from " + TBL_STRUCT_TYPERELATIONS + " where typedef=?");
+            ps2 = con.prepareStatement("SELECT TYPESRC, TYPEDST, MAXSRC, MAXDST FROM " + TBL_STRUCT_TYPERELATIONS + " WHERE TYPEDEF=?");
             //               1   2         3     4       5             6         7          8
-            curSql = "select id, mandator, name, parent, storage_mode, category, type_mode, validity_checks, " +
+            curSql = "SELECT ID, MANDATOR, NAME, PARENT, STORAGE_MODE, CATEGORY, TYPE_MODE, VALIDITY_CHECKS, " +
                     //9         10          11             12            13           14
-                    "lang_mode, type_state, security_mode, trackhistory, history_age, max_versions," +
+                    "LANG_MODE, TYPE_STATE, SECURITY_MODE, TRACKHISTORY, HISTORY_AGE, MAX_VERSIONS," +
                     //15                 16                17          18          19           20           21   22
-                    "rel_total_maxsrc, rel_total_maxdst, created_by, created_at, modified_by, modified_at, acl, workflow" +
-                    " from " + TBL_STRUCT_TYPES + " order by name";
+                    "REL_TOTAL_MAXSRC, REL_TOTAL_MAXDST, CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT, ACL, WORKFLOW" +
+                    " FROM " + TBL_STRUCT_TYPES + " ORDER BY NAME";
 
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(curSql);
@@ -501,10 +483,10 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
             //final List<FxStructureOption> emptyOptions = new ArrayList<FxStructureOption>(0);
 
             //               1   2      3        4        5        6        7    8      9
-            curSql = "select id, atype, enabled, typedef, MINMULT, MAXMULT, pos, xpath, xalias, " +
-                    //10          11      12         13   14          15           16            17             18    19       20           21         22
-                    "parentgroup, agroup, aproperty, acl, inoverview, ismultilang, issearchable, usehtmleditor, base, deflang, SYSINTERNAL, GROUPMODE, DEFMULT from " +
-                    TBL_STRUCT_ASSIGNMENTS + " order by typedef, parentgroup, pos";//atype, enabled";
+            curSql = "SELECT ID, ATYPE, ENABLED, TYPEDEF, MINMULT, MAXMULT, POS, XPATH, XALIAS, " +
+                    //10          11      12         13   14    15       16           17         18
+                    "PARENTGROUP, AGROUP, APROPERTY, ACL, BASE, DEFLANG, SYSINTERNAL, GROUPMODE, DEFMULT FROM " +
+                    TBL_STRUCT_ASSIGNMENTS + " ORDER BY TYPEDEF, PARENTGROUP, POS";
 
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(curSql);
@@ -513,31 +495,30 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                     case FxAssignment.TYPE_GROUP:
                         if (rs.getLong(1) == FxAssignment.NO_PARENT)
                             break;
-                        final FxString[] desc_hint = FxSharedUtils.get(translations, rs.getLong(1), emptyTranslation);//Database.loadFxString(con, TBL_STRUCT_ASSIGNMENTS, new String[]{"DESCRIPTION", "HINT"}, "ID=" + rs.getLong(1));
+                        final FxString[] desc_hint = FxSharedUtils.get(translations, rs.getLong(1), emptyTranslation);
                         FxGroupAssignment ga = new FxGroupAssignment(rs.getLong(1), rs.getBoolean(3), environment.getType(rs.getLong(4)),
                                 rs.getString(9), rs.getString(8), rs.getInt(7),
-                                new FxMultiplicity(rs.getInt(5), rs.getInt(6)), rs.getInt(22),
+                                new FxMultiplicity(rs.getInt(5), rs.getInt(6)), rs.getInt(18),
                                 new FxPreloadGroupAssignment(rs.getLong(10)),
-                                rs.getLong(18), desc_hint[0], desc_hint[1],
-                                environment.getGroup(rs.getLong(11)), GroupMode.getById(rs.getInt(21)),
+                                rs.getLong(14), desc_hint[0], desc_hint[1],
+                                environment.getGroup(rs.getLong(11)), GroupMode.getById(rs.getInt(17)),
                                 FxSharedUtils.get(groupAssignmentOptions, rs.getLong(1), new ArrayList<FxStructureOption>(0)));
-                        if (rs.getBoolean(20))
+                        if (rs.getBoolean(16))
                             ga._setSystemInternal();
                         result.add(ga);
                         break;
                     case FxAssignment.TYPE_PROPERTY:
-                        final FxString[] desc_hint_def = FxSharedUtils.get(translations, rs.getLong(1), emptyTranslation);//Database.loadFxString(con, TBL_STRUCT_ASSIGNMENTS, new String[]{"DESCRIPTION", "HINT", "DEFAULT_VALUE"}, "ID=" + rs.getLong(1));
-//                        System.out.println("===> Loading assignment #"+rs.getLong(1)+": "+desc_hint_def[0].getDefaultTranslation() );
+                        final FxString[] desc_hint_def = FxSharedUtils.get(translations, rs.getLong(1), emptyTranslation);
                         FxPropertyAssignment pa = new FxPropertyAssignment(rs.getLong(1), rs.getBoolean(3), environment.getType(rs.getLong(4)),
                                 rs.getString(9), rs.getString(8), rs.getInt(7),
-                                new FxMultiplicity(rs.getInt(5), rs.getInt(6)), rs.getInt(22),
+                                new FxMultiplicity(rs.getInt(5), rs.getInt(6)), rs.getInt(18),
                                 new FxPreloadGroupAssignment(rs.getLong(10)),
-                                rs.getLong(18),
+                                rs.getLong(14),
                                 desc_hint_def[0], desc_hint_def[1], desc_hint_def[2],
                                 environment.getProperty(rs.getLong(12)),
-                                environment.getACL(rs.getInt(13)), rs.getInt(19),
+                                environment.getACL(rs.getInt(13)), rs.getInt(15),
                                 FxSharedUtils.get(propertyAssignmentOptions, rs.getLong(1), new ArrayList<FxStructureOption>(0)));
-                        if (rs.getBoolean(20))
+                        if (rs.getBoolean(16))
                             pa._setSystemInternal();
                         result.add(pa);
                         break;

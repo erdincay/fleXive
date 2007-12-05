@@ -124,6 +124,8 @@ public class GroovyTypeBuilder extends BuilderSupport {
             "ACL",
             "NAME",
             "HINT",
+            "ALIAS",
+            "LABEL",
             "DESCRIPTION",
             "DATATYPE",
             "MULTIPLICITY",
