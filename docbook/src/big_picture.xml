@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE chapter [
+        <!ENTITY % global_entities SYSTEM "global.ent">
+        %global_entities;
+        ]>
+<chapter xml:id="big_picture" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude">
+    <title>The big picture</title>
+
+    <xi:include href="includes/author_dlichtenberger.xml"/>
+
+    <para>
+        &Flexive; is a comprehensive &jee5; library with an EJB3 interface and a supplementing
+        JSF component library. It is based on current Java enterprise technologies and focuses
+        on flexibility and extensibility.
+        <xref linkend="core"/>
+        and
+        <xref linkend="jsfsupport"/>
+        explain all key concepts services relevant to users of the &flexive; framework.
+    </para>
+    <para>
+        The core of &flexive; is a collection of EJB3 beans (called engines) that offer services such as content
+        creation and retrieval, search queries and the definition of data structures. The client
+        is usually a web application or another EJB3 that extends or embeds &flexive; functionality.
+    </para>
+    <para>
+        The &flexive; core is based on the following EJB engines:
+        <itemizedlist>
+            <listitem>
+                <para>
+                    The
+                    <link linkend="core_contents">content engine</link>
+                    implements the persistency layer that is used to create, update and delete
+                    &flexive; contents. It is supported by an extensive
+                    <link linkend="core_security">security layer</link>
+                    that offers fine-grained permission controls for all contents managed by &flexive;.
+                </para>
+            </listitem>
+
+            <listitem>
+                <para>
+                    The content engine is supplemented by the
+                    <link linkend="core_search">search engine</link>
+                    to search for contents in a SQL-like query language.
+                </para>
+            </listitem>
+            
+            <listitem>
+                <para>
+                    The
+                    <link linkend="core_structure">structure engine</link>
+                    is responsible for creating and editing the dynamic data structures used by the
+                    content engine.
+                </para>
+            </listitem>
+
+            <listitem>
+                <para>
+                    The
+                    <link linkend="core_tree">tree engine</link>
+                    provides a scalable implementation for organizing contents in a hierarchical
+                    tree structure.
+                </para>
+            </listitem>
+
+            <listitem>
+                <para>
+                    Further engines extend the basic functionality: the
+                    <link linkend="core_scripting">scripting engine</link>
+                    allows to fire user-defined code at almost any event in the content engine,
+                    <link linkend="core_users">user management</link>
+                    provides access to the user directory, the
+                    <link linkend="core_workflow">workflow engine</link>
+                    implements workflows for content instances, and the
+                    <link linkend="core_configuration">configuration engine</link>
+                    stores user preferences and system configuration parameters.
+                </para>
+            </listitem>
+        </itemizedlist>
+    </para>
+</chapter>

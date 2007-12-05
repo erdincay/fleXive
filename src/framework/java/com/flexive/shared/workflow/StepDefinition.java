@@ -65,13 +65,13 @@ public class StepDefinition extends AbstractSelectableObjectWithLabel implements
     /**
      * StepDefinition Constructor.
      *
-     * @param name        the unique name of the step
+     * @param label        the unique label of the step
      * @param description the description of the step
      * @param id          the unique id of the step
      * @param uniqueTargetId  the unique target id (-1 if it there is no unique target)
      */
-    public StepDefinition(long id, FxString name, String description, long uniqueTargetId) {
-        this.label = name;
+    public StepDefinition(long id, FxString label, String description, long uniqueTargetId) {
+        this.label = label;
         this.description = description;
         this.id = id;
         if (uniqueTargetId >= 0 && id == uniqueTargetId) {
@@ -79,6 +79,26 @@ public class StepDefinition extends AbstractSelectableObjectWithLabel implements
                     this.id).asRuntimeException();
         }
         this.uniqueTargetId = (uniqueTargetId < 0) ? -1 : uniqueTargetId;
+    }
+
+    /**
+     * StepDefinition Constructor.
+     *
+     * @param label        the unique name of the step
+     * @param description the description of the step
+     * @param uniqueTargetId  the unique target id (-1 if it there is no unique target)
+     */
+    public StepDefinition(FxString label, String description, long uniqueTargetId) {
+        this(-1, label, description, uniqueTargetId);
+    }
+
+    /**
+     * Returns an editable step definition object.
+     *
+     * @return  this step definition as an editable object.
+     */
+    public StepDefinitionEdit asEditable() {
+        return new StepDefinitionEdit(this);
     }
 
 

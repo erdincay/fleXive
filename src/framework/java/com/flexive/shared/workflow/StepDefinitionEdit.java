@@ -47,11 +47,11 @@ public class StepDefinitionEdit extends StepDefinition implements Serializable {
     private static final long serialVersionUID = 8136768479690229989L;
 
     /**
-     * Copy constructor taking a step defintion object
+     * Copy constructor taking a step definition object
      * @param stepDefinition    the source step definition
      */
     public StepDefinitionEdit(StepDefinition stepDefinition) {
-        super(stepDefinition.getId(), new FxString(stepDefinition.getLabel()), stepDefinition.getDescription(),
+        super(stepDefinition.getId(), stepDefinition.getLabel().copy(), stepDefinition.getDescription(),
                 stepDefinition.getUniqueTargetId());
     }
 

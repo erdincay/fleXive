@@ -1,5 +1,5 @@
-<!ENTITY flexive "<trademark class='trade'>[fleXive]</trademark>">
-<!ENTITY Flexive "<trademark class='trade'>[fleXive]</trademark>">
+<!ENTITY flexive "[fleXive]">
+<!ENTITY Flexive "[fleXive]">
 <!ENTITY backendGui "backend administration application">
 <!ENTITY xpath "XPath">
 <!ENTITY messagekey "message key">

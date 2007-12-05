@@ -79,6 +79,15 @@ public class Workflow extends AbstractSelectableObject implements Serializable, 
     }
 
     /**
+     * Returns this workflow as an editable object.
+     *
+     * @return  this workflow as an editable object.
+     */
+    public WorkflowEdit asEditable() {
+        return new WorkflowEdit(this);
+    }
+
+    /**
      * Returns the name of the workflow.
      *
      * @return the name of the workflow

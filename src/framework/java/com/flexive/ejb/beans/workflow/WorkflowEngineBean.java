@@ -288,12 +288,20 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
             stmt.executeUpdate();
             
             // create step(s)
+            final Map<Long, Step> createdSteps = new HashMap<Long, Step>();
             for (Step step: workflow.getSteps()) {
-                stepEngine.createStep(new Step(-1, step.getStepDefinitionId(), id, step.getAclId()));
+                final Step wfstep = new Step(-1, step.getStepDefinitionId(), id, step.getAclId());
+                final long newStepId = stepEngine.createStep(wfstep);
+                createdSteps.put(step.getId(), new Step(newStepId, wfstep));
             }
-            
-            if (workflow.getRoutes() != null && workflow.getRoutes().size() > 0) {
-            	throw new FxCreateException(LOG, "ex.workflow.create.routes");
+
+            // create route(s)
+            for (Route route: workflow.getRoutes()) {
+            	routeEngine.create(
+                        resolveTemporaryStep(createdSteps, route.getFromStepId()),
+                        resolveTemporaryStep(createdSteps, route.getToStepId()),
+                        route.getGroupId()
+                );
             }
             success = true;
         } catch (Exception exc) {

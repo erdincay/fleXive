@@ -5,9 +5,7 @@
         ]>
 <chapter xml:id="core" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink/namespace"
          xmlns:xi="http://www.w3.org/2001/XInclude">
-    <info>
-        <title>The &flexive; core components</title>
-    </info>
+    <title>The &flexive; core components</title>
 
     <para>
         If you remove all eyecandy created by more or less sophisticated user interfaces you will discover the
@@ -32,5 +30,6 @@
     <xi:include href="core/tree.xml"/>
     <xi:include href="core/scripting.xml"/>
     <xi:include href="core/workflow.xml"/>
-
+    <xi:include href="core/configuration.xml"/>
+    
 </chapter>

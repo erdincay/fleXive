@@ -65,6 +65,19 @@ public class Step implements Serializable {
     }
 
     /**
+     * Creates a new workflow step that is not assigned to an existing workflow.
+     *
+     * @param id        the step ID
+     * @param stepDefinitionId  the step definition ID
+     * @param aclId     the ACL ID for the step
+     */
+    public Step(long id, long stepDefinitionId, long aclId) {
+        this.id = id;
+        this.stepDefinitionId = stepDefinitionId;
+        this.aclId = aclId;
+    }
+
+    /**
      * Creates a new workflow step.
      * 
      * @param id        the step ID
@@ -89,6 +102,16 @@ public class Step implements Serializable {
      * Protected default constructor.
      */
     protected Step() {
+    }
+
+
+    /**
+     * Returns this step as an editable instance.
+     *
+     * @return  this step as an editable instance.
+     */
+    public StepEdit asEditable() {
+        return new StepEdit(this);
     }
 
     /**

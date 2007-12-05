@@ -14,6 +14,7 @@
     <xi:include href="installation.xml"/>
     <xi:include href="tutorial.xml"/>
     <xi:include href="writing_applications.xml"/>
+    <xi:include href="big_picture.xml"/> 
     <xi:include href="core.xml"/>
     <xi:include href="jsfsupport.xml"/>
     <xi:include href="admin_gui.xml"/>

@@ -319,9 +319,7 @@ public class WorkflowTest {
             sd2 = stepDefinitionEngine.create(new StepDefinition(-2, new FxString("derived"), "descr", -1));
             // create a workflow which uses only the first step definition
             workflowId = workflowEngine.create(new Workflow(-1, "test", "descr",
-                    Arrays.asList(new Step[]{
-                            new Step(-1, sd1, -1, aclId),
-                    }), new ArrayList<Route>()));
+                    Arrays.asList(new Step(-1, sd1, -1, aclId)), new ArrayList<Route>()));
             // introduce a unique target to sd2
             StepDefinitionEdit edit = new StepDefinitionEdit(getEnvironment().getStepDefinition(sd1));
             edit.setUniqueTargetId(sd2);
@@ -572,6 +570,58 @@ public class WorkflowTest {
                 stepDefinitionEngine.remove(id);
             }
         }
+    }
+
+    /**
+     * Test the code we use in the workflow reference documentation
+     * @throws com.flexive.shared.exceptions.FxApplicationException on errors
+     */
+    @Test
+    public void workflowDocTest() throws FxApplicationException {
+        final List<StepDefinition> stepDefinitions = new ArrayList<StepDefinition>();
+        final List<Workflow> workflows = new ArrayList<Workflow>();
+        try {
+            // create step definition objects
+            final StepDefinitionEdit definition1 =
+                    new StepDefinition(new FxString("step 1"), "first step", -1).asEditable();
+            final StepDefinitionEdit definition2 =
+                    new StepDefinition(new FxString("step 2"), "second step", -1).asEditable();
+
+            // store them in the database and store IDs
+            definition1.setId(EJBLookup.getWorkflowStepDefinitionEngine().create(definition1));
+            definition2.setId(EJBLookup.getWorkflowStepDefinitionEngine().create(definition2));
+
+            stepDefinitions.addAll(Arrays.asList(definition1, definition2));
+
+            // create a workflow and auto-create steps using intermediate IDs
+            final Step step1 = new Step(-10, definition1.getId(), ACL.Category.WORKFLOW.getDefaultId());
+            final Step step2 = new Step(-20, definition2.getId(), ACL.Category.WORKFLOW.getDefaultId());
+
+            // create a route between step1 and step2
+            final Route route = new Route(-1, UserGroup.GROUP_EVERYONE, -10, -20);
+
+            // create workflow object and store it in the database
+            final Workflow workflow = new Workflow(-1, "test wf", "my test workflow",
+                    Arrays.asList(step1, step2), Arrays.asList(route));
+            final long workflowId = EJBLookup.getWorkflowEngine().create(workflow);
+            final Workflow dbWorkflow = CacheAdmin.getEnvironment().getWorkflow(workflowId);
+            workflows.add(dbWorkflow);
+            assert dbWorkflow.getRoutes().size() == 1;      // route available?
+            assert dbWorkflow.getSteps().size() == 2;       // both steps available?
+            
+            // check from and to steps of our route
+            assert dbWorkflow.getRoutes().get(0).getFromStepId() == dbWorkflow.getSteps().get(0).getId();
+            assert dbWorkflow.getRoutes().get(0).getToStepId() == dbWorkflow.getSteps().get(1).getId();
+        } finally {
+            for (Workflow workflow: workflows) {
+                EJBLookup.getWorkflowEngine().remove(workflow.getId());
+            }
+            for (StepDefinition def: stepDefinitions) {
+                EJBLookup.getWorkflowStepDefinitionEngine().remove(def.getId());
+            }
+        }
+
+
     }
 
     /**

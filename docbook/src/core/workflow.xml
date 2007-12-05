@@ -6,4 +6,161 @@
 <section xml:id="core_workflow" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude">
     <title>Workflow Engine</title>
+
+    <xi:include href="../includes/author_dlichtenberger.xml"/>
+
+    <para>
+        The workflow engine is responsible for creating and maintaining workflows.
+        Unless you need to create your own workflows programmatically, the most important information in this section
+        is the conceptual overview which explains the basic concepts of the workflow engine.
+        The &flexive; workflow engine is a specialized workflow implementation used by the
+        <link linkend="core_contents">content engine</link>, it does not offer a generic workflow implementation.
+    </para>
+
+    <section xml:id="core_workflow_overview">
+        <title>Conceptual Overview</title>
+
+        <para>
+            A workflow combines a collection of workflow states and the enumeration of all possible
+            transitions between those states. In &flexive;, the following terminology is used:
+            <variablelist>
+                <varlistentry>
+                    <term>Step definition</term>
+                    <listitem>
+                        <para>
+                            An abstract definition of a workflow step. It defines a localized label
+                            and a unique target.
+                        </para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term>Unique target</term>
+                    <listitem>
+                        <para>
+                            Supports the concept of
+                            <emphasis>unique steps</emphasis>
+                            for versioned contents. When a workflow step with a unique target is assigned
+                            to a content instance version, all other versions of the instance
+                            that are in the same workflow step are moved to the unique target step.
+                            Since this transition is executed every time a content instance is saved,
+                            there can be at most one content instance version in a step
+                            with a unique target at any given time.
+                        </para>
+                        <para>
+                            The canonical example for this is the Edit/Live/Archived workflow for publishing
+                            website contents: a content is created in the Edit workflow step. When it is deemed
+                            to be ready for publication, the latest version is set to the Live workflow step
+                            and is shown on the web page. When an update is necessary, a new version is created
+                            in the Edit workflow step which can be modified without altering the Live instance.
+                            When the new version is to be published, it is set to the Live workflow step.
+                            However, there already exists an old version in the Live step: to resolve this, the Live
+                            step has a unique target (e.g. Archived). When the latest version is set to the Live
+                            step, the previous Live version is moved to the Archived step.
+                        </para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term>Workflow</term>
+                    <listitem>
+                        <para>
+                            A concrete workflow that consists of steps and routes, including the permission
+                            configuration for both.
+                        </para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term>Step</term>
+                    <listitem>
+                        <para>
+                            A concrete assignment of a step definition to a workflow, including an
+                            ACL that defines the permissions on objects in this workflow step.
+                        </para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term>Route</term>
+                    <listitem>
+                        <para>
+                            A transition between two steps of a workflow, including the user group
+                            for which it should be available.
+                        </para>
+                    </listitem>
+                </varlistentry>
+
+            </variablelist>
+        </para>
+    </section>
+
+    <section xml:id="core_workflow_api">
+        <title>Creating and updating workflows</title>
+
+        <para>
+            Although workflows can be edited in the
+            <link linkend="admin_gui">&backendGui;</link>, you can also setup new workflows
+            programmatically. The workflow engine is spread across four EJB interfaces, each one
+            handling the create/update/delete operations for its part of the workflow: step definitions, steps,
+            routes, and the workflow objects themselves. We'll show how to create a simple workflow from scratch,
+            for a more elaborate explanation of the methods please refer to the &flexiveJavadoc;.
+        </para>
+
+
+        <example xml:id="core_workflow_api_ex_stepdef">
+            <title>Creating a workflow step definition</title>
+            <para>
+                First of all, we need some step definitions to work with. We start with creating editable
+                <classname>StepDefinition</classname>
+                objects, which are then stored in the database using the
+                <interfacename>StepDefinitionEngine</interfacename>.
+            </para>
+            <programlisting language="java"><![CDATA[// create step definition objects
+final StepDefinitionEdit definition1 =
+        new StepDefinition(new FxString("step 1"), "first step", -1).asEditable();
+final StepDefinitionEdit definition2 =
+        new StepDefinition(new FxString("step 2"), "second step", -1).asEditable();
+
+// store them in the database and store IDs
+definition1.setId(EJBLookup.getWorkflowStepDefinitionEngine().create(definition1));
+definition2.setId(EJBLookup.getWorkflowStepDefinitionEngine().create(definition2));
+]]></programlisting>
+        </example>
+
+        <example xml:id="core_workflow_api_ex_workflowauto">
+            <title>Creating a new workflow with steps and routes</title>
+            <para>
+                There are EJB interfaces for adding steps and routes to an existing workflow.
+                However, when we create a new workflow we would have to first create an empty workflow,
+                and then create each step and route using EJB calls. To simplify things a bit, the workflow
+                engine can create the steps and routes for a new workflow object using
+                <emphasis>intermediate IDs</emphasis>. An intermediate step or route ID is negative
+                (IDs retrieved from the database are always positive) and can be referenced in
+                routes. Finally we retrieve the created workflow from the environment
+                (workflows are always cached, so there isn't even a method to load workflows directly
+                from the database) and perform some validity checks.
+            </para>
+            <programlisting language="java"><![CDATA[// create a workflow and auto-create steps using intermediate IDs
+final Step step1 = new Step(-10, definition1.getId(), ACL.Category.WORKFLOW.getDefaultId());
+final Step step2 = new Step(-20, definition2.getId(), ACL.Category.WORKFLOW.getDefaultId());
+
+// create a route between step1 and step2
+final Route route = new Route(-1, UserGroup.GROUP_EVERYONE, -10, -20);
+
+// create workflow object and store it in the database
+final Workflow workflow = new Workflow(-1, "test wf", "my test workflow",
+        Arrays.asList(step1, step2), Arrays.asList(route));
+final long workflowId = EJBLookup.getWorkflowEngine().create(workflow);
+
+final Workflow dbWorkflow = CacheAdmin.getEnvironment().getWorkflow(workflowId);
+assert dbWorkflow.getRoutes().size() == 1;      // route available?
+assert dbWorkflow.getSteps().size() == 2;       // both steps available?
+
+// check from and to steps of our route
+assert dbWorkflow.getRoutes().get(0).getFromStepId() == dbWorkflow.getSteps().get(0).getId();
+assert dbWorkflow.getRoutes().get(0).getToStepId() == dbWorkflow.getSteps().get(1).getId();
+]]></programlisting>
+        </example>
+    </section>
 </section>
