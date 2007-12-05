@@ -44,7 +44,8 @@
     </para>
 
     <section xml:id="jsf_component_library">
-        <title>The &flexive; component library</title>
+        <title>The &flexive; component library
+        </title>
 
         <section xml:id="jcl_using">
             <title>
@@ -233,7 +234,8 @@
                             </term>
                             <listitem>
                                 <para>
-                                    Provide a list for all entries of the group (or property) "element". If "element" is a
+                                    Provide a list for all entries of the group (or property) "element". If "element" is
+                                    a
                                     property, the iterator returns FxValue objects, otherwise it returns a
                                     list of virtual fx:content instances with a prefix for the current group element
                                     (
@@ -431,7 +433,8 @@
 
                 <section xml:id="jcl_fx_value_synopsis">
                     <title>Synopsis</title>
-                    <programlisting language="xhtml"><![CDATA[<fx:value property="xpath" [var="varname"] [labelKey="messagekey"] [any attribute for fx:formRow]/>]]></programlisting>
+                    <programlisting language="xhtml">
+                        <![CDATA[<fx:value property="xpath" [var="varname"] [labelKey="messagekey"] [any attribute for fx:formRow]/>]]></programlisting>
                 </section>
 
                 <section xml:id="jcl_fx_value_parameters">
@@ -655,7 +658,8 @@
 
                 <section xml:id="jcl_fx_resultvalue_synopsis">
                     <title>Synopsis</title>
-                    <programlisting language="xhtml"><![CDATA[<fx:resultValue value="value" [linkFormatter="formatter"] [itemLinkFormat="format"] [contentLinkFormat="format"]/>]]></programlisting>
+                    <programlisting language="xhtml">
+                        <![CDATA[<fx:resultValue value="value" [linkFormatter="formatter"] [itemLinkFormat="format"] [contentLinkFormat="format"]/>]]></programlisting>
                 </section>
 
                 <section xml:id="jcl_fx_resultvalue_parameters">
@@ -685,7 +689,7 @@
                                         <xref linkend="css_tree"/>.
                                         If not specified, the default
                                         <classname>ContentLinkFormatter</classname>
-                                        will be used.  For a description of the supported link format,
+                                        will be used. For a description of the supported link format,
                                         please refer to the &flexiveJavadoc; of this class.
                                     </para>
                                 </listitem>
@@ -711,7 +715,8 @@
                                         <classname>FxPaths</classname>
                                         values as returned by the virtual
                                         <code>@path</code>
-                                        property. For a description of the supported link format of the default formatter,
+                                        property. For a description of the supported link format of the default
+                                        formatter,
                                         please refer to the &flexiveJavadoc; of this class.
                                     </para>
                                 </listitem>
@@ -912,7 +917,7 @@
                             <listitem>
                                 <para>
                                     Message key of the tooltip (if not specified and labelKey is set,
-                                    it defaults to <code language="jsfel">#{labelKey}.tooltip</code>)
+                                    it defaults to<code language="jsfel">#{labelKey}.tooltip</code>)
                                 </para>
                             </listitem>
                         </varlistentry>
@@ -1246,14 +1251,16 @@
     </section>
 
     <section xml:id="reusable_components">
-        <title>Writing reusable &flexive; components</title>
+        <title>Writing reusable &flexive; components
+        </title>
         <para>
             While &flexive; builds on existing &jee5; infrastructure,
             it integrates additional services that make writing components for &flexive; applications even easier.
             <itemizedlist>
                 <listitem>
                     <para>
-                        Full EJB3 support in your applications and plugins, you can use existing EJBs or create new ones,
+                        Full EJB3 support in your applications and plugins, you can use existing EJBs or create new
+                        ones,
                         and call your EJBs from &flexive; via scripting.
                     </para>
                 </listitem>
@@ -1299,11 +1306,218 @@
                 to existing applications, for example a forum or comment sections.
                 A component packages all Java code and web resources into a single JAR file that can
                 be dropped into the
-                <filename>lib/</filename> directory of an existing
+                <filename>lib/</filename>
+                directory of an existing
                 <filename>flexive.ear</filename>
                 file. After the next &flexive; startup it is available to all applications contained
                 in the &flexive; archive.
             </para>
+
+            <section xml:id="components_jsf_building">
+                <title>Build file support</title>
+
+                <para>
+                    The &flexive; distribution contains a build target to create the directory structure
+                    of a standalone component, including a build file to compile and package the component.
+                </para>
+
+                <para>
+                    To create a new component, open the command shell and go to the directory containing
+                    the &flexive; distribution. Execute
+                    <command>ant</command>. You are greeted by the welcome screen of the flexive
+                    build tool. Enter
+                    <userinput>component.create</userinput>
+                    as the target name and supply the name of your component (e.g.
+                    <code>test</code>).
+                    When you confirm the input, a new component directory layout is initialized in
+                    the distribution's parent directory, in this case in
+                    <filename>../test</filename>. Your screen should look approximately like this:
+                    <screen><![CDATA[
+Buildfile: build.xml
+
+info:
+  [flexive]
+  [flexive] Welcome to the flexive build tool. Feel free to use the following build targets:
+  [flexive]
+  [flexive] project.create
+  [flexive]     Creates a new flexive project directory.
+  [flexive]
+  [flexive] component.create
+  [flexive]     Creates a new flexive UI component directory.
+  [flexive]
+  [flexive] db.create
+  [flexive]         Create or reset the database schema of a flexive division.
+  [flexive]         Warning: if the schema already exists, it will be dropped (i.e. you will lose all data
+  [flexive]         stored in the schema).
+  [flexive]
+  [flexive] db.config.create
+  [flexive]         Create or reset the global flexive configuration schema.
+  [flexive]
+    [input] Please enter a target name, or quit to exit:
+]]><userinput>component.create</userinput><![CDATA[
+
+check:
+
+component.create:
+    [input] Name of the component you want to create:
+]]><userinput>test</userinput><![CDATA[
+  [flexive]
+  [flexive] Please confirm your input:
+  [flexive] Component name:      test
+  [flexive] Base directory:      ../test
+  [flexive]
+    [input] Are these settings correct? ([y], n)
+]]><userinput>y</userinput><![CDATA[
+    [mkdir] Created dir: /tmp/test
+     [copy] Copying 8 files to /tmp/test
+     [copy] Copied 13 empty directories to 6 empty directories under /tmp/test
+     [copy] Copying 1 file to /tmp/test
+     [echo] Component test created successfully. The component root directory is
+     [echo] ../test
+]]>
+                    </screen>
+                </para>
+                <para>
+                    Change to your component directory in
+                    <filename>../test</filename>. The directory structure is similar to a &flexive;
+                    project, the main difference is that there is only one source folder since all
+                    classes will be packaged into one JAR file.
+                    <screen><![CDATA[.
+|-- build.xml
+|-- resources
+|   |-- META-INF
+|   |   |-- faces-config.xml
+|   |   |-- flexive-plugins-config.xml
+|   |   `-- weblets-config.xml
+|   |-- messages
+|   |-- scripts
+|   |   |-- library
+|   |   |-- runonce
+|   |   `-- startup
+|   |-- templates
+|   `-- weblets
+|-- src
+|   `-- java
+`-- web]]></screen>
+
+                    <variablelist>
+                        <varlistentry>
+                            <term>
+                                <filename>src/java</filename>
+                            </term>
+                            <listitem>
+                                <para>
+                                    contains the Java sources of the component.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>
+                                <filename>web</filename>
+                            </term>
+                            <listitem>
+                                <para>
+                                    contains the web documents of the component, e.g. configuration screens
+                                    for the component.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>
+                                <filename>resources/META-INF</filename>
+                            </term>
+                            <listitem>
+                                <para>
+                                    contains the component's configuration files for JSF,
+                                    the &flexive; plugin descriptor, and the Weblets
+                                    configuration.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>
+                                <filename>resources/messages</filename>
+                            </term>
+                            <listitem>
+                                <para>
+                                    contains the component's localized message resources that can
+                                    be accessed with the &messageBean;.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>
+                                <filename>resources/scripts</filename>
+                            </term>
+                            <listitem>
+                                <para>
+                                    contains the run-once, startup and library scripts of the component.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>
+                                <filename>resources/weblets</filename>
+                            </term>
+                            <listitem>
+                                <para>
+                                    contains the &weblets; that serve resources like images or stylesheets
+                                    directly from you component JAR file.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>
+                                <filename>resources/templates</filename>
+                            </term>
+                            <listitem>
+                                <para>
+                                    is the standard folder for Facelets templates. You can choose any
+                                    folder of course if you like, but then you'd have to modify the
+                                    build script.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                    </variablelist>
+                </para>
+                <para>To check if your build environment is working, execute
+                    <command>ant</command>
+                    in the component's base directory.
+                    An (empty) component JAR file should now be created in
+                    <filename>dist/test.jar</filename>. You can open the component in your favourite IDE now
+                    and start adding classes, templates and web pages. If you move the component directory
+                    to another directory (e.g. to maintain components in a larger &flexive; project)
+                    be sure to modify the path to the &flexive; distribution in
+                    <filename>build.xml</filename>.
+                </para>
+            </section>
+
+            <section>
+                <title>Deployment</title>
+                <para>
+                    To deploy the component, you have to make it available to the &flexive; application's classpath.
+                    The easiest way to do this is to add the JAR file to the
+                    <filename>lib/</filename>
+                    folder of your
+                    <filename>flexive.ear</filename>
+                    file.
+                </para>
+                <para>
+                    If you want to add it to your own &flexive; project created by the
+                    build tool, you can copy it to the project's
+                    <filename>lib/</filename>
+                    directory. When you build the EAR file, it will be added to the archive's
+                    <filename>lib/</filename>
+                    folder and will be automatically deployed when &flexive; starts up.
+                </para>
+            </section>
 
             <section xml:id="components_jsf_package">
                 <title>Packaging</title>
@@ -1312,7 +1526,9 @@
                     A JSF component is a JAR file that may contain the following elements:
                     <variablelist>
                         <varlistentry>
-                            <term><filename>META-INF/faces-config.xml</filename></term>
+                            <term>
+                                <filename>META-INF/faces-config.xml</filename>
+                            </term>
                             <listitem>
                                 <para>
                                     Registers JSF beans, components, validators, and navigation rules.
@@ -1324,7 +1540,9 @@
                         </varlistentry>
 
                         <varlistentry>
-                            <term><filename>META-INF/*.taglib.xml</filename></term>
+                            <term>
+                                <filename>META-INF/*.taglib.xml</filename>
+                            </term>
                             <listitem>
                                 <para>
                                     Register your own Facelets templates. The templates are stored directly
@@ -1351,14 +1569,17 @@
 </facelet-taglib>
 ]]></programlisting>
                                     Facelets scans the classpath for
-                                    <filename>*.taglib.xml</filename> files and will automatically provide the
+                                    <filename>*.taglib.xml</filename>
+                                    files and will automatically provide the
                                     registered templates and components under the given namespace.
                                 </para>
                             </listitem>
                         </varlistentry>
 
                         <varlistentry>
-                            <term><filename>META-INF/flexive-plugins-config.xml</filename></term>
+                            <term>
+                                <filename>META-INF/flexive-plugins-config.xml</filename>
+                            </term>
                             <listitem>
                                 <para>
                                     Defines &flexive; JSF plugins, as described in
@@ -1368,7 +1589,9 @@
                         </varlistentry>
 
                         <varlistentry>
-                            <term><filename>META-INF/weblets-config.xml</filename></term>
+                            <term>
+                                <filename>META-INF/weblets-config.xml</filename>
+                            </term>
                             <listitem>
                                 <para>
                                     Contains the &weblets; configuration if you want to deliver
@@ -1376,11 +1599,16 @@
                                     are stored in the JAR file like Facelets templates, but their base directory
                                     may be any package in the JAR file. For example, the following config file
                                     sets the weblets root directory of the &flexive; components package to
-                                    <package>com/flexive/faces/weblets</package> and registers the weblet
+                                    <package>com/flexive/faces/weblets</package>
+                                    and registers the weblet
                                     provider for the URI
                                     <uri>/flexive-web-resources/</uri>:
 
-                                    <programlisting language="xml"><xi:include href="../../src/ui/jsf-components/resources/META-INF/weblets-config.xml" parse="text"/></programlisting>
+                                    <programlisting language="xml">
+                                        <xi:include
+                                                href="../../src/ui/jsf-components/resources/META-INF/weblets-config.xml"
+                                                parse="text"/>
+                                    </programlisting>
 
                                     If you attach
                                     <code>-SNAPSHOT</code>
@@ -1396,14 +1624,6 @@
                 </para>
 
             </section>
-
-            <section xml:id="components_jsf_building">
-                <title>Compiling and packaging</title>
-
-                <para>
-                    TODO
-                </para>
-            </section>
         </section>
 
         <section xml:id="components_ejb">
@@ -1417,7 +1637,8 @@
                 of Glassfish and JBoss unless you included an explicit
                 <filename>ejb-ref.xml</filename>,
                 so you have to add an explicit reference to the EJB JAR file in
-                <filename>flexive.ear!/META-INF/application.xml</filename> if you use only EJB3 annotations.
+                <filename>flexive.ear!/META-INF/application.xml</filename>
+                if you use only EJB3 annotations.
                 When you develop &flexive; applications as described in
                 <xref linkend="writing_applications"/>,
                 this is done automatically by the &flexive; build system.
@@ -1517,7 +1738,8 @@
         </section>
 
         <example xml:id="jpa_example_app">
-            <title>Making a &flexive; application extensible</title>
+            <title>Making a &flexive; application extensible
+            </title>
 
             <para>
                 The intent of the next two examples is to create an extension point which can handle arbitrary
@@ -1578,7 +1800,8 @@
         </example>
 
         <example xml:id="jpa_example_client">
-            <title>Writing a plugin for a &flexive; application</title>
+            <title>Writing a plugin for a &flexive; application
+            </title>
 
             <para>
                 Now that our application supports plugins as described in

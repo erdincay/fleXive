@@ -131,6 +131,7 @@ db.config.create
             <zipfileset prefix="lib" dir="${dist.lib.dir}" includes="**/*" excludes="flexive-ejb.jar"/>
             <zipfileset prefix="lib" dir="${dist.extlib.dir}" includes="**/*" excludes="jsf-api.jar,jsf-impl.jar,javaee.jar,jboss-*.jar,selenium-*,testng-*"/>
             <zipfileset prefix="lib" dir="${build.dist.dir}" includes="**/*.jar" excludes="${package.ejb}"/>
+            <zipfileset prefix="lib" dir="${basedir}/lib" includes="**/*.jar"/>
             <fileset file="${dist.basedir}/*.war"/>
             <fileset file="${dist.lib.dir}/flexive-ejb.jar"/>
             <fileset file="${build.dist.dir}/${package.war}"/>

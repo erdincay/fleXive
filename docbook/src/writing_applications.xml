@@ -50,7 +50,7 @@
 
                 <varlistentry>
                     <term>
-                        <filename>lib/</filename>
+                        <filename>lib</filename>
                     </term>
                     <listitem>
                         <para>
@@ -61,7 +61,7 @@
 
                 <varlistentry>
                     <term>
-                        <filename>extlib/</filename>
+                        <filename>extlib</filename>
                     </term>
                     <listitem>
                         <para>
@@ -75,7 +75,7 @@
 
                 <varlistentry>
                     <term>
-                        <filename>templates/</filename>
+                        <filename>templates</filename>
                     </term>
                     <listitem>
                         <para>
@@ -86,7 +86,7 @@
 
                 <varlistentry>
                     <term>
-                        <filename>META-INF/</filename>
+                        <filename>META-INF</filename>
                     </term>
                     <listitem>
                         <para>
@@ -131,7 +131,18 @@ info:
   [flexive] Welcome to the flexive build tool. Feel free to use the following build targets:
   [flexive]
   [flexive] project.create
-  [flexive]     Creates an empty flexive project.
+  [flexive]     Creates a new flexive project directory.
+  [flexive]
+  [flexive] component.create
+  [flexive]     Creates a new flexive UI component directory.
+  [flexive]
+  [flexive] db.create
+  [flexive]         Create or reset the database schema of a flexive division.
+  [flexive]         Warning: if the schema already exists, it will be dropped (i.e. you will lose all data
+  [flexive]         stored in the schema).
+  [flexive]
+  [flexive] db.config.create
+  [flexive]         Create or reset the global flexive configuration schema.
   [flexive]
     [input] Please enter a target name, or quit to exit:
 ]]></screen>
@@ -188,6 +199,7 @@ BUILD SUCCESSFUL]]></screen>
 
             <screen><![CDATA[.
 |-- build.xml
+|-- lib
 |-- resources
 |   |-- META-INF
 |   |   |-- faces-config.xml
@@ -264,7 +276,7 @@ BUILD SUCCESSFUL]]></screen>
 
                 <varlistentry>
                     <term>
-                        <filename>web/</filename>
+                        <filename>web</filename>
                     </term>
                     <listitem>
                         <para>
@@ -273,10 +285,20 @@ BUILD SUCCESSFUL]]></screen>
                     </listitem>
                 </varlistentry>
 
+                <varlistentry>
+                    <term>
+                        <filename>lib</filename>
+                    </term>
+                    <listitem>
+                        <para>
+                            contains additional libraries and components used by the project.
+                        </para>
+                    </listitem>
+                </varlistentry>
 
                 <varlistentry>
                     <term>
-                        <filename>resources/</filename>
+                        <filename>resources</filename>
                     </term>
                     <listitem>
                         <para>

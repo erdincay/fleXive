@@ -27,7 +27,10 @@
 Welcome to the flexive build tool. Feel free to use the following build targets:
 
 project.create
-    Creates an empty flexive project.
+    Creates a new flexive project directory.
+
+component.create
+    Creates a new flexive UI component directory.
 
 db.create
         Create or reset the database schema of a flexive division.
