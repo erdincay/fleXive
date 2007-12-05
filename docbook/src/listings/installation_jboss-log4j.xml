@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="xml"
+                xmlns="http://docbook.org/ns/docbook">
+    <![CDATA[
+<!-- Limit flexive -->
+<category name="com.flexive">
+    <priority value="INFO"/>
+</category>
+
+<!-- Limit ajax4jsf -->
+<category name="org.ajax4jsf">
+    <priority value="WARN"/>
+</category>]]>
+</programlisting>

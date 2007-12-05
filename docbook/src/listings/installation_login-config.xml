@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="xml"
+                xmlns="http://docbook.org/ns/docbook">
+    <![CDATA[
+<application-policy name = "FxLogin">
+     <authentication>
+       <login-module code="com.flexive.core.security.FxDefaultLogin" flag="required"></login-module>
+     </authentication>
+</application-policy>]]>
+</programlisting>

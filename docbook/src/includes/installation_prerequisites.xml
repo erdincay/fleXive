@@ -1,0 +1,104 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE section [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<section xml:id="run_flexive" xmlns="http://docbook.org/ns/docbook">
+    <title>To run &Flexive; you need
+    </title>
+    <para>
+        <orderedlist>
+            <listitem>
+                <para>
+                    A modern computer (1024 MB RAM, 2+ Ghz CPU or higher, 250 MB free hard disk space)
+                </para>
+            </listitem>
+            <listitem>
+                <para>An operating system
+                    <orderedlist>
+                        <listitem>Supported Linux Distributions: Debian, Ubuntu, Suse</listitem>
+                        <listitem>Windows XP</listitem>
+                    </orderedlist>
+                </para>
+            </listitem>
+            <listitem>
+                <para>Administrator privileges on your machine</para>
+            </listitem>
+            <listitem>
+                <para>The
+                    <link href="http://java.sun.com/javase/downloads/index.jsp">Sun
+                        Java 6 Platform, Standard Edition Development Kit
+                    </link>
+                </para>
+                <orderedlist>
+                    <listitem>Set your
+                        <code>JAVA_HOME</code>
+                        environment variable to your JDK root directory (e.g.
+                        <code>JAVA_HOME=/usr/lib/jvm/java-6-sun</code>
+                        on Linux,
+                        <code>C:\Java\jdk1.6.0_03</code>
+                        on Windows)
+                    </listitem>
+                </orderedlist>
+            </listitem>
+            <listitem>
+                <para>An application server (
+                    <link href="http://labs.jboss.com/">JBoss</link>
+                    or
+                    <link href="http://glassfish.dev.java.net/">Glassfish</link>) with EJB3 support
+                </para>
+                <orderedlist>
+                    <listitem>Download and install
+                        <link href="http://labs.jboss.com/">JBoss 4.2.0.GA</link>
+                        or later
+                        (
+                        <code>${jboss.home}</code>
+                        denotes your JBoss installation
+                        directory)
+                    </listitem>
+                </orderedlist>
+            </listitem>
+            <listitem>
+                <para>A database (at the moment only
+                    <link href="http://www.mysql.com/">MySql</link>
+                    is supported)
+                </para>
+                <orderedlist>
+                    <listitem>Download and install
+                        <link href="http://www.mysql.com/">MySql 5.0</link>
+                        or later
+                        <para>
+                            Currently, choosing UTF-8 as the default charset causes issues with the database setup
+                            scripts. Use the default setting (Latin1) instead.
+                        </para>
+                    </listitem>
+                    <listitem>Download the latest stable
+                        <link href="http://dev.mysql.com/downloads/connector/j/5.0.html">MySQL JDBC driver</link>
+                        (<filename>
+                        mysql-connector-java-5.0.6.zip</filename>) and copy it
+                        to
+                        <filename>${jboss.home}/server/all/lib/</filename>
+                    </listitem>
+                </orderedlist>
+            </listitem>
+            <listitem>
+                <para>
+                    <link href="http://www.imagemagick.org/script/binary-releases.php">ImageMagick</link>
+                    version 6.3.4 or later
+                </para>
+            </listitem>
+            <listitem>
+                <para>A
+                    <link href="http://www.flexive.org/download">&Flexive; binary distribution
+                    </link>
+                    or the
+                    <link href="http://www.flexive.org/download">&Flexive; source code,
+                    </link>
+                    if you want to
+                    <link linkend="building_from_source">build &Flexive; from source
+                    </link>
+                </para>
+            </listitem>
+        </orderedlist>
+    </para>
+</section>

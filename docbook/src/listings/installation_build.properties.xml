@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="xml"
+                xmlns="http://docbook.org/ns/docbook">
+    <![CDATA[
+jboss.home=/path/to/jboss
+
+# path to deploy the ear
+deploy.ear.path=${jboss.home}/server/all/deploy
+
+# path to deploy needed runtime libs like emma.jar
+deploy.lib.path=${jboss.home}/server/all/lib
+
+# path to the embedded jboss ejb3 container neededfor unit testing
+jboss.embedded.path=${jboss.home}/jboss-embeddable/
+
+# (...)]]>
+</programlisting>

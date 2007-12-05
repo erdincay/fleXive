@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE section [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<section xml:id="building_from_source" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xi="http://www.w3.org/2001/XInclude">
+    <title>Building &Flexive; from source</title>
+    <para>
+        This procedure is for those building &Flexive; from the downloaded source code
+        <itemizedlist>
+            <listitem>Copy the build.properties.sample file to build.properties
+                <xi:include href="../listings/installation_build.properties.xml"/>
+            </listitem>
+            <listitem>Execute ant
+                <code>db.update</code>
+                before
+                <code>ant all</code>
+                in your &Flexive; directory where the build.xml file
+                resides.
+                This will recreate all configured databases and destroy existing data.
+                <para>If ant fails: If you get the following warning: Problem: failed to create task or type
+                    javacc when executing
+                    ant make sure you install the ant-optional package.
+                </para>
+            </listitem>
+            <listitem>To deploy the ear execute ant deploy
+                <para>Don't forget to set your
+                    <code>${jboss.home}</code>
+                    variable in the
+                    build.properties properly!
+                </para>
+                <itemizedlist>
+                    <listitem>Note: to successfully compile &Flexive;
+                        <link href="http://java.sun.com/javase/downloads/index.jsp">JAVA 1.6</link>
+                        and
+                        <link href="http://ant.apache.org/">Apache ANT 1.7</link>
+                        is needed
+                    </listitem>
+                    <listitem>Be also sure to set the
+                        <code>JDK_HOME</code>
+                        and
+                        <code>JAVA_HOME</code>
+                        variables accordingly
+                    </listitem>
+                </itemizedlist>
+            </listitem>
+        </itemizedlist>
+    </para>
+</section>
