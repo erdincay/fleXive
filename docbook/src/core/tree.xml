@@ -32,10 +32,16 @@
             The tree does not implement its own security but makes use of the permissions of the attached content
             instances. This means in practice that only those nodes can be seen to which the user has at least read
             access to. As a consequence any child nodes attached to a node that a user has no read permission for will
-            not be accessible<footnote>That applies to user interfaces if the tree was loaded from a parent of the
-            inaccessible node. But since any node can act as the root node (which has to be passed when loading the
-            tree) it is possible to see such nodes, if the path from the root node to the desired node is
-            accessible</footnote>. The same security constraints apply to queries.
+            not be accessible
+            <footnote>
+                <para>That applies to user interfaces if the tree was loaded from a parent of the
+                    inaccessible node. But since any node can act as the root node (which has to be passed when loading
+                    the
+                    tree) it is possible to see such nodes, if the path from the root node to the desired node is
+                    accessible
+                </para>
+            </footnote>
+            . The same security constraints apply to queries.
         </para>
     </section>
 
