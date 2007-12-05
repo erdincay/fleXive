@@ -540,6 +540,11 @@ database.port=3306
 database.username=root
 database.password=a
         </echo>
+
+        <!-- Create flexive ZIP file -->
+        <zip destfile="${flexive.base.build.dir}/flexive-dist.zip">
+            <fileset dir="${basedir}" includes="flexive-dist/**"/>
+        </zip>
     </target>
     
     <target name="jar.webdavOnly">
