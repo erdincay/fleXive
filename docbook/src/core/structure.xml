@@ -530,61 +530,72 @@
             <para>
                 In the following example we create a new type "Customer", provide a multilingual description and assign
                 an access control list:
-                <xi:include href="../listings/core_structure_newtype.xml"/>
-                <calloutlist>
-                    <callout arearefs="cst_newtype_1">
-                        <para>We use the utility class
-                            <classname>EJBLookup</classname>
-                            to retrieve a reference to the type engine enterprise bean.
-                        </para>
-                    </callout>
-                    <callout arearefs="cst_newtype_2">
-                        <para>The multilingual
-                            <classname>FxString</classname>
-                            <varname>typeDesc</varname>
-                            is initialized with support for multilingual values (first parameter set to
-                            <code>true</code>
-                            ) and is assigned the default translation. The default translation is by convention english.
-                            It would have been the same effect if we wrote
-                            <code>FxString typeDesc = new FxString(true, FxLanguage.ENGLISH, "A generic customer");
-                            </code>
-                        </para>
-                    </callout>
-                    <callout arearefs="cst_newtype_3">
-                        <para>The german translation is assigned.
-                        </para>
-                    </callout>
-                    <callout arearefs="cst_newtype_4">
-                        <para>We don't want to create a new ACL and use the default ACL for structures
-                            (<code>Category.STRUCTURE.getDefaultId()</code>)
-                        </para>
-                    </callout>
-                    <callout arearefs="cst_newtype_5">
-                        <para>A new type instance is created with most settings using default values, only setting the
-                            name, description and ACL.
-                        </para>
-                    </callout>
-                    <callout arearefs="cst_newtype_6">
-                        <para>The
-                            <interfacename>TypeEngine</interfacename>
-                            takes care of persisting our new type. Using the<methodname>save(FxTypeEdit
-                            type)</methodname>-method we can create new or save existing types.
-                        </para>
-                    </callout>
-                    <callout arearefs="cst_newtype_7">
-                        <para>This line just serves as an example how to retrieve the a reference to the new type.
-                            Saving the instance automatically forced a reload of the cached environment, that why we can
-                            retrieve it from the cache here.
-                        </para>
-                    </callout>
-                </calloutlist>
+                <example xml:id="core_structre_ex_newType">
+                    <title>Creating a new FxType</title>
+                    <xi:include href="../listings/core_structure_newtype.xml"/>
+
+                    <calloutlist>
+                        <callout arearefs="cst_newtype_1">
+                            <para>We use the utility class
+                                <classname>EJBLookup</classname>
+                                to retrieve a reference to the type engine enterprise bean.
+                            </para>
+                        </callout>
+                        <callout arearefs="cst_newtype_2">
+                            <para>The multilingual
+                                <classname>FxString</classname>
+                                <varname>typeDesc</varname>
+                                is initialized with support for multilingual values (first parameter set to
+                                <code>true</code>
+                                ) and is assigned the default translation. The default translation is by convention
+                                english.
+                                It would have been the same effect if we wrote
+                                <code>FxString typeDesc = new FxString(true, FxLanguage.ENGLISH, "A generic customer");
+                                </code>
+                            </para>
+                        </callout>
+                        <callout arearefs="cst_newtype_3">
+                            <para>The german translation is assigned.
+                            </para>
+                        </callout>
+                        <callout arearefs="cst_newtype_4">
+                            <para>We don't want to create a new ACL and use the default ACL for structures
+                                (<code>Category.STRUCTURE.getDefaultId()</code>)
+                            </para>
+                        </callout>
+                        <callout arearefs="cst_newtype_5">
+                            <para>A new type instance is created with most settings using default values, only setting
+                                the
+                                name, description and ACL.
+                            </para>
+                        </callout>
+                        <callout arearefs="cst_newtype_6">
+                            <para>The
+                                <interfacename>TypeEngine</interfacename>
+                                takes care of persisting our new type. Using the<methodname>save(FxTypeEdit
+                                type)</methodname>-method we can create new or save existing types.
+                            </para>
+                        </callout>
+                        <callout arearefs="cst_newtype_7">
+                            <para>This line just serves as an example how to retrieve the a reference to the new type.
+                                Saving the instance automatically forced a reload of the cached environment, that why we
+                                can
+                                retrieve it from the cache here.
+                            </para>
+                        </callout>
+                    </calloutlist>
+                </example>
             </para>
             <para>
                 Another way to create a new type would be to use the
                 <classname>GroovyTypeBuilder</classname>:
-                <xi:include href="../listings/core_structure_newtype_groovy.xml"/>
-                If executed in the Groovy-Console the code above would return
-                <emphasis>CUSTOMER</emphasis>.
+                <example xml:id="core_structre_ex_newTypeGroovy">
+                    <title>Creating a new FxType using the GroovyTypeBuilder</title>
+                    <xi:include href="../listings/core_structure_newtype_groovy.xml"/>
+                    <para>If executed in the Groovy-Console the code above would return
+                        <emphasis>CUSTOMER</emphasis>.
+                    </para>
+                </example>
             </para>
         </section>
     </section>
@@ -803,47 +814,50 @@
             exist in different virtual machines and is able to detect if they run within the same VM for optimal
             performance.
         </para>
-        <xi:include href="../listings/core_structure_binaries.xml"/>
         <para>
-            Above example show how easy it is to upload a binary programatically to the
-            <interfacename>ContentEngine</interfacename>
-            and download it from the saved instance.
-            <calloutlist>
-                <callout arearefs="cs_bin_1">
-                    <para>A
-                        <classname>BinaryDescriptor</classname>
-                        (the value class used in the value object
-                        <classname>FxBinary</classname>
-                        for the binary data type - See
-                        <xref linkend="core_structure_properties_datatypes"/>
-                        for more information) is created with the file name, size and an
-                        <classname>InputStream</classname>
-                        pointing to the actual binary data.
-                    </para>
-                </callout>
-                <callout arearefs="cs_bin_2">
-                    <para>Simply set a
-                        <classname>FxBinary</classname>
-                        with the created
-                        <code>BinaryDescriptor</code>
-                        as value for a property assignment
-                    </para>
-                </callout>
-                <callout arearefs="cs_bin_3">
-                    <para>Downloading binary content is as simple as providing an
-                        <classname>OutputStream</classname>.
-                        Please note that the stream will not be closed automatically to allow use with<classname>
-                        ServletOutputStream</classname>'s
-                        and the like.
-                    </para>
-                </callout>
-            </calloutlist>
+            <example xml:id="core_structre_ex_binary">
+                <title>Handling binary content</title>
+                <xi:include href="../listings/core_structure_binaries.xml"/>
+                This example show how easy it is to upload a binary programatically to the
+                <interfacename>ContentEngine</interfacename>
+                and download it from the saved instance.
+                <calloutlist>
+                    <callout arearefs="cs_bin_1">
+                        <para>A
+                            <classname>BinaryDescriptor</classname>
+                            (the value class used in the value object
+                            <classname>FxBinary</classname>
+                            for the binary data type - See
+                            <xref linkend="core_structure_properties_datatypes"/>
+                            for more information) is created with the file name, size and an
+                            <classname>InputStream</classname>
+                            pointing to the actual binary data.
+                        </para>
+                    </callout>
+                    <callout arearefs="cs_bin_2">
+                        <para>Simply set a
+                            <classname>FxBinary</classname>
+                            with the created
+                            <code>BinaryDescriptor</code>
+                            as value for a property assignment
+                        </para>
+                    </callout>
+                    <callout arearefs="cs_bin_3">
+                        <para>Downloading binary content is as simple as providing an
+                            <classname>OutputStream</classname>.
+                            Please note that the stream will not be closed automatically to allow use with<classname>
+                            ServletOutputStream</classname>'s
+                            and the like.
+                        </para>
+                    </callout>
+                </calloutlist>
+            </example>
         </para>
     </section>
 
     <section xml:id="core_structure_selectlists">
         <title>Select lists</title>
-        <!-- TODO -->
+        <!-- TODO -->TBD
     </section>
 
     <section xml:id="core_structure_multiplicity">

@@ -32,11 +32,13 @@
         <Street>Office lane</Street>
     </Address>
 </Person>]]></programlisting>
-            With &flexive; we would create a type () called
+            With &flexive; we would create a type called
             <emphasis>Person</emphasis>. Using the
             <classname>GroovyTypeBuilder</classname>
             we would execute the following code in the groovy console:
-            <programlisting xml:id="core_content_groovy_intro" language="groovy"><![CDATA[import com.flexive.shared.scripting.groovy.*
+            <example xml:id="core_content_ex_personType">
+                <title>Creating a "Person" type</title>
+                <programlisting xml:id="core_content_groovy_intro" language="groovy"><![CDATA[import com.flexive.shared.scripting.groovy.*
 import com.flexive.shared.value.*
 import com.flexive.shared.security.*
 import com.flexive.shared.structure.*
@@ -51,10 +53,12 @@ new GroovyTypeBuilder().Person {
   }
 }
 def person = CacheAdmin.environment.getType("Person")]]></programlisting>
-            The groovy above is pretty self-explanatory thanks to the concept of groovy builders. By convention property
-            names are lowercase while groupnames are uppercase. See
-            <xref linkend="core_structure"/>
-            for more information about structures.
+                The groovy code is pretty self-explanatory thanks to the concept of groovy builders. By convention
+                property
+                names are lowercase while groupnames are uppercase. See
+                <xref linkend="core_structure"/>
+                for more information about structures.
+            </example>
         </para>
         <para>
             Lets have a loot at the following table, which based on the XML data example, to visualize the mapping of
@@ -123,11 +127,14 @@ def person = CacheAdmin.environment.getType("Person")]]></programlisting>
             .
         </para>
         <para>
-            <xi:include href="../listings/core_content_fxcontent.xml"/>
-            Copy and pasting the groovy code above into the groovy console will yield the following result on the
-            application servers stdout after execution:
-            <programlisting><![CDATA[11:13:48,898 INFO  [STDOUT] Loaded street: Ofice lane
+            <example xml:id="core_content_ex_personExample">
+                <title>Creating "Person" instances</title>
+                <xi:include href="../listings/core_content_fxcontent.xml"/>
+                Copy and pasting the groovy code above into the groovy console will yield the following result on the
+                application servers stdout after execution:
+                <programlisting><![CDATA[11:13:48,898 INFO  [STDOUT] Loaded street: Ofice lane
 11:13:48,899 INFO  [STDOUT] New street: Office lane]]></programlisting>
+            </example>
         </para>
         <para>
             The purpose of this example is to demonstrate how easy it is to create, update and remove content instances.

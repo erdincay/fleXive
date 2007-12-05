@@ -20,109 +20,119 @@
         FxPropertyAssignmentEdit.createNew(..)</code>.
     </para>
     <para>
-        <xi:include href="../listings/core_structure_newprop.xml"/>
-        <calloutlist>
-            <callout arearefs="cst_newprop_1">
-                <para>Obtain a reference to the assignment engine bean which is responsible for manipulating
-                    assignments
-                </para>
-            </callout>
-            <callout arearefs="cst_newprop_2">
-                <para>Get the default ACL used for structures
-                </para>
-            </callout>
-            <callout arearefs="cst_newprop_3">
-                <para>Create a new property with the alias "Name"
-                </para>
-            </callout>
-            <callout arearefs="cst_newprop_4">
-                <para>Description
-                </para>
-            </callout>
-            <callout arearefs="cst_newprop_5">
-                <para>Hint for user interfaces
-                </para>
-            </callout>
-            <callout arearefs="cst_newprop_6">
-                <para>Configure this property to be required (See
-                    <xref linkend="core_structure_multiplicity"/>
-                    for more information)
-                </para>
-            </callout>
-            <callout arearefs="cst_newprop_7">
-                <para>Assign the ACL to be used. This ACL will only be checked if the type this property will be
-                    assigned to has property permission checks enabled
-                </para>
-            </callout>
-            <callout arearefs="cst_newprop_8">
-                <para>The data type will be a String with a maximum length of 1024 characters. See
-                    <xref linkend="core_structure_properties_datatypes"/>
-                    for an overview of available data types.
-                </para>
-            </callout>
-            <callout arearefs="cst_newprop_9">
-                <para>Since properties can not exist if they are not assigned to a type, we assign them to the type
-                    with the id
-                    <varname>typeId</varname>
-                    to the root group ("/" - for an example how to assign it to a group of choice see <xref linkend="core_structure_groups"/>). Property names have to be unique but since "Name" is very likely to be
-                    used by another property already we allow &flexive; to auto-generate a unique property name (in
-                    the form of "propertyname_"+running number) and make use of the feature that most setters return
-                    the object itself (in this case the FxPropertyEdit object) which we pass to the<methodname>
-                    createProperty(..)</methodname>-method. This method will create the property and assign it to
-                    the type we passed as first argument - creating a new property and property-assignment entry.
-                </para>
-            </callout>
-        </calloutlist>
+        <example xml:id="core_structre_ex_newProperty">
+            <title>Creating new properties</title>
+            <xi:include href="../listings/core_structure_newprop.xml"/>
+
+            <calloutlist>
+                <callout arearefs="cst_newprop_1">
+                    <para>Obtain a reference to the assignment engine bean which is responsible for manipulating
+                        assignments
+                    </para>
+                </callout>
+                <callout arearefs="cst_newprop_2">
+                    <para>Get the default ACL used for structures
+                    </para>
+                </callout>
+                <callout arearefs="cst_newprop_3">
+                    <para>Create a new property with the alias "Name"
+                    </para>
+                </callout>
+                <callout arearefs="cst_newprop_4">
+                    <para>Description
+                    </para>
+                </callout>
+                <callout arearefs="cst_newprop_5">
+                    <para>Hint for user interfaces
+                    </para>
+                </callout>
+                <callout arearefs="cst_newprop_6">
+                    <para>Configure this property to be required (See
+                        <xref linkend="core_structure_multiplicity"/>
+                        for more information)
+                    </para>
+                </callout>
+                <callout arearefs="cst_newprop_7">
+                    <para>Assign the ACL to be used. This ACL will only be checked if the type this property will be
+                        assigned to has property permission checks enabled
+                    </para>
+                </callout>
+                <callout arearefs="cst_newprop_8">
+                    <para>The data type will be a String with a maximum length of 1024 characters. See
+                        <xref linkend="core_structure_properties_datatypes"/>
+                        for an overview of available data types.
+                    </para>
+                </callout>
+                <callout arearefs="cst_newprop_9">
+                    <para>Since properties can not exist if they are not assigned to a type, we assign them to the type
+                        with the id
+                        <varname>typeId</varname>
+                        to the root group ("/" - for an example how to assign it to a group of choice see<xref
+                            linkend="core_structure_groups"/>). Property names have to be unique but since "Name" is
+                        very
+                        likely to be
+                        used by another property already we allow &flexive; to auto-generate a unique property name (in
+                        the form of "propertyname_"+running number) and make use of the feature that most setters return
+                        the object itself (in this case the FxPropertyEdit object) which we pass to the<methodname>
+                        createProperty(..)</methodname>-method. This method will create the property and assign it to
+                        the type we passed as first argument - creating a new property and property-assignment entry.
+                    </para>
+                </callout>
+            </calloutlist>
+        </example>
     </para>
     <para>
         To reuse an existing property-assignment is even simpler:
-        <xi:include href="../listings/core_structure_reuseprop.xml"/>
-        <calloutlist>
-            <callout arearefs="cst_reuseprop_1">
-                <para>Obtaining a reference to the assignment engine bean is omitted in this example. We use the
-                    <methodname>save(..)</methodname>-method for creating or updating assignments.
-                </para>
-            </callout>
-            <callout arearefs="cst_reuseprop_2">
-                <para>The convenience factory method
-                    <methodname>reuse(..)</methodname>
-                    in
-                    <classname>FxPropertyAssignmentEdit</classname>
-                    allows us to reuse an existing property assignment with the least possible overhead
-                </para>
-            </callout>
-            <callout arearefs="cst_reuseprop_3">
-                <para>The XPath of the assignment that is to be reused in, preceeded by the type. Here we reuse the
-                    "Caption" property that is assigned to the virtual Root-Type which acts as a repository (see
-                    <xref linkend="core_structure_root_type"/>
-                    for more information about the virtual root type)
-                </para>
-            </callout>
-            <callout arearefs="cst_reuseprop_4">
-                <para>The type we want to assign it to. Please note that the type name is not case sensitive.
-                </para>
-            </callout>
-            <callout arearefs="cst_reuseprop_5">
-                <para>The new parent XPath relative to the type. Since want to assign it to the root group we use
-                    "/". Would we want to assign the property to a group called "Info" which is a subgroup of a
-                    group named "About", we'd use the XPath "/About/Info".
-                </para>
-            </callout>
-            <callout arearefs="cst_reuseprop_6">
-                <para>The
-                    <parameter>alias</parameter>
-                    parameter is optional. It allows us to use a different alias for the new assignment than the
-                    original. If omitted we'd create the alias "Caption" but in this case we use "AnotherCaption" to
-                    later adress the property assignment using XPaths.
-                </para>
-            </callout>
-            <callout arearefs="cst_reuseprop_7">
-                <para>This boolean parameter is used if the assignment is a group assignment. If set to<code>
-                    true</code>, all assignments that are assigned to the "source" group will be re-created for the
-                    "target" group.
-                </para>
-            </callout>
-        </calloutlist>
+        <example xml:id="core_structre_ex_reuseProperty">
+            <title>Reusing property assignments</title>
+            <xi:include href="../listings/core_structure_reuseprop.xml"/>
+            <calloutlist>
+                <callout arearefs="cst_reuseprop_1">
+                    <para>Obtaining a reference to the assignment engine bean is omitted in this example. We use the
+                        <methodname>save(..)</methodname>-method for creating or updating assignments.
+                    </para>
+                </callout>
+                <callout arearefs="cst_reuseprop_2">
+                    <para>The convenience factory method
+                        <methodname>reuse(..)</methodname>
+                        in
+                        <classname>FxPropertyAssignmentEdit</classname>
+                        allows us to reuse an existing property assignment with the least possible overhead
+                    </para>
+                </callout>
+                <callout arearefs="cst_reuseprop_3">
+                    <para>The XPath of the assignment that is to be reused in, preceeded by the type. Here we reuse the
+                        "Caption" property that is assigned to the virtual Root-Type which acts as a repository (see
+                        <xref linkend="core_structure_root_type"/>
+                        for more information about the virtual root type)
+                    </para>
+                </callout>
+                <callout arearefs="cst_reuseprop_4">
+                    <para>The type we want to assign it to. Please note that the type name is not case sensitive.
+                    </para>
+                </callout>
+                <callout arearefs="cst_reuseprop_5">
+                    <para>The new parent XPath relative to the type. Since want to assign it to the root group we use
+                        "/". Would we want to assign the property to a group called "Info" which is a subgroup of a
+                        group named "About", we'd use the XPath "/About/Info".
+                    </para>
+                </callout>
+                <callout arearefs="cst_reuseprop_6">
+                    <para>The
+                        <parameter>alias</parameter>
+                        parameter is optional. It allows us to use a different alias for the new assignment than the
+                        original. If omitted we'd create the alias "Caption" but in this case we use "AnotherCaption" to
+                        later adress the property assignment using XPaths.
+                    </para>
+                </callout>
+                <callout arearefs="cst_reuseprop_7">
+                    <para>This boolean parameter is used if the assignment is a group assignment. If set to<code>
+                        true</code>, all assignments that are assigned to the "source" group will be re-created for the
+                        "target" group.
+                    </para>
+                </callout>
+            </calloutlist>
+        </example>
     </para>
 
     <section xml:id="core_structures_property_parameters">

@@ -20,83 +20,90 @@
         FxGroupAssignmentEdit.createNew(..)</code>.
     </para>
     <para>
-
-        <programlistingco>
-            <xi:include href="../listings/core_structure_newgroup.xml"/>
-            <calloutlist>
-                <callout arearefs="cst_newgroup_1">
-                    <para>Obtain a reference to the assignment engine which is needed to create groups, properties and
-                        (of course) assignments
-                    </para>
-                </callout>
-                <callout arearefs="cst_newgroup_2">
-                    <para>We're about to create a new group</para>
-                </callout>
-                <callout arearefs="cst_newgroup_3">
-                    <para>Since groups can not be created without assigning them to a type, we have to provide the id of
-                        the type we want to assign this group to.
-                    </para>
-                </callout>
-                <callout arearefs="cst_newgroup_4">
-                    <para>The second parameter to
-                        <methodname>AssignmentEngine.createNew(..)</methodname>
-                        is a new
-                        <classname>FxGroupEdit</classname>
-                        instance.
-                    </para>
-                </callout>
-                <callout arearefs="cst_newgroup_5">
-                    <para>"Address" is the name we chose for the new group</para>
-                </callout>
-                <callout arearefs="cst_newgroup_6">
-                    <para>The label (for user interfaces)</para>
-                </callout>
-                <callout arearefs="cst_newgroup_7">
-                    <para>The hint (for user interfaces again)</para>
-                </callout>
-                <callout arearefs="cst_newgroup_8">
-                    <para>This parameter allows overriding the multiplicity assigned in the next line by assignments to
-                        the group
-                    </para>
-                </callout>
-                <callout arearefs="cst_newgroup_9">
-                    <para>We make the group required, setting the multiplictiy to 1..1 (See
-                        <xref linkend="core_structure_multiplicity"/>
-                        for more information)
-                    </para>
-                </callout>
-                <callout arearefs="cst_newgroup_10">
-                    <para>This parameter is optional, since it is the default value. We set the group mode to allow any
-                        of the groups children to be present. An alternative would be
-                        <constant>OneOf</constant>
-                        where only one child of the group may be set. (See
-                        <xref linkend="core_structure_groups_mode"/>
-                        for more information)
-                    </para>
-                </callout>
-                <callout arearefs="cst_newgroup_11">
-                    <para>We need to provide the XPath relative to the root group of the type where we want to assign
-                        the group to. Using "/" will assign it directly to the root group.
-                    </para>
-                </callout>
-                <callout arearefs="cst_newgroup_12">
-                    <para>We create a property called "Street" which we want to assign to the address group later.
-                    </para>
-                </callout>
-                <callout arearefs="cst_newgroup_13">
-                    <para>Same for the property "ZIP"</para>
-                </callout>
-                <callout arearefs="cst_newgroup_14">
-                    <para>The "Street" property is created like in
-                        <xref linkend="core_structure_properties"/>, but we
-                        assign it to our new created group "/Address"
-                    </para>
-                </callout>
-                <callout arearefs="cst_newgroup_15">
-                    <para>And again for the "ZIP" code</para>
-                </callout>
-            </calloutlist>
-        </programlistingco>
+        <example xml:id="core_structre_ex_newGroup">
+            <title>Creating a new group</title>
+            <programlistingco>
+                <xi:include href="../listings/core_structure_newgroup.xml"/>
+                <calloutlist>
+                    <callout arearefs="cst_newgroup_1">
+                        <para>Obtain a reference to the assignment engine which is needed to create groups, properties
+                            and
+                            (of course) assignments
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_newgroup_2">
+                        <para>We're about to create a new group</para>
+                    </callout>
+                    <callout arearefs="cst_newgroup_3">
+                        <para>Since groups can not be created without assigning them to a type, we have to provide the
+                            id of
+                            the type we want to assign this group to.
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_newgroup_4">
+                        <para>The second parameter to
+                            <methodname>AssignmentEngine.createNew(..)</methodname>
+                            is a new
+                            <classname>FxGroupEdit</classname>
+                            instance.
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_newgroup_5">
+                        <para>"Address" is the name we chose for the new group</para>
+                    </callout>
+                    <callout arearefs="cst_newgroup_6">
+                        <para>The label (for user interfaces)</para>
+                    </callout>
+                    <callout arearefs="cst_newgroup_7">
+                        <para>The hint (for user interfaces again)</para>
+                    </callout>
+                    <callout arearefs="cst_newgroup_8">
+                        <para>This parameter allows overriding the multiplicity assigned in the next line by assignments
+                            to
+                            the group
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_newgroup_9">
+                        <para>We make the group required, setting the multiplictiy to 1..1 (See
+                            <xref linkend="core_structure_multiplicity"/>
+                            for more information)
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_newgroup_10">
+                        <para>This parameter is optional, since it is the default value. We set the group mode to allow
+                            any
+                            of the groups children to be present. An alternative would be
+                            <constant>OneOf</constant>
+                            where only one child of the group may be set. (See
+                            <xref linkend="core_structure_groups_mode"/>
+                            for more information)
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_newgroup_11">
+                        <para>We need to provide the XPath relative to the root group of the type where we want to
+                            assign
+                            the group to. Using "/" will assign it directly to the root group.
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_newgroup_12">
+                        <para>We create a property called "Street" which we want to assign to the address group later.
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_newgroup_13">
+                        <para>Same for the property "ZIP"</para>
+                    </callout>
+                    <callout arearefs="cst_newgroup_14">
+                        <para>The "Street" property is created like in
+                            <xref linkend="core_structure_properties"/>, but we
+                            assign it to our new created group "/Address"
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_newgroup_15">
+                        <para>And again for the "ZIP" code</para>
+                    </callout>
+                </calloutlist>
+            </programlistingco>
+        </example>
     </para>
 
     <section xml:id="core_structures_group_parameters">
