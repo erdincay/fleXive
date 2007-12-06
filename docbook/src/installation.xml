@@ -29,10 +29,10 @@
             </para>
         </section>
     </section>
-    <section xml:id="jboss_linux_installation">
-        <title>&Flexive; installation guide for JBoss 4.2 on Linux
+    <section xml:id="jboss_installation">
+        <title>&Flexive; installation guide for JBoss 4.2.2 GA
         </title>
-        <section xml:id="jboss_linux_installation_system_configuration">
+        <section xml:id="jboss_installation_system_configuration">
             <title>System configuration</title>
             <para>
                 <itemizedlist>
@@ -43,6 +43,21 @@
                             <filename>${jboss.home}/server/all/deploy/</filename>
                             and adapt to your datasource(s)
                             or simply copy it from the &Flexive; source tree, if available.
+                            <para>In the
+                                <filename>flexive-ds.xml</filename>
+                                configure your database connections as follows:
+                            </para>
+                            <para>For the
+                                <code>flexive</code>
+                                database
+                                <xi:include href="listings/installation_flexive-ds_config_flexive.xml"/>
+                            </para>
+                            <para>For the
+                                <code>flexiveConfiguration</code>
+                                database
+                                <xi:include href="listings/installation_flexive-ds_config_flexiveConfiguration.xml"/>
+                            </para>
+                            <filename>flexive-ds.xml</filename>
                             <programlisting language="xml">
                                 <xi:include href="../../src/framework/resources/flexive-ds.xml" parse="text"/>
                             </programlisting>
@@ -53,13 +68,6 @@
                             <filename>${jboss.home}/server/all/conf/login-config.xml</filename>
                             with the following entry:
                             <xi:include href="listings/installation_login-config.xml"/>
-                        </para>
-                    </listitem>
-                    <listitem>
-                        <para>Extend
-                            <filename>${jboss.home}/server/all/conf/jboss-log4j.xml</filename>
-                            to configure logging:
-                            <xi:include href="listings/installation_jboss-log4j.xml"/>
                         </para>
                     </listitem>
                     <listitem>
@@ -75,43 +83,85 @@
                 </itemizedlist>
             </para>
         </section>
-        <section xml:id="jboss_linux_installation_db_setup">
+        <section xml:id="jboss_installation_system_configuration_refining">
+            <title>Refining your configuration</title>
+            <para>Extend
+                <filename>${jboss.home}/server/all/conf/jboss-log4j.xml</filename>
+                to configure logging:
+                <xi:include href="listings/installation_jboss-log4j.xml"/>
+            </para>
+        </section>
+        <section xml:id="jboss_installation_db_setup">
             <title>Database Setup
             </title>
             <para>
-                To set up the databases do the following:
+                To set up the databases do the following
             </para>
-            <para>Run
-                <code>ant db.create db.config.create</code>
-            </para>
+            <itemizedlist>
+                <listitem>
+                    <para>Adapt the
+                        <filename>database.properties</filename>
+                        file located in your
+
+                        <filename>flexive-dist</filename>
+                        directory of your &Flexive; distribution to your needs:
+                        <programlisting><![CDATA[
+# This is the database configuration file used by the flexive setup tasks.
+#
+# Enter the settings for your database server connection to be used for development.
+
+# The server host or IP
+database.host=localhost
+# The server port
+database.port=3306
+# The user name and password to be used for creating flexive database structures
+database.username=root
+database.password=a]]></programlisting>
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>Change to the
+                        <filename>flexive-dist</filename>
+                        directory of your &Flexive; distribution and run
+                        <code>ant db.create db.config.create</code>
+                        Warning: Existing databases will be deleted.
+                    </para>
+                </listitem>
+            </itemizedlist>
         </section>
-        <section xml:id="jboss_linux_installation_deployment">
+        <section xml:id="jboss_installation_deployment">
             <title>Deployment</title>
-            <para>
-                Copy the
-                <filename>flexive3.ear</filename>
-                to
-                <filename>${jboss.home}/server/all/deploy</filename>
-                or run<code>ant deploy</code>.
+            <para>Change to the
+                <filename>flexive-dist</filename>
+                directory of your &Flexive; distribution and run
+                <code>ant ear</code>. This will create the
+                <filename>flexive.ear</filename>
+                file inside the
+                <filename>flexive-dist</filename>
+                directory.
+                <para>
+                    Copy the
+                    <filename>flexive3.ear</filename>
+                    to
+                    <filename>${jboss.home}/server/all/deploy</filename>.
+                </para>
             </para>
         </section>
-        <section xml:id="jboss_linux_installation_starting_flexive">
+        <section xml:id="jboss_installation_starting_flexive">
             <title>Starting &Flexive;
             </title>
             <para>
                 <itemizedlist>
                     <listitem>
                         <para>
-                            Launch JBoss using
+                            On Linux launch JBoss using
                             <programlisting><![CDATA[sh run.sh -c all -Djboss.bind.address=0.0.0.0]]></programlisting>
                         </para>
+                        <para>
+                            On Windows launch JBoss using
+                            <programlisting><![CDATA[start run.bat -c all -Djboss.bind.address=0.0.0.0]]></programlisting>
+                        </para>
                     </listitem>
-                    <para>Important - If there are multiple JBoss installations running in your local network you need
-                        to assign a different partition UDP group to each cluster! This can be done by adding
-                        <code>-Djboss.partition.udpGroup=230.2.3.4</code>
-                        (or any other multicast address you choose thats available)
-                        to the start script/command shown above
-                    </para>
                     <listitem>
                         <para>To access the backend point your browser to
                             <link href="http://localhost:8080/flexive/adm/">http://localhost:8080/flexive/adm/</link>
@@ -129,107 +179,38 @@
         </section>
     </section>
 
-    <section xml:id="jboss_windows_installation">
-        <title>&Flexive; installation guide for JBoss 4.2 on Windows
-        </title>
-        <section xml:id="jboss_windows_installation_system_configuration">
-            <title>System configuration</title>
-            <para>
-                <itemizedlist>
-                    <listitem>
-                        <para>Create and copy the datasource config file
-                            <filename>flexive-ds.xml</filename>
-                            to
-                            <filename>${jboss.home}\server\all\deploy\</filename>
-                            and adapt to your datasource(s)
-                            or simply copy it from the &Flexive; source tree, if available.
-                            <programlisting language="xml">
-                                <xi:include href="../../src/framework/resources/flexive-ds.xml" parse="text"/>
-                            </programlisting>
-                        </para>
-                    </listitem>
-                    <listitem>
-                        <para>Extend
-                            <filename>${jboss.home}\server\all\conf\login-config.xml</filename>
-                            with the following entry:
-                            <xi:include href="listings/installation_login-config.xml"/>
-                        </para>
-                    </listitem>
-                    <listitem>
-                        <para>Extend
-                            <filename>${jboss.home}\server\all\conf\jboss-log4j.xml</filename>
-                            to configure logging:
-                            <xi:include href="listings/installation_jboss-log4j.xml"/>
-                        </para>
-                    </listitem>
-                    <listitem>
-                        <para>Create and copy the cache service file JBossCacheJNDI42-service.xml to
-                            ${jboss.home}\server\all\deploy\
-                            or simply copy it from the &Flexive; source tree, if available.
-                            <programlisting language="xml">
-                                <xi:include href="../../src/framework/resources/JBossCacheJNDI42-service.xml"
-                                            parse="text"/>
-                            </programlisting>
-                        </para>
-                    </listitem>
-                </itemizedlist>
+    <xi:include href="includes/installation_building_from_source.xml"/>
+
+    <section xml:id="jboss_installation_troubleshooting">
+        <title>Troubleshooting</title>
+        <section xml:id="jboss_installation_troubleshooting_multiple">
+            <title>Multiple JBoss installations</title>
+            <para>If there are multiple JBoss installations running in your local network you need
+                to assign a different partition UDP group to each cluster! This can be done by adding
+                <code>-Djboss.partition.udpGroup=230.2.3.4</code>
+                (or any other multicast address you choose thats available)
+                to the start script/command shown in <link linkend="jboss_installation_starting_flexive">Starting &Flexive;</link>.
             </para>
         </section>
-        <section xml:id="jboss_windows_installation_db_setup">
-            <title>Database Setup
-            </title>
-            <para>
-                To set up the databases do the following:
-            </para>
-            <para>Run
-                <code>ant db.create db.config.create</code>
-            </para>
-        </section>
-        <section xml:id="jboss_windows_installation_deployment">
-            <title>Deployment</title>
-            <para>
-                Copy the
-                <filename>flexive3.ear</filename>
-                to
-                <filename>${jboss.home}\server\all\deploy</filename>
-                or run<code>ant deploy</code>.
-            </para>
-        </section>
-        <section xml:id="jboss_windows_installation_starting_flexive">
-            <title>Starting &Flexive;
-            </title>
-            <para>
-                <itemizedlist>
-                    <listitem>
-                        <para>Launch JBoss using
-                            <programlisting>
-                                <![CDATA[start run.bat -c all -Djboss.bind.address=0.0.0.0]]></programlisting>
-                        </para>
-                    </listitem>
-                    <para>Important - If there are multiple JBoss installations running in your local network you need
-                        to assign a different partition UDP group to each cluster! This can be done by adding
-                        <code>-Djboss.partition.udpGroup=230.2.3.4</code>
-                        (or any other multicast address you choose thats available)
-                        to the start script/command shown above
+        <section xml:id="jboss_installation_troubleshooting_ant">
+            <title>Apache ANT</title>
+            <itemizedlist>
+                <listitem>
+                    <para>If an ant-task fails, make sure you have
+                        <link href="http://ant.apache.org">Apache ANT 1.7</link>
+                        installed.
                     </para>
-                    <listitem>
-                        <para>To access the backend point your browser to
-                            <link href="http://localhost:8080/flexive/adm/">http://localhost:8080/flexive/adm/</link>
-                        </para>
-                        <para>Alternatively you can specify your server's IP address which is supported by default,
-                            too.
-                        </para>
-                    </listitem>
-                    <para>
-                        The default superuser's username and password for the Backend Administration are:
+                </listitem>
+                <listitem>
+                    <para>If you get the following warning:
+                        <programlisting>Problem: failed to create task or type javacc when executing ant
+                        </programlisting>
+                        make sure you installed the ant-optional package.
                     </para>
-                    <para>username: supervisor, password: supervisor</para>
-                </itemizedlist>
-            </para>
+                </listitem>
+            </itemizedlist>
         </section>
     </section>
-
-    <xi:include href="includes/installation_building_from_source.xml"/>
 
 </chapter>
         

@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="xml" xmlns="http://docbook.org/ns/docbook"><![CDATA[
+<xa-datasource>
+<jndi-name>jdbc/flexiveDivision1</jndi-name>
+<xa-datasource-class>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</xa-datasource-class>
+<!-- Note: "&amp;" has to be used instead of "&" for parameters -->
+<xa-datasource-property name="URL">]]><emphasis>jdbc:mysql://localhost:3306/flexive?useUnicode=true&amp;characterEncoding=utf8&amp;characterResultSets=utf8</emphasis><![CDATA[</xa-datasource-property>
+<user-name>]]><emphasis>root</emphasis><![CDATA[</user-name>
+<password>]]><emphasis>a</emphasis><![CDATA[</password>]]>
+</programlisting>
