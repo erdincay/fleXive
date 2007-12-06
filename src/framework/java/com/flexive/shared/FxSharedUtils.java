@@ -45,6 +45,7 @@ import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
+import com.flexive.shared.structure.FxAssignment;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -873,4 +874,19 @@ public final class FxSharedUtils {
             return s.getBytes();
         }
     }
+
+    /**
+     * Comparator for sorting Assignments according to their position.
+     */
+    public static class AssignmentPositionSorter implements Comparator<FxAssignment>, Serializable {
+
+        public int compare(FxAssignment o1, FxAssignment o2) {
+            if (o1.getPosition() < o2.getPosition())
+                return -1;
+            else if (o1.getPosition() == o2.getPosition())
+                return 0;
+            else return 1;
+        }
+    }
+
 }

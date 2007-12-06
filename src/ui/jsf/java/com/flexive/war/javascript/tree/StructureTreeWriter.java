@@ -39,11 +39,9 @@ import com.flexive.faces.javascript.tree.TreeNodeWriter;
 import com.flexive.faces.javascript.tree.TreeNodeWriter.Node;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.security.UserTicket;
-import com.flexive.shared.structure.FxEnvironment;
-import com.flexive.shared.structure.FxGroupAssignment;
-import com.flexive.shared.structure.FxPropertyAssignment;
-import com.flexive.shared.structure.FxType;
+import com.flexive.shared.structure.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -51,8 +49,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Renders the structure tree for the current user.
@@ -65,7 +62,6 @@ public class StructureTreeWriter implements Serializable {
     private static final Log LOG = LogFactory.getLog(StructureTreeWriter.class);
     private UserTicket ticket;
 
-    //public static final String DOC_TYPE_ROOT="Root";
     public static final String DOC_TYPE_GROUP = "Group";
     public static final String DOC_TYPE_TYPE = "Type";
     public static final String DOC_TYPE_TYPE_RELATION = "TypeRelation";
@@ -122,7 +118,12 @@ public class StructureTreeWriter implements Serializable {
             }
             // print root properties
 
-            for (FxPropertyAssignment property : environment.getSystemInternalRootPropertyAssignments()) {
+            //sort assignments by position
+            List<FxPropertyAssignment> systemInternalprops = new ArrayList<FxPropertyAssignment>();
+            systemInternalprops.addAll(environment.getSystemInternalRootPropertyAssignments());
+            Collections.sort(systemInternalprops, new FxSharedUtils.AssignmentPositionSorter());
+
+            for (FxPropertyAssignment property : systemInternalprops) {
                 writePropertyAssignment(writer, nodeProperties, property);
             }
 
@@ -151,6 +152,7 @@ public class StructureTreeWriter implements Serializable {
      * @param nodeProperties an existing hashmap for storing additional JS properties (cleared on entry)
      * @throws IOException if the tree could not be written
      */
+
     private void writeType(TreeNodeWriter writer, Map<String, Object> nodeProperties, FxType type) throws IOException {
         nodeProperties.clear();
         nodeProperties.put("propertyId", String.valueOf(type.getId()));
@@ -162,19 +164,25 @@ public class StructureTreeWriter implements Serializable {
         for (FxType child : type.getDerivedTypes()) {
             writeType(writer, nodeProperties, child);
         }
-        // write assigned groups
-        for (FxGroupAssignment group : type.getAssignedGroups()) {
-            writeGroup(writer, nodeProperties, group);
+
+        //sort group and property assignments
+        List <FxAssignment> assignments= new ArrayList<FxAssignment>();
+        assignments.addAll(type.getAssignedGroups());
+        assignments.addAll(type.getAssignedProperties());
+        Collections.sort(assignments, new FxSharedUtils.AssignmentPositionSorter());
+
+        //write group and property assignments
+        for (FxAssignment a : assignments) {
+            if (a instanceof FxPropertyAssignment && !a.isSystemInternal())
+                writePropertyAssignment(writer, nodeProperties, (FxPropertyAssignment)a);
+            else if (a instanceof FxGroupAssignment)
+                writeGroupAssignment(writer, nodeProperties, (FxGroupAssignment)a);
         }
-        // add assigned properties
-        for (FxPropertyAssignment property : type.getAssignedProperties()) {
-            if (!property.isSystemInternal()) {
-                writePropertyAssignment(writer, nodeProperties, property);
-            }
-        }
+
         writer.closeChildren();
         writer.closeNode();
     }
+
 
     /**
      * Render an assigned property.
@@ -192,6 +200,7 @@ public class StructureTreeWriter implements Serializable {
                 property.isSystemInternal() ? DOC_TYPE_ASSIGNMENT_SYSTEMINTERNAL : DOC_TYPE_ASSIGNMENT, nodeProperties));
     }
 
+
     /**
      * Render an assigned group, included assigned subgroups and properties.
      *
@@ -200,17 +209,26 @@ public class StructureTreeWriter implements Serializable {
      * @param group          the group to be rendered
      * @throws IOException if the tree could not be written
      */
-    private void writeGroup(TreeNodeWriter writer, Map<String, Object> nodeProperties, FxGroupAssignment group) throws IOException {
+
+    private void writeGroupAssignment(TreeNodeWriter writer, Map<String, Object> nodeProperties, FxGroupAssignment group) throws IOException {
         nodeProperties.clear();
         nodeProperties.put("propertyId", String.valueOf(group.getId()));
         writer.startNode(new Node(String.valueOf(group.getId()), group.getDisplayName(), DOC_TYPE_GROUP, nodeProperties));
         writer.startChildren();
-        // write nested groups
-        for (FxGroupAssignment nestedGroup : group.getAssignedGroups()) {
-            writeGroup(writer, nodeProperties, nestedGroup);
+
+        // sort and write nested groups
+        List<FxGroupAssignment> nested = new ArrayList<FxGroupAssignment>();
+        nested.addAll(group.getAssignedGroups());
+        Collections.sort(nested, new FxSharedUtils.AssignmentPositionSorter());
+        for (FxGroupAssignment nestedGroup : nested) {
+            writeGroupAssignment(writer, nodeProperties, nestedGroup);
         }
-        // write properties
-        for (FxPropertyAssignment property : group.getAssignedProperties()) {
+
+        // sort and write properties
+        List<FxPropertyAssignment> props = new ArrayList<FxPropertyAssignment>();
+        props.addAll(group.getAssignedProperties());
+        Collections.sort(props, new FxSharedUtils.AssignmentPositionSorter());
+        for (FxPropertyAssignment property : props) {
             if (!property.isSystemInternal()) {
                 writePropertyAssignment(writer, nodeProperties, property);
             }
@@ -219,5 +237,4 @@ public class StructureTreeWriter implements Serializable {
 		writer.closeChildren();
 		writer.closeNode();
 	}
-	
 }

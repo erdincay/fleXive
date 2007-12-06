@@ -119,28 +119,17 @@
                          disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"/>
                 </fx:formRow>
            </fx:fieldSet>
+
            <fx:fieldSet legend="#{fxMessageBean['PropertyEditor.label.referencingPropertyAssignments']}">
              <table dojoType="SortableTable" widgetId="referencingPropertyAssignments" enableMultipleSelect="true"
                                alternateRows="true" maxSortable="1" class="dojoTable">
-            <!--    <thead>
-                    <tr>
-                        <th class="tblHeader" field="xpath" dataType="String" align="left">
-                            #{fxMessageBean['PropertyEditor.table.xPath']}
-                        </th>
-                    </tr>
-                </thead>
-            -->    <tbody>
+                <tbody>
                     <ui:repeat value="#{propertyEditorBean.referencingPropertyAssignments}" var="pa">
-                <!--        <tr value="#{pa.id}">
-                            <td align="left">-->
-                                <!-- #{pa.XPath} -->
-                                <h:commandLink id="gotoPropertyAssignmentButton_#{pa.id}" action="#{propertyEditorBean.showPropertyAssignmentEditor}"
-                                     onclick="var treeframe=parent.getNavFrameWnd(); treeframe.selectNode(#{pa.id});">
-                                    <h:outputText value="#{pa.XPath}"/>
-                                </h:commandLink>
-                                <br/>
-                            <!--</td>
-                        </tr>-->
+                        <h:commandLink id="gotoPropertyAssignmentButton_#{pa.id}" action="#{propertyEditorBean.showPropertyAssignmentEditor}"
+                             onclick="var treeframe=parent.getNavFrameWnd(); treeframe.selectNode(#{pa.id});">
+                                <h:outputText value="#{pa.XPath}"/>
+                        </h:commandLink>
+                        <br/>
                     </ui:repeat>
                 </tbody>
               </table>

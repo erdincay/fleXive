@@ -72,8 +72,6 @@ public class TypeEditorBean {
     private int relMaxDestFiler = DEFAULT_REL_MAX;
     private boolean relSourceUnlimitedFiler = true;
     private boolean relDestUnlimitedFiler = true;
-    private boolean editMode = false;
-
 
     private WrappedRelation wrappedRelationFiler = null;
     private boolean unlimitedVersions = true;
@@ -87,6 +85,9 @@ public class TypeEditorBean {
     private boolean mayEdit = false;
     //checker if current user may delete the property
     private boolean mayDelete = false;
+    //checker for the editMode: if not in edit mode,
+    // save and delete buttons are not rendered by the gui
+    private boolean editMode = false;
 
     //type script editor tab
     private int scriptEventId = -1;
@@ -131,14 +132,12 @@ public class TypeEditorBean {
                 initEditing();
             } else if ("createType".equals(action)) {
                 editMode = true;
-                //long propId = FxJsfUtils.getLongParameter("id", -1);
                 type = FxTypeEdit.createNew("NEWTYPE", new FxString(""), CacheAdmin.getEnvironment().getDefaultACL(ACL.Category.STRUCTURE));
 
                 initEditing();
                 setTypeMode(TypeMode.Content);
             } else if ("createTypeRelation".equals(action)) {
                 editMode = true;
-                //long propId = FxJsfUtils.getLongParameter("id", -1);
                 type = FxTypeEdit.createNew("NEWTYPE", new FxString(""), CacheAdmin.getEnvironment().getDefaultACL(ACL.Category.STRUCTURE));
 
                 initEditing();
@@ -161,6 +160,10 @@ public class TypeEditorBean {
         return editMode;
     }
 
+     /**
+     * Initializes variables and does workarounds so editing
+     * of an existing group and group assignment is possible via the webinterface.
+     */
     private void initEditing() {
         wrappedRelations = new ArrayList<WrappedRelation>(type.getRelations().size());
         for (FxTypeRelation r : type.getRelations()) {
@@ -196,6 +199,12 @@ public class TypeEditorBean {
         this.maxRelDestUnlimited = maxRelDestUnlimited;
     }
 
+    /**
+     * Converts milliseconds to a more user-friendly time format.
+     * 0=forever, 1=ms, 2=sec, 3=min, 4=day
+     *
+     * @return  the maximum appliable time format
+     */
     private int initTimeRange() {
         //0=forever, 1=ms, 2=sec, 3=min, 4=day
         historyAge = type.getHistoryAge();
@@ -213,6 +222,11 @@ public class TypeEditorBean {
         } else return 3;
     }
 
+    /**
+     * Converts the currently used time format back to milliseconds.
+     *
+     * @return  the current time format converted to milliseconds
+     */
     private long historyAgeToMilis() {
         if (timeRange == 0)
             return 0;
@@ -229,6 +243,9 @@ public class TypeEditorBean {
         else return -1;
     }
 
+    /**
+     * Propagates changes to the DB.
+     */
     public void saveChanges() {
         try {
             if (unlimitedVersions) {
@@ -249,22 +266,14 @@ public class TypeEditorBean {
         }
     }
 
-    /* remove all existing relations and add newly created relations,
+    /**
+     * Remove all existing relations and add newly created relations,
      * created from wrappedRelations
-     *
      */
-
     private void updateRelations() {
         while (!type.getRelations().isEmpty()) {
             type.removeRelation(type.getRelations().get(0));
         }
-
-        /*
-        List <FxTypeRelation> relationsToDelete = type.getRelations();
-        for (FxTypeRelation rel: relationsToDelete) {
-            type.removeRelation(rel);
-        }
-        */
 
         for (WrappedRelation r : wrappedRelations) {
             try {
@@ -564,7 +573,8 @@ public class TypeEditorBean {
         return this.type.useTypePermissions();
     }
 
-    /* Simple wrapper class for FxTypeRelation with convenient getters and setters
+    /*
+     *  Simple wrapper class for FxTypeRelation with convenient getters and setters
      * for GUI operations
      */
     public class WrappedRelation {
@@ -685,6 +695,11 @@ public class TypeEditorBean {
         }
     }
 
+    /**
+     * Computes the number of assigned scripts for display in the GUI.
+     *
+     * @return  the number of assigned scripts
+     */
     public int getEventScriptCount() {
         Map scriptMapping = type.getScriptMapping();
         int count = 0;
@@ -715,11 +730,13 @@ public class TypeEditorBean {
         return "typeScriptEditor";
     }
 
-    /*
-     * script editor tab
-     */
+    /***************** script editor tab begin ************************/
 
-    //get script types for this type
+    /**
+     * Compute the script events for this type and sort by name.
+     *
+     * @return  list of selectItems to display script events in the GUI.
+     */
     public List<SelectItem> getScriptEvents() {
         ArrayList<SelectItem> scriptTypes = new ArrayList<SelectItem>(type.getScriptMapping().keySet().size() + 1);
         for (FxScriptEvent scriptEvent : (Set<FxScriptEvent>) type.getScriptMapping().keySet()) {
@@ -747,6 +764,13 @@ public class TypeEditorBean {
         this.scriptId = scriptId;
     }
 
+    /**
+     * Returns a list of scripts for the selected script event id.
+     * In casae the id==-1 return all available scripts assigned to this type.
+     * The returned list of scritpts is sorted by name.
+     *
+     * @return  all scripts for the selected script event id
+     */
     public List<FxScriptInfo> getScripts() {
         long[] scriptIds = new long[0];
         ArrayList<FxScriptInfo> scripts = new ArrayList<FxScriptInfo>();

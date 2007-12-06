@@ -549,15 +549,17 @@ function renderErrors() {
             elementId = errorObj[0];
             errorTxt = errorObj[1];
             ele = findElementById(elementId);
-            // Write back the whole element id, might have been incomplete before
-            errorObj[0] = ele.id;
-            // Set background color, since border will not work for IE drop down lists
-            ele.style.backgroundColor ="#f8e4e4";
-            ele.onmouseover=function() {showError(this)};
-            ele.onfocus=function() {showError(this);};
-            ele.onblur=fctUnset;
-            ele.onmouseout=fctUnset;
-            ele = null;
+            if (ele !=null) {
+                // Write back the whole element id, might have been incomplete before
+                errorObj[0] = ele.id;
+                // Set background color, since border will not work for IE drop down lists
+                ele.style.backgroundColor ="#f8e4e4";
+                ele.onmouseover=function() {showError(this)};
+                ele.onfocus=function() {showError(this);};
+                ele.onblur=fctUnset;
+                ele.onmouseout=fctUnset;
+                ele = null;
+            }
         } catch (e) {
             alert("main.js/renderErrors():"+e+", element="+elementId+"; caller="+_caller);
         }

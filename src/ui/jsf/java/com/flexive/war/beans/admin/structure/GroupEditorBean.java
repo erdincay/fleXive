@@ -47,6 +47,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Bean behind groupAssignmentEditor.xhtml, groupEditor.xhtml and groupOptionEditor to
@@ -73,6 +74,8 @@ public class GroupEditorBean {
     private WrappedOption optionFiler = null;
     private FxType parentType = null;
     private String parentXPath = null;
+    //checker for the editMode: if not in edit mode,
+    // save and delete buttons are not rendered by the gui
     private boolean editMode = false;
 
     public String getParseRequestParameters() {
@@ -153,9 +156,13 @@ public class GroupEditorBean {
     }
 
     public boolean isSystemInternal() {
-        return assignment == null ? false : assignment.isSystemInternal();
+        return assignment != null && assignment.isSystemInternal();
     }
 
+     /**
+     * initializes variables and does workarounds so editing
+     * of an existing group and group assignment is possible via the webinterface
+     */
     private void initEditing() {
         assignmentMinMul = FxMultiplicity.getIntToString(assignment.getMultiplicity().getMin());
         assignmentMaxMul = FxMultiplicity.getIntToString(assignment.getMultiplicity().getMax());
@@ -164,6 +171,10 @@ public class GroupEditorBean {
         optionWrapper = new OptionWrapper(group.getOptions(), assignment.getOptions(), false);
     }
 
+    /**
+     * initializes variables necessarry for creating a new group via the web interface.
+     * during the creation process, new groups don't have assignments yet.
+     */
     private void initNewGroupEditing() {
         group.setOverrideMultiplicity(true);
         groupMinMul = FxMultiplicity.getIntToString(group.getMultiplicity().getMin());
@@ -171,15 +182,19 @@ public class GroupEditorBean {
         optionWrapper = new OptionWrapper(group.getOptions(), null, false);
     }
 
-    //return if the groupMode may be changed.
-    // this is the case for groups where no content yet exists
+    /**
+     *  Return if the groupMode may be changed.
+     *  This is the case for groups where no content exists yet.
+     *
+     * @return  if the groupMode may be changed
+     */
     public boolean isMayChangeGroupMode() {
         try {
             return EJBLookup.getAssignmentEngine().getAssignmentInstanceCount(assignment.getId()) == 0;
         }
         catch (Throwable t) {
             new FxFacesMsgErr(t).addToContext();
-            //safe mode
+            //fallback
             return false;
         }
     }
@@ -346,6 +361,9 @@ public class GroupEditorBean {
         group.setOverrideMultiplicity(b);
     }
 
+    /**
+     * Apply changes to the group and the assignment and forward them to DB
+     */
     public void saveChanges() {
         try {
             applyGroupChanges();
@@ -360,6 +378,9 @@ public class GroupEditorBean {
         }
     }
 
+    /**
+     * Save a newly created group to DB
+     */
     public void createGroup() {
         try {
             applyGroupChanges();
@@ -377,6 +398,12 @@ public class GroupEditorBean {
         }
     }
 
+    /**
+     * Apply all changes to the group assignment which are still cached in
+     * the view (options, multiplicity, label) and forward them to DB
+     *
+     * @throws FxApplicationException   if the label is invalid
+     */
     private void applyAssignmentChanges() throws FxApplicationException {
         if (assignment.getLabel().getIsEmpty()) {
             throw new FxApplicationException("ex.structureEditor.noLabel");
@@ -398,9 +425,10 @@ public class GroupEditorBean {
     }
 
     /**
-     * applies changes for groups
+     * Apply all changes to the group assignment which are still cached in
+     * the view (options, multiplicity, label) and forward them to DB
      *
-     * @throws FxApplicationException localized exception on errors
+     * @throws FxApplicationException   if the label is invalid
      */
     private void applyGroupChanges() throws FxApplicationException {
         if (group.getLabel().getIsEmpty()) {
@@ -487,19 +515,27 @@ public class GroupEditorBean {
     }
 
     public void addAssignmentOption() {
-        if (optionWrapper.addOption(optionWrapper.getAssignmentOptions(),
-                assignmentOptionKey, assignmentOptionValue, false)) {
+        try {
+            optionWrapper.addOption(optionWrapper.getAssignmentOptions(),
+                assignmentOptionKey, assignmentOptionValue, false);
             assignmentOptionKey = null;
             assignmentOptionValue = null;
+        }
+        catch (Throwable t) {
+             new FxFacesMsgErr(t).addToContext();
         }
     }
 
     public void addGroupOption() {
-        if (optionWrapper.addOption(optionWrapper.getStructureOptions(),
-                groupOptionKey, groupOptionValue, groupOptionOverridable)) {
+        try {
+           optionWrapper.addOption(optionWrapper.getStructureOptions(),
+                groupOptionKey, groupOptionValue, groupOptionOverridable);
             groupOptionKey = null;
             groupOptionValue = null;
             groupOptionOverridable = true;
+        }
+         catch (Throwable t) {
+             new FxFacesMsgErr(t).addToContext();
         }
     }
 
@@ -511,8 +547,27 @@ public class GroupEditorBean {
         optionWrapper.deleteOption(optionWrapper.getStructureOptions(), optionFiler);
     }
 
-    //hack in order to use command buttons to submit and update the view of GUI elements
+     /**
+     * Hack in order to use command buttons to submit the form values
+     * and update the view of GUI elements
+     */
     public void doNothing() {
     }
 
+    /**
+     * Returns all pgroup assignments that are referencing this property which the
+     * current user may see, excluding the system internal assignments.
+     *
+     * @return  a list of group assignments that are referencing this group.
+     */
+    public List<FxGroupAssignment> getReferencingGroupAssignments() {
+        List<FxGroupAssignment> assignments = CacheAdmin.getFilteredEnvironment().getGroupAssignments(true);
+        List<FxGroupAssignment> result = new ArrayList<FxGroupAssignment>();
+        for (FxGroupAssignment assignment : assignments) {
+            if (assignment.getGroup().getId() == group.getId() && !assignment.isSystemInternal()) {
+                result.add(assignment);
+            }
+        }
+        return result;
+    }
 }

@@ -53,7 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Bean behind propertyAssignmentEditor.xhtml, propertyEditor.xhtml and ropertyOptionEditor to
+ * Bean behind propertyAssignmentEditor.xhtml, propertyEditor.xhtml and propertyOptionEditor to
  * edit FxPropertyAssignment and FxProperty objects
  *
  * @author Gerhard Glos (gerhard.glos@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
@@ -62,7 +62,7 @@ import java.util.List;
 
 public class PropertyEditorBean implements ActionBean {
     private static final Log LOG = LogFactory.getLog(PropertyEditorBean.class);
-    private String gotoPropertyAssignment = null;
+    //private String gotoPropertyAssignment = null;
     private long propertyId = -1;
     private FxLanguage defaultLanguage = null;
     private String assignmentOptionValue = null;
@@ -87,6 +87,8 @@ public class PropertyEditorBean implements ActionBean {
     private boolean mayEdit = false;
     //checker if current user may delete the property
     private boolean mayDelete = false;
+    //checker for the editMode: if not in edit mode,
+    // save and delete buttons are not rendered by the gui
     private boolean editMode = false;
 
     public boolean isMayEdit() {
@@ -97,13 +99,16 @@ public class PropertyEditorBean implements ActionBean {
         return mayDelete;
     }
 
+    /*
     public String getGotoPropertyAssignment() {
         return gotoPropertyAssignment;
     }
-
+    */
+    /*
     public void setGotoPropertyAssignment(String gotoPropertyAssignment) {
         this.gotoPropertyAssignment = gotoPropertyAssignment;
     }
+    */
 
     public boolean isSystemInternal() {
         return property.isSystemInternal();
@@ -132,16 +137,6 @@ public class PropertyEditorBean implements ActionBean {
     public void setProperty(FxPropertyEdit property) {
         this.property = property;
     }
-
-    /*
-    public boolean isAllowDefaultLanguage() {
-        return allowDefaultLanguage;
-    }
-
-    public void setAllowDefaultLanguage(boolean allowDefaultLanguage) {
-        this.allowDefaultLanguage = allowDefaultLanguage;
-    }
-    */
 
     public void setAcl(long aclid) {
         try {
@@ -355,6 +350,11 @@ public class PropertyEditorBean implements ActionBean {
         return getProperty().getDataType();
     }
 
+    /**
+     * Set the property's data type and update referenced type and referenced list accordingly
+     *
+     * @param d     the data type
+     */
     public void setPropertyDataType(FxDataType d) {
         getProperty().setDataType(d);
         if (!isPropertySelectList() && getPropertyReferencedList() != -1) {
@@ -471,10 +471,14 @@ public class PropertyEditorBean implements ActionBean {
     }
 
     public void addAssignmentOption() {
-        if (optionWrapper.addOption(optionWrapper.getAssignmentOptions(),
-                assignmentOptionKey, assignmentOptionValue, false)) {
+        try {
+            optionWrapper.addOption(optionWrapper.getAssignmentOptions(),
+                assignmentOptionKey, assignmentOptionValue, false);
             assignmentOptionKey = null;
             assignmentOptionValue = null;
+        }
+         catch (Throwable t) {
+             new FxFacesMsgErr(t).addToContext();
         }
     }
 
@@ -495,11 +499,15 @@ public class PropertyEditorBean implements ActionBean {
     }
 
     public void addPropertyOption() {
-        if (optionWrapper.addOption(optionWrapper.getStructureOptions(),
-                propertyOptionKey, propertyOptionValue, propertyOptionOverridable)) {
+        try {
+        optionWrapper.addOption(optionWrapper.getStructureOptions(),
+                propertyOptionKey, propertyOptionValue, propertyOptionOverridable);
             propertyOptionKey = null;
             propertyOptionValue = null;
             propertyOptionOverridable = true;
+        }
+         catch (Throwable t) {
+             new FxFacesMsgErr(t).addToContext();
         }
     }
 
@@ -515,11 +523,19 @@ public class PropertyEditorBean implements ActionBean {
         return optionWrapper;
     }
 
-    //hack in order to use command buttons to submit and update the view of GUI elements
+    /**
+     * Hack in order to use command buttons to submit the form values
+     * and update the view of GUI elements
+     */
     public void doNothing() {
     }
 
-    //returns all property assignments that are referencing this property
+    /**
+     * Returns all property assignments that are referencing this property which the
+     * current user may see, excluding the system internal assignments.
+     *
+     * @return  a list of property assignments that are referencing this property.
+     */
     public List<FxPropertyAssignment> getReferencingPropertyAssignments() {
         List<FxPropertyAssignment> assignments = CacheAdmin.getFilteredEnvironment().getPropertyAssignments(true);
         List<FxPropertyAssignment> result = new ArrayList<FxPropertyAssignment>();
@@ -544,54 +560,60 @@ public class PropertyEditorBean implements ActionBean {
     }
 
     public boolean isPropertyMayOverrideMultiLang() {
-        return optionWrapper.getOption(true, false, FxStructureOption.OPTION_MULTILANG).isOverridable();
+        return optionWrapper.getOption(true, FxStructureOption.OPTION_MULTILANG).isOverridable();
     }
 
-    /*
-    private void setPropertyOverrideMultiLang(boolean b) {
-        optionWrapper.getOption(true,false, FxStructureOption.OPTION_MULTILANG).setOverridable(b);
-    }
-    */
+    /**
+     * Returns if the generic option FxStructureOption.OPTION_MULTILANG is set.
+     * This option controls the multilingualism of a property.
+     *
+     * @return  true if the generic option FxStructureOption.OPTION_MULTILANG is set.
+     */
 
     public boolean isMultiLang() {
-        if (!optionWrapper.getOption(true, false, FxStructureOption.OPTION_MULTILANG).getBooleanValue()) {
+        if (!optionWrapper.getOption(true, FxStructureOption.OPTION_MULTILANG).getBooleanValue()) {
             if (!isPropertyMayOverrideMultiLang()
                     || (isPropertyMayOverrideMultiLang() && !optionWrapper.hasOption(optionWrapper.getAssignmentOptions(), FxStructureOption.OPTION_MULTILANG))
-                    || (isPropertyMayOverrideMultiLang() && !optionWrapper.getOption(false, true, FxStructureOption.OPTION_MULTILANG).getBooleanValue()))
+                    || (isPropertyMayOverrideMultiLang() && !optionWrapper.getOption(false, FxStructureOption.OPTION_MULTILANG).getBooleanValue()))
                 return false;
         } else {
             if (isPropertyMayOverrideMultiLang() && optionWrapper.hasOption(optionWrapper.getAssignmentOptions(), FxStructureOption.OPTION_MULTILANG)
-                    && !optionWrapper.getOption(false, true, FxStructureOption.OPTION_MULTILANG).getBooleanValue())
+                    && !optionWrapper.getOption(false, FxStructureOption.OPTION_MULTILANG).getBooleanValue())
                 return false;
         }
         return true;
     }
 
+    /**
+     * Sets the FxStructureOption.OPTION_MULTILANG option defensively by considering
+     * option overriding.
+     * @param b     boolean to set the option
+     */
     public void setMultiLang(boolean b) {
         if (b) {
-            if (isPropertyMayOverrideMultiLang() && optionWrapper.getOption(true, false, FxStructureOption.OPTION_MULTILANG).getBooleanValue()) {
-                optionWrapper.deleteOption(optionWrapper.getAssignmentOptions(), optionWrapper.getOption(false, true, FxStructureOption.OPTION_MULTILANG));
+            if (isPropertyMayOverrideMultiLang() && optionWrapper.getOption(true, FxStructureOption.OPTION_MULTILANG).getBooleanValue()) {
+                optionWrapper.deleteOption(optionWrapper.getAssignmentOptions(), optionWrapper.getOption(false, FxStructureOption.OPTION_MULTILANG));
             } else
-            if (isPropertyMayOverrideMultiLang() && !optionWrapper.getOption(true, false, FxStructureOption.OPTION_MULTILANG).getBooleanValue()) {
-                optionWrapper.setOption(false, true, FxStructureOption.OPTION_MULTILANG, b);
+            if (isPropertyMayOverrideMultiLang() && !optionWrapper.getOption(true, FxStructureOption.OPTION_MULTILANG).getBooleanValue()) {
+                optionWrapper.setOption(false, FxStructureOption.OPTION_MULTILANG, b);
             } else
-            if (!isPropertyMayOverrideMultiLang() && !optionWrapper.getOption(true, false, FxStructureOption.OPTION_MULTILANG).getBooleanValue()) {
-                optionWrapper.getOption(true, false, FxStructureOption.OPTION_MULTILANG).setOverridable(true);
-                optionWrapper.setOption(false, true, FxStructureOption.OPTION_MULTILANG, b);
+            if (!isPropertyMayOverrideMultiLang() && !optionWrapper.getOption(true, FxStructureOption.OPTION_MULTILANG).getBooleanValue()) {
+                optionWrapper.getOption(true, FxStructureOption.OPTION_MULTILANG).setOverridable(true);
+                optionWrapper.setOption(false, FxStructureOption.OPTION_MULTILANG, b);
             } else
-                optionWrapper.deleteOption(optionWrapper.getAssignmentOptions(), optionWrapper.getOption(false, true, FxStructureOption.OPTION_MULTILANG));
+                optionWrapper.deleteOption(optionWrapper.getAssignmentOptions(), optionWrapper.getOption(false, FxStructureOption.OPTION_MULTILANG));
         } else {
-            if (isPropertyMayOverrideMultiLang() && optionWrapper.getOption(true, false, FxStructureOption.OPTION_MULTILANG).getBooleanValue())
-                optionWrapper.setOption(false, true, FxStructureOption.OPTION_MULTILANG, b);
+            if (isPropertyMayOverrideMultiLang() && optionWrapper.getOption(true, FxStructureOption.OPTION_MULTILANG).getBooleanValue())
+                optionWrapper.setOption(false, FxStructureOption.OPTION_MULTILANG, b);
             else
-            if (isPropertyMayOverrideMultiLang() && !optionWrapper.getOption(true, false, FxStructureOption.OPTION_MULTILANG).getBooleanValue())
-                optionWrapper.deleteOption(optionWrapper.getAssignmentOptions(), optionWrapper.getOption(false, true, FxStructureOption.OPTION_MULTILANG));
+            if (isPropertyMayOverrideMultiLang() && !optionWrapper.getOption(true, FxStructureOption.OPTION_MULTILANG).getBooleanValue())
+                optionWrapper.deleteOption(optionWrapper.getAssignmentOptions(), optionWrapper.getOption(false,  FxStructureOption.OPTION_MULTILANG));
             else
-            if (!isPropertyMayOverrideMultiLang() && optionWrapper.getOption(true, false, FxStructureOption.OPTION_MULTILANG).getBooleanValue()) {
-                optionWrapper.getOption(true, false, FxStructureOption.OPTION_MULTILANG).setOverridable(true);
-                optionWrapper.setOption(false, true, FxStructureOption.OPTION_MULTILANG, b);
+            if (!isPropertyMayOverrideMultiLang() && optionWrapper.getOption(true, FxStructureOption.OPTION_MULTILANG).getBooleanValue()) {
+                optionWrapper.getOption(true, FxStructureOption.OPTION_MULTILANG).setOverridable(true);
+                optionWrapper.setOption(false, FxStructureOption.OPTION_MULTILANG, b);
             } else
-                optionWrapper.deleteOption(optionWrapper.getAssignmentOptions(), optionWrapper.getOption(false, true, FxStructureOption.OPTION_MULTILANG));
+                optionWrapper.deleteOption(optionWrapper.getAssignmentOptions(), optionWrapper.getOption(false, FxStructureOption.OPTION_MULTILANG));
         }
     }
 
@@ -684,7 +706,10 @@ public class PropertyEditorBean implements ActionBean {
         return editMode;
     }
 
-    //sets properties and does workarounds so editing is possible via the webinterface
+    /**
+     * Initializes variables and does workarounds so editing of an existing property and
+     * property assignment is possible via the webinterface
+     */
     private void initEditing() {
 
         setMinMultiplicity(FxMultiplicity.getIntToString(assignment.getMultiplicity().getMin()));
@@ -706,7 +731,6 @@ public class PropertyEditorBean implements ActionBean {
                 FxLanguage language = EJBLookup.getLanguageEngine().load(assignment.getDefaultLanguage());
                 setMultiLang(true);
                 setDefaultLanguage(language);
-                //setAllowDefaultLanguage(true);
             }
         } catch (Throwable t) {
             LOG.error("Failed to initialize the Editing process: " + t.getMessage(), t);
@@ -714,8 +738,11 @@ public class PropertyEditorBean implements ActionBean {
         }
     }
 
-    //returns if the FxProperty's Data Type is reference or inlinereference
-    // in order to enable or disable gui elements
+    /**
+     * Returns if the FxProperty's Data Type is reference or inlinereference
+     * in order to enable or disable gui elements.
+     * @return  true if the data type is reference
+     */
     public boolean isPropertyReference() {
         if (property.getDataType() == null)
             return false;
@@ -724,6 +751,11 @@ public class PropertyEditorBean implements ActionBean {
                     property.getDataType().getId() == FxDataType.Reference.getId());
     }
 
+
+    /**
+     * Initializes variables necessarry for creating a new property via the web interface.
+     * during the creation process, new properties don't have assignments yet.
+     */
     private void initNewPropertyEditing() {
         property.setAutoUniquePropertyName(false);
         setPropertyMinMultiplicity(FxMultiplicity.getIntToString(property.getMultiplicity().getMin()));
@@ -731,9 +763,11 @@ public class PropertyEditorBean implements ActionBean {
         optionWrapper = new OptionWrapper(property.getOptions(), null, true);
     }
 
-
-    //returns if the Fxproperty's Data Type is  selectone or selectmany
-    // in order to enable or disable gui elements
+    /**
+     * Returns if the Fxproperty's Data Type is  SelectOne or SelectMany
+     * in order to enable or disable gui elements.
+     * @return  true if the data type is select list
+     */
     public boolean isPropertySelectList() {
         if (property.getDataType() == null)
             return false;
@@ -743,7 +777,9 @@ public class PropertyEditorBean implements ActionBean {
     }
 
 
-    //creates a new property in DB from an FxPropertyEdit object
+    /**
+     * Stores a newly created property in DB
+     */
     public void createProperty() {
         try {
             applyPropertyChanges();
@@ -760,7 +796,9 @@ public class PropertyEditorBean implements ActionBean {
         }
     }
 
-    //save property and property assignment changes into the db
+    /**
+     * Forward property and property assignment changes to the DB
+     */
     public void saveChanges() {
         try {
             applyPropertyChanges();
@@ -774,7 +812,12 @@ public class PropertyEditorBean implements ActionBean {
         }
     }
 
-    //save changes into DB
+     /**
+     * Apply all changes to the property assignment which are still cached in
+     * the view (property options, multiplicity, label) and forward them to DB
+     *
+     * @throws FxApplicationException   if the label is invalid
+     */
     public void savePropertyAssignmentChanges() throws FxApplicationException {
         if (assignment.getLabel().getIsEmpty()) {
             throw new FxApplicationException("ex.structureEditor.noLabel");
@@ -810,7 +853,12 @@ public class PropertyEditorBean implements ActionBean {
         EJBLookup.getAssignmentEngine().save(assignment, false);
     }
 
-
+    /**
+     * Apply all changes to the property which are still cached in
+     * the view (property options, multiplicity, label)
+     *
+     * @throws FxApplicationException   if the label is invalid
+     */
     public void applyPropertyChanges() throws FxApplicationException {
         if (property.getLabel().getIsEmpty()) {
             throw new FxApplicationException("ex.structureEditor.noLabel");
@@ -835,9 +883,11 @@ public class PropertyEditorBean implements ActionBean {
         }
     }
 
+    /*
     public void gotoPropertyAssignment() {
         setGotoPropertyAssignment(optionFiler.getKey());
     }
+    */
 
     /**
      * Show the PropertyAssignmentEditor

@@ -71,6 +71,21 @@
                      disabled="#{groupEditorBean.systemInternal or not groupEditorBean.editMode}" style="width:40px"/>
             </fx:formRow>
 
+            <fx:fieldSet legend="#{fxMessageBean['GroupEditor.label.referencingGroupAssignments']}">
+                 <table dojoType="SortableTable" widgetId="referencingGroupAssignments" enableMultipleSelect="true"
+                                   alternateRows="true" maxSortable="1" class="dojoTable">
+                    <tbody>
+                        <ui:repeat value="#{groupEditorBean.referencingGroupAssignments}" var="ga">
+                            <h:commandLink id="gotoGroupAssignmentButton_#{pa.id}" action="#{groupEditorBean.showGroupAssignmentEditor}"
+                                 onclick="var treeframe=parent.getNavFrameWnd(); treeframe.selectNode(#{ga.id});">
+                                    <h:outputText value="#{ga.XPath}"/>
+                            </h:commandLink>
+                            <br/>
+                        </ui:repeat>
+                    </tbody>
+                  </table>
+           </fx:fieldSet>
+
             <ui:fragment rendered="#{groupEditorBean.group.new}">
                 <fx:formRow labelKey="GroupEditor.label.assignmentGroupMode" id="assignmentGroupMode">
                     <t:selectOneListbox size="1" id="assignmentGroupMode" value="#{groupEditorBean.groupAssignmentGroupMode}"
