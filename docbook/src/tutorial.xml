@@ -12,112 +12,216 @@
     <xi:include href="includes/author_dlichtenberger.xml"/>
 
     <section xml:id="first_flexive_application">
-        <title>Your first flexive application</title>
-        <para>In this Tutorial we assume you have a flexive installation up and running on your local or on a remote
-            machine.
-            If not, follow the installation guide according to your application server type.
-            Download the source code of the tutorial application, if you have downloaded and installed the blank flexive
-            source code.
+        <title>Your first &flexive; application</title>
+        <para>
+            For your first &flexive; application, we assume you have a flexive installation up and running on
+            your local or on a remote machine. If not, follow the instructions in
+            <xref linkend="installation"/>.
+            The complete source code can be found in &flexive; source packages or in the subversion repository under
+            <filename>src/examples</filename>.
         </para>
         <para>
-            The application we build in this tutorial implements a simple blogging system
+            Our first &flexive; application implements a very simple blogging system
             with an input mask and a view for the submitted entries.
+            Looking at the source directory of the application, we find the following directory structure:
 
-            The directory structure of the tutorial example application looks like this
             <xi:include href="listings/tutorial_directory_structure.xml"/>
+
+            <variablelist>
+                <varlistentry>
+                    <term>
+                        <filename>java</filename>
+                    </term>
+                    <listitem>
+                        <para>
+                            contains the Java sources of the application.
+                        </para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term>
+                        <filename>resources/scripts</filename>
+                    </term>
+                    <listitem>
+                        <para>
+                            contains &flexive; scripts that will be used to setup the data structures
+                            needed by the application.
+                        </para>
+                    </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                    <term>
+                        <filename>web</filename>
+                    </term>
+                    <listitem>
+                        <para>
+                            contains the XHTML pages and the web configuration files.
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
         </para>
 
         <section xml:id="data_model">
             <title>Defining the data model</title>
-            <para>To set up the data model when deploying the application, we use the groovy script hello001.groovy
-                located
-                in the resources/scripts/runonce/ folder.
+            <para>
+                We start with defining the data model of the application. Our blog entry consists of a
+                posting title and the actual text. To set up the data model when deploying the application,
+                we use the
+                <glossterm>run-once script</glossterm>
+                <filename>hello001.groovy</filename>
+                located in the
+                <filename>resources/scripts/runonce/</filename>
+                directory.
+                The easiest way of setting up &flexive; structures is by using the Groovy builder for
+                &flexive; types,
+                <classname>GroovyTypeBuilder</classname>.
             </para>
 
             <xi:include href="listings/tutorial_blog_entry.xml"/>
 
             <calloutlist>
-                <callout arearefs="BlogEntry_1">The method call blogEntry(...) will create an FxType titled "Blog
-                    Entry".
-                    For the first tutorial, we will disable &flexive; security completely for this type by setting
-                    usePermissions to false.
+                <callout arearefs="BlogEntry_1">
+                    <para>
+                        The method call blogEntry(...) will create the &flexive; type "BlogEntry" (type names
+                        are not case sensitive). For the first tutorial, we will disable &flexive; security completely
+                        for this type by setting usePermissions to false.
+                    </para>
                 </callout>
-                <callout arearefs="BlogEntry_2">An FxPropertyAssignment is an instanciated FxProperty. In this case it's
-                    named "entryTitle". Its
-                    multiplicity is 1:1, meaning that it is a required field. Its description/title is "Title".
+                <callout arearefs="BlogEntry_2">
+                    <para>
+                        Create a new property assignment for the blog entry type that is referenced with the path
+                        "/entryTitle". The multiplicity of 1..1 indicates a mandatory field, the description will
+                        be shown in the input forms.
+                    </para>
                 </callout>
-                <callout arearefs="BlogEntry_3">The option "multiline" means this FxPropertyAssignment is shown as
-                    multiple
-                    lines in editors.
+                <callout arearefs="BlogEntry_3">
+                    <para>
+                        The text property is created similar to the title, but we add a "multiline" option
+                        since we don't want to enter our blog text in a single line.
+                    </para>
                 </callout>
             </calloutlist>
-            <para>We now have a setup script for our data model.</para>
         </section>
+
         <section xml:id="retrieving_data">
             <title>Retrieving data from the database</title>
-            <para>The next step will be to define the managed bean HelloWorldBean, which builds a database query and
-                returns the result set as FxResultSetDataModel, which will be used in the user interface.
+
+            <para>
+                The next step is to define a JSF bean that provides the blog postings
+                to be shown on the front page of our application.
             </para>
-            <programlisting language="java"><xi:include href="../../src/examples/helloworld/java/com/flexive/examples/helloworld/war/HelloWorldBean.java" parse="text"/></programlisting>
+
+            <programlisting language="java">
+                <xi:include
+                        href="../../src/examples/helloworld/java/com/flexive/examples/helloworld/war/HelloWorldBean.java"
+                        parse="text"/>
+            </programlisting>
         </section>
+
         <section xml:id="building_the_gui">
             <title>Building the graphical user interface</title>
-            <para>If you are not familiar with JSF tag libraries please refer to the
-                <link href="http://java.sun.com/javaee/javaserverfaces/1.1_01/docs/tlddocs/index.html">Tag Library
+
+            <para>
+                For the web interface of the application we use JSF 1.2, using
+                <link href="https://facelets.dev.java.net/">Facelets</link>
+                for creating the JSF views (i.e. we use plain XHTML templates instead of JSP).
+                &Flexive; includes components for rendering and editing &flexive; contents in JSF applications,
+                although you could also use other web framework like Struts or Tapestry - you'd just miss the convenient
+                UI components that allow a rapid creation of web applications based on &flexive;.
+            </para>
+
+            <para>
+                If you are not familiar with JSF tag libraries please refer to the
+                <link href="http://java.sun.com/javaee/javaserverfaces/1.2_MR1/docs/tlddocs/index.html">Tag Library
                     Documentation
                 </link>
-                or
-                try the
+                or try the
                 <link href="http://java.sun.com/javaee/5/docs/tutorial/doc/bnaph.html">JSF section of the Java EE 5
                     Tutorial.
                 </link>
             </para>
-            <para>Further resources can be found at
-                <itemizedlist>
-                    <listitem>
-                        <link href="https://facelets.dev.java.net/nonav/docs/dev/docbook.html">Facelets - JavaServer
-                            Faces
-                            View Definition Framework
-                        </link>
-                    </listitem>
-                    <listitem>
-                        <link href="http://java.sun.com/products/jsp/jstl/1.1/docs/tlddocs/index.html">JSTL - JavaServer
-                            Pages Standard Tag Library 1.1 Tag Reference
-                        </link>
-                    </listitem>
-                </itemizedlist>
+
+            <para>
+                The main page renders all available blog entries and shows a link to a form
+                for creating new entries. Facelets'
+                <code>&lt;ui:repeat/&gt;</code>
+                tag is used to iterate over the rows of the datamodel returned by the JSF bean we created in the
+                previous
+                section. The source for this file can be found at
+                <filename>web/index.xhtml</filename>.
             </para>
-            <programlisting language="xhtml"><xi:include href="../../src/examples/helloworld/web/index.xhtml" parse="text"/></programlisting>
-            <para>The input mask is represented by the create.xhtml file:</para>
-            <programlisting language="xhtml"><xi:include href="../../src/examples/helloworld/web/create.xhtml" parse="text"/></programlisting>
+
+            <programlisting language="xhtml">
+                <xi:include href="../../src/examples/helloworld/web/index.xhtml" parse="text"/>
+            </programlisting>
+
+            <para>
+                The input form for creating new postings uses the
+                <code>&lt;fx:content/&gt;</code>
+                and
+                <code>&lt;fx:value/&gt;</code>
+                components provided by &flexive; to create a simple input form for &flexive; contents.
+                All you need to provide is the name of the type you want to use as template
+                (<userinput>blogEntry</userinput>)
+                and the references to the properties to be rendered
+                (<userinput>entryTitle</userinput>,
+                <userinput>entryText</userinput>).
+                Finally, a JSF command link is used to render a button for saving the entered data.
+                The save command is executed by a &flexive; system bean,
+                <classname>fxContentViewBean</classname>.
+            </para>
+
+            <programlisting language="xhtml">
+                <xi:include href="../../src/examples/helloworld/web/create.xhtml" parse="text"/>
+            </programlisting>
+
         </section>
         <section xml:id="configuration">
             <title>Deployment descriptor and JSF configuration</title>
             <para>
-                In the /helloworld/web/WEB-INF/ directory there are two files:
+                In the
+                <filename>web/WEB-INF</filename>
+                directory there are two files:
                 <itemizedlist>
-                    <listitem>The deployment descriptor web.xml</listitem>
-                    <listitem>The JSF configuration file faces-config.xml</listitem>
+                    <listitem>
+                        <para>
+                            The web deployment descriptor in
+                            <filename>web.xml</filename>.
+                            Here we initialize the JSF runtime and add the
+                            <classname>FxFilter</classname>
+                            for pages handled by &flexive;.
+                            <classname>FxFilter</classname>
+                            is required for more advanced &flexive; functionality, but is not required
+                            for this application.
+                        </para>
+                        <programlisting language="xml">
+                            <xi:include href="../../src/examples/helloworld/web/WEB-INF/web.xml" parse="text"/>
+                        </programlisting>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            The JSF configuration file in
+                            <filename>faces-config.xml</filename>.
+                            Here we register the
+                            <classname>HelloWorldBean</classname>
+                            and provide navigation rules between the overview and the create page.
+                        </para>
+                        <programlisting language="xml">
+                            <xi:include href="../../src/examples/helloworld/web/WEB-INF/faces-config.xml" parse="text"/>
+                        </programlisting>
+                    </listitem>
                 </itemizedlist>
-                Mind the filter-mapping for the FlexFilter.
             </para>
-            <programlisting language="xml"><xi:include href="../../src/examples/helloworld/web/WEB-INF/web.xml" parse="text"/></programlisting>
-            <para>In the faces-config.xml configuration file you can define managed beans, navigation rules and more.
-            </para>
-            <para>Please refer to the
-                <link href="http://java.sun.com/javaee/5/docs/tutorial/doc/bnapl.html#bnapz">JSF section of the Java EE
-                    5
-                    Tutorial
-                </link>
-                for further information on JSF configuration issues.
-            </para>
-            <programlisting language="xml"><xi:include href="../../src/examples/helloworld/web/WEB-INF/faces-config.xml" parse="text"/></programlisting>
         </section>
         <section xml:id="deployment">
             <title>Compiling and deploying the application</title>
             <para>
-                To compile and deploy the framework and the example application run the following ant tasks in the given
-                order:
+                To compile and deploy the framework and the example application run the following
+                <productname>ant</productname>
+                tasks in the given order (you need a full &flexive; source installation for this):
                 <orderedlist>
                     <listitem>
                         <para>
@@ -127,7 +231,9 @@
                             directory where the
                             <filename>build.xml</filename>
                             file resides if you don't
-                            already have a dist/ directory
+                            already have a
+                            <filename>flexive-dist</filename>
+                            directory
                         </para>
                     </listitem>
                     <listitem>
@@ -168,7 +274,8 @@
             </para>
             <mediaobject>
                 <imageobject>
-                    <imagedata fileref="images/be_structure_editor.png" format="PNG" scalefit="1" width="100%" contentdepth="66%"/>
+                    <imagedata fileref="images/be_structure_editor.png" format="PNG" scalefit="1" width="100%"
+                               contentdepth="66%"/>
                 </imageobject>
             </mediaobject>
         </section>
@@ -214,7 +321,8 @@
             <title>The document store application, version 1</title>
             <mediaobject>
                 <imageobject>
-                    <imagedata fileref="images/tutorial/tutorial01_mediastore.png" format="PNG" scalefit="1" width="100%" contentdepth="66%"/>
+                    <imagedata fileref="images/tutorial/tutorial01_mediastore.png" format="PNG" scalefit="1"
+                               width="100%" contentdepth="66%"/>
                 </imageobject>
             </mediaobject>
         </figure>
@@ -235,7 +343,11 @@
                 found in
                 <filename>resources/scripts/runonce/tutorial001.groovy</filename>:
 
-                <programlisting language="groovy"><xi:include href="../../src/examples/tutorial01-documentstore/resources/scripts/runonce/tutorial001.groovy" parse="text"/></programlisting>
+                <programlisting language="groovy">
+                    <xi:include
+                            href="../../src/examples/tutorial01-documentstore/resources/scripts/runonce/tutorial001.groovy"
+                            parse="text"/>
+                </programlisting>
             </para>
         </section>
 
@@ -354,7 +466,9 @@
                 It can be found in the tutorial01 directory under
                 <filename>web/index.xhtml</filename>.
 
-                <programlisting language="xhtml"><xi:include href="../../src/examples/tutorial01-documentstore/web/index.xhtml" parse="text"/></programlisting>
+                <programlisting language="xhtml">
+                    <xi:include href="../../src/examples/tutorial01-documentstore/web/index.xhtml" parse="text"/>
+                </programlisting>
             </para>
 
             <section xml:id="tutorial01_uploadform">
@@ -414,7 +528,9 @@
                     directory under
                     <filename>web/upload.xhtml</filename>.
 
-                    <programlisting language="xhtml"><xi:include href="../../src/examples/tutorial01-documentstore/web/upload.xhtml" parse="text"/></programlisting>
+                    <programlisting language="xhtml">
+                        <xi:include href="../../src/examples/tutorial01-documentstore/web/upload.xhtml" parse="text"/>
+                    </programlisting>
                 </para>
             </section>
 
@@ -428,7 +544,11 @@
                 our search results.
             </para>
 
-            <programlisting language="java"><xi:include href="../../src/examples/tutorial01-documentstore/src/java/war/com/flexive/examples/tutorial01/Tutorial01Bean.java" parse="text"/></programlisting>
+            <programlisting language="java">
+                <xi:include
+                        href="../../src/examples/tutorial01-documentstore/src/java/war/com/flexive/examples/tutorial01/Tutorial01Bean.java"
+                        parse="text"/>
+            </programlisting>
         </section>
 
         <section xml:id="tutorial01_thumbnails">
@@ -467,15 +587,19 @@
                 our buttons and links in the
                 <code>faces-config.xml</code>:
 
-                <programlisting language="xml"><xi:include href="../../src/examples/tutorial01-documentstore/resources/META-INF/faces-config.xml" parse="text"/></programlisting>
+                <programlisting language="xml">
+                    <xi:include href="../../src/examples/tutorial01-documentstore/resources/META-INF/faces-config.xml"
+                                parse="text"/>
+                </programlisting>
             </para>
         </section>
 
         <section xml:id="tutorial01_deployment">
             <title>Compiling and deploying the application</title>
             <para>
-                To compile and deploy the framework and the example application run the following ant tasks in the given
-                order:
+                To compile and deploy the framework and the example application run the following
+                <productname>ant</productname>
+                tasks (you need a full &flexive; source installation for this):
                 <orderedlist>
                     <listitem>
                         <para>
@@ -485,7 +609,9 @@
                             directory where the
                             <filename>build.xml</filename>
                             file resides if you don't
-                            already have a dist/ directory
+                            already have a
+                            <filename>flexive-dist/</filename>
+                            directory
                         </para>
                     </listitem>
                     <listitem>

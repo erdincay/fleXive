@@ -8,12 +8,12 @@
 import com.flexive.shared.value.*
 import com.flexive.shared.structure.*
 
-new FxTypeBuilder().blogEntry(description: new FxString(true, "Blog Entry"), usePermissions: false) { <co id="BlogEntry_1"/>
+new GroovyTypeBuilder().blogEntry(description: new FxString(true, "Blog Entry"), usePermissions: false) { // <co id="BlogEntry_1"/>
 
     caption(assignment: "ROOT/CAPTION")
-    entryTitle(multiplicity: FxMultiplicity.MULT_1_1, description: new FxString(true, "Title")) <co id="BlogEntry_2"/>
+    entryTitle(multiplicity: FxMultiplicity.MULT_1_1, description: new FxString(true, "Title")) // <co id="BlogEntry_2"/>
     entryText(multiplicity: FxMultiplicity.MULT_1_1, description: new FxString(true, "Text"),
-         multiline: true) <co id="BlogEntry_3"/>
+         multiline: true) // <co id="BlogEntry_3"/>
 
 }
 </programlisting>

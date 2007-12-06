@@ -14,24 +14,29 @@
 <body>
 
 <h:form>
-    <!-- Display all queued messages -->
+    <!-- Display all JSF messages -->
     <h:messages/>
+
     <h:outputLink value="index.xhtml">Back to blog</h:outputLink>
+
     <!-- The fx:content tag references our type "Blog Entry" -->
     <fx:content typeName="blogEntry" var="entry">
+
         <!-- This renders an html input field for the type's property "Entry Title" -->
         <fx:value property="entryTitle"/>
+
         <!-- This renders an html input field for the type's property "Entry Text" -->
         <fx:value property="entryText"/>
+
         <!-- Save content using the FxContentViewBean, pass the content instance
              stored in component_content via f:setPropertyActionListener -->
         <h:commandLink action="#{fxContentViewBean.save}">
             <f:setPropertyActionListener target="#{fxContentViewBean.content}" value="#{entry_content}"/>
             Publish
         </h:commandLink>
+
     </fx:content>
 </h:form>
 
 </body>
-
 </html>
