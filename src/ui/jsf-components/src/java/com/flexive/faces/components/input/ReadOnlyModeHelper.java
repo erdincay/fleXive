@@ -38,10 +38,7 @@ import com.flexive.shared.FxContext;
 import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.XPathElement;
-import com.flexive.shared.value.BinaryDescriptor;
-import com.flexive.shared.value.FxBinary;
-import com.flexive.shared.value.FxReference;
-import com.flexive.shared.value.FxValue;
+import com.flexive.shared.value.*;
 import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import com.flexive.war.servlet.ThumbnailServlet;
 
@@ -91,7 +88,7 @@ class ReadOnlyModeHelper extends RenderHelper {
                 // render preview image
                 final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(component, HtmlGraphicImage.COMPONENT_TYPE);
                 image.setUrl(ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()), BinaryDescriptor.PreviewSizes.PREVIEW2, value.getXPath()));
-            } else if (component.isFilter()) {
+            } else if (component.isFilter() && !(value instanceof FxHTML)) {
                 // escape HTML code and generate <br/> tags for newlines
                 writer.write(FxFormatUtils.escapeForJavaScript(FxValueRendererFactory.getInstance(outputLanguage).format(value, language), true, true));
             } else {
