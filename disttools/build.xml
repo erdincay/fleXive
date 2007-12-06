@@ -3,6 +3,8 @@
     
 -->
 <project name="flexive-disttool" default="info" basedir=".">
+    <property name="dist.basedir" value="${basedir}"/>
+
     <property name="template-component.dir" value="${basedir}/templates/template-component"/>
     <property name="template-project.dir" value="${basedir}/templates/template-project"/>
 
@@ -12,6 +14,7 @@
     <property file="database.properties"/>
     <import file="build.macros.xml"/>
     <import file="build.shared-dist.xml"/>
+    <import file="build.properties-dist.xml"/>
 
     <path id="lib.path">
         <fileset dir="lib" includes="**/*.jar"/>
@@ -33,12 +36,15 @@ component.create
     Creates a new flexive UI component directory.
 
 db.create
-        Create or reset the database schema of a flexive division.
-        Warning: if the schema already exists, it will be dropped (i.e. you will lose all data
-        stored in the schema).
+    Create or reset the database schema of a flexive division.
+    Warning: if the schema already exists, it will be dropped (i.e. you will lose all data
+    stored in the schema).
 
 db.config.create
-        Create or reset the global flexive configuration schema.]]>
+    Create or reset the global flexive configuration schema.
+
+ear
+    Create a flexive.ear distribution including the backend administration GUI.]]>
         </echo>
 
         <input message="Please enter a target name, or quit to exit:" addproperty="info.targetname"/>
@@ -144,6 +150,15 @@ Base directory:      ${project.basedir}]]>
         <!-- Show success message -->
         <echo>Project ${project.name} created successfully. The project root directory is</echo>
         <echo>${project.basedir}</echo>
+    </target>
+
+    <target name="ear" description="Create a flexive.ear archive including the backend administration GUI">
+        <ear earfile="flexive.ear" appxml="META-INF/application.xml">
+            <zipfileset prefix="lib" dir="${dist.lib.dir}" includes="**/*" excludes="flexive-ejb.jar"/>
+            <zipfileset prefix="lib" dir="${dist.extlib.dir}" includes="**/*" excludes="jsf-api.jar,jsf-impl.jar,javaee.jar,jboss-*.jar,selenium-*,testng-*"/>
+            <fileset file="${dist.basedir}/*.war"/>
+            <fileset file="${dist.lib.dir}/flexive-ejb.jar"/>
+        </ear>
     </target>
 
     <!-- Empty no-op target -->
