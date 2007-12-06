@@ -82,9 +82,9 @@ public class FxValueInput extends UIInput {
      */
     public boolean isDisableMultiLanguage() {
         if (disableMultiLanguage == null) {
-            disableMultiLanguage = FxJsfComponentUtils.getBooleanValue(this, "disableMultiLanguage");
+            return FxJsfComponentUtils.getBooleanValue(this, "disableMultiLanguage", false);
         }
-        return disableMultiLanguage != null && disableMultiLanguage;
+        return disableMultiLanguage;
     }
 
     public void setDisableMultiLanguage(boolean disableMultiLanguage) {
@@ -99,9 +99,9 @@ public class FxValueInput extends UIInput {
      */
     public boolean isReadOnly() {
         if (readOnly == null) {
-            readOnly = FxJsfComponentUtils.getBooleanValue(this, "readOnly");
+            return FxJsfComponentUtils.getBooleanValue(this, "readOnly", false);
         }
-        return readOnly != null && readOnly;
+        return readOnly;
     }
 
     public void setReadOnly(boolean readOnly) {
@@ -142,9 +142,9 @@ public class FxValueInput extends UIInput {
      */
     public boolean isForceLineInput() {
         if (forceLineInput == null) {
-            forceLineInput = FxJsfComponentUtils.getBooleanValue(this, "forceLineInput");
+            return FxJsfComponentUtils.getBooleanValue(this, "forceLineInput", false);
         }
-        return forceLineInput != null && forceLineInput;
+        return forceLineInput;
     }
 
     /**
@@ -166,10 +166,7 @@ public class FxValueInput extends UIInput {
      */
     public boolean isFilter() {
         if (filter == null) {
-            filter = FxJsfComponentUtils.getBooleanValue(this, "filter");
-        }
-        if (filter == null) {
-            filter = true;
+            return FxJsfComponentUtils.getBooleanValue(this, "filter", true);
         }
         return filter;
     }

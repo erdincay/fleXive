@@ -7,7 +7,7 @@
 -->
 <project name="tutorial01-documentstore" basedir="." default="package">
     <property name="fxProject" value="tutorial01-documentstore"/>
-    <property name="flexive.dist.dir" value="${basedir}/../../../dist"/>
+    <property name="flexive.dist.dir" value="${basedir}/../../../flexive-dist"/>
 
     <!-- Copy output packages to shared flexive drop dir-->
     <property name="build.dist.dir" value="${basedir}/../../../drop"/>

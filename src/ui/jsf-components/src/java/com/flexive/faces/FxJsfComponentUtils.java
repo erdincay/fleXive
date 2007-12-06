@@ -121,6 +121,19 @@ public class FxJsfComponentUtils {
         return (Boolean) getValue(component, attributeName);
     }
 
+    /**
+     * Evaluate the boolean attribute of a component.
+     *
+     * @param component     a JSF component
+     * @param attributeName the attribute name to be evaluated, e.g. "title"
+     * @param defaultValue  the default value to be used when the attribute is null
+     * @return the bound value, or null if no value is bound
+     */
+    public static boolean getBooleanValue(UIComponent component, String attributeName, boolean defaultValue) {
+        final Boolean value = (Boolean) getValue(component, attributeName);
+        return value != null ? value : defaultValue;
+    }
+
     public static Object getValue(UIComponent component, String attributeName) {
         ValueExpression ve = component.getValueExpression(attributeName);
         if (ve != null) {
