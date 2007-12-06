@@ -63,11 +63,24 @@
             </listitem>
             <listitem>
                 <para>
-                    <link href="http://www.flexive.org/faq">FAQ</link>'s are anwered on the &flexive; 
+                    <link href="http://www.flexive.org/faq">FAQ</link>'s are anwered on the &flexive;
                     <link href="http://www.flexive.org">website</link>
                 </para>
             </listitem>
         </orderedlist>
+    </para>
+
+    <para>
+        For questions, use the &flexive; forum and mailinglists. We also provide a issue trackings system for bug
+        reports and feature requests. In case you are interested in the development of &flexive;, have a look at the
+        Development Section on the &flexive; website and join the developer mailinglist.
+    </para>
+
+    <para>
+
+        &Flexive; is a Professional Open Source project. UCS - unique computing solutions gmbh (<link
+            href="http://www.ucs.at">http://www.ucs.at</link>) offers commercial development support and training
+        for &flexive;.
     </para>
 
 </chapter>
