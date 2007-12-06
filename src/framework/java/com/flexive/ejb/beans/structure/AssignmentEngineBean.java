@@ -1893,9 +1893,6 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 StringBuilder assignmentList = new StringBuilder(200);
                 for (FxAssignment check : affectedAssignments) {
                     assignmentList.append(",").append(check.getId());
-                    if (ticket.getMandatorId() != check.getAssignedType().getMandator().getId())
-                        throw new FxNoAccessException("ex.structure.noAccess.mandator",
-                                check.getAssignedType().getMandator().getDisplay());
                     if (check instanceof FxPropertyAssignment && check.getAssignedType().usePropertyPermissions()) {
                         FxPropertyAssignment pa = (FxPropertyAssignment) check;
                         if (!ticket.mayDeleteACL(pa.getACL().getId()))

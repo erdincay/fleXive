@@ -637,18 +637,6 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
-    public List<FxType> getTypes(long allowedMandator, boolean returnBaseTypes, boolean returnDerivedTypes, boolean returnTypes, boolean returnRelations) {
-        List<FxType> fxTypes = _getTypes(returnBaseTypes, returnDerivedTypes, returnTypes, returnRelations);
-        List<FxType> allowedTypes = new ArrayList<FxType>(fxTypes.size());
-        for (FxType check : fxTypes)
-            if (check.isValidMandator(allowedMandator))
-                allowedTypes.add(check);
-        return Collections.unmodifiableList(allowedTypes);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public FxAssignment getAssignment(String xPath) {
         if (xPath != null && xPath.trim().length() > 0) {
             try {

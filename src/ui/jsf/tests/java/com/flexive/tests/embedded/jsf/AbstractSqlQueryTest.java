@@ -57,8 +57,6 @@ import com.flexive.tests.embedded.TestUsers;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
-import java.util.Arrays;
-
 /**
  * Base class for SQL query tests, including test data generation.
  *
@@ -81,7 +79,6 @@ public class AbstractSqlQueryTest {
         final AssignmentEngine assignmentEngine = EJBLookup.getAssignmentEngine();
         final TypeEngine typeEngine = EJBLookup.getTypeEngine();
         final ContentEngine contentEngine = EJBLookup.getContentEngine();
-        FxEnvironment environment = CacheAdmin.getEnvironment();
 
         login(TestUsers.SUPERVISOR);
 
@@ -94,8 +91,7 @@ public class AbstractSqlQueryTest {
         FxPropertyEdit pe = FxPropertyEdit.createNew(TEST_PROPERTY, new FxString(""),
                 new FxString(""), FxMultiplicity.MULT_0_1, structureAcl, FxDataType.String1024);
         pe.setAutoUniquePropertyName(true);
-        typeId = typeEngine.save(FxTypeEdit.createNew(TEST_TYPE, new FxString(""), structureAcl, null)
-                .setAllowedMandators(Arrays.asList(new Mandator[] { environment.getMandator(Mandator.MANDATOR_FLEXIVE) })));
+        typeId = typeEngine.save(FxTypeEdit.createNew(TEST_TYPE, new FxString(""), structureAcl, null));
         try {
             assignmentId = assignmentEngine.createProperty(typeId, pe, "/");
         } catch (FxEntryExistsException e) {

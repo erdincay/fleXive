@@ -269,6 +269,12 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
                 FxContext.get().stopRunAsSystem();
             }
             con = Database.getDbConnection();
+            //                                                  1
+            sql = "DELETE FROM " + TBL_GROUP + " WHERE MANDATOR=? AND AUTOMANDATOR=TRUE";
+            ps = con.prepareStatement(sql);
+            ps.setLong(1, mandatorId);
+            ps.executeUpdate();
+            ps.close();
             //                                                1
             sql = "DELETE FROM " + TBL_MANDATORS + " WHERE ID=?";
             ps = con.prepareStatement(sql);

@@ -283,19 +283,6 @@ public interface FxEnvironment extends Serializable {
                           boolean returnTypes, boolean returnRelations);
 
     /**
-     * Get types depending that are allowed for the given mandator
-     *
-     * @param allowedMandator    allowed mandator - to filter out inaccessible types for this mandator
-     * @param returnBaseTypes    return types that are not derived from another type
-     * @param returnDerivedTypes return types that are derived from another type
-     * @param returnTypes        return FxTypes
-     * @param returnRelations    return FxTypes that are relations
-     * @return FxType iterator
-     */
-    List<FxType> getTypes(long allowedMandator, boolean returnBaseTypes, boolean returnDerivedTypes,
-                          boolean returnTypes, boolean returnRelations);
-
-    /**
      * Get a type or relation identified by its id
      *
      * @param id type id

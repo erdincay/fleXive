@@ -56,24 +56,22 @@ println "Scanning folder $startFolder for jpg, gif and png files ..."
 
 def importImage(rootNode, file) {
     println "Importing ${file.name}"
-    EJBLookup.getTransactionManager().begin();
-    ContentEngine co = EJBLookup.getContentEngine();
-    FxType type = CacheAdmin.getEnvironment().getType("Image");
-    FileInputStream fis = new FileInputStream(file);
-    BinaryDescriptor binary = new BinaryDescriptor(file.getName(), file.length(), fis);
-    fis.close();
-    FxBinary fxBin = new FxBinary(false, binary);
+    EJBLookup.getTransactionManager().begin()
+    ContentEngine co = EJBLookup.getContentEngine()
+    FxType type = CacheAdmin.getEnvironment().getType("Image")
+    FileInputStream fis = new FileInputStream(file)
+    BinaryDescriptor binary = new BinaryDescriptor(file.getName(), file.length(), fis)
+    fis.close()
+    FxBinary fxBin = new FxBinary(false, binary)
 
-    UserTicket ticket = FxContext.get().getTicket();
-    FxContent img = co.initialize(type.getId(), type.getMandator().getId(),
-            CacheAdmin.getEnvironment().getACL("Image Content ACL").getId(),
-            type.getWorkflow().getSteps().get(0).getId(), ticket.getLanguage().getId());
+    UserTicket ticket = FxContext.get().getTicket()
+    FxContent img = co.initialize(type.getId())
     img.setValue("/ImageBinary", fxBin);
-    img.setValue("/Filename", new FxString(false, file.name));
-    FxPK pk = co.save(img);
+    img.setValue("/Filename", new FxString(false, file.name))
+    FxPK pk = co.save(img)
     // Tree update disabled due to transactional issues
     //EJBLookup.getTreeInterface().createNode(rootNode, file.name, pk.getId());
-    EJBLookup.getTransactionManager().commit();
+    EJBLookup.getTransactionManager().commit()
 }
 
 def folder = new File(startFolder)
@@ -84,13 +82,13 @@ if (!folder.exists()) {
     return
 }
 
-long rootNode = EJBLookup.getTreeEngine().getIdByPath(FxTreeMode.Edit, "/Images");
+long rootNode = EJBLookup.getTreeEngine().getIdByPath(FxTreeMode.Edit, "/Images")
 if (rootNode == -1)
-    rootNode = EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("Images"));
+    rootNode = EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("Images"))
 
 // if we don't commit on the first startup here, the images cannot be attached to the image folder
 // EJBLookup.getTransactionManager().commit();
-def trans = EJBLookup.getTransactionManager().suspend();
+def trans = EJBLookup.getTransactionManager().suspend()
 try {
     folder.eachFileMatch(~/.*\.(JPG|jpg|jpeg|png|gif)/) {file ->
         try {
@@ -105,5 +103,5 @@ try {
         }
     }
 } finally {
-    EJBLookup.getTransactionManager().resume(trans);
+    EJBLookup.getTransactionManager().resume(trans)
 }

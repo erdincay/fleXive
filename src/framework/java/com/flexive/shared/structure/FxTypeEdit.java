@@ -34,11 +34,9 @@
 package com.flexive.shared.structure;
 
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.FxContext;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.security.ACL;
-import com.flexive.shared.security.Mandator;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.workflow.Workflow;
 import org.apache.commons.lang.StringUtils;
@@ -70,8 +68,6 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param description             description
      * @param acl                     type ACL
      * @param workflow                workflow to use
-     * @param mandator                mandator
-     * @param allowedMandators        mandators allowed to use this type
      * @param parent                  parent type or <code>null</code> if not derived
      * @param enableParentAssignments if parent is not <code>null</code> enable all derived assignments from the parent?
      * @param storageMode             the storage mode
@@ -87,13 +83,13 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param maxRelSource            max. number of instance related as source
      * @param maxRelDestination       max. number of instances related as destination
      */
-    private FxTypeEdit(String name, FxString description, ACL acl, Workflow workflow, Mandator mandator,
-                       List<Mandator> allowedMandators, FxType parent, boolean enableParentAssignments,
+    private FxTypeEdit(String name, FxString description, ACL acl, Workflow workflow, FxType parent,
+                       boolean enableParentAssignments,
                        TypeStorageMode storageMode, TypeCategory category, TypeMode mode,
                        boolean checkValidity, LanguageMode language, TypeState state, byte permissions,
                        boolean trackHistory, long historyAge, long maxVersions, int maxRelSource,
                        int maxRelDestination) {
-        super(-1, acl, workflow, mandator, allowedMandators, name, description, parent, storageMode,
+        super(-1, acl, workflow, name, description, parent, storageMode,
                 category, mode, checkValidity, language, state, permissions, trackHistory, historyAge,
                 maxVersions, maxRelSource, maxRelDestination, null, null, new ArrayList<FxTypeRelation>(5));
         this.enableParentAssignments = enableParentAssignments;
@@ -110,7 +106,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param type the FxType to edit
      */
     public FxTypeEdit(FxType type) {
-        super(type.getId(), type.getACL(), type.getWorkflow(), type.getMandator(), type.getAllowedMandators(),
+        super(type.getId(), type.getACL(), type.getWorkflow(), 
                 type.getName(), type.getDescription(), type.getParent(), type.getStorageMode(), type.getCategory(),
                 type.getMode(), type.isCheckValidity(), type.getLanguage(), type.getState(), type.permissions,
                 type.isTrackHistory(), type.getHistoryAge(), type.getMaxVersions(), type.getMaxRelSource(),
@@ -121,7 +117,6 @@ public class FxTypeEdit extends FxType implements Serializable {
         this.assignedGroups = new ArrayList<FxGroupAssignment>(type.assignedGroups);
         this.assignedProperties = new ArrayList<FxPropertyAssignment>(type.assignedProperties);
         this.relations = new ArrayList<FxTypeRelation>(type.relations);
-        this.allowedMandators = new ArrayList<Mandator>(type.allowedMandators);
         this.changed = false;
         this.removeInstancesWithRelationTypes = false;
         this.originalRelations = new ArrayList<FxTypeRelation>(super.getRelations());
@@ -149,8 +144,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      */
     public static FxTypeEdit createNew(String name, FxString description, ACL acl, FxType parent) {
         return createNew(name, description, acl, CacheAdmin.getEnvironment().getWorkflows().get(0),
-                CacheAdmin.getEnvironment().getMandator(FxContext.get().getTicket().getMandatorId()),
-                new ArrayList<Mandator>(0), parent, parent != null, TypeStorageMode.Hierarchical,
+                parent, parent != null, TypeStorageMode.Hierarchical,
                 TypeCategory.User, TypeMode.Content, false, LanguageMode.Multiple, TypeState.Available,
                 getDefaultTypePermissions(), false, 0, -1, 0, 0);
     }
@@ -166,8 +160,6 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param description             description
      * @param acl                     type ACL
      * @param workflow                workflow to use
-     * @param mandator                mandator
-     * @param allowedMandators        mandators allowed to use this type
      * @param parent                  parent type or <code>null</code> if not derived
      * @param enableParentAssignments if parent is not <code>null</code> enable all derived assignments from the parent?
      * @param storageMode             the storage mode
@@ -184,13 +176,13 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param maxRelDestination       max. number of instance related as destination
      * @return FxTypeEdit instance for creating a new FxType
      */
-    public static FxTypeEdit createNew(String name, FxString description, ACL acl, Workflow workflow, Mandator mandator,
-                                       List<Mandator> allowedMandators, FxType parent, boolean enableParentAssignments,
+    public static FxTypeEdit createNew(String name, FxString description, ACL acl, Workflow workflow,
+                                       FxType parent, boolean enableParentAssignments,
                                        TypeStorageMode storageMode, TypeCategory category, TypeMode mode,
                                        boolean checkValidity, LanguageMode language, TypeState state, byte permissions,
                                        boolean trackHistory, long historyAge, long maxVersions, int maxRelSource,
                                        int maxRelDestination) {
-        return new FxTypeEdit(name, description, acl, workflow, mandator, allowedMandators, parent, enableParentAssignments,
+        return new FxTypeEdit(name, description, acl, workflow, parent, enableParentAssignments,
                 storageMode, category, mode, checkValidity, language, state, permissions, trackHistory, historyAge,
                 maxVersions, maxRelSource, maxRelDestination);
     }
@@ -275,30 +267,6 @@ public class FxTypeEdit extends FxType implements Serializable {
      */
     public FxTypeEdit setWorkflow(Workflow workflow) {
         this.workflow = workflow;
-        this.changed = true;
-        return this;
-    }
-
-    /**
-     * Set the mandator of this type
-     *
-     * @param mandator the mandatorof this type
-     * @return the type itself, useful for chained calls
-     */
-    public FxTypeEdit setMandator(Mandator mandator) {
-        this.mandator = mandator;
-        this.changed = true;
-        return this;
-    }
-
-    /**
-     * Set all mandators that are allowed to access this type
-     *
-     * @param allowedMandators all mandators allowed to access this type
-     * @return the type itself, useful for chained calls
-     */
-    public FxTypeEdit setAllowedMandators(List<Mandator> allowedMandators) {
-        this.allowedMandators = allowedMandators;
         this.changed = true;
         return this;
     }
@@ -688,14 +656,6 @@ public class FxTypeEdit extends FxType implements Serializable {
      */
     public void removeRelation(FxTypeRelation relation) {
         relations.remove(relation);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<Mandator> getAllowedMandators() {
-        return allowedMandators;
     }
 
     /**

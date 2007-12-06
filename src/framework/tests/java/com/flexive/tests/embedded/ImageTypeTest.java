@@ -79,21 +79,27 @@ public class ImageTypeTest {
 
     @Test
     public void importTest() throws Exception {
-        File testFile = new File("src/framework/testresources/image/Exif.JPG");
-        if (!testFile.exists())
-            return;
+        FxPK imgPK = null;
+        try {
+            File testFile = new File("src/framework/testresources/image/Exif.JPG");
+            if (!testFile.exists())
+                return;
 
-        FxType type = CacheAdmin.getEnvironment().getType(IMAGE_TYPE);
+            FxType type = CacheAdmin.getEnvironment().getType(IMAGE_TYPE);
 
-        FileInputStream fis = new FileInputStream(testFile);
-        BinaryDescriptor binary = new BinaryDescriptor(testFile.getName(), testFile.length(), fis);
-        FxBinary fxBin = new FxBinary(false, binary);
+            FileInputStream fis = new FileInputStream(testFile);
+            BinaryDescriptor binary = new BinaryDescriptor(testFile.getName(), testFile.length(), fis);
+            FxBinary fxBin = new FxBinary(false, binary);
 
-        FxContent img = co.initialize(type.getId());
-        img.setValue("/ImageBinary", fxBin);
-        img.setValue("/Filename", new FxString(false, "Exif.JPG"));
-        img = co.prepareSave(img);
-        co.save(img);
+            FxContent img = co.initialize(type.getId());
+            img.setValue("/ImageBinary", fxBin);
+            img.setValue("/Filename", new FxString(false, "Exif.JPG"));
+            img = co.prepareSave(img);
+            imgPK = co.save(img);
+        } finally {
+            if( imgPK != null )
+                co.remove(imgPK);
+        }
     }
 
     @Test
@@ -110,16 +116,22 @@ public class ImageTypeTest {
         FxContent img = co.initialize(type.getId());
         img.setValue("/ImageBinary", new FxBinary(false, binary));
         img.setValue("/Filename", new FxString(false, "Exif.JPG"));
-        FxPK pk = co.save(img);
+        FxPK pk = null;
+        try {
+            pk = co.save(img);
 
-        FxContent loaded = co.load(pk);
-        FxBinary bin = (FxBinary) loaded.getValue("/ImageBinary");
-        File comp = File.createTempFile("Exif", "JPG");
-        FileOutputStream fos = new FileOutputStream(comp);
-        bin.getBestTranslation().download(fos);
-        fos.close();
-        assert comp.length() == testFile.length() : "Files differ in length";
-        if (!comp.delete())
-            comp.deleteOnExit();
+            FxContent loaded = co.load(pk);
+            FxBinary bin = (FxBinary) loaded.getValue("/ImageBinary");
+            File comp = File.createTempFile("Exif", "JPG");
+            FileOutputStream fos = new FileOutputStream(comp);
+            bin.getBestTranslation().download(fos);
+            fos.close();
+            assert comp.length() == testFile.length() : "Files differ in length";
+            if (!comp.delete())
+                comp.deleteOnExit();
+        } finally {
+            if( pk != null )
+                co.remove(pk);
+        }
     }
 }

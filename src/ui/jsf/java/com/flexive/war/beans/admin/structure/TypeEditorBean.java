@@ -43,7 +43,6 @@ import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.security.ACL;
-import com.flexive.shared.security.Mandator;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
 import org.apache.commons.lang.StringUtils;
@@ -65,9 +64,6 @@ public class TypeEditorBean {
 
     private static final Log LOG = LogFactory.getLog(TypeEditorBean.class);
     private FxTypeEdit type = null;
-    private List<SelectItem> selectedMandators = null;
-    private List<SelectItem> deselectedMandators = null;
-    private SelectItem mandatorFiler = null;
     private List<WrappedRelation> wrappedRelations = null;
     private long defaultSelectListTypeId = CacheAdmin.getEnvironment().getTypes(true, true, true, false).get(0).getId();
     private long relSourceIdFiler = defaultSelectListTypeId;
@@ -166,17 +162,6 @@ public class TypeEditorBean {
     }
 
     private void initEditing() {
-        selectedMandators = FxJsfUtils.asSelectList(type.getAllowedMandators(), false);
-        deselectedMandators = FxJsfUtils.asSelectList(CacheAdmin.getFilteredEnvironment().getMandators(true, false), false);
-        List<SelectItem> toremove = new ArrayList<SelectItem>();
-        for (SelectItem i : selectedMandators) {
-            for (SelectItem j : deselectedMandators) {
-                if (((Mandator) i.getValue()).getId() == ((Mandator) j.getValue()).getId())
-                    toremove.add(j);
-            }
-        }
-        deselectedMandators.removeAll(toremove);
-
         wrappedRelations = new ArrayList<WrappedRelation>(type.getRelations().size());
         for (FxTypeRelation r : type.getRelations()) {
             wrappedRelations.add(new WrappedRelation(r));
@@ -249,11 +234,6 @@ public class TypeEditorBean {
             if (unlimitedVersions) {
                 type.setMaxVersions(-1);
             }
-            List<Mandator> allowedMandators = new ArrayList<Mandator>(selectedMandators.size());
-            for (SelectItem i : selectedMandators) {
-                allowedMandators.add((Mandator) i.getValue());
-            }
-            this.type.setAllowedMandators(allowedMandators);
             updateRelations();
 
             type.setHistoryAge(historyAgeToMilis());
@@ -424,39 +404,6 @@ public class TypeEditorBean {
         }
     }
 
-    public void removeAllowedMandator() {
-        if (mandatorFiler != null)
-            if (((Mandator) getMandatorFiler().getValue()).getId() != getMandator().getId()) {
-                selectedMandators.remove(getMandatorFiler());
-                deselectedMandators.add(getMandatorFiler());
-            }
-        mandatorFiler = null;
-    }
-
-    public void addAllowedMandator() {
-        if (mandatorFiler != null) {
-            selectedMandators.add(getMandatorFiler());
-            deselectedMandators.remove(getMandatorFiler());
-        }
-        mandatorFiler = null;
-    }
-
-    public SelectItem getMandatorFiler() {
-        return mandatorFiler;
-    }
-
-    public void setMandatorFiler(SelectItem mandatorFiler) {
-        this.mandatorFiler = mandatorFiler;
-    }
-
-    public List<SelectItem> getSelectedMandators() {
-        return selectedMandators;
-    }
-
-    public List<SelectItem> getDeselectedMandators() {
-        return deselectedMandators;
-    }
-
     public FxTypeEdit getType() {
         return type;
     }
@@ -505,47 +452,12 @@ public class TypeEditorBean {
         return this.type.getWorkflow().getId();
     }
 
-    public void setMandator(Mandator m) {
-        this.type.setMandator(m);
-        SelectItem ms = null;
-        boolean found = false;
-        for (SelectItem i : selectedMandators) {
-            if (((Mandator) i.getValue()).getId() == m.getId()) {
-                found = true;
-                ms = i;
-                break;
-            }
-        }
-        if (!found) {
-            for (SelectItem i : deselectedMandators) {
-                if (((Mandator) i.getValue()).getId() == m.getId()) {
-                    ms = i;
-                    break;
-                }
-            }
-            selectedMandators.add(ms);
-            deselectedMandators.remove(ms);
-        }
-    }
-
-    public Mandator getMandator() {
-        return this.type.getMandator();
-    }
-
     public void setACL(long id) {
         this.type.setACL(CacheAdmin.getEnvironment().getACL(id));
     }
 
     public long getACL() {
         return this.type.getACL().getId();
-    }
-
-    public void setAllowedMandators(List<Mandator> mandators) {
-        this.type.setAllowedMandators(mandators);
-    }
-
-    public List<Mandator> getAllowedMandators() {
-        return this.type.getAllowedMandators();
     }
 
     public void setCheckValidity(boolean ck) {

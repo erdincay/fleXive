@@ -51,16 +51,15 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-
 /**
+ * Tests for the filtered environment
+ * 
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
 public class FilteredEnvironmentTest extends EnvironmentTest {
     private static final String MANDATOR_NAME = "EnvironmentTestMandator";
     private static final String TYPE_NAME = "EnvironmentTestType";
-    private static final String FOREIGN_TYPE_NAME = "EnvironmentForeignTestType";
     private Mandator foreignMandator;
     private static final String PROPERTY_NAME = "EnvironmentTestProperty";
 
@@ -95,8 +94,6 @@ public class FilteredEnvironmentTest extends EnvironmentTest {
     @Test(groups = {"ejb", "environment"})
     public void mandatorTypeFilterTest() throws FxLoginFailedException, FxAccountInUseException, FxLogoutFailedException, FxApplicationException {
         long typeId = -1;
-        long propertyId = -1;
-        long assignmentId = -1;
         long foreignTypeId = -1;
         try {
             // check original environment type count
@@ -121,17 +118,6 @@ public class FilteredEnvironmentTest extends EnvironmentTest {
             assertEquals(getEnvironment().getTypes(true, true, true, true).size(), originalEnvironmentSize + 1, "New type not visible in environment");
             assertEquals(getEnvironment().getProperties(true, true).size(), originalPropertiesSize + 1, "New property not visible in environment");
             assertEquals(getEnvironment().getPropertyAssignments().size(), originalAssignmentsSize + 1, "New property assignments not visible in environment");
-
-            // create a new type for the foreign mandator
-            login(TestUsers.SUPERVISOR);
-            foreignTypeId = EJBLookup.getTypeEngine().save(FxTypeEdit.createNew(
-                    FOREIGN_TYPE_NAME, new FxString("test"), acl)
-                    // set type owner
-                    .setMandator(foreignMandator)
-                    // limit allowed mandators (otherwise the creating mandator would be included)
-                    .setAllowedMandators(Arrays.asList(foreignMandator)));
-            assertEquals(CacheAdmin.getEnvironment().getType(foreignTypeId).getMandator(), foreignMandator);
-            logout();
 
             // check the guest user environment - should be unchanged from the previous call
             login(TestUsers.GUEST);

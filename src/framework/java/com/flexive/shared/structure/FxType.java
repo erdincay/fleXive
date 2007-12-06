@@ -81,8 +81,6 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     protected long id;
     protected ACL ACL;
     protected Workflow workflow;
-    protected Mandator mandator;
-    List<Mandator> allowedMandators;
     protected String name;
     protected FxString description;
     protected FxType parent;
@@ -107,15 +105,13 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     protected List<FxAssignment> scriptedAssignments;
     protected Map<FxScriptEvent, long[]> scriptMapping;
 
-    public FxType(long id, ACL acl, Workflow workflow, Mandator mandator, List<Mandator> allowedMandators, String name, FxString description, FxType parent, TypeStorageMode storageMode,
+    public FxType(long id, ACL acl, Workflow workflow, String name, FxString description, FxType parent, TypeStorageMode storageMode,
                   TypeCategory category, TypeMode mode, boolean checkValidity, LanguageMode language, TypeState state, byte permissions,
                   boolean trackHistory, long historyAge, long maxVersions, int maxRelSource, int maxRelDestination,
                   LifeCycleInfo lifeCycleInfo, List<FxType> derivedTypes, List<FxTypeRelation> relations) {
         this.id = id;
         this.ACL = acl;
         this.workflow = workflow;
-        this.mandator = mandator;
-        this.allowedMandators = (allowedMandators != null ? allowedMandators : new ArrayList<Mandator>(0));
         this.name = name.toUpperCase();
         this.description = description;
         this.parent = parent;
@@ -135,16 +131,6 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
         this.derivedTypes = derivedTypes;
         this.relations = relations;
         this.scriptMapping = new HashMap<FxScriptEvent, long[]>(10);
-
-        //make sure the owner is included in allowedMandators
-        boolean foundOwner = false;
-        for (Mandator man : this.allowedMandators)
-            if (man.getId() == mandator.getId()) {
-                foundOwner = true;
-                break;
-            }
-        if (!foundOwner)
-            this.allowedMandators.add(0, mandator);
     }
 
     /**
@@ -199,24 +185,6 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      */
     public void reloadWorkflow(FxEnvironment environment) {
         this.workflow = environment.getWorkflow(this.getWorkflow().getId());
-    }
-
-    /**
-     * Get the owning mandator of this type
-     *
-     * @return the owning mandator of this type
-     */
-    public Mandator getMandator() {
-        return mandator;
-    }
-
-    /**
-     * Get all mandators that have access to this type (including the owner)
-     *
-     * @return all mandators that have access to this type (including the owner)
-     */
-    public List<Mandator> getAllowedMandators() {
-        return Collections.unmodifiableList(allowedMandators);
     }
 
     /**
@@ -826,21 +794,6 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     }
 
     /**
-     * Check if the givane mandatorId is valid for this type
-     *
-     * @param mandatorId requested mandator
-     * @return if the mandatorId is valid for this type
-     */
-    public boolean isValidMandator(long mandatorId) {
-        if (this.mandator.getId() == mandatorId)
-            return true;
-        for (Mandator m : getAllowedMandators())
-            if (m.getId() == mandatorId)
-                return true;
-        return false;
-    }
-
-    /**
      * Check if the given XPath is valid for this content
      *
      * @param XPath         the XPath to check
@@ -920,7 +873,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      */
     @Override
     public String toString() {
-        return this.getName() + "[id=" + this.getId() + ",mandator=" + this.getMandator().getId() + "]";
+        return this.getName() + "[id=" + this.getId() + "]";
     }
 
     /**

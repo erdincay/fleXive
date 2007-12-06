@@ -68,6 +68,8 @@ public class FxTreeTest {
     @AfterClass
     public void afterClass() throws FxLogoutFailedException {
         try {
+            tree.clear(FxTreeMode.Live);
+            tree.clear(FxTreeMode.Edit);
             EJBLookup.getDivisionConfigurationEngine().put(SystemParameters.TREE_CHECKS_ENABLED, false);
         } catch (FxApplicationException e) {
             //ignore
@@ -236,7 +238,7 @@ public class FxTreeTest {
         assert node1_2_loaded.getPosition() == 1 : "Expected [1] got: [" + node1_2_loaded.getPosition() + "]";
         assert node1_3_loaded.getPosition() == 2 : "Expected [2] got: [" + node1_3_loaded.getPosition() + "]";
         //delete 1_2 and check positions
-        tree.remove(new FxTreeNodeEdit(node1_2_loaded), false, false);
+        tree.remove(new FxTreeNodeEdit(node1_2_loaded), true, false);
         assert !tree.exist(mode, id1_2);
         node1_1_loaded = tree.getNode(mode, id1_1);
         node1_3_loaded = tree.getNode(mode, id1_3);
@@ -247,7 +249,7 @@ public class FxTreeTest {
         if (mode == FxTreeMode.Live)
             return; //children are to be removed in live mode
         //delete parent but not children and check if they moved up in hierarchy
-        tree.remove(new FxTreeNodeEdit(node1_loaded), false, false);
+        tree.remove(new FxTreeNodeEdit(node1_loaded), true, false);
         node1_1_loaded = tree.getNode(mode, id1_1);
         node1_3_loaded = tree.getNode(mode, id1_3);
         assert node1_1_loaded.getParentNodeId() == FxTreeNode.ROOT_NODE;
@@ -264,6 +266,7 @@ public class FxTreeTest {
         assert !tree.exist(mode, id1_3);
         assert tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() == 0 :
                 "Expected to have 0 children, got: [" + tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() + "]";
+        tree.clear(mode);
     }
 
     /**

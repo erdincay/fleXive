@@ -48,7 +48,6 @@ import com.flexive.shared.interfaces.*;
 import com.flexive.shared.scripting.FxScriptBinding;
 import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.security.ACL;
-import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxAssignment;
 import com.flexive.shared.structure.FxEnvironment;
@@ -129,9 +128,6 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             } catch (Exception e) {
                 throw new FxInvalidParameterException("STEP", "ex.workflow.noStepDefined", type.getWorkflow().getName());
             }
-        Mandator mand = environment.getMandator(mandatorId);
-        if (!type.isValidMandator(mandatorId))
-            throw new FxInvalidParameterException("MANDATOR", "ex.content.invalidMandator", mand.getName());
         int lang = prefLang;
         try {
             language.load(lang);
@@ -170,7 +166,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
     public FxContent initialize(long typeId) throws FxApplicationException {
         FxType type = CacheAdmin.getEnvironment().getType(typeId);
         UserTicket ticket = FxContext.get().getTicket();
-        return initialize(type.getId(), (ticket.isGlobalSupervisor() ? type.getMandator().getId() : ticket.getMandatorId()),
+        return initialize(type.getId(), ticket.getMandatorId(),
                 -1 /*invalid ACL will cause a lookup for best-fit ACL*/,
                 type.getWorkflow().getSteps().get(0).getId(), ticket.getLanguage().getId());
     }

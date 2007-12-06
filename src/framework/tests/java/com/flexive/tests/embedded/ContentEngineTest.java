@@ -294,9 +294,9 @@ public class ContentEngineTest {
     public void removeAddData() throws Exception {
         FxType testType = CacheAdmin.getEnvironment().getType(TEST_TYPE);
         assert testType != null;
-        FxContent test = co.initialize(testType.getId(), testType.getMandator().getId(), CacheAdmin.getEnvironment().getACL("Test ACL Content 1").getId(),
-                testType.getWorkflow().getSteps().get(0).getId(), FxLanguage.ENGLISH);
+        FxContent test = co.initialize(testType.getId());
         assert test != null;
+        test.setAclId(CacheAdmin.getEnvironment().getACL("Test ACL Content 1").getId());
 
         assert test.getRootGroup().getCreateableChildren(true).size() == 6;
         assert !test.getRootGroup().isRemoveable();
@@ -360,8 +360,8 @@ public class ContentEngineTest {
         FxType testType = CacheAdmin.getEnvironment().getType(TEST_TYPE);
         assert testType != null;
         //initialize tests start
-        FxContent test = co.initialize(testType.getId(), testType.getMandator().getId(), CacheAdmin.getEnvironment().getACL("Test ACL Content 1").getId(),
-                testType.getWorkflow().getSteps().get(0).getId(), FxLanguage.ENGLISH);
+        FxContent test = co.initialize(testType.getId());
+        test.setAclId(CacheAdmin.getEnvironment().getACL("Test ACL Content 1").getId());
         assert test != null;
         int rootSize = 8 + CacheAdmin.getEnvironment().getSystemInternalRootPropertyAssignments().size();
         assert rootSize == test.getData("/").size() : "Root size expected " + rootSize + ", was " + test.getData("/").size();
@@ -491,8 +491,8 @@ public class ContentEngineTest {
     public void contentInitialize() throws Exception {
         try {
             FxType article = CacheAdmin.getEnvironment().getType(TYPE_ARTICLE);
-            FxContent test = co.initialize(article.getId(), article.getMandator().getId(), CacheAdmin.getEnvironment().getACL("Article ACL").getId(),
-                    article.getWorkflow().getSteps().get(0).getId(), FxLanguage.ENGLISH);
+            FxContent test = co.initialize(article.getId());
+            test.setAclId(CacheAdmin.getEnvironment().getACL("Article ACL").getId());
             test.getData("/");
             test.getData("/MYTITLE");
             test.getData("/TEXT");
@@ -543,8 +543,8 @@ public class ContentEngineTest {
     @Test
     public void contentCreate() throws Exception {
         FxType article = CacheAdmin.getEnvironment().getType(TYPE_ARTICLE);
-        FxContent test = co.initialize(article.getId(), article.getMandator().getId(), CacheAdmin.getEnvironment().getACL("Article ACL").getId(),
-                article.getWorkflow().getSteps().get(0).getId(), FxLanguage.ENGLISH);
+        FxContent test = co.initialize(article.getId());
+        test.setAclId(CacheAdmin.getEnvironment().getACL("Article ACL").getId());
         FxString title = new FxString(FxLanguage.ENGLISH, "Title english");
         title.setTranslation(FxLanguage.GERMAN, "Titel deutsch");
         FxString text = new FxString(FxLanguage.ENGLISH, "Text english1");

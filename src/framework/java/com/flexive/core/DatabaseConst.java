@@ -182,10 +182,6 @@ public final class DatabaseConst {
      */
     public static final String TBL_STRUCT_TYPERELATIONS = "FXS_TYPERELS";
     /**
-     * Structure types to mandators table
-     */
-    public static final String TBL_STRUCT_TYPES2MANDATORS = "FXS_TYPE2MANDATORS";
-    /**
      * Main content table
      */
     public static final String TBL_CONTENT = "FX_CONTENT";

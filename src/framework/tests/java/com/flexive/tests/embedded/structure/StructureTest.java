@@ -139,7 +139,6 @@ public class StructureTest {
         FxTypeEdit testEdit = new FxTypeEdit(CacheAdmin.getEnvironment().getType("TestCD"));
         long propCount = testEdit.getAssignedProperties().size();
         testEdit.setName("TestCDNewName");
-        testEdit.setMandator(CacheAdmin.getEnvironment().getMandator(Mandator.MANDATOR_FLEXIVE));
         testEdit.setPermissions((byte) 0); //clear permissions
         testEdit.setUseInstancePermissions(true);
         testEdit.setDescription(new FxString("Changed description"));
@@ -148,7 +147,6 @@ public class StructureTest {
         te.save(testEdit);
         FxType testType = CacheAdmin.getEnvironment().getType("TestCDNewName");
         assert testType.getAssignedProperties().size() == propCount : "Property count mismatch";
-        assert testType.getMandator().getId() == Mandator.MANDATOR_FLEXIVE;
         assert testType.getAssignment("/TestDirectProperty2").getXPath().equals("TESTCDNEWNAME/TESTDIRECTPROPERTY2") :
                 "Expected [TESTCDNEWNAME/TESTDIRECTPROPERTY2] but got: [" + testType.getAssignment("/TestDirectProperty2").getXPath() + "]";
         assert testType.usePermissions();

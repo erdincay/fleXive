@@ -299,18 +299,7 @@ public final class FilteredEnvironment implements FxEnvironment {
      * {@inheritDoc}
      */
     public List<FxType> getTypes(boolean returnBaseTypes, boolean returnDerivedTypes, boolean returnTypes, boolean returnRelations) {
-        return getTypes(getTicket().getMandatorId(), returnBaseTypes, returnDerivedTypes, returnTypes, returnRelations);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public List<FxType> getTypes(long allowedMandator, boolean returnBaseTypes, boolean returnDerivedTypes, boolean returnTypes, boolean returnRelations) {
-        if (getTicket().isGlobalSupervisor() || allowedMandator == getTicket().getMandatorId()) {
-            return environment.getTypes(allowedMandator, returnBaseTypes, returnDerivedTypes, returnTypes, returnRelations);
-        } else {
-            throw new FxNoAccessException("ex.filteredEnvironment.foreignMandator", getTicket().getMandatorId(), allowedMandator).asRuntimeException();
-        }
+        return environment.getTypes(returnBaseTypes, returnDerivedTypes, returnTypes, returnRelations);
     }
 
     /**

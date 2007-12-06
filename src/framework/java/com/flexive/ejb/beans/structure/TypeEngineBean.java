@@ -46,7 +46,6 @@ import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.security.ACL;
-import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.*;
 import org.apache.commons.lang.StringUtils;
@@ -93,14 +92,13 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
     HistoryTrackerEngineLocal htracker;
 
     public static final String TYPE_CREATE =
-            //                                     1   2         3     4       5             6         7
-            "INSERT INTO " + TBL_STRUCT_TYPES + " (ID, MANDATOR, NAME, PARENT, STORAGE_MODE, CATEGORY, TYPE_MODE, " +
-                    //8               9           10          11             12            13           14
+            //                                     1   2     3       4             5         6
+            "INSERT INTO " + TBL_STRUCT_TYPES + " (ID, NAME, PARENT, STORAGE_MODE, CATEGORY, TYPE_MODE, " +
+                    //7               8           9           10             11            12           13
                     "VALIDITY_CHECKS, LANG_MODE,  TYPE_STATE, SECURITY_MODE, TRACKHISTORY, HISTORY_AGE, MAX_VERSIONS, " +
-                    //15                 16                17          18          19           20           21   22
+                    //14                 15                16          17          18           19           20   21
                     "REL_TOTAL_MAXSRC, REL_TOTAL_MAXDST, CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT, ACL, WORKFLOW) VALUES " +
-                    "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-    public static final String TYPE_ALLOWED_MANDATORS_INSERT = "INSERT INTO " + TBL_STRUCT_TYPES2MANDATORS + " (TYPEID,MANDATORID) VALUES (?,?)";
+                    "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     /**
      * {@inheritDoc}
@@ -127,10 +125,6 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             throw new FxInvalidParameterException("NAME", "ex.structure.create.nameMissing");
         if (!type.getStorageMode().isSupported())
             throw new FxInvalidParameterException("STORAGEMODE", "ex.structure.typeStorageMode.notSupported", type.getStorageMode().getLabel().getBestTranslation(ticket));
-        if (!ticket.isGlobalSupervisor())
-            if (ticket.getMandatorId() != type.getMandator().getId())
-                throw new FxNoAccessException("ex.structure.noAccess.mandator", type.getMandator().getDisplay());
-
         if (type.getACL().getCategory() != ACL.Category.STRUCTURE)
             throw new FxInvalidParameterException("aclId", "ex.acl.category.invalid", type.getACL().getCategory().name(), ACL.Category.STRUCTURE.name());
 
@@ -141,30 +135,29 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             con = Database.getDbConnection();
             ps = con.prepareStatement(TYPE_CREATE);
             ps.setLong(1, newId);
-            ps.setLong(2, type.getMandator().getId());
-            ps.setString(3, type.getName());
+            ps.setString(2, type.getName());
             if (type.getParent() != null)
-                ps.setLong(4, type.getParent().getId());
+                ps.setLong(3, type.getParent().getId());
             else
-                ps.setNull(4, java.sql.Types.INTEGER);
-            ps.setInt(5, type.getStorageMode().getId());
-            ps.setInt(6, type.getCategory().getId());
-            ps.setInt(7, type.getMode().getId());
-            ps.setBoolean(8, type.isCheckValidity());
-            ps.setInt(9, type.getLanguage().getId());
-            ps.setInt(10, type.getState().getId());
-            ps.setByte(11, type.getBitCodedPermissions());
-            ps.setBoolean(12, type.isTrackHistory());
-            ps.setLong(13, type.getHistoryAge());
-            ps.setLong(14, type.getMaxVersions());
-            ps.setInt(15, type.getMaxRelSource());
-            ps.setInt(16, type.getMaxRelDestination());
-            ps.setLong(17, ticket.getUserId());
-            ps.setTimestamp(18, new java.sql.Timestamp(java.lang.System.currentTimeMillis()));
-            ps.setLong(19, ticket.getUserId());
-            ps.setTimestamp(20, new java.sql.Timestamp(java.lang.System.currentTimeMillis()));
-            ps.setLong(21, type.getACL().getId());
-            ps.setLong(22, type.getWorkflow().getId());
+                ps.setNull(3, java.sql.Types.INTEGER);
+            ps.setInt(4, type.getStorageMode().getId());
+            ps.setInt(5, type.getCategory().getId());
+            ps.setInt(6, type.getMode().getId());
+            ps.setBoolean(7, type.isCheckValidity());
+            ps.setInt(8, type.getLanguage().getId());
+            ps.setInt(9, type.getState().getId());
+            ps.setByte(10, type.getBitCodedPermissions());
+            ps.setBoolean(11, type.isTrackHistory());
+            ps.setLong(12, type.getHistoryAge());
+            ps.setLong(13, type.getMaxVersions());
+            ps.setInt(14, type.getMaxRelSource());
+            ps.setInt(15, type.getMaxRelDestination());
+            ps.setLong(16, ticket.getUserId());
+            ps.setTimestamp(17, new java.sql.Timestamp(java.lang.System.currentTimeMillis()));
+            ps.setLong(18, ticket.getUserId());
+            ps.setTimestamp(19, new java.sql.Timestamp(java.lang.System.currentTimeMillis()));
+            ps.setLong(20, type.getACL().getId());
+            ps.setLong(21, type.getWorkflow().getId());
             ps.executeUpdate();
             Database.storeFxString(type.getDescription(), con, TBL_STRUCT_TYPES, "DESCRIPTION", "ID", newId);
             //TODO: relations
@@ -191,15 +184,6 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                         pge.setEnabled(type.isEnableParentAssignments());
                         assignmentEngine.save(pge, true);
                     }
-                }
-            }
-            if (type.getAllowedMandators() != null && type.getAllowedMandators().size() > 0) {
-                ps.close();
-                ps = con.prepareStatement(TYPE_ALLOWED_MANDATORS_INSERT);
-                ps.setLong(1, newId);
-                for (Mandator m : type.getAllowedMandators()) {
-                    ps.setLong(2, m.getId());
-                    ps.executeUpdate();
                 }
             }
             StructureLoader.reload(con);
@@ -323,10 +307,6 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             throw new FxInvalidParameterException("NAME", "ex.structure.update.nameMissing");
 
         //security checks start
-        if (!ticket.isGlobalSupervisor())
-            if (ticket.getMandatorId() != type.getMandator().getId())
-                throw new FxNoAccessException("ex.structure.noAccess.mandator", type.getMandator().getDisplay());
-
         if (!ticket.mayEditACL(type.getACL().getId()))
             throw new FxNoAccessException("ex.acl.noAccess.edit", type.getACL().getName());
         //security checks end
@@ -335,14 +315,6 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
         Connection con = null;
         PreparedStatement ps = null;
         FxType orgType = environment.getType(type.getId());
-
-        //remove mandator from allowedMandators if it is contained
-        for (int i = 0; i < type.getAllowedMandators().size(); i++) {
-            if (type.getAllowedMandators().get(i).getId() == type.getMandator().getId()) {
-                type.getAllowedMandators().remove(i);
-                break;
-            }
-        }
 
         StringBuilder sql = new StringBuilder(500);
 
@@ -485,64 +457,6 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                 ps.executeBatch();
             }
             //end relation changes
-
-            //start mandator changes
-            if (!type.getMandator().equals(orgType.getMandator()) || !type.getAllowedMandators().equals(orgType.getAllowedMandators())) {
-                sql.setLength(0);
-                sql.append("SELECT COUNT(*) FROM ").append(TBL_CONTENT).append(" WHERE TDEF=? AND MANDATOR NOT IN (").append(type.getMandator().getId());
-                for (Mandator m : type.getAllowedMandators())
-                    sql.append(',').append(m.getId());
-                sql.append(')');
-                if (ps != null) ps.close();
-                ps = con.prepareStatement(sql.toString());
-                ps.setLong(1, type.getId());
-                ResultSet rs = ps.executeQuery();
-                assert rs != null;
-                rs.next();
-                int count = rs.getInt(1);
-                if (count > 0) {
-                    StringBuilder mandators = new StringBuilder(100);
-                    List<Mandator> orgMandators = new ArrayList<Mandator>(orgType.getAllowedMandators());
-                    orgMandators.add(orgType.getMandator());
-                    orgMandators.remove(type.getMandator());
-                    orgMandators.removeAll(type.getAllowedMandators());
-                    for (int i = 0; i < orgMandators.size(); i++) {
-                        if (i > 0)
-                            mandators.append(", ");
-                        mandators.append(orgMandators.get(i).getName());
-                    }
-                    throw new FxUpdateException("ex.structure.type.mandatorUsed", type.getName(), mandators.toString(), count);
-                }
-                if (!type.getMandator().equals(orgType.getMandator())) {
-                    sql.setLength(0);
-                    sql.append("UPDATE ").append(TBL_STRUCT_TYPES).append(" SET MANDATOR=? WHERE ID=?");
-                    if (ps != null) ps.close();
-                    ps = con.prepareStatement(sql.toString());
-                    ps.setLong(1, type.getMandator().getId());
-                    ps.setLong(2, type.getId());
-                    ps.executeUpdate();
-                    htracker.track(type, "history.type.update.mandator", orgType.getMandator(), type.getMandator());
-                }
-                if (!type.getAllowedMandators().equals(orgType.getAllowedMandators())) {
-                    sql.setLength(0);
-                    sql.append("DELETE FROM ").append(TBL_STRUCT_TYPES2MANDATORS).append(" WHERE TYPEID=?");
-                    if (ps != null) ps.close();
-                    ps = con.prepareStatement(sql.toString());
-                    ps.setLong(1, type.getId());
-                    ps.executeUpdate();
-                    ps.close();
-                    sql.setLength(0);
-                    sql.append("INSERT INTO ").append(TBL_STRUCT_TYPES2MANDATORS).append(" (TYPEID,MANDATORID) " +
-                            " VALUES (?,?)");
-                    ps = con.prepareStatement(sql.toString());
-                    ps.setLong(1, type.getId());
-                    for (Mandator mand : type.getAllowedMandators()) {
-                        ps.setLong(2, mand.getId());
-                        ps.executeUpdate();
-                    }
-                }
-            }
-            //end mandator changes
 
             //start ACL changes
             if (!type.getACL().equals(orgType.getACL())) {
@@ -737,10 +651,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
     public void remove(long id) throws FxApplicationException {
         final UserTicket ticket = FxContext.get().getTicket();
         FxType type = CacheAdmin.getEnvironment().getType(id);
-        if (!ticket.isGlobalSupervisor())
-            if (ticket.getMandatorId() != type.getMandator().getId())
-                throw new FxNoAccessException("ex.structure.noAccess.mandator", type.getMandator().getDisplay());
-
+        
         if (!ticket.mayDeleteACL(type.getACL().getId()))
             throw new FxNoAccessException("ex.acl.noAccess.delete", type.getACL().getName());
 
@@ -750,12 +661,6 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
         StringBuilder sql = new StringBuilder(500);
         try {
             con = Database.getDbConnection();
-            sql.append("DELETE FROM ").append(TBL_STRUCT_TYPES2MANDATORS).append(" WHERE TYPEID=?");
-            ps = con.prepareStatement(sql.toString());
-            ps.setLong(1, type.getId());
-            ps.executeUpdate();
-            ps.close();
-            sql.setLength(0);
             List<FxPropertyAssignment> allPropertyAssignments = new ArrayList<FxPropertyAssignment>(20);
             FxEnvironment env = CacheAdmin.getEnvironment();
             for (FxPropertyAssignment fxpa : env.getPropertyAssignments(true))
@@ -921,47 +826,39 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
      */
     private FxType loadType(Connection con, long id) throws FxLoadException, FxNotFoundException {
         Statement stmt = null;
-        PreparedStatement ps = null, ps2 = null;
+        PreparedStatement ps = null;
         String curSql;
         FxEnvironment environment = CacheAdmin.getEnvironment();
         try {
-            ps = con.prepareStatement("select mandatorid from " + TBL_STRUCT_TYPES2MANDATORS + " where typeid=?");
             //                                 1         2       3        4
-            ps2 = con.prepareStatement("select typesrc, typedst, maxsrc, maxdst from " + TBL_STRUCT_TYPERELATIONS + " where typedef=?");
-            //               1   2         3     4       5             6         7          8
-            curSql = "select id, mandator, name, parent, storage_mode, category, type_mode, validity_checks, " +
-                    //9         10          11             12            13           14
-                    "lang_mode, type_state, security_mode, trackhistory, history_age, max_versions," +
-                    //15               16                17          18          19           20           21   22
-                    "rel_total_maxsrc, rel_total_maxdst, created_by, created_at, modified_by, modified_at, acl, workflow " +
-                    " from " + TBL_STRUCT_TYPES + " where id=" + id;
+            ps = con.prepareStatement("SELECT TYPESRC, TYPEDST, MAXSRC, MAXDST FROM " + TBL_STRUCT_TYPERELATIONS + " WHERE TYPEDEF=?");
+            //               1   2     3       4             5         6          7
+            curSql = "SELECT ID, NAME, PARENT, STORAGE_MODE, CATEGORY, TYPE_MODE, VALIDITY_CHECKS, " +
+                    //8         9           10             11            12           13
+                    "LANG_MODE, TYPE_STATE, SECURITY_MODE, TRACKHISTORY, HISTORY_AGE, MAX_VERSIONS," +
+                    //14               15                16          17          18           19           20   21
+                    "REL_TOTAL_MAXSRC, REL_TOTAL_MAXDST, CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT, ACL, WORKFLOW " +
+                    " FROM " + TBL_STRUCT_TYPES + " WHERE ID=" + id;
 
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(curSql);
-            ResultSet rsMand;
             ResultSet rsRelations;
             if (rs != null && rs.next()) {
                 try {
                     ps.setLong(1, rs.getLong(1));
-                    ps2.setLong(1, rs.getLong(1));
-                    rsMand = ps.executeQuery();
-                    List<Mandator> alMand = new ArrayList<Mandator>(10);
-                    while (rsMand != null && rsMand.next()) {
-                        alMand.add(environment.getMandator(rsMand.getInt(1)));
-                    }
                     List<FxTypeRelation> alRelations = new ArrayList<FxTypeRelation>(10);
-                    rsRelations = ps2.executeQuery();
+                    rsRelations = ps.executeQuery();
                     while (rsRelations != null && rsRelations.next())
                         alRelations.add(new FxTypeRelation(new FxPreloadType(rsRelations.getLong(1)), new FxPreloadType(rsRelations.getLong(2)),
                                 rsRelations.getInt(3), rsRelations.getInt(4)));
-                    return new FxType(rs.getLong(1), environment.getACL(rs.getInt(21)),
-                            environment.getWorkflow(rs.getInt(22)), environment.getMandator(rs.getInt(2)), alMand, rs.getString(3),
+                    return new FxType(rs.getLong(1), environment.getACL(rs.getInt(20)),
+                            environment.getWorkflow(rs.getInt(21)), rs.getString(2),
                             Database.loadFxString(con, TBL_STRUCT_TYPES, "description", "id=" + rs.getLong(1)),
-                            new FxPreloadType(rs.getLong(4)), TypeStorageMode.getById(rs.getInt(5)),
-                            TypeCategory.getById(rs.getInt(6)), TypeMode.getById(rs.getInt(7)), rs.getBoolean(8),
-                            LanguageMode.getById(rs.getInt(9)), TypeState.getById(rs.getInt(10)), rs.getByte(11),
-                            rs.getBoolean(12), rs.getLong(13), rs.getLong(14), rs.getInt(15), rs.getInt(16),
-                            LifeCycleInfoImpl.load(rs, 17, 18, 19, 20), new ArrayList<FxType>(5), alRelations);
+                            new FxPreloadType(rs.getLong(3)), TypeStorageMode.getById(rs.getInt(4)),
+                            TypeCategory.getById(rs.getInt(5)), TypeMode.getById(rs.getInt(6)), rs.getBoolean(7),
+                            LanguageMode.getById(rs.getInt(8)), TypeState.getById(rs.getInt(9)), rs.getByte(10),
+                            rs.getBoolean(11), rs.getLong(12), rs.getLong(13), rs.getInt(14), rs.getInt(15),
+                            LifeCycleInfoImpl.load(rs, 16, 17, 18, 19), new ArrayList<FxType>(5), alRelations);
                 } catch (FxNotFoundException e) {
                     throw new FxLoadException(LOG, e);
                 }
@@ -973,12 +870,6 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             try {
                 if (ps != null)
                     ps.close();
-            } catch (SQLException e) {
-                //ignore
-            }
-            try {
-                if (ps2 != null)
-                    ps2.close();
             } catch (SQLException e) {
                 //ignore
             }
