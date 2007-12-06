@@ -973,7 +973,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             } catch (FxApplicationException e) {
                 throw e.asRuntimeException();
             }
-            parentGroupId = 0;
+            parentGroupId = FxAssignment.NO_PARENT;
         } else {
             parentAssignments = assignment.getParentGroupAssignment().getAssignments();
             parentGroupId = assignment.getParentGroupAssignment().getId();
@@ -981,9 +981,20 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         if (parentAssignments.size() < 1)
             return 0; //need at least 2 assignments to move anything
 
-        if( assignment.getPosition() == parentAssignments.size() ) {
-            //no need to move assignments since it will be appended at the end
-            return assignment.getPosition();
+        int orgPos = -1;
+        for (FxAssignment a : parentAssignments) {
+            if (a.getId() == assignment.getId()) {
+                orgPos = a.getPosition();
+                break;
+            }
+        }
+        boolean posChanged = orgPos != -1 && orgPos != assignment.getPosition();
+        if( orgPos == -1)
+            orgPos = parentAssignments.size() + 1;
+
+        if( assignment.getPosition() >= parentAssignments.size() && !posChanged) {
+            //no need to move assignments since it will be appended at the end or didnt change at all
+            return parentAssignments.size();
         }
 
         //algorithm:
@@ -994,13 +1005,6 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         int savePos = parentAssignments.size() + 1;
         if (pos > parentAssignments.size())
             pos = parentAssignments.size() - 1;
-        int orgPos = parentAssignments.size() + 1;
-        for (FxAssignment a : parentAssignments) {
-            if (a.getId() == assignment.getId()) {
-                orgPos = a.getPosition();
-                break;
-            }
-        }
         PreparedStatement ps = null;
         try {
             // (1) update the position of the assignment to be moved to be maxPos+1 (savePos)
@@ -1734,7 +1738,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     prop.getProperty().getId(), prop.getProperty().getName());
             storeOptions(con, TBL_PROPERTY_OPTIONS, "ID", prop.getProperty().getId(), newAssignmentId, prop.getOptions());
             FxPropertyAssignment newProp = new FxPropertyAssignment(newAssignmentId, prop.isEnabled(), prop.getAssignedType(),
-                    prop.getAlias(), prop.getXPath(), prop.getPosition(), prop.getMultiplicity(), prop.getDefaultMultiplicity(),
+                    prop.getAlias(), prop.getXPath(), position, prop.getMultiplicity(), prop.getDefaultMultiplicity(),
                     prop.getParentGroupAssignment(), prop.getBaseAssignmentId(), prop.getLabel(), prop.getHint(),
                     prop.getDefaultValue(), prop.getProperty(), prop.getACL(), prop.getDefaultLanguage(), prop.getOptions());
             changeAssignmentPosition(con, newProp);
