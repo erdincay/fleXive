@@ -56,7 +56,7 @@ article.setValue("/longtexthtml", new FxHTML(false,
 <h3>What is [fleXive]?</h3>
 <p>
 [fleXive] is a <strong>JavaEE 5 open-source (GPL 2.0) framework</strong> for the development of
-complex and evolving (web-)applications. It <strong>speeds <span class="small"></span>up development</strong>
+complex and evolving (web-)applications. It <strong>speeds up development</strong>
 as it handles numerous important application issues and keeps your application flexible over
 the development-cycle.
 </p>

@@ -253,7 +253,7 @@ class EditModeHelper extends RenderHelper {
             }
             writer.write("tinyMCE.execCommand('mceAddControl', false, '" + inputId + "');\n");
             writer.write("tinyMCE.execInstanceCommand('" + inputId + "', 'mceSetContent', false, '"
-                    + FxFormatUtils.escapeForJavaScript(getTextValue(language), true, false) + "');\n");
+                    + FxFormatUtils.escapeForJavaScript(getTextValue(language), false, false) + "');\n");
             writer.endElement("script");
         } else {
             // render standard text area
