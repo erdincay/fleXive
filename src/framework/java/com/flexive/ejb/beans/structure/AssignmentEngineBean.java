@@ -59,13 +59,13 @@ import java.util.List;
 
 /**
  * Structure Assignment management
+ * <p/>
+ * TODO's:
+ * -property/group removal
+ * -check if modification/creation even possible in case instances exist
+ * -implement all known changeable flags
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
- *         <p/>
- *         TODO's:
- *         -property/group removal
- *         -check if modification/creation even possible in case instances exist
- *         -implement all known changeable flags
  */
 @Stateless(name = "AssignmentEngine")
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
@@ -203,7 +203,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             ps.setLong(4, typeId);
             ps.setInt(5, property.getMultiplicity().getMin());
             ps.setInt(6, property.getMultiplicity().getMax());
-            if( property.getMultiplicity().isValid(property.getAssignmentDefaultMultiplicity())) {
+            if (property.getMultiplicity().isValid(property.getAssignmentDefaultMultiplicity())) {
                 ps.setInt(7, property.getAssignmentDefaultMultiplicity());
             } else {
                 //default is min(min,1).
@@ -620,7 +620,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             ps.setLong(4, typeId);
             ps.setInt(5, group.getMultiplicity().getMin());
             ps.setInt(6, group.getMultiplicity().getMax());
-            if( group.getMultiplicity().isValid(group.getAssignmentDefaultMultiplicity())) {
+            if (group.getMultiplicity().isValid(group.getAssignmentDefaultMultiplicity())) {
                 ps.setInt(7, group.getAssignmentDefaultMultiplicity());
             } else {
                 //default is min(min,1).
@@ -899,7 +899,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             }
 
             //update SystemInternal flag, this is a one way function, so it can only be set, but not reset!!
-            if (!org.isSystemInternal() && group.isSystemInternal() && FxContext.get().getTicket().isGlobalSupervisor() ) {
+            if (!org.isSystemInternal() && group.isSystemInternal() && FxContext.get().getTicket().isGlobalSupervisor()) {
                 if (ps != null) ps.close();
                 ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET SYSINTERNAL=? WHERE ID=?");
                 ps.setBoolean(1, group.isSystemInternal());
@@ -964,10 +964,16 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         int pos = assignment.getPosition();
         if (pos < 0)
             pos = 0;
-        if (!assignment.hasParentGroupAssignment())
-            return 0;
-        List<FxAssignment> parentAssignments = assignment.getParentGroupAssignment().getAssignments();
-        if(parentAssignments.size() == 1)
+        List<FxAssignment> parentAssignments;
+        if (!assignment.hasParentGroupAssignment()) {
+            try {
+                parentAssignments = assignment.getAssignedType().getConnectedAssignments("/");
+            } catch (FxApplicationException e) {
+                throw e.asRuntimeException();
+            }
+        } else
+            parentAssignments = assignment.getParentGroupAssignment().getAssignments();
+        if (parentAssignments.size() == 1)
             return 0; //need at least 2 assignments to move anything
 
         //algorithm:
@@ -975,12 +981,12 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         // close the gap
         // open a gap at the destination position
         // update savepos (maxPos+1) to the destination position
-        int savePos = parentAssignments.size()+1;
+        int savePos = parentAssignments.size() + 1;
         if (pos > parentAssignments.size())
             pos = parentAssignments.size() - 1;
         int orgPos = -1;
-        for(FxAssignment a: parentAssignments) {
-            if( a.getId() == assignment.getId() ) {
+        for (FxAssignment a : parentAssignments) {
+            if (a.getId() == assignment.getId()) {
                 orgPos = a.getPosition();
                 break;
             }
@@ -1016,41 +1022,11 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             ps.setInt(1, pos);
             ps.setLong(2, assignment.getId());
             ps.executeUpdate();
-/*
-            //open a "slot"
-            ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET POS=POS+1 WHERE " +
-                    "TYPEDEF=? AND PARENTGROUP=? AND POS>=?");
-            ps.setLong(1, assignment.getAssignedType().getId());
-            ps.setLong(2, assignment.getParentGroupAssignment().getId());
-            ps.setInt(3, pos);
-            ps.executeUpdate();
-            //get the position if the soon-to-be "hole"
-            ps.close();
-            ps = con.prepareStatement("SELECT POS FROM " + TBL_STRUCT_ASSIGNMENTS + " WHERE ID=?");
-            ps.setLong(1, assignment.getId());
-            ResultSet rs = ps.executeQuery();
-            rs.next();
-            int holePos = rs.getInt(1);
-            //move the assignment to the "slot"
-            ps.close();
-            ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET POS=? WHERE ID=?");
-            ps.setInt(1, pos);
-            ps.setLong(2, assignment.getId());
-            ps.executeUpdate();
-            ps.close();
-            //close the "hole"
-            ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET POS=POS-1 WHERE " +
-                    "TYPEDEF=? AND PARENTGROUP=? AND POS>=?");
-            ps.setLong(1, assignment.getAssignedType().getId());
-            ps.setLong(2, assignment.getParentGroupAssignment().getId());
-            ps.setInt(3, holePos);
-            ps.executeUpdate();
-            */
         } catch (SQLException e) {
             throw new FxUpdateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
             try {
-                if( ps != null )
+                if (ps != null)
                     ps.close();
             } catch (SQLException e) {
                 //ignore
@@ -1120,11 +1096,11 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 ps.executeUpdate();
                 Database.storeFxString(new FxString[]{group.getLabel(), group.getHint()}, con,
                         TBL_STRUCT_ASSIGNMENTS, new String[]{"DESCRIPTION", "HINT"}, "ID", newAssignmentId);
-
                 thisGroupAssignment = new FxGroupAssignment(newAssignmentId, true, group.getAssignedType(),
                         group.getAlias(), XPath, position, group.getMultiplicity(), group.getDefaultMultiplicity(),
                         group.getParentGroupAssignment(), group.getBaseAssignmentId(),
                         group.getLabel(), group.getHint(), group.getGroup(), group.getMode(), null);
+                changeAssignmentPosition(con, thisGroupAssignment);
             } else {
                 thisGroupAssignment = null;
                 newAssignmentId = FxAssignment.NO_PARENT;
@@ -1408,12 +1384,12 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * @param _con     database conneciton
      * @param ps       prepared statement
-     * @param sql
+     * @param sql      StringBuilder to cache query creation
      * @param original the original property assignment to compare changes
      *                 against and update. if==null, the original will be fetched from the cache
      * @param modified the modified property assignment
-     * @return
-     * @throws FxApplicationException
+     * @return if any changes were found
+     * @throws FxApplicationException on errors
      */
 
     private boolean updatePropertyAssignment(Connection _con, PreparedStatement ps, StringBuilder sql, FxPropertyAssignment original,
@@ -1709,7 +1685,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         return changes;
     }
 
-    private long createPropertyAssignment(Connection _con, PreparedStatement ps, StringBuilder sql, FxPropertyAssignmentEdit prop) throws FxApplicationException {
+    private long createPropertyAssignment(Connection _con, PreparedStatement ps, StringBuilder sql,
+                                          FxPropertyAssignmentEdit prop) throws FxApplicationException {
         if (sql == null)
             sql = new StringBuilder(1000);
         if (!prop.isNew())
@@ -1758,6 +1735,11 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             htracker.track(prop.getAssignedType(), "history.assignment.createPropertyAssignment", XPath, prop.getAssignedType().getId(), prop.getAssignedType().getName(),
                     prop.getProperty().getId(), prop.getProperty().getName());
             storeOptions(con, TBL_PROPERTY_OPTIONS, "ID", prop.getProperty().getId(), newAssignmentId, prop.getOptions());
+            FxPropertyAssignment newProp = new FxPropertyAssignment(newAssignmentId, prop.isEnabled(), prop.getAssignedType(),
+                    prop.getAlias(), prop.getXPath(), prop.getPosition(), prop.getMultiplicity(), prop.getDefaultMultiplicity(),
+                    prop.getParentGroupAssignment(), prop.getBaseAssignmentId(), prop.getLabel(), prop.getHint(),
+                    prop.getDefaultValue(), prop.getProperty(), prop.getACL(), prop.getDefaultLanguage(), prop.getOptions());
+            changeAssignmentPosition(con, newProp);
             if (!prop.isSystemInternal()) {
                 //only need a reload and inheritance handling if the property is not system internal
                 //since system internal properties are only created from the type engine we don't have to care
@@ -2249,7 +2231,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         }
         finally {
             if (con != null)
-                Database.closeObjects(AssignmentEngineBean.class, con, null);
+                Database.closeObjects(AssignmentEngineBean.class, con, ps);
         }
         return count;
     }
