@@ -10,14 +10,18 @@
         This procedure is for those building &Flexive; from the
         <link href="http://www.flexive.org/download">source code</link>.
         <itemizedlist>
-            <listitem>Copy the build.properties.sample file to build.properties
+            <listitem>Copy the
+                <filename>build.properties.sample</filename>
+                file located in the root directory of the
+                <link href="http://www.flexive.org/download">&Flexive; source code</link>
+                to<filename>build.properties</filename>.
                 <xi:include href="../listings/installation_build.properties.xml"/>
             </listitem>
             <listitem>Execute ant
                 <code>db.update</code>
                 before
                 <code>ant all</code>
-                in your &Flexive; directory where the
+                in your &Flexive; root directory where the
                 <filename>build.xml</filename>
                 file
                 resides.
