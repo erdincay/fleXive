@@ -60,30 +60,18 @@ public class FxTestUtils {
      * @throws FxAccountInUseException if the user is already logged in (and not multilogin-capable)
      */
     public static void login(String username, String password) throws FxLoginFailedException, FxAccountInUseException {
-        try {
-            FxContext.get().login(username, password, true);
-        } catch (FxLoginFailedException e) {
-            System.err.println("Login failed: " + e.getMessage());
-        } catch (FxAccountInUseException e) {
-            System.err.println("Account for [" + username + "] is in use: " + e.getMessage());
-        }
+        FxContext.get().login(username, password, true);
     }
 
     /**
      * Login a TestUser
      *
      * @param user TestUser
-     * @throws FxLoginFailedException
-     * @throws FxAccountInUseException
+     * @throws FxLoginFailedException  if the login failed
+     * @throws FxAccountInUseException if the user is already logged in (and not multilogin-capable)
      */
     public static void login(TestUser user) throws FxLoginFailedException, FxAccountInUseException {
-        try {
-            FxContext.get().login(user.getUserName(), user.getPassword(), true);
-        } catch (FxLoginFailedException e) {
-            System.err.println("Login failed: " + e.getMessage());
-        } catch (FxAccountInUseException e) {
-            System.err.println("Account for [" + user.getUserName() + "] is in use: " + e.getMessage());
-        }
+        FxContext.get().login(user.getUserName(), user.getPassword(), true);
     }
 
     /**

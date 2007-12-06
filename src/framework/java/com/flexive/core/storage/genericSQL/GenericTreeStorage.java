@@ -966,6 +966,7 @@ while (!hasSpace) {
         Statement stmt = null;
         try {
             FxPK rootPK;
+
             FxTreeMode rootCheckMode = mode == FxTreeMode.Live ? FxTreeMode.Edit : FxTreeMode.Live;
             try {
                 rootPK = getTreeNodeInfo(con, rootCheckMode, FxTreeNode.ROOT_NODE).getReference();
@@ -1078,8 +1079,8 @@ while (!hasSpace) {
                 //FX-102: edit permission checks on references
                 try {
                     if (ce != null)
-                        FxPermissionUtils.checkPermission(FxContext.get().getTicket(), ACL.Permission.EDIT, ce.getContentSecurityInfo(new FxPK(nodeId)), true);
-                    references.add(new FxPK(nodeId));
+                        FxPermissionUtils.checkPermission(FxContext.get().getTicket(), ACL.Permission.EDIT, ce.getContentSecurityInfo(nodeInfo.getReference()), true);
+                    references.add(nodeInfo.getReference());
                 } catch (FxLoadException e) {
                     //ignore, might have been removed meanwhile
                 }

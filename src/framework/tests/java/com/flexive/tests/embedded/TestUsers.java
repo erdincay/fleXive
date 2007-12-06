@@ -101,8 +101,6 @@ public class TestUsers {
             initialized = true;
 
             try {
-                // TODO: workaround for FxContext/UserTicket issue
-                FxTestUtils.login("s", "s");
                 FxContext.get().runAsSystem();
                 languageId = languages.load("en").getId();
                 mandatorId = getTestMandator();
