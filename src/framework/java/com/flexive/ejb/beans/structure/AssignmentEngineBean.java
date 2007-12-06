@@ -965,14 +965,19 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         if (pos < 0)
             pos = 0;
         List<FxAssignment> parentAssignments;
+        long parentGroupId;
+
         if (!assignment.hasParentGroupAssignment()) {
             try {
                 parentAssignments = assignment.getAssignedType().getConnectedAssignments("/");
             } catch (FxApplicationException e) {
                 throw e.asRuntimeException();
             }
-        } else
+            parentGroupId = 0;
+        } else {
             parentAssignments = assignment.getParentGroupAssignment().getAssignments();
+            parentGroupId = assignment.getParentGroupAssignment().getId();
+        }
         if (parentAssignments.size() == 1)
             return 0; //need at least 2 assignments to move anything
 
@@ -1003,7 +1008,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET POS=POS-1 WHERE " +
                     "TYPEDEF=? AND PARENTGROUP=? AND POS>? AND ID<>?");
             ps.setLong(1, assignment.getAssignedType().getId());
-            ps.setLong(2, assignment.getParentGroupAssignment().getId());
+
+            ps.setLong(2, parentGroupId);
             ps.setInt(3, orgPos);
             ps.setLong(4, assignment.getId());
             ps.executeUpdate();
@@ -1012,7 +1018,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET POS=POS+1 WHERE " +
                     "TYPEDEF=? AND PARENTGROUP=? AND POS>=? AND ID<>?");
             ps.setLong(1, assignment.getAssignedType().getId());
-            ps.setLong(2, assignment.getParentGroupAssignment().getId());
+            ps.setLong(2, parentGroupId);
             ps.setInt(3, pos);
             ps.setLong(4, assignment.getId());
             ps.executeUpdate();
@@ -1033,19 +1039,6 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             }
         }
         return pos;
-        /*
-        //TODO:check for valid position
-        if (ps != null) ps.close();
-        ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET POS=? WHERE ID=?");
-        ps.setInt(1, prop.getPosition());
-        ps.setLong(2, prop.getId());
-        ps.executeUpdate();
-        if (changes)
-            changesDesc.append(',');
-        changesDesc.append("position=").append(prop.getPosition());
-        changes = true;
-        */
-//        return assignment.getPosition();
     }
 
     private long createGroupAssignment(Connection _con, PreparedStatement ps, StringBuilder sql, FxGroupAssignmentEdit group, boolean createSubAssignments) throws FxApplicationException {
