@@ -170,10 +170,12 @@ database.password=a]]></programlisting>
                             too.
                         </para>
                     </listitem>
-                    <para>
-                        The default superuser's username and password for the Backend Administration are:
-                    </para>
-                    <para>username: supervisor, password: supervisor</para>
+                    <listitem>
+                        <para>
+                            The default superuser's username and password for the Backend Administration are:
+                        </para>
+                        <para>username: supervisor, password: supervisor</para>
+                    </listitem>
                 </itemizedlist>
             </para>
         </section>
@@ -189,7 +191,8 @@ database.password=a]]></programlisting>
                 to assign a different partition UDP group to each cluster! This can be done by adding
                 <code>-Djboss.partition.udpGroup=230.2.3.4</code>
                 (or any other multicast address you choose thats available)
-                to the start script/command shown in <link linkend="jboss_installation_starting_flexive">Starting &Flexive;</link>.
+                to the start script/command shown in<link linkend="jboss_installation_starting_flexive">
+                Starting &Flexive;</link>.
             </para>
         </section>
         <section xml:id="jboss_installation_troubleshooting_ant">
