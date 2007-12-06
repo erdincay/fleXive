@@ -3,7 +3,11 @@
         <!ENTITY % global_entities SYSTEM "global.ent">
         %global_entities;
         ]>
-<chapter xmlns="http://docbook.org/ns/docbook" xml:id="admin_gui">
+<chapter xmlns="http://docbook.org/ns/docbook" xml:id="admin_gui" xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude">
+
+    <xi:include href="includes/author_gglos.xml"/>
+    <xi:include href="includes/author_azrzavy.xml"/>
 
     <title>The &flexive; administration GUI</title>
 

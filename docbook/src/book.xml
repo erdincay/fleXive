@@ -4,13 +4,16 @@
         %global_entities;
         ]>
 
-<book xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xi="http://www.w3.org/2001/XInclude">
-    <title>&Flexive; Reference Documentation</title>
+<book xmlns="http://docbook.org/ns/docbook" xmlns:xi="http://www.w3.org/2001/XInclude">
+    <title><trademark class='trade'>&flexive;</trademark> Reference Documentation</title>
     <xi:include href="includes/author_dlichtenberger.xml"/>
     <xi:include href="includes/author_mplesser.xml"/>
+    <xi:include href="includes/author_gglos.xml"/>
+    <xi:include href="includes/author_jwernigp.xml"/>
     <xi:include href="includes/author_hbacher.xml"/>
+    <xi:include href="includes/author_azrzavy.xml"/>
 
-    <!-- <xi:include href="intro.xml"/> -->
+    <xi:include href="intro.xml"/> 
     <xi:include href="installation.xml"/>
     <xi:include href="tutorial.xml"/>
     <xi:include href="writing_applications.xml"/>

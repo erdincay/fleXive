@@ -9,7 +9,6 @@
     <title>The &flexive; Tutorial
     </title>
 
-    <xi:include href="includes/author_hbacher.xml"/>
     <xi:include href="includes/author_dlichtenberger.xml"/>
 
     <section xml:id="first_flexive_application">

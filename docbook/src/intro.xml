@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE chapter [
+        <!ENTITY % global_entities SYSTEM "global.ent">
+        %global_entities;
+        ]>
+<chapter xml:id="introduction" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude">
+    <title>Introduction</title>
+    <xi:include href="includes/author_azrzavy.xml"/>
+
+    <para>
+        Managing and operating on hierarchical data structures is an issue in many projects, alongside with security
+        concerns, versioning and querying. Till now, neither open nor closed source projects or frameworks offer
+        possibilities to dynamically define and manipulate the structure of hierarchical data in a scope like &flexive;.
+        Hence the urge to provide a solution that combines flexibility, security and performance in one customizable
+        package.
+    </para>
+
+    <para>
+        &Flexive; is a JavaEE 5 open-source (GPL 2.0) framework for the development of complex and evolving
+        (web-)applications. It speeds up development as it handles numerous important application issues and keeps your
+        application flexible over the development-cycle. It is based on the lastest industry-standards like EJB 3, JSF,
+        etc.
+    </para>
+
+    <para>
+        &Flexive; concentrates on enterprise-scale content storage and retrieval, and includes comprehensive JSF support
+        for displaying and manipulating these contents in web applications. The runtime environment can be included in
+        existing JavaEE applications, but you can also build new applications and package them into stand-alone JavaEE
+        applications. Our emphasis lies on the runtime environment, so if you are looking e.g. for tool-driven JSF
+        development, take a look at the popular JBoss Seam framework and embed the &flexive; runtime environment in that
+        project.
+    </para>
+
+    <para>
+        The goal of &flexive; is to relieve you from many tendious and repetitive programming tasks when building
+        secure, data-centric (web-)applications.
+    </para>
+
+    <para>
+        If you are new to &flexive; please use the following tools to get started:
+        <orderedlist>
+            <listitem>
+                <para>
+                    The &flexive;
+                    <link href="http://www.flexive.org">website</link>
+                    will provide you with top-level information about &flexive;. Have a look at
+                    the "<link href="http://www.flexive.org/explore-flexive">Explore [fleXive]</link>" section.
+                </para>
+            </listitem>
+            <listitem>
+                <para>
+                    This reference documentation will provide all information to use &flexive; for the development of
+                    your application.
+                </para>
+            </listitem>
+            <listitem>
+                <para>
+                    In the &flexive;
+                    <link href="http://wiki.flexive.org">wiki</link>
+                    you will find more tutorials, HowTo's, samples and developer infos
+                </para>
+            </listitem>
+            <listitem>
+                <para>
+                    <link href="http://www.flexive.org/faq">FAQ</link>'s are anwered on the &flexive; 
+                    <link href="http://www.flexive.org">website</link>
+                </para>
+            </listitem>
+        </orderedlist>
+    </para>
+
+</chapter>
