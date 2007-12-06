@@ -978,8 +978,13 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             parentAssignments = assignment.getParentGroupAssignment().getAssignments();
             parentGroupId = assignment.getParentGroupAssignment().getId();
         }
-        if (parentAssignments.size() == 1)
+        if (parentAssignments.size() < 1)
             return 0; //need at least 2 assignments to move anything
+
+        if( assignment.getPosition() == parentAssignments.size() ) {
+            //no need to move assignments since it will be appended at the end
+            return assignment.getPosition();
+        }
 
         //algorithm:
         // update the position of the assignment to be moved to be maxPos+1 (savePos)
@@ -989,7 +994,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         int savePos = parentAssignments.size() + 1;
         if (pos > parentAssignments.size())
             pos = parentAssignments.size() - 1;
-        int orgPos = -1;
+        int orgPos = parentAssignments.size() + 1;
         for (FxAssignment a : parentAssignments) {
             if (a.getId() == assignment.getId()) {
                 orgPos = a.getPosition();
