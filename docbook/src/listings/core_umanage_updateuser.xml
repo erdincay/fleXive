@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="java" xml:id="core_structre_ex_update_user"  xmlns="http://docbook.org/ns/docbook">
+import com.flexive.shared.EJBLookup;
+import com.flexive.shared.interfaces.AccountEngine;
+
+private AccountEngine ae = EJBLookup.getAccountEngine();
+ae.update(1, null, “System administrator”, null, sysadmin@flexive.org, null);
+</programlisting>

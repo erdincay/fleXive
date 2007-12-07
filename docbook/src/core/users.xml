@@ -16,79 +16,76 @@
     </para>
 
 
-    <table xml:id="ex.calstable" frame='all'>
-        <title>Account Attributes</title>
-        <tgroup cols='2' align='left' colsep='1' rowsep='1'>
+    <table xml:id="acattr_table" class="flexive">
+        <caption>Account Attributes</caption>
             <thead>
-                <row>
-                    <entry align="center">Attribute</entry>
-                    <entry align="center">Description</entry>
-                </row>
+                <tr>
+                    <th>Attribute</th>
+                    <th>Description</th>
+                </tr>
             </thead>
             <tbody>
-                <row>
-                    <entry>id, name, login name, e-mail, description, contactDataId</entry>
-                    <entry>Some basic attributes. The Id uniquely identifies the account. The description allows you to characterize the account while the contactDataId identifies the contact data (e.g. postal address, telephon number) linked to this user. Name and login name stand for themselves.</entry>
+                <tr>
+                    <td>id, name, login name, e-mail, description, contactDataId</td>
+                    <td>Some basic attributes. The Id uniquely identifies the account. The description allows you to characterize the account while the contactDataId identifies the contact data (e.g. postal address, telephon number) linked to this user. Name and login name stand for themselves.</td>
 
-                </row>
+                </tr>
 
-                <row>
-                    <entry>mandatorId</entry>
-                    <entry>The mandator the account belongs to. Note that every account has to be assigned to exactly one mandator.</entry>
+                <tr>
+                    <td>mandatorId</td>
+                    <td>The mandator the account belongs to. Note that every account has to be assigned to exactly one mandator.</td>
 
-                </row>
-
-
-                <row>
-                    <entry>language</entry>
-                    <entry>Identifies the preferred language for the account. Whenever there are available user interface translations or contents in several languages the system will select to display the ones in the language specified here, if available.</entry>
-
-                </row>
+                </tr>
 
 
-                <row>
-                    <entry>active</entry>
-                    <entry>An account can be set to status inactive. Thus no login is possible while it is not activated again. Note: both flags, active and validated, have to be set to true for the login to work.</entry>
+                <tr>
+                    <td>language</td>
+                    <td>Identifies the preferred language for the account. Whenever there are available user interface translations or contents in several languages the system will select to display the ones in the language specified here, if available.</td>
 
-                </row>
-
-
-                <row>
-                    <entry>validated</entry>
-                    <entry>Flags for admins indicating that the user data was audited and are no fake. Setting this flag to false prevents a login for the corresponding account until the flag is set to true. This setting can be used when auto-creating accounts to force validation of the account data. Note: both flags, active and validated, have to be set to true for the log in to work.</entry>
-
-                </row>
+                </tr>
 
 
-                <row>
-                    <entry>validFrom, validTo</entry>
-                    <entry>The valid from/to dates may be used to define a timeperiode in which the user may log in.</entry>
+                <tr>
+                    <td>active</td>
+                    <td>An account can be set to status inactive. Thus no login is possible while it is not activated again. Note: both flags, active and validated, have to be set to true for the login to work.</td>
 
-                </row>
-
-
-                <row>
-                    <entry>defaultNodeId</entry>
-                    <entry></entry>
-
-                </row>
+                </tr>
 
 
-                <row>
-                    <entry>allowMultiLogin</entry>
-                    <entry>True if the account may be active more than once at the same time.
-                    </entry>
+                <tr>
+                    <td>validated</td>
+                    <td>Flags for admins indicating that the user data was audited and are no fake. Setting this flag to false prevents a login for the corresponding account until the flag is set to true. This setting can be used when auto-creating accounts to force validation of the account data. Note: both flags, active and validated, have to be set to true for the log in to work.</td>
 
-                </row>
+                </tr>
 
-                <row>
-                    <entry>updateToken</entry>
-                    <entry>The update token may be used in external API calls modifying this account to improve security.</entry>
 
-                </row>
+                <tr>
+                    <td>validFrom, validTo</td>
+                    <td>The valid from/to dates may be used to define a timeperiode in which the user may log in.</td>
+
+                </tr>
+
+
+                <tr>
+                    <td>defaultNodeId</td>
+                    <td></td>
+
+                </tr>
+
+
+                <tr>
+                    <td>allowMultiLogin</td>
+                    <td>True if the account may be active more than once at the same time.</td>
+
+                </tr>
+
+                <tr>
+                    <td>updateToken</td>
+                    <td>The update token may be used in external API calls modifying this account to improve security.</td>
+
+                </tr>
 
             </tbody>
-        </tgroup>
     </table>
 
     <para>
@@ -117,19 +114,20 @@
 
 
     <section>
-        <title>Creating an user</title>
+        <title>Creating a user</title>
         <para>
-            Creating an user requires special rights. More precisely only callers in role ACCOUNT MANAGEMENT may create users, and only for their mandator. An exception is a user with the role GLOBAL_SUPERVISOR who may create users for all mandators.
-            Following you see an example of how to create an user.
+            Creating a user requires special rights. More precisely only callers in role ACCOUNT MANAGEMENT may create users, and only for their mandator. An exception is a user with the role GLOBAL_SUPERVISOR who may create users for all mandators.
+            Following you see an example of how to create a user.
         </para>
 
         <para>
-            <code>
-<literallayout>
-private AccountEngine ae = EJBLookup.getAccountEngine();
-ae.create(“Administrator”, “admin”, “pw123”, “admin@flexive.org”, 1, 1, true, true, SYSDATE, “”, -1, “Administrator account”, false, false);
-</literallayout>
-            </code>
+
+            <example xml:id="core_structre_ex_newUser">
+                    <title>Creating a new user</title>
+                    <xi:include href="../listings/core_umanage_newuser.xml"/>
+                    <para></para>
+            </example>
+
         </para>
 
         <para>
@@ -141,7 +139,7 @@ ae.create(“Administrator”, “admin”, “pw123”, “admin@flexive.org”
 
         <para>
 
-            For assigning a role to an account the following rules apply:
+            For <emphasis>assigning a role</emphasis> to an account the following rules apply:
 
             <itemizedlist mark='bullet'>
 
@@ -167,7 +165,7 @@ ae.create(“Administrator”, “admin”, “pw123”, “admin@flexive.org”
         </para>
 
         <para>
-            Assigning a group to an account presumes the following prerequisites:
+            <emphasis>Assigning a group</emphasis> to an account presumes the following prerequisites:
 
             <itemizedlist mark='bullet'>
 
@@ -195,7 +193,7 @@ ae.create(“Administrator”, “admin”, “pw123”, “admin@flexive.org”
     </section>
 
     <section>
-        <title>Updating an user</title>
+        <title>Updating a user</title>
         <para>
             &flexive; provides two methods for updating an account. One is for updating only some personal data of the specified user (name, login name, password, e-mail address, and language). The other one lets you update all attributes of the user. For both methods applies: setting one parameter to null in the method call means keeping its original value (i.e. the value of the corresponding account attribute is not changed).
         </para>
@@ -203,18 +201,18 @@ ae.create(“Administrator”, “admin”, “pw123”, “admin@flexive.org”
             The following code updates the previously created administrator account (ID 1) by setting its name to “System administrator” and its e-mail address to “sysadmin@flexive.org”. Note that by setting the parameters password, login name and language to null the original values (“pw123”, “admin”, 1) are preserved.
         </para>
         <para>
-            <code>
-<literallayout>
-private AccountEngine ae = EJBLookup.getAccountEngine();
-ae.update(1, null, “System administrator”, null, sysadmin@flexive.org, null);
-</literallayout>
-            </code>
+
+            <example xml:id="core_structre_ex_updateUser">
+                                <title>Creating a new user</title>
+                                <xi:include href="../listings/core_umanage_updateuser.xml"/>
+                                <para></para>
+                        </example>
         </para>
     </section>
 
 
     <section>
-        <title>Removing an user</title>
+        <title>Removing a user</title>
         <para>
             There are two prerequisites for the caller to remove an account:
 
@@ -237,12 +235,13 @@ ae.update(1, null, “System administrator”, null, sysadmin@flexive.org, null)
         </para>
         <para>For removing an account one only needs to know the account ID. Thus removing the previously created and updated administrator account works as follows:</para>
         <para>
-            <code>
-<literallayout>
-private AccountEngine ae = EJBLookup.getAccountEngine();
-ae.remove(admin_id);
-</literallayout>
-            </code>
+
+            <example xml:id="core_structre_ex_removeUser">
+                                <title>Creating a new user</title>
+                                <xi:include href="../listings/core_umanage_removeuser.xml"/>
+                                <para></para>
+                        </example>
+            
         </para>
 
     </section>
