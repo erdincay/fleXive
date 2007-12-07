@@ -27,6 +27,33 @@
                 <link href="http://www.eclipse.org/">Eclipse</link>
                 or a proprietary solution.
             </para>
+            <para>The following sections are good starting points for future &Flexive; developers:</para>
+            <para>
+                <itemizedlist>
+                    <listitem>
+                        <para>
+                            <link linkend="building_from_source">Building &Flexive; from source</link>
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            <link linkend="tutorial">The &flexive; Tutorial</link>
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            <link linkend="writing_applications">Writing &flexive; applications</link>
+                        </para>
+                    </listitem>
+                </itemizedlist>
+                <para>We provide the current generated
+                    <link href="http://www.flexive.org/documentation/api-documentation.html">&Flexive; API
+                        Documentation
+                    </link>
+                    for you on our
+                    <link href="http://www.flexive.org">website</link>.
+                </para>
+            </para>
         </section>
     </section>
     <section xml:id="jboss_installation">
@@ -63,33 +90,37 @@
                             </programlisting>
                         </para>
                     </listitem>
-                    <listitem>
-                        <para>Extend
-                            <filename>${jboss.home}/server/all/conf/login-config.xml</filename>
-                            with the following entry:
-                            <xi:include href="listings/installation_login-config.xml"/>
-                        </para>
-                    </listitem>
-                    <listitem>
-                        <para>Create and copy the cache service file JBossCacheJNDI42-service.xml to
-                            ${jboss.home}/server/all/deploy/
-                            or simply copy it from the &Flexive; source tree, if available.
-                            <programlisting language="xml">
-                                <xi:include href="../../src/framework/resources/JBossCacheJNDI42-service.xml"
-                                            parse="text"/>
-                            </programlisting>
-                        </para>
-                    </listitem>
                 </itemizedlist>
             </para>
         </section>
         <section xml:id="jboss_installation_system_configuration_refining">
             <title>Refining your configuration</title>
-            <para>Extend
-                <filename>${jboss.home}/server/all/conf/jboss-log4j.xml</filename>
-                to configure logging:
-                <xi:include href="listings/installation_jboss-log4j.xml"/>
-            </para>
+            <itemizedlist>
+                <listitem>
+                    <para>Extend
+                        <filename>${jboss.home}/server/all/conf/jboss-log4j.xml</filename>
+                        to configure logging:
+                        <xi:include href="listings/installation_jboss-log4j.xml"/>
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>Extend
+                        <filename>${jboss.home}/server/all/conf/login-config.xml</filename>
+                        with the following entry:
+                        <xi:include href="listings/installation_login-config.xml"/>
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>Create and copy the cache service file JBossCacheJNDI42-service.xml to
+                        ${jboss.home}/server/all/deploy/
+                        or simply copy it from the &Flexive; source tree, if available.
+                        <programlisting language="xml">
+                            <xi:include href="../../src/framework/resources/JBossCacheJNDI42-service.xml"
+                                        parse="text"/>
+                        </programlisting>
+                    </para>
+                </listitem>
+            </itemizedlist>
         </section>
         <section xml:id="jboss_installation_db_setup">
             <title>Database Setup
@@ -124,7 +155,13 @@ database.password=a]]></programlisting>
                         <filename>flexive-dist</filename>
                         directory of your &Flexive; distribution and run
                         <code>ant db.create db.config.create</code>
-                        Warning: Existing databases will be deleted.
+                    </para>
+                    <para>You will be prompted to enter a name for your division database (simply hit enter to keep
+                        <filename>flexive</filename>).
+                    </para>
+                    <para>
+                        <emphasis>Warning:</emphasis>
+                        Existing databases will be deleted.
                     </para>
                 </listitem>
             </itemizedlist>
@@ -150,34 +187,46 @@ database.password=a]]></programlisting>
         <section xml:id="jboss_installation_starting_flexive">
             <title>Starting &Flexive;
             </title>
-            <para>
-                <itemizedlist>
-                    <listitem>
-                        <para>
-                            On Linux launch JBoss using
-                            <programlisting><![CDATA[sh run.sh -c all -Djboss.bind.address=0.0.0.0]]></programlisting>
-                        </para>
-                        <para>
-                            On Windows launch JBoss using
-                            <programlisting><![CDATA[start run.bat -c all -Djboss.bind.address=0.0.0.0]]></programlisting>
-                        </para>
-                    </listitem>
-                    <listitem>
-                        <para>To access the backend point your browser to
-                            <link href="http://localhost:8080/flexive/adm/">http://localhost:8080/flexive/adm/</link>
-                        </para>
-                        <para>Alternatively you can specify your server's IP address, which is supported by default,
-                            too.
-                        </para>
-                    </listitem>
-                    <listitem>
-                        <para>
-                            The default superuser's username and password for the Backend Administration are:
-                        </para>
-                        <para>username: supervisor, password: supervisor</para>
-                    </listitem>
-                </itemizedlist>
-            </para>
+            <itemizedlist>
+                <listitem>
+                    <para>If you provide custom
+                        <code>JAVA_OPTS</code>
+                        for JBoss you have to manually set the memory parameters
+                        <code>-Xms, -Xmx</code>
+                        or JBoss will use defaults that are way too low.
+                    </para>
+                    <para>On Linux execute
+                        <programlisting><![CDATA[export JAVA_OPTS="-Xms128m -Xmx768m"]]></programlisting>
+                    </para>
+                    <para>On Windows execute
+                        <programlisting><![CDATA[set JAVA_OPTS="-Xms128m -Xmx768m"]]></programlisting>
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        On Linux launch JBoss using
+                        <programlisting><![CDATA[sh run.sh -c all -Djboss.bind.address=0.0.0.0]]></programlisting>
+                    </para>
+                    <para>
+                        On Windows launch JBoss using
+                        <programlisting><![CDATA[start run.bat -c all -Djboss.bind.address=0.0.0.0]]></programlisting>
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>To access the backend point your browser to
+                        <link href="http://localhost:8080/flexive/adm/">http://localhost:8080/flexive/adm/</link>
+                    </para>
+                    <para>Alternatively you can specify your server's IP address, which is supported by default,
+                        too.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        The default superuser's username and password for the Backend Administration are:
+                    </para>
+                    <para>username: supervisor, password: supervisor</para>
+                </listitem>
+            </itemizedlist>
         </section>
     </section>
 
