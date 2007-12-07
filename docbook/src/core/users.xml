@@ -125,7 +125,7 @@
             <example xml:id="core_structre_ex_newUser">
                     <title>Creating a new user</title>
                     <xi:include href="../listings/core_umanage_newuser.xml"/>
-                    <para></para>
+                    <para>Returns the ID of the created account.</para>
             </example>
 
         </para>
@@ -198,14 +198,14 @@
             &flexive; provides two methods for updating an account. One is for updating only some personal data of the specified user (name, login name, password, e-mail address, and language). The other one lets you update all attributes of the user. For both methods applies: setting one parameter to null in the method call means keeping its original value (i.e. the value of the corresponding account attribute is not changed).
         </para>
         <para>
-            The following code updates the previously created administrator account (ID 1) by setting its name to “System administrator” and its e-mail address to “sysadmin@flexive.org”. Note that by setting the parameters password, login name and language to null the original values (“pw123”, “admin”, 1) are preserved.
+            The following code updates the previously created administrator account (ID 1) by setting its name to “System administrator” and its e-mail address to “sysadmin@flexive.org”.
         </para>
         <para>
 
             <example xml:id="core_structre_ex_updateUser">
                                 <title>Creating a new user</title>
                                 <xi:include href="../listings/core_umanage_updateuser.xml"/>
-                                <para></para>
+                                <para>Note that by setting the parameters password, login name and language to null the original values (“pw123”, “admin”, 1) are preserved.</para>
                         </example>
         </para>
     </section>
@@ -239,7 +239,7 @@
             <example xml:id="core_structre_ex_removeUser">
                                 <title>Creating a new user</title>
                                 <xi:include href="../listings/core_umanage_removeuser.xml"/>
-                                <para></para>
+                                <para>Removes the account with the ID stored in the variable named 'admin_id'.</para>
                         </example>
             
         </para>
