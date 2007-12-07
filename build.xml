@@ -546,6 +546,12 @@ database.password=a
             <fileset dir="${basedir}" includes="flexive-dist/**"/>
         </zip>
     </target>
+
+    <target name="dist.src" description="Create a ZIP file with all sources of the current flexive installation">
+        <zip destfile="${flexive.base.build.dir}/flexive-src.zip">
+            <fileset dir="src" includes="**/*"/>
+        </zip>
+    </target>
     
     <target name="jar.webdavOnly">
         <javac-call
