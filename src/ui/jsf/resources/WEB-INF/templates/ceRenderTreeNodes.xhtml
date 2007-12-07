@@ -22,13 +22,15 @@
                     <c:if test="#{node.markForDelete==false}">
                         <tr>
 
+                            <!--
                             <td nowrap="true" style="padding-right:5px">
                                 <a href="#{fxSystemBean.contextPath}/+#{node.id}" target="previewWindow">
                                     <t:graphicImage style="border:0;margin:0;margin-left:5px;margin-top:2px;"
                                                     alt="preview" url="/adm/images/contentEditor/preview.png"/>
                                 </a>
                             </td>
-
+                            -->
+                            
                             <td>
                                 <c:if test="#{srcEditor.readOnly==false}">
                                     <a4j:commandLink reRender="treeNodes" actionListener="#{srcEditor.removeTreeNode}">
