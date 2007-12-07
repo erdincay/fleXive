@@ -810,7 +810,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 changes = true;
             }
             if (org.getPosition() != group.getPosition()) {
-                int finalPos = changeAssignmentPosition(con, group);
+                int finalPos = setAssignmentPosition(con, group.getId(), group.getPosition());
                 if (changes)
                     changesDesc.append(',');
                 changesDesc.append("position=").append(finalPos);
@@ -953,90 +953,84 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     }
 
     /**
-     * Change an assignments position, updating positions of all assignments in the same hierarchy level
+     * Set an assignments position, updating positions of all assignments in the same hierarchy level
      *
-     * @param con        an open and valid connection
-     * @param assignment the assignment with the desired position
+     * @param con          an open and valid connection
+     * @param assignmentId the id of the assignment with the desired position
+     * @param position     desired position
      * @return the position that "really" was assigned
      * @throws FxUpdateException on errors
      */
-    private int changeAssignmentPosition(Connection con, FxAssignment assignment) throws FxUpdateException {
-        int pos = assignment.getPosition();
-        if (pos < 0)
-            pos = 0;
-        List<FxAssignment> parentAssignments;
-        long parentGroupId;
-
-        if (!assignment.hasParentGroupAssignment()) {
-            try {
-                parentAssignments = assignment.getAssignedType().getConnectedAssignments("/");
-            } catch (FxApplicationException e) {
-                throw e.asRuntimeException();
-            }
-            parentGroupId = FxAssignment.NO_PARENT;
-        } else {
-            parentAssignments = assignment.getParentGroupAssignment().getAssignments();
-            parentGroupId = assignment.getParentGroupAssignment().getId();
-        }
-        if (parentAssignments.size() < 1)
-            return 0; //need at least 2 assignments to move anything
-
-        int orgPos = -1;
-        for (FxAssignment a : parentAssignments) {
-            if (a.getId() == assignment.getId()) {
-                orgPos = a.getPosition();
-                break;
-            }
-        }
-        boolean posChanged = orgPos != -1 && orgPos != assignment.getPosition();
-        if( orgPos == -1)
-            orgPos = parentAssignments.size() + 1;
-
-        if( assignment.getPosition() >= parentAssignments.size() && !posChanged) {
-            //no need to move assignments since it will be appended at the end or didnt change at all
-            return parentAssignments.size();
-        }
-
-        //algorithm:
-        // update the position of the assignment to be moved to be maxPos+1 (savePos)
-        // close the gap
-        // open a gap at the destination position
-        // update savepos (maxPos+1) to the destination position
-        int savePos = parentAssignments.size() + 1;
-        if (pos > parentAssignments.size())
-            pos = parentAssignments.size() - 1;
-        PreparedStatement ps = null;
+    private int setAssignmentPosition(Connection con, long assignmentId, int position) throws FxUpdateException {
+        if (position < 0)
+            position = 0;
+        PreparedStatement ps = null, ps2 = null;
+        int retPosition = position;
         try {
-            // (1) update the position of the assignment to be moved to be maxPos+1 (savePos)
-            ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET POS=? WHERE ID=?");
-            ps.setInt(1, savePos);
-            ps.setLong(2, assignment.getId());
-            ps.executeUpdate();
-            // (2) close the gap
-            ps.close();
-            ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET POS=POS-1 WHERE " +
-                    "TYPEDEF=? AND PARENTGROUP=? AND POS>? AND ID<>?");
-            ps.setLong(1, assignment.getAssignedType().getId());
+            ps = con.prepareStatement("SELECT TYPEDEF, PARENTGROUP, POS, SYSINTERNAL FROM " + TBL_STRUCT_ASSIGNMENTS + " WHERE ID=?");
+            ps.setLong(1, assignmentId);
+            ResultSet rs = ps.executeQuery();
+            if (rs == null || !rs.next())
+                return position; //no record exists
+            long typeId = rs.getLong(1);
+            long parentGroupId = rs.getLong(2);
+            int orgPos = rs.getInt(3);
+            boolean sysinternal = rs.getBoolean(4);
+            if (orgPos == position)
+                return retPosition; //no need to change anything
 
-            ps.setLong(2, parentGroupId);
-            ps.setInt(3, orgPos);
-            ps.setLong(4, assignment.getId());
-            ps.executeUpdate();
-            // (3) open a gap at the destination position
+            if (!sysinternal && parentGroupId == FxAssignment.NO_PARENT &&
+                    position < CacheAdmin.getEnvironment().getSystemInternalRootPropertyAssignments().size()) {
+                //adjust position to be above the sysinternal properties if connected to the root group
+                position += CacheAdmin.getEnvironment().getSystemInternalRootPropertyAssignments().size();
+            }
+
+            //move all positions in a range of 10000+ without gaps
             ps.close();
-            ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET POS=POS+1 WHERE " +
-                    "TYPEDEF=? AND PARENTGROUP=? AND POS>=? AND ID<>?");
-            ps.setLong(1, assignment.getAssignedType().getId());
+            ps = con.prepareStatement("SELECT ID FROM " + TBL_STRUCT_ASSIGNMENTS + " WHERE TYPEDEF=? AND PARENTGROUP=? ORDER BY POS");
+            ps.setLong(1, typeId);
             ps.setLong(2, parentGroupId);
-            ps.setInt(3, pos);
-            ps.setLong(4, assignment.getId());
-            ps.executeUpdate();
-            // update savepos (maxPos+1) to the destination position
+            rs = ps.executeQuery();
+            ps2 = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET POS=? WHERE ID=?");
+            int counter = 10000;
+            while (rs != null && rs.next()) {
+                ps2.setInt(1, counter++);
+                ps2.setLong(2, rs.getLong(1));
+                ps2.addBatch();
+            }
+            ps2.executeBatch();
+
             ps.close();
-            ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET POS=? WHERE ID=?");
-            ps.setInt(1, pos);
-            ps.setLong(2, assignment.getId());
-            ps.executeUpdate();
+            ps = con.prepareStatement("SELECT ID FROM " + TBL_STRUCT_ASSIGNMENTS +
+                    " WHERE TYPEDEF=? AND PARENTGROUP=? AND POS>=? AND ID<>? ORDER BY POS");
+            ps.setLong(1, typeId);
+            ps.setLong(2, parentGroupId);
+            ps.setInt(3, 10000);
+            ps.setLong(4, assignmentId);
+            rs = ps.executeQuery();
+            int currPos = 0;
+            boolean written = false;
+            while (rs != null && rs.next()) {
+                ps2.setInt(1, currPos);
+                if (!written && currPos == position) {
+                    written = true;
+                    retPosition = currPos;
+                    ps2.setLong(2, assignmentId);
+                    ps2.addBatch();
+                    ps2.setInt(1, ++currPos);
+                }
+                ps2.setLong(2, rs.getLong(1));
+                ps2.addBatch();
+                currPos++;
+            }
+            if (!written) {
+                //last element
+                retPosition = currPos;
+                ps2.setInt(1, currPos);
+                ps2.setLong(2, assignmentId);
+                ps2.addBatch();
+            }
+            ps2.executeBatch();
         } catch (SQLException e) {
             throw new FxUpdateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
@@ -1046,8 +1040,14 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             } catch (SQLException e) {
                 //ignore
             }
+            try {
+                if (ps2 != null)
+                    ps2.close();
+            } catch (SQLException e) {
+                //ignore
+            }
         }
-        return pos;
+        return retPosition;
     }
 
     private long createGroupAssignment(Connection _con, PreparedStatement ps, StringBuilder sql, FxGroupAssignmentEdit group, boolean createSubAssignments) throws FxApplicationException {
@@ -1102,7 +1102,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         group.getAlias(), XPath, position, group.getMultiplicity(), group.getDefaultMultiplicity(),
                         group.getParentGroupAssignment(), group.getBaseAssignmentId(),
                         group.getLabel(), group.getHint(), group.getGroup(), group.getMode(), null);
-                changeAssignmentPosition(con, thisGroupAssignment);
+                setAssignmentPosition(con, group.getId(), group.getPosition());
             } else {
                 thisGroupAssignment = null;
                 newAssignmentId = FxAssignment.NO_PARENT;
@@ -1461,7 +1461,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     changes = true;
                 }
                 if (original.getPosition() != modified.getPosition()) {
-                    int finalPos = changeAssignmentPosition(con, modified);
+                    int finalPos = setAssignmentPosition(con, modified.getId(), modified.getPosition());
                     if (changes)
                         changesDesc.append(',');
                     changesDesc.append("position=").append(finalPos);
@@ -1737,11 +1737,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             htracker.track(prop.getAssignedType(), "history.assignment.createPropertyAssignment", XPath, prop.getAssignedType().getId(), prop.getAssignedType().getName(),
                     prop.getProperty().getId(), prop.getProperty().getName());
             storeOptions(con, TBL_PROPERTY_OPTIONS, "ID", prop.getProperty().getId(), newAssignmentId, prop.getOptions());
-            FxPropertyAssignment newProp = new FxPropertyAssignment(newAssignmentId, prop.isEnabled(), prop.getAssignedType(),
-                    prop.getAlias(), prop.getXPath(), position, prop.getMultiplicity(), prop.getDefaultMultiplicity(),
-                    prop.getParentGroupAssignment(), prop.getBaseAssignmentId(), prop.getLabel(), prop.getHint(),
-                    prop.getDefaultValue(), prop.getProperty(), prop.getACL(), prop.getDefaultLanguage(), prop.getOptions());
-            changeAssignmentPosition(con, newProp);
+            setAssignmentPosition(con, newAssignmentId, prop.getPosition());
             if (!prop.isSystemInternal()) {
                 //only need a reload and inheritance handling if the property is not system internal
                 //since system internal properties are only created from the type engine we don't have to care

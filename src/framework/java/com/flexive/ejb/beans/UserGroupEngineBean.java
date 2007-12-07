@@ -129,11 +129,8 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             ResultSet rs = stmt.executeQuery(sql);
 
             // Does the group exist at all?
-            if (rs == null || !rs.next()) {
-                FxNotFoundException nfe = new FxNotFoundException("ex.account.group.notFound.id", mandatorId);
-                if (LOG.isInfoEnabled()) LOG.info(nfe);
-                throw nfe;
-            }
+            if (rs == null || !rs.next()) 
+                throw new FxNotFoundException("ex.account.group.notFound.id", mandatorId);
             long autoMandator = rs.getLong(5);
             if (rs.wasNull())
                 autoMandator = -1;
