@@ -549,7 +549,10 @@ database.password=a
 
     <target name="dist.src" description="Create a ZIP file with all sources of the current flexive installation">
         <zip destfile="${flexive.base.build.dir}/flexive-src.zip">
-            <fileset dir="src" includes="**/*"/>
+            <fileset dir="${flexive.src.framework.dir}" includes="**/*"/>
+            <fileset dir="${flexive.src.ui.components.dir}" includes="**/*"/>
+            <fileset dir="${flexive.src.ui.jsf.dir}" includes="**/*"/>
+            <fileset dir="${flexive.src.ui.shared.dir}" includes="**/*"/>
         </zip>
     </target>
     
