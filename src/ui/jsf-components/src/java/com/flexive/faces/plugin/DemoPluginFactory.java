@@ -78,8 +78,8 @@ public class DemoPluginFactory implements PluginFactory {
     }
 
     public void initialize(PluginRegistryBean registry) {
-        registry.registerPlugin(AdmExtensionPoints.ADM_MAIN_NAVIGATION, new MainMenuPlugin());
-        registry.registerPlugin(AdmExtensionPoints.ADM_TOOLBAR_PLUGINS, new SystemInfoToolbarPlugin());
+//        registry.registerPlugin(AdmExtensionPoints.ADM_MAIN_NAVIGATION, new MainMenuPlugin());
+//        registry.registerPlugin(AdmExtensionPoints.ADM_TOOLBAR_PLUGINS, new SystemInfoToolbarPlugin());
     }
 
 }
