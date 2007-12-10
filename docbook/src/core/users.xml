@@ -203,7 +203,7 @@
         <para>
 
             <example xml:id="core_structre_ex_updateUser">
-                                <title>Creating a new user</title>
+                                <title>Updating a user</title>
                                 <xi:include href="../listings/core_umanage_updateuser.xml"/>
                                 <para>Note that by setting the parameters password, login name and language to null the original values (“pw123”, “admin”, 1) are preserved.</para>
                         </example>
@@ -237,7 +237,7 @@
         <para>
 
             <example xml:id="core_structre_ex_removeUser">
-                                <title>Creating a new user</title>
+                                <title>Removing a user</title>
                                 <xi:include href="../listings/core_umanage_removeuser.xml"/>
                                 <para>Removes the account with the ID stored in the variable named 'admin_id'.</para>
                         </example>

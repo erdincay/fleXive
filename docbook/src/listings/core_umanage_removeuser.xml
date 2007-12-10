@@ -7,6 +7,6 @@
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.interfaces.AccountEngine;
 
-private AccountEngine ae = EJBLookup.getAccountEngine();
+AccountEngine ae = EJBLookup.getAccountEngine();
 ae.remove(admin_id);
 </programlisting>

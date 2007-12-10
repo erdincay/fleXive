@@ -7,6 +7,6 @@
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.interfaces.AccountEngine;
 
-private AccountEngine ae = EJBLookup.getAccountEngine();
+AccountEngine ae = EJBLookup.getAccountEngine();
 ae.create(“Administrator”, “admin”, “pw123”, “admin@flexive.org”, 1, 1, true, true, SYSDATE, “”, -1, “Administrator account”, false, false);    
 </programlisting>
