@@ -24,7 +24,7 @@ body {
     background-color: #F9FCF1;
     color: #000;
     overflow: auto;
-    margin: 0.5em 2em;
+    margin: 0.5em;
 }
 
 .programlisting .emphasis em {

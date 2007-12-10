@@ -93,35 +93,6 @@
                 </itemizedlist>
             </para>
         </section>
-        <section xml:id="jboss_installation_system_configuration_refining">
-            <title>Refining your configuration</title>
-            <itemizedlist>
-                <listitem>
-                    <para>Extend
-                        <filename>${jboss.home}/server/all/conf/jboss-log4j.xml</filename>
-                        to configure logging:
-                        <xi:include href="listings/installation_jboss-log4j.xml"/>
-                    </para>
-                </listitem>
-                <listitem>
-                    <para>Extend
-                        <filename>${jboss.home}/server/all/conf/login-config.xml</filename>
-                        with the following entry:
-                        <xi:include href="listings/installation_login-config.xml"/>
-                    </para>
-                </listitem>
-                <listitem>
-                    <para>Create and copy the cache service file JBossCacheJNDI42-service.xml to
-                        ${jboss.home}/server/all/deploy/
-                        or simply copy it from the &Flexive; source tree, if available.
-                        <programlisting language="xml">
-                            <xi:include href="../../src/framework/resources/JBossCacheJNDI42-service.xml"
-                                        parse="text"/>
-                        </programlisting>
-                    </para>
-                </listitem>
-            </itemizedlist>
-        </section>
         <section xml:id="jboss_installation_db_setup">
             <title>Database Setup
             </title>
@@ -189,17 +160,17 @@ database.password=a]]></programlisting>
             </title>
             <itemizedlist>
                 <listitem>
-                    <para>If you provide custom
-                        <code>JAVA_OPTS</code>
-                        for JBoss you have to manually set the memory parameters
-                        <code>-Xms, -Xmx</code>
-                        or JBoss will use defaults that are way too low.
+                    <para>Currently JBoss (4.2) uses the Java's default maximum heap size,
+                        which means that &flexive; will probably run out of memory during the
+                        first startup. You have to set the maximum heap size using
+                        <code>-Xmx</code>
+                        to a larger value, at least 256m.
                     </para>
                     <para>On Linux execute
-                        <programlisting><![CDATA[export JAVA_OPTS="-Xms128m -Xmx768m"]]></programlisting>
+                        <programlisting><![CDATA[export JAVA_OPTS="-Xms128m -Xmx512m"]]></programlisting>
                     </para>
                     <para>On Windows execute
-                        <programlisting><![CDATA[set JAVA_OPTS="-Xms128m -Xmx768m"]]></programlisting>
+                        <programlisting><![CDATA[set JAVA_OPTS="-Xms128m -Xmx512m"]]></programlisting>
                     </para>
                 </listitem>
                 <listitem>
@@ -225,6 +196,35 @@ database.password=a]]></programlisting>
                         The default superuser's username and password for the Backend Administration are:
                     </para>
                     <para>username: supervisor, password: supervisor</para>
+                </listitem>
+            </itemizedlist>
+        </section>
+        <section xml:id="jboss_installation_system_configuration_refining">
+            <title>Refining your configuration</title>
+            <itemizedlist>
+                <listitem>
+                    <para>Extend
+                        <filename>${jboss.home}/server/all/conf/jboss-log4j.xml</filename>
+                        to configure logging:
+                        <xi:include href="listings/installation_jboss-log4j.xml"/>
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>Extend
+                        <filename>${jboss.home}/server/all/conf/login-config.xml</filename>
+                        with the following entry:
+                        <xi:include href="listings/installation_login-config.xml"/>
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>Create and copy the cache service file JBossCacheJNDI42-service.xml to
+                        ${jboss.home}/server/all/deploy/
+                        or simply copy it from the &Flexive; source tree, if available.
+                        <programlisting language="xml">
+                            <xi:include href="../../src/framework/resources/JBossCacheJNDI42-service.xml"
+                                        parse="text"/>
+                        </programlisting>
+                    </para>
                 </listitem>
             </itemizedlist>
         </section>
