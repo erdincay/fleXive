@@ -14,14 +14,17 @@
                 <filename>build.properties.sample</filename>
                 file located in the root directory of the
                 <link href="http://www.flexive.org/download">&Flexive; source code</link>
-                to<filename>build.properties</filename>.
+                to
+                <filename>build.properties</filename>.
                 <xi:include href="../listings/installation_build.properties.xml"/>
             </listitem>
-            <listitem>Execute ant
-                <code>db.update</code>
+            <listitem>Execute
+                <code>ant db.update</code>
                 before
                 <code>ant all</code>
-                in your &Flexive; root directory where the
+                in the root directory of the
+                <link href="http://www.flexive.org/download">&Flexive; source code,</link>
+                where the
                 <filename>build.xml</filename>
                 file
                 resides.
@@ -34,7 +37,8 @@
                 <para>Don't forget to set your
                     <code>${jboss.home}</code>
                     variable in the
-                    build.properties properly!
+                    <filename>build.properties</filename>
+                    file properly!
                 </para>
                 <itemizedlist>
                     <listitem>Note: to successfully compile &Flexive;
@@ -47,7 +51,8 @@
                         <code>JDK_HOME</code>
                         and
                         <code>JAVA_HOME</code>
-                        variables accordingly
+                        variables accordingly as explained in section
+                        <link linkend="prerequisites">Prerequisites</link>.
                     </listitem>
                 </itemizedlist>
             </listitem>
