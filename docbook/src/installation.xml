@@ -171,7 +171,7 @@ database.password=a]]></programlisting>
                         <programlisting><![CDATA[export JAVA_OPTS="-Xms128m -Xmx512m"]]></programlisting>
                     </para>
                     <para>On Windows execute
-                        <programlisting><![CDATA[set JAVA_OPTS="-Xms128m -Xmx512m"]]></programlisting>
+                        <programlisting><![CDATA[SET JAVA_OPTS=-Xms128m -Xmx512m]]></programlisting>
                     </para>
                 </listitem>
                 <listitem>
