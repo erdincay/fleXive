@@ -273,46 +273,7 @@
                 invokeContentAction("adm/structure/propertyAssignmentEditor.jsf", "assignProperty", {id: parentId, nodeType: menu.getTreeNode().nodeDocType});
                 contentPage=null;
             }
-            /*
-            function pasteAssignment(menuItem) {
-                var menu = dojo.widget.byId("structureTreeMenu");
-                var parentId = menu.getTreeNode().propertyId;
-                var parentType= menu.getTreeNode().nodeDocType;
-                try {
-                    var newAssignmentId = getJsonRpc().StructureTreeEditor.pasteAssignment(copyNode.propertyId, copyNode.nodeDocType , parentId, parentType, null);
-                    reloadAndKeepExpanded();
-                    expandToNodeWithId(newAssignmentId, false);
-                }
-                catch (e) {
-                        alert(e.message);
-                }
-            }
-            */
-            /*
-            function pasteAssignmentAs(menuItem) {
-                var valid = false;
-                var alias="dummy";
-                while (!valid && alias!=null && alias!="") {
-                    alias =prompt("#{fxMessageBean['StructureTree.message.enterAlias']}");
-                    valid = getJsonRpc().StructureTreeEditor.validateAlias(alias);
-                    if (!valid)
-                        alert("#{fxMessageBean['StructureTree.message.err.invalidAlias']}");
-                }
-                if (alias!=null && alias!="") {
-                    var menu = dojo.widget.byId("structureTreeMenu");
-                    var parentId = menu.getTreeNode().propertyId;
-                    var parentType= menu.getTreeNode().nodeDocType;
-                    try {
-                        var newAssignmentId = getJsonRpc().StructureTreeEditor.pasteAssignment(copyNode.propertyId, copyNode.nodeDocType , parentId, parentType, alias);
-                        reloadAndKeepExpanded();
-                        expandToNodeWithId(newAssignmentId, false);
-                    }
-                    catch (e) {
-                            alert(e.message);
-                    }
-                }
-            }
-            */
+        
             function deleteAssignment(menuItem) {
                 var menu = dojo.widget.byId("structureTreeMenu");
                 var id = menu.getTreeNode().propertyId;

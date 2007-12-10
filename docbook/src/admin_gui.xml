@@ -98,7 +98,7 @@
                     <para>
                         <inlinemediaobject>
                             <imageobject>
-                                <imagedata fileref="images/structureEditor/folderClosed.png" format="PNG" contentwidth="66%"/>
+                                <imagedata fileref="images/structureEditor/fxGroup.png" format="PNG" contentwidth="66%"/>
                             </imageobject>
                         </inlinemediaobject>
                         Group assignments: possible children are group and property assignments. All children are

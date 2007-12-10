@@ -125,8 +125,7 @@ public class StructureTreeEditor implements Serializable {
 
     /**
      * Creates a derived assignment from a given assignment and pastes it at
-     * a relative position above or below (indicated by steps) a destination assignment
-     * at the same hierarchy level.
+     * a relative position above or below (indicated by steps) a destination assignment.
      * A new alias can also be specified.
      *
      * @param srcId        the id from which the assignment will be derived
