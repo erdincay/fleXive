@@ -321,6 +321,11 @@
         </navigation-case>
 
         <navigation-case>
+            <from-outcome>showContentEditor</from-outcome>
+            <to-view-id>/adm/user/showContentEditor.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
             <from-outcome>inlineContentEditor</from-outcome>
             <to-view-id>/adm/content/inlineContentEditor.xhtml</to-view-id>
         </navigation-case>

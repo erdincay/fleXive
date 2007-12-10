@@ -15,18 +15,26 @@
 
     <script type="text/javascript">
         dojo.require("dojo.widget.SortableTable");
+        function makeIt(){alert("eugos");}
     </script>
 
 </ui:define>
 
 <ui:define name="body">
     <c:if test="#{empty accountBean.parseRequestParameters}"> </c:if>
+
     <h:form id="frm">
-        <adm:tab label="Edit User Preferences" active="true" id="tab1"/>
-        
+        <!--<adm:tab label="Edit User Preferences" active="true" id="tab1"/> -->
+
+        <adm:tab label="#{fxMessageBean['User.pref.show']}" active="true" id="tab1"/>
+      <!--  <c:if test="#{not empty accountBean.contactData}"> -->
+            <adm:tab label="#{fxMessageBean['User.pref.contactData']}" active="false" id="tab2"
+            	bean="#{accountBean}" action="showContactData"/>
+      <!--  </c:if>  -->
         <fx:formRow label="Account Name" id="name" newLine="false">
             <h:inputText id="name" value="#{accountBean.account.name}" readonly="true"/>
             <h:inputHidden value="#{accountBean.accountIdFiler}"/>
+            <h:inputHidden value="#{accountBean.account.contactDataId}"/>
         </fx:formRow>
         <fx:formRow label="Login Name" id="loginName">
             <h:inputText id="loginName" value="#{accountBean.account.loginName}" readonly="true"/>
@@ -82,6 +90,7 @@
         <adm:toolbarPluginButtons/>
     </h:form>
     <br/>
+
 </ui:define>
 
 </ui:composition>

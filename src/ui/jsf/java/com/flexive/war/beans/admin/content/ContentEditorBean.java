@@ -262,6 +262,28 @@ public class ContentEditorBean implements ActionBean, Serializable {
         return name;
     }
 
+    public String getUserCd() {
+        try {
+            long id = Long.valueOf(FxJsfUtils.getRequest().getAttribute("cdId").toString());
+            int vers = Integer.valueOf(FxJsfUtils.getRequest().getAttribute("vers").toString());
+            // type is always 'contactData' here...
+            this.type = CacheAdmin.getFilteredEnvironment().getType(FxType.CONTACTDATA).getId();
+            // clear fields...
+            release();
+            if(id != -1){
+                this.id = id;
+                this.version = vers;
+                // init all necessary fields...as this.id is set no new contact data set will be created but the existing one loaded
+                _init();
+                //content = co.load(new FxPK(id, vers));
+            }
+        } catch (Exception e) {
+            // TODO possibly pass some error message to the HTML page
+            LOG.error("Failed to parse request parameters: " + e.getMessage(), e);
+        }
+        return null;
+    }
+
 
     /**
      * {@inheritDoc}
@@ -437,13 +459,21 @@ public class ContentEditorBean implements ActionBean, Serializable {
     public String load() {
         content = null;
         _init();
+        readOnly = true;
         return getEditorPage();
+    }
+
+    public String loadUserContent(){
+        content = null;
+        _init();
+        return "showContentEditor";
     }
 
     public String reload() {
         content = null;
         _init();
-        return getEditorPage();
+        //return getEditorPage();
+        return null;
     }
 
 
@@ -586,7 +616,8 @@ public class ContentEditorBean implements ActionBean, Serializable {
         version = -1;
         id = -1;
         readOnly = false;
-        return getEditorPage();
+        //return getEditorPage();
+        return null;
     }
 
     public List<SelectItem> getPossibleWorkflowSteps() {
@@ -711,7 +742,8 @@ public class ContentEditorBean implements ActionBean, Serializable {
         } catch (Throwable t) {
             new FxFacesMsgErr(t).addToContext();
         }
-        return getEditorPage();
+        //return getEditorPage();
+        return null;
     }
 
 
@@ -777,7 +809,8 @@ public class ContentEditorBean implements ActionBean, Serializable {
         } catch (Throwable t) {
             new FxFacesMsgErr(t).addToContext();
         }
-        return getEditorPage();
+        return null;
+        //return getEditorPage();
     }
 
     public String enableEdit() {

@@ -33,16 +33,20 @@
  ***************************************************************/
 package com.flexive.war.beans.admin.main;
 
+
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.content.FxContent;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.AccountEngine;
+import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.UserGroupEngine;
 import com.flexive.shared.security.*;
+import com.flexive.war.FxRequest;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -56,7 +60,7 @@ import java.util.*;
  * Management of accounts.
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
- * @version $Rev$
+ * @version $Rev: 1418 $
  */
 public class AccountBean {
     private static final Log LOG = LogFactory.getLog(AccountBean.class);
@@ -78,6 +82,8 @@ public class AccountBean {
     private Mandator mandator;
     private Hashtable<String, ArrayList<Account>> listCache;
     private static final String ID_CACHE_KEY = AccountBean.class + "_id";
+    private ContentEngine contentInterface;
+    private FxContent contactData;
 
 
     public List<Role> getRoles() {
@@ -282,6 +288,18 @@ public class AccountBean {
         return null;
     }
 
+    public String showContactData(){
+        FxRequest request = FxJsfUtils.getRequest();        
+        if(this.account.getContactData() != null){
+            request.setAttribute("cdId", this.account.getContactData().getId());
+            request.setAttribute("vers", this.account.getContactData().getVersion());
+        } else {
+            request.setAttribute("cdId", -1);
+            request.setAttribute("vers", -1);
+        }
+        return "showContentEditor";
+    }
+
     /**
      * Deletes a user, with the id specified by accountIdFiler.
      *
@@ -336,11 +354,21 @@ public class AccountBean {
             setAccountIdFiler(this.account.getId());
             this.roles = accountInterface.getRoleList(this.accountIdFiler, AccountEngine.RoleLoadMode.ALL);
             this.groups = accountInterface.getGroupList(this.accountIdFiler);
+            this.contactData = null;
+            try{
+                this.contactData = contentInterface.load(this.account.getContactData());
+            } catch(NullPointerException ex){
+                // ...
+            }
             return "userEdit";
         } catch (Throwable t) {
             new FxFacesMsgErr(t).addToContext();
             return "contentPage";
         }
+    }
+
+    public FxContent getContactData() {
+        return contactData;
     }
 
     /**
