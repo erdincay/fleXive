@@ -6,4 +6,61 @@
 <section xml:id="core_scripting" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude">
     <title>Scripting Engine</title>
+    <xi:include href="../includes/author_mplesser.xml"/>
+
+    <section xml:id="core_scripting_overview">
+        <title>Overview</title>
+        <para>
+            Quite often it is desireable to adjust (or automatically generate) some values in content instance, send
+            emails or perform functionality that the original developer of a software component didnt have in mind when
+            the wrote it. Changing the component is one way - but it doesnt endorse reuseability of neither the
+            component nor the modification or required actions.
+        </para>
+        <para>
+            &Flexive; is built with the intention to allow various kinds of scripting. Scripts can be either executed
+            manually (on demand) or when a certain event occurs. The scope of events are defined in
+            <constant>FxScriptScope</constant>
+            for
+            <link linkend="core_structure">types, assignments</link>, binary processing,
+            <link linkend="core_users">user accounts</link>
+            or
+            <link linkend="core_tree">tree</link>
+            actions.
+        </para>
+        <para>
+            The scripting language of choice is
+            <link href="http://groovy.codehaus.org">Groovy</link>, but if JavaSE 6 or higher is used any language
+            supported by the Java Scripting API can be used.
+        </para>
+    </section>
+
+    <section xml:id="core_scripting_events">
+        <title>Events and Bindings</title>
+        <para>
+            Scripts that are not executed manually or on demand are supplied with context dependent variables in so
+            called
+            <constant>bindings</constant>. A script that is called before a content instance is saved will for example
+            require a reference to the content instance in its bindings.
+            Please see the API documentation of
+            <classname>FxScriptEvent</classname>
+            for further information.
+        </para>
+    </section>
+
+    <section xml:id="core_scripting_runonce">
+        <title>Run-Once and Startup Scripts</title>
+        <para>
+            &Flexive; allows the definition of scripts which are executed once during the initial setup of a division
+            (database) called run-once scripts or every time the application server is started called startup scripts.
+            These scripts are located in the
+            <filename>resources/scripts/runonce</filename>
+            and
+            <filename>resources/scripts/startup</filename>
+            directories for applications extending &flexive; and in
+            <filename>src/framework/resources/fxresources/scripts/runonce</filename>
+            and
+            <filename>src/framework/resources/fxresources/scripts/startup</filename>
+            for the framework itself.
+        </para>
+    </section>
 </section>
