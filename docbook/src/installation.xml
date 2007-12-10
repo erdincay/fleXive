@@ -150,7 +150,7 @@ database.password=a]]></programlisting>
                 directory.
                 <para>
                     Copy the
-                    <filename>flexive3.ear</filename>
+                    <filename>flexive.ear</filename>
                     to
                     <filename>${jboss.home}/server/all/deploy</filename>.
                 </para>
@@ -175,6 +175,7 @@ database.password=a]]></programlisting>
                     </para>
                 </listitem>
                 <listitem>
+                    <para>Change to the <filename>${jboss.home}/bin</filename> directory.</para>
                     <para>
                         On Linux launch JBoss using
                         <programlisting><![CDATA[sh run.sh -c all -Djboss.bind.address=0.0.0.0]]></programlisting>
