@@ -4,7 +4,8 @@
         %global_entities;
         ]>
 <section xml:id="run_flexive" xmlns="http://docbook.org/ns/docbook">
-    <title>To run &Flexive; and develop &Flexive; applications you need
+    <title>
+        To run &Flexive; and develop &Flexive; applications you need...
     </title>
     <para>
         <orderedlist>

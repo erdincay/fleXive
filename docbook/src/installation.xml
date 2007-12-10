@@ -17,7 +17,8 @@
         <xi:include href="includes/installation_prerequisites.xml"/>
 
         <section xml:id="develop_flexive">
-            <title>To develop &Flexive; you need
+            <title>
+                To develop &Flexive; you need...
             </title>
             <para>
                 If you are interested in developing &Flexive;, you will need the
