@@ -61,6 +61,7 @@ div.warning {
 /* Code example boxes */
 div.example {
     padding: 0.5em;
+    margin: 0.5em;
     border: 1px solid gray;
 }
 
