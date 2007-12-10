@@ -95,6 +95,7 @@ public class TypeEditorBean {
     private FxScriptEvent scriptEvent;
     private long scriptId = -1;
     private FxScriptEvent selectedEvent;
+    private long scriptToWithdraw = -1;
     // the script/scripttype combinations for which the mappings for the currently specified type should be created
     private ArrayList<FxScriptInfo> selectedScripts = new ArrayList<FxScriptInfo>();
 
@@ -764,10 +765,18 @@ public class TypeEditorBean {
         this.scriptId = scriptId;
     }
 
+    public long getScriptToWithdraw() {
+        return scriptToWithdraw;
+    }
+
+    public void setScriptToWithdraw(long scriptToWithdraw) {
+        this.scriptToWithdraw = scriptToWithdraw;
+    }
+
     /**
      * Returns a list of scripts for the selected script event id.
      * In casae the id==-1 return all available scripts assigned to this type.
-     * The returned list of scritpts is sorted by name.
+     * The returned list of scripts is sorted by name.
      *
      * @return  all scripts for the selected script event id
      */
@@ -883,6 +892,27 @@ public class TypeEditorBean {
         }
 
         this.selectedScripts = new ArrayList<FxScriptInfo>();
+        return "typeScriptEditor";
+    }
+
+    // withdraw (a) script type mapping(s)
+    public String withdrawScript() {
+        try{
+            if(this.scriptToWithdraw != -1){
+                 if (scriptEventId == -1) {
+                     // remove ALL type script mappings, don't consider script event
+                    EJBLookup.getScriptingEngine().removeTypeScriptMapping(scriptToWithdraw, this.type.getId());
+                 } else {
+                     // remove ONE type script mapping for the specified script event
+                     EJBLookup.getScriptingEngine().removeTypeScriptMappingForEvent(scriptToWithdraw, this.type.getId(), scriptEventId);
+                 }
+
+            }
+        } catch (FxApplicationException e) {
+            new FxFacesMsgErr("Script.err.withdraw").addToContext();
+            e.printStackTrace();
+        }
+        this.scriptToWithdraw = -1;
         return "typeScriptEditor";
     }
 

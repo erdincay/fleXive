@@ -83,7 +83,7 @@ public interface ScriptingEngine {
      * Update a scripts info
      *
      * @param scriptId    requested script id
-     * @param type        script type
+     * @param event     requested script event
      * @param name        new name (or <code>null</code> if unchanged)
      * @param description new description (or <code>null</code> if unchanged)
      * @param code        the code
@@ -105,7 +105,7 @@ public interface ScriptingEngine {
     /**
      * Get scripts by their type
      *
-     * @param scriptType requested type
+     * @param scriptEvent     requested script event
      * @return array of id's by type
      */
     List<Long> getByScriptType(FxScriptEvent scriptEvent);
@@ -113,7 +113,7 @@ public interface ScriptingEngine {
     /**
      * Create a new script
      *
-     * @param type        script type
+     * @param event     script event
      * @param name        (unique) name
      * @param description description
      * @param code        code
@@ -126,7 +126,7 @@ public interface ScriptingEngine {
     /**
      * Create a new script based on a script from the library
      *
-     * @param type        script type
+     * @param event     script event
      * @param libraryname name of the script in the script library
      * @param name        (unique) name
      * @param description description
@@ -140,7 +140,7 @@ public interface ScriptingEngine {
      * Create a new script based on a script from the library
      *
      * @param dropName    name of the drop to use as repository
-     * @param type        script type
+     * @param event     script event
      * @param libraryname name of the script in the script library
      * @param name        (unique) name
      * @param description description
@@ -226,7 +226,7 @@ public interface ScriptingEngine {
     /**
      * Create a new mapping for types with a given FxScriptEvent
      *
-     * @param scriptType   FxScriptEvent for this mapping (on create, save, remove, etc.)
+     * @param scriptEvent   FxScriptEvent for this mapping (on create, save, remove, etc.)
      * @param scriptId     id of the script
      * @param typeId       id of the type
      * @param active       mapping is active?
@@ -253,6 +253,16 @@ public interface ScriptingEngine {
      * @throws FxApplicationException on errors
      */
     void removeTypeScriptMapping(long scriptId, long typeId) throws FxApplicationException;
+
+    /**
+     * Remove a mapping from a script to an type (directly mapped, not via inheritance!) for a specific script event
+     *
+     * @param scriptId id of the script
+     * @param typeId   id of the type
+     * @param scriptEventId id of the script event
+     * @throws FxApplicationException on errors
+     */
+    void removeTypeScriptMappingForEvent(long scriptId, long typeId, long scriptEventId) throws FxApplicationException;
 
     /**
      * Update a mapping for assignments

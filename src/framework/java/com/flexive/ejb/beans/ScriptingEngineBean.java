@@ -594,10 +594,41 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             // Obtain a database connection
             con = Database.getDbConnection();
             //                                                               1                2
-            sql = "DELETE FROM " + TBL_SCRIPT_MAPPING_TYPES + " WHERE SCRIPT=? AND ASSIGNMENT=?";
+            sql = "DELETE FROM " + TBL_SCRIPT_MAPPING_TYPES + " WHERE SCRIPT=? AND TYPEDEF=?";
             ps = con.prepareStatement(sql);
             ps.setLong(1, scriptId);
             ps.setLong(2, typeId);
+            ps.executeUpdate();
+            success = true;
+        } catch (SQLException exc) {
+            throw new FxRemoveException(LOG, exc, "ex.scripting.mapping.type.remove.failed", scriptId, typeId, exc.getMessage());
+        } finally {
+            if (!success)
+                ctx.setRollbackOnly();
+            else
+                StructureLoader.reloadScripting(FxContext.get().getDivisionId());
+            Database.closeObjects(ScriptingEngineBean.class, con, ps);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void removeTypeScriptMappingForEvent(long scriptId, long typeId, long scriptEventId) throws FxApplicationException {
+        Connection con = null;
+        PreparedStatement ps = null;
+        String sql;
+        boolean success = false;
+        try {
+            // Obtain a database connection
+            con = Database.getDbConnection();
+            //                                                               1                2
+            sql = "DELETE FROM " + TBL_SCRIPT_MAPPING_TYPES + " WHERE SCRIPT=? AND TYPEDEF=? AND STYPE=?";
+            ps = con.prepareStatement(sql);
+            ps.setLong(1, scriptId);
+            ps.setLong(2, typeId);
+            ps.setLong(3, scriptEventId);
             ps.executeUpdate();
             success = true;
         } catch (SQLException exc) {

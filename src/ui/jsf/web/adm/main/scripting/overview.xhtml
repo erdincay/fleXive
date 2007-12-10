@@ -28,7 +28,7 @@
             <adm:tab label="Script Overview" active="true" id="tab1"/>
 
             <h:panelGrid columns="2">
-                Script type:&nbsp;
+                #{fxMessageBean['Script.field.type']}:&nbsp;
                 <h:selectOneListbox id="scriptTypeSel" value="#{scriptBean.scriptEvent}" size="1"
                                     onchange="document.listForm.submit();">
                     <f:selectItems value="#{fxSelectBean.scriptEvents}" />

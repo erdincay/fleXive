@@ -26,6 +26,8 @@
                  bean="#{typeEditorBean}" action="showTypeEditor"/>
         <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor']} [#{typeEditorBean.eventScriptCount}]" active="true" id="tab2"/>
 
+        <fx:fieldSet legend="#{fxMessageBean['ScriptEditor.label.assignedScripts']}">
+
         <fx:formRow label="#{fxMessageBean['ScriptEditor.label.scriptEvent']}" id="scriptEvents" height="85">
             <h:selectOneListbox id="scriptEvents" value="#{typeEditorBean.scriptEventId}" size="#{typeEditorBean.eventScriptCount + 1}">
                 <f:selectItems value="#{typeEditorBean.scriptEvents}" />
@@ -35,20 +37,36 @@
 
         <a4j:outputPanel id="scripts">
             <fx:formRow label="#{fxMessageBean['ScriptEditor.label.scripts']}" id="scripts">
+                <table>
+                <tbody>
                 <ui:repeat var="scriptInfo" value="#{typeEditorBean.scripts}">
+                    <tr><td>
+                    <h:commandLink id="withdrawButtons_#{scriptInfo.id}" action="#{typeEditorBean.withdrawScript}">
+                        <t:graphicImage url="/adm/images/commandButton/remove.png"  style="margin-left:5px;"
+                        styleClass="pngSupport"/>
+                        <f:setPropertyActionListener target="#{typeEditorBean.scriptToWithdraw}" value="#{scriptInfo.id}"/>
+                    </h:commandLink>
+                   
+                        
                     <h:commandLink id="editScripts_#{scriptInfo.id}" action="#{scriptBean.editScript}"
                                    value="#{scriptInfo.name}" actionListener="#{scriptBean.structureListen}">
                         <f:param name="oid" value="#{scriptInfo.id}"/>
-                    </h:commandLink>
-                    <br/>
+                    </h:commandLink>                    
+                    </td></tr>
                 </ui:repeat>
+                </tbody>
+                </table>
             </fx:formRow>
         </a4j:outputPanel>
 
+        </fx:fieldSet>
 
         <br/>
         <br/>
         <br/>
+
+
+        <fx:fieldSet legend="#{fxMessageBean['ScriptEditor.label.chooseScriptsToAssign']}">
 
         <fx:formRow label="#{fxMessageBean['ScriptEditor.label.scriptEvent']}" id="scriptTypes2" height="85">
             <h:selectOneListbox id="scriptTypes2" value="#{typeEditorBean.scriptEvent}" size="7">
@@ -82,9 +100,13 @@
             </fx:formRow>
         </a4j:outputPanel>
 
+        </fx:fieldSet>
+
         <br/>
         <br/>
         <br/>
+
+        <fx:fieldSet legend="#{fxMessageBean['ScriptEditor.label.scriptsToAssign']}">
 
         <h:dataTable value="#{typeEditorBean.selectedScripts}" var="itm">
             <h:column>
@@ -103,8 +125,12 @@
 
         <br/>
         <br/>
-        <h:commandButton id="assignScripts" action="#{typeEditorBean.assignScripts}" value="AssignScripts"/>
-        <h:commandButton id="clearTable" action="#{typeEditorBean.clearTable}" value="ClearTable"/>
+        <h:commandButton id="assignScripts" action="#{typeEditorBean.assignScripts}" value="#{fxMessageBean['ScriptEditor.button.assignScripts']}"/>
+            &nbsp;
+        <h:commandButton id="clearTable" action="#{typeEditorBean.clearTable}" value="#{fxMessageBean['ScriptEditor.button.clearTable']}"/>
+
+        </fx:fieldSet>
+
         <br/>
         <br/>
 
