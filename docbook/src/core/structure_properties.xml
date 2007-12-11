@@ -97,14 +97,14 @@
                         <methodname>reuse(..)</methodname>
                         in
                         <classname>FxPropertyAssignmentEdit</classname>
-                        allows us to reuse an existing property assignment with the least possible overhead
+                        allows us to reuse an existing property assignment with the least possible overhead.
                     </para>
                 </callout>
                 <callout arearefs="cst_reuseprop_3">
                     <para>The XPath of the assignment that is to be reused in, preceeded by the type. Here we reuse the
                         "Caption" property that is assigned to the virtual Root-Type which acts as a repository (see
                         <xref linkend="core_structure_root_type"/>
-                        for more information about the virtual root type)
+                        for more information about the virtual root type).
                     </para>
                 </callout>
                 <callout arearefs="cst_reuseprop_4">

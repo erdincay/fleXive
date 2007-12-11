@@ -44,16 +44,20 @@
         <para>
             A good analogy to explain how structures in &flexive; are organised are classes and object instances: a
             class in
-            an object oriented programming language describes which attributes (in &flexive; called<emphasis>
-            properties</emphasis>) are available.
-            If an attribute itself acts like a container for other attributes we call it a<emphasis>group</emphasis>.
+            an object oriented programming language describes which attributes (in &flexive; called
+            <emphasis>properties</emphasis>) are available.
+            If an attribute itself acts like a container for other attributes we call it a
+            <emphasis>group</emphasis>.
             We call the class analogon
             <emphasis>Type</emphasis>
-            (implemented in the class<classname>FxType</classname>), attributes
+            (implemented in the class
+            <classname>FxType</classname>), attributes
             <emphasis>property</emphasis>
-            (implemented in<classname>FxProperty</classname>) and a collection of attributes
+            (implemented in
+            <classname>FxProperty</classname>) and a collection of attributes
             <emphasis>Group</emphasis>
-            (implemented in<classname>FxGroup</classname>).
+            (implemented in
+            <classname>FxGroup</classname>).
         </para>
         <para>
             To enable reuse of properties and groups these entities are independent of types and need to be
@@ -74,8 +78,13 @@
             .
         </para>
         <para>
-            A special extension to types are relations (implemented in<classname>FxType</classname>, mode:<constant>
-            Relation</constant>) which mimics the behaviour of attributed n:m relations known from SQL.
+            A special extension to types are relations (implemented in
+            <classname>FxType</classname>, mode:
+            <constant>Relation</constant>) which mimics the behaviour of attributed n:m relations known from SQL.
+        </para>
+        <para>
+            Structure elements can be addressed using XPath-like expressions as shown in
+            <xref linkend="core_contents"/>. 
         </para>
         <para>
             <table xml:id="cso_table" class="flexive">
@@ -107,7 +116,7 @@
                         </td>
                         <td>A relation is basically a type that relates (or links) two other types together. A good
                             analogy is an attributed relation known from SQL. It is possible to define how many times a
-                            specific instance may be used as a relation source or destination and which types my be
+                            specific instance may be used as a relation source or destination and which types may be
                             related.
                         </td>
                     </tr>
@@ -139,7 +148,7 @@
                             <classname>FxAssignment</classname>
                         </td>
                         <td>An assignment is the correlation of groups and properties to types. A group or property can
-                            only be used in instances if it has been assigned to a group assignment or a type.
+                            only be used in instances if it is connected to a group assignment or a type.
                         </td>
                     </tr>
                     <tr>
@@ -180,9 +189,9 @@
 
         <section xml:id="core_structure_root_type">
             <title>Root Type</title>
-            <para>A system internal and somewhat special type is called the "Root" type: It serves as virtual that can
+            <para>A system internal and somewhat special type is the "Root" type: It serves as virtual that can
                 be used to assign groups or properties to. These can be reused in other types or assignments without the
-                need of inheritance but rather "pure" reuse and thus serves as some kind of repository.
+                need of inheritance and thus serves as some kind of repository.
             </para>
         </section>
 
@@ -805,11 +814,11 @@
     <section xml:id="core_structure_properties_binaries">
         <title>Handling binary content</title>
         <para>
-            Working with binary content is like working with ordinary input- and outputstreams in Java. To upload a
+            Working with binary content is like working with ordinary input- and outputstreams in Java. For uploading a
             binary an
             <classname>InputStream</classname>
-            has to be passed and downloading is as simple as passing an
-            <classname>OutputStream</classname>. Transfer of binaries is handled by &flexive;'s own streaming
+            and for downloading an
+            <classname>OutputStream</classname> has to be passed. Transfer of binaries is handled by &flexive;'s own streaming
             framework &fxStream;. It uses nonblocking tcp sockets as transport medium if the client and server part
             exist in different virtual machines and is able to detect if they run within the same VM for optimal
             performance.
@@ -818,7 +827,7 @@
             <example xml:id="core_structre_ex_binary">
                 <title>Handling binary content</title>
                 <xi:include href="../listings/core_structure_binaries.xml"/>
-                This example show how easy it is to upload a binary programatically to the
+                This example shows how easy it is to upload a binary programatically to the
                 <interfacename>ContentEngine</interfacename>
                 and download it from the saved instance.
                 <calloutlist>

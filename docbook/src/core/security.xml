@@ -11,16 +11,16 @@
     <section xml:id="core_security_overview">
         <title>Overview</title>
         <para>
-            &Flexive; implements an access control list based approach to security combined wit
+            &Flexive; implements an access control list based approach to security combined with
             <link linkend="core_security_roles">roles</link>. Since handling
-            access permissions on a per user user basis would result in tremendous amounts of data, &flexive; checks
+            access permissions on a per user basis would result in tremendous amounts of data, &flexive; checks
             permissions based on access control lists on a per user group basis. User accounts can be assigned to any
             number of user groups and if in rare cases an explicit user based security is needed, the use of one group
             for each user is recommended.
         </para>
         <para>
-            User accounts are stored in the database and consist basically of the login name, a hashed password of the
-            assigned groups and roles. For more information about accounts see
+            User accounts are stored in the database and consist basically of the login name together with a hashed
+            password of the assigned groups and roles. For more information about accounts see
             <xref linkend="core_users"/>.
         </para>
     </section>
@@ -37,7 +37,7 @@
             of &flexive;.
         </para>
         <para>
-            &Flexive; provides at the core and web layer (provided they run in the same virtual machine) a context which
+            At the core and web layer (provided they run in the same virtual machine) a context is available which
             is stored in a
             <classname>ThreadLocal</classname>
             called
@@ -82,7 +82,7 @@
         <para>
             &Flexive; was designed to be used by application service providers (ASP) with only one deployed enterprise
             application instance using multiple databases. These database instances are called
-            <emphasis>Division</emphasis>
+            <emphasis>Divisions</emphasis>
             and contain their own accounts, structures and
             content - totally separated from other users of &flexive;.
         </para>
@@ -114,11 +114,12 @@
     <section xml:id="core_security_acl">
         <title>ACL's - Access Control Lists</title>
         <para>
-            Access control lists - which are assigned to user groups - define a list of permissions attached to an
-            arbitrary object like content instances, types, properties (and property assignments) or select lists. See
+            Access control lists - which are assigned to user groups - define a list (Read, Edit, Create, etc.) of
+            permissions attached to an arbitrary object like content instances, types, properties (and property
+            assignments) or select lists. See
             <link href="http://en.wikipedia.org/wiki/Access_control_list">this</link>
             article on Wikipedia for more information about access control lists.
-            For the purpose of easier organization and logical grouping &flexive; categorizes ACL's in the following
+            For the purpose of easier organization and logical grouping &flexive; categorizes ACL's into the following
             groups:
             <itemizedlist>
                 <listitem>
