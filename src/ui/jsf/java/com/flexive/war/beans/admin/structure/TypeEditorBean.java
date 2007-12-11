@@ -716,7 +716,11 @@ public class TypeEditorBean {
         return "typeEditor";
     }
 
-    // called from the script editor; to open an instance where the script is assigned to
+    /**
+     * called from the script editor; to open an instance where the script is assigned to
+     *
+     * @return type editor page
+     */
     public String showTypeEd() {
         editMode = false;
         long propId = FxJsfUtils.getLongParameter("oid", -1);
@@ -813,7 +817,11 @@ public class TypeEditorBean {
         return scripts;
     }
 
-    // get scripts as id-name pairs
+    /**
+     * get scripts as id-name pairs
+     *
+     * @return scripts as id-name pairs
+     */
     public List<SelectItem> getScriptsAsId() {
         ArrayList<SelectItem> scripts = new ArrayList<SelectItem>();
         // list starts with an empty entry (for the user interface)
@@ -862,7 +870,11 @@ public class TypeEditorBean {
     }
 
 
-    // adds a script/type-combination to the list of scripts for which mappings shall be created
+    /**
+     * adds a script/type-combination to the list of scripts for which mappings shall be created
+     *
+     * @return the type script editor page
+     */
     public String addScript() {
 
         if (this.selectedScriptId != -1 && this.selectedEvent != null) {
@@ -879,7 +891,12 @@ public class TypeEditorBean {
         return "typeScriptEditor";
     }
 
-    // create new script type mappings
+
+    /**
+     * create new script type mappings
+     *
+     * @return the type script editor page
+     */
     public String assignScripts() {
         //TODO: what if mapping already exists?
         try {
@@ -895,7 +912,12 @@ public class TypeEditorBean {
         return "typeScriptEditor";
     }
 
-    // withdraw (a) script type mapping(s)
+
+    /**
+     * withdraw (a) script type mapping(s)
+     *
+     * @return the type script editor page
+     */
     public String withdrawScript() {
         try{
             if(this.scriptToWithdraw != -1){
@@ -920,13 +942,20 @@ public class TypeEditorBean {
         return selectedScripts;
     }
 
-    // reset values ...
+    /**
+     * reset values ...
+     * @param e
+     */
     public void clearSelectedScript(ActionEvent e) {
         this.selectedScriptId = -1;
         this.selectedEvent = null;
     }
 
-    // clear table of type mapping assignments (the ones to add)
+    /**
+     * clear table of type mapping assignments (the ones to add)
+     *
+     * @return the type script editor page
+     */
     public String clearTable() {
         this.selectedScripts = new ArrayList<FxScriptInfo>();
         return "typeScriptEditor";

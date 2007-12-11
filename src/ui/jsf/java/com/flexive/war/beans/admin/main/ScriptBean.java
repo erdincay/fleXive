@@ -126,7 +126,12 @@ public class ScriptBean {
     }
 
 
-    // gets all scripts belonging to the type defined in the "scriptType" member
+
+    /**
+     * gets all scripts belonging to the type defined in the "scriptType" member
+     *
+     * @return all scripts belonging to the type defined in the "scriptType" member
+     */
     public FxScriptInfo[] getList() {
         // if no filtering needs to be done return the whole script list..
         if (scriptEvent == null) {
@@ -356,7 +361,11 @@ public class ScriptBean {
         return "scriptOverview";
     }
 
-    // called from the structure editor -> get the oid of the script to show from the request parameters
+    /**
+     * called from the structure editor -> get the oid of the script to show from the request parameters
+     *
+     * @param e
+     */
     public void structureListen(ActionEvent e) {
         FacesContext context = FacesContext.getCurrentInstance();
         Map requestParams = context.getExternalContext().getRequestParameterMap();

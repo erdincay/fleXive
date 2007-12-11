@@ -356,7 +356,7 @@ public class AccountBean {
             this.groups = accountInterface.getGroupList(this.accountIdFiler);
             this.contactData = null;
             try{
-                this.contactData = contentInterface.load(this.account.getContactData());
+                this.contactData = EJBLookup.getContentEngine().load(this.account.getContactData());
             } catch(NullPointerException ex){
                 // ...
             }
@@ -383,7 +383,11 @@ public class AccountBean {
     }
 
 
-    // saves the user settings
+    /**
+     * save the user settings
+     *
+     * @return  content page
+     */
     public String saveUserPref() {
         try {
             String newPasswd = null;
