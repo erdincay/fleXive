@@ -932,7 +932,6 @@ public class TypeEditorBean {
             }
         } catch (FxApplicationException e) {
             new FxFacesMsgErr("Script.err.withdraw").addToContext();
-            e.printStackTrace();
         }
         this.scriptToWithdraw = -1;
         return "typeScriptEditor";

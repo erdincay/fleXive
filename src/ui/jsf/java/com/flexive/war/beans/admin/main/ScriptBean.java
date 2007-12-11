@@ -90,7 +90,6 @@ public class ScriptBean {
                 scripts = scriptInterface.getScriptInfos();
             } catch (FxApplicationException e) {
                 new FxFacesMsgErr("Script.err.loadAll").addToContext();
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
         }
         return scripts;
@@ -100,12 +99,13 @@ public class ScriptBean {
         if (scripts == null) {
             try {
                 scripts = scriptInterface.getScriptInfos();
+                return FxJsfUtils.asSelectList(Arrays.asList(scripts), true);
             } catch (FxApplicationException e) {
                 new FxFacesMsgErr("Script.err.loadAll").addToContext();
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
         }
-        return FxJsfUtils.asSelectList(Arrays.asList(scripts), true);
+        // if there was an exception, scripts is null so return an empty list
+        return new ArrayList<SelectItem>();
     }
 
 
@@ -115,7 +115,6 @@ public class ScriptBean {
                 scripts = scriptInterface.getScriptInfos();
             } catch (FxApplicationException e) {
                 new FxFacesMsgErr("Script.err.loadAll").addToContext();
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
         }
         ArrayList<SelectItem> retScripts = new ArrayList<SelectItem>(scripts.length);
