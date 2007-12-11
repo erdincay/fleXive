@@ -119,7 +119,7 @@ class svnVersion extends Task {
     String property
 
     public void execute() {
-        File f = new File(".svn/entries")
+        File f = new File(this.project.getProperty("basedir") + "/.svn/entries")
         if (f.exists()) {
             try {
                 StringBuffer sbInput = new StringBuffer(1000)
