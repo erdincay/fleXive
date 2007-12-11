@@ -526,7 +526,7 @@ public final class Database {
             ps.setLong(1, id);
             ps.execute();
             ps.close();
-            if (string != null && string.getTranslatedLanguages().length > 0) {
+            if (string.getTranslatedLanguages().length > 0) {
                 ps = con.prepareStatement("INSERT INTO " + table + ML + " (" + idColumn + ",LANG,DEFLANG,"
                         + dataColumn + ") VALUES (?,?,?,?)");
                 ps.setLong(1, id);

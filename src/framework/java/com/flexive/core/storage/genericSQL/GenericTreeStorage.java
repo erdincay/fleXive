@@ -545,7 +545,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 result = rs.getString(1);
                 if (rs.wasNull()) result = "";
             }
-            return FxFormatUtils.escapeTreePath(result);
+            return result != null ? FxFormatUtils.escapeTreePath(result) : "";
         } catch (SQLException e) {
             throw new FxTreeException(LOG, "ex.db.sqlError", e.getMessage());
         } finally {

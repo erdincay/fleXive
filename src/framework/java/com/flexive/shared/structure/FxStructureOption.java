@@ -33,6 +33,8 @@
  ***************************************************************/
 package com.flexive.shared.structure;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -174,7 +176,7 @@ public class FxStructureOption implements Serializable {
         if (key != null)
             key = key.trim().toUpperCase();
         if (key == null || key.length() == 0 || options == null || options.size() == 0)
-            return getUnknownOption(key);
+            return getUnknownOption(StringUtils.defaultString(key));
         for (FxStructureOption option : options)
             if (key.equals(option.getKey()))
                 return option;
