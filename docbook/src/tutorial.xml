@@ -114,11 +114,50 @@
                 to be shown on the front page of our application.
             </para>
 
-            <programlisting language="java">
-                <xi:include
-                        href="../../src/examples/helloworld/java/com/flexive/examples/helloworld/war/HelloWorldBean.java"
-                        parse="text"/>
-            </programlisting>
+            <xi:include href="listings/tutorial_retrieving_data.xml"/>
+
+            <calloutlist>
+                <callout arearefs="RetrievingData_1">
+                    <para>
+                        We choose the columns to be selected for the result set:
+                        <orderedlist>
+                            <listitem>
+                                <para>
+                                    <code>@pk</code>,
+                                    the primary key of the blog posting,
+                                </para>
+                            </listitem>
+                            <listitem>
+                                <para>
+                                    <code>entryTitle</code>,
+                                    the blog entry title,
+                                </para>
+                            </listitem>
+                            <listitem>
+                                <para>
+                                    <code>entryText</code>,
+                                    the posting text, and
+                                </para>
+                            </listitem>
+                            <listitem>
+                                <para>
+                                    <code>created_at</code>,
+                                    the &flexive; system property that returns the content creation date
+                                    (i.e. the date the posting was created at). You could also select the last
+                                    modification date with
+                                    <code>modified_at</code>.
+                                </para>
+                            </listitem>
+                        </orderedlist>
+                    </para>
+                </callout>
+                <callout arearefs="RetrievingData_2">
+                    <para>
+                        To display the newest postings first, we order by descending creation date
+                        (<code>created_at</code>).
+                    </para>
+                </callout>
+            </calloutlist>
         </section>
 
         <section xml:id="building_the_gui">
@@ -150,7 +189,14 @@
                 <code>&lt;ui:repeat/&gt;</code>
                 tag is used to iterate over the rows of the datamodel returned by the JSF bean we created in the
                 previous
-                section. The source for this file can be found at
+                section. A row of the datamodel provides indexed access to the columns selected in the
+                search query of the previous section.
+                In this case,
+                <code>#{columns[0]}</code>
+                would be the content primary key
+                (<code>@pk</code>),
+                <code>#{columns[1]}</code>
+                returns the entry title, and so on. The source for this file can be found under
                 <filename>web/index.xhtml</filename>.
             </para>
 

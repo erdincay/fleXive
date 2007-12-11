@@ -48,9 +48,15 @@
                             with a unique target at any given time.
                         </para>
                         <para>
-                            The canonical example for this is the Edit/Live/Archived workflow for publishing
-                            website contents: a content is created in the Edit workflow step. When it is deemed
-                            to be ready for publication, the latest version is set to the Live workflow step
+                            The canonical example for this is the
+                            <emphasis>Edit/Live/Archived</emphasis>
+                            workflow for publishing
+                            website contents: a content is created in the
+                            <emphasis>Edit</emphasis>
+                            workflow step. When it is deemed
+                            to be ready for publication, the latest version is set to the
+                            <emphasis>Live</emphasis>
+                            workflow step
                             and is shown on the web page. When an update is necessary, a new version is created
                             in the Edit workflow step which can be modified without altering the Live instance.
                             When the new version is to be published, it is set to the Live workflow step.

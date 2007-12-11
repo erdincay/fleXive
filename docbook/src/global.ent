@@ -3,7 +3,7 @@
 <!ENTITY backendGui "backend administration application">
 <!ENTITY xpath "XPath">
 <!ENTITY messagekey "message key">
-<!ENTITY flexiveJavadoc "&flexive; Javadoc">
+<!ENTITY flexiveJavadoc "&flexive; JavaDoc">
 <!ENTITY flexiveApi "&flexive; API">
 <!ENTITY weblets "<ulink url='https://weblets.dev.java.net/'><glossterm>Weblets</glossterm></ulink>">
 <!ENTITY jee5 "JavaEE 5">

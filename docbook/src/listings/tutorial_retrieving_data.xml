@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="java" id="TutorialRetrievingData"
+                xmlns="http://docbook.org/ns/docbook">public class HelloWorldBean {
+    private DataModel blogEntries;
+
+    public DataModel getBlogEntries() throws FxApplicationException {
+        if (blogEntries == null) {
+            final FxResultSet result = new SqlQueryBuilder()
+                    .select("@pk", "entryTitle", "entryText", "created_at") // <co id="RetrievingData_1"/>
+                    .type("blogEntry")
+                    .orderBy("created_at", SortDirection.DESCENDING)        // <co id="RetrievingData_2"/>
+                    .getResult();
+            blogEntries = new FxResultSetDataModel(result);
+        }
+        return blogEntries;
+    }
+}</programlisting>

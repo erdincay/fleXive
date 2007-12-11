@@ -2,7 +2,7 @@
 <!DOCTYPE chapter [
         <!ENTITY % global_entities SYSTEM "global.ent">
         %global_entities;
-        <!ENTITY pkParameter "May be supplied as an FxPK object, a long ID, a String with an FxPK in string notation (e.g. &quot;5&quot;, &quot;5.1&quot;, &quot;5.MAX&quot;), a FxReference, or a FxSelectListItem whose ID will be interpreted as a content ID.">
+        <!ENTITY pkParameter "May be supplied as an FxPK object, a long ID, a String containing a primary key (e.g. &quot;5&quot;, &quot;5.1&quot;, &quot;5.MAX&quot;), a FxReference, or a FxSelectListItem whose ID will be interpreted as a content ID.">
         ]>
 <chapter xml:id="jsfsupport" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude">
@@ -16,7 +16,7 @@
         This includes components to render and edit FxContent instances,
         submit search queries and show their results, and create custom content queries.
         To make your own reusable components, &flexive; provides a simple-to-use plugin API
-        for wiring your own reusable JSF and EJB components to other &flexive; applications.
+        for wiring your own reusable JSF and EJB components for other &flexive; applications.
     </para>
 
     <para>
@@ -403,7 +403,7 @@
                     <itemizedlist>
                         <listitem>
                             <para>
-                                the assignment label, translated in the current user's locale, and
+                                the assignment label translated in the current user's locale, and
                             </para>
                         </listitem>
                         <listitem>
@@ -500,7 +500,7 @@
                 <para>
                     The
                     <code language="xhtml">&lt;fx:valueInput></code>
-                    component is an universal
+                    component is a universal
                     component for editing FxValue objects. It supports every datatype of FxValue,
                     for example plain text, numbers, dates, or even binaries. It is used in the
                     &backendGui; content and search query editors and in every other place
@@ -868,7 +868,7 @@
                 </title>
 
                 <para>
-                    Renders a row container for a single input field,
+                    Renders a row container for a single input field
                     and renders a label for the input element. The input field(s) are stored in the tag body.
                 </para>
 
@@ -1040,7 +1040,7 @@
 
             <para>
                 &Flexive; provides a set of JSF managed beans for working with &flexive; in JSF
-                applications. Some of them are mostly internal, some will probably be used
+                applications. Some of them are usually used only in administration pages, some will probably be used
                 in every &flexive; application. For a complete reference consult the
                 &flexiveJavadoc;.
             </para>
@@ -1303,7 +1303,7 @@
 
             <para>
                 JSF components provide a simple and powerful way of providing additional functionality
-                to existing applications, for example a forum or comment sections.
+                to existing applications, for example a forum or comment section.
                 A component packages all Java code and web resources into a single JAR file that can
                 be dropped into the
                 <filename>lib/</filename>
@@ -1694,7 +1694,7 @@ component.create:
                             <glossterm>
                                 <firstterm>extension point</firstterm>
                             </glossterm>
-                            defines "points" where existing Java code can be extended.
+                            defines a "code point" where existing Java code can be extended.
                         </para>
                     </listitem>
                     <listitem>

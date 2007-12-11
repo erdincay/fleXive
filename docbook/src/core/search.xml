@@ -55,10 +55,14 @@
 
                 <callout arearefs="csq_intro_filter">
                     <para>
-                        Filters work similar to the SQL having clause by providing a post-processing filter mechanism on
+                        Filters work similar to the SQL
+                        <code>HAVING</code>
+                        clause by providing a post-processing filter mechanism on
                         the results of the actual query. That is, filters are applied every time the search query is
                         executed, and are not stored in the cached result tables. This means that changing filters
-                        usually does not invalidate the query cache, whereas changing the WHERE clause always does.
+                        usually does not invalidate the query cache, whereas changing the
+                        <code>WHERE</code>
+                        clause always does.
                         In this example, we might want to select only live versions. If you do not specify
                         a version filter, the search uses the maximum version of contents for matching
                         conditions and selecting properties.
@@ -67,7 +71,9 @@
 
                 <callout arearefs="csq_intro_where">
                     <para>
-                        The where clause support most standard SQL operators for string and numerical comparisons. Here
+                        The
+                        <code>WHERE</code>
+                        clause support most standard SQL operators for string and numerical comparisons. Here
                         we select all contents whose caption starts with "test". Note that string comparisons are case
                         insensitive.
                     </para>
