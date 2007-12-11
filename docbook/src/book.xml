@@ -7,7 +7,7 @@
 <book xmlns="http://docbook.org/ns/docbook" xmlns:xi="http://www.w3.org/2001/XInclude">
     <title><trademark class='trade'>&flexive;</trademark> Reference Documentation</title>
     <subtitle>
-        Revision $Rev$, $Date$
+        Revision @@build.number@@, @@build.time@@
     </subtitle>
     <xi:include href="includes/author_dlichtenberger.xml"/>
     <xi:include href="includes/author_mplesser.xml"/>

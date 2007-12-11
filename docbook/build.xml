@@ -36,6 +36,9 @@
     </target>
 
     <target name="prepare" description="General setup for docbook processing">
+        <!-- Init flexive groovy tasks -->
+        <groovy src="../buildTasks.groovy"/>
+        
         <groovy>
             def file = properties.basedir+File.separatorChar+"build.properties"
             if( !new File(file).exists() ) {
@@ -225,6 +228,22 @@
             <copy todir="@{todir}">
                 <fileset dir="src" includes="css/**/*,images/**/*"/>
             </copy>
+            <replace-build-properties dir="@{todir}"/>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="replace-build-properties">
+        <attribute name="dir"/>
+        <sequential >
+            <!-- Replace the current SVN version number and build date -->
+            <svnVersion property="svn.version"/>
+            <replace dir="@{dir}" includes="**/*.html,**/*.xhtml"
+                     token="@@@build.number@@@" value="${svn.version}"/>
+            <tstamp>
+                <format property="build.time" pattern="yyyy/MM/dd HH:mm" unit="hour"/>
+            </tstamp>
+            <replace dir="@{dir}" includes="**/*.html,**/*.xhtml"
+                     token="@@@build.time@@@" value="${build.time}"/>
         </sequential>
     </macrodef>
 </project>
