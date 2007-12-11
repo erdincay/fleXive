@@ -68,7 +68,7 @@
 
                 <tr>
                     <td>defaultNodeId</td>
-                    <td></td>
+                    <td>The desired start node in the tree for the user.</td>
 
                 </tr>
 
