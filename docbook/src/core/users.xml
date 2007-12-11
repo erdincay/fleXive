@@ -8,11 +8,11 @@
     <title>User Management</title>
     <xi:include href="../includes/author_jwernigp.xml"/>
 
-    <para>Handling users and user information is a basic business of virtually every major software system in use today. At this juncture fleXive is no exception.
-        User management in fleXive is based on accounts – that is a user and its basic information (name, login name, contact data, e-mail addresss, ...) are stored in accounts.
+    <para>Handling users and user information is a basic business of virtually every major software system in use today. At this juncture &flexive; is no exception.
+        User management in &flexive; is based on accounts – that is a user and its basic information (name, login name, contact data, e-mail addresss, ...) are stored in accounts.
     </para>
     <para>
-        In the table below you see the listing of all attributes an account in fleXive owns.
+        In the table below you see the listing of all attributes an account in &flexive; owns.
     </para>
 
 
@@ -27,7 +27,7 @@
             <tbody>
                 <tr>
                     <td>id, name, login name, e-mail, description, contactDataId</td>
-                    <td>Some basic attributes. The Id uniquely identifies the account. The description allows you to characterize the account while the contactDataId identifies the contact data (e.g. postal address, telephon number) linked to this user. Name and login name stand for themselves.</td>
+                    <td>Some basic attributes. The <emphasis>Id</emphasis> uniquely identifies the account. The <emphasis>description</emphasis> allows you to characterize the account while the <emphasis>contactDataId</emphasis> identifies the contact data (e.g. postal address, telephon number) linked to this user. <emphasis>Name</emphasis> and <emphasis>login name</emphasis> stand for themselves.</td>
 
                 </tr>
 
@@ -54,14 +54,14 @@
 
                 <tr>
                     <td>validated</td>
-                    <td>Flags for admins indicating that the user data was audited and are no fake. Setting this flag to false prevents a login for the corresponding account until the flag is set to true. This setting can be used when auto-creating accounts to force validation of the account data. Note: both flags, active and validated, have to be set to true for the log in to work.</td>
+                    <td>Flags for admins indicating that the user data was audited and is no fake. Setting this flag to false prevents a login for the corresponding account until the flag is set to true. This setting can be used when auto-creating accounts to force validation of the account data. Note: both flags, active and validated, have to be set to true for the log in to work.</td>
 
                 </tr>
 
 
                 <tr>
                     <td>validFrom, validTo</td>
-                    <td>The valid from/to dates may be used to define a timeperiode in which the user may log in.</td>
+                    <td>The valid from/to dates may be used to define a time periode in which the user may log in.</td>
 
                 </tr>
 
@@ -75,7 +75,7 @@
 
                 <tr>
                     <td>allowMultiLogin</td>
-                    <td>True if the account may be active more than once at the same time.</td>
+                    <td>True if multiple logins for the account are possible at the same time.</td>
 
                 </tr>
 
@@ -116,8 +116,8 @@
     <section>
         <title>Creating a user</title>
         <para>
-            Creating a user requires special rights. More precisely only callers in role ACCOUNT MANAGEMENT may create users, and only for their mandator. An exception is a user with the role GLOBAL_SUPERVISOR who may create users for all mandators.
-            Following you see an example of how to create a user.
+            Creating a user requires special rights. More precisely only callers (i.e. a user) in role ACCOUNT MANAGEMENT may create users, and only for their mandator. An exception is a user in the role GLOBAL_SUPERVISOR who may create users for all mandators.
+            An example of how to create a new user is given next.
         </para>
 
         <para>
@@ -132,7 +132,7 @@
 
         <para>
 
-            After the account creation one can assign the roles the account is in and the groups it belongs to. For a detailed explanation of the meaning and functioning of roles and groups please go to the <xref linkend="core_security"/>.
+            After the account creation one can assign the roles the account is in and the groups it belongs to. For a detailed explanation of the meaning and functioning of roles and groups refer to the <xref linkend="core_security"/>.
 
         </para>
 
