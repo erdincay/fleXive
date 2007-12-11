@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Header: /cvsroot/pmd/pmd/etc/xslt/corley-pmd-report.xslt,v 1.1 2005/12/14 14:26:33 tomcopeland Exp $ -->
+<!-- $Header$ -->
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 <xsl:output method="html" encoding="UTF-8" doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN" 
 	doctype-system="http://www.w3.org/TR/html4/loose.dtd" indent="yes"/>
@@ -62,7 +62,6 @@
 			z-index: 100;
 		}
     </style>
-    <script type="text/javascript" src="../../Common/floatmenu.js"></script>
 </head>
 <body>
     <H1><div class="top"><div class="left">PMD <xsl:value-of select="//pmd/@version"/> Report</div><div class="right"><xsl:call-template name="timestamp"/></div></div></H1>
@@ -103,7 +102,7 @@
             <thead>
 				<tr>
 					<th>Prio</th>
-					<th>Line</th>
+					<th>Begin Line</th>
 					<th>Method</th>
 					<th align="left">Description</th>
 				</tr>
@@ -118,7 +117,7 @@
 		    <tbody>
 				<tr>
 					<td style="padding: 3px" align="right"><div><xsl:attribute name="class"><xsl:call-template name="priorityDiv"/></xsl:attribute><xsl:value-of disable-output-escaping="yes" select="@priority"/></div></td>
-					<td style="padding: 3px" align="right"><xsl:value-of disable-output-escaping="yes" select="@line"/></td>
+					<td style="padding: 3px" align="right"><xsl:value-of disable-output-escaping="yes" select="@beginline"/></td>
 					<td style="padding: 3px" align="left"><xsl:value-of disable-output-escaping="yes" select="@method"/></td>
 					<td style="padding: 3px" align="left" width="100%"><xsl:if test="@externalInfoUrl"><a><xsl:attribute name="href"><xsl:value-of select="@externalInfoUrl"/></xsl:attribute><xsl:call-template name="message"/></a></xsl:if><xsl:if test="not(@externalInfoUrl)"><xsl:call-template name="message"/></xsl:if></td>
 				</tr>

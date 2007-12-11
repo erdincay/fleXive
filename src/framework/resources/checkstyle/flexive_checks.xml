@@ -51,9 +51,6 @@
 	<!-- Enable/Disable checkstyle in source code with CHECKSTYLE:ON|OFF -->
 	<module name="SuppressionCommentFilter"/>
 	
-	<module name="StrictDuplicateCode"/>
-
-
     <module name="TreeWalker">
 		<module name="FileContentsHolder"/>
 
@@ -117,7 +114,7 @@
         <!-- See http://checkstyle.sf.net/config_sizes.html -->
         <module name="FileLength"/>
         <module name="LineLength">
-        	<property name="max" value="120"/>
+        	<property name="max" value="150"/>
        	</module>
         <module name="MethodLength"/>
         <module name="ParameterNumber"/>
@@ -129,7 +126,7 @@
         <module name="MethodParamPad"/>
         <module name="NoWhitespaceAfter"/>
         <module name="NoWhitespaceBefore"/>
-        <module name="OperatorWrap"/>
+        <!--<module name="OperatorWrap"/>-->
         <!-- <module name="ParenPad"/> -->    <!-- currently, our coding practices differ on this one -->
        	<module name="TypecastParenPad">
 		    <property name="option" value="nospace"/>

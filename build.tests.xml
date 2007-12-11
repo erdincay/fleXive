@@ -70,7 +70,7 @@
     <!-- tasks -->
     <taskdef resource="emma_ant.properties" classpathref="emma.lib"/>
     <taskdef resource="testngtasks" classpathref="build.classpath.testng"/>
-    <taskdef resource="checkstyletask.properties" classpath="${flexive.lib.dir}/checkstyle/checkstyle-all-4.1.jar"/>
+    <taskdef resource="checkstyletask.properties" classpath="${flexive.lib.dir}/checkstyle/checkstyle-all-4.3.jar"/>
 	<taskdef name="pmd"  classname="net.sourceforge.pmd.ant.PMDTask" classpathref="pmd.lib"/>
     <taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask">
         <classpath>
@@ -389,7 +389,7 @@
         <mkdir dir="${findbugs.report.dir}"/>
 		<findbugs output="xml:withMessages" home="${findbugs.dir}"
 		    outputFile="${findbugs.report.dir}/out.xml"
-		    jvmargs="-Xmx128M">
+		    jvmargs="-Xmx256M">
         	<sourcePath path="${flexive.src.framework.dir}"/>
 		    <class location="${build.framework.classes.dir}"/>
             <class location="${build.ui.classes.dir}"/>
