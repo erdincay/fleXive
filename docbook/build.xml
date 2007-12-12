@@ -47,7 +47,7 @@
         </groovy>
 
         <!-- Unzip docbook stylesheets -->
-        <unzip src="${docbook.stylesheets.zip}" dest="${docbook.styles.dir}">
+        <unzip src="${docbook.stylesheets.zip}" dest="${docbook.styles.dir}" overwrite="false">
             <!-- remove docbook root directory in zip file -->
             <regexpmapper from="^docbook-xsl-[^/]*/(.*)" to="\1" handledirsep="true"/>
         </unzip>

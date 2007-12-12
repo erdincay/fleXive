@@ -15,6 +15,10 @@ body {
     font-family: monospace;
 }
 
+.author, a.email {
+    font-size: 0.9em;
+}
+
 .screen, .programlisting {
     font-family: monospace;
     font-size: 1em;

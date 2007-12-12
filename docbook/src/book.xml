@@ -9,6 +9,15 @@
     <subtitle>
         Revision @@build.number@@, @@build.time@@
     </subtitle>
+    <subtitle>
+        Authors:
+    </subtitle>
+    <info>
+        <copyright>
+            <year>1999-2007</year>
+            <holder>UCS - unique computing solutions gmbh</holder>
+        </copyright>
+    </info>
     <xi:include href="includes/author_dlichtenberger.xml"/>
     <xi:include href="includes/author_mplesser.xml"/>
     <xi:include href="includes/author_gglos.xml"/>
