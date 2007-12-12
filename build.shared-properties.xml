@@ -36,7 +36,7 @@
 
     <fileset id="flexive.dist.jar.all" dir="${flexive.dist.dir}/lib" includes="flexive-*.jar"/>
     <fileset id="flexive.dist.jar.libs" dir="${flexive.lib.dir}"
-        includes="fxTree.jar, fxStream.jar, jboss-cache.jar, javaee.jar, testNG/*.jar, mail/*.jar, xstream/*.jar, groovy/*.jar, selenium-java-client-driver.jar, text_extraction/*.jar, mysql-*.jar, jtidy.jar"/>
+        includes="fxTree.jar, fxStream.jar, jboss-cache.jar, javaee.jar, testNG/*.jar, mail/*.jar, xstream/*.jar, groovy/*.jar, selenium-java-client-driver.jar, text_extraction/*.jar, mysql-*.jar, jtidy.jar, commons-io-1.1.jar"/>
 
     <path id="flexive.shared-libs.path">
         <fileset refid="flexive.lib.ui.jsf"/>
