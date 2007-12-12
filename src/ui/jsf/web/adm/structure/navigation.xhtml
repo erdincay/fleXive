@@ -16,9 +16,13 @@
 
 		<script type="text/javascript">
 		<!--
-            //tracks which page is shown in the contentFrame, must be updated manually!!    
-            var contentPage=null;
+            //var contentPage=null;     tracks which page is shown in the content frame..no longer used
+
             var copyNode=null;
+            //copyMode->copy was selected in context menu
+            var copyMode=false;
+            //cutMode->cut was selected in context menu
+            var cutMode=false;
 
                 //actions defined in StructureTreeControllerBean
             function doTreeAction(action, id, value) {
@@ -85,7 +89,7 @@
             function reloadStructureTree() {
                 var newChildren = eval("(" + getJsonRpc().StructureTreeWriter.renderStructureTree(-1) + ")");
                 dojo.widget.byId('structureTree').setChildren(newChildren);
-                contentPage=null;
+                //contentPage=null;
             }
                 
             function getFxSelector() {
@@ -96,7 +100,7 @@
                 return dojo.widget.byId('structureTree').fxController;
             }
 
-            /*expands all parents upto the node with ID id
+            /*expands all parents up to the node with ID id
             the node objects are lazily initialized, altough they are searchable via the propertyId,
             the actual node object is initialized when the parent node is expanded, so it is necessarry to
             obtain the possibly uninitialized children anew after the parent was expanded
@@ -216,7 +220,7 @@
                 else if ("Group" == node.nodeDocType) {
                     invokeContentAction("adm/structure/groupAssignmentEditor.jsf", defaultAction, {id: propertyId});
                 }
-                contentPage=node.nodeDocType;
+                //contentPage=node.nodeDocType;
             }
 
             function showNode(menuItem) {
@@ -235,7 +239,7 @@
                 var parentId = menu.getTreeNode().propertyId;
 
                 invokeContentAction("adm/structure/propertyEditor.jsf", "createProperty", {id: parentId, nodeType: menu.getTreeNode().nodeDocType});
-                contentPage=null;
+                //contentPage=null;
             }
 
              // create a new group as child of the current node
@@ -244,20 +248,21 @@
                 var parentId = menu.getTreeNode().propertyId;
 
                 invokeContentAction("adm/structure/groupEditor.jsf", "createGroup", {id: parentId, nodeType: menu.getTreeNode().nodeDocType});
-                contentPage=null;
+                //contentPage=null;
             }
 
             // create a new type
             function createType(menuItem) {
                 invokeContentAction("adm/structure/typeEditor.jsf", "createType", {});
-                contentPage=null;
+                //contentPage=null;
             }
 
             function createTypeRelation(menuItem) {
                 invokeContentAction("adm/structure/typeEditor.jsf", "createTypeRelation", {});
-                contentPage=null;
+                //contentPage=null;
             }
 
+        /* no longer used
             function assignGroup(menuItem) {
                 var menu = dojo.widget.byId("structureTreeMenu");
                 var parentId = menu.getTreeNode().propertyId;
@@ -273,7 +278,8 @@
                 invokeContentAction("adm/structure/propertyAssignmentEditor.jsf", "assignProperty", {id: parentId, nodeType: menu.getTreeNode().nodeDocType});
                 contentPage=null;
             }
-        
+          */
+
             function deleteAssignment(menuItem) {
                 var menu = dojo.widget.byId("structureTreeMenu");
                 var id = menu.getTreeNode().propertyId;
@@ -323,9 +329,15 @@
             function copyAssignment(menuItem) {
                 var menu = dojo.widget.byId("structureTreeMenu");
                 copyNode = menu.getTreeNode();
+                copyMode=true;
+                cutMode=false;
             }
 
             function cutAssignment(menuItem) {
+                var menu = dojo.widget.byId("structureTreeMenu");
+                copyNode = menu.getTreeNode();
+                copyMode=false;
+                cutMode=true;
             }
 
             function promptAlias() {
@@ -345,9 +357,16 @@
                 var destId = menu.getTreeNode().propertyId;
                 var destDocType=menu.getTreeNode().nodeDocType;
                 try {
-                    var newAssignmentId = getJsonRpc().StructureTreeEditor.pasteAssignmentRelative(copyNode.propertyId, copyNode.nodeDocType , destId, destDocType ,alias, 1);
-                    reloadAndKeepExpanded();
-                    expandToNodeWithId(newAssignmentId, false);
+                    if (copyMode) {
+                        var newAssignmentId = getJsonRpc().StructureTreeEditor.pasteAssignmentRelative(copyNode.propertyId, copyNode.nodeDocType , destId, destDocType ,alias, 1);
+                        reloadAndKeepExpanded();
+                        expandToNodeWithId(newAssignmentId, false);
+                    }
+                    else {
+                        getJsonRpc().StructureTreeEditor.moveAssignmentRelative(copyNode.propertyId, copyNode.nodeDocType, destId, 1);
+                        reloadAndKeepExpanded();
+                        expandToNodeWithId(copyNode.propertyId, false);
+                    }
                 }
                 catch (e) {
                         alert(e.message);
@@ -366,9 +385,16 @@
                 var destId = menu.getTreeNode().propertyId;
                 var destDocType=menu.getTreeNode().nodeDocType;
                 try {
-                    var newAssignmentId = getJsonRpc().StructureTreeEditor.pasteAssignmentRelative(copyNode.propertyId, copyNode.nodeDocType , destId, destDocType, alias, 0);
-                    reloadAndKeepExpanded();
-                    expandToNodeWithId(newAssignmentId, false);
+                    if (copyMode) {
+                        var newAssignmentId = getJsonRpc().StructureTreeEditor.pasteAssignmentRelative(copyNode.propertyId, copyNode.nodeDocType , destId, destDocType, alias, 0);
+                        reloadAndKeepExpanded();
+                        expandToNodeWithId(newAssignmentId, false);
+                    }
+                    else {
+                        getJsonRpc().StructureTreeEditor.moveAssignmentRelative(copyNode.propertyId, copyNode.nodeDocType, destId, 0);
+                        reloadAndKeepExpanded();
+                        expandToNodeWithId(copyNode.propertyId, false);
+                    }
                 }
                 catch (e) {
                         alert(e.message);
@@ -408,7 +434,7 @@
                 var parentId = menu.getTreeNode().propertyId;
 
                 invokeContentAction("adm/content/contentEditor.jsf", "newInstance", {typeId: parentId});
-                contentPage=null;
+                //contentPage=null;
             }
 
             function searchContents(menuItem) {
@@ -424,7 +450,7 @@
                     invokeContentAction("adm/search/searchResult.jsf", "nodeSearch", {nodeId: nodeId});
                 }
 
-                contentPage=null;
+                //contentPage=null;
             }
 
             function showTreeMenu() {
@@ -438,23 +464,25 @@
                 setActionDisabled(menu.getTreeNode(), "createContent", node.nodeDocType!="Type");
                 setActionDisabled(menu.getTreeNode(), "createProperty", node.nodeDocType!="Group" && !isType(node.nodeDocType));
                 setActionDisabled(menu.getTreeNode(), "createGroup", node.nodeDocType!="Group" && !isType(node.nodeDocType));
-                setActionDisabled(menu.getTreeNode(), "assignProperty", contentPage !="Assignment" || node.nodeDocType!="Group" && !isType(node.nodeDocType));
-                setActionDisabled(menu.getTreeNode(), "assignGroup", contentPage !="Group" || node.nodeDocType!="Group" && !isType(node.nodeDocType));
                 setActionDisabled(menu.getTreeNode(), "deleteAssignment", node.nodeDocType!="Group" && (node.nodeDocType!="Assignment" || node.mayDelete!="true"));
                 setActionDisabled(menu.getTreeNode(), "deleteType", !isType(node.nodeDocType) || node.mayDelete!="true");
                 setActionDisabled(menu.getTreeNode(), "copyAssignment", node.nodeDocType!="Group" && node.nodeDocType!="Assignment");
                 setActionDisabled(menu.getTreeNode(), "searchContents", !isType(node.nodeDocType));
-                setActionDisabled(menu.getTreeNode(), "cutAssignment", node.nodeDocType!="Assignment");
-                setActionDisabled(menu.getTreeNode(), "pasteBelow", copyNode==null ||(node.nodeDocType!="Assignment" && node.nodeDocType!="Group") ||
-                                getJsonRpc().StructureTreeEditor.isSameLevel(copyNode.propertyId, node.propertyId, node.nodeDocType));
-                setActionDisabled(menu.getTreeNode(), "pasteAbove", copyNode==null ||(node.nodeDocType!="Assignment" && node.nodeDocType!="Group") ||
-                                getJsonRpc().StructureTreeEditor.isSameLevel(copyNode.propertyId, node.propertyId, node.nodeDocType));
-                setActionDisabled(menu.getTreeNode(), "pasteInto", copyNode==null || (!isType(node.nodeDocType) && node.nodeDocType!="Group") ||
+                setActionDisabled(menu.getTreeNode(), "cutAssignment", node.nodeDocType!="Assignment" && node.nodeDocType!="Group");
+                setActionDisabled(menu.getTreeNode(), "pasteBelow", copyNode==null || cutMode || (copyMode && (node.nodeDocType!="Assignment" && node.nodeDocType!="Group") ||
+                                getJsonRpc().StructureTreeEditor.isSameLevel(copyNode.propertyId, node.propertyId)));
+                setActionDisabled(menu.getTreeNode(), "pasteBelowAfterCut", copyNode==null || copyMode || (node.nodeDocType!="Assignment" && node.nodeDocType!="Group") ||
+                                (cutMode && !getJsonRpc().StructureTreeEditor.isSameLevel(copyNode.propertyId, node.propertyId)));
+                setActionDisabled(menu.getTreeNode(), "pasteAbove", copyNode==null || cutMode || (copyMode && (node.nodeDocType!="Assignment" && node.nodeDocType!="Group") ||
+                                getJsonRpc().StructureTreeEditor.isSameLevel(copyNode.propertyId, node.propertyId)));
+                setActionDisabled(menu.getTreeNode(), "pasteAboveAfterCut", copyNode==null || copyMode || (node.nodeDocType!="Assignment" && node.nodeDocType!="Group") ||
+                                (cutMode && !getJsonRpc().StructureTreeEditor.isSameLevel(copyNode.propertyId, node.propertyId)));
+                setActionDisabled(menu.getTreeNode(), "pasteInto", copyNode==null || cutMode || (!isType(node.nodeDocType) && node.nodeDocType!="Group") ||
                                 getJsonRpc().StructureTreeEditor.isChild(copyNode.propertyId, node.propertyId, node.nodeDocType));
-                setActionDisabled(menu.getTreeNode(), "pasteBelowAs", copyNode==null ||(node.nodeDocType!="Assignment" && node.nodeDocType!="Group"));
-                setActionDisabled(menu.getTreeNode(), "pasteAboveAs", copyNode==null ||(node.nodeDocType!="Assignment" && node.nodeDocType!="Group"));
-                setActionDisabled(menu.getTreeNode(), "pasteIntoAs", copyNode==null || (!isType(node.nodeDocType) && node.nodeDocType!="Group"));
-                setActionDisabled(menu.getTreeNode(), "pasteSubMenu", copyNode==null);
+                setActionDisabled(menu.getTreeNode(), "pasteBelowAs", copyNode==null || cutMode ||(node.nodeDocType!="Assignment" && node.nodeDocType!="Group"));
+                setActionDisabled(menu.getTreeNode(), "pasteAboveAs", copyNode==null || cutMode ||(node.nodeDocType!="Assignment" && node.nodeDocType!="Group"));
+                setActionDisabled(menu.getTreeNode(), "pasteIntoAs", copyNode==null || cutMode || (!isType(node.nodeDocType) && node.nodeDocType!="Group"));
+                setActionDisabled(menu.getTreeNode(), "pasteSubMenu", copyNode==null || cutMode);
                 menu.show_();
             }
 
@@ -488,13 +516,13 @@
                <adm:treeContextMenuItem icon="edit" treeActions="editNode" labelKey="StructureTree.menu.edit" clickHandler="editNode"/>
                <adm:treeContextMenuItem icon="new" treeActions="createProperty" labelKey="StructureTree.menu.createProperty" clickHandler="createProperty"/>
                <adm:treeContextMenuItem icon="createFolder" treeActions="createGroup" labelKey="StructureTree.menu.createGroup" clickHandler="createGroup" />
-               <adm:treeContextMenuItem icon="add" treeActions="assignProperty" labelKey="StructureTree.menu.assignProperty" clickHandler="assignProperty"/>
-               <adm:treeContextMenuItem icon="add" treeActions="assignGroup" labelKey="StructureTree.menu.assignGroup" clickHandler="assignGroup"/>
                <adm:treeContextMenuItem icon="new" treeActions="createContent" labelKey="ContentTree.menu.create" clickHandler="createContent"/>
                <adm:treeContextMenuItem icon="search" treeActions="searchContents" labelKey="StructureTree.menu.searchContents" clickHandler="searchContents"/>
                <fx:menuSeparator/>
                <adm:treeContextMenuItem treeActions="copyAssignment" icon="copy" labelKey="StructureTree.menu.copyAssignment" clickHandler="copyAssignment"/>
                <adm:treeContextMenuItem treeActions="pasteInto" icon="paste" labelKey="StructureTree.menu.paste.into" clickHandler="pasteInto"/>
+               <adm:treeContextMenuItem treeActions="pasteAboveAfterCut" icon="paste" labelKey="StructureTree.menu.paste.above" clickHandler="pasteAbove"/>
+               <adm:treeContextMenuItem treeActions="pasteBelowAfterCut" icon="paste" labelKey="StructureTree.menu.paste.below" clickHandler="pasteBelow"/>
                <adm:treeContextMenuItem treeActions="pasteSubMenu" icon="paste" labelKey="StructureTree.menu.paste.submenu">
                    <adm:treeContextMenuItem treeActions="pasteAbove" icon="paste" labelKey="StructureTree.menu.paste.above" clickHandler="pasteAbove"/>
                    <adm:treeContextMenuItem treeActions="pasteBelow" icon="paste" labelKey="StructureTree.menu.paste.below" clickHandler="pasteBelow"/>
@@ -505,8 +533,8 @@
                    <adm:treeContextMenuItem treeActions="pasteIntoAs" icon="paste" labelKey="StructureTree.menu.paste.intoAs" clickHandler="pasteIntoAs"/>
                </adm:treeContextMenuItem>
                <adm:treeContextMenuItem icon="delete" treeActions="deleteAssignment" labelKey="StructureTree.menu.delete.assignment" clickHandler="deleteAssignment"/>
-               <adm:treeContextMenuItem icon="delete" treeActions="deleteType" labelKey="StructureTree.menu.delete.type" clickHandler="deleteType"/>
                <adm:treeContextMenuItem icon="cut" treeActions="cutAssignment" labelKey="StructureTree.menu.cut.assignment" clickHandler="cutAssignment"/>
+               <adm:treeContextMenuItem icon="delete" treeActions="deleteType" labelKey="StructureTree.menu.delete.type" clickHandler="deleteType"/>
             </adm:treeContextMenu>
 
             <adm:jsonRpcCall method="StructureTreeWriter.renderStructureTree" args="-1"/>
