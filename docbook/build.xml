@@ -67,10 +67,7 @@
     -->
     <target name="compile.book" depends="prepare.java" description="Compile the book using the Saxon XSL engine.">
         <!--<echo>You might want to use the book-xsltproc target if you have xsltproc installed for faster XML processing.</echo>-->
-        <xslt-docbook out="${book.html.file}" destdir="${build.doc.dir}/xhtml" style="xhtml/docbook.xsl">
-            <!-- Ignore image scaling for HTML output -->
-            <param name="ignore.image.scaling" expression="1"/>
-        </xslt-docbook>
+        <xslt-docbook out="${book.html.file}" destdir="${build.doc.dir}/xhtml" style="custom-xhtml.xsl"/>
         <fixEmptyNamespaces file="${book.html.file}"/>
         <copy-html-resources todir="${build.doc.dir}/xhtml/"/>
         <echo>Wrote documentation to file://${book.html.file}</echo>
@@ -82,12 +79,7 @@
     <target name="compile.book.website" depends="prepare.java" description="Assembles the website-like chunked HTML documentation.">
         <delete dir="${book.website.dir}"/>
         <mkdir dir="${book.website.dir}"/>
-        <xslt-docbook out="${book.website.dir}/index.html" destdir="${book.website.dir}" style="xhtml/chunk.xsl">
-            <!-- Ignore image scaling for HTML output -->
-            <param name="ignore.image.scaling" expression="1"/>
-            <!-- Use section IDs as filenames -->
-            <param name="use.id.as.filename" expression="1"/>
-        </xslt-docbook>
+        <xslt-docbook out="${book.website.dir}/index.html" destdir="${book.website.dir}" style="custom-website.xsl"/>
         <copy-html-resources todir="${book.website.dir}"/>
     </target>
 
@@ -154,7 +146,7 @@
             <arg path="${book.html.file}"/>
 
             <!-- Specify the stylesheet to use -->
-            <arg path="${docbook.styles.dir}/xhtml/docbook.xsl"/>
+            <arg path="${docbook.styles.dir}/custom-xhtml.xsl"/>
 
             <!-- Set the input file -->
             <arg path="${basedir}/src/book.xml"/>
