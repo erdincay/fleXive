@@ -2650,7 +2650,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             while (rs != null && rs.next())
                 count++;
             //Contact Data references
-            rs = s.executeQuery("SELECT DISTINCT ID FROM " + TBL_USER + " WHERE CONTACT_ID=" + id);
+            rs = s.executeQuery("SELECT DISTINCT ID FROM " + TBL_ACCOUNTS + " WHERE CONTACT_ID=" + id);
             while (rs != null && rs.next())
                 count++;
             //Briefcase references

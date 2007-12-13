@@ -63,7 +63,10 @@ import java.util.*;
 import java.util.Date;
 
 /**
+ * Account management
+ *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 @Stateless(name = "AccountEngine")
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
@@ -125,39 +128,45 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
 
 
     /**
-     * Loads the user data from the database.
+     * Loads the account data from the database.
      *
-     * @param loginName the unique name of the user, if null the userId is used
-     * @param userId    the unique id of the user to load
+     * @param loginName the unique name of the user, if null the accountId is used
+     * @param accountId the unique id of the user to load
      * @param contactId the contact id
      * @return the Account object
      * @throws FxApplicationException if the user account could not be loaded
      */
-    private Account load(String loginName, Long userId, Long contactId) throws FxApplicationException {
+    private Account load(String loginName, Long accountId, Long contactId) throws FxApplicationException {
         Statement stmt = null;
         String curSql;
         Connection con = null;
         try {
 
             con = Database.getDbConnection();
-            // Load the users data
+            // Load the account data
             curSql = "SELECT " +
                     // 1, 2   ,  3        ,  4   ,  5       ,  6      ,  7      ,  8      ,  9
                     "ID,EMAIL,CONTACT_ID,MANDATOR,VALID_FROM,VALID_TO,DESCRIPTION,USERNAME,LOGIN_NAME," +
                     // 10     ,  11        ,   12       ,    13    14
-                    "IS_ACTIVE,IS_VALIDATED,LANG,ALLOW_MULTILOGIN,UPDATETOKEN FROM " + TBL_USER +
+                    "IS_ACTIVE,IS_VALIDATED,LANG,ALLOW_MULTILOGIN,UPDATETOKEN FROM " + TBL_ACCOUNTS +
                     " WHERE " +
-                    ((loginName != null) ? "LOGIN_NAME='" + loginName + "'" : "") +
-                    ((userId != null) ? ((loginName != null) ? " and " : "") + "ID=" + userId : "") +
-                    ((contactId != null) ? ((loginName != null || userId != null) ? " and " : "") + "contact_id=" + contactId : "");
+                    (loginName != null
+                            ? "LOGIN_NAME='" + loginName + "'"
+                            : "") +
+                    (accountId != null
+                            ? ((loginName != null) ? " AND " : "") + "ID=" + accountId
+                            : "") +
+                    (contactId != null
+                            ? ((loginName != null || accountId != null) ? " AND " : "") + "CONTACT_ID=" + contactId
+                            : "");
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(curSql);
             if (rs == null || !rs.next())
-                throw new FxNotFoundException(LOG, "ex.account.notFound", (loginName != null ? loginName : userId));
+                throw new FxNotFoundException(LOG, "ex.account.notFound", (loginName != null ? loginName : accountId));
             long id = rs.getLong(1);
             String email = rs.getString(2);
             long contactDataId = rs.getLong(3);
-            int mandator = rs.getInt(4);
+            long mandator = rs.getLong(4);
             Date validFrom = rs.getDate(5);
             Date validTo = rs.getDate(6);
             String description = rs.getString(7);
@@ -174,7 +183,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             if (LOG.isDebugEnabled()) LOG.debug(ad.toString());
             return ad;
         } catch (SQLException exc) {
-            throw new FxLoadException(LOG, "ex.account.loadFailed.sql", (loginName != null ? loginName : userId), exc.getMessage());
+            throw new FxLoadException(LOG, "ex.account.loadFailed.sql", (loginName != null ? loginName : accountId), exc.getMessage());
         } finally {
             Database.closeObjects(AccountEngineBean.class, con, stmt);
         }
@@ -235,31 +244,26 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
 
             // Obtain a database connection
             con = Database.getDbConnection();
-            //               1-4 5      6          7             8                   9          10       11    12
-            curSql = "select d.*,a.ID,a.IS_ACTIVE,a.IS_VALIDATED,a.ALLOW_MULTILOGIN,valid_from,valid_to,NOW(),a.password " +
-                    "from " + TBL_USER + " a " +
+            //               1-4 5      6           7              8                9          10       11      12
+            curSql = "SELECT d.*,a.ID,a.IS_ACTIVE,a.IS_VALIDATED,a.ALLOW_MULTILOGIN,VALID_FROM,VALID_TO,NOW(),a.PASSWORD " +
+                    "FROM " + TBL_ACCOUNTS + " a " +
                     "LEFT JOIN " +
-                    " (select ID,ISLOGGEDIN,LAST_LOGIN,LAST_LOGIN_FROM from " + TBL_USER_DETAILS +
-                    " where application=?) d " +
-                    "ON a.ID=d.ID " +
-                    "where " +
-                    "a.LOGIN_NAME=?";
+                    " (SELECT ID,ISLOGGEDIN,LAST_LOGIN,LAST_LOGIN_FROM FROM " + TBL_ACCOUNT_DETAILS +
+                    " WHERE APPLICATION=?) d ON a.ID=d.ID WHERE a.LOGIN_NAME=?";
             ps = con.prepareStatement(curSql);
             ps.setString(1, inf.getApplicationId());
             ps.setString(2, username);
             final ResultSet rs = ps.executeQuery();
 
             // Anything found?
-            if (rs == null || !rs.next()) {
+            if (rs == null || !rs.next())
                 throw new FxLoginFailedException("Login failed (invalid user or password)", FxLoginFailedException.TYPE_USER_OR_PASSWORD_NOT_DEFINED);
-            }
-            
+
             // check if the hashed password matches the hash stored in the database
             final long id = rs.getLong(5);
             final boolean passwordMatches = FxSharedUtils.hashPassword(id, password).equals(rs.getString(12));
-            if (!passwordMatches) {
+            if (!passwordMatches)
                 throw new FxLoginFailedException("Login failed (invalid user or password)", FxLoginFailedException.TYPE_USER_OR_PASSWORD_NOT_DEFINED);
-            }
 
             // Read data
             final boolean loggedIn = rs.getBoolean(2);
@@ -303,7 +307,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             }
 
             // Clear any old data
-            curSql = "DELETE FROM " + TBL_USER_DETAILS + " WHERE ID=? and application=?";
+            curSql = "DELETE FROM " + TBL_ACCOUNT_DETAILS + " WHERE ID=? AND APPLICATION=?";
             ps.close();
             ps = con.prepareStatement(curSql);
             ps.setLong(1, id);
@@ -311,8 +315,8 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             ps.executeUpdate();
 
             // Mark user as active in the database
-            curSql = "insert into " + TBL_USER_DETAILS + " (id,application,ISLOGGEDIN,LAST_LOGIN,LAST_LOGIN_FROM) " +
-                    "values (?,?,?,?,?)";
+            curSql = "INSERT INTO " + TBL_ACCOUNT_DETAILS + " (ID,APPLICATION,ISLOGGEDIN,LAST_LOGIN,LAST_LOGIN_FROM) " +
+                    "VALUES (?,?,?,?,?)";
             ps.close();
             ps = con.prepareStatement(curSql);
             ps.setLong(1, id);
@@ -324,7 +328,6 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
 
             // Load the user and construct a user ticket
             return UserTicketStore.getUserTicket(username);
-
         } catch (SQLException exc) {
             FxLoginFailedException dbe = new FxLoginFailedException("SqlError=" + exc.getMessage(),
                     FxLoginFailedException.TYPE_SQL_ERROR);
@@ -354,7 +357,6 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void dbLogout(UserTicket ticket) throws LoginException {
-
         PreparedStatement ps = null;
         String curSql;
         Connection con = null;
@@ -366,7 +368,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
 
             // EJBLookup user in the database, combined with a update statement to make sure
             // nothing changes between the lookup/set ISLOGGEDIN flag.
-            curSql = "UPDATE " + TBL_USER_DETAILS + " SET ISLOGGEDIN=FALSE WHERE ID=? and application=?";
+            curSql = "UPDATE " + TBL_ACCOUNT_DETAILS + " SET ISLOGGEDIN=FALSE WHERE ID=? AND APPLICATION=?";
             ps = con.prepareStatement(curSql);
             ps.setLong(1, ticket.getUserId());
             ps.setString(2, inf.getApplicationId());
@@ -395,12 +397,11 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public ArrayList<UserGroup> getGroupList(long userId) throws FxApplicationException {
-        UserGroupList gl = getGroups(userId);
+    public ArrayList<UserGroup> getGroupList(long accountId) throws FxApplicationException {
+        UserGroupList gl = getGroups(accountId);
         ArrayList<UserGroup> result = new ArrayList<UserGroup>(gl.size());
-        for (long id : gl.toLongArray()) {
+        for (long id : gl.toLongArray())
             result.add(group.load(id));
-        }
         return result;
     }
 
@@ -408,47 +409,45 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public UserGroupList getGroups(long userId) throws FxApplicationException {
+    public UserGroupList getGroups(long accountId) throws FxApplicationException {
 
         Connection con = null;
         Statement stmt = null;
         String curSql;
         final UserTicket ticket = UserTicketStore.getTicket(false);
-
         try {
             // Obtain a database connection
             con = Database.getDbConnection();
 
             // Check the user
-            int mandator = checkForUser(con, userId);
-
+            long mandator = getMandatorForAccount(con, accountId);
             // Permission checks (2)
             if (!ticket.isGlobalSupervisor()) {
                 // Read access for all within a mandator
                 if (mandator != ticket.getMandatorId())
-                    throw new FxNoAccessException(LOG, "ex.account.groups.wrongMandator", userId);
+                    throw new FxNoAccessException(LOG, "ex.account.groups.wrongMandator", accountId);
             }
 
-            // Load the groups the user is assigned to
+            // Load the groups the account is assigned to
             curSql = "SELECT DISTINCT ass.USERGROUP,grp.NAME,grp.MANDATOR,grp.COLOR" +
                     " FROM " + TBL_ASSIGN_GROUPS + " ass, " + TBL_GROUP + " grp" +
-                    " WHERE grp.ID=ass.USERGROUP AND ass.ACCOUNT=" + userId;
+                    " WHERE grp.ID=ass.USERGROUP AND ass.ACCOUNT=" + accountId;
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(curSql);
             ArrayList<UserGroup> tmp = new ArrayList<UserGroup>(10);
             while (rs != null && rs.next()) {
-                int id = rs.getInt(1);
+                long id = rs.getLong(1);
                 String grpName = rs.getString(2);
                 long grpMandator = rs.getLong(3);
                 String grpColor = rs.getString(4);
                 final UserGroup aGroup = new UserGroup(id, grpName, grpMandator, grpColor);
-                if (LOG.isDebugEnabled()) LOG.debug("Found group for user [" + userId + "]: " + aGroup);
+                if (LOG.isDebugEnabled()) LOG.debug("Found group for user [" + accountId + "]: " + aGroup);
                 tmp.add(aGroup);
             }
             // Return as array
             return new UserGroupList(tmp.toArray(new UserGroup[tmp.size()]));
         } catch (SQLException exc) {
-            throw new FxLoadException(LOG, exc, "ex.account.groups.loadFailed.sql", userId, exc.getMessage());
+            throw new FxLoadException(LOG, exc, "ex.account.groups.loadFailed.sql", accountId, exc.getMessage());
         } finally {
             Database.closeObjects(AccountEngineBean.class, con, stmt);
         }
@@ -456,31 +455,26 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
     }
 
     /**
-     * Internal helper function, returns the mandator of a user or throws a FxNotFoundException if the user does
+     * Internal helper function, returns the mandator of an account or throws a FxNotFoundException if the user does
      * not exist.
      *
-     * @param con    a already opened connection, will not be closed by the function
-     * @param userId the user to check for
-     * @return the mandator of the given user
-     * @throws FxNotFoundException if the user does not exist
+     * @param con       a already opened connection, will not be closed by the function
+     * @param accountId the account to check for
+     * @return the mandator of the given account
+     * @throws FxNotFoundException if the account does not exist
      * @throws SQLException        if the function failed because od a sql error
      */
-    private int checkForUser(final Connection con, final long userId) throws FxNotFoundException, SQLException {
+    private long getMandatorForAccount(final Connection con, final long accountId) throws FxNotFoundException, SQLException {
         Statement stmt = null;
         try {
-            String curSql = "SELECT MANDATOR FROM " + TBL_USER + " WHERE ID=" + userId;
+            String curSql = "SELECT MANDATOR FROM " + TBL_ACCOUNTS + " WHERE ID=" + accountId;
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(curSql);
-            int mandator = -1;
-            if (rs != null && rs.next()) {
-                mandator = rs.getInt(1);
-            }
-            if (mandator == -1) {
-//                FxNotFoundException nfe = new FxNotFoundException("User [" + userId + "] does not exist");
-//                if (LOG.isDebugEnabled()) LOG.debug(nfe);
-//                throw nfe;
-                throw new FxNotFoundException(LOG, "ex.account.notFound", userId);
-            }
+            long mandator = -1;
+            if (rs != null && rs.next())
+                mandator = rs.getLong(1);
+            if (mandator == -1)
+                throw new FxNotFoundException(LOG, "ex.account.notFound", accountId);
             return mandator;
         } finally {
             Database.closeObjects(AccountEngineBean.class, null, stmt);
@@ -491,8 +485,8 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public List<Role> getRoleList(long userId, RoleLoadMode mode) throws FxApplicationException {
-        return Arrays.asList(getRoles(userId, mode));
+    public List<Role> getRoleList(long accountId, RoleLoadMode mode) throws FxApplicationException {
+        return Arrays.asList(getRoles(accountId, mode));
     }
 
 
@@ -500,7 +494,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public Role[] getRoles(long userId, RoleLoadMode mode) throws FxApplicationException {
+    public Role[] getRoles(long accountId, RoleLoadMode mode) throws FxApplicationException {
         Connection con = null;
         Statement stmt = null;
         String curSql;
@@ -511,36 +505,32 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             con = Database.getDbConnection();
 
             // Check the user
-            int mandator = checkForUser(con, userId);
-
+            long mandator = getMandatorForAccount(con, accountId);
             // Permission checks (2)
             if (!ticket.isGlobalSupervisor()) {
                 if (mandator != ticket.getMandatorId())
-                    throw new FxNoAccessException(LOG, "ex.account.roles.wrongMandator", userId);
+                    throw new FxNoAccessException(LOG, "ex.account.roles.wrongMandator", accountId);
             }
 
             // Load the roles
             curSql = "SELECT DISTINCT ROLE FROM " + TBL_ASSIGN_ROLES + " WHERE " +
-                    ((mode == RoleLoadMode.ALL || mode == RoleLoadMode.FROM_USER_ONLY) ? "ACCOUNT=" + userId : "") +
+                    ((mode == RoleLoadMode.ALL || mode == RoleLoadMode.FROM_USER_ONLY) ? "ACCOUNT=" + accountId : "") +
                     ((mode == RoleLoadMode.ALL) ? " OR " : "") +
                     ((mode == RoleLoadMode.ALL || mode == RoleLoadMode.FROM_GROUPS_ONLY) ? " USERGROUP IN (SELECT USERGROUP FROM " +
-                            TBL_ASSIGN_GROUPS + " WHERE ACCOUNT=" + userId + " )" : "");
+                            TBL_ASSIGN_GROUPS + " WHERE ACCOUNT=" + accountId + " )" : "");
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(curSql);
             ArrayList<Byte> tmp = new ArrayList<Byte>(15);
-            while (rs != null && rs.next()) {
+            while (rs != null && rs.next())
                 tmp.add(rs.getByte(1));
-            }
             Role[] roles = new Role[tmp.size()];
-            for (int i = 0; i < tmp.size(); i++) {
+            for (int i = 0; i < tmp.size(); i++)
                 roles[i] = Role.getById(tmp.get(i));
-            }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Role for user [" + userId + "]: " + FxArrayUtils.toSeparatedList(roles, ','));
-            }
+            if (LOG.isDebugEnabled())
+                LOG.debug("Role for user [" + accountId + "]: " + FxArrayUtils.toSeparatedList(roles, ','));
             return roles;
         } catch (SQLException exc) {
-            throw new FxLoadException(LOG, exc, "ex.account.roles.loadFailed.sql", userId, exc.getMessage());
+            throw new FxLoadException(LOG, exc, "ex.account.roles.loadFailed.sql", accountId, exc.getMessage());
         } finally {
             Database.closeObjects(AccountEngineBean.class, con, stmt);
         }
@@ -558,8 +548,8 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         final UserTicket ticket = FxContext.get().getTicket();
         // Security
         if (checkUserRoles && !ticket.isGlobalSupervisor()) {
-            if (!ticket.isInRole(Role.AccountManagement))
-                throw new FxNoAccessException(LOG, "ex.account.create.roleMissing");
+            if (!ticket.isInRole(Role.MandatorSupervisor))
+                FxSharedUtils.checkRole(ticket, Role.AccountManagement);
             if (ticket.getMandatorId() != mandatorId)
                 throw new FxNoAccessException(LOG, "ex.account.create.wrongMandator");
         }
@@ -573,7 +563,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             if (description == null) description = "";
             email = FxFormatUtils.isEmail(email);
             if (!language.isValid(lang))
-                throw new FxInvalidParameterException("language", "ex.account.languageInvalid", lang);
+                throw new FxInvalidParameterException("LANGUAGE", "ex.account.languageInvalid", lang);
         } catch (FxInvalidParameterException pe) {
             if (LOG.isInfoEnabled()) LOG.info(pe);
             throw pe;
@@ -582,7 +572,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         Connection con = null;
         PreparedStatement stmt = null;
         String curSql;
-
+        FxPK contactDataPK;
         try {
             final FxContext ri = FxContext.get();
             final FxContent contactData;
@@ -600,7 +590,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             }
             contactData.setValue("/SURNAME", new FxString(false, userName));
             contactData.setValue("/EMAIL", new FxString(false, email));
-            FxPK contactDataPK = co.save(contactData);
+            contactDataPK = co.save(contactData);
 
             // Obtain a database connection
             con = Database.getDbConnection();
@@ -609,7 +599,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             long newId = seq.getId(SequencerEngine.System.ACCOUNT);
 
             password = password == null ? "" : FxFormatUtils.encodePassword(newId, password);
-            curSql = "INSERT INTO " + TBL_USER + "(" +
+            curSql = "INSERT INTO " + TBL_ACCOUNTS + "(" +
                     //1 2        3        4          5        6     7          8    9
                     "ID,MANDATOR,USERNAME,LOGIN_NAME,PASSWORD,EMAIL,CONTACT_ID,LANG,VALID_FROM," +
                     //10      11          12         13         14
@@ -648,9 +638,8 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             final FxScriptBinding binding = new FxScriptBinding();
             binding.setVariable("accountId", newId);
             binding.setVariable("pk", contactDataPK);
-            for (long scriptId : scriptIds) {
+            for (long scriptId : scriptIds)
                 scripting.runScript(scriptId, binding);
-            }
 
             // EVERY users is a member of group EVERYONE and his mandator
             final long[] groups = {UserGroup.GROUP_EVERYONE, group.loadMandatorGroup(mandatorId).getId()};
@@ -679,22 +668,18 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
     }
 
     private static String checkLoginName(String name) throws FxInvalidParameterException {
-        if (name == null || name.length() == 0) {
+        if (name == null || name.length() == 0)
             throw new FxInvalidParameterException("loginName", "ex.account.login.noName");
-        }
-        if (name.length() > 255) {
+        if (name.length() > 255)
             throw new FxInvalidParameterException("loginName", "ex.account.login.nameTooLong", 255);
-        }
         return name.trim();
     }
 
     private static String checkUserName(String name) throws FxInvalidParameterException {
-        if (name == null || name.length() == 0) {
+        if (name == null || name.length() == 0)
             throw new FxInvalidParameterException("name", "ex.account.name.noName");
-        }
-        if (name.length() > 255) {
+        if (name.length() > 255)
             throw new FxInvalidParameterException("name", "ex.account.name.nameTooLong", 255);
-        }
         return name.trim();
     }
 
@@ -716,33 +701,24 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void remove(long userId) throws FxApplicationException {
+    public void remove(long accountId) throws FxApplicationException {
         // Handle protected users
-        if (userId == Account.USER_GUEST)
+        if (accountId == Account.USER_GUEST)
             throw new FxNoAccessException("ex.account.delete.guest");
-        if (userId == Account.USER_GLOBAL_SUPERVISOR)
+        if (accountId == Account.USER_GLOBAL_SUPERVISOR)
             throw new FxNoAccessException("ex.account.delete.supervisor");
-        if (userId == Account.NULL_ACCOUNT)
+        if (accountId == Account.NULL_ACCOUNT)
             throw new FxNoAccessException("ex.account.delete.nullAccount");
 
-
-        Account theUser;
-        try {
-            // EJBLookup the user
-            theUser = load(userId);
-        } catch (FxLoadException exc) {
-            throw new FxRemoveException(exc);
-        }
+        Account account = load(accountId);
 
         // Permission checks
         final UserTicket ticket = FxContext.get().getTicket();
         if (!ticket.isGlobalSupervisor()) {
-            if (!ticket.isInRole(Role.AccountManagement)) {
-                throw new FxNoAccessException(LOG, "ex.account.delete.roleMissing");
-            }
-            if (theUser.getMandatorId() != ticket.getMandatorId()) {
+            if (!ticket.isInRole(Role.MandatorSupervisor))
+                FxSharedUtils.checkRole(ticket, Role.AccountManagement);
+            if (account.getMandatorId() != ticket.getMandatorId())
                 throw new FxNoAccessException(LOG, "ex.account.delete.wrongMandator");
-            }
         }
 
         Connection con = null;
@@ -750,49 +726,35 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         String curSql = null;
         try {
             con = Database.getDbConnection();
-            // (A) First delete all group assignments ..
+            // Delete all group assignments ..
             stmt = con.createStatement();
-            curSql = "DELETE FROM " + TBL_ASSIGN_GROUPS + " WHERE ACCOUNT=" + userId;
+            curSql = "DELETE FROM " + TBL_ASSIGN_GROUPS + " WHERE ACCOUNT=" + accountId;
             stmt.executeUpdate(curSql);
             stmt.close();
 
-            // (B) .. then delete all role assigments ..
+            // Delete all role assigments ..
             stmt = con.createStatement();
-            curSql = "DELETE FROM " + TBL_ASSIGN_ROLES + " WHERE ACCOUNT=" + userId;
+            curSql = "DELETE FROM " + TBL_ASSIGN_ROLES + " WHERE ACCOUNT=" + accountId;
             stmt.executeUpdate(curSql);
             stmt.close();
 
-            // (C) .. delete user specific configurations
-            /*
-            stmt = con.createStatement();
-            curSql = "delete from " + TBL_CONFIG + " where ACCOUNT=" + userId;
-            stmt.executeUpdate(curSql);
-            stmt.close();
-            TODO
-              */
-            // (D) .. delete user specific locks
-            /*
-            stmt = con.createStatement();
-            curSql = "delete from " + TBL_LOCK + " where ACCOUNT_ID=" + userId;
-            stmt.executeUpdate(curSql);
-            stmt.close();
-            TODO
-            */
+            // TODO: delete user specific configurations
+            // TODO: delete user specific locks
 
-            // (E) .. and finally remove the user itself
+            // Finally remove the user itself
             stmt = con.createStatement();
-            curSql = "delete from " + TBL_USER + " where ID=" + userId;
+            curSql = "DELETE FROM " + TBL_ACCOUNTS + " WHERE ID=" + accountId;
             stmt.executeUpdate(curSql);
 
             // Log the user out of the system (if he is active)
             // This is done after the commit, since a failure should not block the user delete action
-            UserTicketStore.removeUserId(userId, null);
+            UserTicketStore.removeUserId(accountId, null);
 
             // delete contact data
-            co.remove(theUser.getContactData());
+            co.remove(account.getContactData());
         } catch (SQLException exc) {
             ctx.setRollbackOnly();
-            throw new FxRemoveException(LOG, exc, "ex.account.delete.failed.sql", userId, exc.getMessage(), curSql);
+            throw new FxRemoveException(LOG, exc, "ex.account.delete.failed.sql", accountId, exc.getMessage(), curSql);
         } finally {
             Database.closeObjects(AccountEngineBean.class, con, stmt);
         }
@@ -803,36 +765,33 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * Returns wether the caller may use the operations 'edit','setRoles','setGroups'
      * on a specific user.
      *
-     * @param userId the id of the user to check for
+     * @param accountId the id of the user to check for
      * @return a boolean array indicating if a action may be called<br>
-     *         position <code>User.MAY_UPDATE</code>: update the user<br>
-     *         position <code>User.MAY_SET_ROLES</code>: set roles for the user<br>
-     *         position <code>User.MAY_SET_GROUPS</code>: set groups for the user
-     * @throws FxApplicationException TODO
+     *         position <code>MAY_UPDATE</code>: update the user<br>
+     *         position <code>MAY_SET_ROLES</code>: set roles for the user<br>
+     *         position <code>MAY_SET_GROUPS</code>: set groups for the user
+     * @throws FxApplicationException on errors
      */
-    private boolean[] checkPermissions(long userId) throws FxApplicationException {
-
-        // EJBLookup user
-        Account aUser = load(userId);
-
-        // Get perms
-        return _checkPermissions(aUser);
+    private boolean[] checkPermissions(long accountId) throws FxApplicationException {
+        return _checkPermissions(load(accountId));
     }
 
 
     /**
      * Returns wether the caller may use the operations 'edit','setRoles','setGroups'
-     * on a specific user.
+     * on a specific account.
      *
-     * @param user the user to check the operations for
+     * @param account the user to check the operations for
      * @return a boolean array indicating if a action may be called<br>
-     *         position User.MAY_UPDATE: update the user<br>
-     *         position User.MAY_SET_ROLES: set roles for the user<br>
-     *         position User.MAY_SET_GROUPS: set groups for the user
+     *         position MAY_UPDATE: update the user<br>
+     *         position MAY_SET_ROLES: set roles for the user<br>
+     *         position MAY_SET_GROUPS: set groups for the user
      */
-    private static boolean[] _checkPermissions(Account user) {
+    private static boolean[] _checkPermissions(Account account) {
         final UserTicket ticket = FxContext.get().getTicket();
-        if (ticket.isGlobalSupervisor()) {
+        if (ticket.isGlobalSupervisor() ||
+                (ticket.getMandatorId() == account.getMandatorId() &&
+                        ticket.isMandatorSupervisor())) {
             return new boolean[]{true, true, true}; // full access
         }
 
@@ -842,38 +801,37 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
 
         // Edit access
         if (!ticket.isInRole(Role.AccountManagement)) edit = false;
-        if (ticket.getMandatorId() != user.getMandatorId()) edit = false;
+        if (ticket.getMandatorId() != account.getMandatorId()) edit = false;
 
         // Update roles access
         if (!ticket.isInRole(Role.AccountManagement)) roles = false;
-        if (ticket.getMandatorId() != user.getMandatorId()) roles = false;
+        if (ticket.getMandatorId() != account.getMandatorId()) roles = false;
 
         // Update groups access. Specified via AccountManagement
         if (!ticket.isInRole(Role.AccountManagement)) groups = false;
-        if (ticket.getMandatorId() != user.getMandatorId()) groups = false;
+        if (ticket.getMandatorId() != account.getMandatorId()) groups = false;
 
         boolean result[] = new boolean[3];
         result[MAY_SET_GROUPS] = groups;
         result[MAY_SET_ROLES] = roles;
         result[MAY_UPDATE] = edit;
         return result;
-
     }
 
     /**
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void setGroupList(long userId, List<UserGroup> groups) throws FxApplicationException {
+    public void setGroupList(long accountId, List<UserGroup> groups) throws FxApplicationException {
         if (groups != null && groups.size() > 0) {
             long groupIds[] = new long[groups.size()];
             int pos = 0;
             for (UserGroup group : groups) {
                 groupIds[pos++] = group.getId();
             }
-            setGroups(userId, groupIds);
+            setGroups(accountId, groupIds);
         } else {
-            setGroups(userId, new long[0]);
+            setGroups(accountId, new long[0]);
         }
     }
 
@@ -881,38 +839,34 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void setGroups(long userId, long[] groups)
-            throws FxApplicationException {
-
+    public void setGroups(long accountId, long[] groups) throws FxApplicationException {
         // Handle null params
-        if (groups == null) {
+        if (groups == null)
             groups = new long[0];
-        }
 
         final UserTicket ticket = FxContext.get().getTicket();
 
         // Permission checks
         try {
-            if (!checkPermissions(userId)[MAY_SET_GROUPS]) {
-                throw new FxNoAccessException(LOG, "ex.account.groups.noAssignPermission", userId);
-            }
+            if (!checkPermissions(accountId)[MAY_SET_GROUPS])
+                throw new FxNoAccessException(LOG, "ex.account.groups.noAssignPermission", accountId);
         } catch (FxLoadException le) {
             throw new FxUpdateException(le.getMessage());
         }
 
-        Account user = load(userId);
+        Account account = load(accountId);
 
         // Remove duplicated entries and add group everyone
         groups = FxArrayUtils.removeDuplicates(groups);
 
         // Ensure group EVERYONE and mandator group is part of the list, since every user is assigned to it
         groups = FxArrayUtils.addElement(groups, UserGroup.GROUP_EVERYONE);
-        groups = FxArrayUtils.addElement(groups, group.loadMandatorGroup(user.getMandatorId()).getId());
+        groups = FxArrayUtils.addElement(groups, group.loadMandatorGroup(account.getMandatorId()).getId());
 
         // Check the groups
         UserGroupList currentlyAssigned;
         try {
-            currentlyAssigned = getGroups(userId);
+            currentlyAssigned = getGroups(accountId);
         } catch (FxLoadException exc) {
             throw new FxUpdateException(exc);
         }
@@ -923,20 +877,14 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             if (grp == UserGroup.GROUP_OWNER) continue;
             if (grp == UserGroup.GROUP_UNDEFINED) continue;
             if (currentlyAssigned.contains(grp)) continue;
-            // Perform the check for all regular groups
-            try {
-                UserGroup g = group.load(grp);
-                if (g.isSystem())
-                    continue;
-                if (!ticket.isGlobalSupervisor()) {
-                    if (g.getMandatorId() != user.getMandatorId())
-                        throw new FxNoAccessException(LOG, "ex.account.group.assign.wrongMandator", g.getName(), userId);
-                }
-            } catch (FxLoadException exc) {
-//                FxUpdateException ue = new FxUpdateException("Unable to process group [" + group + "]:" + exc.getMessage(), exc);
-//                if (LOG.isInfoEnabled()) LOG.info(ue);
-//                throw ue;
-                throw new FxUpdateException(exc);
+            // Perform the check for all regular groups, loading an inaccessible
+            // group will throw an exception which is what we want here
+            UserGroup g = group.load(grp);
+            if (g.isSystem())
+                continue;
+            if (!ticket.isGlobalSupervisor()) {
+                if (g.getMandatorId() != account.getMandatorId())
+                    throw new FxNoAccessException(LOG, "ex.account.group.assign.wrongMandator", g.getName(), accountId);
             }
         }
 
@@ -950,7 +898,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
 
             // Delete the old assignments of the user
             ps = con.prepareStatement("DELETE FROM " + TBL_ASSIGN_GROUPS + " WHERE ACCOUNT=?");
-            ps.setLong(1, userId);
+            ps.setLong(1, accountId);
             ps.executeUpdate();
             if (groups.length > 0) {
                 ps.close();
@@ -960,17 +908,17 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             for (long group : groups) {
                 // Skipp 'null' group
                 if (group == UserGroup.GROUP_UNDEFINED) continue;
-                ps.setLong(1, userId);
+                ps.setLong(1, accountId);
                 ps.setLong(2, group);
                 ps.executeUpdate();
             }
 
             // Ensure any active ticket of the updated user are refreshed
-            UserTicketStore.flagDirtyHavingUserId(userId);
+            UserTicketStore.flagDirtyHavingUserId(accountId);
 
         } catch (SQLException exc) {
             ctx.setRollbackOnly();
-            throw new FxUpdateException(LOG, exc, "ex.account.roles.updateFailed.sql", userId, exc.getMessage());
+            throw new FxUpdateException(LOG, exc, "ex.account.roles.updateFailed.sql", accountId, exc.getMessage());
         } finally {
             Database.closeObjects(AccountEngineBean.class, con, ps);
         }
@@ -981,11 +929,11 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void setRoleList(long userId, List<Role> roles) throws FxApplicationException {
+    public void setRoleList(long accountId, List<Role> roles) throws FxApplicationException {
         if (roles != null && roles.size() > 0) {
-            setRoles(userId, roles.toArray(new Role[roles.size()]));
+            setRoles(accountId, roles.toArray(new Role[roles.size()]));
         } else {
-            setRoles(userId);
+            setRoles(accountId);
         }
     }
 
@@ -993,18 +941,15 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void setRoles(long userId, long... roles)
-            throws FxApplicationException {
-
+    public void setRoles(long accountId, long... roles) throws FxApplicationException {
         // Handle null params
-        if (roles == null) {
+        if (roles == null)
             roles = new long[0];
-        }
 
         // Permission checks
         try {
-            if (!checkPermissions(userId)[MAY_SET_ROLES])
-                throw new FxNoAccessException(LOG, "ex.account.roles.noAssignPermission", userId);
+            if (!checkPermissions(accountId)[MAY_SET_ROLES])
+                throw new FxNoAccessException(LOG, "ex.account.roles.noAssignPermission", accountId);
         } catch (FxLoadException le) {
             throw new FxUpdateException(le);
         }
@@ -1016,13 +961,35 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         try {
             // Remove duplicated role entries
             roles = FxArrayUtils.removeDuplicates(roles);
-
             // Obtain a database connection
             con = Database.getDbConnection();
 
+            UserTicket ticket = FxContext.get().getTicket();
+            //only allow to assign roles which the calling user is a member of (unless it is a global supervisor)
+            if (!ticket.isGlobalSupervisor()) {
+                Role[] orgRoles = getRoles(accountId, RoleLoadMode.FROM_USER_ONLY);
+                long[] orgRoleIds = new long[orgRoles.length];
+                for (int i = 0; i < orgRoles.length; i++)
+                    orgRoleIds[i] = orgRoles[i].getId();
+                //check removed roles
+                for (long check : orgRoleIds) {
+                    if (!FxArrayUtils.containsElement(roles, check)) {
+                        if (ticket.isInRole(Role.getById(check)))
+                            throw new FxNoAccessException("ex.account.roles.assign.noMember.remove", Role.getById(check).getName());
+                    }
+                }
+                //check added roles
+                for (long check : roles) {
+                    if (!FxArrayUtils.containsElement(orgRoleIds, check)) {
+                        if (ticket.isInRole(Role.getById(check)))
+                            throw new FxNoAccessException("ex.account.roles.assign.noMember.add", Role.getById(check).getName());
+                    }
+                }
+            }
+
             // Delete the old assignments of the user
             ps = con.prepareStatement("DELETE FROM " + TBL_ASSIGN_ROLES + " WHERE ACCOUNT=?");
-            ps.setLong(1, userId);
+            ps.setLong(1, accountId);
             ps.executeUpdate();
 
             if (roles.length > 0) {
@@ -1031,40 +998,40 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                         + " (ACCOUNT,USERGROUP,ROLE) VALUES (?,?,?)");
             }
 
-            // Store the new assignments of the user
+            // Store the new assignments of the account
             for (long role : roles) {
                 if (Role.isUndefined(role)) continue;
-                ps.setLong(1, userId);
+                ps.setLong(1, accountId);
                 ps.setLong(2, UserGroup.GROUP_NULL);
                 ps.setLong(3, role);
                 ps.executeUpdate();
             }
 
-            // Ensure any active ticket of the updated user are refreshed
-            UserTicketStore.flagDirtyHavingUserId(userId);
+            // Ensure any active ticket of the updated account are refreshed
+            UserTicketStore.flagDirtyHavingUserId(accountId);
 
         } catch (SQLException exc) {
             ctx.setRollbackOnly();
-            throw new FxUpdateException(LOG, exc, "ex.account.roles.updateFailed.sql", userId, exc.getMessage());
+            throw new FxUpdateException(LOG, exc, "ex.account.roles.updateFailed.sql", accountId, exc.getMessage());
         } finally {
             Database.closeObjects(AccountEngineBean.class, con, ps);
         }
     }
 
     /**
-     * Helper function to set the roles for a user.
+     * Helper function to set the roles for an account.
      *
-     * @param userId the user id
-     * @param roles  the roles to set
+     * @param accountId the account id
+     * @param roles     the roles to set
      * @throws FxApplicationException on errors
      */
-    private void setRoles(long userId, Role[] roles)
+    private void setRoles(long accountId, Role[] roles)
             throws FxApplicationException {
         long[] roleIds = new long[roles.length];
         for (int i = 0; i < roles.length; i++) {
             roleIds[i] = roles[i].getId();
         }
-        setRoles(userId, roleIds);
+        setRoles(accountId, roleIds);
     }
 
     /**
@@ -1083,7 +1050,6 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                 mandatorId, isInRole, isInGroup, false);
 
         try {
-
             // Obtain a database connection
             con = Database.getDbConnection();
 
@@ -1114,7 +1080,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                     long contactDataId = rs.getLong(3);
                     if (rs.wasNull())
                         contactDataId = -1;
-                    int mandator = rs.getInt(4);
+                    long mandator = rs.getLong(4);
                     FxLanguage lang = language.load(rs.getInt(5));
                     Date validFrom = rs.getDate(6);
                     Date validTo = rs.getDate(7);
@@ -1195,7 +1161,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                         "usr.ID,usr.EMAIL,usr.CONTACT_ID,usr.MANDATOR,usr.LANG,usr.VALID_FROM," +
                                 "usr.VALID_TO,usr.DESCRIPTION,usr.USERNAME,usr.LOGIN_NAME,usr.IS_ACTIVE," +
                                 "usr.IS_VALIDATED,usr.ALLOW_MULTILOGIN,usr.UPDATETOKEN") +
-                " FROM " + TBL_USER + " usr WHERE ID!=" + Account.NULL_ACCOUNT + " " +
+                " FROM " + TBL_ACCOUNTS + " usr WHERE ID!=" + Account.NULL_ACCOUNT + " " +
                 ((_mandatorId == -1) ? "" : " AND (usr.MANDATOR=" + _mandatorId + " OR usr.ID<=" + Account.USER_GLOBAL_SUPERVISOR + ")") +
                 ((name != null && name.length() > 0) ? " AND UPPER(usr.USERNAME) LIKE '%" + name + "%'" : "") +
                 ((loginName != null && loginName.length() > 0) ? " AND UPPER(usr.LOGIN_NAME) LIKE '%" + loginName + "%'" : "") +
@@ -1225,8 +1191,8 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public int getNumAll(String name, String loginName, String email, Boolean isActive,
-                         Boolean isConfirmed, Long mandatorId, int[] isInRole, long[] isInGroup)
+    public int getAccountMatches(String name, String loginName, String email, Boolean isActive,
+                                 Boolean isConfirmed, Long mandatorId, int[] isInRole, long[] isInGroup)
             throws FxApplicationException {
 
         Connection con = null;
@@ -1234,18 +1200,15 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         final UserTicket ticket = FxContext.get().getTicket();
         String curSql = _buildSearchStmt(ticket, name, loginName, email, isActive, isConfirmed,
                 mandatorId, isInRole, isInGroup, true);
-
         try {
-
             // Obtain a database connection
             con = Database.getDbConnection();
 
             // Load the users
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(curSql);
-            if (rs != null && rs.next()) {
+            if (rs != null && rs.next())
                 return rs.getInt(1);
-            }
             return -1;
 
         } catch (SQLException exc) {
@@ -1260,29 +1223,24 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void update(long userId, String password, Long defaultNode,
+    public void update(long accountId, String password, Long defaultNode,
                        String name, String loginName, String email, Boolean isConfirmed, Boolean isActive,
                        Date validFrom, Date validTo, Integer lang, String description,
                        Boolean allowMultiLogin, Long contactDataId)
             throws FxApplicationException {
 
-        // Load the user to update
-        Account user;
-        try {
-            user = load(userId);
-        } catch (FxLoadException exc) {
-            throw new FxUpdateException(exc.getMessage(), exc);
-        }
+        // Load the account to update
+        Account account = load(accountId);
 
         final UserTicket ticket = FxContext.get().getTicket();
         // Determine if only fields are accessed that the use may alter for himself
         final boolean protectedFields = (name != null || loginName != null || isConfirmed != null || isActive != null ||
                 validTo != null || validFrom != null || description != null);
-        if (!protectedFields && ticket.getUserId() == userId) {
+        if (!protectedFields && ticket.getUserId() == accountId) {
             // passed
         } else {
-            if (!_checkPermissions(user)[MAY_UPDATE])
-                throw new FxNoAccessException(LOG, "ex.account.update.noPermission", user.getName());
+            if (!_checkPermissions(account)[MAY_UPDATE])
+                throw new FxNoAccessException(LOG, "ex.account.update.noPermission", account.getName());
         }
 
         // Parameter checks
@@ -1290,10 +1248,8 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             if (loginName != null) loginName = checkLoginName(loginName);
             if (email != null) email = FxFormatUtils.isEmail(email);
             if (password != null) {
-                password = FxFormatUtils.encodePassword(userId, password.trim());
+                password = FxFormatUtils.encodePassword(accountId, password.trim());
             }
-
-
             if (lang != null && !language.isValid(lang))
                 throw new FxInvalidParameterException("LANGUAGE", "ex.account.languageInvalid", lang);
         } catch (FxInvalidParameterException pe) {
@@ -1305,18 +1261,18 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         PreparedStatement stmt = null;
         String curSql;
 
-        if (name == null) name = user.getName();
-        if (loginName == null) loginName = user.getLoginName();
-        if (email == null) email = user.getEmail();
-        if (lang == null) lang = user.getLanguage().getId();
-        if (isActive == null) isActive = user.isActive();
-        if (isConfirmed == null) isConfirmed = user.isValidated();
-        if (description == null) description = user.getDescription();
-        if (defaultNode == null) defaultNode = user.getDefaultNode();
-        if (allowMultiLogin == null) allowMultiLogin = user.getAllowMultiLogin();
+        if (name == null) name = account.getName();
+        if (loginName == null) loginName = account.getLoginName();
+        if (email == null) email = account.getEmail();
+        if (lang == null) lang = account.getLanguage().getId();
+        if (isActive == null) isActive = account.isActive();
+        if (isConfirmed == null) isConfirmed = account.isValidated();
+        if (description == null) description = account.getDescription();
+        if (defaultNode == null) defaultNode = account.getDefaultNode();
+        if (allowMultiLogin == null) allowMultiLogin = account.getAllowMultiLogin();
         // Assign and check dates
-        if (validFrom == null) validFrom = user.getValidFrom();
-        if (validTo == null) validTo = user.getValidTo();
+        if (validFrom == null) validFrom = account.getValidFrom();
+        if (validTo == null) validTo = account.getValidTo();
         checkDates(validFrom, validTo);
         if (defaultNode < 0) defaultNode = (long) 0;
 
@@ -1325,15 +1281,15 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             // Obtain a database connection
             con = Database.getDbConnection();
 
-            curSql = "update " + TBL_USER + " set " +
+            curSql = "UPDATE " + TBL_ACCOUNTS + " SET " +
                     // 1          2            3            4           5               6
-                    "email=?,lang=?,valid_from=?,valid_to=?,description=?," +
+                    "EMAIL=?,LANG=?,VALID_FROM=?,VALID_TO=?,DESCRIPTION=?," +
                     // 6                  7             8            9              10
-                    "modified_by=?,modified_at=?,is_active=?,is_validated=?,default_node=?," +
+                    "MODIFIED_BY=?,MODIFIED_AT=?,IS_ACTIVE=?,IS_VALIDATED=?,DEFAULT_NODE=?," +
                     //  11,        12     ,    13      ,                                14
-                    "username=?,login_name=?,allow_multilogin=?" + ((password != null) ? ",password=?" : "") +
-                    ((contactDataId != null) ? ",contact_id=?" : "") +
-                    " where id=" + userId;
+                    "USERNAME=?,LOGIN_NAME=?,ALLOW_MULTILOGIN=?" + ((password != null) ? ",PASSWORD=?" : "") +
+                    ((contactDataId != null) ? ",CONTACT_ID=?" : "") +
+                    " WHERE ID=" + accountId;
             stmt = con.prepareStatement(curSql);
             stmt.setString(1, email);
             stmt.setInt(2, lang);
@@ -1350,25 +1306,23 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             stmt.setBoolean(13, allowMultiLogin);
             int pos = 14;
             if (password != null) stmt.setString(pos++, password);
-            if (contactDataId != null) stmt.setLong(pos++, contactDataId);
+            if (contactDataId != null) stmt.setLong(pos/*++*/, contactDataId);
             stmt.executeUpdate();
-//            stmt.close();
 
             // Log the user out of the system if he was made active
             if (!isActive || !isConfirmed) {
-                UserTicketStore.removeUserId(userId, null);
+                UserTicketStore.removeUserId(accountId, null);
             } else {
                 // Ensure any active ticket of the updated user are refreshed
-                UserTicketStore.flagDirtyHavingUserId(user.getId());
+                UserTicketStore.flagDirtyHavingUserId(account.getId());
             }
-
         } catch (SQLException exc) {
             final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(exc);
             ctx.setRollbackOnly();
             if (uniqueConstraintViolation) {
                 throw new FxEntryExistsException(LOG, "ex.account.userExists", name, loginName);
             } else {
-                throw new FxUpdateException(LOG, "ex.account.update.failed.sql", user.getLoginName(), exc.getMessage());
+                throw new FxUpdateException(LOG, "ex.account.update.failed.sql", account.getLoginName(), exc.getMessage());
             }
         } finally {
             Database.closeObjects(AccountEngineBean.class, con, stmt);
@@ -1380,54 +1334,44 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void updateUser(long userId, String password, String name, String loginName, String email, Integer lang) throws FxApplicationException {
-
-        // Load the user to update
-        Account user;
-        try {
-            user = load(userId);
-        } catch (FxLoadException exc) {
-            throw new FxUpdateException(exc.getMessage(), exc);
-        }
+    public void updateUser(long accountId, String password, String name, String loginName, String email, Integer lang) throws FxApplicationException {
+        // Load the account to update
+        Account account = load(accountId);
 
         final UserTicket ticket = FxContext.get().getTicket();
-        if (ticket.getUserId() != userId) {
-            throw new FxNoAccessException(LOG, "ex.account.update.noPermission", user.getName());
+        if (ticket.getUserId() != accountId) {
+            if (!ticket.isGlobalSupervisor() ||
+                    !(ticket.isMandatorSupervisor() && account.getMandatorId() == ticket.getMandatorId()))
+                throw new FxNoAccessException(LOG, "ex.account.update.noPermission", account.getName());
         }
 
         // Parameter checks
-        try {
-            if (loginName != null) loginName = checkLoginName(loginName);
-            if (email != null) email = FxFormatUtils.isEmail(email);
-            if (password != null) {
-                password = FxFormatUtils.encodePassword(userId, password.trim());
-            }
-
-
-            if (lang != null && !language.isValid(lang))
-                throw new FxInvalidParameterException("LANGUAGE", "ex.account.languageInvalid", lang);
-        } catch (FxInvalidParameterException pe) {
-            if (LOG.isInfoEnabled()) LOG.info(pe);
-            throw pe;
+        if (loginName != null) loginName = checkLoginName(loginName);
+        if (email != null) email = FxFormatUtils.isEmail(email);
+        if (password != null) {
+            password = FxFormatUtils.encodePassword(accountId, password.trim());
         }
+
+        if (lang != null && !language.isValid(lang))
+            throw new FxInvalidParameterException("LANGUAGE", "ex.account.languageInvalid", lang);
 
         Connection con = null;
         PreparedStatement stmt = null;
         String curSql;
 
-        if (name == null) name = user.getName();
-        if (loginName == null) loginName = user.getLoginName();
-        if (email == null) email = user.getEmail();
-        if (lang == null) lang = user.getLanguage().getId();
+        if (name == null) name = account.getName();
+        if (loginName == null) loginName = account.getLoginName();
+        if (email == null) email = account.getEmail();
+        if (lang == null) lang = account.getLanguage().getId();
 
         try {
             // Obtain a database connection
             con = Database.getDbConnection();
 
-            curSql = "update " + TBL_USER + " set " +
+            curSql = "UPDATE " + TBL_ACCOUNTS + " SET " +
                     // 1      2           3            4              5             6                                    7
-                    "email=?,lang=?, username=?,login_name=?, modified_by=?,modified_at=?" + ((password != null) ? ",password=?" : "") +
-                    " where id=" + userId;
+                    "EMAIL=?,LANG=?, USERNAME=?,LOGIN_NAME=?, MODIFIED_BY=?,MODIFIED_AT=?" + ((password != null) ? ",PASSWORD=?" : "") +
+                    " WHERE ID=" + accountId;
             stmt = con.prepareStatement(curSql);
             stmt.setString(1, email);
             stmt.setInt(2, lang);
@@ -1441,21 +1385,19 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             stmt.executeUpdate();
 
             // Ensure any active ticket of the updated user are refreshed
-            UserTicketStore.flagDirtyHavingUserId(user.getId());
-
+            UserTicketStore.flagDirtyHavingUserId(account.getId());
         } catch (SQLException exc) {
             final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(exc);
             ctx.setRollbackOnly();
             if (uniqueConstraintViolation) {
                 throw new FxEntryExistsException(LOG, "ex.account.userExists", name, loginName);
             } else {
-                throw new FxUpdateException(LOG, "ex.account.update.failed.sql", user.getLoginName(), exc.getMessage());
+                throw new FxUpdateException(LOG, "ex.account.update.failed.sql", account.getLoginName(), exc.getMessage());
             }
         } finally {
             Database.closeObjects(AccountEngineBean.class, con, stmt);
         }
     }
-
 
     /**
      * {@inheritDoc}
@@ -1478,18 +1420,11 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
 
         // Load the users
 
-        return loadAll(null, null, null, null, null,
-                mandatorId, null, groups, startIdx, maxEntries);
+        return loadAll(null, null, null, null, null, mandatorId, null, groups, startIdx, maxEntries);
     }
 
     /**
-     * Returns the amount of users within a group.
-     *
-     * @param groupId          the group to return the assignment count for
-     * @param includeInvisible a group may contain users belonging to a foreign mandator, which are invisible
-     *                         for the caller (except GLOBAL_SUPERVISOR). This parameter specifies wether to count those invisible
-     *                         users or not.
-     * @return the amount of users belonging to the group
+     * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public long getAssignedUsersCount(long groupId, boolean includeInvisible) throws FxApplicationException {
@@ -1514,7 +1449,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                 sCurSql = "SELECT COUNT(*) FROM " + TBL_ASSIGN_GROUPS + " WHERE USERGROUP=" + groupId;
             } else {
                 sCurSql = "SELECT COUNT(*) FORM " + TBL_ASSIGN_GROUPS + " ln, " +
-                        TBL_USER + " usr WHERE ln.ACCOUNT=usr.ID AND usr.MANDATOR=" + ticket.getMandatorId() +
+                        TBL_ACCOUNTS + " usr WHERE ln.ACCOUNT=usr.ID AND usr.MANDATOR=" + ticket.getMandatorId() +
                         " AND ln.USERGROUP=" + groupId;
             }
 
@@ -1538,7 +1473,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public ACLAssignment[] loadAccountAssignments(long userId) throws
+    public ACLAssignment[] loadAccountAssignments(long accountId) throws
             FxApplicationException {
         Connection con = null;
         Statement stmt = null;
@@ -1546,13 +1481,13 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         UserTicket ticket = UserTicketStore.getTicket(false);
 
         // Security checks
-        if (!ticket.isGlobalSupervisor() && (!(userId == ticket.getUserId()))) {
+        if (!ticket.isGlobalSupervisor() && (!(accountId == ticket.getUserId()))) {
             try {
-                Account usr = load(userId);
+                Account usr = load(accountId);
                 if (ticket.isMandatorSupervisor() && ticket.getMandatorId() == usr.getMandatorId()) {
                     // MandatorSupervisor may access all users within his domain
                 } else {
-                    FxNoAccessException nae = new FxNoAccessException("You may not access the ACLAssignment of user [" + userId + "]");
+                    FxNoAccessException nae = new FxNoAccessException("You may not access the ACLAssignment of user [" + accountId + "]");
                     if (LOG.isInfoEnabled()) LOG.info(nae);
                     throw nae;
                 }
@@ -1571,7 +1506,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             curSql = "SELECT ass.USERGROUP,ass.ACL,ass.PREAD,ass.PEDIT,ass.PREMOVE,ass.PEXPORT,ass.PREL," +
                     "ass.PCREATE, acl.CAT_TYPE " +
                     "FROM " + TBL_ASSIGN_ACLS + " ass, " + TBL_ASSIGN_GROUPS + " grp, " + TBL_ACLS + " acl " +
-                    "WHERE acl.ID=ass.ACL AND ass.USERGROUP=grp.USERGROUP AND grp.ACCOUNT=" + userId;
+                    "WHERE acl.ID=ass.ACL AND ass.USERGROUP=grp.USERGROUP AND grp.ACCOUNT=" + accountId;
 
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(curSql);
@@ -1579,30 +1514,20 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             // Read the data
             ArrayList<ACLAssignment> result = new ArrayList<ACLAssignment>(20);
             while (rs != null && rs.next()) {
-                int iGroupId = rs.getInt(1);
-                if (iGroupId == UserGroup.GROUP_OWNER) {
+                long groupId = rs.getLong(1);
+                if (groupId == UserGroup.GROUP_OWNER) {
                     // skip
                     continue;
                 }
-                int iAclId = rs.getInt(2);
-                boolean bRead = rs.getBoolean(3);
-                boolean bEdit = rs.getBoolean(4);
-                boolean bDelete = rs.getBoolean(5);
-                boolean bExport = rs.getBoolean(6);
-                boolean bRelate = rs.getBoolean(7);
-                boolean bCreate = rs.getBoolean(8);
-                byte category = rs.getByte(9);
-                ACLAssignment ai = new ACLAssignment(iAclId, iGroupId, bRead, bEdit, bRelate, bDelete,
-                        bExport, bCreate, ACL.Category.getById(category));
-                result.add(ai);
+                result.add(new ACLAssignment(rs.getLong(2), groupId,
+                        rs.getBoolean(3), rs.getBoolean(4), rs.getBoolean(7), rs.getBoolean(5),
+                        rs.getBoolean(6), rs.getBoolean(8), ACL.Category.getById(rs.getByte(9))));
             }
-
             // Return the found entries
             return result.toArray(new ACLAssignment[result.size()]);
-
         } catch (SQLException exc) {
             FxLoadException dbe = new FxLoadException("Failed to load the ACL assignments for user [" +
-                    userId + "]: " + exc.getMessage(), exc);
+                    accountId + "]: " + exc.getMessage(), exc);
             LOG.error(dbe);
             throw dbe;
         } finally {

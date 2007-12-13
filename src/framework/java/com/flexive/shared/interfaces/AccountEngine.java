@@ -60,8 +60,8 @@ public interface AccountEngine {
      * @param username the username
      * @param password the password
      * @param takeOver the take over flag
-     * @throws FxLoginFailedException
-     * @throws FxAccountInUseException
+     * @throws FxLoginFailedException  on errors
+     * @throws FxAccountInUseException on errors
      */
     void login(String username, String password, boolean takeOver)
             throws FxLoginFailedException, FxAccountInUseException;
@@ -76,8 +76,7 @@ public interface AccountEngine {
     /**
      * Logout function.
      *
-     * @throws com.flexive.shared.exceptions.FxLogoutFailedException
-     *
+     * @throws FxLogoutFailedException on errors
      */
     void logout() throws FxLogoutFailedException;
 
@@ -93,7 +92,7 @@ public interface AccountEngine {
      *                                if the user does not exist
      * @throws com.flexive.shared.exceptions.FxLoadException
      *                                if the load failed
-     * @throws FxApplicationException TODO
+     * @throws FxApplicationException on errors
      */
     Account load(final long id) throws FxApplicationException;
 
@@ -106,7 +105,7 @@ public interface AccountEngine {
      * @return the account
      * @throws FxNotFoundException    if the user does not exist
      * @throws FxLoadException        if the load failed
-     * @throws FxApplicationException TODO
+     * @throws FxApplicationException on errors
      */
     Account load(final String loginName) throws FxApplicationException;
 
@@ -141,14 +140,14 @@ public interface AccountEngine {
      * A user may only see the groups assigned to other users within his mandator.
      * GLOBAL_SUPERVISOR may get the groups for all users.
      *
-     * @param userId the user to get the groupd for
+     * @param accountId the user to get the groupd for
      * @return the groups a user is assigned to
      * @throws FxLoadException        if the load failed
      * @throws FxNotFoundException    if the user does not exist
      * @throws FxNoAccessException    if the caller lacks the permissions to load the groups
-     * @throws FxApplicationException TODO
+     * @throws FxApplicationException on errors
      */
-    UserGroupList getGroups(long userId) throws FxApplicationException;
+    UserGroupList getGroups(long accountId) throws FxApplicationException;
 
 
     /**
@@ -157,14 +156,14 @@ public interface AccountEngine {
      * A user may only see the groups assigned to other users within his mandator.
      * GLOBAL_SUPERVISOR may get the groups for all users.
      *
-     * @param userId the user to get the groupd for
+     * @param accountId the user to get the groupd for
      * @return the groups a user is assigned to
      * @throws FxLoadException        if the load failed
      * @throws FxNotFoundException    if the user does not exist
      * @throws FxNoAccessException    if the caller lacks the permissions to load the groups
-     * @throws FxApplicationException TODO
+     * @throws FxApplicationException on errors
      */
-    ArrayList<UserGroup> getGroupList(long userId) throws FxApplicationException;
+    ArrayList<UserGroup> getGroupList(long accountId) throws FxApplicationException;
 
     /**
      * Loads all roles that a user is assigned to.
@@ -172,17 +171,17 @@ public interface AccountEngine {
      * Users may only query roles of users within the same mandator domain.<br>
      * GLOBAL_SUPERVISOR may get the roles of all users.
      *
-     * @param userId the unique user id to get the roles for
-     * @param mode   MODE_USER:   get all roles the USER himself is assigned to<br>
-     *               MODE_GROUPS: get all roles from the groups that the user belongs to<br>
-     *               MODE_ALL:    get all roles the user belongs to from his groups, or direct assignment
+     * @param accountId the unique user id to get the roles for
+     * @param mode      MODE_USER:   get all roles the USER himself is assigned to<br>
+     *                  MODE_GROUPS: get all roles from the groups that the user belongs to<br>
+     *                  MODE_ALL:    get all roles the user belongs to from his groups, or direct assignment
      * @return the roles assigned to the given user
      * @throws FxLoadException        if the load failed
      * @throws FxNotFoundException    if the user does not exist
      * @throws FxNoAccessException    if the caller lacks the permissions to load the roles
-     * @throws FxApplicationException TODO
+     * @throws FxApplicationException on errors
      */
-    Role[] getRoles(long userId, RoleLoadMode mode) throws FxApplicationException;
+    Role[] getRoles(long accountId, RoleLoadMode mode) throws FxApplicationException;
 
     /**
      * Loads all roles that a user is assigned to.
@@ -190,17 +189,17 @@ public interface AccountEngine {
      * Users may only query roles of users within the same mandator domain.<br>
      * GLOBAL_SUPERVISOR may get the roles of all users.
      *
-     * @param userId the unique user id to get the roles for
-     * @param mode   MODE_USER:   get all roles the USER himself is assigned to<br>
-     *               MODE_GROUPS: get all roles from the groups that the user belongs to<br>
-     *               MODE_ALL:    get all roles the user belongs to from his groups, or direct assignment
+     * @param accountId the unique user id to get the roles for
+     * @param mode      MODE_USER:   get all roles the USER himself is assigned to<br>
+     *                  MODE_GROUPS: get all roles from the groups that the user belongs to<br>
+     *                  MODE_ALL:    get all roles the user belongs to from his groups, or direct assignment
      * @return the roles assigned to the given user
      * @throws FxLoadException        if the load failed
      * @throws FxNotFoundException    if the user does not exist
      * @throws FxNoAccessException    if the caller lacks the permissions to load the roles
-     * @throws FxApplicationException TODO
+     * @throws FxApplicationException on errors
      */
-    public List<Role> getRoleList(long userId, RoleLoadMode mode) throws FxApplicationException;
+    public List<Role> getRoleList(long accountId, RoleLoadMode mode) throws FxApplicationException;
 
 
     /**
@@ -223,13 +222,14 @@ public interface AccountEngine {
      * @param defaultNode     the desired start node in the tree for the user
      * @param description     description for the user
      * @param allowMultiLogin if true more than one client may login with this account at the same time
-     * @param checkUserRoles
+     * @param checkUserRoles  perform checks if the calling user is a member of valid roles, should only be disabled if
+     *                        called from run-once scripts or the like
      * @return the ID of the created user
      * @throws FxCreateException           if the create failed
      * @throws FxInvalidParameterException if a parameter is invalid (mandatorId, guiLanguage, contentLanguage)
      * @throws FxNoAccessException         if the caller lacks the permissions to create the user
      * @throws FxEntryExistsException      if a user with the given login name already exists
-     * @throws FxApplicationException      TODO
+     * @throws FxApplicationException      on errors
      */
     long create(String userName, String loginName, String password, String email, int lang,
                 long mandatorId, boolean isActive, boolean isConfirmed, Date validFrom, Date validTo, long defaultNode,
@@ -243,29 +243,29 @@ public interface AccountEngine {
      * GlobalSupervisor may remove users belonging to any mandator.<br>
      * USER_GUEST and USER_GLOBAL_SUPERVISOR may not be removed in any case.
      *
-     * @param userId the id of the user to remove
+     * @param accountId the id of the user to remove
      * @throws FxNotFoundException    if the given user does not exist
      * @throws FxNoAccessException    if the caller lacks the permissions to remove the user
      * @throws FxRemoveException      if the remove failed
-     * @throws FxApplicationException TODO
+     * @throws FxApplicationException on errors
      */
-    void remove(long userId) throws FxApplicationException;
+    void remove(long accountId) throws FxApplicationException;
 
     /**
      * Sets the roles a user is in.
      * To set roles the caller must be in role AccountManagement, and may only update users belonging
      * to his mandator. GlobalSupervisor may set the roles for all users in the system.
      *
-     * @param userId the user to set the roles for
-     * @param roles  the roles to set, the array may contain undefined roles (=0) values (which are skipped) to make it
-     *               easier to build the list. <br>
-     *               Duplicated roles are discarded.
+     * @param accountId the user to set the roles for
+     * @param roles     the roles to set, the array may contain undefined roles (=0) values (which are skipped) to make it
+     *                  easier to build the list. <br>
+     *                  Duplicated roles are discarded.
      * @throws FxNoAccessException    if the calling user lacks the permissions to set the roles for the given group
      * @throws FxNotFoundException    if the group does not exist
      * @throws FxUpdateException      if setting the roles failed
-     * @throws FxApplicationException TODO
+     * @throws FxApplicationException on errors
      */
-    void setRoles(long userId, long... roles) throws FxApplicationException;
+    void setRoles(long accountId, long... roles) throws FxApplicationException;
 
     /**
      * Sets the roles a user is in.
@@ -273,16 +273,16 @@ public interface AccountEngine {
      * To set roles the caller must be in role ROLE_ROLE_MANAGEMENT, and may only update users belonging
      * to his mandator. GROUP_GLOBAL_SUPERVISOR may set the roles for all users in the system.
      *
-     * @param userId the user to set the roles for
-     * @param roles  the roles to set, the array may contain ROLE_UNDEFINED (=0) values (which are skipped) to make it
-     *               easier to build the list. <br>
-     *               Duplicated roles are discarded.
+     * @param accountId the user to set the roles for
+     * @param roles     the roles to set, the array may contain ROLE_UNDEFINED (=0) values (which are skipped) to make it
+     *                  easier to build the list. <br>
+     *                  Duplicated roles are discarded.
      * @throws FxNoAccessException    if the calling user lacks the permissions to set the roles for the given group
      * @throws FxNotFoundException    if the group does not exist
      * @throws FxUpdateException      if setting the roles failed
-     * @throws FxApplicationException TODO
+     * @throws FxApplicationException on errors
      */
-    void setRoleList(long userId, List<Role> roles) throws FxApplicationException;
+    void setRoleList(long accountId, List<Role> roles) throws FxApplicationException;
 
     /**
      * Sets the groups a user defined by its unique id belongs to.
@@ -292,16 +292,16 @@ public interface AccountEngine {
      * his mandator, plus GROUP_EVERYONE and GROUP_OWNER.<br>
      * GROUP_GLOBAL_SUPERVISOR may set all groups for all users.
      *
-     * @param userId the userId to get the lifecycle for
-     * @param groups the groups the user should belong to
+     * @param accountId the accountId to get the lifecycle for
+     * @param groups    the groups the user should belong to
      * @throws FxNoAccessException    if the calling user lacks the permissions to set the groups
      * @throws FxNotFoundException    if the user does not exist
      * @throws FxUpdateException      if setting the groups failed
-     * @throws FxApplicationException TODO
+     * @throws FxApplicationException on errors
      */
-    void setGroups(long userId, long[] groups) throws FxApplicationException;
+    void setGroups(long accountId, long[] groups) throws FxApplicationException;
 
-    void setGroupList(long userId, List<UserGroup> groups) throws FxApplicationException;
+    void setGroupList(long accountId, List<UserGroup> groups) throws FxApplicationException;
 
 
     /**
@@ -330,7 +330,7 @@ public interface AccountEngine {
      * @return all matching accounts
      * @throws FxNoAccessException    if the caller may not load users of the specified mandator
      * @throws FxLoadException        if the load failed
-     * @throws FxApplicationException TODO
+     * @throws FxApplicationException on errors
      */
     Account[] loadAll(String name, String loginName, String email, Boolean isActive,
                       Boolean isConfirmed, Long mandatorId, int[] isInRole, long[] isInGroup, int startIdx, int maxEntries)
@@ -341,7 +341,7 @@ public interface AccountEngine {
      *
      * @param mandatorId the mandator ID
      * @return all accounts of the mandator.
-     * @throws FxApplicationException TODO
+     * @throws FxApplicationException on errors
      */
     Account[] loadAll(long mandatorId) throws FxApplicationException;
 
@@ -372,10 +372,10 @@ public interface AccountEngine {
      * @return The number of users matching the given parameters
      * @throws FxNoAccessException    if the caller may not load users of the specified mandator
      * @throws FxLoadException        if the load failed
-     * @throws FxApplicationException TODO
+     * @throws FxApplicationException on errors
      */
-    int getNumAll(String name, String loginName, String email, Boolean isActive,
-                  Boolean isConfirmed, Long mandatorId, int[] isInRole, long[] isInGroup)
+    int getAccountMatches(String name, String loginName, String email, Boolean isActive,
+                          Boolean isConfirmed, Long mandatorId, int[] isInRole, long[] isInGroup)
             throws FxApplicationException;
 
     /**
@@ -386,7 +386,7 @@ public interface AccountEngine {
      * Any user can change HIS OWN password, email, contentLanguage and guiLanguage using this function,
      * but setting any other parameters will cause a FxNoAccessException.
      *
-     * @param userId          the unique id of the user to update
+     * @param accountId       the unique id of the user to update
      * @param password        the new password, or null if the old value should be kept
      * @param defaultNode     the new defaultNode, or null if the old value should be kept
      * @param name            the new name (not unique), or null if the old value should be kept
@@ -406,10 +406,10 @@ public interface AccountEngine {
      * @throws FxUpdateException           if the update failed
      * @throws FxNotFoundException         if the user to update does not exist
      * @throws FxInvalidParameterException if a parameter was invalid
-     * @throws FxApplicationException      TODO
+     * @throws FxApplicationException      on errors
      */
 
-    void update(long userId, String password, Long defaultNode,
+    void update(long accountId, String password, Long defaultNode,
                 String name, String loginName, String email, Boolean isConfirmed, Boolean isActive,
                 Date validFrom, Date validTo, Integer lang, String description,
                 Boolean allowMultiLogin, Long contactDataId)
@@ -418,14 +418,15 @@ public interface AccountEngine {
     /**
      * Updates some personal data of the specified user
      *
-     * @param userId    the user to update the data for
+     * @param accountId the user to update the data for
      * @param password  the new password to assign
+     * @param name      user name
      * @param loginName the new login name to assign
      * @param email     the new e-mail address to assign
      * @param lang      the new language to assign
-     * @throws FxApplicationException      TODO
+     * @throws FxApplicationException on errors
      */
-    void updateUser(long userId, String password, String name, String loginName, String email, Integer lang) throws FxApplicationException;
+    void updateUser(long accountId, String password, String name, String loginName, String email, Integer lang) throws FxApplicationException;
 
 
     /**
@@ -441,7 +442,7 @@ public interface AccountEngine {
      * @param startIdx   the start index in the result, 0 based
      * @param maxEntries the maximum amount of users returned by the funktion (-1 for all), starting at startIdx
      * @return all users assigned to the given group
-     * @throws FxApplicationException TODO
+     * @throws FxApplicationException on errors
      * @throws FxNoAccessException    if the caller may not see the group
      * @throws FxLoadException        if the get failed
      * @throws FxNotFoundException    if the group does not exist
@@ -457,7 +458,7 @@ public interface AccountEngine {
      *                         for the caller (except GLOBAL_SUPERVISOR). This parameter specifies wether to count those invisible
      *                         users or not.
      * @return the amount of users belonging to the group
-     * @throws FxApplicationException TODO
+     * @throws FxApplicationException on errors
      * @throws FxLoadException        if the load of the count failed
      */
     long getAssignedUsersCount(long groupId, boolean includeInvisible) throws FxApplicationException;
@@ -470,13 +471,13 @@ public interface AccountEngine {
      * MANDATOR_FLEXIVE may retrive ACLAssignments for all his users.<br>
      * GLOBAL_SUPERVISOR may retrive the ACLAssignments of all users.
      *
-     * @param userId the user to get the ACLAssignments for
+     * @param accountId the user to get the ACLAssignments for
      * @return the ACLAssignments of the user
      * @throws FxLoadException        if the function failed to load the ACLAssignments
      * @throws FxNoAccessException    if the calling user may not access the ACLAssignment of the given user
-     * @throws FxApplicationException TODO
+     * @throws FxApplicationException on errors
      */
-    ACLAssignment[] loadAccountAssignments(long userId) throws FxApplicationException;
+    ACLAssignment[] loadAccountAssignments(long accountId) throws FxApplicationException;
 
     /**
      * Create contact data for all accounts that dont have them

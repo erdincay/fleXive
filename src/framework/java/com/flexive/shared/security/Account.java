@@ -88,7 +88,7 @@ public class Account extends AbstractSelectableObject implements Serializable {
         /* empty constructor */
     }
 
-    public Account(long id, String name, String loginName, int mandator,
+    public Account(long id, String name, String loginName, long mandator,
                    String email, FxLanguage language, boolean active,
                    boolean validated, Date validFrom, Date validTo, long defaultNode,
                    String description, long contactDataId, boolean allowMultiLogin,

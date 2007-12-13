@@ -84,11 +84,11 @@ public final class DatabaseConst {
     /**
      * Accounts table
      */
-    public static final String TBL_USER = "FXS_ACCOUNTS";
+    public static final String TBL_ACCOUNTS = "FXS_ACCOUNTS";
     /**
      * Account details table
      */
-    public static final String TBL_USER_DETAILS = "FXS_ACCOUNT_DETAILS";
+    public static final String TBL_ACCOUNT_DETAILS = "FXS_ACCOUNT_DETAILS";
     /**
      * User groups to accounts table
      */

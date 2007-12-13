@@ -195,7 +195,8 @@
                     <para>
                         <constant>AccountManagement</constant>: create/update/delete users, groups and roles (may only
                         add roles he is assigned himself, may not alter assigned roles that he has not assigned himself)
-                        for "his" mandator
+                        for "his" mandator. Everybody may read user and group informations (of course no passwords which
+                        are hashed anyways), but only for his own mandators unless he is a global supervisor.
                     </para>
                 </listitem>
                 <listitem>

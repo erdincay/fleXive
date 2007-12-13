@@ -64,8 +64,8 @@ public class MySQLDataSelector extends DataSelector {
 
     static {
         SELECTORS.put("MANDATOR", new MySQLGenericSelector(DatabaseConst.TBL_MANDATORS, "id"));
-        SELECTORS.put("CREATED_BY", new MySQLGenericSelector(DatabaseConst.TBL_USER, "id"));
-        SELECTORS.put("MODIFIED_BY", new MySQLGenericSelector(DatabaseConst.TBL_USER, "id"));
+        SELECTORS.put("CREATED_BY", new MySQLGenericSelector(DatabaseConst.TBL_ACCOUNTS, "id"));
+        SELECTORS.put("MODIFIED_BY", new MySQLGenericSelector(DatabaseConst.TBL_ACCOUNTS, "id"));
         SELECTORS.put("ACL", new MySQLACLSelector());
         SELECTORS.put("STEP", new MySQLStepSelector());
     }

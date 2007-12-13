@@ -636,7 +636,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
                     sql = "DELETE FROM " + TBL_ASSIGN_GROUPS + " WHERE USERGROUP=" + g.getId();
                     stmt.executeUpdate(sql);
                     sql = "INSERT INTO " + TBL_ASSIGN_GROUPS + " (ACCOUNT,USERGROUP) (SELECT a.id, " + g.getId() +
-                            " FROM " + TBL_USER + " a WHERE a.MANDATOR=" + m.getId() + " AND a.ID!=" + Account.NULL_ACCOUNT + ")";
+                            " FROM " + TBL_ACCOUNTS + " a WHERE a.MANDATOR=" + m.getId() + " AND a.ID!=" + Account.NULL_ACCOUNT + ")";
                     stmt.executeUpdate(sql);
                 } catch (FxNotFoundException e) {
                     missing.add(m);
@@ -660,7 +660,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
                 ps.setTimestamp(8, NOW);
                 ps.executeUpdate();
                 sql = "INSERT INTO " + TBL_ASSIGN_GROUPS + " (ACCOUNT,USERGROUP) (SELECT a.ID, " + gid +
-                        " FROM " + TBL_USER + " a WHERE a.MANDATOR=" + m.getId() + " AND a.ID!=" + Account.NULL_ACCOUNT + ")";
+                        " FROM " + TBL_ACCOUNTS + " a WHERE a.MANDATOR=" + m.getId() + " AND a.ID!=" + Account.NULL_ACCOUNT + ")";
                 stmt.executeUpdate(sql);
             }
         } catch (SQLException exc) {
