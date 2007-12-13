@@ -33,6 +33,12 @@ var _toolbarResponseId;
 
 window.onresize = windowResize;
 
+var contentClipboard = new ContentClipboard();
+
+function getContentClipboard() {
+    return contentClipboard;
+}
+
 function stopPropagation(ev) {
     try {
         ev.stopPropagation();

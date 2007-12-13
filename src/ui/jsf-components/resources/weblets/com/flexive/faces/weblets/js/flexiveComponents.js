@@ -52,12 +52,13 @@ function initializeTreeReporter(widgetIds, _clickHandler) {
     }
 }
 
-var ResultSetTableHandler = function(name, tableComponent, menuHandler, viewType) {
+var ResultSetTableHandler = function(name, tableComponent, menuHandler, viewType, clipboard) {
     this.name = name;
     this.table = document.getElementById(name);
     this.tableComponent = tableComponent;
     this.menuHandler = menuHandler;
     this.viewType = viewType;   // LIST or THUMBNAILS
+    this.clipboard = clipboard; // the ContentClipboard instance to be used
     this.showEditButton = false;
     this.showDeleteButton = false;
     this.reference = name + ".fxTableHandler";
@@ -148,6 +149,12 @@ ResultSetTableHandler.prototype = {
         this.refresh();
     },
 
+    // Copy the current selection to the clipboard
+    copySelection: function() {
+        var selection = this._getSelection();
+        this.clipboard.set(selection.length  > 0 ? selection : [this.itemId]);
+    },
+
 
     onShowContextMenu: function(menu) {
         // set selection-based menu item states
@@ -182,7 +189,7 @@ ResultSetTableHandler.prototype = {
         var data = this.rowSelection.getSelected();
         var selection = [];     // the selected ids
         for (var i = 0; i < data.length; i++) {
-            selection.push(data[i].substring(0, data[i].indexOf(".")));
+            selection.push(parseInt(data[i].substring(0, data[i].indexOf("."))));
         }
         return selection;
     }
@@ -481,5 +488,37 @@ TreeHandler.prototype = {
                 this.clickHandler(node, true);
             }
         }
+    }
+}
+
+
+// A simple clipboard for content objects
+var ContentClipboard = function() {
+    this.ids = [];
+}
+
+ContentClipboard.prototype = {
+    // set the clipboard content to the given object ID array
+    set: function(contentIds) {
+        this.ids = [];
+        // copy IDs to our own array to prevent aliasing and inter-frame issues
+        for (var i = 0; i < contentIds.length; i++) {
+            this.ids.push(contentIds[i]);
+        }
+    },
+
+    // get the current clipboard contents as object ID array
+    get: function() {
+        return this.ids != null ? this.ids : [];
+    },
+
+    // clear the clipboard
+    clear: function() {
+        this.ids = [];
+    },
+
+    // returns true for empty clipboards
+    isEmpty: function() {
+        return this.get().length == 0;
     }
 }

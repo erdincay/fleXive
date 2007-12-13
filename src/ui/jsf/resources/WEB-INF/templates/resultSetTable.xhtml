@@ -70,6 +70,8 @@ Parameters:
     <fx:menuItem id="showScreenview" labelKey="SearchResult.menu.showScreenview" icon="open" clickHandler="function() { #{name}.fxTableHandler.showScreenview(); }"/>
     <fx:menuItem id="edit" labelKey="SearchResult.menu.edit" icon="edit" clickHandler="function() { #{name}.fxTableHandler.editRow(); }"/>
     <fx:menuSeparator/>
+    <fx:menuItem id="copy" labelKey="SearchResult.menu.copy" icon="copy" clickHandler="function() { #{name}.fxTableHandler.copySelection(); }"/>
+    <fx:menuSeparator/>
     <fx:menuItem id="deleteBriefcase" labelKey="SearchResult.menu.deleteBriefcase" icon="removeBriefcaseItems" clickHandler="function() { #{name}.fxTableHandler.deleteRowBriefcase(); }"/>
     <fx:menuItem id="deleteBriefcaseSelected" labelKey="SearchResult.menu.deleteBriefcaseSelected" icon="removeBriefcaseItems" clickHandler="function() { #{name}.fxTableHandler.deleteSelectedRowsBriefcase(); }"/>
     <fx:menuItem id="delete" labelKey="SearchResult.menu.delete" icon="remove" clickHandler="function() { #{name}.fxTableHandler.deleteRow(); }"/>
@@ -145,7 +147,7 @@ Parameters:
         menuHandler.messages.confirmDeleteRow = "#{fxMessageBean['SearchResult.dialog.confirm.deleteRow']}";
         menuHandler.messages.confirmDeleteSelection = "#{fxMessageBean['SearchResult.dialog.confirm.deleteSelection']}";
 
-        var tableHandler = new ResultSetTableHandler("#{name}", #{name}, menuHandler, "#{viewType}");
+        var tableHandler = new ResultSetTableHandler("#{name}", #{name}, menuHandler, "#{viewType}", parent.getContentClipboard());
 		tableHandler.showEditButton = showEditButton;
 		tableHandler.showDeleteButton = showDeleteButton;
 		tableHandler.formName = "#{formName}";

@@ -140,7 +140,8 @@
             // attach the selected rows from the content frame
             function attachContentSelection(menuItem) {
                 try {
-                    getJsonRpc().ContentTreeEditor.addReferences(getObjectId(menuItem), extractPkIds(getContentFrame().rowSelection.getSelected()));
+                    getJsonRpc().ContentTreeEditor.addReferences(getObjectId(menuItem), parent.getContentClipboard().get().slice());
+                    parent.getContentClipboard().clear();
                     reloadContentTree();
                 } catch (e) {
                     alert(e.message);
@@ -199,12 +200,14 @@
 
             // Cut the current tree node
             function cutNode(menuItem) {
+                parent.getContentClipboard().clear();
                 cutNodeId = getObjectId(menuItem);
                 copyNodeId = -1;
             }
 
             // Copy the current tree node
             function copyNode(menuItem) {
+                parent.getContentClipboard().clear();
                 copyNodeId = getObjectId(menuItem);
                 cutNodeId = -1;
             }
@@ -254,10 +257,10 @@
                 if (menu.getTreeNode() == null) {
                     return;
                 }
-                var contentAvailable = getContentFrame().rowSelection != null && getContentFrame().rowSelection.getSelected && getContentFrame().rowSelection.getSelected().length > 0;
-                setActionDisabled(menu.getTreeNode(), "attachContentSelection", !contentAvailable);
+                var clipboardEmpty = parent.getContentClipboard().isEmpty();
+                setActionDisabled(menu.getTreeNode(), "attachContentSelection", clipboardEmpty);
                 setActionDisabled(menu.getTreeNode(), "attachNode", !(getContentFrame().isContentEditor && !getContentFrame().isReadOnly));
-                setActionDisabled(menu.getTreeNode(), "pasteNode", cutNodeId == -1 && copyNodeId == -1);
+                setActionDisabled(menu.getTreeNode(), "pasteNode", !clipboardEmpty || (cutNodeId == -1 && copyNodeId == -1));
                 menu.show_();
             }
 
@@ -288,7 +291,6 @@
                  selector="true">
 
             <adm:treeContextMenu showHandler="showTreeMenu">
-                <adm:treeContextMenuItem treeActions="attachContentSelection" icon="add" labelKey="ContentTree.menu.attachContentSelection" clickHandler="attachContentSelection"/>
                 <adm:treeContextMenuItem treeActions="attachNode" icon="attach" labelKey="ContentTree.menu.attachNode" clickHandler="attachNode"/>
                 <adm:treeContextMenuItem treeActions="showContent" icon="open" labelKey="ContentTree.menu.show" clickHandler="showContent"/>
                 <adm:treeContextMenuItem treeActions="editContent" icon="edit" labelKey="ContentTree.menu.edit" clickHandler="editContent"/>
@@ -312,6 +314,7 @@
                 <adm:treeContextMenuItem treeActions="deactivateNodeAndChildren" icon="deactivateWithChildren" labelKey="ContentTree.menu.deactivateWithChildren" clickHandler="deactivateNodeAndChildren"/>
                 <adm:treeContextMenuItem treeActions="editNode" icon="editNode" labelKey="ContentTree.menu.editNode" clickHandler="editNode"/>
                 <fx:menuSeparator/>
+                <adm:treeContextMenuItem treeActions="attachContentSelection" icon="paste" labelKey="ContentTree.menu.attachContentSelection" clickHandler="attachContentSelection"/>
                 <adm:treeContextMenuItem treeActions="pasteNode" icon="paste" labelKey="ContentTree.menu.pasteNode" clickHandler="pasteNode"/>
                 <adm:treeContextMenuItem treeActions="cutNode" icon="cut" labelKey="ContentTree.menu.cutNode" clickHandler="cutNode"/>
                 <adm:treeContextMenuItem treeActions="copyNode" icon="copy" labelKey="ContentTree.menu.copyNode" clickHandler="copyNode"/>

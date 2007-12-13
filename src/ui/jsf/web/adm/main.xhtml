@@ -3,13 +3,15 @@
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:c="http://java.sun.com/jstl/core"
-      xmlns:t="http://myfaces.apache.org/tomahawk">
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:fx="http://www.flexive.com/jsf/core">
 <head>
     <base href="#{fxSystemBean.documentBase}"/>
     <t:stylesheet path="/adm/css/main.css"/>
     <c:if test="#{fxSystemBean.browserAsString=='IE'}">
         <t:stylesheet path="/adm/css/mainIE.css"/>
     </c:if>
+    <fx:includes/>
     <script type="text/javascript" src="adm/js/main.js"> </script>
     <script type="text/javascript" src="adm/js/shared.js"> </script>
     <script type="text/javascript" src="adm/js/commandElement.js"> </script>

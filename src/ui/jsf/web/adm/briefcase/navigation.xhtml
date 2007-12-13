@@ -52,7 +52,7 @@
             // ----------- context menu functions -----------------
 
             function showContextMenu() {
-                var selectionAvailable = getContentFrame().rowSelection != null &amp;&amp; getContentFrame().rowSelection.getSelected &amp;&amp; getContentFrame().rowSelection.getSelected().length > 0;
+                var selectionAvailable = !parent.getContentClipboard().isEmpty();
                 findMenuItem(getContextMenu(), "open").setDisabled(getContextBriefcaseId() == -1);
                 findMenuItem(getContextMenu(), "delete").setDisabled(getContextBriefcaseId() == -1);
                 findMenuItem(getContextMenu(), "addSelection").setDisabled(!selectionAvailable);
@@ -81,7 +81,11 @@
 
             function addSelection(menuItem) {
                 try {
-                    getJsonRpc().BriefcaseEditor.add(getContextBriefcaseId(), extractPkIds(getContentFrame().rowSelection.getSelected()));
+                    // clone clipboard array, otherwise JSON/RPC won't recognize it as an array
+                    // since it was created in another frame
+                    var ids = parent.getContentClipboard().get().slice();
+                    getJsonRpc().BriefcaseEditor.add(getContextBriefcaseId(), ids);
+                    parent.getContentClipboard().clear();
                     briefcasePanel.reload();
                 } catch (e) {
                     alert(e.message);
@@ -141,12 +145,12 @@
         </div>
 
         <fx:menu name="contextMenu" contextMenuTarget="briefcaseContainer" showHandler="showContextMenu">
-            <fx:menuItem id="addSelection" icon="add" labelKey="Briefcase.contextMenu.addSelection" clickHandler="addSelection"/>
             <fx:menuItem id="open" icon="open" labelKey="Briefcase.contextMenu.open" clickHandler="openBriefcase"/>
             <fx:menuItem id="openDetails" icon="openDetails" labelKey="Briefcase.contextMenu.openDetails" clickHandler="openBriefcaseDetails"/>
             <fx:menuItem id="rename" icon="rename" labelKey="Briefcase.contextMenu.rename" clickHandler="renameBriefcase"/>
             <fx:menuItem id="delete" icon="remove" labelKey="Briefcase.contextMenu.delete" clickHandler="deleteBriefcase"/>
             <fx:menuSeparator/>
+            <fx:menuItem id="addSelection" icon="paste" labelKey="Briefcase.contextMenu.addSelection" clickHandler="addSelection"/>
             <fx:menuItem id="share" icon="share" labelKey="Briefcase.contextMenu.share" clickHandler="shareBriefcase">
                 <fx:menuItem id="unshare" labelKey="Briefcase.contextMenu.private" clickHandler="function(menuItem) { shareBriefcase(menuItem, -1); }"/>
                 <c:forEach var="item" items="#{fxSelectBean.briefcaseACLs}">
