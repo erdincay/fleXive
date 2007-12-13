@@ -155,7 +155,7 @@ public interface AssignmentEngine {
     /**
      * Save an existing property.
      *
-     * @param property           instance of FxPropertyEdit
+     * @param property instance of FxPropertyEdit
      * @return the id of the saved property
      * @throws FxApplicationException      on errors
      * @throws FxInvalidParameterException
@@ -169,7 +169,7 @@ public interface AssignmentEngine {
     /**
      * Save an existing group.
      *
-     * @param group           instance of FxGroupEdit
+     * @param group instance of FxGroupEdit
      * @return the id of the saved property
      * @throws FxApplicationException      on errors
      * @throws FxInvalidParameterException
@@ -180,13 +180,14 @@ public interface AssignmentEngine {
      */
     long save(FxGroupEdit group) throws FxApplicationException;
 
-     /**
+    /**
      * Get the number of content instances for a given assignment,
      * (works for group and property assignments)
      *
-     * @param assignmentId         id of the requested assignment
+     * @param assignmentId id of the requested assignment
      * @return number of content instances using the assignment
-      * @throws com.flexive.shared.exceptions.FxApplicationException    on errors
+     * @throws com.flexive.shared.exceptions.FxApplicationException
+     *          on errors
      */
     long getAssignmentInstanceCount(long assignmentId) throws FxApplicationException;
 }

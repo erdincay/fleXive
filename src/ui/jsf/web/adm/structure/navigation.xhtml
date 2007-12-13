@@ -461,28 +461,30 @@
                 var node = menu.getTreeNode();
                 if (!node.nodeDocType)
                     return;
+                var lackRole = #{not fxSystemBean.isInRole['StructureManagement']};
+                setActionDisabled(menu.getTreeNode(), "editNode", lackRole);
                 setActionDisabled(menu.getTreeNode(), "createContent", node.nodeDocType!="Type");
-                setActionDisabled(menu.getTreeNode(), "createProperty", node.nodeDocType!="Group" && !isType(node.nodeDocType));
-                setActionDisabled(menu.getTreeNode(), "createGroup", node.nodeDocType!="Group" && !isType(node.nodeDocType));
+                setActionDisabled(menu.getTreeNode(), "createProperty", !(node.nodeDocType=="Group" || isType(node.nodeDocType)) || lackRole);
+                setActionDisabled(menu.getTreeNode(), "createGroup", !(node.nodeDocType=="Group" || isType(node.nodeDocType)) || lackRole);
                 setActionDisabled(menu.getTreeNode(), "deleteAssignment", node.nodeDocType!="Group" && (node.nodeDocType!="Assignment" || node.mayDelete!="true"));
                 setActionDisabled(menu.getTreeNode(), "deleteType", !isType(node.nodeDocType) || node.mayDelete!="true");
-                setActionDisabled(menu.getTreeNode(), "copyAssignment", node.nodeDocType!="Group" && node.nodeDocType!="Assignment");
+                setActionDisabled(menu.getTreeNode(), "copyAssignment", lackRole || node.nodeDocType!="Group" && node.nodeDocType!="Assignment");
                 setActionDisabled(menu.getTreeNode(), "searchContents", !isType(node.nodeDocType));
-                setActionDisabled(menu.getTreeNode(), "cutAssignment", node.nodeDocType!="Assignment" && node.nodeDocType!="Group");
-                setActionDisabled(menu.getTreeNode(), "pasteBelow", copyNode==null || cutMode || (copyMode && (node.nodeDocType!="Assignment" && node.nodeDocType!="Group") ||
+                setActionDisabled(menu.getTreeNode(), "cutAssignment", lackRole || node.nodeDocType!="Assignment" && node.nodeDocType!="Group");
+                setActionDisabled(menu.getTreeNode(), "pasteBelow", lackRole || copyNode==null || cutMode || (copyMode && (node.nodeDocType!="Assignment" && node.nodeDocType!="Group") ||
                                 getJsonRpc().StructureTreeEditor.isSameLevel(copyNode.propertyId, node.propertyId)));
-                setActionDisabled(menu.getTreeNode(), "pasteBelowAfterCut", copyNode==null || copyMode || (node.nodeDocType!="Assignment" && node.nodeDocType!="Group") ||
+                setActionDisabled(menu.getTreeNode(), "pasteBelowAfterCut", lackRole || copyNode==null || copyMode || (node.nodeDocType!="Assignment" && node.nodeDocType!="Group") ||
                                 (cutMode && !getJsonRpc().StructureTreeEditor.isSameLevel(copyNode.propertyId, node.propertyId)));
-                setActionDisabled(menu.getTreeNode(), "pasteAbove", copyNode==null || cutMode || (copyMode && (node.nodeDocType!="Assignment" && node.nodeDocType!="Group") ||
+                setActionDisabled(menu.getTreeNode(), "pasteAbove", lackRole || copyNode==null || cutMode || (copyMode && (node.nodeDocType!="Assignment" && node.nodeDocType!="Group") ||
                                 getJsonRpc().StructureTreeEditor.isSameLevel(copyNode.propertyId, node.propertyId)));
-                setActionDisabled(menu.getTreeNode(), "pasteAboveAfterCut", copyNode==null || copyMode || (node.nodeDocType!="Assignment" && node.nodeDocType!="Group") ||
+                setActionDisabled(menu.getTreeNode(), "pasteAboveAfterCut", lackRole || copyNode==null || copyMode || (node.nodeDocType!="Assignment" && node.nodeDocType!="Group") ||
                                 (cutMode && !getJsonRpc().StructureTreeEditor.isSameLevel(copyNode.propertyId, node.propertyId)));
-                setActionDisabled(menu.getTreeNode(), "pasteInto", copyNode==null || cutMode || (!isType(node.nodeDocType) && node.nodeDocType!="Group") ||
+                setActionDisabled(menu.getTreeNode(), "pasteInto", lackRole || copyNode==null || cutMode || (!isType(node.nodeDocType) && node.nodeDocType!="Group") ||
                                 getJsonRpc().StructureTreeEditor.isChild(copyNode.propertyId, node.propertyId, node.nodeDocType));
-                setActionDisabled(menu.getTreeNode(), "pasteBelowAs", copyNode==null || cutMode ||(node.nodeDocType!="Assignment" && node.nodeDocType!="Group"));
-                setActionDisabled(menu.getTreeNode(), "pasteAboveAs", copyNode==null || cutMode ||(node.nodeDocType!="Assignment" && node.nodeDocType!="Group"));
-                setActionDisabled(menu.getTreeNode(), "pasteIntoAs", copyNode==null || cutMode || (!isType(node.nodeDocType) && node.nodeDocType!="Group"));
-                setActionDisabled(menu.getTreeNode(), "pasteSubMenu", copyNode==null || cutMode);
+                setActionDisabled(menu.getTreeNode(), "pasteBelowAs", lackRole || copyNode==null || cutMode ||(node.nodeDocType!="Assignment" && node.nodeDocType!="Group"));
+                setActionDisabled(menu.getTreeNode(), "pasteAboveAs", lackRole || copyNode==null || cutMode ||(node.nodeDocType!="Assignment" && node.nodeDocType!="Group"));
+                setActionDisabled(menu.getTreeNode(), "pasteIntoAs", lackRole || copyNode==null || cutMode || (!isType(node.nodeDocType) && node.nodeDocType!="Group"));
+                setActionDisabled(menu.getTreeNode(), "pasteSubMenu", lackRole || copyNode==null || cutMode);
                 menu.show_();
             }
 
@@ -548,7 +550,7 @@
         <div class="menu">
             <fx:menu name="mainMenu">
 
-                <fx:menuItem labelKey="StructureTree.menu.createType" icon="windowNew" clickHandler="function(menuItem) { createType(menuItem); }"/>
+                <fx:menuItem rendered="#{fxSystemBean.isInRole['StructureManagement']}" labelKey="StructureTree.menu.createType" icon="windowNew" clickHandler="function(menuItem) { createType(menuItem); }"/>
               <!-- not part of RC1  
                 <fx:menuItem labelKey="StructureTree.menu.createTypeRelation" icon="fxTypeRelation" clickHandler="function(menuItem) { createTypeRelation(menuItem); }"/>
                 -->

@@ -41,6 +41,7 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.security.Role;
 import com.flexive.shared.structure.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -140,8 +141,8 @@ public class StructureTreeWriter implements Serializable {
      * @param ACLId          the Id of the ACL
      */
     private void setPermissions(Map<String, Object> nodeProperties, long ACLId) {
-        nodeProperties.put("mayEdit", String.valueOf(ticket.mayEditACL(ACLId)));
-        nodeProperties.put("mayDelete", String.valueOf(ticket.mayDeleteACL(ACLId)));
+        nodeProperties.put("mayEdit", ticket.isInRole(Role.StructureManagement));
+        nodeProperties.put("mayDelete", ticket.isInRole(Role.StructureManagement));
     }
 
     /**

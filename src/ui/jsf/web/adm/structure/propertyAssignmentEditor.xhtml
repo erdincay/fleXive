@@ -29,11 +29,20 @@
                     treeframe.doTreeAction('#{structureTreeControllerBean.action}',#{structureTreeControllerBean.id}, '#{structureTreeControllerBean.value}');
                 </script>
             </h:panelGroup>
-            <adm:tab label="#{fxMessageBean['PropertyEditor.tab.propertyAssignment']}" active="true" id="tab1"/>
-            <adm:tab label="#{fxMessageBean['PropertyEditor.tab.property']}" active="false" id="tab2"
-            	bean="#{propertyEditorBean}" action="showPropertyEditor"/>
-            <adm:tab label="#{fxMessageBean['PropertyEditor.tab.option']}" active="false" id="tab3"
-            	bean="#{propertyEditorBean}" action="showPropertyOptionEditor"/>
+            <ui:fragment rendered="#{propertyEditorBean.editMode}">
+                <adm:tab label="#{fxMessageBean['PropertyEditor.tab.propertyAssignment']}" active="true" id="tab1"/>
+                <adm:tab label="#{fxMessageBean['PropertyEditor.tab.property']}" active="false" id="tab2"
+                         bean="#{propertyEditorBean}" action="showPropertyEditor"/>
+                <adm:tab label="#{fxMessageBean['PropertyEditor.tab.option']}" active="false" id="tab3"
+                         bean="#{propertyEditorBean}" action="showPropertyOptionEditor"/>
+            </ui:fragment>
+            <ui:fragment rendered="#{not propertyEditorBean.editMode}">
+                <adm:tab label="#{fxMessageBean['PropertyEditor.tab.propertyAssignment.readonly']}" active="true" id="tab1ro"/>
+                <adm:tab label="#{fxMessageBean['PropertyEditor.tab.property.readonly']}" active="false" id="tab2ro"
+                         bean="#{propertyEditorBean}" action="showPropertyEditor"/>
+                <adm:tab label="#{fxMessageBean['PropertyEditor.tab.option.readonly']}" active="false" id="tab3ro"
+                         bean="#{propertyEditorBean}" action="showPropertyOptionEditor"/>
+            </ui:fragment>
 
             <fx:formRow labelKey="PropertyEditor.label.xPath" id="xPath">
                     <h:outputText id="xPath" value="#{propertyEditorBean.assignment.XPath}"/>

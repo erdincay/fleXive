@@ -40,6 +40,7 @@ import com.flexive.core.structure.FxPreloadType;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPermissionUtils;
@@ -47,6 +48,7 @@ import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.security.Role;
 import com.flexive.shared.structure.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -120,6 +122,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
      */
     private long create(FxTypeEdit type) throws FxApplicationException {
         final UserTicket ticket = FxContext.get().getTicket();
+        FxSharedUtils.checkRole(ticket, Role.StructureManagement);
         final FxEnvironment environment = CacheAdmin.getEnvironment();
         if (StringUtils.isEmpty(type.getName()))
             throw new FxInvalidParameterException("NAME", "ex.structure.create.nameMissing");
@@ -301,6 +304,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             return type.getId();
 
         final UserTicket ticket = FxContext.get().getTicket();
+        FxSharedUtils.checkRole(ticket, Role.StructureManagement);
         final FxEnvironment environment = CacheAdmin.getEnvironment();
 
         if (StringUtils.isEmpty(type.getName()))
@@ -650,12 +654,10 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void remove(long id) throws FxApplicationException {
         final UserTicket ticket = FxContext.get().getTicket();
+        FxSharedUtils.checkRole(ticket, Role.StructureManagement);
+
         FxType type = CacheAdmin.getEnvironment().getType(id);
         
-        if (!ticket.mayDeleteACL(type.getACL().getId()))
-            throw new FxNoAccessException("ex.acl.noAccess.delete", type.getACL().getName());
-
-
         Connection con = null;
         PreparedStatement ps = null;
         StringBuilder sql = new StringBuilder(500);

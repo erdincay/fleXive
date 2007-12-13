@@ -76,8 +76,7 @@ public interface StepDefinitionEngine {
 	 * @throws FxInvalidParameterException if the uniqueTarget id is invalid
 	 * @throws FxUpdateException           if the function failed to modify the step definition
 	 */
-	void update(StepDefinition stepDefinition)
-	throws FxApplicationException;
+	void update(StepDefinition stepDefinition) throws FxApplicationException;
 
 	/**
 	 * Removes a step definition.

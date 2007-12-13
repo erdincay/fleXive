@@ -30,7 +30,12 @@
             </c:if>
             <c:if test="#{empty typeEditorBean.parseRequestParameters}"> </c:if>
 
-            <adm:tab label="#{fxMessageBean['TypeEditor.tab.typeEditor']}" active="true" id="tab1"/>
+            <ui:fragment rendered="#{typeEditorBean.editMode}">
+                <adm:tab label="#{fxMessageBean['TypeEditor.tab.typeEditor']}" active="true" id="tab1"/>
+            </ui:fragment>
+            <ui:fragment rendered="#{not typeEditorBean.editMode}">
+                <adm:tab label="#{fxMessageBean['TypeEditor.tab.typeEditor.readonly']}" active="true" id="tab1ro"/>
+            </ui:fragment>
             <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor']} [#{typeEditorBean.eventScriptCount}]" active="false" id="tab2"
                     bean="#{typeEditorBean}" action="showTypeScriptEditor"/>
 
@@ -300,7 +305,7 @@
                     <h:selectBooleanCheckbox id="checkValidity" value="#{typeEditorBean.checkValidity}"
                             disabled="#{not typeEditorBean.editMode}"/>
             </fx:formRow>
-            <ui:fragment rendered="#{not typeEditorBean.type.new and not typeEditorBean.editMode and typeEditorBean.mayEdit}">
+            <ui:fragment rendered="#{(not typeEditorBean.type.new) and (not typeEditorBean.editMode) and typeEditorBean.mayEdit}">
                 <adm:commandButton labelKey="TypeEditor.button.editMode" location="both"
                         icon="edit"  action="toggleEditMode"  bean="#{typeEditorBean}" id="editModeButton"/>
             </ui:fragment>

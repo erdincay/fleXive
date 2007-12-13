@@ -40,6 +40,7 @@ import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.RouteEngine;
 import com.flexive.shared.interfaces.RouteEngineLocal;
@@ -47,6 +48,7 @@ import com.flexive.shared.interfaces.SequencerEngine.System;
 import com.flexive.shared.interfaces.SequencerEngineLocal;
 import com.flexive.shared.interfaces.UserGroupEngineLocal;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.security.Role;
 import com.flexive.shared.workflow.Route;
 import com.flexive.shared.workflow.Step;
 import org.apache.commons.logging.Log;
@@ -165,7 +167,7 @@ public class RouteEngineBean implements RouteEngine, RouteEngineLocal {
     /** {@inheritDoc} */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long create(long fromStepId, long toStepId, long groupId) throws FxApplicationException {
-
+        FxSharedUtils.checkRole(FxContext.get().getTicket(), Role.WorkflowManagement);
         // Sanity checks.
         // StepImp.loadStep(..) throws a FxNotFoundException if the steps do not exist.
         Step fromStep;
@@ -262,6 +264,7 @@ public class RouteEngineBean implements RouteEngine, RouteEngineLocal {
     /** {@inheritDoc} */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void remove(long routeId) throws FxApplicationException {
+        FxSharedUtils.checkRole(FxContext.get().getTicket(), Role.WorkflowManagement);
         deleteRoute(routeId);
     }
 

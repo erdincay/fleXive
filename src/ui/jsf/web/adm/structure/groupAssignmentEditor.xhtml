@@ -29,11 +29,20 @@
                     treeframe.doTreeAction('#{structureTreeControllerBean.action}',#{structureTreeControllerBean.id}, '#{structureTreeControllerBean.value}');
                 </script>
             </c:if>
-            <adm:tab label="#{fxMessageBean['GroupEditor.tab.groupAssignment']}" active="true" id="tab1"/>
-            <adm:tab label="#{fxMessageBean['GroupEditor.tab.group']}" active="false" id="tab2"
-            	bean="#{groupEditorBean}" action="showGroupEditor"/>
-            <adm:tab label="#{fxMessageBean['GroupEditor.tab.option']}" active="false" id="tab3"
-            	bean="#{groupEditorBean}" action="showGroupOptionEditor"/>
+            <ui:fragment rendered="#{groupEditorBean.editMode}">
+                <adm:tab label="#{fxMessageBean['GroupEditor.tab.groupAssignment']}" active="true" id="tab1"/>
+                <adm:tab label="#{fxMessageBean['GroupEditor.tab.group']}" active="false" id="tab2"
+                         bean="#{groupEditorBean}" action="showGroupEditor"/>
+                <adm:tab label="#{fxMessageBean['GroupEditor.tab.option']}" active="false" id="tab3"
+                         bean="#{groupEditorBean}" action="showGroupOptionEditor"/>
+            </ui:fragment>
+            <ui:fragment rendered="#{not groupEditorBean.editMode}">
+                <adm:tab label="#{fxMessageBean['GroupEditor.tab.groupAssignment.readonly']}" active="true" id="tab1ro"/>
+                <adm:tab label="#{fxMessageBean['GroupEditor.tab.group.readonly']}" active="false" id="tab2ro"
+                         bean="#{groupEditorBean}" action="showGroupEditor"/>
+                <adm:tab label="#{fxMessageBean['GroupEditor.tab.option.readonly']}" active="false" id="tab3ro"
+                         bean="#{groupEditorBean}" action="showGroupOptionEditor"/>
+            </ui:fragment>
 
             <fx:formRow labelKey="GroupEditor.label.xPath" id="xPath">
                     <h:outputText id="xPath" value="#{groupEditorBean.assignment.XPath}"/>
@@ -103,7 +112,7 @@
                 </ui:fragment>
             </fx:fieldSet>
 
-            <ui:fragment rendered="#{not groupEditorBean.editMode}">
+            <ui:fragment rendered="#{not groupEditorBean.editMode and fxSystemBean.isInRole['StructureManagement']}}">
                <adm:commandButton labelKey="GroupEditor.button.editMode" location="both"
                         icon="edit"  action="toggleEditMode"  bean="#{groupEditorBean}" id="editModeButton"/>
             </ui:fragment>

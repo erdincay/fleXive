@@ -30,11 +30,21 @@
             </script>
         </c:if>
         <c:if test="#{not propertyEditorBean.property.new}">
-            <adm:tab label="#{fxMessageBean['PropertyEditor.tab.propertyAssignment']}" active="false" id="tab1"
-                     bean="#{propertyEditorBean}" action="showPropertyAssignmentEditor"/>
-            <adm:tab label="#{fxMessageBean['PropertyEditor.tab.property']}" active="true" id="tab2"/>
-            <adm:tab label="#{fxMessageBean['PropertyEditor.tab.option']}" active="false" id="tab3"
-            	bean="#{propertyEditorBean}" action="showPropertyOptionEditor"/>
+            <ui:fragment rendered="#{propertyEditorBean.editMode}">
+                <adm:tab label="#{fxMessageBean['PropertyEditor.tab.propertyAssignment']}" active="false" id="tab1"/>
+                <adm:tab label="#{fxMessageBean['PropertyEditor.tab.property']}" active="true" id="tab2"
+                         bean="#{propertyEditorBean}" action="showPropertyEditor"/>
+                <adm:tab label="#{fxMessageBean['PropertyEditor.tab.option']}" active="false" id="tab3"
+                         bean="#{propertyEditorBean}" action="showPropertyOptionEditor"/>
+            </ui:fragment>
+            <ui:fragment rendered="#{not propertyEditorBean.editMode}">
+                <adm:tab label="#{fxMessageBean['PropertyEditor.tab.propertyAssignment.readonly']}" active="false"
+                         id="tab1ro"/>
+                <adm:tab label="#{fxMessageBean['PropertyEditor.tab.property.readonly']}" active="true" id="tab2ro"
+                         bean="#{propertyEditorBean}" action="showPropertyEditor"/>
+                <adm:tab label="#{fxMessageBean['PropertyEditor.tab.option.readonly']}" active="false" id="tab3ro"
+                         bean="#{propertyEditorBean}" action="showPropertyOptionEditor"/>
+            </ui:fragment>
         </c:if>
         <c:if test="#{propertyEditorBean.property.new}">
             <adm:tab label="#{fxMessageBean['PropertyEditor.tab.createProperty']}" active="true" id="tab1"/>

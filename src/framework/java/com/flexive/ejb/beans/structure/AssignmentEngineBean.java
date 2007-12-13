@@ -38,13 +38,11 @@ import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.structure.StructureLoader;
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.FxContext;
-import com.flexive.shared.FxLanguage;
-import com.flexive.shared.XPathElement;
+import com.flexive.shared.*;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
+import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
@@ -104,6 +102,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long createProperty(long typeId, FxPropertyEdit property, String parentXPath, String assignmentAlias) throws FxApplicationException {
+        FxSharedUtils.checkRole(FxContext.get().getTicket(), Role.StructureManagement);
         Connection con = null;
         PreparedStatement ps = null;
         StringBuilder sql = new StringBuilder(2000);
@@ -563,6 +562,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long createGroup(long typeId, FxGroupEdit group, String parentXPath) throws FxApplicationException {
+        FxSharedUtils.checkRole(FxContext.get().getTicket(), Role.StructureManagement);
         Connection con = null;
         PreparedStatement ps = null;
         StringBuilder sql = new StringBuilder(2000);
@@ -678,6 +678,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long save(FxAssignment assignment, boolean createSubAssignments) throws FxApplicationException {
+        FxSharedUtils.checkRole(FxContext.get().getTicket(), Role.StructureManagement);
         long returnId;
         boolean reload = false;
         if (assignment instanceof FxPropertyAssignmentEdit) {
@@ -1816,6 +1817,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
 
     private void removeAssignment(long assignmentId, boolean removeSubAssignments, boolean removeDerivedAssignments,
                                   boolean disableAssignment) throws FxApplicationException {
+        final UserTicket ticket = FxContext.get().getTicket();
+        FxSharedUtils.checkRole(ticket, Role.StructureManagement);
         FxAssignment assignment;
         assignment = CacheAdmin.getEnvironment().getAssignment(assignmentId);
         assert assignment != null : "Assignment retrieved was null";
@@ -1824,7 +1827,6 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             if (assignment.isDerivedAssignment())
                 throw new FxRemoveException("ex.structure.assignment.delete.derived", assignment.getXPath());
         }
-        final UserTicket ticket = FxContext.get().getTicket();
 
         Connection con = null;
         PreparedStatement ps = null;
@@ -2132,6 +2134,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long save(FxPropertyEdit property) throws FxApplicationException {
+        FxSharedUtils.checkRole(FxContext.get().getTicket(), Role.StructureManagement);
         long returnId = property.getId();
         boolean reload;
         Connection con = null;
@@ -2160,6 +2163,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long save(FxGroupEdit group) throws FxApplicationException {
+        FxSharedUtils.checkRole(FxContext.get().getTicket(), Role.StructureManagement);
         long returnId = group.getId();
         boolean reload;
         Connection con = null;
