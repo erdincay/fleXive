@@ -37,6 +37,7 @@ import com.flexive.shared.configuration.Parameter;
 import com.flexive.shared.exceptions.*;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -137,6 +138,16 @@ public abstract interface GenericConfigurationEngine {
 	 * @throws FxLoadException	when an error occured reading the keys
 	 */
 	<T extends Serializable> Map<String, T> getAll(Parameter<T> parameter) throws FxApplicationException;
+
+    /**
+     * Retrieves all keys stored under the path of the given parameter.
+     *
+     * @param <T>		value type of the parameter
+     * @param parameter parameter containing the path
+     * @return  all keys stored under the path of the given parameter.
+     * @throws FxApplicationException   TODO
+     */
+    <T extends Serializable> Collection<String> getKeys(Parameter<T> parameter) throws FxApplicationException;
     
     /**
      * Removes a parameter from the database.

@@ -35,6 +35,7 @@ package com.flexive.faces.beans;
 
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.messages.FxFacesMsgErr;
+import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -84,6 +85,8 @@ public class QueryEditorBean implements Serializable {
     private int removeNodeId = -1;
     private String nodeSelection = null;
 
+    private boolean saveQuery;
+
     private SqlQueryBuilder queryBuilder;
     private ResultLocation location = AdminResultLocations.ADMIN;
     private String filterTypeName;
@@ -105,11 +108,18 @@ public class QueryEditorBean implements Serializable {
             }
             if ("nodeSearch".equals(action)) {
                 // create a new query with the node set as "nodeId"
-                rootNode = new QueryRootNode(QueryRootNode.Type.CONTENTSEARCH, location);
+                setRootNode(new QueryRootNode(QueryRootNode.Type.CONTENTSEARCH, location));
                 addAssignmentId = FxJsfUtils.getLongParameter("nodeId", FxTreeNode.ROOT_NODE);
                 addNodeLive = FxJsfUtils.getBooleanParameter("liveMode", false);
                 addTreeNode(null);
+            } else if ("new".equals(action)) {
+                // create a new search query
+                getRootNode().getChildren().clear();
+            } else if ("load".equals(action)) {
+                setRootNode(EJBLookup.getSearchEngine().load(AdminResultLocations.ADMIN,
+                        FxJsfUtils.getParameter("name")));
             }
+            FxJsfUtils.resetFaceletsComponent(RESET_COMPONENT_ID);
         } catch (Exception e) {
             LOG.error("Failed to parse request parameters: " + e.getMessage(), e);
         }
@@ -155,6 +165,19 @@ public class QueryEditorBean implements Serializable {
         } catch (Exception e) {
             new FxFacesMsgErr("QueryEditor.err.buildQuery", e).addToContext();
             return show();
+        }
+        if (saveQuery) {
+            if (StringUtils.isBlank(rootNode.getName())) {
+                new FxFacesMsgErr("QueryEditor.err.saveQuery.empty").addToContext("queryName");
+                return null;
+            }
+            try {
+                getRootNode().setName(rootNode.getName());
+                EJBLookup.getSearchEngine().save(getRootNode());
+                new FxFacesMsgInfo("QueryEditor.nfo.saveQuery", rootNode.getName()).addToContext();
+            } catch (FxApplicationException e) {
+                new FxFacesMsgErr(e).addToContext();
+            }
         }
         resultBean.setQueryBuilder(builder);
         resultBean.setStartRow(0);
@@ -304,6 +327,7 @@ public class QueryEditorBean implements Serializable {
 
     public void setRootNode(QueryRootNode rootNode) {
         this.rootNode = rootNode;
+        updateQueryStore();
     }
 
     public int getAddAssignmentNodeId() {
@@ -370,6 +394,14 @@ public class QueryEditorBean implements Serializable {
 
     public void setAddNodeLive(boolean addNodeLive) {
         this.addNodeLive = addNodeLive;
+    }
+
+    public boolean isSaveQuery() {
+        return saveQuery;
+    }
+
+    public void setSaveQuery(boolean saveQuery) {
+        this.saveQuery = saveQuery;
     }
 
     /**

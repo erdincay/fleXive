@@ -59,6 +59,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.Collection;
 
 @javax.ejb.TransactionManagement(javax.ejb.TransactionManagementType.CONTAINER)
 @Stateless(name = "SearchEngine")
@@ -117,14 +118,14 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
         Statement stmt = null;
         try {
             con = Database.getDbConnection();
-            String contentFilter = live?" where ISLIVE_VER=true ":"";
+            String contentFilter = live ? " where ISLIVE_VER=true " : "";
             String sSql = "select max(modified_at) from\n" +
                     "(select\n" +
-                    "(select max(modified_at) from fx_content" + contentFilter+ ") modified_at\n" +
-                    (live?"\nunion\n(select max(modified_at) from " + DatabaseConst.TBL_TREE + "L)\n":"")+
-                    "\nunion\n(select max(modified_at) from " + DatabaseConst.TBL_TREE + ")\n"+
+                    "(select max(modified_at) from fx_content" + contentFilter + ") modified_at\n" +
+                    (live ? "\nunion\n(select max(modified_at) from " + DatabaseConst.TBL_TREE + "L)\n" : "") +
+                    "\nunion\n(select max(modified_at) from " + DatabaseConst.TBL_TREE + ")\n" +
                     ") changes";
-            stmt =  con.createStatement();
+            stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(sSql);
             rs.next();
             Timestamp ts = rs.getTimestamp(1);
@@ -138,12 +139,16 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     }
 
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public QueryRootNode load(ResultLocation location, String name) throws FxApplicationException {
         return configuration.get(getConfigurationParameter(location), name);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public QueryRootNode loadDefault(ResultLocation location) throws FxApplicationException {
         try {
             return load(location, DEFAULT_QUERY_NAME);
@@ -155,17 +160,30 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
+    public Collection<String> loadNames(ResultLocation location) throws FxApplicationException {
+        return configuration.getKeys(getConfigurationParameter(location));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void save(QueryRootNode query) throws FxApplicationException {
         save(configuration, query, query.getName());
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void saveDefault(QueryRootNode query) throws FxApplicationException {
         save(configuration, query, DEFAULT_QUERY_NAME);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void saveSystemDefault(QueryRootNode query) throws FxApplicationException {
         if (!FxContext.get().getTicket().isGlobalSupervisor()) {
             throw new FxNoAccessException(LOG, "ex.searchQuery.systemDefault.noAccess");
@@ -173,7 +191,9 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
         save(EJBLookup.getDivisionConfigurationEngine(), query, DEFAULT_QUERY_NAME);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void remove(ResultLocation location, String name) throws FxApplicationException {
         configuration.remove(getConfigurationParameter(location), name);
     }
@@ -189,8 +209,8 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * Return the appropriate string parameter for the given query type.
      *
-     * @param location  the result location
-     * @return  the appropriate string parameter for the given query type.
+     * @param location the result location
+     * @return the appropriate string parameter for the given query type.
      */
     private ObjectParameter<QueryRootNode> getConfigurationParameter(ResultLocation location) {
         final Parameter<QueryRootNode> parameter = SystemParameters.USER_QUERIES_CONTENT;

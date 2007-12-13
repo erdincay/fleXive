@@ -41,6 +41,7 @@ import com.flexive.shared.search.ResultViewType;
 import com.flexive.shared.search.query.QueryRootNode;
 
 import javax.ejb.Remote;
+import java.util.Collection;
 
 @Remote
 public interface SearchEngine {
@@ -131,6 +132,17 @@ public interface SearchEngine {
      * @throws FxApplicationException   if the default query could not be loaded
      */
     QueryRootNode loadDefault(ResultLocation location) throws FxApplicationException;
+
+    /**
+     * Returns the names of the stored queries for the calling user/location. The query names
+     * are also the keys for retrieving the actual search query via
+     * {@link #load(com.flexive.shared.search.ResultLocation, String)}.
+     *
+     * @param location  the query location, usually matched to the location of its result
+     * @return  all stored queries for the given location of the current user
+     * @throws FxApplicationException   if the query names could not be retrieved
+     */
+    Collection<String> loadNames(ResultLocation location) throws FxApplicationException;
 
     /**
      * Remove the query of the given name and type from the database.

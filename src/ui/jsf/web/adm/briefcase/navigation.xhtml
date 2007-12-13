@@ -13,7 +13,12 @@
 <ui:composition template="/adm/templates/navigation.xhtml">
     <ui:define name="head">
         <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/briefcasePanel.js"/>
+        <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/searchQueryPanel.js"/>
         <script type="text/javascript">
+
+            // search query methods
+
+            // briefcase methods
             var activeItem = null;
             function selectBriefcase(caller) {
                 if (activeItem!=null) {
@@ -124,22 +129,68 @@
                 return parent != null ? parent.getAttribute("briefcaseId") : -1;
             }
 
-            // ------------ initialize the briefcase panel ---------------------
+            // create a new search query
+            function createQuery() {
+                invokeContentAction("adm/search/query.jsf", "new");
+            }
+
+            // open an existing query
+            function openQuery(name) {
+                invokeContentAction("adm/search/query.jsf", "load", {"name": name});
+            }
+
+            // delete a query
+            function deleteQuery(menuItem) {
+                try {
+                    if (!confirm("#{fxMessageBean['SearchQueries.dialog.confirm.delete']}")) {
+                        return;
+                    }
+                    getJsonRpc().SearchQueryEditor.remove(getContextQueryName());
+                    queryPanel.reload();
+                } catch (e) {
+                    alert(e.message);
+                }
+            }
+
+            function getQueryContextMenu() {
+                return dojo.widget.byId("queryContextMenu");
+            }
+
+            function getContextQueryName() {
+                var parent = findParentWithAttribute(getQueryContextMenu().openEvent, "queryName");
+                return parent != null ? parent.getAttribute("queryName") : null;
+            }
+
+            // ------------ initialize the panels ---------------------
 
             var briefcasePanel;
+            var queryPanel;
             dojo.addOnLoad(function() {
                 briefcasePanel = new BriefcasePanel(document.getElementById("briefcaseContainer"), "showBriefcase");
                 briefcasePanel.reload();
+                queryPanel = new SearchQueryPanel(document.getElementById("queryContainer"), "openQuery");
+                queryPanel.reload();
             });
 
-            function reloadBriefcases() {
+            function reload() {
                 briefcasePanel.reload();
+                queryPanel.reload();
             }
 
         </script>
     </ui:define>
     <ui:define name="content">
         <adm:messages disableErrorRegistration="true"/>
+
+        <h5>#{fxMessageBean['SearchQueries.label.overview']}</h5>
+        <a href="javascript:createQuery()">#{fxMessageBean['SearchQueries.button.new']}</a>
+        <div id="queryContainer">
+
+        </div>
+
+        <br clear="all"/>
+        
+        <h5>#{fxMessageBean['Briefcase.label.briefcases']}</h5>
         <div id="briefcaseContainer">
 
         </div>
@@ -162,6 +213,11 @@
             <fx:menuItem id="createBriefcase" icon="createBriefcase" labelKey="Briefcase.menu.create" clickHandler="createBriefcase"/>
         </fx:menu>
 
+        <fx:menu name="queryContextMenu" contextMenuTarget="queryContainer">
+            <fx:menuItem id="open" icon="open" labelKey="SearchQueries.contextMenu.open" clickHandler="function() { openQuery(getContextQueryName()); }"/>
+            <fx:menuItem id="delete" icon="remove" labelKey="SearchQueries.contextMenu.delete" clickHandler="deleteQuery"/>
+        </fx:menu>
+
         <div style="display:none">
             <t:graphicImage url="/adm/images/briefcaseIcons/normal_shared.gif" id="normalShared"/>
             <t:graphicImage url="/adm/images/briefcaseIcons/normal.gif" id="normal"/>
@@ -173,6 +229,7 @@
     <ui:define name="mainMenu">
         <div class="menu">
         <fx:menu name="mainMenu">
+            <fx:menuItem id="createQuery" icon="query" labelKey="Briefcase.menu.createQuery" clickHandler="createQuery"/>
             <fx:menuItem id="createBriefcase" icon="createBriefcase" labelKey="Briefcase.menu.create" clickHandler="createBriefcase"/>
 
             <fx:menuSeparator/>
@@ -185,7 +242,7 @@
     </ui:define>
 
     <ui:define name="reloadButton">
-        <a href="javascript:briefcasePanel.reload()"><t:graphicImage url="/adm/images/layout/reload.png" alt="reload" style="position:absolute;right:15px;margin-top:2px;border:0;"/></a>
+        <a href="javascript:reload()"><t:graphicImage url="/adm/images/layout/reload.png" alt="reload" style="position:absolute;right:15px;margin-top:2px;border:0;"/></a>
     </ui:define>
 </ui:composition>
 

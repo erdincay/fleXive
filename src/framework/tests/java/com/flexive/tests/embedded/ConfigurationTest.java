@@ -50,10 +50,7 @@ import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.*;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Configuration test suite
@@ -272,11 +269,18 @@ public class ConfigurationTest {
                 Map<String, T> params = configuration.getAll(parameter);
                 assert 4 == params.entrySet().size() : "Should have retrieved four parameters.";
                 int ctr = 1;
-                for (String key : new String[]{"key1", "key2", "key3", "key4"}) {
+                final String[] keyValues = {"key1", "key2", "key3", "key4"};
+                for (String key : keyValues) {
                     if (params.get(key) != null) {
                         assert params.get(key).equals(ctr == 1 ? parameter.getDefaultValue() : value) : "Invalid parameter value";
                     }
                     ctr++;
+                }
+
+                final Collection<String> keys = configuration.getKeys(parameter);
+                assert 4 == keys.size() : "Should have retrieved for parameters.";
+                for (String key: keyValues) {
+                    assert keys.contains(key) : "Key " + key + " not found in result returned by getKeys.";
                 }
             } catch (FxNoAccessException e) {
                 if (mayUpdateConfig()) {

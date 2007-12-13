@@ -127,3 +127,7 @@ function getScrollHeight() {
             document.documentElement.scrollTop;
     return h ? h : 0;
 }
+
+function escapeQuotes(string) {
+    return string.replace("'", "\\'").replace('"', '\\"');
+}

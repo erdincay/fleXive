@@ -621,7 +621,7 @@ function findElementById(elementId) {
 
 // Reload the briefcase view, if available
 function reloadBriefcases() {
-    if (getNavFrameWnd().reloadBriefcases) {
-        getNavFrameWnd().reloadBriefcases();
+    if (getNavFrameWnd().briefcasePanel) {
+        getNavFrameWnd().reload();
     }
 }

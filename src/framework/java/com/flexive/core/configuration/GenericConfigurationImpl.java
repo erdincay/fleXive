@@ -50,6 +50,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -375,6 +376,13 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public final <T extends Serializable> Collection<String> getKeys(Parameter<T> parameter) throws FxApplicationException {
+        return getAll(parameter).keySet();
+    }
 
     /**
      * {@inheritDoc}

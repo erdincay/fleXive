@@ -72,6 +72,11 @@
                     bd.style.display = element.checked ? 'inline' : 'none';
                 }
 
+                function toggleSaveQuery(element) {
+                    var bd = document.getElementById("frm:saveQueryData");
+                    bd.style.display = element.checked ? 'inline' : 'none';
+                }
+
                 dojo.addOnLoad(function() {
                     // toggle search mode in content/structure frames
                     if (parent.getContentNavFrame().enableSearchMode) {
@@ -119,6 +124,18 @@
                     </h:selectOneListbox>
                 </fx:formRow>
 
+                <!-- Save query options -->
+                <fx:formRow labelKey="QueryEditor.label.query.save" id="saveQuery">
+                    <t:selectBooleanCheckbox id="saveQuery" value="#{fxQueryEditorBean.saveQuery}"
+                                             onchange="toggleSaveQuery(this)"/>
+                </fx:formRow>
+
+                <h:panelGroup id="saveQueryData" style="display:#{fxQueryEditorBean.saveQuery ? 'block' : 'none'}">
+                    <fx:formRow labelKey="QueryEditor.label.query.name">
+                        <h:inputText id="queryName" value="${fxQueryEditorBean.rootNode.name}"/>
+                    </fx:formRow>
+                </h:panelGroup>
+
                 <!-- Briefcase options -->
 
                 <fx:formRow labelKey="QueryEditor.label.briefcase.create" id="createBriefcase">
@@ -126,12 +143,12 @@
                                              onchange="toggleBriefcase(this)"/>
                 </fx:formRow>
 
-                <h:panelGroup id="briefcaseData" style="display:none">
+                <h:panelGroup id="briefcaseData" style="display:#{fxSearchResultBean.createBriefcase ? 'block' : 'none'}">
                     <fx:formRow labelKey="QueryEditor.label.briefcase.name" id="briefcaseName" >
-                        <t:inputText id="briefcaseName" value="#{fxSearchResultBean.briefcaseName}" styleClass="fxValueTextInput"/>
+                        <h:inputText id="briefcaseName" value="#{fxSearchResultBean.briefcaseName}" styleClass="fxValueTextInput"/>
                     </fx:formRow>
                     <fx:formRow labelKey="QueryEditor.label.briefcase.description" id="briefcaseDescription">
-                        <t:inputText id="briefcaseDescription" value="#{fxSearchResultBean.briefcaseDescription}" styleClass="fxValueTextInput"/>
+                        <h:inputText id="briefcaseDescription" value="#{fxSearchResultBean.briefcaseDescription}" styleClass="fxValueTextInput"/>
                     </fx:formRow>
                     <fx:formRow labelKey="QueryEditor.label.briefcase.shared" id="briefcaseACL">
                         <h:selectOneListbox id="briefcaseACL" value="#{fxSearchResultBean.briefcaseAclId}" size="1" styleClass="fxValueSelectInput">

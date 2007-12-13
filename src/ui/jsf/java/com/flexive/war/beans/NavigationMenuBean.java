@@ -51,8 +51,8 @@ public class NavigationMenuBean {
     static {
         addItem("Admin.tab.content", "adm/content.jsf", "adm/content/navigation.jsf", "contentNavigation", true);
         addItem("Admin.tab.structure", "adm/content.jsf", "adm/structure/navigation.jsf", "structureNavigation", true);
-        addItem("Admin.tab.admin", "adm/main/userGroup/overview.jsf", "adm/main/navigation.jsf", "mainNavigation", false);
         addItem("Admin.tab.briefcase", "adm/main/briefcase/bcOverview.jsf", "adm/briefcase/navigation.jsf", "briefcaseNavigation", true);
+        addItem("Admin.tab.admin", "adm/main/userGroup/overview.jsf", "adm/main/navigation.jsf", "mainNavigation", false);
         //addItem("menu4","content4.jsf","content/navigation.jsf","contentNavigation",false);
     }
 

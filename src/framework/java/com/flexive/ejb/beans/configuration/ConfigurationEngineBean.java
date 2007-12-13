@@ -156,6 +156,14 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public <T extends Serializable> Collection<String> getKeys(Parameter<T> parameter) throws FxApplicationException {
+        return getAll(parameter).keySet();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> void put(Parameter<T> parameter, String key, T value)
             throws FxApplicationException {
         try {
