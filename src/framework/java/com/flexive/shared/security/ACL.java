@@ -48,6 +48,11 @@ import java.io.Serializable;
 public class ACL extends AbstractSelectableObject implements Serializable, SelectableObjectWithLabel, ObjectWithColor {
     private static final long serialVersionUID = -8177665165523382984L;
 
+    /**
+     * Max. id for internal ACL's (needed for internal checks)
+     */
+    public final static long MAX_INTERNAL_ID = 7;
+
     private String color;
     private long id;
     private long mandatorId;

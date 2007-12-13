@@ -121,8 +121,8 @@ public interface ACLEngine {
     /**
      * Loads a ACLImpl definied by its unique id.
      * <p/>
-     * If ignoreSecurity is true the following permisison checks are performed:<br>
-     * The caller may only load ACLs belonging to his mandator, or ACLs that the caller is assigned to.<br>
+     * If ignoreSecurity is true the following permissison checks are performed:<br>
+     * The caller may only load ACLs belonging to his mandator.<br>
      * GROUP_GLOBAL_SUPERVISOR may load all ACLs.
      *
      * @param id     the unique id of the ACLImpl that should be loaded

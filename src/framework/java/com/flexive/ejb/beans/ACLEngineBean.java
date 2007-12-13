@@ -69,11 +69,14 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
     private static transient Log LOG = LogFactory.getLog(ACLEngineBean.class);
     @Resource
     javax.ejb.SessionContext ctx;
-    @EJB AccountEngineLocal account;
+    @EJB
+    AccountEngineLocal account;
     @EJB
     UserGroupEngineLocal group;
-    @EJB MandatorEngineLocal mandator;
-    @EJB SequencerEngineLocal seq;
+    @EJB
+    MandatorEngineLocal mandator;
+    @EJB
+    SequencerEngineLocal seq;
 
 
     public ACLEngineBean() {
@@ -88,9 +91,8 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
      */
     private String checkDescription(String description) throws FxInvalidParameterException {
         if (description == null) description = "";
-        if (description.length() > 255) {
+        if (description.length() > 255)
             throw new FxInvalidParameterException("DESCRIPTION", "ex.acl.propertyDescriptionTooLong");
-        }
         return description;
     }
 
@@ -102,12 +104,10 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
      * @throws FxInvalidParameterException if the name id invalid
      */
     private String checkName(String name) throws FxInvalidParameterException {
-        if (StringUtils.isEmpty(name)) {
+        if (StringUtils.isEmpty(name))
             throw new FxInvalidParameterException("NAME", "ex.acl.propertyNameMissing");
-        }
-        if (name.length() > 250) {
+        if (name.length() > 250)
             throw new FxInvalidParameterException("NAME", "ex.acl.propertyNameTooLong");
-        }
         return name;
     }
 
@@ -119,14 +119,15 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
      * @throws FxInvalidParameterException if the label id invalid
      */
     private FxString checkLabel(FxString label) throws FxInvalidParameterException {
-        if (label == null || label.isEmpty()) {
+        if (label == null || label.isEmpty())
             throw new FxInvalidParameterException("LABEL", "ex.acl.propertyLabelMissing");
-        }
         return label;
     }
 
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long create(String name, FxString label, long mandatorId, String color, String description, ACL.Category category)
             throws FxApplicationException {
@@ -134,7 +135,8 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
         final UserTicket ticket = FxContext.get().getTicket();
         final FxEnvironment environment = CacheAdmin.getEnvironment();
         // Security
-        FxSharedUtils.checkRole(ticket, Role.ACLManagement);
+        if (!ticket.isInRole(Role.MandatorSupervisor))
+            FxSharedUtils.checkRole(ticket, Role.ACLManagement);
         if (!ticket.isGlobalSupervisor()) {
             if (ticket.getMandatorId() != mandatorId) {
                 String mandatorName = environment.getMandator(mandatorId).getName();
@@ -149,11 +151,8 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
         description = checkDescription(description);
         name = checkName(name);
         label = checkLabel(label);
-        if (category == null) {
-            FxInvalidParameterException ie = new FxInvalidParameterException("CATEGORY", "ex.acl.categoryMissing");
-            if (LOG.isInfoEnabled()) LOG.info(ie, ie);
-            throw ie;
-        }
+        if (category == null)
+            throw new FxInvalidParameterException("CATEGORY", "ex.acl.categoryMissing");
 
         Connection con = null;
         PreparedStatement ps = null;
@@ -166,7 +165,6 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
 
             // Obtain a new id
             int newId = (int) seq.getId(SequencerEngine.System.ACL);
-
             sql = "INSERT INTO " + TBL_ACLS + "(" +
                     //       1      2     3          4              5       6        7         8              9
                     "ID,CAT_TYPE,COLOR,DESCRIPTION,MANDATOR,NAME,CREATED_BY,CREATED_AT,MODIFIED_BY,MODIFIED_AT)" +
@@ -207,40 +205,26 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void remove(long id)
             throws FxApplicationException {
-        ACL theACL;
         UserTicket ticket = FxContext.get().getTicket();
-        try {
-            theACL = load(id);
-        } catch (FxLoadException exc) {
-            FxRemoveException ue = new FxRemoveException(exc.getMessage());
-            LOG.error(ue, exc);
-            throw ue;
-        }
+        ACL theACL = load(id);
 
         // Protected interal ACLs
-        // TODO: store with a database flag!
-        if (theACL.getId()<=7) {
-            FxNoAccessException na = new FxNoAccessException("ex.acl.deleteFailed.internalACL", theACL.getName());
-            if (LOG.isInfoEnabled()) LOG.info(na, na);
-            throw na;
-        }
+        if (theACL.getId() <= ACL.MAX_INTERNAL_ID)
+            throw new FxNoAccessException(LOG, "ex.acl.deleteFailed.internalACL", theACL.getName());
 
         // Security
         if (!ticket.isGlobalSupervisor()) {
-            if (!ticket.isInRole(Role.ACLManagement)) {
-                FxNoAccessException na = new FxNoAccessException("ex.acl.deleteFailed.noPermission", theACL.getName());
-                if (LOG.isInfoEnabled()) LOG.info(na, na);
-                throw na;
-            }
-            if (ticket.getMandatorId() != theACL.getMandatorId()) {
-                FxNoAccessException na = new FxNoAccessException("ex.acl.deleteFailed.foreignMandator", theACL.getName());
-                if (LOG.isInfoEnabled()) LOG.info(na, na);
-                throw na;
-            }
+            // Security
+            if (!ticket.isInRole(Role.MandatorSupervisor) && !ticket.isInRole(Role.ACLManagement))
+                throw new FxNoAccessException(LOG, "ex.acl.deleteFailed.noPermission", theACL.getName());
+            if (ticket.getMandatorId() != theACL.getMandatorId())
+                throw new FxNoAccessException(LOG, "ex.acl.deleteFailed.foreignMandator", theACL.getName());
         }
 
         Connection con = null;
@@ -248,7 +232,6 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
         String curSql;
 
         try {
-
             // Obtain a database connection
             con = Database.getDbConnection();
 
@@ -275,74 +258,55 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
         } catch (SQLException exc) {
             final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(exc);
             ctx.setRollbackOnly();
-            FxRemoveException de;
-            if (uniqueConstraintViolation) {
-                de = new FxRemoveException("ex.acl.aclAlreadyExists", theACL.getName());
-                LOG.info(de, de);
-            } else  if (Database.isForeignKeyViolation(exc)) {
-                de = new FxRemoveException("ex.acl.deleteFailed.aclIsInUse", theACL.getName());
-                LOG.info(de, de);
-            } else {
-                de = new FxRemoveException("ex.acl.deleteFailed", theACL.getName(), exc.getMessage());
-                LOG.error(de, de);
-            }
-            throw de;
-
+            if (uniqueConstraintViolation)
+                throw new FxRemoveException(LOG, "ex.acl.aclAlreadyExists", theACL.getName());
+            else if (Database.isForeignKeyViolation(exc))
+                throw new FxRemoveException(LOG, "ex.acl.deleteFailed.aclIsInUse", theACL.getName());
+            else
+                throw new FxRemoveException(LOG, "ex.acl.deleteFailed", theACL.getName(), exc.getMessage());
         } finally {
             Database.closeObjects(ACLEngineBean.class, con, stmt);
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void update(long id, String name, FxString label, String color, String description,
                        List<ACLAssignment> assignments)
             throws FxApplicationException {
-
         UserTicket ticket = FxContext.get().getTicket();
-        ACL theACL;
-
         // Load the current version of the ACL
-        try {
-            theACL = load(id);
-        } catch (FxLoadException exc) {
-            FxUpdateException ue = new FxUpdateException(exc.getMessage());
-            LOG.error(ue, ue);
-            throw ue;
-        }
+        ACL theACL = load(id);
 
         // Check the assignments array: Every group may only be contained once
-        if (assignments==null) {
+        if (assignments == null) {
             assignments = new ArrayList<ACLAssignment>(0);
-        } else if (assignments.size()>0) {
-            Hashtable<Long,Boolean> uniqueCheck = new Hashtable<Long,Boolean>(assignments.size());
-            for (ACLAssignment ass:assignments) {
+        } else if (assignments.size() > 0) {
+            Hashtable<Long, Boolean> uniqueCheck = new Hashtable<Long, Boolean>(assignments.size());
+            for (ACLAssignment ass : assignments) {
                 // Group defined more than once in the list?
-                if (uniqueCheck.put(ass.getGroupId(),Boolean.TRUE)!=null) {
+                if (uniqueCheck.put(ass.getGroupId(), Boolean.TRUE) != null) {
                     String groupName = "unknown";
                     try {
                         groupName = group.load(ass.getGroupId()).getName();
-                    } catch(Throwable t) {/*ignore*/}
-                    FxUpdateException ue = new FxUpdateException("ex.aclAssignment.update.groupDefinedMoreThanOnce",
-                            theACL.getName(),groupName);
-                    if (LOG.isInfoEnabled()) LOG.info(ue, ue);
-                    throw ue;
+                    } catch (Throwable t) {
+                        //ignore
+                    }
+                    throw new FxUpdateException("ex.aclAssignment.update.groupDefinedMoreThanOnce",
+                            theACL.getName(), groupName);
                 }
             }
         }
 
         // Security
         if (!ticket.isGlobalSupervisor()) {
-            if (!ticket.isInRole(Role.ACLManagement)) {
-                FxNoAccessException na = new FxNoAccessException("ex.acl.updateFailed.noPermission", theACL.getName());
-                if (LOG.isInfoEnabled()) LOG.info(na, na);
-                throw na;
-            }
-            if (ticket.getMandatorId() != theACL.getMandatorId()) {
-                FxNoAccessException na = new FxNoAccessException("ex.acl.updateFailed.foreignMandator", theACL.getName());
-                if (LOG.isInfoEnabled()) LOG.info(na, na);
-                throw na;
-            }
+            // Security
+            if (!ticket.isInRole(Role.MandatorSupervisor) && !ticket.isInRole(Role.ACLManagement))
+                throw new FxNoAccessException(LOG, "ex.acl.updateFailed.noPermission", theACL.getName());
+            if (ticket.getMandatorId() != theACL.getMandatorId())
+                throw new FxNoAccessException(LOG, "ex.acl.updateFailed.foreignMandator", theACL.getName());
         }
 
         // Parameter checks
@@ -362,7 +326,6 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
         String curSql;
 
         try {
-
             // Obtain a database connection
             con = Database.getDbConnection();
 
@@ -388,7 +351,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             stmt = con.prepareStatement(curSql);
             stmt.setLong(1, theACL.getId());
             stmt.executeUpdate();
-            if (assignments.size()>0) {
+            if (assignments.size() > 0) {
                 stmt.close();
                 curSql = "INSERT INTO " + TBL_ASSIGN_ACLS + " (USERGROUP, ACL, PEDIT, PREMOVE, PEXPORT, PREL, PREAD, PCREATE, " +
                         "CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
@@ -422,35 +385,31 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
         } catch (SQLException exc) {
             final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(exc);
             ctx.setRollbackOnly();
-            if (uniqueConstraintViolation) {
-                FxEntryExistsException ee = new FxEntryExistsException("ex.acl.updateFailed.nameTaken",
+            if (uniqueConstraintViolation)
+                throw new FxEntryExistsException(LOG, "ex.acl.updateFailed.nameTaken",
                         theACL.getName(), name);
-                if (LOG.isInfoEnabled()) LOG.info(ee, exc);
-                throw ee;
-            } else {
-                FxUpdateException dbe = new FxUpdateException("ex.acl.updateFailed", theACL.getName(), exc.getMessage());
-                LOG.error(dbe, exc);
-                throw dbe;
-            }
+            else
+                throw new FxUpdateException(LOG, "ex.acl.updateFailed", theACL.getName(), exc.getMessage());
         } finally {
             Database.closeObjects(ACLEngineBean.class, con, stmt);
         }
 
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public ACL load(long id)
-            throws FxApplicationException {
+    public ACL load(long id) throws FxApplicationException {
         return load(id, false);
     }
 
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public ACL load(long id, boolean ignoreSecurity)
-            throws FxApplicationException {
-
+    public ACL load(long id, boolean ignoreSecurity) throws FxApplicationException {
         Connection con = null;
         Statement stmt = null;
         String curSql;
@@ -463,14 +422,11 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(curSql);
 
-            if (rs == null || !rs.next()) {
-                FxNotFoundException nf = new FxNotFoundException("ex.acl.load.notFound", id);
-                if (LOG.isInfoEnabled()) LOG.info(nf, nf);
-                throw nf;
-            }
+            if (rs == null || !rs.next())
+                throw new FxNotFoundException("ex.acl.load.notFound", id);
 
             // Read the ACL
-            int mandatorId = rs.getInt(1);
+            long mandatorId = rs.getLong(1);
             String name = rs.getString(2);
             int cat = rs.getInt(3);
             String desc = rs.getString(4);
@@ -483,81 +439,74 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             } catch (FxInvalidParameterException exc) {
                 throw new FxLoadException("ex.acl.propertyCategoryInvalid", cat);
             }
-
+            if (ignoreSecurity && mandatorId != FxContext.get().getTicket().getMandatorId())
+                throw new FxNoAccessException(LOG, "ex.acl.loadFailed.foreignMandator", theACL.getName());
             // Return the ACL
             return theACL;
-
         } catch (SQLException exc) {
-            FxLoadException dbe = new FxLoadException("ex.acl.load.sqlError", id, exc.getMessage());
-            LOG.error(dbe, dbe);
-            throw dbe;
+            throw new FxLoadException(LOG, "ex.acl.load.sqlError", id, exc.getMessage());
         } finally {
             Database.closeObjects(ACLEngineBean.class, con, stmt);
         }
-
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public ArrayList<ACL> loadAll(long mandatorId, boolean includeForeignAccessibleACLs)
             throws FxApplicationException {
         return loadAll(mandatorId, -1, includeForeignAccessibleACLs);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public ArrayList<ACL> loadAll(long mandatorId, int category, boolean includeForeignAccessibleACLs)
             throws FxApplicationException {
 
         final UserTicket ticket = FxContext.get().getTicket();
         final FxEnvironment environment = CacheAdmin.getEnvironment();
-        // Security
-        /*
-        if (!ticket.isGlobalSupervisor()) {
-          if (mandatorId != ticket.getMandatorId()) {
-            FxNoAccessException nae = new FxNoAccessException("You may not load the ACLs of a foreign mandator");
-            if (LOG.isInfoEnabled()) LOG.info(nae);
-            throw nae;
-          }
-        }
-        */
 
         Connection con = null;
         Statement stmt = null;
         String curSql;
         try {
 
+            //security
+            if (!ticket.isGlobalSupervisor() && mandatorId != ticket.getMandatorId())
+                throw new FxNoAccessException(LOG, "ex.acl.loadAllFailed.foreignMandator");
+
             // Obtain a database connection
             con = Database.getDbConnection();
 
-            ArrayList<ACL> result = new ArrayList<ACL>(250);
+            ArrayList<ACL> result = new ArrayList<ACL>(20);
 
-            String catFilter  = (category >= 0)?"CAT_TYPE=" + category:"";
-            String securityFilter = (ticket.isGlobalSupervisor() && mandatorId == -1)?"":
-                    "("+
-                            "MANDATOR=" + mandatorId+
-                            (includeForeignAccessibleACLs?
-                                    " OR perm.USERGROUP IN ("+ FxArrayUtils.toSeparatedList(ticket.getGroups(), ',') + ")":"")+
-                            ")";
-
-
+            String catFilter = (category >= 0) ? "CAT_TYPE=" + category : "";
+            String securityFilter = (ticket.isGlobalSupervisor() && mandatorId == -1)
+                    ? ""
+                    : "(MANDATOR=" + mandatorId +
+                    (includeForeignAccessibleACLs
+                            ? " OR perm.USERGROUP IN (" + FxArrayUtils.toSeparatedList(ticket.getGroups(), ',') + ")"
+                            : "") +
+                    ")";
             curSql = "SELECT DISTINCT ID,NAME,CAT_TYPE,DESCRIPTION,COLOR,MANDATOR FROM \n" +
                     TBL_ACLS + " acl LEFT JOIN " + TBL_ASSIGN_ACLS + " perm ON acl.ID=perm.ACL\n" +
-                    ((catFilter.length()>0 || securityFilter.length()>0)?"WHERE\n":"") +
-                    catFilter+
-                    ((catFilter.length()>0 && securityFilter.length()>0)?" AND ":"")+
+                    ((catFilter.length() > 0 || securityFilter.length() > 0) ? "WHERE\n" : "") +
+                    catFilter +
+                    ((catFilter.length() > 0 && securityFilter.length() > 0) ? " AND " : "") +
                     securityFilter;
-
 
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(curSql);
             while (rs != null && rs.next()) {
-                int id = rs.getInt(1);
+                long id = rs.getLong(1);
                 String name = rs.getString(2);
                 int cat = rs.getInt(3);
                 String desc = rs.getString(4);
                 String color = rs.getString(5);
-                int mandator = rs.getInt(6);
+                long mandator = rs.getLong(6);
                 FxString label = Database.loadFxString(con, TBL_ACLS, "LABEL", "ID=" + id);
                 try {
                     String sMandator = environment.getMandator(mandator).getName();
@@ -568,13 +517,11 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
                     LOG.error("ACL with invalid mandator=" + mandatorId + " in database (skipped)", exc);
                 }
             }
-
             // Build the result and return it
             result.trimToSize();
             return result;
-
         } catch (SQLException exc) {
-            FxLoadException dbe = new FxLoadException(exc,"ex.aclAssignment.loadFailedForMandator",mandatorId);
+            FxLoadException dbe = new FxLoadException(exc, "ex.aclAssignment.loadFailedForMandator", mandatorId);
             LOG.error(dbe, exc);
             throw dbe;
         } finally {
@@ -583,19 +530,20 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
     }
 
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void assign(long aclId, long groupId, boolean mayRead, boolean mayEdit,
-                       boolean mayRelate, boolean mayDelete, boolean mayExport, boolean mayCreate) throws
-            FxApplicationException {
-
+                       boolean mayRelate, boolean mayDelete, boolean mayExport, boolean mayCreate)
+            throws FxApplicationException {
         UserTicket ticket = FxContext.get().getTicket();
         // Delete rather than create?
         if (!mayRead && !mayRelate && !mayExport && !mayEdit && !mayDelete) {
             try {
                 unassign(aclId, groupId);
                 return;
-            } catch( FxNotFoundException e) {
+            } catch (FxNotFoundException e) {
                 //can happen if an ACL only has create set! -> ignore it then
             } catch (FxRemoveException exc) {
                 throw new FxCreateException(exc.getMessage(), exc);
@@ -603,18 +551,12 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
         }
 
         // Permission & exists check
-        try {
-            checkPermissions(ticket, groupId, aclId, true);
-        } catch (FxLoadException exc) {
-            throw new FxCreateException(exc.getMessage());
-        }
-
+        checkPermissions(ticket, groupId, aclId, true);
 
         Connection con = null;
         PreparedStatement stmt = null;
         String curSql;
         try {
-
             // Obtain a database connection
             con = Database.getDbConnection();
 
@@ -651,10 +593,9 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
 
             // Update active UserTickets
             UserTicketStore.flagDirtyHavingGroupId(groupId);
-
         } catch (Exception exc) {
             ctx.setRollbackOnly();
-            FxCreateException dbe = new FxCreateException(exc,"ex.aclAssignment.createFailed");
+            FxCreateException dbe = new FxCreateException(exc, "ex.aclAssignment.createFailed");
             LOG.error(dbe, exc);
             throw dbe;
         } finally {
@@ -663,7 +604,9 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
 
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void assign(long aclId, long groupId, ACL.Permission... permissions) throws FxApplicationException {
         boolean mayRead = false;
@@ -672,8 +615,8 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
         boolean mayDelete = false;
         boolean mayExport = false;
         boolean mayCreate = false;
-        for( ACL.Permission perm: permissions ) {
-            switch(perm) {
+        for (ACL.Permission perm : permissions) {
+            switch (perm) {
                 case CREATE:
                     mayCreate = true;
                     break;
@@ -697,30 +640,32 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
         assign(aclId, groupId, mayRead, mayEdit, mayRelate, mayDelete, mayExport, mayCreate);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public ArrayList<ACLAssignment> loadGroupAssignments(long groupId) throws FxApplicationException {
         return loadAssignments(null, groupId);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public ArrayList<ACLAssignment> loadAssignments(long aclId) throws FxApplicationException {
         return loadAssignments(aclId, null);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void unassign(long aclId, long groupId) throws FxApplicationException {
         Connection con = null;
         Statement stmt = null;
         String curSql;
         UserTicket ticket = FxContext.get().getTicket();
-        try {
-            checkPermissions(ticket, groupId, aclId, true);
-        } catch (FxLoadException exc) {
-            throw new FxRemoveException(exc.getMessage());
-        }
+        checkPermissions(ticket, groupId, aclId, true);
 
         try {
             // Obtain a database connection
@@ -730,18 +675,18 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             curSql = "DELETE FROM " + TBL_ASSIGN_ACLS + " WHERE USERGROUP=" + groupId + " AND ACL=" + aclId;
             stmt = con.createStatement();
             if (stmt.executeUpdate(curSql) == 0) {
-                FxNotFoundException nfe = new FxNotFoundException("ex.aclAssignment.notFound",aclId,groupId);
+                FxNotFoundException nfe = new FxNotFoundException("ex.aclAssignment.notFound", aclId, groupId);
                 if (LOG.isInfoEnabled()) LOG.info(nfe, nfe);
                 throw nfe;
             }
 
             // Update active UserTickets
             UserTicketStore.flagDirtyHavingGroupId(groupId);
-        } catch( FxNotFoundException e) {
+        } catch (FxNotFoundException e) {
             throw e;
         } catch (Exception exc) {
             ctx.setRollbackOnly();
-            FxRemoveException dbe = new FxRemoveException(exc,"ex.aclAssignment.unassigneFailed",aclId,groupId);
+            FxRemoveException dbe = new FxRemoveException(exc, "ex.aclAssignment.unassigneFailed", aclId, groupId);
             LOG.error(dbe, exc);
             throw dbe;
         } finally {
@@ -753,9 +698,9 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
     /**
      * Permission check helper function.
      *
-     * @param ticket the ticket to use
-     * @param groupId the group id
-     * @param aclId the acl id
+     * @param ticket    the ticket to use
+     * @param groupId   the group id
+     * @param aclId     the acl id
      * @param checkRole the role check option
      * @throws FxApplicationException if a error occured
      */
@@ -763,30 +708,27 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             throws FxApplicationException {
 
         // Security check (1)
-        if (checkRole ) FxSharedUtils.checkRole(ticket, Role.ACLManagement);
+        if (checkRole && !ticket.isInRole(Role.MandatorSupervisor))
+            FxSharedUtils.checkRole(ticket, Role.ACLManagement);
 
         if (groupId != null) {
             UserGroup grp = group.load(groupId);
-            if (!grp.mayAccessGroup(ticket)) {
-                FxNoAccessException na = new FxNoAccessException("ex.acl.noAccess.foreignMandator");
-                if (LOG.isInfoEnabled()) LOG.info(na, na);
-                throw na;
-            }
+            if (!grp.mayAccessGroup(ticket))
+                throw new FxNoAccessException(LOG, "ex.acl.noAccess.foreignMandator");
         }
 
         if (aclId != null) {
             ACL acl = load(aclId);
-            if (!ticket.isGlobalSupervisor() && acl.getMandatorId()!=ticket.getMandatorId()) {
+            if (!ticket.isGlobalSupervisor() && acl.getMandatorId() != ticket.getMandatorId()) {
                 // ACL belongs a foreign mandator
-                FxNoAccessException na = new FxNoAccessException("ex.acl.noAccess.read", aclId);
-                if (LOG.isInfoEnabled()) LOG.info(na, na);
-                throw na;
-
+                throw new FxNoAccessException(LOG, "ex.acl.noAccess.read", aclId);
             }
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public ArrayList<ACLAssignment> loadAssignments(Long aclId, Long groupId) throws FxApplicationException {
         Connection con = null;
@@ -796,9 +738,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
 
         // Permission & Exists check
         checkPermissions(ticket, groupId, aclId, false);
-
         try {
-
             // Obtain a database connection
             con = Database.getDbConnection();
 
@@ -818,29 +758,16 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
 
             // Read the data
             ArrayList<ACLAssignment> result = new ArrayList<ACLAssignment>(20);
-            while (rs != null && rs.next()) {
-                int iGroupId = rs.getInt(1);
-                int iAclId = rs.getInt(2);
-                boolean bRead = rs.getBoolean(3);
-                boolean bEdit = rs.getBoolean(4);
-                boolean bDelete = rs.getBoolean(5);
-                boolean bExport = rs.getBoolean(6);
-                boolean bRelate = rs.getBoolean(7);
-                boolean bCreate = rs.getBoolean(8);
-                byte category = rs.getByte(9);
-                ACLAssignment ai = new ACLAssignment(iAclId, iGroupId, bRead, bEdit, bRelate, bDelete, bExport,
-                        bCreate, ACL.Category.getById(category));
-                result.add(ai);
-            }
+            while (rs != null && rs.next())
+                result.add(new ACLAssignment(rs.getLong(2), rs.getLong(1),
+                        rs.getBoolean(3), rs.getBoolean(4), rs.getBoolean(5), rs.getBoolean(6), rs.getBoolean(7), rs.getBoolean(8),
+                        ACL.Category.getById(rs.getByte(9))));
 
             // Return the found entries
             result.trimToSize();
             return result;
-
         } catch (SQLException exc) {
-            FxLoadException dbe = new FxLoadException(exc,"ex.aclAssignment.loadFailed");
-            LOG.error(dbe, exc);
-            throw dbe;
+            throw new FxLoadException(LOG, exc, "ex.aclAssignment.loadFailed");
         } finally {
             Database.closeObjects(ACLEngineBean.class, con, stmt);
         }
