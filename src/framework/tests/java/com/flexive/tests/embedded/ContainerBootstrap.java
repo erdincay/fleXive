@@ -145,6 +145,7 @@ public class ContainerBootstrap {
     @AfterSuite
     public void shutdown() throws FxApplicationException {
         try {
+            ScriptingTest.allowTearDown = true;
             ScriptingTest.suiteShutDown();
             TestUsers.deleteUsers();
             System.out.println("=== shutting down EJB3 container ===");

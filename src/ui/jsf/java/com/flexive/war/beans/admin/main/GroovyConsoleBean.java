@@ -34,6 +34,8 @@
 package com.flexive.war.beans.admin.main;
 
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxContext;
+import com.flexive.shared.security.Role;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 import org.apache.commons.lang.StringUtils;
@@ -85,6 +87,8 @@ public class GroovyConsoleBean {
         try {
             if (!ejb) {
                 System.out.println("Running on war layer");
+                if( !FxContext.get().getTicket().isInRole(Role.ScriptExecution))
+                    return "No permission to execute scripts!";
                 GroovyShell shell = new GroovyShell();
                 Script script = shell.parse(code);
                 return script.run();

@@ -64,6 +64,7 @@ import java.util.List;
  */
 @Test(groups = {"ejb", "scripting"})
 public class ScriptingTest {
+    public static boolean allowTearDown = false;
 
     ScriptingEngine se;
     protected static FxScriptInfo loadScript = null;
@@ -77,11 +78,15 @@ public class ScriptingTest {
         removeScript = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.BeforeContentRemove, "beforeRemoveTest.gy", "Test script", codeRemove);
     }
 
-    public static void suiteShutDown() throws FxApplicationException {
+    public static void suiteShutDown() throws Exception {
+        if( !allowTearDown ) //"hack" to prevent this method to be run as normal test
+            return;
+        login(TestUsers.SUPERVISOR);
         if (loadScript != null)
             EJBLookup.getScriptingEngine().removeScript(loadScript.getId());
         if (removeScript != null)
             EJBLookup.getScriptingEngine().removeScript(removeScript.getId());
+        logout();
     }
 
     @BeforeClass

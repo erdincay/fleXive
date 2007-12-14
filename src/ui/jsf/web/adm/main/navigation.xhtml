@@ -77,7 +77,9 @@
                 <adm:treeNode id="scripts" icon="scripts" title="#{fxMessageBean['Admin.scripts.root']}">
                     <adm:treeNode title="#{fxMessageBean['Admin.scripts.overview']}" link="/adm/main/scripting/overview.jsf" />
                     <adm:treeNode title="#{fxMessageBean['Admin.scripts.create']}" link="/adm/main/scripting/create.jsf" />
-                    <adm:treeNode title="#{fxMessageBean['Admin.system.groovyConsole']}" link="/adm/main/scripting/groovyConsole.jsf"/>
+                    <c:if test="#{fxSystemBean.isInRole['ScriptExecution']}">
+                        <adm:treeNode title="#{fxMessageBean['Admin.system.groovyConsole']}" link="/adm/main/scripting/groovyConsole.jsf"/>
+                    </c:if>
                 </adm:treeNode>
             </c:if>
             <adm:treeNode id="system" icon="system" title="#{fxMessageBean['Admin.system.root']}">

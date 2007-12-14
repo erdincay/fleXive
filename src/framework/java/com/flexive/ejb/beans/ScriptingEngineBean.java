@@ -50,6 +50,7 @@ import com.flexive.shared.interfaces.ScriptingEngineLocal;
 import com.flexive.shared.interfaces.SequencerEngine;
 import com.flexive.shared.interfaces.SequencerEngineLocal;
 import com.flexive.shared.scripting.*;
+import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxAssignment;
 import com.flexive.shared.structure.FxType;
@@ -194,6 +195,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void updateScriptInfo(long scriptId, FxScriptEvent event, String name, String description, String code) throws FxApplicationException {
+        FxSharedUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
         Connection con = null;
         PreparedStatement ps = null;
         String sql;
@@ -266,6 +268,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxScriptInfo createScript(FxScriptEvent event, String name, String description, String code) throws FxApplicationException {
+        FxSharedUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
         FxScriptInfo si;
         Connection con = null;
         PreparedStatement ps = null;
@@ -306,6 +309,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxScriptInfo createScriptFromLibrary(FxScriptEvent event, String libraryname, String name, String description) throws FxApplicationException {
+        FxSharedUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         String code = FxSharedUtils.loadFromInputStream(cl.getResourceAsStream("fxresources/scripts/library/" + libraryname), -1);
         if (code == null || code.length() == 0)
@@ -318,6 +322,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxScriptInfo createScriptFromDropLibrary(String dropName, FxScriptEvent event, String libraryname, String name, String description) throws FxApplicationException {
+        FxSharedUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         String code = FxSharedUtils.loadFromInputStream(cl.getResourceAsStream(dropName + "Resources/scripts/library/" + libraryname), -1);
         if (code == null || code.length() == 0)
@@ -330,6 +335,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void removeScript(long scriptId) throws FxApplicationException {
+        FxSharedUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
         Connection con = null;
         PreparedStatement ps = null;
         String sql;
@@ -372,7 +378,10 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         FxScriptInfo si = CacheAdmin.getEnvironment().getScript(scriptId);
 
         if (!isGroovyScript(si.getName()))
-            return runScript(si.getName(), binding, si.getCode());
+            return internal_runScript(si.getName(), binding, si.getCode());
+
+        if (si.getEvent() == FxScriptEvent.Manual)
+            FxSharedUtils.checkRole(FxContext.get().getTicket(), Role.ScriptExecution);
 
         long timeStamp = CacheAdmin.getEnvironment().getTimeStamp();
         if (timeStamp != scriptCacheTimestamp) {
@@ -448,6 +457,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxScriptMappingEntry createAssignmentScriptMapping(long scriptId, long assignmentId, boolean active, boolean derivedUsage) throws FxApplicationException {
+        FxSharedUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
         FxScriptMappingEntry sm;
         Connection con = null;
         PreparedStatement ps = null;
@@ -497,6 +507,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxScriptMappingEntry createTypeScriptMapping(FxScriptEvent scriptEvent, long scriptId, long typeId, boolean active, boolean derivedUsage) throws FxApplicationException {
+        FxSharedUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
         FxScriptMappingEntry sm;
         Connection con = null;
         PreparedStatement ps = null;
@@ -556,6 +567,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void removeAssignmentScriptMapping(long scriptId, long assignmentId) throws FxApplicationException {
+        FxSharedUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
         Connection con = null;
         PreparedStatement ps = null;
         String sql;
@@ -586,6 +598,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void removeTypeScriptMapping(long scriptId, long typeId) throws FxApplicationException {
+        FxSharedUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
         Connection con = null;
         PreparedStatement ps = null;
         String sql;
@@ -616,6 +629,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void removeTypeScriptMappingForEvent(long scriptId, long typeId, long scriptEventId) throws FxApplicationException {
+        FxSharedUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
         Connection con = null;
         PreparedStatement ps = null;
         String sql;
@@ -647,6 +661,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxScriptMappingEntry updateAssignmentScriptMapping(long scriptId, long assignmentId, boolean active, boolean derivedUsage) throws FxApplicationException {
+        FxSharedUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
         FxScriptMappingEntry sm;
         Connection con = null;
         PreparedStatement ps = null;
@@ -695,6 +710,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxScriptMappingEntry updateTypeScriptMapping(long scriptId, long typeId, boolean active, boolean derivedUsage) throws FxApplicationException {
+        FxSharedUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
         FxScriptMappingEntry sm;
         Connection con = null;
         PreparedStatement ps = null;
@@ -794,7 +810,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                     LOG.info("running run-once-script [" + file[0] + "] ...");
                 }
                 try {
-                    runScript(file[0], binding, FxSharedUtils.loadFromInputStream(cl.getResourceAsStream(prefix + "/scripts/runonce/" + file[0]), -1));
+                    internal_runScript(file[0], binding, FxSharedUtils.loadFromInputStream(cl.getResourceAsStream(prefix + "/scripts/runonce/" + file[0]), -1));
                 } catch (Throwable e) {
                     LOG.error("Failed to run script " + file[0] + ": " + e.getMessage(), e);
                 }
@@ -872,7 +888,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                 }
                 LOG.info("running startup-script [" + file[0] + "] ...");
                 try {
-                    runScript(file[0], binding, FxSharedUtils.loadFromInputStream(cl.getResourceAsStream(prefix + "/scripts/startup/" + file[0]), -1));
+                    internal_runScript(file[0], binding, FxSharedUtils.loadFromInputStream(cl.getResourceAsStream(prefix + "/scripts/startup/" + file[0]), -1));
                 } catch (Throwable e) {
                     LOG.error("Failed to run script " + file[0] + ": " + e.getMessage(), e);
                 }
@@ -888,6 +904,23 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public FxScriptResult runScript(String name, FxScriptBinding binding, String code) throws FxApplicationException {
+        FxSharedUtils.checkRole(FxContext.get().getTicket(), Role.ScriptExecution);
+        return internal_runScript(name, binding, code);
+    }
+
+    /**
+     * Execute a script.
+     * This method does not check the calling user's role nor does it cache scripts.
+     * It should only be used to execute code from the groovy console or code that is not to be expected to
+     * be run more than once.
+     *
+     * @param name    name of the script, extension is needed to choose interpreter
+     * @param binding bindings to apply
+     * @param code    the script code
+     * @return last script evaluation result
+     * @throws FxApplicationException on errors
+     */
+    private FxScriptResult internal_runScript(String name, FxScriptBinding binding, String code) throws FxApplicationException {
         if (name == null)
             name = "unknown";
         if (binding != null) {
@@ -957,9 +990,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         return name.toLowerCase().endsWith(".gy") || name.toLowerCase().endsWith(".groovy");
     }
 
-
     public FxScriptMapping loadScriptMapping(Connection _con, long scriptId) throws FxLoadException, SQLException {
-
         FxScriptMapping mapping;
         PreparedStatement ps_a = null, ps_t = null;
         String sql;
