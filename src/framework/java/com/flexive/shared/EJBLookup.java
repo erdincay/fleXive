@@ -40,6 +40,8 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.naming.NameClassPair;
+import javax.naming.NamingEnumeration;
 import javax.transaction.TransactionManager;
 import java.util.Hashtable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,7 +56,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class EJBLookup {
     private static transient Log LOG = LogFactory.getLog(EJBLookup.class);
-    public static final String APPNAME = "flexive";
+    public static String APPNAME = "flexive";
 
     private enum STRATEGY {
         APP_SIMPLENAME_LOCAL,
@@ -358,7 +360,7 @@ public class EJBLookup {
                     environment = new Hashtable();
                 InitialContext ctx = new InitialContext(environment);
                 if (used_strategy == null) {
-                    discoverStrategy(appName, ctx, type);
+                    appName = discoverStrategy(appName, ctx, type);
                     if (used_strategy != null) {
                         LOG.info("Working lookup strategy: " + used_strategy);
                     } else {
@@ -382,20 +384,54 @@ public class EJBLookup {
      * @param appName EJB application name
      * @param ctx     InitialContext
      * @param type    the class
+     * @return appName (may have changed)
      */
-    private static <T> void discoverStrategy(String appName, InitialContext ctx, Class<T> type) {
+    private static <T> String discoverStrategy(String appName, InitialContext ctx, Class<T> type) {
         for (STRATEGY strat : STRATEGY.values()) {
             if (strat == STRATEGY.UNKNOWN)
                 continue;
             used_strategy = strat;
             try {
                 ctx.lookup(buildName(appName, type));
-                return;
+                return appName;
             } catch (Exception e) {
                 //ignore and try next
             }
         }
+        //houston, we have a problem - try locale and remote with appname again iterating through all "root" ctx bindings
+        //this can happen if the ear is not named flexive.ear
+        try {
+            NamingEnumeration<NameClassPair> ncpe = ctx.list("");
+            while( ncpe.hasMore() ) {
+                NameClassPair ncp = ncpe.next();
+                if( ncp.getClassName().endsWith("NamingContext") ) {
+                    appName = ncp.getName();
+                    try {
+                        used_strategy = STRATEGY.APP_SIMPLENAME_LOCAL;
+                        ctx.lookup(buildName(ncp.getName(), type));
+                        APPNAME = ncp.getName();
+                        LOG.info("Using application name ["+appName+"] for lookups!");
+                        return APPNAME;
+                    } catch( Exception e) {
+                        //ignore and try remote
+                    }
+                    try {
+                        used_strategy = STRATEGY.APP_SIMPLENAME_REMOTE;
+                        ctx.lookup(buildName(ncp.getName(), type));
+                        APPNAME = ncp.getName();
+                        LOG.info("Using application name ["+appName+"] for lookups!");
+                        return APPNAME;
+                    } catch( Exception e) {
+                        //ignore and try remote
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            LOG.warn(e);
+        }
         used_strategy = null;
+        return appName;
     }
 
     /**
