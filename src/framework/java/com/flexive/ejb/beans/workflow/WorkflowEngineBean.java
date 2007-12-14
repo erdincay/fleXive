@@ -40,6 +40,7 @@ import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.security.Role;
@@ -180,23 +181,29 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
 
             stmt.executeUpdate();
 
+            FxEnvironment fxEnvironment = CacheAdmin.getEnvironment();
             // Remove steps?
-            for (Step step : CacheAdmin.getEnvironment().getStepsByWorkflow(workflow.getId())) {
+            for (Step step : fxEnvironment.getStepsByWorkflow(workflow.getId())) {
                 if (!workflow.getSteps().contains(step)) {
                     // remove step
                     stepEngine.removeStep(step.getId());
                 }
             }
 
-            // Add steps, if necessary
+            // Add/update steps, if necessary
             Map<Long, Step> createdSteps = new HashMap<Long, Step>();
             for (Step step : workflow.getSteps()) {
                 if (step.getId() < 0) {
                     long newStepId = stepEngine.createStep(step);
                     // map created steps using the old ID - if routes reference them
                     createdSteps.put(step.getId(), new Step(newStepId, step));
+                } else {
+                    //ACL changed?
+                    if(fxEnvironment.getStep(step.getId()).getAclId() != step.getAclId())
+                        stepEngine.updateStep(step.getId(), step.getAclId());
                 }
             }
+
 
             // Remove routes?
             Route[] dbRoutes = routeEngine.loadRoutes(workflow.getId());
