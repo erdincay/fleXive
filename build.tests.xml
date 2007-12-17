@@ -24,6 +24,7 @@
     <property name="debug.settings" value="-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=6006"/>
     <property name="run.debug.settings" value=""/>
     <property name="run.profile.settings" value=""/>
+    <property name="run.dist.settings" value=""/>
 
     <property name="findbugs.dir" value="${flexive.lib.dir}/findbugs"/>
     <property name="findbugs.xsl" value="${findbugs.dir}/src/xsl/fancy.xsl"/>
@@ -150,9 +151,9 @@
         <echo message="Run settings: ${run.profile.settings}"/>
     </target>
 
-	<target name="tests.compile.all" depends="tests.compile.shared,tests.compile.ejb,tests.compile.jsf,tests.compile.browser"/>
+	<target name="tests.compile.all" depends="tests.compile.shared,tests.compile.ejb,tests.compile.jsf,tests.compile.browser,tests.compile.dist"/>
 
-    <target name="tests.dist" depends="tests.compile.all" description="Builds flexive-tests.jar in the distribution directory, including all testcases">
+    <target name="tests.package.dist" depends="tests.compile.all" description="Builds flexive-tests.jar in the distribution directory, including all testcases">
         <mkdir dir="${flexive.dist.lib.dir}"/>
         <jar destfile="${flexive.dist.lib.dir}/flexive-tests.jar">
             <fileset dir="${tests.classes.dir}">
@@ -221,14 +222,23 @@
         <groovyc-tests srcdir="${tests.jsf.groovy.dir}" includes="com/flexive/tests/**/jsf/**/*"/>
     </target>
 
-	<!-- run all tests -->
+    <target name="tests.compile.dist" depends="tests.prepare, jar.framework.shared">
+        <javac-call srcdir="${tests.framework.dir}/"
+               destdir="${tests.classes.dir}"
+	       	   includes="com/flexive/tests/disttools/**/*.java">
+            <src path="${flexive.src.framework.dir}"/>
+            <classpath refid="build.classpath.testng"/>
+        </javac-call>
+    </target>
+
+    <!-- run all tests -->
 	<target name="tests.all" depends="tests.all.init, tests.groups.run, emma.report"/>
 	<target name="tests.all.init">
         <groovy>
-            properties.'tests.groups' = "shared,ejb,jsf,tree"
+            properties.'tests.groups' = "shared,ejb,jsf,tree,dist"
         </groovy>
     </target>
-		
+
     <!-- shared tests that don't need an EJB3 container -->
     <target name="tests.shared" depends="tests.shared.run, emma.report"/>
     <target name="tests.shared.run" depends="tests.compile.shared">
@@ -258,10 +268,16 @@
         <echo>Test groups can be specified in the tests.groups property,</echo>
         <echo>e.g. "ant tests.groups -Dtests.groups=shared,configuration"</echo>
         <echo>Running tests in group(s): ${tests.groups}</echo>
+        <groovy>
+            // build dist target only when executing the dist group
+            if (properties.'tests.groups'.indexOf('dist') != -1) {
+                project.executeTarget('dist')
+                properties.'run.dist.settings' = '-Dflexive.test.dist.file=' + properties.'flexive.base.build.dir' + '/flexive-dist.zip'
+            }
+        </groovy>
         <copy file="${tests.resources.dir}/testlog4j.xml" todir="${tests.classes.dir}"/>
         <testng classpathref="ejb3-embedded.classpath"
-                outputDir="${testng.report.dir}"
-                groups="${tests.groups}">
+                outputDir="${testng.report.dir}" groups="${tests.groups}">
             <classpath>
                 <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar, *.ejb3"/>
                 <fileset dir="${build.ui.jar.dir}" includes="*.jar"/>
@@ -275,6 +291,7 @@
             <jvmarg value="-Demma.coverage.out.merge=true"/>
             <jvmarg line="${run.debug.settings}"/>
             <jvmarg line="${run.profile.settings}"/>
+            <jvmarg line="${run.dist.settings}"/>
             <jvmarg value="-Djava.net.preferIPv4Stack=true"/>
             <!-- JDK6 classloader policy issue w/jboss5 workaround -->
             <jvmarg value="-Dsun.lang.ClassLoader.allowArraySyntax=true"/>
@@ -282,6 +299,7 @@
             <!--Enable the following line for log output-->
             <jvmarg value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
             <jvmarg value="-Dlog4j.configuration=testlog4j.xml"/>
+            <jvmarg value="-Dcompiler.fork=true"/>  <!-- Overwrite default buildfile settings for dist tests -->
             <classfileset dir="${tests.classes.dir}" includes="com/flexive/tests/**/*.class"/>
         </testng>
         <junitreport todir="${testng.report.dir}">

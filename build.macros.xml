@@ -17,7 +17,8 @@
                     includes="@{includes}"
                     excludes="@{excludes}"
                     source="${compiler.source}"
-                    target="${compiler.target}">
+                    target="${compiler.target}"
+                    fork="${compiler.fork}">
 				<args/>
 			</javac>
 		</sequential>
