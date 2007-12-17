@@ -441,7 +441,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
     public String initNew() {
         release();
         _init();
-        return getEditorPage();
+        return null;
     }
 
     public FxPK getPk() {

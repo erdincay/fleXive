@@ -17,7 +17,7 @@
             <t:inputHidden id="editorType" value="#{srcEditor.editorType}" />
 
             <!-- Content select screen -->
-            <c:if test="#{srcEditor.initialized==false}">
+            <ui:fragment rendered="#{srcEditor.initialized==false}">
                 <adm:tab label="Choose Content Type" active="true" id="tabChoose"/>
                 <t:selectOneListbox size="1" id="type" value="#{srcEditor.type}">
                     <f:selectItems value="#{srcEditor.editableTypes}" />
@@ -26,22 +26,22 @@
                 <adm:commandButton labelKey="Content.button.create" location="both"
                                   bean="#{srcEditor}"
                                   icon="save" action="initNew" id="initButton"/>
-            </c:if>
+            </ui:fragment>
 
             <!-- Content editor screen -->
-            <c:if test="#{srcEditor.initialized==true}">
+            <ui:fragment rendered="#{srcEditor.initialized==true}">
 
-                <c:if test="#{srcEditor.new}">
+                <ui:fragment rendered="#{srcEditor.new}">
                     <adm:tab label="Content Editor [New]" active="true" id="tabEditNew"/>
-                </c:if>
-                <c:if test="#{srcEditor.new==false}">
-                    <c:if test="#{srcEditor.readOnly==true}">
-                      <adm:tab label="Content Editor ##{srcEditor.id}.#{srcEditor.version} [readonly]" active="true" id="tabEditInit"/>
-                    </c:if>
-                    <c:if test="#{srcEditor.readOnly==false}">
-                      <adm:tab label="Content Editor ##{srcEditor.id}.#{srcEditor.version}" active="true" id="tabEditInit"/>
-                    </c:if>
-                </c:if>
+                </ui:fragment>
+                <ui:fragment rendered="#{srcEditor.new==false}">
+                    <ui:fragment rendered="#{srcEditor.readOnly==true}">
+                      <adm:tab label="Content Editor ##{srcEditor.id}.#{srcEditor.version} [readonly]" active="true" id="tabEditInit1"/>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{srcEditor.readOnly==false}">
+                      <adm:tab label="Content Editor ##{srcEditor.id}.#{srcEditor.version}" active="true" id="tabEditInit2"/>
+                    </ui:fragment>
+                </ui:fragment>
 
 
                     <a4j:outputPanel id="all">
@@ -81,26 +81,26 @@
 
                         <div style="width:40px;float:left;padding-top:2px">Acl</div>
                         <div style="width:180px;float:left;">
-                            <c:if test="#{srcEditor.readOnly==false}">
+                            <ui:fragment rendered="#{srcEditor.readOnly==false}">
                                 <t:selectOneListbox size="1" id="acl" value="#{srcEditor.acl}"
                                                     converter="SelectableConverter">
                                     <f:selectItems value="#{fxSelectBean.contentACLs}" />
                                 </t:selectOneListbox>
-                            </c:if>
-                            <c:if test="#{srcEditor.readOnly==true}">
+                            </ui:fragment>
+                            <ui:fragment rendered="#{srcEditor.readOnly==true}">
                                 <span class="readonlyValue">#{srcEditor.acl.name}</span>
-                            </c:if>
+                            </ui:fragment>
                         </div>
                         <div style="width:40px;float:left;padding-top:2px">Step</div>
                         <div style="float:left;">
-                            <c:if test="#{srcEditor.readOnly==false}">
+                            <ui:fragment rendered="#{srcEditor.readOnly==false}">
                                 <t:selectOneListbox size="1" id="step" value="#{srcEditor.step}">
                                     <f:selectItems value="#{srcEditor.possibleWorkflowSteps}" />
                                 </t:selectOneListbox>
-                            </c:if>
-                            <c:if test="#{srcEditor.readOnly==true}">
+                            </ui:fragment>
+                            <ui:fragment rendered="#{srcEditor.readOnly==true}">
                                 <span class="readonlyValue">#{srcEditor.stepDescription}</span>
-                            </c:if>
+                            </ui:fragment>
                         </div>
                         <br clear="both"/><br/>
 
@@ -108,10 +108,10 @@
                         <adm:ceRenderTreeNodes srcEditor="#{srcEditor}"/>
 
                         <!-- PREVIEW -->
-                        <c:if test="#{srcEditor.content.previewAvailable}">
+                        <ui:fragment rendered="#{srcEditor.content.previewAvailable}">
                             <img src="thumbnail/pk#{srcEditor.id}.1/s2" alt="image" title="image" border="0"
                                  style="border:1px solid gray"/>
-                        </c:if>
+                        </ui:fragment>
 
                         <!-- binary support hack -->
                         <t:inputHidden value="#{srcEditor.editorActionName}"  id="editorActionName"/>
@@ -126,8 +126,8 @@
                                         srcEditor="#{srcEditor}"/>
                                 <div class="display" style="padding-top:2px;width:400px">
                                     #{srcEditor.typeDisplay}
-                                    <c:if test="#{srcEditor.new}"> [new]</c:if>
-                                    <c:if test="#{srcEditor.new==false}"> [#{srcEditor.id}.#{srcEditor.version}]</c:if>
+                                    <ui:fragment rendered="#{srcEditor.new}"> [new]</ui:fragment>
+                                    <ui:fragment rendered="#{srcEditor.new==false}"> [#{srcEditor.id}.#{srcEditor.version}]</ui:fragment>
                                 </div>
                             </div>
                             <br style="clear:both;margin-bottom:7px"/>
@@ -137,25 +137,25 @@
 
                 <div style="clear:both;height:20px"><!-- __ --></div>
 
-                <c:if test="#{srcEditor.readOnly==true}">
+                <ui:fragment rendered="#{srcEditor.readOnly==true}">
                     <adm:commandButton labelKey="Content.button.edit" location="both"
                                       bean="#{srcEditor}"
                                       icon="edit" action="enableEdit" id="enableEditButton"/>
-                </c:if>
-                <c:if test="#{srcEditor.readOnly==false}">
+                </ui:fragment>
+                <ui:fragment rendered="#{srcEditor.readOnly==false}">
                     <!--
                     <adm:commandButton label="Content.button.saveInSession" location="both"
                                       bean="#{srcEditor}"
                                       icon="saveInSession" action="saveInSession" id="storeButton"/>
                                       -->
 
-                    <c:if test="#{srcEditor.new}">
+                    <ui:fragment rendered="#{srcEditor.new}">
                         <adm:commandButton labelKey="Content.button.create" location="both"
                                           bean="#{srcEditor}"
                                           icon="new" action="save" id="createButton"/>
-                    </c:if>
+                    </ui:fragment>
 
-                    <c:if test="#{srcEditor.new==false}">
+                    <ui:fragment rendered="#{srcEditor.new==false}">
                         <adm:commandButton labelKey="Content.button.save" location="both"
                                           bean="#{srcEditor}"
                                           icon="save" action="save" id="saveButton"/>
@@ -171,7 +171,7 @@
                         <adm:commandButton labelKey="Content.button.delete" location="both"
                                           bean="#{srcEditor}" confirm="Content.confirm.delete"
                                           icon="delete" action="delete" id="deleteButton"/>
-                    </c:if>
+                    </ui:fragment>
 
 
                     <adm:commandButton labelKey="Content.button.compact" location="toolbar"
@@ -181,8 +181,8 @@
                     <adm:commandButton labelKey="Content.button.cancel" location="both"
                                       bean="#{srcEditor}" confirm="Content.confirm.abort"
                                       icon="cancel" action="cancel" id="cancelButton"/>
-                </c:if>
-            </c:if>
+                </ui:fragment>
+            </ui:fragment>
 </ui:composition>
 
 
