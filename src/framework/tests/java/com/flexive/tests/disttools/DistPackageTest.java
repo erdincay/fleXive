@@ -38,16 +38,14 @@ public class DistPackageTest {
      * An ANT input handler that works off a predefined set of inputs.
      */
     private static class SimpleInputHandler implements InputHandler {
-        private final Deque<String> inputs = new LinkedList<String>();
+        private final Queue<String> inputs = new LinkedList<String>();
 
         public SimpleInputHandler(String... inputs) {
-            for (String input: inputs) {
-                this.inputs.addLast(input);
-            }
+            this.inputs.addAll(Arrays.asList(inputs));
         }
 
         public void handleInput(InputRequest request) throws BuildException {
-            request.setInput(this.inputs.removeFirst());
+            request.setInput(this.inputs.remove());
         }
     }
 
