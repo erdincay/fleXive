@@ -41,6 +41,7 @@ import com.flexive.core.storage.StorageManager;
 import com.flexive.extractor.ExtractedData;
 import com.flexive.extractor.HtmlExtractor;
 import com.flexive.shared.*;
+import com.flexive.shared.media.FxMediaEngine;
 import com.flexive.shared.content.*;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.ScriptingEngine;
@@ -1131,29 +1132,13 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             int height = 0;
             boolean isImage = binary.getMimeType().startsWith("image/");
             if (isImage) {
-                String geometry = FxXMLUtils.getElementData(binary.getMetadata(), "Geometry");
-                if (geometry != null && geometry.indexOf('x') > 0) {
-                    if (geometry.indexOf('+') > 0) //ignore offsets
-                        geometry = geometry.substring(0, geometry.indexOf('+'));
-                    try {
-                        width = Integer.parseInt(geometry.substring(0, geometry.indexOf('x')));
-                        height = Integer.parseInt(geometry.substring(geometry.indexOf('x') + 1));
-                    } catch (NumberFormatException e) {
-                        //ignore
-                        LOG.warn(e, e);
-                    }
-                }
-                String res = FxXMLUtils.getElementData(binary.getMetadata(), "Resolution");
-                if (res != null) {
-                    try {
-                        if (res.indexOf('x') > 0)
-                            resolution = Double.parseDouble(res.substring(0, res.indexOf('x')));
-                        else
-                            resolution = Double.parseDouble(res);
-                    } catch (NumberFormatException e) {
-                        //ignore
-                        LOG.warn(e, e);
-                    }
+                try {
+                    width = Integer.parseInt(FxXMLUtils.getElementData(binary.getMetadata(), "width"));
+                    height = Integer.parseInt(FxXMLUtils.getElementData(binary.getMetadata(), "height"));
+                    resolution = Double.parseDouble(FxXMLUtils.getElementData(binary.getMetadata(), "xResolution"));
+                } catch (NumberFormatException e) {
+                    //ignore
+                    LOG.warn(e, e);
                 }
             }
             created = new BinaryDescriptor(CacheAdmin.getStreamServers(), id, version, quality, java.lang.System.currentTimeMillis(),
@@ -2326,11 +2311,11 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         if (rs != null && rs.next()) {
             byte[] header = null;
             try {
-                header = rs.getBlob(1).getBytes(1, 128);
+                header = rs.getBlob(1).getBytes(1, 48);
             } catch (Throwable t) {
-                // ignore, header migth be smaller than 128
+                // ignore, header migth be smaller than 48
             }
-            mimeType = MimeTypeDetector.detect(header, binary.getName());
+            mimeType = FxMediaEngine.detectMimeType(header, binary.getName());
         }
         String metaData = "<empty/>";
 

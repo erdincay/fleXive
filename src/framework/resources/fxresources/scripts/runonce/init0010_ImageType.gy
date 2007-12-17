@@ -26,11 +26,25 @@ void createSelectLists() {
     ACL aclItem = CacheAdmin.getEnvironment().getDefaultACL(ACL.Category.SELECTLISTITEM);
     FxSelectListEdit compressionList = FxSelectListEdit.createNew("Image Compression", new FxString("Image Compression"), new FxString("Compression algorithm used for images like JPEG"),
             false, aclList, aclItem);
-    new FxSelectListItemEdit(aclItem, compressionList, new FxString("unknown"), "unknown", "#FFFFFF");
+    new FxSelectListItemEdit(aclItem, compressionList, new FxString("Unknown"), "UNKNOWN", "#FFFFFF");
+    new FxSelectListItemEdit(aclItem, compressionList, new FxString("None"), "NONE", "#FFFFFF");
+    new FxSelectListItemEdit(aclItem, compressionList, new FxString("LZW"), "LZW", "#FFFFFF");
     new FxSelectListItemEdit(aclItem, compressionList, new FxString("JPEG"), "JPEG", "#FFFFFF");
-    new FxSelectListItemEdit(aclItem, compressionList, new FxString("GIF"), "GIF", "#FFFFFF");
-    new FxSelectListItemEdit(aclItem, compressionList, new FxString("TIFF"), "TIFF", "#FFFFFF");
+    new FxSelectListItemEdit(aclItem, compressionList, new FxString("RLE: Run-Length Encoding"), "RLE", "#FFFFFF");
+    new FxSelectListItemEdit(aclItem, compressionList, new FxString("Photoshop"), "PHOTOSHOP", "#FFFFFF");
+    new FxSelectListItemEdit(aclItem, compressionList, new FxString("PNG Filter"), "PNG", "#FFFFFF");
+    new FxSelectListItemEdit(aclItem, compressionList, new FxString("CCITT Group 3 1-Dimensional Modified Huffman run-length encoding."), "CCITT_GROUP_3", "#FFFFFF");
+    new FxSelectListItemEdit(aclItem, compressionList, new FxString("CCITT Group 4"), "CCITT_GROUP_4", "#FFFFFF");
+    new FxSelectListItemEdit(aclItem, compressionList, new FxString("CCITT 1D"), "CCITT_1D", "#FFFFFF");
+
     EJBLookup.getSelectListEngine().save(compressionList);
+
+    FxSelectListEdit orientationList = FxSelectListEdit.createNew("Image Orientation", new FxString("Image Orientation"), new FxString("Image orientation like portrait or landscape"),
+            false, aclList, aclItem);
+    new FxSelectListItemEdit(aclItem, orientationList, new FxString("Unknown"), "UNKNOWN", "#FFFFFF");
+    new FxSelectListItemEdit(aclItem, orientationList, new FxString("Portrait"), "0", "#FFFFFF");
+    new FxSelectListItemEdit(aclItem, orientationList, new FxString("Landscape"), "1", "#FFFFFF");
+    EJBLookup.getSelectListEngine().save(orientationList);
 }
 
 def String IMAGE_TYPE = "Image";
@@ -75,6 +89,8 @@ builder {
     pixelYDimension(FxDataType.Number, multiplicity: FxMultiplicity.MULT_0_1, multilang: false, defaultMultiplicity: 0)
     xResolution(FxDataType.Double, multiplicity: FxMultiplicity.MULT_0_1, multilang: false, defaultMultiplicity: 0)
     yResolution(FxDataType.Double, multiplicity: FxMultiplicity.MULT_0_1, multilang: false, defaultMultiplicity: 0)
+    bitsPerPixel(FxDataType.Number, multiplicity: FxMultiplicity.MULT_0_1, multilang: false, defaultMultiplicity: 0)
+    colorType(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false, defaultMultiplicity: 0)
     keywords(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_N, multilang: true, defaultMultiplicity: 0)
     TakeLocation(defaultMultiplicity: 0) {
         city(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: true)
@@ -85,10 +101,11 @@ builder {
     MetaData(defaultMultiplicity: 0) {
         manufacturer(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
         model(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
-        orientation(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
+        orientation(FxDataType.SelectOne, multiplicity: FxMultiplicity.MULT_0_1, multilang: false, referencedList: CacheAdmin.getEnvironment().getSelectList("Image Orientation"), defaultMultiplicity: 0)
         focalLength(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
-        maxApertureValue(dataType: FxDataType.Double, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
-        exposureBias(dataType: FxDataType.Double, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
+        maxApertureValue(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
+        apertureValue(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
+        exposureBias(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
         exposureProgram(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
         exposureTime(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
         fNumber(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
@@ -96,6 +113,8 @@ builder {
         meteringMode(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
         specialInstructions(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
         fixtureIdentifier(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
+        flash(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
+        whiteBalance(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
     }
 }
 

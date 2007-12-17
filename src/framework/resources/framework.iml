@@ -253,10 +253,10 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../lib/fxTree.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../lib/sanselan.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

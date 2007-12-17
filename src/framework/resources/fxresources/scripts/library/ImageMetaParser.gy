@@ -77,57 +77,89 @@ try {
 
     def meta = new XmlSlurper().parseText(binValue.metadata);
     def cmap = [:]
-    def geometry = ((String) meta.Geometry).split('x')
-    def res = ((String) meta.Resolution).split('x')
-    def java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy:MM:dd HH:mm:ss")
+//    def geometry = ((String) meta.Geometry).split('x')
+//    def res = ((String) meta.Resolution).split('x')
+    def java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 
     def compList = CacheAdmin.environment.getSelectList("Image Compression")
+    def orientList = CacheAdmin.environment.getSelectList("Image Orientation")
 
-    //process(cmap, 'String|Title', meta.@source)
     process(cmap, 'String|Caption', binValue.name)
-    //process(cmap, 'String|Title', binValue.name)
-    process(cmap, 'Number|PixelXDimension', geometry[0])
-    process(cmap, 'Number|PixelYDimension', geometry[1])
-    process(cmap, 'Double|xResolution', res[0])
-    process(cmap, 'Double|yResolution', res[1])
-    if (cmap['DateCreated'] == null)
-        process(cmap, 'DateTime|DateCreated', meta['Exif-DateTime'])
-    if (cmap['DateCreated'] == null)
-        process(cmap, 'DateTime|DateCreated', sdf.format(new java.util.Date(System.currentTimeMillis())))
+    process(cmap, 'DateTime|DateCreated', meta.meta.find{ it.@key == 'DateTime'})
 
-    process(cmap, 'SelectList|Compression', binValue.mimeType);
-    process(cmap, 'String|MetaData/Manufacturer', meta['Exif-Make']);
-    process(cmap, 'String|MetaData/Model', meta['Exif-Model']);
-    process(cmap, 'String|MetaData/Orientation', meta['Orientation']);
+    def width = meta.meta.find{ it.@key == 'PixelXDimension'}
+    if( width == "" )
+        width = meta.imageData.width
+    def height = meta.meta.find{ it.@key == 'PixelYDimension'}
+    if( height == "")
+        height = meta.imageData.height
+    process(cmap, 'Number|PixelXDimension', width)
+    process(cmap, 'Number|PixelYDimension', height)
+    
+    process(cmap, 'Double|xResolution', meta.meta.find{ it.@key == 'xResolution'})
+    process(cmap, 'Double|yResolution', meta.meta.find{ it.@key == 'xResolution'})
+    process(cmap, 'Number|BitsPerPixel', meta.imageData.bpp)
+    process(cmap, 'String|ColorType', meta.imageData.colorType)
+    process(cmap, 'SelectList|Compression', meta.imageData.compressionAlgorithm);
+    process(cmap, 'String|MetaData/Manufacturer', meta.meta.find{ it.@key == 'Make'})
+    process(cmap, 'String|MetaData/Model', meta.meta.find{ it.@key == 'Model'})
+//    process(cmap, 'String|MetaData/Orientation', meta.meta.find{ it.@key == 'Orientation'})
+    process(cmap, 'SelectList|MetaData/Orientation', meta.meta.find{ it.@key == 'Orientation'});
+    process(cmap, 'String|MetaData/FocalLength', meta.meta.find{ it.@key == 'FocalLength'})
+    process(cmap, 'String|MetaData/MaxApertureValue', meta.meta.find{ it.@key == 'MaxApertureValue'})
+    process(cmap, 'String|MetaData/ApertureValue', meta.meta.find{ it.@key == 'ApertureValue'})
+    process(cmap, 'String|MetaData/ExposureBias', meta.meta.find{ it.@key == 'ExposureBiasValue'})
+    process(cmap, 'String|MetaData/ExposureProgram', meta.meta.find{ it.@key == 'ExposureMode'})
+    process(cmap, 'String|MetaData/ExposureTime', meta.meta.find{ it.@key == 'ExposureTime'})
+    process(cmap, 'String|MetaData/FNumber', meta.meta.find{ it.@key == 'FNumber'})
+    process(cmap, 'String|MetaData/Flash', meta.meta.find{ it.@key == 'Flash'})
+    process(cmap, 'String|MetaData/MeteringMode', meta.meta.find{ it.@key == 'MeteringMode'})
+    process(cmap, 'String|MetaData/WhiteBalance', meta.meta.find{ it.@key == 'WhiteBalance'})
+
+
+//    if (cmap['DateCreated'] == null)
+//        process(cmap, 'DateTime|DateCreated', meta['Exif-DateTime'])
+//    if (cmap['DateCreated'] == null)
+//        process(cmap, 'DateTime|DateCreated', sdf.format(new java.util.Date(System.currentTimeMillis())))
+//
+//    process(cmap, 'SelectList|Compression', binValue.mimeType);
+
 
 
     cmap.each() {key, value ->
         def _type = key.split('\\|')[0]
         def fxvalue
         key = key.split("\\|")[1]
-        //  println "${key} -> ${value} (${_type})"
+        println "${key} -> ${value} (${_type})"
         switch (_type) {
-            case "String": fxvalue = new FxString(false, value); break
+            case "String": fxvalue = new FxString(key=="Caption", value); break
             case "Number":
-                if (value.endsWith("+0+0"))
-                    value = value.substring(0, value.indexOf("+0+0"))
                 fxvalue = new FxNumber(false, Integer.parseInt(value)); break
             case "Double": fxvalue = new FxDouble(false, Double.parseDouble(value)); break
             case "DateTime": fxvalue = new FxDateTime(false, sdf.parse(value)); break
             case "SelectList":
                 if (key == "Compression") {
                     try {
-                        def sm = new SelectMany(compList)
-                        sm.selectItem(compList.getItemByData(value.split("\\/")[1].toUpperCase()))
-                        fxvalue = new FxSelectMany(false, sm)
+                        if( value.startsWith("PNG"))
+                            value = "PNG"
+                        fxvalue = new FxSelectOne(false, compList.getItemByData(value.toUpperCase()))
+                    } catch (Throwable t) {
+                        println "Error setting select list item: " + t.message
+                        fxvalue = null
+                    }
+                }
+                if (key == "MetaData/Orientation") {
+                    try {
+                        fxvalue = new FxSelectOne(false, orientList.getItemByData(value.toUpperCase()))
                     } catch (Throwable t) {
                         println "Error setting select list item: " + t.message
                         fxvalue = null
                     }
                 }
         }
-        println "fxValue=" + fxvalue
+        println "fxValue[$key]=$fxvalue"
         content.setValue("/" + key, fxvalue);
+        println "set ok"
     }
 
     return content

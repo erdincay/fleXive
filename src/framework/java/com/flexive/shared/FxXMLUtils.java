@@ -36,6 +36,8 @@ package com.flexive.shared;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.CompactWriter;
 
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
 import java.io.StringWriter;
 import java.io.Writer;
 
@@ -114,5 +116,23 @@ public class FxXMLUtils {
         Writer writer = new StringWriter();
         xStream.marshal(object, new CompactWriter(writer));
         return writer.toString();
+    }
+
+    /**
+     * Write a "simple" tag
+     *
+     * @param writer xml writer
+     * @param tag tag name
+     * @param value value
+     * @param asCData use CDData?
+     * @throws javax.xml.stream.XMLStreamException on errors
+     */
+    public static void writeSimpleTag(XMLStreamWriter writer, String tag, Object value, boolean asCData) throws XMLStreamException {
+        writer.writeStartElement(tag);
+        if( asCData )
+            writer.writeCData(String.valueOf(value));
+        else
+            writer.writeCharacters(String.valueOf(value));
+        writer.writeEndElement();
     }
 }
