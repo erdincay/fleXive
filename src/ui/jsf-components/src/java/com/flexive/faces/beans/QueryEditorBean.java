@@ -112,6 +112,18 @@ public class QueryEditorBean implements Serializable {
                 addAssignmentId = FxJsfUtils.getLongParameter("nodeId", FxTreeNode.ROOT_NODE);
                 addNodeLive = FxJsfUtils.getBooleanParameter("liveMode", false);
                 addTreeNode(null);
+            } else if ("typeSearch".equals(action)) {
+                setRootNode(new QueryRootNode(QueryRootNode.Type.CONTENTSEARCH, location));
+                addAssignmentId = FxJsfUtils.getLongParameter("typeId", -1);
+                if (addAssignmentId != -1) {
+                    addTypeQuery(null);
+                }
+            } else if ("assignmentSearch".equals(action)) {
+                setRootNode(new QueryRootNode(QueryRootNode.Type.CONTENTSEARCH, location));
+                addAssignmentId = FxJsfUtils.getLongParameter("assignmentId", -1);
+                if (addAssignmentId != -1) {
+                    addProperty(null);
+                }
             } else if ("new".equals(action)) {
                 // create a new search query
                 getRootNode().getChildren().clear();

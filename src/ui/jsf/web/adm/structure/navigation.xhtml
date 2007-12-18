@@ -446,9 +446,15 @@
                     // add node to query
                     parent.frames["contentFrame"].addQueryNode(nodeId, docType);
                 } else {
-                    // submit query
-                    invokeContentAction("adm/search/searchResult.jsf", "nodeSearch", {nodeId: nodeId});
+                    // open query editor
+                    if (isType(docType)) {
+                        invokeContentAction("adm/search/query.jsf", "typeSearch", {typeId: nodeId});
+                    } else {
+                        invokeContentAction("adm/search/query.jsf", "assignmentSearch", {assignmentId: nodeId});
+                    }
                 }
+                // submit query
+                //invokeContentAction("adm/search/searchResult.jsf", "nodeSearch", {nodeId: nodeId});
 
                 //contentPage=null;
             }
@@ -469,7 +475,7 @@
                 setActionDisabled(menu.getTreeNode(), "deleteAssignment", node.nodeDocType!="Group" && (node.nodeDocType!="Assignment" || node.mayDelete!="true"));
                 setActionDisabled(menu.getTreeNode(), "deleteType", !isType(node.nodeDocType) || node.mayDelete!="true");
                 setActionDisabled(menu.getTreeNode(), "copyAssignment", lackRole || node.nodeDocType!="Group" && node.nodeDocType!="Assignment");
-                setActionDisabled(menu.getTreeNode(), "searchContents", !isType(node.nodeDocType));
+                setActionDisabled(menu.getTreeNode(), "searchContents", !isType(node.nodeDocType) && !isAssignment(node.nodeDocType));
                 setActionDisabled(menu.getTreeNode(), "cutAssignment", lackRole || node.nodeDocType!="Assignment" && node.nodeDocType!="Group");
                 setActionDisabled(menu.getTreeNode(), "pasteBelow", lackRole || copyNode==null || cutMode || (copyMode && (node.nodeDocType!="Assignment" && node.nodeDocType!="Group") ||
                                 getJsonRpc().StructureTreeEditor.isSameLevel(copyNode.propertyId, node.propertyId)));
@@ -492,6 +498,10 @@
                 if (docType=="Type" || docType=="TypeRelation")
                     return true;
                 return false;
+            }
+
+            function isAssignment(docType) {
+                return docType == "Assignment" || docType == "AssignmentSystemInternal";
             }
 
             function enableSearchMode() {
