@@ -466,6 +466,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
         content = null;
         _init();
         //return getEditorPage();
+        FxJsfUtils.resetFaceletsComponent("frm:all");
         return null;
     }
 
@@ -799,6 +800,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
             // Reload changes
             setPk(pk);
             reload();
+            FxJsfUtils.resetFaceletsComponent("frm:all");
         } catch (Throwable t) {
             new FxFacesMsgErr(t).addToContext();
         }
