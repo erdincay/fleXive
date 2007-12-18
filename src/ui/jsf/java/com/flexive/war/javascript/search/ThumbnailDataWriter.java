@@ -102,7 +102,8 @@ class ThumbnailDataWriter extends TableDataWriter {
                 .append("<div class=\"inner2\">")
                         // render thumbnail
                 .append("<img src=\"")
-                .append(ThumbnailServlet.getLink(pk, BinaryDescriptor.PreviewSizes.PREVIEW2).substring(1))
+                .append(ThumbnailServlet.getLink(pk, BinaryDescriptor.PreviewSizes.PREVIEW2, null,
+                        /* TODO: select FxBinary timestamp */ System.currentTimeMillis()).substring(1))
                 .append("\" alt=\"").append(pk).append("\" title=\"").append(values[0]).append("\"/>")
                 .append("</div></div>")
                         // render bottom label
