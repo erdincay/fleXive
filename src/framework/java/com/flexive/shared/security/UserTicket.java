@@ -116,7 +116,7 @@ public interface UserTicket extends Serializable {
      * @param group the group to check for
      * @return true if the user is a member of the given group
      */
-    boolean isInGroup(int group);
+    boolean isInGroup(long group);
 
     /**
      * Returns true if the user is assigned to the given role.

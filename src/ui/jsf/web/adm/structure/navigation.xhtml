@@ -524,12 +524,13 @@
                   clickHandler="structureTreeClickHandler" docIcons="true" expandFirstNode="false">
 
             <adm:treeContextMenu showHandler="showTreeMenu">
-               <adm:treeContextMenuItem icon="open" treeActions="showNode" labelKey="StructureTree.menu.open" clickHandler="showNode"/>
-               <adm:treeContextMenuItem icon="edit" treeActions="editNode" labelKey="StructureTree.menu.edit" clickHandler="editNode"/>
-               <adm:treeContextMenuItem icon="new" treeActions="createProperty" labelKey="StructureTree.menu.createProperty" clickHandler="createProperty"/>
-               <adm:treeContextMenuItem icon="createFolder" treeActions="createGroup" labelKey="StructureTree.menu.createGroup" clickHandler="createGroup" />
-               <adm:treeContextMenuItem icon="new" treeActions="createContent" labelKey="ContentTree.menu.create" clickHandler="createContent"/>
-               <adm:treeContextMenuItem icon="search" treeActions="searchContents" labelKey="StructureTree.menu.searchContents" clickHandler="searchContents"/>
+                <adm:treeContextMenuItem icon="open" treeActions="showNode" labelKey="StructureTree.menu.open" clickHandler="showNode"/>
+                <adm:treeContextMenuItem icon="edit" treeActions="editNode" labelKey="StructureTree.menu.edit" clickHandler="editNode"/>
+                <adm:treeContextMenuItem icon="property" treeActions="createProperty" labelKey="StructureTree.menu.createProperty" clickHandler="createProperty"/>
+                <adm:treeContextMenuItem icon="group" treeActions="createGroup" labelKey="StructureTree.menu.createGroup" clickHandler="createGroup" />
+               <fx:menuSeparator/> 
+                <adm:treeContextMenuItem icon="new" treeActions="createContent" labelKey="ContentTree.menu.create" clickHandler="createContent"/>
+                <adm:treeContextMenuItem icon="search" treeActions="searchContents" labelKey="StructureTree.menu.searchContents" clickHandler="searchContents"/>
                <fx:menuSeparator/>
                <adm:treeContextMenuItem treeActions="copyAssignment" icon="copy" labelKey="StructureTree.menu.copyAssignment" clickHandler="copyAssignment"/>
                <adm:treeContextMenuItem treeActions="pasteInto" icon="paste" labelKey="StructureTree.menu.paste.into" clickHandler="pasteInto"/>

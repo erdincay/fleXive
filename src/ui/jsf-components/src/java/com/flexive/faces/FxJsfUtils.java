@@ -75,6 +75,33 @@ import java.util.*;
 public class FxJsfUtils {
     private static final Log LOG = LogFactory.getLog(FxJsfUtils.class);
     private static final String JSON_RPC_SERVLET = "/adm/JSON-RPC";
+    private final static String BRACKET_OPEN = "__-";
+    private final static String BRACKET_CLOSE = "_-_";
+    private final static String SLASH = "-__";
+
+    /**
+     * Encode identifier to be valid for JSF components
+     *
+     * @param identifier id to encode
+     * @return encoded id
+     */
+    public static String encodeJSFIdentifier(String identifier) {
+        // We may only use '-' and '_' characters to encode JSF identifiers
+        identifier = identifier.replaceAll("/", SLASH);
+        identifier = identifier.replaceAll("\\[", BRACKET_OPEN);
+        identifier = identifier.replaceAll("]", BRACKET_CLOSE);
+        return identifier;
+    }
+
+    /**
+     * Decode a JSF identifier created by encodeJSFIdentifier
+     *
+     * @param identifier id to decode
+     * @return decoded id
+     */
+    public static String decodeJSFIdentifier(String identifier) {
+        return identifier.replaceAll(BRACKET_CLOSE, "]").replace(SLASH, "/").replace(BRACKET_OPEN, "[");
+    }
 
     private static class EmptySelectableObject extends AbstractSelectableObject implements Serializable {
         private static final long serialVersionUID = 7808775494956188839L;

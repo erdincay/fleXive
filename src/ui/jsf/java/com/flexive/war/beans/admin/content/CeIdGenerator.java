@@ -34,6 +34,7 @@
 package com.flexive.war.beans.admin.content;
 
 import com.flexive.faces.messages.FxFacesMsgErr;
+import com.flexive.faces.FxJsfUtils;
 import com.flexive.shared.content.FxData;
 
 import java.util.Hashtable;
@@ -41,15 +42,11 @@ import java.util.Hashtable;
 /**
  * Helper class for the ContentEditor.
  * <p/>
- * It generates a unique id for a xpath that gets accepted by jsf compontnets.
+ * It generates a unique id for a xpath that gets accepted by jsf components.
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class CeIdGenerator extends Hashtable<String, Object> {
-
-    private final static String BRACKET_OPEN = "__-";
-    private final static String BRACKET_CLOSE = "_-_";
-    private final static String SLASH = "-__";
 
     /**
      * Constructor.
@@ -81,11 +78,7 @@ public class CeIdGenerator extends Hashtable<String, Object> {
         try {
             if (object instanceof FxData) {
                 String result = ((FxData) object).getXPathFull();
-                // We may only use '-' and '_' characters to encode our xpath
-                result = result.replaceAll("/", SLASH);
-                result = result.replaceAll("\\[", BRACKET_OPEN);
-                result = result.replaceAll("]", BRACKET_CLOSE);
-                return result;
+                return FxJsfUtils.encodeJSFIdentifier(result);
             }
             return null;
         } catch (Throwable t) {
@@ -101,7 +94,7 @@ public class CeIdGenerator extends Hashtable<String, Object> {
      * @return the decoded id
      */
     public static String decodeToXPath(String id) {
-        return id.replaceAll(BRACKET_CLOSE, "]").replace(SLASH, "/").replace(BRACKET_OPEN, "[");
+        return FxJsfUtils.decodeJSFIdentifier(id);
     }
 
 }

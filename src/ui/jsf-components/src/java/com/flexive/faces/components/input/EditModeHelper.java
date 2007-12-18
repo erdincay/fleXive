@@ -393,7 +393,8 @@ class EditModeHelper extends RenderHelper {
                     BinaryDescriptor.PreviewSizes.PREVIEW2, value.getXPath(), descriptor.getCreationTime()));
         }
         final HtmlInputFileUpload upload = (HtmlInputFileUpload) FxJsfUtils.addChildComponent(component, HtmlInputFileUpload.COMPONENT_TYPE);
-        upload.setId(stripForm(inputId));
+        upload.setOnchange("fileInputChanged()");
+        upload.setId("fileUpload"+FxJsfUtils.encodeJSFIdentifier(XPathElement.stripType(value.getXPath())));
         upload.setStyleClass("fxValueFileInput");
     }
 

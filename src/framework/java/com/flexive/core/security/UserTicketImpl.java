@@ -142,7 +142,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
-    public boolean isInGroup(int group) {
+    public boolean isInGroup(long group) {
         return FxArrayUtils.containsElement(groups, group);
     }
 

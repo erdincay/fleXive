@@ -539,10 +539,23 @@ public class ContentEditorBean implements ActionBean, Serializable {
      */
     public void _initSteps() {
         UserTicket ticket = FxContext.get().getTicket();
-        List<Step> steps = environment.getType(type).getWorkflow().getSteps();
+        FxType fxType = environment.getType(type);
+
+        List<Step> steps;
+        boolean isNew = content.getPk().isNew();
+        if(isNew) {
+            steps = fxType.getWorkflow().getSteps();
+        } else {
+            steps = fxType.getWorkflow().getTargets(content.getStepId());
+            if (steps.size() == 0 || !steps.contains(environment.getStep(content.getStepId())))
+                steps.add(environment.getStep(content.getStepId()));
+        }
         ArrayList<SelectItem> result = new ArrayList<SelectItem>(steps.size());
         for (Step step : steps) {
-            if (ticket.mayCreateACL(step.getAclId())) {
+            if ( !fxType.useStepPermissions() ||
+                    (isNew
+                    ? ticket.mayCreateACL(step.getAclId())
+                    : ticket.mayEditACL(step.getAclId()) )) {
                 StepDefinition def = environment.getStepDefinition(step.getStepDefinitionId());
                 result.add(new SelectItem(String.valueOf(step.getId()), def.getLabel().getDefaultTranslation()));
             }
@@ -668,6 +681,10 @@ public class ContentEditorBean implements ActionBean, Serializable {
             display = environment.getType(type).getName();
         }
         return display;
+    }
+
+    public boolean isSupportSecurity() {
+        return environment.getType(type).usePermissions();
     }
 
     public CeDataWrapper getData() {

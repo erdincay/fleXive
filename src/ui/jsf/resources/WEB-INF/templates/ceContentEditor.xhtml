@@ -79,19 +79,25 @@
 
                         <!-- General fields -->
 
-                        <div style="width:40px;float:left;padding-top:2px">Acl</div>
-                        <div style="width:180px;float:left;">
-                            <ui:fragment rendered="#{srcEditor.readOnly==false}">
-                                <t:selectOneListbox size="1" id="acl" value="#{srcEditor.acl}"
-                                                    converter="SelectableConverter">
-                                    <f:selectItems value="#{fxSelectBean.contentACLs}" />
-                                </t:selectOneListbox>
-                            </ui:fragment>
-                            <ui:fragment rendered="#{srcEditor.readOnly==true}">
-                                <span class="readonlyValue">#{srcEditor.acl.name}</span>
-                            </ui:fragment>
-                        </div>
-                        <div style="width:40px;float:left;padding-top:2px">Step</div>
+                        <ui:fragment rendered="#{srcEditor.supportSecurity}">
+                            <div style="width:40px;float:left;padding-top:2px">#{fxMessageBean['Content.field.ACL']}
+                            </div>
+                            <div style="width:180px;float:left;">
+                                <ui:fragment rendered="#{srcEditor.readOnly==false}">
+                                    <t:selectOneListbox size="1" id="acl" value="#{srcEditor.acl}"
+                                                        converter="SelectableConverter">
+                                        <f:selectItems value="#{fxSelectBean.contentACLs}"/>
+                                    </t:selectOneListbox>
+                                </ui:fragment>
+                                <ui:fragment rendered="#{srcEditor.readOnly==true}">
+                                    <span class="readonlyValue">#{srcEditor.acl.name}</span>
+                                </ui:fragment>
+                            </div>
+                        </ui:fragment>
+                        <ui:fragment rendered="#{not srcEditor.supportSecurity}">
+                            <div style="width:220px;float:left;padding-top:2px" class="warning">#{fxMessageBean['Content.msg.noSecurity']}</div>
+                        </ui:fragment>
+                        <div style="width:40px;float:left;padding-top:2px">#{fxMessageBean['Content.field.step']}</div>
                         <div style="float:left;">
                             <ui:fragment rendered="#{srcEditor.readOnly==false}">
                                 <t:selectOneListbox size="1" id="step" value="#{srcEditor.step}">

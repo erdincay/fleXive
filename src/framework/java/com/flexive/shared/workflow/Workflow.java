@@ -34,8 +34,10 @@
 package com.flexive.shared.workflow;
 
 import com.flexive.shared.AbstractSelectableObject;
+import com.flexive.shared.FxContext;
 import com.flexive.shared.SelectableObject;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.security.UserTicket;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -81,7 +83,7 @@ public class Workflow extends AbstractSelectableObject implements Serializable, 
     /**
      * Returns this workflow as an editable object.
      *
-     * @return  this workflow as an editable object.
+     * @return this workflow as an editable object.
      */
     public WorkflowEdit asEditable() {
         return new WorkflowEdit(this);
@@ -175,6 +177,58 @@ public class Workflow extends AbstractSelectableObject implements Serializable, 
         for (Step s : steps)
             if (s.isLiveStep())
                 return true;
+        return false;
+    }
+
+    /**
+     * Get a list of all possible targets for the given step id
+     *
+     * @param stepId source step id to get all targets for
+     * @return target steps
+     */
+    public List<Step> getTargets(long stepId) {
+        List<Step> res = new ArrayList<Step>(5);
+        UserTicket ticket = FxContext.get().getTicket();
+        for (Route r : getRoutes()) {
+            if (r.getFromStepId() == stepId) {
+                Step step = getStep(r.getToStepId());
+                if (ticket.isGlobalSupervisor() || ticket.isInGroup(r.getGroupId()))
+                    if (!res.contains(step))
+                        res.add(step);
+            }
+        }
+        return res;
+    }
+
+    /**
+     * Get the requested step from the internal list of steps
+     *
+     * @param stepId requested step id
+     * @return Step instance
+     */
+    private Step getStep(long stepId) {
+        for (Step s : steps)
+            if (s.getId() == stepId)
+                return s;
+        throw new FxApplicationException("ex.workflow.route.referencedStep", stepId).asRuntimeException();
+    }
+
+
+    /**
+     * Check if a route from source to dest exists for the calling user
+     *
+     * @param source source step id
+     * @param dest   destination step id
+     * @return does a valid route exist?
+     */
+    public boolean isRouteValid(long source, long dest) {
+        UserTicket ticket = FxContext.get().getTicket();
+        for (Route r : getRoutes()) {
+            if (r.getFromStepId() == source && r.getToStepId() == dest) {
+                if (ticket.isGlobalSupervisor() || ticket.isInGroup(r.getGroupId()))
+                    return true;
+            }
+        }
         return false;
     }
 }

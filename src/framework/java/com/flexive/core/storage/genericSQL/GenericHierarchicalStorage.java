@@ -58,6 +58,7 @@ import com.flexive.shared.structure.*;
 import com.flexive.shared.value.*;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
+import com.flexive.shared.workflow.Workflow;
 import com.flexive.stream.ServerLocation;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -1676,6 +1677,14 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             throw new FxUpdateException(e);
         } catch (FxNotFoundException e) {
             throw new FxUpdateException(e);
+        }
+        if( original.getStepId() != content.getStepId() ) {
+            Workflow wf = env.getWorkflow(env.getStep(content.getStepId()).getWorkflowId());
+            if( !wf.isRouteValid(original.getStepId(), content.getStepId()) ) {
+                throw new FxInvalidParameterException("STEP", "ex.content.step.noRoute", 
+                        env.getStepDefinition(env.getStep(original.getStepId()).getStepDefinitionId()).getLabel().getBestTranslation(),
+                        env.getStepDefinition(env.getStep(content.getStepId()).getStepDefinitionId()).getLabel().getBestTranslation());
+            }
         }
         if (!delta.changes()) {
             if (LOG.isDebugEnabled()) {

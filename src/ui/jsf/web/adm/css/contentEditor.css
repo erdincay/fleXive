@@ -46,6 +46,9 @@
     overflow:hidden;
 }
 
+.warning {
+    color: #AA0000;
+}
 
 .readonlyValue {
     position:relative;
