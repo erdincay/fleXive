@@ -109,8 +109,8 @@
 
                         <!-- PREVIEW -->
                         <ui:fragment rendered="#{srcEditor.content.previewAvailable}">
-                            <img src="thumbnail/pk#{srcEditor.id}.1/s2" alt="image" title="image" border="0"
-                                 style="border:1px solid gray"/>
+                            <img src="thumbnail/pk#{srcEditor.id}.1/s2/ts#{fxSystemBean.currentTimeMillis}"
+                                 alt="image" title="image" border="0" style="border:1px solid gray"/>
                         </ui:fragment>
 
                         <!-- binary support hack -->

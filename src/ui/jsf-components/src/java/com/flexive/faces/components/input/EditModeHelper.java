@@ -386,13 +386,15 @@ class EditModeHelper extends RenderHelper {
     }
 
     private void renderBinary(String inputId, FxLanguage language) throws IOException {
-        if (!value.isEmpty()) {
+        if (!value.isEmpty() && (language == null || value.translationExists(language.getId()))) {
             final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(component, HtmlGraphicImage.COMPONENT_TYPE);
+            final BinaryDescriptor descriptor = ((FxBinary) value).getTranslation(language);
             image.setUrl(ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()),
-                    BinaryDescriptor.PreviewSizes.PREVIEW2, value.getXPath()));
+                    BinaryDescriptor.PreviewSizes.PREVIEW2, value.getXPath(), descriptor.getCreationTime()));
         }
         final HtmlInputFileUpload upload = (HtmlInputFileUpload) FxJsfUtils.addChildComponent(component, HtmlInputFileUpload.COMPONENT_TYPE);
         upload.setId(stripForm(inputId));
+        upload.setStyleClass("fxValueFileInput");
     }
 
     private void renderCheckbox(String inputId, FxLanguage language) throws IOException {

@@ -37,6 +37,11 @@ input.fxValueTextInput {
     float: left;
 }
 
+input.fxValueFileInput {
+    margin-top: 5px;
+    display: block;
+}
+
 div.fxValueInputWidth, div.fxValueInput {
     width: 260px;
 }

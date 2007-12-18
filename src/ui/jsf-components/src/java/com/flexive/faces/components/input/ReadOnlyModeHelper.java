@@ -84,10 +84,12 @@ class ReadOnlyModeHelper extends RenderHelper {
                     final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(component, HtmlGraphicImage.COMPONENT_TYPE);
                     image.setUrl(ThumbnailServlet.getLink(((FxReference) value).getBestTranslation(language), BinaryDescriptor.PreviewSizes.PREVIEW2));
                 }
-            } else if (value instanceof FxBinary) {
+            } else if (value instanceof FxBinary && !value.isEmpty()) {
                 // render preview image
                 final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(component, HtmlGraphicImage.COMPONENT_TYPE);
-                image.setUrl(ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()), BinaryDescriptor.PreviewSizes.PREVIEW2, value.getXPath()));
+                final BinaryDescriptor descriptor = ((FxBinary) value).getTranslation(language);
+                image.setUrl(ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()),
+                        BinaryDescriptor.PreviewSizes.PREVIEW2, value.getXPath(), descriptor.getCreationTime()));
             } else if (component.isFilter() && !(value instanceof FxHTML)) {
                 // escape HTML code and generate <br/> tags for newlines
                 writer.write(FxFormatUtils.escapeForJavaScript(FxValueRendererFactory.getInstance(outputLanguage).format(value, language), true, true));

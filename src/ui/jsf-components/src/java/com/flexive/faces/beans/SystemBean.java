@@ -536,4 +536,13 @@ public class SystemBean implements Serializable {
         }
         return explodedContentMap;
     }
+
+    /**
+     * Returns the current system timestamp.
+     *
+     * @return  the current system timestamp.
+     */
+    public long getCurrentTimeMillis() {
+        return System.currentTimeMillis();
+    }
 }

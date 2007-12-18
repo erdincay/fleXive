@@ -241,10 +241,24 @@ public class ThumbnailServlet implements Servlet {
      * @return a thumbnail link for the given object.
      */
     public static String getLink(FxPK pk, BinaryDescriptor.PreviewSizes size, String xpath) {
+        return getLink(pk, size, xpath, 0);
+    }
+
+    /**
+     * Return a thumbnail link for the given object.
+     *
+     * @param pk    the object id
+     * @param size  the preview size (if null, the default size is used by the servlet)
+     * @param xpath the binary xpath (if null, the default preview for the object will be used)
+     * @param timestamp the binary timestamp, to be added to the URL for fine-grained cache control
+     * @return a thumbnail link for the given object.
+     */
+    public static String getLink(FxPK pk, BinaryDescriptor.PreviewSizes size, String xpath, long timestamp) {
         try {
             return URI_BASE + "pk" + pk + (size != null ? "/s" + size.getBlobIndex() : "")
                     + (StringUtils.isNotBlank(xpath) ? "/xp"
-                    + URLEncoder.encode(FxSharedUtils.escapeXPath(xpath), "UTF-8") : "");
+                    + URLEncoder.encode(FxSharedUtils.escapeXPath(xpath), "UTF-8") : "")
+                    + "/ts" + timestamp;
         } catch (UnsupportedEncodingException e) {
             // shouldn't happen with UTF-8
             throw new IllegalArgumentException(e);
