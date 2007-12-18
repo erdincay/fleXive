@@ -20,6 +20,9 @@
 
             // briefcase methods
             var activeItem = null;
+            var contextBriefcaseId = null;
+            var contextQueryName = null;
+
             function selectBriefcase(caller) {
                 if (activeItem!=null) {
                     if (activeItem.src.indexOf("shared")==-1) {
@@ -58,10 +61,17 @@
 
             function showContextMenu() {
                 var selectionAvailable = !parent.getContentClipboard().isEmpty();
+                contextBriefcaseId = null;
                 findMenuItem(getContextMenu(), "open").setDisabled(getContextBriefcaseId() == -1);
                 findMenuItem(getContextMenu(), "delete").setDisabled(getContextBriefcaseId() == -1);
                 findMenuItem(getContextMenu(), "addSelection").setDisabled(!selectionAvailable);
                 getContextMenu().show_();
+            }
+
+            function showQueryContextMenu() {
+                contextQueryName = null;
+                getContextQueryName();
+                getQueryContextMenu().show_();
             }
 
             function openBriefcase(menuItem) {
@@ -125,8 +135,11 @@
 
             // Returns the briefcase ID where the context menu was opened
             function getContextBriefcaseId() {
-                var parent = findParentWithAttribute(getContextMenu().openEvent, "briefcaseId");
-                return parent != null ? parent.getAttribute("briefcaseId") : -1;
+                if (contextBriefcaseId == null) {
+                    var parent = findParentWithAttribute(getContextMenu().openEvent, "briefcaseId");
+                    contextBriefcaseId = parent != null ? parent.getAttribute("briefcaseId") : -1;
+                }
+                return contextBriefcaseId;
             }
 
             // create a new search query
@@ -137,6 +150,11 @@
             // open an existing query
             function openQuery(name) {
                 invokeContentAction("adm/search/query.jsf", "load", {"name": name});
+            }
+
+            // open the query via context menu
+            function openContextQuery(name) {
+                openQuery(getContextQueryName());
             }
 
             // delete a query
@@ -157,8 +175,11 @@
             }
 
             function getContextQueryName() {
-                var parent = findParentWithAttribute(getQueryContextMenu().openEvent, "queryName");
-                return parent != null ? parent.getAttribute("queryName") : null;
+                if (contextQueryName == null) {
+                    var parent = findParentWithAttribute(getQueryContextMenu().openEvent, "queryName");
+                    contextQueryName = parent != null ? parent.getAttribute("queryName") : null;
+                }
+                return contextQueryName;
             }
 
             // ------------ initialize the panels ---------------------
@@ -191,6 +212,7 @@
         <br clear="all"/>
         
         <h5>#{fxMessageBean['Briefcase.label.briefcases']}</h5>
+        <a href="javascript:createBriefcase()">#{fxMessageBean['Briefcase.button.create']}</a>
         <div id="briefcaseContainer">
 
         </div>
@@ -213,8 +235,8 @@
             <fx:menuItem id="createBriefcase" icon="createBriefcase" labelKey="Briefcase.menu.create" clickHandler="createBriefcase"/>
         </fx:menu>
 
-        <fx:menu name="queryContextMenu" contextMenuTarget="queryContainer">
-            <fx:menuItem id="open" icon="open" labelKey="SearchQueries.contextMenu.open" clickHandler="function() { openQuery(getContextQueryName()); }"/>
+        <fx:menu name="queryContextMenu" contextMenuTarget="queryContainer" showHandler="showQueryContextMenu">
+            <fx:menuItem id="open" icon="open" labelKey="SearchQueries.contextMenu.open" clickHandler="openContextQuery"/>
             <fx:menuItem id="delete" icon="remove" labelKey="SearchQueries.contextMenu.delete" clickHandler="deleteQuery"/>
         </fx:menu>
 

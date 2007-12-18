@@ -172,7 +172,13 @@ public class MessageBean extends HashMap {
                 System.arraycopy(arr, 1, sParams, 0, sParams.length);
                 for (int i = 1; i < arr.length; i++) {
                     // evaluate parameters
-                    Object value = FxJsfUtils.evalObject(arr[i]);
+                    Object value;
+                    try {
+                        value = FxJsfUtils.evalObject(arr[i]);
+                    } catch (Exception e) {
+                        LOG.warn("Failed to evaluate parameter " + arr[i] + ": " + e.getMessage(), e);
+                        value = "";
+                    }
                     //noinspection unchecked
                     sParams[i - 1] = value != null
                             ? (value instanceof FxValue

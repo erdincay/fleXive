@@ -41,6 +41,7 @@ import com.flexive.faces.model.FxResultSetDataModel;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.search.*;
 import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.search.query.SqlQueryBuilder;
@@ -496,7 +497,11 @@ public class SearchResultBean implements ActionBean, Serializable {
             return null;
         }
         if (briefcase == null || briefcase.getId() != briefcaseId) {
-            briefcase = EJBLookup.getBriefcaseEngine().load(briefcaseId);
+            try {
+                briefcase = EJBLookup.getBriefcaseEngine().load(briefcaseId);
+            } catch (FxNotFoundException e) {
+                getSessionData().setBriefcaseId(-1);
+            }
         }
         return briefcase;
     }
