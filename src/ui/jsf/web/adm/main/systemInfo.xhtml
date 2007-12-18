@@ -18,8 +18,8 @@
             <adm:tab label="#{fxMessageBean['SystemInfo.tabtitle.main']}" active="true" id="tab1"/>
 
             <a4j:outputPanel id="systemInfos">
-                <!-- General system/runtime information -->
-                <fx:fieldSet legend="#{fxMessageBean['SystemInfo.group.general']}" width="450">
+                <!-- General system/runtime information  -->
+                <fx:fieldSet legend="#{fxMessageBean['SystemInfo.group.general']}">
                     <fx:formRow label="#{fxMessageBean['SystemInfo.field.dateTime']}">
                         #{systemInfoBean.dateTime}
                     </fx:formRow>
@@ -35,6 +35,17 @@
                     <fx:formRow label="#{fxMessageBean['SystemInfo.field.memory']}">
                         #{systemInfoBean.freeMemoryMB}
                     </fx:formRow>
+                    <fx:formRow label="#{fxMessageBean['SystemInfo.field.im.available']}">
+                        #{systemInfoBean.IMAvailable}
+                    </fx:formRow>
+                    <ui:fragment rendered="#{systemInfoBean.IMAvailable}">
+                    <fx:formRow label="#{fxMessageBean['SystemInfo.field.im.version']}">
+                        #{systemInfoBean.IMVersion}
+                    </fx:formRow>
+                    <fx:formRow label="#{fxMessageBean['SystemInfo.field.im.identify']}">
+                        #{systemInfoBean.useIMIdentify}
+                    </fx:formRow>
+                    </ui:fragment>
                 </fx:fieldSet>
 
                 <a4j:commandButton id="refreshButton" reRender="systemInfos"

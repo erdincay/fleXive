@@ -66,11 +66,11 @@ void process(cmap, key, rawvalue) {
 
 try {
     if (binValue.isNewBinary()) {
-        println "Processing a new descriptor (got to load meta/mime from transit)..."
+//        println "Processing a new descriptor (got to load meta/mime from transit)..."
     }
-    println "Meta data (first 20 chars): ${binValue.metadata.substring(0, 20)}...";
+//    println "Meta data (first 20 chars): ${binValue.metadata.substring(0, 20)}...";
 
-    println "Image name: " + binValue.name
+//    println "Image name: " + binValue.name
     if (content.getValue("/FILENAME").isEmpty())
         content.setValue("/FILENAME", new FxString(false, binValue.name))
 
@@ -130,7 +130,7 @@ try {
         def _type = key.split('\\|')[0]
         def fxvalue
         key = key.split("\\|")[1]
-        println "${key} -> ${value} (${_type})"
+//        println "${key} -> ${value} (${_type})"
         switch (_type) {
             case "String": fxvalue = new FxString(key=="Caption", value); break
             case "Number":
@@ -157,9 +157,9 @@ try {
                     }
                 }
         }
-        println "fxValue[$key]=$fxvalue"
+//        println "fxValue[$key]=$fxvalue"
         content.setValue("/" + key, fxvalue);
-        println "set ok"
+//        println "set ok"
     }
 
     return content

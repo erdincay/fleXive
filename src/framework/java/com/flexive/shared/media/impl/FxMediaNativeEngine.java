@@ -36,13 +36,21 @@ package com.flexive.shared.media.impl;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.media.FxMetadata;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.sanselan.ImageFormat;
 import org.apache.sanselan.ImageInfo;
 import org.apache.sanselan.Sanselan;
 import org.apache.sanselan.common.IImageMetadata;
 import org.apache.sanselan.common.ImageMetadata;
 
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -53,6 +61,7 @@ import java.util.List;
  * @version $Rev
  */
 public class FxMediaNativeEngine {
+    private static final transient Log LOG = LogFactory.getLog(FxMediaNativeEngine.class);
 
 
     /**
@@ -67,7 +76,63 @@ public class FxMediaNativeEngine {
      * @throws FxApplicationException on errors
      */
     public static int[] scale(File original, File scaled, String extension, int width, int height) throws FxApplicationException {
-        throw new FxApplicationException("ex.general.notImplemented", "scaling using " + FxMediaNativeEngine.class.getName());
+        BufferedImage bi;
+        try {
+            bi = ImageIO.read(original);
+        } catch (Exception e) {
+            LOG.info("Failed to read " + original.getName() + " using ImageIO, trying sanselan");
+            try {
+                bi = Sanselan.getBufferedImage(original);
+            } catch (Exception e1) {
+                throw new FxApplicationException(LOG, "ex.media.readFallback.error", original.getName(), extension, e.getMessage(), e1.getMessage());
+            }
+        }
+        int scaleWidth = bi.getWidth(null);
+        int scaleHeight = bi.getHeight(null);
+        double scaleX = (double) width / scaleWidth;
+        double scaleY = (double) height / scaleHeight;
+        double scale = Math.min(scaleX, scaleY);
+        scaleWidth = (int) ((double) scaleWidth * scale);
+        scaleHeight = (int) ((double) scaleHeight * scale);
+        Image scaledImage;
+        GraphicsConfiguration gc = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
+        BufferedImage bi2 = gc.createCompatibleImage(scaleWidth, scaleHeight, bi.getTransparency());
+        Graphics2D g = bi2.createGraphics();
+        if (scale < 0.3) {
+            scaledImage = bi.getScaledInstance(scaleWidth, scaleHeight, Image.SCALE_SMOOTH);
+            new ImageIcon(scaledImage).getImage();
+            g.drawImage(scaledImage, 0, 0, scaleWidth, scaleHeight, null);
+        } else {
+            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+            g.drawImage(bi, 0, 0, scaleWidth, scaleHeight, null);
+        }
+        String eMsg;
+        boolean fallback;
+        try {
+            fallback = !ImageIO.write(bi2, extension.substring(1), scaled);
+            eMsg = "No ImageIO writer found.";
+        } catch (Exception e) {
+            eMsg = e.getMessage();
+            fallback = true;
+        }
+        if (fallback) {
+            try {
+                ImageFormat iFormat;
+                if (".BMP".equals(extension))
+                    iFormat = ImageFormat.IMAGE_FORMAT_BMP;
+                else if (".TIF".equals(extension))
+                    iFormat = ImageFormat.IMAGE_FORMAT_TIFF;
+                else if( ".PNG".equals(extension) )
+                    iFormat = ImageFormat.IMAGE_FORMAT_PNG;
+                else
+                    iFormat = ImageFormat.IMAGE_FORMAT_GIF;
+                Sanselan.writeImage(bi2, scaled, iFormat, new HashMap());
+            } catch (Exception e1) {
+                throw new FxApplicationException(LOG, "ex.media.write.error", scaled.getName(), extension,
+                        eMsg + ", " + e1.getMessage());
+            }
+        }
+        return new int[]{scaleWidth, scaleHeight};
     }
 
     /**
@@ -83,7 +148,7 @@ public class FxMediaNativeEngine {
             ImageInfo sii = Sanselan.getImageInfo(file);
             IImageMetadata md = Sanselan.getMetadata(file);
             List<FxMetadata.FxMetadataItem> metaItems;
-            if( md == null || md.getItems() == null )
+            if (md == null || md.getItems() == null)
                 metaItems = new ArrayList<FxMetadata.FxMetadataItem>(0);
             else {
                 metaItems = new ArrayList<FxMetadata.FxMetadataItem>(md.getItems().size());

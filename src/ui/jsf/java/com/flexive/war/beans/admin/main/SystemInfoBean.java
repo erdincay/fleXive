@@ -33,6 +33,8 @@
  ***************************************************************/
 package com.flexive.war.beans.admin.main;
 
+import com.flexive.shared.media.FxMediaEngine;
+
 import java.util.Date;
 import java.util.Formatter;
 
@@ -68,5 +70,17 @@ public class SystemInfoBean {
 
     public String getOperatingSystem() {
         return System.getProperty("os.name") + " " + System.getProperty("os.arch");
+    }
+
+    public boolean isIMAvailable() {
+        return FxMediaEngine.hasImageMagickInstalled();
+    }
+
+    public String getIMVersion() {
+        return FxMediaEngine.getImageMagickVersion();
+    }
+    
+    public boolean isUseIMIdentify() {
+        return FxMediaEngine.isImageMagickIdentifySupported();
     }
 }
