@@ -292,13 +292,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
         try {
             String action = FxJsfUtils.getParameter("action");
             if (StringUtils.isBlank(action)) {
-                // no action requested
-                if (this.isInitialized() && FxJsfUtils.getRequest().getParameterMap().size() == 0) {
-                    return null;
-                } else {
-                    // most likely a a4j call
-                    return null;
-                }
+                return null;
             }
             if ("newInstance".equals(action)) {
                 long typeId = FxJsfUtils.getLongParameter("typeId", -1);
@@ -459,7 +453,6 @@ public class ContentEditorBean implements ActionBean, Serializable {
     public String load() {
         content = null;
         _init();
-        readOnly = true;
         return getEditorPage();
     }
 

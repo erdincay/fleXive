@@ -581,6 +581,12 @@ public class MySQLDataFilter extends DataFilter {
                 value = "" + FxValueConverter.toDateTime(constant.getValue()).getTime();
                 break;
             case Binary:
+                if (cond.getComperator().equals(Condition.COMPERATOR.IS_NOT) && constant.isNull()) {
+                    value = "NULL";
+                    break;
+                }
+                throw new FxSqlSearchException("ex.sqlSearch.reader.type.invalidOperator",
+                        entry.getProperty().getDataType(), cond.getComperator());
             case DateRange:
             case DateTimeRange:
             case Reference:
