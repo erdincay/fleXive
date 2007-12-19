@@ -175,7 +175,7 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
     private synchronized void loadAll() {
         String sql = "SELECT l.LANG_CODE, l.ISO_CODE, t.LANG, t.DESCRIPTION FROM " + DatabaseConst.TBL_LANG + " l, " +
                 DatabaseConst.TBL_LANG + DatabaseConst.ML + " t " +
-                "WHERE t.LANG_CODE=l.LANG_CODE ORDER BY l.LANG_CODE ASC";
+                "WHERE t.LANG_CODE=l.LANG_CODE AND l.INUSE=TRUE ORDER BY l.DISPPOS ASC";
         Connection con = null;
         Statement stmt = null;
         try {
