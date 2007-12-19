@@ -100,13 +100,22 @@ public class FxThumbnailURIConfigurator {
             }
             if (size == 0 && pSize.matcher(element).matches())
                 size = Integer.parseInt(element.substring(1));
+            if (lang == null && pLang.matcher(element).matches())
+                lang = element.substring(4);
+            if (langFallback == null && pLangFallback.matcher(element).matches())
+                langFallback = "1".equals(element.substring(3));
         }
+        if( xp == null )
+            xp = "/";
     }
 
     public boolean hasPK() {
         return pk != null;
     }
 
+    public String getXPath() {
+        return xp;
+    }
 
     public FxPK getPK() {
         return pk;

@@ -136,7 +136,8 @@ public interface ContentEngine {
      *
      * @param pk primary key of the content to remove
      * @throws FxApplicationException TODO
-     * @throws com.flexive.shared.exceptions.FxRemoveException      on errors
+     * @throws com.flexive.shared.exceptions.FxRemoveException
+     *                                on errors
      * @throws FxNoAccessException    on errors
      */
     void remove(FxPK pk) throws FxApplicationException;
@@ -147,7 +148,8 @@ public interface ContentEngine {
      *
      * @param pk primary key of a distinct version to remove
      * @throws FxApplicationException TODO
-     * @throws com.flexive.shared.exceptions.FxRemoveException      on errors
+     * @throws com.flexive.shared.exceptions.FxRemoveException
+     *                                on errors
      * @throws FxNoAccessException    on errors
      */
     void removeVersion(FxPK pk) throws FxApplicationException;
@@ -159,7 +161,8 @@ public interface ContentEngine {
      * @param typeId affected FxType
      * @return number of instances removed
      * @throws FxApplicationException TODO
-     * @throws com.flexive.shared.exceptions.FxRemoveException      on errors
+     * @throws com.flexive.shared.exceptions.FxRemoveException
+     *                                on errors
      */
     int removeForType(long typeId) throws FxApplicationException;
 
@@ -190,4 +193,18 @@ public interface ContentEngine {
      * @throws FxApplicationException on errors
      */
     int getReferencedContentCount(FxPK pk) throws FxApplicationException;
+
+    /**
+     * Get the binary id for the given XPath.
+     * The root ("/") XPath will return the contents preview binary id.
+     * An invalid XPath or no associated binary id will throw an FxNotFoundException or
+     * FxInvalidParameterException.
+     * Security will be checked and FxNoAccessException thrown if restricted.
+     *
+     * @param pk    primary key
+     * @param xpath XPath
+     * @return binary id
+     * @throws FxApplicationException on errors
+     */
+    long getBinaryId(FxPK pk, String xpath) throws FxApplicationException;
 }

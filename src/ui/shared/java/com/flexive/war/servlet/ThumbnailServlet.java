@@ -36,7 +36,7 @@ package com.flexive.war.servlet;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.content.FxContentSecurityInfo;
+import com.flexive.shared.XPathElement;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNoAccessException;
@@ -92,7 +92,11 @@ import java.util.Map;
  * <p/>
  * <br/>
  * Examples:
- * <code>/thumbnail/s0/w100/h300/pk4711/vermax/rot90/test.jpg</code>
+ * <code>/thumbnail/pk27.1/s21/test.jpg</code>
+ * <code>/thumbnail/s0/w100/h300/pk4711.MAX/vermax/rot90/test.jpg</code>
+ *
+ * TODO:
+ * rotate, flip, scale and crop are not implemented yet and have no effect!
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
@@ -159,22 +163,7 @@ public class ThumbnailServlet implements Servlet {
     public void service(ServletRequest servletRequest, ServletResponse servletResponse) throws ServletException, IOException {
         final HttpServletRequest request = (HttpServletRequest) servletRequest;
         final HttpServletResponse response = (HttpServletResponse) servletResponse;
-        // Primary key: last path element, oid.version
         final String uri = request.getRequestURI();
-        /*final String prefix = request.getContextPath() + URI_BASE;
-        final String pkValue = uri.substring(uri.lastIndexOf('/') + 1);
-        final FxPK pk;
-        try {
-            final String idValue = pkValue.split("\\.")[0];
-            final String versionValue = pkValue.split("\\.")[1];
-            pk = new FxPK(Long.parseLong(idValue), Integer.parseInt(versionValue));
-        } catch (Exception e) {
-            final String msg = "Invalid PK: " + pkValue;
-            LOG.error(msg, e);
-            FxServletUtils.sendErrorMessage(response, msg);
-            return;
-        }
-        final Map<String, String> params = decodeParameters(uri, prefix);*/
         FxThumbnailURIConfigurator conf = new FxThumbnailURIConfigurator(URLDecoder.decode(uri, "UTF-8"));
         if (conf.getPK() == null) {
             if (LOG.isDebugEnabled()) {
@@ -183,42 +172,23 @@ public class ThumbnailServlet implements Servlet {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
-        //System.out.println("Serving thumbnail for " + conf.getPK()+" size:"+conf.getSize());
-//        EJBLookup.getContentInterface().getContentSecurityInfo(conf.getPK()).
-//        System.out.println("Params: " + params);
-
-        long previewId;
+        long binaryId;
         try {
-            FxContentSecurityInfo si = EJBLookup.getContentEngine().getContentSecurityInfo(conf.getPK());
-            previewId = si.getPreviewId();
-            // TODO authorization check
+            //authorization check and binary lookup
+            binaryId = EJBLookup.getContentEngine().getBinaryId(conf.getPK(), XPathElement.stripType(conf.getXPath()));
         } catch (FxNoAccessException na) {
-            previewId = BinaryDescriptor.SYS_NOACCESS;
+            binaryId = BinaryDescriptor.SYS_NOACCESS;
         } catch (FxApplicationException e) {
-            previewId = BinaryDescriptor.SYS_UNKNOWN;
+            binaryId = BinaryDescriptor.SYS_UNKNOWN;
         }
         try {
             response.setDateHeader("Expires", System.currentTimeMillis() + 24L * 3600 * 1000);
             FxStreamUtils.downloadBinary(new ThumbnailBinaryCallback(response),
-                    CacheAdmin.getStreamServers(), response.getOutputStream(), previewId, conf.getSize());
+                    CacheAdmin.getStreamServers(), response.getOutputStream(), binaryId, conf.getSize());
         } catch (FxStreamException e) {
-            e.printStackTrace();
+            LOG.error(e);
             response.sendRedirect(request.getContextPath() + "/adm/images/layout/Logo_Flexive.gif");
         }
-    }
-
-    private Map<String, String> decodeParameters(String uri, String prefix) {
-        final String[] params = uri.substring(prefix.length(), Math.max(prefix.length(), uri.lastIndexOf('/'))).split(",");
-        final Map<String, String> paramMap = new HashMap<String, String>();
-        for (String param : params) {
-            final String[] value = param.split("_");
-            if (value.length != 2) {
-                LOG.debug("Invalid parameter for thumbnail servlet (ignored): " + param);
-                continue;
-            }
-            paramMap.put(value[0], value[1]);
-        }
-        return paramMap;
     }
 
     /**

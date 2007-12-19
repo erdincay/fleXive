@@ -53,6 +53,7 @@ import com.flexive.shared.structure.FxAssignment;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.BinaryDescriptor;
+import com.flexive.shared.value.FxBinary;
 import com.flexive.shared.workflow.Step;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -114,7 +115,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                 if (acls.length > 0)
                     acl = acls[0];
                 else {
-                    if( type.useInstancePermissions() )
+                    if (type.useInstancePermissions())
                         throw new FxNoAccessException("ex.content.noSuitableACL", type.getName());
                     else
                         acl = ACL.Category.INSTANCE.getDefaultId();
@@ -315,7 +316,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             }
             if (content.getPk().isNew()) {
                 pk = storage.contentCreate(con, env, null, seq.getId(SequencerEngine.System.CONTENT), content);
-                if( LOG.isDebugEnabled() )
+                if (LOG.isDebugEnabled())
                     LOG.debug("creating new content for type " + CacheAdmin.getEnvironment().getType(content.getTypeId()).getName());
             } else {
                 pk = storage.contentSave(con, env, null, content, EJBLookup.getConfigurationEngine().get(SystemParameters.TREE_FQN_PROPERTY));
@@ -552,7 +553,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             FxContentSecurityInfo si = StorageManager.getContentStorage(pk.getStorageMode()).getContentSecurityInfo(con, pk);
             FxPermissionUtils.checkPermission(FxContext.get().getTicket(), ACL.Permission.DELETE, si, true);
             //security check end
-            
+
             storage.contentRemoveVersion(con, pk);
         } catch (FxNotFoundException e) {
             ctx.setRollbackOnly();
@@ -621,7 +622,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             }
             int removed = storage.contentRemoveForType(con, type);
             if (scriptsAfter != null) {
-                if( pks == null )
+                if (pks == null)
                     pks = storage.getPKsForType(con, type, false);
                 for (FxPK pk : pks) {
                     binding.getProperties().remove("securityInfo");
@@ -710,6 +711,42 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             ContentStorage storage = StorageManager.getContentStorage(pk.getStorageMode());
             con = Database.getDbConnection();
             return storage.getReferencedContentCount(con, pk.getId());
+        } catch (FxNotFoundException e) {
+            throw new FxLoadException(e);
+        } catch (SQLException e) {
+            throw new FxLoadException(LOG, e, "ex.db.sqlError", e.getMessage());
+        } finally {
+            Database.closeObjects(ContentEngineBean.class, con, null);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public long getBinaryId(FxPK pk, String xpath) throws FxApplicationException {
+        FxSharedUtils.checkParameterNull(pk, "pk");
+        FxSharedUtils.checkParameterNull(xpath, "xpath");
+        Connection con = null;
+        try {
+            ContentStorage storage = StorageManager.getContentStorage(pk.getStorageMode());
+            con = Database.getDbConnection();
+            FxContent co = load(pk);
+            UserTicket ticket = FxContext.get().getTicket();
+            if (xpath.equals("/")) {
+                if (!ticket.isGlobalSupervisor()) {
+                    FxType type = CacheAdmin.getEnvironment().getType(co.getTypeId());
+                    if (type.usePermissions()) {
+                        FxContentSecurityInfo si = storage.getContentSecurityInfo(con, pk);
+                        FxPermissionUtils.checkPermission(ticket, ACL.Permission.READ, si, true);
+                    }
+                }
+                return co.getBinaryPreviewId();
+            }
+            FxPropertyData pd = co.getPropertyData(xpath);
+            if (!pd.getValue().isEmpty() && pd.getValue() instanceof FxBinary)
+                return ((FxBinary) pd.getValue()).getBestTranslation(ticket).getId();
+            throw new FxInvalidParameterException("XPATH", "ex.content.binary.xpath.invalid", xpath);
         } catch (FxNotFoundException e) {
             throw new FxLoadException(e);
         } catch (SQLException e) {

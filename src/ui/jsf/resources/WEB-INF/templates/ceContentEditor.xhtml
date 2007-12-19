@@ -18,7 +18,7 @@
 
             <!-- Content select screen -->
             <ui:fragment rendered="#{srcEditor.initialized==false}">
-                <adm:tab label="Choose Content Type" active="true" id="tabChoose"/>
+                <adm:tab label="#{fxMessageBean['Content.tabtitle.chooseType']}" active="true" id="tabChoose"/>
                 <t:selectOneListbox size="1" id="type" value="#{srcEditor.type}">
                     <f:selectItems value="#{srcEditor.editableTypes}" />
                 </t:selectOneListbox>
@@ -30,16 +30,16 @@
 
             <!-- Content editor screen -->
             <ui:fragment rendered="#{srcEditor.initialized==true}">
-
+                <c:set var="currentId" value="${srcEditor.id}"/>
                 <ui:fragment rendered="#{srcEditor.new}">
-                    <adm:tab label="Content Editor [New]" active="true" id="tabEditNew"/>
+                    <adm:tab label="#{fxMessageBean['Content.tabtitle.new']}" active="true" id="tabEditNew"/>
                 </ui:fragment>
                 <ui:fragment rendered="#{srcEditor.new==false}">
                     <ui:fragment rendered="#{srcEditor.readOnly==true}">
-                      <adm:tab label="Content Editor ##{srcEditor.id}.#{srcEditor.version} [readonly]" active="true" id="tabEditInit1"/>
+                      <adm:tab label="#{fxMessageBean['Content.tabtitle.readonly,#{contentEditorBean.id},#{contentEditorBean.version}']}" active="true" id="tabEditInit1"/>
                     </ui:fragment>
                     <ui:fragment rendered="#{srcEditor.readOnly==false}">
-                      <adm:tab label="Content Editor ##{srcEditor.id}.#{srcEditor.version}" active="true" id="tabEditInit2"/>
+                      <adm:tab label="#{fxMessageBean['Content.tabtitle.edit,#{contentEditorBean.id},#{contentEditorBean.version}']}" active="true" id="tabEditInit2"/>
                     </ui:fragment>
                 </ui:fragment>
 
@@ -56,7 +56,7 @@
                                 } else {
                                     parent.lockScreen();
                                     _iframe.getElementById('myForm').submit();
-                                    document.getElementById("uploadInfo"+id).innerHTML='upload laeuft';
+                                    document.getElementById("uploadInfo"+id).innerHTML='uploading...';
                                 }
                             }
 
@@ -132,8 +132,8 @@
                                         srcEditor="#{srcEditor}"/>
                                 <div class="display" style="padding-top:2px;width:400px">
                                     #{srcEditor.typeDisplay}
-                                    <ui:fragment rendered="#{srcEditor.new}"> [new]</ui:fragment>
-                                    <ui:fragment rendered="#{srcEditor.new==false}"> [#{srcEditor.id}.#{srcEditor.version}]</ui:fragment>
+                                    <ui:fragment rendered="#{srcEditor.new}"> #{fxMessageBean['Content.flag.new']}</ui:fragment>
+                                    <ui:fragment rendered="#{srcEditor.new==false}"> #{fxMessageBean['Content.flag.existing,#{contentEditorBean.id},#{contentEditorBean.version}']}</ui:fragment>
                                 </div>
                             </div>
                             <br style="clear:both;margin-bottom:7px"/>
