@@ -34,7 +34,8 @@
                     </div>
                     <div class="value" readonly="#{srcEditor.readOnly}">
 
-                        <fx:fxValueInput value="#{srcEditor.data[element.XPathFull]}" readOnly="#{srcEditor.readOnly}"/>
+                        <fx:fxValueInput value="#{srcEditor.data[element.XPathFull]}" readOnly="#{srcEditor.readOnly}"
+                                onchange="#{element.value.class=='class com.flexive.shared.value.FxBinary' ? 'fileInputChanged()' : ''}"/>
 
                         <c:if test="#{element.value.class=='class com.flexive.shared.value.FxBinary' and not srcEditor.data[element.XPathFull].isEmpty}">
                             <br/>

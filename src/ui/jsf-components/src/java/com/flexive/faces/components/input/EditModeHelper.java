@@ -312,10 +312,10 @@ class EditModeHelper extends RenderHelper {
         }
     }
 
-    private void addHtmlAttributes(UIComponent listbox) {
+    private void addHtmlAttributes(UIComponent target) {
         if (component.getOnchange() != null) {
             //noinspection unchecked
-            listbox.getAttributes().put("onchange", component.getOnchange());
+            target.getAttributes().put("onchange", component.getOnchange());
         }
     }
 
@@ -393,8 +393,8 @@ class EditModeHelper extends RenderHelper {
                     BinaryDescriptor.PreviewSizes.PREVIEW2, value.getXPath(), descriptor.getCreationTime()));
         }
         final HtmlInputFileUpload upload = (HtmlInputFileUpload) FxJsfUtils.addChildComponent(component, HtmlInputFileUpload.COMPONENT_TYPE);
-        upload.setOnchange("fileInputChanged()");
-        upload.setId("fileUpload"+FxJsfUtils.encodeJSFIdentifier(XPathElement.stripType(value.getXPath())));
+        addHtmlAttributes(upload);
+        upload.setId(stripForm(inputId));
         upload.setStyleClass("fxValueFileInput");
     }
 

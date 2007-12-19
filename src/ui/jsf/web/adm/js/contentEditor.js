@@ -54,10 +54,9 @@ function preA4jAction(xpath,action) {
     if (dirtyFileInputs) {
         // If a file input was changed we need to submit the whole form, since a4j XhtmlHttpRequests
         // are not able to process binaries.
-        var storeButton = document.getElementById("frm:storeButton");
         document.getElementById("frm:editorActionName").value=action;
         document.getElementById("frm:editorActionXpath").value=xpath;
-        var ignore = storeButton.onclick();
+        document.forms["frm"].submit();
         return false;
     } else {
         // If no file input was changed we can use the a4j XhtmlHttpRequest for submiting the
