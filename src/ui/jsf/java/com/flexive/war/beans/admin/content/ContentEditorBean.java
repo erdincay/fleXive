@@ -166,20 +166,22 @@ public class ContentEditorBean implements ActionBean, Serializable {
     }
 
     private void processAction() {
-        if (editorActionName == null || editorActionXpath == null ||
-                editorActionName.length() == 0 || editorActionXpath.length() == 0) {
+        if (StringUtils.isBlank(editorActionName) || StringUtils.isBlank(editorActionXpath)) {
             return;
         }
         try {
-            List<FxData> data = content.getData(editorActionXpath);
+            final List<FxData> data = content.getData(editorActionXpath);
             setElement(data.get(0));
             if (editorActionName.equalsIgnoreCase("addProperty")) {
                 addElement(null);
             } else if (editorActionName.equalsIgnoreCase("removeProperty")) {
                 removeElement(null);
             }
-        } catch (Throwable t) {
-            System.err.println(t.getMessage());
+            editorActionName = null;
+            editorActionXpath = null;
+        } catch (Exception e) {
+            LOG.warn("Failed to execute content editor action " + editorActionName + " for XPath "
+                + editorActionXpath + ": " + e.getMessage(), e);
         }
     }
 
@@ -289,6 +291,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
      * {@inheritDoc}
      */
     public String getParseRequestParameters() throws FxApplicationException {
+        processAction();    // execute from content editor javascript
         try {
             String action = FxJsfUtils.getParameter("action");
             if (StringUtils.isBlank(action)) {
