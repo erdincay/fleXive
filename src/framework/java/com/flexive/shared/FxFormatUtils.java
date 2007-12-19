@@ -286,7 +286,7 @@ public final class FxFormatUtils {
      * @param values     either FxString, FxException or any Object using toString()
      * @return formatted resource
      */
-    public static String formatResource(String resource, int languageId, Object... values) {
+    public static String formatResource(String resource, long languageId, Object... values) {
         if (resource == null)
             return "";
         StringBuffer msg = new StringBuffer((int) (resource.length() * 1.5));

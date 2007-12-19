@@ -94,7 +94,7 @@ public final class FxNoAccess extends FxValue<Object, FxNoAccess> {
      * {@inheritDoc}
      */
     @Override
-    public int getDefaultLanguage() {
+    public long getDefaultLanguage() {
         return wrappedValue.getDefaultLanguage();
     }
 
@@ -118,7 +118,7 @@ public final class FxNoAccess extends FxValue<Object, FxNoAccess> {
      * {@inheritDoc}
      */
     @Override
-    public String getBestTranslation(int lang) {
+    public String getBestTranslation(long lang) {
         return noAccess;
     }
 
@@ -126,7 +126,7 @@ public final class FxNoAccess extends FxValue<Object, FxNoAccess> {
      * {@inheritDoc}
      */
     @Override
-    public Integer[] getTranslatedLanguages() {
+    public Long[] getTranslatedLanguages() {
         return wrappedValue.getTranslatedLanguages();
     }
 
@@ -134,7 +134,7 @@ public final class FxNoAccess extends FxValue<Object, FxNoAccess> {
      * {@inheritDoc}
      */
     @Override
-    public boolean translationExists(int languageId) {
+    public boolean translationExists(long languageId) {
         return wrappedValue.translationExists(languageId);
     }
 

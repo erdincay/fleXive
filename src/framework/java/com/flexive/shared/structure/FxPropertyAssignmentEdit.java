@@ -66,7 +66,8 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
         super(pa.getId(), pa.isEnabled(), pa.getAssignedType(), pa.getAlias(), pa.getXPath(),
                 pa.getPosition(), new FxMultiplicity(pa.getMultiplicity()), pa.getDefaultMultiplicity(),
                 pa.getParentGroupAssignment(), pa.getBaseAssignmentId(), pa.getLabel() == null ? null : pa.getLabel().copy(),
-                pa.getHint() == null ? null : pa.getHint().copy(), pa.getDefaultValue() == null ? null : pa.getDefaultValue().copy(), pa.getProperty().asEditable(), new ACL(pa.getACL()), pa.getDefaultLanguage(), FxStructureOption.cloneOptions(pa.options));
+                pa.getHint() == null ? null : pa.getHint().copy(), pa.getDefaultValue() == null ? null : pa.getDefaultValue().copy(),
+                pa.getProperty().asEditable(), new ACL(pa.getACL()), pa.getDefaultLanguage(), FxStructureOption.cloneOptions(pa.options));
         if (pa.isSystemInternal())
             _setSystemInternal();
         this.isNew = false;
@@ -189,7 +190,7 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
      * @param language the default language
      * @return this
      */
-    public FxPropertyAssignmentEdit setDefaultLanguage(int language) {
+    public FxPropertyAssignmentEdit setDefaultLanguage(long language) {
         if (this.isMultiLang())
             this.defaultLang = language;
         return this;

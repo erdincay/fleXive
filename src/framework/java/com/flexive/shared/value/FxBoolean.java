@@ -54,7 +54,7 @@ public class FxBoolean extends FxValue<Boolean, FxBoolean> implements Serializab
      * @param defaultLanguage the default language
      * @param translations    HashMap containing language->translation mapping
      */
-    public FxBoolean(boolean multiLanguage, int defaultLanguage, Map<Integer, Boolean> translations) {
+    public FxBoolean(boolean multiLanguage, long defaultLanguage, Map<Long, Boolean> translations) {
         super(multiLanguage, defaultLanguage, translations);
     }
 
@@ -64,7 +64,7 @@ public class FxBoolean extends FxValue<Boolean, FxBoolean> implements Serializab
      * @param defaultLanguage the default language
      * @param translations    HashMap containing language->translation mapping
      */
-    public FxBoolean(int defaultLanguage, Map<Integer, Boolean> translations) {
+    public FxBoolean(long defaultLanguage, Map<Long, Boolean> translations) {
         super(defaultLanguage, translations);
     }
 
@@ -74,7 +74,7 @@ public class FxBoolean extends FxValue<Boolean, FxBoolean> implements Serializab
      * @param multiLanguage multilanguage value?
      * @param translations  HashMap containing language->translation mapping
      */
-    public FxBoolean(boolean multiLanguage, Map<Integer, Boolean> translations) {
+    public FxBoolean(boolean multiLanguage, Map<Long, Boolean> translations) {
         super(multiLanguage, translations);
     }
 
@@ -83,7 +83,7 @@ public class FxBoolean extends FxValue<Boolean, FxBoolean> implements Serializab
      *
      * @param translations HashMap containing language->translation mapping
      */
-    public FxBoolean(Map<Integer, Boolean> translations) {
+    public FxBoolean(Map<Long, Boolean> translations) {
         super(translations);
     }
 
@@ -93,7 +93,7 @@ public class FxBoolean extends FxValue<Boolean, FxBoolean> implements Serializab
      * @param translations HashMap containing language->translation mapping
      * @param pos          position (index) in the array to use
      */
-    public FxBoolean(Map<Integer, Boolean[]> translations, int pos) {
+    public FxBoolean(Map<Long, Boolean[]> translations, int pos) {
         super(translations, pos);
     }
 
@@ -104,7 +104,7 @@ public class FxBoolean extends FxValue<Boolean, FxBoolean> implements Serializab
      * @param defaultLanguage the default language
      * @param value           single initializing value
      */
-    public FxBoolean(boolean multiLanguage, int defaultLanguage, Boolean value) {
+    public FxBoolean(boolean multiLanguage, long defaultLanguage, Boolean value) {
         super(multiLanguage, defaultLanguage, value);
     }
 
@@ -114,7 +114,7 @@ public class FxBoolean extends FxValue<Boolean, FxBoolean> implements Serializab
      * @param defaultLanguage the default language
      * @param value           single initializing value
      */
-    public FxBoolean(int defaultLanguage, Boolean value) {
+    public FxBoolean(long defaultLanguage, Boolean value) {
         super(defaultLanguage, value);
     }
 

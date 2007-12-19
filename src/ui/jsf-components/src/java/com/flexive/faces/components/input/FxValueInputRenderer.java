@@ -156,7 +156,7 @@ public class FxValueInputRenderer extends Renderer {
     }
 
     @SuppressWarnings({"unchecked"})
-    private void updateTranslation(FxValueInput input, FxValue value, String inputId, int languageId, Map parameters, Map parameterValues) {
+    private void updateTranslation(FxValueInput input, FxValue value, String inputId, long languageId, Map parameters, Map parameterValues) {
         if (value instanceof FxSelectMany) {
             final String selectedOptions = StringUtils.join((String[]) parameterValues.get(inputId), ',');
             if (StringUtils.isNotBlank(selectedOptions)) {

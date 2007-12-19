@@ -54,7 +54,7 @@ public class FxFloat extends FxValue<Float, FxFloat> implements Serializable {
      * @param defaultLanguage the default language
      * @param translations    HashMap containing language->translation mapping
      */
-    public FxFloat(boolean multiLanguage, int defaultLanguage, Map<Integer, Float> translations) {
+    public FxFloat(boolean multiLanguage, long defaultLanguage, Map<Long, Float> translations) {
         super(multiLanguage, defaultLanguage, translations);
     }
 
@@ -64,7 +64,7 @@ public class FxFloat extends FxValue<Float, FxFloat> implements Serializable {
      * @param defaultLanguage the default language
      * @param translations    HashMap containing language->translation mapping
      */
-    public FxFloat(int defaultLanguage, Map<Integer, Float> translations) {
+    public FxFloat(long defaultLanguage, Map<Long, Float> translations) {
         super(defaultLanguage, translations);
     }
 
@@ -74,7 +74,7 @@ public class FxFloat extends FxValue<Float, FxFloat> implements Serializable {
      * @param multiLanguage multilanguage value?
      * @param translations  HashMap containing language->translation mapping
      */
-    public FxFloat(boolean multiLanguage, Map<Integer, Float> translations) {
+    public FxFloat(boolean multiLanguage, Map<Long, Float> translations) {
         super(multiLanguage, translations);
     }
 
@@ -83,7 +83,7 @@ public class FxFloat extends FxValue<Float, FxFloat> implements Serializable {
      *
      * @param translations HashMap containing language->translation mapping
      */
-    public FxFloat(Map<Integer, Float> translations) {
+    public FxFloat(Map<Long, Float> translations) {
         super(translations);
     }
 
@@ -93,7 +93,7 @@ public class FxFloat extends FxValue<Float, FxFloat> implements Serializable {
      * @param translations HashMap containing language->translation mapping
      * @param pos          position (index) in the array to use
      */
-    public FxFloat(Map<Integer, Float[]> translations, int pos) {
+    public FxFloat(Map<Long, Float[]> translations, int pos) {
         super(translations, pos);
     }
 
@@ -104,7 +104,7 @@ public class FxFloat extends FxValue<Float, FxFloat> implements Serializable {
      * @param defaultLanguage the default language
      * @param value           single initializing value
      */
-    public FxFloat(boolean multiLanguage, int defaultLanguage, Float value) {
+    public FxFloat(boolean multiLanguage, long defaultLanguage, Float value) {
         super(multiLanguage, defaultLanguage, value);
     }
 
@@ -114,7 +114,7 @@ public class FxFloat extends FxValue<Float, FxFloat> implements Serializable {
      * @param defaultLanguage the default language
      * @param value           single initializing value
      */
-    public FxFloat(int defaultLanguage, Float value) {
+    public FxFloat(long defaultLanguage, Float value) {
         super(defaultLanguage, value);
     }
 

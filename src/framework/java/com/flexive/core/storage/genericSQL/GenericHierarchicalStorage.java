@@ -503,7 +503,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setBoolean(8, content.isMaxVersion());
             ps.setBoolean(9, content.isLiveVersion());
             ps.setBoolean(10, content.isActive());
-            ps.setInt(11, content.getMainLanguage());
+            ps.setInt(11, (int)content.getMainLanguage());
             if (content.isRelation()) {
                 ps.setLong(12, content.getRelatedSource().getId());
                 ps.setInt(13, content.getRelatedSource().getVersion());
@@ -672,7 +672,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps_ft.setInt(2, pk.getVersion());
             if (!data.getValue().isMultiLanguage()) {
                 ps.setBoolean(INSERT_LANG_POS, true);
-                ps_ft.setInt(FT_LANG_POS_INSERT, FxLanguage.DEFAULT_ID);
+                ps_ft.setInt(FT_LANG_POS_INSERT, (int)FxLanguage.DEFAULT_ID);
             } else
                 ps.setBoolean(INSERT_ISDEF_LANG_POS, false);
             ps_ft.setLong(4, data.getAssignmentId());
@@ -747,15 +747,15 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setString(pos_idx + 5, XPathElement.stripType(change.getNewData().getXPathFull()) + (data == null ? "/" : ""));
 
             if (change.isGroup()) {
-                ps.setInt(pos_idx + 3, FxLanguage.SYSTEM_ID);
+                ps.setInt(pos_idx + 3, (int)FxLanguage.SYSTEM_ID);
                 ps.executeUpdate();
                 return;
             }
 
             if (change.isPositionChange() && !change.isDataChange()) {
                 //just update positions
-                for (int lang : data.getValue().getTranslatedLanguages()) {
-                    ps.setInt(pos_idx + 3, lang);
+                for (long lang : data.getValue().getTranslatedLanguages()) {
+                    ps.setInt(pos_idx + 3, (int)lang);
                     ps.executeUpdate();
                 }
                 return;
@@ -823,14 +823,14 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 if (translatedValue == null) {
                     java.lang.System.err.println("null!");
                 }
-                ps.setInt(pos_lang, value.getTranslatedLanguages()[i]);
+                ps.setInt(pos_lang, value.getTranslatedLanguages()[i].intValue());
                 if (!value.isMultiLanguage())
                     ps.setBoolean(pos_isdef_lang, true);
                 else
                     ps.setBoolean(pos_isdef_lang, value.isDefaultLanguage(value.getTranslatedLanguages()[i]));
                 if (upperColumn != null)
                     ps.setString(pos_value + 1, translatedValue.toString().toUpperCase());
-                ps_ft.setInt(insert ? FT_LANG_POS_INSERT : FT_LANG_POS_UPDATE, value.getTranslatedLanguages()[i]);
+                ps_ft.setInt(insert ? FT_LANG_POS_INSERT : FT_LANG_POS_UPDATE, value.getTranslatedLanguages()[i].intValue());
                 ps_ft.setString(insert ? FT_VALUE_POS_INSERT : FT_VALUE_POS_UPDATE, translatedValue.toString());
                 switch (prop.getDataType()) {
                     case Double:
@@ -1196,7 +1196,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setLong(1, pk.getId());
             ps.setInt(2, pk.getVersion());
             ps.setInt(3, groupData.getPos());
-            ps.setInt(4, FxLanguage.SYSTEM_ID);
+            ps.setInt(4, (int)FxLanguage.SYSTEM_ID);
             ps.setLong(5, groupData.getAssignmentId());
             ps.setString(6, groupData.getXPath() + "/");
             ps.setString(7, groupData.getXPathFull() + "/");
@@ -1352,8 +1352,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             String currXPath = null;
             FxAssignment currAssignment = null;
             int currPos = -1;
-            int currLang;
-            int defLang = FxLanguage.SYSTEM_ID;
+            long currLang;
+            long defLang = FxLanguage.SYSTEM_ID;
             boolean isGroup = true;
             boolean isMLDef;
             boolean multiLang = false;
@@ -1897,7 +1897,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setBoolean(6, content.isMaxVersion());
             ps.setBoolean(7, content.isLiveVersion());
             ps.setBoolean(8, content.isActive());
-            ps.setInt(9, content.getMainLanguage());
+            ps.setInt(9, (int)content.getMainLanguage());
             if (content.isRelation()) {
                 ps.setLong(10, content.getRelatedSource().getId());
                 ps.setInt(11, content.getRelatedSource().getVersion());
@@ -2281,7 +2281,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         else {
             if (!data.isEmpty() && ((FxPropertyData) data).getValue() instanceof FxBinary) {
                 FxBinary bin = (FxBinary) ((FxPropertyData) data).getValue();
-                for (int lang : bin.getTranslatedLanguages()) {
+                for (long lang : bin.getTranslatedLanguages()) {
                     BinaryDescriptor bd = bin.getTranslation(lang);
                     if (!bd.isNewBinary())
                         continue;

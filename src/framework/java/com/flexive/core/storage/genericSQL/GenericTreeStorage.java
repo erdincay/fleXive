@@ -491,7 +491,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
         ResultSet rs;
         try {
             ps = con.prepareStatement("SELECT tree_FTEXT1024_Chain(?,?,?,?)");
-            ps.setInt(2, language.getId());
+            ps.setInt(2, (int)language.getId());
             ps.setLong(3, labelPropertyId);
             ps.setBoolean(4, mode == FxTreeMode.Live);
             for (long id : nodeIds) {

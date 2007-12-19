@@ -54,7 +54,7 @@ public class FxDateTimeRange extends FxValue<DateRange, FxDateTimeRange> impleme
      * @param defaultLanguage the default language
      * @param translations    HashMap containing language->translation mapping
      */
-    public FxDateTimeRange(boolean multiLanguage, int defaultLanguage, Map<Integer, DateRange> translations) {
+    public FxDateTimeRange(boolean multiLanguage, long defaultLanguage, Map<Long, DateRange> translations) {
         super(multiLanguage, defaultLanguage, translations);
     }
 
@@ -64,7 +64,7 @@ public class FxDateTimeRange extends FxValue<DateRange, FxDateTimeRange> impleme
      * @param defaultLanguage the default language
      * @param translations    HashMap containing language->translation mapping
      */
-    public FxDateTimeRange(int defaultLanguage, Map<Integer, DateRange> translations) {
+    public FxDateTimeRange(long defaultLanguage, Map<Long, DateRange> translations) {
         super(defaultLanguage, translations);
     }
 
@@ -74,7 +74,7 @@ public class FxDateTimeRange extends FxValue<DateRange, FxDateTimeRange> impleme
      * @param multiLanguage multilanguage value?
      * @param translations  HashMap containing language->translation mapping
      */
-    public FxDateTimeRange(boolean multiLanguage, Map<Integer, DateRange> translations) {
+    public FxDateTimeRange(boolean multiLanguage, Map<Long, DateRange> translations) {
         super(multiLanguage, translations);
     }
 
@@ -83,7 +83,7 @@ public class FxDateTimeRange extends FxValue<DateRange, FxDateTimeRange> impleme
      *
      * @param translations HashMap containing language->translation mapping
      */
-    public FxDateTimeRange(Map<Integer, DateRange> translations) {
+    public FxDateTimeRange(Map<Long, DateRange> translations) {
         super(translations);
     }
 
@@ -93,7 +93,7 @@ public class FxDateTimeRange extends FxValue<DateRange, FxDateTimeRange> impleme
      * @param translations HashMap containing language->translation mapping
      * @param pos          position (index) in the array to use
      */
-    public FxDateTimeRange(Map<Integer, DateRange[]> translations, int pos) {
+    public FxDateTimeRange(Map<Long, DateRange[]> translations, int pos) {
         super(translations, pos);
     }
 
@@ -104,7 +104,7 @@ public class FxDateTimeRange extends FxValue<DateRange, FxDateTimeRange> impleme
      * @param defaultLanguage the default language
      * @param value           single initializing value
      */
-    public FxDateTimeRange(boolean multiLanguage, int defaultLanguage, DateRange value) {
+    public FxDateTimeRange(boolean multiLanguage, long defaultLanguage, DateRange value) {
         super(multiLanguage, defaultLanguage, value);
     }
 
@@ -114,7 +114,7 @@ public class FxDateTimeRange extends FxValue<DateRange, FxDateTimeRange> impleme
      * @param defaultLanguage the default language
      * @param value           single initializing value
      */
-    public FxDateTimeRange(int defaultLanguage, DateRange value) {
+    public FxDateTimeRange(long defaultLanguage, DateRange value) {
         super(defaultLanguage, value);
     }
 

@@ -84,7 +84,7 @@ public class FxRuntimeException extends RuntimeException implements FxLocalizedE
     }
 
     /** {@inheritDoc} */
-    public String getMessage(int localeId) {
+    public String getMessage(long localeId) {
         return converted.getMessage(localeId);
     }
 

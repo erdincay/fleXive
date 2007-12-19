@@ -86,7 +86,7 @@ public class FxExceptionMessage implements Serializable {
      * @param localeId locale id of the desired output
      * @return localized message
      */
-    public String getLocalizedMessage(int localeId) {
+    public String getLocalizedMessage(long localeId) {
         FxLanguage locale;
         try {
             locale = EJBLookup.getLanguageEngine().load(localeId);
@@ -133,7 +133,7 @@ public class FxExceptionMessage implements Serializable {
      * @param localeIso ISO code of the requested locale
      * @return localized message
      */
-    public String getLocalizedMessage(int localeId, String localeIso) {
+    public String getLocalizedMessage(long localeId, String localeIso) {
         return FxSharedUtils.getLocalizedMessage(EXCEPTION_BUNDLE, localeId, localeIso, key, values);
     }
 

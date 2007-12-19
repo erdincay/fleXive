@@ -54,7 +54,7 @@ public class FxDouble extends FxValue<Double, FxDouble> implements Serializable 
      * @param defaultLanguage the default language
      * @param translations    HashMap containing language->translation mapping
      */
-    public FxDouble(boolean multiLanguage, int defaultLanguage, Map<Integer, Double> translations) {
+    public FxDouble(boolean multiLanguage, long defaultLanguage, Map<Long, Double> translations) {
         super(multiLanguage, defaultLanguage, translations);
     }
 
@@ -64,7 +64,7 @@ public class FxDouble extends FxValue<Double, FxDouble> implements Serializable 
      * @param defaultLanguage the default language
      * @param translations    HashMap containing language->translation mapping
      */
-    public FxDouble(int defaultLanguage, Map<Integer, Double> translations) {
+    public FxDouble(long defaultLanguage, Map<Long, Double> translations) {
         super(defaultLanguage, translations);
     }
 
@@ -74,7 +74,7 @@ public class FxDouble extends FxValue<Double, FxDouble> implements Serializable 
      * @param multiLanguage multilanguage value?
      * @param translations  HashMap containing language->translation mapping
      */
-    public FxDouble(boolean multiLanguage, Map<Integer, Double> translations) {
+    public FxDouble(boolean multiLanguage, Map<Long, Double> translations) {
         super(multiLanguage, translations);
     }
 
@@ -83,7 +83,7 @@ public class FxDouble extends FxValue<Double, FxDouble> implements Serializable 
      *
      * @param translations HashMap containing language->translation mapping
      */
-    public FxDouble(Map<Integer, Double> translations) {
+    public FxDouble(Map<Long, Double> translations) {
         super(translations);
     }
 
@@ -93,7 +93,7 @@ public class FxDouble extends FxValue<Double, FxDouble> implements Serializable 
      * @param translations HashMap containing language->translation mapping
      * @param pos          position (index) in the array to use
      */
-    public FxDouble(Map<Integer, Double[]> translations, int pos) {
+    public FxDouble(Map<Long, Double[]> translations, int pos) {
         super(translations, pos);
     }
 
@@ -104,7 +104,7 @@ public class FxDouble extends FxValue<Double, FxDouble> implements Serializable 
      * @param defaultLanguage the default language
      * @param value           single initializing value
      */
-    public FxDouble(boolean multiLanguage, int defaultLanguage, Double value) {
+    public FxDouble(boolean multiLanguage, long defaultLanguage, Double value) {
         super(multiLanguage, defaultLanguage, value);
     }
 
@@ -114,7 +114,7 @@ public class FxDouble extends FxValue<Double, FxDouble> implements Serializable 
      * @param defaultLanguage the default language
      * @param value           single initializing value
      */
-    public FxDouble(int defaultLanguage, Double value) {
+    public FxDouble(long defaultLanguage, Double value) {
         super(defaultLanguage, value);
     }
 

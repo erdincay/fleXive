@@ -64,18 +64,18 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
 
     public static final boolean DEFAULT_MULTILANGUAGE = true;
     private boolean multiLanguage;
-    private int defaultLanguage = FxLanguage.SYSTEM_ID;
-    private int selectedLanguage;
+    private long defaultLanguage = FxLanguage.SYSTEM_ID;
+    private long selectedLanguage;
     private int maxInputLength;
     private String XPath = "";
 
-    private final static Integer[] SYSTEM_LANG_ARRAY = new Integer[]{FxLanguage.SYSTEM_ID};
+    private final static Long[] SYSTEM_LANG_ARRAY = new Long[]{FxLanguage.SYSTEM_ID};
 
     /**
      * Data if <code>multiLanguage</code> is enabled
      */
-    protected Map<Integer, T> translations;
-    protected Map<Integer, Boolean> emptyTranslations;
+    protected Map<Long, T> translations;
+    protected Map<Long, Boolean> emptyTranslations;
 
     /**
      * Data if <code>multiLanguage</code> is disabled
@@ -95,7 +95,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @param defaultLanguage the default language
      * @param translations    HashMap containing language->translation mapping
      */
-    protected FxValue(boolean multiLanguage, int defaultLanguage, Map<Integer, T> translations) {
+    protected FxValue(boolean multiLanguage, long defaultLanguage, Map<Long, T> translations) {
         this.defaultLanguage = defaultLanguage;
         this.multiLanguage = multiLanguage;
         this.maxInputLength = -1;
@@ -103,24 +103,24 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         if (multiLanguage) {
             if (translations == null) {
                 //valid to pass null, create an empty one
-                this.translations = new HashMap<Integer, T>(5);
-                this.emptyTranslations = new HashMap<Integer, Boolean>(5);
+                this.translations = new HashMap<Long, T>(5);
+                this.emptyTranslations = new HashMap<Long, Boolean>(5);
             } else {
-                this.translations = new HashMap<Integer, T>(translations);
-                this.emptyTranslations = new HashMap<Integer, Boolean>(translations.size());
+                this.translations = new HashMap<Long, T>(translations);
+                this.emptyTranslations = new HashMap<Long, Boolean>(translations.size());
             }
             if (this.defaultLanguage < 0) {
                 this.defaultLanguage = FxLanguage.SYSTEM_ID;
                 this.selectedLanguage = FxLanguage.SYSTEM_ID;
                 if (translations != null && !translations.entrySet().isEmpty())
-                    for (Entry<Integer, T> e : translations.entrySet())
+                    for (Entry<Long, T> e : translations.entrySet())
                         if (e.getValue() != null) {
                             this.selectedLanguage = e.getKey();
                             break;
                         }
             } else
                 this.selectedLanguage = this.defaultLanguage;
-            for (Integer lang : this.translations.keySet())
+            for (Long lang : this.translations.keySet())
                 emptyTranslations.put(lang, this.translations.get(lang) == null);
         } else {
             if (translations != null && !translations.isEmpty()) {
@@ -142,7 +142,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @param defaultLanguage the default language
      * @param translations    HashMap containing language->translation mapping
      */
-    protected FxValue(int defaultLanguage, Map<Integer, T> translations) {
+    protected FxValue(long defaultLanguage, Map<Long, T> translations) {
         this(DEFAULT_MULTILANGUAGE, defaultLanguage, translations);
     }
 
@@ -152,7 +152,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @param multiLanguage multilanguage value?
      * @param translations  HashMap containing language->translation mapping
      */
-    protected FxValue(boolean multiLanguage, Map<Integer, T> translations) {
+    protected FxValue(boolean multiLanguage, Map<Long, T> translations) {
         this(multiLanguage, FxLanguage.SYSTEM_ID, translations);
     }
 
@@ -161,7 +161,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      *
      * @param translations HashMap containing language->translation mapping
      */
-    protected FxValue(Map<Integer, T> translations) {
+    protected FxValue(Map<Long, T> translations) {
         this(DEFAULT_MULTILANGUAGE, FxLanguage.SYSTEM_ID, translations);
     }
 
@@ -171,12 +171,12 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @param translations HashMap containing language->translation mapping
      * @param pos          position (index) in the array to use
      */
-    protected FxValue(Map<Integer, T[]> translations, int pos) {
-        this(DEFAULT_MULTILANGUAGE, FxLanguage.SYSTEM_ID, new HashMap<Integer, T>((translations == null ? 5 : translations.size())));
+    protected FxValue(Map<Long, T[]> translations, int pos) {
+        this(DEFAULT_MULTILANGUAGE, FxLanguage.SYSTEM_ID, new HashMap<Long, T>((translations == null ? 5 : translations.size())));
         if (multiLanguage) {
             if (translations == null)
                 return;
-            for (Entry<Integer, T[]> e : translations.entrySet())
+            for (Entry<Long, T[]> e : translations.entrySet())
                 if (e.getValue()[pos] != null)
                     this.translations.put(e.getKey(), e.getValue()[pos]);
         } else
@@ -190,8 +190,8 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @param defaultLanguage the default language
      * @param value           single initializing value
      */
-    protected FxValue(boolean multiLanguage, int defaultLanguage, T value) {
-        this(multiLanguage, defaultLanguage, new HashMap<Integer, T>(5));
+    protected FxValue(boolean multiLanguage, long defaultLanguage, T value) {
+        this(multiLanguage, defaultLanguage, new HashMap<Long, T>(5));
         if (multiLanguage)
             this.translations.put(defaultLanguage, value);
         else
@@ -204,7 +204,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @param defaultLanguage the default language
      * @param value           single initializing value
      */
-    protected FxValue(int defaultLanguage, T value) {
+    protected FxValue(long defaultLanguage, T value) {
         this(DEFAULT_MULTILANGUAGE, defaultLanguage, value);
     }
 
@@ -234,7 +234,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      */
     @SuppressWarnings("unchecked")
     protected FxValue(FxValue<T, TDerived> clone) {
-        this(clone.isMultiLanguage(), clone.getDefaultLanguage(), new HashMap<Integer, T>((clone.translations != null ? clone.translations.size() : 1)));
+        this(clone.isMultiLanguage(), clone.getDefaultLanguage(), new HashMap<Long, T>((clone.translations != null ? clone.translations.size() : 1)));
         this.XPath = clone.XPath;
         if (clone.isImmutableValueType()) {
             if (multiLanguage) {
@@ -249,7 +249,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
             if (multiLanguage) {
                 // clone hashmap values
                 Method meth = null;
-                for (int k : clone.translations.keySet()) {
+                for (long k : clone.translations.keySet()) {
                     T t = clone.translations.get(k);
                     if (t == null)
                         this.translations.put(k, null);
@@ -336,8 +336,8 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     public TDerived setEmpty() {
         if (this.multiLanguage) {
             if (this.emptyTranslations == null)
-                this.emptyTranslations = new HashMap<Integer, Boolean>(this.translations.size());
-            for (Integer lang : this.translations.keySet())
+                this.emptyTranslations = new HashMap<Long, Boolean>(this.translations.size());
+            for (Long lang : this.translations.keySet())
                 this.emptyTranslations.put(lang, true);
         } else
             this.singleValueEmpty = true;
@@ -349,10 +349,10 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      *
      * @param language the language to flag as empty
      */
-    public void setEmpty(int language) {
+    public void setEmpty(long language) {
         if (this.multiLanguage) {
             if (this.emptyTranslations == null)
-                this.emptyTranslations = new HashMap<Integer, Boolean>(this.translations.size());
+                this.emptyTranslations = new HashMap<Long, Boolean>(this.translations.size());
             this.emptyTranslations.put(language, true);
         } else
             this.singleValueEmpty = true;
@@ -483,7 +483,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @param lang requested language
      * @return translation or an empty String if it does not exist
      */
-    public T getTranslation(int lang) {
+    public T getTranslation(long lang) {
         return (multiLanguage ? translations.get(lang) : singleValue);
     }
 
@@ -497,7 +497,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     public T getTranslation(FxLanguage lang) {
         if (!multiLanguage) //redundant but faster
             return singleValue;
-        return getTranslation(lang.getId());
+        return getTranslation((int)lang.getId());
     }
 
     /**
@@ -508,7 +508,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @param lang requested best-fit language
      * @return best fit translation
      */
-    public T getBestTranslation(int lang) {
+    public T getBestTranslation(long lang) {
         if (!multiLanguage) //redundant but faster
             return singleValue;
         T ret = getTranslation(lang);
@@ -530,7 +530,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
             return singleValue;
         if (language == null)   // user ticket language
             return getBestTranslation();
-        return getBestTranslation(language.getId());
+        return getBestTranslation((int)language.getId());
     }
 
     /**
@@ -544,7 +544,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     public T getBestTranslation(UserTicket ticket) {
         if (!multiLanguage) //redundant but faster
             return singleValue;
-        return getBestTranslation(ticket.getLanguage().getId());
+        return getBestTranslation((int)ticket.getLanguage().getId());
     }
 
     /**
@@ -564,8 +564,8 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      *
      * @return languages for which translations exist
      */
-    public Integer[] getTranslatedLanguages() {
-        return (multiLanguage ? translations.keySet().toArray(new Integer[translations.keySet().size()]) : SYSTEM_LANG_ARRAY.clone());
+    public Long[] getTranslatedLanguages() {
+        return (multiLanguage ? translations.keySet().toArray(new Long[translations.keySet().size()]) : SYSTEM_LANG_ARRAY.clone());
     }
 
     /**
@@ -574,7 +574,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @param languageId language to query
      * @return translation exists
      */
-    public boolean translationExists(int languageId) {
+    public boolean translationExists(long languageId) {
         return !multiLanguage || translations.get(languageId) != null;
     }
 
@@ -619,7 +619,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @param lang language to check
      * @return if translation for the given language is empty
      */
-    public boolean isTranslationEmpty(int lang) {
+    public boolean isTranslationEmpty(long lang) {
         if (!multiLanguage)
             return singleValueEmpty;
         syncEmptyTranslations();
@@ -633,10 +633,10 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         if (!multiLanguage)
             return;
         if (emptyTranslations == null)
-            emptyTranslations = new HashMap<Integer, Boolean>(translations.size());
+            emptyTranslations = new HashMap<Long, Boolean>(translations.size());
         if (emptyTranslations.size() != translations.size()) {
             //resync
-            for (Integer _lang : translations.keySet()) {
+            for (Long _lang : translations.keySet()) {
                 if (!emptyTranslations.containsKey(_lang))
                     emptyTranslations.put(_lang, translations.get(_lang) == null);
             }
@@ -648,7 +648,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      *
      * @return selected language
      */
-    public int getSelectedLanguage() {
+    public long getSelectedLanguage() {
         return selectedLanguage;
     }
 
@@ -659,7 +659,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @return self
      * @throws FxNoAccessException if the selected Language is not contained
      */
-    public FxValue setSelectedLanguage(int selectedLanguage) throws FxNoAccessException {
+    public FxValue setSelectedLanguage(long selectedLanguage) throws FxNoAccessException {
         if (selectedLanguage < 0 || !multiLanguage)
             return this;
         //throw exception if selectedLanguage is not contained!
@@ -679,7 +679,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @param value    translation
      * @return this
      */
-    public final TDerived setTranslation(int language, T value) {
+    public final TDerived setTranslation(long language, T value) {
         if (value instanceof String) {
             try {
                 value = this.fromString((String) value);
@@ -726,7 +726,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @return this
      */
     public TDerived setTranslation(FxLanguage lang, T translation) {
-        return setTranslation(lang.getId(), translation);
+        return setTranslation((int)lang.getId(), translation);
     }
 
     /**
@@ -755,7 +755,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      *
      * @return default language
      */
-    public int getDefaultLanguage() {
+    public long getDefaultLanguage() {
         if (!isMultiLanguage())
             return FxLanguage.SYSTEM_ID;
         return this.defaultLanguage;
@@ -789,7 +789,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      *
      * @param defaultLanguage requested default language
      */
-    public void setDefaultLanguage(int defaultLanguage) {
+    public void setDefaultLanguage(long defaultLanguage) {
         setDefaultLanguage(defaultLanguage, false);
     }
 
@@ -799,7 +799,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @param defaultLanguage requested default language
      * @param force           if true, the default language will also be updated if no translation exists (for UI input)
      */
-    public void setDefaultLanguage(int defaultLanguage, boolean force) {
+    public void setDefaultLanguage(long defaultLanguage, boolean force) {
         if (multiLanguage && (force || translationExists(defaultLanguage))) {
             this.defaultLanguage = defaultLanguage;
         }
@@ -827,7 +827,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @param language the language to check
      * @return passed language is the default language
      */
-    public boolean isDefaultLanguage(int language) {
+    public boolean isDefaultLanguage(long language) {
         return hasDefaultLanguage() && language == defaultLanguage;
     }
 
@@ -836,7 +836,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      *
      * @param language the language to remove the translation for
      */
-    public void removeLanguage(int language) {
+    public void removeLanguage(long language) {
         if (!multiLanguage) {
             setEmpty();
         } else {
@@ -917,8 +917,8 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         if (this.isEmpty() != otherValue.isEmpty()) return false;
         if (this.isMultiLanguage() != otherValue.isMultiLanguage()) return false;
         if (multiLanguage) {
-            if (!ArrayUtils.isEquals(this.translations.keySet().toArray(new Integer[this.translations.keySet().size()]),
-                    otherValue.translations.keySet().toArray(new Integer[otherValue.translations.keySet().size()])))
+            if (!ArrayUtils.isEquals(this.translations.keySet().toArray(new Long[this.translations.keySet().size()]),
+                    otherValue.translations.keySet().toArray(new Long[otherValue.translations.keySet().size()])))
                 return false;
             if (!ArrayUtils.isEquals(this.translations.values().toArray(),
                     otherValue.translations.values().toArray())) return false;
@@ -938,9 +938,9 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         for (T translation : translations.values()) {
             hash = 31 * hash + translation.hashCode();
         }
-        hash = 31 * hash + defaultLanguage;
-        for (int language : translations.keySet()) {
-            hash = 31 * hash + language;
+        hash = 31 * hash + (int)defaultLanguage;
+        for (long language : translations.keySet()) {
+            hash = 31 * hash + (int)language;
         }
         return hash;
     }
@@ -959,7 +959,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         if (!isMultiLanguage())
             sb.append(FxXMLUtils.toCData(getStringValue(singleValue)));
         else
-            for (int i : getTranslatedLanguages())
+            for (long i : getTranslatedLanguages())
                 sb.append("<data l=\"").append(i).append("\">").
                         append(FxXMLUtils.toCData(getStringValue(getTranslation(i)))).
                         append("</data>");
@@ -980,14 +980,14 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
             v.multiLanguage = xml.indexOf("m=\"1\"") > 0;
             int def;
             if ((def = xml.indexOf("d=\"")) > 0)
-                v.defaultLanguage = Integer.parseInt(xml.substring(def + 2, xml.indexOf("\"", def + 2)));
+                v.defaultLanguage = Long.parseLong(xml.substring(def + 2, xml.indexOf("\"", def + 2)));
 
             if (v.multiLanguage) {
                 StringBuilder data = new StringBuilder(xml.substring(xml.indexOf('>'), xml.lastIndexOf("</" + clazz + ">")));
                 int start = 0;
                 while ((start = data.indexOf("<data", start)) >= 0) {
                     v.setTranslation(
-                            Integer.parseInt(data.substring(data.indexOf("l=\"", start + 3), data.indexOf("\">"))),
+                            Long.parseLong(data.substring(data.indexOf("l=\"", start + 3), data.indexOf("\">"))),
                             v.fromString(FxXMLUtils.fromCData(data.substring(data.indexOf(">", start), data.indexOf("</data>", start)))));
                 }
             } else {

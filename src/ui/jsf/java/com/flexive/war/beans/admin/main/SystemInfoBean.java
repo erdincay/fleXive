@@ -45,9 +45,6 @@ import java.util.Formatter;
  * @version $Rev$
  */
 public class SystemInfoBean {
-    public String show() {
-        return "systemInfo";
-    }
 
     public Date getDateTime() {
         return new Date();

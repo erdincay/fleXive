@@ -280,6 +280,7 @@ public final class Database {
         try {
             if (stmt != null) stmt.close();
         } catch (Exception exc) {
+            //noinspection ThrowableInstanceNeverThrown
             StackTraceElement[] se = new Throwable().getStackTrace();
             LOG.error(((caller != null) ? caller + " f" : "F") + "ailed to close the statement(s): "
                     + exc.getMessage() + " Calling line: " + se[2].toString());
@@ -290,6 +291,7 @@ public final class Database {
                     con.close();
                 }
             } catch (SQLException exc) {
+                //noinspection ThrowableInstanceNeverThrown
                 FxDbException dbExc = new FxDbException(((caller != null) ? caller + " is u" : "U")
                         + "nable to close the db connection");
                 LOG.error(dbExc);
@@ -367,14 +369,14 @@ public final class Database {
     public static FxString loadFxString(Connection con, String table, String column, String whereClause)
             throws SQLException {
         Statement stmt = null;
-        HashMap<Integer, String> hmTrans = new HashMap<Integer, String>(10);
-        int defaultLanguageId = -1;
+        Map<Long, String> hmTrans = new HashMap<Long, String>(10);
+        long defaultLanguageId = -1;
         try {
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT LANG, DEFLANG, " + column + " FROM " + table + DatabaseConst.ML
                     + " WHERE " + whereClause);
             while (rs != null && rs.next()) {
-                hmTrans.put(rs.getInt(1), rs.getString(3));
+                hmTrans.put(rs.getLong(1), rs.getString(3));
                 if (rs.getBoolean(2)) {
                     defaultLanguageId = rs.getInt(1);
                 }
@@ -398,14 +400,14 @@ public final class Database {
     public static FxString loadContentDataFxString(Connection con, String column, String whereClause)
             throws SQLException {
         Statement stmt = null;
-        HashMap<Integer, String> hmTrans = new HashMap<Integer, String>(10);
+        Map<Long, String> hmTrans = new HashMap<Long, String>(10);
         int defaultLanguageId = -1;
         try {
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT LANG, ISMLDEF, " + column + " FROM " + DatabaseConst.TBL_CONTENT_DATA
                     + " WHERE " + whereClause);
             while (rs != null && rs.next()) {
-                hmTrans.put(rs.getInt(1), rs.getString(3));
+                hmTrans.put(rs.getLong(1), rs.getString(3));
                 if (rs.getBoolean(2)) {
                     defaultLanguageId = rs.getInt(1);
                 }
@@ -430,7 +432,7 @@ public final class Database {
     public static FxString[] loadFxString(Connection con, String table, String[] columns, String whereClause)
             throws SQLException {
         Statement stmt = null;
-        HashMap<Integer, String[]> hmTrans = new HashMap<Integer, String[]>(10);
+        Map<Long, String[]> hmTrans = new HashMap<Long, String[]>(10);
         StringBuffer sql = new StringBuffer(200);
         try {
             sql.append("SELECT LANG");
@@ -446,7 +448,7 @@ public final class Database {
                     if (rs.wasNull())
                         curr[i] = null;
                 }
-                hmTrans.put(rs.getInt(1), curr);
+                hmTrans.put(rs.getLong(1), curr);
             }
         } finally {
             if (stmt != null)
@@ -531,10 +533,10 @@ public final class Database {
                         + dataColumn + ") VALUES (?,?,?,?)");
                 ps.setLong(1, id);
                 String curr;
-                for (int lang : string.getTranslatedLanguages()) {
+                for (long lang : string.getTranslatedLanguages()) {
                     curr = string.getTranslation(lang);
                     if (curr != null && curr.trim().length() > 0) {
-                        ps.setInt(2, lang);
+                        ps.setInt(2, (int)lang);
                         ps.setBoolean(3, lang == string.getDefaultLanguage());
                         ps.setString(4, curr);
                         ps.executeUpdate();
@@ -574,9 +576,9 @@ public final class Database {
             ps.execute();
 
             //find languages to write
-            List<Integer> langs = new ArrayList<Integer>(5);
+            List<Long> langs = new ArrayList<Long>(5);
             for (FxString curr : string)
-                for (int currLang : curr.getTranslatedLanguages())
+                for (long currLang : curr.getTranslatedLanguages())
                     if (curr.translationExists(currLang)) {
                         if (!langs.contains(currLang))
                             langs.add(currLang);
@@ -593,9 +595,9 @@ public final class Database {
                 ps.close();
                 ps = con.prepareStatement(sql.toString());
 
-                for (int lang : langs) {
+                for (long lang : langs) {
                     ps.setLong(1, id);
-                    ps.setInt(2, lang);
+                    ps.setInt(2, (int)lang);
                     for (int i = 0; i < string.length; i++) {
                         if (FxString.EMPTY.equals(string[i].getTranslation(lang)))
                             ps.setNull(3 + i, java.sql.Types.VARCHAR);

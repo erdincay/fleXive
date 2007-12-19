@@ -55,6 +55,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Language Implementation class.
@@ -78,7 +79,7 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
      * @return the language object
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public FxLanguage load(int languageId) throws FxApplicationException {
+    public FxLanguage load(long languageId) throws FxApplicationException {
         try {
             FxLanguage lang = (FxLanguage) CacheAdmin.getInstance().get(CacheAdmin.LANGUAGES_ID, languageId);
             if (lang == null) {
@@ -158,7 +159,7 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
      * @return a array with all available language objects
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public boolean isValid(int languageId) {
+    public boolean isValid(long languageId) {
         // Does the language exist at all? Check via constru
         try {
             load(languageId);
@@ -181,7 +182,7 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
             con = Database.getDbConnection();
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
-            HashMap<Integer, String> hmMl = new HashMap<Integer, String>(5);
+            Map<Long, String> hmMl = new HashMap<Long, String>(5);
             int lang_code = -1;
             String iso_code = null;
             FxCacheMBean cache = CacheAdmin.getInstance();
@@ -199,7 +200,7 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
                     iso_code = rs.getString(2);
                     hmMl.clear();
                 }
-                hmMl.put(rs.getInt(3), rs.getString(4));
+                hmMl.put(rs.getLong(3), rs.getString(4));
             }
             if (lang_code != -1 && lang_code != FxLanguage.SYSTEM_ID) {
                 //add

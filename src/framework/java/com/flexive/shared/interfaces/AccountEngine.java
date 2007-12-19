@@ -231,7 +231,7 @@ public interface AccountEngine {
      * @throws FxEntryExistsException      if a user with the given login name already exists
      * @throws FxApplicationException      on errors
      */
-    long create(String userName, String loginName, String password, String email, int lang,
+    long create(String userName, String loginName, String password, String email, long lang,
                 long mandatorId, boolean isActive, boolean isConfirmed, Date validFrom, Date validTo, long defaultNode,
                 String description, boolean allowMultiLogin, boolean checkUserRoles)
             throws FxApplicationException;
@@ -411,7 +411,7 @@ public interface AccountEngine {
 
     void update(long accountId, String password, Long defaultNode,
                 String name, String loginName, String email, Boolean isConfirmed, Boolean isActive,
-                Date validFrom, Date validTo, Integer lang, String description,
+                Date validFrom, Date validTo, Long lang, String description,
                 Boolean allowMultiLogin, Long contactDataId)
             throws FxApplicationException;
 
@@ -426,7 +426,7 @@ public interface AccountEngine {
      * @param lang      the new language to assign
      * @throws FxApplicationException on errors
      */
-    void updateUser(long accountId, String password, String name, String loginName, String email, Integer lang) throws FxApplicationException;
+    void updateUser(long accountId, String password, String name, String loginName, String email, Long lang) throws FxApplicationException;
 
 
     /**

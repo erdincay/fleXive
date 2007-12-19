@@ -143,7 +143,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             FxDataType dtCurr = null;
-            HashMap<Integer, String> hmDesc = new HashMap<Integer, String>(5);
+            Map<Long, String> hmDesc = new HashMap<Long, String>(5);
             String name = null;
             while (rs != null && rs.next()) {
                 if (dtCurr != null && rs.getLong(1) != dtCurr.getId()) {
@@ -161,7 +161,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                     }
                 if (dtCurr == null)
                     throw new FxLoadException(LOG, "ex.structure.dataType.unknownId", rs.getInt(1));
-                hmDesc.put(rs.getInt(3), rs.getString(4));
+                hmDesc.put(rs.getLong(3), rs.getString(4));
                 name = rs.getString(2);
             }
             if (dtCurr != null) {
@@ -190,8 +190,8 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                     TBL_STRUCT_GROUPS + " g, " + TBL_STRUCT_GROUPS + ML + " t WHERE t.ID=g.ID ORDER BY g.ID, t.LANG ASC";
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
-            HashMap<Integer, String> hmDesc = new HashMap<Integer, String>(5);
-            HashMap<Integer, String> hmHint = new HashMap<Integer, String>(5);
+            Map<Long, String> hmDesc = new HashMap<Long, String>(5);
+            Map<Long, String> hmHint = new HashMap<Long, String>(5);
             String name = null;
             long id = -1;
             int minMult = -1;
@@ -212,8 +212,8 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                     maxMult = rs.getInt(4);
                     mayOverride = rs.getBoolean(5);
                 }
-                hmDesc.put(rs.getInt(6), rs.getString(7));
-                hmHint.put(rs.getInt(6), rs.getString(8));
+                hmDesc.put(rs.getLong(6), rs.getString(7));
+                hmHint.put(rs.getLong(6), rs.getString(8));
             }
             if (hmDesc.size() > 0) {
                 alRet.add(new FxGroup(id, name, new FxString(FxLanguage.DEFAULT_ID, hmDesc),
@@ -249,9 +249,9 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                     TBL_STRUCT_PROPERTIES + " p, " + TBL_STRUCT_PROPERTIES + ML + " t WHERE t.ID=p.ID ORDER BY p.ID, t.LANG ASC";
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
-            HashMap<Integer, String> hmDesc = new HashMap<Integer, String>(5);
-            HashMap<Integer, String> hmHint = new HashMap<Integer, String>(5);
-            HashMap<Integer, String> hmDefault = new HashMap<Integer, String>(5);
+            Map<Long, String> hmDesc = new HashMap<Long, String>(5);
+            Map<Long, String> hmHint = new HashMap<Long, String>(5);
+            Map<Long, String> hmDefault = new HashMap<Long, String>(5);
             String name = null;
             long id = -1;
             int minMult = -1;
@@ -299,9 +299,9 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                     systemInternal = rs.getBoolean(15);
                     uniqueMode = UniqueMode.getById(rs.getInt(17));
                 }
-                hmDesc.put(rs.getInt(6), rs.getString(7));
-                hmDefault.put(rs.getInt(6), rs.getString(13));
-                hmHint.put(rs.getInt(6), rs.getString(14));
+                hmDesc.put(rs.getLong(6), rs.getString(7));
+                hmDefault.put(rs.getLong(6), rs.getString(13));
+                hmHint.put(rs.getLong(6), rs.getString(14));
             }
             if (hmDesc.size() > 0) {
 //                if( !name.startsWith("TEST"))

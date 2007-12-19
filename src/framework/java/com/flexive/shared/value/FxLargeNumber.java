@@ -53,7 +53,7 @@ public class FxLargeNumber extends FxValue<Long, FxLargeNumber> implements Seria
      * @param defaultLanguage the default language
      * @param translations    HashMap containing language->translation mapping
      */
-    public FxLargeNumber(boolean multiLanguage, int defaultLanguage, Map<Integer, Long> translations) {
+    public FxLargeNumber(boolean multiLanguage, long defaultLanguage, Map<Long, Long> translations) {
         super(multiLanguage, defaultLanguage, translations);
     }
 
@@ -63,7 +63,7 @@ public class FxLargeNumber extends FxValue<Long, FxLargeNumber> implements Seria
      * @param defaultLanguage the default language
      * @param translations    HashMap containing language->translation mapping
      */
-    public FxLargeNumber(int defaultLanguage, Map<Integer, Long> translations) {
+    public FxLargeNumber(long defaultLanguage, Map<Long, Long> translations) {
         super(defaultLanguage, translations);
     }
 
@@ -73,7 +73,7 @@ public class FxLargeNumber extends FxValue<Long, FxLargeNumber> implements Seria
      * @param multiLanguage multilanguage value?
      * @param translations  HashMap containing language->translation mapping
      */
-    public FxLargeNumber(boolean multiLanguage, Map<Integer, Long> translations) {
+    public FxLargeNumber(boolean multiLanguage, Map<Long, Long> translations) {
         super(multiLanguage, translations);
     }
 
@@ -82,7 +82,7 @@ public class FxLargeNumber extends FxValue<Long, FxLargeNumber> implements Seria
      *
      * @param translations HashMap containing language->translation mapping
      */
-    public FxLargeNumber(Map<Integer, Long> translations) {
+    public FxLargeNumber(Map<Long, Long> translations) {
         super(translations);
     }
 
@@ -92,7 +92,7 @@ public class FxLargeNumber extends FxValue<Long, FxLargeNumber> implements Seria
      * @param translations HashMap containing language->translation mapping
      * @param pos          position (index) in the array to use
      */
-    public FxLargeNumber(Map<Integer, Long[]> translations, int pos) {
+    public FxLargeNumber(Map<Long, Long[]> translations, int pos) {
         super(translations, pos);
     }
 
@@ -103,7 +103,7 @@ public class FxLargeNumber extends FxValue<Long, FxLargeNumber> implements Seria
      * @param defaultLanguage the default language
      * @param value           single initializing value
      */
-    public FxLargeNumber(boolean multiLanguage, int defaultLanguage, Long value) {
+    public FxLargeNumber(boolean multiLanguage, long defaultLanguage, Long value) {
         super(multiLanguage, defaultLanguage, value);
     }
 
@@ -113,7 +113,7 @@ public class FxLargeNumber extends FxValue<Long, FxLargeNumber> implements Seria
      * @param defaultLanguage the default language
      * @param value           single initializing value
      */
-    public FxLargeNumber(int defaultLanguage, Long value) {
+    public FxLargeNumber(long defaultLanguage, Long value) {
         super(defaultLanguage, value);
     }
 

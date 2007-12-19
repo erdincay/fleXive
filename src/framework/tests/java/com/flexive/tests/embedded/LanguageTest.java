@@ -52,6 +52,8 @@ public class LanguageTest {
 
     /**
      * Asserts that all language labels are different
+     * 
+     * @throws com.flexive.shared.exceptions.FxApplicationException on errors
      */
     @Test
     public void testLanguageLabels() throws FxApplicationException {
@@ -59,7 +61,7 @@ public class LanguageTest {
         FxLanguage[] languages = languageBean.loadAvailable();
         Set<String> defaultTranslations = new HashSet<String>();
         for (FxLanguage language : languages) {
-            String name = language.getName().getDefaultTranslation();
+            String name = language.getLabel().getDefaultTranslation();
             assert !defaultTranslations.contains(name) : "Language name '" + name + "' occurs at least twice.";
             defaultTranslations.add(name);
         }

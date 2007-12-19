@@ -53,7 +53,7 @@ public class FxBinary extends FxValue<BinaryDescriptor, FxBinary> implements Ser
      * @param defaultLanguage the default language
      * @param translations    HashMap containing language->translation mapping
      */
-    public FxBinary(boolean multiLanguage, int defaultLanguage, Map<Integer, BinaryDescriptor> translations) {
+    public FxBinary(boolean multiLanguage, long defaultLanguage, Map<Long, BinaryDescriptor> translations) {
         super(multiLanguage, defaultLanguage, translations);
     }
 
@@ -63,7 +63,7 @@ public class FxBinary extends FxValue<BinaryDescriptor, FxBinary> implements Ser
      * @param defaultLanguage the default language
      * @param translations    HashMap containing language->translation mapping
      */
-    public FxBinary(int defaultLanguage, Map<Integer, BinaryDescriptor> translations) {
+    public FxBinary(long defaultLanguage, Map<Long, BinaryDescriptor> translations) {
         super(defaultLanguage, translations);
     }
 
@@ -73,7 +73,7 @@ public class FxBinary extends FxValue<BinaryDescriptor, FxBinary> implements Ser
      * @param multiLanguage multilanguage value?
      * @param translations  HashMap containing language->translation mapping
      */
-    public FxBinary(boolean multiLanguage, Map<Integer, BinaryDescriptor> translations) {
+    public FxBinary(boolean multiLanguage, Map<Long, BinaryDescriptor> translations) {
         super(multiLanguage, translations);
     }
 
@@ -82,7 +82,7 @@ public class FxBinary extends FxValue<BinaryDescriptor, FxBinary> implements Ser
      *
      * @param translations HashMap containing language->translation mapping
      */
-    public FxBinary(Map<Integer, BinaryDescriptor> translations) {
+    public FxBinary(Map<Long, BinaryDescriptor> translations) {
         super(translations);
     }
 
@@ -92,7 +92,7 @@ public class FxBinary extends FxValue<BinaryDescriptor, FxBinary> implements Ser
      * @param translations HashMap containing language->translation mapping
      * @param pos          position (index) in the array to use
      */
-    public FxBinary(Map<Integer, BinaryDescriptor[]> translations, int pos) {
+    public FxBinary(Map<Long, BinaryDescriptor[]> translations, int pos) {
         super(translations, pos);
     }
 
@@ -103,7 +103,7 @@ public class FxBinary extends FxValue<BinaryDescriptor, FxBinary> implements Ser
      * @param defaultLanguage the default language
      * @param value           single initializing value
      */
-    public FxBinary(boolean multiLanguage, int defaultLanguage, BinaryDescriptor value) {
+    public FxBinary(boolean multiLanguage, long defaultLanguage, BinaryDescriptor value) {
         super(multiLanguage, defaultLanguage, value);
     }
 
@@ -113,7 +113,7 @@ public class FxBinary extends FxValue<BinaryDescriptor, FxBinary> implements Ser
      * @param defaultLanguage the default language
      * @param value           single initializing value
      */
-    public FxBinary(int defaultLanguage, BinaryDescriptor value) {
+    public FxBinary(long defaultLanguage, BinaryDescriptor value) {
         super(defaultLanguage, value);
     }
 
@@ -196,7 +196,7 @@ public class FxBinary extends FxValue<BinaryDescriptor, FxBinary> implements Ser
             this.singleValue = replacement;
         if (this.translations == null || this.translations.size() == 0)
             return;
-        for (int bd_key : translations.keySet()) {
+        for (long bd_key : translations.keySet()) {
             if (translations.get(bd_key).getHandle() != null && translations.get(bd_key).getHandle().equals(handle))
                 translations.put(bd_key, replacement);
         }

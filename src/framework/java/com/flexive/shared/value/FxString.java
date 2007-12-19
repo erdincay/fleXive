@@ -48,15 +48,15 @@ public class FxString extends FxValue<String, FxString> implements Serializable 
     private static final long serialVersionUID = -1441854978719391696L;
     public final static String EMPTY = "";
 
-    public FxString(boolean multiLanguage, Map<Integer, String> translations) {
+    public FxString(boolean multiLanguage, Map<Long, String> translations) {
         super(multiLanguage, translations);
     }
 
-    public FxString(boolean multiLanguage, int defaultLanguage, Map<Integer, String> translations) {
+    public FxString(boolean multiLanguage, long defaultLanguage, Map<Long, String> translations) {
         super(multiLanguage, defaultLanguage, translations);
     }
 
-    public FxString(boolean multiLanguage, int defaultLanguage, String value) {
+    public FxString(boolean multiLanguage, long defaultLanguage, String value) {
         super(multiLanguage, defaultLanguage, value);
     }
 
@@ -64,7 +64,7 @@ public class FxString extends FxValue<String, FxString> implements Serializable 
         super(multiLanguage, value);
     }
 
-    public FxString(Map<Integer, String[]> translations, int pos) {
+    public FxString(Map<Long, String[]> translations, int pos) {
         super(translations, pos);
     }
 
@@ -72,15 +72,15 @@ public class FxString extends FxValue<String, FxString> implements Serializable 
         super(clone);
     }
 
-    public FxString(Map<Integer, String> translations) {
+    public FxString(Map<Long, String> translations) {
         super(translations);
     }
 
-    public FxString(int defaultLanguage, Map<Integer, String> translations) {
+    public FxString(long defaultLanguage, Map<Long, String> translations) {
         super((defaultLanguage != FxLanguage.SYSTEM_ID), defaultLanguage, translations);
     }
 
-    public FxString(int defaultLanguage, String value) {
+    public FxString(long defaultLanguage, String value) {
         super(defaultLanguage, value);
     }
 

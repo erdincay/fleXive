@@ -120,7 +120,7 @@ class EditModeHelper extends RenderHelper {
             if (language.getId() == value.getDefaultLanguage()) {
                 writer.writeAttribute("selected", "selected", null);
             }
-            writer.writeText(language.getName().getBestTranslation(), null);
+            writer.writeText(language.getLabel().getBestTranslation(), null);
             writer.endElement("option");
         }
         writer.endElement("select");
@@ -160,7 +160,7 @@ class EditModeHelper extends RenderHelper {
             }
         }
         if (!defaultLanguageExists && languages.size() > 0) {
-            value.setDefaultLanguage(languages.get(0).getId(), true);
+            value.setDefaultLanguage((int)languages.get(0).getId(), true);
         }
     }
 
@@ -386,7 +386,7 @@ class EditModeHelper extends RenderHelper {
     }
 
     private void renderBinary(String inputId, FxLanguage language) throws IOException {
-        if (!value.isEmpty() && (language == null || value.translationExists(language.getId()))) {
+        if (!value.isEmpty() && (language == null || value.translationExists((int)language.getId()))) {
             final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(component, HtmlGraphicImage.COMPONENT_TYPE);
             final BinaryDescriptor descriptor = ((FxBinary) value).getTranslation(language);
             image.setUrl(ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()),

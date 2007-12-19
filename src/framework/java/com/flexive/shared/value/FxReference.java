@@ -56,7 +56,7 @@ public class FxReference extends FxValue<ReferencedContent, FxReference> impleme
      * @param defaultLanguage the default language
      * @param translations    HashMap containing language->translation mapping
      */
-    public FxReference(boolean multiLanguage, int defaultLanguage, Map<Integer, ReferencedContent> translations) {
+    public FxReference(boolean multiLanguage, long defaultLanguage, Map<Long, ReferencedContent> translations) {
         super(multiLanguage, defaultLanguage, translations);
     }
 
@@ -66,7 +66,7 @@ public class FxReference extends FxValue<ReferencedContent, FxReference> impleme
      * @param defaultLanguage the default language
      * @param translations    HashMap containing language->translation mapping
      */
-    public FxReference(int defaultLanguage, Map<Integer, ReferencedContent> translations) {
+    public FxReference(long defaultLanguage, Map<Long, ReferencedContent> translations) {
         super(defaultLanguage, translations);
     }
 
@@ -76,7 +76,7 @@ public class FxReference extends FxValue<ReferencedContent, FxReference> impleme
      * @param multiLanguage multilanguage value?
      * @param translations  HashMap containing language->translation mapping
      */
-    public FxReference(boolean multiLanguage, Map<Integer, ReferencedContent> translations) {
+    public FxReference(boolean multiLanguage, Map<Long, ReferencedContent> translations) {
         super(multiLanguage, translations);
     }
 
@@ -85,7 +85,7 @@ public class FxReference extends FxValue<ReferencedContent, FxReference> impleme
      *
      * @param translations HashMap containing language->translation mapping
      */
-    public FxReference(Map<Integer, ReferencedContent> translations) {
+    public FxReference(Map<Long, ReferencedContent> translations) {
         super(translations);
     }
 
@@ -95,7 +95,7 @@ public class FxReference extends FxValue<ReferencedContent, FxReference> impleme
      * @param translations HashMap containing language->translation mapping
      * @param pos          position (index) in the array to use
      */
-    public FxReference(Map<Integer, ReferencedContent[]> translations, int pos) {
+    public FxReference(Map<Long, ReferencedContent[]> translations, int pos) {
         super(translations, pos);
     }
 
@@ -106,7 +106,7 @@ public class FxReference extends FxValue<ReferencedContent, FxReference> impleme
      * @param defaultLanguage the default language
      * @param value           single initializing value
      */
-    public FxReference(boolean multiLanguage, int defaultLanguage, ReferencedContent value) {
+    public FxReference(boolean multiLanguage, long defaultLanguage, ReferencedContent value) {
         super(multiLanguage, defaultLanguage, value);
     }
 
@@ -116,7 +116,7 @@ public class FxReference extends FxValue<ReferencedContent, FxReference> impleme
      * @param defaultLanguage the default language
      * @param value           single initializing value
      */
-    public FxReference(int defaultLanguage, ReferencedContent value) {
+    public FxReference(long defaultLanguage, ReferencedContent value) {
         super(defaultLanguage, value);
     }
 

@@ -61,7 +61,7 @@ public interface ContentEngine {
      * @throws FxApplicationException TODO
      * @throws FxLoadException        on initialization errors
      */
-    FxContent initialize(long typeId, long mandatorId, long prefACL, long prefStep, int prefLang) throws FxApplicationException;
+    FxContent initialize(long typeId, long mandatorId, long prefACL, long prefStep, long prefLang) throws FxApplicationException;
 
     /**
      * Initialize a new FxContent instance for a type with default values.

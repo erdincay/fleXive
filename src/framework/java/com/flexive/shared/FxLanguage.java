@@ -43,18 +43,26 @@ import java.util.Locale;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class FxLanguage implements Serializable {
+public class FxLanguage extends AbstractSelectableObject implements Serializable, SelectableObjectWithLabel {
     private static final long serialVersionUID = -7060915362180672721L;
-    /** language set for groups or not localized properties */
-    public static final int SYSTEM_ID = 0;
-    /** default language (english) */
-    public static final int DEFAULT_ID = 1;
-    /** default language ISO code */
+    /**
+     * language set for groups or not localized properties
+     */
+    public static final long SYSTEM_ID = 0;
+    /**
+     * default language (english)
+     */
+    public static final long DEFAULT_ID = 1;
+    /**
+     * default language ISO code
+     */
     public static final String DEFAULT_ISO = "en";
-    /** default language object */
+    /**
+     * default language object
+     */
     public static final FxLanguage DEFAULT = new FxLanguage(DEFAULT_ID, DEFAULT_ISO, new FxString("English"), true);
 
-    private int id;
+    private long id;
     private String iso2digit;
     private FxString name;
     private boolean licensed;
@@ -62,32 +70,32 @@ public class FxLanguage implements Serializable {
     /**
      * pre defined language english
      */
-    public static final int ENGLISH = 1;
+    public static final long ENGLISH = 1;
 
     /**
      * pre defined language german
      */
-    public static final int GERMAN = 2;
+    public static final long GERMAN = 2;
 
     /**
      * pre defined language french
      */
-    public static final int FRENCH = 3;
+    public static final long FRENCH = 3;
 
     /**
      * pre defined language italian
      */
-    public static final int ITALIAN = 4;
+    public static final long ITALIAN = 4;
 
     /**
      * Language constructor.
-     * 
-     * @param id    the language ID
+     *
+     * @param id        the language ID
      * @param iso2digit the 2-digit ISO code (en, de, fr, ...)
-     * @param name  the localized language name
+     * @param name      the localized language name
      * @param licensed  if the language is licensed for the current server installation
      */
-    public FxLanguage(int id, String iso2digit, FxString name, boolean licensed) {
+    public FxLanguage(long id, String iso2digit, FxString name, boolean licensed) {
         this.id = id;
         this.iso2digit = iso2digit;
         this.licensed = licensed;
@@ -111,10 +119,10 @@ public class FxLanguage implements Serializable {
         this.iso2digit = localeIso.substring(0, 2);
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
-
+    
     public String getIso2digit() {
         return iso2digit;
     }
@@ -123,7 +131,17 @@ public class FxLanguage implements Serializable {
         return new Locale(getIso2digit());
     }
 
-    public FxString getName() {
+    /**
+     * {@inheritDoc}
+     */
+    public String getName() {
+        return name.getDefaultTranslation();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public FxString getLabel() {
         return name;
     }
 
@@ -131,26 +149,32 @@ public class FxLanguage implements Serializable {
         return licensed;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
         return iso2digit + "(" + name + ")";
     }
 
 
-    /** {@inheritDoc} */
-	@Override
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof FxLanguage)) return false;
-        FxLanguage comp = (FxLanguage)obj;
+        FxLanguage comp = (FxLanguage) obj;
         return (comp.getIso2digit().equals(this.getIso2digit()));
     }
 
-    /** {@inheritDoc} */
-	@Override
-	public int hashCode() {
-		return iso2digit.hashCode();
-	}
-    
-    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return iso2digit.hashCode();
+    }
+
+
 }

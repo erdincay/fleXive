@@ -76,7 +76,7 @@ public abstract class InputMapper<BaseType extends FxValue, MappedType extends F
      * Map the given value to the destination FxValue type. The resulting object will be
      * used for rendering the input element for the given value. Note that the "output type" of
      * the rendered UI control must be applicable to the base FxValue type, i.e. a
-     * call to {@link FxValue#setTranslation(int, Object)} must be successful.
+     * call to {@link FxValue#setTranslation(long, Object)} must be successful.
      *
      * @param value the value to be mapped
      * @return  the mapped type

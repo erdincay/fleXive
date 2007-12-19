@@ -55,7 +55,7 @@ public class FxDateTime extends FxValue<Date, FxDateTime> implements Serializabl
      * @param defaultLanguage the default language
      * @param translations    HashMap containing language->translation mapping
      */
-    public FxDateTime(boolean multiLanguage, int defaultLanguage, Map<Integer, Date> translations) {
+    public FxDateTime(boolean multiLanguage, long defaultLanguage, Map<Long, Date> translations) {
         super(multiLanguage, defaultLanguage, translations);
     }
 
@@ -65,7 +65,7 @@ public class FxDateTime extends FxValue<Date, FxDateTime> implements Serializabl
      * @param defaultLanguage the default language
      * @param translations    HashMap containing language->translation mapping
      */
-    public FxDateTime(int defaultLanguage, Map<Integer, Date> translations) {
+    public FxDateTime(long defaultLanguage, Map<Long, Date> translations) {
         super(defaultLanguage, translations);
     }
 
@@ -75,7 +75,7 @@ public class FxDateTime extends FxValue<Date, FxDateTime> implements Serializabl
      * @param multiLanguage multilanguage value?
      * @param translations  HashMap containing language->translation mapping
      */
-    public FxDateTime(boolean multiLanguage, Map<Integer, Date> translations) {
+    public FxDateTime(boolean multiLanguage, Map<Long, Date> translations) {
         super(multiLanguage, translations);
     }
 
@@ -84,7 +84,7 @@ public class FxDateTime extends FxValue<Date, FxDateTime> implements Serializabl
      *
      * @param translations HashMap containing language->translation mapping
      */
-    public FxDateTime(Map<Integer, Date> translations) {
+    public FxDateTime(Map<Long, Date> translations) {
         super(translations);
     }
 
@@ -94,7 +94,7 @@ public class FxDateTime extends FxValue<Date, FxDateTime> implements Serializabl
      * @param translations HashMap containing language->translation mapping
      * @param pos          position (index) in the array to use
      */
-    public FxDateTime(Map<Integer, Date[]> translations, int pos) {
+    public FxDateTime(Map<Long, Date[]> translations, int pos) {
         super(translations, pos);
     }
 
@@ -105,7 +105,7 @@ public class FxDateTime extends FxValue<Date, FxDateTime> implements Serializabl
      * @param defaultLanguage the default language
      * @param value           single initializing value
      */
-    public FxDateTime(boolean multiLanguage, int defaultLanguage, Date value) {
+    public FxDateTime(boolean multiLanguage, long defaultLanguage, Date value) {
         super(multiLanguage, defaultLanguage, value);
     }
 
@@ -115,7 +115,7 @@ public class FxDateTime extends FxValue<Date, FxDateTime> implements Serializabl
      * @param defaultLanguage the default language
      * @param value           single initializing value
      */
-    public FxDateTime(int defaultLanguage, Date value) {
+    public FxDateTime(long defaultLanguage, Date value) {
         super(defaultLanguage, value);
     }
 

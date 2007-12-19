@@ -78,12 +78,13 @@
                     <adm:treeNode title="#{fxMessageBean['Admin.scripts.overview']}" link="/adm/main/scripting/overview.jsf" />
                     <adm:treeNode title="#{fxMessageBean['Admin.scripts.create']}" link="/adm/main/scripting/create.jsf" />
                     <c:if test="#{fxSystemBean.isInRole['ScriptExecution']}">
-                        <adm:treeNode title="#{fxMessageBean['Admin.system.groovyConsole']}" link="/adm/main/scripting/groovyConsole.jsf"/>
+                        <adm:treeNode title="#{fxMessageBean['Admin.scripts.groovyConsole']}" link="/adm/main/scripting/groovyConsole.jsf"/>
                     </c:if>
                 </adm:treeNode>
             </c:if>
             <adm:treeNode id="system" icon="system" title="#{fxMessageBean['Admin.system.root']}">
-                <adm:treeNode title="#{fxMessageBean['Admin.system.info']}" link="/adm/main/systemInfo.jsf"/>
+                <adm:treeNode title="#{fxMessageBean['Admin.system.info']}" link="/adm/main/system/systemInfo.jsf"/>
+                <!--<adm:treeNode title="#{fxMessageBean['Admin.system.languages']}" link="/adm/main/system/languages.jsf"/>-->
             </adm:treeNode>
 
             <c:if test="#{fxSystemBean.isInRole['SelectListEditor']}">

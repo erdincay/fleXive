@@ -42,6 +42,7 @@ import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Unit tests for com.flexive.shared.FxSharedUtils.
@@ -60,9 +61,9 @@ public class FxSharedUtilTest {
         assert "ABC".equals(FxFormatUtils.formatResource("{0}", -1, "ABC")) : "Did not replace single argument correctly";
         assert "Test:-ABC-".equals(FxFormatUtils.formatResource("Test:-{0}-", -1, "ABC")) : "Did not replace single argument correctly";
         assert "Test:-ABC-".equals(FxFormatUtils.formatResource("Test:-{0}{1}C{2}", -1, "A", "B", "-")) : "Did not replace multiple arguments correctly";
-        HashMap<Integer, String> translations = new HashMap<Integer, String>();
-        translations.put(1, "translation1");
-        translations.put(2, "translation2");
+        Map<Long, String> translations = new HashMap<Long, String>();
+        translations.put(1L, "translation1");
+        translations.put(2L, "translation2");
         FxString translatedString = new FxString(translations);
         assert "Test: translation1".equals(FxFormatUtils.formatResource("Test: {0}", 1, translatedString)) : "Did not replace FxString argument correctly";
         assert "Test: translation2".equals(FxFormatUtils.formatResource("Test: {0}", 2, translatedString)) : "Did not replace FxString argument correctly";

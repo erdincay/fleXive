@@ -654,7 +654,7 @@ public final class FxSharedUtils {
      * @param args           arguments to replace in the message ({n})
      * @return localized message
      */
-    public static String getLocalizedMessage(String resourceBundle, int localeId, String localeIso, String key, Object... args) {
+    public static String getLocalizedMessage(String resourceBundle, long localeId, String localeIso, String key, Object... args) {
         if (key == null) {
             LOG.error("No key given!", new Throwable());
             return "##NO_KEY_GIVEN";
@@ -685,9 +685,9 @@ public final class FxSharedUtils {
      * @return a multilingual FxString with all translations for the given property key.
      */
     public static FxString getMessage(String resourceBundle, String key, Object... args) {
-        Map<Integer, String> translations = new HashMap<Integer, String>();
+        Map<Long, String> translations = new HashMap<Long, String>();
         for (String localeIso : translatedLocales) {
-            final int localeId = new FxLanguage(localeIso).getId();
+            final long localeId = new FxLanguage(localeIso).getId();
             translations.put(localeId, getLocalizedMessage(resourceBundle, localeId, localeIso, key, args));
         }
         return new FxString(translations);

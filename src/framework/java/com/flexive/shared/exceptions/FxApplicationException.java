@@ -311,7 +311,7 @@ public class FxApplicationException extends Exception implements FxLocalizedExce
      * @param langCode the language code
      * @return the localized messages of any chained exceptions that are derived from FxException
      */
-    private String evaluateCause(int langCode) {
+    private String evaluateCause(long langCode) {
         Throwable org = this.getCause();
         String msg = "";
         while (org != null) {
@@ -334,7 +334,7 @@ public class FxApplicationException extends Exception implements FxLocalizedExce
     /**
      * {@inheritDoc}
      */
-    public String getMessage(int localeId) {
+    public String getMessage(long localeId) {
         return message.getLocalizedMessage(localeId) + evaluateCause(localeId);
     }
 

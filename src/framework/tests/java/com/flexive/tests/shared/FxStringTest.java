@@ -51,13 +51,13 @@ public class FxStringTest {
      * is not shared
      */
     public void testTransTableConstructor() {
-        Map<Integer, String> translations = new HashMap<Integer, String>();
-        for (int i = 0; i < 5; i++) {
+        Map<Long, String> translations = new HashMap<Long, String>();
+        for (long i = 0; i < 5; i++) {
             translations.put(i, "a");
         }
         FxString testA = new FxString(true, translations);
         assert "a".equals(testA.getDefaultTranslation()) : "Default translation: " + testA.getDefaultTranslation() + ", expected: a";
-        for (int i = 0; i < 5; i++) {
+        for (long i = 0; i < 5; i++) {
             translations.put(i, "b");
         }
         assert "a".equals(testA.getDefaultTranslation()) : "Default translation: " + testA.getDefaultTranslation() + ", expected: a";

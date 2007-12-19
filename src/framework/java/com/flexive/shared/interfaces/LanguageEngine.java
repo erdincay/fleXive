@@ -55,7 +55,7 @@ public interface LanguageEngine {
      * @throws FxApplicationException TODO
      *
      */
-    FxLanguage load(int languageId) throws FxApplicationException;
+    FxLanguage load(long languageId) throws FxApplicationException;
 
     /**
      * Loads a language defined by is  iso code.
@@ -91,5 +91,5 @@ public interface LanguageEngine {
      * @param languageId the unqique id of the language to check
      * @return a array with all available language objects
      */
-    boolean isValid(int languageId);
+    boolean isValid(long languageId);
 }

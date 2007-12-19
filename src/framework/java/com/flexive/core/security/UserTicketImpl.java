@@ -114,22 +114,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
      * {@inheritDoc}
      */
     public final boolean isInRole(Role role) {
-        if (role != Role.GlobalSupervisor) {
-            if (isGlobalSupervisor()) {
-                // May do anything
-                return true;
-            }
-            if (isMandatorSupervisor() &&
-//                    role != Role.ROLE_MANDATOR_TRANSFERS &&
-                    role != Role.StructureManagement
-                //TODO: scriptmanagement
-                //role != Role.ROLE_DATASTRUCTURE_MANAGEMENT &&
-                    ) {
-                // May do almost everything, but only for data beloging to him
-                return true;
-            }
-        }
-        return roles != null && FxArrayUtils.containsElement(roles, role);
+        return isGlobalSupervisor() || roles != null && FxArrayUtils.containsElement(roles, role);
     }
 
     /**

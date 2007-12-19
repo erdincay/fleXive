@@ -385,7 +385,7 @@ public class WorkflowTest {
             for (FxLanguage language : languages) {
                 stepDefinition.getLabel().setTranslation(language, "Translation " + language);
             }
-            int defaultLanguage = languages[languages.length - 1].getId();
+            long defaultLanguage = languages[languages.length - 1].getId();
             stepDefinition.getLabel().setDefaultLanguage(defaultLanguage);
             stepDefinitionEngine.update(stepDefinition);
             assert getEnvironment().getStepDefinition(stepDefinitionId).getLabel().getDefaultLanguage() == defaultLanguage

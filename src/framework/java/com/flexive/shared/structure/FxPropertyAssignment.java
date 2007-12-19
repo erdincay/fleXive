@@ -68,7 +68,7 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
 
     protected FxValue defaultValue;
 
-    protected int defaultLang;
+    protected long defaultLang;
 
     /**
      * Constructor
@@ -94,7 +94,7 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
     public FxPropertyAssignment(long assignmentId, boolean enabled, FxType assignedType, String alias, String xpath, int position,
                                 FxMultiplicity multiplicity, int defaultMultiplicity, FxGroupAssignment parentGroupAssignment,
                                 long baseAssignment, FxString label, FxString hint, FxValue defaultValue,
-                                FxProperty property, ACL ACL, int defaultLang, List<FxStructureOption> options) {
+                                FxProperty property, ACL ACL, long defaultLang, List<FxStructureOption> options) {
         super(assignmentId, enabled, assignedType, alias, xpath, position, multiplicity, defaultMultiplicity, parentGroupAssignment,
                 baseAssignment, label, hint, options);
         this.defaultValue = defaultValue;
@@ -269,7 +269,7 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
      *
      * @return default language for this property assignment (if set)
      */
-    public int getDefaultLanguage() {
+    public long getDefaultLanguage() {
         return defaultLang;
     }
 

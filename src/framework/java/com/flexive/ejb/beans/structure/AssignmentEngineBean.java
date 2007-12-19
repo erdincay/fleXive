@@ -1596,7 +1596,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 if (original.getDefaultLanguage() != modified.getDefaultLanguage()) {
                     if (ps != null) ps.close();
                     ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET DEFLANG=? WHERE ID=?");
-                    ps.setInt(1, modified.getDefaultLanguage());
+                    ps.setInt(1, (int)modified.getDefaultLanguage());
                     ps.setLong(2, original.getId());
                     ps.executeUpdate();
                     if (changes)
@@ -1730,7 +1730,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             ps.setLong(12, prop.getParentGroupAssignment() == null ? FxAssignment.NO_PARENT : prop.getParentGroupAssignment().getId());
             ps.setLong(13, prop.getProperty().getId());
             ps.setLong(14, prop.getACL().getId());
-            ps.setInt(15, prop.hasDefaultLanguage() ? prop.getDefaultLanguage() : FxLanguage.SYSTEM_ID);
+            ps.setInt(15, prop.hasDefaultLanguage() ? (int)prop.getDefaultLanguage() : (int)FxLanguage.SYSTEM_ID);
             ps.setBoolean(16, prop.isSystemInternal());
             ps.executeUpdate();
             Database.storeFxString(new FxString[]{prop.getLabel(), prop.getHint(), (FxString) prop.getDefaultValue()}, con,

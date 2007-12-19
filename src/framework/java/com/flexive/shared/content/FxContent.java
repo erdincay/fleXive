@@ -77,7 +77,7 @@ public class FxContent implements Serializable, Cloneable {
     private long stepId;
     private int maxVersion;
     private int liveVersion;
-    private int mainLanguage;
+    private long mainLanguage;
 
     private boolean active;
 
@@ -118,7 +118,7 @@ public class FxContent implements Serializable, Cloneable {
      * @param binaryPreviewACL           id of the ACL of the preview binary
      */
     public FxContent(FxPK pk, long typeId, boolean relation, long mandatorId, long aclId, long stepId, int maxVersion, int liveVersion,
-                     boolean active, int mainLanguage, FxPK relatedSource, FxPK relatedDestination, int relatedSourcePosition,
+                     boolean active, long mainLanguage, FxPK relatedSource, FxPK relatedDestination, int relatedSourcePosition,
                      int relatedDestinationPosition, LifeCycleInfo lifeCycleInfo, FxGroupData data, long binaryPreviewId,
                      long binaryPreviewACL) {
         this.pk = pk;
@@ -285,7 +285,7 @@ public class FxContent implements Serializable, Cloneable {
      *
      * @return main language
      */
-    public int getMainLanguage() {
+    public long getMainLanguage() {
         return mainLanguage;
     }
 
@@ -294,7 +294,7 @@ public class FxContent implements Serializable, Cloneable {
      *
      * @param mainLanguage main language
      */
-    public void setMainLanguage(int mainLanguage) {
+    public void setMainLanguage(long mainLanguage) {
         this.mainLanguage = mainLanguage;
         updateSystemInternalProperties();
     }
@@ -746,7 +746,7 @@ public class FxContent implements Serializable, Cloneable {
             else if (sp.getAlias().equals("ISACTIVE"))
                 value = new FxBoolean(false, this.isActive());
             else if (sp.getAlias().equals("MAINLANG"))
-                value = new FxNumber(false, this.getMainLanguage());
+                value = new FxLargeNumber(false, this.getMainLanguage());
             else if (sp.getAlias().equals("CREATED_BY"))
                 value = new FxLargeNumber(false, this.getLifeCycleInfo().getCreatorId());
             else if (sp.getAlias().equals("CREATED_AT"))
@@ -786,8 +786,8 @@ public class FxContent implements Serializable, Cloneable {
             _long = (FxLargeNumber) getValue("/ACL");
             _long.setValue(aclId);
 
-            FxNumber _int = (FxNumber) getValue("/MAINLANG");
-            _int.setValue(mainLanguage);
+            FxLargeNumber _langlong = (FxLargeNumber) getValue("/MAINLANG");
+            _langlong.setValue(mainLanguage);
 
             FxBoolean _bool = (FxBoolean) getValue("/ISACTIVE");
             _bool.setValue(isActive());
@@ -1030,7 +1030,7 @@ public class FxContent implements Serializable, Cloneable {
             if (ref.isEmpty() || !ref.isValid())
                 continue;
             if (ref.isMultiLanguage()) {
-                for (int lang : ref.getTranslatedLanguages()) {
+                for (long lang : ref.getTranslatedLanguages()) {
                     ReferencedContent r = ref.getTranslation(lang);
                     if (!r.hasContent() && r.isAccessGranted()) {
                         r.setContent(ce.load(r));

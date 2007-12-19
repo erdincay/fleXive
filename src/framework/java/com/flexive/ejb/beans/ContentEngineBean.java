@@ -93,7 +93,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public FxContent initialize(long typeId, long mandatorId, long prefACL, long prefStep, int prefLang)
+    public FxContent initialize(long typeId, long mandatorId, long prefACL, long prefStep, long prefLang)
             throws FxApplicationException {
         UserTicket ticket = FxContext.get().getTicket();
         FxEnvironment environment;
@@ -129,7 +129,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             } catch (Exception e) {
                 throw new FxInvalidParameterException("STEP", "ex.workflow.noStepDefined", type.getWorkflow().getName());
             }
-        int lang = prefLang;
+        long lang = prefLang;
         try {
             language.load(lang);
         } catch (FxInvalidLanguageException e) {

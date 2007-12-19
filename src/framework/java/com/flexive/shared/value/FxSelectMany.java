@@ -63,7 +63,7 @@ public class FxSelectMany extends FxValue<SelectMany, FxSelectMany> implements S
      * @param defaultLanguage the default language
      * @param translations    HashMap containing language->translation mapping
      */
-    public FxSelectMany(boolean multiLanguage, int defaultLanguage, Map<Integer, SelectMany> translations) {
+    public FxSelectMany(boolean multiLanguage, long defaultLanguage, Map<Long, SelectMany> translations) {
         super(multiLanguage, defaultLanguage, translations);
         checkForEmptyTranslations(translations);
     }
@@ -74,7 +74,7 @@ public class FxSelectMany extends FxValue<SelectMany, FxSelectMany> implements S
      * @param defaultLanguage the default language
      * @param translations    HashMap containing language->translation mapping
      */
-    public FxSelectMany(int defaultLanguage, Map<Integer, SelectMany> translations) {
+    public FxSelectMany(long defaultLanguage, Map<Long, SelectMany> translations) {
         super(defaultLanguage, translations);
         checkForEmptyTranslations(translations);
     }
@@ -85,7 +85,7 @@ public class FxSelectMany extends FxValue<SelectMany, FxSelectMany> implements S
      * @param multiLanguage multilanguage value?
      * @param translations  HashMap containing language->translation mapping
      */
-    public FxSelectMany(boolean multiLanguage, Map<Integer, SelectMany> translations) {
+    public FxSelectMany(boolean multiLanguage, Map<Long, SelectMany> translations) {
         super(multiLanguage, translations);
         checkForEmptyTranslations(translations);
     }
@@ -95,7 +95,7 @@ public class FxSelectMany extends FxValue<SelectMany, FxSelectMany> implements S
      *
      * @param translations HashMap containing language->translation mapping
      */
-    public FxSelectMany(Map<Integer, SelectMany> translations) {
+    public FxSelectMany(Map<Long, SelectMany> translations) {
         super(translations);
         checkForEmptyTranslations(translations);
     }
@@ -106,7 +106,7 @@ public class FxSelectMany extends FxValue<SelectMany, FxSelectMany> implements S
      * @param translations HashMap containing language->translation mapping
      * @param pos          position (index) in the array to use
      */
-    public FxSelectMany(Map<Integer, SelectMany[]> translations, int pos) {
+    public FxSelectMany(Map<Long, SelectMany[]> translations, int pos) {
         super(translations, pos);
         FxSharedUtils.checkParameterEmpty(translations, "translations");
         for (SelectMany[] translation: translations.values()) {
@@ -121,7 +121,7 @@ public class FxSelectMany extends FxValue<SelectMany, FxSelectMany> implements S
      * @param defaultLanguage the default language
      * @param value           single initializing value
      */
-    public FxSelectMany(boolean multiLanguage, int defaultLanguage, SelectMany value) {
+    public FxSelectMany(boolean multiLanguage, long defaultLanguage, SelectMany value) {
         super(multiLanguage, defaultLanguage, value);
         FxSharedUtils.checkParameterEmpty(value, "value");
         this.list = value.getSelectList();
@@ -133,7 +133,7 @@ public class FxSelectMany extends FxValue<SelectMany, FxSelectMany> implements S
      * @param defaultLanguage the default language
      * @param value           single initializing value
      */
-    public FxSelectMany(int defaultLanguage, SelectMany value) {
+    public FxSelectMany(long defaultLanguage, SelectMany value) {
         super(defaultLanguage, value);
         FxSharedUtils.checkParameterEmpty(value, "value");
     }
@@ -249,7 +249,7 @@ public class FxSelectMany extends FxValue<SelectMany, FxSelectMany> implements S
         return false;
     }
 
-    private void checkForEmptyTranslations(Map<Integer, SelectMany> translations) {
+    private void checkForEmptyTranslations(Map<Long, SelectMany> translations) {
         FxSharedUtils.checkParameterEmpty(translations, "translations");
         for (SelectMany translation: translations.values()) {
             FxSharedUtils.checkParameterEmpty(translation, "translation");

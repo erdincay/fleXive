@@ -81,7 +81,7 @@ public class TestUsers {
 
     private static boolean initialized = false;
     private static long mandatorId;
-    private static int languageId;
+    private static long languageId;
 
     private static AccountEngine accounts;
     private static MandatorEngine mandators;
@@ -137,7 +137,7 @@ public class TestUsers {
      *
      * @return english id
      */
-    public static int getEnglishLanguageId() {
+    public static long getEnglishLanguageId() {
         return languageId;
     }
 

@@ -311,7 +311,7 @@ public class FxProperty extends FxStructureElement implements Serializable {
      * @param lang      language to initialize this value for
      * @return empty FxValue instance for the data type
      */
-    protected FxValue getEmptyValue(boolean multiLang, int lang) {
+    protected FxValue getEmptyValue(boolean multiLang, long lang) {
         switch (this.getDataType()) {
             case HTML:
                 return new FxHTML(multiLang, lang, FxHTML.EMPTY).setEmpty();

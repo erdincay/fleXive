@@ -53,7 +53,7 @@ public class FxNumber extends FxValue<Integer, FxNumber> implements Serializable
      * @param defaultLanguage the default language
      * @param translations    HashMap containing language->translation mapping
      */
-    public FxNumber(boolean multiLanguage, int defaultLanguage, Map<Integer, Integer> translations) {
+    public FxNumber(boolean multiLanguage, long defaultLanguage, Map<Long, Integer> translations) {
         super(multiLanguage, defaultLanguage, translations);
     }
 
@@ -63,7 +63,7 @@ public class FxNumber extends FxValue<Integer, FxNumber> implements Serializable
      * @param defaultLanguage the default language
      * @param translations    HashMap containing language->translation mapping
      */
-    public FxNumber(int defaultLanguage, Map<Integer, Integer> translations) {
+    public FxNumber(long defaultLanguage, Map<Long, Integer> translations) {
         super(defaultLanguage, translations);
     }
 
@@ -73,7 +73,7 @@ public class FxNumber extends FxValue<Integer, FxNumber> implements Serializable
      * @param multiLanguage multilanguage value?
      * @param translations  HashMap containing language->translation mapping
      */
-    public FxNumber(boolean multiLanguage, Map<Integer, Integer> translations) {
+    public FxNumber(boolean multiLanguage, Map<Long, Integer> translations) {
         super(multiLanguage, translations);
     }
 
@@ -82,7 +82,7 @@ public class FxNumber extends FxValue<Integer, FxNumber> implements Serializable
      *
      * @param translations HashMap containing language->translation mapping
      */
-    public FxNumber(Map<Integer, Integer> translations) {
+    public FxNumber(Map<Long, Integer> translations) {
         super(translations);
     }
 
@@ -92,7 +92,7 @@ public class FxNumber extends FxValue<Integer, FxNumber> implements Serializable
      * @param translations HashMap containing language->translation mapping
      * @param pos          position (index) in the array to use
      */
-    public FxNumber(Map<Integer, Integer[]> translations, int pos) {
+    public FxNumber(Map<Long, Integer[]> translations, int pos) {
         super(translations, pos);
     }
 
@@ -103,7 +103,7 @@ public class FxNumber extends FxValue<Integer, FxNumber> implements Serializable
      * @param defaultLanguage the default language
      * @param value           single initializing value
      */
-    public FxNumber(boolean multiLanguage, int defaultLanguage, Integer value) {
+    public FxNumber(boolean multiLanguage, long defaultLanguage, Integer value) {
         super(multiLanguage, defaultLanguage, value);
     }
 
@@ -113,7 +113,7 @@ public class FxNumber extends FxValue<Integer, FxNumber> implements Serializable
      * @param defaultLanguage the default language
      * @param value           single initializing value
      */
-    public FxNumber(int defaultLanguage, Integer value) {
+    public FxNumber(long defaultLanguage, Integer value) {
         super(defaultLanguage, value);
     }
 

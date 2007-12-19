@@ -59,7 +59,7 @@ public class FxSelectOne extends FxValue<FxSelectListItem, FxSelectOne> implemen
      * @param defaultLanguage the default language
      * @param translations    HashMap containing language->translation mapping
      */
-    public FxSelectOne(boolean multiLanguage, int defaultLanguage, Map<Integer, FxSelectListItem> translations) {
+    public FxSelectOne(boolean multiLanguage, long defaultLanguage, Map<Long, FxSelectListItem> translations) {
         super(multiLanguage, defaultLanguage, translations);
     }
 
@@ -69,7 +69,7 @@ public class FxSelectOne extends FxValue<FxSelectListItem, FxSelectOne> implemen
      * @param defaultLanguage the default language
      * @param translations    HashMap containing language->translation mapping
      */
-    public FxSelectOne(int defaultLanguage, Map<Integer, FxSelectListItem> translations) {
+    public FxSelectOne(long defaultLanguage, Map<Long, FxSelectListItem> translations) {
         super(defaultLanguage, translations);
     }
 
@@ -79,7 +79,7 @@ public class FxSelectOne extends FxValue<FxSelectListItem, FxSelectOne> implemen
      * @param multiLanguage multilanguage value?
      * @param translations  HashMap containing language->translation mapping
      */
-    public FxSelectOne(boolean multiLanguage, Map<Integer, FxSelectListItem> translations) {
+    public FxSelectOne(boolean multiLanguage, Map<Long, FxSelectListItem> translations) {
         super(multiLanguage, translations);
     }
 
@@ -88,7 +88,7 @@ public class FxSelectOne extends FxValue<FxSelectListItem, FxSelectOne> implemen
      *
      * @param translations HashMap containing language->translation mapping
      */
-    public FxSelectOne(Map<Integer, FxSelectListItem> translations) {
+    public FxSelectOne(Map<Long, FxSelectListItem> translations) {
         super(translations);
     }
 
@@ -98,7 +98,7 @@ public class FxSelectOne extends FxValue<FxSelectListItem, FxSelectOne> implemen
      * @param translations HashMap containing language->translation mapping
      * @param pos          position (index) in the array to use
      */
-    public FxSelectOne(Map<Integer, FxSelectListItem[]> translations, int pos) {
+    public FxSelectOne(Map<Long, FxSelectListItem[]> translations, int pos) {
         super(translations, pos);
     }
 
@@ -109,7 +109,7 @@ public class FxSelectOne extends FxValue<FxSelectListItem, FxSelectOne> implemen
      * @param defaultLanguage the default language
      * @param value           single initializing value
      */
-    public FxSelectOne(boolean multiLanguage, int defaultLanguage, FxSelectListItem value) {
+    public FxSelectOne(boolean multiLanguage, long defaultLanguage, FxSelectListItem value) {
         super(multiLanguage, defaultLanguage, value);
         list = value.getList();
     }
@@ -120,7 +120,7 @@ public class FxSelectOne extends FxValue<FxSelectListItem, FxSelectOne> implemen
      * @param defaultLanguage the default language
      * @param value           single initializing value
      */
-    public FxSelectOne(int defaultLanguage, FxSelectListItem value) {
+    public FxSelectOne(long defaultLanguage, FxSelectListItem value) {
         super(defaultLanguage, value);
         list = value.getList();
     }

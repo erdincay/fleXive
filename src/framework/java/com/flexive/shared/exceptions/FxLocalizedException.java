@@ -38,41 +38,41 @@ import com.flexive.shared.security.UserTicket;
 
 /**
  * Common interface for flexive exceptions.
- * 
+ *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public interface FxLocalizedException {
-	/**
+    /**
      * Get the localized message in the default locale (english)
      *
      * @return localized message
      */
     String getMessage();
-    
+
     /**
      * Get the localized message for a locale
      *
-     * @param locale
+     * @param locale locale to get the message got
      * @return localized message
      */
     String getMessage(FxLanguage locale);
-    
+
     /**
      * Get the localized message for a localeId
      *
-     * @param localeId
+     * @param localeId locale id to get the message for
      * @return localized message
      */
-    String getMessage(int localeId);
-    
+    String getMessage(long localeId);
+
     /**
      * Get the localized message for a calling users locale
      *
-     * @param ticket
+     * @param ticket calling users ticket, used to get the locale for the message from
      * @return localized message
      */
     String getMessage(UserTicket ticket);
-    
+
     /**
      * Get the underlying exception message object
      *

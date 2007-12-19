@@ -74,7 +74,7 @@ public class TestUser {
      * @param languageId the test user language
      * @throws FxApplicationException if the account could not be created
      */
-    public void createUser(long mandatorId, int languageId) throws FxApplicationException {
+    public void createUser(long mandatorId, long languageId) throws FxApplicationException {
         AccountEngine accounts = EJBLookup.getAccountEngine();
         if (userId != -1) {
             throw new RuntimeException("Account already exists");

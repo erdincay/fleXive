@@ -381,7 +381,7 @@ public class SelectBean implements Serializable {
                 FxLanguage list[] = EJBLookup.getLanguageEngine().loadAvailable();
                 ArrayList<SelectItem> result = new ArrayList<SelectItem>(list.length);
                 for (FxLanguage item : list) {
-                    String label = item.getName().getBestTranslation(ticket);
+                    String label = item.getLabel().getBestTranslation(ticket);
                     result.add(new SelectItem(item, label/*label*/, label/*description*/));
                 }
                 languages = result;

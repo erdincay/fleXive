@@ -540,7 +540,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public long create(String userName, String loginName, String password, String email, int lang,
+    public long create(String userName, String loginName, String password, String email, long lang,
                        long mandatorId, boolean isActive, boolean isConfirmed, Date validFrom, Date validTo, long defaultNode,
                        String description, boolean allowMultiLogin, boolean checkUserRoles)
             throws FxApplicationException {
@@ -618,7 +618,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             stmt.setString(5, password);
             stmt.setString(6, email);
             stmt.setLong(7, contactDataPK.getId());
-            stmt.setInt(8, lang);
+            stmt.setInt(8, (int)lang);
             stmt.setTimestamp(9, new Timestamp(validFrom.getTime()));
             stmt.setTimestamp(10, new Timestamp(validTo.getTime()));
             stmt.setString(11, description);
@@ -1225,7 +1225,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void update(long accountId, String password, Long defaultNode,
                        String name, String loginName, String email, Boolean isConfirmed, Boolean isActive,
-                       Date validFrom, Date validTo, Integer lang, String description,
+                       Date validFrom, Date validTo, Long lang, String description,
                        Boolean allowMultiLogin, Long contactDataId)
             throws FxApplicationException {
 
@@ -1292,7 +1292,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                     " WHERE ID=" + accountId;
             stmt = con.prepareStatement(curSql);
             stmt.setString(1, email);
-            stmt.setInt(2, lang);
+            stmt.setInt(2, lang.intValue());
             stmt.setTimestamp(3, new Timestamp(validFrom.getTime()));
             stmt.setTimestamp(4, new Timestamp(validTo.getTime()));
             stmt.setString(5, description);
@@ -1334,7 +1334,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void updateUser(long accountId, String password, String name, String loginName, String email, Integer lang) throws FxApplicationException {
+    public void updateUser(long accountId, String password, String name, String loginName, String email, Long lang) throws FxApplicationException {
         // Load the account to update
         Account account = load(accountId);
 
@@ -1374,7 +1374,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                     " WHERE ID=" + accountId;
             stmt = con.prepareStatement(curSql);
             stmt.setString(1, email);
-            stmt.setInt(2, lang);
+            stmt.setInt(2, lang.intValue());
             stmt.setString(3, name);
             stmt.setString(4, loginName);
 

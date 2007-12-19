@@ -71,15 +71,15 @@ public class FxHTML extends FxString {
         return this;
     }
 
-    public FxHTML(boolean multiLanguage, Map<Integer, String> translations) {
+    public FxHTML(boolean multiLanguage, Map<Long, String> translations) {
         super(multiLanguage, translations);
     }
 
-    public FxHTML(boolean multiLanguage, int defaultLanguage, Map<Integer, String> translations) {
+    public FxHTML(boolean multiLanguage, long defaultLanguage, Map<Long, String> translations) {
         super(multiLanguage, defaultLanguage, translations);
     }
 
-    public FxHTML(boolean multiLanguage, int defaultLanguage, String value) {
+    public FxHTML(boolean multiLanguage, long defaultLanguage, String value) {
         super(multiLanguage, defaultLanguage, value);
     }
 
@@ -87,7 +87,7 @@ public class FxHTML extends FxString {
         super(multiLanguage, value);
     }
 
-    public FxHTML(Map<Integer, String[]> translations, int pos) {
+    public FxHTML(Map<Long, String[]> translations, int pos) {
         super(translations, pos);
     }
 
@@ -99,15 +99,15 @@ public class FxHTML extends FxString {
         super(clone);
     }
 
-    public FxHTML(Map<Integer, String> translations) {
+    public FxHTML(Map<Long, String> translations) {
         super(translations);
     }
 
-    public FxHTML(int defaultLanguage, Map<Integer, String> translations) {
+    public FxHTML(long defaultLanguage, Map<Long, String> translations) {
         super(defaultLanguage, translations);
     }
 
-    public FxHTML(int defaultLanguage, String value) {
+    public FxHTML(long defaultLanguage, String value) {
         super(defaultLanguage, value);
     }
 

@@ -55,7 +55,7 @@ public class FxDateRange extends FxValue<DateRange, FxDateRange> implements Seri
      * @param defaultLanguage the default language
      * @param translations    HashMap containing language->translation mapping
      */
-    public FxDateRange(boolean multiLanguage, int defaultLanguage, Map<Integer, DateRange> translations) {
+    public FxDateRange(boolean multiLanguage, long defaultLanguage, Map<Long, DateRange> translations) {
         super(multiLanguage, defaultLanguage, translations);
     }
 
@@ -65,7 +65,7 @@ public class FxDateRange extends FxValue<DateRange, FxDateRange> implements Seri
      * @param defaultLanguage the default language
      * @param translations    HashMap containing language->translation mapping
      */
-    public FxDateRange(int defaultLanguage, Map<Integer, DateRange> translations) {
+    public FxDateRange(long defaultLanguage, Map<Long, DateRange> translations) {
         super(defaultLanguage, translations);
     }
 
@@ -75,7 +75,7 @@ public class FxDateRange extends FxValue<DateRange, FxDateRange> implements Seri
      * @param multiLanguage multilanguage value?
      * @param translations  HashMap containing language->translation mapping
      */
-    public FxDateRange(boolean multiLanguage, Map<Integer, DateRange> translations) {
+    public FxDateRange(boolean multiLanguage, Map<Long, DateRange> translations) {
         super(multiLanguage, translations);
     }
 
@@ -84,7 +84,7 @@ public class FxDateRange extends FxValue<DateRange, FxDateRange> implements Seri
      *
      * @param translations HashMap containing language->translation mapping
      */
-    public FxDateRange(Map<Integer, DateRange> translations) {
+    public FxDateRange(Map<Long, DateRange> translations) {
         super(translations);
     }
 
@@ -94,7 +94,7 @@ public class FxDateRange extends FxValue<DateRange, FxDateRange> implements Seri
      * @param translations HashMap containing language->translation mapping
      * @param pos          position (index) in the array to use
      */
-    public FxDateRange(Map<Integer, DateRange[]> translations, int pos) {
+    public FxDateRange(Map<Long, DateRange[]> translations, int pos) {
         super(translations, pos);
     }
 
@@ -105,7 +105,7 @@ public class FxDateRange extends FxValue<DateRange, FxDateRange> implements Seri
      * @param defaultLanguage the default language
      * @param value           single initializing value
      */
-    public FxDateRange(boolean multiLanguage, int defaultLanguage, DateRange value) {
+    public FxDateRange(boolean multiLanguage, long defaultLanguage, DateRange value) {
         super(multiLanguage, defaultLanguage, value);
     }
 
@@ -115,7 +115,7 @@ public class FxDateRange extends FxValue<DateRange, FxDateRange> implements Seri
      * @param defaultLanguage the default language
      * @param value           single initializing value
      */
-    public FxDateRange(int defaultLanguage, DateRange value) {
+    public FxDateRange(long defaultLanguage, DateRange value) {
         super(defaultLanguage, value);
     }
 
