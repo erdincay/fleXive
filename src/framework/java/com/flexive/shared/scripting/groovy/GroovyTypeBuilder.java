@@ -316,7 +316,7 @@ public class GroovyTypeBuilder extends BuilderSupport {
 
     @Override
     protected Object createNode(Object name) {
-        return "doCall".equals(name) ? new Node() : createNode(name, EMPTYATTRIBUTES, null);
+        return "call".equals(name) || "doCall".equals(name) ? new Node() : createNode(name, EMPTYATTRIBUTES, null);
     }
 
     @Override

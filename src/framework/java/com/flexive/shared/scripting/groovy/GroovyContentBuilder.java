@@ -155,6 +155,7 @@ public class GroovyContentBuilder extends BuilderSupport {
     /**
      * {@inheritDoc}
      */
+    @Override
     protected void setParent(Object parent, Object child) {
         try {
             // if parent is a node info, use its xpath as prefix
@@ -172,14 +173,16 @@ public class GroovyContentBuilder extends BuilderSupport {
     /**
      * {@inheritDoc}
      */
+    @Override
     protected Object createNode(Object name) {
-        return "doCall".equals(name) ? name : new NodeInfo(createXPath(name), null);  
+        return "call".equals(name) || "doCall".equals(name) ? name : new NodeInfo(createXPath(name), null);  
     }
 
     /**
      * {@inheritDoc}
      */
     @SuppressWarnings({"unchecked"})
+    @Override
     protected Object createNode(Object name, Object value) {
         final String xpath = createXPath(name);
         return new NodeInfo(xpath, value);
@@ -188,15 +191,17 @@ public class GroovyContentBuilder extends BuilderSupport {
     /**
      * {@inheritDoc}
      */
+    @Override
     protected Object createNode(Object name, Map attributes) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     protected Object createNode(Object name, Map attributes, Object value) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
     private String createXPath(Object name) {
