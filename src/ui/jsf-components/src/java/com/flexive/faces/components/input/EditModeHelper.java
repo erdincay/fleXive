@@ -34,6 +34,7 @@
 package com.flexive.faces.components.input;
 
 import com.flexive.faces.FxJsfUtils;
+import com.flexive.faces.components.DeferredWriterTag;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.FxLanguage;
@@ -52,6 +53,7 @@ import javax.faces.component.UIInput;
 import javax.faces.component.UISelectItems;
 import javax.faces.component.html.*;
 import javax.faces.context.ResponseWriter;
+import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
 import java.io.IOException;
 import java.text.MessageFormat;
@@ -81,66 +83,84 @@ class EditModeHelper extends RenderHelper {
      */
     @Override
     protected void encodeMultiLanguageField() throws IOException {
-        ArrayList<FxLanguage> languages = FxValueInputRenderer.getLanguages();
+        final List<FxLanguage> languages = FxValueInputRenderer.getLanguages();
         ensureDefaultLanguageExists(value, languages);
-        String radioName = clientId + FxValueInputRenderer.DEFAULT_LANGUAGE;
-        writer.startElement("div", null);
-        writer.writeAttribute("id", clientId, null);
-        writer.writeAttribute("class", FxValueInputRenderer.CSS_CONTAINER, null);
+        final String radioName = clientId + FxValueInputRenderer.DEFAULT_LANGUAGE;
 
-        List<String> rowIds = new ArrayList<String>(languages.size());
-        for (FxLanguage language : languages) {
-            String containerId = clientId + FxValueInputRenderer.LANG_CONTAINER + language.getId();
-            String inputId = clientId + FxValueInputRenderer.INPUT + language.getId();
+        new DeferredWriterTag(component, new DeferredWriterTag.DeferredWriter() {
+            public void render(ResponseWriter out) throws IOException {
+                writer.startElement("div", null);
+                writer.writeAttribute("id", clientId, null);
+                writer.writeAttribute("class", FxValueInputRenderer.CSS_CONTAINER, null);
+            }
+        });
+
+        final List<String> rowIds = new ArrayList<String>(languages.size());
+        for (final FxLanguage language : languages) {
+            final String containerId = clientId + FxValueInputRenderer.LANG_CONTAINER + language.getId();
+            final String inputId = clientId + FxValueInputRenderer.INPUT + language.getId();
             rowIds.add("'" + containerId + "'");
 
-            writer.startElement("div", null);
-            writer.writeAttribute("id", containerId, null);
-            writer.writeAttribute("class", FxValueInputRenderer.CSS_LANG_CONTAINER, null);
-            if (language.getId() != value.getDefaultLanguage()) {
-                writer.writeAttribute("style", "display:none", null);
-            }
+            new DeferredWriterTag(component, new DeferredWriterTag.DeferredWriter() {
+                public void render(ResponseWriter out) throws IOException {
+                    writer.startElement("div", null);
+                    writer.writeAttribute("id", containerId, null);
+                    writer.writeAttribute("class", FxValueInputRenderer.CSS_LANG_CONTAINER, null);
+                    if (language.getId() != value.getDefaultLanguage()) {
+                        writer.writeAttribute("style", "display:none", null);
+                    }
+                }
+            });
 
             encodeField(inputId, language);
             encodeDefaultLanguageRadio(radioName, language);
 
-            writer.endElement("div");
+            new DeferredWriterTag(component, new DeferredWriterTag.DeferredWriter() {
+                public void render(ResponseWriter out) throws IOException {
+                    writer.endElement("div");
+                }
+            });
+
         }
 
         // language select
-        String languageSelectId = clientId + FxValueInputRenderer.LANG_SELECT;
-        writer.startElement("select", null);
-        writer.writeAttribute("name", languageSelectId, null);
-        writer.writeAttribute("style", "float:right", null);
-        writer.writeAttribute("onchange", "document.getElementById('" + clientId + "')."
-                + JS_OBJECT + ".onLanguageChanged(this)", null);
-        for (FxLanguage language : languages) {
-            writer.startElement("option", null);
-            writer.writeAttribute("value", language.getId(), null);
-            if (language.getId() == value.getDefaultLanguage()) {
-                writer.writeAttribute("selected", "selected", null);
+        final String languageSelectId = clientId + FxValueInputRenderer.LANG_SELECT;
+        new DeferredWriterTag(component, new DeferredWriterTag.DeferredWriter() {
+            public void render(ResponseWriter out) throws IOException {
+                writer.startElement("select", null);
+                writer.writeAttribute("name", languageSelectId, null);
+                writer.writeAttribute("style", "float:right", null);
+                writer.writeAttribute("onchange", "document.getElementById('" + clientId + "')."
+                        + JS_OBJECT + ".onLanguageChanged(this)", null);
+                for (FxLanguage language : languages) {
+                    writer.startElement("option", null);
+                    writer.writeAttribute("value", language.getId(), null);
+                    if (language.getId() == value.getDefaultLanguage()) {
+                        writer.writeAttribute("selected", "selected", null);
+                    }
+                    writer.writeText(language.getLabel().getBestTranslation(), null);
+                    writer.endElement("option");
+                }
+                writer.endElement("select");
+
+                writer.startElement("br", null);
+                writer.writeAttribute("clear", "all", null);
+                writer.endElement("br");
+                writer.write("&nbsp;");
+                writer.endElement("div");
+
+                // attach JS handler object to container div
+                writer.write(MessageFormat.format(
+                        "<script language=\"javascript\">\n"
+                                + "<!--\n"
+                                + "  document.getElementById(''{0}'')." + JS_OBJECT
+                                + " = new FxMultiLanguageValueInput(''{0}'', ''{1}'', [{2}]);\n"
+                                + "//-->\n"
+                                + "</script>",
+                        clientId, clientId + FxValueInputRenderer.LANG_CONTAINER, StringUtils.join(rowIds.iterator(), ',')
+                ));
             }
-            writer.writeText(language.getLabel().getBestTranslation(), null);
-            writer.endElement("option");
-        }
-        writer.endElement("select");
-
-        writer.startElement("br", null);
-        writer.writeAttribute("clear", "all", null);
-        writer.endElement("br");
-        writer.write("&nbsp;");
-        writer.endElement("div");
-
-        // attach JS handler object to container div
-        writer.write(MessageFormat.format(
-                "<script language=\"javascript\">\n"
-                        + "<!--\n"
-                        + "  document.getElementById(''{0}'')." + JS_OBJECT
-                        + " = new FxMultiLanguageValueInput(''{0}'', ''{1}'', [{2}]);\n"
-                        + "//-->\n"
-                        + "</script>",
-                clientId, clientId + FxValueInputRenderer.LANG_CONTAINER, StringUtils.join(rowIds.iterator(), ',')
-        ));
+        });
     }
 
     /**
@@ -151,7 +171,7 @@ class EditModeHelper extends RenderHelper {
      * @param value     the FxValue to be checked
      * @param languages the available languages
      */
-    private void ensureDefaultLanguageExists(FxValue value, ArrayList<FxLanguage> languages) {
+    private void ensureDefaultLanguageExists(FxValue value, List<FxLanguage> languages) {
         boolean defaultLanguageExists = false;
         for (FxLanguage language : languages) {
             if (language.getId() == value.getDefaultLanguage()) {
@@ -171,16 +191,20 @@ class EditModeHelper extends RenderHelper {
      * @param language  the language for which this input should be rendered
      * @throws IOException if a io error occured
      */
-    private void encodeDefaultLanguageRadio(String radioName, FxLanguage language) throws IOException {
-        writer.startElement("input", null);
-        writer.writeAttribute("type", "radio", null);
-        writer.writeAttribute("name", radioName, null);
-        writer.writeAttribute("value", language.getId(), null);
-        writer.writeAttribute("style", "float:left", null);
-        if (language.getId() == value.getDefaultLanguage()) {
-            writer.writeAttribute("checked", "true", null);
-        }
-        writer.endElement("input");
+    private void encodeDefaultLanguageRadio(final String radioName, final FxLanguage language) throws IOException {
+        new DeferredWriterTag(component, new DeferredWriterTag.DeferredWriter() {
+            public void render(ResponseWriter out) throws IOException {
+                writer.startElement("input", null);
+                writer.writeAttribute("type", "radio", null);
+                writer.writeAttribute("name", radioName, null);
+                writer.writeAttribute("value", language.getId(), null);
+                writer.writeAttribute("class", "fxValueDefaultLanguageRadio", null);
+                if (language.getId() == value.getDefaultLanguage()) {
+                    writer.writeAttribute("checked", "true", null);
+                }
+                writer.endElement("input");
+            }
+        });
     }
 
     /**
@@ -213,55 +237,63 @@ class EditModeHelper extends RenderHelper {
         }
     }
 
-    private void renderTextInput(String inputId, FxLanguage language) throws IOException {
-        writer.startElement("input", null);
-        writeHtmlAttributes();
-        writer.writeAttribute("type", "text", null);
-        writer.writeAttribute("name", inputId, null);
-        writer.writeAttribute("id", inputId, null);
-        if (value.getMaxInputLength() > 0) {
-            writer.writeAttribute("maxlength", value.getMaxInputLength(), null);
-        }
-        writer.writeAttribute("value", getTextValue(language), null);
-        writer.writeAttribute("class", FxValueInputRenderer.CSS_TEXT_INPUT, null);
-        writer.endElement("input");
+    private void renderTextInput(final String inputId, final FxLanguage language) throws IOException {
+        new DeferredWriterTag(component, new DeferredWriterTag.DeferredWriter() {
+            public void render(ResponseWriter out) throws IOException {
+                writer.startElement("input", null);
+                writeHtmlAttributes();
+                writer.writeAttribute("type", "text", null);
+                writer.writeAttribute("name", inputId, null);
+                writer.writeAttribute("id", inputId, null);
+                if (value.getMaxInputLength() > 0) {
+                    writer.writeAttribute("maxlength", value.getMaxInputLength(), null);
+                }
+                writer.writeAttribute("value", getTextValue(language), null);
+                writer.writeAttribute("class", FxValueInputRenderer.CSS_TEXT_INPUT, null);
+                writer.endElement("input");
+            }
+        });
     }
 
-    private void renderTextArea(String inputId, FxLanguage language) throws IOException {
-        if (component.isForceLineInput()) {
-            renderTextInput(inputId, language);
-            return;
-        }
-        writer.startElement("textarea", null);
-        writer.writeAttribute("id", inputId, null);
-        writeHtmlAttributes();
-        if (value instanceof FxHTML) {
-            // render tinyMCE editor
-            if (!FxJsfUtils.isAjaxRequest()) {
-                // when the page is updated via ajax, tinyMCE generates an additional hidden input
-                // and the text area is essential an anonymous div container (not sure why)
-                writer.writeAttribute("name", inputId, null);
+    private void renderTextArea(final String inputId, final FxLanguage language) throws IOException {
+        new DeferredWriterTag(component, new DeferredWriterTag.DeferredWriter() {
+            public void render(ResponseWriter out) throws IOException {
+                if (component.isForceLineInput()) {
+                    renderTextInput(inputId, language);
+                    return;
+                }
+                writer.startElement("textarea", null);
+                writer.writeAttribute("id", inputId, null);
+                writeHtmlAttributes();
+                if (value instanceof FxHTML) {
+                    // render tinyMCE editor
+                    if (!FxJsfUtils.isAjaxRequest()) {
+                        // when the page is updated via ajax, tinyMCE generates an additional hidden input
+                        // and the text area is essential an anonymous div container (not sure why)
+                        writer.writeAttribute("name", inputId, null);
+                    }
+                    writer.writeAttribute("class", FxValueInputRenderer.CSS_TEXTAREA_HTML, null);
+                    writer.endElement("textarea");
+                    writer.startElement("script", null);
+                    writer.writeAttribute("type", "text/javascript", null);
+                    if (FxJsfUtils.isAjaxRequest() && FxJsfUtils.getRequest().getAttribute(REQUEST_EDITORINIT) == null) {
+                        // reset tinyMCE to avoid getDoc() error messages
+                        writer.write("tinyMCE.idCounter = 0;\n");
+                        FxJsfUtils.getRequest().setAttribute(REQUEST_EDITORINIT, true);
+                    }
+                    writer.write("tinyMCE.execCommand('mceAddControl', false, '" + inputId + "');\n");
+                    writer.write("tinyMCE.execInstanceCommand('" + inputId + "', 'mceSetContent', false, '"
+                            + FxFormatUtils.escapeForJavaScript(getTextValue(language), false, false) + "');\n");
+                    writer.endElement("script");
+                } else {
+                    // render standard text area
+                    writer.writeAttribute("name", inputId, null);
+                    writer.writeAttribute("class", FxValueInputRenderer.CSS_TEXTAREA, null);
+                    writer.writeText(getTextValue(language), null);
+                    writer.endElement("textarea");
+                }
             }
-            writer.writeAttribute("class", FxValueInputRenderer.CSS_TEXTAREA_HTML, null);
-            writer.endElement("textarea");
-            writer.startElement("script", null);
-            writer.writeAttribute("type", "text/javascript", null);
-            if (FxJsfUtils.isAjaxRequest() && FxJsfUtils.getRequest().getAttribute(REQUEST_EDITORINIT) == null) {
-                // reset tinyMCE to avoid getDoc() error messages
-                writer.write("tinyMCE.idCounter = 0;\n");
-                FxJsfUtils.getRequest().setAttribute(REQUEST_EDITORINIT, true);
-            }
-            writer.write("tinyMCE.execCommand('mceAddControl', false, '" + inputId + "');\n");
-            writer.write("tinyMCE.execInstanceCommand('" + inputId + "', 'mceSetContent', false, '"
-                    + FxFormatUtils.escapeForJavaScript(getTextValue(language), false, false) + "');\n");
-            writer.endElement("script");
-        } else {
-            // render standard text area
-            writer.writeAttribute("name", inputId, null);
-            writer.writeAttribute("class", FxValueInputRenderer.CSS_TEXTAREA, null);
-            writer.writeText(getTextValue(language), null);
-            writer.endElement("textarea");
-        }
+        });
     }
 
     /**
@@ -390,7 +422,7 @@ class EditModeHelper extends RenderHelper {
             final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(component, HtmlGraphicImage.COMPONENT_TYPE);
             final BinaryDescriptor descriptor = ((FxBinary) value).getTranslation(language);
             image.setUrl(ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()),
-                    BinaryDescriptor.PreviewSizes.PREVIEW2, value.getXPath(), descriptor.getCreationTime()));
+                    BinaryDescriptor.PreviewSizes.PREVIEW2, value.getXPath(), descriptor.getCreationTime(), language));
         }
         final HtmlInputFileUpload upload = (HtmlInputFileUpload) FxJsfUtils.addChildComponent(component, HtmlInputFileUpload.COMPONENT_TYPE);
         addHtmlAttributes(upload);

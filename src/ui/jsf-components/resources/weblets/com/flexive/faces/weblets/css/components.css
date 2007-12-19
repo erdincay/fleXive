@@ -11,10 +11,15 @@ div.fxValueInput {
 
 /* An input row containing the input element and the default language checkbox */
 div.fxValueInputRow {
-    position: absolute;
+    position: relative;
     left: 0;
     top: 0;
     width: 200px;
+}
+
+input.fxValueDefaultLanguageRadio {
+    position: absolute;
+    right: 0;
 }
 
 input.fxValueTextInput, textarea.fxValueTextArea, select.fxValueSelectInput, .fxValueInputElementWidth {
@@ -38,8 +43,7 @@ input.fxValueTextInput {
 }
 
 input.fxValueFileInput {
-    margin-top: 5px;
-    display: block;
+    float: left;
 }
 
 div.fxValueInputWidth, div.fxValueInput {
@@ -52,6 +56,9 @@ div.fxValueInput {
 }
 
 div.fxValueInput select {
+    position: absolute;
+    right: 0;
+    top: 0;
     width: 60px;
 }
 

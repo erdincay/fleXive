@@ -38,6 +38,7 @@ import com.flexive.shared.content.FxContentSecurityInfo;
 import com.flexive.shared.content.FxContentVersionInfo;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.*;
+import com.flexive.shared.FxLanguage;
 
 import javax.ejb.Remote;
 
@@ -203,8 +204,9 @@ public interface ContentEngine {
      *
      * @param pk    primary key
      * @param xpath XPath
+     * @param language the language (if null, the user ticket language will be used)
      * @return binary id
      * @throws FxApplicationException on errors
      */
-    long getBinaryId(FxPK pk, String xpath) throws FxApplicationException;
+    long getBinaryId(FxPK pk, String xpath, FxLanguage language) throws FxApplicationException;
 }

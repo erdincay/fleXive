@@ -34,10 +34,15 @@
 package com.flexive.war;
 
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.FxLanguage;
+import com.flexive.shared.EJBLookup;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.content.FxPK;
 
 import java.awt.*;
 import java.util.regex.Pattern;
+
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Configuration helper that parses a URI for thumbnail configuration parameters
@@ -123,5 +128,13 @@ public class FxThumbnailURIConfigurator {
 
     public int getSize() {
         return size;
+    }
+
+    public String getLanguageIso() {
+        return lang;
+    }
+
+    public FxLanguage getLanguage() throws FxApplicationException {
+        return StringUtils.isNotBlank(lang) ? EJBLookup.getLanguageEngine().load(lang) : null;
     }
 }

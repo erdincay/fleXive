@@ -33,10 +33,7 @@
  ***************************************************************/
 package com.flexive.war.servlet;
 
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.XPathElement;
+import com.flexive.shared.*;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNoAccessException;
@@ -56,8 +53,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Thumbnail servlet.
@@ -175,7 +170,8 @@ public class ThumbnailServlet implements Servlet {
         long binaryId;
         try {
             //authorization check and binary lookup
-            binaryId = EJBLookup.getContentEngine().getBinaryId(conf.getPK(), XPathElement.stripType(conf.getXPath()));
+            binaryId = EJBLookup.getContentEngine().getBinaryId(conf.getPK(), XPathElement.stripType(conf.getXPath()),
+                    conf.getLanguage());
         } catch (FxNoAccessException na) {
             binaryId = BinaryDescriptor.SYS_NOACCESS;
         } catch (FxApplicationException e) {
@@ -224,11 +220,26 @@ public class ThumbnailServlet implements Servlet {
      * @return a thumbnail link for the given object.
      */
     public static String getLink(FxPK pk, BinaryDescriptor.PreviewSizes size, String xpath, long timestamp) {
+        return getLink(pk, size, xpath, timestamp, null);
+    }
+
+    /**
+     * Return a thumbnail link for the given object.
+     *
+     * @param pk    the object id
+     * @param size  the preview size (if null, the default size is used by the servlet)
+     * @param xpath the binary xpath (if null, the default preview for the object will be used)
+     * @param timestamp the binary timestamp, to be added to the URL for fine-grained cache control
+     * @param language  the language (for multi-lingual objects, otherwise the default language will be used)
+     * @return a thumbnail link for the given object.
+     */
+    public static String getLink(FxPK pk, BinaryDescriptor.PreviewSizes size, String xpath, long timestamp, FxLanguage language) {
         try {
             return URI_BASE + "pk" + pk + (size != null ? "/s" + size.getBlobIndex() : "")
                     + (StringUtils.isNotBlank(xpath) ? "/xp"
                     + URLEncoder.encode(FxSharedUtils.escapeXPath(xpath), "UTF-8") : "")
-                    + "/ts" + timestamp;
+                    + "/ts" + timestamp
+                    + (language != null ? "/lang" + language.getIso2digit() : "");
         } catch (UnsupportedEncodingException e) {
             // shouldn't happen with UTF-8
             throw new IllegalArgumentException(e);

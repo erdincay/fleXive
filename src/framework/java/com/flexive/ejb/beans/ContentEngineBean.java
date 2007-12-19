@@ -37,10 +37,7 @@ import com.flexive.core.Database;
 import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.FxContext;
-import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.*;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.content.*;
 import com.flexive.shared.exceptions.*;
@@ -724,7 +721,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public long getBinaryId(FxPK pk, String xpath) throws FxApplicationException {
+    public long getBinaryId(FxPK pk, String xpath, FxLanguage language) throws FxApplicationException {
         FxSharedUtils.checkParameterNull(pk, "pk");
         FxSharedUtils.checkParameterNull(xpath, "xpath");
         Connection con = null;
@@ -745,7 +742,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             }
             FxPropertyData pd = co.getPropertyData(xpath);
             if (!pd.getValue().isEmpty() && pd.getValue() instanceof FxBinary)
-                return ((FxBinary) pd.getValue()).getBestTranslation(ticket).getId();
+                return ((FxBinary) pd.getValue()).getBestTranslation(language != null ? language : ticket.getLanguage()).getId();
             throw new FxInvalidParameterException("XPATH", "ex.content.binary.xpath.invalid", xpath);
         } catch (FxNotFoundException e) {
             throw new FxLoadException(e);

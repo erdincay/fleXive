@@ -182,7 +182,7 @@ public class FxValueInputRenderer extends Renderer {
                 // keep old value
             }
         } else if (value instanceof FxBinary) {
-            final HtmlInputFileUpload upload = FxJsfUtils.findChild(input, HtmlInputFileUpload.class);
+            final HtmlInputFileUpload upload = (HtmlInputFileUpload) FacesContext.getCurrentInstance().getViewRoot().findComponent(inputId);
             if (upload != null) {
                 try {
                     final UploadedFile file = (UploadedFile) upload.getSubmittedValue();
