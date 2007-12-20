@@ -33,7 +33,6 @@
  ***************************************************************/
 package com.flexive.faces.components.input;
 
-import com.flexive.faces.FxJsfUtils;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -54,8 +53,8 @@ import javax.faces.context.ResponseWriter;
 import javax.faces.render.Renderer;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -211,8 +210,8 @@ public class FxValueInputRenderer extends Renderer {
      *
      * @return all available languages.
      */
-    protected static ArrayList<FxLanguage> getLanguages() {
-        ArrayList<FxLanguage> languages;
+    protected static List<FxLanguage> getLanguages() {
+        List<FxLanguage> languages;
         try {
             languages = EJBLookup.getLanguageEngine().loadAvailable(true);
         } catch (FxApplicationException e) {

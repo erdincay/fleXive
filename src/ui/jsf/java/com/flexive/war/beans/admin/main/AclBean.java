@@ -46,6 +46,7 @@ import javax.faces.event.ActionEvent;
 import javax.faces.model.SelectItem;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Management of ACLs.
@@ -60,7 +61,7 @@ public class AclBean {
     private ACL acl = null;
     private ACLEngine aclEngine;
     private UserGroupEngine groupEngine;
-    private ArrayList<ACLAssignmentEdit> assignments;
+    private List<ACLAssignmentEdit> assignments;
     private long assignmentId;
     private static final String ID_CACHE_KEY = AclBean.class + "_id";
     private String selectedIds;
@@ -129,7 +130,7 @@ public class AclBean {
         FxJsfUtils.setSessionAttribute(ID_CACHE_KEY, id);
     }
 
-    public ArrayList<ACLAssignmentEdit> getAssignments() {
+    public List<ACLAssignmentEdit> getAssignments() {
         if (assignments == null) {
             assignments = new ArrayList<ACLAssignmentEdit>(5);
         }

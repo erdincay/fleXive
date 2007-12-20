@@ -84,7 +84,9 @@
             </c:if>
             <adm:treeNode id="system" icon="system" title="#{fxMessageBean['Admin.system.root']}">
                 <adm:treeNode title="#{fxMessageBean['Admin.system.info']}" link="/adm/main/system/systemInfo.jsf"/>
-                <!--<adm:treeNode title="#{fxMessageBean['Admin.system.languages']}" link="/adm/main/system/languages.jsf"/>-->
+                <c:if test="#{fxSystemBean.isInRole['GlobalSupervisor']}">
+                    <adm:treeNode title="#{fxMessageBean['Admin.system.languages']}" link="/adm/main/system/languages.jsf"/>
+                </c:if>
             </adm:treeNode>
 
             <c:if test="#{fxSystemBean.isInRole['SelectListEditor']}">

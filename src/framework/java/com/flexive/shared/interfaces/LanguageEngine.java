@@ -38,11 +38,15 @@ import com.flexive.shared.exceptions.FxApplicationException;
 
 import javax.ejb.Remote;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Flexive language interface.
+ * [fleXive] language engine interface.
+ * This engine should not be used to load languages as they are available from the environment!
+ * Its purpose is to enable/disable, initially load and manage (position, etc.) languages
  *
- * @author UCS
+ * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @version $Rev
  */
 @Remote
 public interface LanguageEngine {
@@ -52,8 +56,7 @@ public interface LanguageEngine {
      *
      * @param languageId the unqiue id of the language to load
      * @return the language object
-     * @throws FxApplicationException TODO
-     *
+     * @throws FxApplicationException on errors
      */
     FxLanguage load(long languageId) throws FxApplicationException;
 
@@ -62,17 +65,25 @@ public interface LanguageEngine {
      *
      * @param languageIsoCode the iso code of the language to load
      * @return the language object
-     * @throws FxApplicationException TODO
+     * @throws FxApplicationException on errors
      */
     FxLanguage load(String languageIsoCode) throws FxApplicationException;
 
     /**
      * Loads all available languages.
      *
-     * @return a array with all available language objects
-     * @throws FxApplicationException TODO
+     * @return an array with all available languages
+     * @throws FxApplicationException on errors
      */
     FxLanguage[] loadAvailable() throws FxApplicationException;
+
+    /**
+     * Loads all disabled languages.
+     *
+     * @return a list with all disabled languages
+     * @throws FxApplicationException on errors
+     */
+    List<FxLanguage> loadDisabled() throws FxApplicationException;
 
     /**
      * Loads all available languages.
@@ -81,7 +92,7 @@ public interface LanguageEngine {
      * @return a array with all available language objects
      * @throws FxApplicationException if the function fails
      */
-    public ArrayList<FxLanguage> loadAvailable(boolean excludeSystemLanguage) throws FxApplicationException;
+    public List<FxLanguage> loadAvailable(boolean excludeSystemLanguage) throws FxApplicationException;
 
     /**
      * Returns true if the language referenced by its unique id is valid.

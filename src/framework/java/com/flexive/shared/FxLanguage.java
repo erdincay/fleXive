@@ -40,8 +40,10 @@ import java.util.Locale;
 
 /**
  * Languages
+ * Provides mapping functions between language system constants , iso codes and english descriptions.
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @version $Rev
  */
 public class FxLanguage extends AbstractSelectableObject implements Serializable, SelectableObjectWithLabel {
     private static final long serialVersionUID = -7060915362180672721L;
@@ -122,7 +124,7 @@ public class FxLanguage extends AbstractSelectableObject implements Serializable
     public long getId() {
         return id;
     }
-    
+
     public String getIso2digit() {
         return iso2digit;
     }

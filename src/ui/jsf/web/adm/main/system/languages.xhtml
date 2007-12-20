@@ -1,0 +1,178 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:jstl="http://java.sun.com/jsp/jstl/functions"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+    <ui:define name="head">
+        <script type="text/javascript">
+            dojo.require("dojo.widget.FilteringTable");
+        </script>
+    </ui:define>
+    <ui:define name="body">
+        <c:set var="upDownStyle" value="border:0;margin-left:3px;" />
+        <c:set var="upArrow" value="/adm/images/contentEditor/up.png"/>
+        <c:set var="upDownDisabled" value="filter:alpha(opacity=25);-moz-opacity:.25;opacity:.25;border:0;margin-left:3px;"/>
+        <c:set var="downArrow" value="/adm/images/contentEditor/down.png"/>
+        <c:set var="addArrow" value="/adm/images/contentEditor/add.png"/>
+        <c:set var="removeArrow" value="/adm/images/contentEditor/remove.png"/>
+
+        <a4j:form id="frm">
+            <adm:tab label="#{fxMessageBean['Languages.tabtitle.main']}" active="true" id="tab1"/>
+                <a4j:outputPanel id="all">
+                <t:saveState value="#{languagesBean.available}"/>
+                <t:saveState value="#{languagesBean.disabled}"/>
+                <!-- General system/runtime information  -->
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#{fxMessageBean['Languages.label.available.count']}
+                                [#{jstl:length(languagesBean.available)}]</th>
+                                <th>#{fxMessageBean['Languages.label.disabled.count']}
+                                [#{jstl:length(languagesBean.disabled)}]</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <!--Enabled-->
+                                <td valign="top">
+                                    <table dojoType="FilteringTable" widgetId="availableLang" enableMultipleSelect="false"
+                   alternateRows="true" maxSortable="1" class="dojoTable">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    #{fxMessageBean['Languages.label.isocode']}
+                                                </th>
+                                                <th>
+                                                    #{fxMessageBean['Languages.label.language']}
+                                                </th>
+                                                <th>
+                                                    #{fxMessageBean['Languages.label.action']}
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <ui:repeat value="#{languagesBean.available}" var="item">
+                                                <tr>
+                                                    <td>
+                                                        #{jstl:toUpperCase(item.iso2digit)}
+                                                    </td>
+                                                    <td>
+                                                        #{item.label}
+                                                    </td>
+                                                    <td>
+                                                        <ui:fragment rendered="#{languagesBean.first == item.id}">
+                                                            <t:graphicImage alt="moveUp" url="#{upArrow}"
+                                                                            style="#{upDownDisabled}"/>
+                                                        </ui:fragment>
+                                                        <a4j:commandLink reRender="all"
+                                                                         rendered="#{languagesBean.first != item.id}"
+                                                                         actionListener="#{languagesBean.moveLanguageUp}"
+                                                                         onmouseover='ignoreEvent(event)'
+                                                                         eventsQueue="langQ"
+                                                                         >
+                                                            <f:setPropertyActionListener target="#{languagesBean.language}"
+                                                                                         value="#{item}"/>
+                                                            <t:graphicImage alt="moveUp" url="#{upArrow}" style="#{upDownStyle}"/>
+                                                        </a4j:commandLink>
+                                                        <ui:fragment rendered="#{languagesBean.last == item.id}">
+                                                            <t:graphicImage alt="moveDown" url="#{downArrow}"
+                                                                            style="#{upDownDisabled}"/>
+                                                        </ui:fragment>
+                                                        <a4j:commandLink reRender="all"
+                                                                         rendered="#{languagesBean.last != item.id}"
+                                                                         actionListener="#{languagesBean.moveLanguageDown}"
+                                                                         onmouseover='ignoreEvent(event)'
+                                                                         eventsQueue="langQ"
+                                                                         >
+                                                            <f:setPropertyActionListener target="#{languagesBean.language}"
+                                                                                         value="#{item}"/>
+                                                            <t:graphicImage alt="moveDown"
+                                                                            url="#{downArrow}"
+                                                                            style="#{upDownStyle};margin-left:3px"/>
+                                                        </a4j:commandLink>
+                                                        <a4j:commandLink reRender="all"
+                                                                         actionListener="#{languagesBean.removeLanguage}"
+                                                                         onmouseover='ignoreEvent(event)'
+                                                                         eventsQueue="langQ"
+                                                                         >
+                                                            <f:setPropertyActionListener target="#{languagesBean.language}"
+                                                                                         value="#{item}"/>
+                                                            <t:graphicImage alt="remove"
+                                                                            url="#{removeArrow}"
+                                                                            style="#{upDownStyle};margin-left:3px"/>
+                                                        </a4j:commandLink>
+                                                    </td>
+                                                </tr>
+                                            </ui:repeat>
+                                        </tbody>
+                                    </table>
+                                </td>
+                                <!--Disabled-->
+                                <td valign="top">
+                                    <table dojoType="FilteringTable" widgetId="disabledLang" enableMultipleSelect="false"
+                   alternateRows="true" maxSortable="1" class="dojoTable">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    #{fxMessageBean['Languages.label.isocode']}
+                                                </th>
+                                                <th>
+                                                    #{fxMessageBean['Languages.label.language']}
+                                                </th>
+                                                <th>
+                                                    #{fxMessageBean['Languages.label.action']}
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <ui:repeat value="#{languagesBean.disabled}" var="item">
+                                                <tr>
+                                                    <td>
+                                                        #{jstl:toUpperCase(item.iso2digit)}
+                                                    </td>
+                                                    <td>
+                                                        #{item.label}
+                                                    </td>
+                                                    <td>
+                                                        <a4j:commandLink reRender="all"
+                                                                         actionListener="#{languagesBean.addLanguage}"
+                                                                         onmouseover='ignoreEvent(event)'
+                                                                         eventsQueue="langQ"
+                                                                         >
+                                                            <f:setPropertyActionListener target="#{languagesBean.language}"
+                                                                                         value="#{item}"/>
+                                                            <t:graphicImage alt="add"
+                                                                            url="#{addArrow}"
+                                                                            style="#{upDownStyle};margin-left:3px"/>
+                                                        </a4j:commandLink>
+                                                    </td>
+                                                </tr>
+                                            </ui:repeat>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <br/>
+                </a4j:outputPanel>
+                <a4j:commandButton id="refreshButton" reRender="all" eventsQueue="langQ"
+                                   value="#{fxMessageBean['SystemInfo.button.refresh']}"/>
+            <adm:toolbarPluginButtons/>
+        </a4j:form>
+    </ui:define>
+</ui:composition>
+
+</body>
+</html>

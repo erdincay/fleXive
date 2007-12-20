@@ -328,6 +328,10 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
 
             // Load the user and construct a user ticket
             return UserTicketStore.getUserTicket(username);
+        } catch( FxAccountInUseException ae ) {
+            if (ctx != null)
+                ctx.setRollbackOnly();
+            throw ae;
         } catch (SQLException exc) {
             FxLoginFailedException dbe = new FxLoginFailedException("SqlError=" + exc.getMessage(),
                     FxLoginFailedException.TYPE_SQL_ERROR);
@@ -342,7 +346,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         } catch (Exception exc) {
             if (ctx != null)
                 ctx.setRollbackOnly();
-            FxLoginFailedException dbe = new FxLoginFailedException("Error=" + exc.getMessage(),
+            FxLoginFailedException dbe = new FxLoginFailedException("Error: " + exc.getMessage(),
                     FxLoginFailedException.TYPE_SQL_ERROR);
             LOG.error(dbe);
             throw dbe;

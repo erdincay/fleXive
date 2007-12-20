@@ -254,7 +254,7 @@ div.formLabel {
     float: left;
     margin-top: 2px;
     width: 120px;
-    height: 25px;
+    height: 12px;
     padding: 2px;
     white-space: nowrap;
 }
@@ -268,7 +268,7 @@ div.formInputElement {
 
 div.formError {
     float: left;
-    height: 25px;
+    height: 12px;
     padding: 2px;
     width: 80px;
 }
