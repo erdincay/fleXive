@@ -50,40 +50,29 @@ import java.util.List;
 public class LanguagesBean {
 
     private LanguageEngine lang;
-    private List<FxLanguage> available;
-    private List<FxLanguage> disabled;
+    private List<FxLanguage> available = null;
+    private List<FxLanguage> disabled = null;
     private FxLanguage language;
 
     public LanguagesBean() {
         lang = EJBLookup.getLanguageEngine();
-        try {
-            if (available == null)
-                available = lang.loadAvailable(true);
-            if (disabled == null)
-                disabled = lang.loadDisabled();
-            language = null;
-        } catch (FxApplicationException e) {
-            throw e.asRuntimeException();
-        }
+        language = null;
     }
 
-    public List<FxLanguage> getAvailable() {
+    public List<FxLanguage> getAvailable() throws FxApplicationException {
+        if (available == null)
+            available = lang.loadAvailable(true);
         return available;
     }
 
-    public List<FxLanguage> getDisabled() {
+    public List<FxLanguage> getDisabled() throws FxApplicationException {
+        if (disabled == null)
+            disabled = lang.loadDisabled();
         return disabled;
     }
 
     public void setAvailable(List<FxLanguage> available) {
         this.available = available;
-        /*try {
-            disabled = lang.loadDisabled();
-            disabled.addAll(lang.loadAvailable(true));
-            disabled.removeAll(available);
-        } catch (FxApplicationException e) {
-            throw e.asRuntimeException();
-        }*/
     }
 
     public void setDisabled(List<FxLanguage> disabled) {
@@ -98,7 +87,8 @@ public class LanguagesBean {
         this.language = language;
     }
 
-    public synchronized void moveLanguageUp(ActionEvent event) {
+    public synchronized void moveLanguageUp(ActionEvent event) throws FxApplicationException {
+        getAvailable();
         for (int i = 0; i < available.size(); i++) {
             if (available.get(i).getId() == language.getId()) {
                 if (i == 0)
@@ -110,7 +100,8 @@ public class LanguagesBean {
         }
     }
 
-    public synchronized void moveLanguageDown(ActionEvent event) {
+    public synchronized void moveLanguageDown(ActionEvent event) throws FxApplicationException {
+        getAvailable();
         for (int i = 0; i < available.size(); i++) {
             if (available.get(i).getId() == language.getId()) {
                 if (i == available.size() - 1)
@@ -122,39 +113,41 @@ public class LanguagesBean {
         }
     }
 
-    public long getFirst() {
-        if( available == null || available.size() == 0 )
-            return 0;
+    public long getFirst() throws FxApplicationException {
+        getAvailable();
         return available.get(0).getId();
     }
 
-    public long getLast() {
-        if( available == null || available.size() == 0 )
-            return 0;
-        return available.get(available.size()-1).getId();
+    public long getLast() throws FxApplicationException {
+        getAvailable();
+        return available.get(available.size() - 1).getId();
     }
 
-    public void addLanguage(ActionEvent event) {
-        for( int i=0; i<disabled.size(); i++ ) {
-            if( disabled.get(i).getId() == language.getId() ) {
+    public void addLanguage(ActionEvent event) throws FxApplicationException {
+        getAvailable();
+        getDisabled();
+        for (int i = 0; i < disabled.size(); i++) {
+            if (disabled.get(i).getId() == language.getId()) {
                 available.add(disabled.remove(i));
                 return;
             }
         }
     }
 
-    public void removeLanguage(ActionEvent event) {
+    public void removeLanguage(ActionEvent event) throws FxApplicationException {
+        getAvailable();
+        getDisabled();
         FxLanguage tmp = null;
-        for( int i=0; i<available.size(); i++ ) {
-            if( available.get(i).getId() == language.getId() ) {
+        for (int i = 0; i < available.size(); i++) {
+            if (available.get(i).getId() == language.getId()) {
                 tmp = available.remove(i);
                 break;
             }
         }
-        if( tmp == null )
+        if (tmp == null)
             return;
-        for( int i=0; i<disabled.size(); i++ ) {
-            if( disabled.get(i).getIso2digit().compareTo(language.getIso2digit()) > 0 ) {
+        for (int i = 0; i < disabled.size(); i++) {
+            if (disabled.get(i).getIso2digit().compareTo(language.getIso2digit()) > 0) {
                 disabled.add(i, tmp);
                 return;
             }
