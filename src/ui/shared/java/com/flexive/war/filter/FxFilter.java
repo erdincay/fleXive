@@ -60,6 +60,8 @@ import java.util.List;
 public class FxFilter implements Filter {
     private static final Log LOG = LogFactory.getLog(FxFilter.class);
 
+    private final static String CATALINA_CLIENT_ABORT = "org.apache.catalina.connector.ClientAbortException";
+
     private String FILESYSTEM_WAR_ROOT = null;
     private FilterConfig config = null;
     private static String PATH_DIVISION = "division_";
@@ -213,10 +215,13 @@ public class FxFilter implements Filter {
                 } else {
                     // nothing
                 }
-            } catch (org.apache.catalina.connector.ClientAbortException e) {
-                LOG.debug("Client aborted transfer: " + e);
+//            } catch (org.apache.catalina.connector.ClientAbortException e) {
+//                LOG.debug("Client aborted transfer: " + e);
             } catch (Exception e) {
-                LOG.error("FxFilter caught exception: " + e.getMessage(), e);
+                if (CATALINA_CLIENT_ABORT.equals(e.getClass().getCanonicalName())) {
+                    LOG.debug("Client aborted transfer: " + e);
+                } else
+                    LOG.error("FxFilter caught exception: " + e.getMessage(), e);
             }
         } finally {
             FxContext.cleanup();

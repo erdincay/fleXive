@@ -55,7 +55,7 @@ import java.util.Map;
 
 public class SelectListBean {
     //used to filter out the select lists with id's 0 up to DELIMITER and prevent them from being edited
-    private static final long SYSTEM_INTERNAL_LISTS_DELIMITER = 2;
+    private static final long SYSTEM_INTERNAL_LISTS_DELIMITER = 0;
     private FxSelectListEdit selectList = null;
     private long selectListId = -1;
     private String selectListName = "";
