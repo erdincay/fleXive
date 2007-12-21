@@ -9,6 +9,11 @@
         <webroots>
           <root url="file://$MODULE_DIR$" relative="/WEB-INF" />
         </webroots>
+        <sourceRoots>
+          <root url="file://$MODULE_DIR$/../java" />
+          <root url="file://$MODULE_DIR$/../tests/groovy" />
+          <root url="file://$MODULE_DIR$/../tests/java" />
+        </sourceRoots>
         <building>
           <setting name="EXPLODED_URL" value="file://" />
           <setting name="EXPLODED_ENABLED" value="false" />
@@ -272,7 +277,7 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="file://$MODULE_DIR$/../../../../../../misc/sources/facelets-1.1.12/src/java" />
+          <root url="jar://$MODULE_DIR$/../../../../lib/facelets-1.1.12.src.zip!/facelets-1.1.12/src/java" />
         </SOURCES>
       </library>
     </orderEntry>

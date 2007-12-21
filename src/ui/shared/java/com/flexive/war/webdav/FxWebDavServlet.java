@@ -33,7 +33,7 @@
  ***************************************************************/
 package com.flexive.war.webdav;
 
-import sun.misc.BASE64Decoder;
+import org.apache.commons.codec.binary.Base64;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
@@ -122,9 +122,8 @@ public abstract class FxWebDavServlet extends FxWebDavServletBase implements Ser
         // Security
         final String AUTH = req.getHeader("Authorization");
         if (AUTH != null && AUTH.length() > 0) {
-            BASE64Decoder decoder = new BASE64Decoder();
             String enc = AUTH.substring(6);
-            String dec = new String(decoder.decodeBuffer(enc));
+            String dec = new String(Base64.decodeBase64(enc.getBytes("UTF-8")), "UTF-8");
             int idx = dec.indexOf(":");
             String uid = dec.substring(0, idx);
             String pwd = dec.substring(idx + 1);

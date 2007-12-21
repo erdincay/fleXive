@@ -511,10 +511,11 @@
         </copy>
 
         <!-- Copy third-party libraries to extlib/ -->
-        <copy todir="${flexive.dist.extlib.dir}">
+        <copy todir="${flexive.dist.extlib.dir}" >
             <path refid="flexive.shared-libs.path"/>
             <mapper type="flatten"/>
         </copy>
+        <delete dir="${flexive.dist.extlib.dir}" includes="el-ri.jar, jsf-impl.jar, weblets-impl*.jar"/>
 
         <!-- Copy global deployment descriptots -->
         <copy todir="${flexive.dist.meta.dir}">
@@ -545,6 +546,7 @@ database.password=a
         <!-- Create flexive ZIP file -->
         <zip destfile="${flexive.base.build.dir}/flexive-dist.zip">
             <fileset dir="${basedir}" includes="flexive-dist/**"/>
+            <fileset dir="${basedir}/legal" includes="LICENSE.txt,GPL.txt"/>
         </zip>
     </target>
 
@@ -554,6 +556,7 @@ database.password=a
             <fileset dir="${flexive.src.ui.components.dir}" includes="**/*"/>
             <fileset dir="${flexive.src.ui.jsf.dir}" includes="**/*"/>
             <fileset dir="${flexive.src.ui.shared.dir}" includes="**/*"/>
+            <fileset dir="${basedir}/legal" includes="LICENSE.txt,GPL.txt"/>
         </zip>
     </target>
     

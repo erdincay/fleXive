@@ -1,0 +1,2 @@
+Red Hat released Ajax4jsf under the LGPL license at Jboss.org
+Please see jboss-LICENSE.txt
