@@ -127,11 +127,17 @@ db.config.create
         <applicationDescriptorBuilder dropDir="${build.dist.dir}"
                                       destFile="${build.dir}/application.xml"
                                       srcFile="${dist.basedir}/META-INF/application.xml"/>
+        <!-- Create drops.archives -->
+        <echo file="${build.dir}/drops.archives">${fxProject}</echo>
+        <jar jarfile="${build.dir}/flexive-drop-resources.jar">
+            <fileset file="${build.dir}/drops.archives"/>
+        </jar>
         <ear earfile="${build.dist.dir}/${package.ear}" appxml="${build.dir}/application.xml">
             <zipfileset prefix="lib" dir="${dist.lib.dir}" includes="**/*" excludes="flexive-ejb.jar"/>
             <zipfileset prefix="lib" dir="${dist.extlib.dir}" includes="**/*" excludes="jsf-api.jar,jsf-impl.jar,javaee.jar,jboss-*.jar,selenium-*,testng-*"/>
             <zipfileset prefix="lib" dir="${build.dist.dir}" includes="**/*.jar" excludes="${package.ejb}"/>
             <zipfileset prefix="lib" dir="${basedir}/lib" includes="**/*.jar"/>
+            <zipfileset prefix="lib" dir="${build.dir}" includes="flexive-drop-resources.jar"/>
             <fileset file="${dist.basedir}/*.war"/>
             <fileset file="${dist.lib.dir}/flexive-ejb.jar"/>
             <fileset file="${build.dist.dir}/${package.war}"/>
