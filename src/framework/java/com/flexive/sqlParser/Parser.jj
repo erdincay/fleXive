@@ -87,7 +87,6 @@ TOKEN [IGNORE_CASE] :
 | < FILTER      : "FILTER" >
 | < NOT         : "NOT" >
 | < UNION       : "UNION" >
-| < COMBINE_OR_INTERSECT     : ("COMBINE" | "INTERSECT") >
 | < EQUALS    : "=" >
 | < NEAR    : "~=" >
 | < MORE_THAN : ">" >
@@ -120,13 +119,13 @@ TOKEN [IGNORE_CASE] :
 | < DISTINCT    : "DISTINCT " >
 | < RELATION    : "RELATION" >
 | < RECURSIVE    : "RECURSIVE" >
-| < FROM_ID   : "FROM_ID" >
 | < END_STMT  : ";"([" ","\n"])* >
 | < FUNCTION  : (["a"-"z","A"-"Z"])+"(">
 | < WILDCARD  : "*" >
 | < INTEGER   : ("-"|"")["0"-"9"] (["0"-"9"])* >
 | < FLOAT     : ("-"|"")(["0"-"9"])*(".")(["0"-"9"])+>
 | < STRING:    ("'"(~["'"]|"''")*"'" | "\""(~["\""]|"\"\"")*"\"") >
+| < BOOLEAN   : ("TRUE" | "FALSE") >
 | < LIST_SEPERATOR : "," >
 | < IDENTIFIER: ["@","a"-"z","A"-"Z","_"] ( ["!","a"-"z","A"-"Z","_","0"-"9"] )* >
 | < SYM_SELECT_ITEM: ["a"-"z","A"-"Z","_"] ( ["a"-"z","A"-"Z","_","0"-"9"] )*"."((["*","@","#","a"-"z","A"-"Z","_"] ( [".","a"-"z","A"-"Z","_","0"-"9"] )*)|(((["a"-"z","A"-"Z"])(["a"-"z","_","A"-"Z","0"-"9"])*)+("/"["a"-"z","A"-"Z"])(["a"-"z","_","A"-"Z","0"-"9"])*)+) >
@@ -370,27 +369,12 @@ void where(final FxStatement PI) throws SqlParserException : {
   Token comOrInt = null;
   FxStatement combine = null;
 }{
-
     [ braceO=<BRACE_CI_O> ] search_condition(PI) [ braceC=<BRACE_CI_C> ] {
         //PI.setStartingBraces(braceO);
         //PI.setSearchConditions(searchc);
         //PI.setEndingBraces(braceC);
     }
-    [
-    comOrInt=<COMBINE_OR_INTERSECT> {
-      //FxStatement p = PI;
-      //while (p.getParent()!=null) {
-      //  p = p.getParent();
-      //}
-      //combine = p.newSubParsedInfo(comOrInt.image);
-    }
-    where(combine)
-    ]
 }
-
-
-
-
 
 
 /**
@@ -637,6 +621,11 @@ Constant constantValue() :
 	t1=<FLOAT>
 	{
 		return new Constant(t1.image);
+	}
+	|
+	t1=<BOOLEAN>
+	{
+	    return new Constant(t1.image);
 	}
 	|
 	<NULL> 

@@ -44,6 +44,7 @@ public class Constant extends Value
         super(sValue);
     }
 
+    @Override
     public String getValue() {
         return (String)super.getValue();
     }
