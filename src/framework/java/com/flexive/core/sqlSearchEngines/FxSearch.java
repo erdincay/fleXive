@@ -57,6 +57,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * The main search engine class
@@ -64,6 +68,7 @@ import java.util.ArrayList;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class FxSearch {
+    private static final Log LOG = LogFactory.getLog(FxSearch.class);
 
     private int startIndex;
     private int fetchRows;
@@ -138,10 +143,10 @@ public class FxSearch {
             this.hasWildcard = this.hasWildcard();
             this.parserExecutionTime = (int) (java.lang.System.currentTimeMillis() - time);
         } catch (SqlParserException pe) {
-            // Catche the parse exception and convert it to an localized one
-            throw new FxSqlSearchException(pe);
+            // Catch the parse exception and convert it to an localized one
+            throw new FxSqlSearchException(LOG, pe, "ex.sqlSearch.parser.error", pe.getMessage(), query);
         } catch (Throwable t) {
-            throw new FxSqlSearchException(t, "ex.sqlSearch.parser.error", t.getMessage());
+            throw new FxSqlSearchException(LOG, t, "ex.sqlSearch.parser.error", t.getMessage(), query);
         }
 
         // Process content type filter
@@ -475,5 +480,9 @@ public class FxSearch {
 
         //ArrayList<SelectedValue> selValues = new ArrayList<SelectedValue>(fx_stmt.getSelectedValues().size()+25);
         return conf.load(cType, viewType, location);
+    }
+
+    public String getQuery() {
+        return query;
     }
 }

@@ -221,7 +221,7 @@ public class MySQLDataFilter extends DataFilter {
         } catch (FxSqlSearchException exc) {
             throw exc;
         } catch (Throwable t) {
-            throw new FxSqlSearchException(t, "ex.sqlSearch.failedToBuildDataFilter");
+            throw new FxSqlSearchException(t, "ex.sqlSearch.failedToBuildDataFilter", t.getMessage(), search.getQuery());
         } finally {
             Database.closeObjects(MySQLDataFilter.class, null, stmt);
         }

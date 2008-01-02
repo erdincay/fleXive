@@ -33,8 +33,13 @@
  ***************************************************************/
 package com.flexive.shared.value;
 
+import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.exceptions.FxInvalidParameterException;
+
 import java.io.Serializable;
 import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.text.ParsePosition;
 
 /**
  * A class to describe an immutable date range
@@ -53,11 +58,21 @@ public class DateRange implements Serializable {
 
     public DateRange(Date lower, Date upper) {
         assert lower != null && upper != null;
-        assert upper.getTime() == lower.getTime() || upper.getTime() > lower.getTime();
+        assert upper.getTime() >= lower.getTime();
         this.lower = (Date) lower.clone();
         this.upper = (Date) upper.clone();
     }
 
+    public DateRange(String dateRange) {
+        final SimpleDateFormat sdf = FxFormatUtils.getDateTimeFormat();
+        final ParsePosition pos = new ParsePosition(0);
+        this.lower = sdf.parse(dateRange, pos);
+        pos.setIndex(pos.getIndex() + 2);   // skip the " - "
+        this.upper = sdf.parse(dateRange, pos);
+        if (this.lower == null || this.upper == null) {
+            throw new FxInvalidParameterException("dateRange", "ex.daterange.format", dateRange).asRuntimeException();
+        }
+    }
 
     public Date getLower() {
         return (Date) lower.clone();
@@ -198,4 +213,11 @@ public class DateRange implements Serializable {
     public int hashCode() {
         return lower.hashCode() + 31 * upper.hashCode();
     }
+
+    @Override
+    public String toString() {
+        final SimpleDateFormat sdf = FxFormatUtils.getDateTimeFormat();
+        return sdf.format(lower) + " - " + sdf.format(upper);
+    }
+
 }

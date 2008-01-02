@@ -44,13 +44,22 @@ import com.flexive.shared.search.query.QueryOperatorNode;
 import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.security.Account;
 import com.flexive.shared.structure.FxType;
-import com.flexive.shared.value.FxLargeNumber;
+import com.flexive.shared.structure.FxDataType;
+import com.flexive.shared.structure.FxPropertyAssignment;
+import com.flexive.shared.value.*;
 import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.annotations.DataProvider;
+import org.apache.commons.lang.StringUtils;
+
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Random;
+import java.util.Arrays;
 
 /**
  * FxSQL search query engine tests.
@@ -62,10 +71,33 @@ import org.testng.annotations.Test;
  */
 @Test(groups = {"ejb", "search"})
 public class SqlQueryTest {
+    private static final String TEST_SUFFIX = "SearchProp";
+    private static final String TEST_TYPE = "SearchTest";
+    private static final Map<String, FxDataType> TEST_PROPS = new HashMap<String, FxDataType>();
+    static {
+        TEST_PROPS.put("string", FxDataType.String1024);
+        TEST_PROPS.put("text", FxDataType.Text);
+        TEST_PROPS.put("html", FxDataType.HTML);
+        TEST_PROPS.put("number", FxDataType.Number);
+        TEST_PROPS.put("largeNumber", FxDataType.LargeNumber);
+        TEST_PROPS.put("float", FxDataType.Float);
+        TEST_PROPS.put("double", FxDataType.Double);
+        TEST_PROPS.put("date", FxDataType.Date);
+        TEST_PROPS.put("dateTime", FxDataType.DateTime);
+        TEST_PROPS.put("dateRange", FxDataType.DateRange);
+        TEST_PROPS.put("boolean", FxDataType.Boolean);
+        TEST_PROPS.put("binary", FxDataType.Binary);
+        TEST_PROPS.put("reference", FxDataType.Reference);
+        TEST_PROPS.put("selectOne", FxDataType.SelectOne);
+        TEST_PROPS.put("selectMany", FxDataType.SelectMany);
+    }
+    private int testInstanceCount;  // number of instances for the SearchTest type
 
     @BeforeClass
     public void setup() throws Exception {
         login(TestUsers.SUPERVISOR);
+        testInstanceCount = new SqlQueryBuilder().type(TEST_TYPE).getResult().getRowCount();
+        assert testInstanceCount > 0 : "No instances of test type " + TEST_TYPE + " found.";
     }
 
     @AfterClass
@@ -161,5 +193,74 @@ public class SqlQueryTest {
             assert ((FxLargeNumber) row.getFxValue(1)).getDefaultTranslation() == cdType.getId()
                     : "Unexpected type in result, expected " + cdType.getId() + ", was: " + row.getFxValue(1);
         }
+    }
+
+    /**
+     * Generic tests on the SearchTest type.
+     * 
+     * @param name  the base property name
+     * @param dataType  the datatype of the property
+     * @throws com.flexive.shared.exceptions.FxApplicationException on search engine errors
+     */
+    @Test(dataProvider = "testProperties")
+    public void genericSelectTest(String name, FxDataType dataType) throws FxApplicationException {
+        final FxResultSet result = new SqlQueryBuilder().select(getTestPropertyName(name)).type(TEST_TYPE).getResult();
+        assert result.getRowCount() == testInstanceCount : "Expected all test instances to be returned, got "
+                + result.getRowCount() + " instead of " + testInstanceCount;
+        for (FxResultRow row : result.getResultRows()) {
+            assert dataType.getValueClass().isAssignableFrom(row.getFxValue(1).getClass())
+                    : "Invalid class returned for datatype " + dataType + ": " + row.getFxValue(1).getClass() + " instead of " + dataType.getValueClass();
+        }
+    }
+
+    /**
+     * Tests all available value comparators for the given datatype. Note that no semantic
+     * tests are performed, each comparator is executed with a random value.
+     *
+     * @param name  the base property name
+     * @param dataType  the datatype of the property
+     * @throws com.flexive.shared.exceptions.FxApplicationException on search engine errors
+     */
+    @Test(dataProvider = "testProperties")
+    public void genericConditionTest(String name, FxDataType dataType) throws FxApplicationException {
+        final FxPropertyAssignment assignment = getTestPropertyAssignment(name);
+        final Random random = new Random(0);
+        for (PropertyValueComparator comparator : PropertyValueComparator.getAvailable(dataType)) {
+            for (String prefix: new String[] {
+                    TEST_TYPE + "/",
+                    TEST_TYPE + "/groupTop/",
+                    TEST_TYPE + "/groupTop/groupNested/"
+            }) {
+                final String assignmentName = prefix + getTestPropertyName(name);
+                try {
+                    // submit a query with the given property/comparator combination
+                    final FxValue value = dataType.getRandomValue(random, assignment);
+                    new SqlQueryBuilder().condition(assignmentName, comparator, value).getResult();
+                    // no exception thrown, consider it a success
+                } catch (Exception e) {
+                    assert false : "Failed to submit for property " + dataType + " with comparator " + comparator
+                            + ":\n" + e.getMessage() + ", thrown at:\n"
+                            + StringUtils.join(e.getStackTrace(), '\n');
+                }
+            }
+        }
+    }
+
+    @DataProvider(name = "testProperties")
+    public Object[][] getTestProperties() {
+        final Object[][] result = new Object[TEST_PROPS.size()][];
+        int ctr = 0;
+        for (Map.Entry<String, FxDataType> entry: TEST_PROPS.entrySet()) {
+            result[ctr++] = new Object[] { entry.getKey(), entry.getValue() };
+        }
+        return result;
+    }
+
+    private String getTestPropertyName(String baseName) {
+        return baseName + TEST_SUFFIX;
+    }
+
+    private FxPropertyAssignment getTestPropertyAssignment(String baseName) {
+        return (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + "/" + getTestPropertyName(baseName));
     }
 }

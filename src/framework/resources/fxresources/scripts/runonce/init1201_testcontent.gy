@@ -89,7 +89,7 @@ new GroovyTypeBuilder().SearchTest {
     dateTimeRangeSearchProp(FxDataType.DateTimeRange, multiplicity: FxMultiplicity.MULT_0_N)
     booleanSearchProp(FxDataType.Boolean, multiplicity: FxMultiplicity.MULT_0_N)
     binarySearchProp(FxDataType.Binary, multiplicity: FxMultiplicity.MULT_0_N)
-    referenceSearchProp(FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_N, referencedType: CacheAdmin.environment.getType("FOLDER"))
+    referenceSearchProp(FxDataType.Reference, multiplicity: FxMultiplicity.MULT_0_N, referencedType: CacheAdmin.environment.getType("FOLDER"))
 //    inlineReferenceSearchProp(FxDataType.InlineReference, multiplicity: FxMultiplicity.MULT_0_N, referencedType: CacheAdmin.environment.getType("FOLDER"))
     selectOneSearchProp(FxDataType.SelectOne, multiplicity: FxMultiplicity.MULT_0_N, referencedList: CacheAdmin.environment.getSelectList("SearchTest SelectList"))
     selectManySearchProp(FxDataType.SelectMany, multiplicity: FxMultiplicity.MULT_0_1, referencedList: CacheAdmin.environment.getSelectList("SearchTest SelectList"))

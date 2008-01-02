@@ -33,9 +33,14 @@
  ***************************************************************/
 package com.flexive.shared.value;
 
+import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.exceptions.FxInvalidStateException;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
+import java.text.SimpleDateFormat;
 
 /**
  * A multilingual Date range, internally represented as java.util.Date; EMPTY is a Date with a timestamp of <code>0</code> (usually 01/01/1970)
@@ -167,7 +172,28 @@ public class FxDateRange extends FxValue<DateRange, FxDateRange> implements Seri
      */
     @Override
     public DateRange fromString(String value) {
-        return null; //TODO!!!
+        return new DateRange(value);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getStringValue(DateRange value) {
+        return value.toString();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getSqlValue() {
+        if (isEmpty()) {
+            throw new FxInvalidStateException("ex.content.value.sql.empty").asRuntimeException();
+        }
+        // TODO: use proper syntax when the SQL parser supports ranges
+        return FxFormatUtils.escapeForSql(getDefaultTranslation().getLower())
+                + ".." + FxFormatUtils.escapeForSql(getDefaultTranslation().getUpper());
     }
 
     /**

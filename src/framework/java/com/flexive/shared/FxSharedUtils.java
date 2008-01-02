@@ -879,6 +879,7 @@ public final class FxSharedUtils {
      * Comparator for sorting Assignments according to their position.
      */
     public static class AssignmentPositionSorter implements Comparator<FxAssignment>, Serializable {
+        private static final long serialVersionUID = 9197582519027523108L;
 
         public int compare(FxAssignment o1, FxAssignment o2) {
             if (o1.getPosition() < o2.getPosition())

@@ -459,4 +459,22 @@ public final class FxFormatUtils {
             return "null";
         }
     }
+
+    /**
+     * Returns a basic date/time format that is readable but not localized.
+     *
+     * @return  a basic date/time format that is readable but not localized.
+     */
+    public static SimpleDateFormat getDateTimeFormat() {
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    }
+
+    /**
+     * Returns a basic date format that is readable but not localized.
+     *
+     * @return  a basic date format that is readable but not localized.
+     */
+    public static SimpleDateFormat getDateFormat() {
+        return new SimpleDateFormat("yyyy-MM-dd");
+    }
 }
