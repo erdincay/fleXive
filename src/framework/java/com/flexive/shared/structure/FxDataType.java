@@ -34,21 +34,19 @@
 package com.flexive.shared.structure;
 
 import com.flexive.shared.FxLanguage;
-import com.flexive.shared.SelectableObject;
+import com.flexive.shared.SelectableObjectWithName;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.value.*;
 
 import java.io.Serializable;
 import java.util.*;
 
-import org.apache.commons.lang.math.RandomUtils;
-
 /**
  * [fleXive] data types
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public enum FxDataType implements Serializable, SelectableObject {
+public enum FxDataType implements Serializable, SelectableObjectWithName {
     HTML(1, true, FxHTML.class),
     String1024(2, true, FxString.class),
     Text(3, true, FxString.class),

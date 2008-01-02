@@ -36,8 +36,8 @@ package com.flexive.faces.converter;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.beans.SelectBean;
 import com.flexive.faces.messages.FxFacesMsgErr;
-import com.flexive.shared.SelectableObject;
 import com.flexive.shared.SelectableObjectWithLabel;
+import com.flexive.shared.SelectableObject;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.Role;
@@ -53,7 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Basic Converter for all subclasses of SelectableObject.
+ * Basic Converter for all subclasses of SelectableObjectWithName.
  */
 public class SelectableObjectConverter implements Converter {
 
@@ -142,7 +142,7 @@ public class SelectableObjectConverter implements Converter {
         if (object instanceof SelectableObjectWithLabel) {
             final SelectableObjectWithLabel input = (SelectableObjectWithLabel) object;
             try {
-                // Return the id of the SelectableObject
+                // Return the id of the SelectableObjectWithName
                 if (items != null) {
                     for (SelectItem item : items) {
                         SelectableObjectWithLabel so = (SelectableObjectWithLabel) item.getValue();
@@ -160,7 +160,7 @@ public class SelectableObjectConverter implements Converter {
         } else if (object instanceof SelectableObject) {
             final SelectableObject input = (SelectableObject) object;
             try {
-                // Return the id of the SelectableObject
+                // Return the id of the SelectableObjectWithName
                 if (items != null) {
                     for (SelectItem item : items) {
                         SelectableObject so = (SelectableObject) item.getValue();

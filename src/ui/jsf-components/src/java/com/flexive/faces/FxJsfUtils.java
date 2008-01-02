@@ -103,10 +103,10 @@ public class FxJsfUtils {
         return identifier.replaceAll(BRACKET_CLOSE, "]").replace(SLASH, "/").replace(BRACKET_OPEN, "[");
     }
 
-    private static class EmptySelectableObject extends AbstractSelectableObject implements Serializable {
+    private static class EmptySelectableObjectWithName extends AbstractSelectableObjectWithName implements Serializable {
         private static final long serialVersionUID = 7808775494956188839L;
 
-        public EmptySelectableObject() {
+        public EmptySelectableObjectWithName() {
             // nothing
         }
 
@@ -659,9 +659,9 @@ public class FxJsfUtils {
      * @param items the items to be converted
      * @return the given list converted to JSF SelectItems
      */
-    public static List<SelectItem> asIdSelectList(List<? extends SelectableObject> items) {
+    public static List<SelectItem> asIdSelectList(List<? extends SelectableObjectWithName> items) {
         final List<SelectItem> result = new ArrayList<SelectItem>(items.size());
-        for (SelectableObject item : items) {
+        for (SelectableObjectWithName item : items) {
             result.add(new SelectItem(item.getId(), item.getName()));
         }
         return result;
@@ -688,12 +688,12 @@ public class FxJsfUtils {
      * @param addEmptyElement if set to true a empty element is added
      * @return the given list converted to JSF SelectItems
      */
-    public static List<SelectItem> asSelectList(List<? extends SelectableObject> items, boolean addEmptyElement) {
+    public static List<SelectItem> asSelectList(List<? extends SelectableObjectWithName> items, boolean addEmptyElement) {
         final List<SelectItem> result = new ArrayList<SelectItem>(items.size() + (addEmptyElement ? 1 : 0));
         if (addEmptyElement) {
-            result.add(new SelectItem(new EmptySelectableObject(), ""));
+            result.add(new SelectItem(new EmptySelectableObjectWithName(), ""));
         }
-        for (SelectableObject item : items) {
+        for (SelectableObjectWithName item : items) {
             result.add(new SelectItem(item, item.getName()));
         }
         return result;

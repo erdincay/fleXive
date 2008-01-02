@@ -33,7 +33,7 @@
  ***************************************************************/
 package com.flexive.shared.security;
 
-import com.flexive.shared.AbstractSelectableObject;
+import com.flexive.shared.AbstractSelectableObjectWithName;
 import com.flexive.shared.ObjectWithColor;
 
 import java.io.Serializable;
@@ -45,7 +45,7 @@ import java.io.Serializable;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class UserGroup extends AbstractSelectableObject implements Serializable, ObjectWithColor {
+public class UserGroup extends AbstractSelectableObjectWithName implements Serializable, ObjectWithColor {
     private static final long serialVersionUID = 8672395090967024861L;
 
     /**

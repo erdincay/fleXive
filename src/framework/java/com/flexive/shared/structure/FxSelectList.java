@@ -34,7 +34,7 @@
 package com.flexive.shared.structure;
 
 import com.flexive.shared.ObjectWithLabel;
-import com.flexive.shared.SelectableObject;
+import com.flexive.shared.SelectableObjectWithName;
 import com.flexive.shared.SelectableObjectWithLabel;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
@@ -309,14 +309,14 @@ public class FxSelectList implements Serializable, ObjectWithLabel {
 
     /**
      * Factory method to create a select list based on a collection of
-     * {@link SelectableObject} objects. This select list cannot be persisted
+     * {@link com.flexive.shared.SelectableObjectWithName} objects. This select list cannot be persisted
      * to the DB, but may used e.g. for UI input components.
      *
      * @param name  name of the select list to be created
      * @param items selectable objects
      * @return a new select list
      */
-    public static FxSelectList createListWithName(String name, List<? extends SelectableObject> items) {
+    public static FxSelectList createListWithName(String name, List<? extends SelectableObjectWithName> items) {
         FxSelectListEdit list = new FxSelectList(name).asEditable();
         list.addAllWithName(items);
         return list;

@@ -33,7 +33,7 @@
  ***************************************************************/
 package com.flexive.tests.shared;
 
-import com.flexive.shared.AbstractSelectableObject;
+import com.flexive.shared.AbstractSelectableObjectWithName;
 import org.testng.annotations.Test;
 
 /**
@@ -44,7 +44,7 @@ import org.testng.annotations.Test;
  */
 @Test(groups = "shared")
 public class SelectableObjectTest {
-    private static class SelectableFromAbstract extends AbstractSelectableObject {
+    private static class SelectableFromAbstract extends AbstractSelectableObjectWithName {
         private long id;
         private String name;
 

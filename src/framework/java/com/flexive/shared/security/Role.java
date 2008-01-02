@@ -34,7 +34,7 @@
 package com.flexive.shared.security;
 
 import com.flexive.shared.ObjectWithColor;
-import com.flexive.shared.SelectableObject;
+import com.flexive.shared.SelectableObjectWithName;
 import com.flexive.shared.SelectableObjectWithLabel;
 import com.flexive.shared.value.FxString;
 
@@ -48,7 +48,7 @@ import java.util.List;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public enum Role implements SelectableObject, SelectableObjectWithLabel, ObjectWithColor, Serializable {
+public enum Role implements SelectableObjectWithName, SelectableObjectWithLabel, ObjectWithColor, Serializable {
 
 
     /**

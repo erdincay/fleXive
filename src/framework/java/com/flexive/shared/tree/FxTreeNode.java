@@ -34,8 +34,9 @@
 package com.flexive.shared.tree;
 
 import com.flexive.shared.FxFormatUtils;
-import com.flexive.shared.SelectableObject;
+import com.flexive.shared.SelectableObjectWithName;
 import com.flexive.shared.SelectableObjectWithLabel;
+import com.flexive.shared.SelectableObject;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.value.FxString;
@@ -49,7 +50,7 @@ import java.util.List;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class FxTreeNode implements Serializable, SelectableObjectWithLabel, SelectableObject {
+public class FxTreeNode implements Serializable, SelectableObjectWithLabel, SelectableObjectWithName {
     private static final long serialVersionUID = -1666004845250114348L;
 
     private String path = null;

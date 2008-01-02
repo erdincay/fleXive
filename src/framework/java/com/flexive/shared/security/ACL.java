@@ -45,7 +45,7 @@ import java.io.Serializable;
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class ACL extends AbstractSelectableObject implements Serializable, SelectableObjectWithLabel, ObjectWithColor {
+public class ACL extends AbstractSelectableObjectWithName implements Serializable, SelectableObjectWithLabel, ObjectWithColor {
     private static final long serialVersionUID = -8177665165523382984L;
 
     /**

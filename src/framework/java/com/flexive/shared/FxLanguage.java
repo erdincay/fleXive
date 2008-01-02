@@ -45,7 +45,7 @@ import java.util.Locale;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev
  */
-public class FxLanguage extends AbstractSelectableObject implements Serializable, SelectableObjectWithLabel {
+public class FxLanguage extends AbstractSelectableObjectWithName implements Serializable, SelectableObjectWithLabel {
     private static final long serialVersionUID = -7060915362180672721L;
     /**
      * language set for groups or not localized properties

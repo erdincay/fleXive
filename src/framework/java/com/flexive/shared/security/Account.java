@@ -34,7 +34,7 @@
 package com.flexive.shared.security;
 
 
-import com.flexive.shared.AbstractSelectableObject;
+import com.flexive.shared.AbstractSelectableObjectWithName;
 import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.content.FxPK;
@@ -48,7 +48,7 @@ import java.util.Date;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class Account extends AbstractSelectableObject implements Serializable {
+public class Account extends AbstractSelectableObjectWithName implements Serializable {
     private static final long serialVersionUID = 5344820690672809623L;
 
     /**

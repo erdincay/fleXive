@@ -33,9 +33,9 @@
  ***************************************************************/
 package com.flexive.shared.workflow;
 
-import com.flexive.shared.AbstractSelectableObject;
+import com.flexive.shared.AbstractSelectableObjectWithName;
 import com.flexive.shared.FxContext;
-import com.flexive.shared.SelectableObject;
+import com.flexive.shared.SelectableObjectWithName;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.security.UserTicket;
 
@@ -48,7 +48,7 @@ import java.util.List;
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class Workflow extends AbstractSelectableObject implements Serializable, SelectableObject {
+public class Workflow extends AbstractSelectableObjectWithName implements Serializable, SelectableObjectWithName {
     private static final long serialVersionUID = 7057943902512439668L;
 
     protected String name = null;

@@ -34,16 +34,39 @@
 package com.flexive.shared;
 
 /**
- * An object that is identified by its unique (long) ID value. Usually these objects are
- * data objects loaded from the database, where the ID value is the primary key.
+ * Abstract implementation of SelectableObjectWithName
  *
- * @author Daniel Lichtenberger, UCS
- * @version $Rev$
+ * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public interface SelectableObject {
+public abstract class AbstractSelectableObjectWithName implements SelectableObjectWithName {
+
     /**
-	 * The object's unique identifier
-     * @return	the object's unique identiefier
+     * {@inheritDoc}
      */
-    long getId();
+    @Override
+    public int hashCode() {
+        return (int) this.getId();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || (!(obj instanceof SelectableObject)) || (!obj.getClass().equals(this.getClass()))) {
+            return false;
+        }
+        SelectableObject comp = (SelectableObject) obj;
+        return this.getId() == comp.getId();
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return this.getClass().getName() + "[id=" + getId() + "]";
+    }
+
 }

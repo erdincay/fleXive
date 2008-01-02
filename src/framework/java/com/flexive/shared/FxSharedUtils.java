@@ -890,4 +890,16 @@ public final class FxSharedUtils {
         }
     }
 
+    /**
+     * Comparator for sorting {@link SelectableObjectWithName} instances by ID.
+     */
+    public static class SelectableObjectSorter implements Comparator<SelectableObject>, Serializable {
+        private static final long serialVersionUID = -1786371691872260074L;
+
+        public int compare(SelectableObject o1, SelectableObject o2) {
+            return o1.getId() > o2.getId()
+                    ? 1 : o1.getId() < o2.getId()
+                    ? -1 : 0;
+        }
+    }
 }

@@ -34,7 +34,7 @@
 package com.flexive.shared.structure;
 
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.SelectableObject;
+import com.flexive.shared.SelectableObjectWithName;
 import com.flexive.shared.SelectableObjectWithLabel;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.value.FxString;
@@ -215,8 +215,8 @@ public class FxSelectListEdit extends FxSelectList implements Serializable {
      *
      * @param items the objects to be added
      */
-    public void addAllWithName(List<? extends SelectableObject> items) {
-        for (SelectableObject item : items) {
+    public void addAllWithName(List<? extends SelectableObjectWithName> items) {
+        for (SelectableObjectWithName item : items) {
             new FxSelectListItem(item.getId(), this, -1, new FxString(false, item.getName()));
         }
     }

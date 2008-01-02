@@ -33,7 +33,7 @@
  ***************************************************************/
 package com.flexive.shared.scripting;
 
-import com.flexive.shared.AbstractSelectableObject;
+import com.flexive.shared.AbstractSelectableObjectWithName;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import org.apache.commons.lang.StringUtils;
 
@@ -44,7 +44,7 @@ import java.io.Serializable;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class FxScriptInfo extends AbstractSelectableObject implements Serializable {
+public class FxScriptInfo extends AbstractSelectableObjectWithName implements Serializable {
     private static final long serialVersionUID = -2845241882558637595L;
     private long id;
     private FxScriptEvent event;

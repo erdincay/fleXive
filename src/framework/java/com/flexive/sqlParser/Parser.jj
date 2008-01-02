@@ -474,7 +474,7 @@ Condition condition(final FxStatement PI) throws SqlParserException: {
 		return new Condition(PI,vi1,Condition.COMPERATOR.IS_DIRECT_CHILD_OF,null);
         }
 	|
-	vi1=value() inNotIn=<IN_OR_NOTIN> <BRACE_OPEN> arr=constantArray(PI) <BRACE_CLOSE>
+	vi1=value() inNotIn=<IN_OR_NOTIN> <BRACE_OPEN> arr=constantArray() <BRACE_CLOSE>
 	{
 		return new Condition(PI,vi1,
 		inNotIn.image.equalsIgnoreCase("IN")?Condition.COMPERATOR.IN:Condition.COMPERATOR.NOT_IN,
@@ -521,12 +521,12 @@ Condition.COMPERATOR comperator(final FxStatement PI) throws SqlParserException:
 /**
  * Returns a value list as array
  */
-ConstantArray constantArray(final FxStatement PI) throws SqlParserException :
+ConstantArray constantArray() throws SqlParserException :
 { 
 	Constant con;
 	ConstantArray arr = null;
 }{
-	con=constantValue() [ <LIST_SEPERATOR> arr=constantArray(PI) ]	
+	con=constantValue() [ <LIST_SEPERATOR> arr=constantArray() ]	
 	{ 
 		if (arr!=null) {
 			return arr.add(con);
@@ -592,6 +592,9 @@ Value value()  throws SqlParserException  :
 		  field = st.nextToken();
 		}
 		return new Property(table,property,field);
+	}
+	| <BRACE_OPEN> con=constantArray() <BRACE_CLOSE> {
+	    return con;
 	}
 	| con=constantValue()
 	{

@@ -33,7 +33,10 @@
  ***************************************************************/
 package com.flexive.sqlParser;
 
+import org.apache.commons.collections.iterators.ObjectArrayIterator;
+
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Array of constants
@@ -100,6 +103,7 @@ public class ConstantArray extends Constant {
      * Example result: '(1,2,3,4,5)'
      * @return a string representation of the array list that can be used in sql.
      */
+    @Override
     public String getValue() {
         return arrayToString(this.array);
     }
@@ -109,8 +113,16 @@ public class ConstantArray extends Constant {
      *
      * @return a string representation of the array list
      */
+    @Override
     public String toString() {
         return arrayToString(this.array);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @SuppressWarnings({"unchecked"})
+    public Iterator<Constant> iterator() {
+        return new ObjectArrayIterator(array);
     }
 
     /**

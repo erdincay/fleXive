@@ -39,10 +39,5 @@ package com.flexive.shared;
  * 
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public interface SelectableObjectWithLabel extends ObjectWithLabel {
-	/**
-	 * The object's unique identifier
-	 * @return	the object's unique identiefier
-	 */
-	long getId();
+public interface SelectableObjectWithLabel extends ObjectWithLabel, SelectableObject {
 }

@@ -33,7 +33,7 @@
  ***************************************************************/
 package com.flexive.shared.tree;
 
-import com.flexive.shared.AbstractSelectableObject;
+import com.flexive.shared.AbstractSelectableObjectWithName;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.interfaces.TemplateEngine;
 
@@ -44,7 +44,7 @@ import java.io.Serializable;
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class FxTemplateInfo  extends AbstractSelectableObject implements Serializable {
+public class FxTemplateInfo  extends AbstractSelectableObjectWithName implements Serializable {
     private static final long serialVersionUID = -7704618161235339482L;
 
     private String contentType;

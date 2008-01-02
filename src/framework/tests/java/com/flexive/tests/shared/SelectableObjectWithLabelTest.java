@@ -40,7 +40,7 @@ import org.testng.annotations.Test;
 /**
  * Selectable object tests, especially equality and comparable tests.
  * NOTE: currently copied from SelectableObjectTest, it's OK to delete this test file entirely
- * when the SelectableObject and SelectableObjectWithLabel interfaces are combined.
+ * when the SelectableObjectWithName and SelectableObjectWithLabel interfaces are combined.
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$

@@ -34,16 +34,17 @@
 package com.flexive.shared;
 
 /**
- * An object that is identified by its unique (long) ID value. Usually these objects are
- * data objects loaded from the database, where the ID value is the primary key.
- *
- * @author Daniel Lichtenberger, UCS
- * @version $Rev$
+ * An interface for simple selectable elements with a unilingual
+ * string as (displayed) name).
+ * 
+ * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public interface SelectableObject {
+public interface SelectableObjectWithName extends SelectableObject {
+
     /**
-	 * The object's unique identifier
-     * @return	the object's unique identiefier
-     */
-    long getId();
+	 * The displayed name of the object.
+	 * 
+	 * @return	the displayed name of the object.
+	 */
+	String getName();
 }

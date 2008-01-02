@@ -34,6 +34,7 @@
 package com.flexive.shared.value;
 
 import com.flexive.shared.FxArrayUtils;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.structure.FxSelectList;
 import com.flexive.shared.structure.FxSelectListItem;
@@ -42,6 +43,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Comparator;
 
 /**
  * Container for manipulating FxSelectList items used in FxSelectMany values
@@ -143,8 +145,10 @@ public class SelectMany implements Serializable {
             return;
         if( available.contains(item))
             available.remove(item);
-        if( !selected.contains(item))
+        if( !selected.contains(item)) {
             selected.add(item);
+            sortSelected();
+        }
     }
 
     /**
@@ -205,9 +209,9 @@ public class SelectMany implements Serializable {
     }
 
     /**
-     * Get a comma separated list of selected id's
+     * Get an ordered comma separated list of selected id's
      *
-     * @return comma separated list of selected id's
+     * @return ordered comma separated list of selected id's
      */
     public String getSelectedIdsList() {
         StringBuilder sb = new StringBuilder(100);
@@ -217,5 +221,9 @@ public class SelectMany implements Serializable {
             sb.append(selected.get(i).getId());
         }
         return sb.toString();
+    }
+
+    private void sortSelected() {
+        Collections.sort(selected, new FxSharedUtils.SelectableObjectSorter());
     }
 }

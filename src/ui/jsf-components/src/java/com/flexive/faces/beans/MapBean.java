@@ -205,7 +205,7 @@ public class MapBean implements Serializable {
      * @param items all items to be added to the map.
      * @return the populated map
      */
-    private <T extends SelectableObject> Map<Long, T> populateMap(Map<Long, T> map, List<T> items) {
+    private <T extends SelectableObjectWithName> Map<Long, T> populateMap(Map<Long, T> map, List<T> items) {
         for (T item : items) {
             map.put(item.getId(), item);
         }

@@ -33,12 +33,18 @@
  ***************************************************************/
 package com.flexive.sqlParser;
 
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.collections.iterators.ArrayIterator;
+import org.apache.commons.collections.iterators.ObjectArrayIterator;
+
+import java.util.Iterator;
+
 /**
  * Class holding constant values.
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class Constant extends Value
+public class Constant extends Value implements Iterable
 {
     public Constant(String sValue) {
         super(sValue);
@@ -47,5 +53,17 @@ public class Constant extends Value
     @Override
     public String getValue() {
         return (String)super.getValue();
+    }
+
+    /**
+     * Returns an iterator over this constant. A single constant will return itself,
+     * an aggregate constant value (e.g. a list of constant values) will return an iterator
+     * over its child elements.
+     *
+     * @return  an iterator over this constant
+     */
+    @SuppressWarnings({"unchecked"})
+    public Iterator<Constant> iterator() {
+        return new ObjectArrayIterator(new Constant[] { this });
     }
 }

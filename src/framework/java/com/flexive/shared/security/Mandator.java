@@ -33,7 +33,7 @@
  ***************************************************************/
 package com.flexive.shared.security;
 
-import com.flexive.shared.AbstractSelectableObject;
+import com.flexive.shared.AbstractSelectableObjectWithName;
 
 import java.io.Serializable;
 
@@ -42,7 +42,7 @@ import java.io.Serializable;
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class Mandator extends AbstractSelectableObject implements Serializable {
+public class Mandator extends AbstractSelectableObjectWithName implements Serializable {
     private static final long serialVersionUID = 4821229397499448319L;
 
     /**

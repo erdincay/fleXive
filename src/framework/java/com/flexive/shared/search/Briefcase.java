@@ -33,7 +33,7 @@
  ***************************************************************/
 package com.flexive.shared.search;
 
-import com.flexive.shared.AbstractSelectableObject;
+import com.flexive.shared.AbstractSelectableObjectWithName;
 import com.flexive.shared.security.LifeCycleInfo;
 
 import java.io.Serializable;
@@ -43,7 +43,7 @@ import java.io.Serializable;
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class Briefcase extends AbstractSelectableObject implements Serializable {
+public class Briefcase extends AbstractSelectableObjectWithName implements Serializable {
     private static final long serialVersionUID = -1594461846638190701L;
 
     protected long id;
