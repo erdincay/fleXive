@@ -36,13 +36,21 @@
                     <link href="http://glassfish.dev.java.net/">Glassfish</link>) with EJB3 support
                 </para>
                 <orderedlist>
-                    <listitem>Download and install
+                    <listitem>Either download and install
                         <link href="http://labs.jboss.com/">JBoss 4.2.2.GA</link>
                         or later
                         (
                         <code>${jboss.home}</code>
                         denotes your JBoss installation
                         directory)
+                    </listitem>
+                    <listitem>or download and install
+                        <link href="https://glassfish.dev.java.net/public/alldownloads.html#Promoted_binary_builds">
+                            Glassfish V2
+                        </link>
+                        or later (
+                        <code>${glassfish.home}</code>
+                        denotes your Glassfish installation directory)
                     </listitem>
                 </orderedlist>
             </listitem>
@@ -51,23 +59,13 @@
                     <link href="http://www.mysql.com/">MySql</link>
                     is supported)
                 </para>
-                <orderedlist>
-                    <listitem>Download and install
-                        <link href="http://www.mysql.com/">MySql 5.0</link>
-                        or later
-                        <para>
-                            Currently, choosing UTF-8 as the default charset causes issues with the database setup
-                            scripts. Use the default setting (Latin1) instead.
-                        </para>
-                    </listitem>
-                    <listitem>Download the latest stable
-                        <link href="http://dev.mysql.com/downloads/connector/j/5.0.html">MySQL JDBC driver</link>
-                        (<filename>
-                        mysql-connector-java-5.0.8-bin.jar</filename>) and copy it
-                        to
-                        <filename>${jboss.home}/server/all/lib/</filename>
-                    </listitem>
-                </orderedlist>
+                <para>Download and install
+                <link href="http://www.mysql.com/">MySql 5.0</link>
+                or later</para>
+                <para>
+                    Currently, choosing UTF-8 as the default charset causes issues with the database setup
+                    scripts. Use the default setting (Latin1) instead.
+                </para>
             </listitem>
             <listitem>
                 <para>

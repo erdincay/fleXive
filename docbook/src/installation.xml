@@ -60,6 +60,19 @@
     <section xml:id="jboss_installation">
         <title>&Flexive; installation guide for JBoss 4.2.2 GA
         </title>
+        <section xml:id="jboss_installation_required_libs">
+            <title>Required libraries</title>
+            <para>The following required libraries have to be deployed:</para>
+            <itemizedlist>
+                <listitem>Download the latest stable
+                    <link href="http://dev.mysql.com/downloads/connector/j/5.0.html">MySQL JDBC driver</link>
+                    (<filename>
+                    mysql-connector-java-5.0.x-bin.jar</filename>) and copy it
+                    to
+                    <filename>${jboss.home}/server/all/lib/</filename>.
+                </listitem>
+            </itemizedlist>
+        </section>
         <section xml:id="jboss_installation_system_configuration">
             <title>System configuration</title>
             <para>
@@ -175,7 +188,10 @@ database.password=a]]></programlisting>
                     </para>
                 </listitem>
                 <listitem>
-                    <para>Change to the <filename>${jboss.home}/bin</filename> directory.</para>
+                    <para>Change to the
+                        <filename>${jboss.home}/bin</filename>
+                        directory.
+                    </para>
                     <para>
                         On Linux launch JBoss using
                         <programlisting><![CDATA[sh run.sh -c all -Djboss.bind.address=0.0.0.0]]></programlisting>
@@ -232,11 +248,311 @@ database.password=a]]></programlisting>
         </section>
     </section>
 
+    <section xml:id="glassfish_installation">
+        <title>&Flexive; installation guide for Glassfish V2
+        </title>
+        <section xml:id="glassfish_installation_required_libs">
+            <title>Required libraries</title>
+            <para>Flexive needs several libraries to be deployed to the application server's internal lib directories.
+            </para>
+            <para>The following required libraries have to be deployed:</para>
+            <itemizedlist>
+                <listitem>
+                    <para>Download the latest stable
+                        <link href="http://dev.mysql.com/downloads/connector/j/5.0.html">MySQL JDBC driver</link>
+                        (<filename>
+                        mysql-connector-java-5.0.x-bin.jar</filename>) and copy it
+                        to
+                        <filename>${glassfish.home}/domains/domain1/lib/ext</filename>.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>Copy the
+                        <filename>jboss-cache.jar</filename>
+                        from the
+                        <filename>lib</filename>
+                        directory of your &Flexive; source tree or from the
+                        <filename>extlib</filename>
+                        directory of your &Flexive; binary distribution to
+                        <filename>${glassfish.home}/lib</filename>.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>Copy the following files to
+                        <filename>${glassfish.home}/domains/domain1/lib/ext</filename>:
+                        <itemizedlist>
+                            <listitem>
+                                <filename>commons-logging.jar</filename>
+                            </listitem>
+                            <listitem>
+                                <filename>concurrent.jar</filename>
+                            </listitem>
+                            <listitem>
+                                <filename>jboss-aop-jdk50.jar</filename>
+                            </listitem>
+                            <listitem>
+                                <filename>jboss-common.jar</filename>
+                            </listitem>
+                            <listitem>
+                                <filename>jboss-jmx.jar</filename>
+                            </listitem>
+                            <listitem>
+                                <filename>jboss-system.jar</filename>
+                            </listitem>
+                            <listitem>
+                                <filename>jgroups.jar</filename>
+                            </listitem>
+                        </itemizedlist>
+                    </para>
+                </listitem>
+            </itemizedlist>
+        </section>
+        <section xml:id="glassfish_installation_setup">
+            <title>Setting up and starting Glassfish
+            </title>
+            <para>
+                <emphasis>Setting up Glassfish</emphasis>
+            </para>
+            <orderedlist>
+                <listitem>
+                    <para>Go to the target installation directory
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <code><![CDATA[java -Xmx256m -jar <<path-to-downloaded-jar>>]]></code>
+                        extracts the installation JAR to
+                        <filename>./glassfish</filename>
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <code>cd glassfish</code>
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>On Unix:
+                        <code>chmod -R +x lib/ant/bin</code>
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Execute the
+                        <filename>setup.xml</filename>
+                        buildfile
+                        <itemizedlist>
+                            <listitem>
+                                <para>Unix:
+                                    <code>lib/ant/bin/ant -f setup.xml</code>
+                                </para>
+                            </listitem>
+                            <listitem>
+                                <para>Windows:
+                                    <code>lib\ant\bin\ant -f setup.xml</code>
+                                </para>
+                            </listitem>
+                        </itemizedlist>
+                    </para>
+                </listitem>
+            </orderedlist>
+            <para>
+                <emphasis>Starting Glassfish</emphasis>
+            </para>
+            <orderedlist>
+                <listitem>
+                    <code>bin/asadmin start-domain domain1</code>
+                    starts the Glassfish server
+                </listitem>
+                <listitem>Open the URL
+                    <link href="http://localhost:4848/">http://localhost:4848/</link>
+                    and login using default credentials
+                    <code>admin/adminadmin</code>.
+                </listitem>
+            </orderedlist>
+            <para>Additional information</para>
+            <orderedlist>
+                <listitem>To stop the Glassfish instance execute
+                    <code>${glassfish.home}/bin/asadmin stop-domain domain1</code>
+                </listitem>
+                <listitem>Admin UI Port: 4848</listitem>
+                <listitem>HTTP Port: 8080</listitem>
+                <listitem>HTTPS Port: 8181</listitem>
+            </orderedlist>
+        </section>
+        <section xml:id="glassfish_installation_conn_pools">
+            <title>Creating the Connection pools
+            </title>
+            <para>In the
+                <link href="http://localhost:4848/">Admin Console</link>
+                navigate to
+                <code>Application Server > Resources > JDBC > Connection Pools</code>
+                and click
+                <code>New</code>
+            </para>
+            <para>
+                <emphasis>Step 1</emphasis>
+            </para>
+            <para>
+                <itemizedlist>
+                    <listitem>Name:
+                        <code>flexiveDivision1</code>
+                    </listitem>
+                    <listitem>ResourceType:
+                        <code>javax.sql.XADataSource</code>
+                    </listitem>
+                    <listitem>Database Vendor:
+                        <code>MySQL</code>
+                    </listitem>
+                </itemizedlist>
+            </para>
+            <para>Click
+                <code>Next</code>
+            </para>
+            <para>
+                <emphasis>Step 2</emphasis>
+            </para>
+            <para>
+                <itemizedlist>
+                    <listitem>Datasource Classname:
+                        <code>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</code>
+                    </listitem>
+                    <listitem>Resource Type:
+                        <code>javax.sql.XADataSource</code>
+                    </listitem>
+                    <listitem>Check
+                        <code>Required</code>
+                        for
+                        <code>Connection Validation</code>
+                    </listitem>
+                    <listitem>Check
+                        <code>Enabled</code>
+                        for
+                        <code>Allow Non Component Callers</code>
+                    </listitem>
+                    <listitem>Set Transaction Isolation to
+                        <code>read-committed</code>
+                        and check Isolation Level as
+                        <code>Guaranteed</code>
+                    </listitem>
+                </itemizedlist>
+            </para>
+            <para>
+                <emphasis>Additional properties</emphasis>
+            </para>
+            <para>
+                <itemizedlist>
+                    <listitem>DatabaseName:
+                        <code>flexive</code>
+                    </listitem>
+                    <listitem>serverName:
+                        <code><![CDATA[<your mysql server ip>]]></code>
+                    </listitem>
+                    <listitem>port:
+                        <code>3306</code>
+                    </listitem>
+                    <listitem>userName:
+                        <code><![CDATA[<your mysql user>]]></code>
+                    </listitem>
+                    <listitem>password:
+                        <code><![CDATA[<your mysql password>]]></code>
+                    </listitem>
+                    <listitem>Url:
+                        <code>
+                            <![CDATA[jdbc:mysql://localhost:3306/flexive?useUnicode=true&characterEncoding=utf8&characterResultSets=utf8]]></code>
+                    </listitem>
+                    <listitem>URL:
+                        <code>
+                            <![CDATA[jdbc:mysql://localhost:3306/flexive?useUnicode=true&characterEncoding=utf8&characterResultSets=utf8]]></code>
+                    </listitem>
+                </itemizedlist>
+            </para>
+            <para>Save and try to ping the server.</para>
+            <para>If you have troubles connecting, please make sure you have the correct server IP set!</para>
+            <para>Once created, you have to create
+                <code>JDBC Resource</code>
+                by selecting
+                <code>Application Server > Resources > JDBC >
+                    JDBC Resources
+                </code>
+                and clicking
+                <code>New</code>:
+                <para>
+                    <itemizedlist>
+                        <listitem>JNDI Name:
+                            <code>jdbc/flexiveDivision1</code>
+                        </listitem>
+                        <listitem>Pool Name:
+                            <code>flexiveDivision1</code>
+                        </listitem>
+                    </itemizedlist>
+                </para>
+            </para>
+            <para>Once done repeat the above steps for the configuration pool.</para>
+            <para>
+                Expected
+                <code>JNDI</code>
+                name is
+                <code>jdbc/flexiveConfiguration</code>
+                , use the same settings as above except:
+                <itemizedlist>
+                    <listitem>
+                        DatabaseName:
+                        <code>flexiveConfiguration</code>
+                    </listitem>
+                    <listitem>
+                        Url:
+                        <code><![CDATA[jdbc:mysql://localhost:3306/flexive?useUnicode=true&characterEncoding=utf8&
+                        characterResultSets=utf8]]></code>
+                    </listitem>
+                    <listitem>
+                        URL:
+                        <code><![CDATA[jdbc:mysql://localhost:3306/flexive?useUnicode=true&characterEncoding=utf8&
+                        characterResultSets=utf8]]></code>
+                    </listitem>
+                </itemizedlist>
+            </para>
+        </section>
+        <section xml:id="glassfish_installation_deployment">
+            <title>Deployment</title>
+            <para>
+                <emphasis>Using the autodeploy directory:</emphasis>
+                <para>
+                    <itemizedlist>
+                        <listitem>Copy the
+                            <filename>flexive.ear</filename>
+                            to
+                            <filename>${glassfish.home}/domains/domain1/autodeploy</filename>
+                        </listitem>
+                    </itemizedlist>
+                </para>
+            </para>
+            <para>
+                <emphasis>Using the Admin UI:</emphasis>
+                <para>
+                    <orderedlist>
+                        <listitem>In the Admin Console, go to
+                            <code>Applications > Enterprise Applications</code>
+                        </listitem>
+                        <listitem>Click
+                            <code>Deploy...</code>
+                        </listitem>
+                        <listitem>Click
+                            <code>OK</code>
+                        </listitem>
+                        <listitem>After successful deployment, enter the Flexive Admin UI at
+                            <link href="http://localhost:8080/flexive/adm/">http://localhost:8080/flexive/adm/</link>
+                        </listitem>
+                    </orderedlist>
+                </para>
+            </para>
+        </section>
+    </section>
+
     <xi:include href="includes/installation_building_from_source.xml"/>
 
-    <section xml:id="jboss_installation_troubleshooting">
+    <section xml:id="installation_troubleshooting">
         <title>Troubleshooting</title>
-        <section xml:id="jboss_installation_troubleshooting_multiple">
+        <section xml:id="installation_troubleshooting_jboss_multiple">
             <title>Multiple JBoss installations</title>
             <para>If there are multiple JBoss installations running in your local network you need
                 to assign a different partition UDP group to each cluster! This can be done by adding
@@ -246,7 +562,22 @@ database.password=a]]></programlisting>
                 Starting &Flexive;</link>.
             </para>
         </section>
-        <section xml:id="jboss_installation_troubleshooting_ant">
+        <section xml:id="installation_troubleshooting_glassfish_IPv4">
+            <title>JBossCache, Linux and IPv6</title>
+            <para>In order to run JBossCache on Linux IPv4 needs to be defined as the preferred IP stack.
+                In the Glassfish admin console, go to
+                <code>Application Server > JVM Settings > JVM Options</code>
+                and add the following option:
+                <itemizedlist>
+                    <listitem>
+                        <para>
+                            <code>-Djava.net.preferIPv4Stack=true</code>
+                        </para>
+                    </listitem>
+                </itemizedlist>
+            </para>
+        </section>
+        <section xml:id="installation_troubleshooting_ant">
             <title>Apache ANT</title>
             <itemizedlist>
                 <listitem>
