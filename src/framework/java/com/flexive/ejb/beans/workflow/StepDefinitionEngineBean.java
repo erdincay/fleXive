@@ -40,6 +40,7 @@ import com.flexive.core.structure.StructureLoader;
 import static com.flexive.shared.CacheAdmin.getEnvironment;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.security.Role;
@@ -140,7 +141,7 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
 
         final UserTicket ticket = FxContext.get().getTicket();
         // Security checks
-        FxSharedUtils.checkRole(ticket, Role.WorkflowManagement);
+        FxPermissionUtils.checkRole(ticket, Role.WorkflowManagement);
         // Create the new step
         Connection con = null;
         PreparedStatement ps = null;
@@ -215,7 +216,7 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
         final FxContext ri = FxContext.get();
 
         // Security checks
-        FxSharedUtils.checkRole(ticket, Role.WorkflowManagement);
+        FxPermissionUtils.checkRole(ticket, Role.WorkflowManagement);
 
         StepDefinition orgDefinition;
         try {
@@ -325,7 +326,7 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
         }
 
         // Security checks
-        FxSharedUtils.checkRole(ticket, Role.WorkflowManagement);
+        FxPermissionUtils.checkRole(ticket, Role.WorkflowManagement);
 
         // Check existance
         getEnvironment().getStepDefinition(id);

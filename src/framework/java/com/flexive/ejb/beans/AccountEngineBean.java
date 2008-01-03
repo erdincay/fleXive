@@ -41,6 +41,7 @@ import com.flexive.core.security.UserTicketStore;
 import com.flexive.shared.*;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
+import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.scripting.FxScriptBinding;
@@ -553,7 +554,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         // Security
         if (checkUserRoles && !ticket.isGlobalSupervisor()) {
             if (!ticket.isInRole(Role.MandatorSupervisor))
-                FxSharedUtils.checkRole(ticket, Role.AccountManagement);
+                FxPermissionUtils.checkRole(ticket, Role.AccountManagement);
             if (ticket.getMandatorId() != mandatorId)
                 throw new FxNoAccessException(LOG, "ex.account.create.wrongMandator");
         }
@@ -720,7 +721,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         final UserTicket ticket = FxContext.get().getTicket();
         if (!ticket.isGlobalSupervisor()) {
             if (!ticket.isInRole(Role.MandatorSupervisor))
-                FxSharedUtils.checkRole(ticket, Role.AccountManagement);
+                FxPermissionUtils.checkRole(ticket, Role.AccountManagement);
             if (account.getMandatorId() != ticket.getMandatorId())
                 throw new FxNoAccessException(LOG, "ex.account.delete.wrongMandator");
         }

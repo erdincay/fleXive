@@ -38,7 +38,6 @@ import com.flexive.core.DatabaseConst;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxLanguage;
-import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.content.FxPermissionUtils;
@@ -234,7 +233,7 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void setAvailable(List<FxLanguage> available) throws FxApplicationException {
-        FxSharedUtils.checkRole(FxContext.get().getTicket(), Role.GlobalSupervisor);
+        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.GlobalSupervisor);
         Connection con = null;
         PreparedStatement ps = null;
         if (available == null || available.size() == 0)

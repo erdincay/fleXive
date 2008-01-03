@@ -36,16 +36,13 @@ package com.flexive.shared;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
-import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.search.FxPaths;
-import com.flexive.shared.security.Role;
-import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.structure.FxAssignment;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
-import com.flexive.shared.structure.FxAssignment;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -62,6 +59,23 @@ import java.util.*;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public final class FxSharedUtils {
+    private static final Log LOG = LogFactory.getLog(FxSharedUtils.class);
+
+    /**
+     * Shared message resources bundle
+     */
+    public static final String SHARED_BUNDLE = "FxSharedMessages";
+
+    private static String fxVersion = "3.0";
+    private static String fxEdition = "framework";
+    private static String fxProduct = "[fleXive]";
+    private static String fxBuild = "unknown";
+    private static String fxBuildDate = "unknown";
+    private static String fxBuildUser = "unknown";
+    private static String fxHeader = "[fleXive]";
+    private static List<String> translatedLocales = Arrays.asList("en");
+
+
     /**
      * The character(s) representing a "xpath slash" (/) in a public URL.
      */
@@ -137,7 +151,7 @@ public final class FxSharedUtils {
      * Compute the hash of the given flexive password.
      *
      * @param accountId the user account ID
-     * @param password the cleartext password
+     * @param password  the cleartext password
      * @return a hashed password
      */
     public synchronized static String hashPassword(long accountId, String password) {
@@ -157,21 +171,6 @@ public final class FxSharedUtils {
     }
 
     public final static boolean WINDOWS = System.getProperty("os.name").indexOf("Windows") >= 0;
-
-    /**
-     * Shared message resources bundle
-     */
-    public static final String SHARED_BUNDLE = "FxSharedMessages";
-
-    private static final Log LOG = LogFactory.getLog(FxSharedUtils.class);
-    private static String fxVersion = "3.0";
-    private static String fxEdition = "framework";
-    private static String fxProduct = "[fleXive]";
-    private static String fxBuild = "unknown";
-    private static String fxBuildDate = "unknown";
-    private static String fxBuildUser = "unknown";
-    private static String fxHeader = "[fleXive]";
-    private static List<String> translatedLocales = Arrays.asList("en");
 
     static {
         try {
@@ -454,23 +453,6 @@ public final class FxSharedUtils {
                 }
             }
         }
-    }
-
-
-    /**
-     * Throw an exception if the calling user is not in the given roles
-     *
-     * @param ticket calling user
-     * @param roles  Roles to check
-     * @throws FxNoAccessException on errors
-     */
-    public static void checkRole(UserTicket ticket, Role... roles) throws FxNoAccessException {
-        if (ticket.isGlobalSupervisor())
-            return;
-        for (Role role : roles)
-            if (!ticket.isInRole(role)) {
-                throw new FxNoAccessException(LOG, "ex.role.notInRole", role.getName());
-            }
     }
 
     /**

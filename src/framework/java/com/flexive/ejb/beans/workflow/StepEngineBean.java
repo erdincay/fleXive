@@ -38,7 +38,7 @@ import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
-import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.SequencerEngine;
 import com.flexive.shared.interfaces.SequencerEngineLocal;
@@ -94,7 +94,7 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
             throws FxApplicationException {
         UserTicket ticket = FxContext.get().getTicket();
         // Security checks
-        FxSharedUtils.checkRole(ticket, Role.WorkflowManagement);
+        FxPermissionUtils.checkRole(ticket, Role.WorkflowManagement);
 
         // Create the new step
         Statement stmt = null;
@@ -268,7 +268,7 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
             throws FxApplicationException {
         UserTicket ticket = FxContext.get().getTicket();
         // Security checks
-        FxSharedUtils.checkRole(ticket, Role.WorkflowManagement);
+        FxPermissionUtils.checkRole(ticket, Role.WorkflowManagement);
 
         long workflowId = -1;
         // Check if the workflow exists at all, throws FxNotFoundException
@@ -343,7 +343,7 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
             throws FxApplicationException {
         UserTicket ticket = FxContext.get().getTicket();
         // Security checks
-        FxSharedUtils.checkRole(ticket, Role.WorkflowManagement);
+        FxPermissionUtils.checkRole(ticket, Role.WorkflowManagement);
 
         // Load the step
         try {

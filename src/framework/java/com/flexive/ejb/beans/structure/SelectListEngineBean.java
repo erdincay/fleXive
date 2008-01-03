@@ -38,8 +38,8 @@ import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.cache.FxCacheException;
@@ -89,7 +89,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long save(FxSelectListEdit list) throws FxApplicationException {
-        FxSharedUtils.checkRole(FxContext.get().getTicket(), Role.SelectListEditor);
+        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.SelectListEditor);
         final boolean newList = list.isNew();
         boolean changes = newList;
         long id = list.getId();
@@ -165,7 +165,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
         if (item.isNew())
             id = createItem(item);
         else if (item.changes()) {
-            FxSharedUtils.checkRole(FxContext.get().getTicket(), Role.SelectListEditor);
+            FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.SelectListEditor);
             updateItem(item);
         } else
             return id;
@@ -184,7 +184,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void remove(FxSelectList list) throws FxApplicationException {
 //        System.out.println("Removing list " + list.getLabel());
-        FxSharedUtils.checkRole(FxContext.get().getTicket(), Role.SelectListEditor);
+        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.SelectListEditor);
         Connection con = null;
         PreparedStatement ps = null;
         try {
@@ -252,7 +252,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void remove(FxSelectListItem item) throws FxApplicationException {
 //        System.out.println("Removing item " + item.getLabel());
-        FxSharedUtils.checkRole(FxContext.get().getTicket(), Role.SelectListEditor);
+        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.SelectListEditor);
         Connection con = null;
         PreparedStatement ps = null;
         try {

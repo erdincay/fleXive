@@ -41,6 +41,7 @@ import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.security.Mandator;
@@ -81,7 +82,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
         final UserTicket ticket = FxContext.get().getTicket();
         final FxEnvironment environment;
         // Security
-        FxSharedUtils.checkRole(ticket, Role.GlobalSupervisor);
+        FxPermissionUtils.checkRole(ticket, Role.GlobalSupervisor);
         FxSharedUtils.checkParameterEmpty(name, "NAME");
         environment = CacheAdmin.getEnvironment();
         //exist check
@@ -170,7 +171,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
         final UserTicket ticket = FxContext.get().getTicket();
         final FxEnvironment environment;
         // Security
-        FxSharedUtils.checkRole(ticket, Role.GlobalSupervisor);
+        FxPermissionUtils.checkRole(ticket, Role.GlobalSupervisor);
         environment = CacheAdmin.getEnvironment();
         //exist check
         Mandator mand = environment.getMandator(mandatorId);
@@ -212,7 +213,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
         final UserTicket ticket = FxContext.get().getTicket();
         final FxEnvironment environment;
         // Security
-        FxSharedUtils.checkRole(ticket, Role.GlobalSupervisor);
+        FxPermissionUtils.checkRole(ticket, Role.GlobalSupervisor);
         environment = CacheAdmin.getEnvironment();
         //exist check
         Mandator mand = environment.getMandator(mandatorId);
@@ -254,7 +255,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
         final UserTicket ticket = FxContext.get().getTicket();
         final FxEnvironment environment = CacheAdmin.getEnvironment();
         // Security
-        FxSharedUtils.checkRole(ticket, Role.GlobalSupervisor);
+        FxPermissionUtils.checkRole(ticket, Role.GlobalSupervisor);
         //exist check
         Mandator mand = environment.getMandator(mandatorId);
         Connection con = null;
@@ -299,7 +300,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
         final UserTicket ticket = FxContext.get().getTicket();
         final FxEnvironment environment = CacheAdmin.getEnvironment();
         // Security
-        FxSharedUtils.checkRole(ticket, Role.GlobalSupervisor);
+        FxPermissionUtils.checkRole(ticket, Role.GlobalSupervisor);
         //exist check
         Mandator mand = environment.getMandator(mandatorId);
         Connection con = null;

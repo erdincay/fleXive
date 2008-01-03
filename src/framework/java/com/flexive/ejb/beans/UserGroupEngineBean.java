@@ -37,6 +37,7 @@ import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.security.UserTicketStore;
 import com.flexive.shared.*;
+import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.SequencerEngine;
 import com.flexive.shared.interfaces.SequencerEngineLocal;
@@ -215,7 +216,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
                 if (ticket.getMandatorId() != mandatorId) {
                     throw new FxNoAccessException("UserGroup.create.foreignMandator");
                 }
-                FxSharedUtils.checkRole(ticket, Role.AccountManagement);
+                FxPermissionUtils.checkRole(ticket, Role.AccountManagement);
             }
         } catch (FxNoAccessException nae) {
             if (LOG.isInfoEnabled()) LOG.info(nae);
@@ -566,7 +567,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
                 if (ticket.getMandatorId() != group.getMandatorId()) {
                     throw new FxNoAccessException(mode);
                 }
-                FxSharedUtils.checkRole(ticket, Role.AccountManagement);
+                FxPermissionUtils.checkRole(ticket, Role.AccountManagement);
             }
         } catch (FxNoAccessException nae) {
             if (LOG.isInfoEnabled()) LOG.info(nae);

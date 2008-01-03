@@ -39,7 +39,7 @@ import static com.flexive.core.DatabaseConst.TBL_WORKFLOW;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
-import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
@@ -85,7 +85,7 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
     public void remove(long workflowId) throws FxApplicationException {
         UserTicket ticket = FxContext.get().getTicket();
         // Permission checks
-        FxSharedUtils.checkRole(ticket, Role.WorkflowManagement);
+        FxPermissionUtils.checkRole(ticket, Role.WorkflowManagement);
 
         // Do work...
         Connection con = null;
@@ -159,7 +159,7 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
         UserTicket ticket = FxContext.get().getTicket();
 
         // Permission checks
-        FxSharedUtils.checkRole(ticket, Role.WorkflowManagement);
+        FxPermissionUtils.checkRole(ticket, Role.WorkflowManagement);
 
         Connection con = null;
         PreparedStatement stmt = null;
@@ -270,7 +270,7 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
     public long create(Workflow workflow) throws FxApplicationException {
         UserTicket ticket = FxContext.get().getTicket();
         // Permission checks
-        FxSharedUtils.checkRole(ticket, Role.WorkflowManagement);
+        FxPermissionUtils.checkRole(ticket, Role.WorkflowManagement);
 
         // Do work ..
         Connection con = null;

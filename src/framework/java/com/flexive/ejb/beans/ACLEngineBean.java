@@ -38,6 +38,7 @@ import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.security.UserTicketStore;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.*;
+import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.security.*;
@@ -136,7 +137,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
         final FxEnvironment environment = CacheAdmin.getEnvironment();
         // Security
         if (!ticket.isInRole(Role.MandatorSupervisor))
-            FxSharedUtils.checkRole(ticket, Role.ACLManagement);
+            FxPermissionUtils.checkRole(ticket, Role.ACLManagement);
         if (!ticket.isGlobalSupervisor()) {
             if (ticket.getMandatorId() != mandatorId) {
                 String mandatorName = environment.getMandator(mandatorId).getName();
@@ -709,7 +710,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
 
         // Security check (1)
         if (checkRole && !ticket.isInRole(Role.MandatorSupervisor))
-            FxSharedUtils.checkRole(ticket, Role.ACLManagement);
+            FxPermissionUtils.checkRole(ticket, Role.ACLManagement);
 
         if (groupId != null) {
             UserGroup grp = group.load(groupId);

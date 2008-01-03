@@ -39,14 +39,13 @@ import com.flexive.shared.FxLanguage;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.exceptions.FxNotFoundException;
-import com.flexive.shared.security.ACL;
-import com.flexive.shared.security.ACLAssignment;
-import com.flexive.shared.security.UserGroup;
-import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.security.*;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxNoAccess;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,6 +56,7 @@ import java.util.List;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class FxPermissionUtils {
+    private static final Log LOG = LogFactory.getLog(FxPermissionUtils.class);
 
     public static final byte PERM_MASK_INSTANCE = 0x01;
     public static final byte PERM_MASK_PROPERTY = 0x02;
@@ -66,11 +66,11 @@ public class FxPermissionUtils {
     /**
      * Permission check for (new) contents
      *
-     * @param ticket calling users ticket
-     * @param permission permission to check
-     * @param type used type
-     * @param stepACL step ACL
-     * @param contentACL content ACL
+     * @param ticket         calling users ticket
+     * @param permission     permission to check
+     * @param type           used type
+     * @param stepACL        step ACL
+     * @param contentACL     content ACL
      * @param throwException should exception be thrown
      * @return access granted
      * @throws FxNoAccessException if not accessible for calling user
@@ -110,9 +110,9 @@ public class FxPermissionUtils {
     /**
      * Permission check for existing contents
      *
-     * @param ticket calling users ticket
-     * @param permission permission to check
-     * @param si security info of the content to check
+     * @param ticket         calling users ticket
+     * @param permission     permission to check
+     * @param si             security info of the content to check
      * @param throwException should exception be thrown
      * @return access granted
      * @throws FxNoAccessException if access denied and exception should be thrown
@@ -272,15 +272,15 @@ public class FxPermissionUtils {
      */
     public static String toString(byte bitCodedPermissions) {
         StringBuilder res = new StringBuilder(30);
-        if( (bitCodedPermissions & PERM_MASK_TYPE) == PERM_MASK_TYPE)
+        if ((bitCodedPermissions & PERM_MASK_TYPE) == PERM_MASK_TYPE)
             res.append(",Type");
-        if( (bitCodedPermissions & PERM_MASK_STEP) == PERM_MASK_STEP)
+        if ((bitCodedPermissions & PERM_MASK_STEP) == PERM_MASK_STEP)
             res.append(",Step");
-        if( (bitCodedPermissions & PERM_MASK_PROPERTY) == PERM_MASK_PROPERTY)
+        if ((bitCodedPermissions & PERM_MASK_PROPERTY) == PERM_MASK_PROPERTY)
             res.append(",Property");
-        if( (bitCodedPermissions & PERM_MASK_INSTANCE) == PERM_MASK_INSTANCE)
+        if ((bitCodedPermissions & PERM_MASK_INSTANCE) == PERM_MASK_INSTANCE)
             res.append(",Instance");
-        if( res.length() > 0 )
+        if (res.length() > 0)
             res.deleteCharAt(0);
         return res.toString();
     }
@@ -288,13 +288,14 @@ public class FxPermissionUtils {
     /**
      * Get a users permission for a given instance ACL
      *
-     * @param acl instance ACL
-     * @param type used type
-     * @param stepACL step ACL
+     * @param acl       instance ACL
+     * @param type      used type
+     * @param stepACL   step ACL
      * @param createdBy owner
-     * @param mandator mandator
+     * @param mandator  mandator
      * @return array of permissions in the order edit, relate, delete, export and create
-     * @throws com.flexive.shared.exceptions.FxNoAccessException if no read access if permitted
+     * @throws com.flexive.shared.exceptions.FxNoAccessException
+     *          if no read access if permitted
      */
     public static boolean[] getPermissions(long acl, FxType type, long stepACL, long createdBy, long mandator) throws FxNoAccessException {
         boolean[] perms = new boolean[5];
@@ -314,5 +315,22 @@ public class FxPermissionUtils {
             perms[4] = checkPermission(ticket, ACL.Permission.CREATE, type, stepACL, acl, false);
         }
         return perms;
+    }
+
+    /**
+     * Throw an exception if the calling user is not in the given roles
+     *
+     * @param ticket calling user
+     * @param roles  Roles to check
+     * @throws com.flexive.shared.exceptions.FxNoAccessException
+     *          on errors
+     */
+    public static void checkRole(UserTicket ticket, Role... roles) throws FxNoAccessException {
+        if (ticket.isGlobalSupervisor())
+            return;
+        for (Role role : roles)
+            if (!ticket.isInRole(role)) {
+                throw new FxNoAccessException(LOG, "ex.role.notInRole", role.getName());
+            }
     }
 }
