@@ -37,7 +37,6 @@ import com.flexive.shared.FxLanguage;
 import com.flexive.shared.exceptions.FxApplicationException;
 
 import javax.ejb.Remote;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -103,4 +102,12 @@ public interface LanguageEngine {
      * @return a array with all available language objects
      */
     boolean isValid(long languageId);
+
+    /**
+     * Set all available languages
+     *
+     * @param available list containing all available languages
+     * @throws FxApplicationException on errors
+     */
+    public void setAvailable(List<FxLanguage> available) throws FxApplicationException;
 }

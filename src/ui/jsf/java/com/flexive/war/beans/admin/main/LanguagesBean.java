@@ -37,6 +37,7 @@ import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.LanguageEngine;
+import com.flexive.faces.messages.FxFacesMsgErr;
 
 import javax.faces.event.ActionEvent;
 import java.util.List;
@@ -115,11 +116,15 @@ public class LanguagesBean {
 
     public long getFirst() throws FxApplicationException {
         getAvailable();
+        if (available.size() == 0)
+            return 0;
         return available.get(0).getId();
     }
 
     public long getLast() throws FxApplicationException {
         getAvailable();
+        if (available.size() == 0)
+            return 0;
         return available.get(available.size() - 1).getId();
     }
 
@@ -154,4 +159,19 @@ public class LanguagesBean {
         }
         disabled.add(tmp);
     }
+
+    /**
+     * Save language settings.
+     *
+     * @return the next page
+     */
+    public String saveSettings() {
+        try {
+            lang.setAvailable(available);
+        } catch (FxApplicationException e) {
+            new FxFacesMsgErr(e).addToContext();
+        }
+        return "languages";
+    }
+
 }

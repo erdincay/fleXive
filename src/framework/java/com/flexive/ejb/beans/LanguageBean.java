@@ -35,12 +35,15 @@ package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
+import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxLanguage;
+import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.FxContext;
+import com.flexive.shared.security.Role;
+import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.cache.FxCacheException;
-import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.exceptions.FxInvalidLanguageException;
-import com.flexive.shared.exceptions.FxLoadException;
+import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.LanguageEngine;
 import com.flexive.shared.interfaces.LanguageEngineLocal;
 import com.flexive.shared.mbeans.FxCacheMBean;
@@ -49,10 +52,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -171,7 +171,7 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
     /**
      * Initial load function.
      *
-     * @param used        load used or unused languages?
+     * @param used      load used or unused languages?
      * @param add2cache put loaded languages into cache?
      * @return list containing requested languages
      */
@@ -227,6 +227,47 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
                 Database.closeObjects(LanguageBean.class, con, stmt);
         }
         return alLang;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void setAvailable(List<FxLanguage> available) throws FxApplicationException {
+        FxSharedUtils.checkRole(FxContext.get().getTicket(), Role.GlobalSupervisor);
+        Connection con = null;
+        PreparedStatement ps = null;
+        if (available == null || available.size() == 0)
+            throw new FxInvalidParameterException("available", "ex.language.noAvailable");
+        try {
+            con = Database.getDbConnection();
+            ps = con.prepareStatement("UPDATE " + DatabaseConst.TBL_LANG + " SET INUSE=?, DISPPOS=?");
+            ps.setBoolean(1, false);
+            ps.setNull(2, java.sql.Types.INTEGER);
+            ps.executeUpdate();
+            ps.close();
+            int pos = 0;
+            ps = con.prepareStatement("UPDATE " + DatabaseConst.TBL_LANG + " SET INUSE=?, DISPPOS=? WHERE LANG_CODE=?");
+            ps.setBoolean(1, true);
+            for (FxLanguage lang : available) {
+                ps.setInt(2, pos++);
+                ps.setLong(3, lang.getId());
+                ps.addBatch();
+            }
+            ps.executeBatch();
+            FxCacheMBean cache = CacheAdmin.getInstance();
+            cache.remove(CacheAdmin.LANGUAGES_ID);
+            cache.remove(CacheAdmin.LANGUAGES_ISO);
+            cache.remove(CacheAdmin.LANGUAGES_ALL);
+            StructureLoader.reload(con);
+        } catch (SQLException e) {
+            throw new FxUpdateException(LOG, e, "ex.db.sqlError", e.getMessage());
+        } catch (FxCacheException e) {
+            throw new FxApplicationException(LOG, e);
+        } finally {
+            if (con != null)
+                Database.closeObjects(LanguageBean.class, con, ps);
+        }
     }
 }
 
