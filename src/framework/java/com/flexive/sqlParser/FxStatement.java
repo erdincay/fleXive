@@ -38,6 +38,9 @@ import com.flexive.shared.exceptions.FxSqlSearchException;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Statement.
@@ -55,7 +58,7 @@ public class FxStatement {
     private TYPE type = TYPE.FILTER;
     private ArrayList<SelectedValue> selected;
     private ArrayList<OrderByValue> order;
-    private int parserExecutionTime;
+    private int parserExecutionTime = -1;
     private int maxResultRows = -1;
     private String cacheKey;
     private boolean distinct;
@@ -82,7 +85,7 @@ public class FxStatement {
     }
 
     public Filter.VERSION getVersionFilter() {
-        return versionFilter==null? Filter.VERSION.HIGHEST:versionFilter;
+        return versionFilter==null? Filter.VERSION.MAX :versionFilter;
     }
 
 
@@ -180,7 +183,7 @@ public class FxStatement {
      *
      * @return the selected values
      */
-    public ArrayList<SelectedValue> getSelectedValues() {
+    public List<SelectedValue> getSelectedValues() {
         return selected;
     }
 
@@ -222,7 +225,7 @@ public class FxStatement {
      *
      * @return the sort order values
      */
-    public ArrayList<OrderByValue> getOrderByValues() {
+    public List<OrderByValue> getOrderByValues() {
         return order;
     }
 
@@ -298,9 +301,9 @@ public class FxStatement {
             stmt.setParserExecutionTime((int)(System.currentTimeMillis()-startTime));
             return stmt;
         } catch(TokenMgrError exc) {
-            throw new SqlParserException(exc);
+            throw new SqlParserException(exc, query);
         } catch (ParseException exc) {
-            throw new SqlParserException(exc);
+            throw new SqlParserException(exc, query);
         } catch(SqlParserException exc) {
             throw exc;
         } catch(Exception exc) {
@@ -397,6 +400,33 @@ public class FxStatement {
             }
         }
 
+        // Check order by
+        for (OrderByValue ov:getOrderByValues()) {
+            if (StringUtils.isNumeric(ov.getValue())) {
+                // column selected by index (1-based)
+                final int index = Integer.valueOf(ov.getValue()) - 1;
+                if (index >= 0 && selected.size() > index) {
+                    ov.setSelectedValue(selected.get(index), index);
+                } else {
+                    throw new SqlParserException("ex.sqlSearch.invalidOrderByIndex", ov.getValue(), selected.size());
+                }
+            } else {
+                // column selected by alias
+                boolean found = false;
+                int pos = 0;
+                for (SelectedValue sv : selected) {
+                    if (sv.getAlias().equalsIgnoreCase(ov.getValue())) {
+                        found = true;
+                        ov.setSelectedValue(sv,pos);
+                        break;
+                    }
+                    pos++;
+                }
+                if (!found) {
+                    throw new SqlParserException("ex.sqlSearch.invalidOrderByValue",ov.getValue());
+                }
+            }
+        }
 
         // If no where clause is set at all
         if (this.rootBrace==null || this.rootBrace.size()==0) {
@@ -519,7 +549,7 @@ public class FxStatement {
         } else {
             Brace parent = br.getParent();
             try {
-                Condition cd = new Condition(this,new Constant("1"),Condition.COMPERATOR.EQUAL,new Constant(alwaysTrue?"1":"0"));
+                Condition cd = new Condition(this,new Constant("1"), Condition.Comparator.EQUAL,new Constant(alwaysTrue?"1":"0"));
                 parent.addElement(cd);
             } catch (Exception exc) {
                 System.err.println("###Y" +exc.getMessage());
@@ -536,23 +566,6 @@ public class FxStatement {
      * @throws SqlParserException if the function fails
      */
     private void cleanup(Brace br) throws SqlParserException {
-
-        // Check order by
-        for (OrderByValue ov:getOrderByValues()) {
-            boolean found = false;
-            int pos = 0;
-            for (SelectedValue sv : selected) {
-                if (sv.getAlias().equalsIgnoreCase(ov.getValue())) {
-                    found = true;
-                    ov.setSelectedValue(sv,pos);
-                    break;
-                }
-                pos++;
-            }
-            if (!found) {
-                throw new SqlParserException("ex.sqlSearch.invalidOrderByValue",ov.getValue());
-            }
-        }
 
         // Move down the brace tree (recursive) ..
         for (BraceElement be: br.getElements()) {

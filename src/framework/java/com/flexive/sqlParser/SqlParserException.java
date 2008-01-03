@@ -42,14 +42,14 @@ public class SqlParserException extends Exception {
 
     Object[] params;
 
-    public SqlParserException(TokenMgrError pe) {
+    public SqlParserException(TokenMgrError pe, String query) {
         super("ex.sqlSearch.tokenMgrException");
-        params=new Object[]{pe.getErrorLine(),pe.getErrorColumn(),pe.getCurCharEscaped(),pe.getErrorAfter()};
+        params=new Object[]{pe.getErrorLine(),pe.getErrorColumn(),pe.getCurCharEscaped(),pe.getErrorAfter(),query};
 
 
     }
 
-    public SqlParserException(ParseException pe) {
+    public SqlParserException(ParseException pe, String query) {
         super("ex.sqlSearch.parserException");
         String expected = "";
         String encountered = "";
@@ -82,7 +82,7 @@ public class SqlParserException extends Exception {
         }
         int line = pe.currentToken.next.beginLine;
         int column = pe.currentToken.next.beginColumn;
-        params=new Object[]{line,column,encountered,expected};
+        params=new Object[]{line,column,encountered,expected,pe.getMessage(),query};
     }
 
 

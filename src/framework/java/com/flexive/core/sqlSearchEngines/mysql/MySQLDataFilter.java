@@ -54,7 +54,7 @@ import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.value.FxValueConverter;
 import com.flexive.sqlParser.*;
-import static com.flexive.sqlParser.Condition.COMPERATOR;
+import static com.flexive.sqlParser.Condition.Comparator;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -381,7 +381,7 @@ public class MySQLDataFilter extends DataFilter {
      * @return the filter sub-statement
      */
     public String _getTreeFilter(Condition cond, FxTreeMode mode) {
-        boolean direct = cond.getComperator() == COMPERATOR.IS_DIRECT_CHILD_OF;
+        boolean direct = cond.getComperator() == Comparator.IS_DIRECT_CHILD_OF;
 //        String table = DatabaseConst.TBL_TREE+(mode == FxTreeMode.Live ?"L":"");
 
         long parentNode;
@@ -436,8 +436,8 @@ public class MySQLDataFilter extends DataFilter {
         Constant constant = cond.getConstant();
 
 
-        if (cond.getComperator() == COMPERATOR.IS_CHILD_OF ||
-                cond.getComperator() == COMPERATOR.IS_DIRECT_CHILD_OF) {
+        if (cond.getComperator() == Comparator.IS_CHILD_OF ||
+                cond.getComperator() == Comparator.IS_DIRECT_CHILD_OF) {
             // In case of VERSION.ALL we will look up the LIVE and EDIT tree
             String result = "";
             int count = 0;
@@ -446,7 +446,7 @@ public class MySQLDataFilter extends DataFilter {
                 result += _getTreeFilter(cond, FxTreeMode.Live);
                 count++;
             }
-            if (stmt.getVersionFilter() == Filter.VERSION.HIGHEST ||
+            if (stmt.getVersionFilter() == Filter.VERSION.MAX ||
                     stmt.getVersionFilter() == Filter.VERSION.ALL) {
                 if (result.length() > 0) {
                     result += "\n UNION \n";
@@ -511,7 +511,7 @@ public class MySQLDataFilter extends DataFilter {
                 : "TPROP=" + entry.getProperty().getId();
 
         if (entry.getTable().equals(DatabaseConst.TBL_CONTENT_DATA) &&
-                cond.getComperator().equals(COMPERATOR.IS) &&
+                cond.getComperator().equals(Condition.Comparator.IS) &&
                 cond.getConstant().isNull()) {
             // IS NULL is a specical case for the content data table:
             // a property is null if no entry is present in the table, which means we must
@@ -572,7 +572,7 @@ public class MySQLDataFilter extends DataFilter {
                 }
                 break;
             case SelectMany:
-                if (COMPERATOR.EQUAL.equals(cond.getComperator()) || COMPERATOR.NOT_EQUAL.equals(cond.getComperator())) {
+                if (Comparator.EQUAL.equals(cond.getComperator()) || Comparator.NOT_EQUAL.equals(cond.getComperator())) {
                     // exact match, so we use the text column that stores the comma-separated list of selected items
                     column = "FTEXT1024";
                     value = "'" + StringUtils.join(constant.iterator(), ',') + "'";
@@ -591,7 +591,7 @@ public class MySQLDataFilter extends DataFilter {
                 value = "" + FxValueConverter.toDateTime(constant.getValue()).getTime();
                 break;
             case Binary:
-                if (cond.getComperator().equals(COMPERATOR.IS_NOT) && constant.isNull()) {
+                if (cond.getComperator().equals(Comparator.IS_NOT) && constant.isNull()) {
                     value = "NULL";
                     break;
                 }

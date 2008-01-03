@@ -49,12 +49,12 @@ public class Filter {
         IGNORE_CASE,
         MAX_RESULTROWS,
         SEARCH_LANGUAGES,
-        RESULT_LANGUAGES,
+        /*RESULT_LANGUAGES,*/
         BRIEFCASE
     }
 
     public enum VERSION {
-        HIGHEST,
+        MAX,
         LIVE,
         ALL,
         AUTO
@@ -95,7 +95,7 @@ public class Filter {
                 _processVersionFilter(stmt);
             }
             // ----------- CONTENT -------------------------------------------------------------------------------------
-            else if (type.equalsIgnoreCase("CTYPE")) {
+            else if (type.equalsIgnoreCase("TYPE")) {
                 stmt.setContentTypeFilter(value);
             }
             // ----------- LANGUAGES -----------------------------------------------------------------------------------
@@ -123,7 +123,11 @@ public class Filter {
             } else if (type.equalsIgnoreCase(String.valueOf(TYPE.MAX_RESULTROWS))) {
                 this.type = TYPE.MAX_RESULTROWS;
                 try {
-                    stmt.setMaxResultRows(Integer.valueOf(value));
+                    final int maxResultRows = Integer.valueOf(value);
+                    if (maxResultRows < 0) {
+                        throw new SqlParserException("ex.sqlSearch.filter.negativeNumber", TYPE.MAX_RESULTROWS);
+                    }
+                    stmt.setMaxResultRows(maxResultRows);
                 } catch(Exception exc) {
                     throw new SqlParserException("ex.sqlSearch.filter.invalidNumber",
                             type,String.valueOf(TYPE.MAX_RESULTROWS));
@@ -151,10 +155,10 @@ public class Filter {
         value = value.toUpperCase();
         if (value.equals(VERSION.AUTO.toString())) {
             // TODO: AUTO depends on the user/session setting
-            value = VERSION.HIGHEST.toString();
+            value = VERSION.MAX.toString();
         }
-        if (value.equals(VERSION.HIGHEST.toString())) {
-            ver = VERSION.HIGHEST;
+        if (value.equals(VERSION.MAX.toString())) {
+            ver = VERSION.MAX;
         } else if (value.equals(VERSION.LIVE.toString())) {
             ver = VERSION.LIVE;
         } else if (value.equals(VERSION.ALL.toString())) {

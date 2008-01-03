@@ -39,6 +39,7 @@ import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.SelectMany;
+import com.flexive.shared.value.FxValue;
 import org.apache.commons.lang.StringUtils;
 
 import java.text.ParseException;
@@ -421,24 +422,16 @@ public final class FxFormatUtils {
     }
 
     /**
-     * Escape SQL special characters, i.e. replaces ' with ''.
-     *
-     * @param value the value to be escaped
-     * @return the escaped SQL string
-     */
-    public static String escapeForSql(String value) {
-        return StringUtils.replace(value, "'", "''");
-    }
-
-    /**
      * Generic SQL escape method.
      *
      * @param value the value to be formatted
      * @return the formatted value
      */
     public static String escapeForSql(Object value) {
-        if (value instanceof String) {
-            return "'" + escapeForSql((String) value) + "'";
+        if (value instanceof FxValue) {
+            return ((FxValue) value).getSqlValue();
+        } else if (value instanceof String) {
+            return "'" + StringUtils.replace((String) value, "'", "''") + "'";
         } else if (value instanceof Date) {
             return "'" + new Formatter().format("%tF", (Date) value) + "'";
         } else if (value instanceof FxSelectListItem) {

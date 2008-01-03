@@ -228,16 +228,16 @@ public class SqlQueryBuilderTest {
     @Test
     public void filterTypeTest() {
         final SqlQueryBuilder builder = new SqlQueryBuilder().select("@pk").filterType("MYTYPE");
-        Assert.assertEquals(builder.getFilters(), "co.CTYPE=MYTYPE");
-        assert builder.getQuery().contains("FILTER co.CTYPE=MYTYPE") : "Filter not contained in getResult: " + builder.getQuery();
+        Assert.assertEquals(builder.getFilters(), "co.TYPE=MYTYPE");
+        assert builder.getQuery().contains("FILTER co.TYPE=MYTYPE") : "Filter not contained in getResult: " + builder.getQuery();
 
         final SqlQueryBuilder builder2 = new SqlQueryBuilder().select("@pk").filterType(21);
-        Assert.assertEquals(builder2.getFilters(), "co.CTYPE=21");
-        assert builder2.getQuery().contains("FILTER co.CTYPE=21") : "Filter not contained in getResult: " + builder2.getQuery();
+        Assert.assertEquals(builder2.getFilters(), "co.TYPE=21");
+        assert builder2.getQuery().contains("FILTER co.TYPE=21") : "Filter not contained in getResult: " + builder2.getQuery();
         // remove filter
         builder2.filterType(-1);
         Assert.assertEquals(builder2.getFilters(), "");
-        assert !builder2.getQuery().contains("FILTER co.CTYPE=21") : "Filter still present in getResult: " + builder2.getQuery();
+        assert !builder2.getQuery().contains("FILTER co.TYPE=21") : "Filter still present in getResult: " + builder2.getQuery();
     }
 
     @Test

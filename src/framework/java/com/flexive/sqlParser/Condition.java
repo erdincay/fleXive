@@ -40,15 +40,39 @@ package com.flexive.sqlParser;
  */
 public class Condition implements BraceElement {
 
-    private COMPERATOR comperator;
+    private Comparator comparator;
     private Value sLeft;
     private Value sRight;
     private int id;
 
-    public enum COMPERATOR {
-        LIKE,NOT_LIKE,EQUAL,NOT_EQUAL,LESS,GREATER,
-        GREATER_OR_EQUAL,LESS_OR_EQUAL,
-        NOT_GREATER,NOT_LESS,NEAR,IS,IS_NOT,IN,NOT_IN,IS_CHILD_OF,IS_DIRECT_CHILD_OF
+    public enum Comparator {
+        LIKE("like"),
+        NOT_LIKE("not like"),
+        EQUAL("="),
+        NOT_EQUAL("!="),
+        LESS("<"),
+        GREATER(">"),
+        GREATER_OR_EQUAL(">="),
+        LESS_OR_EQUAL("<="),
+        NOT_GREATER("!>"),
+        NOT_LESS("!<"),
+        IS("is"),
+        IS_NOT("is not"),
+        IN("in"),
+        NOT_IN("not in"),
+        NEAR(null) /* no SQL equivalent */,
+        IS_CHILD_OF(null),
+        IS_DIRECT_CHILD_OF(null);
+
+        private String sql;
+
+        Comparator(String sql) {
+            this.sql = sql;
+        }
+
+        public String getSql() {
+            return sql;
+        }
     }
 
     /**
@@ -58,17 +82,17 @@ public class Condition implements BraceElement {
      *  
      * @param stmt the statement
      * @param vleft the left value
-     * @param comperator the comperator
+     * @param comparator the comparator
      * @param vright the right value
      * @throws SqlParserException if a error occured
      */
-    protected Condition(FxStatement stmt,Value vleft, COMPERATOR comperator,Value vright) throws SqlParserException {
-        this.comperator = comperator;
+    protected Condition(FxStatement stmt,Value vleft, Comparator comparator,Value vright) throws SqlParserException {
+        this.comparator = comparator;
         this.sLeft = vleft;
         this.sRight = vright;
         this.id=stmt.getNewBraceElementId();
         if (vleft instanceof Property && vright instanceof Property) {
-            String sParam = vleft+String.valueOf(comperator)+vright;
+            String sParam = vleft+String.valueOf(comparator)+vright;
             throw new SqlParserException("ex.sqlSearch.invalidConditionNoConst",sParam);
         }
         if (vleft instanceof Property) {
@@ -99,7 +123,7 @@ public class Condition implements BraceElement {
 
     public String toString() {
         return (sLeft==null?"null":sLeft.getValue()+" ")+
-                String.valueOf(comperator)+
+                String.valueOf(comparator)+
                 (sRight==null?"":" "+sRight.getValue());
     }
 
@@ -111,45 +135,12 @@ public class Condition implements BraceElement {
         return this.sRight;
     }
 
-    public COMPERATOR getComperator() {
-        return this.comperator;
+    public Comparator getComperator() {
+        return this.comparator;
     }
 
     public String getSqlComperator() {
-        switch(this.comperator) {
-            case LIKE:
-                return " LIKE ";
-            case NOT_LIKE:
-                return " NOT LIKE ";
-            case EQUAL:
-                return " = ";
-            case NOT_EQUAL:
-                return " != ";
-            case GREATER:
-                return " > ";
-            case LESS:
-                return " < ";
-            case GREATER_OR_EQUAL:
-                return " >= ";
-            case LESS_OR_EQUAL:
-                return " <= ";
-            case NOT_GREATER:
-                return " !> ";
-            case NOT_LESS:
-                return " !< ";
-            case IS:
-                return " is ";
-            case IS_NOT:
-                return " is not ";
-            case NEAR:
-                return null;
-            case IN:
-                return " IN ";
-            case NOT_IN:
-                return " NOT IN ";
-            default:
-                return null;
-        }
+        return " " + this.comparator.getSql() + " ";
     }
 
 
@@ -163,10 +154,10 @@ public class Condition implements BraceElement {
         if (!(sLeft instanceof Constant  && sRight instanceof Constant)) {
             return false;
         }
-        if (comperator==COMPERATOR.EQUAL) {
+        if (comparator == Comparator.EQUAL) {
             return  sLeft.equals(sRight);
         }
-        throw new SqlParserException("ex.sqlSearch.connotUseComperator",comperator,(sLeft+" "+comperator+" "+sRight));
+        throw new SqlParserException("ex.sqlSearch.connotUseComperator", comparator,(sLeft+" "+ comparator +" "+sRight));
     }
 
     /**
@@ -179,10 +170,10 @@ public class Condition implements BraceElement {
         if (!(sLeft instanceof Constant && sRight instanceof Constant)) {
             return false;
         }
-        if (comperator==COMPERATOR.EQUAL) {
+        if (comparator == Comparator.EQUAL) {
             return  !sLeft.equals(sRight);
         }
-        throw new SqlParserException("ex.sqlSearch.connotUseComperator",comperator,(sLeft+" "+comperator+" "+sRight));
+        throw new SqlParserException("ex.sqlSearch.connotUseComperator", comparator,(sLeft+" "+ comparator +" "+sRight));
     }
 
     public Constant getConstant() {

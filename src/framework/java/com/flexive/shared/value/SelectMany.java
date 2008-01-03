@@ -36,6 +36,7 @@ package com.flexive.shared.value;
 import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.structure.FxSelectList;
 import com.flexive.shared.structure.FxSelectListItem;
 
@@ -43,7 +44,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Comparator;
 
 /**
  * Container for manipulating FxSelectList items used in FxSelectMany values
@@ -114,66 +114,78 @@ public class SelectMany implements Serializable {
      * Select an item by its id, will throw an exception if item id does not belong to the managed list
      *
      * @param id item id to select
+     * @return this
      */
-    public void select(long id) {
-        if( list == null )
-            return;
-        selectItem(list.getItem(id));
+    public SelectMany select(long id) {
+        if( list != null )
+            selectItem(list.getItem(id));
+        return this;
     }
 
     /**
      * Select all items that are in the given comma separated list
      *
      * @param list items to select
+     * @return this
      */
-    public void selectFromList(String list) {
+    public SelectMany selectFromList(String list) {
         try {
             for(long sel: FxArrayUtils.toLongArray(list,',') )
                 select(sel);
         } catch (FxInvalidParameterException e) {
             //ignore
         }
+        return this;
     }
 
     /**
      * Select an item
      *
      * @param item the item to select
+     * @return this
      */
-    public void selectItem(FxSelectListItem item) {
-        if( list == null ||item == null || !list.containsItem(item.getId()) )
-            return;
+    public SelectMany selectItem(FxSelectListItem item) {
+        if( list == null ||item == null )
+            return this;
+        if (!list.containsItem(item.getId())) {
+            throw new FxNotFoundException("ex.content.value.selectMany.select", item.getId(), list.getId(),
+                    list.getItems()).asRuntimeException();
+        }
         if( available.contains(item))
             available.remove(item);
         if( !selected.contains(item)) {
             selected.add(item);
             sortSelected();
         }
+        return this;
     }
 
     /**
      * Deselect an item by its id, will throw an exception if item id does not belong to the managed list
      *
      * @param id item id to deselect
+     * @return this
      */
-    public void deselect(long id) {
-        if( list == null )
-            return;
-        deselectItem(list.getItem(id));
+    public SelectMany deselect(long id) {
+        if( list != null )
+            deselectItem(list.getItem(id));
+        return this;
     }
 
     /**
      * Deselect an item
      *
      * @param item the item to deselect
+     * @return this
      */
-    public void deselectItem(FxSelectListItem item) {
+    public SelectMany deselectItem(FxSelectListItem item) {
         if( list == null || item == null || !list.containsItem(item.getId()) )
-            return;
+            return this;
         if( selected.contains(item))
             selected.remove(item);
         if( !available.contains(item))
             available.add(item);
+        return this;
     }
 
     /**

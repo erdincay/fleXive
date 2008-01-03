@@ -238,7 +238,7 @@ FROM content co]]></programlisting>
                 <variablelist>
                     <varlistentry>
                         <term>
-                            <code>alias.CTYPE=type</code>
+                            <code>alias.TYPE=type</code>
                         </term>
                         <listitem>
                             <para>
@@ -250,11 +250,11 @@ FROM content co]]></programlisting>
 
                     <varlistentry>
                         <term>
-                            <code>alias.VERSION=AUTO|HIGHEST|LIVE|ALL</code>
+                            <code>alias.VERSION=AUTO|MAX|LIVE|ALL</code>
                         </term>
                         <listitem>
                             <para>
-                                Restricts the Version, AUTO defaults to HIGHEST. If co.version=live is selected and an
+                                Restricts the Version, AUTO defaults to MAX. If co.version=live is selected and an
                                 object has no live version, it is omitted.
                             </para>
                         </listitem>

@@ -375,7 +375,7 @@ public class SqlQueryBuilder implements Serializable {
     }
 
     private SqlQueryBuilder setTypeFilter(Object value) {
-        final String filter = Table.CONTENT.getAlias() + ".CTYPE";
+        final String filter = Table.CONTENT.getAlias() + ".TYPE";
         removeFilter(filter);
         if (value != null) {
             uniqueFilter(filter, value);

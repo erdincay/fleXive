@@ -47,6 +47,7 @@ import org.apache.commons.logging.LogFactory;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 /**
  * MySQL specific data selector
@@ -217,7 +218,7 @@ public class MySQLDataSelector extends DataSelector {
      *         false if it is ordered descending
      */
     private Boolean _isOrderByPos(int pos) {
-        ArrayList<OrderByValue> obvs = search.getFxStatement().getOrderByValues();
+        final List<OrderByValue> obvs = search.getFxStatement().getOrderByValues();
         for (OrderByValue obv : obvs) {
             if (obv.getColumnIndex() == pos) return obv.isAscending();
         }

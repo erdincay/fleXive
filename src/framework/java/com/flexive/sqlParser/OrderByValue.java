@@ -42,7 +42,7 @@ public class OrderByValue extends Constant {
 
     private boolean ascending;
     private SelectedValue sv;
-    private int columnIndex;
+    private int columnIndex = -1;
 
     /**
      * Constructor.

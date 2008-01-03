@@ -103,14 +103,8 @@ TOKEN [IGNORE_CASE] :
 | < IS_NOT    : "IS NOT" >
 | < NULL      : "NULL" >
 | < LIKE      : "LIKE" >
-| < COUNT     : "COUNT" >
-| < SUM       : "SUM" >
-| < AVG       : "AVG" >
-| < MINIMUM   : "MIN" >
-| < MAXIMUM   : "MAX" >
 | < SUBSTRING : "SUBSTRING" >
 | < CONTAINS : "CONTAINS" >
-| < VAR_FUNCTION : "VAR_FUNCTION" >
 | < UPPER     : "UPPER" >
 | < LOWER     : "LOWER" >
 | < ORDER_BY  : "ORDER"(" ")*"BY" >
@@ -124,6 +118,7 @@ TOKEN [IGNORE_CASE] :
 | < WILDCARD  : "*" >
 | < INTEGER   : ("-"|"")["0"-"9"] (["0"-"9"])* >
 | < FLOAT     : ("-"|"")(["0"-"9"])*(".")(["0"-"9"])+>
+| < FXPK      : (["0"-"9"])+(".")("MAX"|"LIVE") >
 | < STRING:    ("'"(~["'"]|"''")*"'" | "\""(~["\""]|"\"\"")*"\"") >
 | < BOOLEAN   : ("TRUE" | "FALSE") >
 | < LIST_SEPERATOR : "," >
@@ -211,7 +206,7 @@ void symItemListOrder(final FxStatement PI) throws SqlParserException :
 	Token ascDesc = null;
 }
 {
-	tk=<SYM_SELECT_ITEM> [ascDesc=<ASC_DESC>] [ <LIST_SEPERATOR> symItemListOrder(PI) ]
+	(tk=<SYM_SELECT_ITEM> | tk=<INTEGER>) [ascDesc=<ASC_DESC>] [ <LIST_SEPERATOR> symItemListOrder(PI) ]
 	{
 		String _sAsc = (ascDesc==null)?null:ascDesc.image.toUpperCase();
 		final boolean asc = (_sAsc==null || _sAsc.indexOf("ASC")!=-1)?true:false;
@@ -234,6 +229,11 @@ String symItemList(final FxStatement PI) :
 	tk=<SYM_SELECT_ITEM> [ sep=<LIST_SEPERATOR> list=symItemList(PI) ]
 	{ 
 		return tk.image+((sep!=null)?sep.image:"")+list; 
+	}
+	|
+	tk=<INTEGER> [ sep=<LIST_SEPERATOR> list=symItemList(PI) ]
+	{
+		return tk.image+((sep!=null)?sep.image:"")+list;
 	}
 }
 
@@ -354,6 +354,9 @@ String filterItem() :{
 	|
 	item = <INTEGER> ["|" val=filterItem()]
 	{return item.image+((val!=null)?"|"+val:"");}
+	|
+	item = <BOOLEAN> ["|" val=filterItem()]
+	{return item.image+((val!=null)?"|"+val:"");}
 }
 
 
@@ -451,7 +454,7 @@ Condition condition(final FxStatement PI) throws SqlParserException: {
 	ConstantArray arr = null;
 	Value vi1 = null;
 	Value vi2 = null;
-	Condition.COMPERATOR fct = null;
+	Condition.Comparator fct = null;
 	Token inNotIn = null;
 	Token symSel = null;
 	Token nullToken = null;
@@ -467,73 +470,54 @@ Condition condition(final FxStatement PI) throws SqlParserException: {
 	}
         |
         <IS_CHILD_OF>  vi1=valueOrSubselect(PI) {
-		return new Condition(PI,vi1,Condition.COMPERATOR.IS_CHILD_OF,null);
+		return new Condition(PI,vi1,Condition.Comparator.IS_CHILD_OF,null);
         }
         |
         <IS_DIRECT_CHILD_OF>  vi1=valueOrSubselect(PI) {
-		return new Condition(PI,vi1,Condition.COMPERATOR.IS_DIRECT_CHILD_OF,null);
+		return new Condition(PI,vi1,Condition.Comparator.IS_DIRECT_CHILD_OF,null);
         }
 	|
 	vi1=value() inNotIn=<IN_OR_NOTIN> <BRACE_OPEN> arr=constantArray() <BRACE_CLOSE>
 	{
 		return new Condition(PI,vi1,
-		inNotIn.image.equalsIgnoreCase("IN")?Condition.COMPERATOR.IN:Condition.COMPERATOR.NOT_IN,
+		inNotIn.image.equalsIgnoreCase("IN")?Condition.Comparator.IN:Condition.Comparator.NOT_IN,
 		arr);
 	}
 }
 
 
 
-Condition.COMPERATOR comperator(final FxStatement PI) throws SqlParserException:
+Condition.Comparator comperator(final FxStatement PI) throws SqlParserException:
 { String id;String id2=null;Token sep=null; }
 {
   <LIKE>
-  { return Condition.COMPERATOR.LIKE; }
+  { return Condition.Comparator.LIKE; }
   | <NOT> <LIKE>
-  { return Condition.COMPERATOR.NOT_LIKE; }
+  { return Condition.Comparator.NOT_LIKE; }
   | <EQUALS>
-  { return Condition.COMPERATOR.EQUAL; }
+  { return Condition.Comparator.EQUAL; }
   | <MORE_THAN>
-  { return Condition.COMPERATOR.GREATER; }
+  { return Condition.Comparator.GREATER; }
   | <LESS_THAN>
-  { return Condition.COMPERATOR.LESS; }
+  { return Condition.Comparator.LESS; }
   | <GEQ>
-  { return Condition.COMPERATOR.GREATER_OR_EQUAL; }
+  { return Condition.Comparator.GREATER_OR_EQUAL; }
   | <LEQ>
-  { return Condition.COMPERATOR.LESS_OR_EQUAL; }
+  { return Condition.Comparator.LESS_OR_EQUAL; }
   | <NOT_GTR>
-  { return Condition.COMPERATOR.NOT_GREATER; }
+  { return Condition.Comparator.NOT_GREATER; }
   | <NOT_LSS>
-  { return Condition.COMPERATOR.NOT_LESS; }
+  { return Condition.Comparator.NOT_LESS; }
   | <NEQ>
-  { return Condition.COMPERATOR.NOT_EQUAL; }
+  { return Condition.Comparator.NOT_EQUAL; }
   | <NEQ2>
-  { return Condition.COMPERATOR.NOT_EQUAL; }
+  { return Condition.Comparator.NOT_EQUAL; }
   | <NEAR>
-  { return Condition.COMPERATOR.NEAR;}
+  { return Condition.Comparator.NEAR;}
   | <IS>
-  { return Condition.COMPERATOR.IS;}
+  { return Condition.Comparator.IS;}
   | <IS_NOT>
-  { return Condition.COMPERATOR.IS_NOT;}
-}
-
-
-/**
- * Returns a value list as array
- */
-ConstantArray constantArray() throws SqlParserException :
-{ 
-	Constant con;
-	ConstantArray arr = null;
-}{
-	con=constantValue() [ <LIST_SEPERATOR> arr=constantArray() ]	
-	{ 
-		if (arr!=null) {
-			return arr.add(con);
-		} else {
-			return new ConstantArray(new Constant[]{con});
-		}
-	}
+  { return Condition.Comparator.IS_NOT;}
 }
 
 
@@ -593,10 +577,10 @@ Value value()  throws SqlParserException  :
 		}
 		return new Property(table,property,field);
 	}
-	| <BRACE_OPEN> con=constantArray() <BRACE_CLOSE> {
+	| LOOKAHEAD(3) <BRACE_OPEN> con=constantArray() <BRACE_CLOSE> {
 	    return con;
 	}
-	| con=constantValue()
+	| LOOKAHEAD(3) con=constantValue()
 	{
 		return con;
 	}
@@ -631,6 +615,11 @@ Constant constantValue() :
 	    return new Constant(t1.image);
 	}
 	|
+	t1=<FXPK>
+	{
+	    return new Constant(t1.image);
+	}
+	|
 	<NULL> 
 	{
 		return new Constant(null);
@@ -638,5 +627,23 @@ Constant constantValue() :
 
 }
 
+
+/**
+ * Returns a value list as array
+ */
+ConstantArray constantArray() throws SqlParserException :
+{
+	Constant con;
+	ConstantArray arr = null;
+}{
+	con=constantValue() [ <LIST_SEPERATOR> arr=constantArray() ]
+	{
+		if (arr!=null) {
+			return arr.add(con);
+		} else {
+			return new ConstantArray(new Constant[]{con});
+		}
+	}
+}
 
 

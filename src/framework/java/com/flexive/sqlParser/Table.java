@@ -62,14 +62,14 @@ public class Table {
      * Returns the version filter for the table.
      * <p />
      * Possible return values are:<br>
-     * "HIGHEST","LIVE","ALL" or an integer array (eg "1,4,7")
+     * "MAX","LIVE","ALL" or an integer array (eg "1,4,7")
      *
      * @return the version filter for the table.
      */
     public String getVersionFilter() {
         Filter f = getFilter(Filter.TYPE.VERSION);
         if (f==null) {
-            return Filter.VERSION.HIGHEST.toString();
+            return Filter.VERSION.MAX.toString();
         } else {
             return f.getValue();
         }

@@ -144,7 +144,7 @@ public class FxSearch {
             this.parserExecutionTime = (int) (java.lang.System.currentTimeMillis() - time);
         } catch (SqlParserException pe) {
             // Catch the parse exception and convert it to an localized one
-            throw new FxSqlSearchException(LOG, pe, "ex.sqlSearch.parser.error", pe.getMessage(), query);
+            throw new FxSqlSearchException(LOG, pe);
         } catch (Throwable t) {
             throw new FxSqlSearchException(LOG, t, "ex.sqlSearch.parser.error", t.getMessage(), query);
         }

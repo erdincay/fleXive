@@ -104,7 +104,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
             try {
                 ctx.setRollbackOnly();
             } catch (IllegalStateException e) {
-                LOG.warn("Can not rollback since we are not in a transation!");
+                LOG.warn("Can not rollback since we are not in a transaction!");
             }
             throw exc;
         }
