@@ -42,8 +42,13 @@ import com.flexive.shared.value.*;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Factory for FxValueRenderer. A FxValueRenderer provides a transparent way of formatting
@@ -109,14 +114,12 @@ public class FxValueRendererFactory {
      */
     private static class FxSelectManyFormatter implements FxValueFormatter<SelectMany, FxSelectMany> {
         public String format(FxSelectMany value, SelectMany translation, FxLanguage outputLanguage) {
-            StringBuilder out = new StringBuilder();
+            final List<String> out = new ArrayList<String>(translation.getSelected().size());
             for (FxSelectListItem item: translation.getSelected()) {
-                if (out.length() > 0) {
-                    out.append(", ");
-                }
-                out.append(item.getLabel().getBestTranslation(outputLanguage));
+                out.add(item.getLabel().getBestTranslation(outputLanguage));
             }
-            return out.toString();
+            Collections.sort(out);  // sort by label
+            return StringUtils.join(out.iterator(), ", ");
         }
     }
 

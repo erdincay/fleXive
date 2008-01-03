@@ -36,6 +36,7 @@ package com.flexive.tests.embedded.structure;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxLanguage;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.interfaces.SelectListEngine;
@@ -60,6 +61,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.util.Iterator;
+import java.util.List;
+import java.util.Collections;
 
 /**
  * FxSelectList and FxSelectListItem tests
@@ -180,8 +183,10 @@ public class SelectListTest {
             final FxSelectMany selectMany = new FxSelectMany(many);
             final String labelManyEn = formatEn.format(selectMany);
             final String labelManyDe = formatDe.format(selectMany);
-            assert labelManyEn.equals(label1En + ", " + label2En) : "Unexpected label: " + labelManyEn;
-            assert labelManyDe.equals(label1De + ", " + label2De) : "Unexpected label: " + labelManyDe;
+            assert labelManyEn.equals(label1En.compareTo(label2En) < 0
+                    ? label1En + ", " + label2En : label2En + ", " + label1En) : "Unexpected label: " + labelManyEn;
+            assert labelManyDe.equals(label1De.compareTo(label2De) < 0
+                    ? label1De + ", " + label2De : label2De + ", " + label1De) : "Unexpected label: " + labelManyDe;
         } finally {
             le.remove(loadedList);
         }
