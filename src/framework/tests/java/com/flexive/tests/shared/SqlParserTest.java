@@ -260,10 +260,10 @@ public class SqlParserTest {
 
     @Test(groups = {"shared", "search"})
     public void queryComments() throws SqlParserException {
-        parse("SELECT co.ID /* some comment */ FROM content co");
-        parse("SELECT co.ID /* some \n multiline \n comment */ FROM content co");
+        parse("SELECT co.ID /* some comment */ FROM content -- line-comment\nco");
+        parse("SELECT co.ID /* some \n multiline -- nested \n comment */ FROM content co");
         parse("SELECT co.ID FROM content co WHERE co.property /* some comment */ = /* some comment */ 21");
-        parse("SELECT /* some \ncomment */ co.ID FROM /* some \n\ncomment */ content co");
+        parse("SELECT /* some \ncomment */ co.ID FROM /* some \n\ncomment */ content co -- another comment");
     }
 
     private void checkStatementCondition(BraceElement element, PropertyValueComparator comp, String lvalue, String rvalue) {

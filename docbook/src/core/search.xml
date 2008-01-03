@@ -78,6 +78,20 @@
                         insensitive.
                     </para>
                 </callout>
+
+                <callout arearefs="csq_intro_order">
+                    <para>
+                        To control the sorting of the result set, you can specify one or more columns in the
+                        <code>ORDER BY</code>
+                        clause. By default an ascending sort is used, to sort by descending values add
+                        <code>DESC</code>
+                        to the column alias (e.g.
+                        <code>ORDER BY co.id DESC</code>). Note that you can only use columns that
+                        are specified in the
+                        <code>SELECT</code>
+                        clause.
+                    </para>
+                </callout>
             </calloutlist>
 
             The rest of this section contains an enumeration of &fxsql; features along with
@@ -308,6 +322,55 @@ FROM content co]]></programlisting>
                         </listitem>
                     </varlistentry>
                 </variablelist>
+            </para>
+        </section>
+
+        <section xml:id="css_orderby">
+            <title>Order by</title>
+
+            <para>
+                To control the sort order of the result set, you can specify one or more
+                columns in the
+                <code>ORDER BY clause</code>.
+                Usually you specify the name of a column previously selected in the
+                <code>SELECT</code>
+                clause, but you can also use the 1-based column index. The direction of the sort
+                (ascending or descending) is set using the
+                <code>ASC</code>
+                and
+                <code>DESC</code>
+                modifiers, respectively.
+                The following two queries order the
+                result by the properties
+                <code>priority</code>
+                and
+                <code>caption</code>
+                (i.e. first the result is sorted by priority, then by caption), the first
+                uses named columns, the second specifies the column indices instead:
+
+                <programlisting language="sql"><![CDATA[SELECT co.@pk, co.caption, co.priority
+FROM content co
+ORDER BY co.priority DESC, co.caption]]></programlisting>
+
+                <programlisting language="sql"><![CDATA[SELECT co.@pk, co.caption, co.priority
+FROM content co
+ORDER BY 3 DESC, 2]]></programlisting>
+            </para>
+        </section>
+
+        <section xml:id="css_comments">
+            <title>Comments</title>
+
+            <para>
+                For testing and documentation purposes you can embed comments in your query. For a standard
+                line-based SQL comment use
+                "<code>--</code>",
+                for an inline or multiline comment use C-style comments in the form of
+                "<code>/*...*/</code>"
+
+                <programlisting language="sql"><![CDATA[SELECT /* inline comment */ co.id
+FROM content co    -- specify tables
+WHERE co.id > 0    -- conditions]]></programlisting>
             </para>
         </section>
 

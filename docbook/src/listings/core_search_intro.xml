@@ -7,4 +7,5 @@
 <co xml:id="csq_intro_from"/> FROM content co
 <co xml:id="csq_intro_filter"/> FILTER co.version=[live|highest]
 <co xml:id="csq_intro_where"/> WHERE co.caption LIKE 'test%'
+<co xml:id="csq_intro_order"/> ORDER BY co.caption
 </programlisting>

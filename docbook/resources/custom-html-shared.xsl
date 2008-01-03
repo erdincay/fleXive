@@ -10,6 +10,7 @@
         xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 
     <xsl:param name="ignore.image.scaling" select="1"/>
+    <xsl:param name="toc.section.depth" select="3"/>
     <!-- Don't (down-)scale bitmaps -->
 
     <!-- Add custom head tags -->
