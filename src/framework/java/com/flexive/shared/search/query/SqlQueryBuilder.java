@@ -436,7 +436,7 @@ public class SqlQueryBuilder implements Serializable {
      */
     public SqlQueryBuilder orderBy(int columnIndex, SortDirection direction) {
         orderBy.clear();
-        orderBy.add(getColumnNames().get(columnIndex - 1) + direction.getSqlSuffix());
+        orderBy(getColumnNames().get(columnIndex - 1), direction);
         return this;
     }
 

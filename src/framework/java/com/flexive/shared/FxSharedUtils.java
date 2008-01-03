@@ -52,6 +52,7 @@ import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.text.Collator;
 
 /**
  * Flexive shared utility functions.
@@ -160,6 +161,15 @@ public final class FxSharedUtils {
         } catch (NoSuchAlgorithmException e) {
             throw new FxCreateException("Failed to load the SHA1 algorithm.").asRuntimeException();
         }
+    }
+
+    /**
+     * Returns a collator for the calling user's locale.
+     *
+     * @return  a collator for the calling user's locale.
+     */
+    public static Collator getCollator() {
+        return Collator.getInstance(FxContext.get().getTicket().getLanguage().getLocale());
     }
 
     /**

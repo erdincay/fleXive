@@ -767,7 +767,7 @@ public class FxJsfUtils {
         private final Collator collator;
 
         public SelectItemSorter() {
-            this.collator = Collator.getInstance(FxContext.get().getTicket().getLanguage().getLocale());
+            this.collator = FxSharedUtils.getCollator();
         }
 
         public int compare(SelectItem o1, SelectItem o2) {
@@ -783,7 +783,7 @@ public class FxJsfUtils {
         private final Collator collator;
 
         public ScriptInfoSorter() {
-            this.collator = Collator.getInstance(FxContext.get().getTicket().getLanguage().getLocale());
+            this.collator = FxSharedUtils.getCollator();
         }
 
         public int compare(FxScriptInfo o1, FxScriptInfo o2) {

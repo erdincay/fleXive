@@ -49,6 +49,7 @@ import com.flexive.shared.value.*;
 import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -56,7 +57,7 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.util.GregorianCalendar;
+import java.util.*;
 
 /**
  * Tests for FxValues (single/multi language, store/load)
@@ -380,5 +381,17 @@ public class ValueTest {
         }
         if (sbErr.length() > 0)
             assert false : sbErr.toString();
+    }
+
+    /**
+     * Basic tests of FxValue's {@link Comparable} implementation
+     */
+    @Test
+    public void compareToTest() {
+        final List<FxString> strings = new ArrayList<FxString>(Arrays.asList(new FxString("b"),
+                new FxString("a"), new FxString("c"), new FxString("a0")));
+        Collections.sort(strings);
+        final String sortedStrings = StringUtils.join(strings.iterator(), ',');
+        assert sortedStrings.equals("a,a0,b,c") : "Expected lexical order 'a,a0,b,c', got: " + sortedStrings;
     }
 }

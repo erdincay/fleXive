@@ -33,10 +33,7 @@
  ***************************************************************/
 package com.flexive.shared.value;
 
-import com.flexive.shared.FxContext;
-import com.flexive.shared.FxFormatUtils;
-import com.flexive.shared.FxLanguage;
-import com.flexive.shared.FxXMLUtils;
+import com.flexive.shared.*;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxInvalidStateException;
 import com.flexive.shared.exceptions.FxNoAccessException;
@@ -59,7 +56,7 @@ import java.util.Map.Entry;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implements Serializable {
+public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implements Serializable, Comparable<FxValue> {
     private static final long serialVersionUID = -5005063788615664383L;
 
     public static final boolean DEFAULT_MULTILANGUAGE = true;
@@ -998,6 +995,27 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * A generic comparable implementation based on the value's string representation.
+     *
+     * @param o the other object
+     * @return see {@link Comparable#compareTo}.
+     */
+    @SuppressWarnings({"unchecked"})
+    public int compareTo(FxValue o) {
+        if (isEmpty() && !o.isEmpty()) {
+            return -1;
+        }
+        if (isEmpty() && o.isEmpty()) {
+            return 0;
+        }
+        if (!isEmpty() && o.isEmpty()) {
+            return 1;
+        }
+        return FxSharedUtils.getCollator().compare(getStringValue(getBestTranslation()),
+                o.getStringValue(o.getBestTranslation()));
     }
 }
 

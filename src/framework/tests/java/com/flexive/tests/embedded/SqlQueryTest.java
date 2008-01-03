@@ -39,6 +39,7 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.search.FxResultRow;
 import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.search.FxSQLSearchParams;
+import com.flexive.shared.search.SortDirection;
 import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.search.query.QueryOperatorNode;
 import com.flexive.shared.search.query.SqlQueryBuilder;
@@ -84,12 +85,12 @@ public class SqlQueryTest {
         TEST_PROPS.put("double", FxDataType.Double);
         TEST_PROPS.put("date", FxDataType.Date);
         TEST_PROPS.put("dateTime", FxDataType.DateTime);
-        TEST_PROPS.put("dateRange", FxDataType.DateRange);
         TEST_PROPS.put("boolean", FxDataType.Boolean);
         TEST_PROPS.put("binary", FxDataType.Binary);
         TEST_PROPS.put("reference", FxDataType.Reference);
         TEST_PROPS.put("selectOne", FxDataType.SelectOne);
         TEST_PROPS.put("selectMany", FxDataType.SelectMany);
+        TEST_PROPS.put("dateRange", FxDataType.DateRange);
     }
     private int testInstanceCount;  // number of instances for the SearchTest type
 
@@ -211,6 +212,22 @@ public class SqlQueryTest {
             assert dataType.getValueClass().isAssignableFrom(row.getFxValue(1).getClass())
                     : "Invalid class returned for datatype " + dataType + ": " + row.getFxValue(1).getClass() + " instead of " + dataType.getValueClass();
         }
+    }
+
+    @Test(dataProvider = "testProperties")
+    public void orderByTest(String name, FxDataType dataType) throws FxApplicationException {
+        final FxResultSet result = new SqlQueryBuilder().select("@pk", getTestPropertyName(name)).type(TEST_TYPE)
+                .orderBy(2, SortDirection.ASCENDING).getResult();
+        assert result.getRowCount() > 0;
+        FxValue oldValue = null;
+        for (FxResultRow row : result.getResultRows()) {
+            // check ascending order
+            assert oldValue == null || row.getFxValue(2).compareTo(oldValue) >= 0
+                    : row.getFxValue(2) + " is not greater than " + oldValue;
+            oldValue = row.getFxValue(2);
+        }
+
+        // TODO: check order by set through result preferences 
     }
 
     /**
