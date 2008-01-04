@@ -215,9 +215,11 @@ public class FxStatement {
      * Adds a new order by condition.
      *
      * @param vi the order by value (column)
+     * @throws com.flexive.sqlParser.SqlParserException   if the column cannot be used for ordering because it is not selected
      */
-    public void addOrderByValue(final OrderByValue vi) {
-        order.add(0,vi);
+    public void addOrderByValue(final OrderByValue vi) throws SqlParserException {
+        computeOrderByColumn(vi);
+        order.add(0, vi);
     }
 
     /**
@@ -402,30 +404,7 @@ public class FxStatement {
 
         // Check order by
         for (OrderByValue ov:getOrderByValues()) {
-            if (StringUtils.isNumeric(ov.getValue())) {
-                // column selected by index (1-based)
-                final int index = Integer.valueOf(ov.getValue()) - 1;
-                if (index >= 0 && selected.size() > index) {
-                    ov.setSelectedValue(selected.get(index), index);
-                } else {
-                    throw new SqlParserException("ex.sqlSearch.invalidOrderByIndex", ov.getValue(), selected.size());
-                }
-            } else {
-                // column selected by alias
-                boolean found = false;
-                int pos = 0;
-                for (SelectedValue sv : selected) {
-                    if (sv.getAlias().equalsIgnoreCase(ov.getValue())) {
-                        found = true;
-                        ov.setSelectedValue(sv,pos);
-                        break;
-                    }
-                    pos++;
-                }
-                if (!found) {
-                    throw new SqlParserException("ex.sqlSearch.invalidOrderByValue",ov.getValue());
-                }
-            }
+            computeOrderByColumn(ov);
         }
 
         // If no where clause is set at all
@@ -447,6 +426,33 @@ public class FxStatement {
             // Only one condition at top level: type has to be null and not 'or'/'and'
             else if (this.rootBrace.size()==1) {
                 this.rootBrace.setType(null);
+            }
+        }
+    }
+
+    private void computeOrderByColumn(OrderByValue ov) throws SqlParserException {
+        if (StringUtils.isNumeric(ov.getValue())) {
+            // column selected by index (1-based)
+            final int index = Integer.valueOf(ov.getValue()) - 1;
+            if (index >= 0 && selected.size() > index) {
+                ov.setSelectedValue(selected.get(index), index);
+            } else {
+                throw new SqlParserException("ex.sqlSearch.invalidOrderByIndex", ov.getValue(), selected.size());
+            }
+        } else {
+            // column selected by alias
+            boolean found = false;
+            int pos = 0;
+            for (SelectedValue sv : selected) {
+                if (sv.getAlias().equalsIgnoreCase(ov.getValue())) {
+                    found = true;
+                    ov.setSelectedValue(sv,pos);
+                    break;
+                }
+                pos++;
+            }
+            if (!found) {
+                throw new SqlParserException("ex.sqlSearch.invalidOrderByValue",ov.getValue());
             }
         }
     }

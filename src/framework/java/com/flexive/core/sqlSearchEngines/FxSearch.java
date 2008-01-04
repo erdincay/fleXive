@@ -247,8 +247,15 @@ public class FxSearch {
                 // add user-defined order by
                 final ResultPreferences resultPreferences = getResultPreferences(df);
                 for (ResultOrderByInfo column : resultPreferences.getOrderByColumns()) {
-                    fx_stmt.addOrderByValue(new OrderByValue(column.getColumnName(),
-                            column.getDirection().equals(SortDirection.ASCENDING)));
+                    try {
+                        fx_stmt.addOrderByValue(new OrderByValue(column.getColumnName(),
+                                column.getDirection().equals(SortDirection.ASCENDING)));
+                    } catch (SqlParserException e) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Ignoring user preferences column " + column
+                                + " since it was not selected.");
+                        }
+                    }
                 }
 
             }

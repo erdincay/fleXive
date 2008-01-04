@@ -36,10 +36,7 @@ package com.flexive.tests.embedded;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.search.FxResultRow;
-import com.flexive.shared.search.FxResultSet;
-import com.flexive.shared.search.FxSQLSearchParams;
-import com.flexive.shared.search.SortDirection;
+import com.flexive.shared.search.*;
 import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.search.query.QueryOperatorNode;
 import com.flexive.shared.search.query.SqlQueryBuilder;
@@ -57,10 +54,7 @@ import org.testng.annotations.Test;
 import org.testng.annotations.DataProvider;
 import org.apache.commons.lang.StringUtils;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Random;
-import java.util.Arrays;
+import java.util.*;
 
 /**
  * FxSQL search query engine tests.
@@ -75,6 +69,7 @@ public class SqlQueryTest {
     private static final String TEST_SUFFIX = "SearchProp";
     private static final String TEST_TYPE = "SearchTest";
     private static final Map<String, FxDataType> TEST_PROPS = new HashMap<String, FxDataType>();
+
     static {
         TEST_PROPS.put("string", FxDataType.String1024);
         TEST_PROPS.put("text", FxDataType.Text);
@@ -92,6 +87,7 @@ public class SqlQueryTest {
         TEST_PROPS.put("selectMany", FxDataType.SelectMany);
         TEST_PROPS.put("dateRange", FxDataType.DateRange);
     }
+
     private int testInstanceCount;  // number of instances for the SearchTest type
 
     @BeforeClass
@@ -198,10 +194,11 @@ public class SqlQueryTest {
 
     /**
      * Generic tests on the SearchTest type.
-     * 
-     * @param name  the base property name
-     * @param dataType  the datatype of the property
-     * @throws com.flexive.shared.exceptions.FxApplicationException on search engine errors
+     *
+     * @param name     the base property name
+     * @param dataType the datatype of the property
+     * @throws com.flexive.shared.exceptions.FxApplicationException
+     *          on search engine errors
      */
     @Test(dataProvider = "testProperties")
     public void genericSelectTest(String name, FxDataType dataType) throws FxApplicationException {
@@ -219,31 +216,43 @@ public class SqlQueryTest {
         final FxResultSet result = new SqlQueryBuilder().select("@pk", getTestPropertyName(name)).type(TEST_TYPE)
                 .orderBy(2, SortDirection.ASCENDING).getResult();
         assert result.getRowCount() > 0;
-        FxValue oldValue = null;
-        for (FxResultRow row : result.getResultRows()) {
-            // check ascending order
-            assert oldValue == null || row.getFxValue(2).compareTo(oldValue) >= 0
-                    : row.getFxValue(2) + " is not greater than " + oldValue;
-            oldValue = row.getFxValue(2);
-        }
-
-        // TODO: check order by set through result preferences 
+        assertAscendingOrder(result, 2);
     }
+
+    @Test
+    public void orderByResultPreferencesTest() throws FxApplicationException {
+        setResultPreferences(SortDirection.ASCENDING);
+        final FxResultSet result = new SqlQueryBuilder().select("@pk", getTestPropertyName("string")).filterType(TEST_TYPE).getResult();
+        assertAscendingOrder(result, 2);
+
+        setResultPreferences(SortDirection.DESCENDING);
+        final FxResultSet descendingResult = new SqlQueryBuilder().select("@pk", getTestPropertyName("string")).filterType(TEST_TYPE).getResult();
+        assertDescendingOrder(descendingResult, 2);
+    }
+
+    private void setResultPreferences(SortDirection sortDirection) throws FxApplicationException {
+        final ResultPreferencesEdit prefs = new ResultPreferencesEdit(new ArrayList<ResultColumnInfo>(0), Arrays.asList(
+                new ResultOrderByInfo(Table.CONTENT, getTestPropertyName("string"), "", sortDirection)),
+                25, 100);
+        EJBLookup.getResultPreferencesEngine().save(prefs, CacheAdmin.getEnvironment().getType(TEST_TYPE).getId(), ResultViewType.LIST, AdminResultLocations.DEFAULT);
+    }
+
 
     /**
      * Tests all available value comparators for the given datatype. Note that no semantic
      * tests are performed, each comparator is executed with a random value.
      *
-     * @param name  the base property name
-     * @param dataType  the datatype of the property
-     * @throws com.flexive.shared.exceptions.FxApplicationException on search engine errors
+     * @param name     the base property name
+     * @param dataType the datatype of the property
+     * @throws com.flexive.shared.exceptions.FxApplicationException
+     *          on search engine errors
      */
     @Test(dataProvider = "testProperties")
     public void genericConditionTest(String name, FxDataType dataType) throws FxApplicationException {
         final FxPropertyAssignment assignment = getTestPropertyAssignment(name);
         final Random random = new Random(0);
         for (PropertyValueComparator comparator : PropertyValueComparator.getAvailable(dataType)) {
-            for (String prefix: new String[] {
+            for (String prefix : new String[]{
                     TEST_TYPE + "/",
                     TEST_TYPE + "/groupTop/",
                     TEST_TYPE + "/groupTop/groupNested/"
@@ -267,8 +276,8 @@ public class SqlQueryTest {
     public Object[][] getTestProperties() {
         final Object[][] result = new Object[TEST_PROPS.size()][];
         int ctr = 0;
-        for (Map.Entry<String, FxDataType> entry: TEST_PROPS.entrySet()) {
-            result[ctr++] = new Object[] { entry.getKey(), entry.getValue() };
+        for (Map.Entry<String, FxDataType> entry : TEST_PROPS.entrySet()) {
+            result[ctr++] = new Object[]{entry.getKey(), entry.getValue()};
         }
         return result;
     }
@@ -280,4 +289,26 @@ public class SqlQueryTest {
     private FxPropertyAssignment getTestPropertyAssignment(String baseName) {
         return (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + "/" + getTestPropertyName(baseName));
     }
+
+    private void assertAscendingOrder(FxResultSet result, int column) {
+        assertOrder(result, column, true);
+    }
+
+    private void assertDescendingOrder(FxResultSet result, int column) {
+        assertOrder(result, column, false);
+    }
+
+    private void assertOrder(FxResultSet result, int column, boolean ascending) {
+        FxValue oldValue = null;
+        for (FxResultRow row : result.getResultRows()) {
+            // check order
+            assert oldValue == null || (ascending
+                            ? row.getFxValue(column).compareTo(oldValue) >= 0
+                            : row.getFxValue(column).compareTo(oldValue) <= 0)
+                    : row.getFxValue(column) + " is not "
+                    + (ascending ? "greater" : "less") + " than " + oldValue;
+            oldValue = row.getFxValue(column);
+        }
+    }
+
 }
