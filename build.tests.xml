@@ -18,7 +18,7 @@
     <property name="emma.dir" value="${flexive.lib.dir}/emma"/>
     <property name="coverage.dir" value="${base.reports.dir}/coverage"/>
     <property name="testng.report.dir" value="${base.reports.dir}/testNG"/>
-    <property name="testng.suite.dir" value="Command line suite"/>
+    <property name="testng.suite.dir" value="Ant suite"/>
     <property name="tests.users" value=""/>	<!-- set to "all" to enable all test users by default -->
 
     <property name="debug.settings" value="-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=6006"/>
