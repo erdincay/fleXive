@@ -35,6 +35,7 @@ package com.flexive.tests.embedded;
 
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.search.*;
 import com.flexive.shared.search.query.PropertyValueComparator;
@@ -86,6 +87,7 @@ public class SqlQueryTest {
         TEST_PROPS.put("selectOne", FxDataType.SelectOne);
         TEST_PROPS.put("selectMany", FxDataType.SelectMany);
         TEST_PROPS.put("dateRange", FxDataType.DateRange);
+        TEST_PROPS.put("dateTimeRange", FxDataType.DateTimeRange);
     }
 
     private int testInstanceCount;  // number of instances for the SearchTest type
@@ -251,6 +253,10 @@ public class SqlQueryTest {
     public void genericConditionTest(String name, FxDataType dataType) throws FxApplicationException {
         final FxPropertyAssignment assignment = getTestPropertyAssignment(name);
         final Random random = new Random(0);
+
+        // need to get some folder IDs for the reference property
+        final List<FxPK> folderPks = new SqlQueryBuilder().select("@pk").type("folder").getResult().collectColumn(1);
+
         for (PropertyValueComparator comparator : PropertyValueComparator.getAvailable(dataType)) {
             for (String prefix : new String[]{
                     TEST_TYPE + "/",
@@ -260,7 +266,21 @@ public class SqlQueryTest {
                 final String assignmentName = prefix + getTestPropertyName(name);
                 try {
                     // submit a query with the given property/comparator combination
-                    final FxValue value = dataType.getRandomValue(random, assignment);
+                    final FxValue value;
+                    switch (dataType) {
+                        case Reference:
+                            value = new FxReference(new ReferencedContent(folderPks.get(random.nextInt(folderPks.size()))));
+                            break;
+                        case DateRange:
+                            // a query is always performed against a particular date, but not a date range
+                            value = new FxDate(new Date());
+                            break;
+                        case DateTimeRange:
+                            value = new FxDateTime(new Date());
+                            break;
+                        default:
+                            value = dataType.getRandomValue(random, assignment);
+                    }
                     new SqlQueryBuilder().condition(assignmentName, comparator, value).getResult();
                     // no exception thrown, consider it a success
                 } catch (Exception e) {
@@ -303,8 +323,8 @@ public class SqlQueryTest {
         for (FxResultRow row : result.getResultRows()) {
             // check order
             assert oldValue == null || (ascending
-                            ? row.getFxValue(column).compareTo(oldValue) >= 0
-                            : row.getFxValue(column).compareTo(oldValue) <= 0)
+                    ? row.getFxValue(column).compareTo(oldValue) >= 0
+                    : row.getFxValue(column).compareTo(oldValue) <= 0)
                     : row.getFxValue(column) + " is not "
                     + (ascending ? "greater" : "less") + " than " + oldValue;
             oldValue = row.getFxValue(column);

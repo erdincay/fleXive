@@ -232,9 +232,11 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
             case DateTime:
                 return new FxDateTime(assignment.isMultiLang(), getRandomDate(rnd));
             case DateRange:
-                return new FxDateRange(assignment.isMultiLang(), new DateRange(getRandomDate(rnd), getRandomDate(rnd)));
+                final List<Date> dates = Arrays.asList(getRandomDate(rnd), getRandomDate(rnd));
+                return new FxDateRange(assignment.isMultiLang(), new DateRange(Collections.min(dates), Collections.max(dates)));
             case DateTimeRange:
-                return new FxDateTimeRange(assignment.isMultiLang(), new DateRange(getRandomDate(rnd), getRandomDate(rnd)));
+                final List<Date> dates2 = Arrays.asList(getRandomDate(rnd), getRandomDate(rnd));
+                return new FxDateTimeRange(assignment.isMultiLang(), new DateRange(Collections.min(dates2), Collections.max(dates2)));
             case Boolean:
                 return new FxBoolean(assignment.isMultiLang(), rnd.nextBoolean());
             case Binary:

@@ -186,4 +186,14 @@ public class FxNumber extends FxValue<Integer, FxNumber> implements Serializable
     public Class<Integer> getValueClass() {
         return Integer.class;
     }
+
+    @Override
+    public int compareTo(FxValue o) {
+        if (!(o instanceof FxNumber) || isEmpty() || o.isEmpty()) {
+            return super.compareTo(o);
+        }
+        final Integer value = getBestTranslation();
+        final Integer otherValue = ((FxNumber) o).getBestTranslation();
+        return value > otherValue ? 1 : value < otherValue ? -1 : 0;
+    }
 }

@@ -263,4 +263,11 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     public long getCreatedBriefcaseId() {
         return -1;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public <T> List<T> collectColumn(int columnIndex) {
+        return new ArrayList<T>(0);
+    }
 }

@@ -33,6 +33,8 @@
  ***************************************************************/
 package com.flexive.shared.value;
 
+import com.flexive.shared.exceptions.FxInvalidStateException;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
@@ -186,4 +188,12 @@ public class FxDateTimeRange extends FxValue<DateRange, FxDateTimeRange> impleme
     public Class<DateRange> getValueClass() {
         return DateRange.class;
 	}
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getSqlValue() {
+        throw new FxInvalidStateException("ex.content.value.sql.notSupported", getClass().getSimpleName()).asRuntimeException();
+    }
 }

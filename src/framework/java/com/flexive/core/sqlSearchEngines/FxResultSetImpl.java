@@ -35,6 +35,7 @@ package com.flexive.core.sqlSearchEngines;
 
 import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.search.*;
 import com.flexive.sqlParser.FxStatement;
@@ -290,6 +291,19 @@ public class FxResultSetImpl implements Serializable, FxResultSet {
         }
     }
 
+    /** {@inheritDoc} */
+    @SuppressWarnings({"unchecked"})
+    public <T> List<T> collectColumn(int columnIndex) {
+        final List<T> result = new ArrayList<T>(rows.size());
+        if (rows.size() == 0) {
+            return result;
+        }
+        checkColumnIndex(columnIndex);
+        for (Object[] row : rows) {
+            result.add((T) row[columnIndex - 1]);
+        }
+        return result;
+    }
 
     /**
      * {@inheritDoc} *
@@ -393,4 +407,19 @@ public class FxResultSetImpl implements Serializable, FxResultSet {
     protected void setTotalRowCount(int totalRowCount) {
         this.totalRowCount = totalRowCount;
     }
+
+    /**
+     * Checks the 1-based column index and throws a runtime exception when it is not valid in this result set.
+     *
+     * @param columnIndex   the 1-based column index
+     */
+    private void checkColumnIndex(int columnIndex) {
+        if (rows.size() == 0) {
+            return;
+        }
+        if (rows.get(0).length < columnIndex || columnIndex < 1) {
+            throw new FxInvalidParameterException("columnIndex", "ex.sqlSearch.column.index", columnIndex, rows.get(0).length).asRuntimeException();
+        }
+    }
+
 }

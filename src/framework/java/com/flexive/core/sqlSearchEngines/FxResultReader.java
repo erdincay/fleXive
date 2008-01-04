@@ -102,6 +102,16 @@ class FxResultReader {
                         Date _date = new Date(tstp.getTime());
                         result = new FxDate(entry.isMultilanguage(), FxLanguage.SYSTEM_ID, _date);
                         break;
+                    case DateRange:
+                        final Date from = new Date(rs.getTimestamp(pos).getTime());     // FDATE1
+                        final Date to = new Date(rs.getTimestamp(pos + 4).getTime());   // FDATE2
+                        result = new FxDateRange(new DateRange(from, to));
+                        break;
+                    case DateTimeRange:
+                        final Date from2 = new Date(rs.getTimestamp(pos).getTime());     // FDATE1
+                        final Date to2 = new Date(rs.getTimestamp(pos + 7).getTime());   // FDATE2
+                        result = new FxDateTimeRange(new DateRange(from2, to2));
+                        break;
                     case HTML:
                         result = new FxHTML(entry.isMultilanguage(), FxLanguage.SYSTEM_ID, rs.getString(pos));
                         break;

@@ -185,4 +185,15 @@ public class FxLargeNumber extends FxValue<Long, FxLargeNumber> implements Seria
     public Class<Long> getValueClass() {
         return Long.class;
     }
+
+    @Override
+    public int compareTo(FxValue o) {
+        if (!(o instanceof FxLargeNumber) || isEmpty() || o.isEmpty()) {
+            return super.compareTo(o);
+        }
+        final Long value = getBestTranslation();
+        final Long otherValue = ((FxLargeNumber) o).getBestTranslation();
+        return value > otherValue ? 1 : value < otherValue ? -1 : 0;
+    }
+
 }

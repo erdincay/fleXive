@@ -188,12 +188,7 @@ public class FxDateRange extends FxValue<DateRange, FxDateRange> implements Seri
      */
     @Override
     public String getSqlValue() {
-        if (isEmpty()) {
-            throw new FxInvalidStateException("ex.content.value.sql.empty").asRuntimeException();
-        }
-        // TODO: use proper syntax when the SQL parser supports ranges
-        return FxFormatUtils.escapeForSql(getDefaultTranslation().getLower())
-                + ".." + FxFormatUtils.escapeForSql(getDefaultTranslation().getUpper());
+        throw new FxInvalidStateException("ex.content.value.sql.notSupported", getClass().getSimpleName()).asRuntimeException();
     }
 
     /**

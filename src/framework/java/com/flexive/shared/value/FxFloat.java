@@ -33,6 +33,8 @@
  ***************************************************************/
 package com.flexive.shared.value;
 
+import org.apache.commons.lang.math.NumberUtils;
+
 import java.io.Serializable;
 import java.util.Map;
 
@@ -175,4 +177,12 @@ public class FxFloat extends FxValue<Float, FxFloat> implements Serializable {
     public Class<Float> getValueClass() {
         return Float.class;
 	}
+
+    @Override
+    public int compareTo(FxValue o) {
+        if (!(o instanceof FxFloat) || isEmpty() || o.isEmpty()) {
+            return super.compareTo(o);
+        }
+        return NumberUtils.compare(getBestTranslation(), ((FxFloat) o).getBestTranslation());
+    }
 }

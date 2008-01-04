@@ -57,8 +57,12 @@ public class DateRange implements Serializable {
 
 
     public DateRange(Date lower, Date upper) {
-        assert lower != null && upper != null;
-        assert upper.getTime() >= lower.getTime();
+        if (lower == null || upper == null) {
+            throw new FxInvalidParameterException("lower, upper", "ex.daterange.empty").asRuntimeException();
+        }
+        if (upper.getTime() < lower.getTime()) {
+            throw new FxInvalidParameterException("lower", "ex.daterange.order", lower, upper).asRuntimeException();
+        }
         this.lower = (Date) lower.clone();
         this.upper = (Date) upper.clone();
     }

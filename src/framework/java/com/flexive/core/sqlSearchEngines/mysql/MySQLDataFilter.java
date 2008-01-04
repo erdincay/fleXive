@@ -46,6 +46,7 @@ import com.flexive.ejb.beans.TreeEngineBean;
 import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLoadException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
@@ -537,6 +538,7 @@ public class MySQLDataFilter extends DataFilter {
         switch (entry.getProperty().getDataType()) {
             case String1024:
             case Text:
+            case HTML:
                 value = constant.getValue();
                 if (value == null) {
                     value = "NULL";
@@ -585,10 +587,12 @@ public class MySQLDataFilter extends DataFilter {
                 value = FxValueConverter.toBoolean(constant.getValue()) ? "1" : "0";
                 break;
             case Date:
-                value = "" + FxValueConverter.toDate(constant.getValue()).getTime();
+            case DateRange:
+                value = constant.getValue() == null ? "NULL" : "" + FxValueConverter.toDate(constant.getValue()).getTime();
                 break;
             case DateTime:
-                value = "" + FxValueConverter.toDateTime(constant.getValue()).getTime();
+            case DateTimeRange:
+                value = constant.getValue() == null ? "NULL" : "" + FxValueConverter.toDateTime(constant.getValue()).getTime();
                 break;
             case Binary:
                 if (cond.getComperator().equals(Comparator.IS_NOT) && constant.isNull()) {
@@ -597,9 +601,9 @@ public class MySQLDataFilter extends DataFilter {
                 }
                 throw new FxSqlSearchException("ex.sqlSearch.reader.type.invalidOperator",
                         entry.getProperty().getDataType(), cond.getComperator());
-            case DateRange:
-            case DateTimeRange:
             case Reference:
+                value = String.valueOf(FxPK.fromString(constant.getValue()).getId());
+                break;
             default:
                 throw new FxSqlSearchException("ex.sqlSearch.reader.unknownPropertyColumnType",
                         entry.getProperty().getDataType(), prop.getPropertyName());

@@ -83,6 +83,12 @@ public enum PropertyValueComparator implements ValueComparator {
     private static final List<PropertyValueComparator> ORDINAL_OPERATORS = Collections.unmodifiableList(Arrays.asList(
             EQ, NE
     ));
+    private static final List<PropertyValueComparator> DATE_OPERATORS = Collections.unmodifiableList(Arrays.asList(
+            EQ, NE, LT, LE, GT, GE, EMPTY, NOT_EMPTY
+    ));
+    private static final List<PropertyValueComparator> DATERANGE_OPERATORS = Collections.unmodifiableList(Arrays.asList(
+            LT, LE, GT, GE, EMPTY, NOT_EMPTY
+    ));
     private static final List<PropertyValueComparator> EMPTY_OPERATORS = Collections.unmodifiableList(Arrays.asList(
             EMPTY, NOT_EMPTY
     ));
@@ -182,6 +188,12 @@ public enum PropertyValueComparator implements ValueComparator {
                 return STRING_OPERATORS;
             case Binary:
                 return EMPTY_OPERATORS;
+            case Date:
+            case DateTime:
+                return DATE_OPERATORS;
+            case DateRange:
+            case DateTimeRange:
+                return DATERANGE_OPERATORS;
             default:
                 return ORDINAL_OPERATORS;
         }

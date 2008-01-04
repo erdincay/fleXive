@@ -240,4 +240,12 @@ public interface FxResultSet {
      * @return  the ID of the created briefcase, or -1 if no briefcase was created
      */
     public long getCreatedBriefcaseId();
+
+    /**
+     * Projects a single column to a list.
+     *
+     * @param columnIndex   the 1-basedcolumn index
+     * @return  all column values collected in a list
+     */
+    <T> List<T> collectColumn(int columnIndex);
 }
