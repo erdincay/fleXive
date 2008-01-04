@@ -45,7 +45,7 @@ import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.war.FxRequest;
 import com.flexive.war.filter.FxResponseWrapper;
 import com.sun.facelets.tag.jsf.ComponentSupport;
-import org.ajax4jsf.framework.renderer.AjaxContainerRenderer;
+import org.ajax4jsf.renderkit.AjaxContainerRenderer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

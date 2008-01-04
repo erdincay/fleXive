@@ -52,7 +52,7 @@
         <fileset dir="${flexive.lib.dir}/jsf" includes="*.jar"/>
 		<fileset dir="${flexive.lib.dir}" includes="*.jar" excludes="qdox.jar"/>
 		<fileset dir="${flexive.lib.dir}/text_extraction" includes="*.jar"/>
-        <fileset dir="${flexive.lib.dir}/ajax4jsf" includes="*.jar"/>
+        <fileset dir="${flexive.lib.dir}/richfaces" includes="*.jar"/>
         <fileset dir="${flexive.lib.dir}/xstream" includes="*.jar"/>
         <fileset dir="${flexive.lib.dir}/groovy" includes="*.jar"/>
         <fileset dir="${flexive.lib.dir}/mail" includes="*.jar"/>

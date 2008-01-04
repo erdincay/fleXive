@@ -32,7 +32,7 @@
     <property name="flexive.ant.jar" value="${flexive.build.framework.jar.dir}/flexive-ant.jar"/>
 
     <fileset id="flexive.lib.ui.jsf" dir="${flexive.lib.dir}/jsf" includes="*.jar"/>
-	<fileset id="flexive.lib.ui.ajax4jsf" dir="${flexive.lib.dir}/ajax4jsf" includes="*.jar"/>
+	<fileset id="flexive.lib.ui.ajax4jsf" dir="${flexive.lib.dir}/richfaces" includes="*.jar"/>
 
     <fileset id="flexive.dist.jar.all" dir="${flexive.dist.dir}/lib" includes="flexive-*.jar"/>
     <fileset id="flexive.dist.jar.libs" dir="${flexive.lib.dir}"

@@ -61,7 +61,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <ui:repeat value="#{languagesBean.available}" var="item">
+                                            <c:forEach items="#{languagesBean.available}" var="item">
                                                 <tr>
                                                     <td>
                                                         #{jstl:toUpperCase(item.iso2digit)}
@@ -113,7 +113,7 @@
                                                         </a4j:commandLink>
                                                     </td>
                                                 </tr>
-                                            </ui:repeat>
+                                            </c:forEach>
                                         </tbody>
                                     </table>
                                 </td>
@@ -135,7 +135,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <ui:repeat value="#{languagesBean.disabled}" var="item">
+                                            <c:forEach items="#{languagesBean.disabled}" var="item">
                                                 <tr>
                                                     <td>
                                                         #{jstl:toUpperCase(item.iso2digit)}
@@ -157,7 +157,7 @@
                                                         </a4j:commandLink>
                                                     </td>
                                                 </tr>
-                                            </ui:repeat>
+                                            </c:forEach>
                                         </tbody>
                                     </table>
                                 </td>
