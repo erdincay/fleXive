@@ -429,7 +429,7 @@
             <zipfileset prefix="lib" dir="${flexive.drop.dir}" includes="*.jar" excludes="*-ejb.jar"/>
 
             <!-- Shared libraries -->
-            <zipfileset prefix="lib" dir="${flexive.lib.dir}" includes="${sqlparser.jar},${extractor.jar},fxStream.jar,fxTree.jar,commons-io-1.1.jar,sanselan.jar"/>
+            <zipfileset prefix="lib" dir="${flexive.lib.dir}" includes="${sqlparser.jar},${extractor.jar},fxStream.jar,fxTree.jar,commons-io-1.1.jar,sanselan.jar,commons-*.jar"/>
             <zipfileset prefix="lib" dir="${flexive.lib.dir}/groovy" includes="*.jar"/>
             <zipfileset prefix="lib" dir="${build.ui.jar.dir}" includes="*.jar"/>
             <zipfileset prefix="lib" dir="${flexive.lib.dir}/xstream" includes="*.jar"/>
@@ -515,7 +515,7 @@
             <path refid="flexive.shared-libs.path"/>
             <mapper type="flatten"/>
         </copy>
-        <delete dir="${flexive.dist.extlib.dir}" includes="el-ri.jar, jsf-impl.jar, weblets-impl*.jar"/>
+        <delete dir="${flexive.dist.extlib.dir}" includes="el-ri.jar, jsf-impl.jar"/>
 
         <!-- Copy global deployment descriptots -->
         <copy todir="${flexive.dist.meta.dir}">
