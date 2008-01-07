@@ -48,7 +48,7 @@ import java.io.Serializable;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class FxPK implements Serializable {
+public class FxPK implements Serializable, Comparable<FxPK> {
     private static final Log LOG = LogFactory.getLog(FxPK.class);
     private static final long serialVersionUID = 8452775369399900087L;
 
@@ -259,5 +259,9 @@ public class FxPK implements Serializable {
             return fromString((String) value);
         }
         throw new FxInvalidParameterException("VALUE", LOG, "ex.content.pk.fromObject.invalid", value, value.getClass()).asRuntimeException();
+    }
+
+    public int compareTo(FxPK o) {
+        return id > o.id ? 1 : id < o.id ? -1 : 0;
     }
 }

@@ -39,8 +39,10 @@ import com.flexive.shared.content.FxContentVersionInfo;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.FxLanguage;
+import com.flexive.shared.structure.FxType;
 
 import javax.ejb.Remote;
+import java.util.List;
 
 /**
  * ContentEngine
@@ -194,6 +196,23 @@ public interface ContentEngine {
      * @throws FxApplicationException on errors
      */
     int getReferencedContentCount(FxPK pk) throws FxApplicationException;
+
+    /**
+     * <p>
+     * Returns all primary keys for the given type. Since this method does not implement security,
+     * it may only be called by the global supervisor. You can use the search engine to achieve
+     * the same, just with security enabled, with
+     * </p>
+     * <code>
+     * final List&lt;FxPK> folderPks = new SqlQueryBuilder().select("@pk").type("FOLDER").getResult().collectColumn(1);
+     * </code>
+     *
+     * @param typeId           the type to request the primary keys for
+     * @param onePkPerInstance return one primary key per instance (with max version) or one per actual version?
+     * @return list containing the primary keys
+     * @throws FxApplicationException   on errors
+     */
+    List<FxPK> getPKsForType(long typeId, boolean onePkPerInstance) throws FxApplicationException;
 
     /**
      * Get the binary id for the given XPath.

@@ -1,36 +1,47 @@
 /***************************************************************
- *  This file is part of the [fleXive](R) project.
- *
- *  Copyright (c) 1999-2007
- *  UCS - unique computing solutions gmbh (http://www.ucs.at)
- *  All rights reserved
- *
- *  The [fleXive](R) project is free software; you can redistribute
- *  it and/or modify it under the terms of the GNU General Public
- *  License as published by the Free Software Foundation;
- *  either version 2 of the License, or (at your option) any
- *  later version.
- *
- *  The GNU General Public License can be found at
- *  http://www.gnu.org/copyleft/gpl.html.
- *  A copy is found in the textfile GPL.txt and important notices to the
- *  license from the author are found in LICENSE.txt distributed with
- *  these libraries.
- *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  For further information about UCS - unique computing solutions gmbh,
- *  please see the company website: http://www.ucs.at
- *
- *  For further information about [fleXive](R), please see the
- *  project website: http://www.flexive.org
- *
- *
- *  This copyright notice MUST APPEAR in all copies of the file!
- ***************************************************************/
+*  This file is part of the [fleXive](R) project.
+*
+*  Copyright (c) 1999-2007
+*  UCS - unique computing solutions gmbh (http://www.ucs.at)
+*  All rights reserved
+*
+*  The [fleXive](R) project is free software; you can redistribute
+*  it and/or modify it under the terms of the GNU General Public
+*  License as published by the Free Software Foundation;
+*  either version 2 of the License, or (at your option) any
+*  later version.
+*
+*  The GNU General Public License can be found at
+*  http://www.gnu.org/copyleft/gpl.html.
+*  A copy is found in the textfile GPL.txt and important notices to the
+*  license from the author are found in LICENSE.txt distributed with
+*  these libraries.
+*
+*  This library is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU General Public License for more details.
+*
+*  For further information about UCS - unique computing solutions gmbh,
+*  please see the company website: http://www.ucs.at
+*
+*  For further information about [fleXive](R), please see the
+*  project website: http://www.flexive.org
+*
+*
+*  This copyright notice MUST APPEAR in all copies of the file!
+***************************************************************/
+
+import com.flexive.shared.CacheAdmin
+import com.flexive.shared.EJBLookup
+import com.flexive.shared.FxContext
+import com.flexive.shared.content.FxContent
+import com.flexive.shared.content.FxPK
+import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
+import com.flexive.shared.security.ACL
+import com.flexive.shared.structure.*
+import com.flexive.shared.value.*
+
 
 
 /**
@@ -40,13 +51,6 @@
  * @author Markus Plesser, UCS
  * @version $Rev$
  */
-import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
-import com.flexive.shared.structure.*
-import com.flexive.shared.*
-import com.flexive.shared.content.FxContent
-import com.flexive.shared.security.ACL
-import com.flexive.shared.value.*
-
 if (!FxContext.get().testDivision) {
     println "Not creating test fixture..."
     return
@@ -161,7 +165,11 @@ SelectMany buildSelectManySearchProp(int counter) {
     return sm
 }
 
-void buildGroupData(String prefix, FxContent co, int counter) {
+ReferencedContent buildReference(int counter, List<FxPK> folderPks) {
+    return new ReferencedContent(folderPks.get(counter % folderPks.size()));
+}
+
+void buildGroupData(String prefix, FxContent co, int counter, folderPks) {
     co.setValue("$prefix/stringSearchProp", new FxString(false, "StringValue$counter"))
     co.setValue("$prefix/textSearchProp", new FxString(false, "TextValue$counter"))
     co.setValue("$prefix/htmlSearchProp", new FxHTML(false, "HTMLValue$counter"))
@@ -175,16 +183,17 @@ void buildGroupData(String prefix, FxContent co, int counter) {
     co.setValue("$prefix/dateTimeRangeSearchProp", new FxDateTimeRange(false, buildDateRange(counter)))
     co.setValue("$prefix/booleanSearchProp", new FxBoolean(false, counter % 2 == 0))
 //    co.setValue("$prefix/binarySearchProp", new FxBinary(false, buildBinarySearchProp(counter)))
-//    co.setValue("$prefix/referenceSearchProp", new FxReference(false, buildReferenceSearchProp(counter)))
+    co.setValue("$prefix/referenceSearchProp", new FxReference(false, buildReference(counter, folderPks)))
 //    co.setValue("$prefix/inlineReferenceSearchProp", new FxReference(false, buildReferenceSearchProp(counter)))
     co.setValue("$prefix/selectOneSearchProp", new FxSelectOne(false, buildSelectOneSearchProp(counter)))
     co.setValue("$prefix/selectManySearchProp", new FxSelectMany(false, buildSelectManySearchProp(counter)))
 }
 
+final List<FxPK> folderPks = EJBLookup.contentEngine.getPKsForType(CacheAdmin.environment.getType("FOLDER").id, true);
 instanceCount.times { int counter ->
     FxContent co = EJBLookup.contentEngine.initialize(CacheAdmin.environment.getType("SearchTest").id)
-    buildGroupData("", co, counter)
-    buildGroupData("/GroupTop", co, counter)
-    buildGroupData("/GroupTop/GroupNested", co, counter)
+    buildGroupData("", co, counter, folderPks)
+    buildGroupData("/GroupTop", co, counter, folderPks)
+    buildGroupData("/GroupTop/GroupNested", co, counter, folderPks)
     EJBLookup.contentEngine.save(co)
 }

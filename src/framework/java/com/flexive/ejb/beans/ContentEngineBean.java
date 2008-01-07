@@ -49,6 +49,7 @@ import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxAssignment;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxType;
+import com.flexive.shared.structure.TypeStorageMode;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxBinary;
 import com.flexive.shared.workflow.Step;
@@ -711,6 +712,26 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
         } catch (FxNotFoundException e) {
             throw new FxLoadException(e);
         } catch (SQLException e) {
+            throw new FxLoadException(LOG, e, "ex.db.sqlError", e.getMessage());
+        } finally {
+            Database.closeObjects(ContentEngineBean.class, con, null);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public List<FxPK> getPKsForType(long typeId, boolean onePkPerInstance) throws FxApplicationException {
+        if (!FxContext.get().getTicket().isGlobalSupervisor()) {
+            throw new FxNoAccessException("ex.content.type.getAll.noPermission");
+        }
+        Connection con = null;
+        try {
+            con = Database.getDbConnection();
+            return StorageManager.getContentStorage(TypeStorageMode.Hierarchical).getPKsForType(con,
+                    CacheAdmin.getEnvironment().getType(typeId), onePkPerInstance);
+        } catch (Exception e) {
             throw new FxLoadException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
             Database.closeObjects(ContentEngineBean.class, con, null);

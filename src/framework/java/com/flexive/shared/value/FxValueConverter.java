@@ -133,7 +133,7 @@ public class FxValueConverter {
     public static Date toDate(String value) {
         try {
             //TODO: use a better date parser
-            return new SimpleDateFormat("yyyy-MM-dd").parse(FxFormatUtils.unquote(value));
+            return FxFormatUtils.getDateFormat().parse(FxFormatUtils.unquote(value));
         } catch (Exception e) {
             throw new FxConversionException(e, "ex.conversion.error", FxDate.class.getCanonicalName(), value,
                     e.getMessage()).asRuntimeException();
@@ -149,7 +149,7 @@ public class FxValueConverter {
     public static Date toDateTime(String value) {
         try {
             //TODO: use a better date parser
-            return new SimpleDateFormat("yyyy-MM-dd").parse(FxFormatUtils.unquote(value));
+            return FxFormatUtils.getDateTimeFormat().parse(FxFormatUtils.unquote(value));
         } catch (Exception e) {
             throw new FxConversionException(e, "ex.conversion.error", FxDate.class.getCanonicalName(), value,
                     e.getMessage()).asRuntimeException();

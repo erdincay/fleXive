@@ -867,8 +867,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         if (isEmpty()) {
             throw new FxInvalidStateException("ex.content.value.sql.empty").asRuntimeException();
         }
-        Object value = getDefaultTranslation();
-        return FxFormatUtils.escapeForSql(value);
+        return FxFormatUtils.escapeForSql(getDefaultTranslation());
     }
 
     /**

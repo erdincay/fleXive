@@ -196,4 +196,19 @@ public class FxDateTimeRange extends FxValue<DateRange, FxDateTimeRange> impleme
     public String getSqlValue() {
         throw new FxInvalidStateException("ex.content.value.sql.notSupported", getClass().getSimpleName()).asRuntimeException();
     }
+
+
+    @Override
+    public int compareTo(FxValue o) {
+        if (o instanceof FxDateRange && !isEmpty() && !o.isEmpty()) {
+            return getBestTranslation().getLower().compareTo(((FxDateRange) o).getBestTranslation().getLower());
+        } else if (o instanceof FxDateTimeRange && !isEmpty() && !o.isEmpty()) {
+            return getBestTranslation().getLower().compareTo(((FxDateTimeRange) o).getBestTranslation().getLower());
+        } else if (o instanceof FxDate && !isEmpty() && !o.isEmpty()) {
+            return getBestTranslation().getLower().compareTo(((FxDate) o).getBestTranslation());
+        } else if (o instanceof FxDateTime && !isEmpty() && !o.isEmpty()) {
+            return getBestTranslation().getLower().compareTo(((FxDateTime) o).getBestTranslation());
+        }
+        return super.compareTo(o);
+    }
 }

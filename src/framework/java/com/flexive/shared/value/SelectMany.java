@@ -238,4 +238,25 @@ public class SelectMany implements Serializable {
     private void sortSelected() {
         Collections.sort(selected, new FxSharedUtils.SelectableObjectSorter());
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SelectMany that = (SelectMany) o;
+
+        if (!list.equals(that.list)) return false;
+        if (!selected.equals(that.selected)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        result = list.hashCode();
+        result = 31 * result + selected.hashCode();
+        return result;
+    }
 }

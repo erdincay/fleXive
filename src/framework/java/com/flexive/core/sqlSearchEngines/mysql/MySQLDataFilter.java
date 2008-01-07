@@ -301,7 +301,7 @@ public class MySQLDataFilter extends DataFilter {
     }
 
     /**
-     * Builds an 'OR' concate.
+     * Builds an 'OR' condition.
      *
      * @param sb the string buffer to use
      * @param br the brace
@@ -332,7 +332,7 @@ public class MySQLDataFilter extends DataFilter {
     }
 
     /**
-     * Builds an 'AND' concate.
+     * Builds an 'AND' condition.
      *
      * @param sb the StringBuilder to use
      * @param br the brace
@@ -588,11 +588,11 @@ public class MySQLDataFilter extends DataFilter {
                 break;
             case Date:
             case DateRange:
-                value = constant.getValue() == null ? "NULL" : "" + FxValueConverter.toDate(constant.getValue()).getTime();
+                value = constant.getValue() == null ? "NULL" : "'" + FxFormatUtils.getDateFormat().format(FxValueConverter.toDate(constant.getValue())) + "'";
                 break;
             case DateTime:
             case DateTimeRange:
-                value = constant.getValue() == null ? "NULL" : "" + FxValueConverter.toDateTime(constant.getValue()).getTime();
+                value = constant.getValue() == null ? "NULL" : "'" + FxFormatUtils.getDateTimeFormat().format(FxValueConverter.toDateTime(constant.getValue())) + "'";
                 break;
             case Binary:
                 if (cond.getComperator().equals(Comparator.IS_NOT) && constant.isNull()) {

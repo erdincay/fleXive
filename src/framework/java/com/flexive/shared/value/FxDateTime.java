@@ -33,6 +33,9 @@
  ***************************************************************/
 package com.flexive.shared.value;
 
+import com.flexive.shared.exceptions.FxInvalidStateException;
+import com.flexive.shared.FxFormatUtils;
+
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.util.Date;
@@ -178,4 +181,12 @@ public class FxDateTime extends FxValue<Date, FxDateTime> implements Serializabl
         return true;
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public String getSqlValue() {
+        if (isEmpty()) {
+            throw new FxInvalidStateException("ex.content.value.sql.empty").asRuntimeException();
+        }
+        return "'" + FxFormatUtils.getDateTimeFormat().format(getDefaultTranslation()) + "'";
+    }
 }

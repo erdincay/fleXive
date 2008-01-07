@@ -54,7 +54,7 @@ class GroovyQueryBuilderTest {
             }
             lt("created_at", new Date(0))
         }
-        def cond = "(co.CAPTION = 'bla' AND co.FILENAME IS NOT NULL AND (co.ID > 0 OR co.ID < 100) AND co.CREATED_AT < '1970-01-01')"
+        def cond = "(co.CAPTION = 'bla' AND co.FILENAME IS NOT NULL AND (co.ID > 0 OR co.ID < 100) AND co.CREATED_AT < '1970-01-01 01:00:00.000')"
         def result = root.sqlQuery
         assert result.indexOf(cond) > 0: "Expected condition: " + cond + ", \ngot:\n" + result
     }

@@ -208,4 +208,18 @@ public class FxDateRange extends FxValue<DateRange, FxDateRange> implements Seri
     public Class<DateRange> getValueClass() {
         return DateRange.class;
 	}
+
+    @Override
+    public int compareTo(FxValue o) {
+        if (o instanceof FxDateRange && !isEmpty() && !o.isEmpty()) {
+            return getBestTranslation().getLower().compareTo(((FxDateRange) o).getBestTranslation().getLower());
+        } else if (o instanceof FxDateTimeRange && !isEmpty() && !o.isEmpty()) {
+            return getBestTranslation().getLower().compareTo(((FxDateTimeRange) o).getBestTranslation().getLower());
+        } else if (o instanceof FxDate && !isEmpty() && !o.isEmpty()) {
+            return getBestTranslation().getLower().compareTo(((FxDate) o).getBestTranslation());
+        } else if (o instanceof FxDateTime && !isEmpty() && !o.isEmpty()) {
+            return getBestTranslation().getLower().compareTo(((FxDateTime) o).getBestTranslation());
+        }
+        return super.compareTo(o);
+    }
 }

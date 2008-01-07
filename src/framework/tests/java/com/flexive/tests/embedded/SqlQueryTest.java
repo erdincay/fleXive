@@ -239,7 +239,6 @@ public class SqlQueryTest {
         EJBLookup.getResultPreferencesEngine().save(prefs, CacheAdmin.getEnvironment().getType(TEST_TYPE).getId(), ResultViewType.LIST, AdminResultLocations.DEFAULT);
     }
 
-
     /**
      * Tests all available value comparators for the given datatype. Note that no semantic
      * tests are performed, each comparator is executed with a random value.
@@ -291,6 +290,125 @@ public class SqlQueryTest {
             }
         }
     }
+
+    /**
+     * Tests relative comparators like &lt; and == for all datatypes that support them.
+     *
+     * @param name     the base property name
+     * @param dataType the datatype of the property
+     * @throws com.flexive.shared.exceptions.FxApplicationException
+     *          on search engine errors
+     */
+    @Test(dataProvider = "testProperties")
+    public void genericRelativeComparatorsTest(String name, FxDataType dataType) throws FxApplicationException {
+        final String propertyName = getTestPropertyName(name);
+
+        for (PropertyValueComparator comparator : PropertyValueComparator.getAvailable(dataType)) {
+            if (!(comparator.equals(PropertyValueComparator.EQ) || comparator.equals(PropertyValueComparator.GE)
+               || comparator.equals(PropertyValueComparator.GT) || comparator.equals(PropertyValueComparator.LE)
+               || comparator.equals(PropertyValueComparator.LT))) {
+                continue;
+            }
+            final FxValue value = getTestValue(name, comparator);
+            final SqlQueryBuilder builder = new SqlQueryBuilder().select("@pk", propertyName).condition(propertyName, comparator, value);
+            final FxResultSet result = builder.getResult();
+            assert result.getRowCount() > 0 : "Cannot test on empty result sets, query=\n" + builder.getQuery();
+            for (FxResultRow row: result.getResultRows()) {
+                final FxValue rowValue = row.getFxValue(2);
+                switch(comparator) {
+                    case EQ:
+                        assert rowValue.getBestTranslation().equals(value.getBestTranslation())
+                                : "Result value " + rowValue + " is not equal to " + value;
+                        break;
+                    case LT:
+                        assert rowValue.compareTo(value) < 0 : "Result value " + rowValue + " is not less than " + value;
+                        break;
+                    case LE:
+                        assert rowValue.compareTo(value) <= 0 : "Result value " + rowValue + " is not less or equal to " + value;
+                        break;
+                    case GT:
+                        assert rowValue.compareTo(value) > 0 : "Result value " + rowValue + " is not greater than " + value;
+                        break;
+                    case GE:
+                        assert rowValue.compareTo(value) >= 0 : "Result value " + rowValue + " is not greater or equal to " + value;
+                        break;
+                    default:
+                        assert false : "Invalid comparator: " + comparator;
+                }
+            }
+        }
+    }
+
+    /**
+     * Finds a FxValue of the test instances that matches some of the result rows
+     * for the given comparator, but not all or none.
+     *
+     * @param name  the test property name
+     * @param comparator    the comparator
+     * @return  a value that matches some rows
+     * @throws FxApplicationException   on search engine errors
+     */
+    private FxValue getTestValue(String name, PropertyValueComparator comparator) throws FxApplicationException {
+        final FxResultSet result = new SqlQueryBuilder().select(getTestPropertyName(name)).type(TEST_TYPE).getResult();
+        final List<FxValue> values = result.collectColumn(1);
+        assert values.size() == testInstanceCount : "Expected " + testInstanceCount + " rows, got: " + values.size();
+        for (FxValue value: values) {
+            if (value == null || value.isEmpty()) {
+                continue;
+            }
+            int match = 0;  // number of matched values for the given comparator
+            int count = 0;  // number of values checked so far
+            for (FxValue value2: values) {
+                if (value2 == null || value2.isEmpty()) {
+                    continue;
+                }
+                count++;
+                switch(comparator) {
+                    case EQ:
+                        if (value.getBestTranslation().equals(value2.getBestTranslation())) {
+                            match++;
+                        }
+                        break;
+                    case LT:
+                        if (value2.compareTo(value) < 0) {
+                            match++;
+                        }
+                        break;
+                    case LE:
+                        if (value2.compareTo(value) <= 0) {
+                            match++;
+                        }
+                        break;
+                    case GT:
+                        if (value2.compareTo(value) > 0) {
+                            match++;
+                        }
+                        break;
+                    case GE:
+                        if (value2.compareTo(value) >= 0) {
+                            match++;
+                        }
+                        break;
+                    default:
+                        assert false : "Cannot check relative ordering for comparator " + comparator;
+                }
+                if (match > 0 && count > match) {
+                    // this value is matched by _some_ other row values, so it's suitable as test input
+                    if (value instanceof FxDateRange) {
+                        // daterange checks are performed against an actual date, not another range
+                        return new FxDate(((FxDateRange) value).getBestTranslation().getLower());
+                    } else if (value instanceof FxDateTimeRange) {
+                        // see above
+                        return new FxDateTime(((FxDateTimeRange) value).getBestTranslation().getLower());
+                    }
+                    return value;
+                }
+            }
+        }
+        throw new IllegalArgumentException("Failed to find a suitable test value for property " + getTestPropertyName(name)
+                + " and comparator " + comparator);
+    }
+
 
     @DataProvider(name = "testProperties")
     public Object[][] getTestProperties() {

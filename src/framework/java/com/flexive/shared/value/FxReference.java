@@ -177,4 +177,12 @@ public class FxReference extends FxValue<ReferencedContent, FxReference> impleme
     public FxReference copy() {
         return new FxReference(this);
     }
+
+    @Override
+    public int compareTo(FxValue o) {
+        if (isEmpty() || o.isEmpty() || !(o instanceof FxReference)) {
+            return super.compareTo(o);
+        }
+        return getBestTranslation().compareTo(((FxReference) o).getBestTranslation());
+    }
 }
