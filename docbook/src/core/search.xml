@@ -844,7 +844,7 @@ WHERE (co.CAPTION = 'test' AND co.FILENAME IS NOT NULL AND
                         <para>
                             The
                             <methodname>FxResultSet#getResultRows()</methodname>
-                            returns an iterable object that returns
+                            method returns an iterable object that returns
                             <classname>FxResultRow</classname>
                             objects
                             for each row in the resultset. Take a look at the example demonstrating accessing
@@ -892,5 +892,27 @@ for (FxResultRow row: result.getResultRows()) {
                 </orderedlist>
             </para>
         </section>
+
+
+        <section xml:id="csr_projections">
+            <title>Projections</title>
+
+            <para>
+                Sometimes you do not want to work with the full result table, but only need
+                a list of property values, for example primary keys. The
+                <methodname>FxResultSet#collectColumn(int)</methodname>
+                method projects a single column of the result set to a linear list.
+                For example, to collect all primary keys of a &flexive; type you submit
+                a query against that type, selecting only the
+                <code>@pk</code>
+                column, and then project the first result column using
+                <methodname>collectColumn</methodname>:
+
+                <programlisting language="java"><![CDATA[final List<FxPK> folderPks =
+    new SqlQueryBuilder().select("@pk").type("FOLDER").getResult().]]><emphasis>collectColumn(1)</emphasis>;
+                </programlisting>
+            </para>
+        </section>
+
     </section>
 </section>

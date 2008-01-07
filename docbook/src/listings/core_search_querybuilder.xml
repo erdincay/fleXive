@@ -3,9 +3,9 @@
         <!ENTITY % global_entities SYSTEM "../global.ent">
         %global_entities;
         ]>
-<programlisting language="xhtml" xml:id="core_search_querybuilder" xmlns="http://docbook.org/ns/docbook"><co xml:id="csq_builder_1"/> new SqlQueryBuilder()
-<co xml:id="csq_builder_2"/>     .select("@pk", "created_at", "caption")
-<co xml:id="csq_builder_3"/>     .type("article")
-<co xml:id="csq_builder_4"/>     .orderBy("created_at", SortDirection.DESCENDING)
-<co xml:id="csq_builder_5"/>     .getResult();    
+<programlisting language="xhtml" xml:id="core_search_querybuilder" xmlns="http://docbook.org/ns/docbook">new SqlQueryBuilder()                                   // <co xml:id="csq_builder_1"/> 
+     .select("@pk", "created_at", "caption")            // <co xml:id="csq_builder_2"/>
+     .type("article")                                   // <co xml:id="csq_builder_3"/>
+     .orderBy("created_at", SortDirection.DESCENDING)   // <co xml:id="csq_builder_4"/>
+     .getResult();                                      // <co xml:id="csq_builder_5"/>
 </programlisting>
