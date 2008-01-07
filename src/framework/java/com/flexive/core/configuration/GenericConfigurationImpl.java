@@ -42,6 +42,7 @@ import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.GenericConfigurationEngine;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.SerializationUtils;
 
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -249,7 +250,9 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
             // update cache?
             String cachePath = getCachePath(data.getPath().getValue());
             if (cachePath != null) {
-                putCache(cachePath, key, value != null ? value : new NullParameter());
+                putCache(cachePath, key, value != null ?
+                        (Serializable) SerializationUtils.clone(value)
+                        : new NullParameter());
             }
         } catch (SQLException se) {
             FxUpdateException ue = new FxUpdateException(LOG, se, "ex.db.sqlError", se.getMessage());
@@ -271,13 +274,14 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * Get a configuration parameter identified by a path and a key.
      *
+     * @param parameter the actual parameter instance
      * @param path path of the parameter
      * @param key  key of the parameter
      * @return the parameter value
      * @throws FxLoadException     if the parameter could not be loaded
      * @throws FxNotFoundException if the parameter does not exist
      */
-    protected Object getParameter(String path, String key) throws FxLoadException, FxNotFoundException {
+    protected <T extends Serializable> Object getParameter(Parameter<T> parameter, String path, String key) throws FxLoadException, FxNotFoundException {
         String cachePath = getCachePath(path);
         if (cachePath != null) {
             // try cache first
@@ -303,7 +307,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
         Serializable value = loadParameterFromDb(path, key);
         if (cachePath != null) {
             // add value to cache
-            putCache(cachePath, key, value);
+            putCache(cachePath, key, parameter.getValue(value));
         }
         return value;
     }
@@ -324,7 +328,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     public final <T extends Serializable> T get(Parameter<T> parameter, String key)
             throws FxApplicationException {
         try {
-            return parameter.getValue(getParameter(parameter.getPath().getValue(), key));
+            return parameter.getValue(getParameter(parameter, parameter.getPath().getValue(), key));
         } catch (FxNotFoundException e) {
             if (parameter.getDefaultValue() != null) {
                 return parameter.getDefaultValue();
@@ -341,7 +345,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     public final <T extends Serializable> T get(Parameter<T> parameter, String key, boolean ignoreDefault)
             throws FxApplicationException {
         try {
-            return parameter.getValue(getParameter(parameter.getPath().getValue(), key));
+            return parameter.getValue(getParameter(parameter, parameter.getPath().getValue(), key));
         } catch (FxNotFoundException e) {
             if (!ignoreDefault && parameter.getDefaultValue() != null) {
                 return parameter.getDefaultValue();
@@ -532,6 +536,6 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
      * @throws FxCacheException if a cache exception occured
      */
     protected Serializable getCache(String path, String key) throws FxCacheException {
-        return (Serializable) CacheAdmin.getInstance().get(path, key);
+        return (Serializable) SerializationUtils.clone((Serializable) CacheAdmin.getInstance().get(path, key));
     }
 }
