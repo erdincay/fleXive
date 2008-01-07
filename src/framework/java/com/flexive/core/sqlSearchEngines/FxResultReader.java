@@ -37,6 +37,7 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxSqlSearchException;
+import com.flexive.shared.search.FxPaths;
 import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.value.*;
 
@@ -52,7 +53,6 @@ import java.util.Date;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 class FxResultReader {
-
     ResultSet rs;
     FxLanguage lang;
 
@@ -68,25 +68,25 @@ class FxResultReader {
 
         try {
             // Special type @NODE_POSITION
-            if (entry.getType() == PropertyResolver.Entry.TYPE.NODE_POSITION) {
+            if (entry.getType() == PropertyResolver.Entry.Type.NODE_POSITION) {
                 result = rs.getLong(pos);
             }
             // Special type @PK
-            else if (entry.getType() == PropertyResolver.Entry.TYPE.PK) {
+            else if (entry.getType() == PropertyResolver.Entry.Type.PK) {
                 long id = rs.getLong(pos);
                 int ver = rs.getInt(pos + 1);
                 result = new FxPK(id, ver);
             }
             // Special type @PATH
-            else if (entry.getType() == PropertyResolver.Entry.TYPE.PATH) {
+            else if (entry.getType() == PropertyResolver.Entry.Type.PATH) {
                 String encoded = rs.getString(pos);
-                result = new FxPathsImpl(encoded);
+                result = new FxPaths(encoded);
             }
             // 'Normal' property
             else {
 
                 // Get the XPATH if we are reading from the content data table
-                if (entry.getTableType() == PropertyResolver.TABLE.T_CONTENT_DATA) {
+                if (entry.getTableType() == PropertyResolver.Table.T_CONTENT_DATA) {
                     xpath = rs.getString(pos + entry.getReadColumns().length);
                 }
 

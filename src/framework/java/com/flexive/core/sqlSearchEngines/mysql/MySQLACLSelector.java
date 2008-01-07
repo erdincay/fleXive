@@ -45,13 +45,13 @@ import com.flexive.sqlParser.Property;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class MySQLACLSelector extends MySQLGenericSelector {
-
-
     public MySQLACLSelector() {
         super(DatabaseConst.TBL_ACLS, null);
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void apply(Property prop, PropertyResolver.Entry entry, StringBuffer statement) throws FxSqlSearchException {
         if (prop.getField().equals("LABEL")) {
@@ -69,8 +69,11 @@ public class MySQLACLSelector extends MySQLGenericSelector {
         super.apply(prop, entry, statement);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public String getAllowedFiels() {
-        return super.getAllowedFiels() + ",label";
+    public String getAllowedFields() {
+        return super.getAllowedFields() + ",label";
     }
 }

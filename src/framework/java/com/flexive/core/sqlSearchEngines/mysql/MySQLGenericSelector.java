@@ -54,9 +54,9 @@ import java.util.Hashtable;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 class MySQLGenericSelector implements FxFieldSelector {
-
-    private Hashtable<String, FxDataType> columns;
     private static final Log LOG = LogFactory.getLog(MySQLGenericSelector.class);
+    
+    private Hashtable<String, FxDataType> columns;
     private String tableName;
     private String linksOn;
 
@@ -113,24 +113,32 @@ class MySQLGenericSelector implements FxFieldSelector {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void apply(Property prop, PropertyResolver.Entry entry, StringBuffer statement) throws FxSqlSearchException {
         FxDataType type = columns.get(prop.getField());
         if (type == null) {
             // This field does not exist
             throw new FxSqlSearchException("ex.sqlSearch.query.undefinedField", prop.getField(), prop.getPropertyName(),
-                    getAllowedFiels());
+                    getAllowedFields());
         } else {
             statement.insert(0, "(select " + prop.getField() + " from " + tableName + " where " + linksOn + "=").append(")");
             entry.overrideDataType(type);
         }
     }
 
-    public String getAllowedFiels() {
-        if (columns == null) return "";
-        String fields = "";
-        for (String fieldName : columns.keySet()) {
-            fields += (fields.length() == 0 ? "" : ",") + fieldName;
+    /**
+     * {@inheritDoc}
+     */
+    public String getAllowedFields() {
+        if (columns == null) {
+            return "";
         }
-        return fields;
+        final StringBuilder fields = new StringBuilder();
+        for (String fieldName : columns.keySet()) {
+            fields.append(fields.length() == 0 ? "" : ",").append(fieldName);
+        }
+        return fields.toString();
     }
 }

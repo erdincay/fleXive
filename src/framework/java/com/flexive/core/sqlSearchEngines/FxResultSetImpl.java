@@ -111,7 +111,7 @@ public class FxResultSetImpl implements Serializable, FxResultSet {
 
     protected FxResultSetImpl(final FxStatement fx_stmt, PropertyResolver pr, final int parserExecutionTime, int dbSearchTime,
                               int startIndex, int maxFetchRows, ResultLocation location, ResultViewType viewType,
-                              ArrayList<FxFoundType> types, long typeId, long createdBriefcaseId) {
+                              List<FxFoundType> types, long typeId, long createdBriefcaseId) {
         this.parserExecutionTime = parserExecutionTime;
         this.startIndex = startIndex;
         this.maxFetchRows = maxFetchRows;
@@ -125,7 +125,7 @@ public class FxResultSetImpl implements Serializable, FxResultSet {
         int pos = 0;
         if (pr != null) {
             for (PropertyResolver.Entry entry : pr.getResultSetColumns()) {
-                if (entry.getType() == PropertyResolver.Entry.TYPE.PK) {
+                if (entry.getType() == PropertyResolver.Entry.Type.PK) {
                     this.pkPos = pos;
                     break;
                 }

@@ -37,6 +37,7 @@ import com.flexive.shared.exceptions.FxSqlSearchException;
 
 import java.sql.Connection;
 import java.util.Hashtable;
+import java.util.Map;
 
 /**
  * Interface for DB specific DataSelectors
@@ -49,7 +50,7 @@ public abstract class DataSelector {
 
     public abstract void cleanup(Connection con) throws FxSqlSearchException;
 
-    public abstract Hashtable<String, FxFieldSelector> getSelectors();
+    public abstract Map<String, FxFieldSelector> getSelectors();
 
 
 }

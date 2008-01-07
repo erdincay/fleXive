@@ -38,6 +38,7 @@ import com.flexive.core.sqlSearchEngines.*;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.search.SortDirection;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.sqlParser.*;
@@ -45,9 +46,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
+import java.util.*;
 
 /**
  * MySQL specific data selector
@@ -60,8 +59,7 @@ public class MySQLDataSelector extends DataSelector {
     /**
      * All field selectors supported by this implementation
      */
-    private final static Hashtable<String, FxFieldSelector> SELECTORS =
-            new Hashtable<String, FxFieldSelector>(5);
+    private static final Map<String, FxFieldSelector> SELECTORS = new HashMap<String, FxFieldSelector>();
 
     static {
         SELECTORS.put("MANDATOR", new MySQLGenericSelector(DatabaseConst.TBL_MANDATORS, "id"));
@@ -71,8 +69,11 @@ public class MySQLDataSelector extends DataSelector {
         SELECTORS.put("STEP", new MySQLStepSelector());
     }
 
-    private final static String CONTENT_DIRECT_SELECT[] = {"ID", "VERSION", "MAINLANG"};
-    private final static String CONTENT_DIRECT_SELECT_PROP[] = {"ID", "VER", "MAINLANG"};
+    private static final String[] CONTENT_DIRECT_SELECT = {"ID", "VERSION", "MAINLANG"};
+    private static final String[] CONTENT_DIRECT_SELECT_PROP = {"ID", "VER", "MAINLANG"};
+    private static final String FILTER_ALIAS = "filter";
+    private static final String SUBSEL_ALIAS = "sub";
+
     private FxSearch search;
 
 
@@ -85,17 +86,20 @@ public class MySQLDataSelector extends DataSelector {
         this.search = search;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public Hashtable<String, FxFieldSelector> getSelectors() {
+    public Map<String, FxFieldSelector> getSelectors() {
         return SELECTORS;
     }
 
-    private String FILTER_ALIAS = "filter";
-    private String SUBSEL_ALIAS = "sub";
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String build(final Connection con) throws FxSqlSearchException {
-        StringBuffer select = new StringBuffer(2000);
+        StringBuffer select = new StringBuffer();
         buildColumnSelectList(select);
         if (LOG.isDebugEnabled()) {
             LOG.debug(search.getFxStatement().printDebug());
@@ -103,6 +107,9 @@ public class MySQLDataSelector extends DataSelector {
         return select.toString();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void cleanup(Connection con) throws FxSqlSearchException {
         // nothing to do
@@ -117,26 +124,25 @@ public class MySQLDataSelector extends DataSelector {
      * @throws FxSqlSearchException if the function fails
      */
     private void buildColumnSelectList(final StringBuffer select) throws FxSqlSearchException {
-
         // Build all value selectors
         int pos = 0;
-        FxSubSelectValues values[] = new FxSubSelectValues[search.getFxStatement().getSelectedValues().size()];
-        for (SelectedValue __sel : search.getFxStatement().getSelectedValues()) {
+        final FxSubSelectValues values[] = new FxSubSelectValues[search.getFxStatement().getSelectedValues().size()];
+        for (SelectedValue selectedValue : search.getFxStatement().getSelectedValues()) {
             // Prepare all values
-            Value sel = __sel.getValue();
+            final Value value = selectedValue.getValue();
             PropertyResolver.Entry entry = null;
-            if (sel instanceof Property) {
-                PropertyResolver pr = search.getPropertyResolver();
-                entry = pr.get(search.getFxStatement(), (Property) sel);
+            if (value instanceof Property) {
+                final PropertyResolver pr = search.getPropertyResolver();
+                entry = pr.get(search.getFxStatement(), (Property) value);
                 pr.addResultSetColumn(entry);
             }
-            values[pos] = selectFromTbl(entry, sel, pos);
+            values[pos] = selectFromTbl(entry, value, pos);
             pos++;
         }
 
         // Build the final select statement
 
-        select.append("select \n");
+        select.append("SELECT \n");
         select.append(FILTER_ALIAS).append(".rownr,").
                 append(FILTER_ALIAS).append(".id, ").
                 append(FILTER_ALIAS).append(".ver\n");
@@ -149,10 +155,9 @@ public class MySQLDataSelector extends DataSelector {
                 }
             }
         }
-        select.append("from (");
-        select.append(_buildSourceTable(values));
-        select.append(") ").append(FILTER_ALIAS).append(" order by 1");
-
+        select.append("FROM (");
+        select.append(buildSourceTable(values));
+        select.append(") ").append(FILTER_ALIAS).append(" ORDER BY 1");
     }
 
     /**
@@ -161,15 +166,12 @@ public class MySQLDataSelector extends DataSelector {
      * @param values the selected values
      * @return a select statement which builds the source table
      */
-    private String _buildSourceTable(final FxSubSelectValues values[]) {
-
+    private String buildSourceTable(final FxSubSelectValues[] values) {
         // Prepare type filter
-        String typeFilter = "";
-        if (search.getTypeFilter() != null) {
-            typeFilter = " and " + FILTER_ALIAS + ".tdef=" + search.getTypeFilter().getId() + " ";
-        }
+        final String typeFilter = search.getTypeFilter() == null ? ""
+                : " and " + FILTER_ALIAS + ".tdef=" + search.getTypeFilter().getId() + " ";
 
-        StringBuffer orderBy = new StringBuffer(1024);
+        final StringBuilder orderBy = new StringBuilder();
         String orderByNumbers = "";
         int orderByPos = 5;
         orderBy.append("select @rownr:=@rownr+1 rownr,").
@@ -190,8 +192,8 @@ public class MySQLDataSelector extends DataSelector {
                 }
             }
         }
-        orderBy.append(("from " + search.getCacheTable() + " filter, " + DatabaseConst.TBL_STRUCT_TYPES + " t " +
-                "where SEARCH_ID=" + search.getSearchId() + " and " + FILTER_ALIAS + ".tdef=t.id " +
+        orderBy.append(("FROM " + search.getCacheTable() + " filter, " + DatabaseConst.TBL_STRUCT_TYPES + " t " +
+                "WHERE search_id=" + search.getSearchId() + " AND " + FILTER_ALIAS + ".tdef=t.id " +
                 typeFilter + " "));
 
         // No order by specified = order by id and version
@@ -201,28 +203,11 @@ public class MySQLDataSelector extends DataSelector {
         orderBy.append(("ORDER BY " + orderByNumbers));
 
         // Evaluate the order by, then limit the result by the desired range if needed
-        String result = orderBy.toString();
         if (search.getStartIndex() > 0 && search.getFetchRows() < Integer.MAX_VALUE) {
-            result = "select * from (" + result + ") tmp limit " + search.getStartIndex() + "," + search.getFetchRows();
+            return "SELECT * FROM (" + orderBy + ") tmp LIMIT " + search.getStartIndex() + "," + search.getFetchRows();
         }
-        return result;
+        return orderBy.toString();
 
-    }
-
-    /**
-     * Returns null if the pos is not part of the orderBy, or true if it is sorted ascending or
-     * false if it is ordered descending.
-     *
-     * @param pos the position to check
-     * @return null if the pos is not part of the orderBy, or true if it is sorted ascending or
-     *         false if it is ordered descending
-     */
-    private Boolean _isOrderByPos(int pos) {
-        final List<OrderByValue> obvs = search.getFxStatement().getOrderByValues();
-        for (OrderByValue obv : obvs) {
-            if (obv.getColumnIndex() == pos) return obv.isAscending();
-        }
-        return null;
     }
 
     /**
@@ -235,45 +220,42 @@ public class MySQLDataSelector extends DataSelector {
      * @throws FxSqlSearchException if anything goes wrong
      */
     private FxSubSelectValues selectFromTbl(PropertyResolver.Entry entry, Value prop, int resultPos) throws FxSqlSearchException {
-
-        Boolean isOrderBy = _isOrderByPos(resultPos);
-        FxSubSelectValues result = new FxSubSelectValues(resultPos, isOrderBy);
-
+        final FxSubSelectValues result = new FxSubSelectValues(resultPos, getSortDirection(resultPos));
         if (prop instanceof Constant || entry == null) {
             result.addItem(prop.getValue().toString(), resultPos, false);
-        } else if (entry.getType() == PropertyResolver.Entry.TYPE.NODE_POSITION) {
+        } else if (entry.getType() == PropertyResolver.Entry.Type.NODE_POSITION) {
             long root = FxContext.get().getNodeId();
             if (root == -1) root = FxTreeNode.ROOT_NODE;
-            String sel = "(select tree_nodeIndex(" + root + "," + FILTER_ALIAS + ".id,false))";   // TODO: LIVE/EDIT
+            final String sel = "(select tree_nodeIndex(" + root + "," + FILTER_ALIAS + ".id,false))";   // TODO: LIVE/EDIT
             result.addItem(sel, resultPos, false);
-        } else if (entry.getType() == PropertyResolver.Entry.TYPE.PATH) {
-            long propertyId = CacheAdmin.getEnvironment().getProperty("CAPTION").getId();
-            String sel = "(select tree_FTEXT1024_Paths(" + FILTER_ALIAS + ".id," +
+        } else if (entry.getType() == PropertyResolver.Entry.Type.PATH) {
+            final long propertyId = CacheAdmin.getEnvironment().getProperty("CAPTION").getId();
+            final String sel = "(select tree_FTEXT1024_Paths(" + FILTER_ALIAS + ".id," +
                     search.getLanguage().getId() + "," + propertyId + ",false))"; // TODO: LIVE/EDIT
             result.addItem(sel, resultPos, false);
         } else {
             switch (entry.getTableType()) {
                 case T_CONTENT:
                     for (String column : entry.getReadColumns()) {
-                        int directSelect = FxArrayUtils.indexOf(CONTENT_DIRECT_SELECT, column, true);
+                        final int directSelect = FxArrayUtils.indexOf(CONTENT_DIRECT_SELECT, column, true);
                         if (directSelect > -1) {
-                            String val = FILTER_ALIAS + "." + CONTENT_DIRECT_SELECT_PROP[directSelect];
+                            final String val = FILTER_ALIAS + "." + CONTENT_DIRECT_SELECT_PROP[directSelect];
                             result.addItem(val, resultPos, false);
                         } else {
-                            String sVal = "(SELECT " + SUBSEL_ALIAS + "." + column + " FROM " + DatabaseConst.TBL_CONTENT +
+                            final String val = "(SELECT " + SUBSEL_ALIAS + "." + column + " FROM " + DatabaseConst.TBL_CONTENT +
                                     " " + SUBSEL_ALIAS + " WHERE " + SUBSEL_ALIAS + ".id=" + FILTER_ALIAS + ".id AND " +
                                     SUBSEL_ALIAS + ".ver=" + FILTER_ALIAS + ".ver)";
-                            result.addItem(sVal, resultPos, false);
+                            result.addItem(val, resultPos, false);
                         }
                     }
                     break;
                 case T_CONTENT_DATA:
                     for (String column : entry.getReadColumns()) {
-                        String sVal = _hlp_content_data(column, entry);
-                        result.addItem(sVal, resultPos, false);
+                        final String val = _hlp_content_data(column, entry);
+                        result.addItem(val, resultPos, false);
                     }
-                    String sValXpath = "concat(filter.xpathPref," + _hlp_content_data("XPATHMULT", entry) + ")";
-                    result.addItem(sValXpath, resultPos, true);
+                    String xpath = "concat(filter.xpathPref," + _hlp_content_data("XPATHMULT", entry) + ")";
+                    result.addItem(xpath, resultPos, true);
                     break;
                 default:
                     throw new FxSqlSearchException("ex.sqlSearch.table.typeNotSupported", entry.getTable());
@@ -281,7 +263,22 @@ public class MySQLDataSelector extends DataSelector {
         }
 
         return result.prepare(this, prop, entry);
+    }
 
+    /**
+     * Returns the {@link SortDirection} for the given column index.
+     *
+     * @param pos the position to check
+     * @return the {@link SortDirection} for the given column index.
+     */
+    private SortDirection getSortDirection(int pos) {
+        final List<OrderByValue> obvs = search.getFxStatement().getOrderByValues();
+        for (OrderByValue obv : obvs) {
+            if (obv.getColumnIndex() == pos) {
+                return obv.isAscending() ? SortDirection.ASCENDING : SortDirection.DESCENDING;
+            }
+        }
+        return SortDirection.UNSORTED;
     }
 
     /**

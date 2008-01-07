@@ -39,6 +39,7 @@ import com.flexive.sqlParser.FxStatement;
 
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Data filter for the FxSQL search engine
@@ -46,7 +47,6 @@ import java.util.ArrayList;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public abstract class DataFilter {
-
     protected FxSearch search;
     private Connection con;
 
@@ -91,5 +91,5 @@ public abstract class DataFilter {
      *
      * @return a list of all content types that are part of the resultset
      */
-    public abstract ArrayList<FxFoundType> getContentTypes();
+    public abstract List<FxFoundType> getContentTypes();
 }

@@ -45,7 +45,8 @@ import com.flexive.shared.value.FxString;
 */
 public enum SortDirection implements ObjectWithLabel {
     ASCENDING(""),
-    DESCENDING(" DESC");
+    DESCENDING(" DESC"),
+    UNSORTED(null);
 
     private final String sqlSuffix;
 

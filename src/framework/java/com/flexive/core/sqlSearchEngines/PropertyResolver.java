@@ -44,7 +44,6 @@ import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.structure.*;
 import com.flexive.sqlParser.FxStatement;
 import com.flexive.sqlParser.Property;
-import com.flexive.sqlParser.Table;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -52,8 +51,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.*;
 
 /**
  * A resolver for properties
@@ -61,22 +59,20 @@ import java.util.Hashtable;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class PropertyResolver {
-    private static final Log LOG = LogFactory.getLog(PropertyResolver.class);
-
-    private static Hashtable<String, FxDataType> CONTENT_PROPS = null;
-    private ContentStorage hierarchicalStorage;
-    private FxEnvironment environment;
-    private int resultSetPos = 4;
-    private int resultSetColumnCount = 0;
-    private Hashtable<String, Entry> cache = new Hashtable<String, Entry>(50);
-
-    public static enum TABLE {
+    public static enum Table {
         T_CONTENT,
         T_CONTENT_DATA
     }
 
-    private ArrayList<Entry> resultSetColumns;
+    private static final Log LOG = LogFactory.getLog(PropertyResolver.class);
+    private static Map<String, FxDataType> CONTENT_PROPS = null;
 
+    private ContentStorage hierarchicalStorage;
+    private FxEnvironment environment;
+    private Map<String, Entry> cache = new HashMap<String, Entry>(50);
+    private List<Entry> resultSetColumns;
+    private int resultSetPos = 4;
+    private int resultSetColumnCount = 0;
 
     public static class Entry {
         private int positionInResultSet = -1;
@@ -85,27 +81,27 @@ public class PropertyResolver {
         private String table;
         private FxProperty property;
         private FxPropertyAssignment assignment;
-        private TABLE tbl;
-        private TYPE type;
+        private Table tbl;
+        private Type type;
         private FxDataType overrideDataType = null;
         private boolean multilanguage;
 
-        public enum TYPE {
+        public static enum Type {
             PROPERTY_REF,
             PK,
             PATH,
             NODE_POSITION
         }
 
-        public Entry(TYPE type) throws FxSqlSearchException {
+        public Entry(Type type) throws FxSqlSearchException {
             switch (type) {
                 case NODE_POSITION:
                     this.readColumns = new String[]{""};
                     this.table = DatabaseConst.TBL_CONTENT;
                     this.filterColumn = null;
                     this.property = null;
-                    this.type = TYPE.NODE_POSITION;
-                    this.tbl = TABLE.T_CONTENT;
+                    this.type = Type.NODE_POSITION;
+                    this.tbl = Table.T_CONTENT;
                     this.multilanguage = false;
                     this.overrideDataType = FxDataType.Number;
                     break;
@@ -114,8 +110,8 @@ public class PropertyResolver {
                     this.table = DatabaseConst.TBL_CONTENT;
                     this.filterColumn = null;
                     this.property = null;
-                    this.type = TYPE.PATH;
-                    this.tbl = TABLE.T_CONTENT;
+                    this.type = Type.PATH;
+                    this.tbl = Table.T_CONTENT;
                     this.multilanguage = false;
                     break;
                 case PK:
@@ -124,8 +120,8 @@ public class PropertyResolver {
                     this.filterColumn = null;
                     this.property = null;
                     this.multilanguage = false;
-                    this.type = TYPE.PK;
-                    this.tbl = TABLE.T_CONTENT;
+                    this.type = Type.PK;
+                    this.tbl = Table.T_CONTENT;
                     break;
                 default:
                     throw new FxSqlSearchException("TODO: virtual"); // TODO
@@ -139,11 +135,11 @@ public class PropertyResolver {
             this.filterColumn = filterColumn;
             this.assignment = assignment;
             this.property = property;
-            this.type = TYPE.PROPERTY_REF;
+            this.type = Type.PROPERTY_REF;
             if (table.equalsIgnoreCase(DatabaseConst.TBL_CONTENT)) {
-                this.tbl = TABLE.T_CONTENT;
+                this.tbl = Table.T_CONTENT;
             } else if (table.equalsIgnoreCase(DatabaseConst.TBL_CONTENT_DATA)) {
-                this.tbl = TABLE.T_CONTENT_DATA;
+                this.tbl = Table.T_CONTENT_DATA;
             } else {
                 throw new FxSqlSearchException(LOG, "ex.sqlSearch.err.unknownPropertyTable", property, table);
             }
@@ -154,7 +150,7 @@ public class PropertyResolver {
             return multilanguage;
         }
 
-        public TYPE getType() {
+        public Type getType() {
             return type;
         }
 
@@ -175,7 +171,7 @@ public class PropertyResolver {
             this.positionInResultSet = positionInResultSet;
         }
 
-        public TABLE getTableType() {
+        public Table getTableType() {
             return tbl;
         }
 
@@ -238,7 +234,7 @@ public class PropertyResolver {
         this.resultSetColumns.add(e);
         // compute next position to use
         resultSetPos += e.getReadColumns().length;
-        if (e.getTableType() == TABLE.T_CONTENT_DATA) {
+        if (e.getTableType() == Table.T_CONTENT_DATA) {
             // also select XPATH 
             resultSetPos += 1;
         }
@@ -251,12 +247,12 @@ public class PropertyResolver {
         return resultSetColumnCount;
     }
 
-    public ArrayList<Entry> getResultSetColumns() {
+    public List<Entry> getResultSetColumns() {
         return resultSetColumns;
     }
 
     public Entry get(FxStatement fx_stmt, Property prop) throws FxSqlSearchException {
-        final Table tbl = fx_stmt.getTableByAlias(prop.getTableAlias());
+        final com.flexive.sqlParser.Table tbl = fx_stmt.getTableByAlias(prop.getTableAlias());
         switch (tbl.getType()) {
             case CONTENT:
                 return getByName(fx_stmt, prop);
@@ -266,18 +262,18 @@ public class PropertyResolver {
     }
 
     private Entry getByName(final FxStatement fx_stmt, final Property _prop) throws FxSqlSearchException {
-        String key = fx_stmt.getIgnoreCase() + "_" + _prop.getPropertyName() +
+        final String key = fx_stmt.getIgnoreCase() + "_" + _prop.getPropertyName() +
                 (_prop.hasField() ? "_" + _prop.getField() : "");
         Entry entry = cache.get(key);
         if (entry == null) {
             if (_prop.getPropertyName().equalsIgnoreCase("@NODE_POSITION")) {
-                entry = new Entry(Entry.TYPE.NODE_POSITION);
+                entry = new Entry(Entry.Type.NODE_POSITION);
                 cache.put(key, entry);
             } else if (_prop.getPropertyName().equalsIgnoreCase("@PATH")) {
-                entry = new Entry(Entry.TYPE.PATH);
+                entry = new Entry(Entry.Type.PATH);
                 cache.put(key, entry);
             } else if (_prop.getPropertyName().equalsIgnoreCase("@PK")) {
-                entry = new Entry(Entry.TYPE.PK);
+                entry = new Entry(Entry.Type.PK);
                 cache.put(key, entry);
             } else {
                 try {
@@ -291,8 +287,7 @@ public class PropertyResolver {
                                 as = (FxPropertyAssignment) environment.getAssignment(_prop.getPropertyName());
                             } else {
                                 //#<id>
-                                as = (FxPropertyAssignment) CacheAdmin.getEnvironment().
-                                        getAssignment(Long.valueOf(_prop.getPropertyName().substring(1)));
+                                as = (FxPropertyAssignment) environment.getAssignment(Long.valueOf(_prop.getPropertyName().substring(1)));
                             }
                         } catch (ClassCastException ce) {
                             throw new FxSqlSearchException(ce, "ex.sqlSearch.query.unknownAssignment",
@@ -314,8 +309,8 @@ public class PropertyResolver {
                     }
 
 
-                    String dbColumns[] = hierarchicalStorage.getColumns(prop);
-                    String tbl = hierarchicalStorage.getTableName(prop);
+                    final String dbColumns[] = hierarchicalStorage.getColumns(prop);
+                    final String tbl = hierarchicalStorage.getTableName(prop);
                     String fColumn = fx_stmt.getIgnoreCase()
                             ? hierarchicalStorage.getUppercaseColumn(prop)
                             : dbColumns[0];
@@ -353,13 +348,13 @@ public class PropertyResolver {
         try {
             con = Database.getDbConnection();
             stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("select * from " + DatabaseConst.TBL_CONTENT + " where 1=2");
-            ResultSetMetaData rsmd = rs.getMetaData();
+            final ResultSet rs = stmt.executeQuery("select * from " + DatabaseConst.TBL_CONTENT + " where 1=2");
+            final ResultSetMetaData rsmd = rs.getMetaData();
             CONTENT_PROPS = new Hashtable<String, FxDataType>(10);
             for (int i = 0; i < rsmd.getColumnCount(); i++) {
-                String columnName = rsmd.getColumnName(i + 1).trim().toUpperCase();
-                int type = rsmd.getColumnType(i + 1);
-                FxDataType dt;
+                final String columnName = rsmd.getColumnName(i + 1).trim().toUpperCase();
+                final int type = rsmd.getColumnType(i + 1);
+                final FxDataType dt;
                 switch (type) {
                     case java.sql.Types.NUMERIC:
                         dt = FxDataType.LargeNumber;

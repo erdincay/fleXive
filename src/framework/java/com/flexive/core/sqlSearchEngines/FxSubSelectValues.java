@@ -34,10 +34,12 @@
 package com.flexive.core.sqlSearchEngines;
 
 import com.flexive.shared.exceptions.FxSqlSearchException;
+import com.flexive.shared.search.SortDirection;
 import com.flexive.sqlParser.Property;
 import com.flexive.sqlParser.Value;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Helper to store subselect values
@@ -45,32 +47,29 @@ import java.util.ArrayList;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class FxSubSelectValues {
-
-
-    private ArrayList<Item> items = new ArrayList<Item>(25);
+    private final int resultSetPos;
+    private final SortDirection sortDirection;
+    private final List<Item> items = new ArrayList<Item>();
     private int values = 0;
-    int resultSetPos = -1;
-    Boolean ascending = null;
     private Value value = null;
 
     /**
      * Constructor.
      *
-     * @param resultSetPos the position within the resultset
-     * @param ascending    null if the subselect is not part of the orderBy,
-     *                     or true if it is sorted ascending or false if it is ordered descending
+     * @param resultSetPos  the position within the resultset
+     * @param sortDirection the sort direction for this column
      */
-    public FxSubSelectValues(int resultSetPos, Boolean ascending) {
-        this.ascending = ascending;
+    public FxSubSelectValues(int resultSetPos, SortDirection sortDirection) {
         this.resultSetPos = resultSetPos;
+        this.sortDirection = sortDirection;
     }
 
     public boolean isSorted() {
-        return ascending != null;
+        return !SortDirection.UNSORTED.equals(sortDirection);
     }
 
     public boolean isSortedAscending() {
-        return ascending != null && ascending.equals(Boolean.TRUE);
+        return SortDirection.ASCENDING.equals(sortDirection);
     }
 
     public void addItem(String select, int resultSetPos, boolean isXpath) {
@@ -78,8 +77,12 @@ public class FxSubSelectValues {
         items.add(new Item(select, isXpath, resultSetPos, items.size()));
     }
 
-    public ArrayList<Item> getItems() {
+    public List<Item> getItems() {
         return items;
+    }
+
+    public int getResultSetPos() {
+        return resultSetPos;
     }
 
     /**
@@ -122,26 +125,25 @@ public class FxSubSelectValues {
      * @throws FxSqlSearchException if the function fails
      */
     protected void applySelector(DataSelector ds, Property prop, PropertyResolver.Entry entry) throws FxSqlSearchException {
-
         // any selector to apply at all?
         if (!prop.hasField()) {
             return;
         }
 
         // Find and apply the selector
-        if (isMultivalue() || entry.getTableType() != PropertyResolver.TABLE.T_CONTENT) {
+        if (isMultivalue() || entry.getTableType() != PropertyResolver.Table.T_CONTENT) {
             throw new FxSqlSearchException("ex.sqlSearch.query.fieldNotAllowedFor", prop.getPropertyName());
         }
-        FxFieldSelector selector = ds.getSelectors().get(prop.getPropertyName());
+        final FxFieldSelector selector = ds.getSelectors().get(prop.getPropertyName());
         if (selector == null) {
             throw new FxSqlSearchException("ex.sqlSearch.query.noFieldsForProp",
                     prop.getField(), prop.getPropertyName());
         } else {
             for (Item it : items) {
                 if (it.isXpath()) continue;
-                StringBuffer tmp = new StringBuffer(it.select);
+                final StringBuffer tmp = new StringBuffer(it.select);
                 selector.apply(prop, entry, tmp);
-                it.select = tmp.toString();
+                it.setSelect(tmp.toString());
             }
         }
     }
@@ -163,15 +165,15 @@ public class FxSubSelectValues {
         }
         for (Item it : items) {
             if (it.isXpath()) continue;
-            it.select = prop.getFunctionsStart() + it.select + prop.getFunctionsEnd();
+            it.setSelect(prop.getFunctionsStart() + it.select + prop.getFunctionsEnd());
         }
     }
 
-    public class Item {
+    public static class Item {
+        private final String alias;
+        private final boolean isXpath;
+        private final boolean orderBy;
         private String select;
-        private String alias;
-        private boolean isXpath;
-        private boolean orderBy;
 
         private Item(String select, boolean isXpath, int resultSetPos, int pos) {
             this.isXpath = isXpath;
@@ -194,6 +196,10 @@ public class FxSubSelectValues {
 
         public boolean isXpath() {
             return isXpath;
+        }
+
+        public void setSelect(String select) {
+            this.select = select;
         }
     }
 

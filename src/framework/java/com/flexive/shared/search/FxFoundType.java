@@ -34,40 +34,71 @@
 package com.flexive.shared.search;
 
 import com.flexive.shared.value.FxString;
+import com.flexive.shared.structure.FxType;
+import com.flexive.shared.CacheAdmin;
+
+import java.io.Serializable;
 
 /**
  * A found FxType
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public interface FxFoundType {
+public class FxFoundType implements Serializable {
+    private static final long serialVersionUID = 4568969162913339997L;
+
+    private final long contentTypeId;
+    private final int foundEntries;
+    private final FxString description;
+    private final String displayName;
+
+    /**
+     * Constructor.
+     *
+     * @param contentTypeId the content type id
+     * @param foundEntries  the amount of entries found by the query
+     */
+    public FxFoundType(long contentTypeId, int foundEntries) {
+        this.contentTypeId = contentTypeId;
+        this.foundEntries = foundEntries;
+        final FxType type = CacheAdmin.getEnvironment().getType(contentTypeId);
+        this.displayName = type.getDisplayName();
+        this.description = type.getDescription();
+    }
 
     /**
      * Returns the content type id.
      *
      * @return the content type name
      */
-    public long getContentTypeId();
+    public long getContentTypeId() {
+        return contentTypeId;
+    }
 
     /**
      * Returns the amount of items found by the query.
      *
      * @return the amount of items found by the quer
      */
-    public int getFoundEntries();
+    public int getFoundEntries() {
+        return foundEntries;
+    }
 
     /**
      * Returns the description of the content type.
      *
      * @return the description of the content type
      */
-    public FxString getDescription();
+    public FxString getDescription() {
+        return description;
+    }
 
     /**
      * Returns the display name of the content type.
      *
      * @return the display name of the content type
      */
-    public String getDisplayName();
-
+    public String getDisplayName() {
+        return displayName;
+    }
 }

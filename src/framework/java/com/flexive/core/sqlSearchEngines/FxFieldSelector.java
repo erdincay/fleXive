@@ -59,7 +59,7 @@ public interface FxFieldSelector {
      * @param statement the statement to modify
      * @throws FxSqlSearchException if the function fails
      */
-    public void apply(Property prop, PropertyResolver.Entry entry, StringBuffer statement) throws FxSqlSearchException;
+    void apply(Property prop, PropertyResolver.Entry entry, StringBuffer statement) throws FxSqlSearchException;
 
     /**
      * Returns all spported fields.
@@ -68,5 +68,5 @@ public interface FxFieldSelector {
      *
      * @return the fields.
      */
-    public String getAllowedFiels();
+    String getAllowedFields();
 }

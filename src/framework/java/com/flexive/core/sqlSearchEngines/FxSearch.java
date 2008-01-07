@@ -40,6 +40,7 @@ import com.flexive.core.sqlSearchEngines.mysql.MySQLDataSelector;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxLanguage;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.configuration.DBVendor;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
@@ -47,7 +48,6 @@ import com.flexive.shared.interfaces.BriefcaseEngine;
 import com.flexive.shared.interfaces.ResultPreferencesEngine;
 import com.flexive.shared.interfaces.SequencerEngine;
 import com.flexive.shared.search.*;
-import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxType;
 import com.flexive.sqlParser.*;
@@ -57,10 +57,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * The main search engine class
@@ -70,25 +70,25 @@ import org.apache.commons.logging.LogFactory;
 public class FxSearch {
     private static final Log LOG = LogFactory.getLog(FxSearch.class);
 
-    private int startIndex;
-    private int fetchRows;
-    private String query;
-    private FxStatement fx_stmt;
+    private final int startIndex;
+    private final int fetchRows;
+    private final String query;
+    private final FxStatement statement;
+    private final ResultLocation location;
+    private final ResultViewType viewType;
+    private final FxType typeFilter;
+    private final SequencerEngine seq;
+    private final BriefcaseEngine briefcase;
+
     private PropertyResolver pr;
     private int parserExecutionTime = -1;
     private long searchId = -1;
     private String cacheTbl;
-    private FxSQLSearchParams params;
+    private final FxSQLSearchParams params;
     private boolean hasWildcard = false;
     private FxEnvironment environment;
-    private ResultPreferencesEngine conf;
+    private final ResultPreferencesEngine conf;
     private FxLanguage language;
-    private ResultLocation location;
-    private ResultViewType viewType;
-    private FxType typeFilter = null;
-
-    private SequencerEngine seq;
-    private BriefcaseEngine briefcase;
 
     /**
      * Ctor
@@ -107,6 +107,7 @@ public class FxSearch {
      */
     public FxSearch(SequencerEngine seq, BriefcaseEngine briefcase, String query, int startIndex, Integer maxFetchRows, FxSQLSearchParams params,
                     ResultPreferencesEngine conf, ResultLocation location, ResultViewType viewType) throws FxSqlSearchException {
+        FxSharedUtils.checkParameterEmpty(query, "query");
         // Init
         this.seq = seq;
         this.briefcase = briefcase;
@@ -116,12 +117,7 @@ public class FxSearch {
         this.startIndex = startIndex;
         this.fetchRows = maxFetchRows == null ? Integer.MAX_VALUE : maxFetchRows;
         this.query = query;
-        if (this.query == null || this.query.trim().length() == 0) {
-            this.query = null;
-            return;
-        }
-        final UserTicket ticket = FxContext.get().getTicket();
-        this.language = ticket.getLanguage();
+        this.language = FxContext.get().getTicket().getLanguage();
         this.location = location;
         this.viewType = viewType;
 
@@ -138,10 +134,10 @@ public class FxSearch {
 
         // Parse the statement
         try {
-            long time = java.lang.System.currentTimeMillis();
-            fx_stmt = FxStatement.parseSql(query);
+            final long start = java.lang.System.currentTimeMillis();
+            statement = FxStatement.parseSql(query);
             this.hasWildcard = this.hasWildcard();
-            this.parserExecutionTime = (int) (java.lang.System.currentTimeMillis() - time);
+            this.parserExecutionTime = (int) (java.lang.System.currentTimeMillis() - start);
         } catch (SqlParserException pe) {
             // Catch the parse exception and convert it to an localized one
             throw new FxSqlSearchException(LOG, pe);
@@ -150,18 +146,17 @@ public class FxSearch {
         }
 
         // Process content type filter
-        if (fx_stmt.hasContentTypeFilter()) {
-            String type = fx_stmt.getContentTypeFilter();
+        if (statement.hasContentTypeFilter()) {
+            String type = statement.getContentTypeFilter();
             try {
-                try {
-                    long typeId = Long.parseLong(type);
-                    typeFilter = environment.getType(typeId);
-                } catch (NumberFormatException nfe) {
-                    typeFilter = environment.getType(type);
-                }
+                typeFilter = StringUtils.isNumeric(type)
+                        ? environment.getType(Long.parseLong(type))
+                        : environment.getType(type);
             } catch (Throwable t) {
                 throw new FxSqlSearchException(t, "ex.sqlSearch.filter.invalidContentTypeFilterValue", type);
             }
+        } else {
+            typeFilter = null;
         }
     }
 
@@ -197,8 +192,8 @@ public class FxSearch {
         }
 
         // Check if the statement will produce any resultset at all
-        if (fx_stmt.getType() == FxStatement.TYPE.EMPTY) {
-            return new FxResultSetImpl(fx_stmt, null, this.parserExecutionTime, 0,
+        if (statement.getType() == FxStatement.TYPE.EMPTY) {
+            return new FxResultSetImpl(statement, null, this.parserExecutionTime, 0,
                     startIndex, fetchRows, location, viewType, null, -1, -1);
         }
 
@@ -238,17 +233,17 @@ public class FxSearch {
             if (this.hasWildcard) {
                 replaceWildcard(df);
             }
-            if (fx_stmt.getOrderByValues().isEmpty()) {
+            if (statement.getOrderByValues().isEmpty()) {
                 // add user-defined order by
                 final ResultPreferences resultPreferences = getResultPreferences(df);
                 for (ResultOrderByInfo column : resultPreferences.getOrderByColumns()) {
                     try {
-                        fx_stmt.addOrderByValue(new OrderByValue(column.getColumnName(),
+                        statement.addOrderByValue(new OrderByValue(column.getColumnName(),
                                 column.getDirection().equals(SortDirection.ASCENDING)));
                     } catch (SqlParserException e) {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("Ignoring user preferences column " + column
-                                + " since it was not selected.");
+                                    + " since it was not selected.");
                         }
                     }
                 }
@@ -275,7 +270,7 @@ public class FxSearch {
             // Fetch the result
             ResultSet rs = stmt.executeQuery(select);
             int dbSearchTime = (int) (java.lang.System.currentTimeMillis() - startTime);
-            fx_result = new FxResultSetImpl(fx_stmt, pr, this.parserExecutionTime, dbSearchTime, startIndex,
+            fx_result = new FxResultSetImpl(statement, pr, this.parserExecutionTime, dbSearchTime, startIndex,
                     fetchRows, location, viewType, df.getContentTypes(),
                     getTypeFilter() != null ? getTypeFilter().getId() : -1,
                     createdBriefcaseId);
@@ -305,7 +300,6 @@ public class FxSearch {
         } catch (FxSqlSearchException exc) {
             throw exc;
         } catch (SQLException exc) {
-            java.lang.System.err.println(exc.getMessage());
             throw new FxSqlSearchException(exc, "ex.sqlSearch.filter.sql.Exception");
         } catch (Throwable t) {
             throw new FxSqlSearchException(t, "ex.sqlSearch.failed", t.getMessage());
@@ -399,7 +393,7 @@ public class FxSearch {
     }
 
     public FxStatement getFxStatement() {
-        return fx_stmt;
+        return statement;
     }
 
     public PropertyResolver getPropertyResolver() {
@@ -426,7 +420,7 @@ public class FxSearch {
     private boolean hasWildcard() throws FxSqlSearchException {
         // Find out if we have to deal with a wildcard
         boolean hasWildcard = false;
-        for (SelectedValue value : fx_stmt.getSelectedValues()) {
+        for (SelectedValue value : statement.getSelectedValues()) {
             if (value.getValue() instanceof Property) {
                 Property prop = ((Property) value.getValue());
                 if (prop.isWildcard()) {
@@ -452,8 +446,8 @@ public class FxSearch {
         try {
             ResultPreferences prefs = getResultPreferences(df);
             ArrayList<SelectedValue> selValues = new ArrayList<SelectedValue>(
-                    (fx_stmt.getSelectedValues().size() - 1) + prefs.getSelectedColumns().size());
-            for (SelectedValue _value : fx_stmt.getSelectedValues()) {
+                    (statement.getSelectedValues().size() - 1) + prefs.getSelectedColumns().size());
+            for (SelectedValue _value : statement.getSelectedValues()) {
                 if (_value.getValue() instanceof Property && ((Property) _value.getValue()).isWildcard()) {
                     Property wildcard = (Property) _value.getValue();
                     // Wildcard, replace it with the correct values
@@ -467,7 +461,7 @@ public class FxSearch {
                     selValues.add(_value);
                 }
             }
-            fx_stmt.setSelectedValues(selValues);
+            statement.setSelectedValues(selValues);
         } catch (Throwable t) {
             throw new FxSqlSearchException(t, "ex.sqlSearch.wildcardProcessingFailed");
         }
@@ -480,7 +474,7 @@ public class FxSearch {
                 // No Type filter: see if we got only one type in the result, or use the default for all types
                 df.getContentTypes().size() == 1 ? df.getContentTypes().get(0).getContentTypeId() : -1;
 
-        //ArrayList<SelectedValue> selValues = new ArrayList<SelectedValue>(fx_stmt.getSelectedValues().size()+25);
+        //ArrayList<SelectedValue> selValues = new ArrayList<SelectedValue>(statement.getSelectedValues().size()+25);
         return conf.load(cType, viewType, location);
     }
 

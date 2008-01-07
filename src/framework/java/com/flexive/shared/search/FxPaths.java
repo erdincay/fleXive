@@ -33,20 +33,43 @@
  ***************************************************************/
 package com.flexive.shared.search;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.io.Serializable;
 
 /**
  * Tree-paths returned by queries
  * 
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public interface FxPaths {
+public class FxPaths implements Serializable {
+    private static final long serialVersionUID = -810354430866830163L;
+    private final List<Path> paths;
 
     /**
      * This object represents a single path, eg '/Images/myFolder/myFile.txt'
      */
-    public interface Path {
+    public static class Path implements Serializable {
+        private static final long serialVersionUID = -4533408073950150665L;
+        private List<Item> items;
+        private String caption = "";
+
+        /**
+         * Constructor.
+         *
+         * @param encoded the encoded path
+         */
+        public Path(String encoded) {
+            String split[] = encoded.substring(1).split("/");
+            items = new ArrayList<Item>(split.length);
+            for (String item : split) {
+                final Item aItem = new Item(item);
+                items.add(aItem);
+                caption += "/" + aItem.getCaption();
+            }
+        }
 
         /**
          * Returns all items of the path in the correct order.
@@ -56,50 +79,101 @@ public interface FxPaths {
          *
          * @return all items of the path 
          */
-        public ArrayList<Item> getItems();
+        public List<Item> getItems() {
+            return items;
+        }
 
         /**
          * Getter for the path caption, eg '/Images/myFolder/myFile.txt'.
          * 
          * @return the path caption
          */
-        public String getCaption();
-        
+        public String getCaption() {
+            return caption;
+        }
     }
 
     /**
      * This object represebts a item within a path, eg 'myFolder' in the path
      * '/Images/myFolder/myFile.txt'.
      */
-    public interface Item {
+    public static class Item implements Serializable {
+        private static final long serialVersionUID = 1498578471619916869L;
+        private String caption;
+        private long nodeId;
+        private long referenceId;
+        private long contentTypeId;
+
+        /**
+         * Constructor.
+         *
+         * @param encodedPath the encoded path, item informations are separated by a ':'
+         */
+        private Item(String encodedPath) {
+            String split[] = encodedPath.split(":");
+            caption = split[0];
+            nodeId = Long.valueOf(split[1]);
+            referenceId = Long.valueOf(split[2]);
+            contentTypeId = Long.valueOf(split[3]);
+        }
 
         /**
          * Getter for the caption of the item.
          *
          * @return the caption
          */
-        public String getCaption();
+        public String getCaption() {
+            return caption;
+        }
 
         /**
          * Gerrer for the node id of the item.
          *
          * @return the node id
          */
-        public long getNodeId();
+        public long getNodeId() {
+            return nodeId;
+        }
 
         /**
          * Getter for the reference id of the item.
          *
          * @return the refrence id
          */
-        public long getReferenceId();
+        public long getReferenceId() {
+            return referenceId;
+        }
 
         /**
          * Returns the referenced content type id of the item, or -1 if the reference is not set.
          *
          * @return the referenced content type id, or -1
          */
-        public long getContentTypeId();
+        public long getContentTypeId() {
+            return contentTypeId;
+        }
+    }
+
+
+    /**
+     * Decodes the given DB string into a FxPaths object.
+     * <p/>
+     * The encoded paths are separated by a newline ('\n').<br>
+     * The items within a path are separated by a '/' character.<br>
+     * The informations within the a path item are separated by a ':' character
+     *
+     * @param encoded the encoded string
+     */
+    public FxPaths(String encoded) {
+        if (StringUtils.isBlank(encoded)) {
+            paths = new ArrayList<Path>(0);
+        } else {
+            final String[] pathArray = encoded.trim().split("\n");
+            this.paths = new ArrayList<Path>(pathArray.length);
+            for (String path : pathArray) {
+                this.paths.add(new Path(path));
+            }
+        }
     }
 
     /**
@@ -107,5 +181,21 @@ public interface FxPaths {
      *
      * @return the paths
      */
-    public List<Path> getPaths();
+    public List<Path> getPaths() {
+        return paths;
+    }
+
+    /**
+     * {@inheritDoc} *
+     */
+    @Override
+    public String toString() {
+        if (paths == null) return "";
+        String result = "";
+        for (Path path : paths) {
+            if (result.length() > 0) result += "\n";
+            result += path.getCaption();
+        }
+        return result;
+    }
 }

@@ -16,7 +16,7 @@ import java.util.Hashtable;
  * <p>Java encoding names are used on <var>encoding</var> parameters to
  * methods such as <code>TXDocument#printWithFormat</code> and <code>DTD#printExternal</code>.
  * <p/>
- * <TABLE BORDER="0" WIDTH="100%">
+ * <Table BORDER="0" WIDTH="100%">
  * <TR>
  * <TD WIDTH="33%">
  * <P ALIGN="CENTER"><B>Common Name</B>
@@ -451,7 +451,7 @@ import java.util.Hashtable;
  * <P ALIGN="CENTER">koi8-r
  * </TD>
  * </TR>
- * </TABLE>
+ * </Table>
  *
  * @author TAMURA Kent &lt;kent@trl.ibm.co.jp&gt;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)

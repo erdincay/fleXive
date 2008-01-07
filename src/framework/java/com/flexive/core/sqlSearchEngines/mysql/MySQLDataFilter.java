@@ -36,16 +36,15 @@ package com.flexive.core.sqlSearchEngines.mysql;
 import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.sqlSearchEngines.DataFilter;
-import com.flexive.core.sqlSearchEngines.FxFoundTypeImpl;
 import com.flexive.core.sqlSearchEngines.FxSearch;
 import com.flexive.core.sqlSearchEngines.PropertyResolver;
 import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.genericSQL.GenericTreeStorage;
 import com.flexive.ejb.beans.TreeEngineBean;
+import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxFormatUtils;
-import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLoadException;
@@ -64,6 +63,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 
 // NVL --> IFNULL((select sub.id from FX_CONTENT_DATA sub where sub.id=filter.id),1)
 
@@ -85,42 +85,42 @@ import java.util.ArrayList;
 public class MySQLDataFilter extends DataFilter {
     private static final transient Log LOG = LogFactory.getLog(MySQLDataFilter.class);
 
-    final static String CSQ_NO_MATCH = "(SELECT DISTINCT null id,null ver,null lang FROM dual where 1=2)";
+    private static final String NO_MATCH = "(SELECT DISTINCT null id,null ver,null lang FROM dual where 1=2)";
 
     // The maximum rows returned by a subquery (property or assignement search)
     // May be -1 to use all found rows (not recommended, since MySQL will be VERY slow in this case).
-    private final static int SUBQUERY_LIMIT = 10000;
+    private static final int SUBQUERY_LIMIT = 10000;
 
-    private String TBL_MAIN;
-    private String TBL_DATA;
-    private String TBL_FT;
+    private final String tableMain;
+    private final String tableContentData;
+    private final String tableFulltext;
+    private final List<FxFoundType> contentTypes = new ArrayList<FxFoundType>(10);
+
     private int foundEntryCount;
     private boolean truncated;
-    private ArrayList<FxFoundType> contentTypes = new ArrayList<FxFoundType>(10);
     private Connection con;
 
     public MySQLDataFilter(Connection con, FxSearch search) throws FxSqlSearchException {
         super(con, search);
         this.con = con;
-        long briefcaseIds[] = getStatement().getBriefcaseFilter();
+        final long[] briefcaseIds = getStatement().getBriefcaseFilter();
         if (briefcaseIds.length == 0) {
-            TBL_MAIN = DatabaseConst.TBL_CONTENT;
-            TBL_DATA = DatabaseConst.TBL_CONTENT_DATA;
-            TBL_FT = DatabaseConst.TBL_CONTENT_DATA_FT;
+            tableMain = DatabaseConst.TBL_CONTENT;
+            tableContentData = DatabaseConst.TBL_CONTENT_DATA;
+            tableFulltext = DatabaseConst.TBL_CONTENT_DATA_FT;
         } else {
             // TODO: Add briefcase security (may the user access the specified briefcases?)
             // TODO: Filter out undesired / desired languages
-
-            String sIdFilter = "select id from " + DatabaseConst.TBL_BRIEFCASE_DATA +
-                    " where briefcase_id " +
-                    (getStatement().getBriefcaseFilter().length == 1 ? ("=" + briefcaseIds[0]) : "in (" +
+            final String briefcaseIdFilter = "SELECT id from " + DatabaseConst.TBL_BRIEFCASE_DATA +
+                    " WHERE briefcase_id " +
+                    (getStatement().getBriefcaseFilter().length == 1 ? ("=" + briefcaseIds[0]) : "IN (" +
                             FxArrayUtils.toSeparatedList(briefcaseIds, ',') + ")");
-            TBL_DATA = "(select * from " + DatabaseConst.TBL_CONTENT_DATA +
-                    " where id in (" + sIdFilter + ") " + _getVersionFilter(null) + ")";
-            TBL_MAIN = "(select * from " + DatabaseConst.TBL_CONTENT +
-                    " where id in (" + sIdFilter + ") " + _getVersionFilter( null) + ")";
-            TBL_FT = "(select * from " + DatabaseConst.TBL_CONTENT_DATA_FT +
-                    " where id in (" + sIdFilter + "))";    // TODO: version filter!!
+            tableContentData = "(SELECT * FROM " + DatabaseConst.TBL_CONTENT_DATA +
+                    " WHERE id IN (" + briefcaseIdFilter + ") " + getVersionFilter(null) + ")";
+            tableMain = "(SELECT * FROM " + DatabaseConst.TBL_CONTENT +
+                    " WHERE id IN (" + briefcaseIdFilter + ") " + getVersionFilter(null) + ")";
+            tableFulltext = "(SELECT * FROM " + DatabaseConst.TBL_CONTENT_DATA_FT +
+                    " WHERE id IN (" + briefcaseIdFilter + "))";    // TODO: version filter!!
         }
     }
 
@@ -136,7 +136,7 @@ public class MySQLDataFilter extends DataFilter {
             try {
                 stmt = getConnection().createStatement();
                 stmt.executeUpdate("DELETE FROM " + DatabaseConst.TBL_SEARCHCACHE_MEMORY +
-                        " WHERE SEARCH_ID=" + search.getSearchId());
+                        " WHERE search_id=" + search.getSearchId());
             } catch (Throwable t) {
                 throw new FxSqlSearchException(t, "ex.sqlSearch.err.failedToClearTempSearchResult", search.getSearchId());
             } finally {
@@ -155,10 +155,10 @@ public class MySQLDataFilter extends DataFilter {
         Statement stmt = null;
         final long MAX_ROWS = search.getFxStatement().getMaxResultRows() + 1;
         try {
-            String dataSelect;
+            final String dataSelect;
             if (getStatement().getType() == FxStatement.TYPE.ALL) {
                 // The statement will not filter the data
-                dataSelect = "select " + search.getSearchId() + " search_id,id,ver,tdef from " + TBL_MAIN + " main LIMIT " +
+                dataSelect = "SELECT " + search.getSearchId() + " search_id,id,ver,tdef FROM " + tableMain + " main LIMIT " +
                         search.getFxStatement().getMaxResultRows();
             } else {
                 // The statement filters the data
@@ -169,13 +169,13 @@ public class MySQLDataFilter extends DataFilter {
                 result.deleteCharAt(result.length() - 1);
                 // Finalize the select
                 final UserTicket ticket = FxContext.get().getTicket();
-                dataSelect = "select * from (select distinct " + search.getSearchId() +
+                dataSelect = "SELECT * FROM (SELECT DISTINCT " + search.getSearchId() +
                         " search_id,data.id,data.ver,main.tdef \n" +
-                        "from (" + result.toString() + ") data, " + DatabaseConst.TBL_CONTENT + " main\n" +
-                        "where data.ver=main.ver and data.id=main.id) data2\n" +
+                        "FROM (" + result.toString() + ") data, " + DatabaseConst.TBL_CONTENT + " main\n" +
+                        "WHERE data.ver=main.ver AND data.id=main.id) data2\n" +
                         // Security
                         (ticket.isGlobalSupervisor() ? "" :
-                                "where mayReadInstance2(data2.id,data2.ver," + ticket.getUserId() + "," +
+                                "WHERE mayReadInstance2(data2.id,data2.ver," + ticket.getUserId() + "," +
                                         ticket.getMandatorId() + "," + ticket.isMandatorSupervisor() + "," + ticket.isGlobalSupervisor() + ")\n") +
                         // Limit by the specified max items
                         "LIMIT " + MAX_ROWS;
@@ -184,10 +184,10 @@ public class MySQLDataFilter extends DataFilter {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("SQL getResult: \n" + dataSelect + "\n");
             }
-            String sSql = "insert into " + search.getCacheTable() + " (" + dataSelect + ")";
+            final String sql = "INSERT INTO " + search.getCacheTable() + " (" + dataSelect + ")";
             stmt = getConnection().createStatement();
             stmt.setQueryTimeout(search.getParams().getQueryTimeout());
-            stmt.executeUpdate(sSql);
+            stmt.executeUpdate(sql);
             analyzeResult();
         } catch (FxSqlSearchException exc) {
             throw exc;
@@ -223,15 +223,14 @@ public class MySQLDataFilter extends DataFilter {
         Statement stmt = null;
         try {
             stmt = getConnection().createStatement();
-            ResultSet rs = stmt.executeQuery("select count(*),tdef from " + search.getCacheTable() +
-                    " where search_id=" + search.getSearchId() + " group by tdef");
+            final ResultSet rs = stmt.executeQuery("SELECT count(*), tdef FROM " + search.getCacheTable() +
+                    " WHERE search_id=" + search.getSearchId() + " GROUP BY tdef");
             foundEntryCount = 0;
             while (rs != null && rs.next()) {
-                FxFoundTypeImpl type = new FxFoundTypeImpl(rs.getLong(2), rs.getInt(1));
+                final FxFoundType type = new FxFoundType(rs.getLong(2), rs.getInt(1));
                 foundEntryCount += type.getFoundEntries();
                 contentTypes.add(type);
             }
-            contentTypes.trimToSize();
 
             if (foundEntryCount > search.getFxStatement().getMaxResultRows()) {
                 foundEntryCount = search.getFxStatement().getMaxResultRows();
@@ -257,7 +256,7 @@ public class MySQLDataFilter extends DataFilter {
      * @return a list of all content types that are part of the resultset
      */
     @Override
-    public ArrayList<FxFoundType> getContentTypes() {
+    public List<FxFoundType> getContentTypes() {
         return this.contentTypes;
     }
 
@@ -278,7 +277,7 @@ public class MySQLDataFilter extends DataFilter {
      */
     private void buildOr(StringBuilder sb, Brace br) throws FxSqlSearchException {
         // Start OR
-        sb.append("(SELECT * from (\n");
+        sb.append("(SELECT * FROM (\n");
         int pos = 0;
         for (BraceElement be : br.getElements()) {
             if (pos > 0) {
@@ -289,7 +288,7 @@ public class MySQLDataFilter extends DataFilter {
             } else if (be instanceof Brace) {
                 build(sb, (Brace) be);
             } else {
-                System.err.println("Invalid BraceElement: " + be);
+                throw new FxSqlSearchException("ex.sqlSearch.filter.invalidBrace", be);
             }
             pos++;
         }
@@ -310,20 +309,20 @@ public class MySQLDataFilter extends DataFilter {
     private void buildAnd(StringBuilder sb, Brace br) throws FxSqlSearchException {
         // Start AND
         int pos = 0;
-        String sCombine = "";
+        final StringBuilder combinedConditions = new StringBuilder();
         int firstId = -1;
         for (BraceElement be : br.getElements()) {
             if (pos == 0) {
                 firstId = be.getId();
-                sb.append(("(SELECT tbl" + firstId + ".id,tbl" + firstId + ".ver,tbl" + firstId + ".lang from\n"));
+                sb.append(("(SELECT tbl" + firstId + ".id,tbl" + firstId + ".ver,tbl" + firstId + ".lang FROM\n"));
             } else {
                 sb.append(",");
-                sCombine += ((pos > 1) ? " and" : "") + " " +
-                        "tbl" + firstId + ".id=tbl" + be.getId() + ".id and " +
-                        "tbl" + firstId + ".ver=tbl" + be.getId() + ".ver and " +
-                        "(tbl" + firstId + ".lang=0 or tbl" + firstId + ".lang is null or " +
-                        "tbl" + be.getId() + ".lang=0 or tbl" + be.getId() + ".lang is null or " +
-                        "tbl" + firstId + ".lang=tbl" + be.getId() + ".lang)";
+                combinedConditions.append((pos > 1) ? " AND " : " ")
+                        .append("tbl").append(firstId).append(".id=tbl").append(be.getId()).append(".id AND ")
+                        .append("tbl").append(firstId).append(".ver=tbl").append(be.getId()).append(".ver AND ")
+                        .append("(tbl").append(firstId).append(".lang=0 or tbl").append(firstId).append(".lang IS NULL OR ")
+                        .append("tbl").append(be.getId()).append(".lang=0 OR tbl").append(be.getId()).append(".lang IS NULL OR ")
+                        .append("tbl").append(firstId).append(".lang=tbl").append(be.getId()).append(".lang)");
             }
 
             if (be instanceof Condition) {
@@ -331,14 +330,14 @@ public class MySQLDataFilter extends DataFilter {
             } else if (be instanceof Brace) {
                 build(sb, (Brace) be);
             } else {
-                System.err.println("Invalid BraceElement: " + be);
+                throw new FxSqlSearchException("ex.sqlSearch.filter.invalidBrace", be);
             }
-            sb.append((" tbl" + be.getId() + "\n"));
+            sb.append(" tbl").append(be.getId()).append("\n");
             pos++;
         }
         // Where links the tables together
         sb.append(" WHERE ");
-        sb.append(sCombine);
+        sb.append(combinedConditions);
         // Close AND
         sb.append(")");
     }
@@ -369,21 +368,21 @@ public class MySQLDataFilter extends DataFilter {
         }
 
         if (parentNode == -1) {
-            return CSQ_NO_MATCH;
+            return NO_MATCH;
         }
 
 
-        FxTreeNodeInfo nodeInfo;
+        final FxTreeNodeInfo nodeInfo;
         try {
             nodeInfo = StorageManager.getTreeStorage().getTreeNodeInfo(con, mode, parentNode);
         } catch (FxApplicationException nf) {
             // Node does not exist -> empty resultset
-            return CSQ_NO_MATCH;
+            return NO_MATCH;
         }
-        return "(SELECT DISTINCT cd.ID,cd.VER,NULL LANG FROM " + TBL_MAIN + " cd WHERE " +
-                "cd.ID IN(SELECT REF FROM " + GenericTreeStorage.getTable(mode) + " WHERE " +
-                "LFT>" + nodeInfo.getLeft() + " AND RGT<" + nodeInfo.getRight() + " AND REF IS NOT NULL " +
-                (direct ? " AND DEPTH=" + (nodeInfo.getDepth() + 1) : "") +
+        return "(SELECT DISTINCT cd.id,cd.ver,null lang FROM " + tableMain + " cd WHERE " +
+                "cd.id IN (SELECT ref FROM " + GenericTreeStorage.getTable(mode) + " WHERE " +
+                "LFT>" + nodeInfo.getLeft() + " AND RGT<" + nodeInfo.getRight() + " AND ref IS NOT NULL " +
+                (direct ? " AND depth=" + (nodeInfo.getDepth() + 1) : "") +
                 "))";
 
     }
@@ -398,12 +397,12 @@ public class MySQLDataFilter extends DataFilter {
      *          if the function failed
      */
     private String getConditionSubQuery(FxStatement stmt, Condition cond) throws FxSqlSearchException {
-        Table tblContent = stmt.getTableByType(Table.TYPE.CONTENT);
+        final Table tblContent = stmt.getTableByType(Table.TYPE.CONTENT);
         if (tblContent == null) {
             throw new FxSqlSearchException("ex.sqlSearch.contentTableMissing");
         }
-        Property prop = cond.getProperty();
-        Constant constant = cond.getConstant();
+        final Property prop = cond.getProperty();
+        final Constant constant = cond.getConstant();
 
 
         if (cond.getComperator() == Comparator.IS_CHILD_OF ||
@@ -427,13 +426,13 @@ public class MySQLDataFilter extends DataFilter {
             return (count < 2) ? result : "(" + result + ")";
         } else if (prop.getPropertyName().equals("*")) {
             // Fulltext search
-            return "(select distinct ft.ID,ft.VER,ft.LANG " +
-                    "from " + TBL_FT + " ft," + DatabaseConst.TBL_CONTENT + " cd where\n" +
-                    "cd.ver=ft.ver and cd.id=ft.id and\n" +
-                    "MATCH (value) against (" + constant.getValue() + ")\n" +
+            return "(SELECT DISTINCT ft.id,ft.ver,ft.lang " +
+                    "FROM " + tableFulltext + " ft," + DatabaseConst.TBL_CONTENT + " cd WHERE\n" +
+                    "cd.ver=ft.ver AND cd.id=ft.id and\n" +
+                    "MATCH (value) AGAINST (" + constant.getValue() + ")\n" +
                     _getLanguageFilter() +
-                    _getVersionFilter("cd") +
-                    _getSubQueryLimit() +
+                    getVersionFilter("cd") +
+                    getSubQueryLimit() +
                     ")";
             /*} else if (prop.getPropertyName().charAt(0)=='#') {
                 long assignmentId = Long.valueOf(prop.getPropertyName().substring(1));
@@ -451,7 +450,7 @@ public class MySQLDataFilter extends DataFilter {
                 }
                 if (!(fx_ass instanceof FxPropertyAssignment)) {
                     // Return no match for group assignments
-                    return CSQ_NO_MATCH;
+                    return NO_MATCH;
                 }
                 FxProperty fx_prop = ((FxPropertyAssignment)fx_ass).getProperty();
                 Property _prop = new Property(prop.getTableAlias(),fx_prop.getName(),prop.getField());
@@ -474,8 +473,8 @@ public class MySQLDataFilter extends DataFilter {
     private String _buildCondSubProp(FxStatement stmt, Condition cond, Property prop)
             throws FxSqlSearchException {
 
-        Constant constant = cond.getConstant();
-        PropertyResolver.Entry entry = getPropertyResolver().get(stmt, prop);
+        final Constant constant = cond.getConstant();
+        final PropertyResolver.Entry entry = getPropertyResolver().get(stmt, prop);
         final String filter = prop.isAssignment()
                 ? "ASSIGN=" + entry.getAssignment().getId()
                 : "TPROP=" + entry.getProperty().getId();
@@ -488,16 +487,16 @@ public class MySQLDataFilter extends DataFilter {
             // find the entries by using a join on the main table
 
             //mp: wrong properties selected for a join/union and braces missing for limit statement
-            //    was:        return "select distinct da.assign,da.tprop,ct.id,ct.ver from "+TBL_MAIN+" ct\n" +
-            return "(SELECT DISTINCT da.ID,da.VER,da.LANG FROM " + TBL_MAIN + " ct\n" +
-                    "LEFT JOIN " + TBL_DATA + " da ON (ct.ID=da.ID AND ct.VER=da.VER AND da." + filter + ")\n" +
-                    "WHERE da.TPROP IS NULL " +
-                    _getVersionFilter("ct") +
+            //    was:        return "select distinct da.assign,da.tprop,ct.id,ct.ver from "+tableMain+" ct\n" +
+            return "(SELECT DISTINCT da.id,da.ver,da.lang FROM " + tableMain + " ct\n" +
+                    "LEFT JOIN " + tableContentData + " da ON (ct.id=da.id AND ct.ver=da.ver AND da." + filter + ")\n" +
+                    "WHERE da.tprop IS NULL " +
+                    getVersionFilter("ct") +
                     // Assignment search: we are only interrested in the type that the assignment belongs to
                     (prop.isAssignment()
                             ? "AND ct.TDEF=" + entry.getAssignment().getAssignedType().getId() + " "
                             : "") +
-                    _getSubQueryLimit() + ")";
+                    getSubQueryLimit() + ")";
         }
 
         String column = prop.getFunctionsStart() +
@@ -549,7 +548,7 @@ public class MySQLDataFilter extends DataFilter {
                     value = "'" + StringUtils.join(constant.iterator(), ',') + "'";
                 } else {
                     throw new FxSqlSearchException("ex.sqlSearch.reader.type.invalidOperator",
-                            entry.getProperty().getDataType(), cond.getComperator()); 
+                            entry.getProperty().getDataType(), cond.getComperator());
                 }
                 break;
             case Boolean:
@@ -588,43 +587,43 @@ public class MySQLDataFilter extends DataFilter {
 
         // Build the final filter statement
         if (entry.getTable().equals(DatabaseConst.TBL_CONTENT)) {
-            return (" (SELECT DISTINCT cd.ID,cd.VER,null lang FROM " + TBL_MAIN + " cd WHERE " +
+            return (" (SELECT DISTINCT cd.id,cd.ver,null lang FROM " + tableMain + " cd WHERE " +
                     column +
                     cond.getSqlComperator() +
                     value +
-                    _getVersionFilter("cd") +
-                    _getSubQueryLimit() +
+                    getVersionFilter("cd") +
+                    getSubQueryLimit() +
                     ") ");
         } else {
-            return " (SELECT DISTINCT cd.ID,cd.VER,cd.LANG FROM " + TBL_DATA + " cd WHERE " +
+            return " (SELECT DISTINCT cd.id,cd.ver,cd.lang FROM " + tableContentData + " cd WHERE " +
                     column +
                     cond.getSqlComperator() +
                     value +
                     " AND " + filter +
-                    _getVersionFilter("cd") +
+                    getVersionFilter("cd") +
                     _getLanguageFilter() +
-                    _getSubQueryLimit() +
+                    getSubQueryLimit() +
                     ") ";
         }
     }
 
-    private String _getVersionFilter(String tblAlias) {
+    private String getVersionFilter(String tblAlias) {
         String tbl = (tblAlias == null || tblAlias.length() == 0) ? "" : tblAlias + ".";
         if (getStatement().getVersionFilter() == Filter.VERSION.ALL) {
             return "";
         } else if (getStatement().getVersionFilter() == Filter.VERSION.LIVE) {
-            return " AND " + tbl + "ISLIVE_VER=true ";
+            return " AND " + tbl + "islive_ver=true ";
         } else {
-            return " AND " + tbl + "ISMAX_VER=true ";
+            return " AND " + tbl + "ismax_ver=true ";
         }
     }
 
-    private String _getSubQueryLimit() {
+    private String getSubQueryLimit() {
         return SUBQUERY_LIMIT == -1 ? "" : " LIMIT " + SUBQUERY_LIMIT + " ";
     }
 
     private String _getLanguageFilter() {
-        return search.getLanguage() == null ? "" : " and lang in (0," + search.getLanguage().getId() + ") ";
+        return search.getLanguage() == null ? "" : " AND lang IN (0," + search.getLanguage().getId() + ") ";
     }
 
 
