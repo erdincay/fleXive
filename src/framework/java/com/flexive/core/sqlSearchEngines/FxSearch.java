@@ -230,11 +230,6 @@ public class FxSearch {
             pr = new PropertyResolver();
             con = Database.getDbConnection();
 
-            // TODO: remove the statement below when FxSearch works with XA transactions 
-            stmt = con.createStatement();
-            stmt.executeQuery("SET AUTOCOMMIT=1;");
-            stmt.close();
-
             // Find all matching objects
             df = getDataFilter(con);
             df.build();

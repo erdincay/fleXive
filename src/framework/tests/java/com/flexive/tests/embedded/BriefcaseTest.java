@@ -107,6 +107,10 @@ public class BriefcaseTest {
             final FxResultSet briefcaseResult = new SqlQueryBuilder().filterBriefcase(briefcaseId).select("@pk").getResult();
             Assert.assertEquals(briefcaseResult.getRowCount(), ids.size(), "Briefcase does not contain all items added previously");
             Assert.assertEquals(be.getItems(briefcaseId).length, ids.size(), "Briefcase does not contain all items added previously");
+            // query briefcase with a condition
+            final FxResultSet briefcaseResult2 = new SqlQueryBuilder().filterBriefcase(briefcaseId).select("@pk").condition("id", PropertyValueComparator.NE, 0).getResult();
+            Assert.assertEquals(briefcaseResult2.getRowCount(), ids.size(), "Briefcase does not contain all items added previously");
+
 
             // replace briefcase content with first row only
             final long addId = result.getResultRow(0).getPk(1).getId();

@@ -41,6 +41,7 @@ import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
 import com.flexive.shared.security.ACL
 import com.flexive.shared.structure.*
 import com.flexive.shared.value.*
+import com.flexive.shared.search.query.SqlQueryBuilder
 
 
 
@@ -189,7 +190,7 @@ void buildGroupData(String prefix, FxContent co, int counter, folderPks) {
     co.setValue("$prefix/selectManySearchProp", new FxSelectMany(false, buildSelectManySearchProp(counter)))
 }
 
-final List<FxPK> folderPks = EJBLookup.contentEngine.getPKsForType(CacheAdmin.environment.getType("FOLDER").id, true);
+final List<FxPK> folderPks = new SqlQueryBuilder().select("@pk").type("FOLDER").getResult().collectColumn(1)
 instanceCount.times { int counter ->
     FxContent co = EJBLookup.contentEngine.initialize(CacheAdmin.environment.getType("SearchTest").id)
     buildGroupData("", co, counter, folderPks)

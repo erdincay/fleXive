@@ -43,9 +43,9 @@ import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.genericSQL.GenericTreeStorage;
 import com.flexive.ejb.beans.TreeEngineBean;
-import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLoadException;
@@ -94,7 +94,6 @@ public class MySQLDataFilter extends DataFilter {
     private String TBL_MAIN;
     private String TBL_DATA;
     private String TBL_FT;
-    private boolean USE_VIEWS;
     private int foundEntryCount;
     private boolean truncated;
     private ArrayList<FxFoundType> contentTypes = new ArrayList<FxFoundType>(10);
@@ -108,36 +107,20 @@ public class MySQLDataFilter extends DataFilter {
             TBL_MAIN = DatabaseConst.TBL_CONTENT;
             TBL_DATA = DatabaseConst.TBL_CONTENT_DATA;
             TBL_FT = DatabaseConst.TBL_CONTENT_DATA_FT;
-            USE_VIEWS = false;
         } else {
-            Statement stmt = null;
-            USE_VIEWS = true;
-            try {
-                TBL_MAIN = "FILTER_MVIEW_" + System.currentTimeMillis();
-                TBL_DATA = "FILTER_DVIEW_" + System.currentTimeMillis();
-                TBL_FT = "FILTER_FVIEW_" + System.currentTimeMillis();
-                FxStatement fxstmt = getStatement();
+            // TODO: Add briefcase security (may the user access the specified briefcases?)
+            // TODO: Filter out undesired / desired languages
 
-                stmt = con.createStatement();
-                // TODO: Add briefcase security (may the user access the specified briefcases?)
-                // TODO: Filter out undesired / desired languages
-
-                String sIdFilter = "select id from " + DatabaseConst.TBL_BRIEFCASE_DATA +
-                        " where briefcase_id " +
-                        (getStatement().getBriefcaseFilter().length == 1 ? ("=" + briefcaseIds[0]) : "in (" +
-                                FxArrayUtils.toSeparatedList(briefcaseIds, ',') + ")");
-                stmt.addBatch("CREATE VIEW " + TBL_DATA + " AS select * from " + DatabaseConst.TBL_CONTENT_DATA +
-                        " where id in (" + sIdFilter + ") " + _getVersionFilter(fxstmt, null));
-                stmt.addBatch("CREATE VIEW " + TBL_MAIN + " AS select * from " + DatabaseConst.TBL_CONTENT +
-                        " where id in (" + sIdFilter + ") " + _getVersionFilter(fxstmt, null));
-                stmt.addBatch("CREATE VIEW " + TBL_FT + " AS select * from " + DatabaseConst.TBL_CONTENT_DATA_FT +
-                        " where id in (" + sIdFilter + ")");    // TODO: version filter!!
-                stmt.executeBatch();
-            } catch (Throwable t) {
-                throw new FxSqlSearchException(t, "ex.sqlSearch.failedToBuildFilterViews", t.getMessage());
-            } finally {
-                Database.closeObjects(MySQLDataFilter.class, null, stmt);
-            }
+            String sIdFilter = "select id from " + DatabaseConst.TBL_BRIEFCASE_DATA +
+                    " where briefcase_id " +
+                    (getStatement().getBriefcaseFilter().length == 1 ? ("=" + briefcaseIds[0]) : "in (" +
+                            FxArrayUtils.toSeparatedList(briefcaseIds, ',') + ")");
+            TBL_DATA = "(select * from " + DatabaseConst.TBL_CONTENT_DATA +
+                    " where id in (" + sIdFilter + ") " + _getVersionFilter(null) + ")";
+            TBL_MAIN = "(select * from " + DatabaseConst.TBL_CONTENT +
+                    " where id in (" + sIdFilter + ") " + _getVersionFilter( null) + ")";
+            TBL_FT = "(select * from " + DatabaseConst.TBL_CONTENT_DATA_FT +
+                    " where id in (" + sIdFilter + "))";    // TODO: version filter!!
         }
     }
 
@@ -148,20 +131,6 @@ public class MySQLDataFilter extends DataFilter {
      */
     @Override
     public void cleanup() throws FxSqlSearchException {
-        if (USE_VIEWS) {
-            Statement stmt = null;
-            try {
-                stmt = getConnection().createStatement();
-                stmt.addBatch("DROP VIEW " + TBL_MAIN);
-                stmt.addBatch("DROP VIEW " + TBL_DATA);
-                stmt.addBatch("DROP VIEW " + TBL_FT);
-                stmt.executeBatch();
-            } catch (Throwable t) {
-                throw new FxSqlSearchException(t, "ex.sqlSearch.failedToDropFilterViews");
-            } finally {
-                Database.closeObjects(MySQLDataFilter.class, null, stmt);
-            }
-        }
         if (search.getCacheTable().equals(DatabaseConst.TBL_SEARCHCACHE_MEMORY)) {
             Statement stmt = null;
             try {
@@ -189,7 +158,7 @@ public class MySQLDataFilter extends DataFilter {
             String dataSelect;
             if (getStatement().getType() == FxStatement.TYPE.ALL) {
                 // The statement will not filter the data
-                dataSelect = "select " + search.getSearchId() + " search_id,id,ver,tdef from " + TBL_MAIN + " LIMIT " +
+                dataSelect = "select " + search.getSearchId() + " search_id,id,ver,tdef from " + TBL_MAIN + " main LIMIT " +
                         search.getFxStatement().getMaxResultRows();
             } else {
                 // The statement filters the data
@@ -463,7 +432,7 @@ public class MySQLDataFilter extends DataFilter {
                     "cd.ver=ft.ver and cd.id=ft.id and\n" +
                     "MATCH (value) against (" + constant.getValue() + ")\n" +
                     _getLanguageFilter() +
-                    _getVersionFilter(stmt, "cd") +
+                    _getVersionFilter("cd") +
                     _getSubQueryLimit() +
                     ")";
             /*} else if (prop.getPropertyName().charAt(0)=='#') {
@@ -523,7 +492,7 @@ public class MySQLDataFilter extends DataFilter {
             return "(SELECT DISTINCT da.ID,da.VER,da.LANG FROM " + TBL_MAIN + " ct\n" +
                     "LEFT JOIN " + TBL_DATA + " da ON (ct.ID=da.ID AND ct.VER=da.VER AND da." + filter + ")\n" +
                     "WHERE da.TPROP IS NULL " +
-                    _getVersionFilter(stmt, "ct") +
+                    _getVersionFilter("ct") +
                     // Assignment search: we are only interrested in the type that the assignment belongs to
                     (prop.isAssignment()
                             ? "AND ct.TDEF=" + entry.getAssignment().getAssignedType().getId() + " "
@@ -623,7 +592,7 @@ public class MySQLDataFilter extends DataFilter {
                     column +
                     cond.getSqlComperator() +
                     value +
-                    _getVersionFilter(stmt, "cd") +
+                    _getVersionFilter("cd") +
                     _getSubQueryLimit() +
                     ") ");
         } else {
@@ -632,18 +601,18 @@ public class MySQLDataFilter extends DataFilter {
                     cond.getSqlComperator() +
                     value +
                     " AND " + filter +
-                    _getVersionFilter(stmt, "cd") +
+                    _getVersionFilter("cd") +
                     _getLanguageFilter() +
                     _getSubQueryLimit() +
                     ") ";
         }
     }
 
-    private String _getVersionFilter(FxStatement stmt, String tblAlias) {
+    private String _getVersionFilter(String tblAlias) {
         String tbl = (tblAlias == null || tblAlias.length() == 0) ? "" : tblAlias + ".";
-        if (stmt.getVersionFilter() == Filter.VERSION.ALL) {
+        if (getStatement().getVersionFilter() == Filter.VERSION.ALL) {
             return "";
-        } else if (stmt.getVersionFilter() == Filter.VERSION.LIVE) {
+        } else if (getStatement().getVersionFilter() == Filter.VERSION.LIVE) {
             return " AND " + tbl + "ISLIVE_VER=true ";
         } else {
             return " AND " + tbl + "ISMAX_VER=true ";

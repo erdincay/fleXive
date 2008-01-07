@@ -82,7 +82,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * {@inheritDoc}
      */
-    @TransactionAttribute(TransactionAttributeType.NEVER)
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxResultSet search(String query, final int startIndex, final Integer fetchRows, FxSQLSearchParams params)
             throws FxApplicationException {
         return search(query, startIndex, fetchRows, params, AdminResultLocations.DEFAULT, ResultViewType.LIST);
@@ -91,7 +91,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * {@inheritDoc}
      */
-    @TransactionAttribute(TransactionAttributeType.NEVER)
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxResultSet search(String query, int startIndex, Integer fetchRows, FxSQLSearchParams params, ResultLocation location, ResultViewType viewType) throws FxApplicationException {
         try {
             if (params == null) {
@@ -113,6 +113,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long getLastContentChange(boolean live) {
         Connection con = null;
         Statement stmt = null;
@@ -142,6 +143,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public QueryRootNode load(ResultLocation location, String name) throws FxApplicationException {
         return configuration.get(getConfigurationParameter(location), name);
     }
@@ -149,6 +151,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public QueryRootNode loadDefault(ResultLocation location) throws FxApplicationException {
         try {
             return load(location, DEFAULT_QUERY_NAME);
@@ -163,6 +166,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public Collection<String> loadNames(ResultLocation location) throws FxApplicationException {
         return configuration.getKeys(getConfigurationParameter(location));
     }
@@ -170,6 +174,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void save(QueryRootNode query) throws FxApplicationException {
         save(configuration, query, query.getName());
     }
@@ -177,6 +182,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void saveDefault(QueryRootNode query) throws FxApplicationException {
         save(configuration, query, DEFAULT_QUERY_NAME);
     }
@@ -184,6 +190,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void saveSystemDefault(QueryRootNode query) throws FxApplicationException {
         if (!FxContext.get().getTicket().isGlobalSupervisor()) {
             throw new FxNoAccessException(LOG, "ex.searchQuery.systemDefault.noAccess");
@@ -194,6 +201,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void remove(ResultLocation location, String name) throws FxApplicationException {
         configuration.remove(getConfigurationParameter(location), name);
     }
