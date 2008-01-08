@@ -185,7 +185,7 @@ public class MandatorBean {
             updateMandatorList();
             new FxFacesMsgInfo("Mandator.nfo.created", mandator.getName()).addToContext();
         } catch (FxApplicationException e) {
-            new FxFacesMsgErr("Mandator.err.create").addToContext();
+            new FxFacesMsgErr(e).addToContext();
             return "mandatorCreate";
         }
 
@@ -208,7 +208,7 @@ public class MandatorBean {
             updateMandatorList();
             new FxFacesMsgInfo("Mandator.nfo.deleted").addToContext();
         } catch (FxApplicationException e) {
-            new FxFacesMsgErr("Mandator.err.delete").addToContext();
+            new FxFacesMsgErr(e).addToContext();
         }
         return "mandatorOverview";
     }
@@ -244,7 +244,7 @@ public class MandatorBean {
             new FxFacesMsgInfo("Mandator.nfo.updated").addToContext();
             return "mandatorOverview";
         } catch (FxApplicationException e) {
-            new FxFacesMsgErr("Mandator.err.save").addToContext();
+            new FxFacesMsgErr(e).addToContext();
             return "mandatorOverview";
         }
     }
