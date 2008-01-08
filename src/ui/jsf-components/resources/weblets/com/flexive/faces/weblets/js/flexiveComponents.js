@@ -220,7 +220,15 @@ ResultMenuHandler.prototype = {
 
     showScreenview: function(id, version) {
         this._setContent(id, version);
-        document.getElementById(this.formName + ":" + this.name + "_refreshScreenviewButton").onclick();
+// ajax4jsf call:
+//        document.getElementById(this.formName + ":" + this.name + "_refreshScreenviewButton").onclick();
+// lytebox call:
+        var a = document.createElement("a");
+        a.href = getBase()+"thumbnail/pk"+id+"/so";
+        a.rel = "lytebox";
+        a.title = "Screenview "+id+"."+version;
+        myLytebox.start( a, false, false);
+
         //eval(this.name + "_screenviewDialog.show()");
     },
 
