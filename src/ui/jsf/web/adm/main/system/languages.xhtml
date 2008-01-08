@@ -27,6 +27,11 @@
         <c:set var="removeArrow" value="/adm/images/contentEditor/remove.png"/>
 
         <h:form id="frm">
+            <br/>
+            <h:selectBooleanCheckbox
+                    title="#{fxMessageBean['Languages.label.ignoreUsage']}"
+                    value="#{languagesBean.ignoreUsage}"/>
+            #{fxMessageBean['Languages.label.ignoreUsage']}<br/><br/>
             <adm:tab label="#{fxMessageBean['Languages.tabtitle.main']}" active="true" id="tab1"/>
                 <a4j:outputPanel id="all">
                 <t:saveState value="#{languagesBean.available}"/>

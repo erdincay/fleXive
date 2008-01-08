@@ -34,18 +34,18 @@
 package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
-import com.flexive.core.DatabaseConst;
+import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.FxLanguage;
 import com.flexive.shared.FxContext;
-import com.flexive.shared.security.Role;
-import com.flexive.shared.content.FxPermissionUtils;
+import com.flexive.shared.FxLanguage;
 import com.flexive.shared.cache.FxCacheException;
+import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.LanguageEngine;
 import com.flexive.shared.interfaces.LanguageEngineLocal;
 import com.flexive.shared.mbeans.FxCacheMBean;
+import com.flexive.shared.security.Role;
 import com.flexive.shared.value.FxString;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -72,6 +72,26 @@ import java.util.Map;
 public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
 
     private static transient Log LOG = LogFactory.getLog(LanguageBean.class);
+
+    /**
+     * All tables that have references to languages and the referencing column
+     */
+    private final static String[][] LANG_USAGE = {
+            {TBL_ACCOUNTS, "LANG"},
+            {TBL_ACLS + ML, "LANG"},
+            {TBL_STEPDEFINITION + ML, "LANG"},
+            {TBL_STRUCT_TYPES + ML, "LANG"},
+            {TBL_STRUCT_GROUPS + ML, "LANG"},
+            {TBL_STRUCT_DATATYPES + ML, "LANG"},
+            {TBL_SELECTLIST + ML, "LANG"},
+            {TBL_SELECTLIST_ITEM + ML, "LANG"},
+            {TBL_STRUCT_PROPERTIES + ML, "LANG"},
+            {TBL_STRUCT_ASSIGNMENTS, "DEFLANG"},
+            {TBL_STRUCT_ASSIGNMENTS + ML, "LANG"},
+            {TBL_CONTENT, "MAINLANG"},
+            {TBL_CONTENT_DATA, "LANG"},
+            {TBL_CONTENT_DATA_FT, "LANG"}
+    };
 
     /**
      * {@inheritDoc} *
@@ -175,8 +195,8 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
      * @return list containing requested languages
      */
     private synchronized List<FxLanguage> loadAll(boolean used, boolean add2cache) {
-        String sql = "SELECT l.LANG_CODE, l.ISO_CODE, t.LANG, t.DESCRIPTION FROM " + DatabaseConst.TBL_LANG + " l, " +
-                DatabaseConst.TBL_LANG + DatabaseConst.ML + " t " +
+        String sql = "SELECT l.LANG_CODE, l.ISO_CODE, t.LANG, t.DESCRIPTION FROM " + TBL_LANG + " l, " +
+                TBL_LANG + ML + " t " +
                 "WHERE t.LANG_CODE=l.LANG_CODE AND l.INUSE=" + used + " ORDER BY l.DISPPOS ASC, l.LANG_CODE ASC";
         Connection con = null;
         Statement stmt = null;
@@ -232,7 +252,7 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void setAvailable(List<FxLanguage> available) throws FxApplicationException {
+    public void setAvailable(List<FxLanguage> available, boolean ignoreUsage) throws FxApplicationException {
         FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.GlobalSupervisor);
         Connection con = null;
         PreparedStatement ps = null;
@@ -240,13 +260,28 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
             throw new FxInvalidParameterException("available", "ex.language.noAvailable");
         try {
             con = Database.getDbConnection();
-            ps = con.prepareStatement("UPDATE " + DatabaseConst.TBL_LANG + " SET INUSE=?, DISPPOS=?");
+            if (!ignoreUsage) {
+                List<FxLanguage> orgLang = loadAvailable(true);
+                boolean found;
+                for (FxLanguage org : orgLang) {
+                    found = false;
+                    for (FxLanguage tmp : available) {
+                        if (tmp.getId() == org.getId()) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found && hasUsages(con, org))
+                        throw new FxInvalidParameterException("available", "ex.language.removeUsed", org.getLabel());
+                }
+            }
+            ps = con.prepareStatement("UPDATE " + TBL_LANG + " SET INUSE=?, DISPPOS=?");
             ps.setBoolean(1, false);
             ps.setNull(2, java.sql.Types.INTEGER);
             ps.executeUpdate();
             ps.close();
             int pos = 0;
-            ps = con.prepareStatement("UPDATE " + DatabaseConst.TBL_LANG + " SET INUSE=?, DISPPOS=? WHERE LANG_CODE=?");
+            ps = con.prepareStatement("UPDATE " + TBL_LANG + " SET INUSE=?, DISPPOS=? WHERE LANG_CODE=?");
             ps.setBoolean(1, true);
             for (FxLanguage lang : available) {
                 ps.setInt(2, pos++);
@@ -267,6 +302,40 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
             if (con != null)
                 Database.closeObjects(LanguageBean.class, con, ps);
         }
+    }
+
+    /**
+     * Check if the given language is referenced from a table
+     *
+     * @param con      an open and valid connection
+     * @param language the language to check
+     * @return if the language is in use
+     * @throws FxApplicationException on errors
+     * @throws SQLException           on errors
+     */
+    private boolean hasUsages(Connection con, FxLanguage language) throws FxApplicationException, SQLException {
+        System.out.println("checking removed language " + language.getLabel().getBestTranslation());
+        PreparedStatement ps = null;
+        try {
+            ResultSet rs;
+            for (String[] check : LANG_USAGE) {
+                if (ps != null)
+                    ps.close();
+                ps = con.prepareStatement("SELECT COUNT(*) FROM " + check[0] + " WHERE " + check[1] + "=?");
+                ps.setLong(1, language.getId());
+                rs = ps.executeQuery();
+                if (rs != null && rs.next()) {
+                    if (rs.getLong(1) > 0) {
+                        LOG.info("Language [" + language.getIso2digit() + "] has [" + rs.getLong(1) + "] usages in table " + check[0] + ", column " + check[1]);
+                        return true;
+                    }
+                }
+            }
+        } finally {
+            if (ps != null)
+                ps.close();
+        }
+        return false;
     }
 }
 

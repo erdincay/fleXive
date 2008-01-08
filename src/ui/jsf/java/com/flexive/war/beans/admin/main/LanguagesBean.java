@@ -50,6 +50,7 @@ import java.util.List;
  */
 public class LanguagesBean {
 
+    private boolean ignoreUsage;
     private LanguageEngine lang;
     private List<FxLanguage> available = null;
     private List<FxLanguage> disabled = null;
@@ -58,6 +59,14 @@ public class LanguagesBean {
     public LanguagesBean() {
         lang = EJBLookup.getLanguageEngine();
         language = null;
+    }
+
+    public boolean isIgnoreUsage() {
+        return ignoreUsage;
+    }
+
+    public void setIgnoreUsage(boolean ignoreUsage) {
+        this.ignoreUsage = ignoreUsage;
     }
 
     public List<FxLanguage> getAvailable() throws FxApplicationException {
@@ -167,7 +176,7 @@ public class LanguagesBean {
      */
     public String saveSettings() {
         try {
-            lang.setAvailable(available);
+            lang.setAvailable(available, ignoreUsage);
         } catch (FxApplicationException e) {
             new FxFacesMsgErr(e).addToContext();
         }

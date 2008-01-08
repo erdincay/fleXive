@@ -107,7 +107,8 @@ public interface LanguageEngine {
      * Set all available languages
      *
      * @param available list containing all available languages
+     * @param ignoreUsage ignore if a language that is no longer available after calling this method is in use
      * @throws FxApplicationException on errors
      */
-    public void setAvailable(List<FxLanguage> available) throws FxApplicationException;
+    public void setAvailable(List<FxLanguage> available, boolean ignoreUsage) throws FxApplicationException;
 }
