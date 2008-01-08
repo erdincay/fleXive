@@ -62,6 +62,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.testng.annotations.DataProvider;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.collections.CollectionUtils;
 
 import java.util.*;
@@ -111,7 +112,8 @@ public class SqlQueryTest {
         // link test instances in tree
         for (FxPK pk: testPks) {
             generatedNodeIds.add(
-                    EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("test" + pk).setReference(pk))
+                    EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("test" + pk)
+                            .setReference(pk).setName(RandomStringUtils.random(1024)))
             );
         }
     }

@@ -273,9 +273,9 @@ public class SqlSearch {
         } catch (FxSqlSearchException exc) {
             throw exc;
         } catch (SQLException exc) {
-            throw new FxSqlSearchException(exc, "ex.sqlSearch.filter.sql.Exception");
+            throw new FxSqlSearchException(exc, "ex.sqlSearch.sql.failed", exc.getMessage(), query);
         } catch (Throwable t) {
-            throw new FxSqlSearchException(t, "ex.sqlSearch.failed", t.getMessage());
+            throw new FxSqlSearchException(t, "ex.sqlSearch.failed", t.getMessage(), query);
         } finally {
             try {
                 if (ds != null) ds.cleanup(con);

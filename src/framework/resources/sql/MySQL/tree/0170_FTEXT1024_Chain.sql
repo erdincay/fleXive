@@ -6,8 +6,8 @@ BEGIN
   DECLARE _id INTEGER UNSIGNED default null;
   DECLARE _tdef INTEGER default null;
   DECLARE _ref INTEGER UNSIGNED default null;
-  DECLARE _display varchar(1024);
-  DECLARE _nodeName varchar(256);
+  DECLARE _display text;
+  DECLARE _nodeName text;
   DECLARE done BOOLEAN DEFAULT FALSE;
   DECLARE CONTINUE HANDLER FOR SQLSTATE '02000' SET done = TRUE;
 
