@@ -71,7 +71,7 @@ public class SearchResultBean implements ActionBean, Serializable {
     private Briefcase briefcase = null; // cached briefcase object for briefcase queries
 
     // cache settings
-    private FxSQLSearchParams.CACHE_MODE cacheMode = FxSQLSearchParams.CACHE_MODE.ON;
+    private FxSQLSearchParams.CacheMode cacheMode = FxSQLSearchParams.CacheMode.ON;
 
     // briefcase-related fields set in the query form
     private long briefcaseAclId;
@@ -231,7 +231,7 @@ public class SearchResultBean implements ActionBean, Serializable {
     }
 
     public SqlQueryBuilder getQueryBuilder() {
-        return getSessionData().getQueryBuilder().setViewType(getViewType());
+        return getSessionData().getQueryBuilder().viewType(getViewType());
     }
 
     public void setQueryBuilder(SqlQueryBuilder queryBuilder) {
@@ -483,11 +483,11 @@ public class SearchResultBean implements ActionBean, Serializable {
         this.createBriefcase = createBriefcase;
     }
 
-    public FxSQLSearchParams.CACHE_MODE getCacheMode() {
+    public FxSQLSearchParams.CacheMode getCacheMode() {
         return cacheMode;
     }
 
-    public void setCacheMode(FxSQLSearchParams.CACHE_MODE cacheMode) {
+    public void setCacheMode(FxSQLSearchParams.CacheMode cacheMode) {
         this.cacheMode = cacheMode;
     }
 

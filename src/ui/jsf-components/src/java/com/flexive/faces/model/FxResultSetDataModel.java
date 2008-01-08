@@ -60,7 +60,7 @@ public class FxResultSetDataModel extends DataModel {
     private int rowCount = -1;    // externally cached number of result rows to prevent unnecessary db access
     private int gridColumns = 1;    // result rows per output (datatable) row
 
-    private FxSQLSearchParams.CACHE_MODE cacheMode = FxSQLSearchParams.CACHE_MODE.ON;
+    private FxSQLSearchParams.CacheMode cacheMode = FxSQLSearchParams.CacheMode.ON;
 
     // fields for briefcase creation
     private ACL briefcaseAcl;
@@ -234,11 +234,11 @@ public class FxResultSetDataModel extends DataModel {
         this.briefcaseName = briefcaseName;
     }
 
-    public FxSQLSearchParams.CACHE_MODE getCacheMode() {
+    public FxSQLSearchParams.CacheMode getCacheMode() {
         return cacheMode;
     }
 
-    public void setCacheMode(FxSQLSearchParams.CACHE_MODE cacheMode) {
+    public void setCacheMode(FxSQLSearchParams.CacheMode cacheMode) {
         this.cacheMode = cacheMode;
     }
 

@@ -42,6 +42,8 @@ import com.flexive.shared.security.ACL
 import com.flexive.shared.structure.*
 import com.flexive.shared.value.*
 import com.flexive.shared.search.query.SqlQueryBuilder
+import com.flexive.shared.tree.FxTreeNodeEdit
+import com.flexive.shared.tree.FxTreeNode
 
 
 

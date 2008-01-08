@@ -35,6 +35,8 @@ package com.flexive.shared.search;
 
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxLanguage;
+import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.UserTicket;
@@ -42,6 +44,10 @@ import com.flexive.shared.security.UserTicket;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Date;
+import java.text.SimpleDateFormat;
+
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Search parameters
@@ -49,26 +55,25 @@ import java.util.List;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class FxSQLSearchParams implements Serializable {
-
     private static final long serialVersionUID = -3154811997979332790L;
-    private final static int DEFAULT_QUERY_TIMEOUT = 15; /*seconds*/
+    private static final int DEFAULT_QUERY_TIMEOUT = 15; /*seconds*/
 
     /**
      * The cache modes of the search.
-     *
+     * <p/>
      * <li><b>OFF</b>: No caching will be used at all.</li>
      * <li><b>ON</b>: The search will try to find the query result from its cache, and writes the result to the cache
-     *      for the next similar querys to find it</li>
+     * for the next similar querys to find it</li>
      * <li><b>READ_ONLY</b>: The search will try to find the query result from its cache, but will
-     *      not write the result to the cache</li>
+     * not write the result to the cache</li>
      */
-    static public enum CACHE_MODE {
+    public static enum CacheMode {
         OFF(1),
         READ_ONLY(2),
         ON(3);
         private int id;
 
-        CACHE_MODE(int id) {
+        CacheMode(int id) {
             this.id = id;
         }
 
@@ -82,18 +87,75 @@ public class FxSQLSearchParams implements Serializable {
         }
 
         /**
-         * Get a CACHE_MODE by its id
+         * Get a CacheMode by its id
          *
          * @param id the id
-         * @return CACHE_MODE the type
-         * @throws com.flexive.shared.exceptions.FxNotFoundException if the mode does not exist
-         *
+         * @return CacheMode the type
+         * @throws com.flexive.shared.exceptions.FxNotFoundException
+         *          if the mode does not exist
          */
-        public static CACHE_MODE getById(int id) throws FxNotFoundException {
-            for (CACHE_MODE mode : CACHE_MODE.values()) {
+        public static CacheMode getById(int id) throws FxNotFoundException {
+            for (CacheMode mode : CacheMode.values()) {
                 if (mode.id == id) return mode;
             }
             throw new FxNotFoundException("ex.sqlSearch.cacheMode.notFound.id", id);
+        }
+    }
+
+    /**
+     * Envelope to carry data needed for a briefcase creation.
+     *
+     * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+     */
+    public static class BriefcaseCreationData implements Serializable {
+        private static final long serialVersionUID = -1050668347506270241L;
+        private final Long aclId;
+        private final String description;
+        private final String name;
+
+        /**
+         * Constructor.
+         *
+         * @param name        the name of the briefcase, in case of null or a empty String a name will be constructed
+         * @param description the description
+         * @param aclId       the acl the briefcase is using, or null if the briefcase is not shared
+         */
+        public BriefcaseCreationData(String name, String description, Long aclId) {
+            this.description = description == null ? "" : description;
+            if (StringUtils.isBlank(name)) {
+                final UserTicket ticket = FxContext.get().getTicket();
+                this.name = ticket.getUserName() + "_" + FxFormatUtils.getDateTimeFormat().format(new Date());
+            } else {
+                this.name = name;
+            }
+            this.aclId = aclId;
+        }
+
+        /**
+         * Returns the acl that the briefcase is using, or null if the briefcase is not shared.
+         *
+         * @return the aclId, or null if the briefcase is not shared
+         */
+        public Long getAclId() {
+            return aclId;
+        }
+
+        /**
+         * The briefcase description (may be empty).
+         *
+         * @return the description
+         */
+        public String getDescription() {
+            return description;
+        }
+
+        /**
+         * The briefcase name.
+         *
+         * @return the name
+         */
+        public String getName() {
+            return name;
         }
     }
 
@@ -101,8 +163,9 @@ public class FxSQLSearchParams implements Serializable {
     private BriefcaseCreationData bcd = null;
     private int queryTimeout = -1;
     private List<FxLanguage> resultLanguages;
-    private CACHE_MODE cacheMode = CACHE_MODE.OFF;
-    private static final CACHE_MODE CACHE_MODE_DEFAULT = CACHE_MODE.READ_ONLY;
+    private CacheMode cacheMode = CacheMode.OFF;
+    private static final CacheMode CACHE_MODE_DEFAULT = CacheMode.READ_ONLY;
+
     /**
      * Constructor.
      */
@@ -114,14 +177,14 @@ public class FxSQLSearchParams implements Serializable {
      * Sets the caching mode for the search.
      *
      * @param mode the cache mode to use<br>
-     *      CACHE_MODE.ON: read from the cache if possible and write result to the cache<br>
-     *      CACHE_MODE.OFF: do not read or write the cache<br>
-     *      CACHE_MODE.READ_ONLY: read from the cache, but do not write to it<br>
-     *      if null is specified CACHE_MODE.READ_ONLY will be used.
+     *             CacheMode.ON: read from the cache if possible and write result to the cache<br>
+     *             CacheMode.OFF: do not read or write the cache<br>
+     *             CacheMode.READ_ONLY: read from the cache, but do not write to it<br>
+     *             if null is specified CacheMode.READ_ONLY will be used.
      * @return this
      */
-    public FxSQLSearchParams setCacheMode(CACHE_MODE mode) {
-        this.cacheMode=mode==null?CACHE_MODE_DEFAULT:mode;
+    public FxSQLSearchParams setCacheMode(CacheMode mode) {
+        this.cacheMode = mode == null ? CACHE_MODE_DEFAULT : mode;
         return this;
     }
 
@@ -131,15 +194,15 @@ public class FxSQLSearchParams implements Serializable {
      *
      * @return the cache mode.
      */
-    public CACHE_MODE getCacheMode() {
-        return (cacheMode==null)?CACHE_MODE_DEFAULT:cacheMode;
+    public CacheMode getCacheMode() {
+        return (cacheMode == null) ? CACHE_MODE_DEFAULT : cacheMode;
     }
 
     /**
      * Sets the languages that the resultset should contain.
      *
      * @param languages the languages, if null or a emtpty array is specified the default language of the
-     * calling user will be used.
+     *                  calling user will be used.
      * @return this
      */
     public FxSQLSearchParams setResultLanguages(List<FxLanguage> languages) {
@@ -153,7 +216,7 @@ public class FxSQLSearchParams implements Serializable {
      * @return the languages
      */
     public List<FxLanguage> getResultLanguages() {
-        if (this.resultLanguages==null) {
+        if (this.resultLanguages == null) {
             this.resultLanguages = new ArrayList<FxLanguage>(1);
             final UserTicket ticket = FxContext.get().getTicket();
             this.resultLanguages.add(ticket.getLanguage());
@@ -164,27 +227,27 @@ public class FxSQLSearchParams implements Serializable {
     /**
      * Saves the result of the query in a new briefcase.
      *
-     * @param name the name of the briefcase to create
+     * @param name        the name of the briefcase to create
      * @param description the description of the briefcase
-     * @param aclId null if the briefcase is not shared, or a ACL to grant permissions to other users
+     * @param aclId       null if the briefcase is not shared, or a ACL to grant permissions to other users
      * @return this
      */
-    public FxSQLSearchParams saveResultInBriefcase(String name,String description,Long aclId) {
-        this.bcd = new BriefcaseCreationData(name,description,aclId);
+    public FxSQLSearchParams saveResultInBriefcase(String name, String description, Long aclId) {
+        this.bcd = new BriefcaseCreationData(name, description, aclId);
         return this;
     }
 
     /**
      * Saves the result of the query in a new briefcase.
      *
-     * @param name the name of the briefcase to create
+     * @param name        the name of the briefcase to create
      * @param description the description of the briefcase
-     * @param acl null if the briefcase is not shared, or a ACL to grant permissions to other users
+     * @param acl         null if the briefcase is not shared, or a ACL to grant permissions to other users
      * @return this
      */
-    public FxSQLSearchParams saveResultInBriefcase(String name,String description, ACL acl) {
-        Long aclId = acl==null?null:acl.getId();
-        this.bcd = new BriefcaseCreationData(name,description,aclId);
+    public FxSQLSearchParams saveResultInBriefcase(String name, String description, ACL acl) {
+        Long aclId = acl == null ? null : acl.getId();
+        this.bcd = new BriefcaseCreationData(name, description, aclId);
         return this;
     }
 
@@ -194,7 +257,7 @@ public class FxSQLSearchParams implements Serializable {
      * @return true if the query will create a briefcase with the found objects.
      */
     public boolean getWillCreateBriefcase() {
-        return (this.bcd!=null);
+        return (this.bcd != null);
     }
 
     public BriefcaseCreationData getBriefcaseCreationData() {
@@ -209,7 +272,7 @@ public class FxSQLSearchParams implements Serializable {
      * @return this
      */
     public FxSQLSearchParams setQueryTimeout(int value) {
-        this.queryTimeout = value<=0?-1:value;
+        this.queryTimeout = value <= 0 ? -1 : value;
         return this;
     }
 
@@ -220,6 +283,7 @@ public class FxSQLSearchParams implements Serializable {
      * @return the query timeout
      */
     public int getQueryTimeout() {
-        return (queryTimeout<0)?DEFAULT_QUERY_TIMEOUT:queryTimeout;
+        return (queryTimeout < 0) ? DEFAULT_QUERY_TIMEOUT : queryTimeout;
     }
+
 }

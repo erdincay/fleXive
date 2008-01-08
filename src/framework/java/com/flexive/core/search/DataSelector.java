@@ -31,28 +31,25 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.sqlParser;
+package com.flexive.core.search;
 
-public class SelectedValue
-{
-    private final String alias;
-    private final Value value;
+import com.flexive.shared.exceptions.FxSqlSearchException;
 
-    public SelectedValue(Value value,String alias) {
-        this.alias = alias;
-        this.value = value;
-    }
+import java.sql.Connection;
+import java.util.Map;
 
-    public String getAlias() {
-        return alias;
-    }
+/**
+ * Interface for DB specific DataSelectors
+ *
+ * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ */
+public abstract class DataSelector {
 
-    public Value getValue() {
-        return value;
-    }
+    public abstract String build(final Connection con) throws FxSqlSearchException;
 
-    @Override
-    public String toString() {
-        return value.toString()+";Alias:"+this.alias;
-    }
+    public abstract void cleanup(Connection con) throws FxSqlSearchException;
+
+    public abstract Map<String, FieldSelector> getSelectors();
+
+
 }

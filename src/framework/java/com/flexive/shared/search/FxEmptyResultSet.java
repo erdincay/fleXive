@@ -60,13 +60,6 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
-    public FxPK getPrimaryKey(int row) {
-        return EMPTY_PK;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public long getCreationTime() {
         return creationTime;
     }

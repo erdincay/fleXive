@@ -123,12 +123,11 @@ public final class FxSharedUtils {
      * @return the 1-based index of the given column, or -1 if it does not exist
      */
     public static int getColumnIndex(String[] columnNames, String name) {
-        final boolean hasPrefix = name.indexOf('.') > 0;
         final String upperName = name.toUpperCase();
         for (int i = 0; i < columnNames.length; i++) {
             final String columnName = columnNames[i];
             final String upperColumn = columnName.toUpperCase();
-            if (upperColumn.equals(upperName) || (!hasPrefix && upperColumn.endsWith("." + upperName))) {
+            if (upperColumn.equals(upperName) || upperColumn.endsWith("." + upperName)) {
                 return i + 1;
             }
         }
@@ -847,6 +846,33 @@ public final class FxSharedUtils {
      */
     public static <K, V> V get(Map<K, V> map, K key, V defaultValue) {
         return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+
+    /**
+     * Returns true if the given string value is quoted with the given character (e.g. 'value').
+     *
+     * @param value the string value to be checked
+     * @param quoteChar the quote character, for example '
+     * @return  true if the given string value is quoted with the given character (e.g. 'value').
+     */
+    public static boolean isQuoted(String value, char quoteChar) {
+        return value != null && value.length() >= 2
+                && value.charAt(0) == quoteChar && value.charAt(value.length() - 1) == quoteChar;
+    }
+
+    /**
+     * Strips the quotes from the given string if it is quoted, otherwise it returns
+     * the input value itself.
+     *
+     * @param value the value to be "unquoted"
+     * @param quoteChar the quote character, for example '
+     * @return  the unquoted string, or <code>value</code>, if it was not quoted
+     */
+    public static String stripQuotes(String value, char quoteChar) {
+        if (isQuoted(value, quoteChar)) {
+            return value.substring(1, value.length() - 1);
+        }
+        return value;
     }
 
     /**

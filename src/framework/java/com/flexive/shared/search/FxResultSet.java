@@ -45,8 +45,6 @@ import java.util.Map;
  */
 public interface FxResultSet {
 
-    public FxPK getPrimaryKey(int row);
-
     /**
      * Returns the time this resultset was created at.
      * 

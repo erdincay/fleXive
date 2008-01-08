@@ -691,7 +691,7 @@ public class SelectBean implements Serializable {
 
     public List<SelectItem> getCacheModes() {
         if (cacheModes == null) {
-            cacheModes = FxJsfUtils.enumsAsSelectList(FxSQLSearchParams.CACHE_MODE.values());
+            cacheModes = FxJsfUtils.enumsAsSelectList(FxSQLSearchParams.CacheMode.values());
         }
         return cacheModes;
     }

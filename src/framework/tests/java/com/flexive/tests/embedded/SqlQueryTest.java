@@ -35,13 +35,20 @@ package com.flexive.tests.embedded;
 
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.tree.FxTreeNode;
+import com.flexive.shared.tree.FxTreeMode;
+import com.flexive.shared.tree.FxTreeNodeEdit;
+import com.flexive.shared.workflow.Step;
+import com.flexive.shared.workflow.StepDefinition;
 import com.flexive.shared.content.FxPK;
+import com.flexive.shared.content.FxContent;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.search.*;
 import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.search.query.QueryOperatorNode;
 import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.security.Account;
+import com.flexive.shared.security.ACL;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxPropertyAssignment;
@@ -91,16 +98,29 @@ public class SqlQueryTest {
     }
 
     private int testInstanceCount;  // number of instances for the SearchTest type
+    private final List<Long> generatedNodeIds = new ArrayList<Long>();
 
     @BeforeClass
     public void setup() throws Exception {
         login(TestUsers.SUPERVISOR);
-        testInstanceCount = new SqlQueryBuilder().type(TEST_TYPE).getResult().getRowCount();
+        final List<FxPK> testPks = new SqlQueryBuilder().select("@pk").type(TEST_TYPE).getResult().collectColumn(1);
+        testInstanceCount = testPks.size();
         assert testInstanceCount > 0 : "No instances of test type " + TEST_TYPE + " found.";
+        // link test instances in tree
+        for (FxPK pk: testPks) {
+            generatedNodeIds.add(
+                    EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("test" + pk).setReference(pk))
+            );
+        }
     }
 
     @AfterClass
     public void shutdown() throws Exception {
+        for (long nodeId: generatedNodeIds) {
+            EJBLookup.getTreeEngine().remove(
+                    FxTreeNodeEdit.createNew("").setReference(new FxPK(nodeId)).setMode(FxTreeMode.Edit),
+                    false, true);
+        }
         logout();
     }
 
@@ -407,6 +427,79 @@ public class SqlQueryTest {
         }
         throw new IllegalArgumentException("Failed to find a suitable test value for property " + getTestPropertyName(name)
                 + " and comparator " + comparator);
+    }
+
+    @Test
+    public void aclSelectorTest() throws FxApplicationException {
+        final FxResultSet result = new SqlQueryBuilder().select("@pk", "acl", "acl.label").getResult();
+        assert result.getRowCount() > 0;
+        for (FxResultRow row: result.getResultRows()) {
+            final ACL acl = CacheAdmin.getEnvironment().getACL(row.getLong("acl"));
+            assert acl.getLabel().getBestTranslation().equals(row.getFxValue("acl.label").getBestTranslation())
+                    : "Invalid ACL label '" + row.getValue(3) + "', expected: '" + acl.getLabel() + "'";
+            final FxContent content = EJBLookup.getContentEngine().load(row.getPk(1));
+            assert content.getAclId() == acl.getId()
+                    : "Invalid ACL for instance " + row.getPk(1) + ": " + acl.getId()
+                    + ", content engine returned " + content.getAclId(); 
+        }
+    }
+
+    @Test
+    public void stepSelectorTest() throws FxApplicationException {
+        final FxResultSet result = new SqlQueryBuilder().select("@pk", "step", "step.label").getResult();
+        assert result.getRowCount() > 0;
+        for (FxResultRow row: result.getResultRows()) {
+            final Step step = CacheAdmin.getEnvironment().getStep(row.getLong("step"));
+            final StepDefinition definition = CacheAdmin.getEnvironment().getStepDefinition(step.getStepDefinitionId());
+            assert definition.getLabel().getBestTranslation().equals(row.getFxValue("step.label").getBestTranslation())
+                    : "Invalid step label '" + row.getValue(3) + "', expected: '" + definition.getLabel() + "'";
+            final FxContent content = EJBLookup.getContentEngine().load(row.getPk(1));
+            assert content.getStepId() == step.getId()
+                    : "Invalid step for instance " + row.getPk(1) + ": " + step.getId()
+                    + ", content engine returned " + content.getStepId();
+        }
+    }
+
+    @Test
+    public void treeSelectorTest() throws FxApplicationException {
+        final FxResultSet result = new SqlQueryBuilder().select("@pk", "@path").isChild(FxTreeNode.ROOT_NODE).getResult();
+        assert result.getRowCount() > 0;
+        for (FxResultRow row: result.getResultRows()) {
+            final List<FxPaths.Path> paths = row.getPaths(2);
+            assert paths.size() > 0 : "Returned no path information for content " + row.getPk(1);
+            for (FxPaths.Path path: paths) {
+                assert path.getItems().size() > 0 : "Empty path returned";
+                final FxPaths.Item leaf = path.getItems().get(path.getItems().size() - 1);
+                assert leaf.getReferenceId() == row.getPk(1).getId() : "Expected reference ID " + row.getPk(1)
+                        + ", got: " + leaf.getReferenceId() + " (nodeId=" + leaf.getNodeId() + ")";
+
+                final String treePath = StringUtils.join(EJBLookup.getTreeEngine().getLabels(FxTreeMode.Edit, leaf.getNodeId()), '/');
+                assert treePath.equals(path.getCaption()) : "Unexpected tree path '" + path.getCaption()
+                        + "', expected: '" + treePath + "'";
+
+            }
+        }
+        // test selection via node path
+        final FxResultSet pathResult = new SqlQueryBuilder().select("@pk", "@path").isChild("/").getResult();
+        assert pathResult.getRowCount() == result.getRowCount() : "Path select returned " + pathResult.getRowCount()
+                + " rows, select by ID returned " + result.getRowCount() + " rows.";
+        // query a leaf node
+        new SqlQueryBuilder().select("@pk").isChild(EJBLookup.getTreeEngine().getPathById(FxTreeMode.Edit, pathResult.getResultRow(0).getPk(1).getId()));
+    }
+
+    @Test
+    public void fulltextSearchTest() throws FxApplicationException {
+        final FxResultSet result = new SqlQueryBuilder().select("@pk", getTestPropertyName("string")).type(TEST_TYPE).maxRows(1).getResult();
+        assert result.getRowCount() == 1 : "Expected only one result, got: " + result.getRowCount();
+
+        // perform a fulltext query against the first word
+        final FxPK pk = result.getResultRow(0).getPk(1);
+        final String[] words = StringUtils.split(((FxString) result.getResultRow(0).getFxValue(2)).getBestTranslation(), ' ');
+        assert words.length > 0;
+        assert words[0].length() > 0 : "Null length word: " + words[0];
+        final FxResultSet ftresult = new SqlQueryBuilder().select("@pk").fulltext(words[0]).getResult();
+        assert ftresult.getRowCount() > 0 : "Expected at least one result for fulltext query '" + words[0] + "'";
+        assert ftresult.collectColumn(1).contains(pk) : "Didn't find pk " + pk + " in result, got: " + ftresult.collectColumn(1);
     }
 
 

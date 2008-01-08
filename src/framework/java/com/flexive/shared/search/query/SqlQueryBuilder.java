@@ -36,6 +36,7 @@ package com.flexive.shared.search.query;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxInvalidStateException;
@@ -250,6 +251,16 @@ public class SqlQueryBuilder implements Serializable {
     }
 
     /**
+     * Performs a fulltext query over all indexed properties against the given text.
+     *
+     * @param value the fulltext query
+     * @return this
+     */
+    public SqlQueryBuilder fulltext(String value) {
+        return condition("*", PropertyValueComparator.EQ, value);
+    }
+
+    /**
      * Adds a condition that selects only objects of the given type. Note that this is different
      * to {@link #filterType(String)}, since filtering is applied on the result that also may contain
      * other types, but this is a standard search condition that restrains the search result.
@@ -288,6 +299,18 @@ public class SqlQueryBuilder implements Serializable {
     }
 
     /**
+     * Limits the (sub-)query to children of the given node.
+     *
+     * @param path   the tree path of the node
+     * @return  this
+     */
+    public SqlQueryBuilder isChild(String path) {
+        renderCondition("IS CHILD OF " + FxFormatUtils.escapeForSql(path));
+        tables.add(Table.CONTENT);
+        return this;
+    }
+
+    /**
      * Limits the (sub-)query to the direct children of the given node.
      *
      * @param nodeId    the root node for the (sub-)query
@@ -295,6 +318,18 @@ public class SqlQueryBuilder implements Serializable {
      */
     public SqlQueryBuilder isDirectChild(long nodeId) {
         renderCondition("IS DIRECT CHILD OF " + nodeId);
+        tables.add(Table.CONTENT);
+        return this;
+    }
+
+    /**
+     * Limits the (sub-)query to the direct children of the given node.
+     *
+     * @param path   the tree path of the node
+     * @return  this
+     */
+    public SqlQueryBuilder isDirectChild(String path) {
+        renderCondition("IS DIRECT CHILD OF " + FxFormatUtils.escapeForSql(path));
         tables.add(Table.CONTENT);
         return this;
     }
@@ -547,7 +582,7 @@ public class SqlQueryBuilder implements Serializable {
         return viewType;
     }
 
-    public SqlQueryBuilder setViewType(ResultViewType viewType) {
+    public SqlQueryBuilder viewType(ResultViewType viewType) {
         this.viewType = viewType;
         return this;
     }
@@ -556,7 +591,7 @@ public class SqlQueryBuilder implements Serializable {
         return startRow;
     }
 
-    public SqlQueryBuilder setStartRow(int startRow) {
+    public SqlQueryBuilder startRow(int startRow) {
         this.startRow = startRow;
         return this;
     }
@@ -565,7 +600,7 @@ public class SqlQueryBuilder implements Serializable {
         return maxRows;
     }
 
-    public SqlQueryBuilder setMaxRows(int maxRows) {
+    public SqlQueryBuilder maxRows(int maxRows) {
         this.maxRows = maxRows;
         return this;
     }

@@ -35,7 +35,7 @@ package com.flexive.ejb.beans.search;
 
 import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
-import com.flexive.core.sqlSearchEngines.FxSearch;
+import com.flexive.core.search.SqlSearch;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.configuration.Parameter;
@@ -78,6 +78,8 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     private BriefcaseEngine briefcase;
     @EJB
     private ConfigurationEngineLocal configuration;
+    @EJB
+    private TreeEngine treeEngine;
 
     /**
      * {@inheritDoc}
@@ -97,8 +99,8 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
             if (params == null) {
                 params = new FxSQLSearchParams();
             }
-            FxSearch fx_search = new FxSearch(seq, briefcase, query, startIndex, fetchRows, params, resultPreferences, location, viewType);
-            return fx_search.executeQuery();
+            return new SqlSearch(seq, briefcase, treeEngine, query, startIndex, fetchRows, 
+                    params, resultPreferences, location, viewType).executeQuery();
         } catch (FxSqlSearchException exc) {
             LOG.error(exc, exc);
             try {

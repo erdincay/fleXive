@@ -48,14 +48,22 @@ import org.apache.commons.lang.StringUtils;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class FxStatement {
+    public static enum Type {
+        /** the statement filter the data */
+        FILTER,
+        /** the statement will always return a empty resultset */
+        EMPTY,
+        /** The statement will always return the whole data from the DB */
+        ALL
+    }
 
-    private HashMap<String,Table> tables;
+    private HashMap<String, Table> tables;
     private Brace currentBrace;
     private Brace rootBrace;
-    private HashMap<Filter.TYPE,Filter> filters;
+    private HashMap<Filter.TYPE, Filter> filters;
     private boolean bDebug = false;
     private int iBraceElementIdGenerator = 1;
-    private TYPE type = TYPE.FILTER;
+    private Type type = Type.FILTER;
     private ArrayList<SelectedValue> selected;
     private ArrayList<OrderByValue> order;
     private int parserExecutionTime = -1;
@@ -77,15 +85,15 @@ public class FxStatement {
      * @return a empty array if the filter is not set, or the id's of all briefcases to search in.
      */
     public long[] getBriefcaseFilter() {
-        return briefcaseFilter==null?new long[0]:briefcaseFilter;
+        return briefcaseFilter == null ? new long[0] : briefcaseFilter;
     }
 
     public boolean hasVersionFilter() {
-        return versionFilter!=null;
+        return versionFilter != null;
     }
 
     public Filter.VERSION getVersionFilter() {
-        return versionFilter==null? Filter.VERSION.MAX :versionFilter;
+        return versionFilter == null ? Filter.VERSION.MAX : versionFilter;
     }
 
 
@@ -107,7 +115,7 @@ public class FxStatement {
      * @return the maximum rows returned by the search
      */
     public int getMaxResultRows() {
-        return maxResultRows==-1?2000:maxResultRows; // TODO
+        return maxResultRows == -1 ? 2000 : maxResultRows; // TODO
     }
 
     /**
@@ -125,7 +133,7 @@ public class FxStatement {
      * @param contentName the content name
      */
     protected void setContentTypeFilter(String contentName) {
-        this.contentType = contentName.trim().length()==0?null:contentName.trim().toUpperCase();
+        this.contentType = contentName.trim().length() == 0 ? null : contentName.trim().toUpperCase();
     }
 
     /**
@@ -143,16 +151,8 @@ public class FxStatement {
      * @return true if the content type filter is set
      */
     public boolean hasContentTypeFilter() {
-        return contentType!=null;
+        return contentType != null;
     }
-
-    // FILTER: the statement filter the data <br>
-    // EMPTY: the statement will always return a empty resultset<br>
-    // ALL: The statement will always return the whole data from the DB
-    public enum TYPE {
-        FILTER,
-        EMPTY,
-        ALL }
 
 
     /**
@@ -167,15 +167,19 @@ public class FxStatement {
     /**
      * Add a Value to the selected elements.
      *
-     * @param vi the element
+     * @param vi    the element
      * @param alias the alias
      */
-    protected void addSelectedValue(final Value vi,String alias) {
-        if (alias==null) {
-            //alias = String.valueOf((selected.size()+1));
-            alias = (vi.getValue() instanceof String)?(String)vi.getValue():String.valueOf(vi.getValue());
+    protected void addSelectedValue(final Value vi, String alias) {
+        if (alias == null) {
+            if (vi instanceof Property) {
+                final Property property = (Property) vi;
+                alias = property.getValue() + (StringUtils.isNotBlank(property.getField()) ? "." + property.getField() : "");
+            } else {
+                alias = (vi.getValue() instanceof String) ? (String) vi.getValue() : String.valueOf(vi.getValue());
+            }
         }
-        selected.add(new SelectedValue(vi,alias));
+        selected.add(new SelectedValue(vi, alias));
     }
 
     /**
@@ -189,8 +193,8 @@ public class FxStatement {
 
     /**
      * Returns the selected value matching the given alias, or null if no match can be found.
-     * <p />
-     * If a alias is used more than one time the first match will be returned. 
+     * <p/>
+     * If a alias is used more than one time the first match will be returned.
      *
      * @param alias the alias to look for
      * @return the matching selected value, or null
@@ -208,14 +212,15 @@ public class FxStatement {
      * @param values the new list
      */
     public void setSelectedValues(ArrayList<SelectedValue> values) {
-        this.selected=values;
+        this.selected = values;
     }
 
     /**
      * Adds a new order by condition.
      *
      * @param vi the order by value (column)
-     * @throws com.flexive.sqlParser.SqlParserException   if the column cannot be used for ordering because it is not selected
+     * @throws com.flexive.sqlParser.SqlParserException
+     *          if the column cannot be used for ordering because it is not selected
      */
     public void addOrderByValue(final OrderByValue vi) throws SqlParserException {
         computeOrderByColumn(vi);
@@ -242,8 +247,8 @@ public class FxStatement {
     }
 
     public Table getTableByType(Table.TYPE type) {
-        for (Table tbl:getTables()) {
-            if (tbl.getType()==type) return tbl;
+        for (Table tbl : getTables()) {
+            if (tbl.getType() == type) return tbl;
         }
         return null;
     }
@@ -255,16 +260,16 @@ public class FxStatement {
      */
     public Table[] getTables() {
         Table[] result = new Table[tables.size()];
-        int pos =0;
-        for (String key:this.tables.keySet()) {
-            result[pos++]=this.tables.get(key);
+        int pos = 0;
+        for (String key : this.tables.keySet()) {
+            result[pos++] = this.tables.get(key);
         }
         return result;
     }
 
     /**
      * Returns the root brace.
-     * <p />
+     * <p/>
      * The root brace will be null if the getType is TYPE.ALL or TYPE.EMPTY
      *
      * @return the root brace
@@ -279,9 +284,10 @@ public class FxStatement {
      * TYPE.FILTER: there are conditions<br>
      * TYPE.EMPTY: the statement will not deliver any results<br>
      * TYPE.ALL: the statements will deliver all data from the selected sources (no filter set)
+     *
      * @return the statements type
      */
-    public TYPE getType() {
+    public Type getType() {
         return this.type;
     }
 
@@ -298,17 +304,17 @@ public class FxStatement {
             long startTime = System.currentTimeMillis();
             query = cleanupQueryString(query);
             ByteArrayInputStream byis = new ByteArrayInputStream(query.getBytes("UTF-8"));
-            FxStatement stmt = new SQL(byis,"UTF-8").statement();
+            FxStatement stmt = new SQL(byis, "UTF-8").statement();
             byis.close();
-            stmt.setParserExecutionTime((int)(System.currentTimeMillis()-startTime));
+            stmt.setParserExecutionTime((int) (System.currentTimeMillis() - startTime));
             return stmt;
-        } catch(TokenMgrError exc) {
+        } catch (TokenMgrError exc) {
             throw new SqlParserException(exc, query);
         } catch (ParseException exc) {
             throw new SqlParserException(exc, query);
-        } catch(SqlParserException exc) {
+        } catch (SqlParserException exc) {
             throw exc;
-        } catch(Exception exc) {
+        } catch (Exception exc) {
             throw new SqlParserException(exc.getMessage());
         }
     }
@@ -330,14 +336,14 @@ public class FxStatement {
     protected FxStatement() {
         this.rootBrace = new Brace(this);
         this.currentBrace = this.rootBrace;
-        this.tables = new HashMap<String,Table>(10);
-        this.filters = new HashMap<Filter.TYPE,Filter>(5);
+        this.tables = new HashMap<String, Table>(10);
+        this.filters = new HashMap<Filter.TYPE, Filter>(5);
         this.selected = new ArrayList<SelectedValue>(50);
         this.order = new ArrayList<OrderByValue>(5);
     }
 
     protected void addFilter(Filter f) {
-        this.filters.put(f.getType(),f);
+        this.filters.put(f.getType(), f);
     }
 
     /**
@@ -353,8 +359,8 @@ public class FxStatement {
 
 
     protected void addTable(Table table) {
-        if (bDebug) System.out.println("Adding table: "+table);
-        this.tables.put(table.getAlias(),table);
+        if (bDebug) System.out.println("Adding table: " + table);
+        this.tables.put(table.getAlias(), table);
     }
 
 
@@ -371,7 +377,7 @@ public class FxStatement {
 
     protected Brace endSubBrace() throws SqlParserException {
         Brace parent = currentBrace.getParent();
-        if (currentBrace.size()==1) {
+        if (currentBrace.size() == 1) {
             // Brace with only one element, remove it and move its element to the parent
             BraceElement ele = currentBrace.removeLastElement();
             parent.removeElement(currentBrace);
@@ -390,41 +396,41 @@ public class FxStatement {
     protected void cleanup() throws SqlParserException {
 
         // Check if all referenced tables are present
-        for (SelectedValue val:selected) {
+        for (SelectedValue val : selected) {
             if (!(val.getValue() instanceof Property)) continue;
-            Property prop = (Property)val.getValue() ;
-            if (this.getTableByAlias(prop.getTableAlias())==null) {
+            Property prop = (Property) val.getValue();
+            if (this.getTableByAlias(prop.getTableAlias()) == null) {
                 String stables = "";
-                for (String alias:tables.keySet()) {
-                    stables+=((stables.length()>0)?",":"")+alias;
+                for (String alias : tables.keySet()) {
+                    stables += ((stables.length() > 0) ? "," : "") + alias;
                 }
-                throw new SqlParserException("ex.sqlSearch.filter.unknownTableAlias",prop.getTableAlias(),stables);
+                throw new SqlParserException("ex.sqlSearch.filter.unknownTableAlias", prop.getTableAlias(), stables);
             }
         }
 
         // Check order by
-        for (OrderByValue ov:getOrderByValues()) {
+        for (OrderByValue ov : getOrderByValues()) {
             computeOrderByColumn(ov);
         }
 
         // If no where clause is set at all
-        if (this.rootBrace==null || this.rootBrace.size()==0) {
+        if (this.rootBrace == null || this.rootBrace.size() == 0) {
             rootBrace = null;
-            type=TYPE.ALL;
+            type = Type.ALL;
             return;
         }
 
         // Cleanup where clause
         cleanup(this.rootBrace);
 
-        if (rootBrace!=null) {
+        if (rootBrace != null) {
             // Nothing left and TYPE=FILTER has to be set to TYPE.EMPTY
-            if (this.rootBrace.size()==0 && this.getType()==TYPE.FILTER) {
-                this.type=TYPE.EMPTY;
-                this.rootBrace=null;
+            if (this.rootBrace.size() == 0 && this.getType() == Type.FILTER) {
+                this.type = Type.EMPTY;
+                this.rootBrace = null;
             }
             // Only one condition at top level: type has to be null and not 'or'/'and'
-            else if (this.rootBrace.size()==1) {
+            else if (this.rootBrace.size() == 1) {
                 this.rootBrace.setType(null);
             }
         }
@@ -446,20 +452,20 @@ public class FxStatement {
             for (SelectedValue sv : selected) {
                 if (sv.getAlias().equalsIgnoreCase(ov.getValue())) {
                     found = true;
-                    ov.setSelectedValue(sv,pos);
+                    ov.setSelectedValue(sv, pos);
                     break;
                 }
                 pos++;
             }
             if (!found) {
-                throw new SqlParserException("ex.sqlSearch.invalidOrderByValue",ov.getValue());
+                throw new SqlParserException("ex.sqlSearch.invalidOrderByValue", ov.getValue());
             }
         }
     }
 
     /**
      * Compute a cache key for the statement.
-     * <p />
+     * <p/>
      * Statements with the same cache key will produce the same resultset.
      *
      * @return the cacheKey.
@@ -468,27 +474,27 @@ public class FxStatement {
     protected String getCacheKey() throws SqlParserException {
         try {
             // Only build once
-            if (cacheKey!=null) {
+            if (cacheKey != null) {
                 return cacheKey;
             }
 
             StringBuffer key = new StringBuffer(512);
 
-            if (type==TYPE.FILTER) {
-                computeCacheKey(key,this.rootBrace);
+            if (type == Type.FILTER) {
+                computeCacheKey(key, this.rootBrace);
             } else {
                 key.append(type);
             }
 
-            for (String table:this.tables.keySet()) {
+            for (String table : this.tables.keySet()) {
                 Table t = this.tables.get(table);
                 Filter vf = t.getFilter(Filter.TYPE.VERSION);
                 String langs = "";
-                for (String lang:t.getSearchLanguages()) {
-                    langs+="|"+lang;
+                for (String lang : t.getSearchLanguages()) {
+                    langs += "|" + lang;
                 }
                 key.append("_").append(t.getAlias()).append(";").append(t.getType()).append(";").append(langs).
-                        append(";").append(vf==null?"null":vf.getValue());
+                        append(";").append(vf == null ? "null" : vf.getValue());
             }
             key.append("_").
                     append("_").append(this.getMaxResultRows()).
@@ -496,10 +502,10 @@ public class FxStatement {
 
             cacheKey = key.toString();
             return cacheKey;
-        } catch(Throwable t) {
+        } catch (Throwable t) {
             System.err.println(t.getMessage());
             t.printStackTrace();
-            throw new SqlParserException("ex.sqlSearch.unbableToBuildCachekey",t);
+            throw new SqlParserException("ex.sqlSearch.unbableToBuildCachekey", t);
         }
     }
 
@@ -527,38 +533,38 @@ public class FxStatement {
      * @param sb the string buffer to write to
      * @param br the current brace
      */
-    private void computeCacheKey(StringBuffer sb,Brace br)  {
-        String brType=(br.getType()==null?"N":(br.getType().equalsIgnoreCase("and")?"A":"O"));
+    private void computeCacheKey(StringBuffer sb, Brace br) {
+        String brType = (br.getType() == null ? "N" : (br.getType().equalsIgnoreCase("and") ? "A" : "O"));
         sb.append("(").append(brType);
-        for (BraceElement be: br.getElements()) {
+        for (BraceElement be : br.getElements()) {
             if (be instanceof Condition) {
-                sb.append((" "+be.toString()));
+                sb.append((" " + be.toString()));
             } else {
-                computeCacheKey(sb,(Brace)be);
+                computeCacheKey(sb, (Brace) be);
             }
         }
         sb.append(")");
     }
 
 
-    private void removeWholeBrace(Brace br,boolean alwaysTrue) {
+    private void removeWholeBrace(Brace br, boolean alwaysTrue) {
         try {
-            if (bDebug) System.out.println("Removing whole brace because of always "+alwaysTrue+" cond");
+            if (bDebug) System.out.println("Removing whole brace because of always " + alwaysTrue + " cond");
         } catch (Exception exc) {
-            System.err.println("###Y" +exc.getMessage());
+            System.err.println("###Y" + exc.getMessage());
         }
 
-        if (br.getParent()==null) {
+        if (br.getParent() == null) {
             br.removeAllElements();
-            rootBrace=null;
-            type=alwaysTrue? FxStatement.TYPE.ALL: FxStatement.TYPE.EMPTY;
+            rootBrace = null;
+            type = alwaysTrue ? Type.ALL : Type.EMPTY;
         } else {
             Brace parent = br.getParent();
             try {
-                Condition cd = new Condition(this,new Constant("1"), Condition.Comparator.EQUAL,new Constant(alwaysTrue?"1":"0"));
+                Condition cd = new Condition(this, new Constant("1"), Condition.Comparator.EQUAL, new Constant(alwaysTrue ? "1" : "0"));
                 parent.addElement(cd);
             } catch (Exception exc) {
-                System.err.println("###Y" +exc.getMessage());
+                System.err.println("###Y" + exc.getMessage());
             }
             parent.removeElement(br);
         }
@@ -574,20 +580,20 @@ public class FxStatement {
     private void cleanup(Brace br) throws SqlParserException {
 
         // Move down the brace tree (recursive) ..
-        for (BraceElement be: br.getElements()) {
+        for (BraceElement be : br.getElements()) {
             if (be instanceof Brace) {
-                cleanup((Brace)be);
+                cleanup((Brace) be);
             }
         }
 
         // ... now start cleanup from bottom up
         if (br.isOr()) {
-            for (BraceElement be: br.getElements()) {
+            for (BraceElement be : br.getElements()) {
                 if (!(be instanceof Condition)) continue;
-                Condition cond = (Condition)be;
+                Condition cond = (Condition) be;
                 if (cond.isAlwaysTrue()) {
                     // Whole brace will be true, remove it and terminate loop
-                    removeWholeBrace(br,true);
+                    removeWholeBrace(br, true);
                     break;
                 }
                 if (cond.isAlwaysFalse()) {
@@ -596,63 +602,64 @@ public class FxStatement {
                 }
             }
             // If the whole OR is empty we need to add an ALWAYS false to the parent
-            if (br.size()==0 && br.getParent()!=null) {
-                removeWholeBrace(br,false);
+            if (br.size() == 0 && br.getParent() != null) {
+                removeWholeBrace(br, false);
             }
 
         } else if (br.isAnd()) {
-            for (BraceElement be: br.getElements()) {
+            for (BraceElement be : br.getElements()) {
                 if (!(be instanceof Condition)) continue;
-                Condition cond = (Condition)be;
+                Condition cond = (Condition) be;
                 if (cond.isAlwaysTrue()) {
                     // Condition always true, so remove it
                     br.removeElement(cond);
                 }
                 if (cond.isAlwaysFalse()) {
                     // Whole brace will be false, remove it and terminate loop
-                    removeWholeBrace(br,false);
+                    removeWholeBrace(br, false);
                     break;
                 }
             }
             // If the whole AND is empty we need to add an ALWAYS true to the parent
-            if (br.size()==0 && br.getParent()!=null) {
-                removeWholeBrace(br,true);
+            if (br.size() == 0 && br.getParent() != null) {
+                removeWholeBrace(br, true);
             }
-        } else if (br.getSize()>0) {
+        } else if (br.getSize() > 0) {
             // Just one single condition is set, examine it!
             BraceElement be = br.getElementAt(0);
             if (be instanceof Condition) {
-                Condition cond = (Condition)be;
+                Condition cond = (Condition) be;
                 if (cond.isAlwaysTrue()) {
                     // Everything is selected!
                     br.removeAllElements();
                     this.rootBrace = null;
-                    this.type = FxStatement.TYPE.ALL;
+                    this.type = Type.ALL;
                 } else if (cond.isAlwaysFalse()) {
                     // No result at all!
                     br.removeAllElements();
                     this.rootBrace = null;
-                    this.type = FxStatement.TYPE.EMPTY;
+                    this.type = Type.EMPTY;
                 }
             }
         }
 
         // Cleanup empty braces, and braces that contain just one element
-        if (br.size()==1) {
+        if (br.size() == 1) {
             Brace parent = br.getParent();
-            if (parent!=null) {
+            if (parent != null) {
                 BraceElement be = br.removeLastElement();
-                if (bDebug) System.out.println("Moving element to parent since its the only one left in the brace: "+be);
+                if (bDebug)
+                    System.out.println("Moving element to parent since its the only one left in the brace: " + be);
                 parent.removeElement(br);
                 parent.addElement(be);
             } else {
                 // Only one brace in root brace -> make it the root brace
                 if (br.getElementAt(0) instanceof Brace) {
-                    rootBrace=(Brace)br.removeLastElement();
+                    rootBrace = (Brace) br.removeLastElement();
                 }
             }
-        } else if (br.size()==0 && br.getParent()!=null) {
-            if (bDebug) System.out.println("Removing empty brace: "+br);
+        } else if (br.size() == 0 && br.getParent() != null) {
+            if (bDebug) System.out.println("Removing empty brace: " + br);
             br.getParent().removeElement(br);
         }
     }
@@ -661,52 +668,53 @@ public class FxStatement {
      * Generates a debug string.
      *
      * @return a debug string of the statement
-     * @throws com.flexive.shared.exceptions.FxSqlSearchException if the function failed
+     * @throws com.flexive.shared.exceptions.FxSqlSearchException
+     *          if the function failed
      */
     public String printDebug() throws FxSqlSearchException {
         try {
             StringBuffer result = new StringBuffer(1024);
-            if (this.rootBrace==null) {
+            if (this.rootBrace == null) {
                 return String.valueOf(this.getType());
             } else {
-                printDebug(result,this.rootBrace);
-                result=result.deleteCharAt(0);
+                printDebug(result, this.rootBrace);
+                result = result.deleteCharAt(0);
             }
             result.append(("\n##################################################\n"));
-            int pos=0;
-            for (SelectedValue v:getSelectedValues()) {
-                result.append(("Selected["+(pos++)+"]: "+ v.toString()+"\n"));
+            int pos = 0;
+            for (SelectedValue v : getSelectedValues()) {
+                result.append(("Selected[" + (pos++) + "]: " + v.toString() + "\n"));
             }
 
-            pos=0;
+            pos = 0;
             result.append("Order by: ");
-            for (Value v:getOrderByValues()) {
-                if ((pos++)>0) result.append(",");
+            for (Value v : getOrderByValues()) {
+                if ((pos++) > 0) result.append(",");
                 result.append(v.toString());
             }
-            if (pos==0) {
+            if (pos == 0) {
                 result.append(("Order: n/a\n"));
             }
             result.append("\n");
 
             result.append("Search Languages: ");
-            pos=0;
-            for (String v:getTableByType(Table.TYPE.CONTENT).getSearchLanguages()) {
-                if ((pos++)>0) result.append(",");
+            pos = 0;
+            for (String v : getTableByType(Table.TYPE.CONTENT).getSearchLanguages()) {
+                if ((pos++) > 0) result.append(",");
                 result.append(v);
             }
             result.append("\n");
             result.append("Cache Key: ");
             try {
                 result.append(getCacheKey());
-            } catch(Throwable t) {
+            } catch (Throwable t) {
                 result.append(t.getMessage());
             }
             result.append("\n");
-            result.append(("Parser execution time: "+this.getParserExecutionTime()+" ms\n"));
+            result.append(("Parser execution time: " + this.getParserExecutionTime() + " ms\n"));
             return result.toString();
-        } catch(Throwable t) {
-            throw new FxSqlSearchException(t,"ex.sqlSearch.printDebugFailed");
+        } catch (Throwable t) {
+            throw new FxSqlSearchException(t, "ex.sqlSearch.printDebugFailed");
         }
     }
 
@@ -716,24 +724,24 @@ public class FxStatement {
      * @param sb the StringBuffer to write to
      * @param br the current bracer (recursion)
      */
-    protected void printDebug(StringBuffer sb,Brace br) {
+    protected void printDebug(StringBuffer sb, Brace br) {
         String sPrefix = "\n";
-        for (int i=0;i<br.getLevel();i++) {
-            sPrefix+="+";
+        for (int i = 0; i < br.getLevel(); i++) {
+            sPrefix += "+";
         }
-        sPrefix+=(br.getType()==null?"N":(br.getType().equalsIgnoreCase("and")?"A":"O"))+"  ";
-        sb.append((sPrefix+"("));
+        sPrefix += (br.getType() == null ? "N" : (br.getType().equalsIgnoreCase("and") ? "A" : "O")) + "  ";
+        sb.append((sPrefix + "("));
         boolean hadSubs = false;
-        for (BraceElement be: br.getElements()) {
+        for (BraceElement be : br.getElements()) {
             if (be instanceof Condition) {
-                sb.append((" "+be.toString()+" "));
+                sb.append((" " + be.toString() + " "));
             } else {
-                printDebug(sb,(Brace)be);
-                hadSubs=true;
+                printDebug(sb, (Brace) be);
+                hadSubs = true;
             }
         }
         if (hadSubs) {
-            sb.append((sPrefix+")"));
+            sb.append((sPrefix + ")"));
         } else {
             sb.append(" )");
         }
@@ -743,8 +751,9 @@ public class FxStatement {
 
     /**
      * Cleanup the query string.
-     * <p />
+     * <p/>
      * This function removes comments from the query.
+     *
      * @param query the query to cleanup
      * @return the processed query string
      * @throws SqlParserException ifthe function fails
@@ -753,7 +762,7 @@ public class FxStatement {
         // Make sure the statement has the EOF charater at the end, also add one
         // '\n' to ensure that the last line comment ("--") is closed
         query = query.trim();
-        query+="\n";
+        query += "\n";
         if (query.charAt(query.length() - 1) != ';') query += ";";
         return query;
     }

@@ -37,8 +37,11 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.value.FxValue;
+import com.flexive.shared.value.FxNumber;
+import com.flexive.shared.value.FxLargeNumber;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Provides a thin wrapper for a result row of a SQL search
@@ -84,8 +87,12 @@ public class FxResultRow {
         return (FxValue) getValue(column);
     }
 
-    public FxPaths getPaths(int column) {
-        return (FxPaths) getValue(column);
+    public List<FxPaths.Path> getPaths(int column) {
+        return ((FxPaths) getValue(column)).getPaths();
+    }
+
+    public List<FxPaths.Path> getPaths(String columnName) {
+        return getPaths(getColumnIndex(columnName));
     }
 
     public Object getValue(String columnName) {
@@ -105,8 +112,35 @@ public class FxResultRow {
         return (FxValue) getValue(columnName);
     }
 
-    public FxPaths getPaths(String columnName) {
-        return (FxPaths) getValue(columnName);
+    public long getLong(int column) {
+        final Object value = getValue(column);
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
+        } else if (value instanceof FxNumber) {
+            return ((FxNumber) value).getBestTranslation();
+        } else if (value instanceof FxLargeNumber) {
+            return ((FxLargeNumber) value).getBestTranslation();
+        }
+        throw new FxInvalidParameterException("column", "ex.sqlSearch.resultRow.invalidType",
+                column, "Long", value.getClass().getName()).asRuntimeException();
     }
 
+    public long getLong(String columnName) {
+        return getLong(getColumnIndex(columnName));
+    }
+
+    public int getInt(int column) {
+        final Object value = getValue(column);
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
+        } else if (value instanceof FxNumber) {
+            return ((FxNumber) value).getBestTranslation();
+        }
+        throw new FxInvalidParameterException("column", "ex.sqlSearch.resultRow.invalidType",
+                column, "Integer", value.getClass().getName()).asRuntimeException();
+    }
+
+    public int getInt(String columnName) {
+        return getInt(getColumnIndex(columnName));
+    }
 }

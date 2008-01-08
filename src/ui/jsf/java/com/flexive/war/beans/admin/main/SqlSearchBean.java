@@ -46,6 +46,7 @@ import com.flexive.war.beans.admin.content.ContentEditorBean;
 import javax.faces.event.ActionEvent;
 import javax.faces.model.SelectItem;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This Bean provides access the the sql search.
@@ -117,12 +118,12 @@ public class SqlSearchBean {
         this.cacheMode = cacheMode;
     }
 
-    private FxSQLSearchParams.CACHE_MODE _getCacheMode() {
+    private FxSQLSearchParams.CacheMode _getCacheMode() {
         try {
             if (cacheMode == null || cacheMode.trim().length() == 0) {
                 return null;
             }
-            return FxSQLSearchParams.CACHE_MODE.getById(Integer.valueOf(cacheMode));
+            return FxSQLSearchParams.CacheMode.getById(Integer.valueOf(cacheMode));
         } catch (Throwable t) {
             return null;
         }
@@ -133,9 +134,9 @@ public class SqlSearchBean {
      *
      * @return all available cache modes
      */
-    public ArrayList<SelectItem> getCacheModes() {
-        ArrayList<SelectItem> result = new ArrayList<SelectItem>(FxSQLSearchParams.CACHE_MODE.values().length);
-        for (FxSQLSearchParams.CACHE_MODE mode : FxSQLSearchParams.CACHE_MODE.values()) {
+    public List<SelectItem> getCacheModes() {
+        final List<SelectItem> result = new ArrayList<SelectItem>(FxSQLSearchParams.CacheMode.values().length);
+        for (FxSQLSearchParams.CacheMode mode : FxSQLSearchParams.CacheMode.values()) {
             result.add(new SelectItem(String.valueOf(mode.getId()), String.valueOf(mode)));
         }
         return result;
