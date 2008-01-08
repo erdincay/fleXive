@@ -413,7 +413,8 @@ public abstract class GenericTreeStorage implements TreeStorage {
      */
     public long getIdByFQNPath(Connection con, FxTreeMode mode, long startNode, String path) throws FxApplicationException {
         path = path.replaceAll("/+", "/");
-
+        if ("/".equals(path))
+            return FxTreeNode.ROOT_NODE;
         // Using a statement instead of a prepare statement because it is much faster,
         // so make sure the path will not crash
         if (path.contains("'") || path.contains("\n"))
@@ -447,7 +448,8 @@ public abstract class GenericTreeStorage implements TreeStorage {
      */
     public long getIdByLabelPath(Connection con, FxTreeMode mode, long startNode, String path) throws FxApplicationException {
         path = path.replaceAll("/+", "/");
-
+        if ("/".equals(path))
+            return FxTreeNode.ROOT_NODE;
         // Using a statement instead of a prepare statement because it is much faster,
         // so make sure the path will not crash
         if (path.contains("'") || path.contains("\n"))
