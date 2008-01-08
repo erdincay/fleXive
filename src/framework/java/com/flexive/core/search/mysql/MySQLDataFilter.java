@@ -49,6 +49,7 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.search.FxFoundType;
+import com.flexive.shared.search.query.VersionFilter;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.value.FxValueConverter;
@@ -410,13 +411,13 @@ public class MySQLDataFilter extends DataFilter {
             // In case of VERSION.ALL we will look up the LIVE and EDIT tree
             String result = "";
             int count = 0;
-            if (stmt.getVersionFilter() == Filter.VERSION.LIVE ||
-                    stmt.getVersionFilter() == Filter.VERSION.ALL) {
+            if (stmt.getVersionFilter() == VersionFilter.LIVE ||
+                    stmt.getVersionFilter() == VersionFilter.ALL) {
                 result += getTreeFilter(cond, FxTreeMode.Live);
                 count++;
             }
-            if (stmt.getVersionFilter() == Filter.VERSION.MAX ||
-                    stmt.getVersionFilter() == Filter.VERSION.ALL) {
+            if (stmt.getVersionFilter() == VersionFilter.MAX ||
+                    stmt.getVersionFilter() == VersionFilter.ALL) {
                 if (result.length() > 0) {
                     result += "\n UNION \n";
                 }
@@ -609,9 +610,9 @@ public class MySQLDataFilter extends DataFilter {
 
     private String getVersionFilter(String tblAlias) {
         String tbl = (tblAlias == null || tblAlias.length() == 0) ? "" : tblAlias + ".";
-        if (getStatement().getVersionFilter() == Filter.VERSION.ALL) {
+        if (getStatement().getVersionFilter() == VersionFilter.ALL) {
             return "";
-        } else if (getStatement().getVersionFilter() == Filter.VERSION.LIVE) {
+        } else if (getStatement().getVersionFilter() == VersionFilter.LIVE) {
             return " AND " + tbl + "islive_ver=true ";
         } else {
             return " AND " + tbl + "ismax_ver=true ";

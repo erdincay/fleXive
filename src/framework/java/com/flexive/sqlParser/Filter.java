@@ -34,6 +34,7 @@
 package com.flexive.sqlParser;
 
 import com.flexive.shared.FxArrayUtils;
+import com.flexive.shared.search.query.VersionFilter;
 
 import java.util.StringTokenizer;
 
@@ -43,7 +44,6 @@ import java.util.StringTokenizer;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class Filter {
-
     public enum TYPE {
         VERSION,
         IGNORE_CASE,
@@ -51,13 +51,6 @@ public class Filter {
         SEARCH_LANGUAGES,
         /*RESULT_LANGUAGES,*/
         BRIEFCASE
-    }
-
-    public enum VERSION {
-        MAX,
-        LIVE,
-        ALL,
-        AUTO
     }
 
     private TYPE type;
@@ -151,18 +144,18 @@ public class Filter {
      */
     private void _processVersionFilter(FxStatement stmt) throws SqlParserException {
         this.type = TYPE.VERSION;
-        VERSION ver;
+        VersionFilter ver;
         value = value.toUpperCase();
-        if (value.equals(VERSION.AUTO.toString())) {
+        if (value.equals(VersionFilter.AUTO.toString())) {
             // TODO: AUTO depends on the user/session setting
-            value = VERSION.MAX.toString();
+            value = VersionFilter.MAX.toString();
         }
-        if (value.equals(VERSION.MAX.toString())) {
-            ver = VERSION.MAX;
-        } else if (value.equals(VERSION.LIVE.toString())) {
-            ver = VERSION.LIVE;
-        } else if (value.equals(VERSION.ALL.toString())) {
-            ver = VERSION.ALL;
+        if (value.equals(VersionFilter.MAX.toString())) {
+            ver = VersionFilter.MAX;
+        } else if (value.equals(VersionFilter.LIVE.toString())) {
+            ver = VersionFilter.LIVE;
+        } else if (value.equals(VersionFilter.ALL.toString())) {
+            ver = VersionFilter.ALL;
         } else {
               throw new SqlParserException("ex.sqlSearch.filter.unknownVersionFilter",value);
         }

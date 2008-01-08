@@ -47,6 +47,7 @@ import com.flexive.shared.search.*;
 import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.search.query.QueryOperatorNode;
 import com.flexive.shared.search.query.SqlQueryBuilder;
+import com.flexive.shared.search.query.VersionFilter;
 import com.flexive.shared.security.Account;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.structure.FxType;
@@ -61,6 +62,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.testng.annotations.DataProvider;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.collections.CollectionUtils;
 
 import java.util.*;
 
@@ -500,6 +502,32 @@ public class SqlQueryTest {
         final FxResultSet ftresult = new SqlQueryBuilder().select("@pk").fulltext(words[0]).getResult();
         assert ftresult.getRowCount() > 0 : "Expected at least one result for fulltext query '" + words[0] + "'";
         assert ftresult.collectColumn(1).contains(pk) : "Didn't find pk " + pk + " in result, got: " + ftresult.collectColumn(1);
+    }
+
+    @Test
+    public void versionFilterTest() throws FxApplicationException {
+        final List<FxPK> allVersions = getPksForVersion(VersionFilter.ALL);
+        final List<FxPK> liveVersions = getPksForVersion(VersionFilter.LIVE);
+        final List<FxPK> maxVersions = getPksForVersion(VersionFilter.MAX);
+        assert allVersions.size() > 0 : "All versions result must not be empty";
+        assert liveVersions.size() > 0 : "Live versions result must not be empty";
+        assert maxVersions.size() > 0 : "Max versions result must not be empty";
+        assert allVersions.size() > liveVersions.size() : "Expected more than only live versions";
+        assert allVersions.size() > maxVersions.size() : "Expected more than only max versions";
+        assert !CollectionUtils.isEqualCollection(liveVersions, maxVersions) : "Expected different results for max and live version filter";
+        for (FxPK pk: liveVersions) {
+            final FxContent content = EJBLookup.getContentEngine().load(pk);
+            assert content.isLiveVersion() : "Expected live version for " + pk;
+        }
+        for (FxPK pk: maxVersions) {
+            final FxContent content = EJBLookup.getContentEngine().load(pk);
+            assert content.isMaxVersion() : "Expected max version for " + pk;
+            assert content.getVersion() == 1 || !content.isLiveVersion();
+        }
+    }
+
+    private List<FxPK> getPksForVersion(VersionFilter versionFilter) throws FxApplicationException {
+        return new SqlQueryBuilder().select("@pk").type(TEST_TYPE).filterVersion(versionFilter).getResult().collectColumn(1);
     }
 
 

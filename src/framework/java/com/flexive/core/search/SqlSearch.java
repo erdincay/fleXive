@@ -330,8 +330,9 @@ public class SqlSearch {
             stmt.addBatch("SET @pos=0;");
             String sSql = "insert into " + DatabaseConst.TBL_BRIEFCASE_DATA +
                     "(BRIEFCASE_ID,POS,ID,AMOUNT) " +
-                    "(select " + bid + ",@pos:=@pos+1 pos,data.id,1 from " + getCacheTable() + " data " +
-                    "where SEARCH_ID=" + getSearchId() + ")";
+                    "(select " + bid + ",@pos:=@pos+1 pos,data.id,1 from " +
+                    "(SELECT DISTINCT data2.id FROM " + getCacheTable() + " data2 WHERE data2.search_id="
+                    + getSearchId() + ") data)";
             stmt.addBatch(sSql);
             stmt.executeBatch();
             return bid;

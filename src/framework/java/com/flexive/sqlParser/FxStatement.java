@@ -34,6 +34,7 @@
 package com.flexive.sqlParser;
 
 import com.flexive.shared.exceptions.FxSqlSearchException;
+import com.flexive.shared.search.query.VersionFilter;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
@@ -71,7 +72,7 @@ public class FxStatement {
     private String cacheKey;
     private boolean distinct;
     private boolean ignoreCase = true;
-    private Filter.VERSION versionFilter = null;
+    private VersionFilter versionFilter = null;
     private long[] briefcaseFilter = null;
     private String contentType;
 
@@ -92,12 +93,12 @@ public class FxStatement {
         return versionFilter != null;
     }
 
-    public Filter.VERSION getVersionFilter() {
-        return versionFilter == null ? Filter.VERSION.MAX : versionFilter;
+    public VersionFilter getVersionFilter() {
+        return versionFilter == null ? VersionFilter.MAX : versionFilter;
     }
 
 
-    public void setVersionFilter(Filter.VERSION filter) {
+    public void setVersionFilter(VersionFilter filter) {
         this.versionFilter = filter;
     }
 

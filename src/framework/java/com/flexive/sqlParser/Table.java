@@ -33,6 +33,8 @@
  ***************************************************************/
 package com.flexive.sqlParser;
 
+import com.flexive.shared.search.query.VersionFilter;
+
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -69,7 +71,7 @@ public class Table {
     public String getVersionFilter() {
         Filter f = getFilter(Filter.TYPE.VERSION);
         if (f==null) {
-            return Filter.VERSION.MAX.toString();
+            return VersionFilter.MAX.toString();
         } else {
             return f.getValue();
         }

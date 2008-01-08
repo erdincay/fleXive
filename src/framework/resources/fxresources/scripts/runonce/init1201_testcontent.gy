@@ -42,8 +42,10 @@ import com.flexive.shared.security.ACL
 import com.flexive.shared.structure.*
 import com.flexive.shared.value.*
 import com.flexive.shared.search.query.SqlQueryBuilder
-import com.flexive.shared.tree.FxTreeNodeEdit
-import com.flexive.shared.tree.FxTreeNode
+import com.flexive.shared.interfaces.ContentEngine
+import com.flexive.shared.workflow.Workflow
+import com.flexive.shared.workflow.Step
+import com.flexive.shared.workflow.StepDefinition
 
 
 
@@ -194,9 +196,20 @@ void buildGroupData(String prefix, FxContent co, int counter, folderPks) {
 
 final List<FxPK> folderPks = new SqlQueryBuilder().select("@pk").type("FOLDER").getResult().collectColumn(1)
 instanceCount.times { int counter ->
-    FxContent co = EJBLookup.contentEngine.initialize(CacheAdmin.environment.getType("SearchTest").id)
+    final ContentEngine contentEngine = EJBLookup.contentEngine
+    final FxEnvironment env = CacheAdmin.environment
+    FxContent co = contentEngine.initialize(env.getType("SearchTest").id)
     buildGroupData("", co, counter, folderPks)
     buildGroupData("/GroupTop", co, counter, folderPks)
     buildGroupData("/GroupTop/GroupNested", co, counter, folderPks)
-    EJBLookup.contentEngine.save(co)
+    FxContent dbContent = contentEngine.load(EJBLookup.contentEngine.save(co))
+    final Workflow workflow = env.getWorkflow(env.getStep(dbContent.stepId).workflowId)
+    final Step editStep = (Step) workflow.getSteps().find { Step step ->
+        step.stepDefinitionId == StepDefinition.EDIT_STEP_ID
+    }
+    // create some versions
+    (counter % 5).times {
+        dbContent.setStepId(editStep.id)
+        dbContent = contentEngine.load(contentEngine.createNewVersion(dbContent))
+    }
 }

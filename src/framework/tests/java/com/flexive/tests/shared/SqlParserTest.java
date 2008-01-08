@@ -4,6 +4,7 @@ import org.testng.annotations.Test;
 import org.apache.commons.lang.StringUtils;
 import com.flexive.sqlParser.*;
 import com.flexive.shared.search.query.PropertyValueComparator;
+import com.flexive.shared.search.query.VersionFilter;
 import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.structure.FxSelectListItem;
@@ -45,11 +46,11 @@ public class SqlParserTest {
 
     @Test(groups = {"shared", "search"})
     public void versionFilter() throws SqlParserException {
-        assert parse("SELECT co.id FROM content co FILTER co.VERSION=max").getVersionFilter().equals(Filter.VERSION.MAX);
-        assert parse("SELECT co.id FROM content co FILTER co.VERSION=LIVE").getVersionFilter().equals(Filter.VERSION.LIVE);
-        assert parse("SELECT co.id FROM content co FILTER co.VERSION=ALL").getVersionFilter().equals(Filter.VERSION.ALL);
+        assert parse("SELECT co.id FROM content co FILTER co.VERSION=max").getVersionFilter().equals(VersionFilter.MAX);
+        assert parse("SELECT co.id FROM content co FILTER co.VERSION=LIVE").getVersionFilter().equals(VersionFilter.LIVE);
+        assert parse("SELECT co.id FROM content co FILTER co.VERSION=ALL").getVersionFilter().equals(VersionFilter.ALL);
         // auto gets the version through some user session magic, but it should definitely not return auto
-        assert !parse("SELECT co.id FROM content co FILTER co.VERSION=AUTO").getVersionFilter().equals(Filter.VERSION.AUTO);
+        assert !parse("SELECT co.id FROM content co FILTER co.VERSION=AUTO").getVersionFilter().equals(VersionFilter.AUTO);
         try {
             parse("SELECT co.id FROM content co FILTER co.VERSION=15");
             assert false : "Specific versions cannot be selected.";

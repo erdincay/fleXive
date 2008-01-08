@@ -409,6 +409,16 @@ public class SqlQueryBuilder implements Serializable {
         return setTypeFilter(typeId != -1 ? typeId : null);
     }
 
+    /**
+     * Filter the result set using the given version filter mode (live, max, auto or all).
+     *
+     * @param filter    the version filter to be applied
+     * @return  this
+     */
+    public SqlQueryBuilder filterVersion(VersionFilter filter) {
+        return uniqueFilter("co.version", filter.name());
+    }
+
     private SqlQueryBuilder setTypeFilter(Object value) {
         final String filter = Table.CONTENT.getAlias() + ".TYPE";
         removeFilter(filter);
