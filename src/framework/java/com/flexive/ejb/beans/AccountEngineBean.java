@@ -35,6 +35,7 @@ package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.*;
+import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.core.security.FxCallback;
 import com.flexive.core.security.LoginLogoutHandler;
 import com.flexive.core.security.UserTicketStore;
@@ -148,8 +149,10 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             curSql = "SELECT " +
                     // 1, 2   ,  3        ,  4   ,  5       ,  6      ,  7      ,  8      ,  9
                     "ID,EMAIL,CONTACT_ID,MANDATOR,VALID_FROM,VALID_TO,DESCRIPTION,USERNAME,LOGIN_NAME," +
-                    // 10     ,  11        ,   12       ,    13    14
-                    "IS_ACTIVE,IS_VALIDATED,LANG,ALLOW_MULTILOGIN,UPDATETOKEN FROM " + TBL_ACCOUNTS +
+                    //10     ,  11        ,   12       ,    13    14          15         16
+                    "IS_ACTIVE,IS_VALIDATED,LANG,ALLOW_MULTILOGIN,UPDATETOKEN,CREATED_BY,CREATED_AT," +
+                    //17         18
+                    "MODIFIED_BY,MODIFIED_AT FROM " + TBL_ACCOUNTS +
                     " WHERE " +
                     (loginName != null
                             ? "LOGIN_NAME='" + loginName + "'"
@@ -180,7 +183,8 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             String updateToken = rs.getString(14);
             Account ad = new Account(id, name, _loginName, mandator, email,
                     lang, active, validated, validFrom, validTo, -1,
-                    description, contactDataId, bAllowMultiLogin, updateToken);
+                    description, contactDataId, bAllowMultiLogin, updateToken,
+                    LifeCycleInfoImpl.load(rs, 15, 16, 17, 18));
             if (LOG.isDebugEnabled()) LOG.debug(ad.toString());
             return ad;
         } catch (SQLException exc) {
@@ -329,7 +333,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
 
             // Load the user and construct a user ticket
             return UserTicketStore.getUserTicket(username);
-        } catch( FxAccountInUseException ae ) {
+        } catch (FxAccountInUseException ae) {
             if (ctx != null)
                 ctx.setRollbackOnly();
             throw ae;
@@ -623,7 +627,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             stmt.setString(5, password);
             stmt.setString(6, email);
             stmt.setLong(7, contactDataPK.getId());
-            stmt.setInt(8, (int)lang);
+            stmt.setInt(8, (int) lang);
             stmt.setTimestamp(9, new Timestamp(validFrom.getTime()));
             stmt.setTimestamp(10, new Timestamp(validTo.getTime()));
             stmt.setString(11, description);
@@ -917,10 +921,9 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                 ps.setLong(2, group);
                 ps.executeUpdate();
             }
-
+            LifeCycleInfoImpl.updateLifeCycleInfo(TBL_ACCOUNTS, "ID", accountId);
             // Ensure any active ticket of the updated user are refreshed
             UserTicketStore.flagDirtyHavingUserId(accountId);
-
         } catch (SQLException exc) {
             ctx.setRollbackOnly();
             throw new FxUpdateException(LOG, exc, "ex.account.roles.updateFailed.sql", accountId, exc.getMessage());
@@ -1011,7 +1014,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                 ps.setLong(3, role);
                 ps.executeUpdate();
             }
-
+            LifeCycleInfoImpl.updateLifeCycleInfo(TBL_ACCOUNTS, "ID", accountId);
             // Ensure any active ticket of the updated account are refreshed
             UserTicketStore.flagDirtyHavingUserId(accountId);
 
@@ -1099,7 +1102,8 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
 
                     alResult.add(new Account(id, _name, _loginName, mandator, _email,
                             lang, active, validated, validFrom, validTo, -1,
-                            description, contactDataId, multiLogin, updateToken));
+                            description, contactDataId, multiLogin, updateToken,
+                            LifeCycleInfoImpl.load(rs, 15, 16, 17, 18)));
                 }
             }
 
@@ -1163,9 +1167,14 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
 
         String curSql = "SELECT " + "" +
                 (isCountOnly ? "COUNT(*)" :
+                        //   1      2         3              4            5        6
                         "usr.ID,usr.EMAIL,usr.CONTACT_ID,usr.MANDATOR,usr.LANG,usr.VALID_FROM," +
+                                //   7            8               9            10             11
                                 "usr.VALID_TO,usr.DESCRIPTION,usr.USERNAME,usr.LOGIN_NAME,usr.IS_ACTIVE," +
-                                "usr.IS_VALIDATED,usr.ALLOW_MULTILOGIN,usr.UPDATETOKEN") +
+                                //   12               13                   14
+                                "usr.IS_VALIDATED,usr.ALLOW_MULTILOGIN,usr.UPDATETOKEN," +
+                                //   15             16             17              18
+                                "usr.CREATED_BY,usr.CREATED_AT,usr.MODIFIED_BY,usr.MODIFIED_AT") +
                 " FROM " + TBL_ACCOUNTS + " usr WHERE ID!=" + Account.NULL_ACCOUNT + " " +
                 ((_mandatorId == -1) ? "" : " AND (usr.MANDATOR=" + _mandatorId + " OR usr.ID<=" + Account.USER_GLOBAL_SUPERVISOR + ")") +
                 ((name != null && name.length() > 0) ? " AND UPPER(usr.USERNAME) LIKE '%" + name + "%'" : "") +
@@ -1509,7 +1518,8 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             // Delete any old assignments
             //                    1          2           3        4        5       6          7
             curSql = "SELECT ass.USERGROUP,ass.ACL,ass.PREAD,ass.PEDIT,ass.PREMOVE,ass.PEXPORT,ass.PREL," +
-                    "ass.PCREATE, acl.CAT_TYPE " +
+                    //   8            9            10             11             12              13
+                    "ass.PCREATE, acl.CAT_TYPE,ass.CREATED_BY,ass.CREATED_AT,ass.MODIFIED_BY,ass.MODIFIED_AT " +
                     "FROM " + TBL_ASSIGN_ACLS + " ass, " + TBL_ASSIGN_GROUPS + " grp, " + TBL_ACLS + " acl " +
                     "WHERE acl.ID=ass.ACL AND ass.USERGROUP=grp.USERGROUP AND grp.ACCOUNT=" + accountId;
 
@@ -1526,7 +1536,8 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                 }
                 result.add(new ACLAssignment(rs.getLong(2), groupId,
                         rs.getBoolean(3), rs.getBoolean(4), rs.getBoolean(7), rs.getBoolean(5),
-                        rs.getBoolean(6), rs.getBoolean(8), ACL.Category.getById(rs.getByte(9))));
+                        rs.getBoolean(6), rs.getBoolean(8), ACL.Category.getById(rs.getByte(9)),
+                        LifeCycleInfoImpl.load(rs, 10, 11, 12, 13)));
             }
             // Return the found entries
             return result.toArray(new ACLAssignment[result.size()]);

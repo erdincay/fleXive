@@ -34,6 +34,7 @@
 package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
+import com.flexive.core.LifeCycleInfoImpl;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.security.UserTicketStore;
 import com.flexive.core.structure.StructureLoader;
@@ -330,9 +331,9 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             // Obtain a database connection
             con = Database.getDbConnection();
 
-            curSql = "update " + TBL_ACLS + " set " +
+            curSql = "UPDATE " + TBL_ACLS + " SET " +
                     //       1         2        3            4           5         6
-                    "cat_type=?,color=?,description=?,name=?,modified_by=?,modified_at=? where id=" + id;
+                    "cat_type=?,color=?,description=?,name=?,modified_by=?,modified_at=? WHERE id=" + id;
             final Timestamp NOW = new Timestamp(java.lang.System.currentTimeMillis());
             stmt = con.prepareStatement(curSql);
             stmt.setInt(1, theACL.getCategory().getId());
@@ -419,7 +420,9 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
 
             // Obtain a database connection
             con = Database.getDbConnection();
-            curSql = "SELECT MANDATOR,NAME,CAT_TYPE,DESCRIPTION,COLOR FROM " + TBL_ACLS + " WHERE ID=" + id;
+            //               1        2    3        4           5     6          7          8           9
+            curSql = "SELECT MANDATOR,NAME,CAT_TYPE,DESCRIPTION,COLOR,CREATED_BY,CREATED_AT,MODIFIED_BY,MODIFIED_AT FROM " +
+                    TBL_ACLS + " WHERE ID=" + id;
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(curSql);
 
@@ -433,13 +436,9 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             String desc = rs.getString(4);
             String color = rs.getString(5);
             FxString label = Database.loadFxString(con, TBL_ACLS, "LABEL", "ID=" + id);
-            ACL theACL;
-            try {
-                String sMandator = environment.getMandator(mandatorId).getName();
-                theACL = new ACL(id, name, label, mandatorId, sMandator, desc, color, cat);
-            } catch (FxInvalidParameterException exc) {
-                throw new FxLoadException("ex.acl.propertyCategoryInvalid", cat);
-            }
+            String sMandator = environment.getMandator(mandatorId).getName();
+            ACL theACL = new ACL(id, name, label, mandatorId, sMandator, desc, color, ACL.Category.getById(cat),
+                    LifeCycleInfoImpl.load(rs, 6, 7, 8, 9));
             if (ignoreSecurity && mandatorId != FxContext.get().getTicket().getMandatorId())
                 throw new FxNoAccessException(LOG, "ex.acl.loadFailed.foreignMandator", theACL.getName());
             // Return the ACL
@@ -492,7 +491,8 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
                             ? " OR perm.USERGROUP IN (" + FxArrayUtils.toSeparatedList(ticket.getGroups(), ',') + ")"
                             : "") +
                     ")";
-            curSql = "SELECT DISTINCT ID,NAME,CAT_TYPE,DESCRIPTION,COLOR,MANDATOR FROM \n" +
+            //                        1  2    3        4           5     6        7          8          9           10
+            curSql = "SELECT DISTINCT ID,NAME,CAT_TYPE,DESCRIPTION,COLOR,MANDATOR,CREATED_BY,CREATED_AT,MODIFIED_BY,MODIFIED_AT FROM " +
                     TBL_ACLS + " acl LEFT JOIN " + TBL_ASSIGN_ACLS + " perm ON acl.ID=perm.ACL\n" +
                     ((catFilter.length() > 0 || securityFilter.length() > 0) ? "WHERE\n" : "") +
                     catFilter +
@@ -511,9 +511,8 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
                 FxString label = Database.loadFxString(con, TBL_ACLS, "LABEL", "ID=" + id);
                 try {
                     String sMandator = environment.getMandator(mandator).getName();
-                    result.add(new ACL(id, name, label, mandator, sMandator, desc, color, cat));
-                } catch (FxInvalidParameterException exc) {
-                    LOG.error("ACL with invalid category=" + cat + " in database (skipped)", exc);
+                    result.add(new ACL(id, name, label, mandator, sMandator, desc, color, ACL.Category.getById(cat),
+                            LifeCycleInfoImpl.load(rs, 7, 8, 9, 10)));
                 } catch (FxRuntimeException exc) {
                     LOG.error("ACL with invalid mandator=" + mandatorId + " in database (skipped)", exc);
                 }
@@ -746,8 +745,8 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             // load assignments
             //                  1       ,  2        ,  3     ,  4     ,    5  ,   6      ,  7
             curSql = "SELECT ass.USERGROUP,ass.ACL,ass.PREAD,ass.PEDIT,ass.PREMOVE,ass.PEXPORT,ass.PREL," +
-                    //   8        ,      9
-                    "ass.PCREATE,acl.CAT_TYPE \n" +
+                    //   8        ,      9        10             11             12              13
+                    "ass.PCREATE,acl.CAT_TYPE,ass.CREATED_BY,ass.CREATED_AT,ass.MODIFIED_BY,ass.MODIFIED_AT " +
                     "FROM " + TBL_ASSIGN_ACLS + " ass, " + TBL_ACLS + " acl WHERE " +
                     "ass.ACL=acl.ID AND " +
                     ((groupId != null) ? "USERGROUP=" + groupId : "") +
@@ -761,8 +760,9 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             ArrayList<ACLAssignment> result = new ArrayList<ACLAssignment>(20);
             while (rs != null && rs.next())
                 result.add(new ACLAssignment(rs.getLong(2), rs.getLong(1),
-                        rs.getBoolean(3), rs.getBoolean(4), rs.getBoolean(5), rs.getBoolean(6), rs.getBoolean(7), rs.getBoolean(8),
-                        ACL.Category.getById(rs.getByte(9))));
+                        rs.getBoolean(3), rs.getBoolean(4), rs.getBoolean(5), rs.getBoolean(6), rs.getBoolean(7),
+                        rs.getBoolean(8), ACL.Category.getById(rs.getByte(9)),
+                        LifeCycleInfoImpl.load(rs, 10, 11, 12, 13)));
 
             // Return the found entries
             result.trimToSize();

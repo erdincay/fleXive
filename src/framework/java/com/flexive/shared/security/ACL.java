@@ -34,7 +34,6 @@
 package com.flexive.shared.security;
 
 import com.flexive.shared.*;
-import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.value.FxString;
 
@@ -61,30 +60,7 @@ public class ACL extends AbstractSelectableObjectWithName implements Serializabl
     private String name;
     private FxString label;
     private String mandator;
-
-    /**
-     * Constructor
-     */
-    public ACL() {
-        this.label = new FxString("");
-    }
-
-    /**
-     * Copy Constructor
-     *
-     * @param acl ACL to copy
-     */
-    public ACL(ACL acl) {
-        this.color = acl.color;
-        this.id = acl.id;
-        this.mandatorId = acl.mandatorId;
-        this.category = acl.category;
-        this.description = acl.description;
-        this.name = acl.name;
-        this.label = acl.label.copy();
-        this.mandator = acl.mandator;
-    }
-
+    private LifeCycleInfo lifeCycleInfo = null;
 
     /**
      * ACL categories and their defaults
@@ -128,13 +104,12 @@ public class ACL extends AbstractSelectableObjectWithName implements Serializabl
          *
          * @param id the id
          * @return TypeMode the type
-         * @throws FxNotFoundException on errors
          */
-        public static Category getById(int id) throws FxNotFoundException {
+        public static Category getById(int id) {
             for (Category cat : Category.values())
                 if (cat.id == id)
                     return cat;
-            throw new FxNotFoundException("ex.acl.category.notFound.id", id);
+            throw new FxNotFoundException("ex.acl.category.notFound.id", id).asRuntimeException();
         }
 
         /**
@@ -174,20 +149,45 @@ public class ACL extends AbstractSelectableObjectWithName implements Serializabl
         }
     }
 
+    /**
+     * Constructor
+     */
+    public ACL() {
+        this.label = new FxString("");
+    }
+
+    /**
+     * Copy Constructor
+     *
+     * @param acl ACL to copy
+     */
+    public ACL(ACL acl) {
+        this.color = acl.color;
+        this.id = acl.id;
+        this.mandatorId = acl.mandatorId;
+        this.category = acl.category;
+        this.description = acl.description;
+        this.name = acl.name;
+        this.label = acl.label.copy();
+        this.mandator = acl.mandator;
+        this.lifeCycleInfo = acl.lifeCycleInfo;
+    }
 
     /**
      * Constructor.
      *
-     * @param id          the unique id
-     * @param color       the color (RGB code or style class)
-     * @param mandatorId  the id of the mandator the acl belongs to
-     * @param category    the category
-     * @param description the description
-     * @param name        the name
-     * @param label       display label
-     * @param mandator    the name of the mandator
+     * @param id            the unique id
+     * @param name          the name
+     * @param label         display label
+     * @param mandatorId    the id of the mandator the acl belongs to
+     * @param mandator      the name of the mandator
+     * @param description   the description
+     * @param color         the color (RGB code or style class)
+     * @param category      the category
+     * @param lifeCycleInfo lifecycle information
      */
-    public ACL(long id, String name, FxString label, long mandatorId, String mandator, String description, String color, Category category) {
+    public ACL(long id, String name, FxString label, long mandatorId, String mandator, String description,
+               String color, Category category, LifeCycleInfo lifeCycleInfo) {
         this.color = color;
         this.id = id;
         this.mandatorId = mandatorId;
@@ -196,37 +196,8 @@ public class ACL extends AbstractSelectableObjectWithName implements Serializabl
         this.name = name;
         this.label = label;
         this.mandator = mandator;
+        this.lifeCycleInfo = lifeCycleInfo;
     }
-
-    /**
-     * Constructor.
-     *
-     * @param id          the unique id
-     * @param color       the color (RGB code or style class)
-     * @param mandatorId  the id of the mandator the acl belongs to
-     * @param category    the category
-     * @param description the description
-     * @param name        the name
-     * @param label       display label
-     * @param mandator    the name of the mandator
-     * @throws FxInvalidParameterException on errors
-     */
-    public ACL(long id, String name, FxString label, long mandatorId, String mandator, String description, String color, int category)
-            throws FxInvalidParameterException {
-        this.color = color;
-        this.id = id;
-        this.mandatorId = mandatorId;
-        try {
-            this.category = Category.getById(category);
-        } catch (FxNotFoundException e) {
-            throw new FxInvalidParameterException("CATEGORY", e);
-        }
-        this.description = description;
-        this.name = name;
-        this.label = label;
-        this.mandator = mandator;
-    }
-
 
     /**
      * Returns the unique id of the ACL.
@@ -273,6 +244,15 @@ public class ACL extends AbstractSelectableObjectWithName implements Serializabl
      */
     public Category getCategory() {
         return this.category;
+    }
+
+    /**
+     * Get lifecycle information
+     *
+     * @return lifecycle information
+     */
+    public LifeCycleInfo getLifeCycleInfo() {
+        return lifeCycleInfo;
     }
 
     /**

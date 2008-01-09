@@ -52,18 +52,18 @@ import java.util.List;
 public interface ACLEngine {
 
     /**
-     * Creates a new ACLImpl for a specific mandator.
+     * Creates a new ACL for a specific mandator.
      * <p/>
      * The caller needs to be in ACLManagement, and may only create ACLs for the
      * mandator he belongs to.<br>
      * GROUP_GLOBAL_SUPERVISOR may create ACLs for all mandators.
      *
-     * @param name        the unique name for the new ACLImpl
+     * @param name        the unique name for the new ACL
      * @param label       display label
-     * @param mandatorId  the mandator the ACLImpl belongs to
+     * @param mandatorId  the mandator the ACL belongs to
      * @param color       the color of the acl as 6 digit RGB value, for example FF0000 for pure red
-     * @param description a description for the ACLImpl
-     * @param category    the category of the ACLImpl
+     * @param description a description for the ACL
+     * @param category    the category of the ACL
      * @return		      id of the newly created ACL
      * @throws FxApplicationException creation failed, acl with the given name exists, calling user lacks
      *      permissions, parameter (name,mandator,color,category) was invalid, mandator does not exist
@@ -79,8 +79,8 @@ public interface ACLEngine {
      * GROUP_GLOBAL_SUPERVISOR may unassign ACLs of mandators.
      *
      * @param aclId  the id of the ACL to remove
-     * @throws FxApplicationException when the function failed to unassign the ACLImpl,
-     *      when a ACLImpl with the given id does not exist,
+     * @throws FxApplicationException when the function failed to unassign the ACL,
+     *      when a ACL with the given id does not exist,
      *      when the function failed to unassign the ACL
      */
     void remove(long aclId) throws FxApplicationException;
@@ -93,10 +93,10 @@ public interface ACLEngine {
      * GROUP_GLOBAL_SUPERVISOR may update ACLs of all mandators.
      *
      * @param aclId       The unique id of the acl that should be updated
-     * @param name        The new unqiue name of the ACLImpl, or null if the old name should be kept
+     * @param name        The new unqiue name of the ACL, or null if the old name should be kept
      * @param label       display label
-     * @param color       The new color of the ACLImpl, or null if the old color should be kept
-     * @param description The new description of the ACLImpl, or null if the old description should be kept     
+     * @param color       The new color of the ACL, or null if the old color should be kept
+     * @param description The new description of the ACL, or null if the old description should be kept
      * @param assignments ACL assignments
      * @throws FxApplicationException update failed, acl does not exist, user lacks permissions, parameter is
      *      invalid, acl with the given name exists
@@ -106,12 +106,12 @@ public interface ACLEngine {
             throws FxApplicationException;
 
     /**
-     * Loads a ACLImpl definied by its unique id.
+     * Loads a ACL definied by its unique id.
      * <p/>
      * The caller may only load ACLs belonging to his mandator, or ACLs that the caller is assigned to.<br>
      * GROUP_GLOBAL_SUPERVISOR may load all ACLs.
      *
-     * @param id     the unique id of the ACLImpl that should be loaded
+     * @param id     the unique id of the ACL that should be loaded
      * @return the ACL
      * @throws FxApplicationException load failed, acl does no exist, calling user may not access the ACL
      */
@@ -119,13 +119,13 @@ public interface ACLEngine {
 
 
     /**
-     * Loads a ACLImpl definied by its unique id.
+     * Loads a ACL definied by its unique id.
      * <p/>
      * If ignoreSecurity is true the following permissison checks are performed:<br>
      * The caller may only load ACLs belonging to his mandator.<br>
      * GROUP_GLOBAL_SUPERVISOR may load all ACLs.
      *
-     * @param id     the unique id of the ACLImpl that should be loaded
+     * @param id     the unique id of the ACL that should be loaded
      * @param ignoreSecurity security checks are skipped if set to true
      * @return the ACL
      * @throws FxApplicationException load failed, acl doesnt exist, calling user may not access the ACL

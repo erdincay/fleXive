@@ -40,7 +40,7 @@ import java.io.Serializable;
 
 /**
  * A concrete assignment of an ACL to a user group
- * 
+ *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class ACLAssignment implements Serializable, Cloneable {
@@ -55,6 +55,7 @@ public class ACLAssignment implements Serializable, Cloneable {
     private boolean mayDelete;
     private boolean mayExport;
     private boolean mayCreate;
+    private LifeCycleInfo lifeCycleInfo = null;
     private static transient Log LOG = LogFactory.getLog(ACLAssignment.class);
 
     /**
@@ -65,7 +66,6 @@ public class ACLAssignment implements Serializable, Cloneable {
      */
     @Override
     public ACLAssignment clone() throws CloneNotSupportedException {
-//        return new ACLAssignment(aclId, groupId, mayRead, mayEdit, mayRelate, mayDelete, mayExport, mayCreate, category);
         ACLAssignment clone = (ACLAssignment) super.clone();
         clone.aclId = this.aclId;
         clone.groupId = this.groupId;
@@ -76,6 +76,7 @@ public class ACLAssignment implements Serializable, Cloneable {
         clone.mayDelete = this.mayDelete;
         clone.mayExport = this.mayExport;
         clone.mayCreate = this.mayCreate;
+        clone.lifeCycleInfo = this.lifeCycleInfo;
         return clone;
     }
 
@@ -103,18 +104,19 @@ public class ACLAssignment implements Serializable, Cloneable {
     /**
      * Constructor.
      *
-     * @param aclId the id
-     * @param groupId the assigned grou
-     * @param read the read permission
-     * @param edit the edit permission
-     * @param relate the relate permission
-     * @param delete the delete permission
-     * @param export the export permission
-     * @param create the create permission
-     * @param category the assignment category
+     * @param aclId         the id
+     * @param groupId       the assigned grou
+     * @param read          the read permission
+     * @param edit          the edit permission
+     * @param relate        the relate permission
+     * @param delete        the delete permission
+     * @param export        the export permission
+     * @param create        the create permission
+     * @param category      the assignment category
+     * @param lifeCycleInfo the lifecycle information
      */
     public ACLAssignment(long aclId, long groupId, boolean read, boolean edit, boolean relate, boolean delete,
-                         boolean export, boolean create, ACL.Category category) {
+                         boolean export, boolean create, ACL.Category category, LifeCycleInfo lifeCycleInfo) {
         this.aclId = aclId;
         this.groupId = groupId;
         this.mayRead = read;
@@ -124,16 +126,18 @@ public class ACLAssignment implements Serializable, Cloneable {
         this.mayExport = export;
         this.category = category;
         this.mayCreate = create;
+        this.lifeCycleInfo = lifeCycleInfo;
     }
 
     /**
      * Constructor, all permissions flags are set to false
      *
-     * @param aclId the id
-     * @param groupId the assigned grou
-     * @param category the assignment category
+     * @param aclId         the id
+     * @param groupId       the assigned grou
+     * @param category      the assignment category
+     * @param lifeCycleInfo the lifecycle information
      */
-    public ACLAssignment(long aclId, long groupId, ACL.Category category) {
+    protected ACLAssignment(long aclId, long groupId, ACL.Category category, LifeCycleInfo lifeCycleInfo) {
         this.aclId = aclId;
         this.groupId = groupId;
         this.mayRead = false;
@@ -143,8 +147,8 @@ public class ACLAssignment implements Serializable, Cloneable {
         this.mayExport = false;
         this.category = category;
         this.mayCreate = false;
+        this.lifeCycleInfo = lifeCycleInfo;
     }
-
 
 
     /**
@@ -219,10 +223,14 @@ public class ACLAssignment implements Serializable, Cloneable {
         return this.groupId;
     }
 
+    /**
+     * Setter for the group id
+     *
+     * @param groupId group id
+     */
     public void setGroupId(long groupId) {
         this.groupId = groupId;
     }
-
 
     /**
      * Returns the type of the ACL.
@@ -234,13 +242,22 @@ public class ACLAssignment implements Serializable, Cloneable {
     }
 
     /**
+     * Get lifecycle information
+     *
+     * @return lifecycle information
+     */
+    public LifeCycleInfo getLifeCycleInfo() {
+        return lifeCycleInfo;
+    }
+
+    /**
      * Returns a string representation.
      *
      * @return a string representation
      */
     @Override
     public String toString() {
-        return this.getClass() + "@[acl=" + aclId + ",group=" + groupId + ",create=" + mayCreate +",read=" + mayRead +
+        return this.getClass() + "@[acl=" + aclId + ",group=" + groupId + ",create=" + mayCreate + ",read=" + mayRead +
                 ",edit=" + mayEdit + ",delete=" + mayDelete
                 + ",relate=" + mayRelate + ",export=" + mayExport + "]";
     }
@@ -271,12 +288,12 @@ public class ACLAssignment implements Serializable, Cloneable {
 
     /**
      * Check if the requested permission is granted
-     * 
+     *
      * @param permission the permission to check
      * @return granted
      */
     public boolean getPermission(ACL.Permission permission) {
-        switch( permission ) {
+        switch (permission) {
             case CREATE:
                 return mayCreate;
             case DELETE:
@@ -295,5 +312,5 @@ public class ACLAssignment implements Serializable, Cloneable {
         }
     }
 
-    
+
 }

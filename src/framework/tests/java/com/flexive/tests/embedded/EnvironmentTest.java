@@ -67,7 +67,7 @@ public class EnvironmentTest {
     @Test(groups = {"ejb", "environment"})
     public void testGetACLs() {
         List<ACL> acls = getEnvironment().getACLs();
-        testUnmodifiableList("environment.getACLs()", acls, new ACL(1, "test", null, -1, null, null, null, ACL.Category.INSTANCE));
+        testUnmodifiableList("environment.getACLs()", acls, new ACL(1, "test", null, -1, null, null, null, ACL.Category.INSTANCE, null));
         assert acls.equals(getEnvironment().getACLs());
     }
 
@@ -75,7 +75,7 @@ public class EnvironmentTest {
     public void testGetACLsByCategory() {
         for (Category category : Category.values()) {
             List<ACL> acls = getEnvironment().getACLsByCategory(category);
-            testUnmodifiableList("environment.getACLsByCategory()", acls, new ACL(1, "test", null, -1, null, null, null, ACL.Category.INSTANCE));
+            testUnmodifiableList("environment.getACLsByCategory()", acls, new ACL(1, "test", null, -1, null, null, null, ACL.Category.INSTANCE, null));
             assert acls.equals(getEnvironment().getACLsByCategory(category));
         }
     }

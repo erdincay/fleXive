@@ -126,10 +126,6 @@ public class Mandator extends AbstractSelectableObjectWithName implements Serial
         this.active = active;
     }
 
-    public void setLci(LifeCycleInfo lci) {
-        this.lci = lci;
-    }
-
     /**
      * Returns a string representation of the object.
      *

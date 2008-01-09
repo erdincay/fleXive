@@ -137,7 +137,7 @@ public class AclBean {
         return assignments;
     }
 
-    public void setAssignments(ArrayList<ACLAssignmentEdit> assignments) {
+    public void setAssignments(List<ACLAssignmentEdit> assignments) {
         this.assignments = assignments;
     }
 
@@ -159,7 +159,7 @@ public class AclBean {
      *
      * @return a list of all ACL.
      */
-    public ArrayList<ACL> getList() {
+    public List<ACL> getList() {
         try {
             final UserTicket ticket = FxContext.get().getTicket();
             long mandatorId = (ticket.isGlobalSupervisor()) ?
@@ -274,7 +274,7 @@ public class AclBean {
             for (ACLAssignmentEdit ass : getAssignments()) {
                 list.add(new ACLAssignment(ass.getAclId(), ass.getGroupId(), ass.getMayRead(), ass.getMayEdit(),
                         ass.getMayRelate(), ass.getMayDelete(), ass.getMayExport(),
-                        ass.getMayCreate(), ass.getACLCategory()));
+                        ass.getMayCreate(), ass.getACLCategory(), ass.getLifeCycleInfo()));
             }
             aclEngine.update(id, acl.getName(), acl.getLabel(), acl.getColor(), acl.getDescription(), list);
             this.acl = aclEngine.load(id);
@@ -290,8 +290,8 @@ public class AclBean {
      *
      * @return all available categories
      */
-    public ArrayList<SelectItem> getCategories() {
-        ArrayList<SelectItem> result = new ArrayList<SelectItem>(ACL.Category.values().length);
+    public List<SelectItem> getCategories() {
+        List<SelectItem> result = new ArrayList<SelectItem>(ACL.Category.values().length);
         for (ACL.Category cat : ACL.Category.values()) {
             result.add(new SelectItem(String.valueOf(cat.getId()), String.valueOf(cat)));
         }
@@ -309,12 +309,12 @@ public class AclBean {
 
         public ACLAssignmentEdit(ACLAssignment ass) {
             super(ass.getAclId(), ass.getGroupId(), ass.getMayRead(), ass.getMayEdit(), ass.getMayRelate(), ass.getMayDelete(),
-                    ass.getMayExport(), ass.getMayCreate(), ass.getACLCategory());
+                    ass.getMayExport(), ass.getMayCreate(), ass.getACLCategory(), ass.getLifeCycleInfo());
             id = generateId();
         }
 
         public ACLAssignmentEdit(ACL acl) {
-            super(acl.getId(), -1, acl.getCategory());
+            super(acl.getId(), -1, acl.getCategory(), acl.getLifeCycleInfo());
             id = generateId();
         }
 

@@ -45,10 +45,10 @@ import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxLoadException;
 import com.flexive.shared.exceptions.FxNotFoundException;
+import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.scripting.FxScriptMappingEntry;
-import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.structure.*;
@@ -84,18 +84,17 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
         ArrayList<ACL> result = new ArrayList<ACL>(250);
         try {
             //                            1      2          3             4                5          6                 7
-            curSql = "SELECT DISTINCT acl.ID, acl.NAME, acl.CAT_TYPE, acl.DESCRIPTION, acl.COLOR, acl.MANDATOR, mand.NAME from \n" +
+            curSql = "SELECT DISTINCT acl.ID, acl.NAME, acl.CAT_TYPE, acl.DESCRIPTION, acl.COLOR, acl.MANDATOR, mand.NAME, " +
+                    //    8               9               10               11
+                    " acl.CREATED_BY, acl.CREATED_AT, acl.MODIFIED_BY, acl.MODIFIED_AT FROM " +
                     TBL_ACLS + " acl, " + TBL_MANDATORS + " mand WHERE mand.ID=acl.MANDATOR";
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(curSql);
             while (rs != null && rs.next()) {
-                try {
-                    result.add(new ACL(rs.getInt(1), rs.getString(2),
-                            Database.loadFxString(con, TBL_ACLS, "LABEL", "ID=" + rs.getInt(1)),
-                            rs.getInt(6), rs.getString(7), rs.getString(4), rs.getString(5), rs.getInt(3)));
-                } catch (FxInvalidParameterException e) {
-                    throw new FxLoadException(LOG, e);
-                }
+                result.add(new ACL(rs.getInt(1), rs.getString(2),
+                        Database.loadFxString(con, TBL_ACLS, "LABEL", "ID=" + rs.getInt(1)),
+                        rs.getInt(6), rs.getString(7), rs.getString(4), rs.getString(5), ACL.Category.getById(rs.getInt(3)),
+                        LifeCycleInfoImpl.load(rs, 8, 9, 10, 11)));
             }
         } catch (SQLException exc) {
             throw new FxLoadException(LOG, "Failed to load all ACLs: " + exc.getMessage(), exc);
@@ -241,7 +240,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
             //                     1     2       3             4             5                  6       7
             String sql = "SELECT p.ID, p.NAME, p.DEFMINMULT, p.DEFMAXMULT, p.MAYOVERRIDEMULT, t.LANG, t.DESCRIPTION, " +
                     // 8      9                 10          11
-                    "p.ACL, p.MAYOVERRIDEACL, p.DATATYPE, p.REFTYPE, "+
+                    "p.ACL, p.MAYOVERRIDEACL, p.DATATYPE, p.REFTYPE, " +
                     // 12                   13               14     15
                     "p.ISFULLTEXTINDEXED, t.DEFAULT_VALUE, t.HINT, p.SYSINTERNAL, " +
                     //16          17

@@ -83,6 +83,7 @@ public class Account extends AbstractSelectableObjectWithName implements Seriali
     private boolean allowMultiLogin = false;
     private String updateToken;
     private FxPK contactData;
+    private LifeCycleInfo lifeCycleInfo = null;
 
     public Account() {
         /* empty constructor */
@@ -92,7 +93,7 @@ public class Account extends AbstractSelectableObjectWithName implements Seriali
                    String email, FxLanguage language, boolean active,
                    boolean validated, Date validFrom, Date validTo, long defaultNode,
                    String description, long contactDataId, boolean allowMultiLogin,
-                   String updateToken) {
+                   String updateToken, LifeCycleInfo lifeCycleInfo) {
         this.name = name;
         this.loginName = loginName;
         this.id = id;
@@ -109,6 +110,7 @@ public class Account extends AbstractSelectableObjectWithName implements Seriali
         this.contactData = new FxPK(this.contactDataId);
         this.allowMultiLogin = allowMultiLogin;
         this.updateToken = updateToken;
+        this.lifeCycleInfo = lifeCycleInfo;
     }
 
     /**
@@ -273,6 +275,11 @@ public class Account extends AbstractSelectableObjectWithName implements Seriali
         return this.contactData;
     }
 
+    /**
+     * Get the id of the contact data instance associated to this account
+     *
+     * @return contact data id
+     */
     public long getContactDataId() {
         return contactDataId;
     }
@@ -297,8 +304,22 @@ public class Account extends AbstractSelectableObjectWithName implements Seriali
         return this.defaultNodeId;
     }
 
+    /**
+     * Is this account allowed to be logged in more than once?
+     *
+     * @return multi login allowed?
+     */
     public boolean getAllowMultiLogin() {
         return this.allowMultiLogin;
+    }
+
+    /**
+     * Get the lifecycle information
+     *
+     * @return lifecycle information
+     */
+    public LifeCycleInfo getLifeCycleInfo() {
+        return lifeCycleInfo;
     }
 
     public void setName(String sName) {
