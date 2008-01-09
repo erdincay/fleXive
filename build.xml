@@ -331,6 +331,15 @@
 				<filter value="+com.flexive.war.*" />
 			</instr>
 		</emma>
+        <emma enabled="${emma.enabled}">
+			<instr
+				instrpath="${build.ui.jar.dir}/flexive-ui-shared.jar"
+				mode="overwrite"
+				merge="true"
+				metadatafile="${coverage.dir}/coverage.em">
+				<filter value="+com.flexive.war.*" />
+			</instr>
+		</emma>
 		<!-- assemble the flexive-webdav jar -->
 		<jar jarfile="${build.ui.jar.dir}/flexive-webdav.jar">
 			<fileset dir="${build.ui.shared.classes.dir}">
@@ -581,6 +590,15 @@ database.password=a
         <buildPlugin name="jsf-core" srcdir="${flexive.base.ui.components.dir}"/>
         <buildPlugin name="jsf-testrunner" srcdir="${flexive.base.ui.dir}/jsf-testrunner"/>
         <buildPlugin name="jsf-globalconfig" srcdir="${flexive.base.ui.dir}/jsf-globalconfig"/>
+        <emma enabled="${emma.enabled}">
+			<instr
+				instrpath="${build.ui.jar.dir}/flexive-jsf-core.jar"
+				mode="overwrite"
+				merge="true"
+				metadatafile="${coverage.dir}/coverage.em">
+				<filter value="+com.flexive.*" />
+			</instr>
+		</emma>
     </target>
 
     <macrodef name="buildPlugin">

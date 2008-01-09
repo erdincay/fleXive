@@ -173,8 +173,9 @@
         <javac-call srcdir="${tests.framework.dir}/"
                destdir="${tests.classes.dir}"
 	       	   includes="com/flexive/tests/shared/*.java">
-            <src path="${flexive.src.framework.dir}"/>
-<!--            <src path="${src.ui.shared.dir}"/>-->
+            <classpath>
+                <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar"/>
+            </classpath>
             <classpath refid="build.classpath.testng"/>
         </javac-call>
         <groovyc-tests srcdir="${tests.framework.groovy.dir}" includes="com/flexive/tests/shared/**/*"/>
@@ -184,7 +185,9 @@
         <javac-call srcdir="${tests.framework.dir}/"
                destdir="${tests.classes.dir}"
 	       	   includes="com/flexive/tests/browser/*.java">
-            <src path="${flexive.src.framework.dir}"/>
+            <classpath>
+                <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar"/>
+            </classpath>
 <!--            <src path="${src.ui.shared.dir}"/>-->
             <classpath refid="build.classpath.testng"/>
         </javac-call>
@@ -202,7 +205,9 @@
                includes="com/flexive/tests/embedded/**/*.java, com/flexive/tests/shared/*.java, com/flexive/tutorial/**/*.java"
 	       excludes="com/flexive/tests/embedded/jsf/**">
             <classpath refid="ejb3-embedded.classpath"/>
-            <src path="${flexive.src.framework.dir}"/>
+            <classpath>
+                <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar"/>
+            </classpath>
 <!--            <src path="${src.ui.shared.dir}"/>-->
         </javac-call>
         <groovyc-tests srcdir="${tests.framework.groovy.dir}" includes="com/flexive/tests/embedded/**/*, com/flexive/tests/shared/**/*"/>
@@ -213,9 +218,8 @@
                destdir="${tests.classes.dir}"
                includes="com/flexive/tests/**/jsf/**/*.java">
             <classpath refid="ejb3-embedded.classpath"/>
-            <src path="${flexive.src.framework.dir}"/>
-            <src path="${flexive.src.ui.shared.dir}"/>
             <classpath>
+                <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar"/>
                 <fileset dir="${build.ui.jar.dir}" includes="*.jar"/>
             </classpath>
         </javac-call>
@@ -226,7 +230,9 @@
         <javac-call srcdir="${tests.framework.dir}/"
                destdir="${tests.classes.dir}"
 	       	   includes="com/flexive/tests/disttools/**/*.java">
-            <src path="${flexive.src.framework.dir}"/>
+            <classpath>
+                <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar"/>
+            </classpath>
             <classpath refid="build.classpath.testng"/>
         </javac-call>
     </target>
@@ -279,7 +285,7 @@
         <testng classpathref="ejb3-embedded.classpath"
                 outputDir="${testng.report.dir}" groups="${tests.groups}">
             <classpath>
-                <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar, *.ejb3"/>
+                <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar"/>
                 <fileset dir="${build.ui.jar.dir}" includes="*.jar"/>
                 <!--<fileset dir="${flexive.lib.dir}" includes="**/*.jar"/>-->
                 <!-- include .properties -->
@@ -315,6 +321,10 @@
         <groovy>
             properties.'run.debug.settings' = properties.'debug.settings'
         </groovy>
+    </target>
+
+    <target name="tests.emma.enable">
+        <property name="tests.emma.enabled" value="1"/>
     </target>
     
     <target name="tests.ejb.debug" depends="tests.compile.ejb,tests.debug.enable">
