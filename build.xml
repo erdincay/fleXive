@@ -104,7 +104,7 @@
 		<delete dir="${base.reports.dir}"/>
 	</target>
 
-	<target name="prepare" description="Prepare build directory structures" depends="init" unless="prepare.done">
+	<target name="prepare" description="Prepare build directory structures" depends="init">
         <groovy>
             def file = properties.basedir+File.separatorChar+"build.properties"
             if( !new File(file).exists() ) {
@@ -134,8 +134,6 @@
         <taskdef name="makeMessages"
                  classname="com.flexive.tools.ant.MakeMessagesTask"
                  classpath="${flexive.build.framework.jar.dir}/flexive-ant.jar"/>
-        <!-- Ensure prepare is called only once -->
-        <property name="prepare.done" value="true"/>
     </target>
 
 
