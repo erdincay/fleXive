@@ -381,7 +381,7 @@ public class TypeEditorBean {
 
     public void addRelation() {
         WrappedRelation relationToAdd = new WrappedRelation(getRelSourceIdFiler(), getRelDestIdFiler(),
-                getRelMaxSourceFiler(), getRelMaxDestFiler());
+                isRelSourceUnlimitedFiler() ? 0 : getRelMaxSourceFiler(), isRelDestUnlimitedFiler() ? 0 :getRelMaxDestFiler());
         if (!wrappedRelations.contains(relationToAdd)) {
             wrappedRelations.add(relationToAdd);
             setRelSourceIdFiler(defaultSelectListTypeId);
@@ -583,8 +583,6 @@ public class TypeEditorBean {
         private long destId;
         protected int maxSource;
         protected int maxDest;
-        private boolean maxSourceUnlimited = false;
-        private boolean maxDestUnlimited = false;
 
         WrappedRelation(FxTypeRelation r) {
             this.sourceId = r.getSource().getId();
@@ -597,11 +595,7 @@ public class TypeEditorBean {
             this.sourceId = sourceId;
             this.destId = destId;
             this.maxSource = maxSource;
-            if (maxSource == 0)
-                maxSourceUnlimited = true;
             this.maxDest = maxDest;
-            if (maxDest == 0)
-                maxDestUnlimited = true;
         }
 
         public FxTypeRelation asRelation() {
@@ -672,27 +666,25 @@ public class TypeEditorBean {
         }
 
         public boolean isMaxSourceUnlimited() {
-            return maxSourceUnlimited;
+            return maxSource == 0;
         }
 
         public void setMaxSourceUnlimited(boolean maxSourceUnlimited) {
-            if (this.maxSourceUnlimited && !maxSourceUnlimited)
+            if (this.isMaxSourceUnlimited() && !maxSourceUnlimited)
                 setMaxSource(DEFAULT_REL_MAX);
-            if (!this.maxSourceUnlimited && maxSourceUnlimited)
+            if (!this.isMaxSourceUnlimited() && maxSourceUnlimited)
                 setMaxRelSource(0);
-            this.maxSourceUnlimited = maxSourceUnlimited;
         }
 
         public boolean isMaxDestUnlimited() {
-            return maxDestUnlimited;
+            return maxDest ==0;
         }
 
         public void setMaxDestUnlimited(boolean maxDestUnlimited) {
-            if (this.maxDestUnlimited && !maxDestUnlimited)
+            if (this.isMaxDestUnlimited() && !maxDestUnlimited)
                 setMaxDest(DEFAULT_REL_MAX);
-            if (!this.maxDestUnlimited && maxDestUnlimited)
+            if (!this.isMaxDestUnlimited() && maxDestUnlimited)
                 setMaxDest(0);
-            this.maxDestUnlimited = maxDestUnlimited;
         }
     }
 

@@ -459,6 +459,13 @@
                 //contentPage=null;
             }
 
+            function createTestData(menuItem) {
+                var menu = dojo.widget.byId("structureTreeMenu");
+                var nodeId = menu.getTreeNode().propertyId;
+                if (menu.getTreeNode().nodeDocType == "Type")
+                    invokeContentAction("adm/content/createTestData.jsf", "setTypeId", {typeId: nodeId});
+            }
+
             function showTreeMenu() {
                 var menu = dojo.widget.byId("structureTreeMenu");
                 if (menu.getTreeNode() == null) {
@@ -491,6 +498,7 @@
                 setActionDisabled(menu.getTreeNode(), "pasteAboveAs", lackRole || copyNode==null || cutMode ||(node.nodeDocType!="Assignment" && node.nodeDocType!="Group"));
                 setActionDisabled(menu.getTreeNode(), "pasteIntoAs", lackRole || copyNode==null || cutMode || (!isType(node.nodeDocType) && node.nodeDocType!="Group"));
                 setActionDisabled(menu.getTreeNode(), "pasteSubMenu", lackRole || copyNode==null || cutMode);
+                setActionDisabled(menu.getTreeNode(), "createTestData", lackRole || node.nodeDocType!="Type");
                 menu.show_();
             }
 
@@ -528,7 +536,8 @@
                 <adm:treeContextMenuItem icon="edit" treeActions="editNode" labelKey="StructureTree.menu.edit" clickHandler="editNode"/>
                 <adm:treeContextMenuItem icon="property" treeActions="createProperty" labelKey="StructureTree.menu.createProperty" clickHandler="createProperty"/>
                 <adm:treeContextMenuItem icon="group" treeActions="createGroup" labelKey="StructureTree.menu.createGroup" clickHandler="createGroup" />
-               <fx:menuSeparator/> 
+                <adm:treeContextMenuItem icon="createTestData" treeActions="createTestData" labelKey="StructureTree.menu.createTestData" clickHandler="createTestData" />
+                <fx:menuSeparator/>
                 <adm:treeContextMenuItem icon="new" treeActions="createContent" labelKey="ContentTree.menu.create" clickHandler="createContent"/>
                 <adm:treeContextMenuItem icon="search" treeActions="searchContents" labelKey="StructureTree.menu.searchContents" clickHandler="searchContents"/>
                <fx:menuSeparator/>
@@ -562,12 +571,16 @@
             <fx:menu name="mainMenu">
 
                 <fx:menuItem rendered="#{fxSystemBean.isInRole['StructureManagement']}" labelKey="StructureTree.menu.createType" icon="windowNew" clickHandler="function(menuItem) { createType(menuItem); }"/>
-              <!-- not part of RC1  
+
                 <fx:menuItem labelKey="StructureTree.menu.createTypeRelation" icon="fxTypeRelation" clickHandler="function(menuItem) { createTypeRelation(menuItem); }"/>
-                -->
+                
                 <ui:include src="/adm/templates/navigation.menu.tabs.xhtml"/>
             </fx:menu>
         </div>
+    </ui:define>
+
+    <ui:define name="reloadButton">
+        <a href="javascript:reloadStructureTree()"><t:graphicImage url="/adm/images/layout/reload.png" alt="reload" style="position:absolute;right:15px;margin-top:2px;border:0;"/></a>
     </ui:define>
 
 </ui:composition>

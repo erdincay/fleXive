@@ -16,7 +16,7 @@
         <h:form id="frm">
 
             <adm:tab label="#{fxMessageBean['Content.tabtitle.createTestData']}" active="true" id="tabChoose"/>
-
+            <c:if test="#{empty contentGeneratorBean.parseRequestParameters}"/>
 			<fx:formRow id="type">
 	            <t:selectOneListbox size="1" id="type" value="#{contentGeneratorBean.type}">
 	                <f:selectItems value="#{fxSelectBean.types}" />

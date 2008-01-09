@@ -35,6 +35,7 @@ package com.flexive.war.beans.admin.content;
 
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
+import com.flexive.faces.FxJsfUtils;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
@@ -58,6 +59,16 @@ public class ContentGeneratorBean {
     private int count = 100;
     private int maxMultiplicity = 2;
     private String treeFolder = "/Test Data";
+
+    public String getParseRequestParameters() {
+    String action = FxJsfUtils.getParameter("action");
+        if (StringUtils.isBlank(action)) {
+            return null;
+        } else if ("setTypeId".equals(action)) {
+            type = FxJsfUtils.getLongParameter("typeId", -1);
+        }
+        return null;
+    }
 
     public String create() {
         try {
