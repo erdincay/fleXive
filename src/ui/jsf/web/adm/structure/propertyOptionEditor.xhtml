@@ -30,19 +30,18 @@
         </c:if>
         <c:if test="#{not propertyEditorBean.property.new}">
             <ui:fragment rendered="#{propertyEditorBean.editMode}">
-                <adm:tab label="#{fxMessageBean['PropertyEditor.tab.propertyAssignment']}" active="false" id="tab1"/>
+                <adm:tab label="#{fxMessageBean['PropertyEditor.tab.propertyAssignment']}" active="false" id="tab1"
+                        bean="#{propertyEditorBean}" action="showPropertyAssignmentEditor"/>
                 <adm:tab label="#{fxMessageBean['PropertyEditor.tab.property']}" active="false" id="tab2"
                          bean="#{propertyEditorBean}" action="showPropertyEditor"/>
-                <adm:tab label="#{fxMessageBean['PropertyEditor.tab.option']}" active="true" id="tab3"
-                         bean="#{propertyEditorBean}" action="showPropertyOptionEditor"/>
+                <adm:tab label="#{fxMessageBean['PropertyEditor.tab.option']}" active="true" id="tab3"/>
             </ui:fragment>
             <ui:fragment rendered="#{not propertyEditorBean.editMode}">
                 <adm:tab label="#{fxMessageBean['PropertyEditor.tab.propertyAssignment.readonly']}" active="false"
-                         id="tab1ro"/>
+                         id="tab1ro" bean="#{propertyEditorBean}" action="showPropertyAssignmentEditor"/>
                 <adm:tab label="#{fxMessageBean['PropertyEditor.tab.property.readonly']}" active="false" id="tab2ro"
                          bean="#{propertyEditorBean}" action="showPropertyEditor"/>
-                <adm:tab label="#{fxMessageBean['PropertyEditor.tab.option.readonly']}" active="true" id="tab3ro"
-                         bean="#{propertyEditorBean}" action="showPropertyOptionEditor"/>
+                <adm:tab label="#{fxMessageBean['PropertyEditor.tab.option.readonly']}" active="true" id="tab3ro"/>
             </ui:fragment>
         </c:if>
         <c:if test="#{propertyEditorBean.property.new}">
@@ -211,7 +210,7 @@
             </ui:fragment>
             <ui:fragment rendered="#{propertyEditorBean.property.new}">
                 <adm:commandButton labelKey="PropertyEditor.button.property.createNew" location="both"
-                    icon="create"  action="createProperty"  bean="#{propertyEditorBean}" id="createPropertyButton">
+                    icon="new"  action="createProperty"  bean="#{propertyEditorBean}" id="createPropertyButton">
                 </adm:commandButton>
             </ui:fragment>
         
