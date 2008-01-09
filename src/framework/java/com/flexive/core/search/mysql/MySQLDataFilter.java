@@ -62,6 +62,7 @@ import org.apache.commons.logging.LogFactory;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -138,7 +139,7 @@ public class MySQLDataFilter extends DataFilter {
                 stmt.executeUpdate("DELETE FROM " + DatabaseConst.TBL_SEARCHCACHE_MEMORY +
                         " WHERE search_id=" + search.getSearchId());
             } catch (Throwable t) {
-                throw new FxSqlSearchException(t, "ex.sqlSearch.err.failedToClearTempSearchResult", search.getSearchId());
+                throw new FxSqlSearchException(LOG, t, "ex.sqlSearch.err.failedToClearTempSearchResult", search.getSearchId());
             } finally {
                 Database.closeObjects(MySQLDataSelector.class, null, stmt);
             }
@@ -154,6 +155,7 @@ public class MySQLDataFilter extends DataFilter {
     public void build() throws FxSqlSearchException {
         Statement stmt = null;
         final long MAX_ROWS = search.getFxStatement().getMaxResultRows() + 1;
+        String sql = null;
         try {
             final String dataSelect;
             if (getStatement().getType() == FxStatement.Type.ALL) {
@@ -184,15 +186,17 @@ public class MySQLDataFilter extends DataFilter {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("SQL getResult: \n" + dataSelect + "\n");
             }
-            final String sql = "INSERT INTO " + search.getCacheTable() + " (" + dataSelect + ")";
+            sql = "INSERT INTO " + search.getCacheTable() + " (" + dataSelect + ")";
             stmt = getConnection().createStatement();
             stmt.setQueryTimeout(search.getParams().getQueryTimeout());
             stmt.executeUpdate(sql);
             analyzeResult();
         } catch (FxSqlSearchException exc) {
             throw exc;
+        } catch (SQLException e) {
+            throw new FxSqlSearchException(LOG, e, "ex.sqlSearch.failedToBuildDataFilter.sql", e.getMessage(), search.getQuery(), sql);
         } catch (Throwable t) {
-            throw new FxSqlSearchException(t, "ex.sqlSearch.failedToBuildDataFilter", t.getMessage(), search.getQuery());
+            throw new FxSqlSearchException(LOG, t, "ex.sqlSearch.failedToBuildDataFilter", t.getMessage(), search.getQuery());
         } finally {
             Database.closeObjects(MySQLDataFilter.class, null, stmt);
         }
@@ -244,7 +248,7 @@ public class MySQLDataFilter extends DataFilter {
                 totalFiltered = rs.getLong(1);
             System.out.println("Total filtered: "+totalFiltered);*/
         } catch (Throwable t) {
-            throw new FxSqlSearchException(t, "ex.sqlSearch.failedToCountFoundEntries", search.getSearchId());
+            throw new FxSqlSearchException(LOG, t, "ex.sqlSearch.failedToCountFoundEntries", search.getSearchId());
         } finally {
             Database.closeObjects(MySQLDataFilter.class, null, stmt);
         }
@@ -288,7 +292,7 @@ public class MySQLDataFilter extends DataFilter {
             } else if (be instanceof Brace) {
                 build(sb, (Brace) be);
             } else {
-                throw new FxSqlSearchException("ex.sqlSearch.filter.invalidBrace", be);
+                throw new FxSqlSearchException(LOG, "ex.sqlSearch.filter.invalidBrace", be);
             }
             pos++;
         }
@@ -330,7 +334,7 @@ public class MySQLDataFilter extends DataFilter {
             } else if (be instanceof Brace) {
                 build(sb, (Brace) be);
             } else {
-                throw new FxSqlSearchException("ex.sqlSearch.filter.invalidBrace", be);
+                throw new FxSqlSearchException(LOG, "ex.sqlSearch.filter.invalidBrace", be);
             }
             sb.append(" tbl").append(be.getId()).append("\n");
             pos++;
@@ -364,21 +368,21 @@ public class MySQLDataFilter extends DataFilter {
                 // Lookup the path in the tree
                 parentNode = search.getTreeEngine().getIdByPath(mode, path);
             } catch (FxApplicationException e2) {
-                throw new FxSqlSearchException(e2, "ex.sqlSearch.filter.invalidTreePath", path);
+                throw new FxSqlSearchException(LOG, e2, "ex.sqlSearch.filter.invalidTreePath", path);
             }
             if (parentNode == -1) {
-                throw new FxSqlSearchException("ex.sqlSearch.filter.invalidTreePath", path);
+                throw new FxSqlSearchException(LOG, "ex.sqlSearch.filter.invalidTreePath", path);
             }
         }
         if (parentNode < 0) {
-            throw new FxSqlSearchException("ex.sqlSearch.filter.invalidTreeId", parentNode);
+            throw new FxSqlSearchException(LOG, "ex.sqlSearch.filter.invalidTreeId", parentNode);
         }
 
         final FxTreeNodeInfo nodeInfo;
         try {
             nodeInfo = StorageManager.getTreeStorage().getTreeNodeInfo(con, mode, parentNode);
         } catch (FxApplicationException e) {
-            throw new FxSqlSearchException(e, "ex.sqlSearch.filter.loadTreeNode", parentNode, e.getMessage());
+            throw new FxSqlSearchException(LOG, e, "ex.sqlSearch.filter.loadTreeNode", parentNode, e.getMessage());
         }
         return "(SELECT DISTINCT cd.id,cd.ver,null lang FROM " + tableMain + " cd WHERE " +
                 "cd.id IN (SELECT ref FROM " + GenericTreeStorage.getTable(mode) + " WHERE " +
@@ -400,7 +404,7 @@ public class MySQLDataFilter extends DataFilter {
     private String getConditionSubQuery(FxStatement stmt, Condition cond) throws FxSqlSearchException {
         final Table tblContent = stmt.getTableByType(Table.TYPE.CONTENT);
         if (tblContent == null) {
-            throw new FxSqlSearchException("ex.sqlSearch.contentTableMissing");
+            throw new FxSqlSearchException(LOG, "ex.sqlSearch.contentTableMissing");
         }
         final Property prop = cond.getProperty();
         final Constant constant = cond.getConstant();
@@ -548,7 +552,7 @@ public class MySQLDataFilter extends DataFilter {
                     column = "FTEXT1024";
                     value = "'" + StringUtils.join(constant.iterator(), ',') + "'";
                 } else {
-                    throw new FxSqlSearchException("ex.sqlSearch.reader.type.invalidOperator",
+                    throw new FxSqlSearchException(LOG, "ex.sqlSearch.reader.type.invalidOperator",
                             entry.getProperty().getDataType(), cond.getComperator());
                 }
                 break;
@@ -568,13 +572,13 @@ public class MySQLDataFilter extends DataFilter {
                     value = "NULL";
                     break;
                 }
-                throw new FxSqlSearchException("ex.sqlSearch.reader.type.invalidOperator",
+                throw new FxSqlSearchException(LOG, "ex.sqlSearch.reader.type.invalidOperator",
                         entry.getProperty().getDataType(), cond.getComperator());
             case Reference:
                 value = String.valueOf(FxPK.fromString(constant.getValue()).getId());
                 break;
             default:
-                throw new FxSqlSearchException("ex.sqlSearch.reader.unknownPropertyColumnType",
+                throw new FxSqlSearchException(LOG, "ex.sqlSearch.reader.unknownPropertyColumnType",
                         entry.getProperty().getDataType(), prop.getPropertyName());
         }
 

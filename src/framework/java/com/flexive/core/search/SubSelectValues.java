@@ -41,12 +41,17 @@ import com.flexive.sqlParser.Value;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Helper to store subselect values
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class SubSelectValues {
+    private static final Log LOG = LogFactory.getLog(SubSelectValues.class);
+
     private final int resultSetPos;
     private final SortDirection sortDirection;
     private final List<Item> items = new ArrayList<Item>();
@@ -132,11 +137,11 @@ public class SubSelectValues {
 
         // Find and apply the selector
         if (isMultivalue() || entry.getTableType() != PropertyResolver.Table.T_CONTENT) {
-            throw new FxSqlSearchException("ex.sqlSearch.query.fieldNotAllowedFor", prop.getPropertyName());
+            throw new FxSqlSearchException(LOG, "ex.sqlSearch.query.fieldNotAllowedFor", prop.getPropertyName());
         }
         final FieldSelector selector = ds.getSelectors().get(prop.getPropertyName());
         if (selector == null) {
-            throw new FxSqlSearchException("ex.sqlSearch.query.noFieldsForProp",
+            throw new FxSqlSearchException(LOG, "ex.sqlSearch.query.noFieldsForProp",
                     prop.getField(), prop.getPropertyName());
         } else {
             for (Item it : items) {
@@ -160,7 +165,7 @@ public class SubSelectValues {
         if (prop.getFunctionsStart().length() == 0 && prop.getFunctionsEnd().length() == 0) return;
 
         if (isMultivalue()) {
-            throw new FxSqlSearchException("ex.sqlSearch.query.fieldNotAllowedFor",
+            throw new FxSqlSearchException(LOG, "ex.sqlSearch.query.fieldNotAllowedFor",
                     (prop instanceof Property) ? ((Property) prop).getPropertyName() : "[constant]");
         }
         for (Item it : items) {

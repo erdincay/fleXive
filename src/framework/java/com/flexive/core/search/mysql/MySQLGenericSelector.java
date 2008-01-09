@@ -38,6 +38,7 @@ import com.flexive.core.search.FieldSelector;
 import com.flexive.core.search.PropertyResolver;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.structure.FxDataType;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.sqlParser.Property;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -63,6 +64,8 @@ class MySQLGenericSelector implements FieldSelector {
     private final String linksOn;
 
     protected MySQLGenericSelector(String tableName, String linksOn) {
+        FxSharedUtils.checkParameterNull(tableName, "tableName");
+        FxSharedUtils.checkParameterNull(linksOn, "linksOn");
         Connection con = null;
         Statement stmt = null;
         this.tableName = tableName;
@@ -85,6 +88,7 @@ class MySQLGenericSelector implements FieldSelector {
                         columnType = FxDataType.Boolean;
                         break;
                     case java.sql.Types.TINYINT:
+                    case java.sql.Types.SMALLINT:
                     case java.sql.Types.INTEGER:
                     case java.sql.Types.BIT:
                         columnType = FxDataType.Number;
@@ -98,6 +102,13 @@ class MySQLGenericSelector implements FieldSelector {
                     case java.sql.Types.BIGINT:
                         columnType = FxDataType.LargeNumber;
                         break;
+                    case java.sql.Types.DATE:
+                        columnType = FxDataType.Date;
+                        break;
+                    case java.sql.Types.TIME:
+                    case java.sql.Types.TIMESTAMP:
+                        columnType = FxDataType.DateTime;
+                        break;
                     default:
                         columnType = FxDataType.String1024;
                 }
@@ -105,7 +116,7 @@ class MySQLGenericSelector implements FieldSelector {
             }
 
         } catch (Throwable t) {
-            FxSqlSearchException ex = new FxSqlSearchException("ex.sqlSearch.fieldSelector.initializeFailed",
+            FxSqlSearchException ex = new FxSqlSearchException(LOG, "ex.sqlSearch.fieldSelector.initializeFailed",
                     tableName, t.getMessage());
             LOG.error(ex.getMessage(), ex);
             throw ex.asRuntimeException();
@@ -121,7 +132,7 @@ class MySQLGenericSelector implements FieldSelector {
         FxDataType type = columns.get(prop.getField());
         if (type == null) {
             // This field does not exist
-            throw new FxSqlSearchException("ex.sqlSearch.query.undefinedField", prop.getField(), prop.getPropertyName(),
+            throw new FxSqlSearchException(LOG, "ex.sqlSearch.query.undefinedField", prop.getField(), prop.getPropertyName(),
                     getAllowedFields());
         } else {
             statement.insert(0, "(select " + prop.getField() + " from " + tableName + " where " + linksOn + "=").append(")");

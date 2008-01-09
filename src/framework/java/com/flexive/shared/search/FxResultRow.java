@@ -36,12 +36,11 @@ package com.flexive.shared.search;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
-import com.flexive.shared.value.FxValue;
-import com.flexive.shared.value.FxNumber;
-import com.flexive.shared.value.FxLargeNumber;
+import com.flexive.shared.value.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Date;
 
 /**
  * Provides a thin wrapper for a result row of a SQL search
@@ -122,7 +121,7 @@ public class FxResultRow {
             return ((FxLargeNumber) value).getBestTranslation();
         }
         throw new FxInvalidParameterException("column", "ex.sqlSearch.resultRow.invalidType",
-                column, "Long", value.getClass().getName()).asRuntimeException();
+                column, getColumnNames()[column - 1], "Long", value.getClass().getName()).asRuntimeException();
     }
 
     public long getLong(String columnName) {
@@ -137,10 +136,42 @@ public class FxResultRow {
             return ((FxNumber) value).getBestTranslation();
         }
         throw new FxInvalidParameterException("column", "ex.sqlSearch.resultRow.invalidType",
-                column, "Integer", value.getClass().getName()).asRuntimeException();
+                column, getColumnNames()[column - 1], "Integer", value.getClass().getName()).asRuntimeException();
     }
 
     public int getInt(String columnName) {
         return getInt(getColumnIndex(columnName));
+    }
+
+    public String getString(int column) {
+        final Object value = getValue(column);
+        if (value instanceof FxString) {
+            return ((FxString) value).getBestTranslation();
+        } else if (value instanceof String) {
+            return (String) value;
+        } else {
+            return value != null ? value.toString() : null;
+        }
+    }
+
+    public String getString(String columnName) {
+        return getString(getColumnIndex(columnName));
+    }
+
+    public Date getDate(int column) {
+        final Object value = getValue(column);
+        if (value instanceof FxDate) {
+            return ((FxDate) value).getBestTranslation();
+        } else if (value instanceof FxDateTime) {
+            return ((FxDateTime) value).getBestTranslation();
+        } else if (value instanceof Date) {
+            return (Date) value;
+        }
+        throw new FxInvalidParameterException("column", "ex.sqlSearch.resultRow.invalidType",
+                column, getColumnNames()[column - 1], "Date", value.getClass().getName()).asRuntimeException();
+    }
+
+    public Date getDate(String columnName) {
+        return getDate(getColumnIndex(columnName));
     }
 }

@@ -47,7 +47,7 @@ import com.flexive.sqlParser.Property;
  */
 public class MySQLACLSelector extends MySQLGenericSelector {
     public MySQLACLSelector() {
-        super(DatabaseConst.TBL_ACLS, null);
+        super(DatabaseConst.TBL_ACLS, "id");
     }
 
     /**
@@ -68,8 +68,7 @@ public class MySQLACLSelector extends MySQLGenericSelector {
             entry.overrideDataType(FxDataType.String1024);
             return;
         }
-        throw new FxSqlSearchException("ex.sqlSearch.fieldSelector.invalidField", prop.getField(),
-                prop.getPropertyName(), "label");
+        super.apply(prop, entry, statement);
     }
 
     /**

@@ -1283,7 +1283,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         if (isConfirmed == null) isConfirmed = account.isValidated();
         if (description == null) description = account.getDescription();
         if (defaultNode == null) defaultNode = account.getDefaultNode();
-        if (allowMultiLogin == null) allowMultiLogin = account.getAllowMultiLogin();
+        if (allowMultiLogin == null) allowMultiLogin = account.isAllowMultiLogin();
         // Assign and check dates
         if (validFrom == null) validFrom = account.getValidFrom();
         if (validTo == null) validTo = account.getValidTo();

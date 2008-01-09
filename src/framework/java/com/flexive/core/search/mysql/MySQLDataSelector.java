@@ -258,7 +258,7 @@ public class MySQLDataSelector extends DataSelector {
                     result.addItem(xpath, resultPos, true);
                     break;
                 default:
-                    throw new FxSqlSearchException("ex.sqlSearch.table.typeNotSupported", entry.getTable());
+                    throw new FxSqlSearchException(LOG, "ex.sqlSearch.table.typeNotSupported", entry.getTable());
             }
         }
 

@@ -102,12 +102,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
             return new SqlSearch(seq, briefcase, treeEngine, query, startIndex, fetchRows, 
                     params, resultPreferences, location, viewType).executeQuery();
         } catch (FxSqlSearchException exc) {
-            LOG.error(exc, exc);
-            try {
-                ctx.setRollbackOnly();
-            } catch (IllegalStateException e) {
-                LOG.warn("Can not rollback since we are not in a transaction!");
-            }
+            ctx.setRollbackOnly();
             throw exc;
         }
     }

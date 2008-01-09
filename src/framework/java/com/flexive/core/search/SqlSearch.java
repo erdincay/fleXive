@@ -127,12 +127,12 @@ public class SqlSearch {
 
         // Parameter checks
         if (this.startIndex < 0) {
-            throw new FxSqlSearchException("ex.sqlSearch.parameter.invalidStartIndex", startIndex);
+            throw new FxSqlSearchException(LOG, "ex.sqlSearch.parameter.invalidStartIndex", startIndex);
         }
 
         if (maxFetchRows != null) {
             if (maxFetchRows < 1 && maxFetchRows != -1) {
-                throw new FxSqlSearchException("ex.sqlSearch.parameter.fetchRows", maxFetchRows);
+                throw new FxSqlSearchException(LOG, "ex.sqlSearch.parameter.fetchRows", maxFetchRows);
             }
         }
     }
@@ -177,6 +177,7 @@ public class SqlSearch {
         final long startTime = java.lang.System.currentTimeMillis();
         DataSelector ds = null;
         DataFilter df = null;
+        String selectSql = null;
         try {
 
             // Init
@@ -231,7 +232,7 @@ public class SqlSearch {
 
             // Select all desired rows for the resultset
             ds = getDataSelector();
-            String select = ds.build(con);
+            selectSql = ds.build(con);
 
             stmt = con.createStatement();
             stmt.executeUpdate("set @rownr=1;");
@@ -241,7 +242,7 @@ public class SqlSearch {
             stmt.setQueryTimeout(params.getQueryTimeout());
 
             // Fetch the result
-            ResultSet rs = stmt.executeQuery(select);
+            ResultSet rs = stmt.executeQuery(selectSql);
             int dbSearchTime = (int) (java.lang.System.currentTimeMillis() - startTime);
             fx_result = new FxResultSetImpl(statement, pr, this.parserExecutionTime, dbSearchTime, startIndex,
                     fetchRows, location, viewType, df.getContentTypes(),
@@ -273,9 +274,9 @@ public class SqlSearch {
         } catch (FxSqlSearchException exc) {
             throw exc;
         } catch (SQLException exc) {
-            throw new FxSqlSearchException(exc, "ex.sqlSearch.sql.failed", exc.getMessage(), query);
-        } catch (Throwable t) {
-            throw new FxSqlSearchException(t, "ex.sqlSearch.failed", t.getMessage(), query);
+            throw new FxSqlSearchException(LOG, exc, "ex.sqlSearch.failed", exc.getMessage(), query, selectSql);
+        } catch (Exception e) {
+            throw new FxSqlSearchException(LOG, e, "ex.sqlSearch.failed", e.getMessage(), query, selectSql);
         } finally {
             try {
                 if (ds != null) ds.cleanup(con);
@@ -313,7 +314,7 @@ public class SqlSearch {
                         ? environment.getType(Long.parseLong(type))
                         : environment.getType(type);
             } catch (Throwable t) {
-                throw new FxSqlSearchException(t, "ex.sqlSearch.filter.invalidContentTypeFilterValue", type);
+                throw new FxSqlSearchException(LOG, t, "ex.sqlSearch.filter.invalidContentTypeFilterValue", type);
             }
         } else {
             typeFilter = null;
@@ -337,7 +338,7 @@ public class SqlSearch {
             stmt.executeBatch();
             return bid;
         } catch (Throwable t) {
-            throw new FxSqlSearchException(t, "ex.sqlSearch.err.failedToBuildBriefcase", bcd.getName());
+            throw new FxSqlSearchException(LOG, t, "ex.sqlSearch.err.failedToBuildBriefcase", bcd.getName());
         } finally {
             Database.closeObjects(MySQLDataSelector.class, null, stmt);
         }
@@ -357,10 +358,10 @@ public class SqlSearch {
                 case MySQL:
                     return new MySQLDataSelector(this);
                 default:
-                    throw new FxSqlSearchException("ex.db.selector.undefined", vendor);
+                    throw new FxSqlSearchException(LOG, "ex.db.selector.undefined", vendor);
             }
         } catch (SQLException e) {
-            throw new FxSqlSearchException("ex.db.vendor.notFound", FxContext.get().getDivisionId());
+            throw new FxSqlSearchException(LOG, "ex.db.vendor.notFound", FxContext.get().getDivisionId());
         }
     }
 
@@ -379,10 +380,10 @@ public class SqlSearch {
                 case MySQL:
                     return new MySQLDataFilter(con, this);
                 default:
-                    throw new FxSqlSearchException("ex.db.filter.undefined", vendor);
+                    throw new FxSqlSearchException(LOG, "ex.db.filter.undefined", vendor);
             }
         } catch (SQLException e) {
-            throw new FxSqlSearchException("ex.db.vendor.notFound", FxContext.get().getDivisionId());
+            throw new FxSqlSearchException(LOG, "ex.db.vendor.notFound", FxContext.get().getDivisionId());
         }
     }
 
@@ -429,7 +430,7 @@ public class SqlSearch {
                 if (prop.isWildcard()) {
                     if (hasWildcard) {
                         // Only one wildcard may be used per statement
-                        throw new FxSqlSearchException("ex.sqlSearch.onlyOneWildcardPermitted");
+                        throw new FxSqlSearchException(LOG, "ex.sqlSearch.onlyOneWildcardPermitted");
                     }
                     hasWildcard = true;
                 }
@@ -466,7 +467,7 @@ public class SqlSearch {
             }
             statement.setSelectedValues(selValues);
         } catch (Throwable t) {
-            throw new FxSqlSearchException(t, "ex.sqlSearch.wildcardProcessingFailed");
+            throw new FxSqlSearchException(LOG, t, "ex.sqlSearch.wildcardProcessingFailed");
         }
     }
 

@@ -427,7 +427,7 @@ public class AccountBean {
             accountInterface.update(this.accountIdFiler, newPasswd, null, null, null, this.account.getEmail(),
                     this.account.isValidated(), this.account.isActive(), this.account.getValidFrom(),
                     this.account.getValidTo(), this.account.getLanguage().getId(), this.account.getDescription(),
-                    this.account.getAllowMultiLogin(), this.account.getContactData().getId());
+                    this.account.isAllowMultiLogin(), this.account.getContactData().getId());
             new FxFacesMsgInfo("User.nfo.saved").addToContext();
             // Assign the given groups to the account
             try {

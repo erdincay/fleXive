@@ -290,15 +290,15 @@ public class PropertyResolver {
                                 as = (FxPropertyAssignment) environment.getAssignment(Long.valueOf(_prop.getPropertyName().substring(1)));
                             }
                         } catch (ClassCastException ce) {
-                            throw new FxSqlSearchException(ce, "ex.sqlSearch.query.unknownAssignment",
+                            throw new FxSqlSearchException(LOG, ce, "ex.sqlSearch.query.unknownAssignment",
                                     _prop.getPropertyName());
                         } catch (Throwable t) {
                             boolean notFound = ((FxRuntimeException) t).getConverted() instanceof FxNotFoundException;
                             if (notFound) {
-                                throw new FxSqlSearchException(t, "ex.sqlSearch.query.unknownAssignment",
+                                throw new FxSqlSearchException(LOG, t, "ex.sqlSearch.query.unknownAssignment",
                                         _prop.getPropertyName());
                             } else {
-                                throw new FxSqlSearchException(t, "ex.sqlSearch.query.failedToResolveAssignment",
+                                throw new FxSqlSearchException(LOG, t, "ex.sqlSearch.query.failedToResolveAssignment",
                                         _prop.getPropertyName(), t.getMessage());
                             }
                         }
@@ -375,7 +375,7 @@ public class PropertyResolver {
                         dt = FxDataType.Boolean;
                         break;
                     default:
-                        throw new FxSqlSearchException("ex.sqlSearch.init.unknowColumnType", columnName,
+                        throw new FxSqlSearchException(LOG, "ex.sqlSearch.init.unknowColumnType", columnName,
                                 DatabaseConst.TBL_CONTENT, type);
                 }
                 CONTENT_PROPS.put(columnName, dt);

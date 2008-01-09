@@ -53,7 +53,7 @@ public class MySQLStepSelector extends MySQLGenericSelector {
             " deft.id=def.id AND ";
 
     public MySQLStepSelector() {
-        super(DatabaseConst.TBL_STEP, null);
+        super(DatabaseConst.TBL_STEP, "id");
     }
 
     /**
@@ -71,8 +71,7 @@ public class MySQLStepSelector extends MySQLGenericSelector {
             entry.overrideDataType(FxDataType.String1024);
             return;
         }
-        throw new FxSqlSearchException("ex.sqlSearch.fieldSelector.invalidField", prop.getField(),
-                prop.getPropertyName(), "label");
+        super.apply(prop, entry, statement);
     }
 
     /**

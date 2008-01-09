@@ -46,6 +46,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 /**
  * This class is repsonsible for reading value from the search result set, and converting it to the
  * correct result Objects
@@ -53,6 +56,8 @@ import java.util.Date;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 class ResultReader {
+    private static final transient Log LOG = LogFactory.getLog(ResultReader.class);
+
     ResultSet rs;
     FxLanguage lang;
 
@@ -152,7 +157,7 @@ class ResultReader {
                         result = new FxBinary(entry.isMultilanguage(), FxLanguage.SYSTEM_ID, new BinaryDescriptor());
                         break;
                     default:
-                        throw new FxSqlSearchException("ex.sqlSearch.reader.UnknownColumnType",
+                        throw new FxSqlSearchException(LOG, "ex.sqlSearch.reader.UnknownColumnType",
                                 String.valueOf(entry.getProperty().getDataType()));
                 }
             }
@@ -172,7 +177,7 @@ class ResultReader {
             return result;
 
         } catch (SQLException exc) {
-            throw new FxSqlSearchException(exc, "ex.sqlSearch.reader.failedToReadValue", pos,
+            throw new FxSqlSearchException(LOG, exc, "ex.sqlSearch.reader.failedToReadValue", pos,
                     String.valueOf(entry.getProperty().getDataType()));
         }
     }

@@ -50,13 +50,15 @@ import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.search.query.VersionFilter;
 import com.flexive.shared.security.Account;
 import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.Mandator;
+import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.value.*;
 import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
-import org.testng.Assert;
+import static org.testng.Assert.assertEquals;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -173,7 +175,7 @@ public class SqlQueryTest {
     public void selectUserTest() throws FxApplicationException {
         for (FxResultRow row : new SqlQueryBuilder().select("created_by", "created_by.username").getResult().getResultRows()) {
             final Account account = EJBLookup.getAccountEngine().load(((FxLargeNumber) row.getFxValue(1)).getDefaultTranslation());
-            Assert.assertEquals(row.getFxValue(2).getDefaultTranslation(), account.getName());
+            assertEquals(row.getFxValue(2).getDefaultTranslation(), account.getName());
         }
     }
 
@@ -435,22 +437,35 @@ public class SqlQueryTest {
 
     @Test
     public void aclSelectorTest() throws FxApplicationException {
-        final FxResultSet result = new SqlQueryBuilder().select("@pk", "acl", "acl.label").getResult();
+        final FxResultSet result = new SqlQueryBuilder().select("@pk", "acl", "acl.label", "acl.name",
+                "acl.mandator", "acl.description", "acl.cat_type", "acl.color", "acl.created_by", "acl.created_at",
+                "acl.modified_by", "acl.modified_at").getResult();
         assert result.getRowCount() > 0;
         for (FxResultRow row: result.getResultRows()) {
             final ACL acl = CacheAdmin.getEnvironment().getACL(row.getLong("acl"));
-            assert acl.getLabel().getBestTranslation().equals(row.getFxValue("acl.label").getBestTranslation())
-                    : "Invalid ACL label '" + row.getValue(3) + "', expected: '" + acl.getLabel() + "'";
             final FxContent content = EJBLookup.getContentEngine().load(row.getPk(1));
             assert content.getAclId() == acl.getId()
                     : "Invalid ACL for instance " + row.getPk(1) + ": " + acl.getId()
-                    + ", content engine returned " + content.getAclId(); 
+                    + ", content engine returned " + content.getAclId();
+
+            // check label
+            assert acl.getLabel().getBestTranslation().equals(row.getFxValue("acl.label").getBestTranslation())
+                    : "Invalid ACL label '" + row.getValue(3) + "', expected: '" + acl.getLabel() + "'";
+
+            // check fields selected directly from the ACL table
+            assertEquals(row.getString("acl.name"), (Object) acl.getName(), "Invalid value for field: name");
+            assertEquals(row.getLong("acl.mandator"), (Object) acl.getMandatorId(), "Invalid value for field: mandator");
+            assertEquals(row.getString("acl.description"), (Object) acl.getDescription(), "Invalid value for field: description");
+            assertEquals(row.getInt("acl.cat_type"), (Object) acl.getCategory().getId(), "Invalid value for field: category");
+            assertEquals(row.getString("acl.color"), (Object) acl.getColor(), "Invalid value for field: color");
+            checkLifecycleInfo(row, "acl", acl.getLifeCycleInfo());
         }
     }
 
     @Test
     public void stepSelectorTest() throws FxApplicationException {
-        final FxResultSet result = new SqlQueryBuilder().select("@pk", "step", "step.label").getResult();
+        final FxResultSet result = new SqlQueryBuilder().select("@pk", "step", "step.label", "step.id", "step.stepdef",
+                "step.workflow", "step.acl").getResult();
         assert result.getRowCount() > 0;
         for (FxResultRow row: result.getResultRows()) {
             final Step step = CacheAdmin.getEnvironment().getStep(row.getLong("step"));
@@ -461,7 +476,66 @@ public class SqlQueryTest {
             assert content.getStepId() == step.getId()
                     : "Invalid step for instance " + row.getPk(1) + ": " + step.getId()
                     + ", content engine returned " + content.getStepId();
+
+            // check fields selected from the ACL table
+            assertEquals(row.getLong("step.id"), step.getId(), "Invalid value for field: id");
+            assertEquals(row.getLong("step.stepdef"), step.getStepDefinitionId(), "Invalid value for field: stepdef");
+            assertEquals(row.getLong("step.workflow"), step.getWorkflowId(), "Invalid value for field: workflow");
+            assertEquals(row.getLong("step.acl"), step.getAclId(), "Invalid value for field: acl");
         }
+    }
+
+    @Test
+    public void mandatorSelectorTest() throws FxApplicationException {
+        final FxResultSet result = new SqlQueryBuilder().select("@pk", "mandator", "mandator.id",
+                "mandator.metadata", "mandator.is_active", "mandator.created_by", "mandator.created_at",
+                "mandator.modified_by", "mandator.modified_at").getResult();
+        assert result.getRowCount() > 0;
+        for (FxResultRow row: result.getResultRows()) {
+            final Mandator mandator = CacheAdmin.getEnvironment().getMandator(row.getLong("mandator"));
+            final FxContent content = EJBLookup.getContentEngine().load(row.getPk(1));
+
+            assertEquals(mandator.getId(), content.getMandatorId(), "Search returned different mandator than content engine");
+            assertEquals(row.getLong("mandator.id"), mandator.getId(), "Invalid value for field: id");
+            assertEquals(row.getValue("mandator.metadata") != null
+                    ? row.getLong("mandator.metadata") : -1, mandator.getMetadataId(), "Invalid value for field: metadata");
+            assertEquals(row.getLong("mandator.is_active"), mandator.isActive() ? 1 : 0, "Invalid value for field: is_active");
+            checkLifecycleInfo(row, "mandator", mandator.getLifeCycleInfo());
+        }
+    }
+
+    @Test
+    public void accountSelectorTest() throws FxApplicationException {
+        for (String name : new String[] { "created_by", "modified_by" }) {
+            final FxResultSet result = new SqlQueryBuilder().select("@pk", name, name + ".mandator",
+                    name + ".username", name + ".password", name + ".email", name + ".contact_id",
+                    name + ".valid_from", name + ".valid_to", name + ".description", name + ".created_by",
+                    name + ".created_at", name + ".modified_by", name + ".modified_at",
+                    name + ".is_active", name + ".is_validated", name + ".lang", name + ".login_name",
+                    name + ".allow_multilogin", name + ".default_node").maxRows(10).getResult();
+            assert result.getRowCount() == 10 : "Expected 10 result rows";
+            for (FxResultRow row: result.getResultRows()) {
+                final Account account = EJBLookup.getAccountEngine().load(row.getLong(name));
+                assertEquals(row.getString(name + ".username"), account.getName(), "Invalid value for field: username");
+                assertEquals(row.getString(name + ".login_name"), account.getLoginName(), "Invalid value for field: login_name");
+                assertEquals(row.getString(name + ".email"), account.getEmail(), "Invalid value for field: email");
+                assertEquals(row.getLong(name + ".contact_id"), account.getContactDataId(), "Invalid value for field: contact_id");
+                assertEquals(row.getLong(name + ".is_active"), account.isActive() ? 1 : 0, "Invalid value for field: is_active");
+                assertEquals(row.getLong(name + ".is_validated"), account.isValidated() ? 1 : 0, "Invalid value for field: is_validated");
+                assertEquals(row.getLong(name + ".allow_multilogin"), account.isAllowMultiLogin() ? 1 : 0, "Invalid value for field: allow_multilogin");
+                assertEquals(row.getLong(name + ".lang"), account.getLanguage().getId(), "Invalid value for field: lang");
+                // default_node is not supported yet
+                //assertEquals(row.getLong(name + ".default_node"), account.getDefaultNode(), "Invalid value for field: default_node");
+                checkLifecycleInfo(row, name, account.getLifeCycleInfo());
+            }
+        }
+    }
+
+    private void checkLifecycleInfo(FxResultRow row, String baseName, LifeCycleInfo lifeCycleInfo) {
+        assertEquals(row.getLong(baseName + ".created_by"), lifeCycleInfo.getCreatorId(), "Invalid value for field: created_by");
+        assertEquals(row.getDate(baseName + ".created_at").getTime(), lifeCycleInfo.getCreationTime(), "Invalid value for field: id");
+        assertEquals(row.getLong(baseName + ".modified_by"), lifeCycleInfo.getModificatorId(), "Invalid value for field: modified_by");
+        assertEquals(row.getDate(baseName + ".modified_at").getTime(), lifeCycleInfo.getModificationTime(), "Invalid value for field: modified_at");
     }
 
     @Test

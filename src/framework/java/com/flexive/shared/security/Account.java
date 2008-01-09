@@ -309,7 +309,7 @@ public class Account extends AbstractSelectableObjectWithName implements Seriali
      *
      * @return multi login allowed?
      */
-    public boolean getAllowMultiLogin() {
+    public boolean isAllowMultiLogin() {
         return this.allowMultiLogin;
     }
 

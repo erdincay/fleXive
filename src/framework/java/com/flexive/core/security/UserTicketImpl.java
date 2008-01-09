@@ -290,7 +290,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
         this.loginName = acc.getLoginName();
         this.userId = acc.getId();
         this.contactData = acc.getContactData();
-        this.multiLogin = acc.getAllowMultiLogin();
+        this.multiLogin = acc.isAllowMultiLogin();
         this.roles = (Role[]) ArrayUtils.clone(roles);
         this.groups = ArrayUtils.clone(groups);
         this.mandator = acc.getMandatorId();

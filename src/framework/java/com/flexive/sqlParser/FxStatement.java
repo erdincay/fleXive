@@ -42,6 +42,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Statement.
@@ -49,6 +51,8 @@ import org.apache.commons.lang.StringUtils;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class FxStatement {
+    private static final Log LOG = LogFactory.getLog(FxStatement.class);
+
     public static enum Type {
         /** the statement filter the data */
         FILTER,
@@ -715,7 +719,7 @@ public class FxStatement {
             result.append(("Parser execution time: " + this.getParserExecutionTime() + " ms\n"));
             return result.toString();
         } catch (Throwable t) {
-            throw new FxSqlSearchException(t, "ex.sqlSearch.printDebugFailed");
+            throw new FxSqlSearchException(LOG, t, "ex.sqlSearch.printDebugFailed");
         }
     }
 
