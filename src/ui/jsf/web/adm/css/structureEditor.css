@@ -1,7 +1,7 @@
 div.formLabel {
     float: left;
     margin-top: 2px;
-    width: 140px;
+    width: 160px;
     height: 25px;
     padding: 2px;
     white-space:nowrap;
@@ -18,4 +18,8 @@ div.formRow {
     float: left;
     display: block;
     padding: 0;
+}
+
+div.extraWidth div.formLabel {
+    width: 220px;
 }

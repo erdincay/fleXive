@@ -114,7 +114,7 @@ public class StructureTreeWriter implements Serializable {
             // print whole tree
 
             // print root types
-            for (FxType type : environment.getTypes(true, false, true, false)) {
+            for (FxType type : environment.getTypes(true, false, true, true)) {
                 writeType(writer, nodeProperties, type);
             }
             // print root properties

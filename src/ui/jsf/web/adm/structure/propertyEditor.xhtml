@@ -133,8 +133,8 @@
                                alternateRows="true" maxSortable="1" class="dojoTable">
                 <tbody>
                     <ui:repeat value="#{propertyEditorBean.referencingPropertyAssignments}" var="pa">
-                        <h:commandLink id="gotoPropertyAssignmentButton_#{pa.id}" action="#{propertyEditorBean.showPropertyAssignmentEditor}"
-                             onclick="var treeframe=parent.getNavFrameWnd(); treeframe.selectNode(#{pa.id});">
+                        <h:commandLink id="gotoPropertyAssignmentButton_#{pa.id}"
+                             onclick="var treeframe=parent.getNavFrameWnd(); treeframe.selectNode(#{pa.id}, false);">
                                 <h:outputText value="#{pa.XPath}"/>
                         </h:commandLink>
                         <br/>

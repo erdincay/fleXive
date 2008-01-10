@@ -113,7 +113,7 @@
                                         <ui:fragment rendered="#{typeEditorBean.editMode}">
                                             <adm:commandButton labelKey="TypeEditor.table.relation.button.remove" location="content"
                                                             icon="delete"  action="removeRelation"  bean="#{typeEditorBean}"
-                                                            id="removeRelationButton">
+                                                            id="removeRelationButton_#{wr.sourceId}_#{wr.destId}">
                                                 <f:setPropertyActionListener target="#{typeEditorBean.wrappedRelationFiler}" value="#{wr}"/>
                                             </adm:commandButton>
                                         </ui:fragment>
@@ -185,23 +185,26 @@
                     </ui:fragment>
                 </fx:formRow>
 
-            <fx:formRow labelKey="TypeEditor.label.maxRelDestination" id="maxRelDestination">
-                <h:outputText value="#{fxMessageBean['TypeEditor.relation.unlimited']}"/>
-                    <h:selectBooleanCheckbox id="maxRelDestination" value="#{typeEditorBean.maxRelDestUnlimited}"
-                         onchange="submit();" disabled="#{not typeEditorBean.editMode}"/>
-                    <ui:fragment rendered="#{not typeEditorBean.maxRelDestUnlimited}">
-                    <h:inputText id="maxRelDestinationInput" value="#{typeEditorBean.maxRelDestination}"
-                                 disabled="#{not typeEditorBean.editMode}" style="width:40px">
-                        <f:validateLongRange/>
-                    </h:inputText>
-                </ui:fragment>
-            </fx:formRow>
+                <fx:formRow labelKey="TypeEditor.label.maxRelDestination" id="maxRelDestination">
+                    <h:outputText value="#{fxMessageBean['TypeEditor.relation.unlimited']}"/>
+                        <h:selectBooleanCheckbox id="maxRelDestination" value="#{typeEditorBean.maxRelDestUnlimited}"
+                             onchange="submit();" disabled="#{not typeEditorBean.editMode}"/>
+                        <ui:fragment rendered="#{not typeEditorBean.maxRelDestUnlimited}">
+                        <h:inputText id="maxRelDestinationInput" value="#{typeEditorBean.maxRelDestination}"
+                                     disabled="#{not typeEditorBean.editMode}" style="width:40px">
+                            <f:validateLongRange/>
+                        </h:inputText>
+                    </ui:fragment>
+                </fx:formRow>
 
-             <fx:formRow labelKey="TypeEditor.label.removeInstancesWithRelationTypes" id="removeInstancesWithRelationTypes">
-                    <h:selectBooleanCheckbox id="removeInstancesWithRelationTypes" value="#{typeEditorBean.removeInstancesWithRelationTypes}"
-                            disabled="#{not typeEditorBean.editMode}"/>
-            </fx:formRow>
+                 <div class="extraWidth">
+                     <fx:formRow labelKey="TypeEditor.label.removeInstancesWithRelationTypes" id="removeInstancesWithRelationTypes">
+                            <h:selectBooleanCheckbox id="removeInstancesWithRelationTypes" value="#{typeEditorBean.removeInstancesWithRelationTypes}"
+                                    disabled="#{not typeEditorBean.editMode}"/>
+                    </fx:formRow>
+                </div>
             </ui:fragment>
+
 
             <fx:formRow labelKey="TypeEditor.label.typeState" id="typeState">
                 <t:selectOneListbox size="1" id="typeState" value="#{typeEditorBean.typeState}"
@@ -230,6 +233,23 @@
                     <f:selectItems value="#{fxSelectBean.structureACLs}" />
                 </t:selectOneListbox>
             </fx:formRow>
+            
+            <ui:fragment rendered="#{not typeEditorBean.type.new and not typeEditorBean.type.relation}">
+                <fx:fieldSet legend="#{fxMessageBean['TypeEditor.label.referencingRelationTypes']}">
+                 <table dojoType="SortableTable" widgetId="referencingPropertyAssignments" enableMultipleSelect="true"
+                                   alternateRows="true" maxSortable="1" class="dojoTable">
+                    <tbody>
+                        <ui:repeat value="#{typeEditorBean.referencingRelations}" var="r">
+                            <h:commandLink id="gotoPropertyRelationButton_#{r.id}"
+                                 onclick="var treeframe=parent.getNavFrameWnd(); treeframe.selectNode(#{r.id}, true);">
+                                    <h:outputText value="#{r.name}"/>
+                            </h:commandLink>
+                            <br/>
+                        </ui:repeat>
+                    </tbody>
+                  </table>
+                </fx:fieldSet>
+            </ui:fragment>
 
             <fx:fieldSet legend="#{fxMessageBean['TypeEditor.label.historyTracking']}">
                 <fx:formRow labelKey="TypeEditor.label.trackHistory" id="trackHistory">

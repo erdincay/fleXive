@@ -50,8 +50,7 @@
             <ui:fragment rendered="#{propertyEditorBean.assignment.derivedAssignment}">
                 <fx:formRow labelKey="PropertyEditor.label.xPathBase" id="xPathBase">
                     <h:commandLink id="gotoPropertyAssignmentButton_#{propertyEditorBean.assignment.baseAssignmentId}"
-                                   action="#{propertyEditorBean.showPropertyAssignmentEditor}"
-                                   onclick="var treeframe=parent.getNavFrameWnd(); treeframe.selectNode(#{propertyEditorBean.assignment.baseAssignmentId});">
+                                   onclick="var treeframe=parent.getNavFrameWnd(); treeframe.selectNode(#{propertyEditorBean.assignment.baseAssignmentId}, false);">
                         <h:outputText id="xPathBase" value="#{propertyEditorBean.baseAssignmentXPath}"/>
                     </h:commandLink>
                 </fx:formRow>

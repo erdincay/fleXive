@@ -254,7 +254,8 @@ public class StructureTreeEditor implements Serializable {
                 if (a.getId() == assId)
                     return true;
             }
-        } else if (StructureTreeWriter.DOC_TYPE_TYPE.equals(parentNodeType)) {
+        } else if (StructureTreeWriter.DOC_TYPE_TYPE.equals(parentNodeType) ||
+                StructureTreeWriter.DOC_TYPE_TYPE_RELATION.equals(parentNodeType)) {
             FxType type = CacheAdmin.getEnvironment().getType(parentId);
             for (FxAssignment a : type.getConnectedAssignments("/")) {
                 if (a.getId() == assId)

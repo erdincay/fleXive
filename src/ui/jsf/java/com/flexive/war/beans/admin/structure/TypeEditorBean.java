@@ -727,6 +727,16 @@ public class TypeEditorBean {
         return "typeScriptEditor";
     }
 
+    /**
+     * computes a list of relation types that contain relations of
+     * which this type is source or destination
+     *
+     * @return  the ids of referencing relation types
+     */
+    public List<FxType> getReferencingRelations() {
+       return CacheAdmin.getEnvironment().getReferencingRelationTypes(type.getId());
+    }
+
     /***************** script editor tab begin ************************/
 
     /**

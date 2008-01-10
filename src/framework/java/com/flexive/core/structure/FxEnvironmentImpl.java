@@ -606,6 +606,23 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public List<FxType> getReferencingRelationTypes(long typeId) {
+        ArrayList<FxType> relTypes = new ArrayList<FxType>();
+        List<FxType> relations = getTypes(true, true, false, true);
+        for (FxType t : relations) {
+            for (FxTypeRelation r : t.getRelations()) {
+                if (r.getDestination().getId() == typeId || r.getSource().getId() == typeId) {
+                    relTypes.add(t);
+                    break;
+                }
+            }
+        }
+        return Collections.unmodifiableList(relTypes);    
+    }
+
+    /**
      * Get types depending on selection criteria
      *
      * @param returnBaseTypes    return types that are not derived from another type
@@ -624,7 +641,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
                     ret.add(t);
                 else if (t.getParent() != null && returnDerivedTypes)
                     ret.add(t);
-            } else if (returnTypes) {
+            } else if (t.getMode() != TypeMode.Relation && returnTypes) {
                 if (t.getParent() == null && returnBaseTypes)
                     ret.add(t);
                 else if (t.getParent() != null && returnDerivedTypes)

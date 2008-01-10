@@ -283,6 +283,15 @@ public interface FxEnvironment extends Serializable {
                           boolean returnTypes, boolean returnRelations);
 
     /**
+     * Gets relation types that contain the type with the specified id as source
+     * or destination of their relations.
+     *
+     * @param typeId    id which is referenced by relations
+     * @return          list of relation types that contain relations to the type with the specified id
+     */
+    List<FxType> getReferencingRelationTypes(long typeId);
+
+    /**
      * Get a type or relation identified by its id
      *
      * @param id type id
