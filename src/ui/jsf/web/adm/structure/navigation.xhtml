@@ -204,6 +204,7 @@
                 doContentAction(node, "openInstance");
             }
 
+            //should be invoked by the click handler when normally clicking on tree nodes
             function doContentAction(node, defaultAction) {
                 var propertyId = node["propertyId"];
                 if (propertyId != null && propertyId != -1 && parent.frames["contentFrame"].addQueryNode) {
@@ -211,7 +212,13 @@
                     parent.frames["contentFrame"].addQueryNode(propertyId, node.nodeDocType);
                     //alert("sturctureTreeClickHandler, addProperty branch");
                 }
-                else if ("Assignment" == node.nodeDocType || "AssignmentSystemInternal" == node.nodeDocType) {
+                else doContentActionFromContextMenu(node, defaultAction);
+            }
+
+            //should be invoked from the nodes in the context menu
+            function doContentActionFromContextMenu(node, defaultAction) {
+                var propertyId = node["propertyId"];
+                if ("Assignment" == node.nodeDocType || "AssignmentSystemInternal" == node.nodeDocType) {
                     invokeContentAction("adm/structure/propertyAssignmentEditor.jsf", defaultAction, {id: propertyId, mayEdit: node.mayEdit, mayDelete: node.mayDelete});
                 }
                 else if ("Type" == node.nodeDocType || "TypeRelation" == node.nodeDocType) {
@@ -220,17 +227,16 @@
                 else if ("Group" == node.nodeDocType) {
                     invokeContentAction("adm/structure/groupAssignmentEditor.jsf", defaultAction, {id: propertyId});
                 }
-                //contentPage=node.nodeDocType;
             }
 
             function showNode(menuItem) {
                 var menu = dojo.widget.byId("structureTreeMenu");
-                doContentAction(menu.getTreeNode(), "openInstance");
+                doContentActionFromContextMenu(menu.getTreeNode(), "openInstance");
             }
 
             function editNode(menuItem) {
                 var menu = dojo.widget.byId("structureTreeMenu");
-                doContentAction(menu.getTreeNode(), "editInstance");
+                doContentActionFromContextMenu(menu.getTreeNode(), "editInstance");
             }
 
             // create a new property as child of the current node
