@@ -305,6 +305,13 @@ public final class FilteredEnvironment implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
+    public List<FxType> getReferencingRelationTypes(long typeId) {
+        return environment.getReferencingRelationTypes(typeId);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public FxAssignment getAssignment(String xPath) {
         return environment.getAssignment(xPath);
     }
