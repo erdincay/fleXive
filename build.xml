@@ -104,7 +104,31 @@
 		<delete dir="${base.reports.dir}"/>
 	</target>
 
-	<target name="prepare" description="Prepare build directory structures" depends="init">
+    <target name="redeploy.web.jboss" depends="init" description="Redeploy web files to JBoss">
+        <groovy>
+             File jbossDir = null
+             new File(properties['deploy.ear.path']+"/../tmp/deploy").eachFileMatch(~/.*flexive.ear-contents.*/) { dir ->
+                if( jbossDir == null )
+                    jbossDir = dir
+             }
+             if( jbossDir == null ) {
+                ant.fail(message:"No JBoss webdeployment found!")
+             }
+             println "Redeploying web files to [$jbossDir] ..."
+             properties['dir.deploy.jboss'] = jbossDir
+        </groovy>
+        <copy todir="${dir.deploy.jboss}/flexive-exp.war/adm" verbose="true" >
+            <fileset dir="${basedir}/src/ui/jsf/web/adm"/>
+        </copy>
+        <copy todir="${dir.deploy.jboss}/flexive-exp.war/pub" verbose="true" >
+            <fileset dir="${basedir}/src/ui/jsf/web/pub"/>
+        </copy>
+        <copy todir="${dir.deploy.jboss}/flexive-exp.war/WEB-INF" verbose="true" >
+            <fileset dir="${basedir}/src/ui/jsf/resources/WEB-INF"/>
+        </copy>
+    </target>
+
+    <target name="prepare" description="Prepare build directory structures" depends="init">
         <groovy>
             def file = properties.basedir+File.separatorChar+"build.properties"
             if( !new File(file).exists() ) {
