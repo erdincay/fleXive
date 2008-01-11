@@ -97,7 +97,7 @@ public class FxJBossExternalCacheProvider extends AbstractBackingCacheProvider<F
             if (LOG.isInfoEnabled()) {
                 LOG.info("Evicting " + fqn);
             }
-            treeCache.getCache().evict(new Fqn<String>(fqn), true);
+            treeCache.getCache().evict(Fqn.fromString(fqn), true);
         }
         // also evict children
 //        final Set childrenNames = treeCache.getChildrenNames(fqn);

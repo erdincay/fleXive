@@ -70,7 +70,7 @@ public class FxJBossTreeCacheWrapper implements FxBackingCache {
      */
     public Object get(String path, Object key) throws FxCacheException {
         try {
-            return cache.get(new Fqn<String>(path), key);
+            return cache.get(Fqn.fromString(path), key);
         } catch (CacheException e) {
             throw new FxCacheException(e);
         }
@@ -80,7 +80,7 @@ public class FxJBossTreeCacheWrapper implements FxBackingCache {
      * {@inheritDoc}
      */
     public boolean exists(String path, Object key) throws FxCacheException {
-        return cache.get(new Fqn<String>(path), key) != null;
+        return cache.get(Fqn.fromString(path), key) != null;
     }
 
     /**
@@ -88,7 +88,7 @@ public class FxJBossTreeCacheWrapper implements FxBackingCache {
      */
     public void put(String path, Object key, Object value) throws FxCacheException {
         try {
-            cache.put(new Fqn<String>(path), key, value);
+            cache.put(Fqn.fromString(path), key, value);
         } catch (CacheException e) {
             throw new FxCacheException(e);
         }
@@ -113,7 +113,7 @@ public class FxJBossTreeCacheWrapper implements FxBackingCache {
      */
     public void remove(String path, Object key) throws FxCacheException {
         try {
-            cache.remove(new Fqn<String>(path), key);
+            cache.remove(Fqn.fromString(path), key);
         } catch (CacheException e) {
             throw new FxCacheException(e);
         }
@@ -132,7 +132,7 @@ public class FxJBossTreeCacheWrapper implements FxBackingCache {
     }
 
     private Node<Object, Object> getNode(String path) {
-        return cache.getRoot().getChild(new Fqn<String>(path));
+        return cache.getRoot().getChild(Fqn.fromString(path));
     }
 
     /**
@@ -140,7 +140,7 @@ public class FxJBossTreeCacheWrapper implements FxBackingCache {
      */
     public Set getChildrenNames(String path) throws FxCacheException {
         try {
-            final Node<Object, Object> region = getNode(path);
+            final Node<Object,Object> region = getNode(path);
             return region != null ? region.getChildrenNames() : new HashSet();
         } catch (CacheException e) {
             throw new FxCacheException(e);

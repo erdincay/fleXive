@@ -119,7 +119,7 @@ public class MandatorTest {
             //ignore
         }
         try {
-            me.remove(1); //try to remove the public mandator -> got to fail
+            me.remove(Mandator.MANDATOR_FLEXIVE); //try to remove the public mandator -> got to fail
             assert false : "Removing the public mandator should have failed!";
         } catch (FxEntryInUseException e) {
             //ok

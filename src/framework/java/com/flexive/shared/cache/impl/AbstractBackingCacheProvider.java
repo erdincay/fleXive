@@ -60,6 +60,6 @@ public abstract class AbstractBackingCacheProvider<T extends FxBackingCache> imp
         config.setMaxNodes(maxContents);
         config.setMaxAgeSeconds(timeToIdle);
         config.setTimeToLiveSeconds(timeToLive);
-        rm.getRegion(new Fqn<String>(path), true).setEvictionPolicy(config);
+        rm.getRegion(Fqn.fromString(path), true).setEvictionPolicy(config);
     }
 }

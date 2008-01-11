@@ -351,7 +351,7 @@ public final class Database {
                 return errorCode == 1451 || errorCode == 1217;
             }
         } catch (SQLException e) {
-            return false;
+            throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage()).asRuntimeException();
         }
         return false;
     }

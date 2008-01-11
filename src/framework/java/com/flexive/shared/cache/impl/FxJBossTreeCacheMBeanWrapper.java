@@ -60,7 +60,7 @@ public class FxJBossTreeCacheMBeanWrapper implements FxBackingCache {
      */
     public Object get(String path, Object key) throws FxCacheException {
         try {
-            return cache.getCache().get(new Fqn<String>(path), key);
+            return cache.getCache().get(Fqn.fromString(path), key);
         } catch (CacheException e) {
             throw new FxCacheException(e);
         }
@@ -83,7 +83,7 @@ public class FxJBossTreeCacheMBeanWrapper implements FxBackingCache {
      * {@inheritDoc}
      */
     public boolean exists(String path, Object key) throws FxCacheException {
-        return cache.getCache().get(new Fqn<String>(path), key) != null;
+        return cache.getCache().get(Fqn.fromString(path), key) != null;
     }
 
     /**
@@ -91,7 +91,7 @@ public class FxJBossTreeCacheMBeanWrapper implements FxBackingCache {
      */
     public void put(String path, Object key, Object value) throws FxCacheException {
         try {
-            cache.getCache().put(new Fqn<String>(path), key, value);
+            cache.getCache().put(Fqn.fromString(path), key, value);
         } catch (CacheException e) {
             throw new FxCacheException(e);
         }
@@ -116,7 +116,7 @@ public class FxJBossTreeCacheMBeanWrapper implements FxBackingCache {
      */
     public void remove(String path, Object key) throws FxCacheException {
         try {
-            cache.getCache().remove(new Fqn<String>(path), key);
+            cache.getCache().remove(Fqn.fromString(path), key);
         } catch (CacheException e) {
             throw new FxCacheException(e);
         }
@@ -135,7 +135,7 @@ public class FxJBossTreeCacheMBeanWrapper implements FxBackingCache {
     }
 
     private Node<Object, Object> getNode(String path) {
-        return cache.getCache().getRoot().getChild(new Fqn<String>(path));
+        return cache.getCache().getRoot().getChild(Fqn.fromString(path));
     }
 
     /**
