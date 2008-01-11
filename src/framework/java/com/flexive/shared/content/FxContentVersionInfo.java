@@ -33,10 +33,12 @@
  ***************************************************************/
 package com.flexive.shared.content;
 
+import com.flexive.shared.FxContext;
 import com.flexive.shared.security.LifeCycleInfo;
 
 import java.io.Serializable;
-import java.util.Iterator;
+import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 
 /**
@@ -53,6 +55,31 @@ public class FxContentVersionInfo implements Serializable {
     private int liveVersion;
     private int lastModifiedVersion;
     private Map<Integer, LifeCycleInfo> versions;
+    private VersionSelector versionSelector;
+
+    /**
+     * Selector for versions (helps with EL)
+     */
+    public static final class VersionSelector extends Hashtable<Integer, LifeCycleInfo> {
+        FxContentVersionInfo versionInfo;
+
+        /**
+         * Ctor
+         *
+         * @param versionInfo versionInfo to use
+         */
+        VersionSelector(FxContentVersionInfo versionInfo) {
+            this.versionInfo = versionInfo;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public LifeCycleInfo get(Object key) {
+            return versionInfo.versions.get(key);
+        }
+    }
 
     /**
      * Ctor
@@ -71,6 +98,7 @@ public class FxContentVersionInfo implements Serializable {
         this.liveVersion = liveVersion;
         this.lastModifiedVersion = lastModifiedVersion;
         this.versions = versions;
+        this.versionSelector = new VersionSelector(this);
     }
 
     /**
@@ -119,6 +147,17 @@ public class FxContentVersionInfo implements Serializable {
     }
 
     /**
+     * Does a live version exist for this content instance
+     * (EL compatible variant)
+     *
+     * @return if a live version exists for this content instance
+     * @see #hasLiveVersion()
+     */
+    public boolean isHasLiveVersion() {
+        return liveVersion > 0;
+    }
+
+    /**
      * Get the version that was changed most recently
      *
      * @return version that was changed most recently
@@ -132,8 +171,26 @@ public class FxContentVersionInfo implements Serializable {
      *
      * @return iterator for all available versions
      */
-    public Iterator<Integer> getVersions() {
-        return versions.keySet().iterator();
+    public Integer[] getVersions() {
+        return versions.keySet().toArray(new Integer[versions.keySet().size()]);
+    }
+
+    /**
+     * How many versions exist?
+     *
+     * @return number of versions
+     */
+    public int getVersionCount() {
+        return versions.size();
+    }
+
+    /**
+     * Get the version selector
+     *
+     * @return VersionSelector
+     */
+    public VersionSelector getVersionSelector() {
+        return versionSelector;
     }
 
     /**
@@ -164,7 +221,7 @@ public class FxContentVersionInfo implements Serializable {
     /**
      * Check if the requested Pk's version exists
      *
-     * @param pk
+     * @param pk primary key
      * @return if the requested Pk's version exists
      */
     public boolean containsVersion(FxPK pk) {
@@ -181,10 +238,68 @@ public class FxContentVersionInfo implements Serializable {
      * @return distinct version
      */
     public int getDistinctVersion(int version) {
-        if( version == FxPK.MAX )
+        if (version == FxPK.MAX)
             return maxVersion;
-        if( version == FxPK.LIVE )
+        if (version == FxPK.LIVE)
             return liveVersion;
         return version;
+    }
+
+    /**
+     * Temp. class to create LifeCycleInfo's for new instances
+     */
+    static class NewLifeCycleInfoImpl implements LifeCycleInfo {
+
+        private long userId;
+        private long time;
+
+        /**
+         * Ctor
+         *
+         * @param userId user id to use
+         */
+        NewLifeCycleInfoImpl(long userId) {
+            this.userId = userId;
+            this.time = System.currentTimeMillis();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public long getCreatorId() {
+            return userId;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public long getCreationTime() {
+            return time;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public long getModificatorId() {
+            return userId;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public long getModificationTime() {
+            return time;
+        }
+    }
+
+    /**
+     * Create an empty version info for new FxContent instances using the calling user as creator
+     *
+     * @return an empty version info for new FxContent instances
+     */
+    public static FxContentVersionInfo createEmpty() {
+        Map<Integer, LifeCycleInfo> versions = new HashMap<Integer, LifeCycleInfo>(1);
+        versions.put(1, new NewLifeCycleInfoImpl(FxContext.get().getTicket().getUserId()));
+        return new FxContentVersionInfo(FxPK.NEW_ID, 1, 1, -1, 1, versions);
     }
 }

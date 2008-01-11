@@ -41,10 +41,7 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxContext;
-import com.flexive.shared.content.FxContent;
-import com.flexive.shared.content.FxData;
-import com.flexive.shared.content.FxGroupData;
-import com.flexive.shared.content.FxPK;
+import com.flexive.shared.content.*;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.TreeEngine;
@@ -80,6 +77,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
     private List<FxPropertyAssignment> properties;
     private List<FxGroupAssignment> groups;
     private FxContent content;
+    private FxContentVersionInfo versionInfo;
     private CeDataWrapper data;
     private CeDisplayProvider displayProv;
     private CeAddElementOptions addElementOptions;
@@ -181,7 +179,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
             editorActionXpath = null;
         } catch (Exception e) {
             LOG.warn("Failed to execute content editor action " + editorActionName + " for XPath "
-                + editorActionXpath + ": " + e.getMessage(), e);
+                    + editorActionXpath + ": " + e.getMessage(), e);
         }
     }
 
@@ -272,7 +270,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
             this.type = CacheAdmin.getFilteredEnvironment().getType(FxType.CONTACTDATA).getId();
             // clear fields...
             release();
-            if(id != -1){
+            if (id != -1) {
                 this.id = id;
                 this.version = vers;
                 // init all necessary fields...as this.id is set no new contact data set will be created but the existing one loaded
@@ -459,7 +457,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
         return getEditorPage();
     }
 
-    public String loadUserContent(){
+    public String loadUserContent() {
         content = null;
         _init();
         return "showContentEditor";
@@ -501,11 +499,13 @@ public class ContentEditorBean implements ActionBean, Serializable {
                     content.loadReferences(co);
                     type = content.getTypeId();
                     version = content.getVersion();
+                    versionInfo = co.getContentVersionInfo(pk);
                     // Load the tree nodes assigned to this content
                     initTreeData(pk.getId());
                 } else {
                     // Create a new empty content
                     content = co.initialize(type);
+                    versionInfo = FxContentVersionInfo.createEmpty();
                     version = FxPK.MAX;
                     treeNodes = new ArrayList<FxTreeNode>(5);
                 }
@@ -546,7 +546,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
 
         List<Step> steps;
         boolean isNew = content.getPk().isNew();
-        if(isNew) {
+        if (isNew) {
             steps = fxType.getWorkflow().getSteps();
         } else {
             steps = fxType.getWorkflow().getTargets(content.getStepId());
@@ -555,10 +555,10 @@ public class ContentEditorBean implements ActionBean, Serializable {
         }
         ArrayList<SelectItem> result = new ArrayList<SelectItem>(steps.size());
         for (Step step : steps) {
-            if ( !fxType.useStepPermissions() ||
+            if (!fxType.useStepPermissions() ||
                     (isNew
-                    ? ticket.mayCreateACL(step.getAclId())
-                    : ticket.mayEditACL(step.getAclId()) )) {
+                            ? ticket.mayCreateACL(step.getAclId())
+                            : ticket.mayEditACL(step.getAclId()))) {
                 StepDefinition def = environment.getStepDefinition(step.getStepDefinitionId());
                 result.add(new SelectItem(String.valueOf(step.getId()), def.getLabel().getDefaultTranslation()));
             }
@@ -718,6 +718,15 @@ public class ContentEditorBean implements ActionBean, Serializable {
 
     public FxContent getContent() {
         return content;
+    }
+
+    /**
+     * Get all available information about versions
+     *
+     * @return version info
+     */
+    public FxContentVersionInfo getVersionInfo() {
+        return versionInfo;
     }
 
     /**

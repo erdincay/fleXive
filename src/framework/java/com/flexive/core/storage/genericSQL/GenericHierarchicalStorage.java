@@ -1819,6 +1819,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     original.getBinaryPreviewACL() != content.getBinaryPreviewACL())
                 updateContentBinaryEntry(con, pk, content.getBinaryPreviewId(), content.getBinaryPreviewACL());
             enableDetailUniqueChecks(con);
+            LifeCycleInfoImpl.updateLifeCycleInfo(TBL_CONTENT, "ID", "VER",
+                    content.getPk().getId(), content.getPk().getVersion(), false, false);
         } catch (FxCreateException e) {
             throw new FxUpdateException(e);
         } catch (FxApplicationException e) {

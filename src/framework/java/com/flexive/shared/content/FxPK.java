@@ -53,6 +53,11 @@ public class FxPK implements Serializable, Comparable<FxPK> {
     private static final long serialVersionUID = 8452775369399900087L;
 
     /**
+     * Id to use for new instances (flags them as new)
+     */
+    public static final int NEW_ID = -1;
+
+    /**
      * Constant to select the maximum available version
      */
     public static final int MAX = -1;
@@ -95,7 +100,7 @@ public class FxPK implements Serializable, Comparable<FxPK> {
      * Constructor for new FxContents
      */
     public FxPK() {
-        this.id = -1;
+        this.id = NEW_ID;
         this.version = 1;
     }
 
@@ -105,7 +110,7 @@ public class FxPK implements Serializable, Comparable<FxPK> {
      * @return if this primary key is for a new FxContent
      */
     public boolean isNew() {
-        return this.id == -1;
+        return this.id == NEW_ID;
     }
 
     /**

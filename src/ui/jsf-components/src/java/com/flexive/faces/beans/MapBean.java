@@ -36,6 +36,7 @@ package com.flexive.faces.beans;
 import com.flexive.shared.*;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.Account;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.UserGroup;
 import com.flexive.shared.structure.FxEnvironment;
@@ -44,6 +45,7 @@ import com.flexive.shared.structure.FxType;
 import com.flexive.shared.workflow.StepDefinition;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +67,8 @@ public class MapBean implements Serializable {
     private Map<String, FxType> typesByNameMap = null;
     private Map<Long, FxProperty> propertiesMap = null;
     private Map<String, FxProperty> propertiesByNameMap = null;
+    private Map<Long, Account> accountMap = null;
+    private Map<Long, String> dateTimeMap = null;
     private FxEnvironment environment;
 
     /**
@@ -116,8 +120,8 @@ public class MapBean implements Serializable {
     /**
      * Return all user groups for the current mandator.
      *
-     * @throws FxApplicationException if an error occured
      * @return all user groups for the current mandator.
+     * @throws FxApplicationException if an error occured
      */
     public Map<Long, UserGroup> getUserGroups() throws FxApplicationException {
         if (userGroupsMap != null) {
@@ -198,6 +202,56 @@ public class MapBean implements Serializable {
     }
 
     /**
+     * Get an account by id
+     *
+     * @return map containing accounts by id
+     */
+    public Map<Long, Account> getAccount() {
+        if (accountMap == null) {
+            accountMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Long, Account>() {
+                private Map<Long, Account> cache = new HashMap<Long, Account>(10);
+
+                @SuppressWarnings({"SuspiciousMethodCalls"})
+                public Account get(Object key) {
+                    if (key == null || !(key instanceof Long)) {
+                        return null;
+                    }
+                    if (cache.containsKey(key)) {
+                        return cache.get(key);
+                    }
+                    try {
+                        cache.put((Long) key, EJBLookup.getAccountEngine().load((Long) key));
+                        return cache.get(key);
+                    } catch (FxApplicationException e) {
+                        throw e.asRuntimeException();
+                    }
+                }
+            });
+        }
+        return accountMap;
+    }
+
+    /**
+     * A date/time formatter
+     *
+     * @return date/time formatter
+     */
+    public Map<Long, String> getDateTime() {
+        if (dateTimeMap == null) {
+            dateTimeMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Long, String>() {
+
+                public String get(Object key) {
+                    if (key == null || !(key instanceof Long)) {
+                        return null;
+                    }
+                    return FxFormatUtils.getDateTimeFormat().format(new Date((Long) key));
+                }
+            });
+        }
+        return dateTimeMap;
+    }
+
+    /**
      * Put all objects in the given hash map.
      *
      * @param <T>   item type parameter
@@ -222,10 +276,10 @@ public class MapBean implements Serializable {
      */
     private <T extends SelectableObjectWithLabel> Map<Long, T> populateMapWithLabel(
             Map<Long, T> map, List<T> items) {
-		for (T item: items) {
-			map.put(item.getId(), item);
-		}
-		return map;
-	}
+        for (T item : items) {
+            map.put(item.getId(), item);
+        }
+        return map;
+    }
 
 }

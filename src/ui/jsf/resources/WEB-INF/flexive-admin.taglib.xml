@@ -39,6 +39,11 @@
     </tag>
 
     <tag>
+        <tag-name>ceVersionInfo</tag-name>
+        <source>templates/ceVersionInfo.xhtml</source>
+    </tag>
+
+    <tag>
         <tag-name>contentEditor</tag-name>
         <source>templates/ceContentEditor.xhtml</source>
     </tag>

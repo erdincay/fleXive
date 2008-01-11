@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:fx="http://www.flexive.com/jsf/core"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xml:lang="en" lang="en">
+<head>
+    <title>Version Information tag</title>
+</head>
+<body>
+
+Parameters:
+* versionInfo ... FxContentVersionInfo instance
+
+<ui:composition>
+</ui:composition>
+Work in progress ... temp. disabled
+    <div style="float:left;">
+        <ui:fragment rendered="#{versionInfo.hasLiveVersion}">
+            Live version: #{versionInfo.liveVersion}<br/>
+        </ui:fragment>
+
+        <ui:fragment rendered="#{versionInfo.versionCount > 1}">
+            Versions: #{versionInfo.versionCount}<br/>
+            Min. version: #{versionInfo.minVersion}<br/>
+            Max. version: #{versionInfo.maxVersion}<br/>
+        </ui:fragment>
+        <ui:repeat var="ver" value="#{versionInfo.versions}">
+            version #{ver}:<br/>
+            +-- Created: #{fxMapBean.dateTime[versionInfo.versionSelector[ver].creationTime]} by
+            #{fxMapBean.account[versionInfo.versionSelector[ver].creatorId].name} <br/>
+            +-- Last modified: #{fxMapBean.dateTime[versionInfo.versionSelector[ver].modificationTime]} by
+            #{fxMapBean.account[versionInfo.versionSelector[ver].modificatorId].name} <br/>
+        </ui:repeat>
+
+    </div>
+    <br clear="both"/><br/>
+
+
+</body>
+</html>

@@ -457,11 +457,8 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             //security check start
             if (!(FxContext.get().getRunAsSystem() || FxContext.get().getTicket().isGlobalSupervisor())) {
                 FxContentVersionInfo cvi = storage.getContentVersionInfo(con, pk.getId());
-                int currVer;
                 FxPK currPK;
-                Iterator i = cvi.getVersions();
-                while (i.hasNext()) {
-                    currVer = (Integer) i.next();
+                for (int currVer: cvi.getVersions()) {
                     currPK = new FxPK(pk.getId(), currVer);
                     FxContentSecurityInfo si = storage.getContentSecurityInfo(con, currPK);
                     FxPermissionUtils.checkPermission(FxContext.get().getTicket(), ACL.Permission.DELETE, si, true);

@@ -9,7 +9,8 @@
       xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
       xmlns:fx="http://www.flexive.com/jsf/core"
       xmlns:adm="http://www.flexive.com/jsf/admin"
-      xmlns:t="http://myfaces.apache.org/tomahawk">
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:jstl="http://java.sun.com/jsp/jstl/functions">
 
 <ui:composition>
        <c:if test="#{empty srcEditor.parseRequestParameters}"> </c:if>
@@ -109,6 +110,9 @@
                             </ui:fragment>
                         </div>
                         <br clear="both"/><br/>
+
+                        <!-- version information -->
+                        <adm:ceVersionInfo versionInfo="#{srcEditor.versionInfo}"/>
 
                         <!-- Tree -->
                         <adm:ceRenderTreeNodes srcEditor="#{srcEditor}"/>
