@@ -760,7 +760,11 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void executeRunOnceScripts() {
+        final long start = System.currentTimeMillis();
         runOnce(SystemParameters.DIVISION_RUNONCE, "fxresources", "flexive");
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Executed flexive run-once scripts in " + (System.currentTimeMillis() - start) + "ms");
+        }
     }
 
     /**

@@ -76,6 +76,7 @@ public interface FxBackingCacheProvider {
      * @param maxContents max. number of entries to allow (0=unlimited)
      * @param timeToIdle  time a value has to be idle to be evicted (0=forever)
      * @param timeToLive  time to live (0=forever)
+     * @throws FxCacheException on cache errors
      */
-    public void setEvictionStrategy(String path, int maxContents, int timeToIdle, int timeToLive);
+    public void setEvictionStrategy(String path, int maxContents, int timeToIdle, int timeToLive) throws FxCacheException;
 }

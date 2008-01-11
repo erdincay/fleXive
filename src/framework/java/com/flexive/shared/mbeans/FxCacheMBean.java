@@ -167,5 +167,5 @@ public interface FxCacheMBean extends FxBackingCache {
      * @param timeToIdle  time a value has to be idle to be evicted (0=forever)
      * @param timeToLive  time to live (0=forever)
      */
-    void setEvictionStrategy(Integer divisionId, String path, Integer maxContents, Integer timeToIdle, Integer timeToLive);
+    void setEvictionStrategy(Integer divisionId, String path, Integer maxContents, Integer timeToIdle, Integer timeToLive) throws FxCacheException;
 }

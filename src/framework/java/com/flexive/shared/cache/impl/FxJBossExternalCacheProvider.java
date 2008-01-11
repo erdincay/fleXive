@@ -34,22 +34,27 @@
 package com.flexive.shared.cache.impl;
 
 import com.flexive.shared.cache.FxBackingCache;
-import com.flexive.shared.cache.FxBackingCacheProvider;
 import com.flexive.shared.cache.FxCacheException;
+import com.flexive.shared.mbeans.MBeanHelper;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jboss.cache.*;
-import org.jboss.cache.eviction.LRUConfiguration;
-import org.jboss.cache.eviction.LRUPolicy;
+import org.jboss.cache.CacheException;
+import org.jboss.cache.Fqn;
+import org.jboss.cache.jmx.CacheJmxWrapperMBean;
+
+import javax.management.MBeanServerInvocationHandler;
+import javax.management.ObjectName;
 
 /**
- * JBossCache FxBackingCacheProvider
+ * FxBackingCache Provider for a JBossCache instance registered via an external -service.xml deployment
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * 
  */
-public class FxJBossEmbeddedCacheProvider extends AbstractBackingCacheProvider<FxJBossTreeCacheWrapper> {
-    private static transient Log LOG = LogFactory.getLog(FxJBossEmbeddedCacheProvider.class);
-    private static final String CONFIG_FILE = "embeddedJBossCacheConfig.xml";
+public class FxJBossExternalCacheProvider extends AbstractBackingCacheProvider<FxJBossTreeCacheMBeanWrapper> {
+    private static transient Log LOG = LogFactory.getLog(FxJBossExternalCacheProvider.class);
 
     /**
      * {@inheritDoc}
@@ -65,14 +70,16 @@ public class FxJBossEmbeddedCacheProvider extends AbstractBackingCacheProvider<F
         if (cache != null)
             return;
         try {
-            final Cache<Object, Object> tc = DefaultCacheFactory.getInstance().createCache(CONFIG_FILE);
-            tc.create();
-            tc.start();
-            cache = new FxJBossTreeCacheWrapper(tc);
+            // first check if the cache MBean exists
+            MBeanHelper.locateServer().getMBeanInfo(new ObjectName("jboss.cache:service=JNDITreeCache"));
+            // create wrapper MBean
+            final CacheJmxWrapperMBean wrapper = MBeanServerInvocationHandler.newProxyInstance(MBeanHelper.locateServer(),
+                    new ObjectName("jboss.cache:service=JNDITreeCache"), CacheJmxWrapperMBean.class, false);
+            cache = new FxJBossTreeCacheMBeanWrapper(wrapper);
+            evictChildren("");  // clean up possible leftovers from previous deployment
+            LOG.trace(Fqn.class);
         } catch (Exception e) {
-            LOG.error("Failed to start TreeCache. Error: " + e.getMessage(), e);
-            System.err.println("!!! Failed to start TreeCache !!!! Error: " + e.getMessage());
-            e.printStackTrace();
+            throw new FxCacheException(e);
         }
     }
 
@@ -80,7 +87,25 @@ public class FxJBossEmbeddedCacheProvider extends AbstractBackingCacheProvider<F
      * {@inheritDoc}
      */
     public void shutdown() throws FxCacheException {
-        cache.getCache().stop();
+        //do nothing since we just "use" a cache and dont provide it
+    }
+
+    private void evictChildren(String fqn) throws CacheException {
+        final CacheJmxWrapperMBean<Object, Object> treeCache = cache.getCacheWrapper();
+        if (StringUtils.isNotBlank(fqn)) {
+            // evict local cache entry
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Evicting " + fqn);
+            }
+            treeCache.getCache().evict(new Fqn<String>(fqn), true);
+        }
+        // also evict children
+//        final Set childrenNames = treeCache.getChildrenNames(fqn);
+//        if (childrenNames != null) {
+//            for (Object childFqn: childrenNames) {
+//                evictChildren(fqn + "/" + childFqn);
+//            }
+//        }
     }
 
     /**

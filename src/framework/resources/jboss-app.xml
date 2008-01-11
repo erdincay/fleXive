@@ -1,0 +1,8 @@
+<jboss-app>
+    <!--
+        Use a scoped deployment to allow us using JBoss Cache >= 2.0 with JBossAS 4.2.x
+    -->
+   <loader-repository>
+        com.flexive:archive=flexive.ear
+   </loader-repository>
+</jboss-app>

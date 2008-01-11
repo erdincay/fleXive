@@ -235,13 +235,29 @@ database.password=a]]></programlisting>
                     </para>
                 </listitem>
                 <listitem>
-                    <para>Create and copy the cache service file JBossCacheJNDI42-service.xml to
-                        ${jboss.home}/server/all/deploy/
-                        or simply copy it from the &Flexive; source tree, if available.
+                    <para>To use an external service deployer for JBoss Cache,
+                        create the cache service file
+                        <filename>99_JBossCacheJNDI42-service.xml</filename>
+                        in
+                        <filename>${jboss.home}/server/all/deploy/</filename>
+                        or simply copy it from the &flexive; source tree, if available:
+
                         <programlisting language="xml">
-                            <xi:include href="../../src/framework/resources/JBossCacheJNDI42-service.xml"
+                            <xi:include href="../../src/framework/resources/99_JBossCacheJNDI42-service.xml"
                                         parse="text"/>
                         </programlisting>
+                    </para>
+                    <para>
+                        Due to classloading issues (&flexive; uses JBoss Cache 2.x, while
+                        JBoss 4.2 uses JBoss Cache 1.x) you need to modify the deployment scanner in
+                        <filename>${jboss.home}/server/all/conf/jboss-service.xml</filename>:
+                        replace the entry
+                        <programlisting language="xml"><![CDATA[<attribute name="URLComparator">org.jboss.deployment.DeploymentSorter</attribute>]]></programlisting>
+                        with
+                        <programlisting language="xml"><![CDATA[<attribute name="URLComparator">org.jboss.deployment.scanner.AlphaNumericDeploymentSorter</attribute>]]></programlisting>
+                        This ensures that the cache service is started after flexive.ear is deployed and thus
+                        can use its cache implementation classes (this deployment scanner allows to influence
+                        the deployment order with a numeric prefix, otherwise it's the same as the default one).
                     </para>
                 </listitem>
             </itemizedlist>

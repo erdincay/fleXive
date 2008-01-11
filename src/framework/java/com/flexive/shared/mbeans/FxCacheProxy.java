@@ -40,6 +40,8 @@ import com.flexive.shared.cache.FxCacheException;
 import javax.management.*;
 import java.util.Set;
 
+import org.jboss.cache.Cache;
+
 /**
  * Proxy for the FxCache MBean (only for internal used!)
  * TODO: code error handling
@@ -75,7 +77,14 @@ public class FxCacheProxy implements FxCacheMBean {
         server.invoke(name, "destroy", new Object[0], new String[0]);
     }
 
-    public FxBackingCache getCache() {
+    /**
+     * {@inheritDoc}
+     */
+    public Cache<Object, Object> getCache() throws FxCacheException {
+        return getBackingCache().getCache();
+    }
+
+    private FxBackingCache getBackingCache() {
         try {
             return (FxBackingCache) server.getAttribute(name, "FxCache");
         } catch (MBeanException e) {

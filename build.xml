@@ -429,14 +429,17 @@
 			<metainf dir="${flexive.base.build.dir}">
 				<include name="application.xml"/>
 			</metainf>
-			<fileset dir="${flexive.build.framework.jar.dir}" includes="*-ejb.jar,*.par"/>
+            <metainf dir="${flexive.base.framework.dir}/resources">
+                <include name="jboss-app.xml"/>
+            </metainf>
+            <fileset dir="${flexive.build.framework.jar.dir}" includes="*-ejb.jar,*.par"/>
             <zipfileset prefix="lib" dir="${flexive.build.framework.jar.dir}" includes="*.jar" excludes="${sqlparser.jar},${htmlparser.jar},*-ejb.jar"/>
             <fileset dir="${flexive.base.build.dir}/ui" includes="*.war"/>
             <fileset dir="${flexive.drop.dir}" includes="*.war,*-ejb.jar,*.par"/>
             <zipfileset prefix="lib" dir="${flexive.drop.dir}" includes="*.jar" excludes="*-ejb.jar"/>
 
             <!-- Shared libraries -->
-            <zipfileset prefix="lib" dir="${flexive.lib.dir}" includes="${sqlparser.jar},${extractor.jar},fxStream.jar,fxTree.jar,commons-io-1.1.jar,sanselan.jar,commons-*.jar"/>
+            <zipfileset prefix="lib" dir="${flexive.lib.dir}" includes="${sqlparser.jar},${extractor.jar},fxStream.jar,fxTree.jar,commons-io-1.1.jar,sanselan.jar,commons-*.jar,jbosscache-core.jar,jgroups.jar,jboss-common-core-42-compat.jar"/>
             <zipfileset prefix="lib" dir="${flexive.lib.dir}/groovy" includes="*.jar"/>
             <zipfileset prefix="lib" dir="${build.ui.jar.dir}" includes="*.jar"/>
             <zipfileset prefix="lib" dir="${flexive.lib.dir}/xstream" includes="*.jar"/>
@@ -444,7 +447,7 @@
             <zipfileset prefix="lib" dir="${flexive.lib.dir}/mail" includes="*.jar"/>
             <zipfileset prefix="lib" dir="${flexive.lib.dir}/text_extraction" includes="*.jar"/>
             
-            <zipfileset prefix="lib" dir="${flexive.lib.dir}/jsf" includes="*.jar" excludes="jsf-api.jar, jsf-impl.jar"/>
+            <zipfileset prefix="lib" dir="${flexive.lib.dir}/jsf" includes="*.jar" excludes="jsf-api.jar, jsf-impl.jar,el-api.jar,el-impl.jar"/>
             <zipfileset prefix="lib" refid="flexive.lib.ui.ajax4jsf"/>
             
             <!-- uncomment to create lib folder in ear -->

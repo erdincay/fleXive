@@ -33,6 +33,8 @@
  ***************************************************************/
 package com.flexive.shared.cache;
 
+import org.jboss.cache.Cache;
+
 import java.util.Set;
 
 /**
@@ -112,4 +114,12 @@ public interface FxBackingCache {
      * @throws FxCacheException on errors
      */
     Set getChildrenNames(String path) throws FxCacheException;
+
+    /**
+     * Get the wrapped cache
+     *
+     * @return TreeCache
+     * @throws FxCacheException on errors
+     */
+    Cache<Object, Object> getCache() throws FxCacheException;
 }

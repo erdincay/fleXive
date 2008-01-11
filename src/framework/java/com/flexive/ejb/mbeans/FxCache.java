@@ -49,6 +49,7 @@ import com.flexive.stream.ServerLocation;
 import com.flexive.stream.StreamServer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jboss.cache.Cache;
 
 import javax.management.*;
 import java.util.ArrayList;
@@ -230,6 +231,12 @@ public class FxCache implements FxCacheMBean, DynamicMBean {
         return "/GlobalConfiguration" + (path.startsWith("/") ? "" : "/") + path;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public Cache<Object, Object> getCache() throws FxCacheException {
+        return getBackingCache().getCache();
+    }
 
     /**
      * {@inheritDoc}
@@ -335,7 +342,7 @@ public class FxCache implements FxCacheMBean, DynamicMBean {
      * {@inheritDoc}
      */
     public void setEvictionStrategy(Integer divisionId, String path, Integer maxContents, Integer timeToIdle,
-                                    Integer timeToLive) {
+                                    Integer timeToLive) throws FxCacheException {
         cacheProvider.setEvictionStrategy("/Division" + divisionId + (path.charAt(0) == '/' ? path : '/' + path),
                 maxContents, timeToIdle, timeToLive);
     }

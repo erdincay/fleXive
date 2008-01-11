@@ -34,7 +34,7 @@
 package com.flexive.shared.cache;
 
 import com.flexive.shared.cache.impl.FxJBossEmbeddedCacheProvider;
-import com.flexive.shared.cache.impl.FxJBossJNDICacheProvider;
+import com.flexive.shared.cache.impl.FxJBossExternalCacheProvider;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -82,11 +82,11 @@ public class FxBackingCacheProviderFactory {
                 }
             }
             try {
-                instance = new FxJBossJNDICacheProvider();
+                instance = new FxJBossExternalCacheProvider();
                 instance.init();
                 return instance;
             } catch (FxCacheException e) {
-                LOG.info("Failed to instantiate FxJBossJNDICacheProvider: " + e.getMessage());
+                LOG.info("Failed to instantiate FxJBossExternalCacheProvider: " + e.getMessage());
             }
             instance = new FxJBossEmbeddedCacheProvider();
         } finally {

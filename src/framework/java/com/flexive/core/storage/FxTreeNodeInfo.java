@@ -36,7 +36,8 @@ package com.flexive.core.storage;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
-import org.jboss.cache.aop.annotation.Serializable;
+
+import java.io.Serializable;
 
 /**
  * Information about a tree node that implementation specific and provide information about parameters
@@ -46,6 +47,7 @@ import org.jboss.cache.aop.annotation.Serializable;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public abstract class FxTreeNodeInfo implements Serializable {
+    private static final long serialVersionUID = 6152424443687210402L;
 
     protected int totalChildCount;
     protected int directChildCount;

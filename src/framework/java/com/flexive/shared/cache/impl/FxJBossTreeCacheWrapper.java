@@ -36,9 +36,12 @@ package com.flexive.shared.cache.impl;
 import com.flexive.shared.cache.FxBackingCache;
 import com.flexive.shared.cache.FxCacheException;
 import org.jboss.cache.CacheException;
-import org.jboss.cache.TreeCache;
+import org.jboss.cache.Cache;
+import org.jboss.cache.Fqn;
+import org.jboss.cache.Node;
 
 import java.util.Set;
+import java.util.HashSet;
 
 /**
  * Proxy TreeCache <-> FxBackingCache
@@ -47,14 +50,9 @@ import java.util.Set;
  */
 public class FxJBossTreeCacheWrapper implements FxBackingCache {
 
-    private TreeCache cache;
+    private Cache<Object, Object> cache;
 
-    /**
-     * Get the wrapped cache
-     *
-     * @return TreeCache
-     */
-    public TreeCache getCache() {
+    public Cache<Object, Object> getCache() {
         return cache;
     }
 
@@ -63,7 +61,7 @@ public class FxJBossTreeCacheWrapper implements FxBackingCache {
      *
      * @param cache TreeCache to wrap
      */
-    public FxJBossTreeCacheWrapper(TreeCache cache) {
+    public FxJBossTreeCacheWrapper(Cache<Object, Object> cache) {
         this.cache = cache;
     }
 
@@ -72,7 +70,7 @@ public class FxJBossTreeCacheWrapper implements FxBackingCache {
      */
     public Object get(String path, Object key) throws FxCacheException {
         try {
-            return cache.get(path, key);
+            return cache.get(new Fqn<String>(path), key);
         } catch (CacheException e) {
             throw new FxCacheException(e);
         }
@@ -82,7 +80,7 @@ public class FxJBossTreeCacheWrapper implements FxBackingCache {
      * {@inheritDoc}
      */
     public boolean exists(String path, Object key) throws FxCacheException {
-        return cache.exists(path, key);
+        return cache.get(new Fqn<String>(path), key) != null;
     }
 
     /**
@@ -90,7 +88,7 @@ public class FxJBossTreeCacheWrapper implements FxBackingCache {
      */
     public void put(String path, Object key, Object value) throws FxCacheException {
         try {
-            cache.put(path, key, value);
+            cache.put(new Fqn<String>(path), key, value);
         } catch (CacheException e) {
             throw new FxCacheException(e);
         }
@@ -101,7 +99,10 @@ public class FxJBossTreeCacheWrapper implements FxBackingCache {
      */
     public void remove(String path) throws FxCacheException {
         try {
-            cache.remove(path);
+            final Node<Object, Object> node = getNode(path);
+            if (node != null) {
+                node.clearData();
+            }
         } catch (CacheException e) {
             throw new FxCacheException(e);
         }
@@ -112,7 +113,7 @@ public class FxJBossTreeCacheWrapper implements FxBackingCache {
      */
     public void remove(String path, Object key) throws FxCacheException {
         try {
-            cache.remove(path, key);
+            cache.remove(new Fqn<String>(path), key);
         } catch (CacheException e) {
             throw new FxCacheException(e);
         }
@@ -123,10 +124,15 @@ public class FxJBossTreeCacheWrapper implements FxBackingCache {
      */
     public Set getKeys(String path) throws FxCacheException {
         try {
-            return cache.getKeys(path);
+            final Node<Object, Object> region = getNode(path);
+            return region != null ? region.getKeys() : new HashSet();
         } catch (CacheException e) {
             throw new FxCacheException(e);
         }
+    }
+
+    private Node<Object, Object> getNode(String path) {
+        return cache.getRoot().getChild(new Fqn<String>(path));
     }
 
     /**
@@ -134,7 +140,8 @@ public class FxJBossTreeCacheWrapper implements FxBackingCache {
      */
     public Set getChildrenNames(String path) throws FxCacheException {
         try {
-            return cache.getChildrenNames(path);
+            final Node<Object, Object> region = getNode(path);
+            return region != null ? region.getChildrenNames() : new HashSet();
         } catch (CacheException e) {
             throw new FxCacheException(e);
         }

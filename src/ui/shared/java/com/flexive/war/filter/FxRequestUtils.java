@@ -40,7 +40,11 @@ import com.flexive.shared.interfaces.GlobalConfigurationEngine;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class FxRequestUtils {
+    private static final transient Log LOG = LogFactory.getLog(FxRequestUtils.class);
 
     // Do not use upper case characters, URL needs to be valid
     // or IE will lose the session after every request (ie do not use
@@ -87,7 +91,7 @@ public class FxRequestUtils {
         try {
             divisionId = configuration.getDivisionId(server);
         } catch (Exception e) {
-            System.out.println("Could not determine division: " + e.getMessage());
+            LOG.error("Could not determine division: " + e.getMessage(), e);
         }
         if (divisionId != -1)
             return divisionId;

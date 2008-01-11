@@ -34,12 +34,12 @@
 package com.flexive.shared.media;
 
 import com.flexive.shared.exceptions.FxApplicationException;
-import org.jboss.cache.aop.annotation.Serializable;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.StringWriter;
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -54,6 +54,8 @@ public abstract class FxMetadata {
      * An item holding metadata
      */
     public static class FxMetadataItem implements Serializable {
+        private static final long serialVersionUID = -4856169406370122927L;
+        
         private String key;
         private String value;
 
