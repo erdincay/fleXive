@@ -72,8 +72,8 @@ public class FxJBossExternalCacheProvider extends AbstractBackingCacheProvider<F
         try {
             // first check if the cache MBean exists
             MBeanHelper.locateServer().getMBeanInfo(new ObjectName("jboss.cache:service=JNDITreeCache"));
-            // create wrapper MBean
-            final CacheJmxWrapperMBean wrapper = MBeanServerInvocationHandler.newProxyInstance(MBeanHelper.locateServer(),
+            // create wrapper MBean (cast necessary for java 1.5)
+            final CacheJmxWrapperMBean wrapper = (CacheJmxWrapperMBean) MBeanServerInvocationHandler.newProxyInstance(MBeanHelper.locateServer(),
                     new ObjectName("jboss.cache:service=JNDITreeCache"), CacheJmxWrapperMBean.class, false);
             cache = new FxJBossTreeCacheMBeanWrapper(wrapper);
             evictChildren("");  // clean up possible leftovers from previous deployment
