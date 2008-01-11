@@ -33,21 +33,13 @@
  ***************************************************************/
 package com.flexive.shared.cache.impl;
 
-import com.flexive.shared.cache.FxBackingCache;
-import com.flexive.shared.cache.FxCacheException;
-import org.jboss.cache.CacheException;
-import org.jboss.cache.Fqn;
-import org.jboss.cache.Node;
 import org.jboss.cache.Cache;
 import org.jboss.cache.jmx.CacheJmxWrapperMBean;
-
-import java.util.Set;
-import java.util.HashSet;
 
 /**
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class FxJBossTreeCacheMBeanWrapper implements FxBackingCache {
+public class FxJBossTreeCacheMBeanWrapper extends AbstractJBossTreeCacheWrapper {
 
     private CacheJmxWrapperMBean<Object, Object> cache;
 
@@ -58,19 +50,6 @@ public class FxJBossTreeCacheMBeanWrapper implements FxBackingCache {
     /**
      * {@inheritDoc}
      */
-    public Object get(String path, Object key) throws FxCacheException {
-        try {
-            return cache.getCache().get(Fqn.fromString(path), key);
-        } catch (CacheException e) {
-            throw new FxCacheException(e);
-        }
-    }
-
-    /**
-     * Get the wrapped TreeCache
-     *
-     * @return wrapped TreeCache
-     */
     public Cache<Object, Object> getCache() {
         return cache.getCache();
     }
@@ -78,76 +57,4 @@ public class FxJBossTreeCacheMBeanWrapper implements FxBackingCache {
     public CacheJmxWrapperMBean<Object, Object> getCacheWrapper() {
         return cache;
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    public boolean exists(String path, Object key) throws FxCacheException {
-        return cache.getCache().get(Fqn.fromString(path), key) != null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void put(String path, Object key, Object value) throws FxCacheException {
-        try {
-            cache.getCache().put(Fqn.fromString(path), key, value);
-        } catch (CacheException e) {
-            throw new FxCacheException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void remove(String path) throws FxCacheException {
-        try {
-            final Node<Object, Object> node = getNode(path);
-            if (node != null) {
-                node.clearData();
-            }
-        } catch (CacheException e) {
-            throw new FxCacheException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void remove(String path, Object key) throws FxCacheException {
-        try {
-            cache.getCache().remove(Fqn.fromString(path), key);
-        } catch (CacheException e) {
-            throw new FxCacheException(e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Set getKeys(String path) throws FxCacheException {
-        try {
-            final Node<Object, Object> region = getNode(path);
-            return region != null ? region.getKeys() : new HashSet();
-        } catch (CacheException e) {
-            throw new FxCacheException(e);
-        }
-    }
-
-    private Node<Object, Object> getNode(String path) {
-        return cache.getCache().getRoot().getChild(Fqn.fromString(path));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Set getChildrenNames(String path) throws FxCacheException {
-        try {
-            final Node<Object,Object> region = getNode(path);
-            return region != null ? region.getChildrenNames() : new HashSet();
-        } catch (CacheException e) {
-            throw new FxCacheException(e);
-        }
-    }
-
 }
