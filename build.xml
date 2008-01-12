@@ -386,8 +386,12 @@
 	            <include name="templates/**/*"/>
                 <include name="cmsTemplates/**/*"/>
             </zipfileset>
+            <!-- richfaces skins -->
+			<zipfileset dir="${resources.ui.jsf.dir}/WEB-INF" prefix="META-INF/skins">
+	            <include name="flexive.skin.properties"/>
+            </zipfileset>
 
-		    <!-- include dojo from ZIP file, install in /pub/js/dojo -->
+            <!-- include dojo from ZIP file, install in /pub/js/dojo -->
 		    <zipfileset src="${flexive.base.ui.shared.dir}/resources/lib/dojo/${web.ui.dojo.baseName}.zip" prefix="pub/js/dojo">
 		        <include name="*"/>
 		        <include name="src/**/*"/>

@@ -21,10 +21,9 @@
 Parameters:
 * versionInfo ... FxContentVersionInfo instance
 
-<ui:composition>
-</ui:composition>
-Work in progress ... temp. disabled
-    <div style="float:left;">
+<ui:composition xmlns:rich="http://richfaces.org/rich">
+    <rich:simpleTogglePanel switchType="client" label="Versions" opened="false" width="500px">
+
         <ui:fragment rendered="#{versionInfo.hasLiveVersion}">
             Live version: #{versionInfo.liveVersion}<br/>
         </ui:fragment>
@@ -35,15 +34,17 @@ Work in progress ... temp. disabled
             Max. version: #{versionInfo.maxVersion}<br/>
         </ui:fragment>
         <ui:repeat var="ver" value="#{versionInfo.versions}">
-            version #{ver}:<br/>
-            +-- Created: #{fxMapBean.dateTime[versionInfo.versionSelector[ver].creationTime]} by
+            <hr/>
+            Version #{ver}:<br/>
+            Created: #{fxMapBean.dateTime[versionInfo.versionSelector[ver].creationTime]} by
             #{fxMapBean.account[versionInfo.versionSelector[ver].creatorId].name} <br/>
-            +-- Last modified: #{fxMapBean.dateTime[versionInfo.versionSelector[ver].modificationTime]} by
+            Last modified: #{fxMapBean.dateTime[versionInfo.versionSelector[ver].modificationTime]} by
             #{fxMapBean.account[versionInfo.versionSelector[ver].modificatorId].name} <br/>
         </ui:repeat>
-
-    </div>
+    </rich:simpleTogglePanel>
     <br clear="both"/><br/>
+</ui:composition>
+
 
 
 </body>

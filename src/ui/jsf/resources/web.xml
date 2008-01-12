@@ -84,6 +84,12 @@
         <param-value>com.sun.facelets.FaceletViewHandler</param-value>
     </context-param>
 
+    <!-- Richfaces parameters -->
+    <context-param>
+        <param-name>org.richfaces.SKIN</param-name>
+        <param-value>flexive</param-value> 
+    </context-param>
+
     <filter>
         <display-name>Ajax4jsf Filter</display-name>
         <filter-name>ajax4jsf</filter-name>
