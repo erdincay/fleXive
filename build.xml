@@ -387,7 +387,7 @@
                 <include name="cmsTemplates/**/*"/>
             </zipfileset>
             <!-- richfaces skins -->
-			<zipfileset dir="${resources.ui.jsf.dir}/WEB-INF" prefix="META-INF/skins">
+			<zipfileset dir="${resources.ui.jsf.dir}/WEB-INF" prefix="WEB-INF/classes">
 	            <include name="flexive.skin.properties"/>
             </zipfileset>
 

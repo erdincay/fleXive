@@ -493,7 +493,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
             try {
                 environment = CacheAdmin.getFilteredEnvironment();
                 if (id != -1) {
-                    FxPK pk = (version == -1) ? new FxPK(id) : new FxPK(id, version);
+                    FxPK pk = (version == -1) ? new FxPK(id, FxPK.MAX) : new FxPK(id, version);
                     // Load the content itself
                     content = co.load(pk);
                     content.loadReferences(co);
@@ -607,7 +607,22 @@ public class ContentEditorBean implements ActionBean, Serializable {
     }
 
     public String cancel() {
-        return release();
+        String ret;
+        long _id = id;
+        int _version = version;
+        if( content != null && content.getPk().isNew() )
+            ret = null;
+        else {
+            ret = getEditorPage();
+        }
+        release();
+        if( ret != null ) {
+            this.id = _id;
+            this.version = _version;
+            reload();
+            this.readOnly = true;
+        }
+        return ret;
     }
 
     protected String release() {

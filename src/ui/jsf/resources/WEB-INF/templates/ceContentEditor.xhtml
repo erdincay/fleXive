@@ -14,7 +14,6 @@
 
 <ui:composition>
        <c:if test="#{empty srcEditor.parseRequestParameters}"> </c:if>
-
             <t:inputHidden id="editorType" value="#{srcEditor.editorType}" />
 
             <!-- Content select screen -->
@@ -35,14 +34,18 @@
                 <ui:fragment rendered="#{srcEditor.new}">
                     <adm:tab label="#{fxMessageBean['Content.tabtitle.new']}" active="true" id="tabEditNew"/>
                 </ui:fragment>
-                <ui:fragment rendered="#{srcEditor.new==false}">
-                    <ui:fragment rendered="#{srcEditor.readOnly==true}">
-                      <adm:tab label="#{fxMessageBean['Content.tabtitle.readonly,#{contentEditorBean.id},#{contentEditorBean.version}']}" active="true" id="tabEditInit1"/>
+                <ui:repeat var="srcEditor" value="#{srcEditor}">
+                    <ui:fragment rendered="#{srcEditor.new==false}">
+                        <ui:fragment rendered="#{srcEditor.readOnly==true}">
+                            <adm:tab label="#{fxMessageBean['Content.tabtitle.readonly,#{srcEditor.id},#{srcEditor.version}']}"
+                                    active="true" id="tabEditInit1"/>
+                        </ui:fragment>
+                        <ui:fragment rendered="#{srcEditor.readOnly==false}">
+                            <adm:tab label="#{fxMessageBean['Content.tabtitle.edit,#{srcEditor.id},#{srcEditor.version}']}"
+                                    active="true" id="tabEditInit2"/>
+                        </ui:fragment>
                     </ui:fragment>
-                    <ui:fragment rendered="#{srcEditor.readOnly==false}">
-                      <adm:tab label="#{fxMessageBean['Content.tabtitle.edit,#{contentEditorBean.id},#{contentEditorBean.version}']}" active="true" id="tabEditInit2"/>
-                    </ui:fragment>
-                </ui:fragment>
+                </ui:repeat>
 
 
                     <a4j:outputPanel id="all">
@@ -111,9 +114,6 @@
                         </div>
                         <br clear="both"/><br/>
 
-                        <!-- version information -->
-                        <adm:ceVersionInfo versionInfo="#{srcEditor.versionInfo}"/>
-
                         <!-- Tree -->
                         <adm:ceRenderTreeNodes srcEditor="#{srcEditor}"/>
 
@@ -127,20 +127,15 @@
                         <t:inputHidden value="#{srcEditor.editorActionName}"  id="editorActionName"/>
                         <t:inputHidden value="#{srcEditor.editorActionXpath}" id="editorActionXpath"/>
 
-
                         <!-- Properties and Groups -->
                         <t:inputHidden value="#{srcEditor.elements}" id="elements"/>
                         <div style="position:relative;left:-10px">
-                            <div class="property">
+                            <div style="padding-top: 3px; padding-left: 3px; width: 30px; float: left;">
                                 <adm:ceRenderFieldMenu group="#{srcEditor.content.rootGroup}" icon="root"
-                                        srcEditor="#{srcEditor}"/>
-                                <div class="display" style="padding-top:2px;width:400px">
-                                    #{srcEditor.typeDisplay}
-                                    <ui:fragment rendered="#{srcEditor.new}"> #{fxMessageBean['Content.flag.new']}</ui:fragment>
-                                    <ui:fragment rendered="#{srcEditor.new==false}"> #{fxMessageBean['Content.flag.existing,#{contentEditorBean.id},#{contentEditorBean.version}']}</ui:fragment>
-                                </div>
+                                                       srcEditor="#{srcEditor}"/>
                             </div>
-                            <br style="clear:both;margin-bottom:7px"/>
+                            <adm:ceVersionInfo versionInfo="#{srcEditor.versionInfo}"/>
+                            <br clear="both"/>
                             <adm:ceRenderFields data="#{srcEditor.content.rootGroup.children}" srcEditor="#{srcEditor}"/>
                         </div>
                     </a4j:outputPanel>

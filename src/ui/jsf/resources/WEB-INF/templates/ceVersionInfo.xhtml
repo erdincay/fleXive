@@ -21,25 +21,47 @@
 Parameters:
 * versionInfo ... FxContentVersionInfo instance
 
+this template has to use ui:repeat to make the el expression available in fxMessageBean
+see http://www.nabble.com/How-to-get-the-ui%3Aparam-value-in-Javabean--td12120387.html
+or http://forum.java.sun.com/thread.jspa?threadID=5218131&amp;messageID=9886363
+for more info
+
 <ui:composition xmlns:rich="http://richfaces.org/rich">
-    <rich:simpleTogglePanel switchType="client" label="Versions" opened="false" width="500px">
+    <c:if test="#{srcEditor.new}">
+        <c:set var="lbl1" value="#{srcEditor.typeDisplay} #{fxMessageBean['Content.flag.new']}"/>
+    </c:if>
+    <c:if test="#{!srcEditor.new and versionInfo.versionCount > 1}">
+        <c:set var="lbl1" value="#{srcEditor.typeDisplay} [Id: #{srcEditor.id}, version: #{srcEditor.version}] - #{versionInfo.versionCount} versions"/>
+    </c:if>
+    <c:if test="#{!srcEditor.new and versionInfo.versionCount == 1}">
+        <c:set var="lbl1" value="#{srcEditor.typeDisplay} [Id: #{srcEditor.id}, version: #{srcEditor.version}]"/>
+    </c:if>
 
-        <ui:fragment rendered="#{versionInfo.hasLiveVersion}">
-            Live version: #{versionInfo.liveVersion}<br/>
-        </ui:fragment>
+    <rich:simpleTogglePanel switchType="client" label="#{lbl1}" opened="false" width="340px" style="">
+        <ui:repeat var="vi" value="#{versionInfo}">
+            <ui:fragment rendered="#{versionInfo.hasLiveVersion}">
+                #{fxMessageBean['Content.field.versionInfo.liveVersion,#{vi.liveVersion}']}<br/>
+            </ui:fragment>
 
-        <ui:fragment rendered="#{versionInfo.versionCount > 1}">
-            Versions: #{versionInfo.versionCount}<br/>
-            Min. version: #{versionInfo.minVersion}<br/>
-            Max. version: #{versionInfo.maxVersion}<br/>
-        </ui:fragment>
-        <ui:repeat var="ver" value="#{versionInfo.versions}">
-            <hr/>
-            Version #{ver}:<br/>
-            Created: #{fxMapBean.dateTime[versionInfo.versionSelector[ver].creationTime]} by
-            #{fxMapBean.account[versionInfo.versionSelector[ver].creatorId].name} <br/>
-            Last modified: #{fxMapBean.dateTime[versionInfo.versionSelector[ver].modificationTime]} by
-            #{fxMapBean.account[versionInfo.versionSelector[ver].modificatorId].name} <br/>
+            <ui:fragment rendered="#{versionInfo.versionCount > 1}">
+                #{fxMessageBean['Content.field.versionInfo.versionCount,#{vi.versionCount}']}<br/>
+                #{fxMessageBean['Content.field.versionInfo.minVersion,#{vi.minVersion}']}<br/>
+                #{fxMessageBean['Content.field.versionInfo.maxVersion,#{vi.maxVersion}']}<br/>
+            </ui:fragment>
+            <ui:repeat var="ver" value="#{vi.versions}">
+                <hr/>
+                <b>#{fxMessageBean['Content.field.versionInfo.version,#{ver}']}</b><br/>
+                <ui:fragment rendered="#{ver!=srcEditor.version and srcEditor.readOnly}">
+                    <adm:commandIcon labelKey="Content.button.loadVersion" location="content"
+                                     icon="load" action="reload" bean="#{srcEditor}"
+                                     id="editVersion_#{ver}">
+                        <f:setPropertyActionListener target="#{srcEditor.version}" value="#{ver}"/>
+                    </adm:commandIcon>
+                    <br/>
+                </ui:fragment>
+                #{fxMessageBean['Content.field.versionInfo.created,#{fxMapBean.dateTime[vi.versionSelector[ver].creationTime]},#{fxMapBean.account[vi.versionSelector[ver].creatorId].name}']}<br/>
+                #{fxMessageBean['Content.field.versionInfo.modified,#{fxMapBean.dateTime[vi.versionSelector[ver].modificationTime]},#{fxMapBean.account[vi.versionSelector[ver].modificatorId].name}']}<br/>
+            </ui:repeat>
         </ui:repeat>
     </rich:simpleTogglePanel>
     <br clear="both"/><br/>
