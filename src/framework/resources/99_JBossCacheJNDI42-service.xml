@@ -116,6 +116,7 @@
             <region name="/_default_">
                <attribute name="maxNodes">0</attribute>
                <attribute name="timeToIdleSeconds">0</attribute>
+               <attribute name="timeToLiveSeconds">0</attribute>
             </region>
             <!-- cache region for contents -->
             <region name="/Division1/FxContent">
