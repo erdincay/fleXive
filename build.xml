@@ -553,11 +553,12 @@
             <path refid="flexive.shared-libs.path"/>
             <mapper type="flatten"/>
         </copy>
-        <delete dir="${flexive.dist.extlib.dir}" includes="el-ri.jar, jsf-impl.jar"/>
+        <delete dir="${flexive.dist.extlib.dir}" includes="el-ri.jar, el-api.jar, jsf-impl.jar"/>
 
         <!-- Copy global deployment descriptots -->
         <copy todir="${flexive.dist.meta.dir}">
             <fileset file="${flexive.base.ui.shared.dir}/resources/application.xml"/>
+            <fileset file="${flexive.base.framework.dir}/resources/jboss-app.xml"/>
         </copy>
         <!--<copy file="${flexive.base.build.dir}/flexive.ear" tofile="${flexive.dist.dir}/flexive.ear" overwrite="true"/>-->
 
@@ -584,7 +585,7 @@ database.password=a
         <!-- Create flexive ZIP file -->
         <zip destfile="${flexive.base.build.dir}/flexive-dist.zip">
             <fileset dir="${basedir}" includes="flexive-dist/**"/>
-            <fileset dir="${basedir}/legal" includes="LICENSE.txt,GPL.txt"/>
+            <zipfileset prefix="flexive-dist" dir="${basedir}/legal" includes="LICENSE.txt,GPL.txt"/>
         </zip>
     </target>
 
