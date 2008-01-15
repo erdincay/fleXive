@@ -6,11 +6,6 @@
       xmlns:fx="http://www.flexive.com/jsf/core">
 <head>
     <t:stylesheet path="/adm/css/content.css"/>
-    <script language='JavaScript' type='text/javascript'>
-        function isIE() {
-            return navigator.appName.indexOf("Explorer") != -1;
-        }
-    </script>
 </head>
 <body>
 
@@ -20,10 +15,11 @@
     <ui:define name="body">
         #{fxMessageBean['Global.welcome']} #{fxSystemBean.buildInfoVerbose}
         <script language='JavaScript' type='text/javascript'>
-            if (isIE())
-            document.write("<br/><br/>#{fxMessageBean['Login.message.IEbug1']}");
-            document.write("<br/>#{fxMessageBean['Login.message.IEbug2']}");
-            document.write("<br/>#{fxMessageBean['Login.message.IEbug3']}");
+            if (navigator.appName.indexOf("Explorer") != -1) {
+                document.write("<br/><br/>#{fxMessageBean['Login.message.IEbug1']}");
+                document.write("<br/>#{fxMessageBean['Login.message.IEbug2']}");
+                document.write("<br/>#{fxMessageBean['Login.message.IEbug3']}");
+            }
         </script>
     </ui:define>
 </ui:composition>
