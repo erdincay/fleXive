@@ -6,7 +6,8 @@
       xmlns:t="http://myfaces.apache.org/tomahawk"
       xmlns:c="http://java.sun.com/jstl/core"
       xmlns:adm="http://www.flexive.com/jsf/admin"
-      xmlns:fx="http://www.flexive.com/jsf/core">
+      xmlns:fx="http://www.flexive.com/jsf/core"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax">
 <body>
 
 <ui:composition template="/adm/contentTemplate.xhtml">
@@ -26,64 +27,65 @@
 
             <adm:tab label="Script Overview" active="true" id="tab1"/>
 
-            <h:panelGrid columns="2">
-                #{fxMessageBean['Script.field.type']}:&nbsp;
-                <h:selectOneListbox id="scriptTypeSel" value="#{scriptBean.scriptEvent}" size="1"
-                                    onchange="document.listForm.submit();">
-                    <f:selectItems value="#{fxSelectBean.scriptEvents}" />
+            <h:panelGrid columns="4">
+                #{fxMessageBean['Script.field.scriptScope']}:&nbsp;
+                <h:selectOneListbox id="selectedScriptScope" value="#{scriptBean.selectedScope}" size="1" onchange="submit();">
+                    <f:selectItems value="#{fxSelectBean.scriptScopes}" />
+                </h:selectOneListbox>
+                #{fxMessageBean['Script.field.event']}:&nbsp;
+                <h:selectOneListbox id="selectedScriptEvent" value="#{scriptBean.selectedScriptEventId}" size="1" onchange="submit();">
+                    <f:selectItems value="#{scriptBean.eventsForScope}" />
                 </h:selectOneListbox>
             </h:panelGrid>
 
             <br/>
-
-            <table dojoType="FilteringTable" widgetId="testTable" enableMultipleSelect="true"
-                   alternateRows="true" maxSortable="1" class="dojoTable">
-                <thead>
-                    <tr>
-                        <th class="tblHeader" field="name" dataType="String" align="left">
-                            #{fxMessageBean['Script.field.name']}
-                        </th>
-                        <th class="tblHeader" field="desc" dataType="String" align="left">
-                            #{fxMessageBean['Script.field.desc']}
-                        </th>
-                        <th class="tblHeader" field="type" dataType="String" align="left">
-                            #{fxMessageBean['Script.field.event']}
-                        </th>
-                        <th class="tblHeader" dataType="html" align="left">
-                            #{fxMessageBean['Script.field.actions']}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <ui:repeat value="#{scriptBean.list}" var="item">
-                        <tr value="#{item.id}">
-                            <td align="left"><h:outputText value="#{item.name}" /></td>
-                            <td align="left"><h:outputText value="#{item.description}" /></td>
-                            <td align="left"><h:outputText value="#{item.event.name}" /></td>
-                            <td align="left">
-                                <adm:commandIcon labelKey="Script.button.edit" location="content"
-                                                 icon="edit"  action="editScript"  bean="#{scriptBean}"
-                                                 id="editButton_#{item.id}">
-                                    <f:setPropertyActionListener target="#{scriptBean.id}" value="#{item.id}"/>
-                                </adm:commandIcon>
-                                <adm:commandIcon labelKey="Script.button.delete" location="content"
-                                                 icon="delete"  action="deleteScript"  bean="#{scriptBean}"
-                                                 id="deleteButton_#{item.id}" confirm="Script.confirm.delete">
-                                    <f:setPropertyActionListener target="#{scriptBean.id}" value="#{item.id}"/>
-                                </adm:commandIcon>
-                                <!-- show run icon only if the script is an independent one (i.e. a not-triggered script) -->
-                                <h:panelGroup rendered="#{item.event.name=='Manual' and fxSystemBean.isInRole['ScriptExecution']}">
-                                    <adm:commandIcon labelKey="Script.button.run" location="content" icon="run"
-                                                     action="runScript" bean="#{scriptBean}" id="runButton_#{item.id}">
-                                        <f:setPropertyActionListener value="#{item.id}" target="#{scriptBean.id}"/>
-                                    </adm:commandIcon>
-                                </h:panelGroup>
-
-                            </td>
+                <table dojoType="FilteringTable" widgetId="testTable" enableMultipleSelect="true"
+                       alternateRows="true" maxSortable="1" class="dojoTable">
+                    <thead>
+                        <tr>
+                            <th class="tblHeader" field="name" dataType="String" align="left">
+                                #{fxMessageBean['Script.field.name']}
+                            </th>
+                            <th class="tblHeader" field="desc" dataType="String" align="left">
+                                #{fxMessageBean['Script.field.desc']}
+                            </th>
+                            <th class="tblHeader" field="type" dataType="String" align="left">
+                                #{fxMessageBean['Script.field.event']}
+                            </th>
+                            <th class="tblHeader" dataType="html" align="left">
+                                #{fxMessageBean['Script.field.actions']}
+                            </th>
                         </tr>
-                    </ui:repeat>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <ui:repeat value="#{scriptBean.scriptsForEvent}" var="item">
+                            <tr value="#{item.id}">
+                                <td align="left"><h:outputText value="#{item.name}" /></td>
+                                <td align="left"><h:outputText value="#{item.description}" /></td>
+                                <td align="left"><h:outputText value="#{item.event.name}" /></td>
+                                <td align="left">
+                                    <adm:commandIcon labelKey="Script.button.edit" location="content"
+                                                     icon="edit"  action="editScript"  bean="#{scriptBean}"
+                                                     id="editButton_#{item.id}">
+                                        <f:setPropertyActionListener target="#{scriptBean.id}" value="#{item.id}"/>
+                                    </adm:commandIcon>
+                                    <adm:commandIcon labelKey="Script.button.delete" location="content"
+                                                     icon="delete"  action="deleteScript"  bean="#{scriptBean}"
+                                                     id="deleteButton_#{item.id}" confirm="Script.confirm.delete">
+                                        <f:setPropertyActionListener target="#{scriptBean.id}" value="#{item.id}"/>
+                                    </adm:commandIcon>
+                                    <!-- show run icon only if the script is an independent one (i.e. a not-triggered script) -->
+                                    <h:panelGroup rendered="#{item.event.name=='Manual' and fxSystemBean.isInRole['ScriptExecution']}">
+                                        <adm:commandIcon labelKey="Script.button.run" location="content" icon="run"
+                                                         action="runScript" bean="#{scriptBean}" id="runButton_#{item.id}">
+                                            <f:setPropertyActionListener value="#{item.id}" target="#{scriptBean.id}"/>
+                                        </adm:commandIcon>
+                                    </h:panelGroup>
+                                </td>
+                            </tr>
+                        </ui:repeat>
+                    </tbody>
+                </table>
             <br/>
             <adm:commandButton labelKey="Script.button.create" location="both"
                                icon="new" action="scriptCreate" id="createScriptButton"/>

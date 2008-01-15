@@ -34,6 +34,8 @@
 package com.flexive.shared.structure;
 
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.scripting.FxScriptInfo;
+import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.security.ACL;
@@ -42,10 +44,7 @@ import com.flexive.shared.workflow.Workflow;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * FxType used for structure editing
@@ -202,7 +201,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @return  the unmodifiable script mapping of this type
      */
 
-    public Map getScriptMapping() {
+    public Map<FxScriptEvent, long[]> getScriptMapping() {
         return Collections.unmodifiableMap(scriptMapping);
     }
 

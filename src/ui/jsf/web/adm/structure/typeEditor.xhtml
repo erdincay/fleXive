@@ -35,9 +35,10 @@
             <ui:fragment rendered="#{not typeEditorBean.editMode}">
                 <adm:tab label="#{fxMessageBean['TypeEditor.tab.typeEditor.readonly']}" active="true" id="tab1ro"/>
             </ui:fragment>
-            <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor']} [#{typeEditorBean.eventScriptCount}]" active="false" id="tab2"
-                    bean="#{typeEditorBean}" action="showTypeScriptEditor"/>
-
+            <ui:fragment rendered="#{not typeEditorBean.type.new}">
+                <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor']} [#{typeEditorBean.scriptCount}]" active="false" id="tab2"
+                        bean="#{typeEditorBean}" action="showTypeScriptEditor"/>
+            </ui:fragment>
              <fx:formRow labelKey="TypeEditor.label.name" id="name">
                 <h:inputText id="name" value="#{typeEditorBean.name}" disabled="#{not typeEditorBean.editMode}">
                     <f:validator validatorId="flexive.FxNameForXPathValidator"/>
@@ -112,7 +113,7 @@
                                     <td align="left" rowspan="2">
                                         <ui:fragment rendered="#{typeEditorBean.editMode}">
                                             <adm:commandButton labelKey="TypeEditor.table.relation.button.remove" location="content"
-                                                            icon="delete"  action="removeRelation"  bean="#{typeEditorBean}"
+                                                            icon="delete"  action="removeScript"  bean="#{typeEditorBean}"
                                                             id="removeRelationButton_#{wr.sourceId}_#{wr.destId}">
                                                 <f:setPropertyActionListener target="#{typeEditorBean.wrappedRelationFiler}" value="#{wr}"/>
                                             </adm:commandButton>

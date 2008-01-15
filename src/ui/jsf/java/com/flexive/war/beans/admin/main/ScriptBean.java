@@ -33,27 +33,25 @@
  ***************************************************************/
 package com.flexive.war.beans.admin.main;
 
-import com.flexive.faces.FxJsfUtils;
-import com.flexive.faces.messages.FxFacesMsgErr;
-import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
-import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.exceptions.FxLoadException;
-import com.flexive.shared.interfaces.ScriptingEngine;
-import com.flexive.shared.scripting.FxScriptEvent;
-import com.flexive.shared.scripting.FxScriptInfo;
-import com.flexive.shared.scripting.FxScriptMapping;
-import com.flexive.shared.scripting.FxScriptMappingEntry;
-import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.security.Role;
+import com.flexive.shared.exceptions.FxLoadException;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.interfaces.ScriptingEngine;
+import com.flexive.shared.scripting.*;
+import com.flexive.faces.FxJsfUtils;
+import com.flexive.faces.beans.MessageBean;
+import com.flexive.faces.messages.FxFacesMsgErr;
+import com.flexive.faces.messages.FxFacesMsgInfo;
 
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.faces.model.SelectItem;
-import java.sql.SQLException;
 import java.util.*;
+import java.sql.SQLException;
 
 /**
  * JSF scripting bean
@@ -73,6 +71,10 @@ public class ScriptBean {
     private FxScriptEvent scriptEvent;
     private FxScriptMapping mapping;
     private Map<Long, String> typeMappingNames;
+    private FxScriptScope selectedScope = null;
+    private int selectedScriptEventId = -1;
+    private boolean resetEvent = false;
+
 
     private static final String ID_CACHE_KEY = ScriptBean.class + "_id";
 
@@ -83,7 +85,245 @@ public class ScriptBean {
         this.sinfo = new FxScriptInfo();
     }
 
+    public FxScriptScope getSelectedScope() {
+        if (selectedScope == null)
+            selectedScope = FxScriptScope.All;
+        return selectedScope;
+    }
 
+    public List<SelectItem> getEventsForScope() {
+        FxScriptScope scope = getSelectedScope();
+        List<SelectItem> eventsForScope = new ArrayList<SelectItem>();
+        eventsForScope.add(new SelectItem(-1, MessageBean.getInstance().getMessage("Script.selectItem.allEvents")));
+        for (FxScriptEvent e : FxScriptEvent.values()) {
+            if (e.getScope().compareTo(scope) == 0 || scope.compareTo(FxScriptScope.All) ==0)
+                eventsForScope.add(new SelectItem(e.getId(), e.getName()));
+        }
+        return eventsForScope;
+    }
+
+    public void setSelectedScope(FxScriptScope selectedScope) {
+        //if the scope has changed, the events need to be updated as well
+        if (this.selectedScope.compareTo(selectedScope) !=0)
+            resetEvent = true;
+        this.selectedScope = selectedScope;
+    }
+
+    public int getSelectedScriptEventId() {
+        //scope has changed-> set the currently selected event to default
+        if (resetEvent) {
+            selectedScriptEventId = -1;
+            resetEvent = false;
+        }
+       return selectedScriptEventId;
+    }
+
+    public void setSelectedScriptEventId(int selectedScriptEventId) {
+        this.selectedScriptEventId = selectedScriptEventId;
+    }
+
+    public List<FxScriptInfo> getScriptsForEvent() {
+        int eventId = getSelectedScriptEventId();
+        List<FxScriptInfo> scriptsForEvent= new ArrayList<FxScriptInfo>();
+        for (FxScriptInfo s: CacheAdmin.getFilteredEnvironment().getScripts())
+            if ( (eventId == -1 && getSelectedScope().compareTo(FxScriptScope.All) ==0) || (eventId == -1 && s.getEvent().getScope().compareTo(getSelectedScope()) ==0) || s.getEvent().getId() == eventId)
+                scriptsForEvent.add(s);
+        return scriptsForEvent;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    /**
+     * Loads the script specified by the parameter id.
+     *
+     * @return the next page to render
+     */
+
+    public String editScript() {
+        ensureScriptIdSet();
+        setSinfo(CacheAdmin.getEnvironment().getScript(id));
+        try {
+            this.mapping = scriptInterface.loadScriptMapping(null, id);
+            this.typeMappingNames = new HashMap<Long, String>(mapping.getMappedAssignments().size() + mapping.getMappedTypes().size());
+            // we need the type names for the user interface and the type ids for the links
+            for (FxScriptMappingEntry entry : this.mapping.getMappedTypes()) {
+                this.typeMappingNames.put(entry.getId(), CacheAdmin.getEnvironment().getType(entry.getId()).getName());
+            }
+        } catch (FxLoadException e) {
+            new FxFacesMsgErr("Script.err.loadMap").addToContext();
+        } catch (SQLException e) {
+            new FxFacesMsgErr("Script.err.loadMap").addToContext();
+        }
+        setName(sinfo.getName());
+        setDesc(sinfo.getDescription());
+        setCode(sinfo.getCode());
+        return "scriptEdit";
+    }
+
+    public FxScriptInfo getSinfo() {
+        return sinfo;
+    }
+
+    public void setSinfo(FxScriptInfo sinfo) {
+        this.sinfo = sinfo;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    private void ensureScriptIdSet() {
+        if (this.id <= 0) {
+            this.id = (Long) FxJsfUtils.getSessionAttribute(ID_CACHE_KEY);
+        }
+    }
+
+    /**
+     * Deletes a script, with the id specified by id.
+     *
+     * @return the next pageto render
+     */
+    public String deleteScript() {
+
+        final UserTicket ticket = FxContext.get().getTicket();
+        if (!ticket.isInRole(Role.ScriptManagement)) {
+            new FxFacesMsgErr("Script.err.deletePerm").addToContext();
+            return "scriptOverview";
+        }
+
+        ensureScriptIdSet();
+        try {
+            scriptInterface.removeScript(id);
+            // display updated script list  -->handled via a4j now
+            //updateScriptList();  -->handled via a4j now
+            new FxFacesMsgInfo("Script.nfo.deleted").addToContext();
+        } catch (FxApplicationException e) {
+            new FxFacesMsgErr("Script.err.delete").addToContext();
+        }
+        return "scriptOverview";
+    }
+
+    /**
+     * Executes a script, with the id specified by id.
+     *
+     * @return the next page to render
+     */
+    public String runScript() {
+
+        final UserTicket ticket = FxContext.get().getTicket();
+        if (!ticket.isInRole(Role.ScriptExecution)) {
+            new FxFacesMsgErr("Script.err.runPerm").addToContext();
+            return "scriptOverview";
+        }
+
+        ensureScriptIdSet();
+        try {
+            scriptInterface.runScript(id);
+            new FxFacesMsgInfo("Script.nfo.executed", CacheAdmin.getEnvironment().getScript(id).getName()).addToContext();
+        } catch (FxApplicationException e) {
+            new FxFacesMsgErr("Script.err.run").addToContext();
+        }
+        return "scriptOverview";
+    }
+
+    /**
+     * Creates a new script from the beans data.
+     *
+     * @return the next jsf page to render
+     */
+    public String createScript() {
+        final UserTicket ticket = FxContext.get().getTicket();
+        if (!ticket.isInRole(Role.ScriptManagement)) {
+            new FxFacesMsgErr("Script.err.createPerm").addToContext();
+            return "scriptOverview";
+        }
+
+        if (sinfo.getName().length() < 1 || sinfo.getEvent() == null) {
+            new FxFacesMsgErr("Script.err.createMiss").addToContext();
+            return "scriptCreate";
+        }
+
+        try {
+            setId(scriptInterface.createScript(sinfo.getEvent(), sinfo.getName(), sinfo.getDescription(), sinfo.getCode()).getId());
+            setSinfo(CacheAdmin.getEnvironment().getScript(id));
+            // display updated script list
+            //updateScriptList();
+            new FxFacesMsgInfo("Script.nfo.created", sinfo.getName()).addToContext();
+        } catch (FxApplicationException e) {
+            new FxFacesMsgErr("Script.err.create").addToContext();
+        }
+        return "scriptOverview";
+    }
+
+
+    /**
+     * Saves the edited script
+     *
+     * @return the next page to render
+     */
+    public String saveScript() {
+
+        final UserTicket ticket = FxContext.get().getTicket();
+        if (!ticket.isInRole(Role.ScriptManagement)) {
+            new FxFacesMsgErr("Script.err.editPerm").addToContext();
+            return "scriptOverview";
+        }
+
+        ensureScriptIdSet();
+
+        try {
+            scriptInterface.updateScriptInfo(id, sinfo.getEvent(), sinfo.getName(), sinfo.getDescription(), sinfo.getCode());
+            //updateScriptList(); needed (see mandators) ???
+            new FxFacesMsgInfo("Script.nfo.updated").addToContext();
+            return "scriptOverview";
+        } catch (FxApplicationException e) {
+            new FxFacesMsgErr("Script.err.save").addToContext();
+            return "scriptOverview";
+        }
+    }
+
+    public List<Map.Entry<Long, String>> getTypeMappingNames() {
+        ArrayList<Map.Entry<Long, String>> list = new ArrayList<Map.Entry<Long, String>>(this.typeMappingNames.entrySet().size());
+
+        for (Map.Entry<Long, String> entry : this.typeMappingNames.entrySet()) {
+            list.add(entry);
+        }
+        return list;
+        //Set<Map.Entry<Long, String>> set = typeMappingNames.entrySet();
+        //return set;
+    }
+
+    public FxScriptMapping getMapping() {
+        return mapping;
+    }
+
+    /*
     public FxScriptInfo[] getScripts() {
         if (scripts == null) {
             try {
@@ -123,7 +363,7 @@ public class ScriptBean {
         }
         return retScripts;
     }
-
+    */
 
 
     /**
@@ -131,6 +371,7 @@ public class ScriptBean {
      *
      * @return all scripts belonging to the type defined in the "scriptType" member
      */
+    /*
     public FxScriptInfo[] getList() {
         // if no filtering needs to be done return the whole script list..
         if (scriptEvent == null) {
@@ -151,57 +392,12 @@ public class ScriptBean {
         }
     }
 
-    public List<Map.Entry<Long, String>> getTypeMappingNames() {
-        ArrayList<Map.Entry<Long, String>> list = new ArrayList<Map.Entry<Long, String>>(this.typeMappingNames.entrySet().size());
-
-        for (Map.Entry<Long, String> entry : this.typeMappingNames.entrySet()) {
-            list.add(entry);
-        }
-        return list;
-        //Set<Map.Entry<Long, String>> set = typeMappingNames.entrySet();
-        //return set;
-    }
-
 
     public Set getSet() {
         return typeMappingNames.entrySet();
     }
 
-    private void ensureScriptIdSet() {
-        if (this.id <= 0) {
-            this.id = (Long) FxJsfUtils.getSessionAttribute(ID_CACHE_KEY);
-        }
-    }
 
-    /**
-     * Loads the script specified by the parameter id.
-     *
-     * @return the next page to render
-     */
-    public String editScript() {
-        ensureScriptIdSet();
-        setSinfo(CacheAdmin.getEnvironment().getScript(id));
-        try {
-            this.mapping = scriptInterface.loadScriptMapping(null, id);
-            this.typeMappingNames = new HashMap<Long, String>(mapping.getMappedAssignments().size() + mapping.getMappedTypes().size());
-            // we need the type names for the user interface and the type ids for the links
-            for (FxScriptMappingEntry entry : this.mapping.getMappedTypes()) {
-                this.typeMappingNames.put(entry.getId(), CacheAdmin.getEnvironment().getType(entry.getId()).getName());
-            }
-        } catch (FxLoadException e) {
-            new FxFacesMsgErr("Script.err.loadMap").addToContext();
-        } catch (SQLException e) {
-            new FxFacesMsgErr("Script.err.loadMap").addToContext();
-        }
-        setName(sinfo.getName());
-        setDesc(sinfo.getDescription());
-        setCode(sinfo.getCode());
-        return "scriptEdit";
-    }
-
-    public FxScriptMapping getMapping() {
-        return mapping;
-    }
 
     public FxScriptEvent getScriptEvent() {
         return scriptEvent;
@@ -211,154 +407,14 @@ public class ScriptBean {
         this.scriptEvent = scriptEvent;
     }
 
-    public FxScriptInfo getSinfo() {
-        return sinfo;
-    }
-
-    public void setSinfo(FxScriptInfo sinfo) {
-        this.sinfo = sinfo;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDesc() {
-        return desc;
-    }
-
-    public void setDesc(String desc) {
-        this.desc = desc;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
+    */
     // ensures that the scriptinfos will be loaded from cache on the next request form them (so changes will be displayed immediately)
+    /*
     private void updateScriptList() {
         scripts = null;
     }
+    */
 
-    /**
-     * Deletes a script, with the id specified by id.
-     *
-     * @return the next pageto render
-     */
-    public String deleteScript() {
-
-        final UserTicket ticket = FxContext.get().getTicket();
-        if (!ticket.isInRole(Role.ScriptManagement)) {
-            new FxFacesMsgErr("Script.err.deletePerm").addToContext();
-            return "scriptOverview";
-        }
-
-        ensureScriptIdSet();
-        try {
-            scriptInterface.removeScript(id);
-            // display updated script list
-            updateScriptList();
-            new FxFacesMsgInfo("Script.nfo.deleted").addToContext();
-        } catch (FxApplicationException e) {
-            new FxFacesMsgErr("Script.err.delete").addToContext();
-        }
-        return "scriptOverview";
-    }
-
-    /**
-     * Executes a script, with the id specified by id.
-     *
-     * @return the next page to render
-     */
-    public String runScript() {
-
-        final UserTicket ticket = FxContext.get().getTicket();
-        if (!ticket.isInRole(Role.ScriptExecution)) {
-            new FxFacesMsgErr("Script.err.runPerm").addToContext();
-            return "scriptOverview";
-        }
-
-        ensureScriptIdSet();
-        try {
-            scriptInterface.runScript(id);
-            new FxFacesMsgInfo("Script.nfo.executed", CacheAdmin.getEnvironment().getScript(id).getName()).addToContext();
-        } catch (FxApplicationException e) {
-            new FxFacesMsgErr("Script.err.run").addToContext();
-        }
-        return "scriptOverview";
-    }
-
-    /**
-     * Saves the edited script
-     *
-     * @return the next page to render
-     */
-    public String saveScript() {
-
-        final UserTicket ticket = FxContext.get().getTicket();
-        if (!ticket.isInRole(Role.ScriptManagement)) {
-            new FxFacesMsgErr("Script.err.editPerm").addToContext();
-            return "scriptOverview";
-        }
-
-        ensureScriptIdSet();
-
-        try {
-            scriptInterface.updateScriptInfo(id, sinfo.getEvent(), sinfo.getName(), sinfo.getDescription(), sinfo.getCode());
-            //updateScriptList(); needed (see mandators) ???
-            new FxFacesMsgInfo("Script.nfo.updated").addToContext();
-            return "scriptOverview";
-        } catch (FxApplicationException e) {
-            new FxFacesMsgErr("Script.err.save").addToContext();
-            return "scriptOverview";
-        }
-    }
-
-    /**
-     * Creates a new script from the beans data.
-     *
-     * @return the next jsf page to render
-     */
-    public String createScript() {
-
-        final UserTicket ticket = FxContext.get().getTicket();
-        if (!ticket.isInRole(Role.ScriptManagement)) {
-            new FxFacesMsgErr("Script.err.createPerm").addToContext();
-            return "scriptOverview";
-        }
-
-        if (sinfo.getName().length() < 1 || sinfo.getEvent() == null) {
-            new FxFacesMsgErr("Script.err.createMiss").addToContext();
-            return "scriptCreate";
-        }
-
-        try {
-            setId(scriptInterface.createScript(sinfo.getEvent(), sinfo.getName(), sinfo.getDescription(), sinfo.getCode()).getId());
-            setSinfo(CacheAdmin.getEnvironment().getScript(id));
-            // display updated script list
-            updateScriptList();
-            new FxFacesMsgInfo("Script.nfo.created", sinfo.getName()).addToContext();
-        } catch (FxApplicationException e) {
-            new FxFacesMsgErr("Script.err.create").addToContext();
-        }
-        return "scriptOverview";
-    }
 
     /**
      * called from the structure editor -> get the oid of the script to show from the request parameters

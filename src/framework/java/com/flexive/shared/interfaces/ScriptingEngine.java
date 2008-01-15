@@ -246,7 +246,7 @@ public interface ScriptingEngine {
     void removeAssignmentScriptMapping(long scriptId, long assignmentId) throws FxApplicationException;
 
     /**
-     * Remove a mapping from a script to an type (directly mapped, not via inheritance!)
+     * Remove a mapping from a script to a type (directly mapped, not via inheritance!)
      *
      * @param scriptId id of the script
      * @param typeId   id of the type
@@ -255,7 +255,7 @@ public interface ScriptingEngine {
     void removeTypeScriptMapping(long scriptId, long typeId) throws FxApplicationException;
 
     /**
-     * Remove a mapping from a script to an type (directly mapped, not via inheritance!) for a specific script event
+     * Remove a mapping from a script to a type (directly mapped, not via inheritance!) for a specific script event
      *
      * @param scriptId id of the script
      * @param typeId   id of the type

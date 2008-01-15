@@ -40,6 +40,8 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.TemplateEngine;
 import com.flexive.shared.interfaces.UserGroupEngine;
 import com.flexive.shared.scripting.FxScriptEvent;
+import com.flexive.shared.scripting.FxScriptScope;
+import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.search.AdminResultLocations;
 import com.flexive.shared.search.FxSQLSearchParams;
 import com.flexive.shared.search.ResultViewType;
@@ -56,6 +58,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 /**
  * Wrapper bean that provides access to most internal flexive3 select lists
@@ -104,7 +107,12 @@ public class SelectBean implements Serializable {
     private List<SelectItem> groupModes = null;
     private List<SelectItem> restrictedTypeModes = null;
     private List<SelectItem> restrictedTypeCategories = null;
-    private List<SelectItem> scriptEvents = null;
+    private List<SelectItem> typeScriptEvents = null;
+    private List<SelectItem> allScriptEvents = null;
+    private List<SelectItem> allScriptEventsAsEnum = null;
+    private List<SelectItem> scriptScopes = null;
+    private List<SelectItem> allScripts = null;
+    private List<SelectItem> typeScripts = null;
     private List<SelectItem> aclCategories = null;
     private List<SelectItem> selectListACLs = null;
     private List<SelectItem> selectListItemACLs = null;
@@ -697,17 +705,89 @@ public class SelectBean implements Serializable {
     }
 
     /**
-     * Return the enum FxScriptEvent as SelectList.
+     * Return the enum FxScriptEvent of ScriptScope "Type" as SelectList
      *
-     * @return the enum FxScriptEvent as SelectList
+     * @return the enum of FxScriptEvent of scope "Type" as SelectList
      */
-    public List<SelectItem> getScriptEvents() {
-        if (scriptEvents == null) {
-            scriptEvents = FxJsfUtils.enumsAsSelectList(FxScriptEvent.values());
-            // to have an empty element on first position (index 0) in the select list...
-            scriptEvents.add(0, new SelectItem("", ""));
+    public List<SelectItem> getTypeScriptEvents() {
+        if (typeScriptEvents == null) {
+            typeScriptEvents = new ArrayList<SelectItem>();
+            for (FxScriptEvent e : FxScriptEvent.values()) {
+                if (e.getScope().compareTo(FxScriptScope.Type) ==0)
+                    typeScriptEvents.add(new SelectItem(e.getId(), e.getName()));
+            }
+
         }
-        return scriptEvents;
+        return typeScriptEvents;
+    }
+
+   /**
+     * Return all available FxScriptEvents as SelectList.
+     *
+     * @return all available FxScriptEvents as SelectList
+     */
+    public List<SelectItem> getAllScriptEvents() {
+        if (allScriptEvents == null) {
+            allScriptEvents = new ArrayList<SelectItem>();
+            for (FxScriptEvent e : FxScriptEvent.values()) {
+                allScriptEvents.add(new SelectItem(e.getId(), e.getName()));
+            }
+        }
+        return allScriptEvents;
+    }
+
+    /**
+     * Return all available scripts as SelectList.
+     *
+     * @return all available scripts as SelectList
+     */
+    public List<SelectItem> getAllScripts() {
+        if (allScripts ==null) {
+            allScripts = FxJsfUtils.asSelectList(CacheAdmin.getFilteredEnvironment().getScripts(), false);
+        }
+        return allScripts;
+    }
+
+    /**
+     * Return scripts with the default event scope "Type "as SelectList.
+     *
+     * @return scripts with the default event scope "Type "as SelectList.
+     */
+    public List<SelectItem> getTypeScripts() {
+        if (typeScripts ==null) {
+            List<FxScriptInfo> scriptList = new ArrayList<FxScriptInfo>();
+            for (FxScriptInfo s : CacheAdmin.getFilteredEnvironment().getScripts()) {
+                if (s.getEvent().getScope() == FxScriptScope.Type)
+                    scriptList.add(s);
+            }
+            Collections.sort(scriptList, new FxJsfUtils.ScriptInfoSorter());
+            typeScripts = FxJsfUtils.asSelectList(scriptList, false);
+        }
+        return typeScripts;
+    }
+
+    /**
+     * returns scriptScope enum as select list.
+     *
+     * @return  scriptScope enum as select list.
+     */
+    public List<SelectItem> getScriptScopes() {
+        if (scriptScopes == null) {
+            scriptScopes = FxJsfUtils.enumsAsSelectList(FxScriptScope.values());
+        }
+        return scriptScopes;
+    }
+
+    /**
+     * returns FxScriptEvent enum as select list.
+     *
+     * @return  FxScriptEvent enum as select list.
+     */
+    public List<SelectItem> getAllScriptEventsAsEnum() {
+        if (allScriptEventsAsEnum == null) {
+            allScriptEventsAsEnum = FxJsfUtils.enumsAsSelectList(FxScriptEvent.values());
+        }
+        return allScriptEventsAsEnum;
     }
 
     /**

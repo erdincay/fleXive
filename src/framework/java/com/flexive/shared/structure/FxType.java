@@ -33,10 +33,7 @@
  ***************************************************************/
 package com.flexive.shared.structure;
 
-import com.flexive.shared.AbstractSelectableObjectWithLabel;
-import com.flexive.shared.FxArrayUtils;
-import com.flexive.shared.SelectableObjectWithLabel;
-import com.flexive.shared.XPathElement;
+import com.flexive.shared.*;
 import com.flexive.shared.content.FxGroupData;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPermissionUtils;
@@ -46,6 +43,7 @@ import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.scripting.FxScriptMappingEntry;
+import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.security.Mandator;
@@ -893,5 +891,38 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      */
     public String buildXPathPrefix(FxPK pk) {
         return this.getName().toUpperCase() + "[@pk=" + pk + "]";
+    }
+
+    /**
+     * Returns a view of the current scriptMapping, where FxScriptInfo are used as keys and
+     * a list of FxScriptEvent as values.
+     * Changing this map doesn't affect the original scriptMapping, it is only used as an
+     * alternative view.
+     *
+     * @return  Map containing assigned scripts as keys and script events as values.
+     */
+
+    public Map<FxScriptInfo, List<FxScriptEvent>> getScriptsView() {
+        HashMap<Long, List<FxScriptEvent>> scriptsHelper = new HashMap<Long, List<FxScriptEvent>>();
+        HashMap<FxScriptInfo, List<FxScriptEvent>> scripts = new HashMap<FxScriptInfo, List<FxScriptEvent>>();
+
+        //exchange keys and values
+        for (FxScriptEvent e : scriptMapping.keySet()) {
+            for (long sId : scriptMapping.get(e)) {
+                if (!scriptsHelper.containsKey(sId)) {
+                    List<FxScriptEvent> events = new ArrayList<FxScriptEvent>();
+                    events.add(e);
+                    scriptsHelper.put(sId, events);
+                }
+                else
+                    scriptsHelper.get(sId).add(e);
+            }
+        }
+
+        //build the final map by looking up the scriptInfo
+        for (long sid: scriptsHelper.keySet()) {
+            scripts.put(CacheAdmin.getEnvironment().getScript(sid), scriptsHelper.get(sid));
+        }
+        return scripts;
     }
 }

@@ -790,4 +790,5 @@ public class FxJsfUtils {
             return this.collator.compare(o1.getName(), o2.getName());
         }
     }
+
 }

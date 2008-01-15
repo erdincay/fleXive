@@ -23,3 +23,13 @@ div.formRow {
 div.extraWidth div.formLabel {
     width: 220px;
 }
+
+div.scriptTable fieldSet {
+    width: 430px;
+}
+
+a.sortArrow img {
+    border:none;
+    padding-left:7px;
+    max-height:12px;
+}

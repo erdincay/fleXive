@@ -38,6 +38,7 @@ import com.flexive.faces.beans.SelectBean;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.shared.SelectableObjectWithLabel;
 import com.flexive.shared.SelectableObject;
+import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.Role;
@@ -110,6 +111,8 @@ public class SelectableObjectConverter implements Converter {
                 return sb.getRoles();
             } else if (c.equals(FxTemplateInfo.class)) {
                 return sb.getTemplates();
+            } else if (c.equals(FxScriptInfo.class)) {
+                return sb.getAllScripts();
             } else {
                 new FxFacesMsgErr("ex.converter.selectableObjectConverter.classNotSupported",
                         c.getName() + "'").addToContext();

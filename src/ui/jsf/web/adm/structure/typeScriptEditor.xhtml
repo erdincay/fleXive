@@ -14,134 +14,115 @@
 <ui:define name="head">
     <t:stylesheet path="/adm/css/content.css"/>
     <t:stylesheet path="/adm/css/structureEditor.css"/>
-    <script type="text/javascript">
-        dojo.require("dojo.widget.FilteringTable");
-    </script>
 </ui:define>
 
 <ui:define name="body">
     <h:form id="frm" enctype="multipart/form-data">
         <adm:tab label="#{fxMessageBean['TypeEditor.tab.typeEditor']}" active="false" id="tab1"
                  bean="#{typeEditorBean}" action="showTypeEditor"/>
-        <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor']} [#{typeEditorBean.eventScriptCount}]" active="true" id="tab2"/>
+        <ui:fragment rendered="#{not typeEditorBean.type.new}">
+            <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor']} [#{typeEditorBean.scriptCount}]" active="true" id="tab2"/>
+        </ui:fragment>
+        <div class="scriptTable">
+            <fx:fieldSet legend="#{fxMessageBean['ScriptEditor.label.assignedScripts']}">
+                <a4j:outputPanel id="scripts">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>
+                                    <a4j:commandLink action="#{typeEditorBean.scriptWrapper.sortByScripts}" reRender="scripts" styleClass="sortArrow">
+                                        #{fxMessageBean['ScriptEditor.label.name']}
+                                        <ui:fragment rendered="#{typeEditorBean.scriptWrapper.sortStatusScriptInfo == 1}">
+                                            <h:graphicImage value="/adm/images/commandButton/down.png"/>
+                                        </ui:fragment>
+                                        <ui:fragment rendered="#{typeEditorBean.scriptWrapper.sortStatusScriptInfo == 2}">
+                                            <h:graphicImage value="/adm/images/commandButton/up.png"/>
+                                        </ui:fragment>
+                                    </a4j:commandLink>
+                                </th>
+                                <th>
+                                    <a4j:commandLink action="#{typeEditorBean.scriptWrapper.sortByEvents}" reRender="scripts" styleClass="sortArrow">
+                                        #{fxMessageBean['ScriptEditor.label.event']}
+                                        <ui:fragment rendered="#{typeEditorBean.scriptWrapper.sortStatusEvent == 1}">
+                                            <h:graphicImage value="/adm/images/commandButton/down.png"/>
+                                        </ui:fragment>
+                                        <ui:fragment rendered="#{typeEditorBean.scriptWrapper.sortStatusEvent == 2}">
+                                            <h:graphicImage value="/adm/images/commandButton/up.png"/>
+                                        </ui:fragment>
+                                    </a4j:commandLink>
+                                </th>
+                                <ui:fragment rendered="#{typeEditorBean.editMode}">
+                                    <th>#{fxMessageBean['ScriptEditor.label.actions']}</th>
+                                </ui:fragment>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <c:forEach var="listEntry" items="#{typeEditorBean.scriptWrapper.scriptList}">
+                            <tr>
+                                <td>
+                                    <h:commandLink id="editScript_#{listEntry.id}" action="#{scriptBean.editScript}"
+                                           value="#{listEntry.scriptInfo.name}" actionListener="#{scriptBean.structureListen}">
+                                    <f:param name="oid" value="#{listEntry.scriptInfo.id}"/>
+                                    </h:commandLink>
+                                </td>
+                                <td style="padding-left:15px">
+                                    <h:outputText value="#{listEntry.scriptEvent.name}"/>
+                                </td>
+                                <ui:fragment rendered="#{typeEditorBean.editMode}">
+                                    <td style="padding-left:15px">
+                                        <a4j:commandButton id="removeScript_#{listEntry.id}" action="#{typeEditorBean.removeScript}" reRender="scripts, tab2"
+                                                           image="/adm/images/commandButton/delete.png" onclick=" var disabled=!confirm('#{fxMessageBean['ScriptEditor.message.remove']}'); if (disabled) return false;">
+                                            <f:setPropertyActionListener target="#{typeEditorBean.scriptListFiler}" value="#{listEntry.id}"/>
+                                        </a4j:commandButton>
+                                    </td>
+                                </ui:fragment>
+                            </tr>
+                            </c:forEach>
+                            <tr>
+                                <td>
+                                    <h:selectOneListbox size="1" id="selectedScriptInfo" value="#{typeEditorBean.selectedScriptInfo}"
+                                            converter="SelectableConverter" disabled="#{not typeEditorBean.editMode}">
+                                        <f:selectItems value="#{fxSelectBean.typeScripts}"/>
+                                        <a4j:support event="onchange" reRender="selectedScriptEvent" />
+                                    </h:selectOneListbox>
+                                </td>
+                                <td style="padding-left:15px">
+                                     <h:selectOneListbox size="1" id="selectedScriptEvent" value="#{typeEditorBean.selectedScriptEventId}"
+                                             disabled="#{not typeEditorBean.editMode}">
+                                        <f:selectItems value="#{fxSelectBean.typeScriptEvents}"/>
+                                    </h:selectOneListbox>
+                                </td>
+                                <ui:fragment rendered="#{typeEditorBean.editMode}">
+                                    <td style="padding-left:15px">
+                                        <a4j:commandButton id="addScript" action="#{typeEditorBean.addScript}" reRender="scripts, tab2"
+                                                           image="/adm/images/commandButton/new.png">
+                                        </a4j:commandButton>
+                                    </td>
+                                </ui:fragment>
+                            </tr>
+                        </tbody>
+                        </table>
+                </a4j:outputPanel>
+            </fx:fieldSet>
+        </div>
+        <ui:fragment rendered="#{(not typeEditorBean.type.new) and (not typeEditorBean.editMode) and typeEditorBean.mayEdit}">
+                <adm:commandButton labelKey="TypeEditor.button.editMode" location="both"
+                        icon="edit"  action="toggleEditMode"  bean="#{typeEditorBean}" id="editModeButton"/>
+        </ui:fragment>
 
-        <fx:fieldSet legend="#{fxMessageBean['ScriptEditor.label.assignedScripts']}">
+        <ui:fragment rendered="#{not typeEditorBean.type.new and typeEditorBean.editMode}">
+                <adm:commandButton labelKey="TypeEditor.button.cancel" location="both" lockscreen="false"
+                        icon="cancel" id="cancelButton"
+                        onclick="parent.getNavFrameWnd().openNode(#{typeEditorBean.type.id}, true);return false;"/>
+        </ui:fragment>
 
-        <fx:formRow label="#{fxMessageBean['ScriptEditor.label.scriptEvent']}" id="scriptEvents" height="85">
-            <h:selectOneListbox id="scriptEvents" value="#{typeEditorBean.scriptEventId}" size="#{typeEditorBean.eventScriptCount + 1}">
-                <f:selectItems value="#{typeEditorBean.scriptEvents}" />
-                <a4j:support event="onchange" reRender="scripts" />
-            </h:selectOneListbox>
-        </fx:formRow>
+        <ui:fragment rendered="#{not typeEditorBean.type.new and typeEditorBean.mayEdit and typeEditorBean.editMode}">
+            <adm:commandButton labelKey="TypeEditor.button.save" location="both" 
+                            icon="save"  action="saveChanges"  bean="#{typeEditorBean}" id="saveChangesButton">
+            </adm:commandButton>
+        </ui:fragment>
 
-        <a4j:outputPanel id="scripts">
-            <fx:formRow label="#{fxMessageBean['ScriptEditor.label.scripts']}" id="scripts">
-                <table>
-                <tbody>
-                <ui:repeat var="scriptInfo" value="#{typeEditorBean.scripts}">
-                    <tr><td>
-                    <h:commandLink id="withdrawButtons_#{scriptInfo.id}" action="#{typeEditorBean.withdrawScript}">
-                        <t:graphicImage url="/adm/images/commandButton/remove.png"  style="margin-left:5px;"
-                        styleClass="pngSupport"/>
-                        <f:setPropertyActionListener target="#{typeEditorBean.scriptToWithdraw}" value="#{scriptInfo.id}"/>
-                    </h:commandLink>
-                   
-                        
-                    <h:commandLink id="editScripts_#{scriptInfo.id}" action="#{scriptBean.editScript}"
-                                   value="#{scriptInfo.name}" actionListener="#{scriptBean.structureListen}">
-                        <f:param name="oid" value="#{scriptInfo.id}"/>
-                    </h:commandLink>                    
-                    </td></tr>
-                </ui:repeat>
-                </tbody>
-                </table>
-            </fx:formRow>
-        </a4j:outputPanel>
-
-        </fx:fieldSet>
-
-        <br/>
-        <br/>
-        <br/>
-
-
-        <fx:fieldSet legend="#{fxMessageBean['ScriptEditor.label.chooseScriptsToAssign']}">
-
-        <fx:formRow label="#{fxMessageBean['ScriptEditor.label.scriptEvent']}" id="scriptTypes2" height="85">
-            <h:selectOneListbox id="scriptTypes2" value="#{typeEditorBean.scriptEvent}" size="7">
-                <f:selectItems value="#{fxSelectBean.scriptEvents}" />
-                <a4j:support event="onchange" reRender="scripts2, scripts3" actionListener="#{typeEditorBean.clearSelectedScript}"/>
-            </h:selectOneListbox>
-        </fx:formRow>
-
-        <br/>
-        <br/>
-
-        <a4j:outputPanel id="scripts2">
-            <fx:formRow label="#{fxMessageBean['ScriptEditor.label.scripts']}" id="scripts2">
-                <h:selectOneListbox id="scriptTypes3" value="#{typeEditorBean.selectedScriptId}" size="5">
-                    <f:selectItems value="#{typeEditorBean.scriptsAsId}" />
-                    <a4j:support event="onchange" reRender="scripts3" />
-                </h:selectOneListbox>
-            </fx:formRow>
-        </a4j:outputPanel>
-
-        <br/>
-        <br/>
-        <br/>
-        <a4j:outputPanel id="scripts3">
-            <fx:formRow label="#{fxMessageBean['ScriptEditor.label.scripts']}" id="scripts3">
-                #{typeEditorBean.selectedScriptName}
-                <h:selectOneListbox id="scriptTypes4" value="#{typeEditorBean.selectedEvent}" size="1">
-                    <f:selectItems value="#{fxSelectBean.scriptEvents}" />
-                </h:selectOneListbox>
-                <h:commandButton id="addScript" action="#{typeEditorBean.addScript}" value="AddScript"/>
-            </fx:formRow>
-        </a4j:outputPanel>
-
-        </fx:fieldSet>
-
-        <br/>
-        <br/>
-        <br/>
-
-        <fx:fieldSet legend="#{fxMessageBean['ScriptEditor.label.scriptsToAssign']}">
-
-        <h:dataTable value="#{typeEditorBean.selectedScripts}" var="itm">
-            <h:column>
-                <f:facet name="header">
-                    <h:outputText value="Script name"/>
-                </f:facet>
-                <h:outputText value="#{itm.name}"/>
-            </h:column>
-            <h:column>
-                <f:facet name="header">
-                    <h:outputText value="Type"/>
-                </f:facet>
-                <h:outputText value="#{itm.event.name}"/>
-            </h:column>
-        </h:dataTable>
-
-        <br/>
-        <br/>
-        <h:commandButton id="assignScripts" action="#{typeEditorBean.assignScripts}" value="#{fxMessageBean['ScriptEditor.button.assignScripts']}"/>
-            &nbsp;
-        <h:commandButton id="clearTable" action="#{typeEditorBean.clearTable}" value="#{fxMessageBean['ScriptEditor.button.clearTable']}"/>
-
-        </fx:fieldSet>
-
-        <br/>
-        <br/>
-
-        <adm:toolbarPluginButtons/>
-    </h:form>
-
-
-    <script type="text/javascript">
-
-
-    </script>
-
+     </h:form>
 </ui:define>
 </ui:composition>
 </body>

@@ -12,10 +12,6 @@
     <title>#{fxSystemBean.header}</title>
     <link rel="stylesheet" type="text/css" href="/flexive/pub/css/login.css" />
     <script language='JavaScript' type='text/javascript'>
-        function isIE() {
-            return navigator.appName.indexOf("Explorer") != -1;
-        }
-        
         if (this.parent.frames[1]) {
             this.parent.location.href=this.location.href;
         }
@@ -83,11 +79,5 @@
         </div>
     </td></tr>
 </table>
-
-<script language='JavaScript' type='text/javascript'>
-    if (isIE())
-        document.write("<br/><br/>#{fxMessageBean['Login.message.IEbug']}");
-</script>
-
 </body></html>
 
