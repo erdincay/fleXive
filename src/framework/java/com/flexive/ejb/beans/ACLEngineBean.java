@@ -401,7 +401,6 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
     /**
      * {@inheritDoc}
      */
-    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public ACL load(long id) throws FxApplicationException {
         return load(id, false);
     }
@@ -565,7 +564,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public ArrayList<ACLAssignment> loadGroupAssignments(long groupId) throws FxApplicationException {
+    public List<ACLAssignment> loadGroupAssignments(long groupId) throws FxApplicationException {
         return loadAssignments(null, groupId);
     }
 
@@ -573,7 +572,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public ArrayList<ACLAssignment> loadAssignments(long aclId) throws FxApplicationException {
+    public List<ACLAssignment> loadAssignments(long aclId) throws FxApplicationException {
         return loadAssignments(aclId, null);
     }
 
@@ -651,7 +650,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public ArrayList<ACLAssignment> loadAssignments(Long aclId, Long groupId) throws FxApplicationException {
+    public List<ACLAssignment> loadAssignments(Long aclId, Long groupId) throws FxApplicationException {
         Connection con = null;
         Statement stmt = null;
         String curSql;

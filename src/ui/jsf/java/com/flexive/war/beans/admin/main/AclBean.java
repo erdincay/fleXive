@@ -248,7 +248,7 @@ public class AclBean {
         try {
             ensureIdSet();
             acl = aclEngine.load(id);
-            ArrayList<ACLAssignment> _assignments = aclEngine.loadAssignments(id);
+            final List<ACLAssignment> _assignments = aclEngine.loadAssignments(id);
             assignments = new ArrayList<ACLAssignmentEdit>(_assignments.size() + 5);
             for (ACLAssignment ass : _assignments)
                 assignments.add(new ACLAssignmentEdit(ass));

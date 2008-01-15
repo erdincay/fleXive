@@ -180,7 +180,7 @@ public interface ACLEngine {
      * @return the ACL assignments of the group
      * @throws FxApplicationException not found, load failed, caller may not access the given group
      */
-    ArrayList<ACLAssignment> loadGroupAssignments(long groupId) throws FxApplicationException;
+    List<ACLAssignment> loadGroupAssignments(long groupId) throws FxApplicationException;
 
     /**
      * Loads all ACL assignments of a ACL.
@@ -192,7 +192,7 @@ public interface ACLEngine {
      * @return the ACL assignments of the group
      * @throws FxApplicationException not found, load failed, no access
      */
-    ArrayList<ACLAssignment> loadAssignments(long aclId) throws FxApplicationException;
+    List<ACLAssignment> loadAssignments(long aclId) throws FxApplicationException;
 
     /**
      * Removes an ACLAssignment defined by its groupId and aclId.
@@ -214,11 +214,11 @@ public interface ACLEngine {
      * The caller may only load ACL assingments belonging to a group or acl of his mandator.<br>
      * GLOBAL_SUPERVISOR may load the ACL assignments of all groups.
      *
-     * @param groupId the group to load the ACL assignment for, or null
      * @param aclId the acl to load the ACL assigments for, or null
+     * @param groupId the group to load the ACL assignment for, or null
      * @return the ACL assignments of the group
      * @throws FxApplicationException when no data was found, if the user may not access the data, or when a
      *      unexpected error occured
      */
-    ArrayList<ACLAssignment> loadAssignments(Long aclId,Long groupId) throws FxApplicationException;
+    List<ACLAssignment> loadAssignments(Long aclId,Long groupId) throws FxApplicationException;
 }
