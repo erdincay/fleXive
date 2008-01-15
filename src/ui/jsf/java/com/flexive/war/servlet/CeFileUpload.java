@@ -97,12 +97,15 @@ public class CeFileUpload implements Servlet {
                         InputStream uploadedStream = null;
                         try {
                             uploadedStream = item.getInputStream();
-                            binary = new BinaryDescriptor(item.getName(), item.getSize(), uploadedStream);
+                            String name = item.getName();
+                            if (name.indexOf('\\') > 0)
+                                name = name.substring(name.lastIndexOf('\\') + 1);
+                            binary = new BinaryDescriptor(name, item.getSize(), uploadedStream);
                         } finally {
                             if (uploadedStream != null) uploadedStream.close();
                         }
                     }
-                    System.out.println("Item: " + item.getName());
+//                    System.out.println("Item: " + item.getName());
                 }
 
 

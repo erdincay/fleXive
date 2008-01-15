@@ -50,6 +50,10 @@
     color: #AA0000;
 }
 
+.editableNodes {
+    border:1px solid #bdbdbd
+}
+
 .readonlyValue {
     position:relative;
     top:2px;

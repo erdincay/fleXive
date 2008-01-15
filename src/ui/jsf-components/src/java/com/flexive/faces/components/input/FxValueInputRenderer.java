@@ -187,7 +187,11 @@ public class FxValueInputRenderer extends Renderer {
                     final UploadedFile file = (UploadedFile) upload.getSubmittedValue();
                     if (file != null && file.getSize() > 0) {
                         //noinspection unchecked
-                        value.setTranslation(languageId, new BinaryDescriptor(file.getName(), file.getSize(), file.getInputStream()));
+
+                        String name = file.getName();
+                        if (name.indexOf('\\') > 0)
+                            name = name.substring(name.lastIndexOf('\\') + 1);
+                        value.setTranslation(languageId, new BinaryDescriptor(name, file.getSize(), file.getInputStream()));
                     }
                 } catch (Exception e) {
                     throw new FxUpdateException(LOG, e, "ex.jsf.valueInput.file.upload.io", e).asRuntimeException();

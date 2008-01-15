@@ -34,10 +34,10 @@ for more info
         <c:set var="lbl1" value="#{srcEditor.typeDisplay} [Id: #{srcEditor.id}, version: #{srcEditor.version}] - #{versionInfo.versionCount} versions"/>
     </c:if>
     <c:if test="#{!srcEditor.new and versionInfo.versionCount == 1}">
-        <c:set var="lbl1" value="#{srcEditor.typeDisplay} [Id: #{srcEditor.id}, version: #{srcEditor.version}]"/>
+        <c:set var="lbl1" value="#{srcEditor.typeDisplay} [Id: #{srcEditor.id}]"/>
     </c:if>
 
-    <rich:simpleTogglePanel switchType="client" label="#{lbl1}" opened="false" width="340px" style="">
+    <rich:simpleTogglePanel switchType="client" label="#{lbl1}" opened="false">
         <ui:repeat var="vi" value="#{versionInfo}">
             <ui:fragment rendered="#{versionInfo.hasLiveVersion}">
                 #{fxMessageBean['Content.field.versionInfo.liveVersion,#{vi.liveVersion}']}<br/>
@@ -64,7 +64,6 @@ for more info
             </ui:repeat>
         </ui:repeat>
     </rich:simpleTogglePanel>
-    <br clear="both"/><br/>
 </ui:composition>
 
 

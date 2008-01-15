@@ -13,11 +13,20 @@
 
 <ui:composition>
 
+    <c:if test="#{srcEditor.readOnly}">
+        <c:set var="nodeStyle" value="readonlyValue"/>
+    </c:if>
+    <c:if test="#{not srcEditor.readOnly}">
+        <c:set var="nodeStyle" value="editableNodes"/>
+    </c:if>
+
+
+
     <a4j:outputPanel id="treeNodes">
         <h:inputHidden id="treeNodeParent" value="#{srcEditor.treeNodeParent}" />
-        <div style="width:40px;float:left;padding-top:2px">#{fxMessageBean['Content.field.nodes']}</div>
-        <div style="width:180px;float:left;">
-            <table border="0" cellpadding="0" cellspacing="2" style="border:1px solid #bdbdbd">
+        <!--<div style="width:40px;float:left;padding-top:2px">#{fxMessageBean['Content.field.nodes']}</div>-->
+        <!--<div style="width:180px;float:left;">-->
+            <table border="0" cellpadding="0" cellspacing="2" class="#{nodeStyle}">
                 <c:forEach items="#{srcEditor.treeNodes}" var="node">
                     <c:if test="#{node.markForDelete==false}">
                         <tr>
@@ -49,11 +58,11 @@
                 <tr>
                 </tr>
             </table>
-        </div>
+        <!--</div>-->
         <div style="display:none">
             <a4j:commandButton id="addTreeNodeButton" reRender="treeNodes" actionListener="#{srcEditor.addTreeNode}"/>
         </div>
-        <br clear="both"/><br/>
+        <!--<br clear="both"/><br/>-->
     </a4j:outputPanel>
 
 
