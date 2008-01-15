@@ -39,6 +39,7 @@ import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Account;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.UserGroup;
+import com.flexive.shared.structure.FxAssignment;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.structure.FxType;
@@ -67,6 +68,7 @@ public class MapBean implements Serializable {
     private Map<String, FxType> typesByNameMap = null;
     private Map<Long, FxProperty> propertiesMap = null;
     private Map<String, FxProperty> propertiesByNameMap = null;
+    private Map<Long, FxAssignment> assignmentsMap = null;
     private Map<Long, Account> accountMap = null;
     private Map<Long, String> dateTimeMap = null;
     private FxEnvironment environment;
@@ -200,6 +202,26 @@ public class MapBean implements Serializable {
         }
         return propertiesByNameMap;
     }
+
+    /**
+     * Return all defined assignments.
+     *
+     * @return all defined assignments.
+     */
+    public Map<Long, FxAssignment> getAssignments() {
+        if (assignmentsMap == null) {
+            assignmentsMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Long, FxAssignment>() {
+                public FxAssignment get(Object key) {
+                    if (key == null) {
+                        return null;
+                    }
+                    return environment.getAssignment((Long) key);
+                }
+            });
+        }
+        return assignmentsMap;
+    }
+
 
     /**
      * Get an account by id

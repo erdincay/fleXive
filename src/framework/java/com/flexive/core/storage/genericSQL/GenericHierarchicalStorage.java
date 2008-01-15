@@ -1714,7 +1714,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 binding.setVariable("content", content);
             }
             //delta-deletes:
-            for (FxDelta.FxDeltaChange change : delta.getDeletes()) {
+            for (FxDelta.FxDeltaChange change : delta.getRemoves()) {
                 if (checkScripting)
                     for (long scriptId : change.getOriginalData().getAssignment().
                             getScriptMapping(FxScriptEvent.BeforeDataChangeDelete)) {
@@ -1752,7 +1752,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                             }
                         } else {
                             FxProperty prop = env.getProperty(((FxPropertyData) change.getNewData()).getPropertyId());
-                            if (!change.isUpdateable()) {
+                            if (!change._isUpdateable()) {
                                 deleteDetailData(con, sql, pk, change.getOriginalData());
                                 insertPropertyData(prop, content.getData("/"), con, sql, pk,
                                         ((FxPropertyData) change.getNewData()),
@@ -1777,8 +1777,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         }
                     updatesRemaining.remove(0);
                 } catch (SQLException e) {
-                    change.increaseRetries();
-                    if (change.getRetryCount() > 100)
+                    change._increaseRetries();
+                    if (change._getRetryCount() > 100)
                         throw e;
                     updatesRemaining.remove(0);
                     updatesRemaining.add(change); //add as last

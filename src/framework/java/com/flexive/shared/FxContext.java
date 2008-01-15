@@ -470,6 +470,13 @@ public class FxContext implements Serializable {
     }
 
     /**
+     * Reload the UserTicket, needed i.e. when language settings change
+     */
+    public void _reloadUserTicket() {
+        ticket = EJBLookup.getAccountEngine().getUserTicket();
+    }
+
+    /**
      * Returns true if this request is triggered by a webdav operation.
      *
      * @return true if this request is triggered by a webdav operation

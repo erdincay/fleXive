@@ -15,7 +15,7 @@
 
     <a4j:outputPanel id="treeNodes">
         <h:inputHidden id="treeNodeParent" value="#{srcEditor.treeNodeParent}" />
-        <div style="width:40px;float:left;padding-top:2px">Nodes</div>
+        <div style="width:40px;float:left;padding-top:2px">#{fxMessageBean['Content.field.nodes']}</div>
         <div style="width:180px;float:left;">
             <table border="0" cellpadding="0" cellspacing="2" style="border:1px solid #bdbdbd">
                 <c:forEach items="#{srcEditor.treeNodes}" var="node">

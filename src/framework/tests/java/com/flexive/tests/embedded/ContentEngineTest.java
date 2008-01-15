@@ -674,16 +674,16 @@ public class ContentEngineTest {
             FxDelta d = FxDelta.processDelta(org, test);
             System.out.println(d.dump());
             assert d.getAdds().size() == 0 : "Expected no adds, but got " + d.getAdds().size();
-            assert d.getDeletes().size() == 0 : "Expected no deletes, but got " + d.getDeletes().size();
+            assert d.getRemoves().size() == 0 : "Expected no deletes, but got " + d.getRemoves().size();
             assert d.getUpdates().size() == 0 : "Expected no updates, but got " + d.getUpdates().size();
 
             test.remove("/TestProperty3[2]");
             d = FxDelta.processDelta(org, test);
             System.out.println(d.dump());
             assert d.getAdds().size() == 0 : "Expected no adds, but got " + d.getAdds().size();
-            assert d.getDeletes().size() == 1 : "Expected 1 deletes, but got " + d.getDeletes().size();
+            assert d.getRemoves().size() == 1 : "Expected 1 deletes, but got " + d.getRemoves().size();
             assert d.getUpdates().size() == 1 : "Expected 1 updates, but got " + d.getUpdates().size();
-            assert d.getDeletes().get(0).getXPath().equals("/TESTPROPERTY3[3]") : "Expected /TESTPROPERTY3[3] but got: " + d.getDeletes().get(0).getXPath();
+            assert d.getRemoves().get(0).getXPath().equals("/TESTPROPERTY3[3]") : "Expected /TESTPROPERTY3[3] but got: " + d.getRemoves().get(0).getXPath();
             assert d.getUpdates().get(0).getXPath().equals("/TESTPROPERTY3[2]") : "Expected /TESTPROPERTY3[2] but got: " + d.getUpdates().get(0).getXPath();
 
             test = co.load(pk);
@@ -695,7 +695,7 @@ public class ContentEngineTest {
             System.out.println(d.dump());
             assert d.changes() : "Expected some changes";
             assert d.getAdds().size() == 3 : "Expected 3 (group + 2 properties) adds but got " + d.getAdds().size();
-            assert d.getDeletes().size() == 0 : "Expected 0 deletes but got " + d.getDeletes().size();
+            assert d.getRemoves().size() == 0 : "Expected 0 deletes but got " + d.getRemoves().size();
             assert d.getUpdates().size() == 0 : "Expected 0 updates but got " + d.getUpdates().size();
         } finally {
             co.remove(pk);

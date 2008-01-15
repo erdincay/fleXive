@@ -151,7 +151,7 @@ public class UserTicketStore {
                     LOG.error("No UserTicket found in Subject " + sub, exc);
                     continue;
                 }
-                boolean match = userId != null && aTicket.getUserId() != userId;
+                boolean match = userId != null && aTicket.getUserId() == userId;
                 match = match || aTicket.isInAtLeastOneGroup(groupId);
                 match = match || aTicket.hasAtLeastOneACL(acls);
                 if (!match) continue;

@@ -22,13 +22,12 @@
 
     <c:set var="selectListId" value="addElementsListBox#{srcEditor.idGenerator[element]}" />
     <c:if test="#{group.property==false}">
-        <c:set var="elementType" value="group" />
         <c:set var="upDownStyle" value="border:0;margin-left:0px;" />
     </c:if>
     <c:if test="#{group.property==true}">
-        <c:set var="elementType" value="field" />
         <c:set var="upDownStyle" value="border:0;float:left;margin-left:0px;" />
     </c:if>
+    <c:set var="assignmentLabel" value="#{fxMapBean.assignments[group.assignmentId].label}" />
 
 
     <t:graphicImage styleClass="icon" alt="menu" url="/adm/images/contentEditor/#{icon}.png"
@@ -58,7 +57,9 @@
                              onmouseover='ignoreEvent(event)' onclick="tinyMCE.triggerSave();if (!preA4jAction('#{group.XPathFull}','removeProperty')) return false;">
                 <f:setPropertyActionListener target="#{srcEditor.element}" value="#{group}"/>
                 <t:graphicImage styleClass="icon" alt="remove" url="/adm/images/contentEditor/remove.png"/>
-                <span class="txt">Remove the #{elementType}</span>
+                <ui:repeat var="assignmentLabel" value="#{assignmentLabel}">
+                #{fxMessageBean['Content.field.elementmenu.remove,#{assignmentLabel}']}
+                </ui:repeat>
                 <br clear="all"/>
             </a4j:commandLink>
         </c:if>
@@ -69,7 +70,9 @@
                              onmouseover='ignoreEvent(event)'  onclick="tinyMCE.triggerSave();if (!preA4jAction('#{group.XPathFull}','addProperty')) return false;">
                 <f:setPropertyActionListener target="#{srcEditor.element}" value="#{group}"/>
                 <t:graphicImage styleClass="icon" alt="add" url="/adm/images/contentEditor/add.png"/>
-                <span class="txt">Add a #{elementType} of the same type</span>
+                <ui:repeat var="assignmentLabel" value="#{assignmentLabel}">
+                #{fxMessageBean['Content.field.elementmenu.add,#{assignmentLabel}']}
+                </ui:repeat>
                 <br clear="all"/>
             </a4j:commandLink>
         </c:if>
@@ -87,12 +90,12 @@
                 <f:setPropertyActionListener target="#{srcEditor.element}" value="#{group}"/>
                 <br />
                 <t:graphicImage styleClass="icon" alt="add" url="/adm/images/contentEditor/add.png"/>
-                <span class="txt">Add selected fields</span>
+                #{fxMessageBean['Content.field.elementmenu.addSelected']}
             </a4j:commandLink>
         </c:if>
 
         <c:if test="${count==0}">
-            There are no options for this node
+            #{fxMessageBean['Content.field.elementmenu.noOptions']}
         </c:if>
     </div>
 
@@ -126,8 +129,6 @@
                             style="filter:alpha(opacity=25);-moz-opacity:.25;opacity:.25;float:left;margin-left:3px;"/>
         </c:if>
     </c:if>
-
-
 
 </c:if>
 </ui:composition>

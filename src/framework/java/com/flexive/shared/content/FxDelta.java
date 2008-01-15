@@ -52,6 +52,9 @@ import java.util.List;
 public class FxDelta implements Serializable {
     private static final long serialVersionUID = -6246822483703676822L;
 
+    /**
+     * A single delta change
+     */
     public static class FxDeltaChange implements Serializable {
         private static final long serialVersionUID = -9026076539541708345L;
 
@@ -65,6 +68,13 @@ public class FxDelta implements Serializable {
         private int retryCount;
         private boolean multiColumn;
 
+        /**
+         * Ctor
+         *
+         * @param XPath        affected XPath
+         * @param originalData original data
+         * @param newData      new data
+         */
         @SuppressWarnings({"ConstantConditions"})
         public FxDeltaChange(String XPath, FxData originalData, FxData newData) {
             this.XPath = XPath;
@@ -96,69 +106,119 @@ public class FxDelta implements Serializable {
                 this.multiColumn = false;
         }
 
+        /**
+         * Getter for the XPath (based on the origina XPath)
+         *
+         * @return XPath
+         */
         public String getXPath() {
             return XPath;
         }
 
+        /**
+         * Getter for the original data
+         *
+         * @return original data
+         */
         public FxData getOriginalData() {
             return originalData;
         }
 
+        /**
+         * Getter for the new data
+         *
+         * @return new data
+         */
         public FxData getNewData() {
             return newData;
         }
 
+        /**
+         * Is the change affecting a property?
+         *
+         * @return property affected?
+         */
         public boolean isProperty() {
             return property;
         }
 
+        /**
+         * Is the change affecting a group?
+         *
+         * @return group affected?
+         */
         public boolean isGroup() {
             return !property;
         }
 
+        /**
+         * Did the position change?
+         *
+         * @return position change
+         */
         public boolean isPositionChange() {
             return positionChange;
         }
 
+        /**
+         * Has data changed?
+         *
+         * @return data changed
+         */
         public boolean isDataChange() {
             return dataChange;
         }
 
         /**
+         * <b>Internal use only!</b>
          * Is this delta updateable or do we need delete/insert?
          * A property is not updateable if language settings changed or it spans multiple columns like a select-many
          *
          * @return if this chance is updateable
          */
-        public boolean isUpdateable() {
+        public boolean _isUpdateable() {
             return !(languageSettingChanged || multiColumn);
         }
 
         /**
+         * <b>Internal use only!</b>
          * Increase the retry count - used when saving and conflicts arise that
          * are fixed after some retries (ie positioning changes)
          */
-        public synchronized void increaseRetries() {
+        public synchronized void _increaseRetries() {
             retryCount++;
         }
 
-        public synchronized int getRetryCount() {
+        /**
+         * <b>Internal use only!</b>
+         * Getter for the retry count
+         *
+         * @return retry count
+         */
+        public synchronized int _getRetryCount() {
             return retryCount;
         }
     }
 
     private final static List<FxDeltaChange> EMPTY = Collections.unmodifiableList(new ArrayList<FxDeltaChange>(0));
 
-    private List<FxDeltaChange> updates, adds, deletes;
+    private List<FxDeltaChange> updates, adds, removes;
     private boolean internalPropertyChanged = false;
 
-    public FxDelta(List<FxDeltaChange> updates, List<FxDeltaChange> adds, List<FxDeltaChange> deletes) {
+    /**
+     * Ctor
+     *
+     * @param updates delta updates
+     * @param adds    delta adds
+     * @param removes delta removes
+     */
+    public FxDelta(List<FxDeltaChange> updates, List<FxDeltaChange> adds, List<FxDeltaChange> removes) {
         this.updates = (updates != null ? updates : EMPTY);
         this.adds = (adds != null ? adds : EMPTY);
-        this.deletes = (deletes != null ? deletes : EMPTY);
+        this.removes = (removes != null ? removes : EMPTY);
         checkInternal(this.updates);
         if (!internalPropertyChanged) checkInternal(this.adds);
-        if (!internalPropertyChanged) checkInternal(this.deletes);
+        if (!internalPropertyChanged) checkInternal(this.removes);
     }
 
     private void checkInternal(List<FxDeltaChange> list) {
@@ -170,26 +230,56 @@ public class FxDelta implements Serializable {
             }
     }
 
+    /**
+     * Get a list of all updated deltas
+     *
+     * @return list of all updated deltas
+     */
     public List<FxDeltaChange> getUpdates() {
         return updates;
     }
 
+    /**
+     * Get a list of all added deltas
+     *
+     * @return list of all added deltas
+     */
     public List<FxDeltaChange> getAdds() {
         return adds;
     }
 
-    public List<FxDeltaChange> getDeletes() {
-        return deletes;
+    /**
+     * Get a list of all removed deltas
+     *
+     * @return list of all removed deltas
+     */
+    public List<FxDeltaChange> getRemoves() {
+        return removes;
     }
 
+    /**
+     * Was there a change of system internal properties like ACL?
+     *
+     * @return change of system internal properies
+     */
     public boolean isInternalPropertyChanged() {
         return internalPropertyChanged;
     }
 
+    /**
+     * Are there any changes?
+     *
+     * @return changes?
+     */
     public boolean changes() {
-        return !(updates.size() == 0 && deletes.size() == 0 && adds.size() == 0);
+        return !(updates.size() == 0 && removes.size() == 0 && adds.size() == 0);
     }
 
+    /**
+     * Create a dump of all changes for debugging purposes
+     *
+     * @return dump of all changes for debugging purposes
+     */
     public String dump() {
         if (!changes())
             return "===> No changes! <===";
@@ -208,7 +298,7 @@ public class FxDelta implements Serializable {
                                 append(" to ").append(c.getNewData().getPos());
                     if (c.isDataChange())
                         sb.append(" [data changes]");
-                    if (c.isUpdateable())
+                    if (c._isUpdateable())
                         sb.append(" [lang.settings changes]");
                     sb.append("\n");
                 }
@@ -220,10 +310,10 @@ public class FxDelta implements Serializable {
                 sb.append(c.getXPath()).append(": added at position ").append(c.getNewData().getPos()).append("\n");
             }
         }
-        if (deletes.size() > 0) {
-            sb.append("Deletes:\n");
-            for (FxDeltaChange c : deletes) {
-                sb.append(c.getXPath()).append(": deleted at position ").append(c.getOriginalData().getPos()).append("\n");
+        if (removes.size() > 0) {
+            sb.append("Removes:\n");
+            for (FxDeltaChange c : removes) {
+                sb.append(c.getXPath()).append(": removed at position ").append(c.getOriginalData().getPos()).append("\n");
             }
         }
         sb.append("<=== changes end ===>\n");
@@ -238,10 +328,8 @@ public class FxDelta implements Serializable {
      * @param original original content
      * @param compare  content that original is compared against
      * @return deltas
-     * @throws com.flexive.shared.exceptions.FxInvalidParameterException
-     *          on errors
-     * @throws com.flexive.shared.exceptions.FxNotFoundException
-     *          on errors
+     * @throws FxInvalidParameterException on errors
+     * @throws FxNotFoundException         on errors
      */
     public static FxDelta processDelta(final FxContent original, final FxContent compare) throws FxNotFoundException, FxInvalidParameterException {
         List<String> org = original.getAllXPaths("/");
