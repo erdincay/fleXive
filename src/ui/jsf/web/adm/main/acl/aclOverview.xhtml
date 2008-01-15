@@ -29,7 +29,7 @@
                 #{fxMessageBean['ACL.field.mandator']}:&nbsp;
                 <h:selectOneListbox id="Mandator" value="#{aclBean.mandator}" size="1"
                                     converter="SelectableConverter" onchange="document.frm.submit();">
-                    <f:selectItems value="#{fxSelectBean.mandatorsForEdit}" />
+                    <f:selectItems value="#{fxSelectBean.mandatorsForEditNoEmpty}" />
                 </h:selectOneListbox>
             </h:panelGrid>
             <br/>

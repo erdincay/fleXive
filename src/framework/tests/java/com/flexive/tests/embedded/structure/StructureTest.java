@@ -180,7 +180,7 @@ public class StructureTest {
     public void derivedType() throws Exception {
         long testId = -1;
         try {
-            testId = te.save(FxTypeEdit.createNew("TestCDP", new FxString("description..."), CacheAdmin.getEnvironment().getACLsByCategory(ACL.Category.STRUCTURE).get(0), null));
+            testId = te.save(FxTypeEdit.createNew("TestCDP", new FxString("description..."), CacheAdmin.getEnvironment().getACLs(ACL.Category.STRUCTURE).get(0), null));
 //            testId = te.create(1, 1, 1, new ArrayList<Mandator>(2), "TestCDP",
 //                    new FxString("description..."), null, false,
 //                    TypeStorageMode.Hierarchical, TypeCategory.User, TypeMode.Content,
@@ -212,7 +212,7 @@ public class StructureTest {
 
         long testDerivedId;
         testDerivedId = te.save(FxTypeEdit.createNew("TestCDDerived", new FxString("description..."),
-                CacheAdmin.getEnvironment().getACLsByCategory(ACL.Category.STRUCTURE).get(0), testType).setEnableParentAssignments(false));
+                CacheAdmin.getEnvironment().getACLs(ACL.Category.STRUCTURE).get(0), testType).setEnableParentAssignments(false));
 //        testDerivedId = te.create(1, 1, 1, new ArrayList<Mandator>(2), "TestCDDerived",
 //                new FxString("description..."), testType, false,
 //                TypeStorageMode.Hierarchical, TypeCategory.User, TypeMode.Content,
@@ -373,7 +373,7 @@ public class StructureTest {
         FxString hint = new FxString("Hint text ...");
         FxString desc = new FxString("Test data structure");
         try {
-            testId = te.save(FxTypeEdit.createNew("TestAssignmentRemove", new FxString("description..."), CacheAdmin.getEnvironment().getACLsByCategory(ACL.Category.STRUCTURE).get(0), null));
+            testId = te.save(FxTypeEdit.createNew("TestAssignmentRemove", new FxString("description..."), CacheAdmin.getEnvironment().getACLs(ACL.Category.STRUCTURE).get(0), null));
 //                    te.create(1, 1, 1, new ArrayList<Mandator>(2), "TestAssignmentRemove",
 //                    new FxString("description..."), null, false,
 //                    TypeStorageMode.Hierarchical, TypeCategory.User, TypeMode.Content,

@@ -235,14 +235,14 @@ public class ContentEngineTest {
                 true, new FxMultiplicity(0, 1),
                 true, structACL, FxDataType.String1024, new FxString(FxString.EMPTY),
                 true, null, null, null).setAutoUniquePropertyName(true).setMultiLang(true).setOverrideMultiLang(true);
-        long articleId = type.save(FxTypeEdit.createNew(TYPE_ARTICLE, new FxString("Article test type"), CacheAdmin.getEnvironment().getACLsByCategory(ACL.Category.STRUCTURE).get(0), null));
+        long articleId = type.save(FxTypeEdit.createNew(TYPE_ARTICLE, new FxString("Article test type"), CacheAdmin.getEnvironment().getACLs(ACL.Category.STRUCTURE).get(0), null));
         ass.createProperty(articleId, pe, "/");
         pe.setName("Text");
         pe.setDataType(FxDataType.Text);
         pe.setMultiplicity(new FxMultiplicity(0, 2));
         ass.createProperty(articleId, pe, "/");
 
-        long testDataId = type.save(FxTypeEdit.createNew(TEST_TYPE, new FxString("Test data"), CacheAdmin.getEnvironment().getACLsByCategory(ACL.Category.STRUCTURE).get(0), null));
+        long testDataId = type.save(FxTypeEdit.createNew(TEST_TYPE, new FxString("Test data"), CacheAdmin.getEnvironment().getACLs(ACL.Category.STRUCTURE).get(0), null));
         FxGroupAssignment ga = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment("ROOT/" + TEST_GROUP);
         FxGroupAssignmentEdit gae = FxGroupAssignmentEdit.createNew(ga, CacheAdmin.getEnvironment().getType(TEST_TYPE), null, "/");
         ass.save(gae, true);

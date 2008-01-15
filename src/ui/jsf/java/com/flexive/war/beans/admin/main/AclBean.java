@@ -38,6 +38,7 @@ import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.interfaces.ACLEngine;
 import com.flexive.shared.interfaces.UserGroupEngine;
 import com.flexive.shared.security.*;
@@ -113,6 +114,9 @@ public class AclBean {
 
 
     public Mandator getMandator() {
+        if (mandator == null) {
+            return CacheAdmin.getEnvironment().getMandator(FxContext.get().getTicket().getMandatorId());
+        }
         return mandator;
     }
 
@@ -162,9 +166,8 @@ public class AclBean {
     public List<ACL> getList() {
         try {
             final UserTicket ticket = FxContext.get().getTicket();
-            long mandatorId = (ticket.isGlobalSupervisor()) ?
-                    (mandator == null ? -1 : mandator.getId()) : ticket.getMandatorId();
-            return aclEngine.loadAll(mandatorId, true);
+            long mandatorId = (ticket.isGlobalSupervisor()) ? getMandator().getId() : ticket.getMandatorId();
+            return CacheAdmin.getFilteredEnvironment().getACLs(mandatorId, false);
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();
             return new ArrayList<ACL>(0);

@@ -35,6 +35,7 @@ package com.flexive.core.structure;
 
 import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.XPathElement;
+import com.flexive.shared.FxContext;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxRuntimeException;
@@ -42,6 +43,7 @@ import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Mandator;
+import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.workflow.Route;
 import com.flexive.shared.workflow.Step;
@@ -385,10 +387,40 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
-    public List<ACL> getACLsByCategory(ACL.Category category) {
+    public List<ACL> getACLs(ACL.Category category) {
         List<ACL> result = new ArrayList<ACL>(acls.size());
         for (ACL acl : acls) {
             if (acl.getCategory() == category) {
+                result.add(acl);
+            }
+        }
+        return Collections.unmodifiableList(result);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public List<ACL> getACLs(long mandatorId) {
+        return getACLs(mandatorId, null, true);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public List<ACL> getACLs(long mandatorId, boolean includeForeignAccessible) {
+        return getACLs(mandatorId, null, includeForeignAccessible);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public List<ACL> getACLs(long mandatorId, ACL.Category category, boolean includeForeignAccessible) {
+        final UserTicket ticket = FxContext.get().getTicket();
+        final List<ACL> result = new ArrayList<ACL>();
+        for (ACL acl : acls) {
+            if ((acl.getMandatorId() == mandatorId                                          // mandator filter matches
+                    || (includeForeignAccessible && ticket.isAssignedToACL(acl.getId())))   // user assigned to mandator-foreign ACL
+                    && (category == null || category.equals(acl.getCategory()))) {          // category filter matches
                 result.add(acl);
             }
         }
@@ -619,7 +651,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
                 }
             }
         }
-        return Collections.unmodifiableList(relTypes);    
+        return Collections.unmodifiableList(relTypes);
     }
 
     /**

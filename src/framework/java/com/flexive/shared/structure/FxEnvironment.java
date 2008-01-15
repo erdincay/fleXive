@@ -97,7 +97,38 @@ public interface FxEnvironment extends Serializable {
      * @param category ACL category to be filtered
      * @return all ACLs of the given category.
      */
-    List<ACL> getACLsByCategory(ACL.Category category);
+    List<ACL> getACLs(ACL.Category category);
+
+    /**
+     * Return all ACLs of a given mandatorId.
+     *
+     * @param mandatorId the function returns all ACLs from this mandatorId
+     * @return all ACLs of the given mandator
+     */
+    List<ACL> getACLs(long mandatorId);
+
+    /**
+     * Return all ACLs of a given mandatorId and category.
+     * <p/>
+     *
+     * @param mandatorId                   the function loads all ACLs from this mandatorId.
+     * @param includeForeignAccessible     when true, also loads ACLs that the calling user has at least one permission on,
+     *                                     even if they belong to another mandator.
+     * @return the ACLs
+     */
+    List<ACL> getACLs(long mandatorId, boolean includeForeignAccessible);
+
+    /**
+     * Return all ACLs of a given mandatorId and category.
+     * <p/>
+     *
+     * @param mandatorId                   the function loads all ACLs from this mandatorId.
+     * @param category                     a ACL.CATEGORY_... constant or <code>-1</code> if the category should be ignored
+     * @param includeForeignAccessible     when true, also loads ACLs that the calling user has at least one permission on,
+     *                                     even if they belong to another mandator.
+     * @return the ACLs
+     */
+    List<ACL> getACLs(long mandatorId, ACL.Category category, boolean includeForeignAccessible);
 
     /**
      * Get the default ACL for given categors

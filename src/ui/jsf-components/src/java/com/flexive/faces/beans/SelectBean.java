@@ -400,7 +400,7 @@ public class SelectBean implements Serializable {
      */
     public List<SelectItem> getContentACLs() {
         if (contentACLs == null) {
-            contentACLs = FxJsfUtils.asSelectList(environment.getACLsByCategory(ACL.Category.INSTANCE), false);
+            contentACLs = FxJsfUtils.asSelectList(environment.getACLs(ACL.Category.INSTANCE), false);
         }
         return contentACLs;
     }
@@ -425,7 +425,7 @@ public class SelectBean implements Serializable {
      */
     public List<SelectItem> getBriefcaseACLs() {
         if (briefcaseACLs == null) {
-            briefcaseACLs = FxJsfUtils.asSelectListWithLabel(environment.getACLsByCategory(ACL.Category.BRIEFCASE));
+            briefcaseACLs = FxJsfUtils.asSelectListWithLabel(environment.getACLs(ACL.Category.BRIEFCASE));
         }
         return briefcaseACLs;
     }
@@ -437,7 +437,7 @@ public class SelectBean implements Serializable {
      */
     public List<SelectItem> getStructureACLs() {
         if (structureACLs == null) {
-            structureACLs = FxJsfUtils.asSelectListWithLabel(environment.getACLsByCategory(ACL.Category.STRUCTURE));
+            structureACLs = FxJsfUtils.asSelectListWithLabel(environment.getACLs(ACL.Category.STRUCTURE));
         }
         return structureACLs;
     }
@@ -449,7 +449,7 @@ public class SelectBean implements Serializable {
      */
     public List<SelectItem> getWorkflowACLs() {
         if (workflowACLs == null) {
-            workflowACLs = FxJsfUtils.asSelectListWithLabel(environment.getACLsByCategory(ACL.Category.WORKFLOW));
+            workflowACLs = FxJsfUtils.asSelectListWithLabel(environment.getACLs(ACL.Category.WORKFLOW));
         }
         return workflowACLs;
     }
@@ -728,7 +728,7 @@ public class SelectBean implements Serializable {
      */
     public List<SelectItem> getSelectListACLs() {
         if (selectListACLs == null) {
-            selectListACLs = FxJsfUtils.asSelectListWithLabel(CacheAdmin.getEnvironment().getACLsByCategory(ACL.Category.SELECTLIST));
+            selectListACLs = FxJsfUtils.asSelectListWithLabel(CacheAdmin.getEnvironment().getACLs(ACL.Category.SELECTLIST));
         }
         return selectListACLs;
     }
@@ -741,7 +741,7 @@ public class SelectBean implements Serializable {
 
     public List<SelectItem> getSelectListItemACLs() {
         if (selectListItemACLs == null) {
-            selectListItemACLs = FxJsfUtils.asSelectList(CacheAdmin.getEnvironment().getACLsByCategory(ACL.Category.SELECTLISTITEM), false);
+            selectListItemACLs = FxJsfUtils.asSelectList(CacheAdmin.getEnvironment().getACLs(ACL.Category.SELECTLISTITEM), false);
         }
         return selectListItemACLs;
     }

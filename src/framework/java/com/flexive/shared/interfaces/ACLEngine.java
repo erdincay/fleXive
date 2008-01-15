@@ -132,42 +132,6 @@ public interface ACLEngine {
      */
     ACL load(long id, boolean ignoreSecurity) throws FxApplicationException;
 
-    /**
-     * Loads all ACLs of a given mandatorId.
-     * <p/>
-     * A user may only see the ACLs belonging to his mandatorId, with exception of GROUP_GLOBAL_SUPERVISOR
-     * who may see all ACLs.<br>
-     * The mandatorId id may be set to -1 by GROUP_GLOBAL_SUPERVISOR to retrieve the ACLs of all
-     * mandators.
-     *
-     * @param mandatorId the function loads all ACLs from this mandatorId, or -1 for
-     *                   all mandators if the calling user is a supervisor.
-     * @param includeForeignAccessibleACLs Also loads ACLs that the calling user has at least one permission on,
-     *                                     even if they belong to a foreign mandator.
-     * @throws FxApplicationException load failed, when the calling user may not read the ACLs of the given mandatorId
-     * @return all ACLs
-     */
-    ArrayList<ACL> loadAll(long mandatorId, boolean includeForeignAccessibleACLs)throws FxApplicationException ;
-
-    /**
-     * Loads all ACLs of a given mandatorId and category.
-     * <p/>
-     * A user may only see the ACLs belonging to his mandatorId, with exception of GROUP_GLOBAL_SUPERVISOR
-     * who may see all ACLs.<br>
-     * The mandatorId id may be set to -1 by GROUP_GLOBAL_SUPERVISOR to retrieve the ACLs of all
-     * mandators.
-     *
-     * @param mandatorId                   the function loads all ACLs from this mandatorId, or -1 for
-     *                                     all mandators if the calling user is a supervisor.
-     * @param includeForeignAccessibleACLs Also loads ACLs that the calling user has at least one permission on,
-     *                                     even if they belong to a foreign mandator.
-     * @param category                     a ACL.CATEGORY_... constant or <code>-1</code> if the category should be ignored
-     * @return the ACLs
-     * @throws FxApplicationException load failed, calling user may not read the ACLs of the given mandatorId
-     */
-    ArrayList<ACL> loadAll(long mandatorId, int category, boolean includeForeignAccessibleACLs)
-            throws FxApplicationException ;
-
 
     /**
      * Defines a ACL assignment between a group and a ACL.

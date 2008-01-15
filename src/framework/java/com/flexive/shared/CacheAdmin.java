@@ -44,7 +44,7 @@ import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.mbeans.FxCacheMBean;
 import com.flexive.shared.mbeans.FxCacheProxy;
 import com.flexive.shared.mbeans.MBeanHelper;
-import com.flexive.shared.structure.FilteredEnvironment;
+import com.flexive.shared.structure.FxFilteredEnvironment;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.stream.ServerLocation;
 import org.apache.commons.logging.Log;
@@ -215,12 +215,12 @@ public class CacheAdmin {
     }
 
     /**
-     * Return a {@link FilteredEnvironment} for the calling user.
+     * Return a {@link com.flexive.shared.structure.FxFilteredEnvironment} for the calling user.
      *
-     * @return a {@link FilteredEnvironment} for the calling user.
+     * @return a {@link com.flexive.shared.structure.FxFilteredEnvironment} for the calling user.
      */
     public static FxEnvironment getFilteredEnvironment() {
-        return new FilteredEnvironment(getEnvironment());
+        return new FxFilteredEnvironment(getEnvironment());
     }
 
     /**
