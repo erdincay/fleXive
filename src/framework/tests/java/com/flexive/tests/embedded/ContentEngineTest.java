@@ -73,8 +73,8 @@ public class ContentEngineTest {
     private TypeEngine type;
     private AssignmentEngine ass;
     public static final String TEST_EN = "Test value in english";
-    public static final String TEST_DE = "Test datensatz in deutsch mit �m�ut te�t";
-    public static final String TEST_FR = "My french is bad but testing special characters: ?`?$��1�~�\\/";
+    public static final String TEST_DE = "Test datensatz in deutsch mit \u00E4ml\u00E5ut te\u00DFt";
+    public static final String TEST_FR = "My french is bad but testing special characters: ?`?$\u010E1\u00C6~\u0119\\/";
     public static final String TEST_IT = "If i knew italian this would be a test value in italian ;)";
 
     public static final String TEST_TYPE = "TEST_TYPE_" + RandomStringUtils.random(16, true, true);
