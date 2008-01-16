@@ -43,6 +43,7 @@ import javax.naming.NamingException;
 import javax.naming.NameClassPair;
 import javax.naming.NamingEnumeration;
 import javax.transaction.TransactionManager;
+import javax.ejb.SessionContext;
 import java.util.Hashtable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -333,7 +334,20 @@ public class EJBLookup {
         } catch (Exception e) {
             throw new FxLookupException("Failed to lookup transaction manager: " + e.getMessage(), e).asRuntimeException();
         }
+    }
 
+    /**
+     * Get a reference of the current EJB session context.
+     *
+     * @return  the EJB session context
+     */
+    public static SessionContext getSessionContext() {
+        try {
+            final InitialContext ctx = new InitialContext();
+            return (SessionContext) ctx.lookup("java:comp/EJBContext");
+        } catch (NamingException e) {
+            throw new FxLookupException("Failed to lookup session context: " + e.getMessage(), e).asRuntimeException();
+        }
     }
 
     /**

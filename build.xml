@@ -475,7 +475,7 @@
             <zipfileset prefix="lib" dir="${flexive.lib.dir}/mail" includes="*.jar"/>
             <zipfileset prefix="lib" dir="${flexive.lib.dir}/text_extraction" includes="*.jar"/>
             
-            <zipfileset prefix="lib" dir="${flexive.lib.dir}/jsf" includes="*.jar" excludes="jsf-api.jar, jsf-impl.jar,el-api.jar,el-impl.jar"/>
+            <zipfileset prefix="lib" dir="${flexive.lib.dir}/jsf" includes="*.jar" excludes="jsf-api.jar, jsf-impl.jar,el-*.jar"/>
             <zipfileset prefix="lib" refid="flexive.lib.ui.ajax4jsf"/>
             
             <!-- uncomment to create lib folder in ear -->
