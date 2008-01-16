@@ -94,7 +94,7 @@
                         #{fxMessageBean['Workflow.field.step.actions']}
                     </f:facet>
                     <adm:commandIcon labelKey="Workflow.button.step.remove" location="content"
-						icon="delete" bean="#{workflowBean}" action="removeStep" id="stepDeleteButton#{step.id}">
+						icon="delete" bean="#{workflowBean}" action="removeStep" id="stepDeleteButton#{rowIndex}">
 						<f:setPropertyActionListener target="#{workflowBean.stepIndex}" value="#{rowIndex}"/>
 					</adm:commandIcon>
 				</h:column>
