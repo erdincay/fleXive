@@ -64,12 +64,20 @@
             <title>Required libraries</title>
             <para>The following required libraries have to be deployed:</para>
             <itemizedlist>
-                <listitem>Download the latest stable
-                    <link href="http://dev.mysql.com/downloads/connector/j/5.0.html">MySQL JDBC driver</link>
-                    (<filename>
-                    mysql-connector-java-5.0.x-bin.jar</filename>) and copy it
-                    to
-                    <filename>${jboss.home}/server/all/lib/</filename>.
+                <listitem>
+                    <para>Copy the following files from the
+                        <filename>lib</filename>
+                        directory of your &Flexive; source tree to
+                        <filename>${jboss.home}/server/all/lib/</filename>
+                    </para>
+                    <itemizedlist>
+                        <listitem>
+                            <filename>mysql-connector-java-*.jar</filename>
+                            (Alternatively you can download the latest stable
+                            <link href="http://dev.mysql.com/downloads/connector/j/5.0.html">MySQL JDBC
+                                driver</link>)
+                        </listitem>
+                    </itemizedlist>
                 </listitem>
             </itemizedlist>
         </section>
@@ -252,9 +260,11 @@ database.password=a]]></programlisting>
                         JBoss 4.2 uses JBoss Cache 1.x) you need to modify the deployment scanner in
                         <filename>${jboss.home}/server/all/conf/jboss-service.xml</filename>:
                         replace the entry
-                        <programlisting language="xml"><![CDATA[<attribute name="URLComparator">org.jboss.deployment.DeploymentSorter</attribute>]]></programlisting>
+                        <programlisting language="xml">
+                            <![CDATA[<attribute name="URLComparator">org.jboss.deployment.DeploymentSorter</attribute>]]></programlisting>
                         with
-                        <programlisting language="xml"><![CDATA[<attribute name="URLComparator">org.jboss.deployment.scanner.AlphaNumericDeploymentSorter</attribute>]]></programlisting>
+                        <programlisting language="xml">
+                            <![CDATA[<attribute name="URLComparator">org.jboss.deployment.scanner.AlphaNumericDeploymentSorter</attribute>]]></programlisting>
                         This ensures that the cache service is started after flexive.ear is deployed and thus
                         can use its cache implementation classes (this deployment scanner allows to influence
                         the deployment order with a numeric prefix, otherwise it's the same as the default one).
@@ -274,27 +284,9 @@ database.password=a]]></programlisting>
             <para>The following required libraries have to be deployed:</para>
             <itemizedlist>
                 <listitem>
-                    <para>Download the latest stable
-                        <link href="http://dev.mysql.com/downloads/connector/j/5.0.html">MySQL JDBC driver</link>
-                        (<filename>
-                        mysql-connector-java-5.0.x-bin.jar</filename>) and copy it
-                        to
-                        <filename>${glassfish.home}/domains/domain1/lib/ext</filename>.
-                    </para>
-                </listitem>
-                <listitem>
-                    <para>Copy the
-                        <filename>jboss-cache.jar</filename>
-                        from the
+                    <para>Copy the following files from the
                         <filename>lib</filename>
-                        directory of your &Flexive; source tree or from the
-                        <filename>extlib</filename>
-                        directory of your &Flexive; binary distribution to
-                        <filename>${glassfish.home}/lib</filename>.
-                    </para>
-                </listitem>
-                <listitem>
-                    <para>Copy the following files to
+                        directory of your &Flexive; source tree to
                         <filename>${glassfish.home}/domains/domain1/lib/ext</filename>:
                         <itemizedlist>
                             <listitem>
@@ -304,10 +296,7 @@ database.password=a]]></programlisting>
                                 <filename>concurrent.jar</filename>
                             </listitem>
                             <listitem>
-                                <filename>jboss-aop-jdk50.jar</filename>
-                            </listitem>
-                            <listitem>
-                                <filename>jboss-common.jar</filename>
+                                <filename>jboss-common-core.jar</filename>
                             </listitem>
                             <listitem>
                                 <filename>jboss-jmx.jar</filename>
@@ -318,7 +307,24 @@ database.password=a]]></programlisting>
                             <listitem>
                                 <filename>jgroups.jar</filename>
                             </listitem>
+                            <listitem>
+                                <filename>mysql-connector-java-*.jar</filename>
+                                (Alternatively you can download the latest stable
+                                <link href="http://dev.mysql.com/downloads/connector/j/5.0.html">MySQL JDBC
+                                    driver</link>)
+                            </listitem>
                         </itemizedlist>
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>Copy the
+                        <filename>jbosscache-core.jar</filename>
+                        from the
+                        <filename>lib</filename>
+                        directory of your &Flexive; source tree or from the
+                        <filename>extlib</filename>
+                        directory of your &Flexive; binary distribution to
+                        <filename>${glassfish.home}/lib</filename>.
                     </para>
                 </listitem>
             </itemizedlist>
@@ -401,7 +407,7 @@ database.password=a]]></programlisting>
             <para>In the
                 <link href="http://localhost:4848/">Admin Console</link>
                 navigate to
-                <code>Application Server > Resources > JDBC > Connection Pools</code>
+                <code>Resources > JDBC > Connection Pools</code>
                 and click
                 <code>New</code>
             </para>
@@ -487,7 +493,7 @@ database.password=a]]></programlisting>
             <para>Once created, you have to create
                 <code>JDBC Resource</code>
                 by selecting
-                <code>Application Server > Resources > JDBC >
+                <code>Resources > JDBC >
                     JDBC Resources
                 </code>
                 and clicking
@@ -502,30 +508,43 @@ database.password=a]]></programlisting>
                         </listitem>
                     </itemizedlist>
                 </para>
+                Click
+                <code>OK</code>
             </para>
-            <para>Once done repeat the above steps for the configuration pool.</para>
+            <para>Once done repeat the above steps for the
+                <emphasis>configuration connection pool</emphasis>
+                and its JDBC resource.
+            </para>
             <para>
-                Expected
-                <code>JNDI</code>
-                name is
-                <code>jdbc/flexiveConfiguration</code>
-                , use the same settings as above except:
-                <itemizedlist>
-                    <listitem>
-                        DatabaseName:
-                        <code>flexiveConfiguration</code>
-                    </listitem>
-                    <listitem>
-                        Url:
-                        <code><![CDATA[jdbc:mysql://localhost:3306/flexive?useUnicode=true&characterEncoding=utf8&
-                        characterResultSets=utf8]]></code>
-                    </listitem>
-                    <listitem>
-                        URL:
-                        <code><![CDATA[jdbc:mysql://localhost:3306/flexive?useUnicode=true&characterEncoding=utf8&
-                        characterResultSets=utf8]]></code>
-                    </listitem>
-                </itemizedlist>
+                <para>
+                    <itemizedlist>
+                        <listitem>Expected JNDI Name:
+                            <code>jdbc/flexiveConfiguration</code>
+                        </listitem>
+                        <listitem>Pool Name:
+                            <code>flexiveConfiguration</code>
+                        </listitem>
+                    </itemizedlist>
+                </para>
+                <para>
+                    For the connection pool use the same settings as above except:
+                    <itemizedlist>
+                        <listitem>
+                            DatabaseName:
+                            <code>flexiveConfiguration</code>
+                        </listitem>
+                        <listitem>
+                            Url:
+                            <code>
+                                <![CDATA[jdbc:mysql://localhost:3306/flexiveConfiguration?useUnicode=true&characterEncoding=utf8&characterResultSets=utf8]]></code>
+                        </listitem>
+                        <listitem>
+                            URL:
+                            <code>
+                                <![CDATA[jdbc:mysql://localhost:3306/flexiveConfiguration?useUnicode=true&characterEncoding=utf8&characterResultSets=utf8]]></code>
+                        </listitem>
+                    </itemizedlist>
+                </para>
             </para>
         </section>
         <section xml:id="glassfish_installation_deployment">
