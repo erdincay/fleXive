@@ -136,7 +136,7 @@
 }
 
 /* Content editor input styles */
-.property .fxValueTextInput, .property .fxValueInputElementWidth, .property textarea.fxValueTextArea {
+.property .fxValueTextInput, .property .fxValueInputElementWidth, .property textarea.fxValueTextArea, .property textarea.fxValueTextAreaHtml {
     width: 310px;
 }
 

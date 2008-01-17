@@ -87,13 +87,7 @@ class EditModeHelper extends RenderHelper {
         ensureDefaultLanguageExists(value, languages);
         final String radioName = clientId + FxValueInputRenderer.DEFAULT_LANGUAGE;
 
-        new DeferredWriterTag(component, new DeferredWriterTag.DeferredWriter() {
-            public void render(ResponseWriter out) throws IOException {
-                writer.startElement("div", null);
-                writer.writeAttribute("id", clientId, null);
-                writer.writeAttribute("class", FxValueInputRenderer.CSS_CONTAINER, null);
-            }
-        });
+        new DeferredWriterTag(component, new ContainerWriter());
 
         final List<String> rowIds = new ArrayList<String>(languages.size());
         for (final FxLanguage language : languages) {
@@ -129,7 +123,7 @@ class EditModeHelper extends RenderHelper {
             public void render(ResponseWriter out) throws IOException {
                 writer.startElement("select", null);
                 writer.writeAttribute("name", languageSelectId, null);
-                writer.writeAttribute("style", "float:right", null);
+                writer.writeAttribute("class", "languages", null);
                 writer.writeAttribute("onchange", "document.getElementById('" + clientId + "')."
                         + JS_OBJECT + ".onLanguageChanged(this)", null);
                 for (FxLanguage language : languages) {
@@ -213,6 +207,9 @@ class EditModeHelper extends RenderHelper {
     @Override
     protected void encodeField(String inputId, FxLanguage language) throws IOException {
         boolean multiLine = false;
+        if (language == null) {
+            new DeferredWriterTag(component, new ContainerWriter());
+        }
         if (value != null && StringUtils.isNotBlank(value.getXPath()) && value instanceof FxString) {
             multiLine = ((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(value.getXPath())).isMultiLine();
         }
@@ -234,6 +231,13 @@ class EditModeHelper extends RenderHelper {
             renderCheckbox(inputId, language);
         } else {
             renderTextInput(inputId, language);
+        }
+        if (language == null) {
+            new DeferredWriterTag(component, new DeferredWriterTag.DeferredWriter() {
+                public void render(ResponseWriter out) throws IOException {
+                    writer.endElement("div");
+                }
+            });
         }
     }
 
@@ -467,4 +471,11 @@ class EditModeHelper extends RenderHelper {
         return inputId.substring(0, inputId.indexOf(':'));
     }
 
+    private class ContainerWriter implements DeferredWriterTag.DeferredWriter {
+        public void render(ResponseWriter out) throws IOException {
+            writer.startElement("div", null);
+            writer.writeAttribute("id", clientId, null);
+            writer.writeAttribute("class", FxValueInputRenderer.CSS_CONTAINER + " " + value.getClass().getSimpleName() + "Input", null);
+        }
+    }
 }
