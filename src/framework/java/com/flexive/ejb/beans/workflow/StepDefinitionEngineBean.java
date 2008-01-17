@@ -40,6 +40,7 @@ import com.flexive.core.structure.StructureLoader;
 import static com.flexive.shared.CacheAdmin.getEnvironment;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
@@ -125,8 +126,15 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
      */
     private void checkForCycles(Set<Long> visitedStepDefinitions, long stepDefinitionId) throws FxInvalidParameterException {
         if (!visitedStepDefinitions.add(stepDefinitionId)) {
+            String id = ""+stepDefinitionId;
+            try {
+                id = CacheAdmin.getEnvironment().getStepDefinition(stepDefinitionId).getLabel() +
+                        " (Id: " + stepDefinitionId + ")";
+            } catch(Exception e) {
+                //ignore
+            }
             throw new FxInvalidParameterException("UNIQUETARGET", LOG,
-                    "ex.stepdefinition.uniqueTarget.circular", stepDefinitionId);
+                    "ex.stepdefinition.uniqueTarget.circular", id);
         }
         StepDefinition sd = getEnvironment().getStepDefinition(stepDefinitionId);
         if (sd.getUniqueTargetId() != -1) {

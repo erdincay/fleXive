@@ -44,6 +44,7 @@ import com.flexive.shared.workflow.StepDefinitionEdit;
 
 import javax.faces.model.SelectItem;
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
@@ -68,7 +69,7 @@ public class StepDefinitionBean {
      * @return the edit form
      */
     public String edit() {
-        stepDefinition = new StepDefinitionEdit(CacheAdmin.getEnvironment().getStepDefinition(stepDefinitionId));
+        stepDefinition =CacheAdmin.getEnvironment().getStepDefinition(stepDefinitionId).asEditable();
         return "stepDefinitionEdit";
     }
 
@@ -146,6 +147,12 @@ public class StepDefinitionBean {
     }
 
     public List<SelectItem> getStepDefinitions() {
-        return FxJsfUtils.asIdSelectListWithLabel(CacheAdmin.getFilteredEnvironment().getStepDefinitions());
+        List<StepDefinition> sdList = CacheAdmin.getFilteredEnvironment().getStepDefinitions();
+        List<StepDefinition> filteredList = new ArrayList<StepDefinition>(sdList.size());
+        for (StepDefinition sd : sdList)
+            if (sd.getId() != stepDefinition.getId()) {
+                filteredList.add(sd);
+            }
+        return FxJsfUtils.asIdSelectListWithLabel(filteredList);
     }
 }

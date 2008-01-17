@@ -95,7 +95,7 @@ public class StepDefinitionEdit extends StepDefinition implements Serializable {
     public void setUniqueTargetId(long uniqueTarget) {
         if (uniqueTarget != -1 && uniqueTarget == this.id) {
             throw new FxInvalidParameterException("UNIQUETARGET", "ex.stepdefinition.uniqueTarget.circular.self",
-                    this.id).asRuntimeException();
+                    this.label + " (Id: " + this.id + ")").asRuntimeException();
         }
         this.uniqueTargetId = uniqueTarget;
     }

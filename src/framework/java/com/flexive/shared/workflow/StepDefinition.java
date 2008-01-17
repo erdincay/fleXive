@@ -41,10 +41,10 @@ import java.io.Serializable;
 
 /**
  * Definition of a workflow step.
- * 
+ *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class StepDefinition extends AbstractSelectableObjectWithLabel implements Serializable{
+public class StepDefinition extends AbstractSelectableObjectWithLabel implements Serializable {
     private static final long serialVersionUID = 7468501311030816400L;
 
     /**
@@ -65,10 +65,10 @@ public class StepDefinition extends AbstractSelectableObjectWithLabel implements
     /**
      * StepDefinition Constructor.
      *
-     * @param label        the unique label of the step
-     * @param description the description of the step
-     * @param id          the unique id of the step
-     * @param uniqueTargetId  the unique target id (-1 if it there is no unique target)
+     * @param label          the unique label of the step
+     * @param description    the description of the step
+     * @param id             the unique id of the step
+     * @param uniqueTargetId the unique target id (-1 if it there is no unique target)
      */
     public StepDefinition(long id, FxString label, String description, long uniqueTargetId) {
         this.label = label;
@@ -76,7 +76,7 @@ public class StepDefinition extends AbstractSelectableObjectWithLabel implements
         this.id = id;
         if (uniqueTargetId >= 0 && id == uniqueTargetId) {
             throw new FxInvalidParameterException("UNIQUETARGET", "ex.stepdefinition.uniqueTarget.circular.self",
-                    this.id).asRuntimeException();
+                    this.label + " (Id: " + this.id + ")").asRuntimeException();
         }
         this.uniqueTargetId = (uniqueTargetId < 0) ? -1 : uniqueTargetId;
     }
@@ -84,9 +84,9 @@ public class StepDefinition extends AbstractSelectableObjectWithLabel implements
     /**
      * StepDefinition Constructor.
      *
-     * @param label        the unique name of the step
-     * @param description the description of the step
-     * @param uniqueTargetId  the unique target id (-1 if it there is no unique target)
+     * @param label          the unique name of the step
+     * @param description    the description of the step
+     * @param uniqueTargetId the unique target id (-1 if it there is no unique target)
      */
     public StepDefinition(FxString label, String description, long uniqueTargetId) {
         this(-1, label, description, uniqueTargetId);
@@ -95,7 +95,7 @@ public class StepDefinition extends AbstractSelectableObjectWithLabel implements
     /**
      * Returns an editable step definition object.
      *
-     * @return  this step definition as an editable object.
+     * @return this step definition as an editable object.
      */
     public StepDefinitionEdit asEditable() {
         return new StepDefinitionEdit(this);
@@ -107,7 +107,6 @@ public class StepDefinition extends AbstractSelectableObjectWithLabel implements
      */
     protected StepDefinition() {
     }
-
 
 
     /**
@@ -162,15 +161,17 @@ public class StepDefinition extends AbstractSelectableObjectWithLabel implements
      * @return true if the step definition is needed by the system and can not be deleted.
      */
     public boolean isSystemStepDefinition() {
-        return (id==LIVE_STEP_ID || id==EDIT_STEP_ID);
+        return (id == LIVE_STEP_ID || id == EDIT_STEP_ID);
     }
 
 
-    /** {@inheritDoc} */
-	@Override
-	public String toString() {
-		return "StepDefinition[id=" + id + "]";
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return "StepDefinition[id=" + id + "]";
+    }
 
 
 }

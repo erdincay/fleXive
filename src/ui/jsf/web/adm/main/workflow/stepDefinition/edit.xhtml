@@ -18,10 +18,10 @@
         <h:form id="frm">
             <h:inputHidden value="#{stepDefinitionBean.stepDefinition.id}"/>
 
-            <ui:fragment rendered="#{stepDefinitionBean.stepDefinitionId == -1}">
+            <ui:fragment rendered="#{stepDefinitionBean.stepDefinition.id == -1}">
                 <adm:tab label="#{fxMessageBean['StepDefinition.tabtitle.create']}" active="true" id="tab1"/>
             </ui:fragment>
-            <ui:fragment rendered="#{stepDefinitionBean.stepDefinitionId != -1}">
+            <ui:fragment rendered="#{stepDefinitionBean.stepDefinition.id != -1}">
                 <adm:tab label="#{fxMessageBean['StepDefinition.tabtitle.edit,#{stepDefinitionBean.stepDefinition.label}']}" active="true" id="tab2">
                     <f:param value="#{stepDefinition.label}"/>
                 </adm:tab>
@@ -42,10 +42,10 @@
                 </h:selectOneListbox>
             </fx:formRow>
 
-            <c:if test="#{stepDefinitionBean.stepDefinitionId == -1}">
+            <c:if test="#{stepDefinitionBean.stepDefinition.id == -1}">
                 <adm:commandButton id="createButton" labelKey="StepDefinition.button.create" icon="new"  bean="#{stepDefinitionBean}" action="create"/>
             </c:if>    
-            <c:if test="#{stepDefinitionBean.stepDefinitionId != -1}">
+            <c:if test="#{stepDefinitionBean.stepDefinition.id != -1}">
                 <adm:commandButton id="saveButton" labelKey="StepDefinition.button.save" icon="save"  bean="#{stepDefinitionBean}" action="save"/>
             </c:if>
 
