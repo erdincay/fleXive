@@ -68,7 +68,7 @@
                     <para>Copy the following files from the
                         <filename>lib</filename>
                         directory of your &Flexive; source tree to
-                        <filename>${jboss.home}/server/all/lib/</filename>
+                        <filename>${jboss.home}/server/default/lib/</filename>
                     </para>
                     <itemizedlist>
                         <listitem>
@@ -89,7 +89,7 @@
                         <para>Create and copy the datasource config file
                             <filename>flexive-ds.xml</filename>
                             to
-                            <filename>${jboss.home}/server/all/deploy/</filename>
+                            <filename>${jboss.home}/server/default/deploy/</filename>
                             and adapt to your datasource(s)
                             or simply copy it from the &Flexive; source tree, if available.
                             <para>In the
@@ -170,10 +170,10 @@ database.password=a]]></programlisting>
                 <filename>flexive-dist</filename>
                 directory.
                 <para>
-                    Copy the
+                    Copy
                     <filename>flexive.ear</filename>
                     to
-                    <filename>${jboss.home}/server/all/deploy</filename>.
+                    <filename>${jboss.home}/server/default/deploy</filename>.
                 </para>
             </para>
         </section>
@@ -202,11 +202,11 @@ database.password=a]]></programlisting>
                     </para>
                     <para>
                         On Linux launch JBoss using
-                        <programlisting><![CDATA[sh run.sh -c all -Djboss.bind.address=0.0.0.0]]></programlisting>
+                        <programlisting><![CDATA[sh run.sh -c default -Djboss.bind.address=0.0.0.0]]></programlisting>
                     </para>
                     <para>
                         On Windows launch JBoss using
-                        <programlisting><![CDATA[start run.bat -c all -Djboss.bind.address=0.0.0.0]]></programlisting>
+                        <programlisting><![CDATA[start run.bat -c default -Djboss.bind.address=0.0.0.0]]></programlisting>
                     </para>
                 </listitem>
                 <listitem>
@@ -230,24 +230,24 @@ database.password=a]]></programlisting>
             <itemizedlist>
                 <listitem>
                     <para>Extend
-                        <filename>${jboss.home}/server/all/conf/jboss-log4j.xml</filename>
+                        <filename>${jboss.home}/server/default/conf/jboss-log4j.xml</filename>
                         to configure logging:
                         <xi:include href="listings/installation_jboss-log4j.xml"/>
                     </para>
                 </listitem>
                 <listitem>
-                    <para>Extend
-                        <filename>${jboss.home}/server/all/conf/login-config.xml</filename>
+                    <para>Optional if you need JAAS support: Extend
+                        <filename>${jboss.home}/server/default/conf/login-config.xml</filename>
                         with the following entry:
                         <xi:include href="listings/installation_login-config.xml"/>
                     </para>
                 </listitem>
                 <listitem>
-                    <para>To use an external service deployer for JBoss Cache,
+                    <para>Optional step: To use an external service deployer for JBoss Cache,
                         create the cache service file
                         <filename>99_JBossCacheJNDI42-service.xml</filename>
                         in
-                        <filename>${jboss.home}/server/all/deploy/</filename>
+                        <filename>${jboss.home}/server/default/deploy/</filename>
                         or simply copy it from the &flexive; source tree, if available:
 
                         <programlisting language="xml">
@@ -256,9 +256,10 @@ database.password=a]]></programlisting>
                         </programlisting>
                     </para>
                     <para>
+                        If you want to use the external cache deplyoment you have to apply another modification:
                         Due to classloading issues (&flexive; uses JBoss Cache 2.x, while
                         JBoss 4.2 uses JBoss Cache 1.x) you need to modify the deployment scanner in
-                        <filename>${jboss.home}/server/all/conf/jboss-service.xml</filename>:
+                        <filename>${jboss.home}/server/default/conf/jboss-service.xml</filename>:
                         replace the entry
                         <programlisting language="xml">
                             <![CDATA[<attribute name="URLComparator">org.jboss.deployment.DeploymentSorter</attribute>]]></programlisting>
