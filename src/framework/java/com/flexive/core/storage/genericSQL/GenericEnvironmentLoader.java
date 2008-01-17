@@ -643,7 +643,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
             ps = con.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
             while (rs != null && rs.next())
-                scripts.add(new FxScriptInfo(rs.getLong(1), FxScriptEvent.getById(rs.getInt(5)), rs.getString(2),
+                scripts.add(new FxScriptInfo(rs.getLong(1), FxScriptEvent.getById(rs.getLong(5)), rs.getString(2),
                         rs.getString(3), rs.getString(4)));
         } catch (SQLException exc) {
             throw new FxLoadException(LOG, exc, "ex.scripting.load.failed", -1, exc.getMessage());
@@ -685,7 +685,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                         for (int i = 0; i < ass.size(); i++)
                             derived[i] = ass.get(i).getId();
                     }
-                    e_ass.add(new FxScriptMappingEntry(FxScriptEvent.getById(rs.getInt(4)), si.getId(), rs.getBoolean(3), rs.getBoolean(2), rs.getLong(1), derived));
+                    e_ass.add(new FxScriptMappingEntry(FxScriptEvent.getById(rs.getLong(4)), si.getId(), rs.getBoolean(3), rs.getBoolean(2), rs.getLong(1), derived));
                 }
                 rs = ps_t.executeQuery();
                 while (rs != null && rs.next()) {
@@ -698,7 +698,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                         for (int i = 0; i < types.size(); i++)
                             derived[i] = types.get(i).getId();
                     }
-                    e_types.add(new FxScriptMappingEntry(FxScriptEvent.getById(rs.getInt(4)), si.getId(), rs.getBoolean(3), rs.getBoolean(2), rs.getLong(1), derived));
+                    e_types.add(new FxScriptMappingEntry(FxScriptEvent.getById(rs.getLong(4)), si.getId(), rs.getBoolean(3), rs.getBoolean(2), rs.getLong(1), derived));
                 }
                 mapping.add(new FxScriptMapping(si.getId(), e_types, e_ass));
             }

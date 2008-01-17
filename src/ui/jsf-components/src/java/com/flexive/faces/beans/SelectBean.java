@@ -716,7 +716,6 @@ public class SelectBean implements Serializable {
                 if (e.getScope().compareTo(FxScriptScope.Type) ==0)
                     typeScriptEvents.add(new SelectItem(e.getId(), e.getName()));
             }
-
         }
         return typeScriptEvents;
     }

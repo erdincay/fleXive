@@ -205,7 +205,7 @@ public enum FxScriptEvent {
     AfterAccountCreate(25, FxScriptScope.Accounts, "long accountId", "FxPK pk");
 
 
-    private int id;
+    private long id;
     private FxScriptScope scope;
     private String[] bindingInfo;
 
@@ -246,7 +246,7 @@ public enum FxScriptEvent {
      *
      * @return internal id
      */
-    public int getId() {
+    public long getId() {
         return id;
     }
 
@@ -268,7 +268,7 @@ public enum FxScriptEvent {
      * @return FxScriptEvent
      * @throws FxNotFoundException on errors
      */
-    public static FxScriptEvent getById(int id) throws FxNotFoundException {
+    public static FxScriptEvent getById(long id) throws FxNotFoundException {
         for (FxScriptEvent event : FxScriptEvent.values())
             if (event.id == id)
                 return event;

@@ -901,7 +901,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      *
      * @return  Map containing assigned scripts as keys and script events as values.
      */
-
+    /*
     public Map<FxScriptInfo, List<FxScriptEvent>> getScriptsView() {
         HashMap<Long, List<FxScriptEvent>> scriptsHelper = new HashMap<Long, List<FxScriptEvent>>();
         HashMap<FxScriptInfo, List<FxScriptEvent>> scripts = new HashMap<FxScriptInfo, List<FxScriptEvent>>();
@@ -925,4 +925,5 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
         }
         return scripts;
     }
+    */
 }

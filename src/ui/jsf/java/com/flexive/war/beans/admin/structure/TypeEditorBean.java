@@ -91,13 +91,9 @@ public class TypeEditorBean {
     private ScriptListWrapper scriptWrapper = null;
     private int scriptListFiler = -1;
     private FxScriptInfo selectedScriptInfo = CacheAdmin.getFilteredEnvironment().getScripts().get(0);
-    private int selectedScriptEventId = selectedScriptInfo.getEvent().getId();
-    private long scriptId = -1;
-    private FxScriptEvent selectedEvent;
-    private long scriptToWithdraw = -1;
-    // the script/scripttype combinations for which the mappings for the currently specified type should be created
-    private ArrayList<FxScriptInfo> selectedScripts = new ArrayList<FxScriptInfo>();
-
+    private long selectedScriptEventId = selectedScriptInfo.getEvent().getId();
+    private boolean selectedDerivedUsage = false;
+    private boolean selectedActive = true;
 
     public boolean isMayEdit() {
         return mayEdit;
@@ -119,7 +115,7 @@ public class TypeEditorBean {
                 mayDelete = FxJsfUtils.getBooleanParameter("mayDelete", false);
 
                 this.type = CacheAdmin.getEnvironment().getType(propId).asEditable();
-                scriptWrapper = new ScriptListWrapper(type.getScriptMapping());
+
 
                 initEditing();
             } else if ("editInstance".equals(action)) {
@@ -129,7 +125,6 @@ public class TypeEditorBean {
                 mayDelete = FxJsfUtils.getBooleanParameter("mayDelete", false);
 
                 this.type = CacheAdmin.getEnvironment().getType(propId).asEditable();
-                scriptWrapper = new ScriptListWrapper(type.getScriptMapping());
 
                 initEditing();
             } else if ("createType".equals(action)) {
@@ -167,6 +162,8 @@ public class TypeEditorBean {
      * of an existing group and group assignment is possible via the webinterface.
      */
     private void initEditing() {
+        if (!type.isNew())
+            scriptWrapper = new ScriptListWrapper(type.getId(), true);
         wrappedRelations = new ArrayList<WrappedRelation>(type.getRelations().size());
         for (FxTypeRelation r : type.getRelations()) {
             wrappedRelations.add(new WrappedRelation(r));
@@ -691,22 +688,6 @@ public class TypeEditorBean {
         }
     }
 
-    /**
-     * Computes the number of assigned scripts for display in the GUI.
-     *
-     * @return  the number of assigned scripts
-     */
-    public int getEventScriptCount() {
-        Map scriptMapping = type.getScriptMapping();
-        int count = 0;
-        Collection<long[]> scriptIds = scriptMapping.values();
-        for (long[] scripts : scriptIds) {
-            if (scripts != null)
-                count += scripts.length;
-        }
-        return count;
-    }
-
     public String showTypeEditor() {
         return "typeEditor";
     }
@@ -770,25 +751,49 @@ public class TypeEditorBean {
         this.selectedScriptInfo = selectedScriptInfo;
     }
 
-    public int getSelectedScriptEventId() {
+    public long getSelectedScriptEventId() {
         return selectedScriptInfo.getEvent().getId();
         //return selectedScriptEventId;
     }
 
-    public void setSelectedScriptEventId(int selectedScriptEventId) {
+    public void setSelectedScriptEventId(long selectedScriptEventId) {
         this.selectedScriptEventId = selectedScriptEventId;
+    }
+
+    public boolean isSelectedDerivedUsage() {
+        return selectedDerivedUsage;
+    }
+
+    public void setSelectedDerivedUsage(boolean selectedDerivedUsage) {
+        this.selectedDerivedUsage = selectedDerivedUsage;
+    }
+
+    public boolean isSelectedActive() {
+        return selectedActive;
+    }
+
+    public void setSelectedActive(boolean selectedActive) {
+        this.selectedActive = selectedActive;
     }
 
     public void addScript() {
         try {
-            scriptWrapper.add(selectedScriptInfo.getId(), selectedScriptEventId);
+            scriptWrapper.add(selectedScriptInfo.getId(), selectedScriptEventId, selectedDerivedUsage, selectedActive);
             this.selectedScriptInfo = CacheAdmin.getFilteredEnvironment().getScripts().get(0);
-            this.selectedScriptInfo.getEvent().getId(); 
+            this.selectedScriptInfo.getEvent().getId();
         }
         catch (Throwable t) {
             //TODO: print error message, a4j tags do not support faces message erros
             //new FxFacesMsgErr(t).addToContext();
         }
+    }
+
+    public Map<Long, String> getTypeNameForId() {
+        return new HashMap<Long,String>() {
+            public String get(Object key) {
+                return CacheAdmin.getFilteredEnvironment().getType((Long)key).getDisplayName();
+            }
+        };
     }
 
     /**
@@ -797,14 +802,34 @@ public class TypeEditorBean {
      * @throws com.flexive.shared.exceptions.FxApplicationException  on errors
      */
     public void saveScriptChanges() throws FxApplicationException {
-       for (ScriptListWrapper.ScriptListEntry e : scriptWrapper.getDelta(type.getScriptMapping())) {
+       for (ScriptListWrapper.ScriptListEntry e : scriptWrapper.getDelta(type.getId(), true)) {
            if (e.getId() == ScriptListWrapper.ID_SCRIPT_ADDED)
-               EJBLookup.getScriptingEngine().createTypeScriptMapping(e.getScriptEvent(), e.getScriptInfo().getId(), type.getId(), true, true);
+               EJBLookup.getScriptingEngine().createTypeScriptMapping(e.getScriptEvent(), e.getScriptInfo().getId(), type.getId(), e.isActive(), e.isDerivedUsage());
            else if (e.getId() == ScriptListWrapper.ID_SCRIPT_REMOVED)
                EJBLookup.getScriptingEngine().removeTypeScriptMappingForEvent(e.getScriptInfo().getId(), type.getId(), e.getScriptEvent().getId());
+           else if (e.getId() == ScriptListWrapper.ID_SCRIPT_UPDATED)
+               EJBLookup.getScriptingEngine().updateTypeScriptMappingForEvent(e.getScriptInfo().getId(), type.getId(), e.getScriptEvent().getId(), e.isActive(), e.isDerivedUsage());
        }
     }
 
+
+    /**
+     * Computes the number of assigned scripts for display in the GUI.
+     *
+     * @return  the number of assigned scripts
+     */
+    /*
+    public int getEventScriptCount() {
+        Map scriptMapping = type.getScriptMapping();
+        int count = 0;
+        Collection<long[]> scriptIds = scriptMapping.values();
+        for (long[] scripts : scriptIds) {
+            if (scripts != null)
+                count += scripts.length;
+        }
+        return count;
+    }
+    */
 
     /**
      * Compute the script events for this type and sort by name.

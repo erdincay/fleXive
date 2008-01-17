@@ -151,7 +151,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             ResultSet rs = ps.executeQuery();
             if (rs == null || !rs.next())
                 throw new FxNotFoundException("ex.scripting.notFound", scriptId);
-            si = new FxScriptInfo(scriptId, FxScriptEvent.getById(rs.getInt(4)), rs.getString(1), rs.getString(2),
+            si = new FxScriptInfo(scriptId, FxScriptEvent.getById(rs.getLong(4)), rs.getString(1), rs.getString(2),
                     rs.getString(3));
         } catch (SQLException exc) {
             ctx.setRollbackOnly();
@@ -177,7 +177,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             ResultSet rs = ps.executeQuery();
 
             while (rs != null && rs.next()) {
-                slist.add(new FxScriptInfo(rs.getInt(1), FxScriptEvent.getById(rs.getInt(5)), rs.getString(2), rs.getString(3),
+                slist.add(new FxScriptInfo(rs.getInt(1), FxScriptEvent.getById(rs.getLong(5)), rs.getString(2), rs.getString(3),
                         rs.getString(4)));
             }
 
@@ -212,7 +212,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             ps.setString(1, name);
             ps.setString(2, description);
             ps.setString(3, code);
-            ps.setInt(4, event.getId());
+            ps.setLong(4, event.getId());
             ps.setLong(5, scriptId);
             ps.executeUpdate();
             success = true;
@@ -288,7 +288,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             ps.setString(2, si.getName());
             ps.setString(3, si.getDescription());
             ps.setString(4, code);
-            ps.setInt(5, si.getEvent().getId());
+            ps.setLong(5, si.getEvent().getId());
             ps.executeUpdate();
             success = true;
         } catch (SQLException exc) {
@@ -486,7 +486,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             ps.setLong(2, sm.getScriptId());
             ps.setBoolean(3, sm.isDerivedUsage());
             ps.setBoolean(4, sm.isActive());
-            ps.setInt(5, sm.getScriptEvent().getId());
+            ps.setLong(5, sm.getScriptEvent().getId());
             ps.executeUpdate();
             success = true;
         } catch (SQLException exc) {
@@ -537,7 +537,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             ps.setLong(2, sm.getScriptId());
             ps.setBoolean(3, sm.isDerivedUsage());
             ps.setBoolean(4, sm.isActive());
-            ps.setInt(5, scriptEvent.getId());
+            ps.setLong(5, scriptEvent.getId());
             ps.executeUpdate();
             success = true;
         } catch (SQLException exc) {
@@ -710,7 +710,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public FxScriptMappingEntry updateTypeScriptMapping(long scriptId, long typeId, boolean active, boolean derivedUsage) throws FxApplicationException {
+    public FxScriptMappingEntry updateTypeScriptMappingForEvent(long scriptId, long typeId, long eventId, boolean active, boolean derivedUsage) throws FxApplicationException {
         FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
         FxScriptMappingEntry sm;
         Connection con = null;
@@ -729,16 +729,17 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                     derived[i] = types.get(i).getId();
             }
             //TODO: dont overwrite type info, use xxEdit objects!!
-            sm = new FxScriptMappingEntry(si.getEvent(), scriptId, active, derivedUsage, typeId, derived);
+            sm = new FxScriptMappingEntry(FxScriptEvent.getById(eventId), scriptId, active, derivedUsage, typeId, derived);
             // Obtain a database connection
             con = Database.getDbConnection();
-            //                                                               1        2                  3            4
-            sql = "UPDATE " + TBL_SCRIPT_MAPPING_TYPES + " SET DERIVED_USAGE=?,ACTIVE=? WHERE ASSIGNMENT=? AND SCRIPT=?";
+            //                                                               1        2             3          4          5
+            sql = "UPDATE " + TBL_SCRIPT_MAPPING_TYPES + " SET DERIVED_USAGE=?,ACTIVE=? WHERE TYPEDEF=? AND SCRIPT=? AND STYPE=?";
             ps = con.prepareStatement(sql);
             ps.setBoolean(1, sm.isDerivedUsage());
             ps.setBoolean(2, sm.isActive());
             ps.setLong(3, sm.getId());
             ps.setLong(4, sm.getScriptId());
+            ps.setLong(5, sm.getScriptEvent().getId());
             ps.executeUpdate();
             success = true;
         } catch (SQLException exc) {
@@ -1031,7 +1032,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                     for (int i = 0; i < ass.size(); i++)
                         derived[i] = ass.get(i).getId();
                 }
-                e_ass.add(new FxScriptMappingEntry(FxScriptEvent.getById(rs.getInt(4)), scriptId, rs.getBoolean(3), rs.getBoolean(2), rs.getLong(1), derived));
+                e_ass.add(new FxScriptMappingEntry(FxScriptEvent.getById(rs.getLong(4)), scriptId, rs.getBoolean(3), rs.getBoolean(2), rs.getLong(1), derived));
             }
             rs = ps_t.executeQuery();
             while (rs != null && rs.next()) {
@@ -1044,7 +1045,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                     for (int i = 0; i < types.size(); i++)
                         derived[i] = types.get(i).getId();
                 }
-                e_types.add(new FxScriptMappingEntry(FxScriptEvent.getById(rs.getInt(4)), scriptId, rs.getBoolean(3), rs.getBoolean(2), rs.getLong(1), derived));
+                e_types.add(new FxScriptMappingEntry(FxScriptEvent.getById(rs.getLong(4)), scriptId, rs.getBoolean(3), rs.getBoolean(2), rs.getLong(1), derived));
             }
             mapping = new FxScriptMapping(scriptId, e_types, e_ass);
 

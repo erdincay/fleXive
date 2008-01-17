@@ -201,7 +201,7 @@ public interface ScriptingEngine {
     FxScriptMappingEntry createAssignmentScriptMapping(long scriptId, long assignmentId, boolean active, boolean derivedUsage) throws FxApplicationException;
 
     /**
-     * Loads all assignment mappings for a specified scirpt
+     * Loads all assignment mappings for a specified script
      *
      * @param _con  the database connection
      * @param scriptId  the script
@@ -279,14 +279,15 @@ public interface ScriptingEngine {
     /**
      * Update a mapping for types
      *
-     * @param scriptId     id of the script
-     * @param typeId       id of the type
-     * @param active       mapping is active?
-     * @param derivedUsage mapping used in derived types?
-     * @return the updated entry
+     * @param scriptId      id of the script
+     * @param typeId        id of the type
+     * @param scriptEventId id of the script event
+     * @param active        mapping is active?
+     * @param derivedUsage  mapping used in derived types?
+     * @return the updated  entry
      * @throws FxApplicationException on errors
      */
-    FxScriptMappingEntry updateTypeScriptMapping(long scriptId, long typeId, boolean active, boolean derivedUsage) throws FxApplicationException;
+    FxScriptMappingEntry updateTypeScriptMappingForEvent(long scriptId, long typeId, long scriptEventId, boolean active, boolean derivedUsage) throws FxApplicationException;
 
     /**
      * Execute run-once scripts.

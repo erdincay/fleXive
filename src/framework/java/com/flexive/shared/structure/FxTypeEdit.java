@@ -200,10 +200,11 @@ public class FxTypeEdit extends FxType implements Serializable {
      *
      * @return  the unmodifiable script mapping of this type
      */
-
+    /*
     public Map<FxScriptEvent, long[]> getScriptMapping() {
         return Collections.unmodifiableMap(scriptMapping);
     }
+    */
 
     /**
      * If FxTypeRelation entries are removed, remove all affected instances?
