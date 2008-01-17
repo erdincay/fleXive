@@ -51,7 +51,18 @@ function fileInputChanged() {
 }
 
 function preA4jAction(xpath,action) {
-    tinyMCE.triggerSave();
+    var instances = [];
+    for (var instanceName in tinyMCE.instances) {
+        if (tinyMCE.isInstance(tinyMCE.instances[instanceName])) {
+            instances.push(tinyMCE.instances[instanceName]);
+        }
+    }
+    if (instances.length > 0) {
+        tinyMCE.triggerSave();
+        for (var i = 0; i < instances.length; i++) {
+            tinyMCE.execCommand("mceRemoveControl", false, instances[i].editorId);
+        }
+    }
     if (dirtyFileInputs) {
         // If a file input was changed we need to submit the whole form, since a4j XhtmlHttpRequests
         // are not able to process binaries.
