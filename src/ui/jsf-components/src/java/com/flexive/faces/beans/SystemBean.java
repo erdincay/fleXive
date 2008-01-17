@@ -545,4 +545,13 @@ public class SystemBean implements Serializable {
     public long getCurrentTimeMillis() {
         return System.currentTimeMillis();
     }
+
+    /**
+     * Get the number of failed login attempts
+     *
+     * @return number of failed login attempts
+     */
+    public long getFailedLoginAttempts() {
+        return FxContext.get().getTicket().getFailedLoginAttempts();
+    }
 }

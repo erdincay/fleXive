@@ -83,6 +83,8 @@ public class UserTicketImpl implements UserTicket, Serializable {
     private static Role[] guestRoles = null;
     private static long[] guestGroups = null;
     private static FxPK guestContactData = new FxPK(1); // will be updated when the environment is available
+    private long failedLoginAttempts = 0;
+    private AuthenticationSource authenticationSource = AuthenticationSource.None;
 
     /**
      * Returns a guest ticket, based on the request information data.
@@ -107,7 +109,8 @@ public class UserTicketImpl implements UserTicket, Serializable {
             }
         }
         return new UserTicketImpl(si.getApplicationId(), si.isWebDAV(), "GUEST", "GUEST", Account.USER_GUEST,
-                guestContactData, Mandator.MANDATOR_FLEXIVE, true, guestGroups, guestRoles, guestACLAssignments, FxLanguage.DEFAULT);
+                guestContactData, Mandator.MANDATOR_FLEXIVE, true, guestGroups, guestRoles, guestACLAssignments,
+                FxLanguage.DEFAULT, 0, AuthenticationSource.None);
     }
 
     /**
@@ -304,23 +307,25 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * Private Constructor.
      *
-     * @param applicationId the application name that the ticket belongs to
-     * @param userName      the user name
-     * @param loginName     the login name
-     * @param userId        the user id
-     * @param contactData   contact data pk
-     * @param mandatorId    the mandator id that the user belongs to
-     * @param multiLogin    true if the account may be logged in more than once at a time
-     * @param groups        the groups
-     * @param roles         the roles
-     * @param assignments   the acl assignemnts
-     * @param language      the language
-     * @param isWebDav      true if this is a webdav ticket
+     * @param applicationId        the application name that the ticket belongs to
+     * @param userName             the user name
+     * @param loginName            the login name
+     * @param userId               the user id
+     * @param contactData          contact data pk
+     * @param mandatorId           the mandator id that the user belongs to
+     * @param multiLogin           true if the account may be logged in more than once at a time
+     * @param groups               the groups
+     * @param roles                the roles
+     * @param assignments          the acl assignemnts
+     * @param language             the language
+     * @param isWebDav             true if this is a webdav ticket
+     * @param failedLoginAttempts  number of failed login attempts
+     * @param authenticationSource source of authentication
      */
     private UserTicketImpl(String applicationId, boolean isWebDav, String userName, String loginName, long userId,
                            FxPK contactData, long mandatorId,
                            boolean multiLogin, long[] groups, Role[] roles, ACLAssignment assignments[],
-                           FxLanguage language) {
+                           FxLanguage language, long failedLoginAttempts, AuthenticationSource authenticationSource) {
         this.applicationId = applicationId;
         this.userName = userName;
         this.loginName = loginName;
@@ -333,6 +338,8 @@ public class UserTicketImpl implements UserTicket, Serializable {
         this.assignments = assignments;
         this.language = language;
         this.webDav = isWebDav;
+        this.failedLoginAttempts = failedLoginAttempts;
+        this.authenticationSource = authenticationSource;
         populateData();
     }
 
@@ -407,7 +414,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     public UserTicketImpl cloneAsGlobalSupervisor() {
         UserTicketImpl clone = new UserTicketImpl(this.applicationId, this.webDav, this.userName, this.loginName,
                 this.userId, this.contactData, this.mandator, this.multiLogin, this.groups.clone(), this.roles.clone(),
-                ACLAssignment.clone(this.assignments), this.language);
+                ACLAssignment.clone(this.assignments), this.language, this.failedLoginAttempts, this.authenticationSource);
         clone.globalSupervisor = true;
         return clone;
     }
@@ -685,5 +692,27 @@ public class UserTicketImpl implements UserTicket, Serializable {
      */
     public boolean isWebDav() {
         return this.webDav;
+    }
+
+    public void setFailedLoginAttempts(long failedLoginAttempts) {
+        this.failedLoginAttempts = failedLoginAttempts;
+    }
+
+    public void setAuthenticationSource(AuthenticationSource authenticationSource) {
+        this.authenticationSource = authenticationSource;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public long getFailedLoginAttempts() {
+        return failedLoginAttempts;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public AuthenticationSource getAuthenticationSource() {
+        return authenticationSource;
     }
 }

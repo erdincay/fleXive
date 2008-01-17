@@ -21,6 +21,11 @@
                 document.write("<br/>#{fxMessageBean['Login.message.IEbug3']}");
             }
         </script>
+        <ui:fragment rendered="#{fxSystemBean.failedLoginAttempts > 0}">
+            <div class="errorMessage">
+                <br/><br/>#{fxMessageBean['Global.failedLoginAttempts,#{fxSystemBean.failedLoginAttempts}']}<br/>
+            </div>
+        </ui:fragment>
     </ui:define>
 </ui:composition>
 

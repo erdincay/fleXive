@@ -38,6 +38,7 @@ import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.core.security.FxCallback;
 import com.flexive.core.security.LoginLogoutHandler;
+import com.flexive.core.security.UserTicketImpl;
 import com.flexive.core.security.UserTicketStore;
 import com.flexive.shared.*;
 import com.flexive.shared.content.FxContent;
@@ -249,11 +250,11 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
 
             // Obtain a database connection
             con = Database.getDbConnection();
-            //               1-4 5      6           7              8                9          10       11      12
-            curSql = "SELECT d.*,a.ID,a.IS_ACTIVE,a.IS_VALIDATED,a.ALLOW_MULTILOGIN,VALID_FROM,VALID_TO,NOW(),a.PASSWORD " +
+            //               1-6 7      8           9              10                 11            12       13      14
+            curSql = "SELECT d.*,a.ID,a.IS_ACTIVE,a.IS_VALIDATED,a.ALLOW_MULTILOGIN,a.VALID_FROM,a.VALID_TO,NOW(),a.PASSWORD " +
                     "FROM " + TBL_ACCOUNTS + " a " +
                     "LEFT JOIN " +
-                    " (SELECT ID,ISLOGGEDIN,LAST_LOGIN,LAST_LOGIN_FROM FROM " + TBL_ACCOUNT_DETAILS +
+                    " (SELECT ID,ISLOGGEDIN,LAST_LOGIN,LAST_LOGIN_FROM,FAILED_ATTEMPTS,AUTHSRC FROM " + TBL_ACCOUNT_DETAILS +
                     " WHERE APPLICATION=?) d ON a.ID=d.ID WHERE a.LOGIN_NAME=?";
             ps = con.prepareStatement(curSql);
             ps.setString(1, inf.getApplicationId());
@@ -265,26 +266,30 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                 throw new FxLoginFailedException("Login failed (invalid user or password)", FxLoginFailedException.TYPE_USER_OR_PASSWORD_NOT_DEFINED);
 
             // check if the hashed password matches the hash stored in the database
-            final long id = rs.getLong(5);
-            final boolean passwordMatches = FxSharedUtils.hashPassword(id, password).equals(rs.getString(12));
-            if (!passwordMatches)
+            final long id = rs.getLong(7);
+            final boolean passwordMatches = FxSharedUtils.hashPassword(id, password).equals(rs.getString(14));
+            if (!passwordMatches) {
+                increaseFailedLoginAttempts(con, id);
                 throw new FxLoginFailedException("Login failed (invalid user or password)", FxLoginFailedException.TYPE_USER_OR_PASSWORD_NOT_DEFINED);
+            }
 
             // Read data
             final boolean loggedIn = rs.getBoolean(2);
             final Date lastLogin = rs.getTimestamp(3);
             final String lastLoginFrom = rs.getString(4);
-            final boolean active = rs.getBoolean(6);
-            final boolean validated = rs.getBoolean(7);
-            final boolean allowMultiLogin = rs.getBoolean(8);
-            final Date validFrom = rs.getTimestamp(9);
-            final Date validTo = rs.getTimestamp(10);
-            final Date dbNow = rs.getTimestamp(11);
+            final long failedAttempts = rs.getLong(5);
+            final boolean active = rs.getBoolean(8);
+            final boolean validated = rs.getBoolean(9);
+            final boolean allowMultiLogin = rs.getBoolean(10);
+            final Date validFrom = rs.getTimestamp(11);
+            final Date validTo = rs.getTimestamp(12);
+            final Date dbNow = rs.getTimestamp(13);
 
             // Account active?
             if (!active || !validated) {
                 if (LOG.isDebugEnabled()) LOG.debug("Login for user [" + username +
                         "] failed, account is inactive. active=" + active + " validated=" + validated);
+                increaseFailedLoginAttempts(con, id);
                 throw new FxLoginFailedException("Login failed", FxLoginFailedException.TYPE_INACTIVE_ACCOUNT);
             }
 
@@ -298,6 +303,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                 if (LOG.isDebugEnabled())
                     LOG.debug("Login for user [" + username +
                             "] failed, from/to date not valid. from='" + sdf.format(validFrom) + "' to='" + validTo + "'");
+                increaseFailedLoginAttempts(con, id);
                 throw new FxAccountExpiredException(username, dbNow);
             }
 
@@ -307,6 +313,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                 if (lastLogin.getTime() >= SYS_UP) {
                     FxAccountInUseException aiu = new FxAccountInUseException(username, lastLoginFrom, lastLogin);
                     if (LOG.isInfoEnabled()) LOG.info(aiu);
+                    increaseFailedLoginAttempts(con, id);
                     throw aiu;
                 }
             }
@@ -320,8 +327,8 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             ps.executeUpdate();
 
             // Mark user as active in the database
-            curSql = "INSERT INTO " + TBL_ACCOUNT_DETAILS + " (ID,APPLICATION,ISLOGGEDIN,LAST_LOGIN,LAST_LOGIN_FROM) " +
-                    "VALUES (?,?,?,?,?)";
+            curSql = "INSERT INTO " + TBL_ACCOUNT_DETAILS + " (ID,APPLICATION,ISLOGGEDIN,LAST_LOGIN,LAST_LOGIN_FROM,FAILED_ATTEMPTS,AUTHSRC) " +
+                    "VALUES (?,?,?,?,?,?,?)";
             ps.close();
             ps = con.prepareStatement(curSql);
             ps.setLong(1, id);
@@ -329,16 +336,21 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             ps.setBoolean(3, true);
             ps.setTimestamp(4, new Timestamp(new Date().getTime()));
             ps.setString(5, inf.getRemoteHost());
+            ps.setLong(6, 0); //reset failed attempts
+            ps.setString(7, AuthenticationSource.Database.name());
             ps.executeUpdate();
 
             // Load the user and construct a user ticket
-            return UserTicketStore.getUserTicket(username);
+            final UserTicketImpl ticket = (UserTicketImpl) UserTicketStore.getUserTicket(username);
+            ticket.setFailedLoginAttempts(failedAttempts);
+            ticket.setAuthenticationSource(AuthenticationSource.Database);
+            return ticket;
         } catch (FxAccountInUseException ae) {
             if (ctx != null)
                 ctx.setRollbackOnly();
             throw ae;
         } catch (SQLException exc) {
-            FxLoginFailedException dbe = new FxLoginFailedException("SqlError=" + exc.getMessage(),
+            FxLoginFailedException dbe = new FxLoginFailedException("Database error: " + exc.getMessage(),
                     FxLoginFailedException.TYPE_SQL_ERROR);
             LOG.error(dbe);
             if (ctx != null)
@@ -357,6 +369,37 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             throw dbe;
         } finally {
             Database.closeObjects(AccountEngineBean.class, con, ps);
+        }
+    }
+
+    /**
+     * Increase the number of failed login attempts for the given user
+     *
+     * @param con    an open and valid connection
+     * @param userId user id
+     * @throws SQLException on errors
+     */
+    private void increaseFailedLoginAttempts(Connection con, long userId) throws SQLException {
+        PreparedStatement ps = null;
+        try {
+            ps = con.prepareStatement("UPDATE " + TBL_ACCOUNT_DETAILS + " SET FAILED_ATTEMPTS=FAILED_ATTEMPTS+1 WHERE ID=?");
+            ps.setLong(1, userId);
+            if (ps.executeUpdate() == 0) {
+                ps.close();
+                ps = con.prepareStatement("INSERT INTO " + TBL_ACCOUNT_DETAILS + " (ID,APPLICATION,ISLOGGEDIN,LAST_LOGIN,LAST_LOGIN_FROM,FAILED_ATTEMPTS,AUTHSRC) " +
+                        "VALUES (?,?,?,?,?,?,?)");
+                ps.setLong(1, userId);
+                ps.setString(2, FxContext.get().getApplicationId());
+                ps.setBoolean(3, false);
+                ps.setTimestamp(4, new Timestamp(new Date().getTime()));
+                ps.setString(5, FxContext.get().getRemoteHost());
+                ps.setLong(6, 1); //one failed attempt
+                ps.setString(7, AuthenticationSource.Database.name());
+                ps.executeUpdate();
+            }
+        } finally {
+            if (ps != null)
+                ps.close();
         }
     }
 
@@ -1474,7 +1517,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             if (LOG.isDebugEnabled()) LOG.debug("Users in group [" + groupId + "]:" + result + ", caller=" + ticket);
             return result;
         } catch (SQLException exc) {
-            FxLoadException ce = new FxLoadException("SqlError, last stmt was [" + sCurSql + "]:" + exc.getMessage(), exc);
+            FxLoadException ce = new FxLoadException("Database error! Last stmt was [" + sCurSql + "]:" + exc.getMessage(), exc);
             LOG.error(ce);
             throw ce;
         } finally {

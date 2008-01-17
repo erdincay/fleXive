@@ -304,6 +304,20 @@ public interface UserTicket extends Serializable {
      * @return the cloned ticket with the given session id
      */
     UserTicket cloneAsGlobalSupervisor();
+
+    /**
+     * Get the number of failed login attempts until the user sucessfully logged in
+     *
+     * @return number of failed login attempts until the user sucessfully logged in
+     */
+    public long getFailedLoginAttempts();
+
+    /**
+     * Get the source used to authenticate the user
+     *
+     * @return source used to authenticate the user
+     */
+    public AuthenticationSource getAuthenticationSource();
 }
 
 
