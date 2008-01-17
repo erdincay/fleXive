@@ -51,6 +51,7 @@ function fileInputChanged() {
 }
 
 function preA4jAction(xpath,action) {
+    tinyMCE.triggerSave();
     if (dirtyFileInputs) {
         // If a file input was changed we need to submit the whole form, since a4j XhtmlHttpRequests
         // are not able to process binaries.

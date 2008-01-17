@@ -35,13 +35,13 @@
 
    <c:if test="#{element.XPath!=null}">
         <a4j:commandLink reRender="all" actionListener="#{srcEditor.moveElementUp}"
-                         onmouseover='ignoreEvent(event)'  onclick="tinyMCE.triggerSave();if (!preA4jAction('#{group.XPathFull}','moveElementUp')) return false;">
+                         onmouseover='ignoreEvent(event)'  onclick="if (!preA4jAction('#{group.XPathFull}','moveElementUp')) return false;">
             <f:setPropertyActionListener target="#{srcEditor.element}" value="#{group}"/>
             <t:graphicImage alt="moveUp" url="/adm/images/contentEditor/up.png" style="#{upDownStyle};margin-left:3px"/>
         </a4j:commandLink>
 
         <a4j:commandLink reRender="all" actionListener="#{srcEditor.moveElementDown}"
-                         onmouseover='ignoreEvent(event)'  onclick="tinyMCE.triggerSave();if (!preA4jAction('#{group.XPathFull}','moveElementDown')) return false;">
+                         onmouseover='ignoreEvent(event)'  onclick="if (!preA4jAction('#{group.XPathFull}','moveElementDown')) return false;">
             <f:setPropertyActionListener target="#{srcEditor.element}" value="#{group}"/>
             <t:graphicImage alt="moveDown" url="/adm/images/contentEditor/down.png" style="#{upDownStyle}"/>
         </a4j:commandLink>
@@ -54,7 +54,7 @@
         <c:if test="#{group.removeableElements>0}">
             <c:set var="count" value="#{count+1}"/>
             <a4j:commandLink reRender="all" actionListener="#{srcEditor.removeElement}"
-                             onmouseover='ignoreEvent(event)' onclick="tinyMCE.triggerSave();if (!preA4jAction('#{group.XPathFull}','removeProperty')) return false;">
+                             onmouseover='ignoreEvent(event)' onclick="if (!preA4jAction('#{group.XPathFull}','removeProperty')) return false;">
                 <f:setPropertyActionListener target="#{srcEditor.element}" value="#{group}"/>
                 <t:graphicImage styleClass="icon" alt="remove" url="/adm/images/contentEditor/remove.png"/>
                 <ui:repeat var="assignmentLabel" value="#{assignmentLabel}">
@@ -67,7 +67,7 @@
         <c:if test="#{group.createableElements>0}">
             <c:set var="count" value="#{count+1}"/>
             <a4j:commandLink reRender="all" actionListener="#{srcEditor.addElement}"
-                             onmouseover='ignoreEvent(event)'  onclick="tinyMCE.triggerSave();if (!preA4jAction('#{group.XPathFull}','addProperty')) return false;">
+                             onmouseover='ignoreEvent(event)'  onclick="if (!preA4jAction('#{group.XPathFull}','addProperty')) return false;">
                 <f:setPropertyActionListener target="#{srcEditor.element}" value="#{group}"/>
                 <t:graphicImage styleClass="icon" alt="add" url="/adm/images/contentEditor/add.png"/>
                 <ui:repeat var="assignmentLabel" value="#{assignmentLabel}">
@@ -85,7 +85,7 @@
                 <f:selectItems value="#{items}" />
             </t:selectManyListbox>
             <a4j:commandLink reRender="all" actionListener="#{srcEditor.addChilds}"
-                             onclick="prepareAdd('#{selectListId}');tinyMCE.triggerSave();if (!preA4jAction('#{group.XPathFull}','addChilds')) return false;"
+                             onclick="prepareAdd('#{selectListId}');if (!preA4jAction('#{group.XPathFull}','addChilds')) return false;"
                              onmouseover='ignoreEvent(event)'>
                 <f:setPropertyActionListener target="#{srcEditor.element}" value="#{group}"/>
                 <br />
@@ -108,7 +108,7 @@
         <c:if test="#{group.createableElements>0}">
             <c:set var="count" value="#{count+1}"/>
             <a4j:commandLink reRender="all" actionListener="#{srcEditor.addElement}"
-                             onmouseover='ignoreEvent(event)'  onclick="tinyMCE.triggerSave();if (!preA4jAction('#{group.XPathFull}','addProperty')) return false;">
+                             onmouseover='ignoreEvent(event)'  onclick="if (!preA4jAction('#{group.XPathFull}','addProperty')) return false;">
                 <f:setPropertyActionListener target="#{srcEditor.element}" value="#{group}"/>
                 <t:graphicImage alt="add" url="/adm/images/contentEditor/add.png" style="border:0;float:left;margin-left:3px;"/>
             </a4j:commandLink>
@@ -120,7 +120,7 @@
         <!-- Remove element button -->
         <c:if test="#{group.removeableElements>0}">
             <a4j:commandLink reRender="all" actionListener="#{srcEditor.removeElement}"
-                             onmouseover='ignoreEvent(event)' onclick="tinyMCE.triggerSave();if (!preA4jAction('#{group.XPathFull}','removeProperty')) return false;">
+                             onmouseover='ignoreEvent(event)' onclick="if (!preA4jAction('#{group.XPathFull}','removeProperty')) return false;">
                 <f:setPropertyActionListener target="#{srcEditor.element}" value="#{group}"/>
                 <t:graphicImage alt="remove" url="/adm/images/contentEditor/remove.png" style="border:0;float:left;margin-left:3px;"/>
             </a4j:commandLink>

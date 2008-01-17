@@ -92,7 +92,8 @@ function initHtmlEditor(autoPopulate) {
                 theme_advanced_statusbar_location: "bottom",
 
                 // fix alert when switching between multiple editors
-                focus_alert: false
+                focus_alert: false,
+                strict_loading_mode: true   /* Fixes Firefox HTML encoding problem with multiple editors */
                 /*width: "100%"*/
         });
     } catch (e) {

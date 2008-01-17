@@ -271,12 +271,13 @@ class EditModeHelper extends RenderHelper {
                 writeHtmlAttributes();
                 if (value instanceof FxHTML) {
                     // render tinyMCE editor
-                    if (!FxJsfUtils.isAjaxRequest()) {
+//                    if (!FxJsfUtils.isAjaxRequest()) {
                         // when the page is updated via ajax, tinyMCE generates an additional hidden input
                         // and the text area is essential an anonymous div container (not sure why)
                         writer.writeAttribute("name", inputId, null);
-                    }
+//                    }
                     writer.writeAttribute("class", FxValueInputRenderer.CSS_TEXTAREA_HTML, null);
+                    writer.writeText(getTextValue(language), null);
                     writer.endElement("textarea");
                     writer.startElement("script", null);
                     writer.writeAttribute("type", "text/javascript", null);
@@ -286,8 +287,14 @@ class EditModeHelper extends RenderHelper {
                         FxJsfUtils.getRequest().setAttribute(REQUEST_EDITORINIT, true);
                     }
                     writer.write("tinyMCE.execCommand('mceAddControl', false, '" + inputId + "');\n");
-                    writer.write("tinyMCE.execInstanceCommand('" + inputId + "', 'mceSetContent', false, '"
-                            + FxFormatUtils.escapeForJavaScript(getTextValue(language), false, false) + "');\n");
+                    if (FxJsfUtils.isAjaxRequest()) {
+                        // explicitly set content for firefox, since it messes up HTML markup
+                        // when populated directly from the textarea content
+                        writer.write("if (tinyMCE.isGecko) {\n");
+                        writer.write("    tinyMCE.execInstanceCommand('" + inputId + "', 'mceSetContent', false, '"
+                                + FxFormatUtils.escapeForJavaScript(getTextValue(language), false, false) + "');\n");
+                        writer.write("}\n");
+                    }
                     writer.endElement("script");
                 } else {
                     // render standard text area
