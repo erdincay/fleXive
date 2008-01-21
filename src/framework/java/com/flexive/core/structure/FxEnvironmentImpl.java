@@ -725,8 +725,11 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         if (ret == null)
             ret = new ArrayList<FxAssignment>(0);
         else {
-            for (FxAssignment as : ret)
-                ret.addAll(getDerivedAssignments(as.getId()));
+            List<FxAssignment> ret2 = new ArrayList<FxAssignment>(0);
+            for (FxAssignment as : ret) {
+                ret2.addAll(getDerivedAssignments(as.getId()));
+            }
+            ret.addAll(ret2);
         }
         return ret;
     }

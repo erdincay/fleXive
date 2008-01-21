@@ -34,6 +34,8 @@
                          bean="#{propertyEditorBean}" action="showPropertyEditor"/>
                 <adm:tab label="#{fxMessageBean['PropertyEditor.tab.option']}" active="false" id="tab3"
                          bean="#{propertyEditorBean}" action="showPropertyOptionEditor"/>
+                <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor']} [#{propertyEditorBean.scriptCount}]" active="false" id="tab4"
+                         bean="#{propertyEditorBean}" action="showAssignmentScriptEditor"/>
             </ui:fragment>
             <ui:fragment rendered="#{not propertyEditorBean.editMode}">
                 <adm:tab label="#{fxMessageBean['PropertyEditor.tab.propertyAssignment.readonly']}" active="true" id="tab1ro"/>
@@ -41,6 +43,8 @@
                          bean="#{propertyEditorBean}" action="showPropertyEditor"/>
                 <adm:tab label="#{fxMessageBean['PropertyEditor.tab.option.readonly']}" active="false" id="tab3ro"
                          bean="#{propertyEditorBean}" action="showPropertyOptionEditor"/>
+                <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor.readonly']} [#{propertyEditorBean.scriptCount}]" active="false" id="tab4ro"
+                         bean="#{propertyEditorBean}" action="showAssignmentScriptEditor"/>
             </ui:fragment>
 
             <fx:formRow labelKey="PropertyEditor.label.xPath" id="xPath">

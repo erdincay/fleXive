@@ -37,9 +37,11 @@ import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.beans.ActionBean;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.shared.*;
+import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.security.Role;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
@@ -51,6 +53,8 @@ import org.apache.commons.logging.LogFactory;
 import javax.faces.model.SelectItem;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Bean behind propertyAssignmentEditor.xhtml, propertyEditor.xhtml and propertyOptionEditor to
@@ -90,6 +94,14 @@ public class PropertyEditorBean implements ActionBean {
     //checker for the editMode: if not in edit mode,
     // save and delete buttons are not rendered by the gui
     private boolean editMode = false;
+     //assignment script editor tab
+    private ScriptListWrapper scriptWrapper = null;
+    private int scriptListFiler = -1;
+    private FxScriptInfo selectedScriptInfo = null;
+    private long selectedScriptEventId = -1;
+    private boolean selectedDerivedUsage = false;
+    private boolean selectedActive = true;
+
 
     public boolean isMayEdit() {
         return mayEdit;
@@ -711,6 +723,8 @@ public class PropertyEditorBean implements ActionBean {
      * property assignment is possible via the webinterface
      */
     private void initEditing() {
+        if (!assignment.isNew())
+            scriptWrapper = new ScriptListWrapper(assignment.getId(), false);
 
         setMinMultiplicity(FxMultiplicity.getIntToString(assignment.getMultiplicity().getMin()));
         setMaxMultiplicity(FxMultiplicity.getIntToString(assignment.getMultiplicity().getMax()));
@@ -814,7 +828,7 @@ public class PropertyEditorBean implements ActionBean {
 
      /**
      * Apply all changes to the property assignment which are still cached in
-     * the view (property options, multiplicity, label) and forward them to DB
+     * the view (property options, multiplicity, label, scripts) and forward them to DB
      *
      * @throws FxApplicationException   if the label is invalid
      */
@@ -824,6 +838,10 @@ public class PropertyEditorBean implements ActionBean {
         }
         int min = FxMultiplicity.getStringToInt(minMultiplicity);
         int max = FxMultiplicity.getStringToInt(maxMultiplicity);
+
+        //save script changes
+        if (!assignment.isNew() && !isSystemInternal())
+            saveScriptChanges();
 
         //delete current options
         while (!assignment.getOptions().isEmpty()) {
@@ -915,5 +933,121 @@ public class PropertyEditorBean implements ActionBean {
     public String showPropertyOptionEditor() {
         return "propertyOptionEditor";
     }
+
+    /***************** script editor tab begin ************************/
+
+    public String showAssignmentScriptEditor() {
+        return "assignmentScriptEditor";
+    }
+
+     /**
+     * called from the script editor; to open an instance where the script is assigned to
+     *
+     * @return type editor page
+     */
+    public String gotoAssignmentScriptEditor() {
+        editMode = false;
+        long propId = FxJsfUtils.getLongParameter("oid", -1);
+        mayEdit = mayEdit = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
+        setPropertyId(propId);
+        FxPropertyAssignmentEdit assignment = ((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(propId)).asEditable();
+        setAssignment(assignment);
+        setProperty(assignment.getPropertyEdit());
+        initEditing();
+        return showAssignmentScriptEditor();
+    }
+
+    public ScriptListWrapper getScriptWrapper() {
+        return scriptWrapper;
+    }
+
+    public int getScriptCount() {
+        return scriptWrapper == null ? 0: scriptWrapper.getScriptList().size();
+    }
+
+    public int getScriptListFiler() {
+        return scriptListFiler;
+    }
+
+    public void setScriptListFiler(int scriptListFiler) {
+        this.scriptListFiler = scriptListFiler;
+    }
+
+    public void removeScript() {
+        scriptWrapper.remove(scriptListFiler);
+    }
+
+    public FxScriptInfo getSelectedScriptInfo() {
+        return selectedScriptInfo;
+    }
+
+    public void setSelectedScriptInfo(FxScriptInfo selectedScriptInfo) {
+        this.selectedScriptInfo = selectedScriptInfo;
+    }
+
+    public long getSelectedScriptEventId() {
+        if (selectedScriptInfo != null)
+            return selectedScriptInfo.getEvent().getId();
+        else return -1;
+        //return selectedScriptEventId;
+    }
+
+    public void setSelectedScriptEventId(long selectedScriptEventId) {
+        this.selectedScriptEventId = selectedScriptEventId;
+    }
+
+    public boolean isSelectedDerivedUsage() {
+        return selectedDerivedUsage;
+    }
+
+    public void setSelectedDerivedUsage(boolean selectedDerivedUsage) {
+        this.selectedDerivedUsage = selectedDerivedUsage;
+    }
+
+    public boolean isSelectedActive() {
+        return selectedActive;
+    }
+
+    public void setSelectedActive(boolean selectedActive) {
+        this.selectedActive = selectedActive;
+    }
+
+    public void addScript() {
+        try {
+            scriptWrapper.add(selectedScriptInfo.getId(), selectedScriptEventId, selectedDerivedUsage, selectedActive);
+            this.selectedScriptInfo = CacheAdmin.getFilteredEnvironment().getScripts().get(0);
+            this.selectedScriptInfo.getEvent().getId();
+        }
+        catch (Throwable t) {
+            //TODO: print error message, a4j tags do not support faces message erros
+            //new FxFacesMsgErr(t).addToContext();
+        }
+    }
+
+    public Map<Long, String> getAssignmentNameForId() {
+        return new HashMap<Long,String>() {
+            public String get(Object key) {
+                return CacheAdmin.getFilteredEnvironment().getAssignment((Long)key).getXPath();
+            }
+        };
+    }
+
+    /**
+     *  Saves script assignment changes to DB.
+     *
+     * @throws com.flexive.shared.exceptions.FxApplicationException  on errors
+     */
+    public void saveScriptChanges() throws FxApplicationException {
+       for (ScriptListWrapper.ScriptListEntry e : scriptWrapper.getDelta(assignment.getId(), false)) {
+           if (e.getId() == ScriptListWrapper.ID_SCRIPT_ADDED)
+               EJBLookup.getScriptingEngine().createAssignmentScriptMapping(e.getScriptEvent(), e.getScriptInfo().getId(), assignment.getId(), e.isActive(), e.isDerivedUsage());
+           else if (e.getId() == ScriptListWrapper.ID_SCRIPT_REMOVED)
+               EJBLookup.getScriptingEngine().removeAssignmentScriptMappingForEvent(e.getScriptInfo().getId(), assignment.getId(), e.getScriptEvent());
+           else if (e.getId() == ScriptListWrapper.ID_SCRIPT_UPDATED)
+               EJBLookup.getScriptingEngine().updateAssignmentScriptMappingForEvent(e.getScriptInfo().getId(), assignment.getId(), e.getScriptEvent(), e.isActive(), e.isDerivedUsage());
+       }
+    }
+
+    /****script editor tab end*********/
 
 }

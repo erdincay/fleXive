@@ -161,7 +161,9 @@ public class ScriptListWrapper {
 
         //set remaining propterties
         for (FxScriptInfo s : CacheAdmin.getEnvironment().getScripts())
-            for (FxScriptMappingEntry e : CacheAdmin.getFilteredEnvironment().getScriptMapping(s.getId()).getMappedTypes() ) {
+            for (FxScriptMappingEntry e : isType? CacheAdmin.getFilteredEnvironment().getScriptMapping(s.getId()).getMappedTypes() :
+                    CacheAdmin.getFilteredEnvironment().getScriptMapping(s.getId()).getMappedAssignments()) {
+                FxScriptMappingEntry debug=e;
                 //determine if script is active and if it should be derived
                 if (e.getId() ==id &&  s.getId() == e.getScriptId()) {
                     list.add(new ScriptListEntry(ctr++, s, e.getScriptEvent(), false, -1, e.isDerivedUsage(), e.isActive()));

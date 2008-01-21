@@ -189,7 +189,7 @@ public interface ScriptingEngine {
     FxScriptResult runScript(long scriptId) throws FxApplicationException;
 
     /**
-     * Create a new mapping for assignments
+     * Create a new mapping for assignments with the default FxScriptEvent the script was created with
      *
      * @param scriptId     id of the script
      * @param assignmentId id of the assignment
@@ -199,6 +199,19 @@ public interface ScriptingEngine {
      * @throws FxApplicationException on errors
      */
     FxScriptMappingEntry createAssignmentScriptMapping(long scriptId, long assignmentId, boolean active, boolean derivedUsage) throws FxApplicationException;
+
+    /**
+     * Create a new mapping for assignments with with a given FxScriptEvent
+     *
+     * @param scriptEvent  FxScriptEvent for this mapping (on create, save, remove, etc.)
+     * @param scriptId     id of the script
+     * @param assignmentId id of the assignment
+     * @param active       mapping is active?
+     * @param derivedUsage mapping used in derived assignments?
+     * @return the created entry
+     * @throws FxApplicationException on errors
+     */
+    FxScriptMappingEntry createAssignmentScriptMapping(FxScriptEvent scriptEvent, long scriptId, long assignmentId, boolean active, boolean derivedUsage) throws FxApplicationException;
 
     /**
      * Loads all assignment mappings for a specified script
@@ -246,6 +259,17 @@ public interface ScriptingEngine {
     void removeAssignmentScriptMapping(long scriptId, long assignmentId) throws FxApplicationException;
 
     /**
+     * Remove a mapping from a script to an assignment for a specific event
+     * (directly mapped, not via inheritance!)
+     *
+     * @param scriptId     id of the script
+     * @param assignmentId id of the assignment
+     * @param event         the script event
+     * @throws FxApplicationException on errors
+     */
+    void removeAssignmentScriptMappingForEvent(long scriptId, long assignmentId, FxScriptEvent event) throws FxApplicationException;
+
+    /**
      * Remove a mapping from a script to a type (directly mapped, not via inheritance!)
      *
      * @param scriptId id of the script
@@ -259,35 +283,36 @@ public interface ScriptingEngine {
      *
      * @param scriptId id of the script
      * @param typeId   id of the type
-     * @param scriptEventId id of the script event
+     * @param event    the script event
      * @throws FxApplicationException on errors
      */
-    void removeTypeScriptMappingForEvent(long scriptId, long typeId, long scriptEventId) throws FxApplicationException;
+    void removeTypeScriptMappingForEvent(long scriptId, long typeId, FxScriptEvent event) throws FxApplicationException;
 
     /**
      * Update a mapping for assignments
      *
      * @param scriptId     id of the script
      * @param assignmentId id of the assignment
+     * @param event        the script event
      * @param active       mapping is active?
      * @param derivedUsage mapping used in derived assignments?
      * @return the updated entry
      * @throws FxApplicationException on errors
      */
-    FxScriptMappingEntry updateAssignmentScriptMapping(long scriptId, long assignmentId, boolean active, boolean derivedUsage) throws FxApplicationException;
+    FxScriptMappingEntry updateAssignmentScriptMappingForEvent(long scriptId, long assignmentId, FxScriptEvent event, boolean active, boolean derivedUsage) throws FxApplicationException;
 
     /**
      * Update a mapping for types
      *
      * @param scriptId      id of the script
      * @param typeId        id of the type
-     * @param scriptEventId id of the script event
+     * @param event         the script event
      * @param active        mapping is active?
      * @param derivedUsage  mapping used in derived types?
      * @return the updated  entry
      * @throws FxApplicationException on errors
      */
-    FxScriptMappingEntry updateTypeScriptMappingForEvent(long scriptId, long typeId, long scriptEventId, boolean active, boolean derivedUsage) throws FxApplicationException;
+    FxScriptMappingEntry updateTypeScriptMappingForEvent(long scriptId, long typeId, FxScriptEvent event, boolean active, boolean derivedUsage) throws FxApplicationException;
 
     /**
      * Execute run-once scripts.

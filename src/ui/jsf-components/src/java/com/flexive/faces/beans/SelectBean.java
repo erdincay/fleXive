@@ -108,6 +108,8 @@ public class SelectBean implements Serializable {
     private List<SelectItem> restrictedTypeModes = null;
     private List<SelectItem> restrictedTypeCategories = null;
     private List<SelectItem> typeScriptEvents = null;
+    private List<SelectItem> assignmentScripts = null;
+    private List<SelectItem> assignmentScriptEvents = null;
     private List<SelectItem> allScriptEvents = null;
     private List<SelectItem> allScriptEventsAsEnum = null;
     private List<SelectItem> scriptScopes = null;
@@ -733,6 +735,40 @@ public class SelectBean implements Serializable {
             }
         }
         return allScriptEvents;
+    }
+
+     /**
+     * Return scripts with the default event scope "Assignment "as SelectList.
+     *
+     * @return scripts with the default event scope "Assignment "as SelectList.
+     */
+    public List<SelectItem> getAssignmentScripts() {
+        if (assignmentScripts ==null) {
+            List<FxScriptInfo> scriptList = new ArrayList<FxScriptInfo>();
+            for (FxScriptInfo s : CacheAdmin.getFilteredEnvironment().getScripts()) {
+                if (s.getEvent().getScope() == FxScriptScope.Assignment)
+                    scriptList.add(s);
+            }
+            Collections.sort(scriptList, new FxJsfUtils.ScriptInfoSorter());
+            assignmentScripts = FxJsfUtils.asSelectList(scriptList, false);
+        }
+        return assignmentScripts;
+    }
+
+    /**
+     * Return the enum FxScriptEvent of ScriptScope "Assignment" as SelectList
+     *
+     * @return the enum of FxScriptEvent of scope "Assignment" as SelectList
+     */
+    public List<SelectItem> getAssignmentScriptEvents() {
+        if (assignmentScriptEvents == null) {
+            assignmentScriptEvents = new ArrayList<SelectItem>();
+            for (FxScriptEvent e : FxScriptEvent.values()) {
+                if (e.getScope().compareTo(FxScriptScope.Assignment) ==0)
+                    assignmentScriptEvents.add(new SelectItem(e.getId(), e.getName()));
+            }
+        }
+        return assignmentScriptEvents;
     }
 
     /**

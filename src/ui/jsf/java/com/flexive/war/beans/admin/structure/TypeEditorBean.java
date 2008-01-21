@@ -42,6 +42,7 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.Role;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
 import org.apache.commons.lang.StringUtils;
@@ -90,8 +91,8 @@ public class TypeEditorBean {
     //type script editor tab
     private ScriptListWrapper scriptWrapper = null;
     private int scriptListFiler = -1;
-    private FxScriptInfo selectedScriptInfo = CacheAdmin.getFilteredEnvironment().getScripts().get(0);
-    private long selectedScriptEventId = selectedScriptInfo.getEvent().getId();
+    private FxScriptInfo selectedScriptInfo = null;
+    private long selectedScriptEventId = -1;
     private boolean selectedDerivedUsage = false;
     private boolean selectedActive = true;
 
@@ -115,8 +116,6 @@ public class TypeEditorBean {
                 mayDelete = FxJsfUtils.getBooleanParameter("mayDelete", false);
 
                 this.type = CacheAdmin.getEnvironment().getType(propId).asEditable();
-
-
                 initEditing();
             } else if ("editInstance".equals(action)) {
                 editMode = true;
@@ -697,18 +696,13 @@ public class TypeEditorBean {
      *
      * @return type editor page
      */
-    public String showTypeEd() {
+    public String gotoTypeScriptEditor() {
         editMode = false;
         long propId = FxJsfUtils.getLongParameter("oid", -1);
-        mayEdit = false;
-        mayDelete = false;
+        mayEdit = mayEdit = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
         this.type = CacheAdmin.getEnvironment().getType(propId).asEditable();
         initEditing();
-        return "typeEditor";
-    }
-
-    public String showTypeScriptEditor() {
-        return "typeScriptEditor";
+        return showTypeScriptEditor();
     }
 
     /**
@@ -722,6 +716,10 @@ public class TypeEditorBean {
     }
 
     /***************** script editor tab begin ************************/
+
+    public String showTypeScriptEditor() {
+        return "typeScriptEditor";
+    }
 
     public ScriptListWrapper getScriptWrapper() {
         return scriptWrapper;
@@ -752,8 +750,9 @@ public class TypeEditorBean {
     }
 
     public long getSelectedScriptEventId() {
-        return selectedScriptInfo.getEvent().getId();
-        //return selectedScriptEventId;
+        if (selectedScriptInfo != null)
+            return selectedScriptInfo.getEvent().getId();
+        else return -1;
     }
 
     public void setSelectedScriptEventId(long selectedScriptEventId) {
@@ -806,241 +805,12 @@ public class TypeEditorBean {
            if (e.getId() == ScriptListWrapper.ID_SCRIPT_ADDED)
                EJBLookup.getScriptingEngine().createTypeScriptMapping(e.getScriptEvent(), e.getScriptInfo().getId(), type.getId(), e.isActive(), e.isDerivedUsage());
            else if (e.getId() == ScriptListWrapper.ID_SCRIPT_REMOVED)
-               EJBLookup.getScriptingEngine().removeTypeScriptMappingForEvent(e.getScriptInfo().getId(), type.getId(), e.getScriptEvent().getId());
+               EJBLookup.getScriptingEngine().removeTypeScriptMappingForEvent(e.getScriptInfo().getId(), type.getId(), e.getScriptEvent());
            else if (e.getId() == ScriptListWrapper.ID_SCRIPT_UPDATED)
-               EJBLookup.getScriptingEngine().updateTypeScriptMappingForEvent(e.getScriptInfo().getId(), type.getId(), e.getScriptEvent().getId(), e.isActive(), e.isDerivedUsage());
+               EJBLookup.getScriptingEngine().updateTypeScriptMappingForEvent(e.getScriptInfo().getId(), type.getId(), e.getScriptEvent(), e.isActive(), e.isDerivedUsage());
        }
     }
 
-
-    /**
-     * Computes the number of assigned scripts for display in the GUI.
-     *
-     * @return  the number of assigned scripts
-     */
-    /*
-    public int getEventScriptCount() {
-        Map scriptMapping = type.getScriptMapping();
-        int count = 0;
-        Collection<long[]> scriptIds = scriptMapping.values();
-        for (long[] scripts : scriptIds) {
-            if (scripts != null)
-                count += scripts.length;
-        }
-        return count;
-    }
-    */
-
-    /**
-     * Compute the script events for this type and sort by name.
-     *
-     * @return  list of selectItems to display script events in the GUI.
-     */
-   /*
-    public List<SelectItem> getScriptEvents() {
-        ArrayList<SelectItem> scriptTypes = new ArrayList<SelectItem>(type.getScriptMapping().keySet().size() + 1);
-        for (FxScriptEvent scriptEvent : (Set<FxScriptEvent>) type.getScriptMapping().keySet()) {
-            scriptTypes.add(new SelectItem(scriptEvent.getId(), scriptEvent.getName()));
-        }
-        Collections.sort(scriptTypes, new FxJsfUtils.SelectItemSorter());
-        scriptTypes.add(0, new SelectItem(-1,
-                ((MessageBean) FxJsfUtils.getManagedBean("fxMessageBean")).getMessage("ScriptEditor.list.selectItem.all")));
-        return scriptTypes;
-    }
-
-    public int getScriptEventId() {
-        return scriptEventId;
-    }
-
-    public void setScriptEventId(int scriptEventId) {
-        this.scriptEventId = scriptEventId;
-    }
-
-    public long getScriptId() {
-        return scriptId;
-    }
-
-    public void setScriptId(long scriptId) {
-        this.scriptId = scriptId;
-    }
-
-    public long getScriptToWithdraw() {
-        return scriptToWithdraw;
-    }
-
-    public void setScriptToWithdraw(long scriptToWithdraw) {
-        this.scriptToWithdraw = scriptToWithdraw;
-    }
-    */
-    /**
-     * Returns a list of scripts for the selected script event id.
-     * In casae the id==-1 return all available scripts assigned to this type.
-     * The returned list of scripts is sorted by name.
-     *
-     * @return  all scripts for the selected script event id
-     */
-   /*
-   public List<FxScriptInfo> getScripts() {
-        long[] scriptIds = new long[0];
-        ArrayList<FxScriptInfo> scripts = new ArrayList<FxScriptInfo>();
-        //-1: show ALL scripts
-        if (scriptEventId == -1) {
-            HashSet idSet = new HashSet<Long>();
-            for (long[] sids : (Collection<long[]>) type.getScriptMapping().values()) {
-                for (long l : sids) {
-                    idSet.add(l);
-                }
-            }
-            scriptIds = new long[idSet.size()];
-            Long[] helper = (Long[]) idSet.toArray(new Long[0]);
-            for (int i = 0; i < scriptIds.length; i++) {
-                scriptIds[i] = helper[i];
-            }
-        } else {
-            try {
-                scriptIds = type.getScriptMapping(FxScriptEvent.getById(scriptEventId));
-            }
-            catch (Throwable t) {
-                new FxFacesMsgErr(t).addToContext();
-            }
-        }
-        if (scriptIds != null) {
-            for (long l : scriptIds)
-                scripts.add(CacheAdmin.getEnvironment().getScript(l));
-        }
-        Collections.sort(scripts, new FxJsfUtils.ScriptInfoSorter());
-
-        return scripts;
-    }
-     */
-    /**
-     * get scripts as id-name pairs
-     *
-     * @return scripts as id-name pairs
-     */
-   /*
-   public List<SelectItem> getScriptsAsId() {
-        ArrayList<SelectItem> scripts = new ArrayList<SelectItem>();
-        // list starts with an empty entry (for the user interface)
-        scripts.add(new SelectItem(-1, ""));
-        if (this.scriptEvent != null) {
-            List<Long> scriptIds = EJBLookup.getScriptingEngine().getByScriptType(this.scriptEvent);
-            for (long l : scriptIds) {
-                scripts.add(new SelectItem(l, CacheAdmin.getEnvironment().getScript(l).getName()));
-            }
-        }
-        return scripts;
-    }
-
-
-    public int getSelectedScriptId() {
-        return selectedScriptId;
-    }
-
-    public String getSelectedScriptName() {
-        if (this.selectedScriptId != -1) {
-            return CacheAdmin.getEnvironment().getScript(this.selectedScriptId).getName();
-        } else {
-            return "";
-        }
-    }
-
-    public void setSelectedScriptId(int selectedScriptId) {
-        this.selectedScriptId = selectedScriptId;
-    }
-
-
-    public FxScriptEvent getScriptEvent() {
-        return scriptEvent;
-    }
-
-    public void setScriptEvent(FxScriptEvent scriptEvent) {
-        this.scriptEvent = scriptEvent;
-    }
-
-    public FxScriptEvent getSelectedEvent() {
-        return selectedEvent;
-    }
-
-    public void setSelectedEvent(FxScriptEvent selectedEvent) {
-        this.selectedEvent = selectedEvent;
-    }
-     */
-
-    /**
-     * adds a script/type-combination to the list of scripts for which mappings shall be created
-     *
-     * @return the type script editor page
-     */
-    /*
-    public String addScript() {
-
-        if (this.selectedScriptId != -1 && this.selectedEvent != null) {
-            try {
-                this.selectedScripts.add(new FxScriptInfo(this.selectedScriptId, this.selectedEvent, CacheAdmin.getEnvironment().getScript(this.selectedScriptId).getName(), "", ""));
-                // reset values...
-                this.selectedScriptId = -1;
-                this.selectedEvent = null;
-            } catch (FxInvalidParameterException e) {
-                throw e.asRuntimeException();
-            }
-        }
-
-        return "typeScriptEditor";
-    }
-     */
-
-
-    /**
-     * withdraw (a) script type mapping(s)
-     *
-     * @return the type script editor page
-     */
-    /*
-    public String withdrawScript() {
-        try{
-            if(this.scriptToWithdraw != -1){
-                 if (scriptEventId == -1) {
-                     // remove ALL type script mappings, don't consider script event
-                    EJBLookup.getScriptingEngine().removeTypeScriptMapping(scriptToWithdraw, this.type.getId());
-                 } else {
-                     // remove ONE type script mapping for the specified script event
-                     EJBLookup.getScriptingEngine().removeTypeScriptMappingForEvent(scriptToWithdraw, this.type.getId(), scriptEventId);
-                 }
-
-            }
-        } catch (FxApplicationException e) {
-            new FxFacesMsgErr("Script.err.withdraw").addToContext();
-        }
-        this.scriptToWithdraw = -1;
-        return "typeScriptEditor";
-    }
-
-    public ArrayList<FxScriptInfo> getSelectedScripts() {
-        return selectedScripts;
-    }
-     */
-    /**
-     * reset values ...
-     * @param e
-     */
-    /*
-    public void clearSelectedScript(ActionEvent e) {
-        this.selectedScriptId = -1;
-        this.selectedEvent = null;
-    }
-     */
-    /**
-     * clear table of type mapping assignments (the ones to add)
-     *
-     * @return the type script editor page
-     */
-    /*
-    public String clearTable() {
-        this.selectedScripts = new ArrayList<FxScriptInfo>();
-        return "typeScriptEditor";
-    }
-    */
     /****script editor tab end*********/
 
 }

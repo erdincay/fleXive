@@ -1,0 +1,168 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+<ui:define name="head">
+    <t:stylesheet path="/adm/css/content.css"/>
+    <t:stylesheet path="/adm/css/structureEditor.css"/>
+</ui:define>
+
+<ui:define name="body">
+    <h:form id="frm" enctype="multipart/form-data">
+    <h:panelGroup rendered="#{structureTreeControllerBean.doAction}">
+        <script type="text/javascript">
+            var treeframe=parent.getNavFrameWnd();
+            treeframe.doTreeAction('#{structureTreeControllerBean.action}',#{structureTreeControllerBean.id}, '#{structureTreeControllerBean.value}');
+        </script>
+    </h:panelGroup>
+    <c:if test="#{not propertyEditorBean.property.new}">
+        <ui:fragment rendered="#{propertyEditorBean.editMode}">
+            <adm:tab label="#{fxMessageBean['PropertyEditor.tab.propertyAssignment']}" active="false" id="tab1"
+                    bean="#{propertyEditorBean}" action="showPropertyAssignmentEditor"/>
+            <adm:tab label="#{fxMessageBean['PropertyEditor.tab.property']}" active="false" id="tab2"
+                         bean="#{propertyEditorBean}" action="showPropertyEditor"/>
+            <adm:tab label="#{fxMessageBean['PropertyEditor.tab.option']}" active="false" id="tab3"
+                     bean="#{propertyEditorBean}" action="showPropertyOptionEditor"/>
+            <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor']} [#{propertyEditorBean.scriptCount}]" active="true" id="tab4"/>
+        </ui:fragment>
+        <ui:fragment rendered="#{not propertyEditorBean.editMode}">
+            <adm:tab label="#{fxMessageBean['PropertyEditor.tab.propertyAssignment.readonly']}" active="false"
+                     id="tab1ro" bean="#{propertyEditorBean}" action="showPropertyAssignmentEditor"/>
+            <adm:tab label="#{fxMessageBean['PropertyEditor.tab.property.readonly']}" active="false" id="tab2ro"
+                         bean="#{propertyEditorBean}" action="showPropertyEditor"/>
+            <adm:tab label="#{fxMessageBean['PropertyEditor.tab.option.readonly']}" active="false" id="tab3ro"
+                     bean="#{propertyEditorBean}" action="showPropertyOptionEditor"/>
+            <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor.readonly']} [#{propertyEditorBean.scriptCount}]" active="true" id="tab4ro"/>
+        </ui:fragment>
+    </c:if>
+        <div class="scriptTable">
+            <fx:fieldSet legend="#{fxMessageBean['ScriptEditor.label.assignedScripts']}">
+                <a4j:outputPanel id="scripts">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>
+                                    <a4j:commandLink action="#{propertyEditorBean.scriptWrapper.sortByScripts}" reRender="scripts" styleClass="sortArrow">
+                                        #{fxMessageBean['ScriptEditor.label.name']}
+                                        <ui:fragment rendered="#{propertyEditorBean.scriptWrapper.sortStatusScriptInfo == 1}">
+                                            <h:graphicImage value="/adm/images/commandButton/down.png"/>
+                                        </ui:fragment>
+                                        <ui:fragment rendered="#{propertyEditorBean.scriptWrapper.sortStatusScriptInfo == 2}">
+                                            <h:graphicImage value="/adm/images/commandButton/up.png"/>
+                                        </ui:fragment>
+                                    </a4j:commandLink>
+                                </th>
+                                <th>
+                                    <a4j:commandLink action="#{propertyEditorBean.scriptWrapper.sortByEvents}" reRender="scripts" styleClass="sortArrow">
+                                        #{fxMessageBean['ScriptEditor.label.event']}
+                                        <ui:fragment rendered="#{propertyEditorBean.scriptWrapper.sortStatusEvent == 1}">
+                                            <h:graphicImage value="/adm/images/commandButton/down.png"/>
+                                        </ui:fragment>
+                                        <ui:fragment rendered="#{propertyEditorBean.scriptWrapper.sortStatusEvent == 2}">
+                                            <h:graphicImage value="/adm/images/commandButton/up.png"/>
+                                        </ui:fragment>
+                                    </a4j:commandLink>
+                                </th>
+                                <th>#{fxMessageBean['ScriptEditor.label.active']}</th>
+                                <th>#{fxMessageBean['ScriptEditor.label.derivedUsage']}</th>
+                                <th>#{fxMessageBean['ScriptEditor.label.actions']}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <c:forEach var="listEntry" items="#{propertyEditorBean.scriptWrapper.scriptList}">
+                            <tr>
+                                <td>
+                                    <h:commandLink id="editScript_#{listEntry.id}_#{propertyEditorBean.assignment.id}" action="#{scriptBean.editScript}"
+                                           value="#{listEntry.scriptInfo.name}" actionListener="#{scriptBean.structureListen}">
+                                    <f:param name="oid" value="#{listEntry.scriptInfo.id}"/>
+                                    </h:commandLink>
+                                </td>
+                                <td style="padding-left:15px">
+                                    <h:outputText value="#{listEntry.scriptEvent.name}"/>
+                                </td>
+                                <td style="padding-left:15px">
+                                    <h:selectBooleanCheckbox id="active_#{listEntry.id}_#{propertyEditorBean.assignment.id}" value="#{listEntry.active}" disabled="#{listEntry.derived || not propertyEditorBean.editMode}"/>
+                                </td>
+                                <td style="padding-left:15px">
+                                    <h:selectBooleanCheckbox id="derivedUsage_#{listEntry.id}_#{propertyEditorBean.assignment.id}" value="#{listEntry.derivedUsage}" disabled="#{listEntry.derived || not propertyEditorBean.editMode}"/>
+                                </td>
+                                <td style="padding-left:15px">
+                                    <ui:fragment rendered="#{propertyEditorBean.editMode and not listEntry.derived}">
+                                            <a4j:commandButton id="removeScript_#{listEntry.id}_#{propertyEditorBean.assignment.id}" action="#{propertyEditorBean.removeScript}" reRender="scripts, tab2"
+                                                               image="/adm/images/commandButton/delete.png" onclick=" var disabled=!confirm('#{fxMessageBean['ScriptEditor.message.remove']}'); if (disabled) return false;">
+                                                <f:setPropertyActionListener target="#{propertyEditorBean.scriptListFiler}" value="#{listEntry.id}"/>
+                                            </a4j:commandButton>
+                                    </ui:fragment>
+                                    <ui:fragment rendered="#{listEntry.derived}">
+                                            <a4j:commandLink id="gotoAssignmentButton_#{listEntry.id}_#{propertyEditorBean.assignment.id}"
+                                                 onclick="var treeframe=parent.getNavFrameWnd(); treeframe.selectNode(#{listEntry.derivedFrom}, false);">
+                                                <h:outputText value="#{fxMessageBean['ScriptEditor.label.derivedFrom']} #{propertyEditorBean.assignmentNameForId[listEntry.derivedFrom]}"/>
+                                            </a4j:commandLink>
+                                    </ui:fragment>
+                                </td>
+                            </tr>
+                            </c:forEach>
+                            <ui:fragment rendered="#{propertyEditorBean.editMode}">
+                                <tr>
+                                    <td>
+                                        <h:selectOneListbox size="1" id="selectedScriptInfo" value="#{propertyEditorBean.selectedScriptInfo}"
+                                                converter="SelectableConverter" disabled="#{not propertyEditorBean.editMode}">
+                                            <f:selectItems value="#{fxSelectBean.assignmentScripts}"/>
+                                            <a4j:support event="onchange" reRender="selectedScriptEvent" />
+                                        </h:selectOneListbox>
+                                    </td>
+                                    <td style="padding-left:15px">
+                                         <h:selectOneListbox size="1" id="selectedScriptEvent" value="#{propertyEditorBean.selectedScriptEventId}"
+                                                 disabled="#{not propertyEditorBean.editMode}">
+                                            <f:selectItems value="#{fxSelectBean.assignmentScriptEvents}"/>
+                                        </h:selectOneListbox>
+                                    </td>
+                                    <td style="padding-left:15px">
+                                        <h:selectBooleanCheckbox id="selectedActive" value="#{propertyEditorBean.selectedActive}"/>
+                                    </td>
+                                    <td style="padding-left:15px">
+                                        <h:selectBooleanCheckbox id="selectedDerivedUsage" value="#{propertyEditorBean.selectedDerivedUsage}"/>
+                                    </td>
+                                    <td style="padding-left:15px">
+                                        <a4j:commandButton id="addScript" action="#{propertyEditorBean.addScript}" reRender="scripts, tab2"
+                                                           image="/adm/images/commandButton/new.png">
+                                        </a4j:commandButton>
+                                    </td>
+                                </tr>
+                            </ui:fragment>
+                        </tbody>
+                        </table>
+                </a4j:outputPanel>
+            </fx:fieldSet>
+        </div>
+        <ui:fragment rendered="#{(not propertyEditorBean.property.new) and (not propertyEditorBean.editMode) and propertyEditorBean.mayEdit}">
+                <adm:commandButton labelKey="PropertyEditor.button.editMode" location="both"
+                        icon="edit"  action="toggleEditMode"  bean="#{propertyEditorBean}" id="editModeButton"/>
+        </ui:fragment>
+
+        <ui:fragment rendered="#{not propertyEditorBean.property.new and propertyEditorBean.editMode}">
+                <adm:commandButton labelKey="PropertyEditor.button.cancel" location="both" lockscreen="false"
+                        icon="cancel" id="cancelButton"
+                        onclick="parent.getNavFrameWnd().openNode(#{propertyEditorBean.assignment.id}, false);return false;"/>
+        </ui:fragment>
+
+        <ui:fragment rendered="#{not propertyEditorBean.property.new and propertyEditorBean.mayEdit and propertyEditorBean.editMode}">
+            <adm:commandButton labelKey="PropertyEditor.button.save" location="both"
+                            icon="save"  action="saveChanges"  bean="#{propertyEditorBean}" id="saveChangesButton">
+            </adm:commandButton>
+        </ui:fragment>
+
+     </h:form>
+</ui:define>
+</ui:composition>
+</body>
+</html>

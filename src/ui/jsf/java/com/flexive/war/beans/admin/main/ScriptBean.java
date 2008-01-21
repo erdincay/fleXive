@@ -65,16 +65,13 @@ public class ScriptBean {
     private String name;
     private String desc;
     private String code;
-    private FxScriptInfo[] scripts;
     private FxScriptInfo sinfo;
     private ScriptingEngine scriptInterface;
-    private FxScriptEvent scriptEvent;
     private FxScriptMapping mapping;
     private Map<Long, String> typeMappingNames;
+    private Map<Long, String> assignmentMappingNames;
     private FxScriptScope selectedScope = null;
-    private int selectedScriptEventId = -1;
-    private boolean resetEvent = false;
-
+    private long selectedScriptEventId = -1;
 
     private static final String ID_CACHE_KEY = ScriptBean.class + "_id";
 
@@ -92,41 +89,46 @@ public class ScriptBean {
     }
 
     public List<SelectItem> getEventsForScope() {
+        //if the selected event is not in the list of events for the currently selected scope
+        //reset the selected event id to default -1==all events
+        boolean selectedEventFound =false;
         FxScriptScope scope = getSelectedScope();
         List<SelectItem> eventsForScope = new ArrayList<SelectItem>();
         eventsForScope.add(new SelectItem(-1, MessageBean.getInstance().getMessage("Script.selectItem.allEvents")));
         for (FxScriptEvent e : FxScriptEvent.values()) {
-            if (e.getScope().compareTo(scope) == 0 || scope.compareTo(FxScriptScope.All) ==0)
+            if (e.getScope().compareTo(scope) == 0 || scope.compareTo(FxScriptScope.All) ==0) {
                 eventsForScope.add(new SelectItem(e.getId(), e.getName()));
+                if (getSelectedScriptEventId() == e.getId())
+                    selectedEventFound=true;
+            }
         }
+
+        if (!selectedEventFound)
+            this.selectedScriptEventId=-1;
+
         return eventsForScope;
     }
 
     public void setSelectedScope(FxScriptScope selectedScope) {
-        //if the scope has changed, the events need to be updated as well
-        if (this.selectedScope.compareTo(selectedScope) !=0)
-            resetEvent = true;
         this.selectedScope = selectedScope;
     }
 
-    public int getSelectedScriptEventId() {
-        //scope has changed-> set the currently selected event to default
-        if (resetEvent) {
-            selectedScriptEventId = -1;
-            resetEvent = false;
-        }
+    public long getSelectedScriptEventId() {
        return selectedScriptEventId;
     }
 
-    public void setSelectedScriptEventId(int selectedScriptEventId) {
+    public void setSelectedScriptEventId(long selectedScriptEventId) {
         this.selectedScriptEventId = selectedScriptEventId;
     }
 
     public List<FxScriptInfo> getScriptsForEvent() {
-        int eventId = getSelectedScriptEventId();
+        long eventId = getSelectedScriptEventId();
         List<FxScriptInfo> scriptsForEvent= new ArrayList<FxScriptInfo>();
         for (FxScriptInfo s: CacheAdmin.getFilteredEnvironment().getScripts())
-            if ( (eventId == -1 && getSelectedScope().compareTo(FxScriptScope.All) ==0) || (eventId == -1 && s.getEvent().getScope().compareTo(getSelectedScope()) ==0) || s.getEvent().getId() == eventId)
+            if ( (eventId == -1 && getSelectedScope().compareTo(FxScriptScope.All) ==0)
+                    || (eventId == -1 && s.getEvent().getScope().compareTo(getSelectedScope()) ==0)
+                    || (s.getEvent().getId() == eventId && getSelectedScope().compareTo(FxScriptScope.All) ==0)
+                    || (s.getEvent().getId() == eventId && s.getEvent().getScope().compareTo(getSelectedScope())==0))
                 scriptsForEvent.add(s);
         return scriptsForEvent;
     }
@@ -150,10 +152,18 @@ public class ScriptBean {
         setSinfo(CacheAdmin.getEnvironment().getScript(id));
         try {
             this.mapping = scriptInterface.loadScriptMapping(null, id);
-            this.typeMappingNames = new HashMap<Long, String>(mapping.getMappedAssignments().size() + mapping.getMappedTypes().size());
+            this.typeMappingNames = new HashMap<Long, String>();
             // we need the type names for the user interface and the type ids for the links
             for (FxScriptMappingEntry entry : this.mapping.getMappedTypes()) {
                 this.typeMappingNames.put(entry.getId(), CacheAdmin.getEnvironment().getType(entry.getId()).getName());
+                for (long id : entry.getDerivedIds())
+                    this.typeMappingNames.put(id, CacheAdmin.getEnvironment().getType(id).getName());
+            }
+            this.assignmentMappingNames = new HashMap<Long, String>();
+            for (FxScriptMappingEntry entry : this.mapping.getMappedAssignments()) {
+                this.assignmentMappingNames.put(entry.getId(), CacheAdmin.getEnvironment().getAssignment(entry.getId()).getXPath());
+                for (long id : entry.getDerivedIds())
+                    this.assignmentMappingNames.put(id, CacheAdmin.getEnvironment().getAssignment(id).getXPath());
             }
         } catch (FxLoadException e) {
             new FxFacesMsgErr("Script.err.loadMap").addToContext();
@@ -310,111 +320,23 @@ public class ScriptBean {
 
     public List<Map.Entry<Long, String>> getTypeMappingNames() {
         ArrayList<Map.Entry<Long, String>> list = new ArrayList<Map.Entry<Long, String>>(this.typeMappingNames.entrySet().size());
-
         for (Map.Entry<Long, String> entry : this.typeMappingNames.entrySet()) {
             list.add(entry);
         }
         return list;
-        //Set<Map.Entry<Long, String>> set = typeMappingNames.entrySet();
-        //return set;
+    }
+
+     public List<Map.Entry<Long, String>> getAssignmentMappingNames() {
+        ArrayList<Map.Entry<Long, String>> list = new ArrayList<Map.Entry<Long, String>>(this.assignmentMappingNames.entrySet().size());
+        for (Map.Entry<Long, String> entry : this.assignmentMappingNames.entrySet()) {
+            list.add(entry);
+        }
+        return list;
     }
 
     public FxScriptMapping getMapping() {
         return mapping;
     }
-
-    /*
-    public FxScriptInfo[] getScripts() {
-        if (scripts == null) {
-            try {
-                scripts = scriptInterface.getScriptInfos();
-            } catch (FxApplicationException e) {
-                new FxFacesMsgErr("Script.err.loadAll").addToContext();
-            }
-        }
-        return scripts;
-    }
-
-    public List<SelectItem> getScriptsAsSL() {
-        if (scripts == null) {
-            try {
-                scripts = scriptInterface.getScriptInfos();
-                return FxJsfUtils.asSelectList(Arrays.asList(scripts), true);
-            } catch (FxApplicationException e) {
-                new FxFacesMsgErr("Script.err.loadAll").addToContext();
-            }
-        }
-        // if there was an exception, scripts is null so return an empty list
-        return new ArrayList<SelectItem>();
-    }
-
-
-    public List<SelectItem> getScriptsAsID() {
-        if (scripts == null) {
-            try {
-                scripts = scriptInterface.getScriptInfos();
-            } catch (FxApplicationException e) {
-                new FxFacesMsgErr("Script.err.loadAll").addToContext();
-            }
-        }
-        ArrayList<SelectItem> retScripts = new ArrayList<SelectItem>(scripts.length);
-        for (FxScriptInfo si : scripts) {
-            retScripts.add(new SelectItem(si.getId(), si.getName()));
-        }
-        return retScripts;
-    }
-    */
-
-
-    /**
-     * gets all scripts belonging to the type defined in the "scriptType" member
-     *
-     * @return all scripts belonging to the type defined in the "scriptType" member
-     */
-    /*
-    public FxScriptInfo[] getList() {
-        // if no filtering needs to be done return the whole script list..
-        if (scriptEvent == null) {
-            return getScripts();
-        } else {
-            // get all scripts (only the IDs) belonging to the defined type
-            List<Long> scriptList = scriptInterface.getByScriptType(scriptEvent);
-            ArrayList<FxScriptInfo> result = new ArrayList<FxScriptInfo>(scriptList.size());
-            // get the info to every script
-            for (Long l : scriptList) {
-                try {
-                    result.add(scriptInterface.getScriptInfo(l));
-                } catch (FxApplicationException e) {
-                    // do nothing...
-                }
-            }
-            return result.toArray(new FxScriptInfo[result.size()]);
-        }
-    }
-
-
-    public Set getSet() {
-        return typeMappingNames.entrySet();
-    }
-
-
-
-    public FxScriptEvent getScriptEvent() {
-        return scriptEvent;
-    }
-
-    public void setScriptEvent(FxScriptEvent scriptEvent) {
-        this.scriptEvent = scriptEvent;
-    }
-
-    */
-    // ensures that the scriptinfos will be loaded from cache on the next request form them (so changes will be displayed immediately)
-    /*
-    private void updateScriptList() {
-        scripts = null;
-    }
-    */
-
 
     /**
      * called from the structure editor -> get the oid of the script to show from the request parameters

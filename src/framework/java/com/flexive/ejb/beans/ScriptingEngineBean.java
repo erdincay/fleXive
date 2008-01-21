@@ -80,6 +80,9 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
+
+//TODO: log all modifications done by CRUD operations
+
 @Stateless(name = "ScriptingEngine")
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLocal {
@@ -457,13 +460,14 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public FxScriptMappingEntry createAssignmentScriptMapping(long scriptId, long assignmentId, boolean active, boolean derivedUsage) throws FxApplicationException {
+    public FxScriptMappingEntry createAssignmentScriptMapping(FxScriptEvent scriptEvent, long scriptId, long assignmentId, boolean active, boolean derivedUsage) throws FxApplicationException {
         FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
         FxScriptMappingEntry sm;
         Connection con = null;
         PreparedStatement ps = null;
         String sql;
         boolean success = false;
+        //check existance
         FxScriptInfo si = getScriptInfo(scriptId);
         try {
             long[] derived;
@@ -475,7 +479,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                 for (int i = 0; i < ass.size(); i++)
                     derived[i] = ass.get(i).getId();
             }
-            sm = new FxScriptMappingEntry(si.getEvent(), scriptId, active, derivedUsage, assignmentId, derived);
+            sm = new FxScriptMappingEntry(scriptEvent, scriptId, active, derivedUsage, assignmentId, derived);
             // Obtain a database connection
             con = Database.getDbConnection();
             sql = "INSERT INTO " + TBL_SCRIPT_MAPPING_ASSIGN + " (ASSIGNMENT,SCRIPT,DERIVED_USAGE,ACTIVE,STYPE) VALUES " +
@@ -507,6 +511,15 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public FxScriptMappingEntry createAssignmentScriptMapping(long scriptId, long typeId, boolean active, boolean derivedUsage) throws FxApplicationException {
+        FxScriptInfo si = getScriptInfo(scriptId);
+        return createAssignmentScriptMapping(si.getEvent(), scriptId, typeId, active, derivedUsage);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxScriptMappingEntry createTypeScriptMapping(FxScriptEvent scriptEvent, long scriptId, long typeId, boolean active, boolean derivedUsage) throws FxApplicationException {
         FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
         FxScriptMappingEntry sm;
@@ -526,7 +539,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                 for (int i = 0; i < types.size(); i++)
                     derived[i] = types.get(i).getId();
             }
-            sm = new FxScriptMappingEntry(si.getEvent(), scriptId, active, derivedUsage, typeId, derived);
+            sm = new FxScriptMappingEntry(scriptEvent, scriptId, active, derivedUsage, typeId, derived);
             // Obtain a database connection
             con = Database.getDbConnection();
             sql = "INSERT INTO " + TBL_SCRIPT_MAPPING_TYPES + " (TYPEDEF,SCRIPT,DERIVED_USAGE,ACTIVE,STYPE) VALUES " +
@@ -537,7 +550,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             ps.setLong(2, sm.getScriptId());
             ps.setBoolean(3, sm.isDerivedUsage());
             ps.setBoolean(4, sm.isActive());
-            ps.setLong(5, scriptEvent.getId());
+            ps.setLong(5, sm.getScriptEvent().getId());
             ps.executeUpdate();
             success = true;
         } catch (SQLException exc) {
@@ -594,6 +607,38 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         }
     }
 
+     /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void removeAssignmentScriptMappingForEvent(long scriptId, long assignmentId, FxScriptEvent event) throws FxApplicationException {
+        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
+        Connection con = null;
+        PreparedStatement ps = null;
+        String sql;
+        boolean success = false;
+        try {
+            // Obtain a database connection
+            con = Database.getDbConnection();
+            //                                                                1                2
+            sql = "DELETE FROM " + TBL_SCRIPT_MAPPING_ASSIGN + " WHERE SCRIPT=? AND ASSIGNMENT=? AND STYPE=?";
+            ps = con.prepareStatement(sql);
+            ps.setLong(1, scriptId);
+            ps.setLong(2, assignmentId);
+            ps.setLong(3, event.getId());
+            ps.executeUpdate();
+            success = true;
+        } catch (SQLException exc) {
+            throw new FxRemoveException(LOG, exc, "ex.scripting.mapping.assign.remove.failed", scriptId, assignmentId, exc.getMessage());
+        } finally {
+            if (!success)
+                ctx.setRollbackOnly();
+            else
+                StructureLoader.reloadScripting(FxContext.get().getDivisionId());
+            Database.closeObjects(ScriptingEngineBean.class, con, ps);
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -629,7 +674,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void removeTypeScriptMappingForEvent(long scriptId, long typeId, long scriptEventId) throws FxApplicationException {
+    public void removeTypeScriptMappingForEvent(long scriptId, long typeId, FxScriptEvent event) throws FxApplicationException {
         FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
         Connection con = null;
         PreparedStatement ps = null;
@@ -643,7 +688,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             ps = con.prepareStatement(sql);
             ps.setLong(1, scriptId);
             ps.setLong(2, typeId);
-            ps.setLong(3, scriptEventId);
+            ps.setLong(3, event.getId());
             ps.executeUpdate();
             success = true;
         } catch (SQLException exc) {
@@ -661,13 +706,14 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public FxScriptMappingEntry updateAssignmentScriptMapping(long scriptId, long assignmentId, boolean active, boolean derivedUsage) throws FxApplicationException {
+    public FxScriptMappingEntry updateAssignmentScriptMappingForEvent(long scriptId, long assignmentId, FxScriptEvent event, boolean active, boolean derivedUsage) throws FxApplicationException {
         FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
         FxScriptMappingEntry sm;
         Connection con = null;
         PreparedStatement ps = null;
         String sql;
         boolean success = false;
+        //check existance
         FxScriptInfo si = getScriptInfo(scriptId);
         try {
             long[] derived;
@@ -680,16 +726,17 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                     derived[i] = ass.get(i).getId();
             }
             //TODO: dont overwrite type info, use xxEdit objects!!
-            sm = new FxScriptMappingEntry(si.getEvent(), scriptId, active, derivedUsage, assignmentId, derived);
+            sm = new FxScriptMappingEntry(event, scriptId, active, derivedUsage, assignmentId, derived);
             // Obtain a database connection
             con = Database.getDbConnection();
             //                                                                1        2                  3            4
-            sql = "UPDATE " + TBL_SCRIPT_MAPPING_ASSIGN + " SET DERIVED_USAGE=?,ACTIVE=? WHERE ASSIGNMENT=? AND SCRIPT=?";
+            sql = "UPDATE " + TBL_SCRIPT_MAPPING_ASSIGN + " SET DERIVED_USAGE=?,ACTIVE=? WHERE ASSIGNMENT=? AND SCRIPT=? AND STYPE=?";
             ps = con.prepareStatement(sql);
             ps.setBoolean(1, sm.isDerivedUsage());
             ps.setBoolean(2, sm.isActive());
             ps.setLong(3, sm.getId());
             ps.setLong(4, sm.getScriptId());
+            ps.setLong(5, sm.getScriptEvent().getId());
             ps.executeUpdate();
             success = true;
         } catch (SQLException exc) {
@@ -710,13 +757,14 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public FxScriptMappingEntry updateTypeScriptMappingForEvent(long scriptId, long typeId, long eventId, boolean active, boolean derivedUsage) throws FxApplicationException {
+    public FxScriptMappingEntry updateTypeScriptMappingForEvent(long scriptId, long typeId, FxScriptEvent event, boolean active, boolean derivedUsage) throws FxApplicationException {
         FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
         FxScriptMappingEntry sm;
         Connection con = null;
         PreparedStatement ps = null;
         String sql;
         boolean success = false;
+        //check existance
         FxScriptInfo si = getScriptInfo(scriptId);
         try {
             long[] derived;
@@ -729,7 +777,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                     derived[i] = types.get(i).getId();
             }
             //TODO: dont overwrite type info, use xxEdit objects!!
-            sm = new FxScriptMappingEntry(FxScriptEvent.getById(eventId), scriptId, active, derivedUsage, typeId, derived);
+            sm = new FxScriptMappingEntry(event, scriptId, active, derivedUsage, typeId, derived);
             // Obtain a database connection
             con = Database.getDbConnection();
             //                                                               1        2             3          4          5

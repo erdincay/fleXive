@@ -82,10 +82,10 @@
                                             </a4j:commandButton>
                                     </ui:fragment>
                                     <ui:fragment rendered="#{listEntry.derived}">
-                                            <h:commandLink id="gotoTypeButton_#{listEntry.id}"
+                                            <a4j:commandLink id="gotoTypeButton_#{listEntry.id}"
                                                  onclick="var treeframe=parent.getNavFrameWnd(); treeframe.selectNode(#{listEntry.derivedFrom}, true);">
-                                                <h:outputText value="#{fxMessageBean['ScriptEditor.label.derivedFrom']} #{typeEditorBean.typeNameForId[listEntry.id]}"/>
-                                            </h:commandLink>
+                                                <h:outputText value="#{fxMessageBean['ScriptEditor.label.derivedFrom']} #{typeEditorBean.typeNameForId[listEntry.derivedFrom]}"/>
+                                            </a4j:commandLink>
                                     </ui:fragment>
                                 </td>
                             </tr>

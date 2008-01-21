@@ -34,8 +34,6 @@
 package com.flexive.shared.structure;
 
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.scripting.FxScriptInfo;
-import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.security.ACL;

@@ -35,6 +35,8 @@
                 <adm:tab label="#{fxMessageBean['PropertyEditor.tab.property']}" active="true" id="tab2"/>
                 <adm:tab label="#{fxMessageBean['PropertyEditor.tab.option']}" active="false" id="tab3"
                          bean="#{propertyEditorBean}" action="showPropertyOptionEditor"/>
+                <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor']} [#{propertyEditorBean.scriptCount}]" active="false" id="tab4"
+                         bean="#{propertyEditorBean}" action="showAssignmentScriptEditor"/>
             </ui:fragment>
             <ui:fragment rendered="#{not propertyEditorBean.editMode}">
                 <adm:tab label="#{fxMessageBean['PropertyEditor.tab.propertyAssignment.readonly']}" active="false"
@@ -42,6 +44,8 @@
                 <adm:tab label="#{fxMessageBean['PropertyEditor.tab.property.readonly']}" active="true" id="tab2ro"/>
                 <adm:tab label="#{fxMessageBean['PropertyEditor.tab.option.readonly']}" active="false" id="tab3ro"
                          bean="#{propertyEditorBean}" action="showPropertyOptionEditor"/>
+                <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor.readonly']} [#{propertyEditorBean.scriptCount}]" active="false" id="tab4ro"
+                         bean="#{propertyEditorBean}" action="showAssignmentScriptEditor"/>
             </ui:fragment>
         </c:if>
         <c:if test="#{propertyEditorBean.property.new}">
