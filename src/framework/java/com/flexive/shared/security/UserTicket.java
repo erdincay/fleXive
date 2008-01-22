@@ -318,6 +318,15 @@ public interface UserTicket extends Serializable {
      * @return source used to authenticate the user
      */
     public AuthenticationSource getAuthenticationSource();
+
+    /**
+     * Override the users language.
+     * Please note that overriding a language will only work for the
+     * current session. To change the language permantently edit the users account data!
+     *
+     * @param language language to override
+     */
+    public void overrideLanguage(FxLanguage language);
 }
 
 
