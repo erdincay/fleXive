@@ -56,6 +56,10 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.faces.component.UIOutput;
 import javax.faces.context.FacesContext;
+import javax.faces.event.FacesEvent;
+import javax.faces.event.FacesListener;
+import javax.faces.event.PhaseId;
+import javax.faces.event.AbortProcessingException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -183,6 +187,30 @@ public class FxContentView extends UIOutput {
         provideContent(context);
         super.processUpdates(context);
         removeContent(context);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void broadcast(FacesEvent event) throws AbortProcessingException {
+        if (event instanceof WrappedEvent) {
+            // unwrap and provide content variable in the event context
+            final FacesEvent target = ((WrappedEvent) event).event;
+            provideContent(FacesContext.getCurrentInstance());
+            target.getComponent().broadcast(target);
+            removeContent(FacesContext.getCurrentInstance());
+        } else {
+            super.broadcast(event);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void queueEvent(FacesEvent event) {
+        super.queueEvent(new WrappedEvent(this, event));
     }
 
     public Object getPk() {
@@ -472,6 +500,42 @@ public class FxContentView extends UIOutput {
         private String getXPath(String path) {
             final String xpath = StringUtils.replace(path, "$xpath", "").toUpperCase();
             return xpath.endsWith("/") ? xpath.substring(0, xpath.length() - 1) : xpath;
+        }
+    }
+
+    private static class WrappedEvent extends FacesEvent {
+        private static final long serialVersionUID = 3341414461609445709L;
+        
+        private final FacesEvent event;
+
+        public WrappedEvent(FxContentView component, FacesEvent event) {
+            super(component);
+            this.event = event;
+        }
+
+        @Override
+        public PhaseId getPhaseId() {
+            return event.getPhaseId();
+        }
+
+        @Override
+        public void setPhaseId(PhaseId phaseId) {
+            this.event.setPhaseId(phaseId);
+        }
+
+        @Override
+        public boolean isAppropriateListener(FacesListener listener) {
+            return false;
+        }
+
+        @Override
+        public void processListener(FacesListener listener) {
+            throw new IllegalStateException();
+        }
+
+        @Override
+        public void queue() {
+            event.queue();
         }
     }
 }

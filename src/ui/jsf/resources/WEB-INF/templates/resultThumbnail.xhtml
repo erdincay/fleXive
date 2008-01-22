@@ -23,7 +23,7 @@ Parameters:
     <h:panelGroup rendered="#{row != null}">
         <c:set var="pk" value="#{row[0]}"/>
         <c:set var="boxSize" value="#{fxSearchResultBean.previewSize.size}"/>
-        <div  style="border:1px solid #AAAAAA; width: #{boxSize+4}px; height: #{boxSize+4}px; line-height: #{boxSize+2}px; vertical-align: middle; text-align: center; display: table">
+        <div  style="border:1px solid #AAAAAA; width: #{boxSize+4}px; height: #{boxSize+4}px; line-height: #{boxSize+2}px; vertical-align: middle; text-align: center; display: table" onclick="#{onclick}">
             <div  style="display: table-cell;vertical-align: middle">
                 <img id="loadrow#{index}" src="thumbnail/pk#{pk}/s#{fxSearchResultBean.previewSize.blobIndex}" alt="#{pk}" title="#{pk}" border="0"/>
             </div>

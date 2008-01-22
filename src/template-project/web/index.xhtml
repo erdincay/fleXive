@@ -30,7 +30,7 @@
 
             <!-- Render instance counts as returned by the EJBExample engine using the JSF ManagedExampleBean -->
             <table>
-                <caption>Flexive content instances (visible to the guest user)</caption>
+                <caption style="white-space:nowrap">Flexive content instances (visible to the guest user)</caption>
                 <c:forEach items="#{exampleBean.instanceCounts}" var="instanceCount">
                     <tr>
                         <td>#{instanceCount.value}</td>

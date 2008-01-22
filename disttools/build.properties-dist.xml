@@ -22,6 +22,7 @@
     <property name="web.dir" value="${basedir}/web"/>
     <property name="resources.dir" value="${basedir}/resources"/>
     <property name="meta.dir" value="${resources.dir}/META-INF"/>
+    <property name="templates.dir" value="${resources.dir}/templates"/>
 
     <!-- javac options -->
 	<property name="compiler.deprecation" value="on"/>

@@ -198,16 +198,17 @@ public class FxFilter implements Filter {
                     if (response.hadError()) {
                         response.getWrappedResponse().reset();
                         response.disableBrowserCache();
-                        String error = "<HTML>\n" +
-                                "<HEAD>\n" +
-                                "<TITLE>[fleXive] Error Report</TITLE>\n" +
+                        String error = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\" >\n" +
+                                "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n" +
+                                "<head>\n" +
+                                "<title>[fleXive] Error Report</title>\n" +
                                 //(js==null?"":js)+
-                                "</HEAD>\n" +
-                                "<BODY style=\"background-color:white;\">\n" +
-                                "<H1 style=\"color:red;\"> Error Code: " + response.getStatus() + "</H1><br>" +
-                                response.getStatusMsg().replaceAll("\n", "<br>") + "\n" +
-                                "</BODY>\n" +
-                                "</HTML>";
+                                "</head>\n" +
+                                "<body style=\"background-color:white;\">\n" +
+                                "<h1 style=\"color:red;\"> Error Code: " + response.getStatus() + "</h1><br/>" +
+                                response.getStatusMsg().replaceAll("\n", "<br/>") + "\n" +
+                                "</body>\n" +
+                                "</html>";
                         response.writeToUnderlyingResponse(error);
                     } else {
                         response.writeToUnderlyingResponse(null);

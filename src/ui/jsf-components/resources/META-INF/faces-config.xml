@@ -74,6 +74,11 @@
         <component-class>com.flexive.faces.components.menu.TreeContextMenuItem</component-class>
     </component>
 
+    <component>
+        <component-type>flexive.Thumbnail</component-type>
+        <component-class>com.flexive.faces.components.Thumbnail</component-class>
+    </component>
+
 
     <render-kit>
         <renderer>

@@ -6,6 +6,10 @@
 <facelet-taglib>
     <!-- Place your custom Facelets components (if any) here and modify the namespace -->
     <!--
+        Don't forget to reference this file in the context-param "facelets.LIBRARIES" in
+        web.xml, since it won't be autodetected by Facelets
+    -->
+    <!--
     <namespace>http://your-namespace</namespace>
 
     <tag>

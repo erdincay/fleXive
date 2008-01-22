@@ -37,6 +37,7 @@ import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.exceptions.FxAccountInUseException;
 import com.flexive.shared.exceptions.FxLoginFailedException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.AccountEngine;
 import com.flexive.shared.security.UserTicket;
 import org.apache.commons.logging.Log;
@@ -542,6 +543,15 @@ public class FxContext implements Serializable {
             // Always determine the current user ticket for dynamic pages and webdav requests.
             // This takes about 1 x 5ms for every request on a development machine
             si.ticket = getTicketFromEJB(session);
+            if (si.ticket.isGuest()) {
+                try {
+                    si.ticket.overrideLanguage(EJBLookup.getLanguageEngine().load(request.getLocale().getLanguage()));
+                } catch (FxApplicationException e) {
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("Failed to use request locale from browser: " + e.getMessage(), e);
+                    }
+                }
+            }
         } else {
             // For static content like images we use the last user ticket stored in the session
             // to speed up the request.

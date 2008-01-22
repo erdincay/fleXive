@@ -65,12 +65,20 @@
                 </table>
 
                 <a4j:outputPanel id="results">
-                    <c:forEach var="row" items="#{browseReferencesBean.resultSet.rows}">
-                        <div style="padding:5px;float:left">
-                            <adm:resultThumbnail row="#{row}" resultSet="#{browseReferencesBean.resultSet}"
-                                    onclick="return selectReference('#{row[0]}')"/>
-                        </div>
-                    </c:forEach>
+                    <h:dataTable var="row" value="#{browseReferencesBean.dataModel}">
+                        <h:column>
+                            <img id="loadrow#{index}" src="thumbnail/pk#{row[0]}/s1" alt="#{row[1]}" title="#{row[1]}"
+                                 border="0" onclick="return selectReference('#{row[0]}')" style="cursor: pointer"/>
+                        </h:column>
+                        <c:forEach var="name" varStatus="status" begin="1"
+                                   items="#{browseReferencesBean.dataModel.result.columnNames}">
+                            <h:column>
+                                <span style="cursor: pointer" onclick="return selectReference('#{row[0]}')">
+                                    #{row[status.index]}
+                                </span>
+                            </h:column>
+                        </c:forEach>
+                    </h:dataTable>
                 </a4j:outputPanel>
             </a4j:region>
 

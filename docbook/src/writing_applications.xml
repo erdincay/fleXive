@@ -893,7 +893,7 @@ BUILD SUCCESSFUL]]></screen>
                     </term>
                     <listitem>
                         <para>
-                            Build all archives, unless disabled ones as described in the previous section.
+                            Build all archives, except disabled ones as described in the previous section.
                         </para>
                     </listitem>
                 </varlistentry>

@@ -13,6 +13,14 @@
         <param-value>.xhtml</param-value>
     </context-param>
 
+    <!-- Facelets libraries that are not loaded through the classloader -->
+    <!--
+    <context-param>
+        <param-name>facelets.LIBRARIES</param-name>
+        <param-value>/WEB-INF/template.taglib.xml.sample</param-value>
+    </context-param>
+    -->
+
     <!-- Configure FxFilter -->
     <filter>
         <filter-name>FxFilter</filter-name>

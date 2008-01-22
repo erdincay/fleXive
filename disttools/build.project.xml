@@ -119,6 +119,7 @@ db.config.create
             <zipfileset prefix="WEB-INF" dir="${meta.dir}" includes="*.xml" excludes="web.xml"/>
             <fileset dir="${web.dir}" includes="**/*"/>
             <zipfileset dir="${build.dir}/war" includes="**/*" prefix="WEB-INF/classes"/>
+            <zipfileset dir="${templates.dir}" includes="**/*" prefix="templates"/>
         </war>
     </target>
 
@@ -133,7 +134,7 @@ db.config.create
             <fileset file="${build.dir}/drops.archives"/>
         </jar>
         <ear earfile="${build.dist.dir}/${package.ear}" appxml="${build.dir}/application.xml">
-            <zipfileset prefix="lib" dir="${dist.lib.dir}" includes="**/*" excludes="flexive-ejb.jar"/>
+            <zipfileset prefix="lib" dir="${dist.lib.dir}" includes="**/*" excludes="flexive-ejb.jar, flexive-tests.jar"/>
             <zipfileset prefix="lib" dir="${dist.extlib.dir}" includes="**/*" excludes="jsf-api.jar,jsf-impl.jar,javaee.jar,jboss-*.jar,selenium-*,testng-*"/>
             <zipfileset prefix="lib" dir="${build.dist.dir}" includes="**/*.jar" excludes="${package.ejb}"/>
             <zipfileset prefix="lib" dir="${basedir}/lib" includes="**/*.jar"/>
