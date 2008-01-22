@@ -202,7 +202,15 @@ public enum FxScriptEvent {
      * Fired after a new user account has been created. The account ID and the
      * contact data PK are bound as "accountId" and "pk" .
      */
-    AfterAccountCreate(25, FxScriptScope.Accounts, "long accountId", "FxPK pk");
+    AfterAccountCreate(25, FxScriptScope.Accounts, "long accountId", "FxPK pk"),
+
+    AfterTreeNodeAdded(26, FxScriptScope.Tree),
+    AfterTreeNodeRemoved(27, FxScriptScope.Tree),
+    BeforeTreeNodeRemoved(28, FxScriptScope.Tree),
+    AfterTreeNodeActivated(29, FxScriptScope.Tree),
+    BeforeTreeNodeActivated(30, FxScriptScope.Tree),
+    AfterTreeNodeFolderReplacement(31, FxScriptScope.Tree),
+    BeforeTreeNodeFolderReplacement(32, FxScriptScope.Tree);
 
 
     private long id;

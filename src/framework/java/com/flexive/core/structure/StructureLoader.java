@@ -34,6 +34,7 @@
 package com.flexive.core.structure;
 
 import com.flexive.core.Database;
+import com.flexive.core.security.UserTicketImpl;
 import com.flexive.core.storage.EnvironmentLoader;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.CacheAdmin;
@@ -134,6 +135,7 @@ public final class StructureLoader {
                 //put a dummy cached entry to create the path to avoid cache warnings if the content cache is
                 //accessed and it does not exist because its empty
                 CacheAdmin.getInstance().put(CacheAdmin.CONTENTCACHE_BASE, -1, null);
+                UserTicketImpl.reloadGuestTicketAssignments(true);
             }
         } catch (FxNotFoundException e) {
             throw new FxLoadException(LOG, e);

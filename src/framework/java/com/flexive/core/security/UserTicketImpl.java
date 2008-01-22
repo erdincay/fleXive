@@ -97,20 +97,31 @@ public class UserTicketImpl implements UserTicket, Serializable {
         FxContext si = FxContext.get();
         if (CacheAdmin.isEnvironmentLoaded() && CacheAdmin.getEnvironment().getTimeStamp() != STRUCTURE_TIMESTAMP) {
             STRUCTURE_TIMESTAMP = CacheAdmin.getEnvironment().getTimeStamp();
-            try {
-                AccountEngine accountInterface = EJBLookup.getAccountEngine();
-                guestACLAssignments = accountInterface.loadAccountAssignments(Account.USER_GUEST);
-                guestRoles = accountInterface.getRoles(Account.USER_GUEST, AccountEngine.RoleLoadMode.ALL);
-                guestGroups = accountInterface.getGroups(Account.USER_GUEST).toLongArray();
-                guestContactData = accountInterface.load(Account.USER_GUEST).getContactData();
-            } catch (FxApplicationException e) {
-                guestACLAssignments = null;
-                LOG.error(e);
-            }
+            reloadGuestTicketAssignments(false);
         }
         return new UserTicketImpl(si.getApplicationId(), si.isWebDAV(), "GUEST", "GUEST", Account.USER_GUEST,
                 guestContactData, Mandator.MANDATOR_FLEXIVE, true, guestGroups, guestRoles, guestACLAssignments,
                 FxLanguage.DEFAULT, 0, AuthenticationSource.None);
+    }
+
+    /**
+     * (Re)load all assignments for the guest user ticket
+     *
+     * @param flagDirty flag the UserTicketStores guest ticket as dirty?
+     */
+    public static synchronized void reloadGuestTicketAssignments(boolean flagDirty) {
+        try {
+            AccountEngine accountInterface = EJBLookup.getAccountEngine();
+            guestACLAssignments = accountInterface.loadAccountAssignments(Account.USER_GUEST);
+            guestRoles = accountInterface.getRoles(Account.USER_GUEST, AccountEngine.RoleLoadMode.ALL);
+            guestGroups = accountInterface.getGroups(Account.USER_GUEST).toLongArray();
+            guestContactData = accountInterface.load(Account.USER_GUEST).getContactData();
+            if (flagDirty)
+                UserTicketStore.flagDirtyHavingUserId(Account.USER_GUEST);
+        } catch (FxApplicationException e) {
+            guestACLAssignments = null;
+            LOG.error(e);
+        }
     }
 
     /**

@@ -546,6 +546,13 @@ public class FxContext implements Serializable {
             // For static content like images we use the last user ticket stored in the session
             // to speed up the request.
             si.ticket = getLastUserTicket(session);
+            if( si.ticket != null ) {
+                if (si.ticket.isGuest() && (si.ticket.getACLAssignments() == null || si.ticket.getACLAssignments().length == 0)) {
+                    //reload from EJB layer if we have a guest ticket with no ACL assignments
+                    //this can happen during initial loading
+                    si.ticket = getTicketFromEJB(session);
+                }
+            }
             if (si.ticket == null) {
                 si.ticket = getTicketFromEJB(session);
             }
