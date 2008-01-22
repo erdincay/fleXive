@@ -67,7 +67,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     private final long mandator;
     private final String applicationId;
     private final boolean webDav;
-    private final FxLanguage language;
+    private FxLanguage language;
 
     private boolean globalSupervisor;
     private boolean mandatorSupervisor;
@@ -725,5 +725,13 @@ public class UserTicketImpl implements UserTicket, Serializable {
      */
     public AuthenticationSource getAuthenticationSource() {
         return authenticationSource;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void overrideLanguage(FxLanguage language) {
+        if (language != null)
+            this.language = language;
     }
 }
