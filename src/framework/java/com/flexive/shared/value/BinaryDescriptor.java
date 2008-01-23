@@ -40,9 +40,7 @@ import com.flexive.shared.stream.BinaryUploadPayload;
 import com.flexive.shared.stream.FxStreamUtils;
 import com.flexive.stream.ServerLocation;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.util.List;
 
 /**
@@ -179,6 +177,58 @@ public class BinaryDescriptor implements Serializable {
         this.size = streamLength;
         BinaryUploadPayload payload = FxStreamUtils.uploadBinary(streamLength, stream);
         this.handle = payload.getHandle();
+        this.newBinary = true;
+    }
+
+    /**
+     * Constructor (for new Binaries with unknown length - use with care since it will have to create a temp file to determine length!)
+     *
+     * @param name         name of the binary
+     * @param stream       an open input stream for the binary to upload
+     * @throws FxStreamException on upload errors
+     */
+    public BinaryDescriptor(String name, InputStream stream) throws FxStreamException {
+        this.name = name;
+
+        File tmp = null;
+        FileOutputStream fos = null;
+        FileInputStream fin = null;
+        final int BUF_SIZE = 4096;
+        try {
+            tmp = File.createTempFile("FxBinary", ".bin");
+            fos = new FileOutputStream(tmp);
+            byte[] buffer = new byte[BUF_SIZE];
+            int read;
+            while( (read = stream.read(buffer)) != -1 ) {
+                fos.write(buffer, 0, read);
+            }
+            fos.flush();
+            fos.close();
+            fos = null;
+            fin = new FileInputStream(tmp);
+            this.size = tmp.length();
+            BinaryUploadPayload payload = FxStreamUtils.uploadBinary(tmp.length(), fin);
+            this.handle = payload.getHandle();
+        } catch (IOException e) {
+            throw new FxStreamException(e, "ex.stream", e.getMessage());
+        } finally {
+            try {
+                if( fos != null)
+                    fos.close();
+            } catch (IOException e) {
+                //ignore
+            }
+            try {
+                if( fin != null)
+                    fin.close();
+            } catch (IOException e) {
+                //ignore
+            }
+            if( tmp != null ) {
+                if( !tmp.delete() )
+                    tmp.deleteOnExit();
+            }
+        }
         this.newBinary = true;
     }
 

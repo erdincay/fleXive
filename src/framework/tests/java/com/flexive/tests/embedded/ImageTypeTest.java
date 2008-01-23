@@ -103,7 +103,16 @@ public class ImageTypeTest {
     }
 
     @Test
-    public void binaryTest() throws Exception {
+    public void binaryTestLength() throws Exception {
+        binaryTest(true);
+    }
+
+    @Test
+    public void binaryTestNoLength() throws Exception {
+        binaryTest(false);
+    }
+
+    private void binaryTest(boolean sendLength) throws Exception {
         File testFile = new File("src/framework/testresources/image/Exif.JPG");
         if (!testFile.exists())
             return;
@@ -111,7 +120,11 @@ public class ImageTypeTest {
         FxType type = CacheAdmin.getEnvironment().getType(IMAGE_TYPE);
 
         FileInputStream fis = new FileInputStream(testFile);
-        BinaryDescriptor binary = new BinaryDescriptor(testFile.getName(), testFile.length(), fis);
+        BinaryDescriptor binary;
+        if( sendLength )
+            binary = new BinaryDescriptor(testFile.getName(), testFile.length(), fis);
+        else
+            binary = new BinaryDescriptor(testFile.getName(), fis);
 
         FxContent img = co.initialize(type.getId());
         img.setValue("/ImageBinary", new FxBinary(false, binary));
