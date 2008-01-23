@@ -308,11 +308,16 @@ public abstract class FxData implements Serializable {
             return; //cant compact root group
         int idx = 1;
         int pos = 0;
+        boolean foundOther = false;
         for (FxData curr : parent.getChildren()) {
             curr.setPos(pos++);
-            if (curr.getAssignmentId() == this.assignmentId)
+            if (curr.getAssignmentId() == this.assignmentId) {
                 curr.setIndex(idx++);
+                foundOther = true;
+            }
         }
+        if(!foundOther && this.getIndex() > 1)
+            this.setIndex(1);
     }
 
     /**

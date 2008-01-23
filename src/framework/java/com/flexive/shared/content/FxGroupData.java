@@ -326,6 +326,12 @@ public class FxGroupData extends FxData implements Cloneable {
         for (FxData curr : data)
             if (curr.isEmpty() && (curr.isGroup() || includeRequired || curr.isRemoveable()) && !curr.isSystemInternal()) {
                 data.remove(curr);
+                for(FxData com: data ) {
+                    if (com.getAssignmentId() == curr.getAssignmentId() ) {
+                        com.compact();
+                        break;
+                    }
+                }
                 removeEmptyEntries(includeRequired);
                 return;
             } else if (curr instanceof FxGroupData) {

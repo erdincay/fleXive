@@ -37,7 +37,10 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
+import com.flexive.shared.content.FxPropertyData;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxNotFoundException;
+import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxPropertyAssignment;
@@ -86,6 +89,20 @@ public class GroovyContentBuilder extends BuilderSupport {
                     path = xpath + "[" + (content.getGroupData(xpath).getOccurances() + 1) + "]";
                 } catch (FxApplicationException e) {
                     path = xpath + "[1]"; // first group
+                }
+                this.xpath = path;
+            } else if (!xpath.endsWith("]")) {
+                String path;
+                try {
+                    final FxPropertyData propertyData = content.getPropertyData(xpath);
+                    int newIndex = propertyData.getOccurances() + 1;
+                    if (!propertyData.getAssignment().getMultiplicity().isValid(newIndex)) {
+                        // increase index, unless we're at the end of the multiplicity range
+                        newIndex--;
+                    }
+                    path = xpath + "[" + newIndex + "]";
+                } catch (FxApplicationException e) {
+                    path = xpath + "[1]";
                 }
                 this.xpath = path;
             } else {
