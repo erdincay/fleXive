@@ -36,6 +36,7 @@ package com.flexive.faces.beans;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.messages.FxFacesMessage;
 import com.flexive.faces.messages.FxFacesMessages;
+import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.shared.*;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
@@ -64,6 +65,7 @@ public class SystemBean implements Serializable {
     private static final long serialVersionUID = 6592229045042549537L;
     private static final FacesMessageMap messageMap = new FacesMessageMap();
 
+    private long updateLanguageId = -1;
     private Map<Object, Integer> counters;
     private Map<Object, Integer> counterMap;
     private Map<Object, Integer> counterValueMap;
@@ -143,6 +145,30 @@ public class SystemBean implements Serializable {
      */
     public String gotoPage() {
         return FxJsfUtils.getParameter("page");
+    }
+
+
+    /**
+     * Updates the current session language supplied in the "updateLanguageId" property
+     * and re-renders the current page.
+     */
+    public void updateLanguage() {
+        try {
+            getUserTicket().overrideLanguage(EJBLookup.getLanguageEngine().load(updateLanguageId));
+        } catch (FxApplicationException e) {
+            new FxFacesMsgErr(e).addToContext();
+        }
+    }
+
+    public long getUpdateLanguageId() {
+        if (updateLanguageId == -1) {
+            updateLanguageId = getUserTicket().getLanguage().getId();
+        }
+        return updateLanguageId;
+    }
+
+    public void setUpdateLanguageId(long updateLanguageId) {
+        this.updateLanguageId = updateLanguageId;
     }
 
     /**

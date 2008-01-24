@@ -98,6 +98,7 @@ db.config.create
 
     <target name="package.shared" unless="${fxProject}.shared.disabled">
         <buildScriptIndex dir="${resources.dir}/scripts"/>
+        <makeMessages srcDir="${resources.dir}/messages" dest="${build.dir}/shared/ApplicationMessages"/>
         <!-- Create shared JAR -->
         <jar jarfile="${build.dist.dir}/${package.shared}" whenmanifestonly="skip">
             <!-- Include scripts -->

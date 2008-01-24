@@ -71,6 +71,7 @@ public class MapBean implements Serializable {
     private Map<Long, FxAssignment> assignmentsMap = null;
     private Map<Long, Account> accountMap = null;
     private Map<Long, String> dateTimeMap = null;
+    private Map<Long, FxLanguage> languagesMap = null;
     private FxEnvironment environment;
 
     /**
@@ -271,6 +272,30 @@ public class MapBean implements Serializable {
             });
         }
         return dateTimeMap;
+    }
+
+    /**
+     * Provides access to the system languages by ID.
+     *
+     * @return  the languages by ID
+     */
+    public Map<Long, FxLanguage> getLanguage() {
+        if (languagesMap == null) {
+            languagesMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Long, FxLanguage>() {
+                public FxLanguage get(Object key) {
+                    if (key == null) {
+                        return null;
+                    }
+                    final long id = key instanceof Long ? (Long) key : Long.valueOf(key.toString());
+                    try {
+                        return EJBLookup.getLanguageEngine().load(id);
+                    } catch (FxApplicationException e) {
+                        throw e.asRuntimeException();
+                    }
+                }
+            });
+        }
+        return languagesMap;
     }
 
     /**
