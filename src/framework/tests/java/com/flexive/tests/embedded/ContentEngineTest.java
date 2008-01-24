@@ -52,6 +52,7 @@ import com.flexive.shared.value.FxNumber;
 import com.flexive.shared.value.FxString;
 import static com.flexive.tests.embedded.FxTestUtils.*;
 import org.apache.commons.lang.RandomStringUtils;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -700,6 +701,29 @@ public class ContentEngineTest {
         } finally {
             co.remove(pk);
         }
+    }
 
+    /**
+     * Test compacting and removing empty entries
+     *
+     * @throws Exception on errors
+     */
+    @Test
+    public void compactTest() throws Exception {
+        FxContent org = co.initialize(TEST_TYPE);
+        FxString testValue1 = new FxString("Hello world1");
+        FxString testValue2 = new FxString("Hello world2");
+        FxString testValue3 = new FxString("Hello world3");
+        org.setValue("/TestProperty2[1]", testValue3);
+        org.setValue("/TestProperty4[1]", testValue1);
+        org.setValue("/TestProperty4[2]", testValue2);
+        org.getValue("/TestProperty4[1]").setEmpty();
+        org.setValue("/TestGroup1/TestProperty1_3[4]", testValue3);
+        org.getRootGroup().removeEmptyEntries();
+        org.getRootGroup().compact();
+        Assert.assertEquals(org.getValue("/TestProperty4[1]"), testValue2);
+        Assert.assertFalse(org.containsValue("/TestProperty4[2]"));
+        Assert.assertEquals(org.getValue("/TestGroup1/TestProperty1_3[1]"), testValue3);
+        Assert.assertFalse(org.containsValue("/TestGroup1/TestProperty1_3[4]"));
     }
 }
