@@ -41,14 +41,14 @@ import com.flexive.core.storage.StorageManager;
 import com.flexive.extractor.ExtractedData;
 import com.flexive.extractor.HtmlExtractor;
 import com.flexive.shared.*;
-import com.flexive.shared.media.FxMediaEngine;
 import com.flexive.shared.content.*;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.ScriptingEngine;
 import com.flexive.shared.interfaces.SequencerEngine;
+import com.flexive.shared.media.FxMediaEngine;
 import com.flexive.shared.scripting.FxScriptBinding;
-import com.flexive.shared.scripting.FxScriptResult;
 import com.flexive.shared.scripting.FxScriptEvent;
+import com.flexive.shared.scripting.FxScriptResult;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.security.Mandator;
@@ -503,7 +503,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setBoolean(8, content.isMaxVersion());
             ps.setBoolean(9, content.isLiveVersion());
             ps.setBoolean(10, content.isActive());
-            ps.setInt(11, (int)content.getMainLanguage());
+            ps.setInt(11, (int) content.getMainLanguage());
             if (content.isRelation()) {
                 ps.setLong(12, content.getRelatedSource().getId());
                 ps.setInt(13, content.getRelatedSource().getVersion());
@@ -672,7 +672,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps_ft.setInt(2, pk.getVersion());
             if (!data.getValue().isMultiLanguage()) {
                 ps.setBoolean(INSERT_LANG_POS, true);
-                ps_ft.setInt(FT_LANG_POS_INSERT, (int)FxLanguage.DEFAULT_ID);
+                ps_ft.setInt(FT_LANG_POS_INSERT, (int) FxLanguage.DEFAULT_ID);
             } else
                 ps.setBoolean(INSERT_ISDEF_LANG_POS, false);
             ps_ft.setLong(4, data.getAssignmentId());
@@ -747,7 +747,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setString(pos_idx + 5, XPathElement.stripType(change.getNewData().getXPathFull()) + (data == null ? "/" : ""));
 
             if (change.isGroup()) {
-                ps.setInt(pos_idx + 3, (int)FxLanguage.SYSTEM_ID);
+                ps.setInt(pos_idx + 3, (int) FxLanguage.SYSTEM_ID);
                 ps.executeUpdate();
                 return;
             }
@@ -755,7 +755,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             if (change.isPositionChange() && !change.isDataChange()) {
                 //just update positions
                 for (long lang : data.getValue().getTranslatedLanguages()) {
-                    ps.setInt(pos_idx + 3, (int)lang);
+                    ps.setInt(pos_idx + 3, (int) lang);
                     ps.executeUpdate();
                 }
                 return;
@@ -1196,7 +1196,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setLong(1, pk.getId());
             ps.setInt(2, pk.getVersion());
             ps.setInt(3, groupData.getPos());
-            ps.setInt(4, (int)FxLanguage.SYSTEM_ID);
+            ps.setInt(4, (int) FxLanguage.SYSTEM_ID);
             ps.setLong(5, groupData.getAssignmentId());
             ps.setString(6, groupData.getXPath() + "/");
             ps.setString(7, groupData.getXPathFull() + "/");
@@ -1678,10 +1678,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } catch (FxNotFoundException e) {
             throw new FxUpdateException(e);
         }
-        if( original.getStepId() != content.getStepId() ) {
+        if (original.getStepId() != content.getStepId()) {
             Workflow wf = env.getWorkflow(env.getStep(content.getStepId()).getWorkflowId());
-            if( !wf.isRouteValid(original.getStepId(), content.getStepId()) ) {
-                throw new FxInvalidParameterException("STEP", "ex.content.step.noRoute", 
+            if (!wf.isRouteValid(original.getStepId(), content.getStepId())) {
+                throw new FxInvalidParameterException("STEP", "ex.content.step.noRoute",
                         env.getStepDefinition(env.getStep(original.getStepId()).getStepDefinitionId()).getLabel().getBestTranslation(),
                         env.getStepDefinition(env.getStep(content.getStepId()).getStepDefinitionId()).getLabel().getBestTranslation());
             }
@@ -1899,7 +1899,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setBoolean(6, content.isMaxVersion());
             ps.setBoolean(7, content.isLiveVersion());
             ps.setBoolean(8, content.isActive());
-            ps.setInt(9, (int)content.getMainLanguage());
+            ps.setInt(9, (int) content.getMainLanguage());
             if (content.isRelation()) {
                 ps.setLong(10, content.getRelatedSource().getId());
                 ps.setInt(11, content.getRelatedSource().getVersion());
@@ -2509,52 +2509,98 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             return;
         List<FxProperty> uniques = type.getUniqueProperties();
         if (sql == null)
-            sql = new StringBuilder(200);
+            sql = new StringBuilder(500);
         else
             sql.setLength(0);
         try {
-            String typeChecks;
             for (FxProperty prop : uniques) {
                 sql.setLength(0);
-                typeChecks = null;
-                switch (prop.getUniqueMode()) {
-                    case Global:
-                        sql.append("SELECT tcd.XPATHMULT, COUNT(DISTINCT ccd.ID) FROM ").append(TBL_CONTENT_DATA).
-                                append(" ccd, ").append(TBL_CONTENT_DATA).append(" tcd WHERE " + "ccd.TPROP=").
-                                append(prop.getId()).append(" AND ccd.TPROP=tcd.TPROP AND ccd.ID<>tcd.ID AND tcd.ID=").append(pk.getId()).
-                                append(" AND ccd.LANG=tcd.LANG");
-                        break;
-                    case DerivedTypes:
-                        //gen list of parent and derived types
-                        typeChecks = buildTypeHierarchy(env.getType(typeId));
-//                        System.out.println("typeChecks => "+typeChecks);
-                    case Type:
-                        if (typeChecks == null)
-                            typeChecks = "" + typeId;
-                        sql.append("SELECT tcd.XPATHMULT, COUNT(DISTINCT ccd.ID) FROM ").append(TBL_CONTENT_DATA).
-                                append(" ccd, ").append(TBL_CONTENT_DATA).append(" tcd, ").append(TBL_CONTENT).
-                                append(" cc, ").append(TBL_CONTENT).
-                                append(" tc WHERE " + "cc.ID=ccd.ID AND tc.ID=tcd.ID AND cc.TDEF IN (").
-                                append(typeChecks).append(") AND tc.TDEF IN (").append(typeChecks).
-                                append(") AND " + "ccd.TPROP=").append(prop.getId()).
-                                append(" AND ccd.TPROP=tcd.TPROP AND ccd.ID<>tcd.ID AND tcd.ID=").
-                                append(pk.getId()).append(" AND ccd.LANG=tcd.LANG");
-                        break;
-                    case Instance:
-                        sql.append("SELECT tcd.XPATHMULT FROM ").append(TBL_CONTENT_DATA).append(" ccd, ").
-                                append(TBL_CONTENT_DATA).append(" tcd WHERE " + "ccd.TPROP=").append(prop.getId()).
-                                append(" AND ccd.TPROP=tcd.TPROP AND ccd.ID=tcd.ID AND ccd.VER=tcd.VER AND " + "ccd.XPATHMULT<>tcd.XPATHMULT AND tcd.ID=").
-                                append(pk.getId()).append(" AND " + "ccd.LANG=tcd.LANG");
-                        break;
-                }
-                if (sql.length() == 0)
-                    continue;
-                addColumnComparator(sql, prop, "ccd", "tcd");
-                sql.append(" GROUP BY tcd.XPATHMULT");
-                doCheckUniqueConstraint(con, sql.toString(), prop.getUniqueMode());
+                uniqueConditionsMet(con, env, sql, prop.getUniqueMode(), prop, typeId, pk, true);
             }
         } catch (SQLException e) {
             throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage());
+        }
+    }
+
+    /**
+     * Check if unique constraints are met
+     *
+     * @param con            an open and valid Connection
+     * @param env            environment
+     * @param sql            a StringBuilder instance
+     * @param mode           UniqueMode
+     * @param prop           the propery to check
+     * @param typeId         type to check
+     * @param pk             primary key (optional)
+     * @param throwException should an exception be thrown if conditions are not met?
+     * @return conditions met
+     * @throws SQLException           on errors
+     * @throws FxApplicationException on errors
+     */
+    private boolean uniqueConditionsMet(Connection con, FxEnvironment env, StringBuilder sql, UniqueMode mode,
+                                        FxProperty prop, long typeId, FxPK pk, boolean throwException)
+            throws SQLException, FxApplicationException {
+        String typeChecks = null;
+        sql.setLength(0);
+        switch (mode) {
+            case Global:
+                sql.append("SELECT tcd.XPATHMULT, COUNT(DISTINCT ccd.ID) FROM ").append(TBL_CONTENT_DATA).
+                        append(" ccd, ").append(TBL_CONTENT_DATA).append(" tcd WHERE ccd.TPROP=").
+                        append(prop.getId()).append(" AND ccd.TPROP=tcd.TPROP AND ccd.ID<>tcd.ID AND tcd.ID=").append(pk.getId()).
+                        append(" AND ccd.LANG=tcd.LANG");
+                break;
+            case DerivedTypes:
+                //gen list of parent and derived types
+                typeChecks = buildTypeHierarchy(env.getType(typeId));
+            case Type:
+                if (typeChecks == null)
+                    typeChecks = "" + typeId;
+                sql.append("SELECT tcd.XPATHMULT, COUNT(DISTINCT ccd.ID) FROM ").append(TBL_CONTENT_DATA).
+                        append(" ccd, ").append(TBL_CONTENT_DATA).append(" tcd, ").append(TBL_CONTENT).
+                        append(" cc, ").append(TBL_CONTENT).
+                        append(" tc WHERE cc.ID=ccd.ID AND tc.ID=tcd.ID AND cc.TDEF IN (").
+                        append(typeChecks).append(") AND tc.TDEF IN (").append(typeChecks).
+                        append(") AND ccd.TPROP=").append(prop.getId()).
+                        append(" AND ccd.TPROP=tcd.TPROP AND ccd.LANG=tcd.LANG").
+                        //prevent checks across versions
+                        append(" AND NOT(ccd.ID=tcd.ID AND ccd.VER<>tcd.VER)").
+                        //prevent self-references
+                        append(" AND NOT(ccd.ID=tcd.ID AND ccd.VER=tcd.VER AND ccd.ASSIGN=tcd.ASSIGN AND tcd.XMULT=ccd.XMULT)");
+                break;
+            case Instance:
+                sql.append("SELECT tcd.XPATHMULT FROM ").append(TBL_CONTENT_DATA).append(" ccd, ").
+                        append(TBL_CONTENT_DATA).append(" tcd WHERE ccd.TPROP=").append(prop.getId()).
+                        append(" AND ccd.TPROP=tcd.TPROP AND ccd.ID=tcd.ID AND ccd.VER=tcd.VER AND ccd.XPATHMULT<>tcd.XPATHMULT");
+                if (pk != null)
+                    sql.append(" AND tcd.ID=").append(pk.getId());
+                sql.append(" AND ccd.LANG=tcd.LANG");
+                break;
+        }
+        if (sql.length() == 0)
+            return true;
+        addColumnComparator(sql, prop, "ccd", "tcd");
+        sql.append(" GROUP BY tcd.XPATHMULT");
+        try {
+            doCheckUniqueConstraint(con, sql.toString(), prop.getUniqueMode());
+        } catch (FxApplicationException e) {
+            System.out.println("SQL:\n"+sql);
+            if (throwException)
+                throw e;
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean uniqueConditionValid(Connection con, UniqueMode mode, FxProperty prop, long typeId, FxPK pk) {
+        try {
+            return uniqueConditionsMet(con, CacheAdmin.getEnvironment(), new StringBuilder(500), mode, prop, typeId, pk, false);
+        } catch (SQLException e) {
+            throw new FxApplicationException(e, "ex.db.sqlError", e.getMessage()).asRuntimeException();
+        } catch (FxApplicationException e) {
+            throw e.asRuntimeException();
         }
     }
 

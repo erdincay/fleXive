@@ -38,9 +38,12 @@ import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.structure.StructureLoader;
-import com.flexive.shared.*;
-import com.flexive.shared.content.FxPermissionUtils;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.FxContext;
+import com.flexive.shared.FxLanguage;
+import com.flexive.shared.XPathElement;
 import com.flexive.shared.cache.FxCacheException;
+import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.security.Role;
@@ -1222,19 +1225,21 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     changes = true;
                     */
                 }
-                /* darf nicht verändert werden
+                //may only change if there are no existing content instances that use this property already
                 if (org.getDataType().getId() != prop.getDataType().getId()) {
-                   if (ps != null) ps.close();
-                    ps = con.prepareStatement("UPDATE " + TBL_STRUCT_PROPERTIES + " SET DATATYPE=? WHERE ID=?");
-                    ps.setLong(1, prop.getDataType().getId());
-                    ps.setLong(2, prop.getId());
-                    ps.executeUpdate();
-                    if (changes)
-                        changesDesc.append(',');
-                    changesDesc.append("dataType=").append(prop.getDataType().getName());
-                    changes = true;
+                    if (getInstanceCount(con, org.getId()) == 0) {
+                        if (ps != null) ps.close();
+                        ps = con.prepareStatement("UPDATE " + TBL_STRUCT_PROPERTIES + " SET DATATYPE=? WHERE ID=?");
+                        ps.setLong(1, prop.getDataType().getId());
+                        ps.setLong(2, prop.getId());
+                        ps.executeUpdate();
+                        if (changes)
+                            changesDesc.append(',');
+                        changesDesc.append("dataType=").append(prop.getDataType().getName());
+                        changes = true;
+                    } else
+                        throw new FxUpdateException("ex.structure.modification.contentExists", "dataType");
                 }
-                */
 
                 //may only change if there are no existing content instances that use this property already
                 if (org.getReferencedType() != null && prop.getReferencedType() != null &&
@@ -1300,7 +1305,18 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 }
 
                 if (org.getUniqueMode() != prop.getUniqueMode()) {
-                    if (getInstanceCount(con, org.getId()) == 0 || prop.getUniqueMode().equals(UniqueMode.getById(0))) {
+                    boolean allowChange = getInstanceCount(con, org.getId()) == 0 || prop.getUniqueMode().equals(UniqueMode.None);
+                    if (!allowChange) {
+                        boolean check = true;
+                        for (FxType type : CacheAdmin.getEnvironment().getTypesForProperty(prop.getId())) {
+                            check = StorageManager.getContentStorage(TypeStorageMode.Hierarchical).
+                                    uniqueConditionValid(con, prop.getUniqueMode(), prop, type.getId(), null);
+                            if (!check)
+                                break;
+                        }
+                        allowChange = check;
+                    }
+                    if (allowChange) {
                         if (ps != null) ps.close();
                         ps = con.prepareStatement("UPDATE " + TBL_STRUCT_PROPERTIES + " SET UNIQUEMODE=? WHERE ID=?");
                         ps.setLong(1, prop.getUniqueMode().getId());
@@ -1597,7 +1613,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 if (original.getDefaultLanguage() != modified.getDefaultLanguage()) {
                     if (ps != null) ps.close();
                     ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET DEFLANG=? WHERE ID=?");
-                    ps.setInt(1, (int)modified.getDefaultLanguage());
+                    ps.setInt(1, (int) modified.getDefaultLanguage());
                     ps.setLong(2, original.getId());
                     ps.executeUpdate();
                     if (changes)
@@ -1731,7 +1747,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             ps.setLong(12, prop.getParentGroupAssignment() == null ? FxAssignment.NO_PARENT : prop.getParentGroupAssignment().getId());
             ps.setLong(13, prop.getProperty().getId());
             ps.setLong(14, prop.getACL().getId());
-            ps.setInt(15, prop.hasDefaultLanguage() ? (int)prop.getDefaultLanguage() : (int)FxLanguage.SYSTEM_ID);
+            ps.setInt(15, prop.hasDefaultLanguage() ? (int) prop.getDefaultLanguage() : (int) FxLanguage.SYSTEM_ID);
             ps.setBoolean(16, prop.isSystemInternal());
             ps.executeUpdate();
             Database.storeFxString(new FxString[]{prop.getLabel(), prop.getHint(), (FxString) prop.getDefaultValue()}, con,

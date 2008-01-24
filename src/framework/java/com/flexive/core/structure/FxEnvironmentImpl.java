@@ -34,8 +34,8 @@
 package com.flexive.core.structure;
 
 import com.flexive.shared.FxArrayUtils;
-import com.flexive.shared.XPathElement;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.XPathElement;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxRuntimeException;
@@ -752,6 +752,21 @@ public final class FxEnvironmentImpl implements FxEnvironment {
             if (type.getId() == id)
                 return type;
         throw new FxNotFoundException("ex.structure.type.notFound.id", id).asRuntimeException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public List<FxType> getTypesForProperty(long propertyId) {
+        List<FxType> ret = new ArrayList<FxType>(10);
+        for (FxPropertyAssignment as : propertyAssignmentsAll) {
+            if (as.getProperty().getId() != propertyId)
+                continue;
+            if (ret.contains(as.getAssignedType()))
+                continue;
+            ret.add(as.getAssignedType());
+        }
+        return Collections.unmodifiableList(ret);
     }
 
     /**

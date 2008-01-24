@@ -460,4 +460,12 @@ public interface FxEnvironment extends Serializable {
      * @return timestamp when this environment was loaded
      */
     long getTimeStamp();
+
+    /**
+     * Get a list of all types that have assignments of the requested property
+     *
+     * @param propertyId requested propery
+     * @return list of all types that have assignments of the requested property
+     */
+    List<FxType> getTypesForProperty(long propertyId);
 }

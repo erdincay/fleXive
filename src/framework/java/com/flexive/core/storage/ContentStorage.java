@@ -41,6 +41,7 @@ import com.flexive.shared.exceptions.*;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.structure.FxType;
+import com.flexive.shared.structure.UniqueMode;
 
 import java.io.InputStream;
 import java.sql.Connection;
@@ -273,4 +274,16 @@ public interface ContentStorage {
      * @throws FxUpdateException           on errors
      */
     void updateXPath(Connection con, long assignmentId, String originalXPath, String newXPath) throws FxUpdateException, FxInvalidParameterException;
+
+    /**
+     * Check if a unique condition is valid for a propery
+     *
+     * @param con    an open and valid Connection
+     * @param mode   UniqueMode
+     * @param prop   property
+     * @param typeId type
+     * @param pk     primary key (optional)
+     * @return if mode would be valid
+     */
+    boolean uniqueConditionValid(Connection con, UniqueMode mode, FxProperty prop, long typeId, FxPK pk);
 }

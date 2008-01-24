@@ -225,6 +225,7 @@ public class UniqueModeTest extends StructureTestBase {
         } finally {
             dropTypes();
         }
+        uniqueWithinInstance(UniqueMode.Type);
     }
 
     @Test
@@ -260,11 +261,16 @@ public class UniqueModeTest extends StructureTestBase {
         } finally {
             dropTypes();
         }
+        uniqueWithinInstance(UniqueMode.DerivedTypes);
     }
 
     @Test
     public void uniqueInstance() throws FxApplicationException {
-        long[] types = createTypes(UniqueMode.Instance);
+        uniqueWithinInstance(UniqueMode.Instance);
+    }
+
+    private void uniqueWithinInstance(UniqueMode mode) throws FxApplicationException {
+        long[] types = createTypes(mode);
         try {
             FxContent c = co.initialize(types[A]);
             c.setValue(XPATH, V2);

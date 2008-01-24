@@ -361,7 +361,8 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             throw new FxCreateException(LOG, t);
         } finally {
             Database.closeObjects(ContentEngineBean.class, con, ps);
-            CacheAdmin.expireCachedContent(content.getId());
+            if (!ctx.getRollbackOnly())
+                CacheAdmin.expireCachedContent(content.getId());
         }
     }
 
@@ -383,18 +384,16 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             ContentStorage storage = StorageManager.getContentStorage(content.getPk().getStorageMode());
             con = Database.getDbConnection();
             return storage.contentCreateVersion(con, CacheAdmin.getEnvironment(), null, content);
-        } catch (FxNotFoundException e) {
-            ctx.setRollbackOnly();
-            throw new FxCreateException(e);
         } catch (SQLException e) {
             ctx.setRollbackOnly();
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
-        } catch (FxInvalidParameterException e) {
+        } catch (FxApplicationException e) {
             ctx.setRollbackOnly();
             throw new FxCreateException(e);
         } finally {
             Database.closeObjects(ContentEngineBean.class, con, ps);
-            CacheAdmin.expireCachedContent(content.getId());
+            if (!ctx.getRollbackOnly())
+                CacheAdmin.expireCachedContent(content.getId());
         }
     }
 
