@@ -540,12 +540,16 @@ public class FxContext implements Serializable {
         // Do user ticket retrieval and store it in the threadlocal
         final HttpSession session = request.getSession();
         if (dynamicContent || isWebdav) {
+            UserTicket last = getLastUserTicket(session);
             // Always determine the current user ticket for dynamic pages and webdav requests.
             // This takes about 1 x 5ms for every request on a development machine
             si.ticket = getTicketFromEJB(session);
             if (si.ticket.isGuest()) {
                 try {
-                    si.ticket.overrideLanguage(EJBLookup.getLanguageEngine().load(request.getLocale().getLanguage()));
+                    if( last == null )
+                        si.ticket.overrideLanguage(EJBLookup.getLanguageEngine().load(request.getLocale().getLanguage()));
+                    else
+                        si.ticket.overrideLanguage(last.getLanguage());
                 } catch (FxApplicationException e) {
                     if (LOG.isInfoEnabled()) {
                         LOG.info("Failed to use request locale from browser: " + e.getMessage(), e);
