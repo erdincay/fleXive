@@ -46,11 +46,12 @@ import java.io.Serializable;
  */
 public class FxScriptInfo extends AbstractSelectableObjectWithName implements Serializable {
     private static final long serialVersionUID = -2845241882558637595L;
-    private long id;
-    private FxScriptEvent event;
-    private String name;
-    private String description;
-    private String code;
+    protected long id;
+    protected FxScriptEvent event;
+    protected String name;
+    protected String description;
+    protected String code;
+    protected boolean active =false;
 
     public FxScriptInfo() {
         /* empty constructor */
@@ -64,18 +65,30 @@ public class FxScriptInfo extends AbstractSelectableObjectWithName implements Se
      * @param name        (unique) name of the script
      * @param description description
      * @param code        the script code
+     * @param active      if the script is active
      * @throws FxInvalidParameterException on errors
      * @see FxScriptEvent
      */
-    public FxScriptInfo(long id, FxScriptEvent event, String name, String description, String code) throws FxInvalidParameterException {
+    public FxScriptInfo(long id, FxScriptEvent event, String name, String description, String code, boolean active) throws FxInvalidParameterException {
         this.id = id;
         this.event = event;
         this.name = name;
         this.description = (description == null ? "" : description);
         this.code = (code == null ? "" : code);
+        this.active=active;
         if (StringUtils.isEmpty(this.name) || this.name.length() > 255) {
             throw new FxInvalidParameterException("NAME", "ex.scripting.name.invalid", name);
         }
+    }
+
+    /**
+     * Return this script info as editable object.
+     *
+     * @return  script info as editable
+     */
+
+    public FxScriptInfoEdit asEditable()  {
+        return new FxScriptInfoEdit(this);
     }
 
     /**
@@ -124,23 +137,14 @@ public class FxScriptInfo extends AbstractSelectableObjectWithName implements Se
         return code;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    /**
+     * Returns if the script is set to active.
+     *
+     * @return  active
+     */
+    public boolean isActive() {
+        return active;
     }
 
-    public void setEvent(FxScriptEvent event) {
-        this.event = event;
-    }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
 }

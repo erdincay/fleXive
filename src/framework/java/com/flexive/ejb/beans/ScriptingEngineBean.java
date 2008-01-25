@@ -147,15 +147,15 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         try {
             // Obtain a database connection
             con = Database.getDbConnection();
-            //            1     2     3     4
-            sql = "SELECT SNAME,SDESC,SDATA,STYPE FROM " + TBL_SCRIPTS + " WHERE ID=?";
+            //            1     2     3     4        5
+            sql = "SELECT SNAME,SDESC,SDATA,STYPE,ACTIVE FROM " + TBL_SCRIPTS + " WHERE ID=?";
             ps = con.prepareStatement(sql);
             ps.setLong(1, scriptId);
             ResultSet rs = ps.executeQuery();
             if (rs == null || !rs.next())
                 throw new FxNotFoundException("ex.scripting.notFound", scriptId);
             si = new FxScriptInfo(scriptId, FxScriptEvent.getById(rs.getLong(4)), rs.getString(1), rs.getString(2),
-                    rs.getString(3));
+                    rs.getString(3), rs.getBoolean(5));
         } catch (SQLException exc) {
             ctx.setRollbackOnly();
             throw new FxLoadException(LOG, exc, "ex.scripting.load.failed", scriptId, exc.getMessage());
@@ -174,14 +174,14 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         try {
             // Obtain a database connection
             con = Database.getDbConnection();
-            //                      1     2     3     4     5
-            sql = "SELECT ID, SNAME,SDESC,SDATA,STYPE FROM " + TBL_SCRIPTS + " ORDER BY ID";
+            //                  1     2     3     4     5
+            sql = "SELECT ID, SNAME,SDESC,SDATA,STYPE,ACTIVE FROM " + TBL_SCRIPTS + " ORDER BY ID";
             ps = con.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
 
             while (rs != null && rs.next()) {
                 slist.add(new FxScriptInfo(rs.getInt(1), FxScriptEvent.getById(rs.getLong(5)), rs.getString(2), rs.getString(3),
-                        rs.getString(4)));
+                        rs.getString(4), rs.getBoolean(5)));
             }
 
         } catch (SQLException exc) {
@@ -198,7 +198,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void updateScriptInfo(long scriptId, FxScriptEvent event, String name, String description, String code) throws FxApplicationException {
+    public void updateScriptInfo(long scriptId, FxScriptEvent event, String name, String description, String code, boolean active) throws FxApplicationException {
         FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
         Connection con = null;
         PreparedStatement ps = null;
@@ -209,14 +209,15 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                 code = "";
             // Obtain a database connection
             con = Database.getDbConnection();
-            //                                          1       2       3       4          5
-            sql = "UPDATE " + TBL_SCRIPTS + " SET SNAME=?,SDESC=?,SDATA=?,STYPE=? WHERE ID=?";
+            //                                          1       2       3       4    5            6
+            sql = "UPDATE " + TBL_SCRIPTS + " SET SNAME=?,SDESC=?,SDATA=?,STYPE=?,ACTIVE=? WHERE ID=?";
             ps = con.prepareStatement(sql);
             ps.setString(1, name);
             ps.setString(2, description);
             ps.setString(3, code);
             ps.setLong(4, event.getId());
-            ps.setLong(5, scriptId);
+            ps.setBoolean(5, active);
+            ps.setLong(6, scriptId);
             ps.executeUpdate();
             success = true;
         } catch (SQLException exc) {
@@ -230,13 +231,21 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         }
     }
 
+     /**
+     * {@inheritDoc}
+     */
+    public void updateScriptInfo(FxScriptInfoEdit script) throws FxApplicationException {
+        updateScriptInfo(script.getId(), script.getEvent(), script.getName(), script.getDescription(), script.getCode(), script.isActive());
+    }
+
+
     /**
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void updateScriptCode(long scriptId, String code) throws FxApplicationException {
         FxScriptInfo si = getScriptInfo(scriptId);
-        updateScriptInfo(si.getId(), si.getEvent(), si.getName(), si.getDescription(), code);
+        updateScriptInfo(si.getId(), si.getEvent(), si.getName(), si.getDescription(), code, si.isActive());
     }
 
     /**
@@ -279,19 +288,20 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         String sql;
         boolean success = false;
         try {
-            si = new FxScriptInfo(seq.getId(SequencerEngine.System.SCRIPTS), event, name, description, code);
+            si = new FxScriptInfo(seq.getId(SequencerEngine.System.SCRIPTS), event, name, description, code, true);
             if (code == null)
                 code = "";
             // Obtain a database connection
             con = Database.getDbConnection();
-            //                                      1  2     3     4     5
-            sql = "INSERT INTO " + TBL_SCRIPTS + " (ID,SNAME,SDESC,SDATA,STYPE) VALUES (?,?,?,?,?)";
+            //                                      1  2     3     4     5       6
+            sql = "INSERT INTO " + TBL_SCRIPTS + " (ID,SNAME,SDESC,SDATA,STYPE,ACTIVE) VALUES (?,?,?,?,?,?)";
             ps = con.prepareStatement(sql);
             ps.setLong(1, si.getId());
             ps.setString(2, si.getName());
             ps.setString(3, si.getDescription());
             ps.setString(4, code);
             ps.setLong(5, si.getEvent().getId());
+            ps.setBoolean(6, si.isActive());
             ps.executeUpdate();
             success = true;
         } catch (SQLException exc) {
@@ -380,6 +390,9 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public FxScriptResult runScript(long scriptId, FxScriptBinding binding) throws FxApplicationException {
         FxScriptInfo si = CacheAdmin.getEnvironment().getScript(scriptId);
+
+        if (!si.isActive())
+            throw new FxInvalidParameterException(si.getName(), "ex.general.scripting.notActive");
 
         if (!isGroovyScript(si.getName()))
             return internal_runScript(si.getName(), binding, si.getCode());

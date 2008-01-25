@@ -65,7 +65,8 @@ public class ScriptBean {
     private String name;
     private String desc;
     private String code;
-    private FxScriptInfo sinfo;
+    private boolean active;
+    private FxScriptInfoEdit sinfo;
     private ScriptingEngine scriptInterface;
     private FxScriptMapping mapping;
     private Map<Long, String> typeMappingNames;
@@ -79,7 +80,7 @@ public class ScriptBean {
     // constructor
     public ScriptBean() {
         this.scriptInterface = EJBLookup.getScriptingEngine();
-        this.sinfo = new FxScriptInfo();
+        this.sinfo = new FxScriptInfo().asEditable();
     }
 
     public FxScriptScope getSelectedScope() {
@@ -141,6 +142,14 @@ public class ScriptBean {
         this.id = id;
     }
 
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
     /**
      * Loads the script specified by the parameter id.
      *
@@ -149,7 +158,7 @@ public class ScriptBean {
 
     public String editScript() {
         ensureScriptIdSet();
-        setSinfo(CacheAdmin.getEnvironment().getScript(id));
+        setSinfo(CacheAdmin.getEnvironment().getScript(id).asEditable());
         try {
             this.mapping = scriptInterface.loadScriptMapping(null, id);
             this.typeMappingNames = new HashMap<Long, String>();
@@ -173,6 +182,7 @@ public class ScriptBean {
         setName(sinfo.getName());
         setDesc(sinfo.getDescription());
         setCode(sinfo.getCode());
+        setActive(sinfo.isActive());
         return "scriptEdit";
     }
 
@@ -180,7 +190,7 @@ public class ScriptBean {
         return sinfo;
     }
 
-    public void setSinfo(FxScriptInfo sinfo) {
+    public void setSinfo(FxScriptInfoEdit sinfo) {
         this.sinfo = sinfo;
     }
 
@@ -281,7 +291,7 @@ public class ScriptBean {
 
         try {
             setId(scriptInterface.createScript(sinfo.getEvent(), sinfo.getName(), sinfo.getDescription(), sinfo.getCode()).getId());
-            setSinfo(CacheAdmin.getEnvironment().getScript(id));
+            setSinfo(CacheAdmin.getEnvironment().getScript(id).asEditable());
             // display updated script list
             //updateScriptList();
             new FxFacesMsgInfo("Script.nfo.created", sinfo.getName()).addToContext();
@@ -308,7 +318,7 @@ public class ScriptBean {
         ensureScriptIdSet();
 
         try {
-            scriptInterface.updateScriptInfo(id, sinfo.getEvent(), sinfo.getName(), sinfo.getDescription(), sinfo.getCode());
+            scriptInterface.updateScriptInfo(id, sinfo.getEvent(), sinfo.getName(), sinfo.getDescription(), sinfo.getCode(), sinfo.isActive());
             //updateScriptList(); needed (see mandators) ???
             new FxFacesMsgInfo("Script.nfo.updated").addToContext();
             return "scriptOverview";

@@ -27,6 +27,12 @@
                     treeframe.doTreeAction('#{structureTreeControllerBean.action}',#{structureTreeControllerBean.id}, '#{structureTreeControllerBean.value}');
                 </script>
             </c:if>
+            <!-- quickfix for reloading the content frame context menu after creating a new type -->
+            <c:if test="#{typeEditorBean.reloadContentTree}">
+                <script type="text/javascript">
+                    parent.getNavFrameWnd().reloadContentTreeNavFrame();
+                </script>
+            </c:if>
             <c:if test="#{empty typeEditorBean.parseRequestParameters}"> </c:if>
 
             <ui:fragment rendered="#{typeEditorBean.editMode}">

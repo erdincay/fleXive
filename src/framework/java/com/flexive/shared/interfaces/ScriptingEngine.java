@@ -87,10 +87,19 @@ public interface ScriptingEngine {
      * @param name        new name (or <code>null</code> if unchanged)
      * @param description new description (or <code>null</code> if unchanged)
      * @param code        the code
+     * @param active      if the script is active
      * @throws FxApplicationException on errors
      * @see com.flexive.shared.scripting.FxScriptEvent
      */
-    void updateScriptInfo(long scriptId, FxScriptEvent event, String name, String description, String code) throws FxApplicationException;
+    void updateScriptInfo(long scriptId, FxScriptEvent event, String name, String description, String code, boolean active) throws FxApplicationException;
+
+    /**
+     * Update script info
+     *
+     * @param scriptInfo    the edited script info
+     * @throws com.flexive.shared.exceptions.FxApplicationException     on errors
+     */
+    void updateScriptInfo(FxScriptInfoEdit scriptInfo) throws FxApplicationException;
 
     /**
      * Convenience method to update a scripts code
@@ -98,7 +107,7 @@ public interface ScriptingEngine {
      * @param scriptId requested script id
      * @param code     the code
      * @throws FxApplicationException on errors
-     * @see #updateScriptInfo(long, com.flexive.shared.scripting.FxScriptEvent , String, String, String)
+     * @see #updateScriptInfo(long, com.flexive.shared.scripting.FxScriptEvent , String, String, String, boolean)
      */
     void updateScriptCode(long scriptId, String code) throws FxApplicationException;
 
@@ -112,6 +121,7 @@ public interface ScriptingEngine {
 
     /**
      * Create a new script
+     * (newly created scripts are set to active per default).
      *
      * @param event     script event
      * @param name        (unique) name
@@ -125,7 +135,7 @@ public interface ScriptingEngine {
 
     /**
      * Create a new script based on a script from the library
-     *
+     * (newly created scripts are set to active per default).
      * @param event     script event
      * @param libraryname name of the script in the script library
      * @param name        (unique) name
@@ -138,6 +148,7 @@ public interface ScriptingEngine {
 
     /**
      * Create a new script based on a script from the library
+     * (newly created scripts are set to active per default).
      *
      * @param dropName    name of the drop to use as repository
      * @param event     script event

@@ -88,6 +88,9 @@ public class TypeEditorBean {
     // save and delete buttons are not rendered by the gui
     private boolean editMode = false;
 
+    //quick fix for reloading the content tree context menu after creating a new type
+    private boolean reloadContentTree = false;
+
     //type script editor tab
     private ScriptListWrapper scriptWrapper = null;
     private int scriptListFiler = -1;
@@ -148,6 +151,10 @@ public class TypeEditorBean {
         return null;
     }
 
+    public boolean isReloadContentTree() {
+        return reloadContentTree;
+    }
+
     public void toggleEditMode() {
         editMode = !editMode;
     }
@@ -161,6 +168,7 @@ public class TypeEditorBean {
      * of an existing group and group assignment is possible via the webinterface.
      */
     private void initEditing() {
+        reloadContentTree=false;
         if (!type.isNew())
             scriptWrapper = new ScriptListWrapper(type.getId(), true);
         wrappedRelations = new ArrayList<WrappedRelation>(type.getRelations().size());
@@ -260,6 +268,8 @@ public class TypeEditorBean {
                 s.addAction(StructureTreeControllerBean.ACTION_RELOAD_SELECT_TYPE, id, "");
             } else
                 s.addAction(StructureTreeControllerBean.ACTION_RENAME_SELECT_TYPE, id, type.getDisplayName());
+
+            reloadContentTree =true;
         }
         catch (Throwable t) {
             new FxFacesMsgErr(t).addToContext();

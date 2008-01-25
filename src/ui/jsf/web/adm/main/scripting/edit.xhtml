@@ -44,6 +44,10 @@
                     <h:inputTextarea id="code" value="#{scriptBean.sinfo.code}" cols="100" rows="25"/>
                 </fx:formRow>
 
+                <fx:formRow labelKey="Script.field.active" id="active">
+                    <h:selectBooleanCheckbox id="active" value="#{scriptBean.sinfo.active}"/>
+                </fx:formRow>
+
                 <fx:formRow labelKey="Script.field.typeLinks">
                     <c:forEach items="#{scriptBean.typeMappingNames}" var="mapTypes">
                         <h:commandLink value="#{mapTypes.value}" actionListener="#{structureTreeControllerBean.structureOpener}"
