@@ -169,7 +169,7 @@
 
                 <div style="clear:both;height:20px"><!-- __ --></div>
 
-                <ui:fragment rendered="#{srcEditor.readOnly==true}">
+                <ui:fragment rendered="#{srcEditor.readOnly and srcEditor.editAble}">
                     <adm:commandButton labelKey="Content.button.edit" location="both"
                                       bean="#{srcEditor}"
                                       icon="edit" action="enableEdit" id="enableEditButton"/>
@@ -200,9 +200,11 @@
                                           bean="#{srcEditor}" confirm="Content.confirm.refresh"
                                           icon="reload" action="reload" id="reloadButton"/>
 
-                        <adm:commandButton labelKey="Content.button.delete" location="both"
+                        <ui:fragment rendered="#{srcEditor.deleteAble}">
+                            <adm:commandButton labelKey="Content.button.delete" location="both"
                                           bean="#{srcEditor}" confirm="Content.confirm.delete"
                                           icon="delete" action="delete" id="deleteButton"/>
+                        </ui:fragment>
                     </ui:fragment>
 
 

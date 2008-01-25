@@ -1538,7 +1538,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         UserTicket ticket = UserTicketStore.getTicket(false);
 
         // Security checks
-        if (!ticket.isGlobalSupervisor() && (!(accountId == ticket.getUserId()))) {
+        if (!ticket.isGlobalSupervisor() && (!(accountId == ticket.getUserId() || accountId == Account.USER_GUEST))) {
             try {
                 Account usr = load(accountId);
                 if (ticket.isMandatorSupervisor() && ticket.getMandatorId() == usr.getMandatorId()) {

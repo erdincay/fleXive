@@ -93,6 +93,8 @@ public class ContentEditorBean implements ActionBean, Serializable {
     private FxPK pk;
     private List<FxTreeNode> treeNodes;
     private boolean readOnly;
+    private boolean editAble;
+    private boolean deleteAble;
     private long treeNodeParent;
     private FxTreeNode treeNode;
     private Hashtable<String, String> fileInputValues = new Hashtable<String, String>(10);
@@ -161,6 +163,14 @@ public class ContentEditorBean implements ActionBean, Serializable {
 
     public void setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;
+    }
+
+    public boolean isEditAble() {
+        return editAble;
+    }
+
+    public boolean isDeleteAble() {
+        return deleteAble;
     }
 
     private void processAction() {
@@ -321,7 +331,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
                 release();
                 setPk(newPk);
                 load();
-                this.readOnly = FxJsfUtils.getBooleanParameter("readOnly");
+                setReadOnly(FxJsfUtils.getBooleanParameter("readOnly"));
                 if (this.readOnly) {
                     compact();
                 }
@@ -509,14 +519,34 @@ public class ContentEditorBean implements ActionBean, Serializable {
                     version = FxPK.MAX;
                     treeNodes = new ArrayList<FxTreeNode>(5);
                 }
-                properties = environment.getType(type).getAssignedProperties();
-                groups = environment.getType(type).getAssignedGroups();
+                FxType fxType = environment.getType(type);
+                properties = fxType.getAssignedProperties();
+                groups = fxType.getAssignedGroups();
                 acl = CacheAdmin.getEnvironment().getACL(content.getAclId());
                 data = new CeDataWrapper(this);
                 displayProv = new CeDisplayProvider(this);
                 idGenerator = new CeIdGenerator();
                 addElementOptions = new CeAddElementOptions(this);
                 _initSteps();
+                editAble = true;
+                deleteAble = true;
+                if( steps == null || steps.size() == 0 ) {
+                    new FxFacesMsgErr("Content.err.noStepAccess").addToContext();
+                    editAble = false;
+                    release();
+                    return null;
+                }
+                FxContentSecurityInfo si = fxType.usePermissions() && id != -1
+                        ? co.getContentSecurityInfo(content.getPk())
+                        : null;
+                if( editAble && id != -1 ) {
+                    if( fxType.usePermissions() )
+                        editAble = FxPermissionUtils.checkPermission(FxContext.get().getTicket(), ACL.Permission.EDIT,
+                                si, false);
+                }
+                if( fxType.usePermissions() && id != -1 )
+                        deleteAble = FxPermissionUtils.checkPermission(FxContext.get().getTicket(), ACL.Permission.DELETE,
+                                si, false);
                 return true;
             } catch (Throwable t) {
                 release();
@@ -641,6 +671,8 @@ public class ContentEditorBean implements ActionBean, Serializable {
         version = -1;
         id = -1;
         readOnly = false;
+        editAble = false;
+        deleteAble = false;
         //return getEditorPage();
         return null;
     }
@@ -853,8 +885,10 @@ public class ContentEditorBean implements ActionBean, Serializable {
     }
 
     public String enableEdit() {
+        if( !editAble )
+            return getEditorPage();
         reload(); // TODO: locking
-        this.readOnly = false;
+        setReadOnly(false);
         return getEditorPage();
     }
 
