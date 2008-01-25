@@ -259,10 +259,11 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             StructureLoader.removeACL(FxContext.get().getDivisionId(), id);
         } catch (SQLException exc) {
             final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(exc);
+            final boolean keyViolation = Database.isForeignKeyViolation(exc);
             ctx.setRollbackOnly();
             if (uniqueConstraintViolation)
                 throw new FxRemoveException(LOG, "ex.acl.aclAlreadyExists", theACL.getName());
-            else if (Database.isForeignKeyViolation(exc))
+            else if (keyViolation)
                 throw new FxRemoveException(LOG, "ex.acl.deleteFailed.aclIsInUse", theACL.getName());
             else
                 throw new FxRemoveException(LOG, "ex.acl.deleteFailed", theACL.getName(), exc.getMessage());

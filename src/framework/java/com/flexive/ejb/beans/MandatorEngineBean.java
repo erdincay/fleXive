@@ -283,11 +283,10 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
             ps.executeUpdate();
             StructureLoader.removeMandator(FxContext.get().getDivisionId(), mandatorId);
         } catch (SQLException exc) {
-            if( Database.isForeignKeyViolation(exc)) {
-                ctx.setRollbackOnly();
-                throw new FxEntryInUseException(exc, "ex.mandator.removeFailed.inUse", mand.getName());
-            }
+            final boolean keyViolation = Database.isForeignKeyViolation(exc);
             ctx.setRollbackOnly();
+            if(keyViolation) 
+                throw new FxEntryInUseException(exc, "ex.mandator.removeFailed.inUse", mand.getName());
             throw new FxRemoveException(LOG, exc, "ex.mandator.removeFailed", mand.getName(), exc.getMessage());
         } finally {
             Database.closeObjects(MandatorEngineBean.class, con, ps);
