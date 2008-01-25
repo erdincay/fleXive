@@ -355,7 +355,9 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             stmt.executeUpdate();
             if (assignments.size() > 0) {
                 stmt.close();
+                //                                             1          2    3      4        5        6     7      8
                 curSql = "INSERT INTO " + TBL_ASSIGN_ACLS + " (USERGROUP, ACL, PEDIT, PREMOVE, PEXPORT, PREL, PREAD, PCREATE, " +
+                        //9          10          11           12
                         "CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
                 java.sql.Timestamp now = new java.sql.Timestamp(java.lang.System.currentTimeMillis());
                 stmt = con.prepareStatement(curSql);
@@ -663,7 +665,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             con = Database.getDbConnection();
 
             // load assignments
-            //                  1       ,  2        ,  3     ,  4     ,    5  ,   6      ,  7
+            //                   1             2       3         4         5           6           7
             curSql = "SELECT ass.USERGROUP,ass.ACL,ass.PREAD,ass.PEDIT,ass.PREMOVE,ass.PEXPORT,ass.PREL," +
                     //   8        ,      9        10             11             12              13
                     "ass.PCREATE,acl.CAT_TYPE,ass.CREATED_BY,ass.CREATED_AT,ass.MODIFIED_BY,ass.MODIFIED_AT " +
@@ -680,7 +682,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             ArrayList<ACLAssignment> result = new ArrayList<ACLAssignment>(20);
             while (rs != null && rs.next())
                 result.add(new ACLAssignment(rs.getLong(2), rs.getLong(1),
-                        rs.getBoolean(3), rs.getBoolean(4), rs.getBoolean(5), rs.getBoolean(6), rs.getBoolean(7),
+                        rs.getBoolean(3), rs.getBoolean(4), rs.getBoolean(7), rs.getBoolean(5), rs.getBoolean(6),
                         rs.getBoolean(8), ACL.Category.getById(rs.getByte(9)),
                         LifeCycleInfoImpl.load(rs, 10, 11, 12, 13)));
 
