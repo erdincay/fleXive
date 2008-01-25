@@ -68,10 +68,6 @@ public final class FxFilteredEnvironment implements FxEnvironment {
 
     private final FxEnvironment environment;
 
-    private UserTicket getTicket() {
-        return FxContext.get().getTicket();
-    }
-
     public FxFilteredEnvironment(FxEnvironment environment) {
         this.environment = environment;
     }
@@ -283,7 +279,7 @@ public final class FxFilteredEnvironment implements FxEnvironment {
         final List<FxType> types = getTypes(true, true, true, false);
         final List<FxPropertyAssignment> assignments = new ArrayList<FxPropertyAssignment>(environment.getPropertyAssignments());
         // return only assignments for available types
-        for (Iterator<FxPropertyAssignment> iterator = assignments.iterator(); iterator.hasNext(); ) {
+        for (Iterator<FxPropertyAssignment> iterator = assignments.iterator(); iterator.hasNext();) {
             final FxPropertyAssignment assignment = iterator.next();
             if (!types.contains(assignment.getAssignedType())) {
                 iterator.remove();
@@ -367,6 +363,13 @@ public final class FxFilteredEnvironment implements FxEnvironment {
      */
     public FxType getType(long id) {
         return environment.getType(id);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public List<FxType> getTypesForProperty(long propertyId) {
+        return environment.getTypesForProperty(propertyId);
     }
 
     /**
