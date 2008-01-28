@@ -145,7 +145,7 @@
                 </ui:fragment>
             </fx:fieldSet>
 
-            <ui:fragment rendered="#{propertyEditorBean.mayEdit and not propertyEditorBean.editMode}">
+            <ui:fragment rendered="#{propertyEditorBean.structureManager and not propertyEditorBean.editMode}">
                 <adm:commandButton labelKey="PropertyEditor.button.editMode" location="both"
                         icon="edit"  action="toggleEditMode"  bean="#{propertyEditorBean}" id="editModeButton"/>
             </ui:fragment>
@@ -156,12 +156,12 @@
                         onclick="parent.getNavFrameWnd().openNode(#{propertyEditorBean.assignment.id}, false);return false;"/>
             </ui:fragment>
 
-            <ui:fragment rendered="#{propertyEditorBean.mayEdit and propertyEditorBean.editMode}">
+            <ui:fragment rendered="#{propertyEditorBean.structureManager and propertyEditorBean.editMode}">
                 <adm:commandButton labelKey="PropertyEditor.button.save" location="both" 
                                 icon="save"  action="saveChanges"  bean="#{propertyEditorBean}" id="saveChangesButton">
                 </adm:commandButton>
            </ui:fragment>
-             <ui:fragment rendered="#{propertyEditorBean.mayDelete and not propertyEditorBean.systemInternal and propertyEditorBean.editMode}">
+             <ui:fragment rendered="#{propertyEditorBean.structureManager and not propertyEditorBean.systemInternal and propertyEditorBean.editMode}">
                 <adm:commandButton labelKey="PropertyEditor.button.delete.assignment" location="both" lockscreen="false"
                                 icon="delete" onclick="parent.getNavFrameWnd()._deleteAssignment(#{propertyEditorBean.assignment.id});return false;"
                                 id="deleteAssignmentButton">

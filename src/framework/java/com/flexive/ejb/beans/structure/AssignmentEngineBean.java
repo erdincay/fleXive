@@ -1227,7 +1227,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 }
                 //may only change if there are no existing content instances that use this property already
                 if (org.getDataType().getId() != prop.getDataType().getId()) {
-                    if (getInstanceCount(con, org.getId()) == 0) {
+                    if (getPropertyInstanceCount(org.getId()) == 0) {
                         if (ps != null) ps.close();
                         ps = con.prepareStatement("UPDATE " + TBL_STRUCT_PROPERTIES + " SET DATATYPE=? WHERE ID=?");
                         ps.setLong(1, prop.getDataType().getId());
@@ -1245,7 +1245,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 if (org.getReferencedType() != null && prop.getReferencedType() != null &&
                         org.getReferencedType().getId() != prop.getReferencedType().getId() ||
                         org.hasReferencedType() != prop.hasReferencedType()) {
-                    if (getInstanceCount(con, org.getId()) == 0) {
+                    if (getPropertyInstanceCount(org.getId()) == 0) {
                         ps = con.prepareStatement("UPDATE " + TBL_STRUCT_PROPERTIES + " SET REFTYPE=? WHERE ID=?");
                         ps.setLong(2, prop.getId());
                         if (prop.hasReferencedType()) {
@@ -1288,7 +1288,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 if (org.getReferencedList() != null && prop.getReferencedList() != null &&
                         org.getReferencedList().getId() != prop.getReferencedList().getId() ||
                         org.hasReferencedList() != prop.hasReferencedList()) {
-                    if (getInstanceCount(con, org.getId()) == 0) {
+                    if (getPropertyInstanceCount(org.getId()) == 0) {
                         ps = con.prepareStatement("UPDATE " + TBL_STRUCT_PROPERTIES + " SET REFLIST=? WHERE ID=?");
                         ps.setLong(2, prop.getId());
                         if (prop.hasReferencedList()) {
@@ -1305,7 +1305,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 }
 
                 if (org.getUniqueMode() != prop.getUniqueMode()) {
-                    boolean allowChange = getInstanceCount(con, org.getId()) == 0 || prop.getUniqueMode().equals(UniqueMode.None);
+                    boolean allowChange = getPropertyInstanceCount(org.getId()) == 0 || prop.getUniqueMode().equals(UniqueMode.None);
                     if (!allowChange) {
                         boolean check = true;
                         for (FxType type : CacheAdmin.getEnvironment().getTypesForProperty(prop.getId())) {
@@ -2206,25 +2206,27 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
 
 
     /**
-     * Get the number of content instances for a given property,
-     *
-     * @param con        a valid and open connection
-     * @param propertyId id of the requested assignment
-     * @return number of content instances using the assignment
-     * @throws SQLException on errors
+     * {@inheritDoc}
      */
-    private long getInstanceCount(Connection con, long propertyId) throws SQLException {
+    public long getPropertyInstanceCount(long propertyId) throws FxDbException {
+        Connection con = null;
         PreparedStatement ps = null;
         long count = 0;
         try {
+            con = Database.getDbConnection();
             ps = con.prepareStatement("SELECT COUNT(*) FROM " + TBL_CONTENT_DATA + " WHERE TPROP=?");
             ps.setLong(1, propertyId);
             ResultSet rs = ps.executeQuery();
             rs.next();
             count = rs.getLong(1);
-        } finally {
-            if (ps != null)
-                ps.close();
+            ps.close();
+        }
+        catch (SQLException e) {
+            throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage());
+        }
+        finally {
+            if (con != null)
+                Database.closeObjects(AssignmentEngineBean.class, con, ps);
         }
         return count;
     }

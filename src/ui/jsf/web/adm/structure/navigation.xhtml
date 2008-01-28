@@ -227,10 +227,10 @@
             function doContentActionFromContextMenu(node, defaultAction) {
                 var propertyId = node["propertyId"];
                 if ("Assignment" == node.nodeDocType || "AssignmentSystemInternal" == node.nodeDocType) {
-                    invokeContentAction("adm/structure/propertyAssignmentEditor.jsf", defaultAction, {id: propertyId, mayEdit: node.mayEdit, mayDelete: node.mayDelete});
+                    invokeContentAction("adm/structure/propertyAssignmentEditor.jsf", defaultAction, {id: propertyId});
                 }
                 else if ("Type" == node.nodeDocType || "TypeRelation" == node.nodeDocType) {
-                    invokeContentAction("adm/structure/typeEditor.jsf", defaultAction, {id: propertyId, mayEdit: node.mayEdit, mayDelete: node.mayDelete});
+                    invokeContentAction("adm/structure/typeEditor.jsf", defaultAction, {id: propertyId});
                 }
                 else if ("Group" == node.nodeDocType) {
                     invokeContentAction("adm/structure/groupAssignmentEditor.jsf", defaultAction, {id: propertyId});
@@ -494,8 +494,8 @@
                 setActionDisabled(menu.getTreeNode(), "createContent", node.nodeDocType!="Type");
                 setActionDisabled(menu.getTreeNode(), "createProperty", !(node.nodeDocType=="Group" || isType(node.nodeDocType)) || lackRole);
                 setActionDisabled(menu.getTreeNode(), "createGroup", !(node.nodeDocType=="Group" || isType(node.nodeDocType)) || lackRole);
-                setActionDisabled(menu.getTreeNode(), "deleteAssignment", node.nodeDocType!="Group" && (node.nodeDocType!="Assignment" || node.mayDelete!="true"));
-                setActionDisabled(menu.getTreeNode(), "deleteType", !isType(node.nodeDocType) || node.mayDelete!="true");
+                setActionDisabled(menu.getTreeNode(), "deleteAssignment", (node.nodeDocType!="Group" && node.nodeDocType!="Assignment") || lackRole);
+                setActionDisabled(menu.getTreeNode(), "deleteType", !isType(node.nodeDocType) || lackRole);
                 setActionDisabled(menu.getTreeNode(), "copyAssignment", lackRole || node.nodeDocType!="Group" && node.nodeDocType!="Assignment");
                 setActionDisabled(menu.getTreeNode(), "searchContents", !isType(node.nodeDocType) && !isAssignment(node.nodeDocType));
                 setActionDisabled(menu.getTreeNode(), "cutAssignment", lackRole || node.nodeDocType!="Assignment" && node.nodeDocType!="Group");
@@ -569,8 +569,8 @@
                    <adm:treeContextMenuItem treeActions="pasteBelowAs" icon="paste" labelKey="StructureTree.menu.paste.belowAs" clickHandler="pasteBelowAs"/>
                    <adm:treeContextMenuItem treeActions="pasteIntoAs" icon="paste" labelKey="StructureTree.menu.paste.intoAs" clickHandler="pasteIntoAs"/>
                </adm:treeContextMenuItem>
-               <adm:treeContextMenuItem icon="delete" treeActions="deleteAssignment" labelKey="StructureTree.menu.delete.assignment" clickHandler="deleteAssignment"/>
                <adm:treeContextMenuItem icon="cut" treeActions="cutAssignment" labelKey="StructureTree.menu.cut.assignment" clickHandler="cutAssignment"/>
+               <adm:treeContextMenuItem icon="delete" treeActions="deleteAssignment" labelKey="StructureTree.menu.delete.assignment" clickHandler="deleteAssignment"/>
                <adm:treeContextMenuItem icon="delete" treeActions="deleteType" labelKey="StructureTree.menu.delete.type" clickHandler="deleteType"/>
             </adm:treeContextMenu>
 

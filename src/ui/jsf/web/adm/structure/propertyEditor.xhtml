@@ -78,7 +78,8 @@
             </c:if>
             <fx:formRow labelKey="PropertyEditor.label.uniqueMode" id="uniqueMode">
                 <t:selectOneListbox size="1" id="uniqueMode" value="#{propertyEditorBean.propertyUniqueMode}"
-                     disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}">
+                     disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode or
+                     propertyEditorBean.propertyUsedInInstance}">
                     <f:selectItems value="#{fxSelectBean.uniqueModes}" />
                 </t:selectOneListbox>
             </fx:formRow>
@@ -147,7 +148,7 @@
               </table>
            </fx:fieldSet>
 
-            <ui:fragment rendered="#{not propertyEditorBean.property.new and not propertyEditorBean.editMode and propertyEditorBean.mayEdit}">
+            <ui:fragment rendered="#{not propertyEditorBean.property.new and not propertyEditorBean.editMode and propertyEditorBean.structureManager}">
                 <adm:commandButton labelKey="PropertyEditor.button.editMode" location="both"
                 icon="edit"  action="toggleEditMode"  bean="#{propertyEditorBean}" id="editModeButton"/>
             </ui:fragment>
@@ -158,7 +159,7 @@
                         onclick="parent.getNavFrameWnd().openNode(#{propertyEditorBean.assignment.id}, false);return false;"/>
             </ui:fragment>
 
-           <ui:fragment rendered="#{not propertyEditorBean.property.new and propertyEditorBean.mayEdit and propertyEditorBean.editMode}">
+           <ui:fragment rendered="#{not propertyEditorBean.property.new and propertyEditorBean.structureManager and propertyEditorBean.editMode}">
                 <adm:commandButton labelKey="PropertyEditor.button.save" location="both"
                     icon="save"  action="saveChanges"  bean="#{propertyEditorBean}" id="saveChangesButton">
                 </adm:commandButton>

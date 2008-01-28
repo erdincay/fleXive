@@ -190,4 +190,13 @@ public interface AssignmentEngine {
      *          on errors
      */
     long getAssignmentInstanceCount(long assignmentId) throws FxApplicationException;
+
+     /**
+     * Get the number of existing content instances using a given property.
+     *
+     * @param propertyId id of the requested assignment
+     * @return number of content instances using the assignment
+     * @throws com.flexive.shared.exceptions.FxDbException on errors
+     */
+    long getPropertyInstanceCount(long propertyId) throws FxDbException;
 }

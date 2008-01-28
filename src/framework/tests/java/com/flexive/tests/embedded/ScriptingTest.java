@@ -44,6 +44,7 @@ import com.flexive.shared.interfaces.ScriptingEngine;
 import com.flexive.shared.scripting.FxScriptBinding;
 import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.scripting.FxScriptInfo;
+import com.flexive.shared.scripting.FxScriptInfoEdit;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
@@ -115,6 +116,25 @@ public class ScriptingTest {
         assert si.getEvent().equals(FxScriptEvent.Manual) : "Invalid script type";
         assert se.runScript(si.getId(), new FxScriptBinding()).getResult().equals(result) : "Invalid result from script!";
         se.removeScript(si.getId());
+    }
+
+    @Test
+    public void scriptActivation() throws Exception {
+        FxScriptInfo si = se.createScript(FxScriptEvent.Manual,  "manualTestScript", "manualTestScript", "return \"done\";");
+        se.runScript(si.getId());
+        FxScriptInfoEdit inactive = si.asEditable();
+        inactive.setActive(false);
+        se.updateScriptInfo(inactive);
+        try {
+            se.runScript(si.getId());
+            assert false : "Inactive scripts must not be runnable!";
+        }
+        catch (Exception e) {
+            //ok
+        }
+        finally {
+            se.removeScript(si.getId());
+        }
     }
 
     @Test

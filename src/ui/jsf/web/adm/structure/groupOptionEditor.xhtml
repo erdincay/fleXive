@@ -190,7 +190,7 @@
                     </fx:fieldSet>
                 </ui:fragment>
 
-                <ui:fragment rendered="#{not groupEditorBean.group.new and not groupEditorBean.editMode and fxSystemBean.isInRole['StructureManagement']}}">
+                <ui:fragment rendered="#{not groupEditorBean.group.new and not groupEditorBean.editMode and groupEditorBean.structureManager}">
                     <adm:commandButton labelKey="GroupEditor.button.editMode" location="both"
                     icon="edit"  action="toggleEditMode"  bean="#{groupEditorBean}" id="editModeButton"/>
                 </ui:fragment>
@@ -206,14 +206,16 @@
                                         id="validateChangesButton">
                     </adm:commandButton>
                 </ui:fragment>
-                <ui:fragment rendered="#{not groupEditorBean.group.new and groupEditorBean.editMode}">
-                    <adm:commandButton labelKey="GroupEditor.button.save" location="both"
-                            icon="save"  action="saveChanges"  bean="#{groupEditorBean}" id="saveChangesButton">
-                    </adm:commandButton>
-                </ui:fragment>
-                <ui:fragment rendered="#{groupEditorBean.group.new}">
-                    <adm:commandButton labelKey="GroupEditor.button.createNew" location="both"
-                    icon="new"  action="createGroup"  bean="#{gorupEditorBean}" id="createGroupButton"/>
+                <ui:fragment rendered="#{groupEditorBean.structureManager}">
+                    <ui:fragment rendered="#{not groupEditorBean.group.new and groupEditorBean.editMode}">
+                        <adm:commandButton labelKey="GroupEditor.button.save" location="both"
+                                icon="save"  action="saveChanges"  bean="#{groupEditorBean}" id="saveChangesButton">
+                        </adm:commandButton>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{groupEditorBean.group.new}">
+                        <adm:commandButton labelKey="GroupEditor.button.createNew" location="both"
+                        icon="new"  action="createGroup"  bean="#{gorupEditorBean}" id="createGroupButton"/>
+                    </ui:fragment>
                 </ui:fragment>
             <adm:toolbarPluginButtons/>
             </fx:fieldSet>

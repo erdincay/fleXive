@@ -103,7 +103,7 @@
                 </fx:formRow>
             </ui:fragment>
 
-            <ui:fragment rendered="#{not groupEditorBean.group.new and not groupEditorBean.editMode and fxSystemBean.isInRole['StructureManagement']}}">
+            <ui:fragment rendered="#{not groupEditorBean.group.new and not groupEditorBean.editMode and groupEditorBean.structureManager}">
                 <adm:commandButton labelKey="GroupEditor.button.editMode" location="both"
                     icon="edit"  action="toggleEditMode"  bean="#{groupEditorBean}" id="editModeButton"/>
             </ui:fragment>
@@ -114,13 +114,15 @@
                         onclick="parent.getNavFrameWnd().openNode(#{groupEditorBean.assignment.id}, false);return false;"/>
             </ui:fragment>
 
-            <ui:fragment rendered="#{not groupEditorBean.group.new and groupEditorBean.editMode}">
-                <adm:commandButton labelKey="GroupEditor.button.save" location="both" 
-                    icon="save"  action="saveChanges"  bean="#{groupEditorBean}" id="saveChangesButton">
-                </adm:commandButton>
+            <ui:fragment rendered="#{groupEditorBean.structureManager}">
+                <ui:fragment rendered="#{not groupEditorBean.group.new and groupEditorBean.editMode}">
+                    <adm:commandButton labelKey="GroupEditor.button.save" location="both"
+                        icon="save"  action="saveChanges"  bean="#{groupEditorBean}" id="saveChangesButton">
+                    </adm:commandButton>
 
-                <adm:commandButton labelKey="GroupEditor.button.createNew" location="both"
-                    icon="new"  action="createGroup"  bean="#{groupEditorBean}" id="createGroupButton"/>
+                    <adm:commandButton labelKey="GroupEditor.button.createNew" location="both"
+                        icon="new"  action="createGroup"  bean="#{groupEditorBean}" id="createGroupButton"/>
+                </ui:fragment>
             </ui:fragment>
             <adm:toolbarPluginButtons/>
         </h:form>

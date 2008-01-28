@@ -39,6 +39,7 @@ import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.shared.*;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxDbException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.security.Role;
@@ -88,9 +89,7 @@ public class PropertyEditorBean implements ActionBean {
     //checker to restore system language
     private boolean originalLanguageSystemLanguage = false;
     //checker if current user may edit the property
-    private boolean mayEdit = false;
-    //checker if current user may delete the property
-    private boolean mayDelete = false;
+    private boolean structureManager = false;
     //checker for the editMode: if not in edit mode,
     // save and delete buttons are not rendered by the gui
     private boolean editMode = false;
@@ -101,15 +100,6 @@ public class PropertyEditorBean implements ActionBean {
     private long selectedScriptEventId = -1;
     private boolean selectedDerivedUsage = false;
     private boolean selectedActive = true;
-
-
-    public boolean isMayEdit() {
-        return mayEdit;
-    }
-
-    public boolean isMayDelete() {
-        return mayDelete;
-    }
 
     /*
     public String getGotoPropertyAssignment() {
@@ -397,6 +387,16 @@ public class PropertyEditorBean implements ActionBean {
         return getProperty().getUniqueMode();
     }
 
+    public boolean isPropertyUsedInInstance() {
+        boolean result = true;
+        try {
+            result = !property.isNew() && (EJBLookup.getAssignmentEngine().getPropertyInstanceCount(propertyId) > 0);
+        } catch (Throwable t) {
+             new FxFacesMsgErr(t).addToContext();
+        }
+        return result;
+    }
+
     public void setPropertyUniqueMode(UniqueMode u) {
         getProperty().setUniqueMode(u);
     }
@@ -637,8 +637,6 @@ public class PropertyEditorBean implements ActionBean {
             } else if ("openInstance".equals(action)) {
                 editMode = false;
                 long propId = FxJsfUtils.getLongParameter("id", -1);
-                mayEdit = FxJsfUtils.getBooleanParameter("mayEdit", false);
-                mayDelete = FxJsfUtils.getBooleanParameter("mayDelete", false);
                 setPropertyId(propId);
                 FxPropertyAssignmentEdit assignment = ((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(propId)).asEditable();
                 setAssignment(assignment);
@@ -647,8 +645,6 @@ public class PropertyEditorBean implements ActionBean {
             } else if ("editInstance".equals(action)) {
                 editMode = true;
                 long propId = FxJsfUtils.getLongParameter("id", -1);
-                mayEdit = FxJsfUtils.getBooleanParameter("mayEdit", false);
-                mayDelete = FxJsfUtils.getBooleanParameter("mayDelete", false);
                 setPropertyId(propId);
                 FxPropertyAssignmentEdit assignment = ((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(propId)).asEditable();
                 setAssignment(assignment);
@@ -682,25 +678,28 @@ public class PropertyEditorBean implements ActionBean {
                 initNewPropertyEditing();
             } else if ("assignProperty".equals(action)) {
                 editMode = false;
-                long id = FxJsfUtils.getLongParameter("id");
-                String nodeType = FxJsfUtils.getParameter("nodeType");
+                structureManager = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
+                if (structureManager) {
+                    long id = FxJsfUtils.getLongParameter("id");
+                    String nodeType = FxJsfUtils.getParameter("nodeType");
 
-                parentXPath = "/";
+                    parentXPath = "/";
 
-                if (StructureTreeWriter.DOC_TYPE_TYPE.equals(nodeType)
-                        || StructureTreeWriter.DOC_TYPE_TYPE_RELATION.equals(nodeType)) {
-                    parentType = CacheAdmin.getEnvironment().getType(id);
+                    if (StructureTreeWriter.DOC_TYPE_TYPE.equals(nodeType)
+                            || StructureTreeWriter.DOC_TYPE_TYPE_RELATION.equals(nodeType)) {
+                        parentType = CacheAdmin.getEnvironment().getType(id);
+                    }
+
+                    if (StructureTreeWriter.DOC_TYPE_GROUP.equals(nodeType)) {
+                        FxGroupAssignment ga = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(id);
+                        parentType = ga.getAssignedType();
+                        parentXPath = ga.getXPath();
+                    }
+
+                    long assignmentId = EJBLookup.getAssignmentEngine().save(FxPropertyAssignmentEdit.createNew(assignment, parentType, assignment.getAlias(), parentXPath), false);
+                    StructureTreeControllerBean s = (StructureTreeControllerBean) FxJsfUtils.getManagedBean("structureTreeControllerBean");
+                    s.addAction(StructureTreeControllerBean.ACTION_RELOAD_SELECT_ASSIGNMENT, assignmentId, "");
                 }
-
-                if (StructureTreeWriter.DOC_TYPE_GROUP.equals(nodeType)) {
-                    FxGroupAssignment ga = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(id);
-                    parentType = ga.getAssignedType();
-                    parentXPath = ga.getXPath();
-                }
-
-                long assignmentId = EJBLookup.getAssignmentEngine().save(FxPropertyAssignmentEdit.createNew(assignment, parentType, assignment.getAlias(), parentXPath), false);
-                StructureTreeControllerBean s = (StructureTreeControllerBean) FxJsfUtils.getManagedBean("structureTreeControllerBean");
-                s.addAction(StructureTreeControllerBean.ACTION_RELOAD_SELECT_ASSIGNMENT, assignmentId, "");
             }
         } catch (Throwable t) {
             LOG.error("Failed to parse request parameters: " + t.getMessage(), t);
@@ -718,11 +717,16 @@ public class PropertyEditorBean implements ActionBean {
         return editMode;
     }
 
+    public boolean isStructureManager() {
+        return structureManager;
+    }
+
     /**
      * Initializes variables and does workarounds so editing of an existing property and
      * property assignment is possible via the webinterface
      */
     private void initEditing() {
+        structureManager = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
         if (!assignment.isNew())
             scriptWrapper = new ScriptListWrapper(assignment.getId(), false);
 
@@ -771,6 +775,7 @@ public class PropertyEditorBean implements ActionBean {
      * during the creation process, new properties don't have assignments yet.
      */
     private void initNewPropertyEditing() {
+        structureManager = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
         property.setAutoUniquePropertyName(false);
         setPropertyMinMultiplicity(FxMultiplicity.getIntToString(property.getMultiplicity().getMin()));
         setPropertyMaxMultiplicity(FxMultiplicity.getIntToString(property.getMultiplicity().getMax()));
@@ -901,11 +906,6 @@ public class PropertyEditorBean implements ActionBean {
         }
     }
 
-    /*
-    public void gotoPropertyAssignment() {
-        setGotoPropertyAssignment(optionFiler.getKey());
-    }
-    */
 
     /**
      * Show the PropertyAssignmentEditor
@@ -948,7 +948,6 @@ public class PropertyEditorBean implements ActionBean {
     public String gotoAssignmentScriptEditor() {
         editMode = false;
         long propId = FxJsfUtils.getLongParameter("oid", -1);
-        mayEdit = mayEdit = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
         setPropertyId(propId);
         FxPropertyAssignmentEdit assignment = ((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(propId)).asEditable();
         setAssignment(assignment);

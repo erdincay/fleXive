@@ -331,7 +331,7 @@
                     <h:selectBooleanCheckbox id="checkValidity" value="#{typeEditorBean.checkValidity}"
                             disabled="#{not typeEditorBean.editMode}"/>
             </fx:formRow>
-            <ui:fragment rendered="#{(not typeEditorBean.type.new) and (not typeEditorBean.editMode) and typeEditorBean.mayEdit}">
+            <ui:fragment rendered="#{(not typeEditorBean.type.new) and (not typeEditorBean.editMode) and typeEditorBean.structureManager}">
                 <adm:commandButton labelKey="TypeEditor.button.editMode" location="both"
                         icon="edit"  action="toggleEditMode"  bean="#{typeEditorBean}" id="editModeButton"/>
             </ui:fragment>
@@ -342,7 +342,7 @@
                         onclick="parent.getNavFrameWnd().openNode(#{typeEditorBean.type.id}, true);return false;"/>
             </ui:fragment>
 
-            <ui:fragment rendered="#{not typeEditorBean.type.new and typeEditorBean.mayEdit and typeEditorBean.editMode}">
+            <ui:fragment rendered="#{not typeEditorBean.type.new and typeEditorBean.structureManager and typeEditorBean.editMode}">
                 <adm:commandButton labelKey="TypeEditor.button.save" location="both" 
                                 icon="save"  action="saveChanges"  bean="#{typeEditorBean}" id="saveChangesButton">
                 </adm:commandButton>
@@ -352,7 +352,7 @@
                                 icon="new"  action="saveChanges"  bean="#{typeEditorBean}" id="createTypeButton">
                 </adm:commandButton>
             </ui:fragment>
-            <ui:fragment rendered="#{typeEditorBean.mayDelete and not typeEditorBean.type.new and typeEditorBean.editMode}">
+            <ui:fragment rendered="#{typeEditorBean.structureManager and not typeEditorBean.type.new and typeEditorBean.editMode}">
                 <adm:commandButton labelKey="TypeEditor.button.delete" location="both" lockscreen="false"
                                 icon="delete" onclick="parent.getNavFrameWnd()._deleteType(#{typeEditorBean.type.id});return false;"
                                 id="deleteTypeButton">

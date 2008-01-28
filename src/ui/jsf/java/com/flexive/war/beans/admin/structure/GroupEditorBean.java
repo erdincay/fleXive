@@ -37,6 +37,7 @@ import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.security.Role;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
@@ -77,6 +78,8 @@ public class GroupEditorBean {
     //checker for the editMode: if not in edit mode,
     // save and delete buttons are not rendered by the gui
     private boolean editMode = false;
+    //checker if current user may edit the property
+    private boolean structureManager = false;
 
     public String getParseRequestParameters() {
         try {
@@ -120,23 +123,26 @@ public class GroupEditorBean {
                 initNewGroupEditing();
             } else if ("assignGroup".equals(action)) {
                 editMode = false;
-                long id = FxJsfUtils.getLongParameter("id");
-                String nodeType = FxJsfUtils.getParameter("nodeType");
+                structureManager = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
+                if (structureManager) {
+                    long id = FxJsfUtils.getLongParameter("id");
+                    String nodeType = FxJsfUtils.getParameter("nodeType");
 
-                parentXPath = "/";
+                    parentXPath = "/";
 
-                if (StructureTreeWriter.DOC_TYPE_TYPE.equals(nodeType) || StructureTreeWriter.DOC_TYPE_TYPE_RELATION.equals(nodeType)) {
-                    parentType = CacheAdmin.getEnvironment().getType(id);
+                    if (StructureTreeWriter.DOC_TYPE_TYPE.equals(nodeType) || StructureTreeWriter.DOC_TYPE_TYPE_RELATION.equals(nodeType)) {
+                        parentType = CacheAdmin.getEnvironment().getType(id);
+                    }
+
+                    if (StructureTreeWriter.DOC_TYPE_GROUP.equals(nodeType)) {
+                        FxGroupAssignment ga = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(id);
+                        parentType = ga.getAssignedType();
+                        parentXPath = ga.getXPath();
+                    }
+                    long assignmentId = EJBLookup.getAssignmentEngine().save(FxGroupAssignmentEdit.createNew(assignment, parentType, assignment.getAlias(), parentXPath), true);
+                    StructureTreeControllerBean s = (StructureTreeControllerBean) FxJsfUtils.getManagedBean("structureTreeControllerBean");
+                    s.addAction(StructureTreeControllerBean.ACTION_RELOAD_SELECT_ASSIGNMENT, assignmentId, "");
                 }
-
-                if (StructureTreeWriter.DOC_TYPE_GROUP.equals(nodeType)) {
-                    FxGroupAssignment ga = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(id);
-                    parentType = ga.getAssignedType();
-                    parentXPath = ga.getXPath();
-                }
-                long assignmentId = EJBLookup.getAssignmentEngine().save(FxGroupAssignmentEdit.createNew(assignment, parentType, assignment.getAlias(), parentXPath), true);
-                StructureTreeControllerBean s = (StructureTreeControllerBean) FxJsfUtils.getManagedBean("structureTreeControllerBean");
-                s.addAction(StructureTreeControllerBean.ACTION_RELOAD_SELECT_ASSIGNMENT, assignmentId, "");
             }
 
         } catch (Throwable t) {
@@ -155,6 +161,10 @@ public class GroupEditorBean {
         return editMode;
     }
 
+    public boolean isStructureManager() {
+        return structureManager;
+    }
+
     public boolean isSystemInternal() {
         return assignment != null && assignment.isSystemInternal();
     }
@@ -164,6 +174,7 @@ public class GroupEditorBean {
      * of an existing group and group assignment is possible via the webinterface
      */
     private void initEditing() {
+        structureManager = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
         assignmentMinMul = FxMultiplicity.getIntToString(assignment.getMultiplicity().getMin());
         assignmentMaxMul = FxMultiplicity.getIntToString(assignment.getMultiplicity().getMax());
         groupMinMul = FxMultiplicity.getIntToString(group.getMultiplicity().getMin());
@@ -176,6 +187,7 @@ public class GroupEditorBean {
      * during the creation process, new groups don't have assignments yet.
      */
     private void initNewGroupEditing() {
+        structureManager = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
         group.setOverrideMultiplicity(true);
         groupMinMul = FxMultiplicity.getIntToString(group.getMultiplicity().getMin());
         groupMaxMul = FxMultiplicity.getIntToString(group.getMultiplicity().getMax());

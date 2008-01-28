@@ -190,7 +190,7 @@
                 </fx:fieldSet>
             </ui:fragment>
 
-            <ui:fragment rendered="#{not propertyEditorBean.property.new and not propertyEditorBean.editMode and propertyEditorBean.mayEdit}">
+            <ui:fragment rendered="#{not propertyEditorBean.property.new and not propertyEditorBean.editMode and propertyEditorBean.structureManager}">
                 <adm:commandButton labelKey="PropertyEditor.button.editMode" location="both"
                 icon="edit"  action="toggleEditMode"  bean="#{propertyEditorBean}" id="editModeButton"/>
             </ui:fragment>
@@ -207,7 +207,7 @@
                 </adm:commandButton>
             </ui:fragment>
 
-            <ui:fragment rendered="#{not propertyEditorBean.property.new and propertyEditorBean.mayEdit and propertyEditorBean.editMode}">
+            <ui:fragment rendered="#{not propertyEditorBean.property.new and propertyEditorBean.structureManager and propertyEditorBean.editMode}">
                 <adm:commandButton labelKey="PropertyEditor.button.save" location="both"
                     icon="save"  action="saveChanges"  bean="#{propertyEditorBean}" id="saveChangesButton">
                 </adm:commandButton>

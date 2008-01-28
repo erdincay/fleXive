@@ -81,9 +81,7 @@ public class TypeEditorBean {
     private boolean maxRelDestUnlimited = false;
     private static final int DEFAULT_REL_MAX = 100;
     //checker if current user may edit the property
-    private boolean mayEdit = false;
-    //checker if current user may delete the property
-    private boolean mayDelete = false;
+    boolean structureManager = false;
     //checker for the editMode: if not in edit mode,
     // save and delete buttons are not rendered by the gui
     private boolean editMode = false;
@@ -99,14 +97,6 @@ public class TypeEditorBean {
     private boolean selectedDerivedUsage = false;
     private boolean selectedActive = true;
 
-    public boolean isMayEdit() {
-        return mayEdit;
-    }
-
-    public boolean isMayDelete() {
-        return mayDelete;
-    }
-
     public String getParseRequestParameters() {
         try {
             String action = FxJsfUtils.getParameter("action");
@@ -115,30 +105,21 @@ public class TypeEditorBean {
             } else if ("openInstance".equals(action)) {
                 editMode = false;
                 long propId = FxJsfUtils.getLongParameter("id", -1);
-                mayEdit = FxJsfUtils.getBooleanParameter("mayEdit", false);
-                mayDelete = FxJsfUtils.getBooleanParameter("mayDelete", false);
-
                 this.type = CacheAdmin.getEnvironment().getType(propId).asEditable();
                 initEditing();
             } else if ("editInstance".equals(action)) {
                 editMode = true;
                 long propId = FxJsfUtils.getLongParameter("id", -1);
-                mayEdit = FxJsfUtils.getBooleanParameter("mayEdit", false);
-                mayDelete = FxJsfUtils.getBooleanParameter("mayDelete", false);
-
                 this.type = CacheAdmin.getEnvironment().getType(propId).asEditable();
-
                 initEditing();
             } else if ("createType".equals(action)) {
                 editMode = true;
                 type = FxTypeEdit.createNew("NEWTYPE", new FxString(""), CacheAdmin.getEnvironment().getDefaultACL(ACL.Category.STRUCTURE));
-
                 initEditing();
                 setTypeMode(TypeMode.Content);
             } else if ("createTypeRelation".equals(action)) {
                 editMode = true;
                 type = FxTypeEdit.createNew("NEWTYPE", new FxString(""), CacheAdmin.getEnvironment().getDefaultACL(ACL.Category.STRUCTURE));
-
                 initEditing();
                 setTypeMode(TypeMode.Relation);
             }
@@ -163,11 +144,16 @@ public class TypeEditorBean {
         return editMode;
     }
 
+    public boolean isStructureManager() {
+        return structureManager;
+    }
+
      /**
      * Initializes variables and does workarounds so editing
      * of an existing group and group assignment is possible via the webinterface.
      */
     private void initEditing() {
+        structureManager = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
         reloadContentTree=false;
         if (!type.isNew())
             scriptWrapper = new ScriptListWrapper(type.getId(), true);
@@ -709,7 +695,6 @@ public class TypeEditorBean {
     public String gotoTypeScriptEditor() {
         editMode = false;
         long propId = FxJsfUtils.getLongParameter("oid", -1);
-        mayEdit = mayEdit = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
         this.type = CacheAdmin.getEnvironment().getType(propId).asEditable();
         initEditing();
         return showTypeScriptEditor();

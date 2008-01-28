@@ -90,13 +90,13 @@
                                     <h:outputText value="#{listEntry.scriptEvent.name}"/>
                                 </td>
                                 <td style="padding-left:15px">
-                                    <h:selectBooleanCheckbox id="active_#{listEntry.id}_#{propertyEditorBean.assignment.id}" value="#{listEntry.active}" disabled="#{listEntry.derived || not propertyEditorBean.editMode}"/>
+                                    <h:selectBooleanCheckbox id="active_#{listEntry.id}_#{propertyEditorBean.assignment.id}" value="#{listEntry.active}" disabled="#{listEntry.derived || not propertyEditorBean.editMode || not fxSystemBean.isInRole['ScriptManagement']}"/>
                                 </td>
                                 <td style="padding-left:15px">
-                                    <h:selectBooleanCheckbox id="derivedUsage_#{listEntry.id}_#{propertyEditorBean.assignment.id}" value="#{listEntry.derivedUsage}" disabled="#{listEntry.derived || not propertyEditorBean.editMode}"/>
+                                    <h:selectBooleanCheckbox id="derivedUsage_#{listEntry.id}_#{propertyEditorBean.assignment.id}" value="#{listEntry.derivedUsage}" disabled="#{listEntry.derived || not propertyEditorBean.editMode || not fxSystemBean.isInRole['ScriptManagement']}"/>
                                 </td>
                                 <td style="padding-left:15px">
-                                    <ui:fragment rendered="#{propertyEditorBean.editMode and not listEntry.derived}">
+                                    <ui:fragment rendered="#{propertyEditorBean.editMode and not listEntry.derived and fxSystemBean.isInRole['ScriptManagement']}">
                                             <a4j:commandButton id="removeScript_#{listEntry.id}_#{propertyEditorBean.assignment.id}" action="#{propertyEditorBean.removeScript}" reRender="scripts, tab2"
                                                                image="/adm/images/commandButton/delete.png" onclick=" var disabled=!confirm('#{fxMessageBean['ScriptEditor.message.remove']}'); if (disabled) return false;">
                                                 <f:setPropertyActionListener target="#{propertyEditorBean.scriptListFiler}" value="#{listEntry.id}"/>
@@ -111,7 +111,7 @@
                                 </td>
                             </tr>
                             </c:forEach>
-                            <ui:fragment rendered="#{propertyEditorBean.editMode}">
+                            <ui:fragment rendered="#{propertyEditorBean.editMode and fxSystemBean.isInRole['ScriptManagement']}">
                                 <tr>
                                     <td>
                                         <h:selectOneListbox size="1" id="selectedScriptInfo" value="#{propertyEditorBean.selectedScriptInfo}"
@@ -144,7 +144,7 @@
                 </a4j:outputPanel>
             </fx:fieldSet>
         </div>
-        <ui:fragment rendered="#{(not propertyEditorBean.property.new) and (not propertyEditorBean.editMode) and propertyEditorBean.mayEdit}">
+        <ui:fragment rendered="#{(not propertyEditorBean.property.new) and (not propertyEditorBean.editMode) and propertyEditorBean.structureManager}">
                 <adm:commandButton labelKey="PropertyEditor.button.editMode" location="both"
                         icon="edit"  action="toggleEditMode"  bean="#{propertyEditorBean}" id="editModeButton"/>
         </ui:fragment>
@@ -155,7 +155,7 @@
                         onclick="parent.getNavFrameWnd().openNode(#{propertyEditorBean.assignment.id}, false);return false;"/>
         </ui:fragment>
 
-        <ui:fragment rendered="#{not propertyEditorBean.property.new and propertyEditorBean.mayEdit and propertyEditorBean.editMode}">
+        <ui:fragment rendered="#{not propertyEditorBean.property.new and propertyEditorBean.structureManager and propertyEditorBean.editMode}">
             <adm:commandButton labelKey="PropertyEditor.button.save" location="both"
                             icon="save"  action="saveChanges"  bean="#{propertyEditorBean}" id="saveChangesButton">
             </adm:commandButton>

@@ -38,10 +38,7 @@ import com.flexive.faces.components.TreeRenderer;
 import com.flexive.faces.javascript.tree.TreeNodeWriter;
 import com.flexive.faces.javascript.tree.TreeNodeWriter.Node;
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.security.UserTicket;
-import com.flexive.shared.security.Role;
 import com.flexive.shared.structure.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -61,7 +58,6 @@ import java.util.*;
 public class StructureTreeWriter implements Serializable {
     private static final long serialVersionUID = 7930729560359590725L;
     private static final Log LOG = LogFactory.getLog(StructureTreeWriter.class);
-    private UserTicket ticket;
 
     public static final String DOC_TYPE_GROUP = "Group";
     public static final String DOC_TYPE_TYPE = "Type";
@@ -80,7 +76,6 @@ public class StructureTreeWriter implements Serializable {
     public String renderStructureTree(HttpServletRequest request, long typeId) {
         StringWriter localWriter = null;
         try {
-            ticket = FxContext.get().getTicket();
             // if embedded in a tree component, use the component's tree writer
             TreeNodeWriter writer = (TreeNodeWriter) request.getAttribute(TreeRenderer.PROP_NODEWRITER);
             if (writer == null) {
@@ -134,16 +129,6 @@ public class StructureTreeWriter implements Serializable {
         }
     }
 
-    /**
-     * populates nodeProperties with permissions of the current user for the given ACL
-     *
-     * @param nodeProperties an existing hashmap for storing additional JS properties
-     * @param ACLId          the Id of the ACL
-     */
-    private void setPermissions(Map<String, Object> nodeProperties, long ACLId) {
-        nodeProperties.put("mayEdit", ticket.isInRole(Role.StructureManagement));
-        nodeProperties.put("mayDelete", ticket.isInRole(Role.StructureManagement));
-    }
 
     /**
      * Render a type including its derived types, assigned groups and properties.
@@ -157,7 +142,6 @@ public class StructureTreeWriter implements Serializable {
     private void writeType(TreeNodeWriter writer, Map<String, Object> nodeProperties, FxType type) throws IOException {
         nodeProperties.clear();
         nodeProperties.put("propertyId", String.valueOf(type.getId()));
-        setPermissions(nodeProperties, type.getACL().getId());
 
         writer.startNode(new Node(String.valueOf(type.getId()), type.getDisplayName(), type.isRelation() ? DOC_TYPE_TYPE_RELATION : DOC_TYPE_TYPE, nodeProperties));
         writer.startChildren();
@@ -196,7 +180,6 @@ public class StructureTreeWriter implements Serializable {
     private void writePropertyAssignment(TreeNodeWriter writer, Map<String, Object> nodeProperties, FxPropertyAssignment property) throws IOException {
         nodeProperties.clear();
         nodeProperties.put("propertyId", String.valueOf(property.getId()));
-        setPermissions(nodeProperties, property.getACL().getId());
         writer.writeNode(new Node(String.valueOf(property.getId()), property.getDisplayName(),
                 property.isSystemInternal() ? DOC_TYPE_ASSIGNMENT_SYSTEMINTERNAL : DOC_TYPE_ASSIGNMENT, nodeProperties));
     }

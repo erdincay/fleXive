@@ -69,13 +69,13 @@
                                     <h:outputText value="#{listEntry.scriptEvent.name}"/>
                                 </td>
                                 <td style="padding-left:15px">
-                                    <h:selectBooleanCheckbox id="active_#{listEntry.id}" value="#{listEntry.active}" disabled="#{listEntry.derived || not typeEditorBean.editMode}"/>
+                                    <h:selectBooleanCheckbox id="active_#{listEntry.id}" value="#{listEntry.active}" disabled="#{listEntry.derived || not typeEditorBean.editMode || not fxSystemBean.isInRole['ScriptManagement']}"/>
                                 </td>
                                 <td style="padding-left:15px">
-                                    <h:selectBooleanCheckbox id="derivedUsage_#{listEntry.id}" value="#{listEntry.derivedUsage}" disabled="#{listEntry.derived || not typeEditorBean.editMode}"/>
+                                    <h:selectBooleanCheckbox id="derivedUsage_#{listEntry.id}" value="#{listEntry.derivedUsage}" disabled="#{listEntry.derived || not typeEditorBean.editMode || not fxSystemBean.isInRole['ScriptManagement']}"/>
                                 </td>
                                 <td style="padding-left:15px">
-                                    <ui:fragment rendered="#{typeEditorBean.editMode and not listEntry.derived}">
+                                    <ui:fragment rendered="#{typeEditorBean.editMode and not listEntry.derived and fxSystemBean.isInRole['ScriptManagement']}">
                                             <a4j:commandButton id="removeScript_#{listEntry.id}" action="#{typeEditorBean.removeScript}" reRender="scripts, tab2"
                                                                image="/adm/images/commandButton/delete.png" onclick=" var disabled=!confirm('#{fxMessageBean['ScriptEditor.message.remove']}'); if (disabled) return false;">
                                                 <f:setPropertyActionListener target="#{typeEditorBean.scriptListFiler}" value="#{listEntry.id}"/>
@@ -90,7 +90,7 @@
                                 </td>
                             </tr>
                             </c:forEach>
-                            <ui:fragment rendered="#{typeEditorBean.editMode}">
+                            <ui:fragment rendered="#{typeEditorBean.editMode and fxSystemBean.isInRole['ScriptManagement']}">
                                 <tr>
                                     <td>
                                         <h:selectOneListbox size="1" id="selectedScriptInfo" value="#{typeEditorBean.selectedScriptInfo}"
@@ -123,7 +123,7 @@
                 </a4j:outputPanel>
             </fx:fieldSet>
         </div>
-        <ui:fragment rendered="#{(not typeEditorBean.type.new) and (not typeEditorBean.editMode) and typeEditorBean.mayEdit}">
+        <ui:fragment rendered="#{(not typeEditorBean.type.new) and (not typeEditorBean.editMode) and typeEditorBean.structureManager}">
                 <adm:commandButton labelKey="TypeEditor.button.editMode" location="both"
                         icon="edit"  action="toggleEditMode"  bean="#{typeEditorBean}" id="editModeButton"/>
         </ui:fragment>
@@ -134,7 +134,7 @@
                         onclick="parent.getNavFrameWnd().openNode(#{typeEditorBean.type.id}, true);return false;"/>
         </ui:fragment>
 
-        <ui:fragment rendered="#{not typeEditorBean.type.new and typeEditorBean.mayEdit and typeEditorBean.editMode}">
+        <ui:fragment rendered="#{not typeEditorBean.type.new and typeEditorBean.structureManager and typeEditorBean.editMode}">
             <adm:commandButton labelKey="TypeEditor.button.save" location="both" 
                             icon="save"  action="saveChanges"  bean="#{typeEditorBean}" id="saveChangesButton">
             </adm:commandButton>

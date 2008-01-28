@@ -111,7 +111,7 @@
                 </ui:fragment>
             </fx:fieldSet>
 
-            <ui:fragment rendered="#{not groupEditorBean.editMode and fxSystemBean.isInRole['StructureManagement']}}">
+            <ui:fragment rendered="#{not groupEditorBean.editMode and groupEditorBean.structureManager}">
                <adm:commandButton labelKey="GroupEditor.button.editMode" location="both"
                         icon="edit"  action="toggleEditMode"  bean="#{groupEditorBean}" id="editModeButton"/>
             </ui:fragment>
@@ -120,15 +120,16 @@
                  <adm:commandButton labelKey="GroupEditor.button.cancel" location="both" lockscreen="false"
                         icon="cancel" id="cancelButton"
                         onclick="parent.getNavFrameWnd().openNode(#{groupEditorBean.assignment.id}, false);return false;"/>
+                <ui:fragment rendered="#{groupEditorBean.structureManager}">
+                    <adm:commandButton labelKey="GroupEditor.button.save" location="both"
+                                    icon="save"  action="saveChanges"  bean="#{groupEditorBean}" id="saveChangesButton">
+                    </adm:commandButton>
 
-                <adm:commandButton labelKey="GroupEditor.button.save" location="both"
-                                icon="save"  action="saveChanges"  bean="#{groupEditorBean}" id="saveChangesButton">
-                </adm:commandButton>
-
-                <adm:commandButton labelKey="GroupEditor.button.delete.assignment" location="both" lockscreen="false"
-                                    icon="delete" onclick="parent.getNavFrameWnd()._deleteAssignment(#{groupEditorBean.assignment.id});return false;"
-                                    id="deleteAssignmentButton">
-                </adm:commandButton>
+                    <adm:commandButton labelKey="GroupEditor.button.delete.assignment" location="both" lockscreen="false"
+                                        icon="delete" onclick="parent.getNavFrameWnd()._deleteAssignment(#{groupEditorBean.assignment.id});return false;"
+                                        id="deleteAssignmentButton">
+                    </adm:commandButton>
+                </ui:fragment>
            </ui:fragment>
 
             <adm:toolbarPluginButtons/>
