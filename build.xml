@@ -591,6 +591,7 @@ database.password=a
             <fileset dir="${basedir}" includes="flexive-dist/**"/>
             <zipfileset prefix="flexive-dist" dir="${basedir}/legal" includes="LICENSE.txt,GPL.txt"/>
         </zip>
+	<copy file="${flexive.base.build.dir}/${dist.bin.file}" toFile="${flexive.base.build.dir}/flexive-dist.zip"/>
     </target>
 
     <target name="dist.src" depends="prepare" description="Create a ZIP file with all sources of the current flexive installation">
@@ -605,6 +606,7 @@ database.password=a
             <fileset dir="${flexive.src.ui.shared.dir}" includes="**/*"/>
             <fileset dir="${basedir}/legal" includes="LICENSE.txt,GPL.txt"/>
         </zip>
+	<copy file="${flexive.base.build.dir}/${dist.src.file}" toFile="${flexive.base.build.dir}/flexive-src.zip"/>
     </target>
     
     <target name="jar.webdavOnly">
