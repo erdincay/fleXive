@@ -97,6 +97,7 @@ function init() {
     windowResize();
     renderTabs();
 
+    gotoNavMenu(0);
     loadingDiv.style.display='none';
 }
 

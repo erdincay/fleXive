@@ -80,8 +80,8 @@
             <div id="leftAreaContent" onmouseup="endDrag();">
                 <ui:repeat var="item" value="${navigationMenuBean.items}">
                     <iframe id="treeNavFrame_#{item.id}" name="treeNavFrame_#{item.id}" frameborder="0"
-                            loaded="#{item.id == navigationMenuBean.activeIdx}"
-                            src="#{item.id == navigationMenuBean.activeIdx ? item.navigation : 'adm/empty.html'}"
+                            loaded="false"
+                            src="adm/empty.html"
                             navigationSrc="#{item.navigation}"
                             scrolling="no"
                             style="display:#{item.id == navigationMenuBean.activeIdx ? 'block' : 'none'};position:relative;left:-1px;border:0;width:100%">treeNavFrame</iframe>
