@@ -85,7 +85,9 @@ try {
     def orientList = CacheAdmin.environment.getSelectList("Image Orientation")
 
     process(cmap, 'String|Caption', binValue.name)
-    process(cmap, 'DateTime|DateCreated', meta.meta.find{ it.@key == 'DateTime'})
+    process(cmap, 'DateTime|DateCreated', meta.meta.find{ it.@key == 'DateTimeOriginal'})
+    if( !cmap.containsKey('DateTime|DateCreated') )
+        process(cmap, 'DateTime|DateCreated', meta.meta.find{ it.@key == 'DateTime'})
 
     def width = meta.meta.find{ it.@key == 'PixelXDimension'}
     if( width == "" )
@@ -103,7 +105,7 @@ try {
     process(cmap, 'SelectList|Compression', meta.imageData.compressionAlgorithm);
     process(cmap, 'String|MetaData/Manufacturer', meta.meta.find{ it.@key == 'Make'})
     process(cmap, 'String|MetaData/Model', meta.meta.find{ it.@key == 'Model'})
-//    process(cmap, 'String|MetaData/Orientation', meta.meta.find{ it.@key == 'Orientation'})
+    process(cmap, 'Number|MetaData/ISO', meta.meta.find{ it.@key == 'ISOSpeedRatings'})
     process(cmap, 'SelectList|MetaData/Orientation', meta.meta.find{ it.@key == 'Orientation'});
     process(cmap, 'String|MetaData/FocalLength', meta.meta.find{ it.@key == 'FocalLength'})
     process(cmap, 'String|MetaData/MaxApertureValue', meta.meta.find{ it.@key == 'MaxApertureValue'})
@@ -115,6 +117,7 @@ try {
     process(cmap, 'String|MetaData/Flash', meta.meta.find{ it.@key == 'Flash'})
     process(cmap, 'String|MetaData/MeteringMode', meta.meta.find{ it.@key == 'MeteringMode'})
     process(cmap, 'String|MetaData/WhiteBalance', meta.meta.find{ it.@key == 'WhiteBalance'})
+    process(cmap, 'String|MetaData/OriginatingProgram', meta.meta.find{ it.@key == 'Software'})
 
 
 //    if (cmap['DateCreated'] == null)
@@ -158,7 +161,11 @@ try {
                 }
         }
 //        println "fxValue[$key]=$fxvalue"
-        content.setValue("/" + key, fxvalue);
+        try {
+            content.setValue("/" + key, fxvalue);
+        } catch (Exception e) {
+            System.err.println("Failed to process metadata for /$key (ignored): " + e.getMessage())
+        }
 //        println "set ok"
     }
 

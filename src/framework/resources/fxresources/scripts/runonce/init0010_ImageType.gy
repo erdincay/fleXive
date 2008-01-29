@@ -102,6 +102,7 @@ builder {
         manufacturer(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
         model(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
         orientation(FxDataType.SelectOne, multiplicity: FxMultiplicity.MULT_0_1, multilang: false, referencedList: CacheAdmin.getEnvironment().getSelectList("Image Orientation"), defaultMultiplicity: 0)
+        iso(name:"ISO", FxDataType.Number, multiplicity: FxMultiplicity.MULT_0_1, multilang: false, defaultMultiplicity: 0)
         focalLength(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
         maxApertureValue(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
         apertureValue(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)

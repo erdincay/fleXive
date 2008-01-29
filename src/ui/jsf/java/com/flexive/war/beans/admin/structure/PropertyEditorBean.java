@@ -670,7 +670,7 @@ public class PropertyEditorBean implements ActionBean {
                 if (StructureTreeWriter.DOC_TYPE_GROUP.equals(nodeType)) {
                     FxGroupAssignment ga = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(id);
                     parentType = ga.getAssignedType();
-                    parentXPath = ga.getXPath();
+                    parentXPath = XPathElement.stripType(ga.getXPath());
                 }
 
                 property = FxPropertyEdit.createNew("NEWPROPERTY", new FxString(""), new FxString(""),
@@ -693,7 +693,7 @@ public class PropertyEditorBean implements ActionBean {
                     if (StructureTreeWriter.DOC_TYPE_GROUP.equals(nodeType)) {
                         FxGroupAssignment ga = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(id);
                         parentType = ga.getAssignedType();
-                        parentXPath = ga.getXPath();
+                        parentXPath = XPathElement.stripType(ga.getXPath());
                     }
 
                     long assignmentId = EJBLookup.getAssignmentEngine().save(FxPropertyAssignmentEdit.createNew(assignment, parentType, assignment.getAlias(), parentXPath), false);

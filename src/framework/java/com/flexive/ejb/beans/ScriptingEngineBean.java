@@ -391,8 +391,10 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
     public FxScriptResult runScript(long scriptId, FxScriptBinding binding) throws FxApplicationException {
         FxScriptInfo si = CacheAdmin.getEnvironment().getScript(scriptId);
 
-        if (!si.isActive())
-            throw new FxInvalidParameterException(si.getName(), "ex.general.scripting.notActive");
+        if (!si.isActive()) {
+            LOG.warn("Script [" + si.getName() + "], Id " + si.getId() + " is deactivated and will not be run!");
+            return new FxScriptResult(binding, null);
+        }
 
         if (!isGroovyScript(si.getName()))
             return internal_runScript(si.getName(), binding, si.getCode());

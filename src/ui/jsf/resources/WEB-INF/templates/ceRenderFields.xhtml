@@ -38,7 +38,7 @@
                                 onchange="#{element.value.class=='class com.flexive.shared.value.FxBinary' ? 'fileInputChanged()' : ''}"/>
 
                         <c:if test="#{element.value.class=='class com.flexive.shared.value.FxBinary' and not srcEditor.data[element.XPathFull].isEmpty}">
-                            <br/>
+                            <br clear="all"/>
                             <c:set var="binDesc" value="#{srcEditor.data[element.XPathFull].defaultTranslation}" />
 
                             <span style="padding-left:3px;border:1px solid #d3dcb7;background-color:white">
