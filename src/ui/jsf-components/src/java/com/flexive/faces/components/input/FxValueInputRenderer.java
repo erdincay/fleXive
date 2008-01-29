@@ -39,6 +39,7 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxUpdateException;
 import com.flexive.shared.value.*;
+import com.flexive.faces.FxJsfUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -168,7 +169,7 @@ public class FxValueInputRenderer extends Renderer {
         } else if (value instanceof FxDate || value instanceof FxDateTime) {
             // get date value from dateinput child
             //noinspection unchecked
-            final HtmlInputDate dateInput = (HtmlInputDate) input.getChildren().get(0);
+            final HtmlInputDate dateInput = FxJsfUtils.findChild(input, HtmlInputDate.class);
             HtmlInputDate.UserData data = (HtmlInputDate.UserData) dateInput.getSubmittedValue();
             try {
                 final Date date = data.parse();
