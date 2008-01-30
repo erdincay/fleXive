@@ -191,6 +191,14 @@ public interface ScriptingEngine {
     public FxScriptResult runScript(String name, FxScriptBinding binding, String code) throws FxApplicationException;
 
     /**
+     * Get a list containing script extension and script engine info as 2-dimensional String array
+     *
+     * @return list containing script extension and script engine info as 2-dimensional String array
+     * @throws FxApplicationException on errors
+     */
+    public List<String[]> getAvailableScriptEngines() throws FxApplicationException;
+
+    /**
      * Run a script
      *
      * @param scriptId id of the script to run

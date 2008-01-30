@@ -42,9 +42,9 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.configuration.Parameter;
 import com.flexive.shared.configuration.SystemParameters;
+import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.ScriptingEngine;
 import com.flexive.shared.interfaces.ScriptingEngineLocal;
@@ -74,15 +74,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * ScriptingEngine implementation
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-
-//TODO: log all modifications done by CRUD operations
-
 @Stateless(name = "ScriptingEngine")
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLocal {
@@ -231,7 +229,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         }
     }
 
-     /**
+    /**
      * {@inheritDoc}
      */
     public void updateScriptInfo(FxScriptInfoEdit script) throws FxApplicationException {
@@ -396,7 +394,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             return new FxScriptResult(binding, null);
         }
 
-        if (!isGroovyScript(si.getName()))
+        if (!FxSharedUtils.isGroovyScript(si.getName()))
             return internal_runScript(si.getName(), binding, si.getCode());
 
         if (si.getEvent() == FxScriptEvent.Manual)
@@ -441,26 +439,6 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             LOG.error("Scripting error: " + e.getMessage(), e);
             throw new FxInvalidParameterException(si.getName(), "ex.general.scripting.exception", si.getName(), e.getMessage());
         }
-
-        /*
-//        long time = System.currentTimeMillis();
-        GroovyShell shell = new GroovyShell();
-//        System.out.println("shell creation took " + (System.currentTimeMillis() - time));
-//        time = System.currentTimeMillis();
-        Script script = shell.parse(CacheAdmin.getEnvironment().getScript(scriptId).getCode());
-//        Script script = shell.parse(loadScriptCode(scriptId));
-//        System.out.println("parsing took " + (System.currentTimeMillis() - time));
-//        time = System.currentTimeMillis();
-        if (!binding.getProperties().containsKey("ticket"))
-            binding.setVariable("ticket", FxContext.get().getUserTicket());
-        if (!binding.getProperties().containsKey("environment"))
-            binding.setVariable("environment", CacheAdmin.getEnvironment());
-        script.setBinding(new Binding(binding.getProperties()));
-//        try {
-        return script.run();
-//        } finally {
-//            System.out.println("execution took " + (System.currentTimeMillis() - time));
-//        }*/
     }
 
     /**
@@ -483,7 +461,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         String sql;
         boolean success = false;
         //check existance
-        FxScriptInfo si = getScriptInfo(scriptId);
+        getScriptInfo(scriptId);
         try {
             long[] derived;
             if (!derivedUsage)
@@ -543,7 +521,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         String sql;
         boolean success = false;
         //check existance
-        FxScriptInfo si = getScriptInfo(scriptId);
+        getScriptInfo(scriptId);
         try {
             long[] derived;
             if (!derivedUsage)
@@ -622,7 +600,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         }
     }
 
-     /**
+    /**
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -729,7 +707,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         String sql;
         boolean success = false;
         //check existance
-        FxScriptInfo si = getScriptInfo(scriptId);
+        getScriptInfo(scriptId);
         try {
             long[] derived;
             if (!derivedUsage)
@@ -740,7 +718,6 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                 for (int i = 0; i < ass.size(); i++)
                     derived[i] = ass.get(i).getId();
             }
-            //TODO: dont overwrite type info, use xxEdit objects!!
             sm = new FxScriptMappingEntry(event, scriptId, active, derivedUsage, assignmentId, derived);
             // Obtain a database connection
             con = Database.getDbConnection();
@@ -780,7 +757,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         String sql;
         boolean success = false;
         //check existance
-        FxScriptInfo si = getScriptInfo(scriptId);
+        getScriptInfo(scriptId);
         try {
             long[] derived;
             if (!derivedUsage)
@@ -791,7 +768,6 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                 for (int i = 0; i < types.size(); i++)
                     derived[i] = types.get(i).getId();
             }
-            //TODO: dont overwrite type info, use xxEdit objects!!
             sm = new FxScriptMappingEntry(event, scriptId, active, derivedUsage, typeId, derived);
             // Obtain a database connection
             con = Database.getDbConnection();
@@ -978,6 +954,30 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public List<String[]> getAvailableScriptEngines() throws FxApplicationException {
+        List<String[]> ret = null;
+        if (FxSharedUtils.USE_JDK6_EXTENSION) {
+            try {
+                //noinspection unchecked
+                ret = (List<String[]>) Class.forName("com.flexive.core.JDK6Scripting").
+                        getMethod("getAvailableScriptEngines", new Class[0]).
+                        invoke(null);
+            } catch (Exception e) {
+                LOG.error(e);
+            }
+        }
+        if (ret == null)
+            ret = new ArrayList<String[]>(2);
+        String groovyVersion = org.codehaus.groovy.runtime.InvokerHelper.getVersion();
+        ret.add(0, new String[]{"groovy", "groovy: Groovy v" + FxSharedUtils.getBundledGroovyVersion() + " (Bundled GroovyShell v" + FxSharedUtils.getBundledGroovyVersion() + ")"});
+        ret.add(0, new String[]{"gy", "gy: Groovy v" + FxSharedUtils.getBundledGroovyVersion() + " (Bundled GroovyShell v" + FxSharedUtils.getBundledGroovyVersion() + ")"});
+        return ret;
+    }
+
+    /**
      * Execute a script.
      * This method does not check the calling user's role nor does it cache scripts.
      * It should only be used to execute code from the groovy console or code that is not to be expected to
@@ -990,6 +990,20 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      * @throws FxApplicationException on errors
      */
     private FxScriptResult internal_runScript(String name, FxScriptBinding binding, String code) throws FxApplicationException {
+        if (!FxSharedUtils.isGroovyScript(name) && FxSharedUtils.USE_JDK6_EXTENSION) {
+            try {
+                return (FxScriptResult) Class.forName("com.flexive.core.JDK6Scripting").
+                        getMethod("runScript", new Class[]{String.class, FxScriptBinding.class, String.class}).
+                        invoke(null, name, binding, code);
+            } catch (Exception e) {
+                if (e instanceof FxApplicationException)
+                    throw (FxApplicationException) e;
+                if( e instanceof InvocationTargetException && e.getCause() != null ) {
+                    throw new FxInvalidParameterException(name, e.getCause(), "ex.general.scripting.exception", name, e.getCause().getMessage()).asRuntimeException();
+                }
+                throw new FxInvalidParameterException(name, e, "ex.general.scripting.exception", name, e.getMessage()).asRuntimeException();
+            }
+        }
         if (name == null)
             name = "unknown";
         if (binding != null) {
@@ -999,7 +1013,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                 binding.setVariable("environment", CacheAdmin.getEnvironment());
             binding.setVariable("scriptname", name);
         }
-        if (isGroovyScript(name)) {
+        if (FxSharedUtils.isGroovyScript(name)) {
             //we prefer the native groovy binding
             try {
                 GroovyShell shell = new GroovyShell();
@@ -1015,50 +1029,12 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                 throw new FxInvalidParameterException(name, "ex.general.scripting.exception", name, e.getMessage());
             }
         }
-/*
-        //if we run JDK 6, more engines might be available
-        try {
-            Class.forName("javax.script.ScriptEngineManager"); //provoke exception if no JDK >= 6 installed
-            String ext = name.substring(name.lastIndexOf('.') + 1);
-            javax.script.ScriptEngineManager manager = new javax.script.ScriptEngineManager();
-            javax.script.ScriptEngine engine = manager.getEngineByName(ext);
-            if (engine == null)
-                throw new FxInvalidParameterException(name, "ex.general.scripting.noEngine", name).asRuntimeException();
-            javax.script.Bindings b = engine.createBindings();
-            if (binding != null)
-                b.putAll(binding.getProperties());
-            engine.setBindings(b, javax.script.ScriptContext.ENGINE_SCOPE);
-            Object result = engine.eval(code);
-            if (binding != null) {
-                binding.getProperties().clear();
-                Object o;
-                for (String key : engine.getBindings(javax.script.ScriptContext.ENGINE_SCOPE).keySet()) {
-                    o = engine.getBindings(javax.script.ScriptContext.ENGINE_SCOPE).get(key);
-                    if (o instanceof Serializable)
-                        binding.getProperties().put(key, (Serializable) o);
-                }
-            }
-            return new FxScriptResult(binding, result);
-        } catch (ClassNotFoundException cnfe) {
-            System.err.println("No JDK 6 installed");
-            throw new FxInvalidParameterException(name, "ex.general.scripting.needJDK6", name).asRuntimeException();
-        } catch (javax.script.ScriptException e) {
-            throw new FxInvalidParameterException(name, "ex.general.scripting.exception", name, e.getMessage()).asRuntimeException();
-        }
-*/
-        return null;
+        throw new FxInvalidParameterException(name, "ex.general.scripting.needJDK6", name).asRuntimeException();
     }
 
     /**
-     * Is the script (most likely) a groovy script?
-     *
-     * @param name script name to check
-     * @return if this script could be a groovy script
+     * {@inheritDoc}
      */
-    private static boolean isGroovyScript(String name) {
-        return name.toLowerCase().endsWith(".gy") || name.toLowerCase().endsWith(".groovy");
-    }
-
     public FxScriptMapping loadScriptMapping(Connection _con, long scriptId) throws FxLoadException, SQLException {
         FxScriptMapping mapping;
         PreparedStatement ps_a = null, ps_t = null;

@@ -240,9 +240,9 @@
     </managed-bean>
 
     <managed-bean>
-        <managed-bean-name>groovyConsoleBean</managed-bean-name>
+        <managed-bean-name>scriptConsoleBean</managed-bean-name>
         <managed-bean-class>
-            com.flexive.war.beans.admin.main.GroovyConsoleBean
+            com.flexive.war.beans.admin.main.ScriptConsoleBean
         </managed-bean-class>
         <managed-bean-scope>request</managed-bean-scope>
     </managed-bean>

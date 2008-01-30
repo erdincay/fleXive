@@ -180,4 +180,18 @@ if (!project.getTaskDefinitions().containsKey("safeDelete")) {
     project.addTaskDefinition('buildBatchFile', buildBatchFile)
     project.addTaskDefinition('svnVersion', svnVersion)
     project.addTaskDefinition('batchExec', batchExec)
+
+    //set the isJDK6 property
+    //(code from FxSharedUtils)
+    int major = -1, minor = -1
+    try {
+        String[] ver = System.getProperty("java.specification.version").split("\\.")
+        if (ver.length >= 2) {
+            major = Integer.valueOf(ver[0])
+            minor = Integer.valueOf(ver[1])
+        }
+    } catch (Exception e) {
+    }
+    if (major > 1 || (major == 1 && minor >= 6))
+        properties['isJDK6'] = true;
 }

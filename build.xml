@@ -253,9 +253,19 @@
                 excludes="**/sqlParser/**,**/extractor/**">
 			<classpath refid="classpath.build.framework"/>
 		</javac-call>
-	</target>
+        <antcall target="compile.framework.jdk6"/>
+    </target>
 
-	<target name="jar.framework" depends="jar.framework.shared, jar.ejb" description="Package the complete core framework">
+    <target name="compile.framework.jdk6" if="isJDK6">
+        <echo message="Compiling Java 6+ sources ..."/>
+        <javac-call
+                srcdir="${flexive.src.jdk6.framework.dir}"
+                destdir="${build.framework.classes.dir}">
+			<classpath refid="classpath.build.framework"/>
+		</javac-call>
+    </target>
+
+    <target name="jar.framework" depends="jar.framework.shared, jar.ejb" description="Package the complete core framework">
 	</target>
 	
 	<target name="jar.framework.shared.prepare">

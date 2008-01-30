@@ -21,6 +21,7 @@
     <property name="flexive.drop.dir" value="${flexive.basedir}/drop"/>
 
     <property name="flexive.src.framework.dir" value="${flexive.base.framework.dir}/java"/>
+    <property name="flexive.src.jdk6.framework.dir" value="${flexive.base.framework.dir}/java6"/>
     <property name="flexive.resources.framework.dir" value="${flexive.base.framework.dir}/resources"/>
     <property name="flexive.src.ui.shared.dir" value="${flexive.base.ui.shared.dir}/java"/>
     <property name="flexive.web.ui.shared.dir" value="${flexive.base.ui.shared.dir}/web"/>

@@ -40,8 +40,8 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.TemplateEngine;
 import com.flexive.shared.interfaces.UserGroupEngine;
 import com.flexive.shared.scripting.FxScriptEvent;
-import com.flexive.shared.scripting.FxScriptScope;
 import com.flexive.shared.scripting.FxScriptInfo;
+import com.flexive.shared.scripting.FxScriptScope;
 import com.flexive.shared.search.AdminResultLocations;
 import com.flexive.shared.search.FxSQLSearchParams;
 import com.flexive.shared.search.ResultViewType;
@@ -56,9 +56,9 @@ import com.flexive.shared.value.BinaryDescriptor;
 import javax.faces.model.SelectItem;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Collections;
 
 /**
  * Wrapper bean that provides access to most internal flexive3 select lists
@@ -118,6 +118,7 @@ public class SelectBean implements Serializable {
     private List<SelectItem> aclCategories = null;
     private List<SelectItem> selectListACLs = null;
     private List<SelectItem> selectListItemACLs = null;
+    private List<SelectItem> scriptingEngines = null;
 
     /**
      * Constructs a new select bean.
@@ -715,14 +716,14 @@ public class SelectBean implements Serializable {
         if (typeScriptEvents == null) {
             typeScriptEvents = new ArrayList<SelectItem>();
             for (FxScriptEvent e : FxScriptEvent.values()) {
-                if (e.getScope().compareTo(FxScriptScope.Type) ==0)
+                if (e.getScope().compareTo(FxScriptScope.Type) == 0)
                     typeScriptEvents.add(new SelectItem(e.getId(), e.getName()));
             }
         }
         return typeScriptEvents;
     }
 
-   /**
+    /**
      * Return all available FxScriptEvents as SelectList.
      *
      * @return all available FxScriptEvents as SelectList
@@ -737,13 +738,13 @@ public class SelectBean implements Serializable {
         return allScriptEvents;
     }
 
-     /**
+    /**
      * Return scripts with the default event scope "Assignment "as SelectList.
      *
      * @return scripts with the default event scope "Assignment "as SelectList.
      */
     public List<SelectItem> getAssignmentScripts() {
-        if (assignmentScripts ==null) {
+        if (assignmentScripts == null) {
             List<FxScriptInfo> scriptList = new ArrayList<FxScriptInfo>();
             for (FxScriptInfo s : CacheAdmin.getFilteredEnvironment().getScripts()) {
                 if (s.getEvent().getScope() == FxScriptScope.Assignment)
@@ -764,7 +765,7 @@ public class SelectBean implements Serializable {
         if (assignmentScriptEvents == null) {
             assignmentScriptEvents = new ArrayList<SelectItem>();
             for (FxScriptEvent e : FxScriptEvent.values()) {
-                if (e.getScope().compareTo(FxScriptScope.Assignment) ==0)
+                if (e.getScope().compareTo(FxScriptScope.Assignment) == 0)
                     assignmentScriptEvents.add(new SelectItem(e.getId(), e.getName()));
             }
         }
@@ -777,7 +778,7 @@ public class SelectBean implements Serializable {
      * @return all available scripts as SelectList
      */
     public List<SelectItem> getAllScripts() {
-        if (allScripts ==null) {
+        if (allScripts == null) {
             allScripts = FxJsfUtils.asSelectList(CacheAdmin.getFilteredEnvironment().getScripts(), false);
         }
         return allScripts;
@@ -789,7 +790,7 @@ public class SelectBean implements Serializable {
      * @return scripts with the default event scope "Type "as SelectList.
      */
     public List<SelectItem> getTypeScripts() {
-        if (typeScripts ==null) {
+        if (typeScripts == null) {
             List<FxScriptInfo> scriptList = new ArrayList<FxScriptInfo>();
             for (FxScriptInfo s : CacheAdmin.getFilteredEnvironment().getScripts()) {
                 if (s.getEvent().getScope() == FxScriptScope.Type)
@@ -804,7 +805,7 @@ public class SelectBean implements Serializable {
     /**
      * returns scriptScope enum as select list.
      *
-     * @return  scriptScope enum as select list.
+     * @return scriptScope enum as select list.
      */
     public List<SelectItem> getScriptScopes() {
         if (scriptScopes == null) {
@@ -816,13 +817,29 @@ public class SelectBean implements Serializable {
     /**
      * returns FxScriptEvent enum as select list.
      *
-     * @return  FxScriptEvent enum as select list.
+     * @return FxScriptEvent enum as select list.
      */
     public List<SelectItem> getAllScriptEventsAsEnum() {
         if (allScriptEventsAsEnum == null) {
             allScriptEventsAsEnum = FxJsfUtils.enumsAsSelectList(FxScriptEvent.values());
         }
         return allScriptEventsAsEnum;
+    }
+
+    /**
+     * Returns a list of all available scripting engines
+     *
+     * @return list of all available scripting engines
+     */
+    public List<SelectItem> getScriptingEngines() {
+        if (scriptingEngines == null) {
+            try {
+                scriptingEngines = FxJsfUtils.asSelectList(EJBLookup.getScriptingEngine().getAvailableScriptEngines());
+            } catch (FxApplicationException e) {
+                scriptingEngines = new ArrayList<SelectItem>(0);
+            }
+        }
+        return scriptingEngines;
     }
 
     /**

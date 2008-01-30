@@ -760,6 +760,22 @@ public class FxJsfUtils {
     }
 
     /**
+     * Converts a list of String arrays (2 dim, containing value and display) to a list of JSF SelectItems.
+     *
+     * @param list the list of String arrays (2 dim, containing value and display)
+     * @return a JSF select list corresponding to the given list options
+     */
+    public static List<SelectItem> asSelectList(List<String[]> list) {
+        final List<SelectItem> result = new ArrayList<SelectItem>(list.size());
+        for (String[] item : list) {
+            if (item == null || item.length != 2)
+                continue;
+            result.add(new SelectItem(item[0], item[1]));
+        }
+        return result;
+    }
+
+    /**
      * Comparator for sorting select items by their display label.
      */
     public static class SelectItemSorter implements Comparator<SelectItem>, Serializable {

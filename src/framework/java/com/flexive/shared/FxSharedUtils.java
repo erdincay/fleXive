@@ -74,6 +74,7 @@ public final class FxSharedUtils {
     private static String fxBuildDate = "unknown";
     private static String fxBuildUser = "unknown";
     private static String fxHeader = "[fleXive]";
+    private static String bundledGroovyVersion = "unknown";
     private static List<String> translatedLocales = Arrays.asList("en");
 
 
@@ -90,6 +91,25 @@ public final class FxSharedUtils {
 
     private static List<String> drops = null;
     public static MessageDigest digest = null;
+
+    /**
+     * Are JDK 6+ extensions allowed to be run on the current VM?
+     */
+    public final static boolean USE_JDK6_EXTENSION;
+
+    static {
+        int major = -1, minor = -1;
+        try {
+            String[] ver = System.getProperty("java.specification.version").split("\\.");
+            if (ver.length >= 2) {
+                major = Integer.valueOf(ver[0]);
+                minor = Integer.valueOf(ver[1]);
+            }
+        } catch (Exception e) {
+            LOG.error(e);
+        }
+        USE_JDK6_EXTENSION = major > 1 || (major == 1 && minor >= 6);
+    }
 
     /**
      * Get a list of all installed and deployed drops
@@ -172,6 +192,16 @@ public final class FxSharedUtils {
     }
 
     /**
+     * Is the script (most likely) a groovy script?
+     *
+     * @param name script name to check
+     * @return if this script could be a groovy script
+     */
+    public static boolean isGroovyScript(String name) {
+        return name.toLowerCase().endsWith(".gy") || name.toLowerCase().endsWith(".groovy");
+    }
+
+    /**
      * Maps keys to values. Used for constructing JSF-EL parameter
      * mapper objects for assicative lookups.
      */
@@ -191,6 +221,7 @@ public final class FxSharedUtils {
             fxBuildDate = bundle.getString("flexive.builddate");
             fxBuildUser = bundle.getString("flexive.builduser");
             fxHeader = bundle.getString("flexive.header");
+            bundledGroovyVersion = bundle.getString("flexive.bundledGroovyVersion");
             final String languagesValue = bundle.getString("flexive.translatedLocales");
             if (StringUtils.isNotBlank(languagesValue)) {
                 final String[] languages = StringUtils.split(languagesValue, ",");
@@ -525,6 +556,15 @@ public final class FxSharedUtils {
      */
     public static String getHeader() {
         return fxHeader;
+    }
+
+    /**
+     * Get the version of the bundled groovy runtime
+     *
+     * @return version of the bundled groovy runtime
+     */
+    public static String getBundledGroovyVersion() {
+        return bundledGroovyVersion;
     }
 
     /**
