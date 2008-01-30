@@ -474,13 +474,12 @@ BUILD SUCCESSFUL]]></screen>
                             <menuchoice>
                                 <guibutton>Finish.</guibutton>
                             </menuchoice>
-                            Eclipse should now open the project in the workspace. Currently an error message
-                            about a missing external builder is displayed by Eclipse. However, when you execute
+                            Eclipse should now open the project in the workspace. To build the project EAR
+                            file using Ant, execute
                             <menuchoice>
                                 <guimenu>Project</guimenu>
-                                <guimenuitem>Build all,</guimenuitem>
+                                <guimenuitem>Build all.</guimenuitem>
                             </menuchoice>
-                            it builds the project using Ant without problems.
                         </para>
                         <para>
                             To check if the project and library has been loaded correctly, try to open

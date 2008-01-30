@@ -90,8 +90,9 @@ public class FxResponseWrapper extends HttpServletResponseWrapper {
         NO_CACHE, PUBLIC, PRIVATE
     }
 
-    // Do not declare the SimpleDateFormat static or it might fail
-    private static SimpleDateFormat HTTP_MODIFIED_AT_FORMATER = new SimpleDateFormat(HTTP_MODIFIED_AT_FORMATER_TXT);
+    private static SimpleDateFormat getHttpDateFormat() {
+        return new SimpleDateFormat(HTTP_MODIFIED_AT_FORMATER_TXT);
+    }
 
     /**
      * Returns the modified-at date for a http response with
@@ -105,7 +106,7 @@ public class FxResponseWrapper extends HttpServletResponseWrapper {
     protected static String buildModifiedAtDate(Date date) {
         // HTTP standard time format: "Sat, 07 Apr 2001 00:58:08 GMT"
         // Apache server SSI format: Saturday, 08-Sep-2001 21:46:40 EDT
-        return HTTP_MODIFIED_AT_FORMATER.format(date);
+        return getHttpDateFormat().format(date);
     }
 
     /**
@@ -142,7 +143,7 @@ public class FxResponseWrapper extends HttpServletResponseWrapper {
      */
     public void disableBrowserCache() {
         setModifiedAtDate(new Date());
-        setHeader(HTTP_HEADER_EXPIRES, HTTP_MODIFIED_AT_FORMATER.format(new Date(0)));
+        setHeader(HTTP_HEADER_EXPIRES, getHttpDateFormat().format(new Date(0)));
         setHeader(HTTP_HEADER_CACHE_CONTROL, "no-cache, must-revalidate");
         setHeader(HTTP_HEADER_PRAGMA, "no-cache");
     }

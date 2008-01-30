@@ -412,17 +412,24 @@
 		</style>
 	</target>
 
-    <target name="findbugs" depends="jar.framework">
+    <target name="findbugs" depends="jar.all">
         <delete dir="${findbugs.report.dir}"/>
         <mkdir dir="${findbugs.report.dir}"/>
 		<findbugs output="xml:withMessages" home="${findbugs.dir}"
-		    outputFile="${findbugs.report.dir}/out.xml"
+		    outputFile="${findbugs.report.dir}/out.xml" workhard="true"
 		    jvmargs="-Xmx256M">
         	<sourcePath path="${flexive.src.framework.dir}"/>
-		    <class location="${build.framework.classes.dir}"/>
-            <class location="${build.ui.classes.dir}"/>
+        	<sourcePath path="${flexive.src.ui.jsf.dir}"/>
+        	<sourcePath path="${flexive.src.ui.components.dir}"/>
+        	<sourcePath path="${flexive.src.ui.shared.dir}"/>
+            <class location="${flexive.build.framework.jar.dir}/flexive-shared.jar"/>
+            <class location="${flexive.build.framework.jar.dir}/flexive-ejb.jar"/>
+            <class location="${build.ui.jar.dir}/flexive-ui.jar"/>
+            <class location="${build.ui.jar.dir}/flexive-ui-shared.jar"/>
+            <class location="${build.ui.jar.dir}/flexive-plugin-jsf-core.jar"/>
+            <class location="${build.ui.jar.dir}/flexive-plugin-jsf-globalconfig.jar"/>
             <auxClasspath refid="classpath.build.framework"/>
-	    </findbugs>
+        </findbugs>
 		<style in="${findbugs.report.dir}/out.xml" style="${findbugs.xsl}" destdir="${findbugs.report.dir}"
 		    out="${findbugs.report.dir}/report.html">
 			<param name="output.dir" expression="${findbugs.report.dir}"/>
