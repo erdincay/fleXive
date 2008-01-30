@@ -50,6 +50,7 @@ import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
 import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeSuite;
@@ -120,19 +121,14 @@ public class ScriptingTest {
 
     @Test
     public void scriptActivation() throws Exception {
-        FxScriptInfo si = se.createScript(FxScriptEvent.Manual,  "manualTestScript", "manualTestScript", "return \"done\";");
+        FxScriptInfo si = se.createScript(FxScriptEvent.Manual,  "manualTestScript.gy", "manualTestScript", "return \"done\";");
         se.runScript(si.getId());
         FxScriptInfoEdit inactive = si.asEditable();
         inactive.setActive(false);
         se.updateScriptInfo(inactive);
         try {
-            se.runScript(si.getId());
-            assert false : "Inactive scripts must not be runnable!";
-        }
-        catch (Exception e) {
-            //ok
-        }
-        finally {
+            Assert.assertEquals(se.runScript(si.getId()).getResult(), null, "Inactive scripts must not be runnable!");
+        } finally {
             se.removeScript(si.getId());
         }
     }
