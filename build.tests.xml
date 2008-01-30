@@ -417,7 +417,7 @@
         <mkdir dir="${findbugs.report.dir}"/>
 		<findbugs output="xml:withMessages" home="${findbugs.dir}"
 		    outputFile="${findbugs.report.dir}/out.xml" workhard="true"
-		    jvmargs="-Xmx256M">
+		    jvmargs="-Xmx512M">
         	<sourcePath path="${flexive.src.framework.dir}"/>
         	<sourcePath path="${flexive.src.ui.jsf.dir}"/>
         	<sourcePath path="${flexive.src.ui.components.dir}"/>
