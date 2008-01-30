@@ -21,14 +21,6 @@ body a {
     font-weight:bold;
 }
 
-.pngSupport {
-/*behavior: url("css/pngbehavior.htc");*/
-    width:16px;
-    height:16px;
-    border:0;
-}
-
-
 #slbg {
     position:absolute;
     top:0;

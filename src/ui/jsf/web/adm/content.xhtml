@@ -3,6 +3,7 @@
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
       xmlns:fx="http://www.flexive.com/jsf/core">
 <head>
     <t:stylesheet path="/adm/css/content.css"/>
@@ -12,6 +13,7 @@
         Don't use the contentTemplate.xhtml and don't include dojo.js on this page,
         otherwise we run into Dojo concurrency issues in IE7
     -->
+        <adm:messages/>
 
         #{fxMessageBean['Global.welcome']} #{fxSystemBean.buildInfoVerbose}
         
