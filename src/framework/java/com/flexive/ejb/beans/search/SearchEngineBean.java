@@ -119,8 +119,8 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
             String contentFilter = live ? " where ISLIVE_VER=true " : "";
             String sSql = "select max(modified_at) from\n" +
                     "(select\n" +
-                    "(select max(modified_at) from fx_content" + contentFilter + ") modified_at\n" +
-                    (live ? "\nunion\n(select max(modified_at) from " + DatabaseConst.TBL_TREE + "L)\n" : "") +
+                    "(select max(modified_at) from " + DatabaseConst.TBL_CONTENT + contentFilter + ") modified_at\n" +
+                    (live ? "\nunion\n(select max(modified_at) from " + DatabaseConst.TBL_TREE + "_LIVE)\n" : "") +
                     "\nunion\n(select max(modified_at) from " + DatabaseConst.TBL_TREE + ")\n" +
                     ") changes";
             stmt = con.createStatement();
