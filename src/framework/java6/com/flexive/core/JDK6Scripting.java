@@ -77,10 +77,10 @@ public class JDK6Scripting {
             binding.setVariable("scriptname", name);
         }
         try {
-            Class.forName("javax.script.ScriptEngineManager"); //provoke exception if no JDK >= 6 installed
+            Class.forName("javax.script.ScriptEngine"); //provoke exception if no JDK >= 6 installed
             String ext = name.substring(name.lastIndexOf('.') + 1);
             javax.script.ScriptEngineManager manager = new javax.script.ScriptEngineManager();
-            javax.script.ScriptEngine engine = manager.getEngineByName(ext);
+            javax.script.ScriptEngine engine = manager.getEngineByExtension(ext);
             if (engine == null)
                 throw new FxInvalidParameterException(name, "ex.general.scripting.noEngine", name).asRuntimeException();
             javax.script.Bindings b = engine.createBindings();
