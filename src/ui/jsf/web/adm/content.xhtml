@@ -8,11 +8,11 @@
     <t:stylesheet path="/adm/css/content.css"/>
 </head>
 <body>
+    <!--
+        Don't use the contentTemplate.xhtml and don't include dojo.js on this page,
+        otherwise we run into Dojo concurrency issues in IE7
+    -->
 
-
-<ui:composition template="/adm/contentTemplate.xhtml">
-    <ui:define name="head"/>
-    <ui:define name="body">
         #{fxMessageBean['Global.welcome']} #{fxSystemBean.buildInfoVerbose}
         <script language='JavaScript' type='text/javascript'>
             if (navigator.appName.indexOf("Explorer") != -1) {
@@ -26,8 +26,14 @@
                 <br/><br/>#{fxMessageBean['Global.failedLoginAttempts,#{fxSystemBean.failedLoginAttempts}']}<br/>
             </div>
         </ui:fragment>
-    </ui:define>
-</ui:composition>
+
+    <script type="text/javascript">
+    <!--
+        if (parent && parent.pageLoaded) {
+            parent.pageLoaded(#{fxSystemBean.pageId}, #{fxSystemBean.pageRenderTime}, #{fxSystemBean.treeModified});
+        }
+    -->
+    </script>
 
 </body>
 </html>

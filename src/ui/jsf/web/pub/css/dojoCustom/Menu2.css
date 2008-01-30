@@ -22,7 +22,7 @@
 }
 
 .dojoMenuItem2Icon {
-	position: relative;
+	float: left;
 	background-position: center center;
 	background-repeat: no-repeat;
 	width: 16px;
