@@ -190,15 +190,9 @@
                 </fx:fieldSet>
             </ui:fragment>
 
-            <ui:fragment rendered="#{not propertyEditorBean.property.new and not propertyEditorBean.editMode and propertyEditorBean.structureManager}">
+            <ui:fragment rendered="#{not propertyEditorBean.property.new and not propertyEditorBean.editMode and propertyEditorBean.structureManagement}">
                 <adm:commandButton labelKey="PropertyEditor.button.editMode" location="both"
                 icon="edit"  action="toggleEditMode"  bean="#{propertyEditorBean}" id="editModeButton"/>
-            </ui:fragment>
-
-            <ui:fragment rendered="#{not propertyEditorBean.property.new and propertyEditorBean.editMode}">
-                 <adm:commandButton labelKey="PropertyEditor.button.cancel" location="both"
-                        icon="cancel" id="cancelButton" lockscreen="false"
-                        onclick="parent.getNavFrameWnd().openNode(#{propertyEditorBean.assignment.id}, false);return false;"/>
             </ui:fragment>
 
             <ui:fragment rendered="#{propertyEditorBean.editMode}">
@@ -207,7 +201,7 @@
                 </adm:commandButton>
             </ui:fragment>
 
-            <ui:fragment rendered="#{not propertyEditorBean.property.new and propertyEditorBean.structureManager and propertyEditorBean.editMode}">
+            <ui:fragment rendered="#{not propertyEditorBean.property.new and propertyEditorBean.structureManagement and propertyEditorBean.editMode}">
                 <adm:commandButton labelKey="PropertyEditor.button.save" location="both"
                     icon="save"  action="saveChanges"  bean="#{propertyEditorBean}" id="saveChangesButton">
                 </adm:commandButton>
@@ -217,7 +211,14 @@
                     icon="new"  action="createProperty"  bean="#{propertyEditorBean}" id="createPropertyButton">
                 </adm:commandButton>
             </ui:fragment>
-        
+
+            <ui:fragment rendered="#{not propertyEditorBean.property.new and propertyEditorBean.editMode}">
+                 <adm:commandButton labelKey="PropertyEditor.button.cancel" location="both"
+                        icon="cancel" id="cancelButton" lockscreen="false"
+                        onclick="parent.getNavFrameWnd().openNode(#{propertyEditorBean.assignment.id}, false);return false;"/>
+            </ui:fragment>
+
+
             <adm:toolbarPluginButtons/>
         </h:form>
 

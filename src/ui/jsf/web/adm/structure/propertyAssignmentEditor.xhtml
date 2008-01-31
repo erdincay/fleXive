@@ -20,7 +20,7 @@
       </ui:define>
 
     <ui:define name="body">
-        <h:form id="frm" enctype="multipart/form-data">
+        <a4j:form id="frm" enctype="multipart/form-data">
             <c:if test="#{empty propertyEditorBean.parseRequestParameters}"> </c:if>
             <h:panelGroup rendered="#{structureTreeControllerBean.doAction}">
                 <script type="text/javascript">
@@ -62,37 +62,37 @@
 
             <fx:formRow labelKey="PropertyEditor.label.label" id="label">
                     <fx:fxValueInput id="label" value="#{propertyEditorBean.label}"
-                         readOnly="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"/>
+                         readOnly="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
             </fx:formRow>
             <fx:formRow labelKey="PropertyEditor.label.alias" id="alias">
                     <h:inputText id="alias" value="#{propertyEditorBean.alias}"
-                         disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"/>
+                         disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
             </fx:formRow>
             <fx:formRow labelKey="PropertyEditor.label.hint" id="hint">
                     <fx:fxValueInput id="hint" value="#{propertyEditorBean.hint}"
-                             readOnly="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"/>
+                             readOnly="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
             </fx:formRow>
 
              <fx:formRow labelKey="PropertyEditor.label.defaultValue" id="defaultValue">
                 <fx:fxValueInput id="defaultValue" value="#{propertyEditorBean.defaultValue}"
-                         readOnly="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"/>
+                         readOnly="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
             </fx:formRow>
 
             <fx:formRow labelKey="PropertyEditor.label.defaultMultiplicity" id="defaultMultiplicity">
                 <h:inputText id="defaultMultiplicity" value="#{propertyEditorBean.defaultMultiplicity}"
-                     disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"
+                     disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
                      required="true" style="width:40px"/>
             </fx:formRow>
 
              <fx:formRow labelKey="PropertyEditor.label.enabled" id="enabled">
                 <h:selectBooleanCheckbox id="enabled" value="#{propertyEditorBean.enabled}"
-                        disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"/>
+                        disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
             </fx:formRow>
 
             <fx:fieldSet legend="#{fxMessageBean['PropertyEditor.label.overridePropertyOptions']}">
                 <fx:formRow labelKey="PropertyEditor.label.multiLang" id="multiLang">
                         <h:selectBooleanCheckbox id="multiLang" value="#{propertyEditorBean.multiLang}"
-                             disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"
+                             disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
                              onclick="confirmMultiLang(#{propertyEditorBean.multiLang});"/>
                 </fx:formRow>
 
@@ -101,35 +101,35 @@
                         <fx:formRow labelKey="PropertyEditor.label.defaultLanguage" id="defaultLanguage">
                          <t:selectOneListbox size="1" id="defaultLanguage" value="#{propertyEditorBean.defaultLanguage}"
                                 converter="FxLanguageConverter"
-                                disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}">
+                                disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
                                 <f:selectItems value="#{fxSelectBean.languages}" />
                             </t:selectOneListbox>
                         </fx:formRow>
                     </div>
                 </ui:fragment>
 
-                <fx:formRow labelKey="PropertyEditor.label.mayOverrideBaseMultiplicity" id="mayOverrideBaseMultiplicity">
+                <fx:formRow labelKey="PropertyEditor.label.overrideBaseMultiplicity" id="mayOverrideBaseMultiplicity">
                         <h:selectBooleanCheckbox id="mayOverrideBaseMultiplicity" value="#{propertyEditorBean.propertyMayOverrideBaseMultiplicity}"
-                             disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"
+                             disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
                              onclick="confirmOverrideBaseMultiplicity(#{propertyEditorBean.propertyMayOverrideBaseMultiplicity});"/>
                 </fx:formRow>
 
-                <ui:fragment rendered="#{propertyEditorBean.propertyMayOverrideBaseMultiplicity}">
-                    <div style="padding-left:17px">
-                        <fx:formRow labelKey="PropertyEditor.label.multiplicity" id="multiplicity">
-                            <h:inputText id="multiplicity" value="#{propertyEditorBean.minMultiplicity}"
-                                     disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"
-                                     required="true" style="width:40px"/>
-                            <h:inputText value="#{propertyEditorBean.maxMultiplicity}"
-                                            disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"
-                                            required="true" style="width:40px"/>
-                        </fx:formRow>
-                    </div>
-                </ui:fragment>
+                <div style="padding-left:17px">
+                    <fx:formRow labelKey="PropertyEditor.label.multiplicity" id="multiplicity">
+                        <h:inputText id="minMultiplicity" value="#{propertyEditorBean.minMultiplicity}"
+                                 disabled="#{not propertyEditorBean.editMode or not propertyEditorBean.propertyMayOverrideBaseMultiplicity or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
+                                 required="true" style="width:40px">
+                        </h:inputText>
+                        <h:inputText value="#{propertyEditorBean.maxMultiplicity}" id="maxMultiplicity"
+                                        disabled="#{not propertyEditorBean.editMode or not propertyEditorBean.propertyMayOverrideBaseMultiplicity or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
+                                        required="true" style="width:40px">
+                        </h:inputText>
+                    </fx:formRow>
+                </div>
 
-                <fx:formRow labelKey="PropertyEditor.label.mayOverrideACL" id="mayOverrideACL">
+                <fx:formRow labelKey="PropertyEditor.label.overrideACL" id="mayOverrideACL">
                         <h:selectBooleanCheckbox id="mayOverrideACL" value="#{propertyEditorBean.propertyMayOverrideACL}"
-                             disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}"
+                             disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
                              onclick="confirmOverrideAcl(#{propertyEditorBean.propertyMayOverrideACL});"/>
                 </fx:formRow>
 
@@ -137,7 +137,7 @@
                      <div style="padding-left:17px">
                         <fx:formRow labelKey="PropertyEditor.label.acl" id="acl">
                             <t:selectOneListbox size="1" id="acl" value="#{propertyEditorBean.acl}"
-                                    disabled="#{propertyEditorBean.systemInternal or not propertyEditorBean.editMode}">
+                                    disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
                                 <f:selectItems value="#{fxSelectBean.structureACLs}" />
                             </t:selectOneListbox>
                         </fx:formRow>
@@ -145,10 +145,22 @@
                 </ui:fragment>
             </fx:fieldSet>
 
-            <ui:fragment rendered="#{propertyEditorBean.structureManager and not propertyEditorBean.editMode}">
+            <ui:fragment rendered="#{propertyEditorBean.structureManagement and not propertyEditorBean.editMode}">
                 <adm:commandButton labelKey="PropertyEditor.button.editMode" location="both"
                         icon="edit"  action="toggleEditMode"  bean="#{propertyEditorBean}" id="editModeButton"/>
             </ui:fragment>
+
+            <ui:fragment rendered="#{propertyEditorBean.structureManagement and propertyEditorBean.editMode}">
+                <adm:commandButton labelKey="PropertyEditor.button.save" location="both" 
+                                icon="save"  action="saveChanges"  bean="#{propertyEditorBean}" id="saveChangesButton">
+                </adm:commandButton>
+           </ui:fragment>
+             <ui:fragment rendered="#{propertyEditorBean.structureManagement and propertyEditorBean.editMode}">
+                <adm:commandButton labelKey="PropertyEditor.button.delete.assignment" location="both" lockscreen="false"
+                                icon="delete" onclick="parent.getNavFrameWnd()._deleteAssignment(#{propertyEditorBean.assignment.id});return false;"
+                                id="deleteAssignmentButton">
+                </adm:commandButton>
+           </ui:fragment>
 
             <ui:fragment rendered="#{propertyEditorBean.editMode}">
                 <adm:commandButton labelKey="PropertyEditor.button.cancel" location="both"
@@ -156,21 +168,8 @@
                         onclick="parent.getNavFrameWnd().openNode(#{propertyEditorBean.assignment.id}, false);return false;"/>
             </ui:fragment>
 
-            <ui:fragment rendered="#{propertyEditorBean.structureManager and propertyEditorBean.editMode}">
-                <adm:commandButton labelKey="PropertyEditor.button.save" location="both" 
-                                icon="save"  action="saveChanges"  bean="#{propertyEditorBean}" id="saveChangesButton">
-                </adm:commandButton>
-           </ui:fragment>
-             <ui:fragment rendered="#{propertyEditorBean.structureManager and not propertyEditorBean.systemInternal and propertyEditorBean.editMode}">
-                <adm:commandButton labelKey="PropertyEditor.button.delete.assignment" location="both" lockscreen="false"
-                                icon="delete" onclick="parent.getNavFrameWnd()._deleteAssignment(#{propertyEditorBean.assignment.id});return false;"
-                                id="deleteAssignmentButton">
-                </adm:commandButton>
-           </ui:fragment>
-
-
             <adm:toolbarPluginButtons/>
-        </h:form>
+        </a4j:form>
 
 
         <script type="text/javascript">

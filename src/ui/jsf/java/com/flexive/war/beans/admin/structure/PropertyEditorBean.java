@@ -36,10 +36,10 @@ package com.flexive.war.beans.admin.structure;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.beans.ActionBean;
 import com.flexive.faces.messages.FxFacesMsgErr;
+import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.*;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.exceptions.FxDbException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.security.Role;
@@ -89,7 +89,7 @@ public class PropertyEditorBean implements ActionBean {
     //checker to restore system language
     private boolean originalLanguageSystemLanguage = false;
     //checker if current user may edit the property
-    private boolean structureManager = false;
+    private boolean structureManagement = false;
     //checker for the editMode: if not in edit mode,
     // save and delete buttons are not rendered by the gui
     private boolean editMode = false;
@@ -100,6 +100,7 @@ public class PropertyEditorBean implements ActionBean {
     private long selectedScriptEventId = -1;
     private boolean selectedDerivedUsage = false;
     private boolean selectedActive = true;
+    private int defaultMultiplicity = -1;
 
     /*
     public String getGotoPropertyAssignment() {
@@ -180,16 +181,11 @@ public class PropertyEditorBean implements ActionBean {
     }
 
     public int getDefaultMultiplicity() {
-        return assignment.getDefaultMultiplicity();
+        return defaultMultiplicity;
     }
 
-    public void setDefaultMultiplicity(int i) {
-        try {
-            assignment.setDefaultMultiplicity(i);
-        }
-        catch (Throwable t) {
-            new FxFacesMsgErr(t).addToContext();
-        }
+    public void setDefaultMultiplicity(int defaultMultiplicity) {
+       this.defaultMultiplicity=defaultMultiplicity;
     }
 
     public FxValue getDefaultValue() {
@@ -678,8 +674,8 @@ public class PropertyEditorBean implements ActionBean {
                 initNewPropertyEditing();
             } else if ("assignProperty".equals(action)) {
                 editMode = false;
-                structureManager = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
-                if (structureManager) {
+                structureManagement = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
+                if (structureManagement) {
                     long id = FxJsfUtils.getLongParameter("id");
                     String nodeType = FxJsfUtils.getParameter("nodeType");
 
@@ -717,8 +713,8 @@ public class PropertyEditorBean implements ActionBean {
         return editMode;
     }
 
-    public boolean isStructureManager() {
-        return structureManager;
+    public boolean isStructureManagement() {
+        return structureManagement;
     }
 
     /**
@@ -726,10 +722,11 @@ public class PropertyEditorBean implements ActionBean {
      * property assignment is possible via the webinterface
      */
     private void initEditing() {
-        structureManager = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
+        structureManagement = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
         if (!assignment.isNew())
             scriptWrapper = new ScriptListWrapper(assignment.getId(), false);
 
+        this.defaultMultiplicity = assignment.getDefaultMultiplicity();
         setMinMultiplicity(FxMultiplicity.getIntToString(assignment.getMultiplicity().getMin()));
         setMaxMultiplicity(FxMultiplicity.getIntToString(assignment.getMultiplicity().getMax()));
         setPropertyMinMultiplicity(FxMultiplicity.getIntToString(property.getMultiplicity().getMin()));
@@ -775,7 +772,7 @@ public class PropertyEditorBean implements ActionBean {
      * during the creation process, new properties don't have assignments yet.
      */
     private void initNewPropertyEditing() {
-        structureManager = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
+        structureManagement = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
         property.setAutoUniquePropertyName(false);
         setPropertyMinMultiplicity(FxMultiplicity.getIntToString(property.getMultiplicity().getMin()));
         setPropertyMaxMultiplicity(FxMultiplicity.getIntToString(property.getMultiplicity().getMax()));
@@ -800,35 +797,54 @@ public class PropertyEditorBean implements ActionBean {
      * Stores a newly created property in DB
      */
     public void createProperty() {
-        try {
-            applyPropertyChanges();
-            long assignmentId;
-            if (parentType != null)
-                assignmentId = EJBLookup.getAssignmentEngine().createProperty(parentType.getId(), property, parentXPath);
-            else
-                assignmentId = EJBLookup.getAssignmentEngine().createProperty(property, parentXPath);
-            StructureTreeControllerBean s = (StructureTreeControllerBean) FxJsfUtils.getManagedBean("structureTreeControllerBean");
-            s.addAction(StructureTreeControllerBean.ACTION_RELOAD_SELECT_ASSIGNMENT, assignmentId, "");
+        if (FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement)) {
+            try {
+                applyPropertyChanges();
+                long assignmentId;
+                if (parentType != null)
+                    assignmentId = EJBLookup.getAssignmentEngine().createProperty(parentType.getId(), property, parentXPath);
+                else
+                    assignmentId = EJBLookup.getAssignmentEngine().createProperty(property, parentXPath);
+                StructureTreeControllerBean s = (StructureTreeControllerBean) FxJsfUtils.getManagedBean("structureTreeControllerBean");
+                s.addAction(StructureTreeControllerBean.ACTION_RELOAD_SELECT_ASSIGNMENT, assignmentId, "");
+            }
+            catch (Throwable t) {
+                new FxFacesMsgErr(t).addToContext();
+            }
         }
-        catch (Throwable t) {
-            new FxFacesMsgErr(t).addToContext();
-        }
+         else
+            new FxFacesMsgErr(new FxApplicationException("ex.role.notInRole", "StructureManagement")).addToContext();
     }
 
     /**
      * Forward property and property assignment changes to the DB
      */
     public void saveChanges() {
-        try {
-            applyPropertyChanges();
-            EJBLookup.getAssignmentEngine().save(property);
-            savePropertyAssignmentChanges();
-            StructureTreeControllerBean s = (StructureTreeControllerBean) FxJsfUtils.getManagedBean("structureTreeControllerBean");
-            s.addAction(StructureTreeControllerBean.ACTION_RENAME_SELECT_ASSIGNMENT, assignment.getId(), assignment.getDisplayName());
+        if (FxJsfUtils.getRequest().getUserTicket().isInRole(Role.ScriptManagement))
+            try {
+                if (!property.isNew())
+                    saveScriptChanges();
+            }
+             catch (Throwable t) {
+                new FxFacesMsgErr(t).addToContext();
+            }
+        else
+            new FxFacesMsgInfo("info.structureEditor.notInRole.scriptManagement").addToContext();
+
+        if (FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement)) {
+            try {
+                applyPropertyChanges();
+                EJBLookup.getAssignmentEngine().save(property);
+                savePropertyAssignmentChanges();
+                StructureTreeControllerBean s = (StructureTreeControllerBean) FxJsfUtils.getManagedBean("structureTreeControllerBean");
+                s.addAction(StructureTreeControllerBean.ACTION_RENAME_SELECT_ASSIGNMENT, assignment.getId(), assignment.getDisplayName());
+            }
+            catch (Throwable t) {
+                new FxFacesMsgErr(t).addToContext();
+            }
         }
-        catch (Throwable t) {
-            new FxFacesMsgErr(t).addToContext();
-        }
+        else
+             new FxFacesMsgInfo("info.structureEditor.notInRole.structureManagement").addToContext();
     }
 
      /**
@@ -837,16 +853,12 @@ public class PropertyEditorBean implements ActionBean {
      *
      * @throws FxApplicationException   if the label is invalid
      */
-    public void savePropertyAssignmentChanges() throws FxApplicationException {
+    private void savePropertyAssignmentChanges() throws FxApplicationException {
         if (assignment.getLabel().getIsEmpty()) {
             throw new FxApplicationException("ex.structureEditor.noLabel");
         }
         int min = FxMultiplicity.getStringToInt(minMultiplicity);
         int max = FxMultiplicity.getStringToInt(maxMultiplicity);
-
-        //save script changes
-        if (!assignment.isNew() && !isSystemInternal())
-            saveScriptChanges();
 
         //delete current options
         while (!assignment.getOptions().isEmpty()) {
@@ -864,16 +876,20 @@ public class PropertyEditorBean implements ActionBean {
             assignment.setDefaultLanguage(FxLanguage.SYSTEM_ID);
         }
 
-        if (!isSystemInternal()) {
+        if (!isSystemInternal()
+                || FxJsfUtils.getRequest().getUserTicket().isInRole(Role.GlobalSupervisor)) {
             if (getProperty().mayOverrideBaseMultiplicity()) {
+                FxJsfUtils.checkMultiplicity(min, max);
                 assignment.setMultiplicity(new FxMultiplicity(min, max));
             }
+            assignment.setDefaultMultiplicity(this.defaultMultiplicity);
+
             if (originalLanguageSystemLanguage && !isMultiLang()) {
                 assignment.setDefaultLanguage(FxLanguage.SYSTEM_ID);
             } else
                 assignment.setDefaultLanguage(defaultLanguage.getId());
+            EJBLookup.getAssignmentEngine().save(assignment, false);
         }
-        EJBLookup.getAssignmentEngine().save(assignment, false);
     }
 
     /**
@@ -882,13 +898,15 @@ public class PropertyEditorBean implements ActionBean {
      *
      * @throws FxApplicationException   if the label is invalid
      */
-    public void applyPropertyChanges() throws FxApplicationException {
+    private void applyPropertyChanges() throws FxApplicationException {
         if (property.getLabel().getIsEmpty()) {
             throw new FxApplicationException("ex.structureEditor.noLabel");
         }
 
         int min = FxMultiplicity.getStringToInt(propertyMinMultiplicity);
         int max = FxMultiplicity.getStringToInt(propertyMaxMultiplicity);
+
+        FxJsfUtils.checkMultiplicity(min,max);
 
         //delete current options
         while (!property.getOptions().isEmpty()) {
@@ -901,7 +919,7 @@ public class PropertyEditorBean implements ActionBean {
             property.setOption(o.getKey(), o.isOverrideable(), o.getValue());
         }
 
-        if (!isSystemInternal()) {
+        if (!isSystemInternal() || FxJsfUtils.getRequest().getUserTicket().isInRole(Role.GlobalSupervisor)) {
             property.setMultiplicity(new FxMultiplicity(min, max));
         }
     }
@@ -1036,8 +1054,8 @@ public class PropertyEditorBean implements ActionBean {
      *
      * @throws com.flexive.shared.exceptions.FxApplicationException  on errors
      */
-    public void saveScriptChanges() throws FxApplicationException {
-       for (ScriptListWrapper.ScriptListEntry e : scriptWrapper.getDelta(assignment.getId(), false)) {
+    private void saveScriptChanges() throws FxApplicationException {
+        for (ScriptListWrapper.ScriptListEntry e : scriptWrapper.getDelta(assignment.getId(), false)) {
            if (e.getId() == ScriptListWrapper.ID_SCRIPT_ADDED)
                EJBLookup.getScriptingEngine().createAssignmentScriptMapping(e.getScriptEvent(), e.getScriptInfo().getId(), assignment.getId(), e.isActive(), e.isDerivedUsage());
            else if (e.getId() == ScriptListWrapper.ID_SCRIPT_REMOVED)
@@ -1046,6 +1064,7 @@ public class PropertyEditorBean implements ActionBean {
                EJBLookup.getScriptingEngine().updateAssignmentScriptMappingForEvent(e.getScriptInfo().getId(), assignment.getId(), e.getScriptEvent(), e.isActive(), e.isDerivedUsage());
        }
     }
+
 
     /****script editor tab end*********/
 

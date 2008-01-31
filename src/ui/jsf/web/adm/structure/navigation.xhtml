@@ -490,11 +490,13 @@
                 if (!node.nodeDocType)
                     return;
                 var lackRole = #{not fxSystemBean.isInRole['StructureManagement']};
-                setActionDisabled(menu.getTreeNode(), "editNode", lackRole);
+                var notGlobalSupervisor = #{not fxSystemBean.isInRole['GlobalSupervisor']};
+                var mayOpen = !lackRole || #{fxSystemBean.isInRole['ScriptManagement']};
+                setActionDisabled(menu.getTreeNode(), "editNode", !mayOpen || (node.nodeDocType =="AssignmentSystemInternal" && notGlobalSupervisor));
                 setActionDisabled(menu.getTreeNode(), "createContent", node.nodeDocType!="Type");
                 setActionDisabled(menu.getTreeNode(), "createProperty", !(node.nodeDocType=="Group" || isType(node.nodeDocType)) || lackRole);
                 setActionDisabled(menu.getTreeNode(), "createGroup", !(node.nodeDocType=="Group" || isType(node.nodeDocType)) || lackRole);
-                setActionDisabled(menu.getTreeNode(), "deleteAssignment", (node.nodeDocType!="Group" && node.nodeDocType!="Assignment") || lackRole);
+                setActionDisabled(menu.getTreeNode(), "deleteAssignment", (node.nodeDocType!="Group" && node.nodeDocType!="Assignment") || lackRole || (node.nodeDocType =="AssignmentSystemInternal" && notGlobalSupervisor));
                 setActionDisabled(menu.getTreeNode(), "deleteType", !isType(node.nodeDocType) || lackRole);
                 setActionDisabled(menu.getTreeNode(), "copyAssignment", lackRole || node.nodeDocType!="Group" && node.nodeDocType!="Assignment");
                 setActionDisabled(menu.getTreeNode(), "searchContents", !isType(node.nodeDocType) && !isAssignment(node.nodeDocType));

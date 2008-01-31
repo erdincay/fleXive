@@ -33,6 +33,8 @@
  ***************************************************************/
 package com.flexive.shared.structure;
 
+import com.flexive.shared.exceptions.FxInvalidParameterException;
+
 import java.io.Serializable;
 import java.util.Random;
 
@@ -82,6 +84,13 @@ public class FxMultiplicity implements Serializable {
      * @param max maximum multiplicity, Integer.MAX_VALUE if unlimited
      */
     public FxMultiplicity(int min, int max) {
+        if (min < 0)
+            throw new FxInvalidParameterException("min", "ex.structure.multiplicity.minimum.invalid", min, max).asRuntimeException();
+        if (max <1)
+            throw new FxInvalidParameterException("max", "ex.structure.multiplicity.maximum.invalid", max, min).asRuntimeException();
+        if (min >max)
+             throw new FxInvalidParameterException("min", "ex.structure.multiplicity.minimum.invalid", min, max).asRuntimeException();
+        
         this.min = min;
         this.max = max;
     }

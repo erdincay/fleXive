@@ -516,10 +516,22 @@ public class ContentEngineTest {
             FxPropertyAssignmentEdit pe = new FxPropertyAssignmentEdit((FxPropertyAssignment) article.getAssignment("/TEXT"));
             pe.setDefaultMultiplicity(2);
             assert 2 == pe.getDefaultMultiplicity() : "Wrong default multiplicity";
-            pe.setDefaultMultiplicity(-3);
-            assert 0 == pe.getDefaultMultiplicity() : "Wrong default multiplicity";
-            pe.setDefaultMultiplicity(3);
-            assert 2 == pe.getDefaultMultiplicity() : "Wrong default multiplicity";
+            try {
+                pe.setDefaultMultiplicity(-3);
+                assert false : "Wrong default multiplicities must not be settable!";
+            }
+            catch (Exception e) {
+                //ok
+            }
+            //assert 0 == pe.getDefaultMultiplicity() : "Wrong default multiplicity";
+            try {
+                pe.setDefaultMultiplicity(3);
+                assert false : "Wrong default multiplicites must not be settable!";
+            }
+            catch (Exception e) {
+                //ok
+            }
+            //assert 2 == pe.getDefaultMultiplicity() : "Wrong default multiplicity";
             ass.save(pe, false);
 
             FxContent test = co.initialize(article.getId());

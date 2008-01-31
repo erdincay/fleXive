@@ -36,11 +36,11 @@ package com.flexive.war.beans.admin.structure;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.beans.MessageBean;
 import com.flexive.faces.messages.FxFacesMsgErr;
+import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.scripting.FxScriptInfo;
-import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.structure.*;
@@ -81,7 +81,7 @@ public class TypeEditorBean {
     private boolean maxRelDestUnlimited = false;
     private static final int DEFAULT_REL_MAX = 100;
     //checker if current user may edit the property
-    boolean structureManager = false;
+    boolean structureManagement = false;
     //checker for the editMode: if not in edit mode,
     // save and delete buttons are not rendered by the gui
     private boolean editMode = false;
@@ -144,8 +144,8 @@ public class TypeEditorBean {
         return editMode;
     }
 
-    public boolean isStructureManager() {
-        return structureManager;
+    public boolean isStructureManagement() {
+        return structureManagement;
     }
 
      /**
@@ -153,7 +153,7 @@ public class TypeEditorBean {
      * of an existing group and group assignment is possible via the webinterface.
      */
     private void initEditing() {
-        structureManager = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
+        structureManagement = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
         reloadContentTree=false;
         if (!type.isNew())
             scriptWrapper = new ScriptListWrapper(type.getId(), true);
@@ -239,27 +239,41 @@ public class TypeEditorBean {
      * Propagates changes to the DB.
      */
     public void saveChanges() {
-        try {
-            if (unlimitedVersions) {
-                type.setMaxVersions(-1);
-            }
-            updateRelations();
-
-            type.setHistoryAge(historyAgeToMilis());
-            if (!type.isNew())
+        if (FxJsfUtils.getRequest().getUserTicket().isInRole(Role.ScriptManagement)) {
+            try {
+                if (!type.isNew())
                 saveScriptChanges();
-            long id = EJBLookup.getTypeEngine().save(type);
-            StructureTreeControllerBean s = (StructureTreeControllerBean) FxJsfUtils.getManagedBean("structureTreeControllerBean");
-            if (type.isNew()) {
-                s.addAction(StructureTreeControllerBean.ACTION_RELOAD_SELECT_TYPE, id, "");
-            } else
-                s.addAction(StructureTreeControllerBean.ACTION_RENAME_SELECT_TYPE, id, type.getDisplayName());
+            }
+            catch (Throwable t) {
+                    new FxFacesMsgErr(t).addToContext();
+            }
+        }
+        else
+            new FxFacesMsgInfo("info.structureEditor.notInRole.scriptManagement").addToContext();
 
-            reloadContentTree =true;
+        if (FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement)) {
+            try {
+                if (unlimitedVersions) {
+                    type.setMaxVersions(-1);
+                }
+                updateRelations();
+
+                type.setHistoryAge(historyAgeToMilis());
+                long id = EJBLookup.getTypeEngine().save(type);
+                StructureTreeControllerBean s = (StructureTreeControllerBean) FxJsfUtils.getManagedBean("structureTreeControllerBean");
+                if (type.isNew()) {
+                    s.addAction(StructureTreeControllerBean.ACTION_RELOAD_SELECT_TYPE, id, "");
+                } else
+                    s.addAction(StructureTreeControllerBean.ACTION_RENAME_SELECT_TYPE, id, type.getDisplayName());
+
+                reloadContentTree =true;
+            }
+            catch (Throwable t) {
+                new FxFacesMsgErr(t).addToContext();
+            }
         }
-        catch (Throwable t) {
-            new FxFacesMsgErr(t).addToContext();
-        }
+        else
+            new FxFacesMsgInfo("info.structureEditor.notInRole.structureManagement").addToContext();
     }
 
     /**

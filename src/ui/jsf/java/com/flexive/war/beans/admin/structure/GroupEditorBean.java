@@ -75,11 +75,12 @@ public class GroupEditorBean {
     private WrappedOption optionFiler = null;
     private FxType parentType = null;
     private String parentXPath = null;
+    private int defaultMultiplicity =-1;
     //checker for the editMode: if not in edit mode,
     // save and delete buttons are not rendered by the gui
     private boolean editMode = false;
     //checker if current user may edit the property
-    private boolean structureManager = false;
+    private boolean structureManagement = false;
 
     public String getParseRequestParameters() {
         try {
@@ -123,8 +124,8 @@ public class GroupEditorBean {
                 initNewGroupEditing();
             } else if ("assignGroup".equals(action)) {
                 editMode = false;
-                structureManager = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
-                if (structureManager) {
+                structureManagement = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
+                if (structureManagement) {
                     long id = FxJsfUtils.getLongParameter("id");
                     String nodeType = FxJsfUtils.getParameter("nodeType");
 
@@ -161,8 +162,8 @@ public class GroupEditorBean {
         return editMode;
     }
 
-    public boolean isStructureManager() {
-        return structureManager;
+    public boolean isStructureManagement() {
+        return structureManagement;
     }
 
     public boolean isSystemInternal() {
@@ -174,7 +175,8 @@ public class GroupEditorBean {
      * of an existing group and group assignment is possible via the webinterface
      */
     private void initEditing() {
-        structureManager = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
+        structureManagement = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
+        defaultMultiplicity = assignment.getDefaultMultiplicity();
         assignmentMinMul = FxMultiplicity.getIntToString(assignment.getMultiplicity().getMin());
         assignmentMaxMul = FxMultiplicity.getIntToString(assignment.getMultiplicity().getMax());
         groupMinMul = FxMultiplicity.getIntToString(group.getMultiplicity().getMin());
@@ -187,7 +189,7 @@ public class GroupEditorBean {
      * during the creation process, new groups don't have assignments yet.
      */
     private void initNewGroupEditing() {
-        structureManager = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
+        structureManagement = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
         group.setOverrideMultiplicity(true);
         groupMinMul = FxMultiplicity.getIntToString(group.getMultiplicity().getMin());
         groupMaxMul = FxMultiplicity.getIntToString(group.getMultiplicity().getMax());
@@ -237,11 +239,11 @@ public class GroupEditorBean {
     }
 
     public int getAssignmentDefaultMultiplicity() {
-        return assignment.getDefaultMultiplicity();
+        return this.defaultMultiplicity;
     }
 
-    public void setAssignmentDefaultMultiplicity(int m) {
-        assignment.setDefaultMultiplicity(m);
+    public void setAssignmentDefaultMultiplicity(int defaultMultiplicity) {
+        this.defaultMultiplicity = defaultMultiplicity;
     }
 
     public boolean isAssignmentEnabled() {
@@ -377,37 +379,44 @@ public class GroupEditorBean {
      * Apply changes to the group and the assignment and forward them to DB
      */
     public void saveChanges() {
-        try {
-            applyGroupChanges();
-            applyAssignmentChanges();
-            EJBLookup.getAssignmentEngine().save(group);
-            EJBLookup.getAssignmentEngine().save(assignment, false);
-            StructureTreeControllerBean s = (StructureTreeControllerBean) FxJsfUtils.getManagedBean("structureTreeControllerBean");
-            s.addAction(StructureTreeControllerBean.ACTION_RENAME_SELECT_ASSIGNMENT, assignment.getId(), assignment.getDisplayName());
+        if (FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement)) {
+            try {
+                applyGroupChanges();
+                saveAssignmentChanges();
+                EJBLookup.getAssignmentEngine().save(group);
+                StructureTreeControllerBean s = (StructureTreeControllerBean) FxJsfUtils.getManagedBean("structureTreeControllerBean");
+                s.addAction(StructureTreeControllerBean.ACTION_RENAME_SELECT_ASSIGNMENT, assignment.getId(), assignment.getDisplayName());
+            }
+            catch (Throwable t) {
+                new FxFacesMsgErr(t).addToContext();
+            }
         }
-        catch (Throwable t) {
-            new FxFacesMsgErr(t).addToContext();
-        }
+        else
+            new FxFacesMsgErr(new FxApplicationException("ex.role.notInRole", "StructureManagement")).addToContext();
     }
 
     /**
      * Save a newly created group to DB
      */
     public void createGroup() {
-        try {
-            applyGroupChanges();
-            long assignmentId;
-            if (parentType != null)
-                assignmentId = EJBLookup.getAssignmentEngine().createGroup(parentType.getId(), group, parentXPath);
-            else
-                assignmentId = EJBLookup.getAssignmentEngine().createGroup(group, parentXPath);
-            StructureTreeControllerBean s = (StructureTreeControllerBean) FxJsfUtils.getManagedBean("structureTreeControllerBean");
-            s.addAction(StructureTreeControllerBean.ACTION_RELOAD_SELECT_ASSIGNMENT, assignmentId, "");
+        if (FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement)) {
+            try {
+                applyGroupChanges();
+                long assignmentId;
+                if (parentType != null)
+                    assignmentId = EJBLookup.getAssignmentEngine().createGroup(parentType.getId(), group, parentXPath);
+                else
+                    assignmentId = EJBLookup.getAssignmentEngine().createGroup(group, parentXPath);
+                StructureTreeControllerBean s = (StructureTreeControllerBean) FxJsfUtils.getManagedBean("structureTreeControllerBean");
+                s.addAction(StructureTreeControllerBean.ACTION_RELOAD_SELECT_ASSIGNMENT, assignmentId, "");
 
+            }
+            catch (Throwable t) {
+                new FxFacesMsgErr(t).addToContext();
+            }
         }
-        catch (Throwable t) {
-            new FxFacesMsgErr(t).addToContext();
-        }
+        else
+            new FxFacesMsgErr(new FxApplicationException("ex.role.notInRole", "StructureManagement")).addToContext();
     }
 
     /**
@@ -416,15 +425,7 @@ public class GroupEditorBean {
      *
      * @throws FxApplicationException   if the label is invalid
      */
-    private void applyAssignmentChanges() throws FxApplicationException {
-        if (assignment.getLabel().getIsEmpty()) {
-            throw new FxApplicationException("ex.structureEditor.noLabel");
-        }
-        FxMultiplicity assMul = new FxMultiplicity(FxMultiplicity.getStringToInt(assignmentMinMul),
-                FxMultiplicity.getStringToInt(assignmentMaxMul));
-
-        if (!assignment.isSystemInternal() && group.mayOverrideBaseMultiplicity())
-            assignment.setMultiplicity(assMul);
+    private void saveAssignmentChanges() throws FxApplicationException {
         //delete current options
         while (!assignment.getOptions().isEmpty()) {
             String key = assignment.getOptions().get(0).getKey();
@@ -433,6 +434,22 @@ public class GroupEditorBean {
         List<FxStructureOption> newAssignmentOptions = optionWrapper.asFxStructureOptionList(optionWrapper.getAssignmentOptions());
         for (FxStructureOption o : newAssignmentOptions) {
             assignment.setOption(o.getKey(), o.getValue());
+        }
+
+        if (assignment.getLabel().getIsEmpty()) {
+            throw new FxApplicationException("ex.structureEditor.noLabel");
+        }
+        int min = FxMultiplicity.getStringToInt(assignmentMinMul);
+        int max = FxMultiplicity.getStringToInt(assignmentMaxMul);
+
+        if (!isSystemInternal()
+                || FxJsfUtils.getRequest().getUserTicket().isInRole(Role.GlobalSupervisor)) {
+            if (group.mayOverrideBaseMultiplicity()) {
+                FxJsfUtils.checkMultiplicity(min, max);
+                assignment.setMultiplicity(new FxMultiplicity(min, max));
+            }
+            assignment.setDefaultMultiplicity(this.defaultMultiplicity);
+            EJBLookup.getAssignmentEngine().save(assignment, false);
         }
     }
 
@@ -449,17 +466,20 @@ public class GroupEditorBean {
         FxMultiplicity grpMul = new FxMultiplicity(FxMultiplicity.getStringToInt(groupMinMul),
                 FxMultiplicity.getStringToInt(groupMaxMul));
 
-        if (!isSystemInternal())
-            group.setMultiplicity(grpMul);
+        FxJsfUtils.checkMultiplicity(grpMul.getMin(),grpMul.getMax());
 
         while (!group.getOptions().isEmpty()) {
             String key = group.getOptions().get(0).getKey();
             group.clearOption(key);
         }
+
         List<FxStructureOption> newGroupOptions = optionWrapper.asFxStructureOptionList(optionWrapper.getStructureOptions());
         for (FxStructureOption o : newGroupOptions) {
             group.setOption(o.getKey(), o.isOverrideable(), o.getValue());
         }
+
+        if (!isSystemInternal() || FxJsfUtils.getRequest().getUserTicket().isInRole(Role.GlobalSupervisor))
+            group.setMultiplicity(grpMul);
     }
 
     public String showGroupOptionEditor() {

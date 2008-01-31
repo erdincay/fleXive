@@ -279,23 +279,28 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
     /**
      * Set the default multiplicity (used i.e. in user interfaces editors and determines the amount of values that will
      * be initialized when creating an empty element).
-     * <p/>
-     * If the set value is &lt; min or &gt; max multiplicity of this assignment it will
-     * be auto adjusted to the next valid value without throwing an exception
+     *
+     *
      *
      * @param defaultMultiplicity the default multiplicity
      * @return this
+     * @throws com.flexive.shared.exceptions.FxInvalidParameterException    if the defaultMultiplicity is not within the range of min and max
      */
-    public FxPropertyAssignmentEdit setDefaultMultiplicity(int defaultMultiplicity) {
+    public FxPropertyAssignmentEdit setDefaultMultiplicity(int defaultMultiplicity) throws FxInvalidParameterException {
         if (this.getMultiplicity().isValid(defaultMultiplicity)) {
             this.defaultMultiplicity = defaultMultiplicity;
             return this;
         }
+        else throw new FxInvalidParameterException("default multiplicity", "ex.structure.modificaiton.defaultMultiplicity.invalid");
+        /*
+         *If the set value is &lt; min or &gt; max multiplicity of this assignment it will
+         * be auto adjusted to the next valid value without throwing an exception
+
         if (defaultMultiplicity < this.getMultiplicity().getMin())
             this.defaultMultiplicity = this.getMultiplicity().getMin();
         if (defaultMultiplicity > this.getMultiplicity().getMax())
             this.defaultMultiplicity = this.getMultiplicity().getMax();
-        return this;
+        */
     }
 
     /**

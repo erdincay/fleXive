@@ -30,18 +30,18 @@
         </c:if>
         <c:if test="#{not groupEditorBean.group.new}">
             <ui:fragment rendered="#{groupEditorBean.editMode}">
-                <adm:tab label="#{fxMessageBean['GroupEditor.tab.groupAssignment']}" active="false" id="tab1"/>
+                <adm:tab label="#{fxMessageBean['GroupEditor.tab.groupAssignment']}" active="false" id="tab1"
+                    bean="#{groupEditorBean}" action="showGroupAssignmentEditor"/>
                 <adm:tab label="#{fxMessageBean['GroupEditor.tab.group']}" active="false" id="tab2"
                          bean="#{groupEditorBean}" action="showGroupEditor"/>
-                <adm:tab label="#{fxMessageBean['GroupEditor.tab.option']}" active="true" id="tab3"
-                         bean="#{groupEditorBean}" action="showGroupOptionEditor"/>
+                <adm:tab label="#{fxMessageBean['GroupEditor.tab.option']}" active="true" id="tab3"/>
             </ui:fragment>
             <ui:fragment rendered="#{not groupEditorBean.editMode}">
-                <adm:tab label="#{fxMessageBean['GroupEditor.tab.groupAssignment.readonly']}" active="false" id="tab1ro"/>
+                <adm:tab label="#{fxMessageBean['GroupEditor.tab.groupAssignment.readonly']}" active="false" id="tab1ro"
+                    bean="#{groupEditorBean}" action="showGroupAssignmentEditor"/>
                 <adm:tab label="#{fxMessageBean['GroupEditor.tab.group.readonly']}" active="false" id="tab2ro"
                          bean="#{groupEditorBean}" action="showGroupEditor"/>
-                <adm:tab label="#{fxMessageBean['GroupEditor.tab.option.readonly']}" active="true" id="tab3ro"
-                         bean="#{groupEditorBean}" action="showGroupOptionEditor"/>
+                <adm:tab label="#{fxMessageBean['GroupEditor.tab.option.readonly']}" active="true" id="tab3ro"/>
             </ui:fragment>
         </c:if>
         <c:if test="#{groupEditorBean.group.new}">
@@ -190,15 +190,9 @@
                     </fx:fieldSet>
                 </ui:fragment>
 
-                <ui:fragment rendered="#{not groupEditorBean.group.new and not groupEditorBean.editMode and groupEditorBean.structureManager}">
+                <ui:fragment rendered="#{not groupEditorBean.group.new and not groupEditorBean.editMode and groupEditorBean.structureManagement}">
                     <adm:commandButton labelKey="GroupEditor.button.editMode" location="both"
                     icon="edit"  action="toggleEditMode"  bean="#{groupEditorBean}" id="editModeButton"/>
-                </ui:fragment>
-
-                <ui:fragment rendered="#{not groupEditorBean.group.new and groupEditorBean.editMode}">
-                     <adm:commandButton labelKey="GroupEditor.button.cancel" location="both" lockscreen="false"
-                            icon="cancel" id="cancelButton"
-                            onclick="parent.getNavFrameWnd().openNode(#{groupEditorBean.assignment.id}, false);return false;"/>
                 </ui:fragment>
 
                 <ui:fragment rendered="#{groupEditorBean.editMode}">
@@ -206,7 +200,7 @@
                                         id="validateChangesButton">
                     </adm:commandButton>
                 </ui:fragment>
-                <ui:fragment rendered="#{groupEditorBean.structureManager}">
+                <ui:fragment rendered="#{groupEditorBean.structureManagement}">
                     <ui:fragment rendered="#{not groupEditorBean.group.new and groupEditorBean.editMode}">
                         <adm:commandButton labelKey="GroupEditor.button.save" location="both"
                                 icon="save"  action="saveChanges"  bean="#{groupEditorBean}" id="saveChangesButton">
@@ -217,6 +211,13 @@
                         icon="new"  action="createGroup"  bean="#{gorupEditorBean}" id="createGroupButton"/>
                     </ui:fragment>
                 </ui:fragment>
+
+                <ui:fragment rendered="#{not groupEditorBean.group.new and groupEditorBean.editMode}">
+                     <adm:commandButton labelKey="GroupEditor.button.cancel" location="both" lockscreen="false"
+                            icon="cancel" id="cancelButton"
+                            onclick="parent.getNavFrameWnd().openNode(#{groupEditorBean.assignment.id}, false);return false;"/>
+                </ui:fragment>
+
             <adm:toolbarPluginButtons/>
             </fx:fieldSet>
 

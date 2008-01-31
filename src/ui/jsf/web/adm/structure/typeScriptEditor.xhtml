@@ -123,21 +123,21 @@
                 </a4j:outputPanel>
             </fx:fieldSet>
         </div>
-        <ui:fragment rendered="#{(not typeEditorBean.type.new) and (not typeEditorBean.editMode) and typeEditorBean.structureManager}">
+        <ui:fragment rendered="#{not typeEditorBean.type.new and not typeEditorBean.editMode and (typeEditorBean.structureManagement or fxSystemBean.isInRole['ScriptManagement'])}">
                 <adm:commandButton labelKey="TypeEditor.button.editMode" location="both"
                         icon="edit"  action="toggleEditMode"  bean="#{typeEditorBean}" id="editModeButton"/>
+        </ui:fragment>
+
+        <ui:fragment rendered="#{not typeEditorBean.type.new and (typeEditorBean.structureManagement or fxSystemBean.isInRole['ScriptManagement']) and typeEditorBean.editMode}">
+            <adm:commandButton labelKey="TypeEditor.button.save" location="both" 
+                            icon="save"  action="saveChanges"  bean="#{typeEditorBean}" id="saveChangesButton">
+            </adm:commandButton>
         </ui:fragment>
 
         <ui:fragment rendered="#{not typeEditorBean.type.new and typeEditorBean.editMode}">
                 <adm:commandButton labelKey="TypeEditor.button.cancel" location="both" lockscreen="false"
                         icon="cancel" id="cancelButton"
                         onclick="parent.getNavFrameWnd().openNode(#{typeEditorBean.type.id}, true);return false;"/>
-        </ui:fragment>
-
-        <ui:fragment rendered="#{not typeEditorBean.type.new and typeEditorBean.structureManager and typeEditorBean.editMode}">
-            <adm:commandButton labelKey="TypeEditor.button.save" location="both" 
-                            icon="save"  action="saveChanges"  bean="#{typeEditorBean}" id="saveChangesButton">
-            </adm:commandButton>
         </ui:fragment>
 
      </h:form>

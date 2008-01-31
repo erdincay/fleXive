@@ -1444,6 +1444,18 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     changesDesc.append("enabled=").append(modified.isEnabled());
                     changes = true;
                 }
+                if (original.getDefaultMultiplicity() != modified.getDefaultMultiplicity()) {
+                    if (ps != null) ps.close();
+                    ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET DEFMULT=? WHERE ID=?");
+                    ps.setInt(1, modified.getDefaultMultiplicity());
+                    ps.setLong(2, original.getId());
+                    ps.executeUpdate();
+                    if (changes)
+                        changesDesc.append(',');
+                    changesDesc.append("defaultMultiplicity=").append(modified.getDefaultMultiplicity());
+                    changes = true;
+                }
+
                 //must not change
                 /*
                 if (org.getAssignedType().getId() != prop.getAssignedType().getId()) {
