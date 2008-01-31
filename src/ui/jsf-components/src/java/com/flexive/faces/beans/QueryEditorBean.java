@@ -127,6 +127,7 @@ public class QueryEditorBean implements Serializable {
             } else if ("new".equals(action)) {
                 // create a new search query
                 getRootNode().getChildren().clear();
+                getRootNode().setName(null);
             } else if ("load".equals(action)) {
                 setRootNode(EJBLookup.getSearchEngine().load(AdminResultLocations.ADMIN,
                         FxJsfUtils.getParameter("name")));
@@ -416,6 +417,17 @@ public class QueryEditorBean implements Serializable {
         this.saveQuery = saveQuery;
     }
 
+    /**
+     * Return the current tab title of the query tab.
+     *
+     * @return  the current tab title of the query tab.
+     */
+    public String getTabTitle() {
+        if (StringUtils.isBlank(getRootNode().getName())) {
+            return MessageBean.getInstance().getMessage("QueryEditor.tabtitle.query");
+        }
+        return MessageBean.getInstance().getMessage("QueryEditor.tabtitle.loadedQuery", getRootNode().getName());
+    }
     /**
      * Returns the session attribute key for storing the current query
      *

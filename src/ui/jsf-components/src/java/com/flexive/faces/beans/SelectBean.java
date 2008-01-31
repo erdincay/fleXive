@@ -654,7 +654,8 @@ public class SelectBean implements Serializable {
 
     public List<SelectItem> getResultDirections() {
         if (resultDirections == null) {
-            resultDirections = FxJsfUtils.enumsAsSelectList(SortDirection.values());
+            resultDirections = FxJsfUtils.enumsAsSelectList(new SortDirection[]
+                    {SortDirection.ASCENDING, SortDirection.DESCENDING});
         }
         return resultDirections;
     }

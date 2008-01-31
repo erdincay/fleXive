@@ -38,6 +38,7 @@ import com.flexive.faces.messages.FxFacesMessage;
 import com.flexive.faces.messages.FxFacesMessages;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.shared.*;
+import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -579,5 +580,14 @@ public class SystemBean implements Serializable {
      */
     public long getFailedLoginAttempts() {
         return FxContext.get().getTicket().getFailedLoginAttempts();
+    }
+
+    /**
+     * Return the structure envirnoment (filtered for the current user).
+     *
+     * @return  the structure envirnoment (filtered for the current user).
+     */
+    public FxEnvironment getEnvironment() {
+        return CacheAdmin.getFilteredEnvironment();
     }
 }

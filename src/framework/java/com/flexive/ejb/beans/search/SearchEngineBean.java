@@ -127,9 +127,8 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
             ResultSet rs = stmt.executeQuery(sSql);
             rs.next();
             return rs.getLong(1);
-        } catch (Throwable t) {
-            LOG.error("Failed to get the last content change: " + t.getMessage());
-            return System.currentTimeMillis();
+        } catch (Exception e) {
+            throw new FxLoadException(LOG, e, "ex.sqlSearch.lastContentChange", e).asRuntimeException();
         } finally {
             Database.closeObjects(this.getClass(), con, stmt);
         }

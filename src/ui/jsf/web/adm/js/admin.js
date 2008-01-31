@@ -4,7 +4,7 @@
 var djConfig = {
     isDebug: false,
     baseRelativePath: "pub/js/dojo/",
-    preventBackButtonFix: false,
+    preventBackButtonFix: true,
     parseWidgets: false,
     enableMozDomContentLoaded: true
 };

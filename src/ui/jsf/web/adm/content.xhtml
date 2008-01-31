@@ -15,6 +15,11 @@
     -->
         <adm:messages/>
 
+    <!--
+        Access the environment to keep the loading message until the environment has been initialized
+        after the first login:
+        #{fxSystemBean.environment}
+    -->
         #{fxMessageBean['Global.welcome']} #{fxSystemBean.buildInfoVerbose}
         
         <ui:fragment rendered="#{fxSystemBean.failedLoginAttempts > 0}">

@@ -80,4 +80,14 @@ public class SystemInfoBean {
     public boolean isUseIMIdentify() {
         return FxMediaEngine.isImageMagickIdentifySupported();
     }
+
+    public String getApplicationServerName() {
+        if (System.getProperty("product.name") != null) {
+            return System.getProperty("product.name");
+        } else if (System.getProperty("jboss.home.dir") != null) {
+            return "JBoss"; // TODO: determine JBoss version
+        } else {
+            return "unknown";
+        }
+    }
 }

@@ -23,7 +23,7 @@ Parameters:
     <c:set var="isBriefcase" value="#{fxSearchResultBean.sessionData.briefcaseId != -1}"/>
 
     <!-- Query editor tab -->
-    <adm:tab active="#{activeTab == 'query'}" label="#{fxMessageBean['QueryEditor.tabtitle.query']}" id="tab1" bean="#{fxQueryEditorBean}"
+    <adm:tab active="#{activeTab == 'query'}" label="#{fxQueryEditorBean.tabTitle}" id="tab1" bean="#{fxQueryEditorBean}"
             action="show"/>
     <!-- Search result tab (if !isBriefcase) -->
     <adm:tab active="#{activeTab == 'results'}" label="#{fxMessageBean['SearchResult.tabtitle.results']}" id="tab2" bean="#{fxSearchResultBean}" action="show" rendered="#{!isBriefcase}"/>
