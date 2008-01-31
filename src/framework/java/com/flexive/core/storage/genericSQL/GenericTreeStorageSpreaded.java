@@ -306,9 +306,11 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             rs = stmt.executeQuery(sql);
             //long time2 = System.currentTimeMillis();
             if (createMode) {
+                //                                                                 1  2      3     4     5   6        7   8
                 ps = con.prepareStatement("INSERT INTO " + getTable(destMode) + " (ID,PARENT,DEPTH,DIRTY,REF,TEMPLATE,LFT,RGT," +
+                        //9               10         11   12
                         "TOTAL_CHILDCOUNT,CHILDCOUNT,NAME,MODIFIED_AT) " +
-                        "VALUES (?,?,?,?,?,?,?,?,?,?,?,UNIX_TIMESTAMP()*1000)");
+                        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
             } else {
                 ps = con.prepareStatement("UPDATE " + getTable(sourceMode) + " SET LFT=?,RGT=?,DEPTH=? WHERE ID=?");
             }
@@ -413,6 +415,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                     ps.setInt(9, total_childs);
                     ps.setInt(10, direct_childs);
                     ps.setString(11, name);
+                    ps.setLong(12, System.currentTimeMillis());
                     ps.addBatch();
                 } else {
                     ps.setBigDecimal(1, left);
@@ -746,6 +749,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                     stmt2.addBatch("DELETE FROM " + getTable(FxTreeMode.Live) + " WHERE ID=" + deleteId);
                     stmt2.addBatch("SET FOREIGN_KEY_CHECKS=1");
                 }
+                stmt2.addBatch("UPDATE " + getTable(FxTreeMode.Live) + " SET MODIFIED_AT=" + System.currentTimeMillis());
                 stmt2.executeBatch();
             } catch (SQLException e) {
                 throw new FxTreeException("ex.tree.activate.failed", nodeId, false, e.getMessage());

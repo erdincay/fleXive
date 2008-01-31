@@ -636,7 +636,7 @@ public class SearchEngineTest {
             assert EJBLookup.getSearchEngine().getLastContentChange(true) > editContentChange
                     : "Activated content, but live mode lastContentChange timestamp was not increased: "
                         + EJBLookup.getSearchEngine().getLastContentChange(true);
-            assert EJBLookup.getSearchEngine().getLastContentChange(true) == editContentChange
+            assert EJBLookup.getSearchEngine().getLastContentChange(false) == editContentChange
                     : "Edit tree didn't change, but lastContentChange timestamp was updated";
         } finally {
             try {
