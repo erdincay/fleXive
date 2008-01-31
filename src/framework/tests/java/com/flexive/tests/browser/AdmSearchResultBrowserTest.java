@@ -122,7 +122,7 @@ public class AdmSearchResultBrowserTest extends AbstractBackendBrowserTest {
 
 
     private void submitQuicksearch(String query) {
-        selenium.type("getResult", query);
+        selenium.type("query", query);
         selenium.click("searchForm:submitQueryButton");
 
         // wait for search results

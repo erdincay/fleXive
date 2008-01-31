@@ -343,6 +343,9 @@ public class SearchEngineTest {
                 final FxValue rowValue = row.getFxValue(2);
                 switch(comparator) {
                     case EQ:
+                        assert rowValue.compareTo(value) == 0
+                                : "Result value " + rowValue + " is not equal to " + value + " (compareTo = "
+                                + rowValue.compareTo(value) + ")";
                         assert rowValue.getBestTranslation().equals(value.getBestTranslation())
                                 : "Result value " + rowValue + " is not equal to " + value;
                         break;

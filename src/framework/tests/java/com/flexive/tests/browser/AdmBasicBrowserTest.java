@@ -46,6 +46,41 @@ import org.testng.annotations.Test;
  */
 public class AdmBasicBrowserTest extends AbstractBackendBrowserTest {
     /**
+     * All admin pages.
+     *
+     * To get the list of admin pages, execute
+     * <pre>grep -o "\"\/.*jsf\"" src/ui/jsf/web/adm/main/navigation.xhtml</pre>
+     */
+    private static final String[] ADMIN_PAGES = {
+            "/adm/main/account/overview.jsf",
+            "/adm/main/account/create.jsf",
+            "/adm/main/userGroup/overview.jsf",
+            "/adm/main/userGroup/new.jsf",
+            "/adm/main/mandator/overview.jsf",
+            "/adm/main/mandator/create.jsf",
+            "/adm/main/acl/aclOverview.jsf",
+            "/adm/main/acl/aclCreate.jsf",
+            "/adm/main/workflow/overview.jsf",
+            "/adm/main/workflow/create.jsf",
+            "/adm/main/workflow/stepDefinition/overview.jsf",
+            "/adm/main/workflow/stepDefinition/edit.jsf",
+            "/adm/main/template/contentTemplateOverview.jsf",
+            "/adm/main/template/masterTemplateOverview.jsf",
+            "/adm/main/template/tagOverview.jsf",
+            "/adm/main/sqlsearch/search.jsf",
+            "/adm/search/query.jsf",
+            "/adm/content/contentEditor.jsf",
+            "/adm/content/createTestData.jsf",
+            "/adm/main/scripting/overview.jsf",
+            "/adm/main/scripting/create.jsf",
+            "/adm/main/scripting/scriptConsole.jsf",
+            "/adm/main/system/systemInfo.jsf",
+            "/adm/main/system/languages.jsf",
+            "/adm/main/selectList/overview.jsf",
+            "/adm/main/selectList/create.jsf"
+    };
+
+    /**
      * Logs in into the backend, then logs out again.
      */
     @Test(groups = "browser")
@@ -66,10 +101,13 @@ public class AdmBasicBrowserTest extends AbstractBackendBrowserTest {
     public void basicNavigation() {
         try {
             loginSupervisor();
-            // briefcase tab
-            navigateTo(NavigationTab.Briefcases);
-            // TODO check result
-            // administration tab
+
+            // search/briefcase tab
+            navigateTo(NavigationTab.Search);
+            assertTrue(selenium.isTextPresent("Search queries"));
+            assertTrue(selenium.isTextPresent("Create new Briefcase"));
+
+            // admin tab
             navigateTo(NavigationTab.Administration);
             assertTrue(selenium.isTextPresent("Accounts"));
             assertTrue(selenium.isTextPresent("Groups"));
@@ -78,7 +116,7 @@ public class AdmBasicBrowserTest extends AbstractBackendBrowserTest {
             navigateTo(NavigationTab.Structure);
             assertTrue(selenium.isTextPresent("ROOT"));
             assertTrue(selenium.isTextPresent("ACL"));
-            assertTrue(selenium.isTextPresent("Workflow step"));
+            assertTrue(selenium.isTextPresent("Workflow Step"));
 
             // content tab
             navigateTo(NavigationTab.Content);
@@ -88,5 +126,19 @@ public class AdmBasicBrowserTest extends AbstractBackendBrowserTest {
         }
     }
 
-
+    /**
+     * Load all admin pages.
+     */
+    @Test(groups = "browser")
+    public void loadAdminPages() {
+        try {
+            loginSupervisor();
+            navigateTo(NavigationTab.Administration);
+            for (String page: ADMIN_PAGES) {
+                loadContentPage(page);
+            }
+        } finally {
+            logout();
+        }
+    }
 }

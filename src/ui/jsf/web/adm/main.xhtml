@@ -36,6 +36,10 @@
         function submitSearch() {
             invokeContentAction("adm/search/searchResult.jsf", "fulltextSearch", {query: document.searchForm.query.value});
         }
+
+        function logout() {
+            invokeContentAction("adm/logout.xhtml");
+        }
     </script>
     <link rel="shortcut icon" href="#{fxSystemBean.contextPath}/pub/images/favicon.ico" type="image/vnd.microsoft.icon" />
     <title>#{fxSystemBean.header}</title>
@@ -67,10 +71,10 @@
                     <input type="text" name="query" onkeypress="return onReturnEval(event, 'submitSearch();')" style="margin-right:3px;width:120px;padding-left:2px;height:16px;border:1px solid #d4d9c4;"/>
                     <t:graphicImage id="submitQueryButton" style="position:relative;top:3px;cursor:pointer;" alt="search" url="/adm/images/toolbar/search.png" onclick="submitSearch();"/>
                     <t:graphicImage id="editUserSettingsButton" style="position:relative;margin-left:10px;top:3px;cursor:pointer;" alt="search" url="/adm/images/layout/user_settings.png" onclick="editUserSettings();"/>
-                    <h:commandLink id="logoutButton" action="#{fxAuthenticationBean.logout}">
+                    <a href="javascript:logout()">
                         <t:graphicImage id="logoutImage" style="border:0;position:relative;margin-left:10px;top:3px;"
                                         alt="logout" url="/adm/images/layout/exit.png" />
-                    </h:commandLink>
+                    </a>
                 </h:form>
             </div>
         </td>

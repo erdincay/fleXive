@@ -102,18 +102,22 @@ function init() {
 }
 
 // Opens the given tab menu in the main navigation
+// Returns true if the navigation page is already available, false if it still loads
 function gotoNavMenu(id) {
     // hide current menu
+    var loaded = true;
     getNavFrameObj().style.display = "none";
     activeTabId = parseInt(id);
     if (getNavFrameObj().getAttribute("loaded") == "false") {
         // implement lazy loading of navigation tabs 
         getNavFrameWnd().document.location.href = getBase() + "/" + getNavFrameObj().getAttribute("navigationSrc");
         getNavFrameObj().setAttribute("loaded", true)
+        loaded = false;
     }
     // show new menu
     getNavFrameObj().style.display = "block";
     windowResize();
+    return loaded;
 }
 
 function getNavFrameObj() {

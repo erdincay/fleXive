@@ -51,6 +51,18 @@ a {
     padding-top: 2px;
 }
 
+.commandButton:hover .commandButtonLabel, .commandButton:hover .commandButtonIcon {
+    background-image: url("../images/commandButton/buttonBG_hover.gif");
+}
+
+.commandButton:hover .commandButtonIcon {
+    border-left: 1px solid #6a6a6a;
+}
+
+.commandButton:hover .commandButtonRight {
+    background-image: url("../images/commandButton/buttonRight_hover.gif");
+}
+
 .errorMessage {
     color: red;
 }

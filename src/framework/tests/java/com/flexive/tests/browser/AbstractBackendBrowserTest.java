@@ -45,6 +45,7 @@ import org.testng.annotations.BeforeClass;
  */
 public abstract class AbstractBackendBrowserTest extends AbstractSeleniumTest {
     protected static final String WND = "selenium.browserbot.getCurrentWindow()";
+    private static final String CONTEXTPATH = "/flexive";
 
     /**
      * All IFrames available in the backend administration.
@@ -52,7 +53,10 @@ public abstract class AbstractBackendBrowserTest extends AbstractSeleniumTest {
     protected enum Frame {
         Content("contentFrame"),
         Top("relative=top"),
-        Navigation("treeNavFrame");
+        NavContent("treeNavFrame_0"),
+        NavStructures("treeNavFrame_1"),
+        NavSearch("treeNavFrame_2"),
+        NavAdministration("treeNavFrame_3");
 
         private String name;
 
@@ -69,10 +73,20 @@ public abstract class AbstractBackendBrowserTest extends AbstractSeleniumTest {
      * The available navigation tabs of the main navigation frame.
      */
     protected enum NavigationTab {
-        Content, Structure, Administration, Briefcases
-    }
+        // the order of the navigation tabs must match the actual layout
+        // since the position determines the ID
 
-    ;
+        Content(Frame.NavContent),
+        Structure(Frame.NavStructures),
+        Search(Frame.NavSearch),
+        Administration(Frame.NavAdministration);
+
+        private Frame frame;
+
+        NavigationTab(Frame frame) {
+            this.frame = frame;
+        }
+    }
 
     public AbstractBackendBrowserTest() {
         super(null, "browser.properties");
@@ -91,47 +105,37 @@ public abstract class AbstractBackendBrowserTest extends AbstractSeleniumTest {
     }
 
     protected void login(String userName, String password) {
-        selenium.open("/flexive/adm/pub/login.jsf");
+        selenium.open(CONTEXTPATH + "/adm/pub/login.jsf");
         selenium.type("loginForm:username", userName);
         selenium.type("loginForm:password", password);
         selenium.click("loginForm:takeOver");
         selenium.click("loginForm:loginImage");
         // wait for the loading screen to disappear
         selenium.waitForCondition(WND + ".document.getElementById('loading') != null " +
-                "&& " + WND + ".document.getElementById('loading').style.display == 'none'", "30000");
+                "&& " + WND + ".document.getElementById('loading').style.display == 'none'", "120000");
     }
 
     protected void loginSupervisor() {
-        login("s", "s");
+        login("supervisor", "supervisor");
     }
 
     protected void logout() {
         selectFrame(Frame.Top);
         selenium.click("searchForm:logoutImage");
+        selectFrame(Frame.Content);
+        selenium.waitForPageToLoad("30000");
+        selenium.click("frm:logoutButton");
         selenium.waitForPageToLoad("30000");
     }
 
     protected void navigateTo(NavigationTab tab) {
-        selectFrame(Frame.Navigation);
-        final String locator;
-        switch (tab) {
-            case Content:
-                locator = "mainNavForm:menu_0";
-                break;
-            case Structure:
-                locator = "mainNavForm:menu_1";
-                break;
-            case Administration:
-                locator = "mainNavForm:menu_2";
-                break;
-            case Briefcases:
-                locator = "mainNavForm:menu_3";
-                break;
-            default:
-                throw new IllegalArgumentException(tab.toString());
+        selectFrame(Frame.Top);
+        final String result = selenium.getEval(WND + ".gotoNavMenu(" + tab.ordinal() + ")");
+        selectFrame(tab.frame);
+        if ("false".equals(result)) {
+            // frame not loaded yet, wait for loading to complete
+            selenium.waitForPageToLoad("30000");
         }
-        selenium.click(locator);
-        selenium.waitForPageToLoad("30000");
     }
 
     protected void selectFrame(Frame frame) {
@@ -139,5 +143,11 @@ public abstract class AbstractBackendBrowserTest extends AbstractSeleniumTest {
             selectFrame(Frame.Top); // select top frame first
         }
         selenium.selectFrame(frame.getName());
+    }
+
+    protected void loadContentPage(String url) {
+        selectFrame(Frame.Content);
+        selenium.open(CONTEXTPATH + (url.startsWith("/") ? url : "/" + url));
+        selenium.waitForPageToLoad("30000");
     }
 }

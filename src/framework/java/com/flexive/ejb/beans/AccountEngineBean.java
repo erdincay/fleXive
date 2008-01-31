@@ -1544,7 +1544,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
     /**
      * {@inheritDoc}
      */
-    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public ACLAssignment[] loadAccountAssignments(long accountId) throws
             FxApplicationException {
         Connection con = null;
