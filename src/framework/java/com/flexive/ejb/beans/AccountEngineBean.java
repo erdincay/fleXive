@@ -685,6 +685,13 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             stmt.setString(20, RandomStringUtils.randomAlphanumeric(64));
             stmt.executeUpdate();
 
+            //make sure the user is the owner of his contact data
+            stmt.close();
+            stmt = con.prepareStatement("UPDATE " + TBL_CONTENT + " SET CREATED_BY=? WHERE ID=?");
+            stmt.setLong(1, newId);
+            stmt.setLong(2, contactDataPK.getId());
+            stmt.executeUpdate();
+
             // call scripts
             final List<Long> scriptIds = scripting.getByScriptType(FxScriptEvent.AfterAccountCreate);
             final FxScriptBinding binding = new FxScriptBinding();
@@ -1365,6 +1372,14 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             if (password != null) stmt.setString(pos++, password);
             if (contactDataId != null) stmt.setLong(pos/*++*/, contactDataId);
             stmt.executeUpdate();
+            if( contactDataId != null ) {
+                //make sure the user is the owner of his contact data
+                stmt.close();
+                stmt = con.prepareStatement("UPDATE "+TBL_CONTENT+" SET CREATED_BY=? WHERE ID=?");
+                stmt.setLong(1, accountId);
+                stmt.setLong(2, contactDataId);
+                stmt.executeUpdate();
+            }
 
             // Log the user out of the system if he was made active
             if (!isActive || !isConfirmed) {
