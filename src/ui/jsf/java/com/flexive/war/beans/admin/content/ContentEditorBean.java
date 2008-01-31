@@ -531,10 +531,13 @@ public class ContentEditorBean implements ActionBean, Serializable {
                 editAble = true;
                 deleteAble = true;
                 if( steps == null || steps.size() == 0 ) {
-                    new FxFacesMsgErr("Content.err.noStepAccess").addToContext();
                     editAble = false;
-                    release();
-                    return null;
+                    readOnly = true;
+                    if (id == -1) {
+                        new FxFacesMsgErr("Content.err.noStepAccess").addToContext();
+                        release();
+                        return null;
+                    }
                 }
                 FxContentSecurityInfo si = fxType.usePermissions() && id != -1
                         ? co.getContentSecurityInfo(content.getPk())
