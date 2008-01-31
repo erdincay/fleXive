@@ -206,7 +206,8 @@ database.password=a]]></programlisting>
                     </para>
                     <para>
                         On Windows launch JBoss using
-                        <programlisting><![CDATA[start run.bat -c default -Djboss.bind.address=0.0.0.0]]></programlisting>
+                        <programlisting>
+                            <![CDATA[start run.bat -c default -Djboss.bind.address=0.0.0.0]]></programlisting>
                     </para>
                 </listitem>
                 <listitem>
@@ -280,55 +281,77 @@ database.password=a]]></programlisting>
         </title>
         <section xml:id="glassfish_installation_required_libs">
             <title>Required libraries</title>
-            <para>Flexive needs several libraries to be deployed to the application server's internal lib directories.
+            <para>Flexive needs several libraries to be deployed to the application server's internal
+                <filename>lib</filename>
+                directories.
             </para>
-            <para>The following required libraries have to be deployed:</para>
-            <itemizedlist>
-                <listitem>
-                    <para>Copy the following files from the
-                        <filename>lib</filename>
-                        directory of your &Flexive; source tree to
-                        <filename>${glassfish.home}/domains/domain1/lib/ext</filename>:
-                        <itemizedlist>
-                            <listitem>
-                                <filename>commons-logging.jar</filename>
-                            </listitem>
-                            <listitem>
-                                <filename>concurrent.jar</filename>
-                            </listitem>
-                            <listitem>
-                                <filename>jboss-common-core.jar</filename>
-                            </listitem>
-                            <listitem>
-                                <filename>jboss-jmx.jar</filename>
-                            </listitem>
-                            <listitem>
-                                <filename>jboss-system.jar</filename>
-                            </listitem>
-                            <listitem>
-                                <filename>jgroups.jar</filename>
-                            </listitem>
-                            <listitem>
-                                <filename>mysql-connector-java-*.jar</filename>
-                                (Alternatively you can download the latest stable
-                                <link href="http://dev.mysql.com/downloads/connector/j/5.0.html">MySQL JDBC
-                                    driver</link>)
-                            </listitem>
-                        </itemizedlist>
-                    </para>
-                </listitem>
-                <listitem>
-                    <para>Copy the
+            <section xml:id="glassfish_installation_required_libs_bin_dist">
+                <title>Libraries from subversion</title>
+                <para>You have to check out some libraries from the
+                    <filename>lib</filename>
+                    directory of the &Flexive; subversion repository at<filename>
+                    http://svn.flexive.org/repository/flexive/trunk/lib</filename>. Follow the instructions
+                    on our
+                    <link
+                            href="http://wiki.flexive.org/confluence/display/FX/Checking+out">wiki page
+                    </link>
+                    to get information about checking out files from the &Flexive; repository.
+                </para>
+                <para>Check out the following files from the
+                    <filename>lib</filename>
+                    directory of the
+                    &Flexive; subversion repository and copy them to
+                    <filename>${glassfish.home}/domains/domain1/lib/ext</filename>:
+                </para>
+                <itemizedlist>
+                    <listitem>
+                        <filename>concurrent.jar</filename>
+                    </listitem>
+                    <listitem>
+                        <filename>jboss-common-core.jar</filename>
+                    </listitem>
+                    <listitem>
+                        <filename>jboss-jmx.jar</filename>
+                    </listitem>
+                    <listitem>
+                        <filename>jboss-system.jar</filename>
+                    </listitem>
+                </itemizedlist>
+            </section>
+            <section xml:id="glassfish_installation_required_libs_svn">
+                <title>Libraries from the binary distribution
+                </title>
+                <para>Copy the following file from the
+                    <filename>extlib</filename>
+                    directory of your &Flexive; binary distribution to
+                    <filename>${glassfish.home}/domains/domain1/lib</filename>:
+                </para>
+                <itemizedlist>
+                    <listitem>
                         <filename>jbosscache-core.jar</filename>
-                        from the
-                        <filename>lib</filename>
-                        directory of your &Flexive; source tree or from the
-                        <filename>extlib</filename>
-                        directory of your &Flexive; binary distribution to
-                        <filename>${glassfish.home}/lib</filename>.
-                    </para>
-                </listitem>
-            </itemizedlist>
+                    </listitem>
+                </itemizedlist>
+                <para>Copy the following files from the
+                    <filename>extlib</filename>
+                    directory of your &Flexive; binary distribution to
+                    <filename>${glassfish.home}/domains/domain1/lib/ext</filename>:
+                </para>
+                <itemizedlist>
+                    <listitem>
+                        <filename>commons-logging.jar</filename>
+                    </listitem>
+
+                    <listitem>
+                        <filename>jgroups.jar</filename>
+                    </listitem>
+                    <listitem>
+                        <filename>mysql-connector-java-*.jar</filename>
+                        (Alternatively you can download the latest stable
+                        <link href="http://dev.mysql.com/downloads/connector/j/5.0.html">MySQL JDBC
+                            driver</link>)
+                    </listitem>
+                </itemizedlist>
+            </section>
         </section>
         <section xml:id="glassfish_installation_setup">
             <title>Setting up and starting Glassfish
