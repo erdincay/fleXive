@@ -172,8 +172,8 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             String email = rs.getString(2);
             long contactDataId = rs.getLong(3);
             long mandator = rs.getLong(4);
-            Date validFrom = rs.getDate(5);
-            Date validTo = rs.getDate(6);
+            Date validFrom = new Date(rs.getLong(5));
+            Date validTo = new Date(rs.getLong(6));
             String description = rs.getString(7);
             String name = rs.getString(8);
             String _loginName = rs.getString(9);
@@ -250,7 +250,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
 
             // Obtain a database connection
             con = Database.getDbConnection();
-            //               1-6 7      8           9              10                 11            12       13      14
+            //               1-6 7      8           9              10                 11           12       13      14
             curSql = "SELECT d.*,a.ID,a.IS_ACTIVE,a.IS_VALIDATED,a.ALLOW_MULTILOGIN,a.VALID_FROM,a.VALID_TO,NOW(),a.PASSWORD " +
                     "FROM " + TBL_ACCOUNTS + " a " +
                     "LEFT JOIN " +
@@ -275,14 +275,14 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
 
             // Read data
             final boolean loggedIn = rs.getBoolean(2);
-            final Date lastLogin = rs.getTimestamp(3);
+            final Date lastLogin = new Date(rs.getLong(3));
             final String lastLoginFrom = rs.getString(4);
             final long failedAttempts = rs.getLong(5);
             final boolean active = rs.getBoolean(8);
             final boolean validated = rs.getBoolean(9);
             final boolean allowMultiLogin = rs.getBoolean(10);
-            final Date validFrom = rs.getTimestamp(11);
-            final Date validTo = rs.getTimestamp(12);
+            final Date validFrom = new Date(rs.getLong(11));
+            final Date validTo = new Date(rs.getLong(12));
             final Date dbNow = rs.getTimestamp(13);
 
             // Account active?
@@ -334,7 +334,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             ps.setLong(1, id);
             ps.setString(2, inf.getApplicationId());
             ps.setBoolean(3, true);
-            ps.setTimestamp(4, new Timestamp(new Date().getTime()));
+            ps.setLong(4, System.currentTimeMillis());
             ps.setString(5, inf.getRemoteHost());
             ps.setLong(6, 0); //reset failed attempts
             ps.setString(7, AuthenticationSource.Database.name());
@@ -391,7 +391,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                 ps.setLong(1, userId);
                 ps.setString(2, FxContext.get().getApplicationId());
                 ps.setBoolean(3, false);
-                ps.setTimestamp(4, new Timestamp(new Date().getTime()));
+                ps.setLong(4, System.currentTimeMillis());
                 ps.setString(5, FxContext.get().getRemoteHost());
                 ps.setLong(6, 1); //one failed attempt
                 ps.setString(7, AuthenticationSource.Database.name());
@@ -661,7 +661,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                     //1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0
                     "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
-            final Timestamp NOW = new Timestamp(java.lang.System.currentTimeMillis());
+            final long NOW = System.currentTimeMillis();
             stmt = con.prepareStatement(curSql);
             stmt.setLong(1, newId);
             stmt.setLong(2, mandatorId);
@@ -671,13 +671,13 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             stmt.setString(6, email);
             stmt.setLong(7, contactDataPK.getId());
             stmt.setInt(8, (int) lang);
-            stmt.setTimestamp(9, new Timestamp(validFrom.getTime()));
-            stmt.setTimestamp(10, new Timestamp(validTo.getTime()));
+            stmt.setLong(9, validFrom.getTime());
+            stmt.setLong(10, validTo.getTime());
             stmt.setString(11, description);
             stmt.setLong(12, ticket.getUserId());
-            stmt.setTimestamp(13, NOW);
+            stmt.setLong(13, NOW);
             stmt.setLong(14, ticket.getUserId());
-            stmt.setTimestamp(15, NOW);
+            stmt.setLong(15, NOW);
             stmt.setBoolean(16, isActive);
             stmt.setBoolean(17, isConfirmed);
             stmt.setLong(18, (defaultNode < 0) ? 0 : defaultNode);
@@ -1133,8 +1133,8 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                         contactDataId = -1;
                     long mandator = rs.getLong(4);
                     FxLanguage lang = language.load(rs.getInt(5));
-                    Date validFrom = rs.getDate(6);
-                    Date validTo = rs.getDate(7);
+                    Date validFrom = new Date(rs.getLong(6));
+                    Date validTo = new Date(rs.getLong(7));
                     String description = rs.getString(8);
                     String _name = rs.getString(9);
                     String _loginName = rs.getString(10);
@@ -1350,11 +1350,11 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             stmt = con.prepareStatement(curSql);
             stmt.setString(1, email);
             stmt.setInt(2, lang.intValue());
-            stmt.setTimestamp(3, new Timestamp(validFrom.getTime()));
-            stmt.setTimestamp(4, new Timestamp(validTo.getTime()));
+            stmt.setLong(3, validFrom.getTime());
+            stmt.setLong(4, validTo.getTime());
             stmt.setString(5, description);
             stmt.setLong(6, ticket.getUserId());
-            stmt.setTimestamp(7, new Timestamp(java.lang.System.currentTimeMillis()));
+            stmt.setLong(7, System.currentTimeMillis());
             stmt.setBoolean(8, isActive);
             stmt.setBoolean(9, isConfirmed);
             stmt.setLong(10, defaultNode);
@@ -1436,7 +1436,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             stmt.setString(4, loginName);
 
             stmt.setLong(5, ticket.getUserId());
-            stmt.setTimestamp(6, new Timestamp(java.lang.System.currentTimeMillis()));
+            stmt.setLong(6, System.currentTimeMillis());
 
             if (password != null) stmt.setString(7, password);
             stmt.executeUpdate();

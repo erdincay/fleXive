@@ -244,16 +244,16 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             sql = "INSERT INTO " + TBL_GROUP + " " +
                     "(ID,MANDATOR,AUTOMANDATOR,ISSYSTEM,NAME,COLOR,CREATED_BY,CREATED_AT,MODIFIED_BY,MODIFIED_AT) VALUES (" +
                     "?,?,NULL,FALSE,?,?,?,?,?,?)";
-            Timestamp NOW = new Timestamp(java.lang.System.currentTimeMillis());
+            final long NOW = System.currentTimeMillis();
             pstmt = con.prepareStatement(sql);
             pstmt.setLong(1, groupId);
             pstmt.setLong(2, mandatorId);
             pstmt.setString(3, name);
             pstmt.setString(4, color);
             pstmt.setLong(5, ticket.getUserId());
-            pstmt.setTimestamp(6, NOW);
+            pstmt.setLong(6, NOW);
             pstmt.setLong(7, ticket.getUserId());
-            pstmt.setTimestamp(8, NOW);
+            pstmt.setLong(8, NOW);
             pstmt.executeUpdate();
 
             // Return the new id
@@ -320,12 +320,12 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             sCurSql = "UPDATE " + TBL_GROUP + " SET " +
                     "NAME=?, COLOR=?, MODIFIED_BY=?, MODIFIED_AT=? " +
                     "WHERE ID=" + groupId;
-            Timestamp NOW = new Timestamp(java.lang.System.currentTimeMillis());
+            final long NOW = System.currentTimeMillis();
             pstmt = con.prepareStatement(sCurSql);
             pstmt.setString(1, aGroup.getName());
             pstmt.setString(2, aGroup.getColor());
             pstmt.setLong(3, ticket.getUserId());
-            pstmt.setTimestamp(4, NOW);
+            pstmt.setLong(4, NOW);
             pstmt.executeUpdate();
             pstmt.close();
 
@@ -643,7 +643,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
                     missing.add(m);
                 }
             }
-            Timestamp NOW = new Timestamp(java.lang.System.currentTimeMillis());
+            final long NOW = System.currentTimeMillis();
             for (Mandator m : missing) {
                 sql = "INSERT INTO " + TBL_GROUP + " " +
                         "(ID,MANDATOR,AUTOMANDATOR,ISSYSTEM,NAME,COLOR,CREATED_BY,CREATED_AT,MODIFIED_BY,MODIFIED_AT) VALUES (" +
@@ -656,9 +656,9 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
                 ps.setString(3, "Everyone (" + m.getName() + ")");
                 ps.setString(4, "#00AA00");
                 ps.setLong(5, 0);
-                ps.setTimestamp(6, NOW);
+                ps.setLong(6, NOW);
                 ps.setLong(7, 0);
-                ps.setTimestamp(8, NOW);
+                ps.setLong(8, NOW);
                 ps.executeUpdate();
                 sql = "INSERT INTO " + TBL_ASSIGN_GROUPS + " (ACCOUNT,USERGROUP) (SELECT a.ID, " + gid +
                         " FROM " + TBL_ACCOUNTS + " a WHERE a.MANDATOR=" + m.getId() + " AND a.ID!=" + Account.NULL_ACCOUNT + ")";

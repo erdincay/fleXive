@@ -68,6 +68,7 @@ import org.w3c.tidy.Tidy;
 import java.io.*;
 import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 /**
  * Generic implementation of hierarchical content handling.
@@ -199,7 +200,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     //                                                                                     1  2   3             4(handle)5    6                  7                    8                    9       10         11    12
     protected static final String BINARY_TRANSIT = "INSERT INTO " + TBL_CONTENT_BINARY + "(ID,VER,QUALITY,FBLOB,NAME,BLOBSIZE,XMLMETA,CREATED_AT,MIMETYPE,PREVIEW_REF,ISIMAGE,RESOLUTION,WIDTH,HEIGHT,PREV1,PREV1_WIDTH,PREV1_HEIGHT,PREV2,PREV2_WIDTH,PREV2_HEIGHT,PREV3,PREV3_WIDTH,PREV3_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE) " +
             //      1 2 3       4 5 6       7             8 9 10 11
-            "SELECT ?,?,?,FBLOB,?,?,?,NOW(),?,PREVIEW_REF,?,?,?,?,PREV1,PREV1_WIDTH,PREV1_HEIGHT,PREV2,PREV2_WIDTH,PREV2_HEIGHT,PREV3,PREV3_WIDTH,PREV3_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
+            "SELECT ?,?,?,FBLOB,?,?,?,UNIX_TIMESTAMP()*1000,?,PREVIEW_REF,?,?,?,?,PREV1,PREV1_WIDTH,PREV1_HEIGHT,PREV2,PREV2_WIDTH,PREV2_HEIGHT,PREV3,PREV3_WIDTH,PREV3_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
     //                                                                                                   1              2               3        4              5               6        7              8               9            10           11           12           13
     protected static final String BINARY_TRANSIT_PREVIEWS = "UPDATE " + TBL_BINARY_TRANSIT + " SET PREV1=?, PREV1_WIDTH=?, PREV1_HEIGHT=?, PREV2=?, PREV2_WIDTH=?, PREV2_HEIGHT=?, PREV3=?, PREV3_WIDTH=?, PREV3_HEIGHT=?, PREV1SIZE=?, PREV2SIZE=?, PREV3SIZE=? WHERE BKEY=?";
     protected static final String BINARY_TRANSIT_PREVIEWS_REF = "UPDATE " + TBL_BINARY_TRANSIT + " SET PREVIEW_REF=? WHERE BKEY=?";
@@ -519,12 +520,12 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 ps.setNull(16, java.sql.Types.NUMERIC);
                 ps.setNull(17, java.sql.Types.NUMERIC);
             }
-            long userId = FxContext.get().getTicket().getUserId();
-            java.sql.Timestamp tsNow = new java.sql.Timestamp(java.lang.System.currentTimeMillis());
+            final long userId = FxContext.get().getTicket().getUserId();
+            final long now = System.currentTimeMillis();
             ps.setLong(18, userId);
-            ps.setTimestamp(19, tsNow);
+            ps.setLong(19, now);
             ps.setLong(20, userId);
-            ps.setTimestamp(21, tsNow);
+            ps.setLong(21, now);
             ps.setLong(22, content.getMandatorId());
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -1624,7 +1625,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setInt(3, 1); //ver
             ResultSet rs = ps.executeQuery();
             if (rs != null && rs.next()) {
-                return new BinaryDescriptor(server, id, 1, 1, rs.getTimestamp(4).getTime(), rs.getString(1), rs.getLong(2), rs.getString(3),
+                return new BinaryDescriptor(server, id, 1, 1, rs.getLong(4), rs.getString(1), rs.getLong(2), rs.getString(3),
                         rs.getString(5), rs.getBoolean(6), rs.getDouble(7), rs.getInt(8), rs.getInt(9));
             }
         } finally {
@@ -1916,9 +1917,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 ps.setNull(15, java.sql.Types.NUMERIC);
             }
             long userId = FxContext.get().getTicket().getUserId();
-            java.sql.Timestamp tsNow = new java.sql.Timestamp(java.lang.System.currentTimeMillis());
             ps.setLong(16, userId);
-            ps.setTimestamp(17, tsNow);
+            ps.setLong(17, System.currentTimeMillis());
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new FxUpdateException(LOG, e, "ex.db.sqlError", e.getMessage());
@@ -2245,7 +2245,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         PreparedStatement ps = null;
         try {
             ps = con.prepareStatement(CONTENT_BINARY_TRANSIT_CLEANUP);
-            ps.setTimestamp(1, new Timestamp(java.lang.System.currentTimeMillis()));
+            ps.setLong(1, System.currentTimeMillis());
             int count = ps.executeUpdate();
             if (count > 0)
                 LOG.info(count + " expired binary transit entries removed");
@@ -2580,10 +2580,11 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             return true;
         addColumnComparator(sql, prop, "ccd", "tcd");
         sql.append(" GROUP BY tcd.XPATHMULT");
+        //noinspection CaughtExceptionImmediatelyRethrown
         try {
             doCheckUniqueConstraint(con, sql.toString(), prop.getUniqueMode());
         } catch (FxApplicationException e) {
-            System.out.println("SQL:\n"+sql);
+            LOG.warn("SQL:\n"+sql);
             if (throwException)
                 throw e;
             return false;

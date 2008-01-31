@@ -171,7 +171,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
                     //       1      2     3          4              5       6        7         8              9
                     "ID,CAT_TYPE,COLOR,DESCRIPTION,MANDATOR,NAME,CREATED_BY,CREATED_AT,MODIFIED_BY,MODIFIED_AT)" +
                     "VALUES (?,?,?,?,?,?,?,?,?,?)";
-            final Timestamp NOW = new Timestamp(java.lang.System.currentTimeMillis());
+            final long NOW = System.currentTimeMillis();
             ps = con.prepareStatement(sql);
             ps.setInt(1, newId);
             ps.setInt(2, category.getId());
@@ -180,9 +180,9 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             ps.setLong(5, mandatorId);
             ps.setString(6, name);
             ps.setLong(7, ticket.getUserId());
-            ps.setTimestamp(8, NOW);
+            ps.setLong(8, NOW);
             ps.setLong(9, ticket.getUserId());
-            ps.setTimestamp(10, NOW);
+            ps.setLong(10, NOW);
             ps.executeUpdate();
 
             Database.storeFxString(label, con, TBL_ACLS, "LABEL", "ID", newId);
@@ -335,14 +335,14 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             curSql = "UPDATE " + TBL_ACLS + " SET " +
                     //       1         2        3            4           5         6
                     "cat_type=?,color=?,description=?,name=?,modified_by=?,modified_at=? WHERE id=" + id;
-            final Timestamp NOW = new Timestamp(java.lang.System.currentTimeMillis());
+            final long NOW = System.currentTimeMillis();
             stmt = con.prepareStatement(curSql);
             stmt.setInt(1, theACL.getCategory().getId());
             stmt.setString(2, theACL.getColor());
             stmt.setString(3, theACL.getDescription());
             stmt.setString(4, theACL.getName());
             stmt.setLong(5, ticket.getUserId());
-            stmt.setTimestamp(6, NOW);
+            stmt.setLong(6, NOW);
             final int uCount = stmt.executeUpdate();
             stmt.close();
             if (uCount != 1) {
@@ -360,13 +360,12 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
                 curSql = "INSERT INTO " + TBL_ASSIGN_ACLS + " (USERGROUP, ACL, PEDIT, PREMOVE, PEXPORT, PREL, PREAD, PCREATE, " +
                         //9          10          11           12
                         "CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
-                java.sql.Timestamp now = new java.sql.Timestamp(java.lang.System.currentTimeMillis());
                 stmt = con.prepareStatement(curSql);
                 stmt.setLong(2, theACL.getId());
                 stmt.setLong(9, ticket.getUserId());
-                stmt.setTimestamp(10, now);
+                stmt.setLong(10, NOW);
                 stmt.setLong(11, ticket.getUserId());
-                stmt.setTimestamp(12, now);
+                stmt.setLong(12, NOW);
                 for (ACLAssignment assignment : assignments) {
                     stmt.setLong(1, assignment.getGroupId());
                     stmt.setBoolean(3, assignment.getMayEdit());
@@ -497,7 +496,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
                     " VALUES " +
                     "(?,?,?,?,?,?,?,?,?,?,?,?)";
 
-            final Timestamp NOW = new Timestamp(java.lang.System.currentTimeMillis());
+            final long NOW = System.currentTimeMillis();
             stmt = con.prepareStatement(curSql);
             stmt.setLong(1, groupId);
             stmt.setLong(2, aclId);
@@ -507,9 +506,9 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             stmt.setBoolean(6, mayCreate);
             stmt.setBoolean(7, mayExport);
             stmt.setBoolean(8, mayRelate);
-            stmt.setTimestamp(9, NOW);
+            stmt.setLong(9, NOW);
             stmt.setLong(10, ticket.getUserId());
-            stmt.setTimestamp(11, NOW);
+            stmt.setLong(11, NOW);
             stmt.setLong(12, ticket.getUserId());
 
             stmt.executeUpdate();

@@ -80,7 +80,7 @@ public class TestUser {
             throw new RuntimeException("Account already exists");
         }
         userId = accounts.create(this.userName, this.userName, this.password, this.email,
-                languageId, mandatorId, true, true, new Date(), new Date(new Date().getTime() + 60 * 60 * 1000),
+                languageId, mandatorId, true, true, new Date(System.currentTimeMillis()-1000), new Date(new Date().getTime() + 60 * 60 * 1000),
                 -1, null, false, true);
         if (roles != null) {
             // set user-defined roles

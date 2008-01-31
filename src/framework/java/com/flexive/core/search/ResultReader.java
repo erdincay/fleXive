@@ -98,6 +98,10 @@ class ResultReader {
                 // Handle by type
                 switch (entry.getDataType()) {
                     case DateTime:
+                        if( rs.getMetaData().getColumnType(pos) == java.sql.Types.BIGINT) {
+                            result = new FxDateTime(entry.isMultilanguage(), FxLanguage.SYSTEM_ID, new Date(rs.getLong(pos)));
+                            break;
+                        }
                         Timestamp dttstp = rs.getTimestamp(pos);
                         Date _dtdate = new Date(dttstp.getTime());
                         result = new FxDateTime(entry.isMultilanguage(), FxLanguage.SYSTEM_ID, _dtdate);

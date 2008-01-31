@@ -155,13 +155,13 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
         long ct;
         int mid;
         long mt;
-        java.sql.Timestamp dTmp;
+        long dTmp;
         cid = rs.getInt(creatorColumn);
         if (rs.wasNull()) {
             cid = NOT_DEFINED;
         }
-        dTmp = rs.getTimestamp(creationTimeColumn);
-        ct = (rs.wasNull() ? NOT_DEFINED : dTmp.getTime());
+        dTmp = rs.getLong(creationTimeColumn);
+        ct = (rs.wasNull() ? NOT_DEFINED : dTmp);
         if (modificatorColumns < 0) {
             mid = NOT_DEFINED;
         } else {
@@ -172,8 +172,8 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
         if (modificationTimeColumn < 0) {
             mt = NOT_DEFINED;
         } else {
-            dTmp = rs.getTimestamp(modificationTimeColumn);
-            mt = (rs.wasNull() ? NOT_DEFINED : dTmp.getTime());
+            dTmp = rs.getLong(modificationTimeColumn);
+            mt = (rs.wasNull() ? NOT_DEFINED : dTmp);
         }
         return new LifeCycleInfoImpl(cid, ct, mid, mt);
     }
@@ -191,11 +191,11 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
     public static void store(PreparedStatement ps, int creatorColumn, int creationTimeColumn, int modificatorColumn,
                              int modificationTimeColumn) throws SQLException {
         final UserTicket ticket = FxContext.get().getTicket();
-        final java.sql.Timestamp ts = new Timestamp(System.currentTimeMillis());
+        final long ts = System.currentTimeMillis();
         ps.setLong(creatorColumn, ticket.getUserId());
-        ps.setTimestamp(creationTimeColumn, ts);
+        ps.setLong(creationTimeColumn, ts);
         ps.setLong(modificatorColumn, ticket.getUserId());
-        ps.setTimestamp(modificationTimeColumn, ts);
+        ps.setLong(modificationTimeColumn, ts);
     }
 
     /**
@@ -209,9 +209,9 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
     public static void updateLifeCycleInfo(PreparedStatement ps, int modificatorColumn, int modificationTimeColumn)
             throws SQLException {
         final UserTicket ticket = FxContext.get().getTicket();
-        final java.sql.Timestamp ts = new Timestamp(System.currentTimeMillis());
+        final long ts = System.currentTimeMillis();
         ps.setLong(modificatorColumn, ticket.getUserId());
-        ps.setTimestamp(modificationTimeColumn, ts);
+        ps.setLong(modificationTimeColumn, ts);
     }
 
 
@@ -252,12 +252,12 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
             stmt = con.prepareStatement("UPDATE " + table + " SET MODIFIED_BY=?, MODIFIED_AT=?"
                     + (updateCreated ? ", CREATED_BY=?, CREATED_AT=?" : "") + " WHERE " + idField + "=?"
                     + (verField != null && ver > 0 ? " AND " + verField + "=?" : ""));
-            Timestamp now = new java.sql.Timestamp(System.currentTimeMillis());
+            final long now = System.currentTimeMillis();
             stmt.setInt(1, (int) ticket.getUserId());
-            stmt.setTimestamp(2, now);
+            stmt.setLong(2, now);
             if (updateCreated) {
                 stmt.setInt(3, (int) ticket.getUserId());
-                stmt.setTimestamp(4, now);
+                stmt.setLong(4, now);
                 stmt.setLong(5, id);
             } else
                 stmt.setLong(3, id);

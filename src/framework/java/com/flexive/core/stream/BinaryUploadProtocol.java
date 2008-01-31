@@ -147,7 +147,7 @@ public class BinaryUploadProtocol extends StreamProtocol<BinaryUploadPayload> im
             ps = con.prepareStatement("INSERT INTO " + DatabaseConst.TBL_BINARY_TRANSIT + " (BKEY,FBLOB,TFER_DONE,EXPIRE) VALUES(?,?,FALSE,?)");
             ps.setString(1, handle);
             ps.setBinaryStream(2, pin, (int) expectedLength);
-            ps.setTimestamp(3, new Timestamp(System.currentTimeMillis() + timeToLive));
+            ps.setLong(3, System.currentTimeMillis() + timeToLive);
             time = System.currentTimeMillis();
             ps.executeUpdate();
             if (LOG.isDebugEnabled())

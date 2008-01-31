@@ -122,11 +122,11 @@ public class ScriptingTest {
     @Test
     public void scriptActivation() throws Exception {
         FxScriptInfo si = se.createScript(FxScriptEvent.Manual,  "manualTestScript.gy", "manualTestScript", "return \"done\";");
-        se.runScript(si.getId());
-        FxScriptInfoEdit inactive = si.asEditable();
-        inactive.setActive(false);
-        se.updateScriptInfo(inactive);
         try {
+            se.runScript(si.getId());
+            FxScriptInfoEdit inactive = si.asEditable();
+            inactive.setActive(false);
+            se.updateScriptInfo(inactive);
             Assert.assertEquals(se.runScript(si.getId()).getResult(), null, "Inactive scripts must not be runnable!");
         } finally {
             se.removeScript(si.getId());

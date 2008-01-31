@@ -133,6 +133,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
         Connection con = null;
         PreparedStatement ps = null;
         long newId = seq.getId(SequencerEngine.System.TYPEDEF);
+        final long NOW = System.currentTimeMillis();
         try {
             con = Database.getDbConnection();
             ps = con.prepareStatement(TYPE_CREATE);
@@ -155,9 +156,9 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             ps.setInt(14, type.getMaxRelSource());
             ps.setInt(15, type.getMaxRelDestination());
             ps.setLong(16, ticket.getUserId());
-            ps.setTimestamp(17, new java.sql.Timestamp(java.lang.System.currentTimeMillis()));
+            ps.setLong(17, NOW);
             ps.setLong(18, ticket.getUserId());
-            ps.setTimestamp(19, new java.sql.Timestamp(java.lang.System.currentTimeMillis()));
+            ps.setLong(19, NOW);
             ps.setLong(20, type.getACL().getId());
             ps.setLong(21, type.getWorkflow().getId());
             ps.executeUpdate();

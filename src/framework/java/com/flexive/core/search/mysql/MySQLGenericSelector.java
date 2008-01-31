@@ -100,7 +100,10 @@ class MySQLGenericSelector implements FieldSelector {
                         columnType = FxDataType.Float;
                         break;
                     case java.sql.Types.BIGINT:
-                        columnType = FxDataType.LargeNumber;
+                        if( columnName.endsWith("ED_AT")) //MODIFIED_AT, CREATED_AT
+                            columnType = FxDataType.DateTime;
+                        else
+                            columnType = FxDataType.LargeNumber;
                         break;
                     case java.sql.Types.DATE:
                         columnType = FxDataType.Date;

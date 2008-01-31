@@ -363,8 +363,8 @@ public abstract class GenericTreeStorage implements TreeStorage {
     protected void clearDirtyFlag(Connection con, FxTreeMode mode, long nodeId) throws FxUpdateException {
         PreparedStatement ps = null;
         try {
-            //                                                                 1                                 2
-            ps = con.prepareStatement("UPDATE " + getTable(mode) + " SET DIRTY=?,MODIFIED_AT=SYSDATE() WHERE ID=?");
+            //                                                                 1                                            2
+            ps = con.prepareStatement("UPDATE " + getTable(mode) + " SET DIRTY=?,MODIFIED_AT=UNIX_TIMESTAMP()*1000 WHERE ID=?");
             ps.setBoolean(1, false); //live tree is never dirty
             ps.setLong(2, nodeId);
             ps.executeUpdate();
@@ -391,8 +391,8 @@ public abstract class GenericTreeStorage implements TreeStorage {
     protected void flagDirty(Connection con, FxTreeMode mode, long nodeId) throws FxUpdateException {
         PreparedStatement ps = null;
         try {
-            //                                                                 1                                 2
-            ps = con.prepareStatement("UPDATE " + getTable(mode) + " SET DIRTY=?,MODIFIED_AT=SYSDATE() WHERE ID=?");
+            //                                                                 1                                            2
+            ps = con.prepareStatement("UPDATE " + getTable(mode) + " SET DIRTY=?,MODIFIED_AT=UNIX_TIMESTAMP()*1000 WHERE ID=?");
             ps.setBoolean(1, mode != FxTreeMode.Live); //live tree is never dirty
             ps.setLong(2, nodeId);
             ps.executeUpdate();
@@ -628,7 +628,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 String _template = rs.getString(9);
                 if (rs.wasNull())
                     _template = null;
-                long _modified = rs.getTimestamp(10).getTime();
+                long _modified = rs.getLong(10);
                 int _pos = rs.getInt(11);
                 long _acl = rs.getLong(12);
                 FxType _type = CacheAdmin.getEnvironment().getType(rs.getLong(13));
@@ -693,7 +693,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 String _template = rs.getString(9);
                 if (rs.wasNull())
                     _template = null;
-                long _modified = rs.getTimestamp(10).getTime();
+                long _modified = rs.getLong(10);
                 int _pos = rs.getInt(11);
                 long _acl = rs.getLong(12);
                 FxType _type = CacheAdmin.getEnvironment().getType(rs.getLong(13));
@@ -787,7 +787,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 String _template = rs.getString(9);
                 if (rs.wasNull())
                     _template = null;
-                long _modified = rs.getTimestamp(10).getTime();
+                long _modified = rs.getLong(10);
                 int _pos;
                 FxString label;
                 if (loadPartial) {
@@ -1163,7 +1163,7 @@ while (!hasSpace) {
         // Set the template
         PreparedStatement ps = null;
         try {
-            ps = con.prepareStatement("UPDATE " + getTable(mode) + " SET TEMPLATE=?,DIRTY=TRUE,MODIFIED_AT=SYSDATE() WHERE ID=" + nodeId);
+            ps = con.prepareStatement("UPDATE " + getTable(mode) + " SET TEMPLATE=?,DIRTY=TRUE,MODIFIED_AT=UNIX_TIMESTAMP()*1000 WHERE ID=" + nodeId);
             if (template == null)
                 ps.setNull(1, java.sql.Types.VARCHAR);
             else

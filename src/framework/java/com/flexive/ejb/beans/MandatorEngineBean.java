@@ -56,7 +56,6 @@ import javax.ejb.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 
 /**
  * Mandator Engine implementation
@@ -69,10 +68,13 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
     // Our logger
     private static transient Log LOG = LogFactory.getLog(MandatorEngineBean.class);
 
-    @Resource javax.ejb.SessionContext ctx;
+    @Resource
+    javax.ejb.SessionContext ctx;
 
-    @EJB SequencerEngineLocal seq;
-    @EJB UserGroupEngineLocal grp;
+    @EJB
+    SequencerEngineLocal seq;
+    @EJB
+    UserGroupEngineLocal grp;
 
     /**
      * {@inheritDoc}
@@ -86,9 +88,9 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
         FxSharedUtils.checkParameterEmpty(name, "NAME");
         environment = CacheAdmin.getEnvironment();
         //exist check
-        for(Mandator m: environment.getMandators(true, true) )
-                if( m.getName().equalsIgnoreCase(name))
-                        throw new FxEntryExistsException("ex.mandator.exists", name);
+        for (Mandator m : environment.getMandators(true, true))
+            if (m.getName().equalsIgnoreCase(name))
+                throw new FxEntryExistsException("ex.mandator.exists", name);
 
         Connection con = null;
         PreparedStatement ps = null;
@@ -106,16 +108,16 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
                     //1 2    3        4         5          6          7           8
                     "ID,NAME,METADATA,IS_ACTIVE,CREATED_BY,CREATED_AT,MODIFIED_BY,MODIFIED_AT)" +
                     "VALUES (?,?,?,?,?,?,?,?)";
-            final Timestamp NOW = new Timestamp(java.lang.System.currentTimeMillis());
+            final long NOW = System.currentTimeMillis();
             ps = con.prepareStatement(sql);
             ps.setInt(1, newId);
             ps.setString(2, name.trim());
             ps.setNull(3, java.sql.Types.INTEGER);
             ps.setBoolean(4, active);
             ps.setLong(5, ticket.getUserId());
-            ps.setTimestamp(6, NOW);
+            ps.setLong(6, NOW);
             ps.setLong(7, ticket.getUserId());
-            ps.setTimestamp(8, NOW);
+            ps.setLong(8, NOW);
             ps.executeUpdate();
             ps.close();
             sql = "INSERT INTO " + TBL_GROUP + " " +
@@ -128,11 +130,12 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
             ps.setString(3, "Everyone (" + name.trim() + ")");
             ps.setString(4, "#00AA00");
             ps.setLong(5, 0);
-            ps.setTimestamp(6, NOW);
+            ps.setLong(6, NOW);
             ps.setLong(7, 0);
-            ps.setTimestamp(8, NOW);
+            ps.setLong(8, NOW);
             ps.executeUpdate();
-            StructureLoader.addMandator(FxContext.get().getDivisionId(), new Mandator(newId, name.trim(), -1, active, new LifeCycleInfoImpl(ticket.getUserId(), NOW.getTime(),ticket.getUserId(), NOW.getTime())));
+            StructureLoader.addMandator(FxContext.get().getDivisionId(), new Mandator(newId, name.trim(), -1, active,
+                    new LifeCycleInfoImpl(ticket.getUserId(), NOW, ticket.getUserId(), NOW)));
             return newId;
         } catch (SQLException exc) {
             final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(exc);
@@ -175,7 +178,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
         environment = CacheAdmin.getEnvironment();
         //exist check
         Mandator mand = environment.getMandator(mandatorId);
-        if( mand.isActive() )
+        if (mand.isActive())
             return; //silently ignore
         Connection con = null;
         PreparedStatement ps = null;
@@ -188,15 +191,17 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
 
             //                                                1              2              3          4
             sql = "UPDATE " + TBL_MANDATORS + " SET IS_ACTIVE=?, MODIFIED_BY=?, MODIFIED_AT=? WHERE ID=?";
-            final Timestamp NOW = new Timestamp(java.lang.System.currentTimeMillis());
+            final long NOW = System.currentTimeMillis();
             ps = con.prepareStatement(sql);
 
             ps.setBoolean(1, true);
             ps.setLong(2, ticket.getUserId());
-            ps.setTimestamp(3, NOW);
+            ps.setLong(3, NOW);
             ps.setLong(4, mandatorId);
             ps.executeUpdate();
-            StructureLoader.updateMandator(FxContext.get().getDivisionId(), new Mandator(mand.getId(), mand.getName(), mand.getMetadataId(), true, new LifeCycleInfoImpl(mand.getLifeCycleInfo().getCreatorId(), mand.getLifeCycleInfo().getCreationTime(), ticket.getUserId(), NOW.getTime())));
+            StructureLoader.updateMandator(FxContext.get().getDivisionId(), new Mandator(mand.getId(), mand.getName(),
+                    mand.getMetadataId(), true, new LifeCycleInfoImpl(mand.getLifeCycleInfo().getCreatorId(),
+                    mand.getLifeCycleInfo().getCreationTime(), ticket.getUserId(), NOW)));
         } catch (SQLException exc) {
             ctx.setRollbackOnly();
             throw new FxUpdateException(LOG, exc, "ex.mandator.updateFailed", mand.getName(), exc.getMessage());
@@ -217,7 +222,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
         environment = CacheAdmin.getEnvironment();
         //exist check
         Mandator mand = environment.getMandator(mandatorId);
-        if( !mand.isActive() )
+        if (!mand.isActive())
             return; //silently ignore
         Connection con = null;
         PreparedStatement ps = null;
@@ -230,15 +235,17 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
 
             //                                                1              2              3          4
             sql = "UPDATE " + TBL_MANDATORS + " SET IS_ACTIVE=?, MODIFIED_BY=?, MODIFIED_AT=? WHERE ID=?";
-            final Timestamp NOW = new Timestamp(java.lang.System.currentTimeMillis());
+            final long NOW = System.currentTimeMillis();
             ps = con.prepareStatement(sql);
 
             ps.setBoolean(1, false);
             ps.setLong(2, ticket.getUserId());
-            ps.setTimestamp(3, NOW);
+            ps.setLong(3, NOW);
             ps.setLong(4, mandatorId);
             ps.executeUpdate();
-            StructureLoader.updateMandator(FxContext.get().getDivisionId(), new Mandator(mand.getId(), mand.getName(), mand.getMetadataId(), false, new LifeCycleInfoImpl(mand.getLifeCycleInfo().getCreatorId(), mand.getLifeCycleInfo().getCreationTime(), ticket.getUserId(), NOW.getTime())));
+            StructureLoader.updateMandator(FxContext.get().getDivisionId(), new Mandator(mand.getId(), mand.getName(),
+                    mand.getMetadataId(), false, new LifeCycleInfoImpl(mand.getLifeCycleInfo().getCreatorId(),
+                    mand.getLifeCycleInfo().getCreationTime(), ticket.getUserId(), NOW)));
         } catch (SQLException exc) {
             ctx.setRollbackOnly();
             throw new FxUpdateException(LOG, exc, "ex.mandator.updateFailed", mand.getName(), exc.getMessage());
@@ -285,7 +292,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
         } catch (SQLException exc) {
             final boolean keyViolation = Database.isForeignKeyViolation(exc);
             ctx.setRollbackOnly();
-            if(keyViolation) 
+            if (keyViolation)
                 throw new FxEntryInUseException(exc, "ex.mandator.removeFailed.inUse", mand.getName());
             throw new FxRemoveException(LOG, exc, "ex.mandator.removeFailed", mand.getName(), exc.getMessage());
         } finally {
@@ -314,20 +321,22 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
             con = Database.getDbConnection();
             //                                           1              2              3          4
             sql = "UPDATE " + TBL_MANDATORS + " SET NAME=?, MODIFIED_BY=?, MODIFIED_AT=? WHERE ID=?";
-            final Timestamp NOW = new Timestamp(java.lang.System.currentTimeMillis());
+            final long NOW = System.currentTimeMillis();
             ps = con.prepareStatement(sql);
             ps.setString(1, name);
             ps.setLong(2, ticket.getUserId());
-            ps.setTimestamp(3, NOW);
+            ps.setLong(3, NOW);
             ps.setLong(4, mandatorId);
             ps.executeUpdate();
             ps.close();
-            sql = "UPDATE "+ TBL_GROUP + " SET NAME=? WHERE AUTOMANDATOR=?";
+            sql = "UPDATE " + TBL_GROUP + " SET NAME=? WHERE AUTOMANDATOR=?";
             ps = con.prepareStatement(sql);
-            ps.setString(1, "Everyone ("+name+")");
+            ps.setString(1, "Everyone (" + name + ")");
             ps.setLong(2, mandatorId);
             ps.executeUpdate();
-            StructureLoader.updateMandator(FxContext.get().getDivisionId(), new Mandator(mand.getId(), name, mand.getMetadataId(), mand.isActive(), new LifeCycleInfoImpl(mand.getLifeCycleInfo().getCreatorId(), mand.getLifeCycleInfo().getCreationTime(), ticket.getUserId(), NOW.getTime())));
+            StructureLoader.updateMandator(FxContext.get().getDivisionId(), new Mandator(mand.getId(), name,
+                    mand.getMetadataId(), mand.isActive(), new LifeCycleInfoImpl(mand.getLifeCycleInfo().getCreatorId(),
+                    mand.getLifeCycleInfo().getCreationTime(), ticket.getUserId(), NOW)));
         } catch (SQLException exc) {
             ctx.setRollbackOnly();
             throw new FxUpdateException(LOG, exc, "ex.mandator.updateFailed", mand.getName(), exc.getMessage());

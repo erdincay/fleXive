@@ -126,8 +126,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(sSql);
             rs.next();
-            Timestamp ts = rs.getTimestamp(1);
-            return ts.getTime();
+            return rs.getLong(1);
         } catch (Throwable t) {
             LOG.error("Failed to get the last content change: " + t.getMessage());
             return System.currentTimeMillis();

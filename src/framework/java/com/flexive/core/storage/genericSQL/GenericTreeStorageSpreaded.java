@@ -108,7 +108,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             return new FxTreeNodeInfoSpreaded(rs.getBigDecimal(1), rs.getBigDecimal(2), rs.getBigDecimal(5),
                     rs.getBigDecimal(6), maxRight, rs.getInt(4), rs.getInt(8), rs.getInt(7), rs.getLong(3),
                     nodeId, rs.getString(12), new FxPK(rs.getLong(9), rs.getInt(16)),
-                    _acl, mode, rs.getInt(13), rs.getString(10), rs.getTimestamp(11).getTime(),
+                    _acl, mode, rs.getInt(13), rs.getString(10), rs.getLong(11),
                     perms[0], perms[4], perms[2], perms[1], perms[3]);
         } catch (SQLException e) {
             throw new FxTreeException(e, "ex.tree.nodeInfo.sqlError", nodeId, e.getMessage());
@@ -308,7 +308,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             if (createMode) {
                 ps = con.prepareStatement("INSERT INTO " + getTable(destMode) + " (ID,PARENT,DEPTH,DIRTY,REF,TEMPLATE,LFT,RGT," +
                         "TOTAL_CHILDCOUNT,CHILDCOUNT,NAME,MODIFIED_AT) " +
-                        "VALUES (?,?,?,?,?,?,?,?,?,?,?,sysdate())");
+                        "VALUES (?,?,?,?,?,?,?,?,?,?,?,UNIX_TIMESTAMP()*1000)");
             } else {
                 ps = con.prepareStatement("UPDATE " + getTable(sourceMode) + " SET LFT=?,RGT=?,DEPTH=? WHERE ID=?");
             }
@@ -505,7 +505,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             ps = con.prepareStatement("INSERT INTO " + getTable(mode) + " (ID,PARENT,DEPTH,DIRTY,REF,LFT,RGT," +
                     "TOTAL_CHILDCOUNT,CHILDCOUNT,NAME,MODIFIED_AT,TEMPLATE) VALUES " +
                     "(" + nci.id + "," + parentNodeId + "," + (parentNode.getDepth() + 1) +
-                    ",?," + nci.reference.getId() + ",?,?,0,0,?,SYSDATE(),?)");
+                    ",?," + nci.reference.getId() + ",?,?,0,0,?,UNIX_TIMESTAMP()*1000,?)");
             ps.setBoolean(1, mode != FxTreeMode.Live);
             ps.setBigDecimal(2, left);
             ps.setBigDecimal(3, right);
@@ -865,7 +865,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         stmt.execute("SET FOREIGN_KEY_CHECKS=0");
         stmt.executeUpdate("DELETE FROM " + getTable(mode));
         stmt.executeUpdate("INSERT INTO " + getTable(mode) + " (ID,NAME,MODIFIED_AT,DIRTY,PARENT,DEPTH,CHILDCOUNT,TOTAL_CHILDCOUNT,REF,TEMPLATE,LFT,RGT) " +
-                "VALUES (" + ROOT_NODE + ",'Root',SYSDATE(),FALSE,NULL,1,0,0," + rootPK.getId() +
+                "VALUES (" + ROOT_NODE + ",'Root',UNIX_TIMESTAMP()*1000,FALSE,NULL,1,0,0," + rootPK.getId() +
                 ",NULL,1," + MAX_RIGHT + ")");
         stmt.executeUpdate("SET FOREIGN_KEY_CHECKS=1");
     }

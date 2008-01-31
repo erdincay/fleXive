@@ -176,16 +176,16 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
                     "(ID,TYPEID,NAME,CONTENT_TYPE,CONTENT,CREATED_BY ,CREATED_AT,MODIFIED_BY,MODIFIED_AT," +
                     "TEMPLATE_TYPE,MASTER_TEMPLATE,FINAL_CONTENT,ISLIVE,INSYNC) " +
                     "values (?,?,?,?,?,?,?,?,?,?,?,?," + (mode == Live) + "," + inSync + ")");
-            Timestamp ts = new Timestamp(java.lang.System.currentTimeMillis());
+            final long NOW = System.currentTimeMillis();
             ps.setLong(1, id);
             ps.setInt(2, typeid);
             ps.setString(3, name);
             ps.setString(4, contentType);
             ps.setString(5, content);
             ps.setLong(6, ticket.getUserId());
-            ps.setTimestamp(7, ts);
+            ps.setLong(7, NOW);
             ps.setLong(8, ticket.getUserId());
-            ps.setTimestamp(9, ts);
+            ps.setLong(9, NOW);
             ps.setString(10, String.valueOf(type.getDbValue()));
             if (master == null) {
                 ps.setNull(11, java.sql.Types.INTEGER);
@@ -274,7 +274,7 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
                     " where id=" + id + " and islive=" + (mode == Live));
             ps.setString(1, type);
             ps.setString(2, content);
-            ps.setTimestamp(3, new Timestamp(java.lang.System.currentTimeMillis()));
+            ps.setLong(3, System.currentTimeMillis());
             ps.setLong(4, ticket.getUserId());
             if (master == null) {
                 ps.setNull(5, java.sql.Types.INTEGER);
@@ -501,7 +501,7 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
             ps = con.prepareStatement("UPDATE " + TBL_TEMPLATE + " set NAME=?,MODIFIED_AT=?," +
                     "MODIFIED_BY=? where id=" + id);
             ps.setString(1, name);
-            ps.setTimestamp(2, new Timestamp(java.lang.System.currentTimeMillis()));
+            ps.setLong(2, System.currentTimeMillis());
             ps.setLong(3, ticket.getUserId());
             ps.executeUpdate();
             registerChange(nfo.getTemplateType(), Live);
@@ -576,18 +576,17 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
                 int _typeid = rs.getInt(2);
                 String _type = rs.getString(3);
                 long _modifiedBy = rs.getLong(4);
-                long _modifiedAt = rs.getTimestamp(5).getTime();
+                long _modifiedAt = rs.getLong(5);
                 String _name = rs.getString(6);
                 Type _ttype = Type.fromString(rs.getString(7));
                 Long _master = rs.getLong(8);
                 if (rs.wasNull()) {
                     _master = null;
                 }
-                Timestamp tstp = rs.getTimestamp(9);
+                final long tstp = rs.getLong(9);
                 long _masterMod = -1;
-                if (!rs.wasNull()) {
-                    _masterMod = tstp.getTime();
-                }
+                if (!rs.wasNull())
+                    _masterMod = tstp;
                 boolean hasLive = rs.getLong(10) == 1;
                 boolean inSync = rs.getBoolean(11);
 
@@ -632,18 +631,17 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
                 int typeid = rs.getInt(2);
                 String contentType = rs.getString(3);
                 long modifiedBy = rs.getLong(4);
-                long modifiedAt = rs.getTimestamp(5).getTime();
+                long modifiedAt = rs.getLong(5);
                 String name = rs.getString(6);
                 Type _ttype = Type.fromString(rs.getString(7));
                 Long _master = rs.getLong(8);
                 if (rs.wasNull()) {
                     _master = null;
                 }
-                Timestamp tstp = rs.getTimestamp(9);
+                final long tstp = rs.getLong(9);
                 long _masterMod = -1;
-                if (!rs.wasNull()) {
-                    _masterMod = tstp.getTime();
-                }
+                if (!rs.wasNull())
+                    _masterMod = tstp;
                 boolean hasLive = rs.getInt(10) == 1;
                 boolean inSync  = rs.getBoolean(11);
                 result.add(new FxTemplateInfo(id, typeid, name, contentType, modifiedAt, modifiedBy,

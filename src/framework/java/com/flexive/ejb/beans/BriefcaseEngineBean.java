@@ -118,7 +118,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
                     //1,   2,  3        ,  4         , 5 ,    6        7         8              9      , 10     , 11
                     "ID,NAME,DESCRIPTION,SOURCE_QUERY,ACL,CREATED_BY,CREATED_AT,MODIFIED_BY,MODIFIED_AT,MANDATOR,ICON_ID)" +
                     "VALUES (?,?,?,?,?,?,?,?,?,?,1)";
-            final Timestamp NOW = new Timestamp(java.lang.System.currentTimeMillis());
+            final long NOW = System.currentTimeMillis();
             ps = con.prepareStatement(sql);
             ps.setLong(1, newId);
             ps.setString(2, name);
@@ -130,9 +130,9 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
                 ps.setNull(5, java.sql.Types.NUMERIC);
             }
             ps.setLong(6, ticket.getUserId());
-            ps.setTimestamp(7, NOW);
+            ps.setLong(7, NOW);
             ps.setLong(8, ticket.getUserId());
-            ps.setTimestamp(9, NOW);
+            ps.setLong(9, NOW);
             ps.setLong(10, ticket.getMandatorId());
             ps.executeUpdate();
             return newId;

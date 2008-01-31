@@ -356,6 +356,11 @@ public class PropertyResolver {
                 final int type = rsmd.getColumnType(i + 1);
                 final FxDataType dt;
                 switch (type) {
+                    case java.sql.Types.BIGINT:
+                        if( columnName.endsWith("_ED_AT")) { //CREATED_AT, MODIFIED_AT
+                            dt = FxDataType.DateTime;
+                            break;
+                        }
                     case java.sql.Types.NUMERIC:
                         dt = FxDataType.LargeNumber;
                         break;

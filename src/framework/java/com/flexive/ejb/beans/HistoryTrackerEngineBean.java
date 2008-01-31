@@ -99,7 +99,7 @@ public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTr
             ps.setLong(1, ticket.getUserId());
             ps.setString(2, ticket.getLoginName());
 
-            ps.setTimestamp(3, new java.sql.Timestamp(System.currentTimeMillis()));
+            ps.setLong(3, System.currentTimeMillis());
             ps.setString(4, key);
             ps.setString(5, StringUtils.join(args, '|'));
             try {
