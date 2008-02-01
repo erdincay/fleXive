@@ -311,7 +311,7 @@ database.password=a]]></programlisting>
                         <para>Copy the
                             <filename>jbosscache-core.jar</filename>
                             to
-                            <filename>${glassfish.home}/domains/domain1/lib</filename>
+                            <filename>${glassfish.home}/lib</filename>
                         </para>
                     </listitem>
                 </itemizedlist>
