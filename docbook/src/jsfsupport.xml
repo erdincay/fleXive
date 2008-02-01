@@ -870,6 +870,11 @@
                 <para>
                     Renders a row container for a single input field
                     and renders a label for the input element. The input field(s) are stored in the tag body.
+                    You can set a CSS-based tooltip using the tooltipKey attribute, or use labelKey and
+                    append ".tooltip" to the base message key (e.g.
+                    <code>message.key</code>
+                    and
+                    <code>message.key.tooltip</code>).
                 </para>
 
                 <section xml:id="jcl_fx_formrow_synopsis">
