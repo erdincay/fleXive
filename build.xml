@@ -460,6 +460,7 @@
     <target name="jar.all" depends="jar.framework, jar.ui"/>
     
     <target name="jar.ear" depends="prepare" description="Assemble flexive.ear">
+        <mkdir dir="${flexive.drop.dir}"/>
         <applicationDescriptorBuilder dropDir="${flexive.drop.dir}" destFile="${flexive.base.build.dir}/application.xml" srcFile="${resources.ui.shared.dir}/application.xml"/>
         <jar jarfile="${flexive.build.framework.jar.dir}/flexive-drop-resources.jar">
             <fileset file="${flexive.drop.dir}/drops.archives"/>
@@ -533,7 +534,7 @@
         <mkdir dir="${flexive.dist.dir}"/>
     </target>
 
-    <target name="dist" depends="jar.all,dist.prepare,tests.package.dist" description="Build a distribution of all jars, wars and ears">
+    <target name="dist" depends="jar.all,dist.prepare,tests.package.dist,dist.srcOnly" description="Build a distribution of all jars, wars and ears">
         <svnVersion property="dist.build.number"/>
         <groovy>
             properties['dist.bin.file'] = properties['flexive.dist'].replaceAll("@@build.number@@", properties['dist.build.number'])+"-bin.zip"
@@ -598,29 +599,50 @@ database.username=root
 database.password=a
         </echo>
 
+        <!-- Copy the raw sources created by dist.srcOnly -->
+        <copy todir="${flexive.dist.dir}">
+            <fileset file="${flexive.base.build.dir}/flexive-srcOnly.zip"/>
+        </copy>
+        
         <!-- Create flexive ZIP file -->
         <zip destfile="${flexive.base.build.dir}/${dist.bin.file}">
             <fileset dir="${basedir}" includes="flexive-dist/**"/>
             <zipfileset prefix="flexive-dist" dir="${basedir}/legal" includes="LICENSE.txt,GPL.txt"/>
         </zip>
-	<copy file="${flexive.base.build.dir}/${dist.bin.file}" toFile="${flexive.base.build.dir}/flexive-dist.zip"/>
+	    <copy file="${flexive.base.build.dir}/${dist.bin.file}" toFile="${flexive.base.build.dir}/flexive-dist.zip"/>
     </target>
 
-    <target name="dist.src" depends="prepare" description="Create a ZIP file with all sources of the current flexive installation">
+    <target name="dist.srcOnly" depends="prepare" description="Create a ZIP file with all sources of the current flexive installation (excluding build files and libraries)">
         <svnVersion property="dist.build.number"/>
         <groovy>
-            properties['dist.src.file'] = properties['flexive.dist'].replaceAll("@@build.number@@", properties['dist.build.number'])+"-src.zip"
+            properties['dist.srcOnly.file'] = properties['flexive.dist'].replaceAll("@@build.number@@", properties['dist.build.number'])+"-srcOnly.zip"
         </groovy>
-        <zip destfile="${flexive.base.build.dir}/${dist.src.file}">
+        <zip destfile="${flexive.base.build.dir}/${dist.srcOnly.file}">
             <fileset dir="${flexive.src.framework.dir}" includes="**/*"/>
             <fileset dir="${flexive.src.ui.components.dir}" includes="**/*"/>
             <fileset dir="${flexive.src.ui.jsf.dir}" includes="**/*"/>
             <fileset dir="${flexive.src.ui.shared.dir}" includes="**/*"/>
             <fileset dir="${basedir}/legal" includes="LICENSE.txt,GPL.txt"/>
         </zip>
-	<copy file="${flexive.base.build.dir}/${dist.src.file}" toFile="${flexive.base.build.dir}/flexive-src.zip"/>
+	    <copy file="${flexive.base.build.dir}/${dist.srcOnly.file}" toFile="${flexive.base.build.dir}/flexive-srcOnly.zip"/>
     </target>
-    
+
+    <target name="dist.src" depends="prepare" description="Create a ZIP file with the complete source tree and all libraries and buildfiles needed for building flexive">
+        <svnVersion property="dist.build.number"/>
+        <groovy>
+            properties['dist.src.file'] = properties['flexive.dist'].replaceAll("@@build.number@@", properties['dist.build.number'])+"-src.zip"
+        </groovy>
+
+        <zip destfile="${flexive.base.build.dir}/${dist.src.file}">
+            <zipfileset prefix="flexive-src"
+                    dir="${basedir}" includes="disttools/**/*, legal/**/*, lib/**/*, src/**/*, *.xml, *.sample, flexive.properties, *.groovy"
+                    excludes="build.properties, *.iws, *.ipr"/>
+            <zipfileset prefix="flexive-src" dir="legal" includes="GPL*.txt, LICENSE.txt"/>
+        </zip>
+
+        <copy file="${flexive.base.build.dir}/${dist.src.file}" toFile="${flexive.base.build.dir}/flexive-src.zip"/>
+    </target>
+
     <target name="jar.webdavOnly">
         <javac-call
                 srcdir="${flexive.src.ui.shared.dir}/com/flexive/war/webdav"
