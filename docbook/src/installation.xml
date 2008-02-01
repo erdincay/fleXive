@@ -283,8 +283,8 @@ database.password=a]]></programlisting>
             </para>
             <section xml:id="glassfish_installation_required_libs_ant_task">
                 <title>Running the ant task</title>
-                <para>We provide an ant task for you which creates a directory with all libraries needed
-                    to deploy &Flexive; on Glassfish V2.
+                <para>We provide an <code>ant</code> task for you which copies all libraries needed
+                    to deploy &Flexive; on Glassfish V2 to the specified directory.
                 </para>
                 <itemizedlist>
                     <listitem>
@@ -293,24 +293,20 @@ database.password=a]]></programlisting>
                             directory of your [fleXive] distribution and run
                             <code>ant glassfish.libs</code>.
                         </para>
-                        <para>The
+                        <para>You will be prompted to specify your
+                            <filename>${glassfish.home}/domains/domain1/lib/ext</filename>
+                            directory.
+                            The
                             <code>ant</code>
-                            task will create a directory (you will be prompted to specify a name for it) and copy all
-                            required
-                            libraries to this directory.
-                        </para>
-                    </listitem>
-                    <listitem>
-                        <para>Copy all files except the
-                            <filename>jbosscache-core.jar</filename>
-                            from this directory to
-                            <filename>${glassfish.home}/domains/domain1/lib/ext</filename>.
+                            task will copy all required libraries to this directory.
                         </para>
                     </listitem>
                     <listitem>
                         <para>Copy the
                             <filename>jbosscache-core.jar</filename>
-                            to
+                            from the
+                            <filename>extlib</filename>
+                            directory of your &Flexive; binary distribution to
                             <filename>${glassfish.home}/lib</filename>
                         </para>
                     </listitem>
