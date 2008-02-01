@@ -311,7 +311,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             throw new FxInvalidParameterException("NAME", "ex.structure.update.nameMissing");
 
         //security checks start
-        if (!ticket.mayEditACL(type.getACL().getId()))
+        if (!ticket.mayEditACL(type.getACL().getId(), 0))
             throw new FxNoAccessException("ex.acl.noAccess.edit", type.getACL().getName());
         //security checks end
 

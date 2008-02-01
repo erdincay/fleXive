@@ -642,18 +642,18 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 boolean _export;
                 boolean _relate;
                 final boolean _system = FxContext.get().getRunAsSystem() || ticket.isGlobalSupervisor();
-                FxPermissionUtils.checkPermission(ticket, ACL.Permission.READ, _type, _stepACL, _acl, true);
+                FxPermissionUtils.checkPermission(ticket, _createdBy, ACL.Permission.READ, _type, _stepACL, _acl, true);
                 if (_system || ticket.isMandatorSupervisor() && _mandator == ticket.getMandatorId() ||
                         !_type.usePermissions() || ticket.isInGroup((int) UserGroup.GROUP_OWNER) && _createdBy == ticket.getUserId()) {
                     _edit = _create = _delete = _export = _relate = true;
                 } else {
                     //throw exception if read is forbidden
-                    FxPermissionUtils.checkPermission(ticket, ACL.Permission.READ, _type, _stepACL, _acl, true);
-                    _edit = FxPermissionUtils.checkPermission(ticket, ACL.Permission.EDIT, _type, _stepACL, _acl, false);
-                    _relate = FxPermissionUtils.checkPermission(ticket, ACL.Permission.RELATE, _type, _stepACL, _acl, false);
-                    _delete = FxPermissionUtils.checkPermission(ticket, ACL.Permission.DELETE, _type, _stepACL, _acl, false);
-                    _export = FxPermissionUtils.checkPermission(ticket, ACL.Permission.EXPORT, _type, _stepACL, _acl, false);
-                    _create = FxPermissionUtils.checkPermission(ticket, ACL.Permission.CREATE, _type, _stepACL, _acl, false);
+                    FxPermissionUtils.checkPermission(ticket, _createdBy, ACL.Permission.READ, _type, _stepACL, _acl, true);
+                    _edit = FxPermissionUtils.checkPermission(ticket, _createdBy, ACL.Permission.EDIT, _type, _stepACL, _acl, false);
+                    _relate = FxPermissionUtils.checkPermission(ticket, _createdBy, ACL.Permission.RELATE, _type, _stepACL, _acl, false);
+                    _delete = FxPermissionUtils.checkPermission(ticket, _createdBy, ACL.Permission.DELETE, _type, _stepACL, _acl, false);
+                    _export = FxPermissionUtils.checkPermission(ticket, _createdBy, ACL.Permission.EXPORT, _type, _stepACL, _acl, false);
+                    _create = FxPermissionUtils.checkPermission(ticket, _createdBy, ACL.Permission.CREATE, _type, _stepACL, _acl, false);
                 }
                 FxString label = Database.loadContentDataFxString(con, "FTEXT1024", "ID=" + _ref.getId() + " AND " +
                         (mode == FxTreeMode.Live ? "ISMAX_VER=1" : "ISLIVE_VER=1") + " AND TPROP=" + EJBLookup.getConfigurationEngine().get(SystemParameters.TREE_CAPTION_PROPERTY));
@@ -708,18 +708,18 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 boolean _export;
                 boolean _relate;
                 final boolean _system = FxContext.get().getRunAsSystem() || ticket.isGlobalSupervisor();
-                FxPermissionUtils.checkPermission(ticket, ACL.Permission.READ, _type, _stepACL, _acl, true);
+                FxPermissionUtils.checkPermission(ticket, _createdBy, ACL.Permission.READ, _type, _stepACL, _acl, true);
                 if (_system || ticket.isMandatorSupervisor() && _mandator == ticket.getMandatorId() ||
                         !_type.usePermissions() || ticket.isInGroup((int) UserGroup.GROUP_OWNER) && _createdBy == ticket.getUserId()) {
                     _read = _edit = _create = _delete = _export = _relate = true;
                 } else {
                     //throw exception if read is forbidden
-                    _read = FxPermissionUtils.checkPermission(ticket, ACL.Permission.READ, _type, _stepACL, _acl, false);
-                    _edit = FxPermissionUtils.checkPermission(ticket, ACL.Permission.EDIT, _type, _stepACL, _acl, false);
-                    _relate = FxPermissionUtils.checkPermission(ticket, ACL.Permission.RELATE, _type, _stepACL, _acl, false);
-                    _delete = FxPermissionUtils.checkPermission(ticket, ACL.Permission.DELETE, _type, _stepACL, _acl, false);
-                    _export = FxPermissionUtils.checkPermission(ticket, ACL.Permission.EXPORT, _type, _stepACL, _acl, false);
-                    _create = FxPermissionUtils.checkPermission(ticket, ACL.Permission.CREATE, _type, _stepACL, _acl, false);
+                    _read = FxPermissionUtils.checkPermission(ticket, _createdBy, ACL.Permission.READ, _type, _stepACL, _acl, false);
+                    _edit = FxPermissionUtils.checkPermission(ticket, _createdBy, ACL.Permission.EDIT, _type, _stepACL, _acl, false);
+                    _relate = FxPermissionUtils.checkPermission(ticket, _createdBy, ACL.Permission.RELATE, _type, _stepACL, _acl, false);
+                    _delete = FxPermissionUtils.checkPermission(ticket, _createdBy, ACL.Permission.DELETE, _type, _stepACL, _acl, false);
+                    _export = FxPermissionUtils.checkPermission(ticket, _createdBy, ACL.Permission.EXPORT, _type, _stepACL, _acl, false);
+                    _create = FxPermissionUtils.checkPermission(ticket, _createdBy, ACL.Permission.CREATE, _type, _stepACL, _acl, false);
                 }
                 if (!_read)
                     continue;
@@ -827,12 +827,12 @@ public abstract class GenericTreeStorage implements TreeStorage {
                         !type.usePermissions() || ticket.isInGroup((int) UserGroup.GROUP_OWNER) && _createdBy == ticket.getUserId()) {
                     _read = _edit = _create = _delete = _export = _relate = true;
                 } else {
-                    _read = FxPermissionUtils.checkPermission(ticket, ACL.Permission.READ, type, _stepACL, _acl, false);
-                    _edit = FxPermissionUtils.checkPermission(ticket, ACL.Permission.EDIT, type, _stepACL, _acl, false);
-                    _relate = FxPermissionUtils.checkPermission(ticket, ACL.Permission.RELATE, type, _stepACL, _acl, false);
-                    _delete = FxPermissionUtils.checkPermission(ticket, ACL.Permission.DELETE, type, _stepACL, _acl, false);
-                    _export = FxPermissionUtils.checkPermission(ticket, ACL.Permission.EXPORT, type, _stepACL, _acl, false);
-                    _create = FxPermissionUtils.checkPermission(ticket, ACL.Permission.CREATE, type, _stepACL, _acl, false);
+                    _read = FxPermissionUtils.checkPermission(ticket, _createdBy, ACL.Permission.READ, type, _stepACL, _acl, false);
+                    _edit = FxPermissionUtils.checkPermission(ticket, _createdBy, ACL.Permission.EDIT, type, _stepACL, _acl, false);
+                    _relate = FxPermissionUtils.checkPermission(ticket, _createdBy, ACL.Permission.RELATE, type, _stepACL, _acl, false);
+                    _delete = FxPermissionUtils.checkPermission(ticket, _createdBy, ACL.Permission.DELETE, type, _stepACL, _acl, false);
+                    _export = FxPermissionUtils.checkPermission(ticket, _createdBy, ACL.Permission.EXPORT, type, _stepACL, _acl, false);
+                    _create = FxPermissionUtils.checkPermission(ticket, _createdBy, ACL.Permission.CREATE, type, _stepACL, _acl, false);
                 }
                 if (_read) {
                     FxTreeNode node = new FxTreeNode(mode, _id, _parent, _ref, _acl, _name, FxTreeNode.PATH_NOT_LOADED, label,

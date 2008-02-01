@@ -585,7 +585,8 @@ public class FxGroupData extends FxData implements Cloneable {
             if (as instanceof FxPropertyAssignment && type.usePropertyPermissions()) {
                 UserTicket ticket = FxContext.get().getTicket();
                 long aclId = ((FxPropertyAssignment) as).getACL().getId();
-                if (!ticket.mayReadACL(aclId) || !ticket.mayCreateACL(aclId) || !ticket.mayEditACL(aclId))
+                //ignore owner in this checks since owner membership does not allow creation
+                if (!ticket.mayReadACL(aclId, 0) || !ticket.mayCreateACL(aclId, 0) || !ticket.mayEditACL(aclId, 0))
                     continue;
             }
             for (FxData _curr : this.getChildren()) {

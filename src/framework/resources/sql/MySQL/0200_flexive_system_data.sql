@@ -89,44 +89,65 @@ INSERT INTO FXS_ACL_T VALUES (1, 1, TRUE, 'System Property ACL');
 INSERT INTO FXS_ACL_T VALUES (1, 2, FALSE, 'System Felder ACL');
 -- Assign group everyone to system property ACL, readonly
 INSERT INTO FXS_ACLASSIGNMENTS VALUES (1, 1, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
+-- Assign group "owner" to system property ACL, read and editable
+INSERT INTO FXS_ACLASSIGNMENTS VALUES (2, 1, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
+
 
 -- Default Instance ACL
-INSERT INTO FXS_ACL VALUES (2, 0, 'Default Instance ACL', 'Default ACL for content instances', 1, '#0000AA', 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
+INSERT INTO FXS_ACL VALUES (2, 0, 'Default Instance ACL', 'Default ACL for content instances', 1, '#0000AA', 2, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
 INSERT INTO FXS_ACL_T VALUES (2, 1, TRUE, 'Default ACL for content instances (may read and export)');
 INSERT INTO FXS_ACL_T VALUES (2, 2, FALSE, 'Standard ACL fuer contents (Lese- und Exportberechtigung)');
 -- Assign group everyone to default content ACL, readonly
 INSERT INTO FXS_ACLASSIGNMENTS VALUES (1, 2, TRUE, FALSE, TRUE, FALSE, TRUE, TRUE, 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
+-- Assign group "owner" to Default Instance ACL, read and editable
+INSERT INTO FXS_ACLASSIGNMENTS VALUES (2, 2, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
+
 
 -- Default Workflow ACL
-INSERT INTO FXS_ACL VALUES(3, 0, 'Default Workflow ACL', 'Default Workflow ACL', 3, '#0000AA', 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
+INSERT INTO FXS_ACL VALUES(3, 0, 'Default Workflow ACL', 'Default Workflow ACL', 3, '#0000AA', 2, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
 INSERT INTO FXS_ACL_T VALUES (3, 1, TRUE, 'Default Workflow ACL');
 -- Assign group everyone to default workflow ACL, readonly
 INSERT INTO FXS_ACLASSIGNMENTS VALUES (1, 3, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
+-- Assign group "owner" to Default Workflow ACL, read and editable
+INSERT INTO FXS_ACLASSIGNMENTS VALUES (2, 3, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
+
 
 -- Public Briefcase ACL
-INSERT INTO FXS_ACL VALUES(4, 0, 'Public Briefcase', 'A Briefcase that is shared among all users', 4, '#0000AA', 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
+INSERT INTO FXS_ACL VALUES(4, 0, 'Public Briefcase', 'A Briefcase that is shared among all users', 4, '#0000AA', 2, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
 INSERT INTO FXS_ACL_T VALUES (4, 1, TRUE, 'Public Briefcase');
 -- Assign group everyone to the public briefcase ACL
 INSERT INTO FXS_ACLASSIGNMENTS VALUES (1, 4, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
 
 -- Default SelectList ACL
-INSERT INTO FXS_ACL VALUES(5, 0, 'Default SelectList Create', 'Default SelectLists ACL for deciding if dynamic item creation is allowed', 5, '#0000AA', 1, UNIX_TIMESTAMP(), 1, UNIX_TIMESTAMP());
+INSERT INTO FXS_ACL VALUES(5, 0, 'Default SelectList Create', 'Default SelectLists ACL for deciding if dynamic item creation is allowed', 5, '#0000AA', 2, UNIX_TIMESTAMP(), 1, UNIX_TIMESTAMP());
 INSERT INTO FXS_ACL_T VALUES (5, 1, TRUE, 'Default SelectList Create');
 -- Assign group everyone to the public SelectList ACL (everyone may create items)
 INSERT INTO FXS_ACLASSIGNMENTS VALUES (1, 5, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
 
 -- Default SelectList Item ACL
-INSERT INTO FXS_ACL VALUES(6, 0, 'Default SelectList Item', 'Default SelectLists item ACL for deciding if an items may be added (edit permission for adding and removing protected items)', 6, '#0000AA', 1, UNIX_TIMESTAMP(), 1, UNIX_TIMESTAMP());
+INSERT INTO FXS_ACL VALUES(6, 0, 'Default SelectList Item', 'Default SelectLists item ACL for deciding if an items may be added (edit permission for adding and removing protected items)', 6, '#0000AA', 2, UNIX_TIMESTAMP(), 1, UNIX_TIMESTAMP());
 INSERT INTO FXS_ACL_T VALUES (6, 1, TRUE, 'Default SelectList item');
 -- Assign group everyone to the public SelectList item ACL (everyone may add items)
 INSERT INTO FXS_ACLASSIGNMENTS VALUES (1, 6, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
+
 
 -- Default Structure ACL
 INSERT INTO FXS_ACL VALUES (7, 0, 'Default Structure ACL', 'Default ACL for types, properties and property assignments', 2, '#0000AA', 2, UNIX_TIMESTAMP()*1000, 2, UNIX_TIMESTAMP()*1000);
 INSERT INTO FXS_ACL_T VALUES (7, 1, TRUE, 'Default structure ACL');
 INSERT INTO FXS_ACL_T VALUES (7, 2, FALSE, 'Struktur ACL');
--- Assign group everyone to system property ACL, readonly
+-- Assign group everyone to Default Structure ACL
 INSERT INTO FXS_ACLASSIGNMENTS VALUES (1, 7, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
+-- Assign group "owner" to Default Structure ACL, read and editable
+INSERT INTO FXS_ACLASSIGNMENTS VALUES (2, 7, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
+
+
+-- Contact Data ACL
+INSERT INTO FXS_ACL VALUES (8, 0, 'Contact Data ACL', 'Default ACL for contact data. Permits users to edit their own contact data', 1, '#0000AA', 2, UNIX_TIMESTAMP()*1000, 2, UNIX_TIMESTAMP()*1000);
+INSERT INTO FXS_ACL_T VALUES (8, 1, TRUE, 'Default Contact Data ACL');
+INSERT INTO FXS_ACL_T VALUES (8, 2, FALSE, 'Kontaktdaten ACL');
+-- Assign group "owner" to Contact Data ACL, read and editable
+INSERT INTO FXS_ACLASSIGNMENTS VALUES (2, 8, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
+
 
 -- System Select List (needed for ref. integrity)
 INSERT INTO FXS_SELECTLIST(ID,PARENTID,NAME,ALLOW_ITEM_CREATE,ACL_CREATE_ITEM,ACL_ITEM_NEW)VALUES

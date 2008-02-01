@@ -1906,7 +1906,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     assignmentList.append(",").append(check.getId());
                     if (check instanceof FxPropertyAssignment && check.getAssignedType().usePropertyPermissions()) {
                         FxPropertyAssignment pa = (FxPropertyAssignment) check;
-                        if (!ticket.mayDeleteACL(pa.getACL().getId()))
+                        if (!ticket.mayDeleteACL(pa.getACL().getId(), 0/*owner is irrelevant here*/))
                             throw new FxNoAccessException("ex.acl.noAccess.delete", pa.getACL().getName());
                     }
                 }
@@ -1919,7 +1919,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 sql.setLength(0);
                 ResultSet rs = ps.executeQuery();
                 while (rs != null && rs.next()) {
-                    if (!ticket.mayDeleteACL(rs.getInt(1)))
+                    if (!ticket.mayDeleteACL(rs.getInt(1), 0/*owner is irrelevant here*/))
                         throw new FxNoAccessException("ex.acl.noAccess.delete", CacheAdmin.getEnvironment().getACL(rs.getInt(1)));
                 }
                 ps.close();

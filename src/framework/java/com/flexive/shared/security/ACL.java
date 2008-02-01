@@ -50,7 +50,12 @@ public class ACL extends AbstractSelectableObjectWithName implements Serializabl
     /**
      * Max. id for internal ACL's (needed for internal checks)
      */
-    public final static long MAX_INTERNAL_ID = 7;
+    public final static long MAX_INTERNAL_ID = 8;
+
+    /**
+     * Contact Data ACL
+     */
+    public final static long ACL_CONTACTDATA = 8;
 
     private String color;
     private long id;

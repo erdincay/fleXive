@@ -443,7 +443,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
      */
     public boolean isAssignedToACL(long aclId) {
         for (ACLAssignment item : this.assignments) {
-            if (item.getAclId() == aclId) return true;
+            if (item.getAclId() == aclId && !item.isOwnerGroupAssignment()) return true;
         }
         return false;
     }
@@ -451,9 +451,10 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
-    public boolean mayReadACL(long aclId) {
+    public boolean mayReadACL(long aclId, long ownerId) {
         if (this.isGlobalSupervisor()) return true;
         for (ACLAssignment item : this.assignments) {
+            if (item.isOwnerGroupAssignment() && ownerId != userId) continue;
             if (item.getMayRead() && item.getAclId() == aclId) return true;
         }
         return false;
@@ -462,9 +463,10 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
-    public boolean mayEditACL(long aclId) {
+    public boolean mayEditACL(long aclId, long ownerId) {
         if (this.isGlobalSupervisor()) return true;
         for (ACLAssignment item : this.assignments) {
+            if (item.isOwnerGroupAssignment() && ownerId != userId) continue;
             if (item.getMayEdit() && item.getAclId() == aclId) return true;
         }
         return false;
@@ -473,9 +475,10 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
-    public boolean mayExportACL(long aclId) {
+    public boolean mayExportACL(long aclId, long ownerId) {
         if (this.isGlobalSupervisor()) return true;
         for (ACLAssignment item : this.assignments) {
+            if (item.isOwnerGroupAssignment() && ownerId != userId) continue;
             if (item.getMayExport() && item.getAclId() == aclId) return true;
         }
         return false;
@@ -484,9 +487,10 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
-    public boolean mayRelateACL(long aclId) {
+    public boolean mayRelateACL(long aclId, long ownerId) {
         if (this.isGlobalSupervisor()) return true;
         for (ACLAssignment item : this.assignments) {
+            if (item.isOwnerGroupAssignment() && ownerId != userId) continue;
             if (item.getMayRelate() && item.getAclId() == aclId) return true;
         }
         return false;
@@ -495,9 +499,10 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
-    public boolean mayCreateACL(long aclId) {
+    public boolean mayCreateACL(long aclId, long ownerId) {
         if (this.isGlobalSupervisor()) return true;
         for (ACLAssignment item : this.assignments) {
+            if (item.isOwnerGroupAssignment()) continue; //group owner may never create!
             if (item.getMayCreate() && item.getAclId() == aclId) return true;
         }
         return false;
@@ -506,9 +511,10 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
-    public boolean mayDeleteACL(long aclId) {
+    public boolean mayDeleteACL(long aclId, long ownerId) {
         if (this.isGlobalSupervisor()) return true;
         for (ACLAssignment item : this.assignments) {
+            if (item.isOwnerGroupAssignment() && ownerId != userId) continue;
             if (item.getMayDelete() && item.getAclId() == aclId) return true;
         }
         return false;
@@ -517,7 +523,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
-    public ACLAssignment[] getACLAssignments(ACL.Category category, ACL.Permission... perms) {
+    public ACLAssignment[] getACLAssignments(ACL.Category category, long ownerId, ACL.Permission... perms) {
         Boolean mayCreate = null;
         Boolean mayRead = null;
         Boolean mayEdit = null;
@@ -566,6 +572,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
         }
         List<ACLAssignment> result = new ArrayList<ACLAssignment>(this.assignments.length);
         for (ACLAssignment acl : this.assignments) {
+            if (acl.isOwnerGroupAssignment() && ownerId != userId) continue;
             if (mayRead != null && mayRead != acl.getMayRead()) continue;
             if (mayEdit != null && mayEdit != acl.getMayEdit()) continue;
             if (mayDelete != null && mayDelete != acl.getMayDelete()) continue;
@@ -581,9 +588,9 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
-    public String getACLsCSV(ACL.Category category, ACL.Permission... perms) {
+    public String getACLsCSV(long ownerId, ACL.Category category, ACL.Permission... perms) {
         String result = "";
-        Long ACLs[] = getACLsId(category, perms);
+        Long ACLs[] = getACLsId(ownerId, category, perms);
         for (long acl : ACLs) {
             result += ((result.length() > 0) ? "," : "") + acl;
         }
@@ -593,7 +600,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
-    public Long[] getACLsId(ACL.Category category, ACL.Permission... perms) {
+    public Long[] getACLsId(long ownerId, ACL.Category category, ACL.Permission... perms) {
         Boolean mayCreate = null;
         Boolean mayRead = null;
         Boolean mayEdit = null;
@@ -645,6 +652,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
         // Condense the ACL right informations
         // If a ACL is assigned via groupX and groupY the rights are taken from both assignments.
         for (ACLAssignment acl : this.assignments) {
+            if (acl.isOwnerGroupAssignment() && ownerId != userId) continue;
             if (category != null && acl.getACLCategory() != category) continue;
             Long key = acl.getAclId();
             boolean[] rights = hlp.get(key);
@@ -656,7 +664,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
             if (acl.getMayDelete()) rights[ACL.Permission.DELETE.ordinal()] = true;
             if (acl.getMayRelate()) rights[ACL.Permission.RELATE.ordinal()] = true;
             if (acl.getMayExport()) rights[ACL.Permission.EXPORT.ordinal()] = true;
-            if (acl.getMayCreate()) rights[ACL.Permission.CREATE.ordinal()] = true;
+            if (acl.getMayCreate() && !acl.isOwnerGroupAssignment()) rights[ACL.Permission.CREATE.ordinal()] = true;
             hlp.put(key, rights);
         }
 
@@ -680,8 +688,8 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
-    public ACL[] getACLs(ACL.Category category, ACL.Permission... perms) {
-        Long[] acls = getACLsId(category, perms);
+    public ACL[] getACLs(long owner, ACL.Category category, ACL.Permission... perms) {
+        Long[] acls = getACLsId(owner, category, perms);
         List<ACL> res = new ArrayList<ACL>(acls.length);
         FxEnvironment struct;
         struct = CacheAdmin.getEnvironment();

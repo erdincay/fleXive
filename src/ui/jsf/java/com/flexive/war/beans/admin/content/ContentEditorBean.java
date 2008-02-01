@@ -590,8 +590,8 @@ public class ContentEditorBean implements ActionBean, Serializable {
         for (Step step : steps) {
             if (!fxType.useStepPermissions() ||
                     (isNew
-                            ? ticket.mayCreateACL(step.getAclId())
-                            : ticket.mayEditACL(step.getAclId()))) {
+                            ? ticket.mayCreateACL(step.getAclId(), content.getLifeCycleInfo().getCreatorId())
+                            : ticket.mayEditACL(step.getAclId(), content.getLifeCycleInfo().getCreatorId()))) {
                 StepDefinition def = environment.getStepDefinition(step.getStepDefinitionId());
                 result.add(new SelectItem(String.valueOf(step.getId()), def.getLabel().getDefaultTranslation()));
             }

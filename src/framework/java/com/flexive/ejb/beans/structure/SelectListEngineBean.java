@@ -390,7 +390,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
         UserTicket ticket = FxContext.get().getTicket();
         if(!ticket.isInRole(Role.SelectListEditor)) {
             //check the lists ACL
-            if( ticket.mayCreateACL(item.getList().getCreateItemACL().getId() ) )
+            if( ticket.mayCreateACL(item.getList().getCreateItemACL().getId(), ticket.getUserId()) )
                 throw new FxNoAccessException("ex.selectlist.item.create.noPerm", item.getList().getLabel(), 
                         item.getList().getCreateItemACL().getLabel());
         }

@@ -61,7 +61,6 @@ import javax.ejb.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -98,7 +97,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
         environment = CacheAdmin.getEnvironment();
         FxType type = environment.getType(typeId);
         //security check start
-        if (type.useTypePermissions() && !ticket.mayCreateACL(type.getACL().getId()))
+        if (type.useTypePermissions() && !ticket.mayCreateACL(type.getACL().getId(), ticket.getUserId()))
             throw new FxNoAccessException("ex.acl.noAccess.create", type.getACL().getName());
         //security check end
         long acl = prefACL;
@@ -109,7 +108,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                 acl = ACL.Category.INSTANCE.getDefaultId();
             } else {
                 //get best fit if possible
-                Long[] acls = ticket.getACLsId(ACL.Category.INSTANCE, ACL.Permission.CREATE, ACL.Permission.EDIT, ACL.Permission.READ);
+                Long[] acls = ticket.getACLsId(ticket.getUserId(), ACL.Category.INSTANCE, ACL.Permission.CREATE, ACL.Permission.EDIT, ACL.Permission.READ);
                 if (acls.length > 0)
                     acl = acls[0];
                 else {
@@ -207,7 +206,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             //security check start
             UserTicket ticket = FxContext.get().getTicket();
             FxType type = env.getType(cachedContent.getContent().getTypeId());
-            FxPermissionUtils.checkPermission(ticket, ACL.Permission.READ, type,
+            FxPermissionUtils.checkPermission(ticket, content.getLifeCycleInfo().getCreatorId(), ACL.Permission.READ, type,
                     cachedContent.getSecurityInfo().getStepACL(),
                     cachedContent.getSecurityInfo().getContentACL(), true);
 
@@ -259,11 +258,11 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             Step step = env.getStep(content.getStepId());
             UserTicket ticket = FxContext.get().getTicket();
             if (content.getPk().isNew()) {
-                FxPermissionUtils.checkPermission(ticket, ACL.Permission.CREATE, type, step.getAclId(), content.getAclId(), true);
+                FxPermissionUtils.checkPermission(ticket, ticket.getUserId(), ACL.Permission.CREATE, type, step.getAclId(), content.getAclId(), true);
                 beforeAssignmentScript = FxScriptEvent.BeforeAssignmentDataCreate;
                 afterAssignmentScript = FxScriptEvent.AfterAssignmentDataCreate;
             } else {
-                FxPermissionUtils.checkPermission(ticket, ACL.Permission.EDIT, type, step.getAclId(), content.getAclId(), true);
+                FxPermissionUtils.checkPermission(ticket, content.getLifeCycleInfo().getCreatorId(), ACL.Permission.EDIT, type, step.getAclId(), content.getAclId(), true);
                 beforeAssignmentScript = FxScriptEvent.BeforeAssignmentDataSave;
                 afterAssignmentScript = FxScriptEvent.AfterAssignmentDataSave;
             }
@@ -379,7 +378,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             FxType type = env.getType(content.getTypeId());
             Step step = env.getStep(content.getStepId());
             UserTicket ticket = FxContext.get().getTicket();
-            FxPermissionUtils.checkPermission(ticket, ACL.Permission.CREATE, type, step.getAclId(), content.getAclId(), true);
+            FxPermissionUtils.checkPermission(ticket, ticket.getUserId(), ACL.Permission.CREATE, type, step.getAclId(), content.getAclId(), true);
             //security check end
             ContentStorage storage = StorageManager.getContentStorage(content.getPk().getStorageMode());
             con = Database.getDbConnection();

@@ -138,8 +138,9 @@ public interface UserTicket extends Serializable {
 
     /**
      * Returns all groups the user is in.
-     * <p />
+     * <p/>
      * Every user is at least in the Group EVERYONE
+     *
      * @return all groups the user is in.
      */
     long[] getGroups();
@@ -163,7 +164,7 @@ public interface UserTicket extends Serializable {
 
     /**
      * Returns all ACLAssignments for the user.
-     * <p />
+     * <p/>
      * The user inherits all ACLAssignments from his groups.
      *
      * @return all ACLAssignments for the user, may be a empty list but is never null
@@ -190,50 +191,56 @@ public interface UserTicket extends Serializable {
     /**
      * Returns true if the user may read objects using the given ACL.
      *
-     * @param aclId the acl
+     * @param aclId   the acl
+     * @param ownerId id of the owner
      * @return true if the user may read objects using the given ACL
      */
-    boolean mayReadACL(long aclId);
+    boolean mayReadACL(long aclId, long ownerId);
 
     /**
      * Returns true if the user may edit objects using the given ACL.
      *
-     * @param aclId the acl
+     * @param aclId   the acl
+     * @param ownerId id of the owner
      * @return true if the user may edit objects using the given ACL
      */
-    boolean mayEditACL(long aclId);
+    boolean mayEditACL(long aclId, long ownerId);
 
     /**
      * Returns true if the user may export objects using the given ACL.
      *
-     * @param aclId the acl
+     * @param aclId   the acl
+     * @param ownerId id of the owner
      * @return true if the user may export objects using the given ACL
      */
-    boolean mayExportACL(long aclId);
+    boolean mayExportACL(long aclId, long ownerId);
 
     /**
      * Returns true if the user may relate objects to a object using the given ACL.
      *
-     * @param aclId the acl
+     * @param aclId   the acl
+     * @param ownerId id of the owner
      * @return true if the user may relate objects using the given ACL
      */
-    boolean mayRelateACL(long aclId);
+    boolean mayRelateACL(long aclId, long ownerId);
 
     /**
      * Returns true if the user may create objects using the given ACL.
      *
-     * @param aclId the acl
+     * @param aclId   the acl
+     * @param ownerId id of the owner
      * @return true if the user may create objects using the given ACL
      */
-    boolean mayCreateACL(long aclId);
-    
+    boolean mayCreateACL(long aclId, long ownerId);
+
     /**
      * Returns true if the user may edit objects using the given ACL.
      *
-     * @param aclId the acl
+     * @param aclId   the acl
+     * @param ownerId id of the owner
      * @return true if the user may edit objects using the given ACL
      */
-    boolean mayDeleteACL(long aclId);
+    boolean mayDeleteACL(long aclId, long ownerId);
 
     /**
      * Returns all ACLAssignments for the user matching the filter parameters.
@@ -242,11 +249,12 @@ public interface UserTicket extends Serializable {
      * the groupId that the ACL is assigned to. The user itself gets the ACLAssignments from the groups he
      * belongs to.
      *
-     * @param category  all assignments if null, or only those matching the given category
-     * @param perms ACL.PERM
+     * @param category all assignments if null, or only those matching the given category
+     * @param ownerId  id of the owner
+     * @param perms    ACL.PERM
      * @return all ACLAssignments for the user matching the filter parameters, may be a empty array but is never null
      */
-    ACLAssignment[] getACLAssignments(ACL.Category category, ACL.Permission... perms);
+    ACLAssignment[] getACLAssignments(ACL.Category category, long ownerId, ACL.Permission... perms);
 
     /**
      * Returns the id of all ACLs for the user matching the filter parameters.
@@ -254,11 +262,12 @@ public interface UserTicket extends Serializable {
      * The ACL ids are distinct within the result.<br>
      * The permissions the user gets from all groups he belongs to are taken into account.
      *
+     * @param ownerId  id of the owner
      * @param category ACL.CATEGORY
-     * @param perms ACL.PERM
+     * @param perms    ACL.PERM
      * @return all ACL ids for the user matching the filter parameters, may be an empty array but is never null
      */
-    Long[] getACLsId(ACL.Category category, ACL.Permission... perms);
+    Long[] getACLsId(long ownerId, ACL.Category category, ACL.Permission... perms);
 
     /**
      * Returns the id of all ACLs for the user matching the filter parameters as comma separated list.
@@ -266,11 +275,12 @@ public interface UserTicket extends Serializable {
      * The ACL ids are distinct within the result.<br>
      * The permissions the user gets from all groups he belongs to are taken into account.
      *
-     * @param category  all assignments if null, or only those matching the given category
-     * @param perms ACL.PERM
+     * @param ownerId  id of the owner
+     * @param category all assignments if null, or only those matching the given category
+     * @param perms    ACL.PERM
      * @return all ACL ids for the user matching the filter parameters  as comma separated list.
      */
-    String getACLsCSV(ACL.Category category, ACL.Permission... perms);
+    String getACLsCSV(long ownerId, ACL.Category category, ACL.Permission... perms);
 
     /**
      * Returns the id of all ACLs for the user matching the filter parameters.
@@ -278,11 +288,12 @@ public interface UserTicket extends Serializable {
      * The ACL ids are distinct within the result.<br>
      * The permissions the user gets from all groups he belongs to are taken into account.
      *
+     * @param owner    id of the owner
      * @param category ACL.CATEGORY
-     * @param perms ACL.PERM
+     * @param perms    ACL.PERM
      * @return all ACL ids for the user matching the filter parameters, may be an empty array but is never null
      */
-    ACL[] getACLs(ACL.Category category, ACL.Permission... perms);
+    ACL[] getACLs(long owner, ACL.Category category, ACL.Permission... perms);
 
     /**
      * Get the default language of this user

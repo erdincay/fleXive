@@ -67,6 +67,7 @@ public class FxPermissionUtils {
      * Permission check for (new) contents
      *
      * @param ticket         calling users ticket
+     * @param ownerId        owner of the content to check
      * @param permission     permission to check
      * @param type           used type
      * @param stepACL        step ACL
@@ -75,7 +76,7 @@ public class FxPermissionUtils {
      * @return access granted
      * @throws FxNoAccessException if not accessible for calling user
      */
-    public static boolean checkPermission(UserTicket ticket, ACL.Permission permission, FxType type, long stepACL,
+    public static boolean checkPermission(UserTicket ticket, long ownerId, ACL.Permission permission, FxType type, long stepACL,
                                           long contentACL, boolean throwException) throws FxNoAccessException {
         if (ticket.isGlobalSupervisor() || !type.usePermissions() || FxContext.get().getRunAsSystem())
             return true;
@@ -84,11 +85,11 @@ public class FxPermissionUtils {
         boolean contentAllowed = !type.useInstancePermissions();
         for (ACLAssignment assignment : ticket.getACLAssignments()) {
             if (!typeAllowed && assignment.getAclId() == type.getACL().getId())
-                typeAllowed = assignment.getPermission(permission);
+                typeAllowed = assignment.getPermission(permission, ownerId, ticket.getUserId());
             if (!stepAllowed && assignment.getAclId() == stepACL)
-                stepAllowed = assignment.getPermission(permission);
+                stepAllowed = assignment.getPermission(permission, ownerId, ticket.getUserId());
             if (!contentAllowed && assignment.getAclId() == contentACL)
-                contentAllowed = assignment.getPermission(permission);
+                contentAllowed = assignment.getPermission(permission, ownerId, ticket.getUserId());
         }
         if (throwException && !(typeAllowed && stepAllowed && contentAllowed)) {
             List<String> lacking = new ArrayList<String>(3);
@@ -129,11 +130,11 @@ public class FxPermissionUtils {
 
         for (ACLAssignment assignment : ticket.getACLAssignments()) {
             if (!typeAllowed && assignment.getAclId() == si.getTypeACL())
-                typeAllowed = assignment.getPermission(permission);
+                typeAllowed = assignment.getPermission(permission, si.getOwnerId(), ticket.getUserId());
             if (!stepAllowed && assignment.getAclId() == si.getStepACL())
-                stepAllowed = assignment.getPermission(permission);
+                stepAllowed = assignment.getPermission(permission, si.getOwnerId(), ticket.getUserId());
             if (!contentAllowed && assignment.getAclId() == si.getContentACL())
-                contentAllowed = assignment.getPermission(permission);
+                contentAllowed = assignment.getPermission(permission, si.getOwnerId(), ticket.getUserId());
             if (permission == ACL.Permission.DELETE) {
                 //property permissions are only checked for delete operations since no
                 //exception should be thrown when ie loading as properties are wrapped in
@@ -141,7 +142,7 @@ public class FxPermissionUtils {
                 if (si.usePermissions() && si.getUsedPropertyACL().size() > 0 && assignment.getACLCategory() == ACL.Category.STRUCTURE) {
                     for (long propertyACL : si.getUsedPropertyACL())
                         if (propertyACL == assignment.getAclId())
-                            if (!assignment.getPermission(permission)) {
+                            if (!assignment.getPermission(permission, si.getOwnerId(), ticket.getUserId())) {
                                 propertyAllowed = false;
                                 addACLName(lacking, ticket.getLanguage(), propertyACL);
                             }
@@ -202,9 +203,9 @@ public class FxPermissionUtils {
         List<Long> noAccess = new ArrayList<Long>(5);
         List<Long> readOnly = new ArrayList<Long>(5);
         for (long aclId : securityInfo.getUsedPropertyACL()) {
-            if (!ticket.mayReadACL(aclId))
+            if (!ticket.mayReadACL(aclId, securityInfo.getOwnerId()))
                 noAccess.add(aclId);
-            else if (!ticket.mayEditACL(aclId))
+            else if (!ticket.mayEditACL(aclId, securityInfo.getOwnerId()))
                 readOnly.add(aclId);
         }
         for (String xpath : xpaths) {
@@ -301,18 +302,18 @@ public class FxPermissionUtils {
         boolean[] perms = new boolean[5];
         UserTicket ticket = FxContext.get().getTicket();
         final boolean _system = FxContext.get().getRunAsSystem() || ticket.isGlobalSupervisor();
-        checkPermission(ticket, ACL.Permission.READ, type, stepACL, acl, true);
+        checkPermission(ticket, 0, ACL.Permission.READ, type, stepACL, acl, true);
         if (_system || ticket.isMandatorSupervisor() && mandator == ticket.getMandatorId() ||
-                !type.usePermissions() || ticket.isInGroup((int) UserGroup.GROUP_OWNER) && createdBy == ticket.getUserId()) {
+                !type.usePermissions() /*|| ticket.isInGroup((int) UserGroup.GROUP_OWNER) && createdBy == ticket.getUserId()*/) {
             perms[0] = perms[1] = perms[2] = perms[3] = perms[4] = true;
         } else {
             //throw exception if read is forbidden
-            checkPermission(ticket, ACL.Permission.READ, type, stepACL, acl, true);
-            perms[0] = checkPermission(ticket, ACL.Permission.EDIT, type, stepACL, acl, false);
-            perms[1] = checkPermission(ticket, ACL.Permission.RELATE, type, stepACL, acl, false);
-            perms[2] = checkPermission(ticket, ACL.Permission.DELETE, type, stepACL, acl, false);
-            perms[3] = checkPermission(ticket, ACL.Permission.EXPORT, type, stepACL, acl, false);
-            perms[4] = checkPermission(ticket, ACL.Permission.CREATE, type, stepACL, acl, false);
+            checkPermission(ticket, 0, ACL.Permission.READ, type, stepACL, acl, true);
+            perms[0] = checkPermission(ticket, createdBy, ACL.Permission.EDIT, type, stepACL, acl, false);
+            perms[1] = checkPermission(ticket, createdBy, ACL.Permission.RELATE, type, stepACL, acl, false);
+            perms[2] = checkPermission(ticket, createdBy, ACL.Permission.DELETE, type, stepACL, acl, false);
+            perms[3] = checkPermission(ticket, createdBy, ACL.Permission.EXPORT, type, stepACL, acl, false);
+            perms[4] = checkPermission(ticket, createdBy, ACL.Permission.CREATE, type, stepACL, acl, false);
         }
         return perms;
     }

@@ -211,7 +211,7 @@ public class ACLAssignment implements Serializable, Cloneable {
      * @return true if the ACLAssignment grants create permission.
      */
     public boolean getMayCreate() {
-        return this.mayCreate;
+        return !isOwnerGroupAssignment() && this.mayCreate;
     }
 
     /**
@@ -248,6 +248,15 @@ public class ACLAssignment implements Serializable, Cloneable {
      */
     public LifeCycleInfo getLifeCycleInfo() {
         return lifeCycleInfo;
+    }
+
+    /**
+     * Is this an assignment for the owner group?
+     *
+     * @return if this an assignment for the owner group?
+     */
+    public boolean isOwnerGroupAssignment() {
+        return groupId == UserGroup.GROUP_OWNER;
     }
 
     /**
@@ -290,9 +299,13 @@ public class ACLAssignment implements Serializable, Cloneable {
      * Check if the requested permission is granted
      *
      * @param permission the permission to check
+     * @param ownerId    id of the owner
+     * @param userId     id of the calling user
      * @return granted
      */
-    public boolean getPermission(ACL.Permission permission) {
+    public boolean getPermission(ACL.Permission permission, long ownerId, long userId) {
+        if (isOwnerGroupAssignment() && (ownerId != userId || permission == ACL.Permission.CREATE))
+            return false;
         switch (permission) {
             case CREATE:
                 return mayCreate;

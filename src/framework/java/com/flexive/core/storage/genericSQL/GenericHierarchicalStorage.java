@@ -68,7 +68,6 @@ import org.w3c.tidy.Tidy;
 import java.io.*;
 import java.sql.*;
 import java.util.*;
-import java.util.Date;
 
 /**
  * Generic implementation of hierarchical content handling.
@@ -140,7 +139,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     protected static final String CONTENT_DATA_FT_REMOVE_VERSION = "DELETE FROM " + TBL_CONTENT_DATA_FT + " WHERE ID=? AND VER=?";
 
     //security info main query
-    protected static final String SECURITY_INFO_MAIN = "SELECT DISTINCT c.ACL, t.ACL, s.ACL, t.SECURITY_MODE, t.ID, c.DBIN_ID, c.DBIN_ACL FROM " +
+    protected static final String SECURITY_INFO_MAIN = "SELECT DISTINCT c.ACL, t.ACL, s.ACL, t.SECURITY_MODE, t.ID, c.DBIN_ID, c.DBIN_ACL, c.CREATED_BY FROM " +
             TBL_CONTENT + " c, " + TBL_STRUCT_TYPES + " t, " + TBL_STEP + " s WHERE c.ID=? AND ";
     protected static final String SECURITY_INFO_WHERE = " AND t.ID=c.TDEF AND s.ID=c.STEP";
     protected static final String SECURITY_INFO_VER = SECURITY_INFO_MAIN + "c.VER=?" + SECURITY_INFO_WHERE;
@@ -158,8 +157,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     protected static final String CONTENT_STEP_DEPENDENCIES = "UPDATE " + TBL_CONTENT + " SET STEP=? WHERE STEP=? AND ID=? AND VER<>?";
 
 
-    protected static final String CONTENT_REFERENCE_LIVE = "SELECT VER, ACL, STEP, TDEF FROM " + TBL_CONTENT + " WHERE ID=? AND ISLIVE_VER=TRUE";
-    protected static final String CONTENT_REFERENCE_MAX = "SELECT VER, ACL, STEP, TDEF FROM " + TBL_CONTENT + " WHERE ID=? AND ISMAX_VER=TRUE";
+    protected static final String CONTENT_REFERENCE_LIVE = "SELECT VER, ACL, STEP, TDEF, CREATED_BY FROM " + TBL_CONTENT + " WHERE ID=? AND ISLIVE_VER=TRUE";
+    protected static final String CONTENT_REFERENCE_MAX = "SELECT VER, ACL, STEP, TDEF, CREATED_BY FROM " + TBL_CONTENT + " WHERE ID=? AND ISMAX_VER=TRUE";
     protected static final String CONTENT_REFERENCE_CAPTION = "SELECT FTEXT1024 FROM " + TBL_CONTENT_DATA + " WHERE ID=? AND VER=? AND XPATHMULT='/CAPTION[1]'";
 
     //getContentVersionInfo() statement
@@ -1543,7 +1542,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         String sql = contentVersion == FxPK.LIVE ? CONTENT_REFERENCE_LIVE : CONTENT_REFERENCE_MAX;
         PreparedStatement ps = null;
         int referencedVersion;
-        long stepId, aclId, typeId;
+        long stepId, aclId, typeId, ownerId;
         String caption;
         try {
             ps = con.prepareStatement(sql);
@@ -1554,6 +1553,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 aclId = rs.getLong(2);
                 stepId = rs.getLong(3);
                 typeId = rs.getLong(4);
+                ownerId = rs.getLong(5);
             } else if (contentVersion == FxPK.LIVE) {
                 ps.close();
                 ps = con.prepareStatement(CONTENT_REFERENCE_MAX);
@@ -1564,6 +1564,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     aclId = rs.getLong(2);
                     stepId = rs.getLong(3);
                     typeId = rs.getLong(4);
+                    ownerId = rs.getLong(5);
                 } else {
                     LOG.error("Failed to resolve a reference with id " + referencedId + ": no max. version found! (in fallback already!)");
                     return new ReferencedContent(referencedId);
@@ -1588,7 +1589,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 ref.setAccessGranted(
                         FxPermissionUtils.checkPermission(
                                 FxContext.get().getTicket(),
-                                ACL.Permission.READ,
+                                ownerId, ACL.Permission.READ,
                                 env.getType(typeId),
                                 ref.getStep().getAclId(),
                                 ref.getAcl().getId(),
@@ -1983,7 +1984,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setLong(1, pk.getId());
             byte typePerm;
             int typeACL, contentACL, stepACL, previewACL;
-            long previewId, typeId;
+            long previewId, typeId, ownerId;
             long[] propertyPerm;
             ResultSet rs = ps.executeQuery();
             if (rs == null || !rs.next())
@@ -1995,6 +1996,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             typeId = rs.getLong(5);
             previewId = rs.getLong(6);
             previewACL = rs.getInt(7);
+            ownerId = rs.getLong(8);
             if (rs.next())
                 throw new FxLoadException("ex.db.resultSet.tooManyRows");
             if ((typePerm & 0x02) == 0x02) {
@@ -2022,7 +2024,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     propertyPerm[cnt++] = acl;
             } else
                 propertyPerm = new long[0];
-            return new FxContentSecurityInfo(pk, previewId, typeId, typePerm, typeACL, stepACL, contentACL, previewACL, propertyPerm);
+            return new FxContentSecurityInfo(pk, ownerId, previewId, typeId, typePerm, typeACL, stepACL, contentACL, previewACL, propertyPerm);
         } catch (SQLException e) {
             throw new FxLoadException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {

@@ -55,6 +55,11 @@ public class FxContentSecurityInfo implements Serializable {
     private FxPK pk;
 
     /**
+     * user id of the owner of the content
+     */
+    private long ownerId;
+
+    /**
      * Id of preview image, only relevant for security if &gt; 0
      */
     private long previewId;
@@ -88,6 +93,7 @@ public class FxContentSecurityInfo implements Serializable {
      * Property ACL of the preview, only relevant for security if <code>previewId</code> &gt; 0
      */
     private int previewACL;
+
     /**
      * All used and relevant property ACL's. will be empty if property permissions are disabled for
      * the type
@@ -98,6 +104,7 @@ public class FxContentSecurityInfo implements Serializable {
      * Constructor
      *
      * @param pk              the primary key this info relates to
+     * @param ownerId         owner of the content
      * @param previewId       Id of preview image, only relevant for security if &gt; 0
      * @param typeId          id of the used type
      * @param typePermissions byte encoded type permission handling
@@ -107,10 +114,11 @@ public class FxContentSecurityInfo implements Serializable {
      * @param previewACL      Property ACL of the preview, only relevant for security if <code>previewId</code> &gt; 0
      * @param usedPropertyACL relevant property ACL's
      */
-    public FxContentSecurityInfo(FxPK pk, long previewId, long typeId, byte typePermissions, int typeACL, int stepACL, int contentACL,
+    public FxContentSecurityInfo(FxPK pk, long ownerId, long previewId, long typeId, byte typePermissions, int typeACL, int stepACL, int contentACL,
                                  int previewACL,
                                  long[] usedPropertyACL) {
         this.pk = pk;
+        this.ownerId = ownerId;
         this.previewId = previewId;
         this.typeId = typeId;
         this.permissions = typePermissions;
@@ -128,6 +136,15 @@ public class FxContentSecurityInfo implements Serializable {
      */
     public FxPK getPk() {
         return pk;
+    }
+
+    /**
+     * Get the owner of the content
+     *
+     * @return owner of the content
+     */
+    public long getOwnerId() {
+        return ownerId;
     }
 
     /**

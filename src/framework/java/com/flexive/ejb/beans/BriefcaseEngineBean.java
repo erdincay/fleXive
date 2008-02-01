@@ -97,7 +97,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
             } catch (Throwable t) {
                 throw new FxInvalidParameterException("ex.briefcase.invalidAcl", "acl");
             }
-            if (!ticket.mayCreateACL(aclId)) {
+            if (!ticket.mayCreateACL(aclId, ticket.getUserId())) {
                 throw new FxNoAccessException("ex.briefcase.noCreatePermission", acl.getLabel());
             }
 
@@ -212,7 +212,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
     private void checkEditBriefcase(Briefcase br) throws FxNotFoundException {
         final UserTicket ticket = FxContext.get().getTicket();
         if (!ticket.isGlobalSupervisor() && br.getMandator() != ticket.getMandatorId()) {
-            if (!ticket.mayEditACL((br.getAcl()))) {
+            if (!ticket.mayEditACL((br.getAcl()), br.getLifeCycleInfo().getCreatorId())) {
                 throw new FxNotFoundException("ex.briefcase.noEditPermission", br.getName());
             }
         }
@@ -231,7 +231,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
         // Permission checks
         final UserTicket ticket = FxContext.get().getTicket();
         if (!ticket.isGlobalSupervisor() && br.getMandator() != ticket.getMandatorId()) {
-            if (!ticket.mayDeleteACL(br.getAcl())) {
+            if (!ticket.mayDeleteACL(br.getAcl(), br.getLifeCycleInfo().getCreatorId())) {
                 throw new FxNotFoundException("ex.briefcase.noDeletePermission", br.getName());
             }
         }
@@ -436,13 +436,13 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
                 filter.append(" OR ").append(colACL).append(" IS NOT null");
             } else if (ticket.isMandatorSupervisor()) {
                 // add all shared(match by ACL or mandator)
-                String acls = ticket.getACLsCSV(ACL.Category.INSTANCE, perms);
+                String acls = ticket.getACLsCSV(0/*owner is irrelevant here*/, ACL.Category.INSTANCE, perms);
                 filter.append((acls.length() > 0) ? (" OR " + colACL + " IN (" + acls + ") ") : "").
                         append(" OR (").append(colACL).append(" IS NOT null AND ").
                         append(colMANDATOR).append("=").append(ticket.getMandatorId()).append(")");
             } else {
                 // add all shared(match by ACL)
-                String acls = ticket.getACLsCSV(ACL.Category.INSTANCE, perms);
+                String acls = ticket.getACLsCSV(0/*owner is irrelevant here*/, ACL.Category.INSTANCE, perms);
                 if (acls.length() > 0) {
                     filter.append(" OR ").append(colACL).append(" IN (").append(acls).append(") ");
                 }

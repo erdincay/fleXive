@@ -640,6 +640,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                     ri.stopRunAsSystem();
                 }
             }
+            contactData.setAclId(ACL.ACL_CONTACTDATA);
             contactData.setValue("/SURNAME", new FxString(false, userName));
             contactData.setValue("/EMAIL", new FxString(false, email));
             contactDataPK = co.save(contactData);
@@ -1579,7 +1580,8 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                     //   8            9            10             11             12              13
                     "ass.PCREATE, acl.CAT_TYPE,ass.CREATED_BY,ass.CREATED_AT,ass.MODIFIED_BY,ass.MODIFIED_AT " +
                     "FROM " + TBL_ASSIGN_ACLS + " ass, " + TBL_ASSIGN_GROUPS + " grp, " + TBL_ACLS + " acl " +
-                    "WHERE acl.ID=ass.ACL AND ass.USERGROUP=grp.USERGROUP AND grp.ACCOUNT=" + accountId;
+                    "WHERE acl.ID=ass.ACL AND ((ass.USERGROUP=grp.USERGROUP AND grp.ACCOUNT=" + accountId +
+                    ")OR(ass.USERGROUP=" + UserGroup.GROUP_OWNER + "))";
 
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(curSql);
@@ -1588,10 +1590,10 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             ArrayList<ACLAssignment> result = new ArrayList<ACLAssignment>(20);
             while (rs != null && rs.next()) {
                 long groupId = rs.getLong(1);
-                if (groupId == UserGroup.GROUP_OWNER) {
+                /*if (groupId == UserGroup.GROUP_OWNER) {
                     // skip
                     continue;
-                }
+                }*/
                 result.add(new ACLAssignment(rs.getLong(2), groupId,
                         rs.getBoolean(3), rs.getBoolean(4), rs.getBoolean(7), rs.getBoolean(5),
                         rs.getBoolean(6), rs.getBoolean(8), ACL.Category.getById(rs.getByte(9)),
