@@ -76,6 +76,7 @@ public class WorkflowTest {
     private RouteEngine routeEngine = null;
 
     private ACL myWorkflowACL = null;
+    private static int ctr = 0;
 
     /**
      * Create test ACLs.
@@ -121,6 +122,13 @@ public class WorkflowTest {
         long workflowId = -1;
         try {
             workflowId = createTestWorkflow();
+            try {
+                createTestWorkflow();
+                assert false:"Workflows must have unique names";
+            }
+            catch (Exception e) {
+                //ok
+            }
             assert getUserTicket().isInRole(Role.WorkflowManagement) : "User is not in role workflow management - call should have failed.";
             Workflow workflow = getEnvironment().getWorkflow(workflowId);
             assert workflowId == workflow.getId() : "Workflow ID not set/returned correctly.";
@@ -223,7 +231,14 @@ public class WorkflowTest {
         long acl2Id = -1;
         Workflow workflow;
         try {
-            stepDefinitionId = createStepDefinition();
+            stepDefinitionId = createStepDefinition(null);
+            try {
+                createStepDefinition(null);
+                assert false:"Step definitions must have unique names for a specific language";
+            }
+            catch (Exception e) {
+                //ok
+            }
             aclId = createAcl();
             List<Step> steps = new ArrayList<Step>();
             steps.add(new Step(-1, stepDefinitionId, -1, aclId));
@@ -354,7 +369,7 @@ public class WorkflowTest {
     public void updateStepDefinition() throws FxApplicationException {
         long stepDefinitionId = -1;
         try {
-            stepDefinitionId = createStepDefinition();
+            stepDefinitionId = createStepDefinition(null);
             assert stepDefinitionId != -1 : "Failed to create step definition";
             StepDefinition stepDefinition = getEnvironment().getStepDefinition(stepDefinitionId);
             assert new FxString(STEPDEF_NAME).equals(stepDefinition.getLabel()) : "Invalid name: " + stepDefinition.getLabel();
@@ -379,7 +394,7 @@ public class WorkflowTest {
     public void stepDefinitionDefaultLanguage() throws FxApplicationException {
         long stepDefinitionId = -1;
         try {
-            stepDefinitionId = createStepDefinition();
+            stepDefinitionId = createStepDefinition(null);
             StepDefinition stepDefinition = getEnvironment().getStepDefinition(stepDefinitionId);
             FxLanguage[] languages = EJBLookup.getLanguageEngine().loadAvailable();
             for (FxLanguage language : languages) {
@@ -402,8 +417,8 @@ public class WorkflowTest {
         long stepDefinitionId = -1;
         long targetStepDefinitionId = -1;
         try {
-            stepDefinitionId = createStepDefinition();
-            targetStepDefinitionId = createStepDefinition();
+            stepDefinitionId = createStepDefinition("st1");
+            targetStepDefinitionId = createStepDefinition("st2");
             StepDefinitionEdit stepDefinition = new StepDefinitionEdit(getEnvironment().getStepDefinition(stepDefinitionId));
             stepDefinition.setUniqueTargetId(targetStepDefinitionId);
             stepDefinitionEngine.update(stepDefinition);
@@ -426,7 +441,7 @@ public class WorkflowTest {
         long stepId = -1;
         try {
             workflowId = createTestWorkflow();
-            stepDefinitionId = createStepDefinition();
+            stepDefinitionId = createStepDefinition(null);
             stepId = stepEngine.createStep(new Step(-1, stepDefinitionId, workflowId, myWorkflowACL.getId()));
             List<StepPermission> stepPermissions = stepEngine.loadAllStepsForUser(FxContext.get().getTicket().getUserId());
             assert stepPermissions.size() > 0 : "No steps/step permissions returned.";
@@ -630,9 +645,13 @@ public class WorkflowTest {
      * @return a new step definition for testing.
      * @throws FxApplicationException
      */
-    private long createStepDefinition() throws FxApplicationException {
-        return stepDefinitionEngine.create(new StepDefinition(-1,
-                new FxString(STEPDEF_NAME), STEPDEF_DESCRIPTION, -1));
+    private long createStepDefinition(String name) throws FxApplicationException {
+        if (name == null)
+            return stepDefinitionEngine.create(new StepDefinition(-1,
+                    new FxString(STEPDEF_NAME), STEPDEF_DESCRIPTION, -1));
+        else
+            return stepDefinitionEngine.create(new StepDefinition(-1,
+                    new FxString(name), STEPDEF_DESCRIPTION, -1));
     }
 
     /**
@@ -642,7 +661,7 @@ public class WorkflowTest {
      * @throws FxApplicationException
      */
     private long createAcl() throws FxApplicationException {
-        return aclEngine.create(ACL_NAME, new FxString(ACL_LABEL), getUserTicket().getMandatorId(),
+        return aclEngine.create(ACL_NAME + ctr++, new FxString(ACL_LABEL), getUserTicket().getMandatorId(),
                 "#000000", "", ACL.Category.WORKFLOW);
     }
 

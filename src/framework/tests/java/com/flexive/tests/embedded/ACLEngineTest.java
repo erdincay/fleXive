@@ -44,6 +44,15 @@ public class ACLEngineTest {
         final long aclId = EJBLookup.getACLEngine().create("create-acl-test", new FxString("first label"), TestUsers.getTestMandator(),
                 "#000000", "", ACL.Category.INSTANCE);
         try {
+                EJBLookup.getACLEngine().create("create-acl-test", new FxString("first label"), TestUsers.getTestMandator(),
+                "#000000", "", ACL.Category.INSTANCE);
+                assert false:"ACL's must have unique names";
+            }
+            catch (Exception e) {
+                //ok
+            }
+
+        try {
             final ACL acl = CacheAdmin.getFilteredEnvironment().getACL(aclId);
             assertEquals(acl.getName(), "create-acl-test");
             assertEquals(acl.getDescription(), "");
