@@ -63,21 +63,17 @@
         <section xml:id="jboss_installation_required_libs">
             <title>Required libraries</title>
             <para>The following required libraries have to be deployed:</para>
+            <para>Copy the following file from the
+                <filename>extlib</filename>
+                directory of your &Flexive; binary distribution to
+                <filename>${jboss.home}/server/default/lib</filename>:
+            </para>
             <itemizedlist>
                 <listitem>
-                    <para>Copy the following files from the
-                        <filename>lib</filename>
-                        directory of your &Flexive; source tree to
-                        <filename>${jboss.home}/server/default/lib/</filename>
-                    </para>
-                    <itemizedlist>
-                        <listitem>
-                            <filename>mysql-connector-java-*.jar</filename>
-                            (Alternatively you can download the latest stable
-                            <link href="http://dev.mysql.com/downloads/connector/j/5.0.html">MySQL JDBC
-                                driver</link>)
-                        </listitem>
-                    </itemizedlist>
+                    <filename>mysql-connector-java-*.jar</filename>
+                    (Alternatively you can download the latest stable
+                    <link href="http://dev.mysql.com/downloads/connector/j/5.0.html">MySQL JDBC
+                        driver</link>)
                 </listitem>
             </itemizedlist>
         </section>
@@ -285,70 +281,38 @@ database.password=a]]></programlisting>
                 <filename>lib</filename>
                 directories.
             </para>
-            <section xml:id="glassfish_installation_required_libs_bin_dist">
-                <title>Libraries from subversion</title>
-                <para>You have to check out some libraries from the
-                    <filename>lib</filename>
-                    directory of the &Flexive; subversion repository at<filename>
-                    http://svn.flexive.org/repository/flexive/trunk/lib</filename>. Follow the instructions
-                    on our
-                    <link
-                            href="http://wiki.flexive.org/confluence/display/FX/Checking+out">wiki page
-                    </link>
-                    to get information about checking out files from the &Flexive; repository.
-                </para>
-                <para>Check out the following files from the
-                    <filename>lib</filename>
-                    directory of the
-                    &Flexive; subversion repository and copy them to
-                    <filename>${glassfish.home}/domains/domain1/lib/ext</filename>:
+            <section xml:id="glassfish_installation_required_libs_ant_task">
+                <title>Running the ant task</title>
+                <para>We provide an ant task for you which creates a directory with all libraries needed
+                    deploy &Flexive; on Glassfish V2.
                 </para>
                 <itemizedlist>
                     <listitem>
-                        <filename>concurrent.jar</filename>
+                        <para>Change to the
+                            <filename>flexive-dist</filename>
+                            directory of your [fleXive] distribution and run
+                            <code>ant glassfish.libs</code>.
+                        </para>
+                        <para>The
+                            <code>ant</code>
+                            task will create a directory (you will be prompted to specify a name for it) and copy all
+                            required
+                            libraries to this directory.
+                        </para>
                     </listitem>
                     <listitem>
-                        <filename>jboss-common-core.jar</filename>
+                        <para>Copy all files except the
+                            <filename>jbosscache-core.jar</filename>
+                            from this directory to
+                            <filename>${glassfish.home}/domains/domain1/lib/ext</filename>.
+                        </para>
                     </listitem>
                     <listitem>
-                        <filename>jboss-jmx.jar</filename>
-                    </listitem>
-                    <listitem>
-                        <filename>jboss-system.jar</filename>
-                    </listitem>
-                </itemizedlist>
-            </section>
-            <section xml:id="glassfish_installation_required_libs_svn">
-                <title>Libraries from the binary distribution
-                </title>
-                <para>Copy the following file from the
-                    <filename>extlib</filename>
-                    directory of your &Flexive; binary distribution to
-                    <filename>${glassfish.home}/domains/domain1/lib</filename>:
-                </para>
-                <itemizedlist>
-                    <listitem>
-                        <filename>jbosscache-core.jar</filename>
-                    </listitem>
-                </itemizedlist>
-                <para>Copy the following files from the
-                    <filename>extlib</filename>
-                    directory of your &Flexive; binary distribution to
-                    <filename>${glassfish.home}/domains/domain1/lib/ext</filename>:
-                </para>
-                <itemizedlist>
-                    <listitem>
-                        <filename>commons-logging.jar</filename>
-                    </listitem>
-
-                    <listitem>
-                        <filename>jgroups.jar</filename>
-                    </listitem>
-                    <listitem>
-                        <filename>mysql-connector-java-*.jar</filename>
-                        (Alternatively you can download the latest stable
-                        <link href="http://dev.mysql.com/downloads/connector/j/5.0.html">MySQL JDBC
-                            driver</link>)
+                        <para>Copy the
+                            <filename>jbosscache-core.jar</filename>
+                            to
+                            <filename>${glassfish.home}/domains/domain1/lib</filename>
+                        </para>
                     </listitem>
                 </itemizedlist>
             </section>
