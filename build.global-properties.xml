@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="flexive-global-properties" basedir=".">
+
+    <!-- All libraries that need to be installed for non-JBoss servers -->
+    <property name="flexive.global.include.appserverlibs"
+        value="commons-logging.jar, concurrent.jar, jboss-common-core.jar, jboss-jmx.jar, jboss-system.jar, jgroups.jar, mysql-connector-java-*.jar"/>
+
+</project>

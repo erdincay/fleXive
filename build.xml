@@ -10,6 +10,7 @@
 
     <property name="flexive.basedir" value="${basedir}"/>
     <import file="build.shared-properties.xml"/>
+    <import file="build.global-properties.xml"/>
 
 	<property name="resources.ui.jsf.dir" value="${flexive.base.ui.jsf.dir}/resources"/>
 	<property name="resources.ui.shared.dir" value="${flexive.base.ui.shared.dir}/resources"/>
@@ -552,6 +553,7 @@
         <copy todir="${flexive.dist.dir}">
             <fileset dir="${basedir}/disttools" includes="*"/>
             <fileset file="${basedir}/build.macros.xml"/>
+            <fileset file="${basedir}/build.global-properties.xml"/>
         </copy>
 
         <!-- Copy template projects to templates/ -->

@@ -136,7 +136,7 @@ db.config.create
         </jar>
         <ear earfile="${build.dist.dir}/${package.ear}" appxml="${build.dir}/application.xml">
             <zipfileset prefix="lib" dir="${dist.lib.dir}" includes="**/*" excludes="flexive-ejb.jar, flexive-tests.jar"/>
-            <zipfileset prefix="lib" dir="${dist.extlib.dir}" includes="**/*" excludes="jsf-api.jar,jsf-impl.jar,javaee.jar,jboss-*.jar,selenium-*,testng-*"/>
+            <zipfileset prefix="lib" dir="${dist.extlib.dir}" includes="**/*" excludes="jsf-api.jar,jsf-impl.jar,javaee.jar,jboss-*.jar,selenium-*,testng-*,jboss-common-core.jar,jboss-jmx.jar,jboss-system.jar,mysql-connector-*.jar,concurrent.jar"/>
             <zipfileset prefix="lib" dir="${build.dist.dir}" includes="**/*.jar" excludes="${package.ejb}"/>
             <zipfileset prefix="lib" dir="${basedir}/lib" includes="**/*.jar"/>
             <zipfileset prefix="lib" dir="${build.dir}" includes="flexive-drop-resources.jar"/>

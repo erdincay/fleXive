@@ -15,6 +15,7 @@
     <import file="build.macros.xml"/>
     <import file="build.shared-dist.xml"/>
     <import file="build.properties-dist.xml"/>
+    <import file="build.global-properties.xml"/>
 
     <path id="lib.path">
         <fileset dir="lib" includes="**/*.jar"/>
@@ -45,6 +46,9 @@ db.config.create
 
 ear
     Create a flexive.ear distribution including the backend administration GUI.]]>
+
+glassfish.libs
+    Copies libraries needed for Glassfish compatibility to a directory
         </echo>
 
         <input message="Please enter a target name, or quit to exit:" addproperty="info.targetname"/>
@@ -160,6 +164,21 @@ Base directory:      ${project.basedir}]]>
             <fileset file="${dist.basedir}/*.war"/>
             <fileset file="${dist.lib.dir}/flexive-ejb.jar"/>
         </ear>
+    </target>
+
+    <target name="glassfish.libs" description="Copy the libraries needed for Glassfish to a directory">
+        <echo taskname="flexive"><![CDATA[
+This tasks copies the libraries needed for compatibility with Sun's Glassfish V2
+server to a directory. These libraries should go to the lib/ext directory of your domain,
+e.g. /domains/domain1/lib/ext.
+]]>
+        </echo>
+        <input message="Enter the target directory (will be created if it does not exist): "
+               addproperty="glassfishlibs.dir"/>
+        <mkdir dir="${glassfishlibs.dir}"/>
+        <copy todir="${glassfishlibs.dir}">
+            <fileset dir="${dist.extlib.dir}" includes="${flexive.global.include.appserverlibs}"/>
+        </copy>
     </target>
 
     <!-- Empty no-op target -->
