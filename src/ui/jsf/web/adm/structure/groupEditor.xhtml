@@ -113,10 +113,11 @@
                     <adm:commandButton labelKey="GroupEditor.button.save" location="both"
                         icon="save"  action="saveChanges"  bean="#{groupEditorBean}" id="saveChangesButton">
                     </adm:commandButton>
-
-                    <adm:commandButton labelKey="GroupEditor.button.createNew" location="both"
-                        icon="new"  action="createGroup"  bean="#{groupEditorBean}" id="createGroupButton"/>
                 </ui:fragment>
+                <ui:fragment rendered="#{groupEditorBean.group.new}">
+                    <adm:commandButton labelKey="GroupEditor.button.createNew" location="both"
+                            icon="new"  action="createGroup"  bean="#{groupEditorBean}" id="createGroupButton"/>
+                </ui:fragment>    
             </ui:fragment>
 
             <ui:fragment rendered="#{not groupEditorBean.group.new and groupEditorBean.editMode}">
