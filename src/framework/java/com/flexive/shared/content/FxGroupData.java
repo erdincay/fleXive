@@ -579,7 +579,7 @@ public class FxGroupData extends FxData implements Cloneable {
 
         int count;
         for (FxAssignment as : childAssignments) {
-            if (!as.isEnabled())
+            if (!as.isEnabled() || as.isSystemInternal())
                 continue;
             count = 0;
             if (as instanceof FxPropertyAssignment && type.usePropertyPermissions()) {

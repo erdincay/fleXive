@@ -34,6 +34,8 @@
 package com.flexive.shared.structure;
 
 import com.flexive.shared.XPathElement;
+import com.flexive.shared.FxContext;
+import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.content.FxData;
 import com.flexive.shared.content.FxGroupData;
 import com.flexive.shared.exceptions.FxCreateException;
@@ -220,6 +222,7 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
         ArrayList<FxData> children = new ArrayList<FxData>(5);
         FxGroupData thisGroup;
         try {
+            final UserTicket ticket = FxContext.get().getTicket();
             if (!this.getMultiplicity().isValid(index))
                 throw new FxCreateException("ex.content.xpath.index.invalid", index, this.getMultiplicity(), this.getXPath()).setAffectedXPath(parent.getXPathFull());
             thisGroup = new FxGroupData(parent == null ? "" : parent.getXPathPrefix(), this.getAlias(), index, this.getXPath(),
@@ -230,6 +233,9 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
                 //but still possible, multiple non-optional childs will result in errors that are thrown in an exception
                 boolean hasRequired = false;
                 for (FxAssignment as : assignments) {
+                    if (as instanceof FxPropertyAssignment && as.getAssignedType().usePropertyPermissions() &&
+                            !ticket.mayCreateACL(((FxPropertyAssignment) as).getACL().getId(), ticket.getUserId()))
+                        continue;
                     if (as.getMultiplicity().isRequired()) {
                         if (hasRequired)
                             throw new FxCreateException("ex.content.data.create.oneof.multiple",
@@ -241,6 +247,9 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
                 }
             } else { // 'regular' Any-Of group
                 for (FxAssignment as : assignments) {
+                    if (as instanceof FxPropertyAssignment && as.getAssignedType().usePropertyPermissions() &&
+                            !ticket.mayCreateACL(((FxPropertyAssignment) as).getACL().getId(), ticket.getUserId()))
+                        continue;
                     if (as.getMultiplicity().isOptional())
                         thisGroup.getChildren().add(as.createEmptyData(thisGroup, 1));
                     else for (int c = 0; c < as.getMultiplicity().getMin(); c++)
@@ -279,6 +288,7 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
         ArrayList<FxData> children = new ArrayList<FxData>(5);
         FxGroupData thisGroup;
         try {
+            final UserTicket ticket = FxContext.get().getTicket();
             thisGroup = new FxGroupData(parent == null ? "" : parent.getXPathPrefix(), this.getAlias(), index, this.getXPath(),
                     XPathElement.stripType(XPathElement.toXPathMult(this.getXPath())), XPathElement.getIndices(getXPath()),
                     this.getId(), this.getMultiplicity(), this.getPosition(), parent, children, this.isSystemInternal());
@@ -286,6 +296,8 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
             for (FxAssignment as : assignments) {
                 if (!as.isEnabled()
                     || as.isSystemInternal()
+                    || (as instanceof FxPropertyAssignment && as.getAssignedType().usePropertyPermissions() &&
+                            !ticket.mayCreateACL(((FxPropertyAssignment) as).getACL().getId(), ticket.getUserId()))    
                     || (as instanceof FxPropertyAssignment && ((FxPropertyAssignment) as).getProperty().getDataType() == FxDataType.Binary)
                     || (as instanceof FxPropertyAssignment && ((FxPropertyAssignment) as).getProperty().getDataType() == FxDataType.Reference)    )
                     continue;

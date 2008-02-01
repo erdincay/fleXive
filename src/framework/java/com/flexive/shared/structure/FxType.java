@@ -45,6 +45,7 @@ import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.scripting.FxScriptMappingEntry;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.LifeCycleInfo;
+import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.workflow.Workflow;
 import org.apache.commons.lang.StringUtils;
@@ -603,8 +604,9 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
         } catch (FxInvalidParameterException e) {
             throw new FxCreateException(e);
         }
+        final UserTicket ticket = FxContext.get().getTicket();
         for (FxPropertyAssignment fxpa : assignedProperties) {
-            if (!fxpa.isEnabled())
+            if (!fxpa.isEnabled() || (usePropertyPermissions() && !ticket.mayCreateACL(fxpa.getACL().getId(), ticket.getUserId())))
                 continue;
             /*if (fxpa.getMultiplicity().isOptional())
                 base.addChild(fxpa.createEmptyData(base, 1));

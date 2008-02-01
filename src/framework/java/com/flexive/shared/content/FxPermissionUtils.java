@@ -39,7 +39,10 @@ import com.flexive.shared.FxLanguage;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.exceptions.FxNotFoundException;
-import com.flexive.shared.security.*;
+import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.ACLAssignment;
+import com.flexive.shared.security.Role;
+import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
@@ -179,6 +182,8 @@ public class FxPermissionUtils {
         } catch (Exception e) {
             name = "#" + acl;
         }
+        if (list == null)
+            list = new ArrayList<String>(3);
         if (!list.contains(name))
             list.add(name);
     }
@@ -195,7 +200,7 @@ public class FxPermissionUtils {
      * @throws FxInvalidParameterException on errors
      * @throws FxNoAccessException         on errors
      */
-    public static void processPropertyPermissions(UserTicket ticket, FxContentSecurityInfo securityInfo, FxContent content, FxType type, FxEnvironment env) throws FxNotFoundException, FxInvalidParameterException, FxNoAccessException {
+    public static void wrapNoAccessValues(UserTicket ticket, FxContentSecurityInfo securityInfo, FxContent content, FxType type, FxEnvironment env) throws FxNotFoundException, FxInvalidParameterException, FxNoAccessException {
         if (!type.usePropertyPermissions() || ticket.isGlobalSupervisor() || FxContext.get().getRunAsSystem())
             return; //invalid call, nothing to process ...
         List<String> xpaths = content.getAllPropertyXPaths();
@@ -239,6 +244,38 @@ public class FxPermissionUtils {
             pdata = content.getPropertyData(xpath);
             if (pdata.getValue() instanceof FxNoAccess)
                 pdata.setValue(((FxNoAccess) pdata.getValue()).getWrappedValue());
+        }
+    }
+
+    /**
+     * Check if the calling user has the requested permission for all properties in this content.
+     * Call only if the assigned type uses propery permissions!
+     *
+     * @param content content to check
+     * @param perm    requested permission
+     * @throws FxNotFoundException         on errors
+     * @throws FxInvalidParameterException on errors
+     * @throws FxNoAccessException         on errors
+     */
+    public static void checkPropertyPermissions(FxContent content, ACL.Permission perm) throws FxNotFoundException, FxInvalidParameterException, FxNoAccessException {
+        final UserTicket ticket = FxContext.get().getTicket();
+        List<String> xpaths = content.getAllPropertyXPaths();
+        FxPropertyData pdata;
+        for (String xpath : xpaths) {
+            pdata = content.getPropertyData(xpath);
+            if (pdata.getValue() instanceof FxNoAccess || pdata.isEmpty() || pdata.getValue().isReadOnly())
+                continue; //dont touch NoAccess or readonly values
+            if (perm == ACL.Permission.EDIT && !ticket.mayEditACL(((FxPropertyAssignment) pdata.getAssignment()).getACL().getId(), content.getLifeCycleInfo().getCreatorId()))
+                throw new FxNoAccessException("ex.acl.noAccess.property.edit", xpath);
+            else
+            if (perm == ACL.Permission.CREATE && !ticket.mayCreateACL(((FxPropertyAssignment) pdata.getAssignment()).getACL().getId(), content.getLifeCycleInfo().getCreatorId()))
+                throw new FxNoAccessException("ex.acl.noAccess.property.create", xpath);
+            else
+            if (perm == ACL.Permission.READ && !ticket.mayReadACL(((FxPropertyAssignment) pdata.getAssignment()).getACL().getId(), content.getLifeCycleInfo().getCreatorId()))
+                throw new FxNoAccessException("ex.acl.noAccess.property.read", xpath);
+            else
+            if (perm == ACL.Permission.DELETE && !ticket.mayDeleteACL(((FxPropertyAssignment) pdata.getAssignment()).getACL().getId(), content.getLifeCycleInfo().getCreatorId()))
+                throw new FxNoAccessException("ex.acl.noAccess.property.delete", xpath);
         }
     }
 

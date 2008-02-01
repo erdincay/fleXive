@@ -202,7 +202,7 @@ public class FxPropertyData extends FxData {
      */
     @Override
     public int getRemoveableElements() {
-        if (this.value != null && this.value instanceof FxNoAccess)
+        if (this.value != null && (this.value instanceof FxNoAccess || this.value.isReadOnly()))
             return 0;
         return super.getRemoveableElements();
     }

@@ -212,7 +212,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
 
             if (type.usePropertyPermissions() && !ticket.isGlobalSupervisor()) {
                 //wrap with FxNoAccess or set to readonly when appropriate
-                FxPermissionUtils.processPropertyPermissions(ticket, cachedContent.getSecurityInfo(),
+                FxPermissionUtils.wrapNoAccessValues(ticket, cachedContent.getSecurityInfo(),
                         content, type, env);
             }
             //security check end
@@ -266,6 +266,8 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                 beforeAssignmentScript = FxScriptEvent.BeforeAssignmentDataSave;
                 afterAssignmentScript = FxScriptEvent.AfterAssignmentDataSave;
             }
+            if (type.usePropertyPermissions() && !ticket.isGlobalSupervisor()) 
+                FxPermissionUtils.checkPropertyPermissions(content, content.getPk().isNew() ? ACL.Permission.CREATE : ACL.Permission.EDIT);
             //security check end
 
             storage.prepareSave(con, content);
