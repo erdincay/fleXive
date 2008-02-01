@@ -14,13 +14,13 @@
 
     <ui:define name="body">
 
-        <adm:tab label="#{fxMessageBean['Logout.tabtitle']}" active="true" id="logout"/>
-
         <h:form id="frm">
+
+            <adm:tab label="#{fxMessageBean['Logout.tabtitle']}" active="true" id="logout"/>
 
             <table>
                 <tr>
-                    <td colspan="2">
+                    <td>
                         <div class="infoMessage" style="padding-bottom: 20px">
                             #{fxMessageBean['Logout.message']}
                         </div >
@@ -29,11 +29,9 @@
                 <tr>
                     <td>
                         <adm:commandButton id="logoutButton" bean="#{fxAuthenticationBean}" action="logout"
-                            location="content" labelKey="Logout.button.confirm"/>
-                    </td>
-                    <td>
+                            location="content" icon="ok" labelKey="Logout.button.confirm"/>
                         <adm:commandButton id="cancelButton" action="contentPage"
-                           location="content" labelKey="Logout.button.cancel"/>
+                           location="content" icon="cancel" labelKey="Logout.button.cancel"/>
                     </td>
                 </tr>
             </table>

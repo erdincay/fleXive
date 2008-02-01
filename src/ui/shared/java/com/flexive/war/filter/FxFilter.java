@@ -48,6 +48,7 @@ import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.war.webdav.FxWebDavUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.StringUtils;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -145,13 +146,6 @@ public class FxFilter implements Filter {
                             ? (FxResponseWrapper) servletResponse
                             : new FxResponseWrapper(servletResponse, catchData);
 
-            if ("faces".equals(request.getPageType()) || "jsf".equals(request.getPageType()) || "xhtml".equals(request.getPageType())) {
-                // TODO: flag response as XHTML only if our response actually is valid XHTML (which it currently is not)
-                response.setContentType("text/html");
-            } else if ("css".equalsIgnoreCase(request.getPageType())) {
-                response.setContentType("text/css");
-            }
-
 //            if (isFinalPath(request)) {
             if (request.isCmsUrl()) {
                 // Resolve CMS request
@@ -186,6 +180,14 @@ public class FxFilter implements Filter {
                 }
             }
             try {
+                if ("faces".equals(request.getPageType()) || "jsf".equals(request.getPageType()) || "xhtml".equals(request.getPageType())
+                        || StringUtils.defaultString(response.getContentType()).contains("application/xhtml+xml")) {
+                    // TODO: flag response as XHTML only if our response actually is valid XHTML (which it currently is not)
+                    response.setContentType("text/html");
+                } else if ("css".equalsIgnoreCase(request.getPageType())) {
+                    response.setContentType("text/css");
+                }
+
                 response.setXPoweredBy(X_POWERED_BY_VALUE);
                 if (request.browserMayCache()) {
                     response.enableBrowserCache(FxResponseWrapper.CacheControl.PRIVATE, null, false);
