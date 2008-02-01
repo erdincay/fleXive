@@ -217,7 +217,14 @@
                 var propertyId = node["propertyId"];
                 if (propertyId != null && propertyId != -1 && parent.frames["contentFrame"].addQueryNode) {
                     // add to search query
-                    parent.frames["contentFrame"].addQueryNode(propertyId, node.nodeDocType);
+                    if (node.nodeDocType=="AssignmentSystemInternal" || node.nodeDocType=="Assignment") {
+                        if (getJsonRpc().StructureTreeEditor.isSearchable(propertyId))
+                            parent.frames["contentFrame"].addQueryNode(propertyId, node.nodeDocType);
+                        else
+                            alert("#{fxMessageBean['StructureTree.message.property.notSearchable']}");
+                    }
+                    else
+                        parent.frames["contentFrame"].addQueryNode(propertyId, node.nodeDocType);
                     //alert("sturctureTreeClickHandler, addProperty branch");
                 }
                 else doContentActionFromContextMenu(node, defaultAction);

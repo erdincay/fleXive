@@ -34,6 +34,8 @@
 package com.flexive.war.beans.admin.structure;
 
 import com.flexive.faces.FxJsfUtils;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.structure.FxPropertyAssignment;
 
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
