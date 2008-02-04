@@ -396,128 +396,144 @@ database.password=a]]></programlisting>
         <section xml:id="glassfish_installation_conn_pools">
             <title>Creating the Connection pools
             </title>
-            <para>In the
-                <link href="http://localhost:4848/">Admin Console</link>
-                navigate to
-                <code>Resources > JDBC > Connection Pools</code>
-                and click
-                <code>New</code>
+            <para>Two connection pools, one for the division and one for the configuration database, have to be set
+                up.
             </para>
-            <para>
-                <emphasis>Step 1</emphasis>
-            </para>
-            <para>
-                <itemizedlist>
-                    <listitem>Name:
-                        <code>flexiveDivision1</code>
-                    </listitem>
-                    <listitem>ResourceType:
-                        <code>javax.sql.XADataSource</code>
-                    </listitem>
-                    <listitem>Database Vendor:
-                        <code>MySQL</code>
-                    </listitem>
-                </itemizedlist>
-            </para>
-            <para>Click
-                <code>Next</code>
-            </para>
-            <para>
-                <emphasis>Step 2</emphasis>
-            </para>
-            <para>
-                <itemizedlist>
-                    <listitem>Datasource Classname:
-                        <code>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</code>
-                    </listitem>
-                    <listitem>Resource Type:
-                        <code>javax.sql.XADataSource</code>
-                    </listitem>
-                    <listitem>Check
-                        <code>Required</code>
-                        for
-                        <code>Connection Validation</code>
-                    </listitem>
-                    <listitem>Check
-                        <code>Enabled</code>
-                        for
-                        <code>Allow Non Component Callers</code>
-                    </listitem>
-                    <listitem>Set Transaction Isolation to
-                        <code>read-committed</code>
-                        and check Isolation Level as
-                        <code>Guaranteed</code>
-                    </listitem>
-                </itemizedlist>
-            </para>
-            <para>
-                <emphasis>Additional properties</emphasis>
-            </para>
-            <para>
-                <itemizedlist>
-                    <listitem>DatabaseName:
-                        <code>flexive</code>
-                    </listitem>
-                    <listitem>serverName:
-                        <code><![CDATA[<your mysql server ip>]]></code>
-                    </listitem>
-                    <listitem>port:
-                        <code>3306</code>
-                    </listitem>
-                    <listitem>userName:
-                        <code><![CDATA[<your mysql user>]]></code>
-                    </listitem>
-                    <listitem>password:
-                        <code><![CDATA[<your mysql password>]]></code>
-                    </listitem>
-                    <listitem>Url:
-                        <code>
-                            <![CDATA[jdbc:mysql://localhost:3306/flexive?useUnicode=true&characterEncoding=utf8&characterResultSets=utf8]]></code>
-                    </listitem>
-                    <listitem>URL:
-                        <code>
-                            <![CDATA[jdbc:mysql://localhost:3306/flexive?useUnicode=true&characterEncoding=utf8&characterResultSets=utf8]]></code>
-                    </listitem>
-                </itemizedlist>
-            </para>
-            <para>Save and try to ping the server.</para>
-            <para>If you have troubles connecting, please make sure you have the correct server IP set!</para>
-            <para>Once created, you have to create
-                <code>JDBC Resource</code>
-                by selecting
-                <code>Resources > JDBC >
-                    JDBC Resources
-                </code>
-                and clicking
-                <code>New</code>:
+
+            <section xml:id="glassfish_installation_conn_pools_division">
+                <title>Division connection pool</title>
+                <para>In the
+                    <link href="http://localhost:4848/">Admin Console</link>
+                    navigate to
+                    <code>Resources > JDBC > Connection Pools</code>
+                    and click
+                    <code>New</code>
+                </para>
+
+                <para>
+                    <emphasis>Step 1</emphasis>
+                </para>
                 <para>
                     <itemizedlist>
-                        <listitem>JNDI Name:
-                            <code>jdbc/flexiveDivision1</code>
-                        </listitem>
-                        <listitem>Pool Name:
+                        <listitem>Name:
                             <code>flexiveDivision1</code>
                         </listitem>
+                        <listitem>ResourceType:
+                            <code>javax.sql.XADataSource</code>
+                        </listitem>
+                        <listitem>Database Vendor:
+                            <code>MySQL</code>
+                        </listitem>
                     </itemizedlist>
                 </para>
-                Click
-                <code>OK</code>
-            </para>
-            <para>Once done repeat the above steps for the
-                <emphasis>configuration connection pool</emphasis>
-                and its JDBC resource.
-            </para>
-            <para>
+                <para>Click
+                    <code>Next</code>
+                </para>
+                <para>
+                    <emphasis>Step 2</emphasis>
+                </para>
                 <para>
                     <itemizedlist>
-                        <listitem>Expected JNDI Name:
-                            <code>jdbc/flexiveConfiguration</code>
+                        <listitem>Datasource Classname:
+                            <code>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</code>
                         </listitem>
-                        <listitem>Pool Name:
-                            <code>flexiveConfiguration</code>
+                        <listitem>Resource Type:
+                            <code>javax.sql.XADataSource</code>
+                        </listitem>
+                        <listitem>Check
+                            <code>Required</code>
+                            for
+                            <code>Connection Validation</code>
+                        </listitem>
+                        <listitem>Check
+                            <code>Enabled</code>
+                            for
+                            <code>Allow Non Component Callers</code>
+                        </listitem>
+                        <listitem>Set Transaction Isolation to
+                            <code>read-committed</code>
+                            and check Isolation Level as
+                            <code>Guaranteed</code>
                         </listitem>
                     </itemizedlist>
                 </para>
+                <para>
+                    <emphasis>Additional properties</emphasis>
+                </para>
+                <para>
+                    <itemizedlist>
+                        <listitem>DatabaseName:
+                            <code>flexive</code>
+                        </listitem>
+                        <listitem>serverName:
+                            <code><![CDATA[<your mysql server ip>]]></code>
+                        </listitem>
+                        <listitem>port:
+                            <code>3306</code>
+                        </listitem>
+                        <listitem>userName:
+                            <code><![CDATA[<your mysql user>]]></code>
+                        </listitem>
+                        <listitem>password:
+                            <code><![CDATA[<your mysql password>]]></code>
+                        </listitem>
+                        <listitem>Url:
+                            <code>
+                                <![CDATA[jdbc:mysql://localhost:3306/flexive?useUnicode=true&characterEncoding=utf8&characterResultSets=utf8]]></code>
+                        </listitem>
+                        <listitem>URL:
+                            <code>
+                                <![CDATA[jdbc:mysql://localhost:3306/flexive?useUnicode=true&characterEncoding=utf8&characterResultSets=utf8]]></code>
+                        </listitem>
+                    </itemizedlist>
+                </para>
+                <para>Click
+                    <code>Finish</code>.
+                </para>
+                <section xml:id="glassfish_installation_conn_pools_division_jdbc">
+                    <title>JDBC Resource</title>
+                    <para>Try to ping the server.</para>
+                    <para>If you have troubles connecting, please make sure you have the correct server IP set!</para>
+                    <para>You have to create the
+                        <code>JDBC Resource</code>
+                        by selecting
+                        <code>Resources > JDBC >
+                            JDBC Resources
+                        </code>
+                        and clicking
+                        <code>New</code>:
+                        <para>
+                            <itemizedlist>
+                                <listitem>JNDI Name:
+                                    <code>jdbc/flexiveDivision1</code>
+                                </listitem>
+                                <listitem>Pool Name:
+                                    <code>flexiveDivision1</code>
+                                </listitem>
+                            </itemizedlist>
+                        </para>
+                        Click
+                        <code>OK</code>
+                    </para>
+                </section>
+            </section>
+
+            <section xml:id="glassfish_installation_conn_pools_config">
+                <title>Configuration connection pool</title>
+                <para>In the
+                    <link href="http://localhost:4848/">Admin Console</link>
+                    navigate to
+                    <code>Resources > JDBC > Connection Pools</code>
+                    and click
+                    <code>New</code>
+                </para>
+            </section>
+
+            <para>Repeat the above steps as explained in section
+                <link linkend="glassfish_installation_conn_pools_division">Division connection pool</link>
+                for the configuration connection pool.
+            </para>
+            <para>
                 <para>
                     For the connection pool use the same settings as above except:
                     <itemizedlist>
@@ -537,20 +553,44 @@ database.password=a]]></programlisting>
                         </listitem>
                     </itemizedlist>
                 </para>
+                <section xml:id="glassfish_installation_conn_pools_config_jdbc">
+                    <title>JDBC Resource</title>
+                    <para>To create the JDBC resource, also follow the procedure in section
+                        <link linkend="glassfish_installation_conn_pools_division">Division connection pool
+                        </link>, using these settings:
+                        <itemizedlist>
+                            <listitem>JNDI Name:
+                                <code>jdbc/flexiveConfiguration</code>
+                            </listitem>
+                            <listitem>Pool Name:
+                                <code>flexiveConfiguration</code>
+                            </listitem>
+                        </itemizedlist>
+                    </para>
+                </section>
             </para>
         </section>
         <section xml:id="glassfish_installation_deployment">
             <title>Deployment</title>
+            <para>Change to the
+                <filename>flexive-dist</filename>
+                directory of your &Flexive; distribution and run
+                <code>ant ear</code>. This will create the
+                <filename>flexive.ear</filename>
+                file inside the
+                <filename>flexive-dist</filename>
+                directory.
+            </para>
             <para>
                 <emphasis>Using the autodeploy directory:</emphasis>
                 <para>
-                    <itemizedlist>
+                    <orderedlist>
                         <listitem>Copy the
                             <filename>flexive.ear</filename>
                             to
                             <filename>${glassfish.home}/domains/domain1/autodeploy</filename>
                         </listitem>
-                    </itemizedlist>
+                    </orderedlist>
                 </para>
             </para>
             <para>
@@ -562,14 +602,25 @@ database.password=a]]></programlisting>
                         </listitem>
                         <listitem>Click
                             <code>Deploy...</code>
+                            and upload the
+                            <filename>flexive.ear</filename>
+                            file.
                         </listitem>
                         <listitem>Click
                             <code>OK</code>
                         </listitem>
-                        <listitem>After successful deployment, enter the Flexive Admin UI at
-                            <link href="http://localhost:8080/flexive/adm/">http://localhost:8080/flexive/adm/</link>
-                        </listitem>
                     </orderedlist>
+                    <para>To access the backend point your browser to
+                        <link href="http://localhost:8080/flexive/adm/">http://localhost:8080/flexive/adm/
+                        </link>
+                    </para>
+                    <para>Alternatively you can specify your server's IP address, which is supported by default,
+                        too.
+                    </para>
+                    <para>
+                        The default superuser's username and password for the Backend Administration are:
+                    </para>
+                    <para>username: supervisor, password: supervisor</para>
                 </para>
             </para>
         </section>
