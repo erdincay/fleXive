@@ -35,10 +35,21 @@ package com.flexive.tests.embedded;
 
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
-import com.flexive.shared.exceptions.FxEntryInUseException;
+import com.flexive.shared.FxLanguage;
+import com.flexive.shared.content.FxContent;
+import com.flexive.shared.content.FxPK;
+import com.flexive.shared.exceptions.*;
+import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.MandatorEngine;
+import com.flexive.shared.interfaces.TypeEngine;
 import com.flexive.shared.security.Mandator;
+import com.flexive.shared.structure.FxType;
+import com.flexive.shared.structure.FxTypeEdit;
 import static com.flexive.tests.embedded.FxTestUtils.*;
+import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -49,19 +60,38 @@ import org.testng.annotations.Test;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Test(groups = {"ejb"})
+@Test(groups = {"ejb", "mandator"})
 public class MandatorTest {
 
+    private static transient Log LOG = LogFactory.getLog(MandatorTest.class);
+
     private MandatorEngine me = null;
+    private TypeEngine te = null;
+    private ContentEngine ce = null;
+    private long testMandator = -1;
+    private long testType = -1;
 
     @BeforeClass
     public void beforeClass() throws Exception {
         me = EJBLookup.getMandatorEngine();
+        te = EJBLookup.getTypeEngine();
+        ce = EJBLookup.getContentEngine();
         login(TestUsers.SUPERVISOR);
+        try {
+            testMandator = me.create("MANDATOR_" + RandomStringUtils.randomAlphanumeric(10), true);
+            testType = te.save(FxTypeEdit.createNew("TEST_" + RandomStringUtils.randomAlphanumeric(10)));
+        } catch (FxApplicationException e) {
+            LOG.error(e);
+        }
     }
 
     @AfterClass
     public void afterClass() throws Exception {
+        if (testMandator != -1) {
+            if (testType != -1)
+                ce.removeForType(testType);
+            me.remove(testMandator);
+        }
         logout();
     }
 
@@ -126,6 +156,83 @@ public class MandatorTest {
         } catch (Exception e) {
             assert false : "Unexpected exception: " + e.getMessage();
         }
+    }
+
+    /**
+     * Test active/inactive mandators with contents
+     *
+     * @throws FxApplicationException on errors
+     */
+    public void activeContent() throws FxApplicationException {
+        me.activate(testMandator); //make sure the mandator is active
+        FxType type = CacheAdmin.getEnvironment().getType(testType);
+        Assert.assertTrue(CacheAdmin.getEnvironment().getMandator(testMandator).isActive(), "Expected mandator to be active!");
+        FxContent co_act1 = ce.initialize(testType, testMandator, -1, type.getWorkflow().getSteps().get(0).getId(), FxLanguage.DEFAULT_ID);
+        me.deactivate(testMandator);
+        Assert.assertFalse(CacheAdmin.getEnvironment().getMandator(testMandator).isActive(), "Expected mandator to be inactive!");
+        try {
+            ce.initialize(testType, testMandator, -1, type.getWorkflow().getSteps().get(0).getId(), FxLanguage.DEFAULT_ID);
+            Assert.fail("Initialize on a deactivated mandator should fail!");
+        } catch (FxNotFoundException e) {
+            //expected
+        } catch (Exception ex) {
+            Assert.fail("FxNotFoundException expected! Got: " + ex.getClass().getCanonicalName());
+        }
+        try {
+            ce.save(co_act1);
+            Assert.fail("Save on a deactivated mandator should fail!");
+        } catch (FxCreateException e) {
+            //expected
+        } catch (Exception ex) {
+            Assert.fail("FxCreateException expected! Got: " + ex.getClass().getCanonicalName());
+        }
+        me.activate(testMandator);
+        FxPK pk = ce.save(co_act1);
+        FxContent co_loaded = ce.load(pk);
+        FxPK pk_ver = ce.createNewVersion(co_loaded);
+        ce.removeVersion(pk_ver);
+        ce.remove(pk);
+        pk = ce.save(co_act1);
+        me.deactivate(testMandator);
+        try {
+            ce.load(pk);
+            Assert.fail("Load on a deactivated mandator should fail!");
+        } catch (FxNotFoundException e) {
+            //expected
+        } catch (Exception ex) {
+            Assert.fail("FxNotFoundException expected! Got: " + ex.getClass().getCanonicalName());
+        }
+        me.activate(testMandator);
+        co_loaded = ce.load(pk);
+        me.deactivate(testMandator);
+        try {
+            ce.createNewVersion(co_loaded);
+            Assert.fail("CreateNewVersion on a deactivated mandator should fail!");
+        } catch (FxNotFoundException e) {
+            //expected
+        } catch (Exception ex) {
+            Assert.fail("FxNotFoundException expected! Got: " + ex.getClass().getCanonicalName());
+        }
+        me.activate(testMandator);
+        pk_ver = ce.createNewVersion(co_loaded);
+        me.deactivate(testMandator);
+        try {
+            ce.removeVersion(pk_ver);
+            Assert.fail("RemoveVersion on a deactivated mandator should fail!");
+        } catch (FxNotFoundException e) {
+            //expected
+        } catch (Exception ex) {
+            Assert.fail("FxNotFoundException expected! Got: " + ex.getClass().getCanonicalName());
+        }
+        try {
+            ce.remove(pk);
+            Assert.fail("Remove on a deactivated mandator should fail!");
+        } catch (FxRemoveException e) {
+            //expected
+        } catch (Exception ex) {
+            Assert.fail("FxRemoveException expected! Got: " + ex.getClass().getCanonicalName());
+        }
+        me.activate(testMandator);
     }
 
 }

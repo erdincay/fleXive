@@ -34,6 +34,7 @@
 package com.flexive.shared.structure;
 
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.FxLanguage;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.security.ACL;
@@ -118,6 +119,18 @@ public class FxTypeEdit extends FxType implements Serializable {
         this.removeInstancesWithRelationTypes = false;
         this.originalRelations = new ArrayList<FxTypeRelation>(super.getRelations());
     }
+
+    /**
+     * Create a new FxTypeEdit instance for creating a new FxType
+     *
+     * @param name        name of the type
+     * @return FxTypeEdit instance for creating a new FxType
+     */
+    public static FxTypeEdit createNew(String name) {
+        return createNew(name, new FxString(FxLanguage.DEFAULT_ID, name),
+                CacheAdmin.getEnvironment().getACL(com.flexive.shared.security.ACL.Category.STRUCTURE.getDefaultId()), null);
+    }
+
     /**
      * Create a new FxTypeEdit instance for creating a new FxType
      *

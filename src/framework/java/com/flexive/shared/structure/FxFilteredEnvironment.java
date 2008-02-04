@@ -35,6 +35,7 @@ package com.flexive.shared.structure;
 
 import com.flexive.shared.FxContext;
 import com.flexive.shared.exceptions.FxNoAccessException;
+import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.security.ACL;
@@ -214,6 +215,13 @@ public final class FxFilteredEnvironment implements FxEnvironment {
      */
     public Mandator getMandator(long id) {
         return environment.getMandator(id);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void checkMandatorExistance(long id) throws FxNotFoundException {
+        environment.checkMandatorExistance(id);
     }
 
     /**

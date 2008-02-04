@@ -464,6 +464,19 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
+    public void checkMandatorExistance(long id) throws FxNotFoundException {
+        for (Mandator mandator : mandators)
+            if (mandator.getId() == id) {
+                if( !mandator.isActive() )
+                    throw new FxNotFoundException("ex.structure.mandator.notFound.notActive", mandator.getName(), id);
+                return;
+            }
+        throw new FxNotFoundException("ex.structure.mandator.notFound.id", id);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public Mandator getMandator(String name) {
         for (Mandator mandator : mandators) {
             if (mandator.getName().equals(name)) {

@@ -41,6 +41,7 @@ import com.flexive.shared.workflow.Route;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
 import com.flexive.shared.workflow.Workflow;
+import com.flexive.shared.exceptions.FxNotFoundException;
 
 import java.io.Serializable;
 import java.util.List;
@@ -160,6 +161,15 @@ public interface FxEnvironment extends Serializable {
      * @return the mandator with the given id
      */
     Mandator getMandator(long id);
+
+    /**
+     * Check if the mandator with the requested id exists and is active.
+     * Will throw a FxNotFoundException if inactive or not existant.
+     *
+     * @param id requested mandator id
+     * @throws com.flexive.shared.exceptions.FxNotFoundException if inactive or not existant
+     */
+    void checkMandatorExistance(long id) throws FxNotFoundException;
 
     /**
      * Get a mandator by its name

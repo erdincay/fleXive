@@ -139,7 +139,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     protected static final String CONTENT_DATA_FT_REMOVE_VERSION = "DELETE FROM " + TBL_CONTENT_DATA_FT + " WHERE ID=? AND VER=?";
 
     //security info main query
-    protected static final String SECURITY_INFO_MAIN = "SELECT DISTINCT c.ACL, t.ACL, s.ACL, t.SECURITY_MODE, t.ID, c.DBIN_ID, c.DBIN_ACL, c.CREATED_BY FROM " +
+    protected static final String SECURITY_INFO_MAIN = "SELECT DISTINCT c.ACL, t.ACL, s.ACL, t.SECURITY_MODE, t.ID, c.DBIN_ID, c.DBIN_ACL, c.CREATED_BY, c.MANDATOR FROM " +
             TBL_CONTENT + " c, " + TBL_STRUCT_TYPES + " t, " + TBL_STEP + " s WHERE c.ID=? AND ";
     protected static final String SECURITY_INFO_WHERE = " AND t.ID=c.TDEF AND s.ID=c.STEP";
     protected static final String SECURITY_INFO_VER = SECURITY_INFO_MAIN + "c.VER=?" + SECURITY_INFO_WHERE;
@@ -1984,7 +1984,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setLong(1, pk.getId());
             byte typePerm;
             int typeACL, contentACL, stepACL, previewACL;
-            long previewId, typeId, ownerId;
+            long previewId, typeId, ownerId, mandatorId;
             long[] propertyPerm;
             ResultSet rs = ps.executeQuery();
             if (rs == null || !rs.next())
@@ -1997,6 +1997,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             previewId = rs.getLong(6);
             previewACL = rs.getInt(7);
             ownerId = rs.getLong(8);
+            mandatorId = rs.getLong(9);
             if (rs.next())
                 throw new FxLoadException("ex.db.resultSet.tooManyRows");
             if ((typePerm & 0x02) == 0x02) {
@@ -2024,7 +2025,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     propertyPerm[cnt++] = acl;
             } else
                 propertyPerm = new long[0];
-            return new FxContentSecurityInfo(pk, ownerId, previewId, typeId, typePerm, typeACL, stepACL, contentACL, previewACL, propertyPerm);
+            return new FxContentSecurityInfo(pk, ownerId, previewId, typeId, mandatorId, typePerm, typeACL, stepACL, contentACL, previewACL, propertyPerm);
         } catch (SQLException e) {
             throw new FxLoadException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {

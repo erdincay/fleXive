@@ -70,6 +70,11 @@ public class FxContentSecurityInfo implements Serializable {
     private long typeId;
 
     /**
+     * Id of the mandator this content belongs to
+     */
+    private long mandatorId;
+
+    /**
      * binary encoded type permissions
      */
     private byte permissions;
@@ -107,6 +112,7 @@ public class FxContentSecurityInfo implements Serializable {
      * @param ownerId         owner of the content
      * @param previewId       Id of preview image, only relevant for security if &gt; 0
      * @param typeId          id of the used type
+     * @param mandatorId      id of the mandator
      * @param typePermissions byte encoded type permission handling
      * @param typeACL         ACL of the type
      * @param stepACL         ACL of the step
@@ -114,13 +120,14 @@ public class FxContentSecurityInfo implements Serializable {
      * @param previewACL      Property ACL of the preview, only relevant for security if <code>previewId</code> &gt; 0
      * @param usedPropertyACL relevant property ACL's
      */
-    public FxContentSecurityInfo(FxPK pk, long ownerId, long previewId, long typeId, byte typePermissions, int typeACL, int stepACL, int contentACL,
+    public FxContentSecurityInfo(FxPK pk, long ownerId, long previewId, long typeId, long mandatorId, byte typePermissions, int typeACL, int stepACL, int contentACL,
                                  int previewACL,
                                  long[] usedPropertyACL) {
         this.pk = pk;
         this.ownerId = ownerId;
         this.previewId = previewId;
         this.typeId = typeId;
+        this.mandatorId = mandatorId;
         this.permissions = typePermissions;
         this.typeACL = typeACL;
         this.stepACL = stepACL;
@@ -154,6 +161,15 @@ public class FxContentSecurityInfo implements Serializable {
      */
     public long getTypeId() {
         return typeId;
+    }
+
+    /**
+     * Get the id of the mandator
+     *
+     * @return mandator id
+     */
+    public long getMandatorId() {
+        return mandatorId;
     }
 
     /**
@@ -202,10 +218,19 @@ public class FxContentSecurityInfo implements Serializable {
         return permissions != 0;
     }
 
+    /**
+     * Get the binary id of the preview
+     *
+     * @return binary id of the preview
+     */
     public long getPreviewId() {
         return previewId;
     }
 
+    /**
+     *
+     * @return
+     */
     public int getPreviewACL() {
         return previewACL;
     }
