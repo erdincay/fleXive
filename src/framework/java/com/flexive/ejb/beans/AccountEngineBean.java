@@ -250,8 +250,8 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
 
             // Obtain a database connection
             con = Database.getDbConnection();
-            //               1-6 7      8           9              10                 11           12       13      14
-            curSql = "SELECT d.*,a.ID,a.IS_ACTIVE,a.IS_VALIDATED,a.ALLOW_MULTILOGIN,a.VALID_FROM,a.VALID_TO,NOW(),a.PASSWORD " +
+            //               1-6 7      8           9              10                 11           12       13      14         15
+            curSql = "SELECT d.*,a.ID,a.IS_ACTIVE,a.IS_VALIDATED,a.ALLOW_MULTILOGIN,a.VALID_FROM,a.VALID_TO,NOW(),a.PASSWORD,a.MANDATOR " +
                     "FROM " + TBL_ACCOUNTS + " a " +
                     "LEFT JOIN " +
                     " (SELECT ID,ISLOGGEDIN,LAST_LOGIN,LAST_LOGIN_FROM,FAILED_ATTEMPTS,AUTHSRC FROM " + TBL_ACCOUNT_DETAILS +
@@ -284,11 +284,13 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             final Date validFrom = new Date(rs.getLong(11));
             final Date validTo = new Date(rs.getLong(12));
             final Date dbNow = rs.getTimestamp(13);
+            final long mandator = rs.getLong(15);
 
             // Account active?
-            if (!active || !validated) {
+            if (!active || !validated || !CacheAdmin.getEnvironment().getMandator(mandator).isActive()) {
                 if (LOG.isDebugEnabled()) LOG.debug("Login for user [" + username +
-                        "] failed, account is inactive. active=" + active + " validated=" + validated);
+                        "] failed, account is inactive. Active=" + active + ", Validated=" + validated +
+                        ", Mandator active: " + CacheAdmin.getEnvironment().getMandator(mandator).isActive());
                 increaseFailedLoginAttempts(con, id);
                 throw new FxLoginFailedException("Login failed", FxLoginFailedException.TYPE_INACTIVE_ACCOUNT);
             }
@@ -672,7 +674,8 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             stmt.setString(6, email);
             stmt.setLong(7, contactDataPK.getId());
             stmt.setInt(8, (int) lang);
-            stmt.setLong(9, validFrom.getTime());
+            //subtract a second to prevent login-after-immediatly-create problems with databases truncating milliseconds
+            stmt.setLong(9, validFrom.getTime()-1000);
             stmt.setLong(10, validTo.getTime());
             stmt.setString(11, description);
             stmt.setLong(12, ticket.getUserId());
@@ -751,6 +754,10 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * @throws FxInvalidParameterException if the dates are invalid
      */
     private static void checkDates(final Date validFrom, final Date validTo) throws FxInvalidParameterException {
+        if( validFrom == null )
+            throw new FxInvalidParameterException("VALID_FROM", "ex.account.login.validFrom.missing");
+        if( validTo == null )
+            throw new FxInvalidParameterException("VALID_FROM", "ex.account.login.validTo.missing");
         if (validFrom.getTime() > validTo.getTime())
             throw new FxInvalidParameterException("VALID_FROM", "ex.account.login.dateMismatch");
         if (validTo.getTime() < java.lang.System.currentTimeMillis())
@@ -1373,10 +1380,10 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             if (password != null) stmt.setString(pos++, password);
             if (contactDataId != null) stmt.setLong(pos/*++*/, contactDataId);
             stmt.executeUpdate();
-            if( contactDataId != null ) {
+            if (contactDataId != null) {
                 //make sure the user is the owner of his contact data
                 stmt.close();
-                stmt = con.prepareStatement("UPDATE "+TBL_CONTENT+" SET CREATED_BY=? WHERE ID=?");
+                stmt = con.prepareStatement("UPDATE " + TBL_CONTENT + " SET CREATED_BY=? WHERE ID=?");
                 stmt.setLong(1, accountId);
                 stmt.setLong(2, contactDataId);
                 stmt.executeUpdate();

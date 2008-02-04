@@ -48,6 +48,7 @@ import com.flexive.shared.security.UserGroup;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
+import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.value.FxString;
@@ -612,6 +613,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
      */
     public FxTreeNode getNode(Connection con, FxTreeMode mode, long nodeId) throws FxApplicationException {
         PreparedStatement ps = null;
+        final FxEnvironment env = CacheAdmin.getEnvironment();
         try {
             ps = con.prepareStatement(mode == FxTreeMode.Live ? TREE_LIVE_GETNODE : TREE_EDIT_GETNODE);
             ps.setLong(1, nodeId);
@@ -631,8 +633,8 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 long _modified = rs.getLong(10);
                 int _pos = rs.getInt(11);
                 long _acl = rs.getLong(12);
-                FxType _type = CacheAdmin.getEnvironment().getType(rs.getLong(13));
-                long _stepACL = CacheAdmin.getEnvironment().getStep(rs.getLong(15)).getAclId();
+                FxType _type = env.getType(rs.getLong(13));
+                long _stepACL = env.getStep(rs.getLong(15)).getAclId();
                 long _createdBy = rs.getLong(16);
                 long _mandator = rs.getLong(17);
                 UserTicket ticket = FxContext.get().getTicket();
@@ -643,6 +645,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 boolean _relate;
                 final boolean _system = FxContext.get().getRunAsSystem() || ticket.isGlobalSupervisor();
                 FxPermissionUtils.checkPermission(ticket, _createdBy, ACL.Permission.READ, _type, _stepACL, _acl, true);
+                env.checkMandatorExistance(_mandator);
                 if (_system || ticket.isMandatorSupervisor() && _mandator == ticket.getMandatorId() ||
                         !_type.usePermissions() || ticket.isInGroup((int) UserGroup.GROUP_OWNER) && _createdBy == ticket.getUserId()) {
                     _edit = _create = _delete = _export = _relate = true;
@@ -814,13 +817,14 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 boolean _relate;
 
                 FxType type = typeId2Type.get(_tdef);
+                final FxEnvironment env = CacheAdmin.getEnvironment();
                 if (type == null) {
-                    type = CacheAdmin.getEnvironment().getType(_tdef);
+                    type = env.getType(_tdef);
                     typeId2Type.put(_tdef, type);
                 }
                 Long _stepACL = step2stepACLId.get(_step);
                 if (_stepACL == null) {
-                    _stepACL = CacheAdmin.getEnvironment().getStep(_step).getAclId();
+                    _stepACL = env.getStep(_step).getAclId();
                     step2stepACLId.put(_step, _stepACL);
                 }
                 if (_system || ticket.isMandatorSupervisor() && _mandator == ticket.getMandatorId() ||
@@ -834,6 +838,8 @@ public abstract class GenericTreeStorage implements TreeStorage {
                     _export = FxPermissionUtils.checkPermission(ticket, _createdBy, ACL.Permission.EXPORT, type, _stepACL, _acl, false);
                     _create = FxPermissionUtils.checkPermission(ticket, _createdBy, ACL.Permission.CREATE, type, _stepACL, _acl, false);
                 }
+                if (_read && !env.getMandator(_mandator).isActive())
+                    _read = false; //filter out inactive mandators
                 if (_read) {
                     FxTreeNode node = new FxTreeNode(mode, _id, _parent, _ref, _acl, _name, FxTreeNode.PATH_NOT_LOADED, label,
                             _pos, new ArrayList<FxTreeNode>(10), new ArrayList<Long>(10), _depth, _totalChilds, _directChilds,
@@ -862,104 +868,6 @@ public abstract class GenericTreeStorage implements TreeStorage {
 //            System.out.println(nodes + " nodes loaded in " + (System.currentTimeMillis() - time) + "[ms]. Partial:" + loadPartial);
         }
     }
-
-    /*public BigDecimal makeSpace(Connection con, SequencerEngine seq, FxTreeMode mode, long nodeId, int position, final int additional) throws FxApplicationException {
-
-FxTreeNodeInfo nodeInfo = getTreeNodeInfo(con, mode, nodeId);
-//        BigDecimal boundaries[] = getBoundaries(con, nodeInfo, position);
-
-
-//check if there is enough space within the boundaries: ((right-left)-1)-(spacing*3)-2 > 0
-// => right-left-spacing*3 > 3
-
-
-int totalChildCount = nodeInfo.getTotalChildCount() + additional;
-boolean hasSpace = nodeInfo.hasSpaceFor(totalChildCount);
-
-Stack<FxTreeNodeInfo> children = new Stack<FxTreeNodeInfo>();
-children.push(nodeInfo);
-// Determine node to work on
-while (!hasSpace) {
-  nodeInfo = getTreeNodeInfo(con, mode, nodeInfo.getParentId());
-  totalChildCount += nodeInfo.getDirectChildCount()*//* + 1*//*;
-            hasSpace = nodeInfo.hasSpaceFor(totalChildCount);
-            if (!hasSpace && nodeInfo.isRoot())
-                throw new FxUpdateException("ex.tree.makeSpace.failed");
-//            if (!hasSpace)
-                children.push(nodeInfo);
-        }
-
-        // re-allocate all entries in the given nodeInfo with the calculated spacing
-        BigDecimal spacing = nodeInfo.getSpacing(totalChildCount);
-        BigDecimal left = nodeInfo.getLeft().add(spacing);
-        BigDecimal right;
-
-        PreparedStatement psSelect = null;
-        PreparedStatement psUpdate = null;
-        try {
-            psSelect = con.prepareStatement("SELECT ID,TOTAL_CHILDCOUNT FROM "+getTable(mode)+" WHERE PARENT=? AND DEPTH=? ORDER BY LFT");
-            psUpdate = con.prepareStatement("UPDATE "+getTable(mode)+" SET LFT=?,RGT=? WHERE ID=?");
-            ResultSet rs;
-            long childCount;
-            long id;
-            int batches = 0;
-            FxTreeNodeInfo current;
-            while (!children.isEmpty()) {
-                current = children.pop();
-                psSelect.setLong(1, current.getId());
-                psSelect.setInt(2, current.getDepth()+1);
-                rs = psSelect.executeQuery();
-                while (rs != null && rs.next()) {
-                    id = rs.getLong(1);
-                    childCount = rs.getLong(2);
-                    psUpdate.setBigDecimal(1, left.add(BigDecimal.ONE).add(spacing));
-                    // right = left + (3*spacing + 2)*(childcount+additional) + 1
-                    // 3... left, middle, right spacing
-                    // 2... left and right slot
-                    right = left.add(TWO.add(TWO.add(THREE.multiply(spacing)).multiply(new BigDecimal(childCount+additional))));
-                    //two is added above instead of one because left was not updated with +1
-                    left = right.add(BigDecimal.ONE).add(spacing);
-                    psUpdate.setBigDecimal(2, right);
-                    psUpdate.setLong(3, id);
-                    psUpdate.addBatch();
-                    batches++;
-                    if( batches % 1000 == 0) {
-                        psUpdate.executeBatch();
-                        batches = 0;
-                    }
-                }
-                if( batches > 0)
-                    psUpdate.executeBatch();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new FxTreeException(e, "ex.tree.makeSpace.failed");
-        } finally {
-            try {
-                if( psSelect != null )
-                    psSelect.close();
-            } catch (SQLException e) {
-                //ignore
-            }
-            try {
-                if( psUpdate != null )
-                    psUpdate.close();
-            } catch (SQLException e) {
-                //ignore
-            }
-        }
-
-*//*
-
-        int spaceCount = (additional * 2) + 1;
-        BigDecimal insertSpace = spacing.multiply(new BigDecimal(spaceCount));
-        insertSpace = insertSpace.add(new BigDecimal(additional * 2));
-
-        reorganizeSpace(con, seq, mode, mode, nodeInfo.getId(), false, spacing, null, nodeInfo, position,
-                insertSpace, boundaries, 0, null, false, false, null);
-*//*
-        return spacing;
-    }*/
 
     /**
      * {@inheritDoc}

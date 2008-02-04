@@ -41,10 +41,7 @@ import com.flexive.core.search.PropertyResolver;
 import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.genericSQL.GenericTreeStorage;
-import com.flexive.shared.FxArrayUtils;
-import com.flexive.shared.FxContext;
-import com.flexive.shared.FxFormatUtils;
-import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.*;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
@@ -117,9 +114,9 @@ public class MySQLDataFilter extends DataFilter {
                     (getStatement().getBriefcaseFilter().length == 1 ? ("=" + briefcaseIds[0]) : "IN (" +
                             FxArrayUtils.toSeparatedList(briefcaseIds, ',') + ")");
             tableContentData = "(SELECT * FROM " + DatabaseConst.TBL_CONTENT_DATA +
-                    " WHERE id IN (" + briefcaseIdFilter + ") " + getVersionFilter(null) + ")";
+                    " WHERE id IN (" + briefcaseIdFilter + ") " + getVersion_MandatorFilter(null) + ")";
             tableMain = "(SELECT * FROM " + DatabaseConst.TBL_CONTENT +
-                    " WHERE id IN (" + briefcaseIdFilter + ") " + getVersionFilter(null) + ")";
+                    " WHERE id IN (" + briefcaseIdFilter + ") " + getVersion_MandatorFilter(null) + ")";
             tableFulltext = "(SELECT * FROM " + DatabaseConst.TBL_CONTENT_DATA_FT +
                     " WHERE id IN (" + briefcaseIdFilter + "))";    // TODO: version filter!!
         }
@@ -384,11 +381,17 @@ public class MySQLDataFilter extends DataFilter {
         } catch (FxApplicationException e) {
             throw new FxSqlSearchException(LOG, e, "ex.sqlSearch.filter.loadTreeNode", parentNode, e.getMessage());
         }
+        String mandators = CacheAdmin.getEnvironment().getInactiveMandatorList();
+        final String mandatorFilter;
+        if (mandators.length() > 0)
+            mandatorFilter = " AND cd.mandator NOT IN(" + mandators + ")";
+        else
+            mandatorFilter = mandators; //empty
         return "(SELECT DISTINCT cd.id,cd.ver,null lang FROM " + tableMain + " cd WHERE " +
                 "cd.id IN (SELECT ref FROM " + GenericTreeStorage.getTable(mode) + " WHERE " +
                 "LFT>" + nodeInfo.getLeft() + " AND RGT<" + nodeInfo.getRight() + " AND ref IS NOT NULL " +
                 (direct ? " AND depth=" + (nodeInfo.getDepth() + 1) : "") +
-                "))";
+                ")"+mandatorFilter+")";
 
     }
 
@@ -436,7 +439,7 @@ public class MySQLDataFilter extends DataFilter {
                     "cd.ver=ft.ver AND cd.id=ft.id and\n" +
                     "MATCH (value) AGAINST (" + constant.getValue() + ")\n" +
                     getLanguageFilter() +
-                    getVersionFilter("cd") +
+                    getVersion_MandatorFilter("cd") +
                     getSubQueryLimit() +
                     ")";
             /*} else if (prop.getPropertyName().charAt(0)=='#') {
@@ -496,7 +499,7 @@ public class MySQLDataFilter extends DataFilter {
             return "(SELECT DISTINCT da.id,da.ver,da.lang FROM " + tableMain + " ct\n" +
                     "LEFT JOIN " + tableContentData + " da ON (ct.id=da.id AND ct.ver=da.ver AND da." + filter + ")\n" +
                     "WHERE da.tprop IS NULL " +
-                    getVersionFilter("ct") +
+                    getVersion_MandatorFilter("ct") +
                     // Assignment search: we are only interrested in the type that the assignment belongs to
                     (prop.isAssignment()
                             ? "AND ct.TDEF=" + entry.getAssignment().getAssignedType().getId() + " "
@@ -596,7 +599,7 @@ public class MySQLDataFilter extends DataFilter {
                     column +
                     cond.getSqlComperator() +
                     value +
-                    getVersionFilter("cd") +
+                    getVersion_MandatorFilter("cd") +
                     getSubQueryLimit() +
                     ") ");
         } else {
@@ -605,21 +608,33 @@ public class MySQLDataFilter extends DataFilter {
                     cond.getSqlComperator() +
                     value +
                     " AND " + filter +
-                    getVersionFilter("cd") +
+                    getVersion_MandatorFilter("cd") +
                     getLanguageFilter() +
                     getSubQueryLimit() +
                     ") ";
         }
     }
 
-    private String getVersionFilter(String tblAlias) {
+    /**
+     * Get a filter for the version and (in)active mandators
+     *
+     * @param tblAlias table alias
+     * @return filter statement
+     */
+    private String getVersion_MandatorFilter(String tblAlias) {
         String tbl = (tblAlias == null || tblAlias.length() == 0) ? "" : tblAlias + ".";
+        String mandators = CacheAdmin.getEnvironment().getInactiveMandatorList();
+        final String mandatorFilter;
+        if (mandators.length() > 0)
+            mandatorFilter = " AND " + tbl + "mandator NOT IN(" + mandators + ")";
+        else
+            mandatorFilter = mandators; //empty
         if (getStatement().getVersionFilter() == VersionFilter.ALL) {
-            return "";
+            return mandatorFilter;
         } else if (getStatement().getVersionFilter() == VersionFilter.LIVE) {
-            return " AND " + tbl + "islive_ver=true ";
+            return mandatorFilter + " AND " + tbl + "islive_ver=TRUE ";
         } else {
-            return " AND " + tbl + "ismax_ver=true ";
+            return mandatorFilter + " AND " + tbl + "ismax_ver=TRUE ";
         }
     }
 

@@ -75,6 +75,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     private List<FxGroupAssignment> groupAssignmentsAll;
     private List<FxType> types;
     private Mandator[] mandators;
+    private String inactiveMandators = null;
     private List<FxAssignment> assignments;
     private List<StepDefinition> stepDefinitions;
     private List<Step> steps;
@@ -467,7 +468,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     public void checkMandatorExistance(long id) throws FxNotFoundException {
         for (Mandator mandator : mandators)
             if (mandator.getId() == id) {
-                if( !mandator.isActive() )
+                if (!mandator.isActive())
                     throw new FxNotFoundException("ex.structure.mandator.notFound.notActive", mandator.getName(), id);
                 return;
             }
@@ -938,6 +939,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
                 return;
             }
         }
+        inactiveMandators = null;
     }
 
     /**
@@ -1025,5 +1027,23 @@ public final class FxEnvironmentImpl implements FxEnvironment {
             if (list.containsItem(id))
                 return list.getItem(id);
         throw new FxNotFoundException("ex.structure.list.item.notFound", id).asRuntimeException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getInactiveMandatorList() {
+        if (inactiveMandators != null)
+            return inactiveMandators;
+        StringBuilder sb = new StringBuilder(50);
+        for (Mandator m : mandators) {
+            if (!m.isActive()) {
+                if (sb.length() > 0)
+                    sb.append(',');
+                sb.append(m.getId());
+            }
+        }
+        inactiveMandators = sb.toString();
+        return inactiveMandators;
     }
 }

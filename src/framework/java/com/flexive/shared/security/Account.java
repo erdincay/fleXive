@@ -66,6 +66,11 @@ public class Account extends AbstractSelectableObjectWithName implements Seriali
      */
     public static final long NULL_ACCOUNT = 3;
 
+    /**
+     * 01.01.3000
+     */
+    public static final Date VALID_FOREVER = new Date(32503676400000L);
+
 
     private String name = null;
     private String loginName = null;

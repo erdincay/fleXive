@@ -218,7 +218,7 @@ public interface AccountEngine {
      * @param isActive        the active flag of the user
      * @param isConfirmed     the confirmed flag of the user
      * @param validFrom       the valid from date
-     * @param validTo         the valid from date
+     * @param validTo         the valid to date
      * @param defaultNode     the desired start node in the tree for the user
      * @param description     description for the user
      * @param allowMultiLogin if true more than one client may login with this account at the same time

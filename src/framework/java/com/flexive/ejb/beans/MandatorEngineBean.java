@@ -224,6 +224,8 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
         Mandator mand = environment.getMandator(mandatorId);
         if (!mand.isActive())
             return; //silently ignore
+        if( mand.getId() == ticket.getMandatorId() )
+            throw new FxInvalidParameterException("mandatorId", "ex.mandator.deactivate.own", mand.getName(), mand.getId());
         Connection con = null;
         PreparedStatement ps = null;
         String sql;

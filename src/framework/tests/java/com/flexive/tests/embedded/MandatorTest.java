@@ -42,9 +42,14 @@ import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.MandatorEngine;
 import com.flexive.shared.interfaces.TypeEngine;
+import com.flexive.shared.search.query.SqlQueryBuilder;
+import com.flexive.shared.security.Account;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.structure.FxTypeEdit;
+import com.flexive.shared.tree.FxTreeMode;
+import com.flexive.shared.tree.FxTreeNode;
+import com.flexive.shared.tree.FxTreeNodeEdit;
 import static com.flexive.tests.embedded.FxTestUtils.*;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.logging.Log;
@@ -53,6 +58,8 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import java.util.Date;
 
 /**
  * Mandator tests.
@@ -235,4 +242,99 @@ public class MandatorTest {
         me.activate(testMandator);
     }
 
+    /**
+     * Test active/inactive mandators with the tree
+     *
+     * @throws FxApplicationException on errors
+     */
+    public void activeTree() throws Exception {
+        EJBLookup.getTreeEngine().clear(FxTreeMode.Edit);
+        me.activate(testMandator); //make sure we're active
+        FxType type = CacheAdmin.getEnvironment().getType(testType);
+        Assert.assertTrue(CacheAdmin.getEnvironment().getMandator(testMandator).isActive(), "Expected mandator to be active!");
+        FxContent co_act1 = ce.initialize(testType, testMandator, -1, type.getWorkflow().getSteps().get(0).getId(), FxLanguage.DEFAULT_ID);
+        FxPK pk = ce.save(co_act1);
+        EJBLookup.getTreeEngine().getNode(FxTreeMode.Edit, FxTreeNode.ROOT_NODE).getTotalChildCount();
+        long folder = EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("MandatorTestFolder"));
+        long node_root = EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("MandatorTestRoot").setReference(pk));
+        EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("MandatorTestChild").setReference(pk).setParentNodeId(folder));
+        FxTreeNode node = EJBLookup.getTreeEngine().getTree(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, 100);
+        Assert.assertEquals(node.getTotalChildCount(), 3);
+        Assert.assertEquals(node.getDirectChildCount(), 2);
+        Assert.assertEquals(node.getChildren().size(), 2);
+        Assert.assertEquals(node.getChildren().get(0).getChildren().size(), 1);
+        me.deactivate(testMandator);
+        node = EJBLookup.getTreeEngine().getTree(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, 100);
+        Assert.assertEquals(node.getChildren().size(), 1);
+        Assert.assertEquals(node.getChildren().get(0).getChildren().size(), 0);
+        try {
+            EJBLookup.getTreeEngine().getNode(FxTreeMode.Edit, node_root);
+            Assert.fail("getNode on a deactivated mandator should fail!");
+        } catch (FxNotFoundException e) {
+            //expected
+        } catch (Exception ex) {
+            Assert.fail("FxNotFoundException expected! Got: " + ex.getClass().getCanonicalName());
+        }
+        me.activate(testMandator);
+        node = EJBLookup.getTreeEngine().getTree(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, 100);
+        Assert.assertEquals(node.getChildren().size(), 2);
+        Assert.assertEquals(node.getChildren().get(0).getChildren().size(), 1);
+        EJBLookup.getTreeEngine().getNode(FxTreeMode.Edit, node_root);
+        EJBLookup.getTreeEngine().clear(FxTreeMode.Edit);
+    }
+
+    /**
+     * Test active/inactive mandators concerning login
+     *
+     * @throws Exception on errors
+     */
+    public void activeLogin() throws Exception {
+        String name = "USR_" + RandomStringUtils.randomAlphanumeric(10);
+        String pwd = RandomStringUtils.randomAlphanumeric(10);
+        long accountId = EJBLookup.getAccountEngine().create(name, name, pwd, "test@flexive.org", FxLanguage.ENGLISH, testMandator, true, true,
+                new Date(), Account.VALID_FOREVER, 0, "", false, true);
+        try {
+            me.activate(testMandator);
+            logout();
+            //check if login/logout works while active
+            login(name, pwd);
+            logout();
+            login(TestUsers.SUPERVISOR);
+            me.deactivate(testMandator);
+            try {
+                EJBLookup.getAccountEngine().login(name, pwd, false);
+                Assert.fail("Expected an account of a deactivated mandator to not be able to log in.");
+            } catch (FxLoginFailedException e) {
+                //expected
+            }
+            logout();
+            login(TestUsers.SUPERVISOR);
+            me.activate(testMandator);
+            //check if login/logout works again
+            login(name, pwd);
+            logout();
+        } finally {
+            login(TestUsers.SUPERVISOR);
+            EJBLookup.getAccountEngine().remove(accountId);
+        }
+    }
+
+    /**
+     * Test active/inactive mandators concerning queries
+     *
+     * @throws Exception on errors
+     */
+    public void activeQuery() throws Exception {
+        me.activate(testMandator); //make sure the mandator is active
+        FxType type = CacheAdmin.getEnvironment().getType(testType);
+        FxContent co_act = ce.initialize(testType, testMandator, -1, type.getWorkflow().getSteps().get(0).getId(), FxLanguage.DEFAULT_ID);
+        FxPK pk = ce.save(co_act);
+        long org = new SqlQueryBuilder().type(testType).getResult().getRowCount();
+        Assert.assertTrue(org > 0, "Expected at least one result!");
+        me.deactivate(testMandator);
+        Assert.assertEquals(new SqlQueryBuilder().type(testType).getResult().getRowCount(), 0, "Expected 0 results!");
+        me.activate(testMandator);
+        Assert.assertEquals(new SqlQueryBuilder().type(testType).getResult().getRowCount(), org, "Expected " + org + " results!");
+        ce.remove(pk);
+    }
 }

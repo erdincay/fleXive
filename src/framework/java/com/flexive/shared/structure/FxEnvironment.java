@@ -478,4 +478,11 @@ public interface FxEnvironment extends Serializable {
      * @return list of all types that have assignments of the requested property
      */
     List<FxType> getTypesForProperty(long propertyId);
+
+    /**
+     * Get a comma separated list of inactive mandators
+     *
+     * @return comma separated list of inactive mandators
+     */
+    String getInactiveMandatorList();
 }
