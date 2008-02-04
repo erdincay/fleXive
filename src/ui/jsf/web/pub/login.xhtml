@@ -32,7 +32,14 @@
                     <td colspan="2" width="241"></td>
                 </tr>
                 <tr><td colspan="3" height="45">
-                    <div style="padding-left:20px;padding-right:20px;"><adm:messages /></div>
+                    <div style="padding-left:20px;padding-right:20px;">
+                        <adm:messages />
+                        <ui:fragment rendered="#{fxSystemBean.browser != 'IE' and fxSystemBean.browser != 'FIREFOX'}">
+                            <span class="errorMessage">
+                                #{fxMessageBean['Login.error.unsupportedBrowser']}
+                            </span>
+                        </ui:fragment>
+                    </div>
                 </td></tr>
                 <tr>
                     <td align="right" id="username"><label for="loginForm:username">#{fxMessageBean['Login.field.name']}</label></td>
