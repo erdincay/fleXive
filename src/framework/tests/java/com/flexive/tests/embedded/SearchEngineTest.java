@@ -230,12 +230,29 @@ public class SearchEngineTest {
      */
     @Test(dataProvider = "testProperties")
     public void genericSelectTest(String name, FxDataType dataType) throws FxApplicationException {
-        final FxResultSet result = new SqlQueryBuilder().select(getTestPropertyName(name)).type(TEST_TYPE).getResult();
+        // also select virtual properties to make sure they don't mess up the result
+        final FxResultSet result = new SqlQueryBuilder().select(
+                getTestPropertyName(name)).type(TEST_TYPE).getResult();
         assert result.getRowCount() == testInstanceCount : "Expected all test instances to be returned, got "
                 + result.getRowCount() + " instead of " + testInstanceCount;
+        final int idx = 1;
         for (FxResultRow row : result.getResultRows()) {
-            assert dataType.getValueClass().isAssignableFrom(row.getFxValue(1).getClass())
-                    : "Invalid class returned for datatype " + dataType + ": " + row.getFxValue(1).getClass() + " instead of " + dataType.getValueClass();
+            assert dataType.getValueClass().isAssignableFrom(row.getFxValue(idx).getClass())
+                    : "Invalid class returned for datatype " + dataType + ": " + row.getFxValue(idx).getClass() + " instead of " + dataType.getValueClass();
+            assert row.getFxValue(idx).getXPathName() != null : "XPath was null";
+            assert row.getFxValue(idx).getXPathName().equalsIgnoreCase(getTestPropertyName(name)) : "Invalid property name: " + row.getFxValue(idx).getXPathName() + ", expected: " + getTestPropertyName(name);
+        }
+    }
+
+    @Test
+    public void selectVirtualPropertiesTest() throws FxApplicationException {
+        final FxResultSet result = new SqlQueryBuilder().select("@pk", "@path", "@node_position",
+                getTestPropertyName("string")).type(TEST_TYPE).getResult();
+        final int idx = 4;
+        for (FxResultRow row : result.getResultRows()) {
+            assert getTestPropertyName("string").equalsIgnoreCase(row.getFxValue(idx).getXPathName())
+                    : "Invalid property name from XPath: " + row.getFxValue(idx).getXPathName()
+                    + ", expected: " + getTestPropertyName("string");
         }
     }
 

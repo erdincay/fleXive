@@ -34,7 +34,7 @@
 package com.flexive.core.search.mysql;
 
 import com.flexive.core.DatabaseConst;
-import com.flexive.core.search.PropertyResolver;
+import com.flexive.core.search.PropertyEntry;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.FxContext;
@@ -44,6 +44,7 @@ import com.flexive.sqlParser.Property;
  * MySQL specific workflow step selector
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @version $Rev$
  */
 public class MySQLStepSelector extends MySQLGenericSelector {
     private static final String ML_SEL = "(SELECT description FROM " + DatabaseConst.TBL_CONTENT + " ct," + DatabaseConst.TBL_STEP + " step, " +
@@ -60,7 +61,7 @@ public class MySQLStepSelector extends MySQLGenericSelector {
      * {@inheritDoc}
      */
     @Override
-    public void apply(Property prop, PropertyResolver.Entry entry, StringBuffer statement) throws FxSqlSearchException {
+    public void apply(Property prop, PropertyEntry entry, StringBuffer statement) throws FxSqlSearchException {
         if (prop.getField().equals("LABEL")) {
             statement.delete(0, statement.length());
             final long lang = FxContext.get().getTicket().getLanguage().getId();

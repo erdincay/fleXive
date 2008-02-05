@@ -37,7 +37,7 @@ import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.search.DataFilter;
 import com.flexive.core.search.SqlSearch;
-import com.flexive.core.search.PropertyResolver;
+import com.flexive.core.search.PropertyEntry;
 import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.genericSQL.GenericTreeStorage;
@@ -79,6 +79,7 @@ import java.util.List;
  * WHERE  tbl6.id=tbl7.id and tbl6.ver=tbl7.ver and tbl6.lang=tbl7.lang
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @version $Rev$
  */
 public class MySQLDataFilter extends DataFilter {
     private static final transient Log LOG = LogFactory.getLog(MySQLDataFilter.class);
@@ -482,12 +483,12 @@ public class MySQLDataFilter extends DataFilter {
             throws FxSqlSearchException {
 
         final Constant constant = cond.getConstant();
-        final PropertyResolver.Entry entry = getPropertyResolver().get(stmt, prop);
+        final PropertyEntry entry = getPropertyResolver().get(stmt, prop);
         final String filter = prop.isAssignment()
                 ? "ASSIGN=" + entry.getAssignment().getId()
                 : "TPROP=" + entry.getProperty().getId();
 
-        if (entry.getTable().equals(DatabaseConst.TBL_CONTENT_DATA) &&
+        if (entry.getTableName().equals(DatabaseConst.TBL_CONTENT_DATA) &&
                 cond.getComperator().equals(Condition.Comparator.IS) &&
                 cond.getConstant().isNull()) {
             // IS NULL is a specical case for the content data table:
@@ -594,7 +595,7 @@ public class MySQLDataFilter extends DataFilter {
         value = constant.getFunctionsStart() + value + constant.getFunctionsEnd();
 
         // Build the final filter statement
-        if (entry.getTable().equals(DatabaseConst.TBL_CONTENT)) {
+        if (entry.getTableName().equals(DatabaseConst.TBL_CONTENT)) {
             return (" (SELECT DISTINCT cd.id,cd.ver,null lang FROM " + tableMain + " cd WHERE " +
                     column +
                     cond.getSqlComperator() +

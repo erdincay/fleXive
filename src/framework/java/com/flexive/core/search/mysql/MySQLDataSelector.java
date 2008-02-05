@@ -52,6 +52,7 @@ import java.util.*;
  * MySQL specific data selector
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @version $Rev$
  */
 public class MySQLDataSelector extends DataSelector {
     private static final transient Log LOG = LogFactory.getLog(MySQLDataSelector.class);
@@ -130,7 +131,7 @@ public class MySQLDataSelector extends DataSelector {
         for (SelectedValue selectedValue : search.getFxStatement().getSelectedValues()) {
             // Prepare all values
             final Value value = selectedValue.getValue();
-            PropertyResolver.Entry entry = null;
+            PropertyEntry entry = null;
             if (value instanceof Property) {
                 final PropertyResolver pr = search.getPropertyResolver();
                 entry = pr.get(search.getFxStatement(), (Property) value);
@@ -219,16 +220,16 @@ public class MySQLDataSelector extends DataSelector {
      * @return the SubSelectValues
      * @throws FxSqlSearchException if anything goes wrong
      */
-    private SubSelectValues selectFromTbl(PropertyResolver.Entry entry, Value prop, int resultPos) throws FxSqlSearchException {
+    private SubSelectValues selectFromTbl(PropertyEntry entry, Value prop, int resultPos) throws FxSqlSearchException {
         final SubSelectValues result = new SubSelectValues(resultPos, getSortDirection(resultPos));
         if (prop instanceof Constant || entry == null) {
             result.addItem(prop.getValue().toString(), resultPos, false);
-        } else if (entry.getType() == PropertyResolver.Entry.Type.NODE_POSITION) {
+        } else if (entry.getType() == PropertyEntry.Type.NODE_POSITION) {
             long root = FxContext.get().getNodeId();
             if (root == -1) root = FxTreeNode.ROOT_NODE;
             final String sel = "(select tree_nodeIndex(" + root + "," + FILTER_ALIAS + ".id,false))";   // TODO: LIVE/EDIT
             result.addItem(sel, resultPos, false);
-        } else if (entry.getType() == PropertyResolver.Entry.Type.PATH) {
+        } else if (entry.getType() == PropertyEntry.Type.PATH) {
             final long propertyId = CacheAdmin.getEnvironment().getProperty("CAPTION").getId();
             final String sel = "(select tree_FTEXT1024_Paths(" + FILTER_ALIAS + ".id," +
                     search.getLanguage().getId() + "," + propertyId + ",false))"; // TODO: LIVE/EDIT
@@ -258,7 +259,7 @@ public class MySQLDataSelector extends DataSelector {
                     result.addItem(xpath, resultPos, true);
                     break;
                 default:
-                    throw new FxSqlSearchException(LOG, "ex.sqlSearch.table.typeNotSupported", entry.getTable());
+                    throw new FxSqlSearchException(LOG, "ex.sqlSearch.table.typeNotSupported", entry.getTableName());
             }
         }
 
@@ -288,7 +289,7 @@ public class MySQLDataSelector extends DataSelector {
      * @param entry  the entry
      * @return the subselect string for the value
      */
-    private String _hlp_content_data(String column, PropertyResolver.Entry entry) {
+    private String _hlp_content_data(String column, PropertyEntry entry) {
         // TODO: lang fallback
         return "(SELECT " + SUBSEL_ALIAS + "." + column +
                 " FROM " + DatabaseConst.TBL_CONTENT_DATA + " " +

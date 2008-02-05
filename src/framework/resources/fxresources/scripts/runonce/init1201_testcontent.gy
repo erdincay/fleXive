@@ -174,6 +174,10 @@ ReferencedContent buildReference(int counter, List<FxPK> folderPks) {
     return new ReferencedContent(folderPks.get(counter % folderPks.size()));
 }
 
+BinaryDescriptor buildBinarySearchProp(int counter) {
+    return new BinaryDescriptor("test binary prop", Thread.currentThread().contextClassLoader.getResourceAsStream("fxresources/binaries/thumbs/mime-txt.png"))
+}
+
 void buildGroupData(String prefix, FxContent co, int counter, folderPks) {
     co.setValue("$prefix/stringSearchProp", new FxString(false, "StringValue$counter"))
     co.setValue("$prefix/textSearchProp", new FxString(false, "TextValue$counter"))
@@ -187,7 +191,7 @@ void buildGroupData(String prefix, FxContent co, int counter, folderPks) {
     co.setValue("$prefix/dateRangeSearchProp", new FxDateRange(false, buildDateRange(counter)))
     co.setValue("$prefix/dateTimeRangeSearchProp", new FxDateTimeRange(false, buildDateRange(counter)))
     co.setValue("$prefix/booleanSearchProp", new FxBoolean(false, counter % 2 == 0))
-//    co.setValue("$prefix/binarySearchProp", new FxBinary(false, buildBinarySearchProp(counter)))
+    co.setValue("$prefix/binarySearchProp", new FxBinary(false, buildBinarySearchProp(counter)))
     co.setValue("$prefix/referenceSearchProp", new FxReference(false, buildReference(counter, folderPks)))
 //    co.setValue("$prefix/inlineReferenceSearchProp", new FxReference(false, buildReferenceSearchProp(counter)))
     co.setValue("$prefix/selectOneSearchProp", new FxSelectOne(false, buildSelectOneSearchProp(counter)))

@@ -67,6 +67,7 @@ import org.apache.commons.lang.StringUtils;
  * The main search engine class
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @version $Rev$
  */
 public class SqlSearch {
     private static final Log LOG = LogFactory.getLog(SqlSearch.class);
@@ -166,7 +167,7 @@ public class SqlSearch {
 
         // Check if the statement will produce any resultset at all
         if (statement.getType() == FxStatement.Type.EMPTY) {
-            return new FxResultSetImpl(statement, null, this.parserExecutionTime, 0,
+            return new FxResultSetImpl(statement, this.parserExecutionTime, 0,
                     startIndex, fetchRows, location, viewType, null, -1, -1);
         }
 
@@ -244,7 +245,7 @@ public class SqlSearch {
             // Fetch the result
             ResultSet rs = stmt.executeQuery(selectSql);
             int dbSearchTime = (int) (java.lang.System.currentTimeMillis() - startTime);
-            fx_result = new FxResultSetImpl(statement, pr, this.parserExecutionTime, dbSearchTime, startIndex,
+            fx_result = new FxResultSetImpl(statement, this.parserExecutionTime, dbSearchTime, startIndex,
                     fetchRows, location, viewType, df.getContentTypes(),
                     getTypeFilter() != null ? getTypeFilter().getId() : -1,
                     createdBriefcaseId);
@@ -252,13 +253,12 @@ public class SqlSearch {
             fx_result.setTruncated(df.isTruncated());
 
             final long fetchStart = java.lang.System.currentTimeMillis();
-            ResultReader reader = new ResultReader(rs, language);
             while (rs.next()) {
                 Object[] row = new Object[pr.getResultSetColumns().size()];
                 int i = 0;
-                for (PropertyResolver.Entry entry : pr.getResultSetColumns()) {
+                for (PropertyEntry entry : pr.getResultSetColumns()) {
                     //Object val =getValue(rs,entry);
-                    Object val = reader.getValue(entry);
+                    Object val = entry.getResultValue(rs, language);
                     row[i] = val;
                     i++;
                 }

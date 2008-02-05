@@ -42,6 +42,7 @@ import java.util.Map;
  * Interface for DB specific DataSelectors
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @version $Rev$
  */
 public abstract class DataSelector {
 

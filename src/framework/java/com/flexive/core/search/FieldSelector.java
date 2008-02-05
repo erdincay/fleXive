@@ -40,6 +40,7 @@ import com.flexive.sqlParser.Property;
  * Helper to generate select statements on queries
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @version $Rev$
  */
 public interface FieldSelector {
 
@@ -59,7 +60,7 @@ public interface FieldSelector {
      * @param statement the statement to modify
      * @throws FxSqlSearchException if the function fails
      */
-    void apply(Property prop, PropertyResolver.Entry entry, StringBuffer statement) throws FxSqlSearchException;
+    void apply(Property prop, PropertyEntry entry, StringBuffer statement) throws FxSqlSearchException;
 
     /**
      * Returns all spported fields.

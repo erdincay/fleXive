@@ -48,6 +48,7 @@ import org.apache.commons.logging.LogFactory;
  * Helper to store subselect values
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @version $Rev$
  */
 public class SubSelectValues {
     private static final Log LOG = LogFactory.getLog(SubSelectValues.class);
@@ -109,7 +110,7 @@ public class SubSelectValues {
      * @return the modified object itself
      * @throws FxSqlSearchException if the function fails
      */
-    public SubSelectValues prepare(DataSelector ds, Value prop, PropertyResolver.Entry entry) throws FxSqlSearchException {
+    public SubSelectValues prepare(DataSelector ds, Value prop, PropertyEntry entry) throws FxSqlSearchException {
         applySelector(ds, (Property) prop, entry);
         applyWrapper(prop);
         this.value = prop;
@@ -129,7 +130,7 @@ public class SubSelectValues {
      * @param entry the entry
      * @throws FxSqlSearchException if the function fails
      */
-    protected void applySelector(DataSelector ds, Property prop, PropertyResolver.Entry entry) throws FxSqlSearchException {
+    protected void applySelector(DataSelector ds, Property prop, PropertyEntry entry) throws FxSqlSearchException {
         // any selector to apply at all?
         if (!prop.hasField()) {
             return;

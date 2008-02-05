@@ -44,6 +44,7 @@ import java.util.List;
  * Data filter for the FxSQL search engine
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @version $Rev$
  */
 public abstract class DataFilter {
     protected SqlSearch search;

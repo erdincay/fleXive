@@ -35,7 +35,7 @@ package com.flexive.core.search.mysql;
 
 import com.flexive.core.Database;
 import com.flexive.core.search.FieldSelector;
-import com.flexive.core.search.PropertyResolver;
+import com.flexive.core.search.PropertyEntry;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.FxSharedUtils;
@@ -55,6 +55,7 @@ import java.util.HashMap;
  * A generic MySQL selector
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @version $Rev$
  */
 class MySQLGenericSelector implements FieldSelector {
     private static final Log LOG = LogFactory.getLog(MySQLGenericSelector.class);
@@ -131,7 +132,7 @@ class MySQLGenericSelector implements FieldSelector {
     /**
      * {@inheritDoc}
      */
-    public void apply(Property prop, PropertyResolver.Entry entry, StringBuffer statement) throws FxSqlSearchException {
+    public void apply(Property prop, PropertyEntry entry, StringBuffer statement) throws FxSqlSearchException {
         FxDataType type = columns.get(prop.getField());
         if (type == null) {
             // This field does not exist

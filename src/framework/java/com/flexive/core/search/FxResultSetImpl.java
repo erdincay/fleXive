@@ -50,6 +50,7 @@ import java.util.Map;
  * FxResultSet implementation
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @version $Rev$
  */
 public class FxResultSetImpl implements Serializable, FxResultSet {
     private static final long serialVersionUID = -7038323618490882790L;
@@ -69,7 +70,6 @@ public class FxResultSetImpl implements Serializable, FxResultSet {
 
     private int fetchTime = 0;
     private int totalTime = 0;
-    private int pkPos;
     private int totalRowCount;
     private boolean truncated;
     private Map<String, Integer> columnIndexMap;
@@ -104,11 +104,10 @@ public class FxResultSetImpl implements Serializable, FxResultSet {
         this.viewType = viewType;
         this.creationTime = System.currentTimeMillis();
         this.typeId = -1;
-        this.pkPos = -1;
         this.createdBriefcaseId = -1;
     }
 
-    protected FxResultSetImpl(final FxStatement fx_stmt, PropertyResolver pr, final int parserExecutionTime, int dbSearchTime,
+    protected FxResultSetImpl(final FxStatement fx_stmt, final int parserExecutionTime, int dbSearchTime,
                               int startIndex, int maxFetchRows, ResultLocation location, ResultViewType viewType,
                               List<FxFoundType> types, long typeId, long createdBriefcaseId) {
         this.parserExecutionTime = parserExecutionTime;
@@ -122,16 +121,6 @@ public class FxResultSetImpl implements Serializable, FxResultSet {
         this.rows = new ArrayList<Object[]>(fx_stmt.getMaxResultRows());
         this.columnNames = new String[fx_stmt.getSelectedValues().size()];
         int pos = 0;
-        if (pr != null) {
-            for (PropertyResolver.Entry entry : pr.getResultSetColumns()) {
-                if (entry.getType() == PropertyResolver.Entry.Type.PK) {
-                    this.pkPos = pos;
-                    break;
-                }
-                pos++;
-            }
-        }
-        pos = 0;
         for (SelectedValue v : fx_stmt.getSelectedValues()) {
             this.columnNames[pos++] = v.getAlias();
         }
