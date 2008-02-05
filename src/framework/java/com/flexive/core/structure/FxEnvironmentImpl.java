@@ -76,6 +76,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     private List<FxType> types;
     private Mandator[] mandators;
     private String inactiveMandators = null;
+    private String deactivatedTypes = null;
     private List<FxAssignment> assignments;
     private List<StepDefinition> stepDefinitions;
     private List<Step> steps;
@@ -460,19 +461,6 @@ public final class FxEnvironmentImpl implements FxEnvironment {
             if (mandator.getId() == id)
                 return mandator;
         throw new FxNotFoundException("ex.structure.mandator.notFound.id", id).asRuntimeException();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void checkMandatorExistance(long id) throws FxNotFoundException {
-        for (Mandator mandator : mandators)
-            if (mandator.getId() == id) {
-                if (!mandator.isActive())
-                    throw new FxNotFoundException("ex.structure.mandator.notFound.notActive", mandator.getName(), id);
-                return;
-            }
-        throw new FxNotFoundException("ex.structure.mandator.notFound.id", id);
     }
 
     /**
@@ -1045,5 +1033,22 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         }
         inactiveMandators = sb.toString();
         return inactiveMandators;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getDeactivatedTypesList() {
+        if (deactivatedTypes != null)
+            return deactivatedTypes;
+        StringBuilder sb = new StringBuilder(50);
+        for (FxType t : types)
+            if (t.getState() == TypeState.Unavailable) {
+                if (sb.length() > 0)
+                    sb.append(',');
+                sb.append(t.getId());
+            }
+        deactivatedTypes = sb.toString();
+        return deactivatedTypes;
     }
 }

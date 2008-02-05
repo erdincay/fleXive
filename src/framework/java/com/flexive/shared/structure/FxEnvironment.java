@@ -41,7 +41,6 @@ import com.flexive.shared.workflow.Route;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
 import com.flexive.shared.workflow.Workflow;
-import com.flexive.shared.exceptions.FxNotFoundException;
 
 import java.io.Serializable;
 import java.util.List;
@@ -112,9 +111,9 @@ public interface FxEnvironment extends Serializable {
      * Return all ACLs of a given mandatorId and category.
      * <p/>
      *
-     * @param mandatorId                   the function loads all ACLs from this mandatorId.
-     * @param includeForeignAccessible     when true, also loads ACLs that the calling user has at least one permission on,
-     *                                     even if they belong to another mandator.
+     * @param mandatorId               the function loads all ACLs from this mandatorId.
+     * @param includeForeignAccessible when true, also loads ACLs that the calling user has at least one permission on,
+     *                                 even if they belong to another mandator.
      * @return the ACLs
      */
     List<ACL> getACLs(long mandatorId, boolean includeForeignAccessible);
@@ -123,10 +122,10 @@ public interface FxEnvironment extends Serializable {
      * Return all ACLs of a given mandatorId and category.
      * <p/>
      *
-     * @param mandatorId                   the function loads all ACLs from this mandatorId.
-     * @param category                     a ACL.CATEGORY_... constant or <code>-1</code> if the category should be ignored
-     * @param includeForeignAccessible     when true, also loads ACLs that the calling user has at least one permission on,
-     *                                     even if they belong to another mandator.
+     * @param mandatorId               the function loads all ACLs from this mandatorId.
+     * @param category                 a ACL.CATEGORY_... constant or <code>-1</code> if the category should be ignored
+     * @param includeForeignAccessible when true, also loads ACLs that the calling user has at least one permission on,
+     *                                 even if they belong to another mandator.
      * @return the ACLs
      */
     List<ACL> getACLs(long mandatorId, ACL.Category category, boolean includeForeignAccessible);
@@ -161,15 +160,6 @@ public interface FxEnvironment extends Serializable {
      * @return the mandator with the given id
      */
     Mandator getMandator(long id);
-
-    /**
-     * Check if the mandator with the requested id exists and is active.
-     * Will throw a FxNotFoundException if inactive or not existant.
-     *
-     * @param id requested mandator id
-     * @throws com.flexive.shared.exceptions.FxNotFoundException if inactive or not existant
-     */
-    void checkMandatorExistance(long id) throws FxNotFoundException;
 
     /**
      * Get a mandator by its name
@@ -327,8 +317,8 @@ public interface FxEnvironment extends Serializable {
      * Gets relation types that contain the type with the specified id as source
      * or destination of their relations.
      *
-     * @param typeId    id which is referenced by relations
-     * @return          list of relation types that contain relations to the type with the specified id
+     * @param typeId id which is referenced by relations
+     * @return list of relation types that contain relations to the type with the specified id
      */
     List<FxType> getReferencingRelationTypes(long typeId);
 
@@ -485,4 +475,11 @@ public interface FxEnvironment extends Serializable {
      * @return comma separated list of inactive mandators
      */
     String getInactiveMandatorList();
+
+    /**
+     * Get a comma separated list of deactivated FxTypes
+     *
+     * @return comma separated list of deactivated FxTypes
+     */
+    String getDeactivatedTypesList();
 }

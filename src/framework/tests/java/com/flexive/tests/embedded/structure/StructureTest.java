@@ -81,22 +81,23 @@ public class StructureTest {
     @AfterClass
     public void afterClass() throws Exception {
         try {
-            if (CacheAdmin.getEnvironment().getType("ContactsTest") != null)
-                te.remove(CacheAdmin.getEnvironment().getType("ContactsTest").getId());
+            te.remove(CacheAdmin.getEnvironment().getType("ContactsTest").getId());
+        } catch (FxRuntimeException e) {
+//            ignore
+        }
+        try {
             ae.removeAssignment(CacheAdmin.getEnvironment().getAssignment("ROOT/CONTACT_DATA").getId(),
                     true, false);
-        } catch (FxNotFoundException e) {
+        } catch (FxRuntimeException e) {
+//            ignore
+        }
+        try {
+            acl.remove(CacheAdmin.getEnvironment().getACL("ContactsTest").getId());
+        } catch (FxRuntimeException e) {
 //            ignore
         }
         logout();
     }
-
-//    @AfterSuite
-//    public void afterSuite() throws Exception {
-//        login(TestUsers.SUPERVISOR);
-//
-//        logout();
-//    }
 
     @Test(invocationCount = 2)
     public void typeCreateDeleteUpdate() throws Exception {

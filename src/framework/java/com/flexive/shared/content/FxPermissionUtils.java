@@ -36,13 +36,11 @@ package com.flexive.shared.content;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxLanguage;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.exceptions.FxNotFoundException;
-import com.flexive.shared.security.ACL;
-import com.flexive.shared.security.ACLAssignment;
-import com.flexive.shared.security.Role;
-import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.security.*;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
@@ -370,5 +368,42 @@ public class FxPermissionUtils {
             if (!ticket.isInRole(role)) {
                 throw new FxNoAccessException(LOG, "ex.role.notInRole", role.getName());
             }
+    }
+
+    /**
+     * Check if the requested FxType is available. A FxNotFoundException will be thrown if the FxType's state is
+     * <code>TypeState.Unavailable</code>, if <code>allowLocked</code> is <code>true</code> and the FxType's state is
+     * <code>TypeState.Locked</code> a FxNoAccessException will be thrown.
+     *
+     * @param typeId      requested type id to check
+     * @param allowLocked allow a locked state?
+     * @throws FxApplicationException on errors
+     * @see com.flexive.shared.structure.TypeState
+     */
+    public static void checkTypeAvailable(long typeId, boolean allowLocked) throws FxApplicationException {
+        FxType check = CacheAdmin.getEnvironment().getType(typeId);
+        switch (check.getState()) {
+            case Available:
+                return;
+            case Locked:
+                if (allowLocked)
+                    return;
+                throw new FxNoAccessException("ex.structure.type.locked", check.getName(), check.getId());
+            case Unavailable:
+                throw new FxNotFoundException("ex.structure.type.unavailable", check.getName(), check.getId());
+        }
+    }
+
+    /**
+     * Check if the mandator with the requested id exists and is active.
+     * Will throw a FxNotFoundException if inactive or not existant.
+     *
+     * @param id requested mandator id
+     * @throws FxNotFoundException if inactive or not existant
+     */
+    public static void checkMandatorExistance(long id) throws FxNotFoundException {
+        Mandator m = CacheAdmin.getEnvironment().getMandator(id);
+        if (!m.isActive())
+            throw new FxNotFoundException("ex.structure.mandator.notFound.notActive", m.getName(), id);
     }
 }

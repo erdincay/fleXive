@@ -46,9 +46,10 @@ import com.flexive.shared.interfaces.SequencerEngine;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.UserGroup;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
-import com.flexive.shared.structure.FxEnvironment;
+import com.flexive.shared.structure.TypeState;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.value.FxString;
@@ -494,7 +495,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
         ResultSet rs;
         try {
             ps = con.prepareStatement("SELECT tree_FTEXT1024_Chain(?,?,?,?)");
-            ps.setInt(2, (int)language.getId());
+            ps.setInt(2, (int) language.getId());
             ps.setLong(3, labelPropertyId);
             ps.setBoolean(4, mode == FxTreeMode.Live);
             for (long id : nodeIds) {
@@ -645,7 +646,8 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 boolean _relate;
                 final boolean _system = FxContext.get().getRunAsSystem() || ticket.isGlobalSupervisor();
                 FxPermissionUtils.checkPermission(ticket, _createdBy, ACL.Permission.READ, _type, _stepACL, _acl, true);
-                env.checkMandatorExistance(_mandator);
+                FxPermissionUtils.checkMandatorExistance(_mandator);
+                FxPermissionUtils.checkTypeAvailable(_type.getId(), true);
                 if (_system || ticket.isMandatorSupervisor() && _mandator == ticket.getMandatorId() ||
                         !_type.usePermissions() || ticket.isInGroup((int) UserGroup.GROUP_OWNER) && _createdBy == ticket.getUserId()) {
                     _edit = _create = _delete = _export = _relate = true;
@@ -838,8 +840,8 @@ public abstract class GenericTreeStorage implements TreeStorage {
                     _export = FxPermissionUtils.checkPermission(ticket, _createdBy, ACL.Permission.EXPORT, type, _stepACL, _acl, false);
                     _create = FxPermissionUtils.checkPermission(ticket, _createdBy, ACL.Permission.CREATE, type, _stepACL, _acl, false);
                 }
-                if (_read && !env.getMandator(_mandator).isActive())
-                    _read = false; //filter out inactive mandators
+                if (_read && (!env.getMandator(_mandator).isActive() || type.getState() == TypeState.Unavailable))
+                    _read = false; //filter out inactive mandators and unavailable types
                 if (_read) {
                     FxTreeNode node = new FxTreeNode(mode, _id, _parent, _ref, _acl, _name, FxTreeNode.PATH_NOT_LOADED, label,
                             _pos, new ArrayList<FxTreeNode>(10), new ArrayList<Long>(10), _depth, _totalChilds, _directChilds,

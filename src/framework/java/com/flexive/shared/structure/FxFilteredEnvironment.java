@@ -215,7 +215,7 @@ public final class FxFilteredEnvironment implements FxEnvironment {
      */
     public Mandator getMandator(long id) {
         final Mandator mandator = environment.getMandator(id);
-        if( !mandator.isActive() )
+        if (!mandator.isActive())
             throw new FxNotFoundException("ex.structure.mandator.notFound.id", id).asRuntimeException();
         return mandator;
     }
@@ -223,16 +223,9 @@ public final class FxFilteredEnvironment implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
-    public void checkMandatorExistance(long id) throws FxNotFoundException {
-        environment.checkMandatorExistance(id);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public Mandator getMandator(String name) {
         final Mandator mandator = environment.getMandator(name);
-        if( !mandator.isActive() )
+        if (!mandator.isActive())
             throw new FxNotFoundException("ex.structure.mandator.notFound.name", name).asRuntimeException();
         return mandator;
     }
@@ -461,5 +454,12 @@ public final class FxFilteredEnvironment implements FxEnvironment {
      */
     public String getInactiveMandatorList() {
         return environment.getInactiveMandatorList();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getDeactivatedTypesList() {
+        return environment.getDeactivatedTypesList();
     }
 }
