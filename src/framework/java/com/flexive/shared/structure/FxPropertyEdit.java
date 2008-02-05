@@ -119,6 +119,7 @@ public class FxPropertyEdit extends FxProperty {
         super(-1, name, description, hint, false, overrideBaseMultiplicity, multiplicity, overrideACL, ACL, dataType, defaultValue,
                 fulltextIndexed, referencedType, referencedList, UniqueMode.None, options);
         setName(name);
+        setSearchable(true); //default is searchable
         this.isNew = true;
     }
 
