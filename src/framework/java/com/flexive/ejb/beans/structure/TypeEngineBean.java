@@ -46,8 +46,8 @@ import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.security.ACL;
-import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.security.Role;
+import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -191,6 +191,10 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             }
             StructureLoader.reload(con);
         } catch (SQLException e) {
+            if (Database.isUniqueConstraintViolation(e)) {
+                ctx.setRollbackOnly();
+                throw new FxCreateException("ex.structure.type.exists", type.getName());
+            }
             ctx.setRollbackOnly();
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } catch (FxCacheException e) {
@@ -657,7 +661,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
         FxPermissionUtils.checkRole(ticket, Role.StructureManagement);
 
         FxType type = CacheAdmin.getEnvironment().getType(id);
-        
+
         Connection con = null;
         PreparedStatement ps = null;
         StringBuilder sql = new StringBuilder(500);

@@ -50,7 +50,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.faces.model.SelectItem;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Bean behind typeEditor.xhtml to
@@ -148,13 +151,13 @@ public class TypeEditorBean {
         return structureManagement;
     }
 
-     /**
+    /**
      * Initializes variables and does workarounds so editing
      * of an existing group and group assignment is possible via the webinterface.
      */
     private void initEditing() {
         structureManagement = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
-        reloadContentTree=false;
+        reloadContentTree = false;
         if (!type.isNew())
             scriptWrapper = new ScriptListWrapper(type.getId(), true);
         wrappedRelations = new ArrayList<WrappedRelation>(type.getRelations().size());
@@ -195,7 +198,7 @@ public class TypeEditorBean {
      * Converts milliseconds to a more user-friendly time format.
      * 0=forever, 1=ms, 2=sec, 3=min, 4=day
      *
-     * @return  the maximum appliable time format
+     * @return the maximum appliable time format
      */
     private int initTimeRange() {
         //0=forever, 1=ms, 2=sec, 3=min, 4=day
@@ -217,7 +220,7 @@ public class TypeEditorBean {
     /**
      * Converts the currently used time format back to milliseconds.
      *
-     * @return  the current time format converted to milliseconds
+     * @return the current time format converted to milliseconds
      */
     private long historyAgeToMilis() {
         if (timeRange == 0)
@@ -242,14 +245,13 @@ public class TypeEditorBean {
         if (FxJsfUtils.getRequest().getUserTicket().isInRole(Role.ScriptManagement)) {
             try {
                 if (!type.isNew())
-                saveScriptChanges();
+                    saveScriptChanges();
             }
             catch (Throwable t) {
-                    new FxFacesMsgErr(t).addToContext();
+                new FxFacesMsgErr(t).addToContext();
             }
-        }
-        else
-            new FxFacesMsgInfo("info.structureEditor.notInRole.scriptManagement").addToContext();
+        } else
+            new FxFacesMsgInfo("StructureEditor.info.notInRole.scriptManagement").addToContext();
 
         if (FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement)) {
             try {
@@ -266,14 +268,13 @@ public class TypeEditorBean {
                 } else
                     s.addAction(StructureTreeControllerBean.ACTION_RENAME_SELECT_TYPE, id, type.getDisplayName());
 
-                reloadContentTree =true;
+                reloadContentTree = true;
             }
             catch (Throwable t) {
                 new FxFacesMsgErr(t).addToContext();
             }
-        }
-        else
-            new FxFacesMsgInfo("info.structureEditor.notInRole.structureManagement").addToContext();
+        } else
+            new FxFacesMsgInfo("StructureEditor.info.notInRole.structureManagement").addToContext();
     }
 
     /**
@@ -390,7 +391,7 @@ public class TypeEditorBean {
 
     public void addRelation() {
         WrappedRelation relationToAdd = new WrappedRelation(getRelSourceIdFiler(), getRelDestIdFiler(),
-                isRelSourceUnlimitedFiler() ? 0 : getRelMaxSourceFiler(), isRelDestUnlimitedFiler() ? 0 :getRelMaxDestFiler());
+                isRelSourceUnlimitedFiler() ? 0 : getRelMaxSourceFiler(), isRelDestUnlimitedFiler() ? 0 : getRelMaxDestFiler());
         if (!wrappedRelations.contains(relationToAdd)) {
             wrappedRelations.add(relationToAdd);
             setRelSourceIdFiler(defaultSelectListTypeId);
@@ -686,7 +687,7 @@ public class TypeEditorBean {
         }
 
         public boolean isMaxDestUnlimited() {
-            return maxDest ==0;
+            return maxDest == 0;
         }
 
         public void setMaxDestUnlimited(boolean maxDestUnlimited) {
@@ -718,13 +719,15 @@ public class TypeEditorBean {
      * computes a list of relation types that contain relations of
      * which this type is source or destination
      *
-     * @return  the ids of referencing relation types
+     * @return the ids of referencing relation types
      */
     public List<FxType> getReferencingRelations() {
-       return CacheAdmin.getEnvironment().getReferencingRelationTypes(type.getId());
+        return CacheAdmin.getEnvironment().getReferencingRelationTypes(type.getId());
     }
 
-    /***************** script editor tab begin ************************/
+    /**
+     * ************** script editor tab begin ***********************
+     */
 
     public String showTypeScriptEditor() {
         return "typeScriptEditor";
@@ -735,7 +738,7 @@ public class TypeEditorBean {
     }
 
     public int getScriptCount() {
-        return scriptWrapper == null ? 0: scriptWrapper.getScriptList().size();
+        return scriptWrapper == null ? 0 : scriptWrapper.getScriptList().size();
     }
 
     public int getScriptListFiler() {
@@ -797,27 +800,28 @@ public class TypeEditorBean {
     }
 
     public Map<Long, String> getTypeNameForId() {
-        return new HashMap<Long,String>() {
+        return new HashMap<Long, String>() {
             public String get(Object key) {
-                return CacheAdmin.getFilteredEnvironment().getType((Long)key).getDisplayName();
+                return CacheAdmin.getFilteredEnvironment().getType((Long) key).getDisplayName();
             }
         };
     }
 
     /**
-     *  Saves script assignment changes to DB.
+     * Saves script assignment changes to DB.
      *
-     * @throws com.flexive.shared.exceptions.FxApplicationException  on errors
+     * @throws com.flexive.shared.exceptions.FxApplicationException
+     *          on errors
      */
     public void saveScriptChanges() throws FxApplicationException {
-       for (ScriptListWrapper.ScriptListEntry e : scriptWrapper.getDelta(type.getId(), true)) {
-           if (e.getId() == ScriptListWrapper.ID_SCRIPT_ADDED)
-               EJBLookup.getScriptingEngine().createTypeScriptMapping(e.getScriptEvent(), e.getScriptInfo().getId(), type.getId(), e.isActive(), e.isDerivedUsage());
-           else if (e.getId() == ScriptListWrapper.ID_SCRIPT_REMOVED)
-               EJBLookup.getScriptingEngine().removeTypeScriptMappingForEvent(e.getScriptInfo().getId(), type.getId(), e.getScriptEvent());
-           else if (e.getId() == ScriptListWrapper.ID_SCRIPT_UPDATED)
-               EJBLookup.getScriptingEngine().updateTypeScriptMappingForEvent(e.getScriptInfo().getId(), type.getId(), e.getScriptEvent(), e.isActive(), e.isDerivedUsage());
-       }
+        for (ScriptListWrapper.ScriptListEntry e : scriptWrapper.getDelta(type.getId(), true)) {
+            if (e.getId() == ScriptListWrapper.ID_SCRIPT_ADDED)
+                EJBLookup.getScriptingEngine().createTypeScriptMapping(e.getScriptEvent(), e.getScriptInfo().getId(), type.getId(), e.isActive(), e.isDerivedUsage());
+            else if (e.getId() == ScriptListWrapper.ID_SCRIPT_REMOVED)
+                EJBLookup.getScriptingEngine().removeTypeScriptMappingForEvent(e.getScriptInfo().getId(), type.getId(), e.getScriptEvent());
+            else if (e.getId() == ScriptListWrapper.ID_SCRIPT_UPDATED)
+                EJBLookup.getScriptingEngine().updateTypeScriptMappingForEvent(e.getScriptInfo().getId(), type.getId(), e.getScriptEvent(), e.isActive(), e.isDerivedUsage());
+        }
     }
 
     /****script editor tab end*********/

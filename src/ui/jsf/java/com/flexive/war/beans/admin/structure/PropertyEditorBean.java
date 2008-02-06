@@ -38,11 +38,11 @@ import com.flexive.faces.beans.ActionBean;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.*;
-import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.security.ACL;
-import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.security.Role;
+import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
@@ -53,9 +53,9 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.faces.model.SelectItem;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 /**
  * Bean behind propertyAssignmentEditor.xhtml, propertyEditor.xhtml and propertyOptionEditor to
@@ -93,7 +93,7 @@ public class PropertyEditorBean implements ActionBean {
     //checker for the editMode: if not in edit mode,
     // save and delete buttons are not rendered by the gui
     private boolean editMode = false;
-     //assignment script editor tab
+    //assignment script editor tab
     private ScriptListWrapper scriptWrapper = null;
     private int scriptListFiler = -1;
     private FxScriptInfo selectedScriptInfo = null;
@@ -185,7 +185,7 @@ public class PropertyEditorBean implements ActionBean {
     }
 
     public void setDefaultMultiplicity(int defaultMultiplicity) {
-       this.defaultMultiplicity=defaultMultiplicity;
+        this.defaultMultiplicity = defaultMultiplicity;
     }
 
     public FxValue getDefaultValue() {
@@ -351,7 +351,7 @@ public class PropertyEditorBean implements ActionBean {
     /**
      * Set the property's data type and update referenced type and referenced list accordingly
      *
-     * @param d     the data type
+     * @param d the data type
      */
     public void setPropertyDataType(FxDataType d) {
         getProperty().setDataType(d);
@@ -388,7 +388,7 @@ public class PropertyEditorBean implements ActionBean {
         try {
             result = !property.isNew() && (EJBLookup.getAssignmentEngine().getPropertyInstanceCount(propertyId) > 0);
         } catch (Throwable t) {
-             new FxFacesMsgErr(t).addToContext();
+            new FxFacesMsgErr(t).addToContext();
         }
         return result;
     }
@@ -481,12 +481,12 @@ public class PropertyEditorBean implements ActionBean {
     public void addAssignmentOption() {
         try {
             optionWrapper.addOption(optionWrapper.getAssignmentOptions(),
-                assignmentOptionKey, assignmentOptionValue, false);
+                    assignmentOptionKey, assignmentOptionValue, false);
             assignmentOptionKey = null;
             assignmentOptionValue = null;
         }
-         catch (Throwable t) {
-             new FxFacesMsgErr(t).addToContext();
+        catch (Throwable t) {
+            new FxFacesMsgErr(t).addToContext();
         }
     }
 
@@ -508,14 +508,14 @@ public class PropertyEditorBean implements ActionBean {
 
     public void addPropertyOption() {
         try {
-        optionWrapper.addOption(optionWrapper.getStructureOptions(),
-                propertyOptionKey, propertyOptionValue, propertyOptionOverridable);
+            optionWrapper.addOption(optionWrapper.getStructureOptions(),
+                    propertyOptionKey, propertyOptionValue, propertyOptionOverridable);
             propertyOptionKey = null;
             propertyOptionValue = null;
             propertyOptionOverridable = true;
         }
-         catch (Throwable t) {
-             new FxFacesMsgErr(t).addToContext();
+        catch (Throwable t) {
+            new FxFacesMsgErr(t).addToContext();
         }
     }
 
@@ -542,7 +542,7 @@ public class PropertyEditorBean implements ActionBean {
      * Returns all property assignments that are referencing this property which the
      * current user may see, excluding the system internal assignments.
      *
-     * @return  a list of property assignments that are referencing this property.
+     * @return a list of property assignments that are referencing this property.
      */
     public List<FxPropertyAssignment> getReferencingPropertyAssignments() {
         List<FxPropertyAssignment> assignments = CacheAdmin.getFilteredEnvironment().getPropertyAssignments(true);
@@ -575,7 +575,7 @@ public class PropertyEditorBean implements ActionBean {
      * Returns if the generic option FxStructureOption.OPTION_MULTILANG is set.
      * This option controls the multilingualism of a property.
      *
-     * @return  true if the generic option FxStructureOption.OPTION_MULTILANG is set.
+     * @return true if the generic option FxStructureOption.OPTION_MULTILANG is set.
      */
 
     public boolean isMultiLang() {
@@ -595,7 +595,8 @@ public class PropertyEditorBean implements ActionBean {
     /**
      * Sets the FxStructureOption.OPTION_MULTILANG option defensively by considering
      * option overriding.
-     * @param b     boolean to set the option
+     *
+     * @param b boolean to set the option
      */
     public void setMultiLang(boolean b) {
         if (b) {
@@ -615,7 +616,7 @@ public class PropertyEditorBean implements ActionBean {
                 optionWrapper.setOption(false, FxStructureOption.OPTION_MULTILANG, b);
             else
             if (isPropertyMayOverrideMultiLang() && !optionWrapper.getOption(true, FxStructureOption.OPTION_MULTILANG).getBooleanValue())
-                optionWrapper.deleteOption(optionWrapper.getAssignmentOptions(), optionWrapper.getOption(false,  FxStructureOption.OPTION_MULTILANG));
+                optionWrapper.deleteOption(optionWrapper.getAssignmentOptions(), optionWrapper.getOption(false, FxStructureOption.OPTION_MULTILANG));
             else
             if (!isPropertyMayOverrideMultiLang() && optionWrapper.getOption(true, FxStructureOption.OPTION_MULTILANG).getBooleanValue()) {
                 optionWrapper.getOption(true, FxStructureOption.OPTION_MULTILANG).setOverridable(true);
@@ -756,7 +757,8 @@ public class PropertyEditorBean implements ActionBean {
     /**
      * Returns if the FxProperty's Data Type is reference or inlinereference
      * in order to enable or disable gui elements.
-     * @return  true if the data type is reference
+     *
+     * @return true if the data type is reference
      */
     public boolean isPropertyReference() {
         if (property.getDataType() == null)
@@ -782,7 +784,8 @@ public class PropertyEditorBean implements ActionBean {
     /**
      * Returns if the Fxproperty's Data Type is  SelectOne or SelectMany
      * in order to enable or disable gui elements.
-     * @return  true if the data type is select list
+     *
+     * @return true if the data type is select list
      */
     public boolean isPropertySelectList() {
         if (property.getDataType() == null)
@@ -811,8 +814,7 @@ public class PropertyEditorBean implements ActionBean {
             catch (Throwable t) {
                 new FxFacesMsgErr(t).addToContext();
             }
-        }
-         else
+        } else
             new FxFacesMsgErr(new FxApplicationException("ex.role.notInRole", "StructureManagement")).addToContext();
     }
 
@@ -825,11 +827,11 @@ public class PropertyEditorBean implements ActionBean {
                 if (!property.isNew())
                     saveScriptChanges();
             }
-             catch (Throwable t) {
+            catch (Throwable t) {
                 new FxFacesMsgErr(t).addToContext();
             }
         else
-            new FxFacesMsgInfo("info.structureEditor.notInRole.scriptManagement").addToContext();
+            new FxFacesMsgInfo("StructureEditor.info.notInRole.scriptManagement").addToContext();
 
         if (FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement)) {
             try {
@@ -842,16 +844,15 @@ public class PropertyEditorBean implements ActionBean {
             catch (Throwable t) {
                 new FxFacesMsgErr(t).addToContext();
             }
-        }
-        else
-             new FxFacesMsgInfo("info.structureEditor.notInRole.structureManagement").addToContext();
+        } else
+            new FxFacesMsgInfo("StructureEditor.info.notInRole.structureManagement").addToContext();
     }
 
-     /**
+    /**
      * Apply all changes to the property assignment which are still cached in
      * the view (property options, multiplicity, label, scripts) and forward them to DB
      *
-     * @throws FxApplicationException   if the label is invalid
+     * @throws FxApplicationException if the label is invalid
      */
     private void savePropertyAssignmentChanges() throws FxApplicationException {
         if (assignment.getLabel().getIsEmpty()) {
@@ -896,7 +897,7 @@ public class PropertyEditorBean implements ActionBean {
      * Apply all changes to the property which are still cached in
      * the view (property options, multiplicity, label)
      *
-     * @throws FxApplicationException   if the label is invalid
+     * @throws FxApplicationException if the label is invalid
      */
     private void applyPropertyChanges() throws FxApplicationException {
         if (property.getLabel().getIsEmpty()) {
@@ -906,7 +907,7 @@ public class PropertyEditorBean implements ActionBean {
         int min = FxMultiplicity.getStringToInt(propertyMinMultiplicity);
         int max = FxMultiplicity.getStringToInt(propertyMaxMultiplicity);
 
-        FxJsfUtils.checkMultiplicity(min,max);
+        FxJsfUtils.checkMultiplicity(min, max);
 
         //delete current options
         while (!property.getOptions().isEmpty()) {
@@ -952,13 +953,15 @@ public class PropertyEditorBean implements ActionBean {
         return "propertyOptionEditor";
     }
 
-    /***************** script editor tab begin ************************/
+    /**
+     * ************** script editor tab begin ***********************
+     */
 
     public String showAssignmentScriptEditor() {
         return "assignmentScriptEditor";
     }
 
-     /**
+    /**
      * called from the script editor; to open an instance where the script is assigned to
      *
      * @return type editor page
@@ -979,7 +982,7 @@ public class PropertyEditorBean implements ActionBean {
     }
 
     public int getScriptCount() {
-        return scriptWrapper == null ? 0: scriptWrapper.getScriptList().size();
+        return scriptWrapper == null ? 0 : scriptWrapper.getScriptList().size();
     }
 
     public int getScriptListFiler() {
@@ -1042,29 +1045,29 @@ public class PropertyEditorBean implements ActionBean {
     }
 
     public Map<Long, String> getAssignmentNameForId() {
-        return new HashMap<Long,String>() {
+        return new HashMap<Long, String>() {
             public String get(Object key) {
-                return CacheAdmin.getFilteredEnvironment().getAssignment((Long)key).getXPath();
+                return CacheAdmin.getFilteredEnvironment().getAssignment((Long) key).getXPath();
             }
         };
     }
 
     /**
-     *  Saves script assignment changes to DB.
+     * Saves script assignment changes to DB.
      *
-     * @throws com.flexive.shared.exceptions.FxApplicationException  on errors
+     * @throws com.flexive.shared.exceptions.FxApplicationException
+     *          on errors
      */
     private void saveScriptChanges() throws FxApplicationException {
         for (ScriptListWrapper.ScriptListEntry e : scriptWrapper.getDelta(assignment.getId(), false)) {
-           if (e.getId() == ScriptListWrapper.ID_SCRIPT_ADDED)
-               EJBLookup.getScriptingEngine().createAssignmentScriptMapping(e.getScriptEvent(), e.getScriptInfo().getId(), assignment.getId(), e.isActive(), e.isDerivedUsage());
-           else if (e.getId() == ScriptListWrapper.ID_SCRIPT_REMOVED)
-               EJBLookup.getScriptingEngine().removeAssignmentScriptMappingForEvent(e.getScriptInfo().getId(), assignment.getId(), e.getScriptEvent());
-           else if (e.getId() == ScriptListWrapper.ID_SCRIPT_UPDATED)
-               EJBLookup.getScriptingEngine().updateAssignmentScriptMappingForEvent(e.getScriptInfo().getId(), assignment.getId(), e.getScriptEvent(), e.isActive(), e.isDerivedUsage());
-       }
+            if (e.getId() == ScriptListWrapper.ID_SCRIPT_ADDED)
+                EJBLookup.getScriptingEngine().createAssignmentScriptMapping(e.getScriptEvent(), e.getScriptInfo().getId(), assignment.getId(), e.isActive(), e.isDerivedUsage());
+            else if (e.getId() == ScriptListWrapper.ID_SCRIPT_REMOVED)
+                EJBLookup.getScriptingEngine().removeAssignmentScriptMappingForEvent(e.getScriptInfo().getId(), assignment.getId(), e.getScriptEvent());
+            else if (e.getId() == ScriptListWrapper.ID_SCRIPT_UPDATED)
+                EJBLookup.getScriptingEngine().updateAssignmentScriptMappingForEvent(e.getScriptInfo().getId(), assignment.getId(), e.getScriptEvent(), e.isActive(), e.isDerivedUsage());
+        }
     }
-
 
     /****script editor tab end*********/
 
