@@ -64,9 +64,9 @@
             what you really do is removing the assignment so that this specific property or group is
             no longer assigned to the type anymore.
         </important>
+    </section>
 
-
-        <section xml:id="structure_editor_gui">
+    <section xml:id="structure_editor_gui">
             <title>The structure editor GUI</title>
             <para>
                 <mediaobject>
@@ -75,7 +75,7 @@
                     </imageobject>
                 </mediaobject>
             </para>
-         </section>
+
             <para>The structure editor GUI is reachable by clicking the <guimenuitem>Structure</guimenuitem>
                 tab (1) in the administration backend. The GUI is separated into two parts: the
                 structure tree (2) on the left half of the screen and the edit view (3) on the right half.
@@ -387,368 +387,412 @@
                 Depending on which item is left-clicked in the structure tree, or which item is selected for creation
                 in the context menu of the structure tree, one of the three sub editors is opened in either view mode or edit mode.
             </para>
-            <section xml:id="structure_editor_type_editor">
-                <title>The type editor</title>
-                 <para>
+        </section>
+        <section xml:id="structure_editor_type_editor">
+            <title>The type editor</title>
+             <para>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/structureEditor/type_editor_general.png" format="PNG" contentwidth="66%"/>
+                    </imageobject>
+                </mediaobject>
+            </para>
+            <section xml:id="structure_editor_editing_types">
+                <title>Editing types</title>
+                <para>
+                    When editing an existing type, you will notice that the type's
+                    <guimenuitem>"Mode"</guimenuitem> and <guimenuitem>"Language mode"</guimenuitem>
+                    select boxes are disabled and grayed out. This is due to the fact that the setting
+                    of a type's mode and language mode is only allowed when a new type is created. For
+                    types that are already stored in the database, content may also already exist which
+                    would become invalid if those fields change.
+                </para>
+                <para>
+                    Types with their mode set to <guibutton>"Relation"</guibutton> are called relation types.
+                    For relation types
+                    a table is provided to add and remove relations. For adding a relation the user needs
+                    to set the source and
+                    destination type, together with the maximum multiplicities and click the <guibutton>"Add"</guibutton>
+                    button in the <guimenuitem>"Actions"</guimenuitem> column. In order to set unlimited
+                    multiplicities simply enable or disable the according checkbox in a table row. For specifying
+                    the multiplicites manually, first disable the checkbox and use the input field below the
+                    source or destination type which appears after disabling the checkbox.
+                    Relations can be removed again by clicking on the <guibutton>"Delete"</guibutton> button
+                    in the <guimenuitem>"Actions"</guimenuitem> column.
+
                     <mediaobject>
                         <imageobject>
-                            <imagedata fileref="images/structureEditor/type_editor_general.png" format="PNG" contentwidth="66%"/>
+                            <imagedata fileref="images/structureEditor/type_editor_relations.png" format="PNG" contentwidth="66%"/>
                         </imageobject>
                     </mediaobject>
                 </para>
-                <section xml:id="structure_editor_editing_types">
-                    <title>Editing types</title>
-                    <para>
-                        When editing an existing type, you will notice that the type's
-                        <guimenuitem>"Mode"</guimenuitem> and <guimenuitem>"Language mode"</guimenuitem>
-                        select boxes are disabled and grayed out. This is due to the fact that the setting
-                        of a type's mode and language mode is only allowed when a new type is created. For
-                        types that are already stored in the database, content may also already exist which
-                        would become invalid if those fields change.
-                    </para>
-                    <para>
-                        Types with their mode set to <guibutton>"Relation"</guibutton> are called relation types.
-                        For relation types
-                        a table is provided to add and remove relations. For adding a relation the user needs
-                        to set the source and
-                        destination type, together with the maximum multiplicities and click the <guibutton>"Add"</guibutton>
-                        button in the <guimenuitem>"Actions"</guimenuitem> column. In order to set unlimited
-                        multiplicities simply enable or disable the according checkbox in a table row. For specifying
-                        the multiplicites manually, first disable the checkbox and use the input field below the
-                        source or destination type which appears after disabling the checkbox.
-                        Relations can be removed again by clicking on the <guibutton>"Delete"</guibutton> button
-                        in the <guimenuitem>"Actions"</guimenuitem> column.
-
-                        <mediaobject>
-                            <imageobject>
-                                <imagedata fileref="images/structureEditor/type_editor_relations.png" format="PNG" contentwidth="66%"/>
-                            </imageobject>
-                        </mediaobject>
-                    </para>
-                    <para>
-                        Also notice that by enabling the <guibutton>"Track history"</guibutton> checkbox, by disabling the
-                        <guibutton>"Unlimited Versions"</guibutton> checkbox and for type relations by disabling the
-                        <guibutton>"maxRelSource"</guibutton> and "maxRelDest" checkboxes,
-                        input fields for setting the <guibutton>"History Age"</guibutton>,
-                        <guibutton>"Max. Versions"</guibutton>, and the maximum number of relation sources and destinations
-                        become available that are hidden otherwise.
-                        <mediaobject>
-                            <imageobject>
-                                <imagedata fileref="images/structureEditor/type_editor_hidden_fields.png" format="PNG" contentwidth="66%"/>
-                            </imageobject>
-                        </mediaobject>
-                    </para>
-                </section>
-                <section xml:id="structure_editor_saving_deleting_types">
-                    <title>Saving, creating and deleting types</title>
-                    <para>
-                        In order to save changes to existing types,
-                        the type editor provides the <guibutton>"Save"</guibutton> button
-                        <inlinemediaobject>
-                             <imageobject>
-                                <imagedata fileref="images/structureEditor/save_button.png" format="PNG" contentwidth="66%"/>
-                            </imageobject>
-                        </inlinemediaobject>
-                        at the bottom left of the type editor view. A shortcut to the button can also be
-                        found on top of the content frame.
-                    </para>
-                    <para>
-                        In order to create a new type, the "Create Type..." option has to be selected from
-                        the drop down menu of the <guimenuitem>"Structure"</guimenuitem> tab above the
-                        structure tree. Instead of a <guibutton>"Save"</guibutton> button, the type editor
-                        provides the <guibutton>"Create"</guibutton> button
-                        <inlinemediaobject>
-                             <imageobject>
-                                <imagedata fileref="images/structureEditor/create_button.png" format="PNG" contentwidth="66%"/>
-                            </imageobject>
-                        </inlinemediaobject>
-                        at the bottom left of the type editor view, as well as a shortcut on top of the
-                        content frame.
-                    </para>
-                    <para>
-                        For deleting an existing type, the type editor provides the <guibutton>"Delete"</guibutton> button
-                        <inlinemediaobject>
-                             <imageobject>
-                                <imagedata fileref="images/structureEditor/delete_button_type.png" format="PNG" contentwidth="66%"/>
-                            </imageobject>
-                        </inlinemediaobject>
-                        at the bottom right of the type editor view. A shortcut to the button can also be
-                        found on top of the content frame. Note that only existing types (types have already
-                        been saved into the database) can be deleted. Therefore, when creating a new type,
-                        the <guibutton>"Delete"</guibutton> is not displayed.
-                    </para>
-                </section>
-                If you want more information on types and their specific settings please refer to
-                        <xref linkend="core_structures_types_parameters"/>.
-            </section>
-
-            <section xml:id="structure_editor_group_editor">
-                <title>The group editor</title>
-                 <para>
+                <para>
+                    Also notice that by enabling the <guibutton>"Track history"</guibutton> checkbox, by disabling the
+                    <guibutton>"Unlimited Versions"</guibutton> checkbox and for type relations by disabling the
+                    <guibutton>"maxRelSource"</guibutton> and "maxRelDest" checkboxes,
+                    input fields for setting the <guibutton>"History Age"</guibutton>,
+                    <guibutton>"Max. Versions"</guibutton>, and the maximum number of relation sources and destinations
+                    become available that are hidden otherwise.
                     <mediaobject>
                         <imageobject>
-                            <imagedata fileref="images/structureEditor/group_editor_assignment.png" format="PNG" contentwidth="66%"/>
+                            <imagedata fileref="images/structureEditor/type_editor_hidden_fields.png" format="PNG" contentwidth="66%"/>
                         </imageobject>
                     </mediaobject>
-                 </para>
-
-                <section xml:id="structure_editor_editing_groups">
-                    <title>Editing group assignments</title>
-                    <para>
-                        When editing an existing group assignment, you will notice three tabs:
-                        <itemizedlist>
-                            <listitem>
-                                <para>
-                                    The <guimenuitem>"Edit Group Assignment"</guimenuitem> tab, which gives you
-                                    access to the group assignment that is selected in the structure tree.
-                                </para>
-                            </listitem>
-                            <listitem>
-                                <para>
-                                    The <guimenuitem>"Edit Group"</guimenuitem> tab, which gives you
-                                    access to the actual group that is assigned by the selected group assignment.
-                                </para>
-                            </listitem>
-                            <listitem>
-                                <para>
-                                    The <guimenuitem>"Edit Options"</guimenuitem> tab, which gives you
-                                    access to the options of the group assignment and its group as well.
-                                </para>
-                            </listitem>
-                        </itemizedlist>
-                        </para>
-                    <caution>
-                        <para>
-                        When creating a new group, the <guimenuitem>"Edit Group Assignment"</guimenuitem> tab will
-                        be hidden, as well as the options of the group assignment in the
-                        <guimenuitem>"Edit Options"</guimenuitem> tab. The according assignment will then be
-                        automatically generated after the group has been created and automatically
-                        inserted into the structure tree accordingly.
-                        </para>
-                        <para>
-                        Notice that assignments may override specific settings of their groups.
-                        For group assignments, if the checkbox <guimenuitem>"Override Multiplicity"</guimenuitem>
-                        in the <guimenuitem>"Edit Group Assignment"</guimenuitem> tab, or the checkbox
-                        <guimenuitem>"Overridable Multiplicity"</guimenuitem> is enabled, the multiplicity
-                        defined in the group assignment overrides the multiplicity of its group.
-                        </para>
-                        <para>
-                        Also notice that the group mode of a group assignment may not be changed if content
-                        instances for the group assignment already exist.
-                        </para>
-                    </caution>
-
-                </section>
-                <section xml:id="structure_editor_group_options">
-                    <title>Editing group assignment and group options</title>
-                    <para>
-                        Generally speaking an option is just a pair of a key and a value. The user
-                        can access the options by left clicking the
-                        <guimenuitem>"Edit Options"</guimenuitem> tab.
-                        <mediaobject>
-                            <imageobject>
-                                <imagedata fileref="images/structureEditor/group_options.png" format="PNG" contentwidth="66%"/>
-                            </imageobject>
-                        </mediaobject>
-                        In the image above, the group options table and the group assignment options table
-                        are displayed. The group has three options with the keys "MYOPTION", "MYOPTION2"
-                        and "MYOPTION3". The <guimenuitem>"Overridable"</guimenuitem> checkbox indicates
-                        which options may be overwritten by the group assignment (i.e. may have the
-                        same key but a different value).
-                        </para>
-                        <para>In the example above, only the group option with
-                        the key "MYOPTION2" and value "myvalue" is marked as overridable. This option
-                        is successfully overwritten by the group assignment option with the same key
-                        "MYOPTION2" and the different value "another value".
-                        </para>
-                        <para>
-                        Options can be added by filling in the empty fields on the bottom of the
-                        according table and clicking the <guibutton>"Add"</guibutton> button which is
-                        located in the <guimenuitem>"Actions"</guimenuitem> column of the table. An
-                        option can be deleted again by selecting the according row and pressing the
-                        <guibutton>"Delete"</guibutton> button which is
-                        also located in the <guimenuitem>"Actions"</guimenuitem> column of the table.
-                        </para>
-                        <para>
-                            In order to facilitate the editing of options, visual helpers are provided:
-                            <itemizedlist>
-                                <listitem>
-                                    <para>
-                                        Option displayed in green: This is a valid option, for example "MYOPTION"
-                                        in the group options table.
-                                    </para>
-                                </listitem>
-                                <listitem>
-                                    <para>
-                                        Option displayed with grey background: The assignment tries to
-                                        override a group option which is currently not set to "Overridable", for
-                                        example "MYOPTION3" in the group assignment options table.
-                                    </para>
-                                </listitem>
-                                <listitem>
-                                    <para>
-                                        Option displayed in red: This is an invalid option. Either the option
-                                        has no key, or the option has no value, the key already exists or
-                                        the assignment tries to override an option with the same value. The key
-                                        "MYOPTION4" exists twice in the group assignment options table, therefore
-                                        making it invalid.
-                                    </para>
-                                </listitem>
-                            </itemizedlist>
-                            In order to display the visual helpers, the "Validate" button
-                            <inlinemediaobject>
-                                <imageobject>
-                                    <imagedata fileref="images/structureEditor/validate_button.png" format="PNG" contentwidth="66%"/>
-                                </imageobject>
-                            </inlinemediaobject>
-                            on the bottom left has to be clicked.
-                        </para>
-                </section>
-
-                <section xml:id="structure_editor_saving_deleting_groups">
-                    <title>Saving and deleting group assignments and groups </title>
-                    <para>
-                        In order to save changes to existing group assignments, groups and options,
-                        the group editor provides the <guibutton>"Save"</guibutton> button
-                        <inlinemediaobject>
-                             <imageobject>
-                                <imagedata fileref="images/structureEditor/save_button.png" format="PNG" contentwidth="66%"/>
-                            </imageobject>
-                        </inlinemediaobject>
-                        located at the bottom left of the group editor in every tab. A shortcut to the button
-                        can also be found on top of the content frame.
-                        <warning>
-                            When pressing the "Save"
-                            button, all changes within the three tabs are saved, meaning all changes that
-                            have been made to the assignment, to the group and to the options, altough only one
-                            tab is visible.
-                        </warning>
-                    </para>
-                    <para>
-                        In order to create a new group, the "Create Group..." option has to be selected from
-                        the context menu of the of the structure tree. Instead of a <guibutton>"Save"</guibutton> button,
-                        the group editor provides the <guibutton>"Create"</guibutton> button
-                        <inlinemediaobject>
-                             <imageobject>
-                                <imagedata fileref="images/structureEditor/create_button.png" format="PNG" contentwidth="66%"/>
-                            </imageobject>
-                        </inlinemediaobject>
-                        at the bottom left of the group editor view, as well as a shortcut on top of the
-                        content frame. After the group has been successfully created, an according group assignment
-                        is automatically generated as well and automatically inserted into the structure tree.
-                    </para>
-                    <para>
-                        For deleting an existing group assignment, the group editor provides the <guibutton>"Delete"</guibutton> button
-                        <inlinemediaobject>
-                             <imageobject>
-                                <imagedata fileref="images/structureEditor/delete_button_assignment.png" format="PNG" contentwidth="66%"/>
-                            </imageobject>
-                        </inlinemediaobject>
-                        at the bottom right of the "Edit Group Assignment" tab. A shortcut to the button can also be
-                        found on top of the content frame.
-                        <caution>
-                            <para>
-                                Note that by deleting a group assignment, the group itsself
-                                is not automatically deleted! Only if the group is not assigned to another group or type anymore
-                                , the group will be removed from the database.
-                            </para>
-                        </caution>
-                    </para>
-                </section>
-                 If you want more information on groups and their specific settings please refer to
-                        <xref linkend="core_structures_group_parameters"/>.
+                </para>
             </section>
-
-            <section xml:id="structure_editor_property_editor">
-                <title>The property editor</title>
-                 <para>
-                    <mediaobject>
-                        <imageobject>
-                            <imagedata fileref="images/structureEditor/property_editor_general.png" format="PNG" contentwidth="66%"/>
+            <section xml:id="structure_editor_saving_deleting_types">
+                <title>Saving, creating and deleting types</title>
+                <para>
+                    In order to save changes to existing types,
+                    the type editor provides the <guibutton>"Save"</guibutton> button
+                    <inlinemediaobject>
+                         <imageobject>
+                            <imagedata fileref="images/structureEditor/save_button.png" format="PNG" contentwidth="66%"/>
                         </imageobject>
-                    </mediaobject>
-                 </para>
-
-                <section xml:id="structure_editor_editing_properties">
-                    <title>Editing property assignments</title>
-                    <para>
-                        Similar to the group editor, the property editor provides three tabs:
-                        <itemizedlist>
-                            <listitem>
-                                <para>
-                                    The <guimenuitem>"Edit Property Assignment"</guimenuitem> tab, which gives you
-                                    access to the property assignment that is selected in the structure tree.
-                                </para>
-                            </listitem>
-                            <listitem>
-                                <para>
-                                    The <guimenuitem>"Edit Property"</guimenuitem> tab, which gives you
-                                    access to the actual property that is assigned by the selected property
-                                    assignment.
-                                </para>
-                            </listitem>
-                            <listitem>
-                                <para>
-                                    The <guimenuitem>"Edit Options"</guimenuitem> tab, which gives you
-                                    access to the options of the property assignment and its property as well.
-                                </para>
-                            </listitem>
-                        </itemizedlist>
-                    </para>
-                    <para>
-                        System internal property assignments
-                        <inlinemediaobject>
-                            <imageobject>
-                                <imagedata fileref="images/structureEditor/fxAssignedPropertySystemInternal.png" format="PNG" contentwidth="66%"/>
-                            </imageobject>
-                        </inlinemediaobject>
-                        , together with their properties may not be edited. This is why all input elements
-                        are deactivated. It is only allowed to edit their options.
-                    </para>
-                    <caution>
-                        <para>
-                            When creating a new property, the <guimenuitem>"Edit Property Assignment"</guimenuitem> tab will
-                            be hidden, as well as the options of the property assignment in the
-                            <guimenuitem>"Edit Options"</guimenuitem> tab. The according assignment will then be
-                            automatically generated after the property has been created and automatically inserted into the
-                            structure tree accordingly.
-                        </para>
-                        <para>
-                            Note that property assignments may override specific settings of their property.
-                            If a specific setting may be overwritten is controlled by the "Override property options"
-                            section in the <guimenuitem>"Edit Property Assignment"</guimenuitem> tab and by the "Property
-                            override options" section in the
-                            <guimenuitem>"Edit Property</guimenuitem> tab respectively.
-                                <mediaobject>
-                                <imageobject>
-                                    <imagedata fileref="images/structureEditor/override_property_options.png" format="PNG" contentwidth="66%"/>
-                                </imageobject>
-                            </mediaobject>
-                        </para>
-                    </caution>
-                </section>
-                <section xml:id="structure_editor_property_options">
-                    <title>Editing property assignment and property options</title>
-                    <para>
-                        Editing property assignment and property options works exactly the same as
-                        editing group assignment and group options. The only difference is that, when
-                        creating a new property, a set of standard options is automatically added.
-                        If you need more information please refer to
-                        <xref linkend="structure_editor_group_options"/>.
-                    </para>
-                </section>
-
-                <section xml:id="structure_editor_saving_deleting_properties">
-                    <title>Saving and deleting property assignments and properties </title>
-                    <para>
-                        Also concerning saving and deletion operations, properties and property assignments
-                        exactly comply to group and group assignments. The reader is therefore refered to
-                        <xref linkend="structure_editor_saving_deleting_groups"/>.
-                    </para>
-                </section>
-                If you want more information on properties and their specific settings please refer to
-                        <xref linkend="core_structures_property_parameters"/>.
+                    </inlinemediaobject>
+                    at the bottom left of the type editor view. A shortcut to the button can also be
+                    found on top of the content frame.
+                </para>
+                <para>
+                    In order to create a new type, the "Create Type..." option has to be selected from
+                    the drop down menu of the <guimenuitem>"Structure"</guimenuitem> tab above the
+                    structure tree. Instead of a <guibutton>"Save"</guibutton> button, the type editor
+                    provides the <guibutton>"Create"</guibutton> button
+                    <inlinemediaobject>
+                         <imageobject>
+                            <imagedata fileref="images/structureEditor/create_button.png" format="PNG" contentwidth="66%"/>
+                        </imageobject>
+                    </inlinemediaobject>
+                    at the bottom left of the type editor view, as well as a shortcut on top of the
+                    content frame.
+                </para>
+                <para>
+                    For deleting an existing type, the type editor provides the <guibutton>"Delete"</guibutton> button
+                    <inlinemediaobject>
+                         <imageobject>
+                            <imagedata fileref="images/structureEditor/delete_button_type.png" format="PNG" contentwidth="66%"/>
+                        </imageobject>
+                    </inlinemediaobject>
+                    at the bottom right of the type editor view. A shortcut to the button can also be
+                    found on top of the content frame. Note that only existing types (types have already
+                    been saved into the database) can be deleted. Therefore, when creating a new type,
+                    the <guibutton>"Delete"</guibutton> is not displayed.
+                </para>
             </section>
+            If you want more information on types and their specific settings please refer to
+                    <xref linkend="core_structures_types_parameters"/>.
         </section>
+
+        <section xml:id="structure_editor_group_editor">
+            <title>The group editor</title>
+             <para>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/structureEditor/group_editor_assignment.png" format="PNG" contentwidth="66%"/>
+                    </imageobject>
+                </mediaobject>
+             </para>
+
+            <section xml:id="structure_editor_editing_groups">
+                <title>Editing group assignments</title>
+                <para>
+                    When editing an existing group assignment, you will notice three tabs:
+                    <itemizedlist>
+                        <listitem>
+                            <para>
+                                The <guimenuitem>"Edit Group Assignment"</guimenuitem> tab, which gives you
+                                access to the group assignment that is selected in the structure tree.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                The <guimenuitem>"Edit Group"</guimenuitem> tab, which gives you
+                                access to the actual group that is assigned by the selected group assignment.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                The <guimenuitem>"Edit Options"</guimenuitem> tab, which gives you
+                                access to the options of the group assignment and its group as well.
+                            </para>
+                        </listitem>
+                    </itemizedlist>
+                    </para>
+                <caution>
+                    <para>
+                    When creating a new group, the <guimenuitem>"Edit Group Assignment"</guimenuitem> tab will
+                    be hidden, as well as the options of the group assignment in the
+                    <guimenuitem>"Edit Options"</guimenuitem> tab. The according assignment will then be
+                    automatically generated after the group has been created and automatically
+                    inserted into the structure tree accordingly.
+                    </para>
+                    <para>
+                    Notice that assignments may override specific settings of their groups.
+                    For group assignments, if the checkbox <guimenuitem>"Override Multiplicity"</guimenuitem>
+                    in the <guimenuitem>"Edit Group Assignment"</guimenuitem> tab, or the checkbox
+                    <guimenuitem>"Overridable Multiplicity"</guimenuitem> is enabled, the multiplicity
+                    defined in the group assignment overrides the multiplicity of its group.
+                    </para>
+                    <para>
+                    Also notice that the group mode of a group assignment may not be changed if content
+                    instances for the group assignment already exist.
+                    </para>
+                </caution>
+            </section>
+
+            <section xml:id="structure_editor_group_options">
+                <title>Editing group assignment and group options</title>
+                <para>
+                    Generally speaking an option is just a pair of a key and a value. The user
+                    can access the options by left clicking the
+                    <guimenuitem>"Edit Options"</guimenuitem> tab.
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/structureEditor/group_options.png" format="PNG" contentwidth="66%"/>
+                        </imageobject>
+                    </mediaobject>
+                    In the image above, the group options table and the group assignment options table
+                    are displayed. The group has three options with the keys "MYOPTION", "MYOPTION2"
+                    and "MYOPTION3". The <guimenuitem>"Overridable"</guimenuitem> checkbox indicates
+                    which options may be overwritten by the group assignment (i.e. may have the
+                    same key but a different value).
+                </para>
+                <para>In the example above, only the group option with
+                    the key "MYOPTION2" and value "myvalue" is marked as overridable. This option
+                    is successfully overwritten by the group assignment option with the same key
+                    "MYOPTION2" and the different value "another value".
+                </para>
+                <para>
+                    Options can be added by filling in the empty fields on the bottom of the
+                    according table and clicking the <guibutton>"Add"</guibutton> button which is
+                    located in the <guimenuitem>"Actions"</guimenuitem> column of the table. An
+                    option can be deleted again by selecting the according row and pressing the
+                    <guibutton>"Delete"</guibutton> button which is
+                    also located in the <guimenuitem>"Actions"</guimenuitem> column of the table.
+                </para>
+                <para>
+                    In order to facilitate the editing of options, visual helpers are provided:
+                    <itemizedlist>
+                        <listitem>
+                            <para>
+                                Option displayed in green: This is a valid option, for example "MYOPTION"
+                                in the group options table.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Option displayed with grey background: The assignment tries to
+                                override a group option which is currently not set to "Overridable", for
+                                example "MYOPTION3" in the group assignment options table.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Option displayed in red: This is an invalid option. Either the option
+                                has no key, or the option has no value, the key already exists or
+                                the assignment tries to override an option with the same value. The key
+                                "MYOPTION4" exists twice in the group assignment options table, therefore
+                                making it invalid.
+                            </para>
+                        </listitem>
+                    </itemizedlist>
+                    In order to display the visual helpers, the "Validate" button
+                    <inlinemediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/structureEditor/validate_button.png" format="PNG" contentwidth="66%"/>
+                        </imageobject>
+                    </inlinemediaobject>
+                    on the bottom left has to be clicked.
+                </para>
+            </section>
+
+            <section xml:id="structure_editor_saving_deleting_groups">
+                <title>Saving and deleting group assignments and groups </title>
+                <para>
+                    In order to save changes to existing group assignments, groups and options,
+                    the group editor provides the <guibutton>"Save"</guibutton> button
+                    <inlinemediaobject>
+                         <imageobject>
+                            <imagedata fileref="images/structureEditor/save_button.png" format="PNG" contentwidth="66%"/>
+                        </imageobject>
+                    </inlinemediaobject>
+                    located at the bottom left of the group editor in every tab. A shortcut to the button
+                    can also be found on top of the content frame.
+                    <warning>
+                        When pressing the "Save"
+                        button, all changes within the three tabs are saved, meaning all changes that
+                        have been made to the assignment, to the group and to the options, altough only one
+                        tab is visible. This behaviour is the same for type and property assignment editors
+                        as well.
+                    </warning>
+                </para>
+                <para>
+                    In order to create a new group, the "Create Group..." option has to be selected from
+                    the context menu of the of the structure tree. Instead of a <guibutton>"Save"</guibutton> button,
+                    the group editor provides the <guibutton>"Create"</guibutton> button
+                    <inlinemediaobject>
+                         <imageobject>
+                            <imagedata fileref="images/structureEditor/create_button.png" format="PNG" contentwidth="66%"/>
+                        </imageobject>
+                    </inlinemediaobject>
+                    at the bottom left of the group editor view, as well as a shortcut on top of the
+                    content frame. After the group has been successfully created, an according group assignment
+                    is automatically generated as well and automatically inserted into the structure tree.
+                </para>
+                <para>
+                    For deleting an existing group assignment, the group editor provides the <guibutton>"Delete"</guibutton> button
+                    <inlinemediaobject>
+                         <imageobject>
+                            <imagedata fileref="images/structureEditor/delete_button_assignment.png" format="PNG" contentwidth="66%"/>
+                        </imageobject>
+                    </inlinemediaobject>
+                    at the bottom right of the "Edit Group Assignment" tab. A shortcut to the button can also be
+                    found on top of the content frame.
+                    <caution>
+                        <para>
+                            Note that by deleting a group assignment, the group itsself
+                            is not automatically deleted! Only if the group is not assigned to another group or type anymore
+                            , the group will be removed from the database.
+                        </para>
+                    </caution>
+                </para>
+            </section>
+             If you want more information on groups and their specific settings please refer to
+                    <xref linkend="core_structures_group_parameters"/>.
+        </section>
+
+        <section xml:id="structure_editor_property_editor">
+            <title>The property editor</title>
+             <para>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/structureEditor/property_editor_general.png" format="PNG" contentwidth="66%"/>
+                    </imageobject>
+                </mediaobject>
+             </para>
+
+            <section xml:id="structure_editor_editing_properties">
+                <title>Editing property assignments</title>
+                <para>
+                    Similar to the group editor, the property editor provides three tabs:
+                    <itemizedlist>
+                        <listitem>
+                            <para>
+                                The <guimenuitem>"Edit Property Assignment"</guimenuitem> tab, which gives you
+                                access to the property assignment that is selected in the structure tree.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                The <guimenuitem>"Edit Property"</guimenuitem> tab, which gives you
+                                access to the actual property that is assigned by the selected property
+                                assignment.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                The <guimenuitem>"Edit Options"</guimenuitem> tab, which gives you
+                                access to the options of the property assignment and its property as well.
+                            </para>
+                        </listitem>
+                    </itemizedlist>
+                </para>
+                <para>
+                    System internal property assignments
+                    <inlinemediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/structureEditor/fxAssignedPropertySystemInternal.png" format="PNG" contentwidth="66%"/>
+                        </imageobject>
+                    </inlinemediaobject>
+                    , together with their properties may not be edited. This is why all input elements
+                    are deactivated. It is only allowed to edit their options.
+                </para>
+                <caution>
+                    <para>
+                        When creating a new property, the <guimenuitem>"Edit Property Assignment"</guimenuitem> tab will
+                        be hidden, as well as the options of the property assignment in the
+                        <guimenuitem>"Edit Options"</guimenuitem> tab. The according assignment will then be
+                        automatically generated after the property has been created and automatically inserted into the
+                        structure tree accordingly.
+                    </para>
+                    <para>
+                        Note that property assignments may override specific settings of their property.
+                        If a specific setting may be overwritten is controlled by the "Override property options"
+                        section in the <guimenuitem>"Edit Property Assignment"</guimenuitem> tab and by the "Property
+                        override options" section in the
+                        <guimenuitem>"Edit Property</guimenuitem> tab respectively.
+                            <mediaobject>
+                            <imageobject>
+                                <imagedata fileref="images/structureEditor/override_property_options.png" format="PNG" contentwidth="66%"/>
+                            </imageobject>
+                        </mediaobject>
+                    </para>
+                </caution>
+            </section>
+            <section xml:id="structure_editor_property_options">
+                <title>Editing property assignment and property options</title>
+                <para>
+                    Editing property assignment and property options works exactly the same as
+                    editing group assignment and group options. The only difference is that, when
+                    creating a new property, a set of standard options is automatically added.
+                    If you need more information please refer to
+                    <xref linkend="structure_editor_group_options"/>.
+                </para>
+            </section>
+
+            <section xml:id="structure_editor_saving_deleting_properties">
+                <title>Saving and deleting property assignments and properties </title>
+                <para>
+                    Also concerning saving and deletion operations, properties and property assignments
+                    exactly comply to group and group assignments. The reader is therefore refered to
+                    <xref linkend="structure_editor_saving_deleting_groups"/>.
+                </para>
+            </section>
+            If you want more information on properties and their specific settings please refer to
+                    <xref linkend="core_structures_property_parameters"/>.
+        </section>
+
+        <section xml:id="structure_editor_script_assignment_editor">
+            <title>The script assignment Editor</title>
+            <para>
+                Scripts can be assigned to a type or property assignment by using the script assignment editor,
+                wich is reachable by clicking on the "Scripting" tab. The number in brackets on
+                the "Scripting" tab refers to the number of scripts that have already been assigned.
+                Note that only users that are in the role of "Script Manager" may edit script assignments.
+            </para>
+            <para>
+                Via the editor it is possible to add, remove and edit existing script assignments.
+                Clicking on a specific script name provides a shortcut to the
+                script editor in the "Admin" section, where the script code can be inspected or changed.
+                A script assignment consists of a specific script and a specific script event, which designates
+                when a script will be run. Naturally, types and assignments provide different subsets of events
+                to choose from.
+            </para>
+            <para>
+                Furthermore it is possible to activate and deactivate script assignments. For deactivated
+                script assignments, script execution will be prevented. It is also possible to derive script
+                assignments to child types or property assignments. The inherited script assignments
+                of a parent type or property assignment can not be directly in the script assignment editor of
+                the child. Instead
+                a link is provided for derived script assignments, which opens the script assignment editor
+                of the parent type where changes can be made and are in turn propagated to all derived children.
+            </para>
+            <para>
+                In order for changes to take effect, the script assignment editor -just like the other editors-
+                provides the <guibutton>"Save"</guibutton> button
+                    <inlinemediaobject>
+                         <imageobject>
+                            <imagedata fileref="images/structureEditor/save_button.png" format="PNG" contentwidth="66%"/>
+                        </imageobject>
+                    </inlinemediaobject>
+                    at the bottom left of the script assignment editor view. A shortcut to the button can also be
+                    found on top of the content frame.
+            </para>
+            <para>
+             If you want more information on scripts and their specific settings please refer to
+                    <xref linkend="core_scripting" />.
+            </para>
+        </section>
+
     </section>
 </chapter>
