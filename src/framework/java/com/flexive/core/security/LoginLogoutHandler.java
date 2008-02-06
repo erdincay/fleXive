@@ -33,7 +33,6 @@
  ***************************************************************/
 package com.flexive.core.security;
 
-import com.flexive.ejb.beans.AccountEngineBean;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.exceptions.FxAccountInUseException;
 import com.flexive.shared.exceptions.FxLoginFailedException;
@@ -100,7 +99,7 @@ public final class LoginLogoutHandler {
             callback.setTakeOverSession(takeOver);
             callback.setSessionContext(ctx);
             callback.setDataSource(ds);
-            ticket = new AccountEngineBean().dbLogin(username, password, callback);
+            ticket = FxDBAuthentication.login(username, password, callback);
             // Log out any other sessions of the user
             if (!ticket.isMultiLogin() && !ticket.isWebDav()) {
                 // TODO: real logout?
@@ -148,8 +147,7 @@ public final class LoginLogoutHandler {
         }
 
         try {
-            //new LoginContext(LOGIN_CTX, sub).logout();
-            new AccountEngineBean().dbLogout(FxContext.get().getTicket());
+            FxDBAuthentication.logout(FxContext.get().getTicket());
             UserTicketStore.removeSubject();
         } catch (Exception exc) {
             FxLogoutFailedException lfe = new FxLogoutFailedException("Logout failed", exc);

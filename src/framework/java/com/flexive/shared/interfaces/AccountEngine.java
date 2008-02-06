@@ -38,7 +38,6 @@ import com.flexive.shared.exceptions.*;
 import com.flexive.shared.security.*;
 
 import javax.ejb.Remote;
-import javax.security.auth.login.LoginException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -124,15 +123,6 @@ public interface AccountEngine {
      * @return the user ticket for the current request.
      */
     UserTicket getUserTicket();
-
-    /**
-     * Marks a user as not active in the database.
-     *
-     * @param ticket the ticke of the user
-     * @throws javax.security.auth.login.LoginException
-     *          if the function failed
-     */
-    void dbLogout(UserTicket ticket) throws LoginException;
 
     /**
      * Gets the groups a user is assigned to.

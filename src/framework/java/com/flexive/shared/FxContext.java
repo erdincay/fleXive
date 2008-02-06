@@ -35,9 +35,9 @@ package com.flexive.shared;
 
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.exceptions.FxAccountInUseException;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLoginFailedException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
-import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.AccountEngine;
 import com.flexive.shared.security.UserTicket;
 import org.apache.commons.logging.Log;
@@ -169,23 +169,21 @@ public class FxContext implements Serializable {
      * <p/>
      * The next getUserTicket() call will return the new ticket.
      *
-     * @param username the unique user name
-     * @param password the password
-     * @param takeOver the take over flag
-     * @throws com.flexive.shared.exceptions.FxLoginFailedException
-     *          if the login failed
-     * @throws com.flexive.shared.exceptions.FxAccountInUseException
-     *          if take over was false and the account is in use
+     * @param loginname the unique user name
+     * @param password  the password
+     * @param takeOver  the take over flag
+     * @throws FxLoginFailedException  if the login failed
+     * @throws FxAccountInUseException if take over was false and the account is in use
      */
-    public void login(String username, String password, boolean takeOver) throws FxLoginFailedException,
+    public void login(String loginname, String password, boolean takeOver) throws FxLoginFailedException,
             FxAccountInUseException {
         // Anything to do at all?
-        if (ticket != null && ticket.getUserName().equals(username)) {
+        if (ticket != null && ticket.getLoginName().equals(loginname)) {
             return;
         }
         // Try the login
         AccountEngine acc = EJBLookup.getAccountEngine();
-        acc.login(username, password, takeOver);
+        acc.login(loginname, password, takeOver);
         ticket = acc.getUserTicket();
     }
 
@@ -546,7 +544,7 @@ public class FxContext implements Serializable {
             si.ticket = getTicketFromEJB(session);
             if (si.ticket.isGuest()) {
                 try {
-                    if( last == null )
+                    if (last == null)
                         si.ticket.overrideLanguage(EJBLookup.getLanguageEngine().load(request.getLocale().getLanguage()));
                     else
                         si.ticket.overrideLanguage(last.getLanguage());
@@ -560,7 +558,7 @@ public class FxContext implements Serializable {
             // For static content like images we use the last user ticket stored in the session
             // to speed up the request.
             si.ticket = getLastUserTicket(session);
-            if( si.ticket != null ) {
+            if (si.ticket != null) {
                 if (si.ticket.isGuest() && (si.ticket.getACLAssignments() == null || si.ticket.getACLAssignments().length == 0)) {
                     //reload from EJB layer if we have a guest ticket with no ACL assignments
                     //this can happen during initial loading

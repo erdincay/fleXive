@@ -64,6 +64,14 @@ public class UserTicketStore {
     private static transient Log LOG = LogFactory.getLog(UserTicketStore.class);
 
     /**
+     * Helper class
+     */
+    static class SubjectWithPath {
+        Subject subject;
+        String path;
+    }
+
+    /**
      * Stores a subject (and its ticket) for the current session.
      *
      * @param sub the subject to store
@@ -73,9 +81,26 @@ public class UserTicketStore {
         FxContext si = FxContext.get();
         try {
             cache.put(getCacheRoot(si), KEY_TICKET, sub);
+            if (LOG.isDebugEnabled()) LOG.debug("Storing at [" + getCacheRoot(si) + "]: [" + sub + "]");
         } catch (FxCacheException exc) {
             LOG.error("Failed to store ticket in UserTickerStore: " + exc.getMessage(), exc);
             System.err.println("Failed to store ticket in UserTickerStore: " + exc.getMessage());
+        }
+    }
+
+    /**
+     * Stores a subject (and its ticket) for the given path
+     *
+     * @param sub the subject to store
+     */
+    private static void storeSubject(SubjectWithPath sub) {
+        FxCacheMBean cache = CacheAdmin.getInstance();
+        try {
+            cache.put(CacheAdmin.ROOT_USERTICKETSTORE + "/" + sub.path, KEY_TICKET, sub.subject);
+            if (LOG.isDebugEnabled())
+                LOG.debug("Storing at [" + CacheAdmin.ROOT_USERTICKETSTORE + "/" + sub.path + "]: [" + sub.subject + "]");
+        } catch (FxCacheException exc) {
+            LOG.error("Failed to store ticket in UserTickerStore: " + exc.getMessage(), exc);
         }
     }
 
@@ -87,9 +112,9 @@ public class UserTicketStore {
         FxContext si = FxContext.get();
         try {
             cache.remove(getCacheRoot(si), KEY_TICKET);
+            if (LOG.isDebugEnabled()) LOG.debug("Removing all subjects at for [" + getCacheRoot(si) + "]");
         } catch (FxCacheException exc) {
             LOG.error("Failed to clear session in UserTickerStore: " + exc.getMessage(), exc);
-            System.err.println("Failed to store ticket in UserTickerStore: " + exc.getMessage());
         }
     }
 
@@ -116,6 +141,7 @@ public class UserTicketStore {
         Subject sub = null;
         try {
             sub = (Subject) cache.get(getCacheRoot(si), KEY_TICKET);
+            if (LOG.isDebugEnabled()) LOG.debug("getSubject returned for [" + getCacheRoot(si) + "]: " + sub);
         } catch (FxCacheException exc) {
             LOG.error("Failed to get ticket from UserTicketStore Cache: " + exc.getMessage(), exc);
         } catch (Exception exc) {
@@ -134,12 +160,12 @@ public class UserTicketStore {
      * @param acls    the acls
      * @return the matching subjects
      */
-    private static Subject[] getSubjects(Long userId, long[] groupId, long[] acls) {
+    private static SubjectWithPath[] getSubjects(Long userId, long[] groupId, long[] acls) {
         FxCacheMBean cache = CacheAdmin.getInstance();
         try {
-            List<Subject> result = new ArrayList<Subject>(50);
+            List<SubjectWithPath> result = new ArrayList<SubjectWithPath>(50);
             Set aSet = cache.getChildrenNames(CacheAdmin.ROOT_USERTICKETSTORE);
-            if (aSet == null) return new Subject[0];
+            if (aSet == null) return new SubjectWithPath[0];
             UserTicketImpl aTicket;
             Subject sub;
             for (Object subPath : aSet) {
@@ -155,12 +181,15 @@ public class UserTicketStore {
                 match = match || aTicket.isInAtLeastOneGroup(groupId);
                 match = match || aTicket.hasAtLeastOneACL(acls);
                 if (!match) continue;
-                result.add(sub);
+                SubjectWithPath sp = new SubjectWithPath();
+                sp.subject = sub;
+                sp.path = String.valueOf(subPath);
+                result.add(sp);
             }
-            return result.toArray(new Subject[result.size()]);
+            return result.toArray(new SubjectWithPath[result.size()]);
         } catch (FxCacheException exc) {
             LOG.error("Failed to examine tickets: " + exc.getMessage(), exc);
-            return new Subject[0];
+            return new SubjectWithPath[0];
         }
     }
 
@@ -243,7 +272,6 @@ public class UserTicketStore {
      */
     public static void flagDirtyHavingACL(long aclId) {
         flagDirtyHaving(null, null, aclId);
-
     }
 
     /**
@@ -266,16 +294,19 @@ public class UserTicketStore {
      * @param groupId a group id, or null
      */
     private static void flagDirtyHaving(Long userId, Long groupId, Long aclId) {
-        Subject[] subs = getSubjects(userId,
+        SubjectWithPath[] subs = getSubjects(userId,
                 groupId == null ? null : new long[]{groupId},
                 aclId == null ? null : new long[]{aclId});
-        for (Subject sub : subs) {
+        if (LOG.isDebugEnabled())
+            LOG.debug("Flagging " + subs.length + " dirty subjects with userId=" + userId + ", groupId=" + groupId + ", aclId=" + aclId);
+        for (SubjectWithPath sub : subs) {
+            if (LOG.isDebugEnabled()) LOG.debug("Dirty subject: " + sub);
             try {
-                final UserTicketImpl ticket = (UserTicketImpl) FxDefaultLogin.getUserTicket(sub);
+                final UserTicketImpl ticket = (UserTicketImpl) FxDefaultLogin.getUserTicket(sub.subject);
                 if (!ticket.isDirty()) {
                     // Flag as dirty
                     ticket.setDirty(true);
-                    FxDefaultLogin.updateUserTicket(sub, ticket);
+                    FxDefaultLogin.updateUserTicket(sub.subject, ticket);
                     // Write back to the cluster cache
                     storeSubject(sub);
                 }
@@ -283,6 +314,7 @@ public class UserTicketStore {
                 LOG.fatal("Subject without UserTicket [" + sub + "], dirty flag update skipped", exc);
             }
         }
+        if (LOG.isDebugEnabled()) LOG.debug("Done flagging dirty.");
         if (FxContext.get() != null) {
             // update current user's ticket
             FxContext.get().setTicket(getTicket());
@@ -297,6 +329,7 @@ public class UserTicketStore {
      * @return amount of deleted entries
      */
     public static int removeUserId(final long userId, final String applicationId) {
+        if (LOG.isDebugEnabled()) LOG.debug("Removing userId " + userId + " with applicationId " + applicationId);
         FxCacheMBean cache = CacheAdmin.getInstance();
         List<String> remove = new ArrayList<String>(100);
         // Find all matching nodes

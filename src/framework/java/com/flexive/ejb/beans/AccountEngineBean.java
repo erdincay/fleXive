@@ -36,9 +36,7 @@ package com.flexive.ejb.beans;
 import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.LifeCycleInfoImpl;
-import com.flexive.core.security.FxCallback;
 import com.flexive.core.security.LoginLogoutHandler;
-import com.flexive.core.security.UserTicketImpl;
 import com.flexive.core.security.UserTicketStore;
 import com.flexive.shared.*;
 import com.flexive.shared.content.FxContent;
@@ -58,12 +56,12 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.annotation.Resource;
 import javax.ejb.*;
-import javax.security.auth.login.LoginException;
 import javax.sql.DataSource;
 import java.sql.*;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Account management
@@ -228,224 +226,6 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
     public UserTicket getUserTicket() {
         return UserTicketStore.getTicket();
     }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public UserTicket dbLogin(String username, String password, FxCallback ac)
-            throws FxAccountInUseException, FxLoginFailedException {
-        final long SYS_UP = CacheAdmin.getInstance().getSystemStartTime();
-        FxContext inf = FxContext.get();
-
-        // Avoid null pointer exceptions
-        if (password == null) password = "";
-        if (username == null) username = "";
-
-        String curSql;
-        PreparedStatement ps = null;
-        Connection con = null;
-        try {
-
-            // Obtain a database connection
-            con = Database.getDbConnection();
-            //               1-6 7      8           9              10                 11           12       13      14         15
-            curSql = "SELECT d.*,a.ID,a.IS_ACTIVE,a.IS_VALIDATED,a.ALLOW_MULTILOGIN,a.VALID_FROM,a.VALID_TO,NOW(),a.PASSWORD,a.MANDATOR " +
-                    "FROM " + TBL_ACCOUNTS + " a " +
-                    "LEFT JOIN " +
-                    " (SELECT ID,ISLOGGEDIN,LAST_LOGIN,LAST_LOGIN_FROM,FAILED_ATTEMPTS,AUTHSRC FROM " + TBL_ACCOUNT_DETAILS +
-                    " WHERE APPLICATION=?) d ON a.ID=d.ID WHERE a.LOGIN_NAME=?";
-            ps = con.prepareStatement(curSql);
-            ps.setString(1, inf.getApplicationId());
-            ps.setString(2, username);
-            final ResultSet rs = ps.executeQuery();
-
-            // Anything found?
-            if (rs == null || !rs.next())
-                throw new FxLoginFailedException("Login failed (invalid user or password)", FxLoginFailedException.TYPE_USER_OR_PASSWORD_NOT_DEFINED);
-
-            // check if the hashed password matches the hash stored in the database
-            final long id = rs.getLong(7);
-            final boolean passwordMatches = FxSharedUtils.hashPassword(id, password).equals(rs.getString(14));
-            if (!passwordMatches) {
-                increaseFailedLoginAttempts(con, id);
-                throw new FxLoginFailedException("Login failed (invalid user or password)", FxLoginFailedException.TYPE_USER_OR_PASSWORD_NOT_DEFINED);
-            }
-
-            // Read data
-            final boolean loggedIn = rs.getBoolean(2);
-            final Date lastLogin = new Date(rs.getLong(3));
-            final String lastLoginFrom = rs.getString(4);
-            final long failedAttempts = rs.getLong(5);
-            final boolean active = rs.getBoolean(8);
-            final boolean validated = rs.getBoolean(9);
-            final boolean allowMultiLogin = rs.getBoolean(10);
-            final Date validFrom = new Date(rs.getLong(11));
-            final Date validTo = new Date(rs.getLong(12));
-            final Date dbNow = rs.getTimestamp(13);
-            final long mandator = rs.getLong(15);
-
-            // Account active?
-            if (!active || !validated || !CacheAdmin.getEnvironment().getMandator(mandator).isActive()) {
-                if (LOG.isDebugEnabled()) LOG.debug("Login for user [" + username +
-                        "] failed, account is inactive. Active=" + active + ", Validated=" + validated +
-                        ", Mandator active: " + CacheAdmin.getEnvironment().getMandator(mandator).isActive());
-                increaseFailedLoginAttempts(con, id);
-                throw new FxLoginFailedException("Login failed", FxLoginFailedException.TYPE_INACTIVE_ACCOUNT);
-            }
-
-            // Account date from-to valid?
-            //Compute the day AFTER the dValidTo
-            Calendar endDate = Calendar.getInstance();
-            endDate.setTime(validTo);
-            endDate.add(Calendar.DAY_OF_MONTH, 1);
-            if (validFrom.getTime() > dbNow.getTime() || endDate.getTimeInMillis() < dbNow.getTime()) {
-                SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-                if (LOG.isDebugEnabled())
-                    LOG.debug("Login for user [" + username +
-                            "] failed, from/to date not valid. from='" + sdf.format(validFrom) + "' to='" + validTo + "'");
-                increaseFailedLoginAttempts(con, id);
-                throw new FxAccountExpiredException(username, dbNow);
-            }
-
-            // Check 'Account in use and takeOver false'
-            if (!allowMultiLogin && !ac.getTakeOverSession() && loggedIn && lastLogin != null) {
-                // Only if the last login time was AFTER the system started
-                if (lastLogin.getTime() >= SYS_UP) {
-                    FxAccountInUseException aiu = new FxAccountInUseException(username, lastLoginFrom, lastLogin);
-                    if (LOG.isInfoEnabled()) LOG.info(aiu);
-                    increaseFailedLoginAttempts(con, id);
-                    throw aiu;
-                }
-            }
-
-            // Clear any old data
-            curSql = "DELETE FROM " + TBL_ACCOUNT_DETAILS + " WHERE ID=? AND APPLICATION=?";
-            ps.close();
-            ps = con.prepareStatement(curSql);
-            ps.setLong(1, id);
-            ps.setString(2, inf.getApplicationId());
-            ps.executeUpdate();
-
-            // Mark user as active in the database
-            curSql = "INSERT INTO " + TBL_ACCOUNT_DETAILS + " (ID,APPLICATION,ISLOGGEDIN,LAST_LOGIN,LAST_LOGIN_FROM,FAILED_ATTEMPTS,AUTHSRC) " +
-                    "VALUES (?,?,?,?,?,?,?)";
-            ps.close();
-            ps = con.prepareStatement(curSql);
-            ps.setLong(1, id);
-            ps.setString(2, inf.getApplicationId());
-            ps.setBoolean(3, true);
-            ps.setLong(4, System.currentTimeMillis());
-            ps.setString(5, inf.getRemoteHost());
-            ps.setLong(6, 0); //reset failed attempts
-            ps.setString(7, AuthenticationSource.Database.name());
-            ps.executeUpdate();
-
-            // Load the user and construct a user ticket
-            final UserTicketImpl ticket = (UserTicketImpl) UserTicketStore.getUserTicket(username);
-            ticket.setFailedLoginAttempts(failedAttempts);
-            ticket.setAuthenticationSource(AuthenticationSource.Database);
-            return ticket;
-        } catch (FxAccountInUseException ae) {
-            if (ctx != null)
-                ctx.setRollbackOnly();
-            throw ae;
-        } catch (SQLException exc) {
-            FxLoginFailedException dbe = new FxLoginFailedException("Database error: " + exc.getMessage(),
-                    FxLoginFailedException.TYPE_SQL_ERROR);
-            LOG.error(dbe);
-            if (ctx != null)
-                ctx.setRollbackOnly();
-            throw dbe;
-        } catch (FxLoginFailedException exc) {
-            if (ctx != null)
-                ctx.setRollbackOnly();
-            throw exc;
-        } catch (Exception exc) {
-            if (ctx != null)
-                ctx.setRollbackOnly();
-            FxLoginFailedException dbe = new FxLoginFailedException("Error: " + exc.getMessage(),
-                    FxLoginFailedException.TYPE_SQL_ERROR);
-            LOG.error(dbe);
-            throw dbe;
-        } finally {
-            Database.closeObjects(AccountEngineBean.class, con, ps);
-        }
-    }
-
-    /**
-     * Increase the number of failed login attempts for the given user
-     *
-     * @param con    an open and valid connection
-     * @param userId user id
-     * @throws SQLException on errors
-     */
-    private void increaseFailedLoginAttempts(Connection con, long userId) throws SQLException {
-        PreparedStatement ps = null;
-        try {
-            ps = con.prepareStatement("UPDATE " + TBL_ACCOUNT_DETAILS + " SET FAILED_ATTEMPTS=FAILED_ATTEMPTS+1 WHERE ID=?");
-            ps.setLong(1, userId);
-            if (ps.executeUpdate() == 0) {
-                ps.close();
-                ps = con.prepareStatement("INSERT INTO " + TBL_ACCOUNT_DETAILS + " (ID,APPLICATION,ISLOGGEDIN,LAST_LOGIN,LAST_LOGIN_FROM,FAILED_ATTEMPTS,AUTHSRC) " +
-                        "VALUES (?,?,?,?,?,?,?)");
-                ps.setLong(1, userId);
-                ps.setString(2, FxContext.get().getApplicationId());
-                ps.setBoolean(3, false);
-                ps.setLong(4, System.currentTimeMillis());
-                ps.setString(5, FxContext.get().getRemoteHost());
-                ps.setLong(6, 1); //one failed attempt
-                ps.setString(7, AuthenticationSource.Database.name());
-                ps.executeUpdate();
-            }
-        } finally {
-            if (ps != null)
-                ps.close();
-        }
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void dbLogout(UserTicket ticket) throws LoginException {
-        PreparedStatement ps = null;
-        String curSql;
-        Connection con = null;
-        FxContext inf = FxContext.get();
-        try {
-
-            // Obtain a database connection
-            con = Database.getDbConnection();
-
-            // EJBLookup user in the database, combined with a update statement to make sure
-            // nothing changes between the lookup/set ISLOGGEDIN flag.
-            curSql = "UPDATE " + TBL_ACCOUNT_DETAILS + " SET ISLOGGEDIN=FALSE WHERE ID=? AND APPLICATION=?";
-            ps = con.prepareStatement(curSql);
-            ps.setLong(1, ticket.getUserId());
-            ps.setString(2, inf.getApplicationId());
-
-            // Not more than one row should be affected, or the logout failed
-            final int rowCount = ps.executeUpdate();
-            if (rowCount > 1) {
-                // Logout failed.
-                LoginException le = new LoginException("Logout for user [" + ticket.getUserId() + "] failed");
-                LOG.error(le);
-                throw le;
-            }
-
-        } catch (SQLException exc) {
-            ctx.setRollbackOnly();
-            LoginException le = new LoginException("Logout failed because of a sql error: " + exc.getMessage());
-            LOG.error(le);
-            throw le;
-        } finally {
-            Database.closeObjects(AccountEngineBean.class, con, ps);
-        }
-    }
-
 
     /**
      * {@inheritDoc}
@@ -675,7 +455,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             stmt.setLong(7, contactDataPK.getId());
             stmt.setInt(8, (int) lang);
             //subtract a second to prevent login-after-immediatly-create problems with databases truncating milliseconds
-            stmt.setLong(9, validFrom.getTime()-1000);
+            stmt.setLong(9, validFrom.getTime() - 1000);
             stmt.setLong(10, validTo.getTime());
             stmt.setString(11, description);
             stmt.setLong(12, ticket.getUserId());
@@ -754,9 +534,9 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * @throws FxInvalidParameterException if the dates are invalid
      */
     private static void checkDates(final Date validFrom, final Date validTo) throws FxInvalidParameterException {
-        if( validFrom == null )
+        if (validFrom == null)
             throw new FxInvalidParameterException("VALID_FROM", "ex.account.login.validFrom.missing");
-        if( validTo == null )
+        if (validTo == null)
             throw new FxInvalidParameterException("VALID_FROM", "ex.account.login.validTo.missing");
         if (validFrom.getTime() > validTo.getTime())
             throw new FxInvalidParameterException("VALID_FROM", "ex.account.login.dateMismatch");

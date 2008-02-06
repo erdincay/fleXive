@@ -33,11 +33,8 @@
  ***************************************************************/
 package com.flexive.core.security;
 
-import com.flexive.ejb.beans.AccountEngineBean;
-import com.flexive.shared.EJBLookup;
 import com.flexive.shared.exceptions.FxLoginFailedException;
 import com.flexive.shared.exceptions.FxNotFoundException;
-import com.flexive.shared.interfaces.AccountEngine;
 import com.flexive.shared.security.UserTicket;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -54,7 +51,7 @@ import java.util.Vector;
 
 
 /**
- * Flexive login module.
+ * Default login module.
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
@@ -98,15 +95,11 @@ public class FxDefaultLogin implements LoginModule {
      * @return the user ticket
      */
     public static Subject updateUserTicket(Subject sub, UserTicket ticket) {
-
         // remove the old user ticket
-        for (FxPrincipal p : sub.getPrincipals(FxPrincipal.class)) {
+        for (FxPrincipal p : sub.getPrincipals(FxPrincipal.class))
             sub.getPrincipals().remove(p);
-        }
-
         // Set the credentials and principals
         sub.getPrincipals().add(new FxPrincipal(ticket));
-
         return sub;
     }
 
@@ -131,11 +124,9 @@ public class FxDefaultLogin implements LoginModule {
      * @throws LoginException if the abort fails.
      */
     public boolean abort() throws LoginException {
-
         clearTemporaryStates();
         // Login aborted
         success = false;
-
         return true;
     }
 
@@ -152,8 +143,6 @@ public class FxDefaultLogin implements LoginModule {
      * <code>LoginModule</code>.  If this LoginModule's own
      * authentication attempted failed, then this method removes
      * any state that was originally saved.
-     * <p/>
-     * <p/>
      *
      * @return true if this LoginModule's own login and commit attempts succeeded, or false otherwise.
      * @throws LoginException if the commit fails
@@ -161,23 +150,18 @@ public class FxDefaultLogin implements LoginModule {
 
     public boolean commit() throws LoginException {
         if (success) {
-
             // Subject may not be read only
             if (subject.isReadOnly()) {
                 LoginException le = new LoginException("Subject is Readonly");
                 LOG.error(le);
                 throw le;
             }
-
             // Set the principials and credentials
             subject.getPrincipals().addAll(tempPrincipals);
             //subject.getPublicCredentials().add(tempUserTicket);
-
         }
-
         // Clear all temp variables
         clearTemporaryStates();
-
         return true;
     }
 
@@ -187,9 +171,8 @@ public class FxDefaultLogin implements LoginModule {
      */
     private void clearTemporaryStates() {
         tempPrincipals.clear();
-        if (callbackHandler instanceof PassiveCallbackHandler) {
+        if (callbackHandler instanceof PassiveCallbackHandler)
             ((PassiveCallbackHandler) callbackHandler).clearPassword();
-        }
     }
 
     /**
@@ -202,7 +185,6 @@ public class FxDefaultLogin implements LoginModule {
     public boolean login() throws LoginException {
         LoginException le = null;
         try {
-
             // Determine username and password using the callback handler
             final Callback[] callbacks = new Callback[]{
                     new NameCallback("user: "),
@@ -216,18 +198,13 @@ public class FxDefaultLogin implements LoginModule {
             final PasswordCallback pc = (PasswordCallback) callbacks[1];
             final String password = new String((pc.getPassword()));
             pc.clearPassword();
-
-            UserTicket ticket = new AccountEngineBean().dbLogin(username, password, ac);
+            UserTicket ticket = FxDBAuthentication.login(username, password, ac);
             // Set the credentials and principals
             this.tempPrincipals.add(new FxPrincipal(ticket));
-
             // The login was successfull
             success = true;
-
-            if (LOG.isInfoEnabled()) {
+            if (LOG.isInfoEnabled())
                 LOG.info("User [" + ticket.getUserName() + "] successfully logged in, ticket=" + ticket);
-            }
-
         } catch (IOException exc) {
             le = new FxLoginFailedException("IOException: " + exc.getMessage(),
                     FxLoginFailedException.TYPE_UNKNOWN_ERROR);
@@ -237,13 +214,11 @@ public class FxDefaultLogin implements LoginModule {
                     FxLoginFailedException.TYPE_UNKNOWN_ERROR);
             LOG.error(le);
         }
-
-        // Log an throw exceptions
+        // Log and throw exceptions
         if (le != null) {
             success = false;
             throw le;
         }
-
         return true;
     }
 
@@ -257,26 +232,12 @@ public class FxDefaultLogin implements LoginModule {
      * @throws LoginException if the logout fails.
      */
     public boolean logout() throws LoginException {
-
-        if (LOG.isDebugEnabled()) LOG.debug("Logout");
-
         // Clear all temp variables
         clearTemporaryStates();
 
-        // EJBLookup account
-        AccountEngine acc;
-        try {
-            acc = EJBLookup.getAccountEngine();
-        } catch (Exception e) {
-            throw new FxLoginFailedException("Unable to lookup account bean: " + e.getMessage(),
-                    FxLoginFailedException.TYPE_UNKNOWN_ERROR);
-        }
-
         // remove the principals the login module added
-        for (FxPrincipal p : subject.getPrincipals(FxPrincipal.class)) {
-            acc.dbLogout(p.getUserTicket());
-        }
-
+        for (FxPrincipal p : subject.getPrincipals(FxPrincipal.class))
+            FxDBAuthentication.logout(p.getUserTicket());
         return true;
     }
 

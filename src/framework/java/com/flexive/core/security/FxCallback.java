@@ -41,7 +41,7 @@ import javax.sql.DataSource;
  * Flexive callback class.
  * <p/>
  * Underlying security services instantiate and pass a
- * <code>flexCallback</code> to the <code>handle</code>
+ * <code>FxCallback</code> to the <code>handle</code>
  * method of a <code>CallbackHandler</code> to retrieve name information.
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
