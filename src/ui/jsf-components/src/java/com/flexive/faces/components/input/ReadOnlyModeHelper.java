@@ -86,10 +86,24 @@ class ReadOnlyModeHelper extends RenderHelper {
                 }
             } else if (value instanceof FxBinary && !value.isEmpty()) {
                 // render preview image
-                final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(component, HtmlGraphicImage.COMPONENT_TYPE);
                 final BinaryDescriptor descriptor = ((FxBinary) value).getTranslation(language);
-                image.setUrl(ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()),
-                        BinaryDescriptor.PreviewSizes.PREVIEW2, value.getXPath(), descriptor.getCreationTime()));
+                StringBuilder sb = new StringBuilder(1000);
+                String urlThumb = FxJsfUtils.getServletContext().getContextPath() +
+                        ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()),
+                                BinaryDescriptor.PreviewSizes.PREVIEW2, value.getXPath(), descriptor.getCreationTime());
+                String urlOriginal = FxJsfUtils.getServerURL() + FxJsfUtils.getServletContext().getContextPath() +
+                        ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()),
+                                BinaryDescriptor.PreviewSizes.ORIGINAL, value.getXPath(), descriptor.getCreationTime());
+                final String text = descriptor.getName()+", "+descriptor.getSize()+" byte"+(descriptor.isImage()
+                        ? ", "+descriptor.getWidth()+"x"+descriptor.getHeight()
+                        : "");
+                sb.append("<a title=\"").append(text).append("\" href=\"").append(urlOriginal).
+                        append("\" rel=\"lytebox[ce]\"><img style=\"border-style:none;\" alt=\"").
+                        append(text).
+                        append("\" src=\"").
+                        append(urlThumb).
+                        append("\"/></a>");
+                writer.write(sb.toString());
             } else if (component.isFilter() && !(value instanceof FxHTML)) {
                 // escape HTML code and generate <br/> tags for newlines
                 writer.write(FxFormatUtils.escapeForJavaScript(FxValueRendererFactory.getInstance(outputLanguage).format(value, language), true, true));

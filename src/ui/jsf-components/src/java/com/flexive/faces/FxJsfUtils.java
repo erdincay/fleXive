@@ -37,14 +37,12 @@ import com.flexive.faces.beans.MessageBean;
 import com.flexive.faces.messages.FxFacesMessage;
 import com.flexive.faces.messages.FxFacesMessages;
 import com.flexive.shared.*;
-import com.flexive.shared.exceptions.FxNotFoundException;
-import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxSelectList;
 import com.flexive.shared.structure.FxSelectListItem;
-import com.flexive.shared.structure.FxMultiplicity;
 import com.flexive.war.FxRequest;
 import com.flexive.war.filter.FxResponseWrapper;
 import com.sun.facelets.tag.jsf.ComponentSupport;
@@ -62,6 +60,7 @@ import javax.faces.context.FacesContext;
 import static javax.faces.context.FacesContext.getCurrentInstance;
 import javax.faces.model.SelectItem;
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponseWrapper;
 import javax.servlet.http.HttpSession;
@@ -421,6 +420,23 @@ public class FxJsfUtils {
      */
     public static String getJsonServletUri() {
         return getRequest().getContextPath() + JSON_RPC_SERVLET;
+    }
+
+    /**
+     * Get the server URL like "http://www.flexive.org" without the context path
+     *
+     * @return server URL
+     */
+    public static String getServerURL() {
+        final FxRequest req = FxJsfUtils.getRequest();
+        try {
+            return req.getRequestURL().substring(0, req.getRequestURL().indexOf(req.getContextPath()));
+        } catch (Exception e) {
+            final HttpServletRequest r = req.getRequest();
+            return r.getProtocol() + "://" + r.getRemoteHost() + (r.getProtocol().startsWith("http")
+                    ? ""
+                    : ":" + r.getRemotePort());
+        }
     }
 
     /**
@@ -813,17 +829,17 @@ public class FxJsfUtils {
     /**
      * Checks if the minimum and maximum values of a muliplicity are in valid ranges
      *
-     * @param min   minMultiplicity
-     * @param max   maxMultiplicity
+     * @param min minMultiplicity
+     * @param max maxMultiplicity
      * @throws FxApplicationException on errors
      */
     public static void checkMultiplicity(int min, int max) throws FxApplicationException {
         if (min < 0)
             throw new FxApplicationException("ex.structure.multiplicity.minimum.invalid", min, max);
-        if (max <1)
+        if (max < 1)
             throw new FxApplicationException("ex.structure.multiplicity.maximum.invalid", max, min);
-        if (min >max)
-             throw new FxApplicationException("ex.structure.multiplicity.minimum.invalid", min, max);
+        if (min > max)
+            throw new FxApplicationException("ex.structure.multiplicity.minimum.invalid", min, max);
     }
 
 }

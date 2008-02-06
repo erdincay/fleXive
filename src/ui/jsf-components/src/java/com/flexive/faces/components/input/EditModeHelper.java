@@ -53,7 +53,6 @@ import javax.faces.component.UIInput;
 import javax.faces.component.UISelectItems;
 import javax.faces.component.html.*;
 import javax.faces.context.ResponseWriter;
-import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
 import java.io.IOException;
 import java.text.MessageFormat;
@@ -430,10 +429,30 @@ class EditModeHelper extends RenderHelper {
 
     private void renderBinary(String inputId, FxLanguage language) throws IOException {
         if (!value.isEmpty() && (language == null || value.translationExists((int)language.getId()))) {
-            final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(component, HtmlGraphicImage.COMPONENT_TYPE);
             final BinaryDescriptor descriptor = ((FxBinary) value).getTranslation(language);
-            image.setUrl(ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()),
-                    BinaryDescriptor.PreviewSizes.PREVIEW2, value.getXPath(), descriptor.getCreationTime(), language));
+            if (!descriptor.isNewBinary()) {
+                /*final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(component, HtmlGraphicImage.COMPONENT_TYPE);
+                image.setUrl(ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()),
+                        BinaryDescriptor.PreviewSizes.PREVIEW2, value.getXPath(), descriptor.getCreationTime(), language));*/
+                // render preview image
+                StringBuilder sb = new StringBuilder(1000);
+                String urlThumb = FxJsfUtils.getServletContext().getContextPath() +
+                        ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()),
+                                BinaryDescriptor.PreviewSizes.PREVIEW2, value.getXPath(), descriptor.getCreationTime());
+                String urlOriginal = FxJsfUtils.getServerURL() + FxJsfUtils.getServletContext().getContextPath() +
+                        ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()),
+                                BinaryDescriptor.PreviewSizes.ORIGINAL, value.getXPath(), descriptor.getCreationTime());
+                final String text = descriptor.getName()+", "+descriptor.getSize()+" byte"+(descriptor.isImage()
+                        ? ", "+descriptor.getWidth()+"x"+descriptor.getHeight()
+                        : "");
+                sb.append("<a title=\"").append(text).append("\" href=\"").append(urlOriginal).
+                        append("\" rel=\"lytebox[ce]\"><img style=\"border-style:none;\" alt=\"").
+                        append(text).
+                        append("\" src=\"").
+                        append(urlThumb).
+                        append("\"/></a>");
+                writer.write(sb.toString());
+            }
         }
         final HtmlInputFileUpload upload = (HtmlInputFileUpload) FxJsfUtils.addChildComponent(component, HtmlInputFileUpload.COMPONENT_TYPE);
         addHtmlAttributes(upload);

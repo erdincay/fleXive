@@ -57,12 +57,6 @@
                                     <t:graphicImage alt="download" url="/adm/images/contentEditor/download.png"
                                         style="padding:0;margin-left:5px;border:0;height:16px;width:16px;vertical-align:middle;"/>
                                 </a>
-                                <c:if test="#{binDesc.image}">
-                                    <a rel="lytebox[ce]" title="#{binDesc.name}, #{binDesc.size} byte (#{binDesc.width}x#{binDesc.height} pixel)" href="#{fxSystemBean.documentBase}cefiledownload/#{url}/#{binDesc.name}">
-                                        <t:graphicImage alt="view" url="/adm/images/contentEditor/viewImage.png"
-                                                        style="padding:0;margin-left:2px;border:0;height:16px;width:16px;vertical-align:middle;"/>
-                                    </a>
-                                </c:if>
                             </c:if>
                         </c:if>
 
