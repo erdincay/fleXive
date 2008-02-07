@@ -59,7 +59,7 @@ import java.util.HashMap;
  */
 class MySQLGenericSelector implements FieldSelector {
     private static final Log LOG = LogFactory.getLog(MySQLGenericSelector.class);
-    
+
     private final Map<String, FxDataType> columns = new HashMap<String, FxDataType>();
     private final String tableName;
     private final String linksOn;
@@ -101,7 +101,7 @@ class MySQLGenericSelector implements FieldSelector {
                         columnType = FxDataType.Float;
                         break;
                     case java.sql.Types.BIGINT:
-                        if( columnName.endsWith("ED_AT")) //MODIFIED_AT, CREATED_AT
+                        if ("CREATED_AT".equalsIgnoreCase(columnName) || "MODIFIED_AT".equalsIgnoreCase(columnName))
                             columnType = FxDataType.DateTime;
                         else
                             columnType = FxDataType.LargeNumber;

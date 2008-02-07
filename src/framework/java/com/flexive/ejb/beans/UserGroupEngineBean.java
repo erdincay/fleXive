@@ -208,7 +208,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public int create(String name, String color, long mandatorId) throws FxApplicationException {
+    public long create(String name, String color, long mandatorId) throws FxApplicationException {
         final UserTicket ticket = FxContext.get().getTicket();
         // Permission checks
         try {
@@ -257,7 +257,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             pstmt.executeUpdate();
 
             // Return the new id
-            return (int) groupId;
+            return groupId;
 
         } catch (SQLException exc) {
             final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(exc);

@@ -152,15 +152,19 @@ public class MySQLDataFilter extends DataFilter {
      */
     @Override
     public void build() throws FxSqlSearchException {
+        final UserTicket ticket = FxContext.get().getTicket();
+        final long maxRows = search.getFxStatement().getMaxResultRows() + 1;
         Statement stmt = null;
-        final long MAX_ROWS = search.getFxStatement().getMaxResultRows() + 1;
         String sql = null;
         try {
             final String dataSelect;
+            final String securityFilter = ticket.isGlobalSupervisor() ? "" :
+                    "WHERE mayReadInstance2(data2.id,data2.ver," + ticket.getUserId() + "," +
+                            ticket.getMandatorId() + "," + ticket.isMandatorSupervisor() + "," + ticket.isGlobalSupervisor() + ")\n";
             if (getStatement().getType() == FxStatement.Type.ALL) {
                 // The statement will not filter the data
-                dataSelect = "SELECT " + search.getSearchId() + " search_id,id,ver,tdef FROM " + tableMain + " main LIMIT " +
-                        search.getFxStatement().getMaxResultRows();
+                dataSelect = "SELECT " + search.getSearchId() + " search_id,id,ver,tdef FROM " + tableMain + " data2 " +
+                        securityFilter + " LIMIT " + maxRows;
             } else {
                 // The statement filters the data
                 StringBuilder result = new StringBuilder(5000);
@@ -169,17 +173,12 @@ public class MySQLDataFilter extends DataFilter {
                 result.deleteCharAt(0);
                 result.deleteCharAt(result.length() - 1);
                 // Finalize the select
-                final UserTicket ticket = FxContext.get().getTicket();
                 dataSelect = "SELECT * FROM (SELECT DISTINCT " + search.getSearchId() +
                         " search_id,data.id,data.ver,main.tdef \n" +
                         "FROM (" + result.toString() + ") data, " + DatabaseConst.TBL_CONTENT + " main\n" +
-                        "WHERE data.ver=main.ver AND data.id=main.id) data2\n" +
-                        // Security
-                        (ticket.isGlobalSupervisor() ? "" :
-                                "WHERE mayReadInstance2(data2.id,data2.ver," + ticket.getUserId() + "," +
-                                        ticket.getMandatorId() + "," + ticket.isMandatorSupervisor() + "," + ticket.isGlobalSupervisor() + ")\n") +
+                        "WHERE data.ver=main.ver AND data.id=main.id) data2\n" + securityFilter +
                         // Limit by the specified max items
-                        "LIMIT " + MAX_ROWS;
+                        "LIMIT " + maxRows;
             }
             // Find all matching data enties and store them
             if (LOG.isDebugEnabled()) {

@@ -90,7 +90,7 @@ public class ContentEngineTest {
     @BeforeClass
     public void beforeClass() throws Exception {
         co = EJBLookup.getContentEngine();
-        acl = EJBLookup.getACLEngine();
+        acl = EJBLookup.getAclEngine();
         type = EJBLookup.getTypeEngine();
         ass = EJBLookup.getAssignmentEngine();
         login(TestUsers.SUPERVISOR);

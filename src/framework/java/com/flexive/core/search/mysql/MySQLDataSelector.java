@@ -44,6 +44,7 @@ import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.sqlParser.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.StringUtils;
 
 import java.sql.Connection;
 import java.util.*;
@@ -143,10 +144,9 @@ public class MySQLDataSelector extends DataSelector {
 
         // Build the final select statement
 
-        select.append("SELECT \n");
-        select.append(FILTER_ALIAS).append(".rownr,").
-                append(FILTER_ALIAS).append(".id, ").
-                append(FILTER_ALIAS).append(".ver\n");
+        select.append("SELECT \n")
+              .append(filterProperties(INTERNAL_RESULTCOLS))
+              .append(' ');
         for (SubSelectValues ssv : values) {
             for (SubSelectValues.Item item : ssv.getItems()) {
                 if (ssv.isSorted() && item.isOrderBy()) {
@@ -172,43 +172,69 @@ public class MySQLDataSelector extends DataSelector {
         final String typeFilter = search.getTypeFilter() == null ? ""
                 : " and " + FILTER_ALIAS + ".tdef=" + search.getTypeFilter().getId() + " ";
 
-        final StringBuilder orderBy = new StringBuilder();
-        String orderByNumbers = "";
-        int orderByPos = 5;
-        orderBy.append("select @rownr:=@rownr+1 rownr,").
-                append(("concat(concat(concat(concat(concat(t.name,'[@pk=')," + FILTER_ALIAS + ".id),'.')," + FILTER_ALIAS + ".ver),']') xpathPref,")).
-                append(FILTER_ALIAS).append(".id,").append(FILTER_ALIAS).append(".ver\n");
+        final List<String> orderByNumbers = new ArrayList<String>();
+        final List<String> columns = new ArrayList<String>();
 
+        // create select columns
+        for (String column: INTERNAL_RESULTCOLS) {
+            if ("rownr".equals(column)) {
+                columns.add("@rownr:=@rownr+1 rownr");
+            } else {
+                columns.add(filterProperties(column));
+            }
+        }
+        columns.add("concat(concat(concat(concat(concat(t.name,'[@pk=')," + filterProperties("id") + "),'.'),"
+                + filterProperties("ver") + "),']') xpathPref");
+        // order by starts after the internal selected columns
+        int orderByPos = columns.size() + 1;
+
+        // create SQL statement
+        final StringBuilder sql = new StringBuilder();
+        sql.append("select ").append(StringUtils.join(columns, ',')).append(' ');
+
+        // add order by indices
         for (SubSelectValues ssv : values) {
             if (ssv.isSorted()) {
                 for (SubSelectValues.Item item : ssv.getItems()) {
                     if (item.isOrderBy()) {
-                        orderBy.append(",").append(item.getSelect()).append(" ").append(item.getAlias()).append("\n");
-                        orderByNumbers += (orderByNumbers.length() == 0 ? "" : ",") + orderByPos + " " +
-                                (ssv.isSortedAscending() ? "asc" : "desc");
+                        // select item from order by
+                        sql.append(",").append(item.getSelect()).append(" ").append(item.getAlias()).append("\n");
+                        // add index
+                        orderByNumbers.add(orderByPos + " " + (ssv.isSortedAscending() ? "asc" : "desc"));
                     } else {
-                        orderBy.append(",null\n");
+                        sql.append(",null\n");
                     }
                     orderByPos++;
                 }
             }
         }
-        orderBy.append(("FROM " + search.getCacheTable() + " filter, " + DatabaseConst.TBL_STRUCT_TYPES + " t " +
+        sql.append(("FROM " + search.getCacheTable() + " filter, " + DatabaseConst.TBL_STRUCT_TYPES + " t " +
                 "WHERE search_id=" + search.getSearchId() + " AND " + FILTER_ALIAS + ".tdef=t.id " +
                 typeFilter + " "));
 
         // No order by specified = order by id and version
-        if (orderByNumbers.length() == 0) {
-            orderByNumbers = "2 asc, 3 asc";
+        if (orderByNumbers.size() == 0) {
+            orderByNumbers.add("2 asc");
+            orderByNumbers.add("3 asc");
         }
-        orderBy.append(("ORDER BY " + orderByNumbers));
+        sql.append("ORDER BY ").append(StringUtils.join(orderByNumbers, ','));
 
         // Evaluate the order by, then limit the result by the desired range if needed
         if (search.getStartIndex() > 0 && search.getFetchRows() < Integer.MAX_VALUE) {
-            return "SELECT * FROM (" + orderBy + ") tmp LIMIT " + search.getStartIndex() + "," + search.getFetchRows();
+            return "SELECT * FROM (" + sql + ") tmp LIMIT " + search.getStartIndex() + "," + search.getFetchRows();
         }
-        return orderBy.toString();
+        return sql.toString();
 
+    }
+
+    /**
+     * Returns a comma-separated list of the given property names after adding FILTER_ALIAS to every property.
+     *
+     * @param names the property name(s)
+     * @return  a comma-separated list of the given property names after adding FILTER_ALIAS to every property.
+     */
+    private String filterProperties(String... names) {
+        return FILTER_ALIAS + "." + StringUtils.join(names, "," + FILTER_ALIAS + ".");
     }
 
     /**

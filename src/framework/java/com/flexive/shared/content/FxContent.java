@@ -39,6 +39,7 @@ import com.flexive.shared.XPathElement;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.security.LifeCycleInfo;
+import com.flexive.shared.security.PermissionSet;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxMultiplicity;
 import com.flexive.shared.structure.FxPropertyAssignment;
@@ -1044,5 +1045,21 @@ public class FxContent implements Serializable, Cloneable {
             }
         }
 //        System.out.println("=> Loading " + refcount + " references took " + (System.currentTimeMillis() - time) + "[ms]");
+    }
+
+    /**
+     * Returns the permission set for the calling user.
+     *
+     * @return  the permission set for the calling user.
+     */
+    public PermissionSet getPermissions() {
+        try {
+            return FxPermissionUtils.getPermissions(aclId, CacheAdmin.getEnvironment().getType(typeId),
+                    CacheAdmin.getEnvironment().getStep(stepId).getAclId(),
+                    lifeCycleInfo.getCreatorId(), mandatorId);
+        } catch (FxNoAccessException e) {
+            // this shouldn't happen since a user must not have access to a content instance without read perms
+            throw e.asRuntimeException();
+        }
     }
 }

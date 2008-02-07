@@ -37,15 +37,18 @@ import com.flexive.shared.structure.*;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.exceptions.FxNotFoundException;
+import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.value.*;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.search.FxPaths;
 import com.flexive.shared.content.FxPK;
+import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.sqlParser.Property;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -53,6 +56,7 @@ import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.Arrays;
 
 /**
  * <p>
@@ -100,7 +104,12 @@ public class PropertyEntry {
         /**
          * A tree node position (@node_position) column.
          */
-        NODE_POSITION("@node_position");
+        NODE_POSITION("@node_position"),
+
+        /**
+         * A property permission (@permissions) column.
+         */
+        PERMISSIONS("@permissions");
 
         private final String propertyName;
 
@@ -144,6 +153,8 @@ public class PropertyEntry {
                     return new NodePositionEntry();
                 case PATH:
                     return new PathEntry();
+                case PERMISSIONS:
+                    return new PermissionsEntry();
                 case PROPERTY_REF:
                     throw new FxSqlSearchException(LOG, "ex.sqlSearch.entry.virtual").asRuntimeException();
                 default:
@@ -213,6 +224,41 @@ public class PropertyEntry {
             } catch (SQLException e) {
                 throw new FxSqlSearchException(LOG, e);
             }
+        }
+    }
+
+    private static class PermissionsEntry extends PropertyEntry {
+        private static final String[] READ_COLUMNS = new String[] { "acl", "created_by", "step", "tdef", "mandator" };
+
+        private final FxEnvironment environment;
+
+        private PermissionsEntry() {
+            super(Type.PERMISSIONS, PropertyResolver.Table.T_CONTENT, READ_COLUMNS,
+                    null, false, null);
+            this.environment = CacheAdmin.getEnvironment();
+        }
+
+        @Override
+        public Object getResultValue(ResultSet rs, FxLanguage language) throws FxSqlSearchException {
+            try {
+                final long aclId = rs.getLong(positionInResultSet + getIndex("acl"));
+                final long createdBy = rs.getLong(positionInResultSet + getIndex("created_by"));
+                final long stepId = rs.getLong(positionInResultSet + getIndex("step"));
+                final long typeId = rs.getLong(positionInResultSet + getIndex("tdef"));
+                final long mandatorId = rs.getLong(positionInResultSet + getIndex("mandator"));
+                return FxPermissionUtils.getPermissions(aclId, environment.getType(typeId), 
+                        environment.getStep(stepId).getAclId(), createdBy, mandatorId);
+            } catch (SQLException e) {
+                throw new FxSqlSearchException(e);
+            } catch (FxNoAccessException e) {
+                // search should never have returned an object without read permissions
+                LOG.error("Search returned an object without read permissions");
+                throw e.asRuntimeException();
+            }
+        }
+
+        private int getIndex(String name) {
+            return ArrayUtils.indexOf(READ_COLUMNS, name);
         }
     }
 
@@ -309,7 +355,7 @@ public class PropertyEntry {
      */
     public Object getResultValue(ResultSet rs, FxLanguage language) throws FxSqlSearchException {
         final FxValue result;
-        int pos = positionInResultSet;
+        final int pos = positionInResultSet;
         // Handle by type
         try {
             switch (overrideDataType == null ? property.getDataType() : overrideDataType) {

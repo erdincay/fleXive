@@ -103,7 +103,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
     protected boolean isDummy;
 
     public String getEditorType() {
-        return "NORMAL";
+        return "REGULAR";
     }
 
     public void setEditorType(String editorType) {

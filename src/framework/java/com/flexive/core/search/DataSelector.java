@@ -37,6 +37,8 @@ import com.flexive.shared.exceptions.FxSqlSearchException;
 
 import java.sql.Connection;
 import java.util.Map;
+import java.util.List;
+import java.util.Arrays;
 
 /**
  * Interface for DB specific DataSelectors
@@ -45,6 +47,13 @@ import java.util.Map;
  * @version $Rev$
  */
 public abstract class DataSelector {
+    /**
+     * All result columns that are selected for search-internal queries and are not
+     * returned to the user. Note that this is mostly an informal listing and used to determine
+     * the number of internal columns, but that changing the order will probably not work as intended
+     * since the generated SQL requires that these internal properties are actually selected. 
+     */
+    protected static final String[] INTERNAL_RESULTCOLS = new String[] { "rownr", "id", "ver" };
 
     public abstract String build(final Connection con) throws FxSqlSearchException;
 

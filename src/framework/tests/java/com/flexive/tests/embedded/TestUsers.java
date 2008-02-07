@@ -36,11 +36,8 @@ package com.flexive.tests.embedded;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxLanguage;
 import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.interfaces.ACLEngine;
-import com.flexive.shared.interfaces.AccountEngine;
-import com.flexive.shared.interfaces.LanguageEngine;
-import com.flexive.shared.interfaces.MandatorEngine;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Account;
 import com.flexive.shared.security.Role;
@@ -63,14 +60,16 @@ public class TestUsers {
     /**
      * System property that contains the enabled test users (or "all" for all users)
      */
-    public final static String ENABLE_USERS_PROPERTY = "tests.users";
+    public static final String ENABLE_USERS_PROPERTY = "tests.users";
 
-    public final static TestUser SUPERVISOR = new TestUser("SUPERVISOR");
-    public final static TestUser MANDATOR_SUPERVISOR = new TestUser("MANDATOR-SUPERVISOR");
-    public final static TestUser GUEST = new TestUser("GUEST");
+    public static final TestUser SUPERVISOR = new TestUser("SUPERVISOR");
+    public static final TestUser MANDATOR_SUPERVISOR = new TestUser("MANDATOR-SUPERVISOR");
+    public static final TestUser GUEST = new TestUser("GUEST");
+    /** A "normal" test user who belongs to the shared test group but has no other roles/groups */
+    public static final TestUser REGULAR = new TestUser("REGULAR");
 
-    public final static List<TestUser> ALL_USERS = Collections.unmodifiableList(Arrays.asList(
-            new TestUser[]{SUPERVISOR, MANDATOR_SUPERVISOR, GUEST}));
+    public static final List<TestUser> ALL_USERS = Collections.unmodifiableList(
+            Arrays.asList(SUPERVISOR, MANDATOR_SUPERVISOR, GUEST, REGULAR));
     /**
      * Keeps track of user defined users
      */
@@ -82,53 +81,73 @@ public class TestUsers {
     private static boolean initialized = false;
     private static long mandatorId;
     private static long languageId;
+    private static long sharedTestGroupId;
+    private static long sharedInstanceAclId;
 
-    private static AccountEngine accounts;
-    private static MandatorEngine mandators;
-    private static LanguageEngine languages;
-    private static ACLEngine acl;
-
-    public static void initializeUsers() throws FxApplicationException {
+    public static synchronized void initializeUsers() throws FxApplicationException {
         if (initialized) {
             return;
         }
-        synchronized (TestUsers.class) {
-            accounts = EJBLookup.getAccountEngine();
-            mandators = EJBLookup.getMandatorEngine();
-            languages = EJBLookup.getLanguageEngine();
-            acl = EJBLookup.getACLEngine();
+        initialized = true;
+        try {
+            FxContext.get().runAsSystem();
+            languageId = EJBLookup.getLanguageEngine().load("en").getId();
+            mandatorId = getTestMandator();
+            removeOrphanedAccounts();
 
-            initialized = true;
+            // setup supervisor
+            SUPERVISOR.createUser(mandatorId, languageId);
+            EJBLookup.getAccountEngine().setRoleList(SUPERVISOR.getUserId(), Role.getList());
 
-            try {
-                FxContext.get().runAsSystem();
-                languageId = languages.load("en").getId();
-                mandatorId = getTestMandator();
-                removeOrphanedAccounts();
+            // setup mandator supervisor
+            MANDATOR_SUPERVISOR.createUser(mandatorId, languageId);
+            EJBLookup.getAccountEngine().setRoles(MANDATOR_SUPERVISOR.getUserId(), Role.MandatorSupervisor.getId());
 
-                // setup supervisor
-                SUPERVISOR.createUser(mandatorId, languageId);
-                accounts.setRoleList(SUPERVISOR.getUserId(), Role.getList());
+            // setup guest user
+            GUEST.createUser(mandatorId, languageId);
 
-                // setup mandator supervisor
-                MANDATOR_SUPERVISOR.createUser(mandatorId, languageId);
-                accounts.setRoles(MANDATOR_SUPERVISOR.getUserId(), Role.MandatorSupervisor.getId());
+            REGULAR.createUser(mandatorId, languageId);
 
-                // setup guest user
-                GUEST.createUser(mandatorId, languageId);
 
-                // create user-defined users
-                for (TestUser user : USER_DEFINED_USERS) {
-                    user.createUser(mandatorId, languageId);
-                }
-                getTestMandator(); //create mandator
-            } catch (Exception e) {
-                deleteUsers();      // cleanup
-                e.printStackTrace();
-                throw new RuntimeException("Failed to initialize test users: " + e.getMessage());
-            } finally {
-                FxContext.get().stopRunAsSystem();
+            // create user-defined users
+            for (TestUser user : USER_DEFINED_USERS) {
+                user.createUser(mandatorId, languageId);
             }
+
+            // assign all test users except GUEST to this group
+            sharedTestGroupId = EJBLookup.getUserGroupEngine().create("Test user group", "#000000", mandatorId);
+            for (TestUser user : ALL_USERS) {
+                if (user != GUEST) {
+                    EJBLookup.getAccountEngine().addGroup(user.getUserId(), sharedTestGroupId);
+                }
+            }
+            for (TestUser user : USER_DEFINED_USERS) {
+                EJBLookup.getAccountEngine().addGroup(user.getUserId(), sharedTestGroupId);
+            }
+            createTestGroupAssignments();
+
+
+        } catch (Exception e) {
+            deleteUsers();      // cleanup
+            e.printStackTrace();
+            throw new RuntimeException("Failed to initialize test users: " + e.getMessage());
+        } finally {
+            FxContext.get().stopRunAsSystem();
+        }
+    }
+
+    private static synchronized void createTestGroupAssignments() throws FxApplicationException {
+        // create a content ACL where test users have read/write access
+        sharedInstanceAclId = EJBLookup.getAclEngine().create("test content ACL", new FxString(FxLanguage.ENGLISH,  "Test content ACL"),
+                getTestMandator(), "", "", ACL.Category.INSTANCE);
+        // assign all permissions
+        EJBLookup.getAclEngine().assign(sharedInstanceAclId, sharedTestGroupId, ACL.Permission.values());
+
+        // update search test type ACLs to include edit&create&delete permissions for the test user
+        final long searchTypeAclId = CacheAdmin.getEnvironment().getType("SEARCHTEST").getACL().getId();
+        final long workflowAclId = CacheAdmin.getEnvironment().getDefaultACL(ACL.Category.WORKFLOW).getId();
+        for (long aclId: new long[] { searchTypeAclId, workflowAclId }) {
+            EJBLookup.getAclEngine().assign(aclId, sharedTestGroupId, true, true, false, true, false, true);
         }
     }
 
@@ -137,11 +156,11 @@ public class TestUsers {
      *
      * @return english id
      */
-    public static long getEnglishLanguageId() {
+    public static synchronized long getEnglishLanguageId() {
         return languageId;
     }
 
-    public static TestUser createUser(String informalName, Role... roles) throws FxApplicationException {
+    public static synchronized TestUser createUser(String informalName, Role... roles) throws FxApplicationException {
         TestUser user = new TestUser(informalName);
         if (roles != null && roles.length > 0) {
             user.setRoles(roles);
@@ -158,25 +177,25 @@ public class TestUsers {
      * @param permissions permissions to assign for the acl
      * @throws FxApplicationException on errors
      */
-    public static void assignACL(TestUser user, long aclId, ACL.Permission... permissions) throws FxApplicationException {
-        acl.assign(aclId, user.getUserGroupId(), permissions);
+    public static synchronized void assignACL(TestUser user, long aclId, ACL.Permission... permissions) throws FxApplicationException {
+        EJBLookup.getAclEngine().assign(aclId, user.getUserGroupId(), permissions);
     }
 
-    public static long getTestMandator() throws FxApplicationException {
+    public static synchronized long getTestMandator() throws FxApplicationException {
         try {
             return CacheAdmin.getEnvironment().getMandator(MANDATOR_NAME).getId();
         } catch (Exception e) {
             // ignore - try to create
-            return mandators.create(MANDATOR_NAME, true);
+            return EJBLookup.getMandatorEngine().create(MANDATOR_NAME, true);
         }
     }
 
-    private static void removeOrphanedAccounts() throws FxApplicationException {
+    private static synchronized void removeOrphanedAccounts() throws FxApplicationException {
         // first remove all orphaned accounts created in previous runs
-        for (Account account : accounts.loadAll(mandatorId)) {
+        for (Account account : EJBLookup.getAccountEngine().loadAll(mandatorId)) {
             if (account.getEmail().startsWith("TESTEMAIL_")) {
                 System.out.println("Removing orphaned test account: " + account.getLoginName());
-                accounts.remove(account.getId());
+                EJBLookup.getAccountEngine().remove(account.getId());
             }
         }
     }
@@ -194,8 +213,11 @@ public class TestUsers {
                     e.printStackTrace();
                 }
             }
+            // remove shared test group
+            EJBLookup.getUserGroupEngine().remove(sharedTestGroupId);
+            EJBLookup.getAclEngine().remove(sharedInstanceAclId);
             // remove test mandator
-            mandators.remove(mandatorId);
+            EJBLookup.getMandatorEngine().remove(mandatorId);
         } finally {
             FxContext.get().stopRunAsSystem();
         }
@@ -206,7 +228,7 @@ public class TestUsers {
      *
      * @return all test users as configured in the test environment.
      */
-    public static List<TestUser> getConfiguredTestUsers() {
+    public static synchronized List<TestUser> getConfiguredTestUsers() {
         String enableUsers = System.getProperty(ENABLE_USERS_PROPERTY);
         if (StringUtils.isBlank(enableUsers)) {
             return Collections.unmodifiableList(Arrays.asList(new TestUser[]{SUPERVISOR}));
@@ -225,7 +247,7 @@ public class TestUsers {
      * @throws FxApplicationException on errors
      */
     public static long newContentACL(String name) throws FxApplicationException {
-        return acl.create("TEST_" + name + RandomStringUtils.random(16, true, true), new FxString(name + " (content)"), TestUsers.getTestMandator(),
+        return EJBLookup.getAclEngine().create("TEST_" + name + RandomStringUtils.random(16, true, true), new FxString(name + " (content)"), TestUsers.getTestMandator(),
                 "#112233", "", ACL.Category.INSTANCE);
     }
 
@@ -237,7 +259,7 @@ public class TestUsers {
      * @throws FxApplicationException on errors
      */
     public static long newStructureACL(String name) throws FxApplicationException {
-        return acl.create("TEST_" + name + RandomStringUtils.random(16, true, true), new FxString(name + " (structure)"), TestUsers.getTestMandator(),
+        return EJBLookup.getAclEngine().create("TEST_" + name + RandomStringUtils.random(16, true, true), new FxString(name + " (structure)"), TestUsers.getTestMandator(),
                 "#112233", "", ACL.Category.STRUCTURE);
     }
 
@@ -249,7 +271,11 @@ public class TestUsers {
      * @throws FxApplicationException on errors
      */
     public static long newWorkflowACL(String name) throws FxApplicationException {
-        return acl.create("TEST_" + name + RandomStringUtils.random(16, true, true), new FxString(name + " (workflow)"), TestUsers.getTestMandator(),
+        return EJBLookup.getAclEngine().create("TEST_" + name + RandomStringUtils.random(16, true, true), new FxString(name + " (workflow)"), TestUsers.getTestMandator(),
                 "#112233", "", ACL.Category.WORKFLOW);
+    }
+
+    public static synchronized ACL getInstanceAcl() {
+        return CacheAdmin.getEnvironment().getACL(sharedInstanceAclId);
     }
 }

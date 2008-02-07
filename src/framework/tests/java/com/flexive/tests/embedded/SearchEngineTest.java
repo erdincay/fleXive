@@ -43,15 +43,13 @@ import com.flexive.shared.workflow.StepDefinition;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.search.*;
 import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.search.query.QueryOperatorNode;
 import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.search.query.VersionFilter;
-import com.flexive.shared.security.Account;
-import com.flexive.shared.security.ACL;
-import com.flexive.shared.security.Mandator;
-import com.flexive.shared.security.LifeCycleInfo;
+import com.flexive.shared.security.*;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxPropertyAssignment;
@@ -107,7 +105,7 @@ public class SearchEngineTest {
 
     @BeforeClass
     public void setup() throws Exception {
-        login(TestUsers.SUPERVISOR);
+        login(TestUsers.REGULAR);
         final List<FxPK> testPks = new SqlQueryBuilder().select("@pk").type(TEST_TYPE).getResult().collectColumn(1);
         testInstanceCount = testPks.size();
         assert testInstanceCount > 0 : "No instances of test type " + TEST_TYPE + " found.";
@@ -246,9 +244,9 @@ public class SearchEngineTest {
 
     @Test
     public void selectVirtualPropertiesTest() throws FxApplicationException {
-        final FxResultSet result = new SqlQueryBuilder().select("@pk", "@path", "@node_position",
+        final FxResultSet result = new SqlQueryBuilder().select("@pk", "@path", "@node_position", "@permissions",
                 getTestPropertyName("string")).type(TEST_TYPE).getResult();
-        final int idx = 4;
+        final int idx = 5;
         for (FxResultRow row : result.getResultRows()) {
             assert getTestPropertyName("string").equalsIgnoreCase(row.getFxValue(idx).getXPathName())
                     : "Invalid property name from XPath: " + row.getFxValue(idx).getXPathName()
@@ -262,6 +260,19 @@ public class SearchEngineTest {
                 .orderBy(2, SortDirection.ASCENDING).getResult();
         assert result.getRowCount() > 0;
         assertAscendingOrder(result, 2);
+    }
+
+    @Test
+    public void selectPermissionsTest() throws FxApplicationException {
+        final FxResultSet result = new SqlQueryBuilder().select("@pk", "@permissions").type(TEST_TYPE).getResult();
+        assert result.getRowCount() > 0;
+        for (FxResultRow row : result.getResultRows()) {
+            final FxPK pk = row.getPk(1);
+            final PermissionSet permissions = row.getPermissions(2);
+            assert permissions.isMayRead();
+            final PermissionSet contentPerms = EJBLookup.getContentEngine().load(pk).getPermissions();
+            assert contentPerms.equals(permissions) : "Permissions from search: " + permissions + ", content: " + contentPerms;
+        }
     }
 
     @Test
@@ -459,7 +470,7 @@ public class SearchEngineTest {
     public void aclSelectorTest() throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().select("@pk", "acl", "acl.label", "acl.name",
                 "acl.mandator", "acl.description", "acl.cat_type", "acl.color", "acl.created_by", "acl.created_at",
-                "acl.modified_by", "acl.modified_at").getResult();
+                "acl.modified_by", "acl.modified_at").type(TEST_TYPE).getResult();
         assert result.getRowCount() > 0;
         for (FxResultRow row: result.getResultRows()) {
             final ACL acl = CacheAdmin.getEnvironment().getACL(row.getLong("acl"));
@@ -492,16 +503,55 @@ public class SearchEngineTest {
             final StepDefinition definition = CacheAdmin.getEnvironment().getStepDefinition(step.getStepDefinitionId());
             assert definition.getLabel().getBestTranslation().equals(row.getFxValue("step.label").getBestTranslation())
                     : "Invalid step label '" + row.getValue(3) + "', expected: '" + definition.getLabel() + "'";
-            final FxContent content = EJBLookup.getContentEngine().load(row.getPk(1));
-            assert content.getStepId() == step.getId()
-                    : "Invalid step for instance " + row.getPk(1) + ": " + step.getId()
-                    + ", content engine returned " + content.getStepId();
+            try {
+                final FxContent content = EJBLookup.getContentEngine().load(row.getPk(1));
+                assert content.getStepId() == step.getId()
+                        : "Invalid step for instance " + row.getPk(1) + ": " + step.getId()
+                        + ", content engine returned " + content.getStepId();
+            } catch (FxNoAccessException e) {
+                assert false : "Content engine denied read access to instance " + row.getPk(1) + " that was returned by search."; 
+            }
 
             // check fields selected from the ACL table
             assertEquals(row.getLong("step.id"), step.getId(), "Invalid value for field: id");
             assertEquals(row.getLong("step.stepdef"), step.getStepDefinitionId(), "Invalid value for field: stepdef");
             assertEquals(row.getLong("step.workflow"), step.getWorkflowId(), "Invalid value for field: workflow");
             assertEquals(row.getLong("step.acl"), step.getAclId(), "Invalid value for field: acl");
+        }
+    }
+
+    @Test
+    public void contactDataSelectTest() throws FxApplicationException {
+        // contact data is an example of a content with extended private permissions and no permissions for other users
+        final FxResultSet result = new SqlQueryBuilder().select("@pk", "@permissions").type(FxType.CONTACTDATA).getResult();
+        for (FxResultRow row: result.getResultRows()) {
+            try {
+                final FxContent content = EJBLookup.getContentEngine().load(row.getPk(1));
+                assert content.getPermissions().equals(row.getPermissions("@permissions"))
+                        : "Content perm: " + content.getPermissions() + ", search perm: " + row.getPermissions(2);
+            } catch (FxNoAccessException e) {
+                assert false : "Search returned contact data #" + row.getPk(1)
+                        + ", but content engine disallows access: " + e.getMessage();
+            }
+        }
+    }
+
+    /**
+     * Executes a query without conditions and checks if it returns only instances
+     * the user can actually read (a select without conditions is an optimized case of the
+     * search that must implement the same security constraints as a regular query).
+     *
+     * @throws FxApplicationException   on errors
+     */
+    @Test
+    public void selectAllPermissionsTest() throws FxApplicationException {
+        final FxResultSet result = EJBLookup.getSearchEngine().search("SELECT co.@pk FROM content co", 0, 999999, null);
+        for (FxResultRow row: result.getResultRows()) {
+            try {
+                EJBLookup.getContentEngine().load(row.getPk(1));
+            } catch (FxNoAccessException e) {
+                assert false : "Content engine denied read access to instance " + row.getPk(1) + " that was returned by search."; 
+            }
         }
     }
 
@@ -627,6 +677,7 @@ public class SearchEngineTest {
         final long lastContentChange = EJBLookup.getSearchEngine().getLastContentChange(false);
         assert lastContentChange > 0;
         final FxContent content = EJBLookup.getContentEngine().initialize(TEST_TYPE);
+        content.setAclId(TestUsers.getInstanceAcl().getId());
         content.setValue("/" + getTestPropertyName("string"), new FxString(false, "lastContentChangeTest"));
         FxPK pk = null;
         try {
@@ -647,7 +698,7 @@ public class SearchEngineTest {
     public void lastContentChangeTreeTest() throws FxApplicationException {
         final long lastContentChange = EJBLookup.getSearchEngine().getLastContentChange(false);
         assert lastContentChange > 0;
-        final long nodeId = EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("bla"));
+        final long nodeId = EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("lastContentChangeTreeTest"));
         try {
             final long editContentChange = EJBLookup.getSearchEngine().getLastContentChange(false);
             assert editContentChange > lastContentChange

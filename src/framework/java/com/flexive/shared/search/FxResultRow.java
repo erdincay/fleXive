@@ -37,6 +37,7 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.value.*;
+import com.flexive.shared.security.PermissionSet;
 
 import java.util.Arrays;
 import java.util.List;
@@ -173,5 +174,13 @@ public class FxResultRow {
 
     public Date getDate(String columnName) {
         return getDate(getColumnIndex(columnName));
+    }
+
+    public PermissionSet getPermissions(int column) {
+        return (PermissionSet) getValue(column);
+    }
+
+    public PermissionSet getPermissions(String columnName) {
+        return getPermissions(getColumnIndex(columnName));
     }
 }

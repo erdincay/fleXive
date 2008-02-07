@@ -46,6 +46,9 @@ import com.flexive.shared.interfaces.ContentEngine
 import com.flexive.shared.workflow.Workflow
 import com.flexive.shared.workflow.Step
 import com.flexive.shared.workflow.StepDefinition
+import com.flexive.shared.FxLanguage
+import com.flexive.shared.security.ACLAssignment
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 
@@ -84,7 +87,13 @@ EJBLookup.getSelectListEngine().save(searchTestList);
 //TODO: update once inline reference is implemented!
 
 // create a type that contains all data types to test the search engine(s)
-new GroovyTypeBuilder().SearchTest {
+final ACL defaultInstanceACL = CacheAdmin.getEnvironment().getDefaultACL(ACL.Category.STRUCTURE)
+final long instanceAclId = EJBLookup.aclEngine.create("Test type ACL", new FxString(FxLanguage.ENGLISH, "Test type ACL"),
+        defaultInstanceACL.mandatorId, "#000000", "ACL for type SearchTest", ACL.Category.STRUCTURE);
+final ACL instanceACL = CacheAdmin.environment.getACL(instanceAclId);
+
+new GroovyTypeBuilder().SearchTest(acl: instanceACL, useTypePermissions: true, useStepPermissions: true,
+                                   useInstancePermissions: true, usePropertyPermissions: false) {
     stringSearchProp(FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_N)
     textSearchProp(FxDataType.Text, multiplicity: FxMultiplicity.MULT_0_N)
     htmlSearchProp(FxDataType.HTML, multiplicity: FxMultiplicity.MULT_0_N)
@@ -198,6 +207,7 @@ void buildGroupData(String prefix, FxContent co, int counter, folderPks) {
     co.setValue("$prefix/selectManySearchProp", new FxSelectMany(false, buildSelectManySearchProp(counter)))
 }
 
+long start = System.currentTimeMillis()
 final List<FxPK> folderPks = new SqlQueryBuilder().select("@pk").type("FOLDER").getResult().collectColumn(1)
 instanceCount.times { int counter ->
     final ContentEngine contentEngine = EJBLookup.contentEngine
@@ -217,3 +227,5 @@ instanceCount.times { int counter ->
         dbContent = contentEngine.load(contentEngine.createNewVersion(dbContent))
     }
 }
+
+println "Creation of " + instanceCount + " test instances took " + (System.currentTimeMillis() - start) + " ms (= " + ((System.currentTimeMillis() - start) / instanceCount) + " ms/instance)"

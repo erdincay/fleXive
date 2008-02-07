@@ -258,6 +258,20 @@ public interface AccountEngine {
     void setRoles(long accountId, long... roles) throws FxApplicationException;
 
     /**
+     * Adds a role for a user.
+     * To set roles the caller must be in role AccountManagement, and may only update users belonging
+     * to his mandator. GlobalSupervisor may set the roles for all users in the system.
+     *
+     * @param accountId the user ID
+     * @param roleId    the role ID to be added
+     * @throws FxNoAccessException    if the calling user lacks the permissions to set the roles for the given group
+     * @throws FxNotFoundException    if the group does not exist
+     * @throws FxUpdateException      if setting the roles failed
+     * @throws FxApplicationException on errors
+     */
+    void addRole(long accountId, long roleId) throws FxApplicationException;
+
+    /**
      * Sets the roles a user is in.
      * <p/>
      * To set roles the caller must be in role ROLE_ROLE_MANAGEMENT, and may only update users belonging
@@ -282,7 +296,7 @@ public interface AccountEngine {
      * his mandator, plus GROUP_EVERYONE and GROUP_OWNER.<br>
      * GROUP_GLOBAL_SUPERVISOR may set all groups for all users.
      *
-     * @param accountId the accountId to get the lifecycle for
+     * @param accountId the accountId
      * @param groups    the groups the user should belong to
      * @throws FxNoAccessException    if the calling user lacks the permissions to set the groups
      * @throws FxNotFoundException    if the user does not exist
@@ -290,6 +304,23 @@ public interface AccountEngine {
      * @throws FxApplicationException on errors
      */
     void setGroups(long accountId, long[] groups) throws FxApplicationException;
+
+    /**
+     * Adds a usergroup to a user.
+     * <p/>
+     * The caller must be in role ROLE_GROUP_MANAGEMENT or AccountManagement, and may
+     * only update users belonging to his mandator. He may only assign groups that also belong to
+     * his mandator, plus GROUP_EVERYONE and GROUP_OWNER.<br>
+     * GROUP_GLOBAL_SUPERVISOR may set all groups for all users.
+     *
+     * @param accountId the accountId
+     * @param groupId   the groupID to be added
+     * @throws FxNoAccessException    if the calling user lacks the permissions to set the groups
+     * @throws FxNotFoundException    if the user does not exist
+     * @throws FxUpdateException      if setting the groups failed
+     * @throws FxApplicationException on errors
+     */
+    void addGroup(long accountId, long groupId) throws FxApplicationException;
 
     void setGroupList(long accountId, List<UserGroup> groups) throws FxApplicationException;
 

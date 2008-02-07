@@ -864,6 +864,24 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         }
     }
 
+    /** {@inheritDoc} */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void addRole(long accountId, long roleId) throws FxApplicationException {
+        final List<Role> roles = new ArrayList<Role>();
+        roles.addAll(getRoleList(accountId, RoleLoadMode.ALL));
+        roles.add(Role.getById(roleId));
+        setRoleList(accountId, roles);
+    }
+
+    /** {@inheritDoc} */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void addGroup(long accountId, long groupId) throws FxApplicationException {
+        final List<UserGroup> groups = new ArrayList<UserGroup>();
+        groups.addAll(getGroupList(accountId));
+        groups.add(group.load(groupId));
+        setGroupList(accountId, groups);
+    }
+
     /**
      * Helper function to set the roles for an account.
      *

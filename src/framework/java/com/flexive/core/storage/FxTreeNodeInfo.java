@@ -36,6 +36,7 @@ package com.flexive.core.storage;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
+import com.flexive.shared.security.PermissionSet;
 
 import java.io.Serializable;
 
@@ -61,7 +62,7 @@ public abstract class FxTreeNodeInfo implements Serializable {
     protected int position;
     protected String template;
     protected long modifiedAt;
-    protected boolean mayEdit, mayDelete, mayRelate, mayExport, mayCreate;
+    protected PermissionSet permissions;
 
     /**
      * Ctor
@@ -78,15 +79,11 @@ public abstract class FxTreeNodeInfo implements Serializable {
      * @param position         position
      * @param template         template
      * @param modifiedAt       last modified at
-     * @param mayEdit          edit permission of the referenced ACL
-     * @param mayCreate        create permission of the referenced ACL
-     * @param mayDelete        delete permission of the referenced ACL
-     * @param mayRelate        relate permission of the referenced ACL
-     * @param mayExport        export permission of the referenced ACL
+     * @param permissions      the node permissions of the calling user
      */
     protected FxTreeNodeInfo(int totalChildCount, int directChildCount, int depth, long parentId, long id, String name,
                              FxPK reference, long ACLId, FxTreeMode mode, int position, String template, long modifiedAt,
-                             boolean mayEdit, boolean mayDelete, boolean mayRelate, boolean mayExport, boolean mayCreate) {
+                             PermissionSet permissions) {
         this.totalChildCount = totalChildCount;
         this.directChildCount = directChildCount;
         this.depth = depth;
@@ -99,11 +96,7 @@ public abstract class FxTreeNodeInfo implements Serializable {
         this.position = position;
         this.template = template;
         this.modifiedAt = modifiedAt;
-        this.mayEdit = mayEdit;
-        this.mayDelete = mayDelete;
-        this.mayRelate = mayRelate;
-        this.mayExport = mayExport;
-        this.mayCreate = mayCreate;
+        this.permissions = permissions;
     }
 
     /**
@@ -218,7 +211,7 @@ public abstract class FxTreeNodeInfo implements Serializable {
      * @return ACL: Edit permission for the calling user
      */
     public boolean isMayEdit() {
-        return mayEdit;
+        return permissions.isMayEdit();
     }
 
     /**
@@ -227,7 +220,7 @@ public abstract class FxTreeNodeInfo implements Serializable {
      * @return ACL: Delete permission for the calling user
      */
     public boolean isMayDelete() {
-        return mayDelete;
+        return permissions.isMayDelete();
     }
 
     /**
@@ -236,7 +229,7 @@ public abstract class FxTreeNodeInfo implements Serializable {
      * @return ACL: Relate permission for the calling user
      */
     public boolean isMayRelate() {
-        return mayRelate;
+        return permissions.isMayRelate();
     }
 
     /**
@@ -245,7 +238,7 @@ public abstract class FxTreeNodeInfo implements Serializable {
      * @return ACL: Export permission for the calling user
      */
     public boolean isMayExport() {
-        return mayExport;
+        return permissions.isMayExport();
     }
 
     /**
@@ -254,7 +247,7 @@ public abstract class FxTreeNodeInfo implements Serializable {
      * @return ACL: Create permission for the calling user
      */
     public boolean isMayCreate() {
-        return mayCreate;
+        return permissions.isMayCreate();
     }
 
     /**

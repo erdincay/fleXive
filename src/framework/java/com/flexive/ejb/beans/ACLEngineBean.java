@@ -262,11 +262,11 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             final boolean keyViolation = Database.isForeignKeyViolation(exc);
             ctx.setRollbackOnly();
             if (uniqueConstraintViolation)
-                throw new FxRemoveException(LOG, "ex.acl.aclAlreadyExists", theACL.getName());
+                throw new FxRemoveException(LOG, exc, "ex.acl.aclAlreadyExists", theACL.getName());
             else if (keyViolation)
-                throw new FxRemoveException(LOG, "ex.acl.deleteFailed.aclIsInUse", theACL.getName());
+                throw new FxRemoveException(LOG, exc, "ex.acl.deleteFailed.aclIsInUse", theACL.getName());
             else
-                throw new FxRemoveException(LOG, "ex.acl.deleteFailed", theACL.getName(), exc.getMessage());
+                throw new FxRemoveException(LOG, exc, "ex.acl.deleteFailed", theACL.getName(), exc.getMessage());
         } finally {
             Database.closeObjects(ACLEngineBean.class, con, stmt);
         }

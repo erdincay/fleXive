@@ -86,7 +86,7 @@ public class WorkflowTest {
     @BeforeClass
     public void beforeClass() throws Exception {
         // EJB lookup
-        aclEngine = EJBLookup.getACLEngine();
+        aclEngine = EJBLookup.getAclEngine();
         workflowEngine = EJBLookup.getWorkflowEngine();
         stepEngine = EJBLookup.getWorkflowStepEngine();
         stepDefinitionEngine = EJBLookup.getWorkflowStepDefinitionEngine();

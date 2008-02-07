@@ -74,7 +74,7 @@ public class StructureTest {
         System.out.println("setting up structure test");
         te = EJBLookup.getTypeEngine();
         ae = EJBLookup.getAssignmentEngine();
-        acl = EJBLookup.getACLEngine();
+        acl = EJBLookup.getAclEngine();
         login(TestUsers.SUPERVISOR);
     }
 

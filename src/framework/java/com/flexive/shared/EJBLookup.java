@@ -138,7 +138,7 @@ public class EJBLookup {
      *
      * @return a reference to the ACLEngine EJB
      */
-    public static ACLEngine getACLEngine() {
+    public static ACLEngine getAclEngine() {
         return getEngine(ACLEngine.class);
     }
 

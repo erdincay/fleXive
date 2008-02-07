@@ -36,6 +36,7 @@ package com.flexive.core.storage.genericSQL;
 import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.FxTreeNodeInfoSimple;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.security.PermissionSet;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -134,12 +135,11 @@ public class GenericTreeStorageSimple extends GenericTreeStorage {
             long _stepACL = CacheAdmin.getEnvironment().getStep(rs.getLong(17)).getAclId();
             long _createdBy = rs.getLong(18);
             long _mandator = rs.getLong(19);
-            boolean[] perms = FxPermissionUtils.getPermissions(_acl, _type, _stepACL, _createdBy, _mandator);
             return new FxTreeNodeInfoSimple(rs.getLong(1), rs.getLong(2), rs.getLong(5),
                     rs.getLong(6), rs.getInt(4), rs.getInt(8), rs.getInt(7), rs.getLong(3),
                     nodeId, rs.getString(12), new FxPK(rs.getLong(9), rs.getInt(16)),
                     _acl, mode, rs.getInt(13), rs.getString(10), rs.getLong(11),
-                    perms[0], perms[4], perms[2], perms[1], perms[3]);
+                    FxPermissionUtils.getPermissions(_acl, _type, _stepACL, _createdBy, _mandator));
         } catch (SQLException e) {
             throw new FxTreeException(e, "ex.tree.nodeInfo.sqlError", nodeId, e.getMessage());
         } finally {

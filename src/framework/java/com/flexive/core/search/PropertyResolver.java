@@ -80,7 +80,7 @@ public class PropertyResolver {
     private ContentStorage hierarchicalStorage;
     private Map<String, PropertyEntry> cache = new HashMap<String, PropertyEntry>(50);
     private List<PropertyEntry> resultSetColumns;
-    private int resultSetPos = 4;
+    private int resultSetPos = DataSelector.INTERNAL_RESULTCOLS.length + 1; // start after internal properties
     private int resultSetColumnCount = 0;
 
     protected PropertyResolver() throws FxSqlSearchException {

@@ -120,7 +120,7 @@ public class FxTestUtils {
     public static ACL[] createACLs(String[] name, ACL.Category[] category, long mandator) throws FxApplicationException {
         assert name != null && category != null && name.length == category.length : "Invalid parameter(s) for createACL!";
         ACL[] acls = new ACL[name.length];
-        ACLEngine acl = EJBLookup.getACLEngine();
+        ACLEngine acl = EJBLookup.getAclEngine();
         FxString label = new FxString("Unit Test ACL Label");
         for (int i = 0; i < name.length; i++) {
             long tmpId = acl.create(name[i], label, mandator, "#AABBCC", "UnitTest ACL", category[i]);
@@ -149,7 +149,7 @@ public class FxTestUtils {
      * @throws FxApplicationException
      */
     public static void removeACL(ACL... acls) throws FxApplicationException {
-        ACLEngine aclEngine = EJBLookup.getACLEngine();
+        ACLEngine aclEngine = EJBLookup.getAclEngine();
         for (ACL acl : acls)
             aclEngine.remove(acl.getId());
     }

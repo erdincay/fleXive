@@ -76,7 +76,7 @@ public class WorkflowBeanTest {
     public void beforeClass() throws FxLoginFailedException, FxAccountInUseException, FxApplicationException {
         workflowBean = new WorkflowBean();
         workflowEngine = EJBLookup.getWorkflowEngine();
-        aclEngine = EJBLookup.getACLEngine();
+        aclEngine = EJBLookup.getAclEngine();
         login(TestUsers.SUPERVISOR);
         workflowAcl = aclEngine.load(aclEngine.create("WorkflowBeanTestACL", new FxString("Test ACL"),
                 Mandator.MANDATOR_FLEXIVE, "#000000", null, ACL.Category.WORKFLOW));

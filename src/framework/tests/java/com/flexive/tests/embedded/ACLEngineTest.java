@@ -41,10 +41,10 @@ public class ACLEngineTest {
 
     @Test(groups = {"ejb", "security"})
     public void createAclTest() throws FxApplicationException {
-        final long aclId = EJBLookup.getACLEngine().create("create-acl-test", new FxString("first label"), TestUsers.getTestMandator(),
+        final long aclId = EJBLookup.getAclEngine().create("create-acl-test", new FxString("first label"), TestUsers.getTestMandator(),
                 "#000000", "", ACL.Category.INSTANCE);
         try {
-                EJBLookup.getACLEngine().create("create-acl-test", new FxString("first label"), TestUsers.getTestMandator(),
+                EJBLookup.getAclEngine().create("create-acl-test", new FxString("first label"), TestUsers.getTestMandator(),
                 "#000000", "", ACL.Category.INSTANCE);
                 assert false:"ACL's must have unique names";
             }
@@ -62,7 +62,7 @@ public class ACLEngineTest {
             assert FxContext.get().getTicket().getGroups().length > 0;
             final long groupId = FxContext.get().getTicket().getGroups()[0];
 
-            EJBLookup.getACLEngine().update(aclId, "new-acl-test", new FxString("test"), null, "new description",
+            EJBLookup.getAclEngine().update(aclId, "new-acl-test", new FxString("test"), null, "new description",
                     Arrays.asList(new ACLAssignment(aclId, groupId, true, true, true, false, false, false,
                             ACL.Category.INSTANCE, null)));
             final ACL updatedAcl = CacheAdmin.getFilteredEnvironment().getACL(aclId);
@@ -71,13 +71,13 @@ public class ACLEngineTest {
             assertEquals(updatedAcl.getColor(), "#000000");
             assertEquals(updatedAcl.getLabel(), new FxString("test"));
         } finally {
-            EJBLookup.getACLEngine().remove(aclId);
+            EJBLookup.getAclEngine().remove(aclId);
         }
     }
 
     @Test(groups = {"ejb", "security"})
     public void aclAssignmentsTest() throws FxApplicationException {
-        final ACLEngine aclEngine = EJBLookup.getACLEngine();
+        final ACLEngine aclEngine = EJBLookup.getAclEngine();
         final long aclId = aclEngine.create("create-acl-test", new FxString("first label"), TestUsers.getTestMandator(),
                 "#000000", "", ACL.Category.INSTANCE);
         try {

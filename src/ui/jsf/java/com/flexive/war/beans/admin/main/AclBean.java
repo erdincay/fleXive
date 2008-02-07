@@ -99,7 +99,7 @@ public class AclBean {
     }
 
     public AclBean() {
-        this.aclEngine = EJBLookup.getACLEngine();
+        this.aclEngine = EJBLookup.getAclEngine();
         this.groupEngine = EJBLookup.getUserGroupEngine();
         this.acl = new ACL();
     }

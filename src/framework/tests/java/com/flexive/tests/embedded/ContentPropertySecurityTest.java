@@ -93,7 +93,7 @@ public class ContentPropertySecurityTest {
     @BeforeClass
     public void setup() throws Exception {
         co = EJBLookup.getContentEngine();
-        acl = EJBLookup.getACLEngine();
+        acl = EJBLookup.getAclEngine();
         type = EJBLookup.getTypeEngine();
         ass = EJBLookup.getAssignmentEngine();
         login(TestUsers.SUPERVISOR);

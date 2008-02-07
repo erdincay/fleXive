@@ -58,7 +58,7 @@ public class TestUser {
     private String userGroup;
     private Role[] roles = null;
     private long userId = -1;
-    private int userGroupId = -1;
+    private long userGroupId = -1;
 
     public TestUser(String informalName) {
         this.userName = informalName + "_" + RandomStringUtils.random(16, true, true);
@@ -115,7 +115,7 @@ public class TestUser {
         return userId;
     }
 
-    public int getUserGroupId() {
+    public long getUserGroupId() {
         return userGroupId;
     }
 

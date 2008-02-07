@@ -65,7 +65,7 @@ if( true ) {
 def String CSS_TYPE = "CSS";
 
 def ContentEngine co = EJBLookup.getContentEngine();
-def ACLEngine acl = EJBLookup.getACLEngine();
+def ACLEngine acl = EJBLookup.getAclEngine();
 def TypeEngine type = EJBLookup.getTypeEngine();
 def AssignmentEngine ass = EJBLookup.getAssignmentEngine();
 def ScriptingEngine se = EJBLookup.getScriptingEngine();

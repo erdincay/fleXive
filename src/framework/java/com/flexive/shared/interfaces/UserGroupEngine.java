@@ -110,7 +110,7 @@ public interface UserGroupEngine {
      * @throws com.flexive.shared.exceptions.FxCreateException
      *                                if the create failed
      */
-    int create(String name, String color, long mandatorId) throws FxApplicationException;
+    long create(String name, String color, long mandatorId) throws FxApplicationException;
 
     /**
      * Updates a group defined by its unique id.

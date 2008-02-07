@@ -109,8 +109,8 @@ public class AbstractSqlQueryTest {
     @AfterClass
     public void afterClass() throws FxLogoutFailedException, FxApplicationException {
         tearDownStructures();
-        EJBLookup.getACLEngine().remove(structureAcl.getId());
-        EJBLookup.getACLEngine().remove(contentAcl.getId());
+        EJBLookup.getAclEngine().remove(structureAcl.getId());
+        EJBLookup.getAclEngine().remove(contentAcl.getId());
         logout();
     }
 

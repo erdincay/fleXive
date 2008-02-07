@@ -333,24 +333,24 @@ public class FxPermissionUtils {
      * @throws com.flexive.shared.exceptions.FxNoAccessException
      *          if no read access if permitted
      */
-    public static boolean[] getPermissions(long acl, FxType type, long stepACL, long createdBy, long mandator) throws FxNoAccessException {
-        boolean[] perms = new boolean[5];
-        UserTicket ticket = FxContext.get().getTicket();
+    public static PermissionSet getPermissions(long acl, FxType type, long stepACL, long createdBy, long mandator) throws FxNoAccessException {
+        final UserTicket ticket = FxContext.get().getTicket();
         final boolean _system = FxContext.get().getRunAsSystem() || ticket.isGlobalSupervisor();
+        //throw exception if read is forbidden
         checkPermission(ticket, 0, ACL.Permission.READ, type, stepACL, acl, true);
+        // check for supervisor permissions
         if (_system || ticket.isMandatorSupervisor() && mandator == ticket.getMandatorId() ||
                 !type.usePermissions() /*|| ticket.isInGroup((int) UserGroup.GROUP_OWNER) && createdBy == ticket.getUserId()*/) {
-            perms[0] = perms[1] = perms[2] = perms[3] = perms[4] = true;
-        } else {
-            //throw exception if read is forbidden
-            checkPermission(ticket, 0, ACL.Permission.READ, type, stepACL, acl, true);
-            perms[0] = checkPermission(ticket, createdBy, ACL.Permission.EDIT, type, stepACL, acl, false);
-            perms[1] = checkPermission(ticket, createdBy, ACL.Permission.RELATE, type, stepACL, acl, false);
-            perms[2] = checkPermission(ticket, createdBy, ACL.Permission.DELETE, type, stepACL, acl, false);
-            perms[3] = checkPermission(ticket, createdBy, ACL.Permission.EXPORT, type, stepACL, acl, false);
-            perms[4] = checkPermission(ticket, createdBy, ACL.Permission.CREATE, type, stepACL, acl, false);
+            return new PermissionSet(true, true, true, true, true);
         }
-        return perms;
+        // get permission matrix from ACL assignments
+        return new PermissionSet(
+                checkPermission(ticket, createdBy, ACL.Permission.EDIT, type, stepACL, acl, false),
+                checkPermission(ticket, createdBy, ACL.Permission.RELATE, type, stepACL, acl, false),
+                checkPermission(ticket, createdBy, ACL.Permission.DELETE, type, stepACL, acl, false),
+                checkPermission(ticket, createdBy, ACL.Permission.EXPORT, type, stepACL, acl, false),
+                checkPermission(ticket, createdBy, ACL.Permission.CREATE, type, stepACL, acl, false)
+        );
     }
 
     /**
