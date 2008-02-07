@@ -789,6 +789,10 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             StructureLoader.reload(con);
             htracker.track(type, "history.type.remove", type.getName(), type.getId());
         } catch (SQLException e) {
+            if( Database.isForeignKeyViolation(e)) {
+                ctx.setRollbackOnly();
+                throw new FxRemoveException(LOG, e, "ex.structure.type.inUse", type.getName());
+            }
             ctx.setRollbackOnly();
             throw new FxRemoveException(LOG, e, "ex.db.sqlError", e.getMessage());
         } catch (FxCacheException e) {
