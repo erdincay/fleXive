@@ -84,7 +84,7 @@ public class ContentBenchmark {
             assertEquals(scriptCtr1, runs);
             assertEquals(scriptCtr2, runs);
         } finally {
-            FxBenchmarkUtils.logExecutionTime("createContactData", startTime, 100);
+            FxBenchmarkUtils.logExecutionTime("createContactData", startTime, 100, "instance");
             final long deleteStart = System.currentTimeMillis();
             for (FxPK pk : result) {
                 try {
@@ -93,7 +93,7 @@ public class ContentBenchmark {
                     System.err.println("Failed to remove content " + pk + ": " + e.getMessage());
                 }
             }
-            FxBenchmarkUtils.logExecutionTime("deleteContactData", deleteStart, 100);
+            FxBenchmarkUtils.logExecutionTime("deleteContactData", deleteStart, 100, "instance");
             EJBLookup.getScriptingEngine().removeScript(script1.getId());
             EJBLookup.getScriptingEngine().removeScript(script2.getId());
         }
@@ -119,6 +119,6 @@ public class ContentBenchmark {
             content.getData("/address/zipCode");
             content.getData("/address/street");
         }
-        FxBenchmarkUtils.logExecutionTime("getContentData", startTime, 100000 * 4);
+        FxBenchmarkUtils.logExecutionTime("getContentData", startTime, 100000 * 4, "instance property lookup");
     }
 }

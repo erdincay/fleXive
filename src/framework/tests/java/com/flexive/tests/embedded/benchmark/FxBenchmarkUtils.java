@@ -41,8 +41,8 @@ package com.flexive.tests.embedded.benchmark;
  */
 class FxBenchmarkUtils {
 
-    public static void logExecutionTime(String name, long startTimeMillis, int factor) {
+    public static void logExecutionTime(String name, long startTimeMillis, int factor, String unit) {
         final double time = ((double) System.currentTimeMillis() - startTimeMillis) / factor;
-        System.out.printf("%.20s: %." + (time < 1.0 ? "5" : "1") + "fms%n", name, time);
+        System.out.printf("%.30s: %." + (time < 1.0 ? "5" : "1") + "fms per %s%n", name, time, unit);
     }
 }

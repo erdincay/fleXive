@@ -5,7 +5,7 @@
 -- @param _contentId the instance id
 -- @param _lang      the language to retrieve
 -- @param _tprop     the property to use for the path (must be of type FTEXT1024)
--- @param _live      true:  read from th live tree,
+-- @param _live      true:  read from the live tree,
 --       false: read from the edit tree, 
 --       null:  read from both trees (paths will be returned double if contained in both trees)
 -- --------------------------------------------------------------------------------------------

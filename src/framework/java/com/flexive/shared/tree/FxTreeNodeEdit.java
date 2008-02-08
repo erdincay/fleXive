@@ -113,6 +113,17 @@ public class FxTreeNodeEdit extends FxTreeNode implements Serializable {
     }
 
     /**
+     * Sets the node ID to the given value.
+     *
+     * @param id    the node ID
+     * @return      this
+     */
+    public FxTreeNodeEdit setId(long id) {
+        this.id = id;
+        return this;
+    }
+
+    /**
      * Set the referenced content
      *
      * @param reference referenced content

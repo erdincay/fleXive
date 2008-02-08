@@ -43,7 +43,7 @@ import com.flexive.core.storage.genericSQL.GenericEnvironmentLoader;
  */
 public class MySQLEnvironmentLoader extends GenericEnvironmentLoader {
 
-    private static MySQLEnvironmentLoader instance = new MySQLEnvironmentLoader();
+    private static final MySQLEnvironmentLoader instance = new MySQLEnvironmentLoader();
 
     public static EnvironmentLoader getInstance() {
         return instance;

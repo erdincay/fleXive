@@ -359,6 +359,9 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
     public void removeNode(FxTreeMode mode, long nodeId, boolean deleteReferencedContent, boolean deleteChildren) throws FxApplicationException {
         Connection con = null;
         FxPK ref = null;
+        if (nodeId < 0) {
+            throw new FxInvalidParameterException("nodeId", "ex.tree.delete.nodeId");
+        }
         try {
             FxContext.get().setTreeWasModified();
             con = Database.getDbConnection();

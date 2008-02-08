@@ -42,7 +42,7 @@ import com.flexive.core.storage.genericSQL.GenericHierarchicalStorage;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class MySQLHierarchicalStorage extends GenericHierarchicalStorage {
-    private static MySQLHierarchicalStorage instance = new MySQLHierarchicalStorage();
+    private static final MySQLHierarchicalStorage instance = new MySQLHierarchicalStorage();
 
     /**
      * Singleton getter

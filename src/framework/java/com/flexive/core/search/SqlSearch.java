@@ -199,8 +199,8 @@ public class SqlSearch {
                     cacheTbl = null;
             }
 
-            pr = new PropertyResolver();
             con = Database.getDbConnection();
+            pr = new PropertyResolver(con);
 
             // Find all matching objects
             df = getDataFilter(con);

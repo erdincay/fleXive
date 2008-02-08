@@ -83,7 +83,7 @@ public class PropertyResolver {
     private int resultSetPos = DataSelector.INTERNAL_RESULTCOLS.length + 1; // start after internal properties
     private int resultSetColumnCount = 0;
 
-    protected PropertyResolver() throws FxSqlSearchException {
+    protected PropertyResolver(Connection con) throws FxSqlSearchException {
         try {
             this.hierarchicalStorage = StorageManager.getContentStorage(TypeStorageMode.Hierarchical);
             this.resultSetColumns = new ArrayList<PropertyEntry>(50);
@@ -92,7 +92,7 @@ public class PropertyResolver {
         } catch (Exception e) {
             throw new FxSqlSearchException(LOG, "Init error:" + e.getMessage());
         }
-        initColumnInformations();
+        initColumnInformations(con);
     }
 
     public void addResultSetColumn(PropertyEntry e) {
@@ -151,16 +151,15 @@ public class PropertyResolver {
     /**
      * Initializes the column informations.
      *
+     * @param con   an existing connection
      * @throws FxSqlSearchException if the init fails
      */
-    private synchronized void initColumnInformations() throws FxSqlSearchException {
+    private synchronized void initColumnInformations(Connection con) throws FxSqlSearchException {
         if (CONTENT_PROPS != null) {
             return;
         }
-        Connection con = null;
         Statement stmt = null;
         try {
-            con = Database.getDbConnection();
             stmt = con.createStatement();
             final ResultSet rs = stmt.executeQuery("select * from " + DatabaseConst.TBL_CONTENT + " where 1=2");
             final ResultSetMetaData rsmd = rs.getMetaData();
@@ -204,7 +203,7 @@ public class PropertyResolver {
         } catch (Exception exc) {
             throw new FxSqlSearchException(LOG, "ex.sqlSearch.init.failedToReadTableMetadata", DatabaseConst.TBL_CONTENT);
         } finally {
-            Database.closeObjects(PropertyResolver.class, con, stmt);
+            Database.closeObjects(PropertyResolver.class, null, stmt);
         }
     }
 }

@@ -42,7 +42,7 @@ import com.flexive.core.storage.genericSQL.GenericTreeStorageSpreaded;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class MySQLTreeStorage extends GenericTreeStorageSpreaded {
-    private static MySQLTreeStorage instance = new MySQLTreeStorage();
+    private static final MySQLTreeStorage instance = new MySQLTreeStorage();
 
     /**
      * Singleton getter

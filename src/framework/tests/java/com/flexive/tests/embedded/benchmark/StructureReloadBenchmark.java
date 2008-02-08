@@ -34,6 +34,7 @@
 package com.flexive.tests.embedded.benchmark;
 
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.FxContext;
 import org.testng.annotations.Test;
 
 /**
@@ -47,12 +48,17 @@ import org.testng.annotations.Test;
 public class StructureReloadBenchmark {
 
     public void benchStructureReload() throws Exception {
-        CacheAdmin.reloadEnvironment(); // warm up
-        CacheAdmin.reloadEnvironment();
-        long start = System.currentTimeMillis();
-        for (int i = 0; i < 10; i++) {
+        FxContext.get().runAsSystem();
+        try {
+            CacheAdmin.reloadEnvironment(); // warm up
             CacheAdmin.reloadEnvironment();
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < 10; i++) {
+                CacheAdmin.reloadEnvironment();
+            }
+            FxBenchmarkUtils.logExecutionTime("reloadEnvironment", start, 10, "reload");
+        } finally {
+            FxContext.get().stopRunAsSystem();
         }
-        FxBenchmarkUtils.logExecutionTime("reloadEnvironment", start, 10);
     }
 }

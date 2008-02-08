@@ -63,7 +63,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
     protected List<FxTreeNode> children;
     private List<Long> childIds = null;
     private boolean dirty;
-    private long id;
+    protected long id;
     private long ACLId;
     protected long parentNodeId;
     protected String name;

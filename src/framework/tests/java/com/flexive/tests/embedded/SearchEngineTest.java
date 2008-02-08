@@ -114,7 +114,7 @@ public class SearchEngineTest {
         for (FxPK pk: testPks) {
             generatedNodeIds.add(
                     EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("test" + pk)
-                            .setReference(pk).setName(RandomStringUtils.random(1024)))
+                            .setReference(pk).setName(RandomStringUtils.random(new Random().nextInt(1024), true, true)))
             );
         }
     }
@@ -123,7 +123,7 @@ public class SearchEngineTest {
     public void shutdown() throws Exception {
         for (long nodeId: generatedNodeIds) {
             EJBLookup.getTreeEngine().remove(
-                    FxTreeNodeEdit.createNew("").setReference(new FxPK(nodeId)).setMode(FxTreeMode.Edit),
+                    FxTreeNodeEdit.createNew("").setId(nodeId).setMode(FxTreeMode.Edit),
                     false, true);
         }
         logout();
