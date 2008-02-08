@@ -365,7 +365,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
             if (deleteReferencedContent)
                 ref = getNode(mode, nodeId).getReference();
             StorageManager.getTreeStorage().removeNode(con, mode, contentEngine, nodeId, deleteChildren);
-            if (ref != null)
+            if (ref != null && contentEngine.getReferencedContentCount(ref) == 0)
                 contentEngine.remove(ref);
             StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
         } catch (FxNotFoundException nf) {

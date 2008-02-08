@@ -35,6 +35,7 @@ package com.flexive.tests.embedded;
 
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxContext;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNodeEdit;
@@ -710,15 +711,20 @@ public class SearchEngineTest {
             assert EJBLookup.getSearchEngine().getLastContentChange(false) == editContentChange
                     : "Edit tree didn't change, but lastContentChange timestamp was updated";
         } finally {
+            FxContext.get().runAsSystem();
             try {
-                EJBLookup.getTreeEngine().remove(EJBLookup.getTreeEngine().getNode(FxTreeMode.Edit, nodeId), true, false);
-            } catch (FxApplicationException e) {
-                // pass
-            }
-            try {
-                EJBLookup.getTreeEngine().remove(EJBLookup.getTreeEngine().getNode(FxTreeMode.Live, nodeId), true, false);
-            } catch (FxApplicationException e) {
-                // pass 
+                try {
+                    EJBLookup.getTreeEngine().remove(EJBLookup.getTreeEngine().getNode(FxTreeMode.Edit, nodeId), true, false);
+                } catch (FxApplicationException e) {
+                    // pass
+                }
+                try {
+                    EJBLookup.getTreeEngine().remove(EJBLookup.getTreeEngine().getNode(FxTreeMode.Live, nodeId), true, false);
+                } catch (FxApplicationException e) {
+                    // pass
+                }
+            } finally {
+                FxContext.get().stopRunAsSystem();
             }
         }
     }

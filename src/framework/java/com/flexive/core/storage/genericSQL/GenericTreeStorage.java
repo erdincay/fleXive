@@ -1056,10 +1056,10 @@ public abstract class GenericTreeStorage implements TreeStorage {
             //if the referenced content is a folder, remove it
             long folderTypeId = CacheAdmin.getEnvironment().getType(FxType.FOLDER).getId();
             for (FxPK ref : references) {
-                FxContent coRef = ce.load(ref);
-                int contentCount = ce.getReferencedContentCount(coRef.getPk());
-//                System.out.println("ContentCount for " + coRef.getPk() + ": " + contentCount);
-                if (coRef.getTypeId() == folderTypeId && contentCount == 0) {
+                FxContentSecurityInfo si = ce.getContentSecurityInfo(ref);
+                int contentCount = ce.getReferencedContentCount(si.getPk());
+//                System.out.println("ContentCount for " + si.getPk() + ": " + contentCount);
+                if (si.getTypeId() == folderTypeId && contentCount == 0) {
 //                    System.out.println("Removing "+ref);
                     ce.remove(ref);
                 }
