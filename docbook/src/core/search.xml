@@ -164,6 +164,24 @@ WHERE co.ARTICLE/TITLE LIKE 'Earthquake%']]></programlisting>
             </para>
         </section>
 
+        <section xml:id="css_permissions">
+            <title>Content permissions</title>
+            <para>
+                The
+                <glossterm>virtual property</glossterm>
+                <code>@permissions</code>
+                selects the permissions of the calling user on the content instance:
+
+                <programlisting language="sql"><![CDATA[SELECT co.@pk, co.@permissions
+FROM content co]]></programlisting>
+
+                The column returns instances of
+                <link href="http://www.flexive.org/docs/javadoc/shared/com/flexive/shared/security/PermissionSet.html">
+                    <classname>com.flexive.shared.security.PermissionSet</classname>.
+                </link>
+            </para>
+        </section>
+
         <section xml:id="css_tree">
             <title>Tree Search</title>
 
@@ -270,7 +288,9 @@ FROM content co]]></programlisting>
                             Selects the content ACL. Additional fields include:
                             <variablelist>
                                 <varlistentry>
-                                    <term><code>acl.label</code></term>
+                                    <term>
+                                        <code>acl.label</code>
+                                    </term>
                                     <listitem>
                                         <para>
                                             The localized label in the calling user's language.
@@ -278,7 +298,9 @@ FROM content co]]></programlisting>
                                     </listitem>
                                 </varlistentry>
                                 <varlistentry>
-                                    <term><code>acl.name</code></term>
+                                    <term>
+                                        <code>acl.name</code>
+                                    </term>
                                     <listitem>
                                         <para>
                                             The unique name of the ACL.
@@ -286,7 +308,9 @@ FROM content co]]></programlisting>
                                     </listitem>
                                 </varlistentry>
                                 <varlistentry>
-                                    <term><code>acl.description</code></term>
+                                    <term>
+                                        <code>acl.description</code>
+                                    </term>
                                     <listitem>
                                         <para>
                                             The ACL description.
@@ -294,7 +318,9 @@ FROM content co]]></programlisting>
                                     </listitem>
                                 </varlistentry>
                                 <varlistentry>
-                                    <term><code>acl.cat_type</code></term>
+                                    <term>
+                                        <code>acl.cat_type</code>
+                                    </term>
                                     <listitem>
                                         <para>
                                             The ACL category.
@@ -302,7 +328,9 @@ FROM content co]]></programlisting>
                                     </listitem>
                                 </varlistentry>
                                 <varlistentry>
-                                    <term><code>acl.color</code></term>
+                                    <term>
+                                        <code>acl.color</code>
+                                    </term>
                                     <listitem>
                                         <para>
                                             The RGB color code used for this ACL.
@@ -317,13 +345,16 @@ FROM content co]]></programlisting>
                         <td>created_by, modified_by (FXS_ACCOUNTS)</td>
                         <td>
                             Selects the user that has created/lastly modified the content
-                            (<code>created_by</code>
+                            (
+                            <code>created_by</code>
                             and
                             <code>modified_by</code>
                             both have the same fields). Interesting fields include:
                             <variablelist>
                                 <varlistentry>
-                                    <term><code>created_by.username</code></term>
+                                    <term>
+                                        <code>created_by.username</code>
+                                    </term>
                                     <listitem>
                                         <para>
                                             The associated user's username.
@@ -331,7 +362,9 @@ FROM content co]]></programlisting>
                                     </listitem>
                                 </varlistentry>
                                 <varlistentry>
-                                    <term><code>created_by.email</code></term>
+                                    <term>
+                                        <code>created_by.email</code>
+                                    </term>
                                     <listitem>
                                         <para>
                                             The associated user's email address.
@@ -339,7 +372,9 @@ FROM content co]]></programlisting>
                                     </listitem>
                                 </varlistentry>
                                 <varlistentry>
-                                    <term><code>created_by.login_name</code></term>
+                                    <term>
+                                        <code>created_by.login_name</code>
+                                    </term>
                                     <listitem>
                                         <para>
                                             The unique login name of the user.
@@ -364,7 +399,9 @@ FROM content co]]></programlisting>
                             Selects the workflow step of the content instance. You can select the following fields:
                             <variablelist>
                                 <varlistentry>
-                                    <term><code>step.label</code></term>
+                                    <term>
+                                        <code>step.label</code>
+                                    </term>
                                     <listitem>
                                         <para>
                                             The localized step label in the calling user's language.
@@ -372,16 +409,21 @@ FROM content co]]></programlisting>
                                     </listitem>
                                 </varlistentry>
                                 <varlistentry>
-                                    <term><code>step.workflow</code></term>
+                                    <term>
+                                        <code>step.workflow</code>
+                                    </term>
                                     <listitem>
                                         <para>
-                                            The workflow ID of the step (and thus the complete workflow used for this content
+                                            The workflow ID of the step (and thus the complete workflow used for this
+                                            content
                                             instance).
                                         </para>
                                     </listitem>
                                 </varlistentry>
                                 <varlistentry>
-                                    <term><code>step.stepdef</code></term>
+                                    <term>
+                                        <code>step.stepdef</code>
+                                    </term>
                                     <listitem>
                                         <para>
                                             The step definition ID.
@@ -389,7 +431,9 @@ FROM content co]]></programlisting>
                                     </listitem>
                                 </varlistentry>
                                 <varlistentry>
-                                    <term><code>step.acl</code></term>
+                                    <term>
+                                        <code>step.acl</code>
+                                    </term>
                                     <listitem>
                                         <para>
                                             The ACL of the step.
