@@ -106,19 +106,17 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
         try {
             environment.getACL(acl);
         } catch (Exception e) {
-            if (ticket.isGlobalSupervisor()) {
-                acl = ACL.Category.INSTANCE.getDefaultId();
-            } else {
+            acl = ACL.Category.INSTANCE.getDefaultId();
+            if (!ticket.isGlobalSupervisor() && type.useInstancePermissions() &&
+                    !(ticket.mayCreateACL(acl, ticket.getUserId()) &&
+                            ticket.mayReadACL(acl, ticket.getUserId()) &&
+                            ticket.mayEditACL(acl, ticket.getUserId()))) {
                 //get best fit if possible
                 Long[] acls = ticket.getACLsId(ticket.getUserId(), ACL.Category.INSTANCE, ACL.Permission.CREATE, ACL.Permission.EDIT, ACL.Permission.READ);
                 if (acls.length > 0)
                     acl = acls[0];
-                else {
-                    if (type.useInstancePermissions())
-                        throw new FxNoAccessException("ex.content.noSuitableACL", type.getName());
-                    else
-                        acl = ACL.Category.INSTANCE.getDefaultId();
-                }
+                else
+                    throw new FxNoAccessException("ex.content.noSuitableACL", type.getName());
             }
         }
         long step = prefStep;
