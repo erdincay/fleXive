@@ -310,7 +310,8 @@ public class ResultPreferencesBean {
             final SelectItemGroup virtualGroup = new SelectItemGroup(messageBean.getMessage("ResultPreferences.label.group.virtual"));
             virtualGroup.setSelectItems(new SelectItem[]{
                     new SelectItem("@pk", messageBean.getMessage("ResultPreferences.label.property.pk")),
-                    new SelectItem("@path", messageBean.getMessage("ResultPreferences.label.property.path"))
+                    new SelectItem("@path", messageBean.getMessage("ResultPreferences.label.property.path")),
+                    new SelectItem("@permissions", messageBean.getMessage("ResultPreferences.label.property.permissions"))
             });
             properties.add(virtualGroup);
             // add type properties
@@ -391,10 +392,8 @@ public class ResultPreferencesBean {
                         return null;
                     }
                     final String name = key.toString();
-                    if ("@pk".equals(name)) {
-                        return MessageBean.getInstance().getMessage("ResultPreferences.label.property.pk");
-                    } else if ("@path".equals(name)) {
-                        return MessageBean.getInstance().getMessage("ResultPreferences.label.property.path");
+                    if (name.charAt(0) == '@') {
+                        return MessageBean.getInstance().getMessage("ResultPreferences.label.property." + name.substring(1));
                     } else {
                         return environment.getProperty(name).getLabel().getBestTranslation();
                     }
