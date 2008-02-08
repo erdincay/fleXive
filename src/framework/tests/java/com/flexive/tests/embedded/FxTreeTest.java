@@ -35,9 +35,12 @@ package com.flexive.tests.embedded;
 
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.configuration.SystemParameters;
+import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
+import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.TreeEngine;
+import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.tree.FxTreeNodeEdit;
@@ -266,6 +269,21 @@ public class FxTreeTest {
         assert !tree.exist(mode, id1_3);
         assert tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() == 0 :
                 "Expected to have 0 children, got: [" + tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() + "]";
+        tree.clear(mode);
+
+        //test changing a referenced content
+        ContentEngine co = EJBLookup.getContentEngine();
+        FxPK testFolder = co.save(co.initialize(FxType.FOLDER));
+        try {
+            long nodeId = tree.save(FxTreeNodeEdit.createNew("Test").setParentNodeId(FxTreeNode.ROOT_NODE).setMode(mode));
+            FxTreeNode node = tree.getNode(mode, nodeId);
+            Assert.assertNotSame(node.getReference(), testFolder, "Expected to have a different folder pk!");
+            tree.save(node.asEditable().setReference(testFolder));
+            node = tree.getNode(mode, nodeId);
+            Assert.assertEquals(node.getReference(), testFolder, "Node reference should have been updated!");
+        } finally {
+            co.remove(testFolder);
+        }
         tree.clear(mode);
     }
 

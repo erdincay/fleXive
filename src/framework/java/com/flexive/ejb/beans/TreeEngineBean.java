@@ -43,9 +43,11 @@ import com.flexive.shared.FxLanguage;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
+import com.flexive.shared.content.FxContentSecurityInfo;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.security.ACL;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
@@ -285,10 +287,15 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
     }
 
     /**
-     * {@inheritDoc}
+     * Rename a node
+     *
+     * @param nodeId id of the node
+     * @param mode   tree mode
+     * @param name   new name
+     * @param label  new label
+     * @throws FxApplicationException on errors
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void renameNode(long nodeId, FxTreeMode mode, String name, FxString label) throws FxApplicationException {
+    private void renameNode(long nodeId, FxTreeMode mode, String name, FxString label) throws FxApplicationException {
         Connection con = null;
 //        boolean setInContent = false;
         try {
@@ -369,6 +376,25 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
         } catch (Throwable t) {
             ctx.setRollbackOnly();
             throw new FxRemoveException(LOG, t, "ex.tree.delete.failed", nodeId, t.getMessage());
+        } finally {
+            Database.closeObjects(TreeEngineBean.class, con, null);
+        }
+    }
+
+    /**
+     * Update a nodes reference
+     *
+     * @param node node to update
+     * @throws FxTreeException on errors
+     */
+    private void updateReference(FxTreeNodeEdit node) throws FxTreeException {
+        Connection con = null;
+        try {
+            con = Database.getDbConnection();
+            StorageManager.getTreeStorage().updateReference(con, node.getMode(), node.getId(), node.getReference().getId());
+        } catch (Throwable t) {
+            ctx.setRollbackOnly();
+            throw new FxTreeException(LOG, t, "ex.tree.update.reference.failed", node.getId(), node.getMode().name(), t.getMessage());
         } finally {
             Database.closeObjects(TreeEngineBean.class, con, null);
         }
@@ -632,16 +658,40 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
         if (node.isPartialLoaded())
             throw new FxTreeException("ex.tree.partialnode.notAllowed", node.getMode(), node.getId());
         if (node.isNew()) {
-            return createNode(node.getParentNodeId(), node.getName(), node.getLabel(), node.getPosition(),
+            long nodeId = createNode(node.getParentNodeId(), node.getName(), node.getLabel(), node.getPosition(),
                     node.getReference(), node.getTemplate(), node.getMode());
+            if ((node.getReference() == null || node.getReference().isNew()) &&
+                    node.getACLId() != ACL.Category.INSTANCE.getDefaultId()) {
+                //requested a non-default ACL for a folder
+                FxTreeNode created = getNode(node.getMode(), nodeId);
+                FxContent co = contentEngine.load(created.getReference());
+                co.setAclId(node.getACLId());
+                contentEngine.save(co);
+            }
+            return nodeId;
         } else {
             FxTreeNode old = getNode(node.getOriginalMode(), node.getId());
+            if( node.getReference().getId() != old.getReference().getId() ) {
+                updateReference(node);
+                FxContentSecurityInfo si = contentEngine.getContentSecurityInfo(old.getReference());
+                if( si.getTypeId() == CacheAdmin.getEnvironment().getType(FxType.FOLDER).getId() ) {
+                    if( contentEngine.getReferencedContentCount(old.getReference()) == 0)
+                        contentEngine.remove(old.getReference());
+                }
+                //need refresh with new reference data
+                old = getNode(node.getOriginalMode(), node.getId());
+            }
             if (!old.getName().equals(node.getName()) || !old.getLabel().equals(node.getLabel()))
                 renameNode(node.getId(), node.getOriginalMode(), node.getName(), node.getLabel());
             if (old.getParentNodeId() != node.getParentNodeId() || old.getPosition() != node.getPosition())
                 move(node.getMode(), node.getId(), node.getParentNodeId(), node.getPosition());
             if (node.isActivate() && node.getMode() != FxTreeMode.Live)
                 activate(FxTreeMode.Edit, node.getId(), node.isActivateWithChildren());
+            if( node.getACLId() != old.getACLId() ) {
+                FxContent co = contentEngine.load(node.getReference());
+                co.setAclId(node.getACLId());
+                contentEngine.save(co);
+            }
         }
         return node.getId();
     }

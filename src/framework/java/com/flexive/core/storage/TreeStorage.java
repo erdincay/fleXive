@@ -225,6 +225,17 @@ public interface TreeStorage {
     void updateName(Connection con, FxTreeMode mode, ContentEngine ce, long nodeId, String name) throws FxApplicationException;
 
     /**
+     * Update a nodes reference
+     *
+     * @param con         an open and valid connection
+     * @param mode        tree mode
+     * @param nodeId      node id to update
+     * @param referenceId new reference id
+     * @throws FxApplicationException on errors
+     */
+    void updateReference(Connection con, FxTreeMode mode, long nodeId, long referenceId) throws FxApplicationException;
+
+    /**
      * Returns a list of paths made up of Caption's for the given id's.
      * If there is no caption propery found in the instance, the FQN will be used.
      * The root node will be excluded.

@@ -314,6 +314,31 @@ public abstract class GenericTreeStorage implements TreeStorage {
     /**
      * {@inheritDoc}
      */
+    public void updateReference(Connection con, FxTreeMode mode, long nodeId, long referenceId) throws FxApplicationException {
+        PreparedStatement ps = null;
+        try {
+            //                                                               1        2           3
+            ps = con.prepareStatement("UPDATE " + getTable(mode) + " SET REF=?, DIRTY=? WHERE ID=?");
+            ps.setLong(1, referenceId);
+            ps.setBoolean(2, mode != FxTreeMode.Live); //live tree is never dirty
+            ps.setLong(3, nodeId);
+            ps.executeUpdate();
+            FxContext.get().setTreeWasModified();
+        } catch (SQLException e) {
+            throw new FxUpdateException(LOG, e, "ex.tree.update.failed", mode.name(), e.getMessage());
+        } finally {
+            try {
+                if (ps != null)
+                    ps.close();
+            } catch (SQLException e) {
+                //ignore
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void syncFQNName(Connection con, long referenceId, boolean maxVersion, boolean liveVersion, String name) throws FxApplicationException {
         if (StringUtils.isEmpty(name))
             return;
