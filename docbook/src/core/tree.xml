@@ -10,7 +10,7 @@
         &Flexive; comes with a tree component, accessible via the
         <interfacename>FxTree</interfacename>
         interface with means to create and manage tree based structures and attach FxContent instances to tree
-        nodes. There are actually 2 logically (and physically in terms of used database tables) distinct tree's: a
+        nodes. There are actually 2 logically (and physically in terms of used database tables) distinct trees: a
         <emphasis>live</emphasis>
         (published) and an
         <emphasis>edit</emphasis>

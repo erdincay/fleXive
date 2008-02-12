@@ -495,7 +495,7 @@
 
             <section xml:id="jcl_fx_value_input">
                 <title>
-                    <code language="xhtml">&lt;fx:valueInput></code>
+                    <code language="xhtml">&lt;fx:fxValueInput></code>
                 </title>
                 <para>
                     The

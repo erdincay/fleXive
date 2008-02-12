@@ -37,6 +37,7 @@ import com.flexive.shared.FxLanguage;
 import com.flexive.shared.value.FxValue;
 
 import javax.faces.context.ResponseWriter;
+import javax.faces.component.UIComponent;
 import java.io.IOException;
 
 /**
@@ -74,7 +75,7 @@ abstract class RenderHelper {
         if (value.isMultiLanguage() && !component.isDisableMultiLanguage()) {
             encodeMultiLanguageField();
         } else {
-            encodeField(clientId + FxValueInputRenderer.INPUT, null);
+            encodeField(component, clientId + FxValueInputRenderer.INPUT, null);
         }
     }
 
@@ -88,9 +89,9 @@ abstract class RenderHelper {
     /**
      * Render a input field for the given language.
      *
+     * @param parent  the parent component
      * @param inputId  the input element ID (= form name)
-     * @param language the language for the input field, or null if the value is not multi-language.
-     * @throws IOException if the input could not be rendered
+     * @param language the language for the input field, or null if the value is not multi-language. @throws IOException if the input could not be rendered
      */
-    protected abstract void encodeField(String inputId, FxLanguage language) throws IOException;
+    protected abstract void encodeField(UIComponent parent, String inputId, FxLanguage language) throws IOException;
 }

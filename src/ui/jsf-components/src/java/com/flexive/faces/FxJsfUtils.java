@@ -72,6 +72,7 @@ import java.util.*;
  * Utility class for JSF functionality within beans.
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
 public class FxJsfUtils {
@@ -636,6 +637,9 @@ public class FxJsfUtils {
      * @return the created child component
      */
     public static UIComponent addChildComponent(UIComponent parent, String componentType) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Adding a component of type " + componentType + " to " + parent.getClientId(FacesContext.getCurrentInstance()));
+        }
         final UIComponent child = createComponent(componentType);
         parent.getChildren().add(child);
         return child;

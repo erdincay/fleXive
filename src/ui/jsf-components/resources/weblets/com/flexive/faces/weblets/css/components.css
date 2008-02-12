@@ -14,7 +14,7 @@ div.fxValueInputRow {
     position: relative;
     left: 0;
     top: 0;
-    width: 190px;
+    width: 225px;
 }
 
 input.fxValueDefaultLanguageRadio {
@@ -28,7 +28,7 @@ div.FxHTMLInput div.fxValueInputRow {
 }
 
 input.fxValueTextInput, textarea.fxValueTextArea, select.fxValueSelectInput, .fxValueInputElementWidth {
-    width: 160px;
+    width: 195px;
 }
 
 input.fxValueTextInput, textarea.fxValueTextArea, select.fxValueSelectInput {
@@ -49,10 +49,6 @@ input.fxValueTextInput {
 
 input.fxValueFileInput {
     float: left;
-}
-
-div.fxValueInputWidth, div.fxValueInput {
-    width: 260px;
 }
 
 div.fxValueInput {
@@ -186,7 +182,7 @@ select.queryValueComparator {
     float: left;
 }
 
-.queryRoot div.fxValueInputWidth, .queryRoot div.fxValueInput {
+.queryRoot div.fxValueInput {
     width: 210px;
 }
 

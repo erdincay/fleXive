@@ -33,6 +33,9 @@
  ***************************************************************/
 package com.flexive.faces.listener;
 
+import com.flexive.faces.FxJsfUtils;
+import com.flexive.faces.beans.SystemBean;
+
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.PhaseListener;
@@ -59,6 +62,7 @@ public class JsfPhaseListener implements PhaseListener {
 
     public void beforePhase(PhaseEvent e) {
         currentPhase.set(e.getPhaseId());
+        FxJsfUtils.getManagedBean(SystemBean.class).reset();
     }
 
     public void afterPhase(PhaseEvent e) {

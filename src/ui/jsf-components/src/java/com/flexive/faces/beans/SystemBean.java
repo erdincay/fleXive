@@ -75,6 +75,15 @@ public class SystemBean implements Serializable {
     private Map<Object, FxContent> contentMap;
     private Map<Object, FxContent> explodedContentMap;
 
+    /**
+     * Resets all counters between phases.
+     */
+    public void reset() {
+        counters = null;
+        counterMap = null;
+        counterValueMap = null;
+    }
+
     public Map<String, List<FacesMessage>> getComponentMessages() {
         return messageMap;
     }

@@ -42,6 +42,7 @@ import com.flexive.shared.value.renderer.FxValueFormatter;
 import javax.faces.component.UIInput;
 import javax.faces.component.UIViewRoot;
 import javax.faces.context.FacesContext;
+import javax.faces.validator.Validator;
 
 /**
  * Input fields for FxValue variables, including multi-language support.
@@ -66,12 +67,29 @@ public class FxValueInput extends UIInput {
     private String onchange;
     private FxValueFormatter valueFormatter;
 
+    private int configurationMask = -1;
+
     /**
      * Default constructor
      */
     public FxValueInput() {
         setRendererType("flexive.FxValueInput");
-        addValidator(new FxValueInputValidator());
+    }
+
+    @Override
+    public void validate(FacesContext context) {
+        // automatically register a FxValueInputValidator, unless it is already present
+        boolean validatorFound = false;
+        for (Validator validator: getValidators()) {
+            if (validator instanceof FxValueInputValidator) {
+                validatorFound = true;
+                break;
+            }
+        }
+        if (!validatorFound) {
+            addValidator(new FxValueInputValidator());
+        }
+        super.validate(context);
     }
 
     /**
@@ -261,6 +279,38 @@ public class FxValueInput extends UIInput {
     }
 
     /**
+     * Returns the configuration bitmask of the current component.
+     *
+     * @return  the configuration bitmask of the current component.
+     * @see #calcConfigurationMask()
+     */
+    public int getConfigurationMask() {
+        return configurationMask;
+    }
+
+    /**
+     * Calculates a bitmask for the current component configuration (i.e. read-only mode,
+     * line input mode). Used to detect configuration changes between page views by the
+     * {@link com.flexive.faces.components.input.FxValueInputRenderer}.
+     *
+     * @return  the bitmask of the current component configuration
+     */
+    public int calcConfigurationMask() {
+        return (isReadOnly() ? 1 : 0)
+                + ((isForceLineInput() ? 1 : 0) << 2)
+                + ((isFilter() ? 1 : 0) << 4);
+    }
+
+    /**
+     * Resets the configuration bitmask.
+     * 
+     * @see #calcConfigurationMask()
+     */
+    public void resetConfigurationMask() {
+        this.configurationMask = calcConfigurationMask();
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -273,8 +323,9 @@ public class FxValueInput extends UIInput {
         this.readOnly = (Boolean) values[index++];
         this.forceLineInput = (Boolean) values[index++];
         this.onchange = (String) values[index++];
-        //noinspection UnusedAssignment
         this.filter = (Boolean) values[index++];
+        //noinspection UnusedAssignment
+        this.configurationMask = (Integer) values[index++];
     }
 
     /**
@@ -282,7 +333,7 @@ public class FxValueInput extends UIInput {
      */
     @Override
     public Object saveState(FacesContext context) {
-        Object[] values = new Object[7];
+        Object[] values = new Object[8];
         int index = 0;
         values[index++] = super.saveState(context);
         values[index++] = disableMultiLanguage;
@@ -290,8 +341,9 @@ public class FxValueInput extends UIInput {
         values[index++] = readOnly;
         values[index++] = forceLineInput;
         values[index++] = onchange;
-        //noinspection UnusedAssignment
         values[index++] = filter;
+        //noinspection UnusedAssignment
+        values[index++] = configurationMask >= 0 ? configurationMask : calcConfigurationMask();
         return values;
 	}
 	

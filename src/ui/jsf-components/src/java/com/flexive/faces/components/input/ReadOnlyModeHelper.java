@@ -43,6 +43,7 @@ import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import com.flexive.war.servlet.ThumbnailServlet;
 
 import javax.faces.component.html.HtmlGraphicImage;
+import javax.faces.component.UIComponent;
 import javax.faces.context.ResponseWriter;
 import java.io.IOException;
 
@@ -63,7 +64,7 @@ class ReadOnlyModeHelper extends RenderHelper {
      */
     @Override
     protected void encodeMultiLanguageField() throws IOException {
-        encodeField(clientId, FxContext.get().getTicket().getLanguage());
+        encodeField(component, clientId, FxContext.get().getTicket().getLanguage());
     }
 
     /**
@@ -71,7 +72,7 @@ class ReadOnlyModeHelper extends RenderHelper {
      */
     @Override
     @SuppressWarnings({"unchecked"})
-    protected void encodeField(String inputId, FxLanguage language) throws IOException {
+    protected void encodeField(UIComponent parent, String inputId, FxLanguage language) throws IOException {
         if (!value.isEmpty()) {
             // TODO: optional "empty" message
             final FxLanguage outputLanguage = FxContext.get().getTicket().getLanguage();
@@ -86,6 +87,11 @@ class ReadOnlyModeHelper extends RenderHelper {
                 }
             } else if (value instanceof FxBinary && !value.isEmpty()) {
                 // render preview image
+                final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(component, HtmlGraphicImage.COMPONENT_TYPE);
+                final BinaryDescriptor descriptor = ((FxBinary) value).getTranslation(language);
+                image.setUrl(ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()),
+                        BinaryDescriptor.PreviewSizes.PREVIEW2, value.getXPath(), descriptor.getCreationTime()));
+/*
                 final BinaryDescriptor descriptor = ((FxBinary) value).getTranslation(language);
                 StringBuilder sb = new StringBuilder(1000);
                 String urlThumb = FxJsfUtils.getServletContext().getContextPath() +
@@ -104,6 +110,7 @@ class ReadOnlyModeHelper extends RenderHelper {
                         append(urlThumb).
                         append("\"/></a>");
                 writer.write(sb.toString());
+*/
             } else if (component.isFilter() && !(value instanceof FxHTML)) {
                 // escape HTML code and generate <br/> tags for newlines
                 writer.write(FxFormatUtils.escapeForJavaScript(FxValueRendererFactory.getInstance(outputLanguage).format(value, language), true, true));

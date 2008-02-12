@@ -209,6 +209,7 @@ void buildGroupData(String prefix, FxContent co, int counter, folderPks) {
 
 long start = System.currentTimeMillis()
 final List<FxPK> folderPks = new SqlQueryBuilder().select("@pk").type("FOLDER").getResult().collectColumn(1)
+int instances = 0
 instanceCount.times { int counter ->
     final ContentEngine contentEngine = EJBLookup.contentEngine
     final FxEnvironment env = CacheAdmin.environment
@@ -217,6 +218,7 @@ instanceCount.times { int counter ->
     buildGroupData("/GroupTop", co, counter, folderPks)
     buildGroupData("/GroupTop/GroupNested", co, counter, folderPks)
     FxContent dbContent = contentEngine.load(EJBLookup.contentEngine.save(co))
+    instances++
     final Workflow workflow = env.getWorkflow(env.getStep(dbContent.stepId).workflowId)
     final Step editStep = (Step) workflow.getSteps().find { Step step ->
         step.stepDefinitionId == StepDefinition.EDIT_STEP_ID
@@ -225,7 +227,8 @@ instanceCount.times { int counter ->
     (counter % 5).times {
         dbContent.setStepId(editStep.id)
         dbContent = contentEngine.load(contentEngine.createNewVersion(dbContent))
+        instances++
     }
 }
 
-println "Creation of " + instanceCount + " test instances took " + (System.currentTimeMillis() - start) + " ms (= " + ((System.currentTimeMillis() - start) / instanceCount) + " ms/instance)"
+println "Creation of " + instances + " test instances took " + (System.currentTimeMillis() - start) + " ms (= " + ((System.currentTimeMillis() - start) / instances) + " ms/instance)"

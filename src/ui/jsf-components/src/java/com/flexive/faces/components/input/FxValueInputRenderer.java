@@ -77,6 +77,7 @@ public class FxValueInputRenderer extends Renderer {
     protected static final String CSS_TEXTAREA = "fxValueTextArea";
     protected static final String CSS_TEXTAREA_HTML = "fxValueTextAreaHtml";
     protected static final String CSS_INPUTELEMENTWIDTH = "fxValueInputElementWidth";
+    private static final String DBG = "fxValueInput: ";
 
     /**
      * {@inheritDoc}
@@ -84,16 +85,28 @@ public class FxValueInputRenderer extends Renderer {
     @Override
     public void encodeBegin(FacesContext context, UIComponent input) throws IOException {
         FxValueInput component = (FxValueInput) input;
-        ResponseWriter writer = context.getResponseWriter();
-        String clientId = input.getClientId(context);
-        //noinspection unchecked
-        FxValue value = component.getInputMapper().encode(getFxValue(context, component));
-        RenderHelper helper = component.isReadOnly()
-                ? new ReadOnlyModeHelper(writer, component, clientId, value)
-                : new EditModeHelper(writer, component, clientId, value);
-        component.getChildren().clear();
-        if (!(value instanceof FxVoid)) {
-            helper.render();
+
+        if (component.calcConfigurationMask() != component.getConfigurationMask()) {
+            ResponseWriter writer = context.getResponseWriter();
+            String clientId = input.getClientId(context);
+            //noinspection unchecked
+            FxValue value = component.getInputMapper().encode(getFxValue(context, component));
+            RenderHelper helper = component.isReadOnly()
+                    ? new ReadOnlyModeHelper(writer, component, clientId, value)
+                    : new EditModeHelper(writer, component, clientId, value);
+            if (!component.getChildren().isEmpty()) {
+                LOG.warn(DBG + "Component " + clientId + " already has " + component.getChildren().size()
+                        + " children which will be discarded. Please don't use fx:fxValueInput inside render-time tags like ui:repeat.");
+            }
+            component.getChildren().clear();
+            if (!(value instanceof FxVoid)) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(DBG + "Rendering " + (component.isReadOnly() ? "read only" : "editable")
+                        + " component " + clientId + " for value=" + value);
+                }
+                helper.render();
+            }
+            component.resetConfigurationMask();
         }
     }
 
@@ -140,6 +153,9 @@ public class FxValueInputRenderer extends Renderer {
         final String clientId = component.getClientId(context);
         final FxValue value = getFxValue(context, input).copy();
 
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(DBG + "Decoding value for " + clientId + ", component value=" + value);
+        }
         if (value.isMultiLanguage() && !input.isDisableMultiLanguage()) {
             final int defaultLanguageId = Integer.parseInt((String) parameters.get(clientId + DEFAULT_LANGUAGE));
             value.setDefaultLanguage(defaultLanguageId, true);
@@ -151,7 +167,9 @@ public class FxValueInputRenderer extends Renderer {
         } else {
             updateTranslation(input, value, clientId + FxValueInputRenderer.INPUT, value.getDefaultLanguage(), parameters, parameterValues);
         }
-
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(DBG + "Decoded value for " + clientId + ": " + value);
+        }
         return value;
     }
 
@@ -170,16 +188,21 @@ public class FxValueInputRenderer extends Renderer {
             // get date value from dateinput child
             //noinspection unchecked
             final HtmlInputDate dateInput = FxJsfUtils.findChild(input, HtmlInputDate.class);
+            if (dateInput == null) {
+                throw new FxUpdateException(LOG, "ex.jsf.valueInput.date.input", inputId, value).asRuntimeException();
+            }
             HtmlInputDate.UserData data = (HtmlInputDate.UserData) dateInput.getSubmittedValue();
-            try {
-                final Date date = data.parse();
-                if (date != null) {
-                    value.setTranslation(languageId, date);
-                } else {
-                    value.setEmpty(languageId);
+            if (data != null) {
+                try {
+                    final Date date = data.parse();
+                    if (date != null) {
+                        value.setTranslation(languageId, date);
+                    } else {
+                        value.setEmpty(languageId);
+                    }
+                } catch (ParseException e) {
+                    // keep old value
                 }
-            } catch (ParseException e) {
-                // keep old value
             }
         } else if (value instanceof FxBinary) {
             final HtmlInputFileUpload upload = (HtmlInputFileUpload) FacesContext.getCurrentInstance().getViewRoot().findComponent(inputId);

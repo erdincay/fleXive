@@ -62,11 +62,14 @@ public class FxValueInputValidator implements Validator {
             // TODO: add input component label to the error message
             FxFacesMsgErr message = new FxFacesMsgErr("FxValueInput.err.invalid", fxValue.getErrorValue());
             message.setId(input.getExternalId() == -1 ? input.getClientId(context) : String.valueOf(input.getExternalId()));
+            message.setLocalizedDetail("FxValueInput.err.invalid.detail", fxValue.getErrorValue());
             throw new ValidatorException(message);
         }
         // check default translation
         if (input.isRequired() && !fxValue.translationExists(fxValue.getDefaultLanguage())) {
-            throw new ValidatorException(new FxFacesMsgErr("FxValueInput.err.emptyDefaultLanguage"));
+            final FxFacesMsgErr message = new FxFacesMsgErr("FxValueInput.err.emptyDefaultLanguage");
+            message.setLocalizedDetail("FxValueInput.err.emptyDefaultLanguage");
+            throw new ValidatorException(message);
         }
     }
 }
