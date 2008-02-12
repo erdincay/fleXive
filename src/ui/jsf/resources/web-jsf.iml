@@ -9,11 +9,6 @@
         <webroots>
           <root url="file://$MODULE_DIR$" relative="/WEB-INF" />
         </webroots>
-        <sourceRoots>
-          <root url="file://$MODULE_DIR$/../java" />
-          <root url="file://$MODULE_DIR$/../tests/groovy" />
-          <root url="file://$MODULE_DIR$/../tests/java" />
-        </sourceRoots>
         <building>
           <setting name="EXPLODED_URL" value="file://" />
           <setting name="EXPLODED_ENABLED" value="false" />

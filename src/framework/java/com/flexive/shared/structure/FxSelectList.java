@@ -227,9 +227,9 @@ public class FxSelectList implements Serializable, ObjectWithLabel {
     }
 
     /**
-     * Get the default ACL assigned to new created items
+     * Get the default ACL assigned to newly created items
      *
-     * @return default ACL assigned to new created items
+     * @return default ACL assigned to newly created items
      */
     public ACL getNewItemACL() {
         return newItemACL;

@@ -89,7 +89,6 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long save(FxSelectListEdit list) throws FxApplicationException {
-        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.SelectListEditor);
         final boolean newList = list.isNew();
         boolean changes = newList;
         long id = list.getId();
@@ -132,11 +131,16 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
                 if (defaultItemId < 0 && e.getId() == defaultItemId)
                     defaultItemId = currentItemId;
             } else if( e.isNew() ) {
-                createItem(e);
-                changes = true;
+                    createItem(e);
+                    changes = true;
             } else if (e.changes()) {
-                updateItem(e);
-                changes = true;
+                //check if the user is permitted to edit this specific item
+                if (FxContext.get().getTicket().isInRole(Role.SelectListEditor) || FxContext.get().getTicket().mayCreateACL(e.getAcl().getId(), -1)) {
+                    updateItem(e);
+                    changes = true;
+                }
+                 else
+                    throw new FxNoAccessException("ex.role.notInRole", Role.SelectListEditor.getName());
             }
         }
         updateDefaultItem(id, defaultItemId);
@@ -252,7 +256,9 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void remove(FxSelectListItem item) throws FxApplicationException {
 //        System.out.println("Removing item " + item.getLabel());
-        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.SelectListEditor);
+        if (!(FxContext.get().getTicket().isInRole(Role.SelectListEditor) || FxContext.get().getTicket().mayDeleteACL(item.getList().getCreateItemACL().getId(), FxContext.get().getTicket().getUserId())))
+            throw new FxNoAccessException("ex.selectlist.item.remove.noPerm", item.getList().getLabel(),
+                        item.getAcl().getLabel());
         Connection con = null;
         PreparedStatement ps = null;
         try {
@@ -290,6 +296,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
     }
 
     private long createList(FxSelectListEdit list) throws FxApplicationException {
+        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.SelectListEditor);
         checkValidListParameters(list);
         long newId = seq.getId(SequencerEngine.System.SELECTLIST);
         list._synchronizeId(newId);
@@ -355,6 +362,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
     private void updateList(FxSelectListEdit list) throws FxApplicationException {
         if (!list.changes())
             return;
+        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.SelectListEditor);
         checkValidListParameters(list);
 //        System.out.println("Updating list " + list.getLabel());
         Connection con = null;
@@ -390,11 +398,10 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
         UserTicket ticket = FxContext.get().getTicket();
         if(!ticket.isInRole(Role.SelectListEditor)) {
             //check the lists ACL
-            if( ticket.mayCreateACL(item.getList().getCreateItemACL().getId(), ticket.getUserId()) )
+            if(! (ticket.mayCreateACL(item.getList().getCreateItemACL().getId(), ticket.getUserId())) )
                 throw new FxNoAccessException("ex.selectlist.item.create.noPerm", item.getList().getLabel(), 
                         item.getList().getCreateItemACL().getLabel());
         }
-
         long newId = seq.getId(SequencerEngine.System.SELECTLIST_ITEM);
 //        System.out.println("Creating item " + item.getLabel() + " for list with id " + item.getList().getId());
         Connection con = null;
@@ -436,6 +443,9 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             return;
         checkValidItemParameters(item);
 //        System.out.println("Updating item " + item.getLabel());
+        if (!(FxContext.get().getTicket().isInRole(Role.SelectListEditor) || FxContext.get().getTicket().mayEditACL(item.getAcl().getId(), FxContext.get().getTicket().getUserId())))
+            throw new FxNoAccessException("ex.selectlist.item.update.noPerm", item.getList().getLabel(), 
+                        item.getAcl().getLabel());
         Connection con = null;
         PreparedStatement ps = null;
         try {
@@ -469,9 +479,14 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
 
     private void checkValidListParameters(FxSelectListEdit list) throws FxInvalidParameterException {
         //TODO: codeme!
+        if (list.getName() == null || list.getName().isEmpty())
+            throw new FxInvalidParameterException("Name", "ex.selectlist.name.empty");
     }
 
     private void checkValidItemParameters(FxSelectListItemEdit item) throws FxInvalidParameterException {
         //TODO: codeme!
+        if (item.getLabel() == null || item.getLabel().getIsEmpty()) {
+            throw new FxInvalidParameterException("Label", "ex.selectlist.item.label.emty");
+        }
     }
 }

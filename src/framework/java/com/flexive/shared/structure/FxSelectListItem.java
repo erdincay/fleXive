@@ -86,7 +86,7 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
         this.list = list;
         this.parentItemId = parentItemId;
         this.parentItem = null;
-        this.label = label;
+        this.label = label==null? new FxString(""):label;
         this.data = data;
         if (this.data == null)
             this.data = "";
@@ -148,7 +148,8 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
      * Get the ACL for this item.
      * This ACL is treated in a special way:
      * The only relevant permissions are create and delete for adding and removing entries, all items are readable
-     * and editable (to allow saving set items) by default
+     * and editable (to allow saving set items) if the create permission is set for the current user and are
+     * deselectable if the user has the delete permission.
      *
      * @return ACL for this item
      */

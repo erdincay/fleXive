@@ -866,7 +866,356 @@
 
     <section xml:id="core_structure_selectlists">
         <title>Select lists</title>
-        <!-- TODO -->TBD
+        <para>
+            Select lists usually contain a set of related select items, which are used in GUIs
+            to enable the user to make a selection of one or more of these items. &flexive; allows
+            in-memory creation of slim select lists for quick GUI display, as well as defining and
+            persisting fully fledged deeply nested select lists.
+        </para>
+
+        <section xml:id="core_structure_selectlist_parameters">
+        <title>Select list parameters</title>
+        <para>
+            The following is a list of parameters that can be passed as arguments to
+            <classname>FxSelectListEdit</classname>
+            when editing or creating a new select list:
+            <table xml:id="csslp_table" class="flexive">
+                <caption>FxSelectList parameters</caption>
+                <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Method</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Parent list</td>
+                        <td>
+                            <methodname>&list_no;</methodname>
+                        </td>
+                        <td>Set the parent list of this select list (used for nested select lists). Can only be set
+                            when the select list is created.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Name</td>
+                        <td>
+                            <methodname>setName(String name)</methodname>
+                        </td>
+                        <td>Set the name of the select list (has to be unique).
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Label</td>
+                        <td>
+                            <methodname>setLabel(FxString label)</methodname>
+                        </td>
+                        <td>Set a label text to be displayed in user interfaces.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Description</td>
+                        <td>
+                            <methodname>setDescription(FxString description)</methodname>
+                        </td>
+                        <td>Set a description text to be displayed in user interfaces.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Allow dynamic item creation</td>
+                        <td>
+                            <methodname>&list_no;</methodname>
+                        </td>
+                        <td>
+                            May items be created dynamically (in UI's other than backends). Can only be set
+                            when the select list is created. This flag is merely used as information
+                            for UI's where users may create select list items themselves. Independent of this
+                            flag the users can only create items if they have the permission (see <xref linkend="cssliperm_table">select list item permissions</xref>
+                            for details).
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Create Item ACL</td>
+                        <td>
+                            <methodname>&list_no;</methodname>
+                        </td>
+                        <td>
+                            The ACL which controls the permissions for adding and removing select items to the select list.
+                            Can only be set when the select list is created.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>New Item ACL</td>
+                        <td>
+                            <methodname>&list_no;</methodname>
+                        </td>
+                        <td>
+                            The ACL which is assigned to newly created items by default. Can only be set when the select list is created.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Default Item</td>
+                        <td>
+                            <methodname>setDefaultItem(FxSelectListItem defaultItem)</methodname>
+                        </td>
+                        <td>
+                            A select list item, which is selected by default.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </para>
+        </section>
+
+        <section xml:id="core_structure_selectlist_item_parameters">
+        <title>Select list item parameters</title>
+        <para>
+            The following is a list of parameters that can be passed as arguments to
+            <classname>FxSelectListItemEdit</classname>
+            when editing or creating a new select list item:
+            <table xml:id="csslpi_table" class="flexive">
+                <caption>FxSelectListItem parameters</caption>
+                <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Method</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>List</td>
+                        <td>
+                            <methodname>&list_no;</methodname>
+                        </td>
+                        <td>The select list to which this select item belongs.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Parent Item</td>
+                        <td>
+                            <methodname>setParentItem(FxSelectListItem item)</methodname>
+                        </td>
+                        <td>Set the parent item of this select list item (used for nested select lists).
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>ACL</td>
+                        <td>
+                            <methodname>setAcl(ACL acl)</methodname>
+                        </td>
+                        <td>The ACL of the select item (see <xref linkend="cssliperm_table">select list item permissions</xref>
+                            for details).
+                        </td>
+                    </tr>
+                     <tr>
+                        <td>Label</td>
+                        <td>
+                            <methodname>setLabel(FxString label)</methodname>
+                        </td>
+                        <td>Set a label text to be displayed in user interfaces.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Data</td>
+                        <td>
+                            <methodname>setData(String data)</methodname>
+                        </td>
+                        <td>
+                            Set additional data stored in the select item.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Color</td>
+                        <td>
+                            <methodname>setColor(String color)</methodname>
+                        </td>
+                        <td>
+                            Set the item's display color.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Icon Id</td>
+                        <td>
+                            <methodname>setIconId(long iconId)</methodname>
+                        </td>
+                        <td>
+                            Set the id of this select list item's icon.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Icon version</td>
+                        <td>
+                            <methodname>setIconVer(int iconVer)</methodname>
+                        </td>
+                        <td>
+                            Set the version of the icon to be displayed.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Icon quality</td>
+                        <td>
+                            <methodname>setIconQuality(int iconQuality)</methodname>
+                        </td>
+                        <td>
+                            Set the quality of the icon to be displayed.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            The item's Life Cycle Information <methodname>getLifeCycleInfo()</methodname> is generated and managed by
+            the database and can not be edited.
+        </para>
+        </section>
+
+        <section xml:id="core_structure_selectlist_creation">
+            <title>Select list creation and persistance</title>
+            <para>
+                As mentioned earlier, two kinds of select lists can be created. The first kind is
+                not suitable for being persisted and is used for example for quick display
+                in UI input components. <classname>FxSelectList</classname> provides
+                <methodname>FxSelectList(String name)</methodname>,
+                <methodname>
+                createList(String name, List&lt;? extends SelectableObjectWithLabel&gt; items)</methodname> and
+                <methodname>createListWithName(String name, List&lt;? extends SelectableObjectWithName&gt; items)</methodname>
+                for these purposes. <classname>FxSelectListItem</classname> provides <methodname>
+                FxSelectListItem(long id, FxSelectList list, long parentItemId, FxString label)
+                </methodname> for select list items that are not persisted.
+            </para>
+            <para>
+                The second kind of select lists, which can be persisted, are created via <classname>FxSelectListEdit</classname> and
+                its constructor or <methodname>createNew(..)</methodname> helper methods.
+                Similar to persistable select lists, persistable select list items are created via
+                the <classname>FxSelectListItemEdit</classname> class by invoking its constructor or its
+                <methodname>createNew(..)</methodname> method.
+                The persistance is handled via methods provided
+                by the<classname>SelectListEngine</classname>.
+            </para>
+        </section>
+
+        <section xml:id="core_structure_selectlist_item_permissions">
+            <title>Select list item permissions</title>
+            <para>
+                While only users in the role of <link linkend="core_security_roles">SelectListEditor</link> may create, update and delete
+                select lists, select list items are handled differently.
+                Whether a specific user is permitted to add itmes to and remove items from a specific select list
+                is handled by the createItem ACL of the select list. Whether users may read, edit, select and deselect
+                a specific select list item is handled by the ACL of the select item itsself. The operations
+                and relevant permissions are specified in <xref linkend="cssliperm_table">following table</xref>.
+            </para>
+
+            <table xml:id="cssliperm_table" class="flexive">
+                <caption>Relevant permissions for working with select list items</caption>
+                <thead>
+                    <tr>
+                        <th>Operation</th>
+                        <th>ACL</th>
+                        <th>Permission</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            Creating a select list item
+                        </td>
+                        <td>
+                            FxSelectList.createItemACL
+                        </td>
+                        <td>
+                            CREATE
+                        </td>
+                        <td>
+                            The <parameter>createItemACL</parameter> of the item's select list controls which users
+                            may create and hence add select list items to this specific select list.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Deleting a select list item
+                        </td>
+                        <td>
+                            FxSelectList.createItemACL
+                        </td>
+                        <td>
+                            DELETE
+                        </td>
+                        <td>
+                            Similar to the creation of new select list items, the <parameter>createItemACL</parameter>
+                            of the item's select list also controls which users
+                            may remove select list items from this specific select list.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Editing a select list item
+                        </td>
+                        <td>
+                            FxSelectListItem.acl
+                        </td>
+                        <td>
+                            EDIT
+                        </td>
+                        <td>
+                            Whether a user may change the data of a specific select list item is controlled by the EDIT
+                            permission of the ACL of the select list item itsself.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Reading a select list item
+                        </td>
+                        <td>
+                            FxSelectListItem.acl
+                        </td>
+                        <td>
+                            READ
+                        </td>
+                        <td>
+                            Whether a user may read a specific select list item
+                            and its data (for exmaple in the content editor) is controlled by the READ
+                            permission of the select list item.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Adding a select list item to a selection (when working with contents)
+                        </td>
+                        <td>
+                            FxSelectListItem.acl
+                        </td>
+                        <td>
+                            READ, CREATE
+                        </td>
+                        <td>
+                            Whether a user may add specific select list item to his seleciton
+                            is controlled by the READ (otherwise the
+                            user wouldn't see that the item exists) and by the CREATE
+                            permission of the select list item.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Removing a select list item to a selection (when working with contents)
+                        </td>
+                        <td>
+                            FxSelectListItem.acl
+                        </td>
+                        <td>
+                            READ, DELETE
+                        </td>
+                        <td>
+                            Whether a user may remove specific select list item from his seleciton
+                            is controlled by the READ (otherwise the
+                            user wouldn't see that the item exists) and by the DELETE
+                            permission of the select list item.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
     </section>
 
     <section xml:id="core_structure_multiplicity">

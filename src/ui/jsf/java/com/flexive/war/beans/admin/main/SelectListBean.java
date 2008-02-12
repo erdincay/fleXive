@@ -34,18 +34,22 @@
 package com.flexive.war.beans.admin.main;
 
 import com.flexive.faces.messages.FxFacesMsgErr;
+import com.flexive.faces.FxJsfUtils;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.exceptions.FxNoAccessException;
+import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.Role;
 import com.flexive.shared.structure.FxSelectList;
 import com.flexive.shared.structure.FxSelectListEdit;
 import com.flexive.shared.structure.FxSelectListItemEdit;
 import com.flexive.shared.value.FxString;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import javax.faces.model.SelectItem;
+import java.util.*;
 
 /**
  * Bean to display and edit FxSelectList objects and FxSelectListItem objects
@@ -58,7 +62,7 @@ public class SelectListBean {
     private static final long SYSTEM_INTERNAL_LISTS_DELIMITER = 0;
     private FxSelectListEdit selectList = null;
     private long selectListId = -1;
-    private String selectListName = "";
+    private String selectListName =null;
     private FxString selectListLabel = new FxString("");
     private FxString selectListDescription = new FxString("");
     private boolean selectListAllowDynamicCreation = true;
@@ -68,8 +72,9 @@ public class SelectListBean {
     private long listItemId = -1;
     private FxString itemLabel = new FxString("");
     private ACL itemACL = null;
-    private String itemData = "";
-    private String itemColor = "";
+    private String itemData =null;
+    private String itemColor =FxFormatUtils.DEFAULT_COLOR;
+    private ItemIdSorter sorter = new ItemIdSorter();
 
     /**
      * hack to generate unique id for the UI delete button, which can be used in java script
@@ -189,6 +194,92 @@ public class SelectListBean {
         return selectList;
     }
 
+    /**
+     * filters out select list items which the current user is not allowed to see (==user doesn't have read permission)
+     * and sorts them by id.
+     *
+     * @return  filtered select list items sorted by id.
+     */
+    public List<FxSelectListItemEdit> getItems() {
+        List<FxSelectListItemEdit> items = new ArrayList<FxSelectListItemEdit>();
+        for (FxSelectListItemEdit i : selectList.getEditableItems())
+            if (FxJsfUtils.getRequest().getUserTicket().isInRole(Role.SelectListEditor) ||
+                    FxJsfUtils.getRequest().getUserTicket().mayReadACL(i.getAcl().getId(), FxJsfUtils.getRequest().getUserTicket().getUserId()))
+                    items.add(i);
+        Collections.sort(items, sorter);
+        return items;
+    }
+
+    /**
+     * Map containing boolean values, if the current user may create select list items
+     * for a given select list (id of the select list is used as key).
+     *
+     * @return  Map containing id's of select lists as keys and if the current user may create
+     * select list items as values.
+     */
+    public Map<Long, Boolean> getMayCreateItems() {
+        return new HashMap<Long,Boolean>() {
+            public Boolean get(Object key) {
+                if (FxJsfUtils.getRequest().getUserTicket().isInRole(Role.SelectListEditor))
+                    return true;
+                else {
+                    return FxJsfUtils.getRequest().getUserTicket().mayCreateACL(
+                            CacheAdmin.getEnvironment().getSelectList((Long)key).getCreateItemACL().getId(), FxJsfUtils.getRequest().getUserTicket().getUserId());
+                }
+            }
+        };
+    }
+
+    public boolean getMayDeleteItems() {
+        return FxJsfUtils.getRequest().getUserTicket().isInRole(Role.SelectListEditor)
+                || FxJsfUtils.getRequest().getUserTicket().mayDeleteACL(
+                    selectList.getCreateItemACL().getId(), FxJsfUtils.getRequest().getUserTicket().getUserId());
+    }
+
+    /**
+     * Returns if the current user may edit a specific select list item.
+     *
+     * @return  if the current user may edit a specific select list item
+     */
+    public Map<FxSelectListItemEdit, Boolean> getMayEditItem() {
+        return new HashMap<FxSelectListItemEdit,Boolean>() {
+            public Boolean get(Object key) {
+                if (FxJsfUtils.getRequest().getUserTicket().isInRole(Role.SelectListEditor))
+                    return true;
+                else {
+                    return FxJsfUtils.getRequest().getUserTicket().mayEditACL(
+                            ((FxSelectListItemEdit)key).getAcl().getId(), FxJsfUtils.getRequest().getUserTicket().getUserId());
+                }
+            }
+        };
+    }
+
+   /**
+     * Returns all available select item acl's.
+     *
+     * @return all available select list item acl's
+     *
+     */
+
+    public List<SelectItem> getSelectListItemACLs() {
+        return FxJsfUtils.asSelectList(CacheAdmin.getEnvironment().getACLs(ACL.Category.SELECTLISTITEM), false);
+    }
+
+    private class ItemIdSorter implements Comparator<FxSelectListItemEdit> {
+        public int compare(FxSelectListItemEdit i1, FxSelectListItemEdit i2) {
+            if ( i1.getId() >=0 && i2.getId() >=0)
+                return (int) (i1.getId() - i2.getId());
+            else if(i1.getId() <0 && i2.getId() <0)
+                return (int) -(i1.getId() - i2.getId());    
+            else if (i1.getId() <0 && i2.getId() >=0)
+                return 1;
+            else if (i1.getId() >=0 && i2.getId() <0)
+                return -1;
+            else //should never happen
+                return 0;
+        }
+    }
+
     public List<FxSelectList> getSelectLists() {
         return doFilter(CacheAdmin.getEnvironment().getSelectLists());
     }
@@ -203,7 +294,21 @@ public class SelectListBean {
     }
 
     public String showSelectListOverview() {
+        reset();
         return "selectListOverview";
+    }
+
+    /**
+     * Function is called ONLY from create.xhtml hence it can be also
+     * used to check permissions
+     *
+     * @return
+     */
+    public String getResetSelectList() {
+        reset();
+        if (!FxJsfUtils.getRequest().getUserTicket().isInRole(Role.SelectListEditor))
+            new FxFacesMsgErr(new FxNoAccessException("ex.role.notInRole", Role.SelectListEditor.getName())).addToContext();
+        return null;
     }
 
     public String showCreateSelectList() {
@@ -215,17 +320,22 @@ public class SelectListBean {
         return "editSelectList";
     }
 
-    public void reset() {
-        selectListName = "";
+    private void reset() {
+        selectListName = null;
         selectListLabel = new FxString("");
         selectListDescription = new FxString("");
         selectListAllowDynamicCreation = true;
         selectListCreateItemACLId = ACL.Category.SELECTLIST.getDefaultId();
         selectListDefaultItemACLId = ACL.Category.SELECTLISTITEM.getDefaultId();
+        itemLabel = new FxString("");
+        itemACL = CacheAdmin.getEnvironment().getACL(selectListDefaultItemACLId);
+        itemData = null;
+        itemColor = FxFormatUtils.DEFAULT_COLOR;
     }
 
     public String createSelectList() {
         try {
+            FxPermissionUtils.checkRole(FxJsfUtils.getRequest().getUserTicket(), Role.SelectListEditor);
             selectListId = EJBLookup.getSelectListEngine().save(
                     FxSelectListEdit.createNew(selectListName, selectListLabel,
                             selectListDescription, selectListAllowDynamicCreation,
@@ -246,8 +356,8 @@ public class SelectListBean {
         setSelectListAllowDynamicCreation(selectList.isAllowDynamicItemCreation());
         setSelectListDefaultItemACL(selectList.getNewItemACL());
         setSelectListCreateItemACLId(selectList.getCreateItemACL().getId());
-        setSelectListDescription(selectList.getDescription());
-        setSelectListLabel(selectList.getLabel());
+        setSelectListDescription(selectList.getDescription() == null ? new FxString("") : selectList.getDescription());
+        setSelectListLabel(selectList.getLabel() == null ? new FxString("") : selectList.getLabel());
         setSelectListName(selectList.getName());
         setItemACL(selectList.getNewItemACL());
 
@@ -256,6 +366,7 @@ public class SelectListBean {
 
     public void deleteSelectList() {
         try {
+            FxPermissionUtils.checkRole(FxJsfUtils.getRequest().getUserTicket(), Role.SelectListEditor);
             EJBLookup.getSelectListEngine().remove(CacheAdmin.getEnvironment().getSelectList(selectListId));
         }
         catch (Throwable t) {
@@ -264,19 +375,60 @@ public class SelectListBean {
     }
 
     public void deleteListItem() {
-        selectList.removeItem(listItemId);
+        try {
+            //check if the user has permission
+            if (getMayDeleteItems())
+                selectList.removeItem(listItemId);
+            else
+                throw new FxNoAccessException("ex.selectlist.item.remove.noPerm", selectList.getLabel(), selectList.getCreateItemACL().getLabel());
+        }
+        catch (Throwable t) {
+            new FxFacesMsgErr(t).addToContext();
+        }
     }
 
     public void addListItem() {
-        new FxSelectListItemEdit(itemACL, selectList, itemLabel, itemData, itemColor);
-        itemLabel = new FxString("");
-        itemACL = selectList.getNewItemACL();
-        itemData = "";
-        itemColor = "";
+        try {
+            //check if the user has permission
+            if (getMayCreateItems().get(getSelectListId())) {
+                new FxSelectListItemEdit(itemACL, selectList, itemLabel, itemData, FxFormatUtils.processColorString("Color",itemColor));
+                itemLabel = new FxString("");
+                itemACL = selectList.getNewItemACL();
+                itemData = null;
+                itemColor = FxFormatUtils.DEFAULT_COLOR;
+            }
+            //else provoke exception
+            else
+                throw new FxNoAccessException("ex.selectlist.item.create.noPerm", selectList.getLabel(), selectList.getCreateItemACL().getLabel());
+        }
+        catch (Throwable t) {
+            new FxFacesMsgErr(t).addToContext();
+        }
+    }
+
+    public Map<String, String>getColor() {
+        return new HashMap<String, String>() {
+            public String get(Object key) {
+                String RGBCode = null;
+                try {
+                    RGBCode = FxFormatUtils.processColorString("color", (String)key);
+                }
+                catch (Exception e) {
+                    //exception is ok, original values are used
+                }
+                return (RGBCode == null ? (String) key : RGBCode);
+            }
+        };
     }
 
     public String saveSelectList() {
         try {
+            //set and check default colors if the user has permission,
+            // if not just store them to DB as set
+            for (FxSelectListItemEdit i : selectList.getEditableItems()) {
+                if (getMayEditItem().get(i))
+                    i.setColor(FxFormatUtils.processColorString("Color", i.getColor()));
+            }
             EJBLookup.getSelectListEngine().save(selectList);
             reset();
             return showSelectListOverview();
@@ -286,6 +438,4 @@ public class SelectListBean {
             return null;
         }
     }
-
-
 }

@@ -117,7 +117,6 @@ public class SelectBean implements Serializable {
     private List<SelectItem> typeScripts = null;
     private List<SelectItem> aclCategories = null;
     private List<SelectItem> selectListACLs = null;
-    private List<SelectItem> selectListItemACLs = null;
     private List<SelectItem> scriptingEngines = null;
 
     /**
@@ -864,19 +863,6 @@ public class SelectBean implements Serializable {
             selectListACLs = FxJsfUtils.asSelectListWithLabel(CacheAdmin.getEnvironment().getACLs(ACL.Category.SELECTLIST));
         }
         return selectListACLs;
-    }
-
-    /**
-     * Return all available select list item ACLs.
-     *
-     * @return all available select list item ACLs
-     */
-
-    public List<SelectItem> getSelectListItemACLs() {
-        if (selectListItemACLs == null) {
-            selectListItemACLs = FxJsfUtils.asSelectList(CacheAdmin.getEnvironment().getACLs(ACL.Category.SELECTLISTITEM), false);
-        }
-        return selectListItemACLs;
     }
 
     /**

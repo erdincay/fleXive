@@ -23,6 +23,8 @@
         <h:form id="frm" enctype="multipart/form-data">
             <adm:tab label="#{fxMessageBean['SelectList.tab.createSelectList']}" active="true" id="tab1"/>
 
+            <c:if test="#{selectListBean.resetSelectList}"/>
+
             <fx:formRow labelKey="SelectList.label.selectList.name" id="name">
                 <h:inputText id="name" value="#{selectListBean.selectListName}"/>
             </fx:formRow>
@@ -43,15 +45,19 @@
             <fx:formRow labelKey="SelectList.label.selectList.defaultItemACL" id="defaultItemACL">
                 <t:selectOneListbox size="1" id="defaultItemACL" value="#{selectListBean.selectListDefaultItemACL}"
                                     converter="SelectableConverter">
-                    <f:selectItems value="#{fxSelectBean.selectListItemACLs}" />
+                    <f:selectItems value="#{selectListBean.selectListItemACLs}" />
                 </t:selectOneListbox>
             </fx:formRow>
 
-
-            <adm:commandButton labelKey="SelectList.button.selectList.createNew" location="both"
-                icon="new"  action="createSelectList"  bean="#{selectListBean}" id="createSelectListButton">
+            <ui:fragment rendered="#{fxSystemBean.isInRole['SelectListEditor']}">
+                <adm:commandButton labelKey="SelectList.button.selectList.createNew" location="both"
+                    icon="new"  action="createSelectList"  bean="#{selectListBean}" id="createSelectListButton">
+                </adm:commandButton>
+            </ui:fragment>
+            
+            <adm:commandButton labelKey="SelectList.button.cancel" location="both"
+                icon="cancel"  action="showSelectListOverview"  bean="#{selectListBean}" id="cancelButton">
             </adm:commandButton>
-
 
         </h:form>
 

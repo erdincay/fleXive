@@ -89,14 +89,14 @@
                 </c:if>
             </adm:treeNode>
 
-            <c:if test="#{fxSystemBean.isInRole['SelectListEditor']}">
-                <adm:treeNode id="selectlists" icon="selectLists" title="#{fxMessageBean['Admin.selectlists.root']}">
-                    <adm:treeNode title="#{fxMessageBean['Admin.selectlists.selectList.overview']}"
-                                  link="/adm/main/selectList/overview.jsf"/>
+            <adm:treeNode id="selectlists" icon="selectLists" title="#{fxMessageBean['Admin.selectlists.root']}">
+                <adm:treeNode title="#{fxMessageBean['Admin.selectlists.selectList.overview']}"
+                              link="/adm/main/selectList/overview.jsf"/>
+                <c:if test="#{fxSystemBean.isInRole['SelectListEditor']}">
                     <adm:treeNode title="#{fxMessageBean['Admin.selectlists.selectList.create']}"
                                   link="/adm/main/selectList/create.jsf"/>
-                </adm:treeNode>
-            </c:if>
+                </c:if>
+            </adm:treeNode>
         </adm:tree>
 
         <div id="treeContent" class="adminTree">

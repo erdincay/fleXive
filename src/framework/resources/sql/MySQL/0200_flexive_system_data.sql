@@ -119,16 +119,16 @@ INSERT INTO FXS_ACL_T VALUES (4, 1, TRUE, 'Public Briefcase');
 INSERT INTO FXS_ACLASSIGNMENTS VALUES (1, 4, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
 
 -- Default SelectList ACL
-INSERT INTO FXS_ACL VALUES(5, 0, 'Default SelectList Create', 'Default SelectLists ACL for deciding if dynamic item creation is allowed', 5, '#0000AA', 2, UNIX_TIMESTAMP(), 1, UNIX_TIMESTAMP());
+INSERT INTO FXS_ACL VALUES(5, 0, 'Default SelectList Create', 'Default SelectLists ACL for deciding if item creation is allowed', 5, '#0000AA', 2, UNIX_TIMESTAMP(), 1, UNIX_TIMESTAMP());
 INSERT INTO FXS_ACL_T VALUES (5, 1, TRUE, 'Default SelectList Create');
 -- Assign group everyone to the public SelectList ACL (everyone may create items)
-INSERT INTO FXS_ACLASSIGNMENTS VALUES (1, 5, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
+INSERT INTO FXS_ACLASSIGNMENTS VALUES (1, 5, FALSE, TRUE, FALSE, FALSE, FALSE, TRUE, 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
 
 -- Default SelectList Item ACL
-INSERT INTO FXS_ACL VALUES(6, 0, 'Default SelectList Item', 'Default SelectLists item ACL for deciding if an items may be added (edit permission for adding and removing protected items)', 6, '#0000AA', 2, UNIX_TIMESTAMP(), 1, UNIX_TIMESTAMP());
+INSERT INTO FXS_ACL VALUES(6, 0, 'Default SelectList Item', 'Default SelectLists item ACL for deciding if an item may be read, selected, deselected', 6, '#0000AA', 2, UNIX_TIMESTAMP(), 1, UNIX_TIMESTAMP());
 INSERT INTO FXS_ACL_T VALUES (6, 1, TRUE, 'Default SelectList item');
--- Assign group everyone to the public SelectList item ACL (everyone may add items)
-INSERT INTO FXS_ACLASSIGNMENTS VALUES (1, 6, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
+-- Assign group everyone to the public SelectList item ACL (everyone may read, select and deselect items)
+INSERT INTO FXS_ACLASSIGNMENTS VALUES (1, 6, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
 
 
 -- Default Structure ACL

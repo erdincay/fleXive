@@ -56,6 +56,8 @@ import java.util.Locale;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public final class FxFormatUtils {
+    public final static String DEFAULT_COLOR="#000000";
+
     /**
      * Private constructor to avoid instantiation
      */
@@ -179,7 +181,7 @@ public final class FxFormatUtils {
      * <p/>
      * The color may be a RGB value (recognized by a starting '#') or a css class name.<br>
      * The function returns the default color if value is empty.<br>
-     * If the value defines a invalid RGB value a FxInvalidParameterException is thrown.<br>
+     * If the value defines an invalid RGB value a FxInvalidParameterException is thrown.<br>
      *
      * @param paramName the name of the parameter that is used when a FxInvalidParameterException is thrown
      * @param value     the color alue
@@ -189,7 +191,7 @@ public final class FxFormatUtils {
     public static String processColorString(String paramName, String value)
             throws FxInvalidParameterException {
         if (value == null || value.length() == 0) {
-            return "#000000";
+            return DEFAULT_COLOR;
         }
         if (value.charAt(0) == '#') {
             if (value.length() != 7) {
