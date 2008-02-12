@@ -83,6 +83,10 @@ public class FxValueInputTestBean {
                 new FxNumber(ENGLISH, 1).setTranslation(GERMAN, 2),
                 new FxLargeNumber(false, 22L),
                 new FxLargeNumber(ENGLISH, 3L).setTranslation(GERMAN, 4L),
+                new FxFloat(false, 3.14f),
+                new FxFloat(ENGLISH, 3.14f).setTranslation(GERMAN, 3.15f),
+                new FxDouble(false, Math.PI),
+                new FxDouble(ENGLISH, Math.PI).setTranslation(GERMAN, Math.PI - 0.1),
                 new FxDate(false, new Date()),
                 new FxDate(ENGLISH, new Date()).setTranslation(GERMAN, new Date(new Date().getTime() - 24*3600*1000)),
                 new FxHTML(false, "HTML value"),
@@ -90,7 +94,7 @@ public class FxValueInputTestBean {
                 new FxSelectOne(false, countries.get(0)),
                 new FxSelectOne(ENGLISH, countries.get(1)).setTranslation(GERMAN, countries.get(2)),
                 new FxSelectMany(false, new SelectMany(countriesList)),
-                new FxSelectMany(ENGLISH, new SelectMany(countriesList)).setTranslation(GERMAN, new SelectMany(countriesList))
+                new FxSelectMany(ENGLISH, new SelectMany(countriesList)).setTranslation(GERMAN, new SelectMany(countriesList)),
         });
     }
 }

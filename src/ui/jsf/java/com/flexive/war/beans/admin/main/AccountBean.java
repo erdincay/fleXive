@@ -60,7 +60,7 @@ import java.util.*;
  * Management of accounts.
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
- * @version $Rev: 1418 $
+ * @version $Rev$
  */
 public class AccountBean {
     private static final Log LOG = LogFactory.getLog(AccountBean.class);

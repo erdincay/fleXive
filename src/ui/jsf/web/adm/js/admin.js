@@ -77,7 +77,7 @@ function initHtmlEditor(autoPopulate) {
                 editor_selector: "fxValueTextAreaHtml",
                 theme: "advanced",
                 plugins: "paste,fullscreen,inlinepopups",
-                language: tinyMCE.guiLanguage ? tinyMCE.guiLanguage : "en",      // set by JSP code
+                language: tinyMCE.guiLanguage ? tinyMCE.guiLanguage : "en",      
                 entity_encoding: "raw",     // don't replace special characters (like umlaut) with HTML entities
 
                 // general layout options

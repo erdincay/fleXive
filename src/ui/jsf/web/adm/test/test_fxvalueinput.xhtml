@@ -14,16 +14,19 @@
 
     <h:messages/>
 
-    <h:form id="someFormId">
+    <h:form id="someFormId" enctype="multipart/form-data">
 
         <h5>c:forEach</h5>
         <table id="c_foreach_basic">
             <c:forEach var="value" items="#{fxValueInputTestBean.basicValues2}" varStatus="status">
                 <tr>
+                    <td valign="top">
+                        #{value.valueClass.simpleName}
+                    </td>
                     <td>
                         <fx:fxValueInput id="basic2#{status.index}" value="#{value}"/>
                     </td>
-                    <td>
+                    <td valign="top">
                         <span style="color:red">
                             <h:message for="basic2#{status.index}"/>
                         </span>

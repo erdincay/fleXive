@@ -77,7 +77,7 @@ class EditModeHelper extends RenderHelper {
     }
 
     /**
-     * Renders a multi langugae input field.
+     * Renders a multi langugage input field.
      *
      * @throws java.io.IOException if the component could not be rendered
      */
@@ -401,6 +401,14 @@ class EditModeHelper extends RenderHelper {
         return inputId.substring(0, inputId.indexOf(':'));
     }
 
+    /**
+     * The base class of all primitive input renderer components.
+     * These inputs are not composed of more complex input elements (like date pickers),
+     * but render a single HTML form element with the given
+     * {@link com.flexive.faces.components.input.EditModeHelper.DeferredInputWriter#inputClientId}
+     * that will be decoded by the
+     * {@link com.flexive.faces.components.input.FxValueInputRenderer}.
+     */
     public static abstract class DeferredInputWriter extends UIOutput {
         protected String inputClientId;
 
@@ -444,6 +452,9 @@ class EditModeHelper extends RenderHelper {
         }
     }
 
+    /**
+     * Renders the container for the whole fxValueInput component.
+     */
     public static class ContainerWriter extends DeferredInputWriter {
         @Override
         public void encodeBegin(FacesContext facesContext) throws IOException {
@@ -460,6 +471,10 @@ class EditModeHelper extends RenderHelper {
         }
     }
 
+    /**
+     * Renders the container of a single language input for multilanguage input components.
+     * Remember to add all elements of the language row to this component, not the parent.
+     */
     public static class LanguageContainerWriter extends DeferredInputWriter {
         private long languageId;
         private String containerId;
@@ -514,6 +529,10 @@ class EditModeHelper extends RenderHelper {
         }
     }
 
+    /**
+     * Renders the language select for multilanguage components and adds a Javascript-based
+     * row switcher.
+     */
     public static class LanguageSelectWriter extends DeferredInputWriter {
         private List<String> rowIds;
 
@@ -579,6 +598,9 @@ class EditModeHelper extends RenderHelper {
         }
     }
 
+    /**
+     * Renders a radio button to choose the default language of a multilanguage component.
+     */
     public static class DefaultLanguageRadioWriter extends DeferredInputWriter {
         private long languageId;
         private String radioName;
@@ -631,6 +653,9 @@ class EditModeHelper extends RenderHelper {
         }
     }
 
+    /**
+     * Renders a text area for plain-text or HTML input values.
+     */
     public static class TextAreaWriter extends DeferredInputWriter {
         private long languageId;
 

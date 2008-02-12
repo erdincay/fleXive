@@ -76,7 +76,9 @@ public class WriteWebletIncludes extends UIOutput {
         if (requestWeblets == null) {
             throw new FxNotFoundException("ex.jsf.webletIncludes.noTagFound").asRuntimeException();
         }
-        requestWeblets.add(weblet);
+        if (!requestWeblets.contains(weblet)) {
+            requestWeblets.add(weblet);
+        }
     }
 
     @Override
