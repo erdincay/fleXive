@@ -24,7 +24,7 @@
             <c:if test="#{empty propertyEditorBean.parseRequestParameters}"> </c:if>
             <h:panelGroup rendered="#{structureTreeControllerBean.doAction}">
                 <script type="text/javascript">
-                    var treeframe=parent.getNavFrameWnd();
+                    var treeframe=parent.getStructureNavFrame();
                     treeframe.doTreeAction('#{structureTreeControllerBean.action}',#{structureTreeControllerBean.id}, '#{structureTreeControllerBean.value}');
                 </script>
             </h:panelGroup>
@@ -54,7 +54,7 @@
             <ui:fragment rendered="#{propertyEditorBean.assignment.derivedAssignment}">
                 <fx:formRow labelKey="PropertyEditor.label.xPathBase" id="xPathBase">
                     <h:commandLink id="gotoPropertyAssignmentButton_#{propertyEditorBean.assignment.baseAssignmentId}"
-                                   onclick="var treeframe=parent.getNavFrameWnd(); treeframe.selectNode(#{propertyEditorBean.assignment.baseAssignmentId}, false);">
+                                   onclick="var treeframe=parent.getStructureNavFrame(); treeframe.selectNode(#{propertyEditorBean.assignment.baseAssignmentId}, false);">
                         <h:outputText id="xPathBase" value="#{propertyEditorBean.baseAssignmentXPath}"/>
                     </h:commandLink>
                 </fx:formRow>
@@ -157,7 +157,7 @@
            </ui:fragment>
              <ui:fragment rendered="#{propertyEditorBean.structureManagement and propertyEditorBean.editMode}">
                 <adm:commandButton labelKey="PropertyEditor.button.delete.assignment" location="both" lockscreen="false"
-                                icon="delete" onclick="parent.getNavFrameWnd()._deleteAssignment(#{propertyEditorBean.assignment.id});return false;"
+                                icon="delete" onclick="parent.getStructureNavFrame()._deleteAssignment(#{propertyEditorBean.assignment.id});return false;"
                                 id="deleteAssignmentButton">
                 </adm:commandButton>
            </ui:fragment>
@@ -165,7 +165,7 @@
             <ui:fragment rendered="#{propertyEditorBean.editMode}">
                 <adm:commandButton labelKey="PropertyEditor.button.cancel" location="both"
                         icon="cancel" id="cancelButton" lockscreen="false"
-                        onclick="parent.getNavFrameWnd().openNode(#{propertyEditorBean.assignment.id}, false);return false;"/>
+                        onclick="parent.getStructureNavFrame().openNode(#{propertyEditorBean.assignment.id}, false);return false;"/>
             </ui:fragment>
 
             <adm:toolbarPluginButtons/>

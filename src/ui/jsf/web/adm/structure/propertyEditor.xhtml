@@ -24,7 +24,7 @@
         <c:if test="#{empty propertyEditorBean.parseRequestParameters}"> </c:if>
         <c:if test="#{structureTreeControllerBean.doAction}">
             <script type="text/javascript">
-                var treeframe=parent.getNavFrameWnd();
+                var treeframe=parent.getStructureNavFrame();
                 treeframe.doTreeAction('#{structureTreeControllerBean.action}',#{structureTreeControllerBean.id}, '#{structureTreeControllerBean.value}');
             </script>
         </c:if>
@@ -139,7 +139,7 @@
                 <tbody>
                     <ui:repeat value="#{propertyEditorBean.referencingPropertyAssignments}" var="pa">
                         <h:commandLink id="gotoPropertyAssignmentButton_#{pa.id}"
-                             onclick="var treeframe=parent.getNavFrameWnd(); treeframe.selectNode(#{pa.id}, false);">
+                             onclick="var treeframe=parent.getStructureNavFrame(); treeframe.selectNode(#{pa.id}, false);">
                                 <h:outputText value="#{pa.XPath}"/>
                         </h:commandLink>
                         <br/>
@@ -167,7 +167,7 @@
             <ui:fragment rendered="#{not propertyEditorBean.property.new and propertyEditorBean.editMode}">
                  <adm:commandButton labelKey="PropertyEditor.button.cancel" location="both"
                         icon="cancel" id="cancelButton" lockscreen="false"
-                        onclick="parent.getNavFrameWnd().openNode(#{propertyEditorBean.assignment.id}, false);return false;"/>
+                        onclick="parent.getStructureNavFrame().openNode(#{propertyEditorBean.assignment.id}, false);return false;"/>
             </ui:fragment>
 
         <adm:toolbarPluginButtons/>

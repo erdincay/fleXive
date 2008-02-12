@@ -24,7 +24,7 @@
         <c:if test="#{empty groupEditorBean.parseRequestParameters}"> </c:if>
         <c:if test="#{structureTreeControllerBean.doAction}">
             <script type="text/javascript">
-                var treeframe=parent.getNavFrameWnd();
+                var treeframe=parent.getStructureNavFrame();
                 treeframe.doTreeAction('#{structureTreeControllerBean.action}',#{structureTreeControllerBean.id}, '#{structureTreeControllerBean.value}');
             </script>
         </c:if>
@@ -215,7 +215,7 @@
                 <ui:fragment rendered="#{not groupEditorBean.group.new and groupEditorBean.editMode}">
                      <adm:commandButton labelKey="GroupEditor.button.cancel" location="both" lockscreen="false"
                             icon="cancel" id="cancelButton"
-                            onclick="parent.getNavFrameWnd().openNode(#{groupEditorBean.assignment.id}, false);return false;"/>
+                            onclick="parent.getStructureNavFrame().openNode(#{groupEditorBean.assignment.id}, false);return false;"/>
                 </ui:fragment>
 
             <adm:toolbarPluginButtons/>

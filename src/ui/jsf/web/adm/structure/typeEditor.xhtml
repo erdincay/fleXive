@@ -23,14 +23,14 @@
         <h:form id="frm" enctype="multipart/form-data">
             <c:if test="#{structureTreeControllerBean.doAction}">
                 <script type="text/javascript">
-                    var treeframe=parent.getNavFrameWnd();
+                    var treeframe=parent.getStructureNavFrame();
                     treeframe.doTreeAction('#{structureTreeControllerBean.action}',#{structureTreeControllerBean.id}, '#{structureTreeControllerBean.value}');
                 </script>
             </c:if>
             <!-- quickfix for reloading the content frame context menu after creating a new type -->
             <c:if test="#{typeEditorBean.reloadContentTree}">
                 <script type="text/javascript">
-                    parent.getNavFrameWnd().reloadContentTreeNavFrame();
+                    parent.getStructureNavFrame().reloadContentTreeNavFrame();
                 </script>
             </c:if>
             <c:if test="#{empty typeEditorBean.parseRequestParameters}"> </c:if>
@@ -248,7 +248,7 @@
                     <tbody>
                         <ui:repeat value="#{typeEditorBean.referencingRelations}" var="r">
                             <h:commandLink id="gotoPropertyRelationButton_#{r.id}"
-                                 onclick="var treeframe=parent.getNavFrameWnd(); treeframe.selectNode(#{r.id}, true);">
+                                 onclick="var treeframe=parent.getStructureNavFrame(); treeframe.selectNode(#{r.id}, true);">
                                     <h:outputText value="#{r.name}"/>
                             </h:commandLink>
                             <br/>
@@ -348,7 +348,7 @@
             </ui:fragment>
             <ui:fragment rendered="#{typeEditorBean.structureManagement and not typeEditorBean.type.new and typeEditorBean.editMode}">
                 <adm:commandButton labelKey="TypeEditor.button.delete" location="both" lockscreen="false"
-                                icon="delete" onclick="parent.getNavFrameWnd()._deleteType(#{typeEditorBean.type.id});return false;"
+                                icon="delete" onclick="parent.getStructureNavFrame()._deleteType(#{typeEditorBean.type.id});return false;"
                                 id="deleteTypeButton">
                 </adm:commandButton>
             </ui:fragment>
@@ -356,7 +356,7 @@
             <ui:fragment rendered="#{not typeEditorBean.type.new and typeEditorBean.editMode}">
                 <adm:commandButton labelKey="TypeEditor.button.cancel" location="both" lockscreen="false"
                         icon="cancel" id="cancelButton"
-                        onclick="parent.getNavFrameWnd().openNode(#{typeEditorBean.type.id}, true);return false;"/>
+                        onclick="parent.getStructureNavFrame().openNode(#{typeEditorBean.type.id}, true);return false;"/>
             </ui:fragment>
 
             <adm:toolbarPluginButtons/>

@@ -24,7 +24,7 @@
             <c:if test="#{empty groupEditorBean.parseRequestParameters}"> </c:if>
             <c:if test="#{structureTreeControllerBean.doAction}">
                 <script type="text/javascript">
-                    var treeframe=parent.getNavFrameWnd();
+                    var treeframe=parent.getStructureNavFrame();
                     treeframe.doTreeAction('#{structureTreeControllerBean.action}',#{structureTreeControllerBean.id}, '#{structureTreeControllerBean.value}');
                 </script>
             </c:if>
@@ -51,7 +51,7 @@
                 <fx:formRow labelKey="GroupEditor.label.xPathBase" id="xPathBase">
                     <h:commandLink id="gotoGroupAssignmentButton_#{groupEditorBean.assignment.baseAssignmentId}"
                                    action="#{groupEditorBean.showGroupAssignmentEditor}"
-                                   onclick="var treeframe=parent.getNavFrameWnd(); treeframe.selectNode(#{groupEditorBean.assignment.baseAssignmentId});">
+                                   onclick="var treeframe=parent.getStructureNavFrame(); treeframe.selectNode(#{groupEditorBean.assignment.baseAssignmentId});">
                         <h:outputText id="xPathBase" value="#{groupEditorBean.baseAssignmentXPath}"/>
                     </h:commandLink>
                 </fx:formRow>
@@ -120,13 +120,13 @@
                     </adm:commandButton>
 
                     <adm:commandButton labelKey="GroupEditor.button.delete.assignment" location="both" lockscreen="false"
-                                        icon="delete" onclick="parent.getNavFrameWnd()._deleteAssignment(#{groupEditorBean.assignment.id});return false;"
+                                        icon="delete" onclick="parent.getStructureNavFrame()._deleteAssignment(#{groupEditorBean.assignment.id});return false;"
                                         id="deleteAssignmentButton">
                     </adm:commandButton>
                 </ui:fragment>
                <adm:commandButton labelKey="GroupEditor.button.cancel" location="both" lockscreen="false"
                         icon="cancel" id="cancelButton"
-                        onclick="parent.getNavFrameWnd().openNode(#{groupEditorBean.assignment.id}, false);return false;"/>
+                        onclick="parent.getStructureNavFrame().openNode(#{groupEditorBean.assignment.id}, false);return false;"/>
            </ui:fragment>
 
             <adm:toolbarPluginButtons/>

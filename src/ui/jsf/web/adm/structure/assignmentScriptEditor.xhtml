@@ -20,7 +20,7 @@
     <h:form id="frm" enctype="multipart/form-data">
     <h:panelGroup rendered="#{structureTreeControllerBean.doAction}">
         <script type="text/javascript">
-            var treeframe=parent.getNavFrameWnd();
+            var treeframe=parent.getStructureNavFrame();
             treeframe.doTreeAction('#{structureTreeControllerBean.action}',#{structureTreeControllerBean.id}, '#{structureTreeControllerBean.value}');
         </script>
     </h:panelGroup>
@@ -104,7 +104,7 @@
                                     </ui:fragment>
                                     <ui:fragment rendered="#{listEntry.derived}">
                                             <a4j:commandLink id="gotoAssignmentButton_#{listEntry.id}_#{propertyEditorBean.assignment.id}"
-                                                 onclick="var treeframe=parent.getNavFrameWnd(); treeframe.selectNode(#{listEntry.derivedFrom}, false);">
+                                                 onclick="var treeframe=parent.getStructureNavFrame(); treeframe.selectNode(#{listEntry.derivedFrom}, false);">
                                                 <h:outputText value="#{fxMessageBean['ScriptEditor.label.derivedFrom']} #{propertyEditorBean.assignmentNameForId[listEntry.derivedFrom]}"/>
                                             </a4j:commandLink>
                                     </ui:fragment>
@@ -158,7 +158,7 @@
         <ui:fragment rendered="#{not propertyEditorBean.property.new and propertyEditorBean.editMode}">
                 <adm:commandButton labelKey="PropertyEditor.button.cancel" location="both" lockscreen="false"
                         icon="cancel" id="cancelButton"
-                        onclick="parent.getNavFrameWnd().openNode(#{propertyEditorBean.assignment.id}, false);return false;"/>
+                        onclick="parent.getStructureNavFrame().openNode(#{propertyEditorBean.assignment.id}, false);return false;"/>
         </ui:fragment>
 
      </h:form>
