@@ -479,7 +479,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
 
     private void checkValidListParameters(FxSelectListEdit list) throws FxInvalidParameterException {
         //TODO: codeme!
-        if (list.getName() == null || list.getName().isEmpty())
+        if (list.getName() == null || list.getName().equals(""))
             throw new FxInvalidParameterException("Name", "ex.selectlist.name.empty");
     }
 
