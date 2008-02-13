@@ -79,12 +79,12 @@
                                         <f:setPropertyActionListener target="#{scriptBean.id}" value="#{item.id}"/>
                                     </adm:commandIcon>
                                     <!-- show run icon only if the script is an independent one (i.e. a not-triggered script) -->
-                                    <h:panelGroup rendered="#{item.event.name=='Manual' and item.active and fxSystemBean.isInRole['ScriptExecution']} ">
+                                    <ui:fragment rendered="#{item.event.name=='Manual' and item.active and fxSystemBean.isInRole['ScriptExecution']}">
                                         <adm:commandIcon labelKey="Script.button.run" location="content" icon="run"
                                                          action="runScript" bean="#{scriptBean}" id="runButton_#{item.id}">
                                             <f:setPropertyActionListener value="#{item.id}" target="#{scriptBean.id}"/>
                                         </adm:commandIcon>
-                                    </h:panelGroup>
+                                    </ui:fragment>
                                 </td>
                             </tr>
                         </ui:repeat>
