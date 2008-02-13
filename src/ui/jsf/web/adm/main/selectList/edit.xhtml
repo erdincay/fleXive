@@ -50,7 +50,6 @@
             <table dojoType="FilteringTable" widgetId="selectListTable" enableMultipleSelect="true"
                    alternateRows="true" maxSortable="1"
                     class="dojoTable">
-
                 <thead>
                     <tr>
                         <th class="tblHeader" dataType="String" field="label" align="left">
@@ -71,50 +70,50 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <ui:repeat var="item" value="#{selectListBean.items}">
+                    <c:forEach var="item" items="#{selectListBean.items}">
                         <tr value="#{selectListBean.idMap[item.id]}">
-                            <td class="tblColumn"><fx:fxValueInput value="#{item.label}" readOnly="#{not (fxSystemBean.isInRole['SelectListEditor'] or selectListBean.mayEditItem[item])}"/></td>
-                            <td class="tblColumn"><h:inputText value="#{item.data}" disabled="#{not (fxSystemBean.isInRole['SelectListEditor'] or selectListBean.mayEditItem[item])}"/></td>
-                            <td class="tblColumn">
-                                <t:selectOneListbox size="1" id="itemACL" value="#{item.acl}" converter="SelectableConverter"  disabled="#{not (fxSystemBean.isInRole['SelectListEditor'] or selectListBean.mayEditItem[item])}">
+                            <td align="left"><fx:fxValueInput id="itemLabel_#{selectListBean.idMap[item.id]}" value="#{item.label}" readOnly="#{not (fxSystemBean.isInRole['SelectListEditor'] or selectListBean.mayEditItem[item])}"/></td>
+                            <td align="left"><h:inputText id="itemData_#{selectListBean.idMap[item.id]}" value="#{item.data}" disabled="#{not (fxSystemBean.isInRole['SelectListEditor'] or selectListBean.mayEditItem[item])}"/></td>
+                            <td align="left">
+                                <t:selectOneListbox size="1" id="itemACL_#{selectListBean.idMap[item.id]}" value="#{item.acl}" converter="SelectableConverter"  disabled="#{not (fxSystemBean.isInRole['SelectListEditor'] or selectListBean.mayEditItem[item])}">
                                     <f:selectItems value="#{selectListBean.selectListItemACLs}"/>
                                 </t:selectOneListbox>
                             </td>
-                            <td class="tblColumn"><h:inputText style="color:#{selectListBean.color[item.color]};" value="#{selectListBean.color[item.color]}"
+                            <td align="left"><h:inputText id="itemColor_#{selectListBean.idMap[item.id]}" style="color:#{selectListBean.color[item.color]};" value="#{selectListBean.color[item.color]}"
                                     disabled="#{not (fxSystemBean.isInRole['SelectListEditor'] or selectListBean.mayEditItem[item])}"/></td>
-                            <td class="tblColumn">
-                                <ui:fragment rendered="#{selectListBean.mayDeleteItems}">
+                            <td align="left">
+                                <c:if test="#{selectListBean.mayDeleteItems}">
                                     <adm:commandButton labelKey="SelectList.button.delete" location="content"
                                                     icon="delete"  bean="#{selectListBean}" action="deleteListItem" id="deleteButton_#{selectListBean.idMap[item.id]}">
                                         <f:setPropertyActionListener target="#{selectListBean.listItemId}" value="#{item.id}"/>
                                     </adm:commandButton>
-                                </ui:fragment>
+                                </c:if>
                             </td>
                         </tr>
-                    </ui:repeat>
-                    <ui:fragment rendered="#{selectListBean.mayCreateItems[selectListBean.selectListId]}">
+                    </c:forEach>
+                    <c:if test="#{selectListBean.mayCreateItems[selectListBean.selectListId]}">
                         <tr>
-                            <td class="tblColumn"><fx:fxValueInput value="#{selectListBean.itemLabel}"/></td>
-                            <td class="tblColumn"><h:inputText value="#{selectListBean.itemData}"/></td>
-                            <td class="tblColumn">
+                            <td align="left"><fx:fxValueInput id="newItemLabel" value="#{selectListBean.itemLabel}"/></td>
+                            <td align="left"><h:inputText id="newItemData" value="#{selectListBean.itemData}"/></td>
+                            <td align="left">
                                 <t:selectOneListbox size="1" id="newItemACL" value="#{selectListBean.itemACL}"
                                                     converter="SelectableConverter">
                                     <f:selectItems value="#{selectListBean.selectListItemACLs}" />
                                 </t:selectOneListbox>
                             </td>
-                            <td class="tblColumn"><h:inputText value="#{selectListBean.itemColor}"/></td>
-                            <td class="tblColumn">
+                            <td align="left"><h:inputText id="newItemColor" value="#{selectListBean.itemColor}"/></td>
+                            <td align="left">
                                 <adm:commandButton labelKey="SelectList.button.add" location="content"
                                                 icon="new"  bean="#{selectListBean}" action="addListItem" id="addButton">
                                 </adm:commandButton>
                             </td>
                         </tr>
-                    </ui:fragment>
+                    </c:if>
                 </tbody>
             </table>
 
             <adm:commandButton labelKey="SelectList.button.selectList.save" location="both"
-                icon="save"  action="saveSelectList"  bean="#{selectListBean}" id="saveSelectListButton">
+                icon="save"  action="saveSelectList"  bean="#{selectListBean}" id="saveButton">
             </adm:commandButton>
             
             <adm:commandButton labelKey="SelectList.button.cancel" location="both"

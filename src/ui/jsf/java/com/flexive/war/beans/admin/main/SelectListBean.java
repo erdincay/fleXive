@@ -88,7 +88,7 @@ public class SelectListBean {
                 if (id >= 0)
                     return String.valueOf(id);
                 else
-                    return "_" + String.valueOf(id * -1);
+                    return "N" + String.valueOf(id*-1);
             }
         });
     }
@@ -377,8 +377,10 @@ public class SelectListBean {
     public void deleteListItem() {
         try {
             //check if the user has permission
-            if (getMayDeleteItems())
+            if (getMayDeleteItems()) {
                 selectList.removeItem(listItemId);
+                FxJsfUtils.resetFaceletsComponent("frm");
+            }
             else
                 throw new FxNoAccessException("ex.selectlist.item.remove.noPerm", selectList.getLabel(), selectList.getCreateItemACL().getLabel());
         }
@@ -396,6 +398,7 @@ public class SelectListBean {
                 itemACL = selectList.getNewItemACL();
                 itemData = null;
                 itemColor = FxFormatUtils.DEFAULT_COLOR;
+                FxJsfUtils.resetFaceletsComponent("frm");
             }
             //else provoke exception
             else
