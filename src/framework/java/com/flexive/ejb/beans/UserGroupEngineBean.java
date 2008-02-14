@@ -39,10 +39,7 @@ import com.flexive.core.security.UserTicketStore;
 import com.flexive.shared.*;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
-import com.flexive.shared.interfaces.SequencerEngine;
-import com.flexive.shared.interfaces.SequencerEngineLocal;
-import com.flexive.shared.interfaces.UserGroupEngine;
-import com.flexive.shared.interfaces.UserGroupEngineLocal;
+import com.flexive.shared.interfaces.*;
 import com.flexive.shared.security.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -101,7 +98,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             return new UserGroup(groupId, rs.getLong(1), autoMandator, rs.getBoolean(5), rs.getString(2), rs.getString(3));
 
         } catch (SQLException exc) {
-            FxLoadException de = new FxLoadException(exc, "UserGroup.err.sqlError", exc.getMessage(), sql);
+            FxLoadException de = new FxLoadException(exc, "ex.usergroup.sqlError", exc.getMessage(), sql);
             LOG.error(de);
             throw de;
         } finally {
@@ -137,7 +134,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
                 autoMandator = -1;
             return new UserGroup(rs.getLong(1), rs.getLong(2), autoMandator, rs.getBoolean(6), rs.getString(3), rs.getString(4));
         } catch (SQLException exc) {
-            FxLoadException de = new FxLoadException(exc, "UserGroup.err.sqlError", exc.getMessage(), sql);
+            FxLoadException de = new FxLoadException(exc, "ex.usergroup.sqlError", exc.getMessage(), sql);
             LOG.error(de);
             throw de;
         } finally {
@@ -188,7 +185,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
 
             // Sanity check
             if (!res.contains(UserGroup.GROUP_EVERYONE) || !res.contains(UserGroup.GROUP_OWNER)) {
-                FxLoadException le = new FxLoadException("UserGroup.err.oneOfSystemGroupsIsMissing");
+                FxLoadException le = new FxLoadException("ex.usergroup.oneOfSystemGroupsIsMissing");
                 LOG.fatal(le);
                 throw le;
             }
@@ -196,7 +193,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             return res;
 
         } catch (SQLException exc) {
-            FxLoadException de = new FxLoadException(exc, "UserGroup.err.sqlError", exc.getMessage(), sql);
+            FxLoadException de = new FxLoadException(exc, "ex.usergroup.sqlError", exc.getMessage(), sql);
             LOG.error(de);
             throw de;
         } finally {
@@ -214,9 +211,10 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
         try {
             if (!ticket.isGlobalSupervisor()) {
                 if (ticket.getMandatorId() != mandatorId) {
-                    throw new FxNoAccessException("UserGroup.create.foreignMandator");
+                    throw new FxNoAccessException("ex.usergroup.create.foreignMandator");
                 }
-                FxPermissionUtils.checkRole(ticket, Role.AccountManagement);
+                if (!ticket.isInRole(Role.MandatorSupervisor))
+                    FxPermissionUtils.checkRole(ticket, Role.AccountManagement);
             }
         } catch (FxNoAccessException nae) {
             if (LOG.isInfoEnabled()) LOG.info(nae);
@@ -263,11 +261,11 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(exc);
             ctx.setRollbackOnly();
             if (uniqueConstraintViolation) {
-                FxEntryExistsException eee = new FxEntryExistsException("UserGroup.create.groupExists", name);
+                FxEntryExistsException eee = new FxEntryExistsException("ex.usergroup.create.groupExists", name);
                 if (LOG.isInfoEnabled()) LOG.info(eee);
                 throw eee;
             } else {
-                FxCreateException ce = new FxCreateException(exc, "UserGroup.err.sqlError", exc.getMessage(), sql);
+                FxCreateException ce = new FxCreateException(exc, "ex.usergroup.sqlError", exc.getMessage(), sql);
                 LOG.error(ce);
                 throw ce;
             }
@@ -295,7 +293,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
         }
 
         // Permission checks
-        checkPermission(aGroup, "noUpdatePerms");
+        checkPermission(aGroup, "ex.usergroup.noUpdatePerms");
 
         Connection con = null;
         Statement stmt = null;
@@ -333,11 +331,11 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(exc);
             ctx.setRollbackOnly();
             if (uniqueConstraintViolation) {
-                FxEntryExistsException eee = new FxEntryExistsException("UserGroup.err.groupExists", name);
+                FxEntryExistsException eee = new FxEntryExistsException("ex.usergroup.groupExists", name);
                 if (LOG.isInfoEnabled()) LOG.info(eee);
                 throw eee;
             } else {
-                FxCreateException ce = new FxCreateException(exc, "UserGroup.err.sqlError", exc.getMessage(), sCurSql);
+                FxCreateException ce = new FxCreateException(exc, "ex.usergroup.sqlError", exc.getMessage(), sCurSql);
                 LOG.error(ce);
                 throw ce;
             }
@@ -365,14 +363,14 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
 
         // Check special groups
         if (theGroup.isSystem() && !FxContext.get().getRunAsSystem()) {
-            FxNoAccessException nae = new FxNoAccessException("UserGroup.err.mayNotDeleteSystemGroups",
+            FxNoAccessException nae = new FxNoAccessException("ex.usergroup.mayNotDeleteSystemGroups",
                     theGroup.getName());
             LOG.error(nae);
             throw nae;
         }
 
         // Caller may delete the group?
-        checkPermission(theGroup, "UserGroup.err.noDeletePerms");
+        checkPermission(theGroup, "ex.usergroup.noDeletePerms");
 
         Connection con = null;
         Statement stmt = null;
@@ -413,7 +411,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
 
         } catch (SQLException exc) {
             ctx.setRollbackOnly();
-            FxRemoveException ce = new FxRemoveException(exc, "UserGroup.err.deleteSqlException", theGroup.getName());
+            FxRemoveException ce = new FxRemoveException(exc, "ex.usergroup.deleteSqlException", theGroup.getName());
             LOG.error(ce);
             throw ce;
         } finally {
@@ -434,15 +432,15 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
      */
     private static void IsValid(final String sName, String sColor) throws FxInvalidParameterException {
         if (sName == null || sName.length() == 0) {
-            throw new FxInvalidParameterException("NAME", "UserGroup.err.nameEmpty");
+            throw new FxInvalidParameterException("NAME", "ex.usergroup.nameEmpty");
         }
         if (sName.indexOf("'") > -1 || sName.indexOf("\"") > -1) {
-            throw new FxInvalidParameterException("NAME", "UserGroup.err.nameContainsInvalidChars");
+            throw new FxInvalidParameterException("NAME", "ex.usergroup.nameContainsInvalidChars");
         }
 
         // Check the color
         if (sColor != null && !FxFormatUtils.isRGBCode(sColor)) {
-            throw new FxInvalidParameterException("COLOR", "UserGroup.err.invalidColor");
+            throw new FxInvalidParameterException("COLOR", "ex.usergroup.invalidColor");
         }
     }
 
@@ -482,12 +480,12 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
         // Permission check
         if (!ticket.isGlobalSupervisor())
             try {
-                if (!ticket.isInRole(Role.AccountManagement)) {
-                    throw new FxNoAccessException("UserGroup.err.noPermSetRoles", aGroup.getName());
-                }
                 if (aGroup.getMandatorId() != ticket.getMandatorId()) {
                     // foreign mandator
-                    throw new FxNoAccessException("UserGroup.err.noPermSetRoles", aGroup.getName());
+                    throw new FxNoAccessException("ex.usergroup.noPermSetRoles", aGroup.getName());
+                }
+                if (!(ticket.isInRole(Role.AccountManagement) || ticket.isInRole(Role.MandatorSupervisor))) {
+                    throw new FxNoAccessException("ex.usergroup.noPermSetRoles", aGroup.getName());
                 }
             } catch (FxNoAccessException nae) {
                 if (LOG.isInfoEnabled()) LOG.info(nae);
@@ -496,6 +494,31 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
 
         // Bye bye duplicates
         roles = FxArrayUtils.removeDuplicates(roles);
+        //only allow to assign roles which the calling user is a member of (unless it is a global supervisor)
+        if (!ticket.isGlobalSupervisor()) {
+            Role[] orgRoles = getRoles(groupId).getRoles();
+            long[] orgRoleIds = new long[orgRoles.length];
+            for (int i = 0; i < orgRoles.length; i++)
+                orgRoleIds[i] = orgRoles[i].getId();
+            //check removed roles
+            for (long check : orgRoleIds) {
+                if (!FxArrayUtils.containsElement(roles, check)) {
+                    if (!ticket.isInRole(Role.getById(check))) {
+                        ctx.setRollbackOnly();
+                        throw new FxNoAccessException("ex.account.roles.assign.noMember.remove", Role.getById(check).getName());
+                    }
+                }
+            }
+            //check added roles
+            for (long check : roles) {
+                if (!FxArrayUtils.containsElement(orgRoleIds, check)) {
+                    if (!ticket.isInRole(Role.getById(check))) {
+                        ctx.setRollbackOnly();
+                        throw new FxNoAccessException("ex.account.roles.assign.noMember.add", Role.getById(check).getName());
+                    }
+                }
+            }
+        }
 
         // Write roles to database
         Connection con = null;
@@ -529,7 +552,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
 
         } catch (SQLException exc) {
             ctx.setRollbackOnly();
-            FxUpdateException dbe = new FxUpdateException(exc, "UserGroup.err.updateRolesSqlException", aGroup.getName());
+            FxUpdateException dbe = new FxUpdateException(exc, "ex.usergroup.updateRolesSqlException", aGroup.getName());
             LOG.error(dbe);
             throw dbe;
         } finally {
@@ -567,7 +590,8 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
                 if (ticket.getMandatorId() != group.getMandatorId()) {
                     throw new FxNoAccessException(mode);
                 }
-                FxPermissionUtils.checkRole(ticket, Role.AccountManagement);
+                if (!ticket.isInRole(Role.MandatorSupervisor))
+                    FxPermissionUtils.checkRole(ticket, Role.AccountManagement);
             }
         } catch (FxNoAccessException nae) {
             if (LOG.isInfoEnabled()) LOG.info(nae);
@@ -590,7 +614,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
 
         // Permission check
         if (!mayAccessGroup(aGroup)) {
-            FxNoAccessException nae = new FxNoAccessException("UserGroup.err.noPermissionsToReadRoles", aGroup.getName());
+            FxNoAccessException nae = new FxNoAccessException("ex.usergroup.noPermissionsToReadRoles", aGroup.getName());
             if (LOG.isInfoEnabled()) LOG.info(nae);
             throw nae;
         }
@@ -610,7 +634,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             }
             return result;
         } catch (SQLException exc) {
-            FxLoadException le = new FxLoadException(exc, "UserGroup.err.sqlError", exc.getMessage(), sql);
+            FxLoadException le = new FxLoadException(exc, "ex.usergroup.sqlError", exc.getMessage(), sql);
             LOG.error(le);
             throw le;
         } finally {
@@ -665,7 +689,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
                 stmt.executeUpdate(sql);
             }
         } catch (SQLException exc) {
-            FxLoadException le = new FxLoadException(exc, "UserGroup.err.sqlError", exc.getMessage(), sql);
+            FxLoadException le = new FxLoadException(exc, "ex.usergroup.sqlError", exc.getMessage(), sql);
             LOG.error(le);
             throw le;
         } finally {

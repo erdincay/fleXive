@@ -425,7 +425,12 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             contactData.setAclId(ACL.ACL_CONTACTDATA);
             contactData.setValue("/SURNAME", new FxString(false, userName));
             contactData.setValue("/EMAIL", new FxString(false, email));
-            contactDataPK = co.save(contactData);
+            try {
+                FxContext.get().runAsSystem();
+                contactDataPK = co.save(contactData);
+            } finally {
+                FxContext.get().stopRunAsSystem();
+            }
 
             // Obtain a database connection
             con = Database.getDbConnection();
@@ -729,9 +734,14 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             UserGroup g = group.load(grp);
             if (g.isSystem())
                 continue;
+            //make sure the calling user is assigned all roles of the group as well
+            RoleList rl = group.getRoles(grp);
+            for(Role check: rl.getRoles())
+                if(!ticket.isInRole(check))
+                    throw new FxNoAccessException("ex.account.roles.assign.noMember.group", check.name(), g.getName());
             if (!ticket.isGlobalSupervisor()) {
                 if (g.getMandatorId() != account.getMandatorId())
-                    throw new FxNoAccessException(LOG, "ex.account.group.assign.wrongMandator", g.getName(), accountId);
+                    throw new FxNoAccessException("ex.account.group.assign.wrongMandator", g.getName(), accountId);
             }
         }
 
@@ -820,15 +830,19 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                 //check removed roles
                 for (long check : orgRoleIds) {
                     if (!FxArrayUtils.containsElement(roles, check)) {
-                        if (ticket.isInRole(Role.getById(check)))
+                        if (!ticket.isInRole(Role.getById(check))) {
+                            ctx.setRollbackOnly();
                             throw new FxNoAccessException("ex.account.roles.assign.noMember.remove", Role.getById(check).getName());
+                        }
                     }
                 }
                 //check added roles
                 for (long check : roles) {
                     if (!FxArrayUtils.containsElement(orgRoleIds, check)) {
-                        if (ticket.isInRole(Role.getById(check)))
+                        if (!ticket.isInRole(Role.getById(check))) {
+                            ctx.setRollbackOnly();
                             throw new FxNoAccessException("ex.account.roles.assign.noMember.add", Role.getById(check).getName());
+                        }
                     }
                 }
             }
@@ -1326,7 +1340,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             if (includeInvisible) {
                 sCurSql = "SELECT COUNT(*) FROM " + TBL_ASSIGN_GROUPS + " WHERE USERGROUP=" + groupId;
             } else {
-                sCurSql = "SELECT COUNT(*) FORM " + TBL_ASSIGN_GROUPS + " ln, " +
+                sCurSql = "SELECT COUNT(*) FROM " + TBL_ASSIGN_GROUPS + " ln, " +
                         TBL_ACCOUNTS + " usr WHERE ln.ACCOUNT=usr.ID AND usr.MANDATOR=" + ticket.getMandatorId() +
                         " AND ln.USERGROUP=" + groupId;
             }
@@ -1422,14 +1436,20 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void fixContactData() throws FxApplicationException {
         Account[] acct = loadAll(null, null, null, null, null, null, null, null, 0, Integer.MAX_VALUE);
-        for (Account a : acct) {
-            if (a.getContactData().getId() == -1) {
-                FxContent contactData = co.initialize(CacheAdmin.getEnvironment().getType(FxType.CONTACTDATA).getId());
-                contactData.setValue("/SURNAME", new FxString(false, a.getName()));
-                contactData.setValue("/EMAIL", new FxString(false, a.getEmail()));
-                FxPK contactDataPK = co.save(contactData);
-                update(a.getId(), null, null, null, null, null, null, null, null, null, null, null, null, contactDataPK.getId());
+        FxContext.get().runAsSystem();
+        try {
+            for (Account a : acct) {
+                if (a.getContactData().getId() == -1) {
+                    FxContent contactData = co.initialize(CacheAdmin.getEnvironment().getType(FxType.CONTACTDATA).getId());
+                    contactData.setAclId(ACL.ACL_CONTACTDATA);
+                    contactData.setValue("/SURNAME", new FxString(false, a.getName()));
+                    contactData.setValue("/EMAIL", new FxString(false, a.getEmail()));
+                    FxPK contactDataPK = co.save(contactData);
+                    update(a.getId(), null, null, null, null, null, null, null, null, null, null, null, null, contactDataPK.getId());
+                }
             }
+        } finally {
+            FxContext.get().stopRunAsSystem();
         }
     }
 }

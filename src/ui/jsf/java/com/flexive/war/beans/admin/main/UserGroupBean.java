@@ -198,6 +198,8 @@ public class UserGroupBean {
                 groupEngine.setRoles(this.id, getRoles());
             } catch (Exception exc) {
                 new FxFacesMsgErr(exc).addToContext();
+                color = groupEngine.load(id).getColor();
+                return "userGroupEdit";
             }
 
             // Deselect the group and return to the overview

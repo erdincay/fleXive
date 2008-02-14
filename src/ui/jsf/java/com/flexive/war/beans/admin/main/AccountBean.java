@@ -40,6 +40,7 @@ import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.AccountEngine;
@@ -150,6 +151,10 @@ public class AccountBean {
         roles = null;
         activeFilter = true;
         validatedFilter = true;
+        UserTicket ticket = FxContext.get().getTicket();
+        if( !ticket.isGlobalSupervisor() ) {
+            mandator = CacheAdmin.getFilteredEnvironment().getMandator(ticket.getMandatorId());
+        }
         try {
             // Default valid from: Today, but delete time part
             account.setValidFrom(SDF.parse(SDF.format(new Date())));
