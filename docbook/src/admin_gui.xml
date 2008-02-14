@@ -1203,10 +1203,96 @@
             complex queries on structures and their properties, it's like building SQL statements visually.
         </para>
         <para>The elements of the query result set can be attached to the
-            <link linkend="content_tree_basics">content tree</link>
+            <link linkend="content_tree">content tree</link>
             or saved into a briefcase, which can be shared among users. A query can also be saved.
         </para>
-        <section>
+        <section xml:id="query_editor_creating_queries">
+            <title>Creating queries with the visual query editor</title>
+            <para>To access the query editor go to the
+                <filename>Search</filename>
+                tab of the &Flexive; backend administration. Open the query editor and rightclick on nodes of the
+                content tree and structure tree to formulate your query. You can add as many nodes as you want.
+                You can also search on structure properties.
+            </para>
+            <para>
+                Select the chosen query elements with Shift or Ctrl and rightclick on them to use the context
+                menu to create subqueries with con/disjunctions.
+            </para>
+            <para>The following screen shows a formulated query in the query editor. You can nest your subqueries
+                infinitely.
+            </para>
+            <para>The following comparison operators are available:</para>
+            <para>
+                <variablelist>
+                    <varlistentry>
+                        <term>
+                            <code>=</code>
+                        </term>
+                        <listitem>
+                            <para>
+                                Expression is equal
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <code>not equal</code>
+                        </term>
+                        <listitem>
+                            <para>
+                                Expression is not equal
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <code>is empty</code>
+                        </term>
+                        <listitem>
+                            <para>
+                                Expression is empty
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <code>is not empty</code>
+                        </term>
+                        <listitem>
+                            <para>
+                                Expression is not empty
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <code>like</code>
+                        </term>
+                        <listitem>
+                            <para>
+                                Compare similarity of expression
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </para>
+            <para>
+                <imagedata fileref="images/adm_ui_query_editor/build_query.png"
+                           format="PNG" contentwidth="100%"/>
+            </para>
+            <section xml:id="query_editor_queries_briefcases">
+                <title>Saved queries and briefcases</title>
+                <para>You can save your query or save the query result to a briefcase by checking the options in the
+                    query editor before executing the query. A briefcase can be public or private, meaning shared or
+                    not shared among other users. Saved queries and briefcases can be found in the
+                    <filename>Search</filename>
+                    tab of the &Flexive; backend administration.
+                </para>
+                <para>
+                    <imagedata fileref="images/adm_ui_query_editor/search_tab.png"
+                               format="PNG" contentwidth="100%"/>
+                </para>
+            </section>
         </section>
     </section>
     <section xml:id="briefcases">
