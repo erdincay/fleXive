@@ -8,6 +8,7 @@
 
     <xi:include href="includes/author_gglos.xml"/>
     <xi:include href="includes/author_azrzavy.xml"/>
+    <xi:include href="includes/author_hbacher.xml"/>
 
     <title>The &flexive; administration GUI</title>
 
@@ -17,11 +18,14 @@
             start the administration GUI by starting your chosen webserver. You enter
             the administration GUI by opening your web browser and entering the address
             of the administration GUI startpage. By default the address is
-            <code>http://XXX.XXX.XXX.XXX:8080/flexive/adm/main.jsf</code> where
-            <code>XXX.XXX.XXX.XXX</code> needs to be replaced by your ip address. After a few moments, you
+            <code>http://XXX.XXX.XXX.XXX:8080/flexive/adm/main.jsf</code>
+            where
+            <code>XXX.XXX.XXX.XXX</code>
+            needs to be replaced by your ip address. After a few moments, you
             will reach the login page. If you want to work with the administration
             GUI in the role of supervisor, the default username to choose is
-            <code>supervisor</code> and the default password is <code>supervisor</code>.
+            <code>supervisor</code>
+            and the default password is<code>supervisor</code>.
         </para>
     </section>
 
@@ -67,19 +71,21 @@
     </section>
 
     <section xml:id="structure_editor_gui">
-            <title>The structure editor GUI</title>
-            <para>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata fileref="images/structureEditor/se_overview.png" format="PNG" scalefit="1" width="100%" contentdepth="66%"/>
-                    </imageobject>
-                </mediaobject>
-            </para>
+        <title>The structure editor GUI</title>
+        <para>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/structureEditor/se_overview.png" format="PNG" scalefit="1" width="100%"
+                               contentdepth="66%"/>
+                </imageobject>
+            </mediaobject>
+        </para>
 
-            <para>The structure editor GUI is reachable by clicking the <guimenuitem>Structure</guimenuitem>
-                tab (1) in the administration backend. The GUI is separated into two parts: the
-                structure tree (2) on the left half of the screen and the edit view (3) on the right half.
-            </para>
+        <para>The structure editor GUI is reachable by clicking the
+            <guimenuitem>Structure</guimenuitem>
+            tab (1) in the administration backend. The GUI is separated into two parts: the
+            structure tree (2) on the left half of the screen and the edit view (3) on the right half.
+        </para>
         <section xml:id="structure_tree_items">
             <title>Structure tree items</title>
             <para>The structure tree consists of the following items:
@@ -88,7 +94,8 @@
                         <para>
                             <inlinemediaobject>
                                 <imageobject>
-                                    <imagedata fileref="images/structureEditor/fxType.png" format="PNG" contentwidth="66%"/>
+                                    <imagedata fileref="images/structureEditor/fxType.png" format="PNG"
+                                               contentwidth="66%"/>
                                 </imageobject>
                             </inlinemediaobject>
                             Content types: types with their mode set to "Content". Types are always displayed
@@ -100,7 +107,8 @@
                         <para>
                             <inlinemediaobject>
                                 <imageobject>
-                                    <imagedata fileref="images/structureEditor/fxTypeRelation.png" format="PNG" contentwidth="66%"/>
+                                    <imagedata fileref="images/structureEditor/fxTypeRelation.png" format="PNG"
+                                               contentwidth="66%"/>
                                 </imageobject>
                             </inlinemediaobject>
                             Relation types: types with their mode set to "Relation". Types are always displayed at
@@ -112,7 +120,8 @@
                         <para>
                             <inlinemediaobject>
                                 <imageobject>
-                                    <imagedata fileref="images/structureEditor/fxGroup.png" format="PNG" contentwidth="66%"/>
+                                    <imagedata fileref="images/structureEditor/fxGroup.png" format="PNG"
+                                               contentwidth="66%"/>
                                 </imageobject>
                             </inlinemediaobject>
                             Group assignments: possible children are group and property assignments. All children are
@@ -123,7 +132,8 @@
                         <para>
                             <inlinemediaobject>
                                 <imageobject>
-                                    <imagedata fileref="images/structureEditor/fxAssignedProperty.png" format="PNG" contentwidth="66%"/>
+                                    <imagedata fileref="images/structureEditor/fxAssignedProperty.png" format="PNG"
+                                               contentwidth="66%"/>
                                 </imageobject>
                             </inlinemediaobject>
                             Property assignments: property assignments are assigned to groups or types and act as the
@@ -134,12 +144,15 @@
                         <para>
                             <inlinemediaobject>
                                 <imageobject>
-                                    <imagedata fileref="images/structureEditor/fxAssignedPropertySystemInternal.png" format="PNG" contentwidth="66%"/>
+                                    <imagedata fileref="images/structureEditor/fxAssignedPropertySystemInternal.png"
+                                               format="PNG" contentwidth="66%"/>
                                 </imageobject>
                             </inlinemediaobject>
                             System internal property assignments: assignments of special system internal properties
-                            that are common to all types and are intentionally not editable. For clarity reasons, instead of displaying
-                            those non editable properties for every type, they are only displayed once at the root level.
+                            that are common to all types and are intentionally not editable. For clarity reasons,
+                            instead of displaying
+                            those non editable properties for every type, they are only displayed once at the root
+                            level.
                         </para>
                     </listitem>
                 </itemizedlist>
@@ -152,9 +165,15 @@
                     <listitem>
                         <para>
                             Left click: left clicking on an element in the structure tree opens
-                            the element in <glossterm>view mode</glossterm> on the right half of the screen. Left clicking
-                            on the <guiicon>[+]</guiicon> graphic icon to the left of a specific element expands the tree
-                            and shows the children of the specific element. Left clicking on the <guiicon>[-]</guiicon> graphic
+                            the element in
+                            <glossterm>view mode</glossterm>
+                            on the right half of the screen. Left clicking
+                            on the
+                            <guiicon>[+]</guiicon>
+                            graphic icon to the left of a specific element expands the tree
+                            and shows the children of the specific element. Left clicking on the
+                            <guiicon>[-]</guiicon>
+                            graphic
                             icon to the left of a specific element collapses the tree and hides the
                             element's children.
                         </para>
@@ -171,7 +190,8 @@
                             </itemizedlist>
                             <inlinemediaobject>
                                 <imageobject>
-                                    <imagedata fileref="images/structureEditor/type_dropdown.png" format="PNG" contentwidth="66%"/>
+                                    <imagedata fileref="images/structureEditor/type_dropdown.png" format="PNG"
+                                               contentwidth="66%"/>
                                 </imageobject>
                             </inlinemediaobject>
                         </para>
@@ -187,29 +207,33 @@
                                         For types it is possible to:
                                         <itemizedlist>
                                             <listitem>
-                                                <para>Open the type in <glossterm>view mode</glossterm>.
+                                                <para>Open the type in<glossterm>view mode</glossterm>.
                                                 </para>
                                             </listitem>
                                             <listitem>
-                                                <para>Open the type in <glossterm>edit mode</glossterm>.
+                                                <para>Open the type in<glossterm>edit mode</glossterm>.
                                                 </para>
                                             </listitem>
                                             <listitem>
-                                                <para>Create a new property that will be automatically assigned to this type.
+                                                <para>Create a new property that will be automatically assigned to this
+                                                    type.
                                                 </para>
                                             </listitem>
                                             <listitem>
-                                                <para>Create a new group that will be automatically assigned to this type.
+                                                <para>Create a new group that will be automatically assigned to this
+                                                    type.
                                                 </para>
                                             </listitem>
                                             <listitem>
                                                 <para>
-                                                    To create content for the selected type (this aciton will open the content editor).
+                                                    To create content for the selected type (this aciton will open the
+                                                    content editor).
                                                 </para>
                                             </listitem>
                                             <listitem>
                                                 <para>
-                                                    To search for content instances of this specific type (this aciton will open the query editor).
+                                                    To search for content instances of this specific type (this aciton
+                                                    will open the query editor).
                                                 </para>
                                             </listitem>
                                             <listitem>
@@ -220,7 +244,8 @@
                                         </itemizedlist>
                                         <mediaobject>
                                             <imageobject>
-                                                <imagedata fileref="images/structureEditor/context_menu_type.png" format="PNG" contentwidth="66%"/>
+                                                <imagedata fileref="images/structureEditor/context_menu_type.png"
+                                                           format="PNG" contentwidth="66%"/>
                                             </imageobject>
                                         </mediaobject>
                                     </para>
@@ -230,32 +255,35 @@
                                         For group assignments it is possible to:
                                         <itemizedlist>
                                             <listitem>
-                                                <para>Open the group assignemnt in <glossterm>view mode</glossterm>.
+                                                <para>Open the group assignemnt in<glossterm>view mode</glossterm>.
                                                 </para>
                                             </listitem>
                                             <listitem>
-                                                <para>Open the group assignment in <glossterm>edit mode</glossterm>.
+                                                <para>Open the group assignment in<glossterm>edit mode</glossterm>.
                                                 </para>
                                             </listitem>
                                             <listitem>
                                                 <para>
                                                     Create a new property or group that
-                                                     will automatically be assigned to the selected group assignment's group.
+                                                    will automatically be assigned to the selected group assignment's
+                                                    group.
                                                 </para>
                                             </listitem>
                                             <listitem>
                                                 <para>
-                                                    To copy the group assignment, so it can be pasted into another group or type.
+                                                    To copy the group assignment, so it can be pasted into another group
+                                                    or type.
                                                 </para>
                                             </listitem>
                                             <listitem>
                                                 <para>
-                                                    To cut the group assignment, so it can be pasted into the same group or type at a different position.
+                                                    To cut the group assignment, so it can be pasted into the same group
+                                                    or type at a different position.
                                                 </para>
                                             </listitem>
                                             <listitem>
                                                 <para>
-                                                   To delete the selected group assignment.
+                                                    To delete the selected group assignment.
                                                 </para>
                                             </listitem>
                                         </itemizedlist>
@@ -263,29 +291,31 @@
                                 </listitem>
                                 <listitem>
                                     <para>
-                                       For property assignments it is possible to:
+                                        For property assignments it is possible to:
                                         <itemizedlist>
-                                         <listitem>
-                                                <para>Open the property assignment in <glossterm>view mode</glossterm>.
+                                            <listitem>
+                                                <para>Open the property assignment in<glossterm>view mode</glossterm>.
                                                 </para>
                                             </listitem>
                                             <listitem>
-                                                <para>Open the assignment in <glossterm>edit mode</glossterm>.
-                                                </para>
-                                            </listitem>
-                                            <listitem>
-                                                <para>
-                                                    To copy the group assignment, so it can be pasted into another group or type.
+                                                <para>Open the assignment in<glossterm>edit mode</glossterm>.
                                                 </para>
                                             </listitem>
                                             <listitem>
                                                 <para>
-                                                    To cut the group assignment, so it can be pasted into the same group or type at a different position.
+                                                    To copy the group assignment, so it can be pasted into another group
+                                                    or type.
                                                 </para>
                                             </listitem>
                                             <listitem>
                                                 <para>
-                                                   To delete the selected group assignment.
+                                                    To cut the group assignment, so it can be pasted into the same group
+                                                    or type at a different position.
+                                                </para>
+                                            </listitem>
+                                            <listitem>
+                                                <para>
+                                                    To delete the selected group assignment.
                                                 </para>
                                             </listitem>
                                         </itemizedlist>
@@ -297,59 +327,71 @@
                 </itemizedlist>
             </para>
             <section xml:id="structure_tree_cut_copy_paste">
-            <title>Cut, copy and paste operations</title>
+                <title>Cut, copy and paste operations</title>
                 <para>
                     <itemizedlist>
-                    <listitem>
-                    <para>Cut: the cut operation is used to change the position of an assignment at its current hierarchy level.
-                        To change the position of an assignment, you have to right-click on the assignment you want to move and
-                        select "Cut" from the context menu. Then you are able to select another assignment on the same hierarical
-                        level, perform a right-click and select either "Paste above" or "Paste below". The assignment which you have
-                        cut will then be inserted either above or below the selected assignment. Note that you cannot change the
-                        position of system internal assignments at the root level of the structure tree.
-                    </para>
-                    </listitem>
+                        <listitem>
+                            <para>Cut: the cut operation is used to change the position of an assignment at its current
+                                hierarchy level.
+                                To change the position of an assignment, you have to right-click on the assignment you
+                                want to move and
+                                select "Cut" from the context menu. Then you are able to select another assignment on
+                                the same hierarical
+                                level, perform a right-click and select either "Paste above" or "Paste below". The
+                                assignment which you have
+                                cut will then be inserted either above or below the selected assignment. Note that you
+                                cannot change the
+                                position of system internal assignments at the root level of the structure tree.
+                            </para>
+                        </listitem>
                     </itemizedlist>
                     <itemizedlist>
-                    <listitem>
-                    <para>Copy: the copy operation is used to create derived assignments and paste
-                        them into the structure tree at a chosen position.
-                        To facilitate insertion various paste operations are provided:
-                        <itemizedlist>
-                            <listitem>
-                            <para>
-                               Paste into: This is the default pasting operation for copied assignments. A derived
-                                assignment will be created and pasted into the chosen group or into the chosen type
-                                at the last position.
+                        <listitem>
+                            <para>Copy: the copy operation is used to create derived assignments and paste
+                                them into the structure tree at a chosen position.
+                                To facilitate insertion various paste operations are provided:
+                                <itemizedlist>
+                                    <listitem>
+                                        <para>
+                                            Paste into: This is the default pasting operation for copied assignments. A
+                                            derived
+                                            assignment will be created and pasted into the chosen group or into the
+                                            chosen type
+                                            at the last position.
+                                        </para>
+                                    </listitem>
+                                </itemizedlist>
+                                <itemizedlist>
+                                    <listitem>
+                                        <para>
+                                            Paste into as: Works like "Paste into" but additionally prompts you specify
+                                            a new alias
+                                            so you can create a derived assignment and paste it into the same group with
+                                            a different alias.
+                                        </para>
+                                    </listitem>
+                                </itemizedlist>
+                                <itemizedlist>
+                                    <listitem>
+                                        <para>
+                                            Paste above and paste below: pastes an assignment directly above or below
+                                            another assignment.
+                                        </para>
+                                    </listitem>
+                                </itemizedlist>
+                                <itemizedlist>
+                                    <listitem>
+                                        <para>
+                                            Paste above and paste below as: Works like "Paste above" and "Paste below"
+                                            but additionally
+                                            prompts you specify a new alias
+                                            so you can create a derived assignment and paste it into the same group with
+                                            a different alias.
+                                        </para>
+                                    </listitem>
+                                </itemizedlist>
                             </para>
-                            </listitem>
-                        </itemizedlist>
-                        <itemizedlist>
-                            <listitem>
-                            <para>
-                               Paste into as: Works like "Paste into" but additionally prompts you specify a new alias
-                               so you can create a derived assignment and paste it into the same group with a different alias.
-                            </para>
-                            </listitem>
-                        </itemizedlist>
-                        <itemizedlist>
-                            <listitem>
-                            <para>
-                               Paste above and paste below: pastes an assignment directly above or below another assignment.
-                            </para>
-                            </listitem>
-                        </itemizedlist>
-                        <itemizedlist>
-                            <listitem>
-                            <para>
-                               Paste above and paste below as: Works like "Paste above" and "Paste below" but additionally
-                               prompts you specify a new alias
-                               so you can create a derived assignment and paste it into the same group with a different alias.
-                            </para>
-                            </listitem>
-                        </itemizedlist>
-                    </para>
-                    </listitem>
+                        </listitem>
                     </itemizedlist>
                 </para>
             </section>
@@ -358,8 +400,12 @@
             <title>View mode vs. edit mode</title>
             <para>
                 By default, left clicking on a structure element in the structure tree opens
-                an editor in <glossterm>view mode</glossterm> on the right half of the screen.
-                In <glossterm>view mode</glossterm> it is
+                an editor in
+                <glossterm>view mode</glossterm>
+                on the right half of the screen.
+                In
+                <glossterm>view mode</glossterm>
+                it is
                 not possible to edit the structure element, you can merely view its current settings.
             </para>
             <para>
@@ -373,27 +419,31 @@
                             The type editor for creating and editing types and scripts assigned to that type.
                         </para>
                     </listitem>
-                     <listitem>
+                    <listitem>
                         <para>
-                            The group editor for editing group assignments, editing and creating groups and their options.
+                            The group editor for editing group assignments, editing and creating groups and their
+                            options.
                         </para>
                     </listitem>
                     <listitem>
                         <para>
-                            The property editor for editing property assignments, editing and creating properties and their options.
+                            The property editor for editing property assignments, editing and creating properties and
+                            their options.
                         </para>
                     </listitem>
                 </itemizedlist>
                 Depending on which item is left-clicked in the structure tree, or which item is selected for creation
-                in the context menu of the structure tree, one of the three sub editors is opened in either view mode or edit mode.
+                in the context menu of the structure tree, one of the three sub editors is opened in either view mode or
+                edit mode.
             </para>
         </section>
         <section xml:id="structure_editor_type_editor">
             <title>The type editor</title>
-             <para>
+            <para>
                 <mediaobject>
                     <imageobject>
-                        <imagedata fileref="images/structureEditor/type_editor_general.png" format="PNG" contentwidth="66%"/>
+                        <imagedata fileref="images/structureEditor/type_editor_general.png" format="PNG"
+                                   contentwidth="66%"/>
                     </imageobject>
                 </mediaobject>
             </para>
@@ -401,41 +451,58 @@
                 <title>Editing types</title>
                 <para>
                     When editing an existing type, you will notice that the type's
-                    <guimenuitem>"Mode"</guimenuitem> and <guimenuitem>"Language mode"</guimenuitem>
+                    <guimenuitem>"Mode"</guimenuitem>
+                    and
+                    <guimenuitem>"Language mode"</guimenuitem>
                     select boxes are disabled and grayed out. This is due to the fact that the setting
                     of a type's mode and language mode is only allowed when a new type is created. For
                     types that are already stored in the database, content may also already exist which
                     would become invalid if those fields change.
                 </para>
                 <para>
-                    Types with their mode set to <guibutton>"Relation"</guibutton> are called relation types.
+                    Types with their mode set to
+                    <guibutton>"Relation"</guibutton>
+                    are called relation types.
                     For relation types
                     a table is provided to add and remove relations. For adding a relation the user needs
                     to set the source and
-                    destination type, together with the maximum multiplicities and click the <guibutton>"Add"</guibutton>
-                    button in the <guimenuitem>"Actions"</guimenuitem> column. In order to set unlimited
+                    destination type, together with the maximum multiplicities and click the
+                    <guibutton>"Add"</guibutton>
+                    button in the
+                    <guimenuitem>"Actions"</guimenuitem>
+                    column. In order to set unlimited
                     multiplicities simply enable or disable the according checkbox in a table row. For specifying
                     the multiplicites manually, first disable the checkbox and use the input field below the
                     source or destination type which appears after disabling the checkbox.
-                    Relations can be removed again by clicking on the <guibutton>"Delete"</guibutton> button
-                    in the <guimenuitem>"Actions"</guimenuitem> column.
+                    Relations can be removed again by clicking on the
+                    <guibutton>"Delete"</guibutton>
+                    button
+                    in the
+                    <guimenuitem>"Actions"</guimenuitem>
+                    column.
 
                     <mediaobject>
                         <imageobject>
-                            <imagedata fileref="images/structureEditor/type_editor_relations.png" format="PNG" contentwidth="66%"/>
+                            <imagedata fileref="images/structureEditor/type_editor_relations.png" format="PNG"
+                                       contentwidth="66%"/>
                         </imageobject>
                     </mediaobject>
                 </para>
                 <para>
-                    Also notice that by enabling the <guibutton>"Track history"</guibutton> checkbox, by disabling the
-                    <guibutton>"Unlimited Versions"</guibutton> checkbox and for type relations by disabling the
-                    <guibutton>"maxRelSource"</guibutton> and "maxRelDest" checkboxes,
-                    input fields for setting the <guibutton>"History Age"</guibutton>,
+                    Also notice that by enabling the
+                    <guibutton>"Track history"</guibutton>
+                    checkbox, by disabling the
+                    <guibutton>"Unlimited Versions"</guibutton>
+                    checkbox and for type relations by disabling the
+                    <guibutton>"maxRelSource"</guibutton>
+                    and "maxRelDest" checkboxes,
+                    input fields for setting the<guibutton>"History Age"</guibutton>,
                     <guibutton>"Max. Versions"</guibutton>, and the maximum number of relation sources and destinations
                     become available that are hidden otherwise.
                     <mediaobject>
                         <imageobject>
-                            <imagedata fileref="images/structureEditor/type_editor_hidden_fields.png" format="PNG" contentwidth="66%"/>
+                            <imagedata fileref="images/structureEditor/type_editor_hidden_fields.png" format="PNG"
+                                       contentwidth="66%"/>
                         </imageobject>
                     </mediaobject>
                 </para>
@@ -444,10 +511,13 @@
                 <title>Saving, creating and deleting types</title>
                 <para>
                     In order to save changes to existing types,
-                    the type editor provides the <guibutton>"Save"</guibutton> button
+                    the type editor provides the
+                    <guibutton>"Save"</guibutton>
+                    button
                     <inlinemediaobject>
-                         <imageobject>
-                            <imagedata fileref="images/structureEditor/save_button.png" format="PNG" contentwidth="66%"/>
+                        <imageobject>
+                            <imagedata fileref="images/structureEditor/save_button.png" format="PNG"
+                                       contentwidth="66%"/>
                         </imageobject>
                     </inlinemediaobject>
                     at the bottom left of the type editor view. A shortcut to the button can also be
@@ -455,43 +525,56 @@
                 </para>
                 <para>
                     In order to create a new type, the "Create Type..." option has to be selected from
-                    the drop down menu of the <guimenuitem>"Structure"</guimenuitem> tab above the
-                    structure tree. Instead of a <guibutton>"Save"</guibutton> button, the type editor
-                    provides the <guibutton>"Create"</guibutton> button
+                    the drop down menu of the
+                    <guimenuitem>"Structure"</guimenuitem>
+                    tab above the
+                    structure tree. Instead of a
+                    <guibutton>"Save"</guibutton>
+                    button, the type editor
+                    provides the
+                    <guibutton>"Create"</guibutton>
+                    button
                     <inlinemediaobject>
-                         <imageobject>
-                            <imagedata fileref="images/structureEditor/create_button.png" format="PNG" contentwidth="66%"/>
+                        <imageobject>
+                            <imagedata fileref="images/structureEditor/create_button.png" format="PNG"
+                                       contentwidth="66%"/>
                         </imageobject>
                     </inlinemediaobject>
                     at the bottom left of the type editor view, as well as a shortcut on top of the
                     content frame.
                 </para>
                 <para>
-                    For deleting an existing type, the type editor provides the <guibutton>"Delete"</guibutton> button
+                    For deleting an existing type, the type editor provides the
+                    <guibutton>"Delete"</guibutton>
+                    button
                     <inlinemediaobject>
-                         <imageobject>
-                            <imagedata fileref="images/structureEditor/delete_button_type.png" format="PNG" contentwidth="66%"/>
+                        <imageobject>
+                            <imagedata fileref="images/structureEditor/delete_button_type.png" format="PNG"
+                                       contentwidth="66%"/>
                         </imageobject>
                     </inlinemediaobject>
                     at the bottom right of the type editor view. A shortcut to the button can also be
                     found on top of the content frame. Note that only existing types (types have already
                     been saved into the database) can be deleted. Therefore, when creating a new type,
-                    the <guibutton>"Delete"</guibutton> is not displayed.
+                    the
+                    <guibutton>"Delete"</guibutton>
+                    is not displayed.
                 </para>
             </section>
             If you want more information on types and their specific settings please refer to
-                    <xref linkend="core_structures_types_parameters"/>.
+            <xref linkend="core_structures_types_parameters"/>.
         </section>
 
         <section xml:id="structure_editor_group_editor">
             <title>The group editor</title>
-             <para>
+            <para>
                 <mediaobject>
                     <imageobject>
-                        <imagedata fileref="images/structureEditor/group_editor_assignment.png" format="PNG" contentwidth="66%"/>
+                        <imagedata fileref="images/structureEditor/group_editor_assignment.png" format="PNG"
+                                   contentwidth="66%"/>
                     </imageobject>
                 </mediaobject>
-             </para>
+            </para>
 
             <section xml:id="structure_editor_editing_groups">
                 <title>Editing group assignments</title>
@@ -500,42 +583,55 @@
                     <itemizedlist>
                         <listitem>
                             <para>
-                                The <guimenuitem>"Edit Group Assignment"</guimenuitem> tab, which gives you
+                                The
+                                <guimenuitem>"Edit Group Assignment"</guimenuitem>
+                                tab, which gives you
                                 access to the group assignment that is selected in the structure tree.
                             </para>
                         </listitem>
                         <listitem>
                             <para>
-                                The <guimenuitem>"Edit Group"</guimenuitem> tab, which gives you
+                                The
+                                <guimenuitem>"Edit Group"</guimenuitem>
+                                tab, which gives you
                                 access to the actual group that is assigned by the selected group assignment.
                             </para>
                         </listitem>
                         <listitem>
                             <para>
-                                The <guimenuitem>"Edit Options"</guimenuitem> tab, which gives you
+                                The
+                                <guimenuitem>"Edit Options"</guimenuitem>
+                                tab, which gives you
                                 access to the options of the group assignment and its group as well.
                             </para>
                         </listitem>
                     </itemizedlist>
-                    </para>
+                </para>
                 <caution>
                     <para>
-                    When creating a new group, the <guimenuitem>"Edit Group Assignment"</guimenuitem> tab will
-                    be hidden, as well as the options of the group assignment in the
-                    <guimenuitem>"Edit Options"</guimenuitem> tab. The according assignment will then be
-                    automatically generated after the group has been created and automatically
-                    inserted into the structure tree accordingly.
+                        When creating a new group, the
+                        <guimenuitem>"Edit Group Assignment"</guimenuitem>
+                        tab will
+                        be hidden, as well as the options of the group assignment in the
+                        <guimenuitem>"Edit Options"</guimenuitem>
+                        tab. The according assignment will then be
+                        automatically generated after the group has been created and automatically
+                        inserted into the structure tree accordingly.
                     </para>
                     <para>
-                    Notice that assignments may override specific settings of their groups.
-                    For group assignments, if the checkbox <guimenuitem>"Override Multiplicity"</guimenuitem>
-                    in the <guimenuitem>"Edit Group Assignment"</guimenuitem> tab, or the checkbox
-                    <guimenuitem>"Overridable Multiplicity"</guimenuitem> is enabled, the multiplicity
-                    defined in the group assignment overrides the multiplicity of its group.
+                        Notice that assignments may override specific settings of their groups.
+                        For group assignments, if the checkbox
+                        <guimenuitem>"Override Multiplicity"</guimenuitem>
+                        in the
+                        <guimenuitem>"Edit Group Assignment"</guimenuitem>
+                        tab, or the checkbox
+                        <guimenuitem>"Overridable Multiplicity"</guimenuitem>
+                        is enabled, the multiplicity
+                        defined in the group assignment overrides the multiplicity of its group.
                     </para>
                     <para>
-                    Also notice that the group mode of a group assignment may not be changed if content
-                    instances for the group assignment already exist.
+                        Also notice that the group mode of a group assignment may not be changed if content
+                        instances for the group assignment already exist.
                     </para>
                 </caution>
             </section>
@@ -545,15 +641,19 @@
                 <para>
                     Generally speaking an option is just a pair of a key and a value. The user
                     can access the options by left clicking the
-                    <guimenuitem>"Edit Options"</guimenuitem> tab.
+                    <guimenuitem>"Edit Options"</guimenuitem>
+                    tab.
                     <mediaobject>
                         <imageobject>
-                            <imagedata fileref="images/structureEditor/group_options.png" format="PNG" contentwidth="66%"/>
+                            <imagedata fileref="images/structureEditor/group_options.png" format="PNG"
+                                       contentwidth="66%"/>
                         </imageobject>
                     </mediaobject>
                     In the image above, the group options table and the group assignment options table
                     are displayed. The group has three options with the keys "MYOPTION", "MYOPTION2"
-                    and "MYOPTION3". The <guimenuitem>"Overridable"</guimenuitem> checkbox indicates
+                    and "MYOPTION3". The
+                    <guimenuitem>"Overridable"</guimenuitem>
+                    checkbox indicates
                     which options may be overwritten by the group assignment (i.e. may have the
                     same key but a different value).
                 </para>
@@ -564,11 +664,18 @@
                 </para>
                 <para>
                     Options can be added by filling in the empty fields on the bottom of the
-                    according table and clicking the <guibutton>"Add"</guibutton> button which is
-                    located in the <guimenuitem>"Actions"</guimenuitem> column of the table. An
+                    according table and clicking the
+                    <guibutton>"Add"</guibutton>
+                    button which is
+                    located in the
+                    <guimenuitem>"Actions"</guimenuitem>
+                    column of the table. An
                     option can be deleted again by selecting the according row and pressing the
-                    <guibutton>"Delete"</guibutton> button which is
-                    also located in the <guimenuitem>"Actions"</guimenuitem> column of the table.
+                    <guibutton>"Delete"</guibutton>
+                    button which is
+                    also located in the
+                    <guimenuitem>"Actions"</guimenuitem>
+                    column of the table.
                 </para>
                 <para>
                     In order to facilitate the editing of options, visual helpers are provided:
@@ -599,7 +706,8 @@
                     In order to display the visual helpers, the "Validate" button
                     <inlinemediaobject>
                         <imageobject>
-                            <imagedata fileref="images/structureEditor/validate_button.png" format="PNG" contentwidth="66%"/>
+                            <imagedata fileref="images/structureEditor/validate_button.png" format="PNG"
+                                       contentwidth="66%"/>
                         </imageobject>
                     </inlinemediaobject>
                     on the bottom left has to be clicked.
@@ -607,13 +715,16 @@
             </section>
 
             <section xml:id="structure_editor_saving_deleting_groups">
-                <title>Saving and deleting group assignments and groups </title>
+                <title>Saving and deleting group assignments and groups</title>
                 <para>
                     In order to save changes to existing group assignments, groups and options,
-                    the group editor provides the <guibutton>"Save"</guibutton> button
+                    the group editor provides the
+                    <guibutton>"Save"</guibutton>
+                    button
                     <inlinemediaobject>
-                         <imageobject>
-                            <imagedata fileref="images/structureEditor/save_button.png" format="PNG" contentwidth="66%"/>
+                        <imageobject>
+                            <imagedata fileref="images/structureEditor/save_button.png" format="PNG"
+                                       contentwidth="66%"/>
                         </imageobject>
                     </inlinemediaobject>
                     located at the bottom left of the group editor in every tab. A shortcut to the button
@@ -628,11 +739,16 @@
                 </para>
                 <para>
                     In order to create a new group, the "Create Group..." option has to be selected from
-                    the context menu of the of the structure tree. Instead of a <guibutton>"Save"</guibutton> button,
-                    the group editor provides the <guibutton>"Create"</guibutton> button
+                    the context menu of the of the structure tree. Instead of a
+                    <guibutton>"Save"</guibutton>
+                    button,
+                    the group editor provides the
+                    <guibutton>"Create"</guibutton>
+                    button
                     <inlinemediaobject>
-                         <imageobject>
-                            <imagedata fileref="images/structureEditor/create_button.png" format="PNG" contentwidth="66%"/>
+                        <imageobject>
+                            <imagedata fileref="images/structureEditor/create_button.png" format="PNG"
+                                       contentwidth="66%"/>
                         </imageobject>
                     </inlinemediaobject>
                     at the bottom left of the group editor view, as well as a shortcut on top of the
@@ -640,10 +756,13 @@
                     is automatically generated as well and automatically inserted into the structure tree.
                 </para>
                 <para>
-                    For deleting an existing group assignment, the group editor provides the <guibutton>"Delete"</guibutton> button
+                    For deleting an existing group assignment, the group editor provides the
+                    <guibutton>"Delete"</guibutton>
+                    button
                     <inlinemediaobject>
-                         <imageobject>
-                            <imagedata fileref="images/structureEditor/delete_button_assignment.png" format="PNG" contentwidth="66%"/>
+                        <imageobject>
+                            <imagedata fileref="images/structureEditor/delete_button_assignment.png" format="PNG"
+                                       contentwidth="66%"/>
                         </imageobject>
                     </inlinemediaobject>
                     at the bottom right of the "Edit Group Assignment" tab. A shortcut to the button can also be
@@ -651,25 +770,27 @@
                     <caution>
                         <para>
                             Note that by deleting a group assignment, the group itsself
-                            is not automatically deleted! Only if the group is not assigned to another group or type anymore
+                            is not automatically deleted! Only if the group is not assigned to another group or type
+                            anymore
                             , the group will be removed from the database.
                         </para>
                     </caution>
                 </para>
             </section>
-             If you want more information on groups and their specific settings please refer to
-                    <xref linkend="core_structures_group_parameters"/>.
+            If you want more information on groups and their specific settings please refer to
+            <xref linkend="core_structures_group_parameters"/>.
         </section>
 
         <section xml:id="structure_editor_property_editor">
             <title>The property editor</title>
-             <para>
+            <para>
                 <mediaobject>
                     <imageobject>
-                        <imagedata fileref="images/structureEditor/property_editor_general.png" format="PNG" contentwidth="66%"/>
+                        <imagedata fileref="images/structureEditor/property_editor_general.png" format="PNG"
+                                   contentwidth="66%"/>
                     </imageobject>
                 </mediaobject>
-             </para>
+            </para>
 
             <section xml:id="structure_editor_editing_properties">
                 <title>Editing property assignments</title>
@@ -678,20 +799,26 @@
                     <itemizedlist>
                         <listitem>
                             <para>
-                                The <guimenuitem>"Edit Property Assignment"</guimenuitem> tab, which gives you
+                                The
+                                <guimenuitem>"Edit Property Assignment"</guimenuitem>
+                                tab, which gives you
                                 access to the property assignment that is selected in the structure tree.
                             </para>
                         </listitem>
                         <listitem>
                             <para>
-                                The <guimenuitem>"Edit Property"</guimenuitem> tab, which gives you
+                                The
+                                <guimenuitem>"Edit Property"</guimenuitem>
+                                tab, which gives you
                                 access to the actual property that is assigned by the selected property
                                 assignment.
                             </para>
                         </listitem>
                         <listitem>
                             <para>
-                                The <guimenuitem>"Edit Options"</guimenuitem> tab, which gives you
+                                The
+                                <guimenuitem>"Edit Options"</guimenuitem>
+                                tab, which gives you
                                 access to the options of the property assignment and its property as well.
                             </para>
                         </listitem>
@@ -701,7 +828,8 @@
                     System internal property assignments
                     <inlinemediaobject>
                         <imageobject>
-                            <imagedata fileref="images/structureEditor/fxAssignedPropertySystemInternal.png" format="PNG" contentwidth="66%"/>
+                            <imagedata fileref="images/structureEditor/fxAssignedPropertySystemInternal.png"
+                                       format="PNG" contentwidth="66%"/>
                         </imageobject>
                     </inlinemediaobject>
                     , together with their properties may not be edited. This is why all input elements
@@ -709,21 +837,28 @@
                 </para>
                 <caution>
                     <para>
-                        When creating a new property, the <guimenuitem>"Edit Property Assignment"</guimenuitem> tab will
+                        When creating a new property, the
+                        <guimenuitem>"Edit Property Assignment"</guimenuitem>
+                        tab will
                         be hidden, as well as the options of the property assignment in the
-                        <guimenuitem>"Edit Options"</guimenuitem> tab. The according assignment will then be
+                        <guimenuitem>"Edit Options"</guimenuitem>
+                        tab. The according assignment will then be
                         automatically generated after the property has been created and automatically inserted into the
                         structure tree accordingly.
                     </para>
                     <para>
                         Note that property assignments may override specific settings of their property.
                         If a specific setting may be overwritten is controlled by the "Override property options"
-                        section in the <guimenuitem>"Edit Property Assignment"</guimenuitem> tab and by the "Property
+                        section in the
+                        <guimenuitem>"Edit Property Assignment"</guimenuitem>
+                        tab and by the "Property
                         override options" section in the
-                        <guimenuitem>"Edit Property</guimenuitem> tab respectively.
-                            <mediaobject>
+                        <guimenuitem>"Edit Property</guimenuitem>
+                        tab respectively.
+                        <mediaobject>
                             <imageobject>
-                                <imagedata fileref="images/structureEditor/override_property_options.png" format="PNG" contentwidth="66%"/>
+                                <imagedata fileref="images/structureEditor/override_property_options.png" format="PNG"
+                                           contentwidth="66%"/>
                             </imageobject>
                         </mediaobject>
                     </para>
@@ -741,7 +876,7 @@
             </section>
 
             <section xml:id="structure_editor_saving_deleting_properties">
-                <title>Saving and deleting property assignments and properties </title>
+                <title>Saving and deleting property assignments and properties</title>
                 <para>
                     Also concerning saving and deletion operations, properties and property assignments
                     exactly comply to group and group assignments. The reader is therefore refered to
@@ -749,7 +884,7 @@
                 </para>
             </section>
             If you want more information on properties and their specific settings please refer to
-                    <xref linkend="core_structures_property_parameters"/>.
+            <xref linkend="core_structures_property_parameters"/>.
         </section>
 
         <section xml:id="structure_editor_script_assignment_editor">
@@ -779,20 +914,350 @@
             </para>
             <para>
                 In order for changes to take effect, the script assignment editor -just like the other editors-
-                provides the <guibutton>"Save"</guibutton> button
-                    <inlinemediaobject>
-                         <imageobject>
-                            <imagedata fileref="images/structureEditor/save_button.png" format="PNG" contentwidth="66%"/>
-                        </imageobject>
-                    </inlinemediaobject>
-                    at the bottom left of the script assignment editor view. A shortcut to the button can also be
-                    found on top of the content frame.
+                provides the
+                <guibutton>"Save"</guibutton>
+                button
+                <inlinemediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/structureEditor/save_button.png" format="PNG" contentwidth="66%"/>
+                    </imageobject>
+                </inlinemediaobject>
+                at the bottom left of the script assignment editor view. A shortcut to the button can also be
+                found on top of the content frame.
             </para>
             <para>
-             If you want more information on scripts and their specific settings please refer to
-                    <xref linkend="core_scripting" />.
+                If you want more information on scripts and their specific settings please refer to
+                <xref linkend="core_scripting"/>.
             </para>
         </section>
 
     </section>
+
+
+    <section xml:id="instance_editor">
+        <title>The instance editor</title>
+        <para>The instance editor allows you to create and edit content instances.</para>
+        <para>It can be accessed via the</para>
+        <para>
+            <itemizedlist>
+                <listitem>Content tree</listitem>
+                <listitem>Structure tree</listitem>
+                <listitem>Query editor / query results</listitem>
+            </itemizedlist>
+        </para>
+        <para>As you might expect, the content tree contains already created instances. The query editor's query
+            results
+            contain already created instances, too. From the structure tree it is possible to create new content
+            instances
+            which can be attached to the content tree.
+        </para>
+        <para>By default, the instantiated type's properties are displayed as input fields on the initialization of an
+            instance. Non mandatory properties can be skipped and added again, when needed.
+        </para>
+        <section xml:id="instance_editor_creating_editing">
+            <title>Creating and editing contents</title>
+            <para>These are the UI elements of the instance editor:</para>
+            <para>
+                <orderedlist>
+                    <listitem>The ACL to choose for this instance</listitem>
+                    <listitem>The workflow step to choose for this instance</listitem>
+                    <listitem>The node of the content tree which the instance is attached to</listitem>
+                    <listitem>The version and access information</listitem>
+                    <listitem>Single properties as input fields</listitem>
+                    <listitem>Grouped properties</listitem>
+                </orderedlist>
+            </para>
+            <para>
+                <imagedata fileref="images/adm_ui_instance_editor/content_instance.png"
+                           format="PNG" contentwidth="100%"/>
+            </para>
+            <para>After saving you will get the following screen. You can see that the fields which have not been filled
+                in,
+                disappeared. No matter, you can add them again by clicking on the symbol for the single fields (1) or
+                by clicking on the symbol for the group section (2).
+            </para>
+            <para>
+                <imagedata fileref="images/adm_ui_instance_editor/content_instance_saved.png"
+                           format="PNG" contentwidth="100%"/>
+            </para>
+            <para>It is possible to create a new version of the instance</para>
+            <para>To learn more about versioning in &Flexive; see the
+                <link linkend="core_contents">Content Engine</link>
+                section.
+            </para>
+        </section>
+    </section>
+
+    <section xml:id="content_tree">
+        <title>The content tree</title>
+        <para>The content tree contains content instances of any type. It can be used i.e. in a Content Management
+            System, where the page tree of a website can be administered inside the &Flexive; backend administration.
+            Mind that when we speak of the content tree, in fact we speak of 2 separate trees. The live and the edit
+            tree.
+            This will be explained in detail in this section.
+            You can find the content tree in the tab
+            <filename>Content Tree</filename>.
+        </para>
+        <section xml:id="content_tree_modes">
+            <title>Modes of the content tree</title>
+            <para>The content tree GUI allows you to administer the 2 separate trees:
+                <para>
+                    <orderedlist>
+                        <listitem>The Live Tree</listitem>
+                        <listitem>The Edit Tree</listitem>
+                    </orderedlist>
+                </para>
+                <para>
+                    The Live tree holds content instances which have been activated in the edit tree. It is not
+                    possible to create content instances directly in the live tree. You can activate tree nodes,
+                    representing content instances, or
+                    subtrees via the
+                    <link linkend="content_tree_context_menu">content tree's
+                        context menu</link>.
+                </para>
+                <para>Furthermore it is possible to change the appearence of the node's textual representation. You
+                    can choose between the caption and the node path of a tree node.
+                </para>
+            </para>
+            <para>The UI provides the following elements to handle these different views:
+            </para>
+            <para>
+                <orderedlist>
+                    <listitem>Button to switch between caption and node paths</listitem>
+                    <listitem>Button to switch between edit and live tree</listitem>
+                </orderedlist>
+            </para>
+            <para>
+                <imagedata fileref="images/adm_ui_content_tree/tree_live_edit_switch.png"
+                           format="PNG" contentwidth="100%"/>
+            </para>
+            <para>See the core components chapter
+                <link linkend="core_tree_live_edit">edit and live modes</link>
+                for additional information.
+            </para>
+        </section>
+        <section xml:id="content_tree_context_menu">
+            <title>The content tree's context menu</title>
+            <para>To activate the context menu rightclick on a tree node. Not all features shown on the following
+                screenshot are always available. For example, attaching a content instance is only possible, if the
+                instance has been
+                loaded into the instance editor before.
+            </para>
+            <para>
+                <imagedata fileref="images/adm_ui_content_tree/content_tree_contextmenu.png"
+                           format="PNG" contentwidth="100%"/>
+            </para>
+            <para>
+                The context menu provides the following functionality:
+                <variablelist>
+                    <varlistentry>
+                        <term>
+                            <code>Attach content here</code>
+                        </term>
+                        <listitem>
+                            <para>
+                                Attach an, into the instance editor loaded, instance to the content tree.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <code>Open</code>
+                        </term>
+                        <listitem>
+                            <para>
+                                Load an instance into the instance editor in view mode.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <code>Edit</code>
+                        </term>
+                        <listitem>
+                            <para>
+                                Load an instance into the instance editor in edit mode.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <code>Rename</code>
+                        </term>
+                        <listitem>
+                            <para>
+                                Rename the instance directly in the content tree's in-place editor.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <code>Create folder</code>
+                        </term>
+                        <listitem>
+                            <para>
+                                Create a folder on the target node.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <code>Create content ...</code>
+                        </term>
+                        <listitem>
+                            <para>
+                                Create a content instance on the target node.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <code>Activate</code>
+                        </term>
+                        <listitem>
+                            <para>
+                                Activate the node for the live tree.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <code>Activate subtree</code>
+                        </term>
+                        <listitem>
+                            <para>
+                                Activate the subtree for the live tree.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <code>Paste</code>
+                        </term>
+                        <listitem>
+                            <para>
+                                Paste a formerly copied content into a tree node. The tree node becomes
+                                the parent of the pasted content instance.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <code>Cut</code>
+                        </term>
+                        <listitem>
+                            <para>
+                                Cut a content instance from its position.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <code>Copy</code>
+                        </term>
+                        <listitem>
+                            <para>
+                                Copy a content instance.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <code>Detach content</code>
+                        </term>
+                        <listitem>
+                            <para>
+                                Detach a content instance from the content tree.
+                                If a node to detach has children they will be shifted onto the detached node's level.
+                                See chapter
+                                <link linkend="core_tree">Tree Engine</link>
+                                for further details.
+                                <para>
+                                    <emphasis>Note:</emphasis>
+                                    Content instances of type
+                                    <filename>folder</filename>
+                                    are deleted permanently if detached.
+                                </para>
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <code>Delete</code>
+                        </term>
+                        <listitem>
+                            <para>
+                                Delete a content instance permanently.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </para>
+        </section>
+    </section>
+
+    <section xml:id="query_editor">
+        <title>The query editor</title>
+        <para>
+            The query editor allows you to search for already created content instances. You can formulate
+            complex queries on structures and their properties, it's like building SQL statements visually.
+        </para>
+        <para>The elements of the query result set can be attached to the
+            <link linkend="content_tree_basics">content tree</link>
+            or saved into a briefcase, which can be shared among users. A query can also be saved.
+        </para>
+        <section>
+        </section>
+    </section>
+    <section xml:id="briefcases">
+        <title>Briefcases</title>
+        <section>
+        </section>
+    </section>
+    <section xml:id="adm_user">
+        <title>User account administration</title>
+        <section>
+        </section>
+    </section>
+    <section xml:id="adm_user_group">
+        <title>User group administration</title>
+        <section>
+        </section>
+    </section>
+    <section xml:id="adm_mandator">
+        <title>Mandator administration</title>
+        <section>
+        </section>
+    </section>
+    <section xml:id="adm_ACL">
+        <title>ACL administration</title>
+        <section>
+        </section>
+    </section>
+    <section xml:id="adm_workflow">
+        <title>Workflow administration</title>
+        <section>
+        </section>
+    </section>
+    <section xml:id="adm_fxsql">
+        <title>FxSQL</title>
+        <section>
+        </section>
+    </section>
+    <section xml:id="adm_scripts">
+        <title>Script administration</title>
+        <section>
+        </section>
+    </section>
+    <section xml:id="adm_system">
+        <title>System information and settings</title>
+        <section>
+        </section>
+    </section>
+    <section xml:id="adm_selectlists">
+        <title>Select list administration</title>
+        <section>
+        </section>
+    </section>
+
 </chapter>
