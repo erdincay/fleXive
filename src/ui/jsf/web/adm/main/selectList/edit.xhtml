@@ -33,16 +33,16 @@
                 <fx:fxValueInput id="description" value="#{selectListBean.selectListDescription}" readOnly="#{not fxSystemBean.isInRole['SelectListEditor']}"/>
 			</fx:formRow>
             <fx:formRow labelKey="SelectList.label.selectList.allowDynamicCreation" id="allowDynamicCreation">
-                <h:selectBooleanCheckbox id="allowDynamicCreation" value="#{selectListBean.selectListAllowDynamicCreation}" disabled="#{not fxSystemBean.isInRole['SelectListEditor']}"/>
+                <h:selectBooleanCheckbox id="allowDynamicCreation" value="#{selectListBean.selectListAllowDynamicCreation}" disabled="true"/>
             </fx:formRow>
             <fx:formRow labelKey="SelectList.label.selectList.createItemACL" id="createItemACL">
-                <t:selectOneListbox size="1" id="createItemACL" value="#{selectListBean.selectListCreateItemACLId}" disabled="#{not fxSystemBean.isInRole['SelectListEditor']}">
+                <t:selectOneListbox size="1" id="createItemACL" value="#{selectListBean.selectListCreateItemACLId}" disabled="true">
                     <f:selectItems value="#{fxSelectBean.selectListACLs}" />
                 </t:selectOneListbox>
             </fx:formRow>
             <fx:formRow labelKey="SelectList.label.selectList.defaultItemACL" id="defaultItemACL">
                 <t:selectOneListbox size="1" id="defaultItemACL" value="#{selectListBean.selectListDefaultItemACL}"
-                                    onchange="submit();" converter="SelectableConverter" disabled="#{not fxSystemBean.isInRole['SelectListEditor']}">
+                                    onchange="submit();" converter="SelectableConverter" disabled="true">
                     <f:selectItems value="#{selectListBean.selectListItemACLs}" />
                 </t:selectOneListbox>
             </fx:formRow>

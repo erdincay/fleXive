@@ -372,7 +372,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             //                                                                    1      2                   3
             ps = con.prepareStatement("UPDATE " + TBL_SELECTLIST + " SET PARENTID=?,NAME=?,ALLOW_ITEM_CREATE=?," +
                     //               4                  5          6
-                    "ACL_CREATE_ITEM=?,ACL_ITEM_NEW=? WHERE ID=?)");
+                    "ACL_CREATE_ITEM=?,ACL_ITEM_NEW=? WHERE ID=?");
             if (list.hasParentList())
                 ps.setLong(1, list.getParentList().getId());
             else
@@ -381,6 +381,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             ps.setBoolean(3, list.isAllowDynamicItemCreation());
             ps.setLong(4, list.getCreateItemACL().getId());
             ps.setLong(5, list.getNewItemACL().getId());
+            ps.setLong(6, list.getId());
             ps.executeUpdate();
             Database.storeFxString(new FxString[]{list.getLabel(), list.getDescription()},
                     con, TBL_SELECTLIST, new String[]{"LABEL", "DESCRIPTION"}, "ID", list.getId());

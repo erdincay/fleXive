@@ -432,6 +432,11 @@ public class SelectListBean {
                 if (getMayEditItem().get(i))
                     i.setColor(FxFormatUtils.processColorString("Color", i.getColor()));
             }
+            if (FxJsfUtils.getRequest().getUserTicket().isInRole(Role.SelectListEditor)) {
+                selectList.setName(selectListName);
+                selectList.setLabel(selectListLabel);
+                selectList.setDescription(selectListDescription);
+            }
             EJBLookup.getSelectListEngine().save(selectList);
             reset();
             return showSelectListOverview();
