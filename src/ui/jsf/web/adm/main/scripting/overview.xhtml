@@ -73,11 +73,13 @@
                                                      id="editButton_#{item.id}">
                                         <f:setPropertyActionListener target="#{scriptBean.id}" value="#{item.id}"/>
                                     </adm:commandIcon>
-                                    <adm:commandIcon labelKey="Script.button.delete" location="content"
-                                                     icon="delete"  action="deleteScript"  bean="#{scriptBean}"
-                                                     id="deleteButton_#{item.id}" confirm="Script.confirm.delete">
-                                        <f:setPropertyActionListener target="#{scriptBean.id}" value="#{item.id}"/>
-                                    </adm:commandIcon>
+                                    <ui:fragment rendered="#{fxSystemBean.isInRole['ScriptManagement']}">
+                                        <adm:commandIcon labelKey="Script.button.delete" location="content"
+                                                         icon="delete" action="deleteScript" bean="#{scriptBean}"
+                                                         id="deleteButton_#{item.id}" confirm="Script.confirm.delete">
+                                            <f:setPropertyActionListener target="#{scriptBean.id}" value="#{item.id}"/>
+                                        </adm:commandIcon>
+                                    </ui:fragment>
                                     <!-- show run icon only if the script is an independent one (i.e. a not-triggered script) -->
                                     <ui:fragment rendered="#{item.event.name=='Manual' and item.active and fxSystemBean.isInRole['ScriptExecution']}">
                                         <adm:commandIcon labelKey="Script.button.run" location="content" icon="run"
@@ -91,9 +93,11 @@
                     </tbody>
                 </table>
             <br/>
-            <adm:commandButton labelKey="Script.button.create" location="both"
-                               icon="new" action="scriptCreate" id="createScriptButton"/>
-            <adm:toolbarPluginButtons/>
+            <ui:fragment rendered="#{fxSystemBean.isInRole['ScriptManagement']}">
+                <adm:commandButton labelKey="Script.button.create" location="both"
+                                   icon="new" action="scriptCreate" id="createScriptButton"/>
+                <adm:toolbarPluginButtons/>
+            </ui:fragment>
         </h:form>
         <br/>
     </ui:define>

@@ -18,10 +18,17 @@
 
 <ui:define name="body">
     <h:form id="frm" enctype="multipart/form-data">
-        <adm:tab label="#{fxMessageBean['TypeEditor.tab.typeEditor']}" active="false" id="tab1"
-                 bean="#{typeEditorBean}" action="showTypeEditor"/>
+        <ui:fragment rendered="#{typeEditorBean.editMode}">
+            <adm:tab label="#{fxMessageBean['TypeEditor.tab.typeEditor']}" active="false" id="tab1"
+                     bean="#{typeEditorBean}" action="showTypeEditor"/>
+        </ui:fragment>
+        <ui:fragment rendered="#{not typeEditorBean.editMode}">
+            <adm:tab label="#{fxMessageBean['TypeEditor.tab.typeEditor.readonly']}" active="false" id="tab1ro"
+                     bean="#{typeEditorBean}" action="showTypeEditor"/>
+        </ui:fragment>
         <ui:fragment rendered="#{not typeEditorBean.type.new}">
-            <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor']} [#{typeEditorBean.scriptCount}]" active="true" id="tab2"/>
+            <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor']} [#{typeEditorBean.scriptCount}]"
+                     active="true" id="tab2"/>
         </ui:fragment>
         <div class="scriptTable">
             <fx:fieldSet legend="#{fxMessageBean['ScriptEditor.label.assignedScripts']}">

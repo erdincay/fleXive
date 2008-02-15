@@ -76,7 +76,9 @@
             <c:if test="#{fxSystemBean.isInRole['ScriptExecution'] or fxSystemBean.isInRole['ScriptManagement']}">
                 <adm:treeNode id="scripts" icon="scripts" title="#{fxMessageBean['Admin.scripts.root']}">
                     <adm:treeNode title="#{fxMessageBean['Admin.scripts.overview']}" link="/adm/main/scripting/overview.jsf" />
-                    <adm:treeNode title="#{fxMessageBean['Admin.scripts.create']}" link="/adm/main/scripting/create.jsf" />
+                    <c:if test="#{fxSystemBean.isInRole['ScriptManagement']}">
+                        <adm:treeNode title="#{fxMessageBean['Admin.scripts.create']}" link="/adm/main/scripting/create.jsf" />
+                    </c:if>
                     <c:if test="#{fxSystemBean.isInRole['ScriptExecution']}">
                         <adm:treeNode title="#{fxMessageBean['Admin.scripts.scriptConsole']}" link="/adm/main/scripting/scriptConsole.jsf"/>
                     </c:if>

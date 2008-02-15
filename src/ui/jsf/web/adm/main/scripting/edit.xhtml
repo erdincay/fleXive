@@ -24,34 +24,34 @@
 
 
                 <fx:formRow labelKey="Script.field.name" id="name">
-                    <h:inputText id="name" value="#{scriptBean.sinfo.name}" size="30"/>
+                    <h:inputText id="name" value="#{scriptBean.sinfo.name}" size="30" readonly="#{!fxSystemBean.isInRole['ScriptManagement']}"/>
                     <!-- remember the script id -->
                     <h:inputHidden value="#{scriptBean.id}"/>
                 </fx:formRow>
 
 
                 <fx:formRow labelKey="Script.field.event.default" id="event">
-                    <h:selectOneListbox id="event" value="#{scriptBean.sinfo.event}" size="1">
+                    <h:selectOneListbox id="event" value="#{scriptBean.sinfo.event}" size="1" disabled="#{!fxSystemBean.isInRole['ScriptManagement']}">
                         <f:selectItems value="#{fxSelectBean.allScriptEventsAsEnum}"/>
                     </h:selectOneListbox>
                 </fx:formRow>
 
                 <fx:formRow labelKey="Script.field.desc" id="desc">
-                    <h:inputText id="desc" value="#{scriptBean.sinfo.description}" size="50"/>
+                    <h:inputText id="desc" value="#{scriptBean.sinfo.description}" size="50" readonly="#{!fxSystemBean.isInRole['ScriptManagement']}"/>
                 </fx:formRow>
 
                 <fx:formRow labelKey="Script.field.code" id="code">
-                    <h:inputTextarea id="code" value="#{scriptBean.sinfo.code}" cols="100" rows="25"/>
+                    <h:inputTextarea id="code" value="#{scriptBean.sinfo.code}" cols="100" rows="25" readonly="#{!fxSystemBean.isInRole['ScriptManagement']}"/>
                 </fx:formRow>
 
                 <fx:formRow labelKey="Script.field.active" id="active">
-                    <h:selectBooleanCheckbox id="active" value="#{scriptBean.sinfo.active}"/>
+                    <h:selectBooleanCheckbox id="active" value="#{scriptBean.sinfo.active}" disabled="#{!fxSystemBean.isInRole['ScriptManagement']}"/>
                 </fx:formRow>
 
                 <fx:formRow labelKey="Script.field.typeLinks">
                     <c:forEach items="#{scriptBean.typeMappingNames}" var="mapTypes">
                         <h:commandLink value="#{mapTypes.value}" actionListener="#{structureTreeControllerBean.structureOpener}"
-                                        action="#{typeEditorBean.showTypeEd}">
+                                        action="#{typeEditorBean.gotoTypeScriptEditor}">
                             <f:param name="oid" value="#{mapTypes.key}"/>
                             <f:param name="action" value="RELOAD_EXPAND_TYPE"/>
                         </h:commandLink>
@@ -69,15 +69,16 @@
                         <br/>
                     </c:forEach>
                 </fx:formRow>
+            <ui:fragment rendered="#{fxSystemBean.isInRole['ScriptManagement']}">
+                <adm:commandButton id="saveButton" labelKey="Script.button.save"
+                                   icon="save" bean="#{scriptBean}" action="saveScript"/>
 
-            <adm:commandButton id="saveButton" labelKey="Script.button.save"
-                               icon="save"  bean="#{scriptBean}" action="saveScript"/>
+                <adm:commandButton id="refreshButton" labelKey="Script.button.refresh"
+                                   icon="reload" bean="#{scriptBean}" action="editScript"/>
 
-            <adm:commandButton id="refreshButton" labelKey="Script.button.refresh"
-                               icon="reload"  bean="#{scriptBean}" action="editScript"/>
-
-            <adm:commandButton id="deleteButton" labelKey="Script.button.delete" confirm="Script.confirm.delete"
-                               icon="delete"  bean="#{scriptBean}" action="deleteScript"/>
+                <adm:commandButton id="deleteButton" labelKey="Script.button.delete" confirm="Script.confirm.delete"
+                                   icon="delete" bean="#{scriptBean}" action="deleteScript"/>
+            </ui:fragment>
 
             <adm:commandButton id="cancelButton" labelKey="Script.button.cancel"
                                icon="cancel" action="scriptOverview"/>

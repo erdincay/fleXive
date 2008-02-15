@@ -41,6 +41,7 @@ import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.scripting.FxScriptMapping;
+import com.flexive.shared.scripting.FxScriptMappingEntry;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.UserTicket;
@@ -816,7 +817,10 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         for (FxScriptMapping mapping : this.scriptMappings)
             if (mapping.getScriptId() == scriptId)
                 return mapping;
-        throw new FxNotFoundException("ex.scripting.notFound", scriptId).asRuntimeException();
+        getScript(scriptId); //make sure the script exists
+        FxScriptMapping mapping = new FxScriptMapping(scriptId, new ArrayList<FxScriptMappingEntry>(0), new ArrayList<FxScriptMappingEntry>(0));
+        scriptMappings.add(mapping);
+        return mapping;
     }
 
     /**
