@@ -82,7 +82,7 @@ public class JDK6Scripting {
             javax.script.ScriptEngineManager manager = new javax.script.ScriptEngineManager();
             javax.script.ScriptEngine engine = manager.getEngineByExtension(ext);
             if (engine == null)
-                throw new FxInvalidParameterException(name, "ex.general.scripting.noEngine", name).asRuntimeException();
+                throw new FxInvalidParameterException(name, "ex.general.scripting.noEngine", name);
             javax.script.Bindings b = engine.createBindings();
             if (binding != null)
                 b.putAll(binding.getProperties());

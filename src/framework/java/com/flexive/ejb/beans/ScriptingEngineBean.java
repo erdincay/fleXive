@@ -66,6 +66,7 @@ import org.codehaus.groovy.control.CompilationFailedException;
 import javax.annotation.Resource;
 import javax.ejb.*;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -74,7 +75,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * ScriptingEngine implementation
@@ -971,7 +971,6 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         }
         if (ret == null)
             ret = new ArrayList<String[]>(2);
-        String groovyVersion = org.codehaus.groovy.runtime.InvokerHelper.getVersion();
         ret.add(0, new String[]{"groovy", "groovy: Groovy v" + FxSharedUtils.getBundledGroovyVersion() + " (Bundled GroovyShell v" + FxSharedUtils.getBundledGroovyVersion() + ")"});
         ret.add(0, new String[]{"gy", "gy: Groovy v" + FxSharedUtils.getBundledGroovyVersion() + " (Bundled GroovyShell v" + FxSharedUtils.getBundledGroovyVersion() + ")"});
         return ret;
@@ -990,6 +989,10 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      * @throws FxApplicationException on errors
      */
     private FxScriptResult internal_runScript(String name, FxScriptBinding binding, String code) throws FxApplicationException {
+        if (name == null)
+            name = "unknown";
+        if (name.indexOf('.') < 0)
+            throw new FxInvalidParameterException(name, "ex.general.scripting.noExtension", name);
         if (!FxSharedUtils.isGroovyScript(name) && FxSharedUtils.USE_JDK6_EXTENSION) {
             try {
                 return (FxScriptResult) Class.forName("com.flexive.core.JDK6Scripting").
@@ -998,14 +1001,14 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             } catch (Exception e) {
                 if (e instanceof FxApplicationException)
                     throw (FxApplicationException) e;
-                if( e instanceof InvocationTargetException && e.getCause() != null ) {
+                if (e instanceof InvocationTargetException && e.getCause() != null) {
+                    if (e.getCause() instanceof FxApplicationException)
+                        throw (FxApplicationException) e.getCause();
                     throw new FxInvalidParameterException(name, e.getCause(), "ex.general.scripting.exception", name, e.getCause().getMessage()).asRuntimeException();
                 }
                 throw new FxInvalidParameterException(name, e, "ex.general.scripting.exception", name, e.getMessage()).asRuntimeException();
             }
         }
-        if (name == null)
-            name = "unknown";
         if (binding != null) {
             if (!binding.getProperties().containsKey("ticket"))
                 binding.setVariable("ticket", FxContext.get().getTicket());

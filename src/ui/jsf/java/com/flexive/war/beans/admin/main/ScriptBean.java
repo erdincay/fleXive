@@ -33,25 +33,28 @@
  ***************************************************************/
 package com.flexive.war.beans.admin.main;
 
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.FxContext;
-import com.flexive.shared.security.UserTicket;
-import com.flexive.shared.security.Role;
-import com.flexive.shared.exceptions.FxLoadException;
-import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.interfaces.ScriptingEngine;
-import com.flexive.shared.scripting.*;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.beans.MessageBean;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxContext;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxLoadException;
+import com.flexive.shared.interfaces.ScriptingEngine;
+import com.flexive.shared.scripting.*;
+import com.flexive.shared.security.Role;
+import com.flexive.shared.security.UserTicket;
 
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.faces.model.SelectItem;
-import java.util.*;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * JSF scripting bean
@@ -92,20 +95,20 @@ public class ScriptBean {
     public List<SelectItem> getEventsForScope() {
         //if the selected event is not in the list of events for the currently selected scope
         //reset the selected event id to default -1==all events
-        boolean selectedEventFound =false;
+        boolean selectedEventFound = false;
         FxScriptScope scope = getSelectedScope();
         List<SelectItem> eventsForScope = new ArrayList<SelectItem>();
         eventsForScope.add(new SelectItem(-1, MessageBean.getInstance().getMessage("Script.selectItem.allEvents")));
         for (FxScriptEvent e : FxScriptEvent.values()) {
-            if (e.getScope().compareTo(scope) == 0 || scope.compareTo(FxScriptScope.All) ==0) {
+            if (e.getScope().compareTo(scope) == 0 || scope.compareTo(FxScriptScope.All) == 0) {
                 eventsForScope.add(new SelectItem(e.getId(), e.getName()));
                 if (getSelectedScriptEventId() == e.getId())
-                    selectedEventFound=true;
+                    selectedEventFound = true;
             }
         }
 
         if (!selectedEventFound)
-            this.selectedScriptEventId=-1;
+            this.selectedScriptEventId = -1;
 
         return eventsForScope;
     }
@@ -115,7 +118,7 @@ public class ScriptBean {
     }
 
     public long getSelectedScriptEventId() {
-       return selectedScriptEventId;
+        return selectedScriptEventId;
     }
 
     public void setSelectedScriptEventId(long selectedScriptEventId) {
@@ -124,12 +127,12 @@ public class ScriptBean {
 
     public List<FxScriptInfo> getScriptsForEvent() {
         long eventId = getSelectedScriptEventId();
-        List<FxScriptInfo> scriptsForEvent= new ArrayList<FxScriptInfo>();
-        for (FxScriptInfo s: CacheAdmin.getFilteredEnvironment().getScripts())
-            if ( (eventId == -1 && getSelectedScope().compareTo(FxScriptScope.All) ==0)
-                    || (eventId == -1 && s.getEvent().getScope().compareTo(getSelectedScope()) ==0)
-                    || (s.getEvent().getId() == eventId && getSelectedScope().compareTo(FxScriptScope.All) ==0)
-                    || (s.getEvent().getId() == eventId && s.getEvent().getScope().compareTo(getSelectedScope())==0))
+        List<FxScriptInfo> scriptsForEvent = new ArrayList<FxScriptInfo>();
+        for (FxScriptInfo s : CacheAdmin.getFilteredEnvironment().getScripts())
+            if ((eventId == -1 && getSelectedScope().compareTo(FxScriptScope.All) == 0)
+                    || (eventId == -1 && s.getEvent().getScope().compareTo(getSelectedScope()) == 0)
+                    || (s.getEvent().getId() == eventId && getSelectedScope().compareTo(FxScriptScope.All) == 0)
+                    || (s.getEvent().getId() == eventId && s.getEvent().getScope().compareTo(getSelectedScope()) == 0))
                 scriptsForEvent.add(s);
         return scriptsForEvent;
     }
@@ -267,6 +270,8 @@ public class ScriptBean {
             scriptInterface.runScript(id);
             new FxFacesMsgInfo("Script.nfo.executed", CacheAdmin.getEnvironment().getScript(id).getName()).addToContext();
         } catch (FxApplicationException e) {
+            new FxFacesMsgErr(e).addToContext();
+        } catch (Throwable t) {
             new FxFacesMsgErr("Script.err.run").addToContext();
         }
         return "scriptOverview";
@@ -336,7 +341,7 @@ public class ScriptBean {
         return list;
     }
 
-     public List<Map.Entry<Long, String>> getAssignmentMappingNames() {
+    public List<Map.Entry<Long, String>> getAssignmentMappingNames() {
         ArrayList<Map.Entry<Long, String>> list = new ArrayList<Map.Entry<Long, String>>(this.assignmentMappingNames.entrySet().size());
         for (Map.Entry<Long, String> entry : this.assignmentMappingNames.entrySet()) {
             list.add(entry);
