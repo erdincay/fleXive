@@ -1295,24 +1295,129 @@
             </section>
         </section>
     </section>
-    <section xml:id="briefcases">
-        <title>Briefcases</title>
-        <section>
-        </section>
-    </section>
     <section xml:id="adm_user">
         <title>User account administration</title>
-        <section>
+        <para>
+            The &Flexive; user account administration UI provides an administration interface to administer your
+            user accounts, assign
+            <link linkend="">user groups</link>
+            and roles and make other settings like activation and language settings.
+        </para>
+        <section xml:id="adm_user_create_user">
+            <title>Creating a user</title>
+            <para>The following screen shows the user account editor when creating a new user.</para>
+            <para>
+                Roles are a key feature of the &Flexive;
+                <link linkend="core_security">security concept</link>. There are two ways to assign roles to a user.
+            </para>
+            <para>
+                <orderedlist>
+                    <listitem>Inheritance through user group membership</listitem>
+                    <listitem>Direct assignment</listitem>
+                </orderedlist>
+            </para>
+            <para>
+                <imagedata fileref="images/adm_ui_user/create_user.png"
+                           format="PNG" contentwidth="100%"/>
+            </para>
+            <para>After creation, you will be redirected to the user account overview where you can edit and delete
+                users.
+            </para>
+        </section>
+        <section xml:id="adm_user_overview">
+            <title>The user account overview</title>
+            <para>The following screen shows the user group overview.</para>
+            <para>
+                You can see the two system defined accounts:
+                <variablelist>
+                    <varlistentry>
+                        <term>Guest</term>
+                        <listitem>
+                            <para>Everyone who is not logged in is treated as guest.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>SUPERVISOR</term>
+                        <listitem>
+                            <para>This user is in all roles and may operate on all mandators.</para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+                These two accounts cannot be removed.
+            </para>
+            <para>
+                <imagedata fileref="images/adm_ui_user/user_overview.png"
+                           format="PNG" contentwidth="100%"/>
+            </para>
         </section>
     </section>
     <section xml:id="adm_user_group">
         <title>User group administration</title>
-        <section>
+        <para>The user group editor allows you to create and edit user groups. You can specify a group name, a color and
+            assign roles to the group.
+        </para>
+        <para>
+            <imagedata fileref="images/adm_ui_user_groups/usergroup_editor.png"
+                       format="PNG" contentwidth="100%"/>
+        </para>
+        After saving you will be redirected to the user group overview.
+        <section xml:id="adm_user_group_overview">
+            <title>The user group overview</title>
+            <para>The following screen shows the user account overview. You can see the default system user groups.
+                These groups cannot be deleted.
+                <variablelist>
+                    <varlistentry>
+                        <term>Everyone (Default)</term>
+                        <listitem>
+                            <para>Every
+                                <link linkend="adm_mandator">mandator</link>
+                                gets this group created automatically, in this screen it is the mandator
+                                <filename>
+                                    Default
+                                </filename>
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Everyone</term>
+                        <listitem>
+                            <para>System user group for all mandators
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>Owner</term>
+                        <listitem>
+                            <para>System user group for all mandators
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </para>
+            <para>
+                <imagedata fileref="images/adm_ui_user_groups/usergroup_overview.png"
+                           format="PNG" contentwidth="100%"/>
+            </para>
         </section>
     </section>
     <section xml:id="adm_mandator">
         <title>Mandator administration</title>
-        <section>
+        <para>In this chapter the administration UI for mandators will be explained. Please see section
+            <link linkend="core_security_mandators">Mandators</link>
+            in chapter
+            <link linkend="core_security">Security</link>
+            for an explanation of the concept of mandators used in &Flexive;.
+        </para>
+        <section xml:id="adm_mandator_create">
+            <para>The following screen shows the mandator editor. You can specify a name for the mandator and set the
+                activation flag.
+            </para>
+            <para>
+                <imagedata fileref="images/adm_ui_mandator/mandator_editor.png"
+                           format="PNG" contentwidth="100%"/>
+            </para>
+            After creating a mandator, you will be redirected to the overview for mandators, where you can select a
+            mandator for editing or delete him.
         </section>
     </section>
     <section xml:id="adm_ACL">
