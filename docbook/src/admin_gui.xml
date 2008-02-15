@@ -974,13 +974,13 @@
             <para>After saving you will get the following screen. You can see that the fields which have not been filled
                 in,
                 disappeared. No matter, you can add them again by clicking on the symbol for the single fields (1) or
-                by clicking on the symbol for the group section (2).
+                by clicking on the symbol for the grouped fields (2).
             </para>
             <para>
                 <imagedata fileref="images/adm_ui_instance_editor/content_instance_saved.png"
                            format="PNG" contentwidth="100%"/>
             </para>
-            <para>It is possible to create a new version of the instance</para>
+            <para>It is possible to create a new version of the instance.</para>
             <para>To learn more about versioning in &Flexive; see the
                 <link linkend="core_contents">Content Engine</link>
                 section.
@@ -1422,9 +1422,84 @@
     </section>
     <section xml:id="adm_ACL">
         <title>ACL administration</title>
-        <section>
+        <para>The ACL administration UI provides an ACL editor to edit and create ACL's and to set permissions for
+            <link linkend="adm_user_group">user groups
+            </link>
+            in the permission matrix. ACL's are a key feature of the &Flexive;
+            <link linkend="core_security">security concept</link>.
+        </para>
+        <section xml:id="adm_ACL_create">
+            <title>Creating an ACL</title>
+            <para>The following screen shows the ACL editor in create mode.</para>
+            <para>
+                You can specify:
+                <orderedlist>
+                    <listitem>
+                        <para>The mandator</para>
+                    </listitem>
+                    <listitem>
+                        <para>The ACL's name</para>
+                    </listitem>
+                    <listitem>
+                        <para>The ACL's label</para>
+                    </listitem>
+                    <listitem>
+                        <para>A color</para>
+                    </listitem>
+                    <listitem>
+                        <para>A category</para>
+                        <para>Please see chapter
+                            <link linkend="core_security_acl">ACL's - Access Control Lists</link>
+                            for information about ACL categories in &Flexive;.
+                        </para>
+                        <para>The following categories are available:</para>
+                        <para>
+                            <itemizedlist>
+                                <listitem>Instance</listitem>
+                                <listitem>Structure</listitem>
+                                <listitem>Workflow</listitem>
+                                <listitem>Briefcase</listitem>
+                                <listitem>SelectList</listitem>
+                                <listitem>SelectList Item</listitem>
+                            </itemizedlist>
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>A description</para>
+                    </listitem>
+                </orderedlist>
+            </para>
+            <para>
+                <imagedata fileref="images/adm_ui_acl/acl_editor.png"
+                           format="PNG" contentwidth="100%"/>
+            </para>
+            After saving you will be able to fill in the permission matrix.
+        </section>
+        <section xml:id="adm_acl_permission_matrix">
+            <title>The permission matrix</title>
+            <para>The permission matrix (1) is available in the ACL editor for already created ACL's. Add rows to add
+                groups
+                and fill in the matrix to grant permissions.
+            </para>
+            <para>
+                <imagedata fileref="images/adm_ui_acl/acl_editor_saved.png"
+                           format="PNG" contentwidth="100%"/>
+            </para>
+        </section>
+        <section xml:id="adm_acl_overview">
+            <title>The ACL overview</title>
+            <para>On the following screen you can see the default ACL's for each
+                <link linkend="adm_ACL_create">category</link>
+                and a user defined ACL (ACL 01).
+            </para>
+            <para>You can switch between different mandators with the select box on top of the list.</para>
+            <para>
+                <imagedata fileref="images/adm_ui_acl/acl_overview.png"
+                           format="PNG" contentwidth="100%"/>
+            </para>
         </section>
     </section>
+
     <section xml:id="adm_workflow">
         <title>Workflow administration</title>
         <section>
