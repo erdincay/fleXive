@@ -945,11 +945,9 @@
                 <listitem>Query editor / query results</listitem>
             </itemizedlist>
         </para>
-        <para>As you might expect, the content tree contains already created instances. The query editor's query
-            results
-            contain already created instances, too. From the structure tree it is possible to create new content
-            instances
-            which can be attached to the content tree.
+        <para>As you might expect, the content tree and the query results contain already created instances. From the
+            structure tree it is possible to create new content
+            instances which can be attached to the content tree.
         </para>
         <para>By default, the instantiated type's properties are displayed as input fields on the initialization of an
             instance. Non mandatory properties can be skipped and added again, when needed.
