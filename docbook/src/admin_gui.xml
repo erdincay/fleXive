@@ -1306,6 +1306,62 @@
                 <imagedata fileref="images/adm_ui_query_editor/build_query.png"
                            format="PNG" contentwidth="100%"/>
             </para>
+            <section xml:id="adm_query_editor_result">
+                <title>Query results</title>
+                <para>If the query with your provided search criteria was successful, the result set will be
+                    displayed.
+                </para>
+                <para>
+                    <imagedata fileref="images/adm_ui_query_editor/query_result.png"
+                               format="PNG" contentwidth="100%"/>
+                </para>
+                <para>Rightclick on an item of the result set to activate the context menu.</para>
+                <para>
+                    <imagedata fileref="images/adm_ui_query_editor/query_result_context_menu.png"
+                               format="PNG" contentwidth="100%"/>
+                </para>
+                <para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>Show</term>
+                            <listitem>
+                                <para>View instance.</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>Show screenview</term>
+                            <listitem>
+                                <para>Show preview (images).</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>Edit</term>
+                            <listitem>
+                                <para>Edit instance.</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>Copy</term>
+                            <listitem>
+                                <para>Copy instance and</para>
+                                <para>
+                                    <itemizedlist>
+                                        <listitem>paste it into a briefcase</listitem>
+                                        <listitem>attach it to a content tree's node</listitem>
+                                    </itemizedlist>
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>Delete</term>
+                            <listitem>
+                                <para>Delete instance permanently.</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </para>
+            </section>
+
             <section xml:id="adm_query_editor_queries_briefcases">
                 <title>Saved queries and briefcases</title>
                 <para>You can save your query or save the query result to a briefcase by checking the options in the
