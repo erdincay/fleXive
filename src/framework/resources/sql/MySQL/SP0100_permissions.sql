@@ -12,7 +12,7 @@ drop function if exists permissions|
 Create function permissions(_contentId INTEGER UNSIGNED,_contentVersion INTEGER UNSIGNED,_userId INTEGER UNSIGNED)
 returns varchar(6) deterministic reads sql data
 BEGIN
-  DECLARE GRP_PRIVATE INTEGER UNSIGNED default 2;	 
+  DECLARE GRP_OWNER INTEGER UNSIGNED default 2;
   DECLARE _result text default '';
   DECLARE done BOOLEAN DEFAULT FALSE;
   DECLARE GLOBAL_SUPERVISOR BOOLEAN DEFAULT FALSE;
@@ -75,7 +75,7 @@ BEGIN
     FXS_ACL acl
   where
     acl.id=ass.acl and
-    ass.usergroup in (select usergroup from FXS_USERGROUPMEMBERS where account=_userId) and
+    ass.usergroup in (select usergroup from FXS_USERGROUPMEMBERS where account=_userId union select GRP_OWNER from FXS_USERGROUPMEMBERS) and
     (ass.acl=dat.acl or ass.acl=dat.typeAcl or ass.acl=dat.stepAcl);
   DECLARE CONTINUE HANDLER FOR SQLSTATE '02000' SET done = TRUE;
 
@@ -112,7 +112,7 @@ BEGIN
     FETCH cur INTO _createdBy,_userGroup,_edit,_delete,_export,_rel,_read,_create,_type,_instanceMandator;
       CASE _type
           WHEN 1 /*Content*/ THEN
-            IF (_userGroup!=GRP_PRIVATE or (_userGroup=GRP_PRIVATE and _createdBy=_userId)) THEN
+            IF (_userGroup!=GRP_OWNER or (_userGroup=GRP_OWNER and _createdBy=_userId)) THEN
               IF (_edit)   THEN set IPEDIT=true;   END IF;
               IF (_delete) THEN set IPREMOVE=true; END IF;
               IF (_export) THEN set IPEXPORT=true; END IF;

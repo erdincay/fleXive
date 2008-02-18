@@ -337,7 +337,7 @@ public class FxPermissionUtils {
         final UserTicket ticket = FxContext.get().getTicket();
         final boolean _system = FxContext.get().getRunAsSystem() || ticket.isGlobalSupervisor();
         //throw exception if read is forbidden
-        checkPermission(ticket, 0, ACL.Permission.READ, type, stepACL, acl, true);
+        checkPermission(ticket, createdBy, ACL.Permission.READ, type, stepACL, acl, true);
         // check for supervisor permissions
         if (_system || ticket.isMandatorSupervisor() && mandator == ticket.getMandatorId() ||
                 !type.usePermissions() /*|| ticket.isInGroup((int) UserGroup.GROUP_OWNER) && createdBy == ticket.getUserId()*/) {

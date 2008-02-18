@@ -15,7 +15,7 @@ Create function mayReadInstance2(_contentId INTEGER UNSIGNED,_contentVersion INT
   _USER_MANDATOR INTEGER UNSIGNED,MANDATOR_SUPERVISOR BOOLEAN,GLOBAL_SUPERVISOR BOOLEAN)
 returns BOOLEAN deterministic reads sql data
 BEGIN
-  DECLARE GRP_PRIVATE INTEGER UNSIGNED default 2;	 
+  DECLARE GRP_OWNER INTEGER UNSIGNED default 2;
   DECLARE _result text default '';
   DECLARE done BOOLEAN DEFAULT FALSE;
   DECLARE _createdBy INTEGER UNSIGNED;
@@ -43,7 +43,7 @@ BEGIN
     FXS_ACL acl
   where
     acl.id=ass.acl and
-    ass.usergroup in (select usergroup from FXS_USERGROUPMEMBERS where account=_userId) and
+    ass.usergroup in (select usergroup from FXS_USERGROUPMEMBERS where account=_userId union select GRP_OWNER from FXS_USERGROUPMEMBERS) and
     (ass.acl=dat.acl or ass.acl=dat.typeAcl or ass.acl=dat.stepAcl);
   DECLARE CONTINUE HANDLER FOR SQLSTATE '02000' SET done = TRUE;
 
@@ -63,7 +63,7 @@ BEGIN
     FETCH cur INTO _createdBy,_userGroup,_read,_type,_instanceMandator;
       CASE _type
           WHEN 1 /*Content*/ THEN
-            IF (_userGroup!=GRP_PRIVATE or (_userGroup=GRP_PRIVATE and _createdBy=_userId)) THEN
+            IF (_userGroup!=GRP_OWNER or (_userGroup=GRP_OWNER and _createdBy=_userId)) THEN
               IF (_read)   THEN set IPREAD=true;   END IF;
             END IF;
           WHEN 2 /*Type*/ THEN

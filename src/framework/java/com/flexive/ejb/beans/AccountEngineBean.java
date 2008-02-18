@@ -476,10 +476,12 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
 
             //make sure the user is the owner of his contact data
             stmt.close();
-            stmt = con.prepareStatement("UPDATE " + TBL_CONTENT + " SET CREATED_BY=? WHERE ID=?");
+            stmt = con.prepareStatement("UPDATE " + TBL_CONTENT + " SET CREATED_BY=?, MANDATOR=? WHERE ID=?");
             stmt.setLong(1, newId);
-            stmt.setLong(2, contactDataPK.getId());
+            stmt.setLong(2, mandatorId);
+            stmt.setLong(3, contactDataPK.getId());
             stmt.executeUpdate();
+            CacheAdmin.expireCachedContent(contactDataPK.getId());
 
             // call scripts
             final List<Long> scriptIds = scripting.getByScriptEvent(FxScriptEvent.AfterAccountCreate);

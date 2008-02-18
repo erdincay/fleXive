@@ -62,6 +62,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.testng.annotations.DataProvider;
+import org.testng.Assert;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -210,8 +211,8 @@ public class SearchEngineTest {
 
     @Test
     public void typeConditionTest() throws FxApplicationException {
-        final FxResultSet result = new SqlQueryBuilder().select("typedef").type("CONTACTDATA").getResult();
-        final FxType cdType = CacheAdmin.getEnvironment().getType("CONTACTDATA");
+        final FxResultSet result = new SqlQueryBuilder().select("typedef").type(FxType.CONTACTDATA).getResult();
+        final FxType cdType = CacheAdmin.getEnvironment().getType(FxType.CONTACTDATA);
         assert result.getRowCount() > 0;
         for (FxResultRow row : result.getResultRows()) {
             assert ((FxLargeNumber) row.getFxValue(1)).getDefaultTranslation() == cdType.getId()
@@ -568,8 +569,11 @@ public class SearchEngineTest {
 
             assertEquals(mandator.getId(), content.getMandatorId(), "Search returned different mandator than content engine");
             assertEquals(row.getLong("mandator.id"), mandator.getId(), "Invalid value for field: id");
-            assertEquals(row.getValue("mandator.metadata") != null
-                    ? row.getLong("mandator.metadata") : -1, mandator.getMetadataId(), "Invalid value for field: metadata");
+            if( row.getValue("mandator.metadata") != null ) {
+                long mand = row.getLong("mandator.metadata");
+                if (!(mand == 0 || mand == -1))
+                    Assert.fail("Invalid mandator: " + mand + "! Expected 0 or -1 (System default or test division)");
+            }
             assertEquals(row.getLong("mandator.is_active"), mandator.isActive() ? 1 : 0, "Invalid value for field: is_active");
             checkLifecycleInfo(row, "mandator", mandator.getLifeCycleInfo());
         }
