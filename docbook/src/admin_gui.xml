@@ -27,7 +27,8 @@
             Application Servers setting and is the default for e.g. JBoss. After a few moments, you
             will reach the login page. If you want to work with the administration
             GUI as supervisor (a role that is allowed to do
-            <emphasis>everything</emphasis> without any security limitations), the default username to
+            <emphasis>everything</emphasis>
+            without any security limitations), the default username to
             choose is
             <code>supervisor</code>
             with its default password
@@ -43,17 +44,20 @@
             <itemizedlist>
                 <listitem>
                     <para>
-                        A <link linkend="core_structure_types">type</link>
+                        A
+                        <link linkend="core_structure_types">type</link>
                     </para>
                 </listitem>
                 <listitem>
                     <para>
-                        The type's assigned <link linkend="core_structure_groups">groups</link>
+                        The type's assigned
+                        <link linkend="core_structure_groups">groups</link>
                     </para>
                 </listitem>
                 <listitem>
                     <para>
-                        The type's assigned <link linkend="core_structure_properties">properties</link>
+                        The type's assigned
+                        <link linkend="core_structure_properties">properties</link>
                     </para>
                 </listitem>
             </itemizedlist>
@@ -894,15 +898,23 @@
     </section>
 
 
-    <section xml:id="instance_editor">
+    <section xml:id="adm_instance_editor">
         <title>The instance editor</title>
-        <para>The instance editor allows you to create and edit content instances.</para>
+        <para>The instance editor allows you to create and edit
+            <link linkend="core_contents">content instances</link>.
+        </para>
         <para>It can be accessed via the</para>
         <para>
             <itemizedlist>
-                <listitem>Content tree</listitem>
-                <listitem>Structure tree</listitem>
-                <listitem>Query editor / query results</listitem>
+                <listitem>
+                    <link linkend="adm_content_tree">Content tree</link>
+                </listitem>
+                <listitem>
+                    <link linkend="structure_editor_gui">Structure tree</link>
+                </listitem>
+                <listitem>
+                    <link linkend="adm_query_editor">Query editor / query results</link>
+                </listitem>
             </itemizedlist>
         </para>
         <para>As you might expect, the content tree and the query results contain already created instances. From the
@@ -912,16 +924,25 @@
         <para>By default, the instantiated type's properties are displayed as input fields on the initialization of an
             instance. Non mandatory properties can be skipped and added again, when needed.
         </para>
-        <section xml:id="instance_editor_creating_editing">
+        <section xml:id="adm_instance_editor_creating_editing">
             <title>Creating and editing contents</title>
             <para>These are the UI elements of the instance editor:</para>
             <para>
                 <orderedlist>
-                    <listitem>The ACL to choose for this instance</listitem>
-                    <listitem>The workflow step to choose for this instance</listitem>
+                    <listitem>The
+                        <link linkend="adm_ACL">ACL</link>
+                        to choose for this instance
+                    </listitem>
+                    <listitem>The
+                        <link linkend="adm_workflow">workflow</link>
+                        step to choose for this instance
+                    </listitem>
                     <listitem>The node of the content tree which the instance is attached to</listitem>
                     <listitem>The version and access information</listitem>
-                    <listitem>Single properties as input fields</listitem>
+                    <listitem>Single
+                        <link linkend="structure_editor_property_editor">properties</link>
+                        as input fields
+                    </listitem>
                     <listitem>Grouped properties</listitem>
                 </orderedlist>
             </para>
@@ -946,7 +967,7 @@
         </section>
     </section>
 
-    <section xml:id="content_tree">
+    <section xml:id="adm_content_tree">
         <title>The content tree</title>
         <para>The content tree contains content instances of any type. It can be used i.e. in a Content Management
             System, where the page tree of a website can be administered inside the &Flexive; backend administration.
@@ -956,7 +977,7 @@
             You can find the content tree in the tab
             <filename>Content Tree</filename>.
         </para>
-        <section xml:id="content_tree_modes">
+        <section xml:id="adm_content_tree_modes">
             <title>Modes of the content tree</title>
             <para>The content tree GUI allows you to administer the 2 separate trees:
                 <para>
@@ -970,7 +991,7 @@
                     possible to create content instances directly in the live tree. You can activate tree nodes,
                     representing content instances, or
                     subtrees via the
-                    <link linkend="content_tree_context_menu">content tree's
+                    <link linkend="adm_content_tree_context_menu">content tree's
                         context menu</link>.
                 </para>
                 <para>Furthermore it is possible to change the appearence of the node's textual representation. You
@@ -994,7 +1015,7 @@
                 for additional information.
             </para>
         </section>
-        <section xml:id="content_tree_context_menu">
+        <section xml:id="adm_content_tree_context_menu">
             <title>The content tree's context menu</title>
             <para>To activate the context menu rightclick on a tree node. Not all features shown on the following
                 screenshot are always available. For example, attaching a content instance is only possible, if the
@@ -1154,23 +1175,27 @@
         </section>
     </section>
 
-    <section xml:id="query_editor">
+    <section xml:id="adm_query_editor">
         <title>The query editor</title>
         <para>
             The query editor allows you to search for already created content instances. You can formulate
             complex queries on structures and their properties, it's like building SQL statements visually.
         </para>
         <para>The elements of the query result set can be attached to the
-            <link linkend="content_tree">content tree</link>
+            <link linkend="adm_content_tree">content tree</link>
             or saved into a briefcase, which can be shared among users. A query can also be saved.
         </para>
-        <section xml:id="query_editor_creating_queries">
+        <section xml:id="adm_query_editor_creating_queries">
             <title>Creating queries with the visual query editor</title>
             <para>To access the query editor go to the
                 <filename>Search</filename>
                 tab of the &Flexive; backend administration. Open the query editor and rightclick on nodes of the
-                content tree and structure tree to formulate your query. You can add as many nodes as you want.
-                You can also search on structure properties.
+                <link linkend="adm_content_tree">content tree</link>
+                and
+                <link linkend="structure_editor_gui">structure tree</link>
+                to formulate your query. You can add as many nodes as you want.
+                You can also search on
+                <link linkend="structure_editor_property_editor">structure properties</link>.
             </para>
             <para>
                 Select the chosen query elements with Shift or Ctrl and rightclick on them to use the context
@@ -1228,7 +1253,50 @@
                         </term>
                         <listitem>
                             <para>
-                                Compare similarity of expression
+                                Partial match. Use the
+                                <code>%</code>
+                                character, meaning
+                                <emphasis>any character(s)</emphasis>,
+                                to build your expression.
+                                Mind that the term
+                                <emphasis>any character(s)</emphasis>
+                                implies
+                                <emphasis>no</emphasis>
+                                character. Expression is case insensitive.
+                            </para>
+                            <para>
+                                The following examples illustrate the usage of
+                                <code>like</code>
+                                in sql statements and the &Flexive; query editor. Assuming a user with first name
+                                <code>John</code>
+                                exists in the database, you could search for him (and all other matching names) using
+                                the following patterns.
+                                <variablelist>
+                                    <varlistentry>
+                                        <term>
+                                            <code>%oh%</code>
+                                        </term>
+                                        <listitem>
+                                            <para>Search for
+                                                <code>oh</code>
+                                                preceded and followed by any character(s), meaning all words containing
+                                                <code>oh</code>.
+                                            </para>
+                                        </listitem>
+                                    </varlistentry>
+                                    <varlistentry>
+                                        <term>
+                                            <code>jo%</code>
+                                        </term>
+                                        <listitem>
+                                            <para>Search for
+                                                <code>jo</code>
+                                                followed by any character(s), meaning all words starting with
+                                                <code>jo</code>.
+                                            </para>
+                                        </listitem>
+                                    </varlistentry>
+                                </variablelist>
                             </para>
                         </listitem>
                     </varlistentry>
@@ -1238,7 +1306,7 @@
                 <imagedata fileref="images/adm_ui_query_editor/build_query.png"
                            format="PNG" contentwidth="100%"/>
             </para>
-            <section xml:id="query_editor_queries_briefcases">
+            <section xml:id="adm_query_editor_queries_briefcases">
                 <title>Saved queries and briefcases</title>
                 <para>You can save your query or save the query result to a briefcase by checking the options in the
                     query editor before executing the query. A briefcase can be public or private, meaning shared or
@@ -1258,7 +1326,7 @@
         <para>
             The &Flexive; user account administration UI provides an administration interface to administer your
             user accounts, assign
-            <link linkend="">user groups</link>
+            <link linkend="adm_user_group">user groups</link>
             and roles and make other settings like activation and language settings.
         </para>
         <section xml:id="adm_user_create_user">
@@ -1367,6 +1435,7 @@
             for an explanation of the concept of mandators used in &Flexive;.
         </para>
         <section xml:id="adm_mandator_create">
+            <title>Creating a mandator</title>
             <para>The following screen shows the mandator editor. You can specify a name for the mandator and set the
                 activation flag.
             </para>
@@ -1374,8 +1443,19 @@
                 <imagedata fileref="images/adm_ui_mandator/mandator_editor.png"
                            format="PNG" contentwidth="100%"/>
             </para>
-            After creating a mandator, you will be redirected to the overview for mandators, where you can select a
-            mandator for editing or delete him.
+            After creating a mandator, you will be redirected to the overview for mandators.
+        </section>
+        <section xml:id="adm_mandator_overview">
+            <title>The mandator overview</title>
+            <para>In the mandator overview you can select a mandator for editing or delete him.</para>
+            <para>In the following screen you can see the mandator
+                <code>Default</code>, representing the
+                fictitious parent company, and mandators for each subsidiary .
+            </para>
+            <para>
+                <imagedata fileref="images/adm_ui_mandator/mandator_overview.png"
+                           format="PNG" contentwidth="100%"/>
+            </para>
         </section>
     </section>
     <section xml:id="adm_ACL">
@@ -1393,7 +1473,9 @@
                 You can specify:
                 <orderedlist>
                     <listitem>
-                        <para>The mandator</para>
+                        <para>The
+                            <link linkend="adm_mandator">mandator</link>
+                        </para>
                     </listitem>
                     <listitem>
                         <para>The ACL's name</para>
@@ -1413,12 +1495,24 @@
                         <para>The following categories are available:</para>
                         <para>
                             <itemizedlist>
-                                <listitem>Instance</listitem>
-                                <listitem>Structure</listitem>
-                                <listitem>Workflow</listitem>
-                                <listitem>Briefcase</listitem>
-                                <listitem>SelectList</listitem>
-                                <listitem>SelectList Item</listitem>
+                                <listitem>
+                                    <link linkend="core_contents">Instance</link>
+                                </listitem>
+                                <listitem>
+                                    <link linkend="core_structure">Structure</link>
+                                </listitem>
+                                <listitem>
+                                    <link linkend="core_workflow">Workflow</link>
+                                </listitem>
+                                <listitem>
+                                    <link linkend="adm_query_editor_queries_briefcases">Briefcase</link>
+                                </listitem>
+                                <listitem>
+                                    <link linkend="adm_selectlists">SelectList</link>
+                                </listitem>
+                                <listitem>
+                                    <link linkend="adm_selectlists">SelectList Item</link>
+                                </listitem>
                             </itemizedlist>
                         </para>
                     </listitem>
@@ -1445,21 +1539,27 @@
             </para>
             <para>
                 In this example
-                <emphasis>everyone</emphasis> (a user group automatically containing every known account)
+                <emphasis>everyone</emphasis>
+                (a user group automatically containing every known account)
                 may read the ACL. Accounts that are a member of the user group
-                <emphasis>Account Managers</emphasis> may read and edit the ACL (please note that
-                <emphasis>Account Managers</emphasis> would already be allowed to read due to their membership to user group
-                <emphasis>Everyone</emphasis> but we added read permission here in case someone decides to remove group
-                <emphasis>Everyone</emphasis> from this ACL at a later date and we still want to keep read permission).
+                <emphasis>Account Managers</emphasis>
+                may read and edit the ACL (please note that
+                <emphasis>Account Managers</emphasis>
+                would already be allowed to read due to their membership to user group
+                <emphasis>Everyone</emphasis>
+                but we added read permission here in case someone decides to remove group
+                <emphasis>Everyone</emphasis>
+                from this ACL at a later date and we still want to keep read permission).
                 Members of the user group
-                <emphasis>Editors</emphasis> may additionally create, delete and export.
+                <emphasis>Editors</emphasis>
+                may additionally create, delete and export.
             </para>
         </section>
         <section xml:id="adm_acl_overview">
             <title>The ACL overview</title>
             <para>On the following screen you can see the default ACL's for each
                 <link linkend="adm_ACL_create">category</link>
-                and a user defined ACL (ACL 01).
+                and a user defined ACL (Public Content Instance ACL).
             </para>
             <para>You can switch between different mandators with the select box on top of the list.</para>
             <para>
