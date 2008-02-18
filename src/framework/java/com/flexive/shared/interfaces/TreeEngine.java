@@ -136,7 +136,7 @@ public interface TreeEngine {
     /**
      * Activates a node - copying it from the "Edit" to the "Live" tree
      *
-     * @param mode            tree mode (currently onld Edit supported)
+     * @param mode            tree mode (currently only Edit supported)
      * @param nodeId          the node to activate
      * @param includeChildren if true all children of the node are activated as well
      * @throws FxApplicationException on errors

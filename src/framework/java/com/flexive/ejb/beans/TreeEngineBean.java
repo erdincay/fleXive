@@ -42,12 +42,14 @@ import com.flexive.shared.FxContext;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.content.FxContent;
-import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxContentSecurityInfo;
+import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
-import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.scripting.FxScriptBinding;
+import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
@@ -87,6 +89,8 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
     ContentEngineLocal contentEngine;
     @EJB
     SequencerEngineLocal seq;
+    @EJB
+    private ScriptingEngineLocal scripting;
 
     public TreeEngineBean() {
         // nothing to do
@@ -215,8 +219,8 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
      * @return id of the node created
      * @throws FxApplicationException on errors
      */
-    public long createNode(long parentNodeId, String name, FxString label,
-                           int position, FxPK reference, String template, FxTreeMode mode) throws FxApplicationException {
+    private long createNode(long parentNodeId, String name, FxString label,
+                            int position, FxPK reference, String template, FxTreeMode mode) throws FxApplicationException {
         Connection con = null;
         try {
             FxContext.get().setTreeWasModified();
@@ -246,7 +250,18 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
             FxContext.get().setTreeWasModified();
             con = Database.getDbConnection();
             try {
-                return StorageManager.getTreeStorage().createNodes(con, seq, contentEngine, mode, parentNodeId, path, position);
+                long[] nodes = StorageManager.getTreeStorage().createNodes(con, seq, contentEngine, mode, parentNodeId, path, position);
+                // call scripts
+                final List<Long> scriptIds = scripting.getByScriptEvent(FxScriptEvent.AfterTreeNodeAdded);
+                if (scriptIds.size() == 0)
+                    return nodes;
+                final FxScriptBinding binding = new FxScriptBinding();
+                for (long node : nodes) {
+                    binding.setVariable("node", getNode(mode, node));
+                    for (long scriptId : scriptIds)
+                        scripting.runScript(scriptId, binding);
+                }
+                return nodes;
             } finally {
                 StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
             }
@@ -356,7 +371,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
      *                                node)
      * @throws FxApplicationException on errors
      */
-    public void removeNode(FxTreeMode mode, long nodeId, boolean deleteReferencedContent, boolean deleteChildren) throws FxApplicationException {
+    private void removeNode(FxTreeMode mode, long nodeId, boolean deleteReferencedContent, boolean deleteChildren) throws FxApplicationException {
         Connection con = null;
         FxPK ref = null;
         if (nodeId < 0) {
@@ -436,7 +451,16 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
         try {
             con = Database.getDbConnection();
             try {
-                return StorageManager.getTreeStorage().copy(con, seq, mode, source, destination, destinationPosition, false, "CopyOf_");
+                long nodeId = StorageManager.getTreeStorage().copy(con, seq, mode, source, destination, destinationPosition, false, "CopyOf_");
+                // call scripts
+                final List<Long> scriptIds = scripting.getByScriptEvent(FxScriptEvent.AfterTreeNodeAdded);
+                if (scriptIds.size() == 0)
+                    return nodeId;
+                FxTreeNode parent = getTree(mode, nodeId, 1000);
+                final FxScriptBinding binding = new FxScriptBinding();
+                for (long scriptId : scriptIds)
+                    executeScript(scriptId, parent, binding);
+                return nodeId;
             } finally {
                 StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
             }
@@ -448,6 +472,23 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
             throw new FxUpdateException(LOG, t, "ex.tree.copy.failed", source, destination, destinationPosition);
         } finally {
             Database.closeObjects(TreeEngineBean.class, con, null);
+        }
+    }
+
+    /**
+     * Execute a script for a tree node and all its children
+     *
+     * @param scriptId id of the script to execute
+     * @param node     node
+     * @param binding  binding
+     * @throws FxApplicationException on errors
+     */
+    private void executeScript(long scriptId, FxTreeNode node, FxScriptBinding binding) throws FxApplicationException {
+        binding.setVariable("node", node);
+        scripting.runScript(scriptId, binding);
+        if (node.getChildren() != null && node.getChildren().size() > 0) {
+            for (FxTreeNode child : node.getChildren())
+                executeScript(scriptId, child, binding);
         }
     }
 
@@ -466,10 +507,41 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
                 if (StorageManager.getTreeStorage().getNode(con, mode, nodeId).isLeaf())
                     includeChildren = true;
             }
-            if (includeChildren)
+
+            final List<Long> scriptBeforeIds = scripting.getByScriptEvent(FxScriptEvent.BeforeTreeNodeActivated);
+            final List<Long> scriptAfterIds = scripting.getByScriptEvent(FxScriptEvent.AfterTreeNodeActivated);
+
+            if (includeChildren) {
+                if (scriptBeforeIds.size() > 0) {
+                    final FxScriptBinding binding = new FxScriptBinding();
+                    FxTreeNode parent = getTree(FxTreeMode.Edit, nodeId, 1000);
+                    for (long scriptId : scriptBeforeIds)
+                        executeScript(scriptId, parent, binding);
+                }
                 StorageManager.getTreeStorage().activateSubtree(con, seq, contentEngine, mode, nodeId);
-            else
+                if (scriptAfterIds.size() > 0) {
+                    final FxScriptBinding binding = new FxScriptBinding();
+                    FxTreeNode parent = getTree(FxTreeMode.Live, nodeId, 1000);
+                    for (long scriptId : scriptAfterIds)
+                        executeScript(scriptId, parent, binding);
+                }
+            } else {
+                if (scriptBeforeIds.size() > 0) {
+                    final FxScriptBinding binding = new FxScriptBinding();
+                    for (long scriptId : scriptBeforeIds) {
+                        binding.setVariable("node", getNode(FxTreeMode.Edit, nodeId));
+                        scripting.runScript(scriptId, binding);
+                    }
+                }
                 StorageManager.getTreeStorage().activateNode(con, seq, contentEngine, mode, nodeId);
+                if (scriptAfterIds.size() > 0) {
+                    final FxScriptBinding binding = new FxScriptBinding();
+                    for (long scriptId : scriptAfterIds) {
+                        binding.setVariable("node", getNode(FxTreeMode.Live, nodeId));
+                        scripting.runScript(scriptId, binding);
+                    }
+                }
+            }
             StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
             StorageManager.getTreeStorage().checkTreeIfEnabled(con, FxTreeMode.Live);
             FxContext.get().setTreeWasModified();
@@ -671,14 +743,22 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
                 co.setAclId(node.getACLId());
                 contentEngine.save(co);
             }
+            // call scripts
+            final List<Long> scriptIds = scripting.getByScriptEvent(FxScriptEvent.AfterTreeNodeAdded);
+            if (scriptIds.size() == 0)
+                return nodeId;
+            final FxScriptBinding binding = new FxScriptBinding();
+            binding.setVariable("node", getNode(node.getMode(), nodeId));
+            for (long scriptId : scriptIds)
+                scripting.runScript(scriptId, binding);
             return nodeId;
         } else {
             FxTreeNode old = getNode(node.getOriginalMode(), node.getId());
-            if( node.getReference().getId() != old.getReference().getId() ) {
+            if (node.getReference().getId() != old.getReference().getId()) {
                 updateReference(node);
                 FxContentSecurityInfo si = contentEngine.getContentSecurityInfo(old.getReference());
-                if( si.getTypeId() == CacheAdmin.getEnvironment().getType(FxType.FOLDER).getId() ) {
-                    if( contentEngine.getReferencedContentCount(old.getReference()) == 0)
+                if (si.getTypeId() == CacheAdmin.getEnvironment().getType(FxType.FOLDER).getId()) {
+                    if (contentEngine.getReferencedContentCount(old.getReference()) == 0)
                         contentEngine.remove(old.getReference());
                 }
                 //need refresh with new reference data
@@ -690,7 +770,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
                 move(node.getMode(), node.getId(), node.getParentNodeId(), node.getPosition());
             if (node.isActivate() && node.getMode() != FxTreeMode.Live)
                 activate(FxTreeMode.Edit, node.getId(), node.isActivateWithChildren());
-            if( node.getACLId() != old.getACLId() ) {
+            if (node.getACLId() != old.getACLId()) {
                 FxContent co = contentEngine.load(node.getReference());
                 co.setAclId(node.getACLId());
                 contentEngine.save(co);

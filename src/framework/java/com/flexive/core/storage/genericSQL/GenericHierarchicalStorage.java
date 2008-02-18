@@ -2359,7 +2359,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
             FxScriptBinding binding;
             ScriptingEngine scripting = EJBLookup.getScriptingEngine();
-            for (long script : scripting.getByScriptType(FxScriptEvent.BinaryPreviewProcess)) {
+            for (long script : scripting.getByScriptEvent(FxScriptEvent.BinaryPreviewProcess)) {
                 binding = new FxScriptBinding();
                 binding.setVariable("processed", processed);
                 binding.setVariable("useDefaultPreview", useDefaultPreview);

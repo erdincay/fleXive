@@ -36,7 +36,6 @@ package com.flexive.core.storage.genericSQL;
 import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.FxTreeNodeInfoSpreaded;
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.security.PermissionSet;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -224,56 +223,55 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         insertSpace = insertSpace.add(new BigDecimal(additional * 2));
 
         reorganizeSpace(con, seq, mode, mode, nodeInfo.getId(), false, spacing, null, nodeInfo, position,
-                insertSpace, boundaries, 0, null, false, false, null);
+                insertSpace, boundaries, 0, null, false, false);
         return spacing;
     }
 
     /**
      * Do what i mean function :-D
      *
-     * @param con                an open and valid Connection
-     * @param seq                a valid Sequencer reference
-     * @param sourceMode         the source table (matters in createMode only)
-     * @param destMode           the destination table (matters in createMode only)
-     * @param nodeId             the node to work on
-     * @param includeNodeId      if true the operations root node (nodeId) is included into the updates
-     * @param overrideSpacing    if set this spacing is used instead of the computed one
-     * @param overrideLeft       if set this will be the first left position
-     * @param insertParent       create mode only: the parent node in which we will generate the free space
-     *                           specified by the parameters [insertPosition] and [insertSpace]
-     * @param insertPosition     create mode only: the position withn the destination nodes childs
-     * @param insertSpace        create mode only: the space to keep free at the specified position
-     * @param insertBoundaries   create mode only: the insert boundaries
-     * @param depthDelta         create mode only: the delta to apply to the depth
-     * @param destinationNode    create mode only: the destination node
-     * @param createMode         if true the function will insert copy of nodes instead of updating them
-     * @param createKeepIds      keep the ids in create mode
-     * @param firstCreatedNodeId first created node id
-     * @return true if the function was successfully
+     * @param con              an open and valid Connection
+     * @param seq              a valid Sequencer reference
+     * @param sourceMode       the source table (matters in createMode only)
+     * @param destMode         the destination table (matters in createMode only)
+     * @param nodeId           the node to work on
+     * @param includeNodeId    if true the operations root node (nodeId) is included into the updates
+     * @param overrideSpacing  if set this spacing is used instead of the computed one
+     * @param overrideLeft     if set this will be the first left position
+     * @param insertParent     create mode only: the parent node in which we will generate the free space
+     *                         specified by the parameters [insertPosition] and [insertSpace]
+     * @param insertPosition   create mode only: the position withn the destination nodes childs
+     * @param insertSpace      create mode only: the space to keep free at the specified position
+     * @param insertBoundaries create mode only: the insert boundaries
+     * @param depthDelta       create mode only: the delta to apply to the depth
+     * @param destinationNode  create mode only: the destination node
+     * @param createMode       if true the function will insert copy of nodes instead of updating them
+     * @param createKeepIds    keep the ids in create mode
+     * @return first created node id or -1 if no node was created using this method
      * @throws FxTreeException if the function fails
      */
-    public boolean reorganizeSpace(Connection con, SequencerEngine seq,
-                                   FxTreeMode sourceMode, FxTreeMode destMode,
-                                   long nodeId, boolean includeNodeId, BigDecimal overrideSpacing, BigDecimal overrideLeft,
-                                   FxTreeNodeInfo insertParent, int insertPosition, BigDecimal insertSpace, BigDecimal insertBoundaries[],
-                                   int depthDelta, Long destinationNode, boolean createMode, boolean createKeepIds, Long firstCreatedNodeId) throws FxTreeException {
+    public long reorganizeSpace(Connection con, SequencerEngine seq,
+                                FxTreeMode sourceMode, FxTreeMode destMode,
+                                long nodeId, boolean includeNodeId, BigDecimal overrideSpacing, BigDecimal overrideLeft,
+                                FxTreeNodeInfo insertParent, int insertPosition, BigDecimal insertSpace, BigDecimal insertBoundaries[],
+                                int depthDelta, Long destinationNode, boolean createMode, boolean createKeepIds) throws FxTreeException {
+        long firstCreatedNodeId = -1;
         FxTreeNodeInfoSpreaded nodeInfo;
         try {
             nodeInfo = (FxTreeNodeInfoSpreaded) getTreeNodeInfo(con, sourceMode, nodeId);
-//                    new FxNodeInfo(con, sourceTbl, nodeId);
         } catch (Exception e) {
-            return false;
+            return -1;
         }
 
         if (!nodeInfo.isSpaceOptimizable()) {
             // The Root node and cant be optimize any more ... so all we can do is fail :-/
             // This should never really happen
             if (nodeId == ROOT_NODE) {
-                return false;
+                return -1;
             }
             //System.out.println("### UP we go");
             return reorganizeSpace(con, seq, sourceMode, destMode, nodeInfo.getParentId(), includeNodeId, overrideSpacing, overrideLeft, insertParent,
-                    insertPosition, insertSpace, insertBoundaries, depthDelta, destinationNode, createMode, createKeepIds, firstCreatedNodeId);
+                    insertPosition, insertSpace, insertBoundaries, depthDelta, destinationNode, createMode, createKeepIds);
         }
 
         BigDecimal SPACING = nodeInfo.getDefaultSpacing();
@@ -282,7 +280,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         } else {
             if (SPACING.compareTo(GO_UP) < 0) {
                 return reorganizeSpace(con, seq, sourceMode, destMode, nodeInfo.getParentId(), includeNodeId, overrideSpacing, overrideLeft, insertParent,
-                        insertPosition, insertSpace, insertBoundaries, depthDelta, destinationNode, createMode, createKeepIds, firstCreatedNodeId);
+                        insertPosition, insertSpace, insertBoundaries, depthDelta, destinationNode, createMode, createKeepIds);
             }
         }
 
@@ -294,7 +292,6 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         BigDecimal right = null;
         String includeNode = includeNodeId ? "=" : "";
         long counter = 0;
-        firstCreatedNodeId = -1L;
         long newId = -1;
         try {
             String createProps = createMode ? ",PARENT,REF,NAME,TEMPLATE" : "";
@@ -446,7 +443,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             //System.out.println("Cleanup: "+counter+" spaceLen="+SPACING+
             //        " time:"+(System.currentTimeMillis()-time)+
             //        " time2:"+(System.currentTimeMillis()-time2));
-            return true;
+            return firstCreatedNodeId;
         } catch (Throwable e) {
             throw new FxTreeException(LOG, e, "ex.tree.reorganize.failed", counter, left, right, e.getMessage());
         } finally {
@@ -553,7 +550,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             return _createNode(con, seq, ce, mode, parentNodeId, name, label, position, reference, template, nodeId);
         } catch (FxTreeException e) {
             if ("ex.tree.create.noSpace".equals(e.getExceptionMessage().getKey())) {
-                reorganizeSpace(con, seq, mode, mode, parentNodeId, false, null, null, null, -1, null, null, 0, null, false, false, null);
+                reorganizeSpace(con, seq, mode, mode, parentNodeId, false, null, null, null, -1, null, null, 0, null, false, false);
                 return _createNode(con, seq, ce, mode, parentNodeId, name, label, position, reference, template, nodeId);
             } else
                 throw e;
@@ -613,7 +610,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         // Move the nodes
         int depthDelta = (destinationNode.getDepth() + 1) - node.getDepth();
         reorganizeSpace(con, seq, mode, mode, node.getId(), true, spacing, boundaries[0], null, -1, null, null,
-                depthDelta, null, false, false, null);
+                depthDelta, null, false, false);
 
 
         Statement stmt = null;
@@ -677,9 +674,8 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         // Copy the data
         BigDecimal boundaries[] = getBoundaries(con, destinationNode, dstPosition);
         int depthDelta = (destinationNode.getDepth() + 1) - sourceNode.getDepth();
-        Long firstCreatedNodeId = -1L;
-        reorganizeSpace(con, seq, mode, mode, sourceNode.getId(), true, spacing, boundaries[0], null, -1, null, null,
-                depthDelta, dstParentNodeId, true, false, firstCreatedNodeId);
+        long firstCreatedNodeId = reorganizeSpace(con, seq, mode, mode, sourceNode.getId(), true, spacing, boundaries[0], null, -1, null, null,
+                depthDelta, dstParentNodeId, true, false);
 
         Statement stmt = null;
         try {
@@ -698,7 +694,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                 int copyOfNr = getCopyOfCount(con, mode, copyOfPrefix, dstParentNodeId, firstCreatedNodeId);
                 // Make sure the name is unique
                 stmt.executeUpdate("UPDATE " + getTable(mode) + " SET NAME=CONCAT(CONCAT('" + copyOfPrefix + "',NAME),'(" +
-                        copyOfNr + ")') WHERE ID=" + (long) firstCreatedNodeId);
+                        copyOfNr + ")') WHERE ID=" + firstCreatedNodeId);
             }
 
         } catch (SQLException exc) {
@@ -839,7 +835,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         BigDecimal boundaries[] = getBoundaries(con, destinationNode, position);
         int depthDelta = (destinationNode.getDepth() + 1) - sourceNode.getDepth();
         reorganizeSpace(con, seq, mode, FxTreeMode.Live, sourceNode.getId(), true, spacing,
-                boundaries[0], null, 0, null, null, depthDelta, destination, true, true, null);
+                boundaries[0], null, 0, null, null, depthDelta, destination, true, true);
 
         try {
             // Update the childcount of the new parents

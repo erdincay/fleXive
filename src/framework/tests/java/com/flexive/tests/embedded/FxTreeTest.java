@@ -39,7 +39,10 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.interfaces.ContentEngine;
+import com.flexive.shared.interfaces.ScriptingEngine;
 import com.flexive.shared.interfaces.TreeEngine;
+import com.flexive.shared.scripting.FxScriptEvent;
+import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
@@ -60,11 +63,13 @@ import org.testng.annotations.Test;
 @Test(groups = {"ejb", "tree"})
 public class FxTreeTest {
     TreeEngine tree;
+    ScriptingEngine scripting;
 
     @BeforeClass
     public void beforeClass() throws Exception {
         login(TestUsers.SUPERVISOR);
         tree = EJBLookup.getTreeEngine();
+        scripting = EJBLookup.getScriptingEngine();
         EJBLookup.getDivisionConfigurationEngine().put(SystemParameters.TREE_CHECKS_ENABLED, true);
     }
 
@@ -358,6 +363,121 @@ public class FxTreeTest {
 //            System.out.println("Creating "+parent.getPath()+"/Node"+i);
             node = FxTreeNodeEdit.createNewChildNode(parent).setName("Node" + i);
             tree.save(node);
+        }
+    }
+
+    public static long scriptCounter = 0;
+
+    /**
+     * Test add/remove node scripting
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test
+    public void scriptingAddRemoveTest() throws FxApplicationException {
+        FxTreeMode mode = FxTreeMode.Edit;
+        tree.clear(mode);
+        scriptCounter = 0;
+        String code = "println \"[Groovy script]=== After adding node ${node.id}: ${node.path} ===\"\n" +
+                "com.flexive.tests.embedded.FxTreeTest.scriptCounter++";
+        FxScriptInfo siAdd = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.AfterTreeNodeAdded,
+                "afterNodeAdded.gy", "Test script", code);
+        code = "println \"[Groovy script]=== Before removing node ${node.id}: ${node.path} ===\"\n" +
+                "com.flexive.tests.embedded.FxTreeTest.scriptCounter -= 2";
+        FxScriptInfo siBeforeRemove = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.BeforeTreeNodeRemoved,
+                "beforeNodeRemoved.gy", "Test script", code);
+        code = "println \"[Groovy script]=== After removing node ${node.id}: ${node.path} ===\"\n" +
+                "com.flexive.tests.embedded.FxTreeTest.scriptCounter++";
+        FxScriptInfo siAfterRemove = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.AfterTreeNodeRemoved,
+                "afterNodeRemoved.gy", "Test script", code);
+        try {
+            Assert.assertEquals(scriptCounter, 0);
+            long nodeId = tree.save(FxTreeNodeEdit.createNew("Test1").setMode(mode).setParentNodeId(FxTreeNode.ROOT_NODE));
+            Assert.assertEquals(scriptCounter, 1);
+            long topNode = tree.createNodes(mode, FxTreeNode.ROOT_NODE, 0, "/A/B/C")[0];
+            Assert.assertEquals(scriptCounter, 4);
+            tree.copy(mode, topNode, nodeId, 0);
+            Assert.assertEquals(scriptCounter, 7);
+            tree.remove(tree.getNode(mode, topNode), true, true);
+            Assert.assertEquals(scriptCounter, 4);
+            tree.remove(tree.getNode(mode, nodeId), true, true);
+            Assert.assertEquals(scriptCounter, 0);
+        } finally {
+            scripting.removeScript(siAdd.getId());
+            scripting.removeScript(siBeforeRemove.getId());
+            scripting.removeScript(siAfterRemove.getId());
+        }
+    }
+
+    /**
+     * Test activate node scripting
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test
+    public void scriptingActivateTest() throws FxApplicationException {
+        FxTreeMode mode = FxTreeMode.Edit;
+        tree.clear(mode);
+        scriptCounter = 0;
+        String code = "println \"[Groovy script]=== Before activating node ${node.id}: ${node.path} ===\"\n" +
+                "com.flexive.tests.embedded.FxTreeTest.scriptCounter+=2";
+        FxScriptInfo siBeforeActivate = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.BeforeTreeNodeActivated,
+                "beforeNodeActivate.gy", "Test script", code);
+        code = "println \"[Groovy script]=== After activating node ${node.id}: ${node.path} ===\"\n" +
+                "com.flexive.tests.embedded.FxTreeTest.scriptCounter--";
+        FxScriptInfo siAfterActivate = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.AfterTreeNodeActivated,
+                "afterNodeActivate.gy", "Test script", code);
+        try {
+            Assert.assertEquals(scriptCounter, 0);
+            long nodeId = tree.save(FxTreeNodeEdit.createNew("Test1").setMode(mode).setParentNodeId(FxTreeNode.ROOT_NODE));
+            tree.activate(FxTreeMode.Edit, nodeId, false);
+            Assert.assertEquals(scriptCounter, 1);
+
+            long topNode = tree.createNodes(mode, FxTreeNode.ROOT_NODE, 0, "/A/B/C")[0];
+            tree.activate(FxTreeMode.Edit, topNode, true);
+            Assert.assertEquals(scriptCounter, 4);
+        } finally {
+            scripting.removeScript(siBeforeActivate.getId());
+            scripting.removeScript(siAfterActivate.getId());
+            tree.clear(FxTreeMode.Edit);
+            tree.clear(FxTreeMode.Live);
+        }
+    }
+
+    /**
+     * Test replacing a content with a folder scripting
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test
+    public void scriptingFolderReplacementTest() throws FxApplicationException {
+        FxTreeMode mode = FxTreeMode.Edit;
+        tree.clear(mode);
+        scriptCounter = 0;
+        ContentEngine co = EJBLookup.getContentEngine();
+        FxPK testContent = co.save(co.initialize(FxType.ROOT_ID));
+        String code = "println \"[Groovy script]=== AfterTreeNodeFolderReplacement node ${node.id}: ${node.path}. co-pk: ${content}, folder-pk: ${node.reference} ===\"\n" +
+                "com.flexive.tests.embedded.FxTreeTest.scriptCounter=42\n"+
+                "if(content.id == node.reference.id) com.flexive.tests.embedded.FxTreeTest.scriptCounter=-1";
+        FxScriptInfo siAfterTreeNodeFolderReplacement = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.AfterTreeNodeFolderReplacement,
+                "treeNodeFolderReplacement.gy", "Test script", code);
+        try {
+            Assert.assertEquals(scriptCounter, 0);
+            long nodeId = tree.save(FxTreeNodeEdit.createNew("Test1").
+                    setMode(mode).
+                    setParentNodeId(FxTreeNode.ROOT_NODE).
+                    setReference(testContent));
+            tree.createNodes(mode, FxTreeNode.ROOT_NODE, 0, "/Test1/A");
+            co.remove(testContent);
+            Assert.assertEquals(scriptCounter, 42);
+        } finally {
+            scripting.removeScript(siAfterTreeNodeFolderReplacement.getId());
+            tree.clear(mode);
+            try {
+                co.remove(testContent);
+            } catch (FxApplicationException e) {
+                //ignore
+            }
         }
     }
 }

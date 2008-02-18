@@ -204,13 +204,43 @@ public enum FxScriptEvent {
      */
     AfterAccountCreate(25, FxScriptScope.Accounts, "long accountId", "FxPK pk"),
 
-    AfterTreeNodeAdded(26, FxScriptScope.Tree),
-    AfterTreeNodeRemoved(27, FxScriptScope.Tree),
-    BeforeTreeNodeRemoved(28, FxScriptScope.Tree),
-    AfterTreeNodeActivated(29, FxScriptScope.Tree),
-    BeforeTreeNodeActivated(30, FxScriptScope.Tree),
-    AfterTreeNodeFolderReplacement(31, FxScriptScope.Tree),
-    BeforeTreeNodeFolderReplacement(32, FxScriptScope.Tree);
+    /**
+     * Fired after a new node was added to the tree.
+     * Note that this event will not be fired from the <code>populate(mode)</code> method!
+     */
+    AfterTreeNodeAdded(26, FxScriptScope.Tree, "FxTreeNode node"),
+
+    /**
+     * Fired after a new node was removed from the tree.
+     * Note that this event will not be fired from the <code>clear(mode)</code> method!
+     */
+    AfterTreeNodeRemoved(27, FxScriptScope.Tree, "FxTreeNode node"),
+
+    /**
+     * Fired after a new node was removed from the tree.
+     * Note that this event will not be fired from the <code>clear(mode)</code> method!
+     */
+    BeforeTreeNodeRemoved(28, FxScriptScope.Tree, "FxTreeNode node"),
+
+    /**
+     * Fired after a node was activated (copied from Edit to Live tree).
+     * The node passed as binding is the activated node from the Live tree!
+     * Please note that there is no deactivate event since this is equal to removal.
+     */
+    AfterTreeNodeActivated(29, FxScriptScope.Tree, "FxTreeNode node"),
+
+    /**
+     * Fired before a node is activated (copied from Edit to Live tree).
+     * The node passed as binding is the node to be activated from the Edit tree!
+     * Please note that there is no deactivate event since this is equal to removal.
+     */
+    BeforeTreeNodeActivated(30, FxScriptScope.Tree, "FxTreeNode node"),
+
+    /**
+     * Fired after a content reference has been replaced by a folder reference.
+     * This event happens when a content that is referenced by the tree is removed and is no leaf node.
+     */
+    AfterTreeNodeFolderReplacement(31, FxScriptScope.Tree, "FxTreeNode node", "FxPK content");
 
 
     private long id;
@@ -258,8 +288,8 @@ public enum FxScriptEvent {
         return id;
     }
 
-    public String getName(){
-        if(id >= 1){
+    public String getName() {
+        if (id >= 1) {
             try {
                 return getById(id).name();
             } catch (FxNotFoundException e) {

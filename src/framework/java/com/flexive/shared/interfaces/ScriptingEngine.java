@@ -112,12 +112,12 @@ public interface ScriptingEngine {
     void updateScriptCode(long scriptId, String code) throws FxApplicationException;
 
     /**
-     * Get scripts by their type
+     * Get scripts by their event
      *
      * @param scriptEvent     requested script event
-     * @return array of id's by type
+     * @return array of id's by event
      */
-    List<Long> getByScriptType(FxScriptEvent scriptEvent);
+    List<Long> getByScriptEvent(FxScriptEvent scriptEvent);
 
     /**
      * Create a new script

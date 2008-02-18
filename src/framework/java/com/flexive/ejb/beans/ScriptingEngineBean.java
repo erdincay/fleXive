@@ -71,8 +71,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -103,6 +102,11 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      * Timestamp of the script cache
      */
     static volatile long scriptCacheTimestamp = -1;
+
+    /**
+     * Scripts by Event cache
+     */
+    private static volatile Map<FxScriptEvent, List<Long>> scriptsByEvent = new HashMap<FxScriptEvent, List<Long>>(10);
 
     /**
      * {@inheritDoc}
@@ -250,7 +254,13 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public List<Long> getByScriptType(FxScriptEvent scriptEvent) {
+    public List<Long> getByScriptEvent(FxScriptEvent scriptEvent) {
+        long timeStamp = CacheAdmin.getEnvironment().getTimeStamp();
+        if (timeStamp != scriptCacheTimestamp)
+            resetLocalCaches(timeStamp);
+        List<Long> cached = scriptsByEvent.get(scriptEvent);
+        if (cached != null)
+            return cached;
         Connection con = null;
         PreparedStatement ps = null;
         String sql;
@@ -271,7 +281,19 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         } finally {
             Database.closeObjects(ScriptingEngineBean.class, con, ps);
         }
+        scriptsByEvent.put(scriptEvent, Collections.unmodifiableList(ret));
         return ret;
+    }
+
+    /**
+     * Reset all local caches in use
+     *
+     * @param timeStamp new timestamp to use for comparing the script cache
+     */
+    private void resetLocalCaches(long timeStamp) {
+        scriptCacheTimestamp = timeStamp;
+        groovyScriptCache.clear();
+        scriptsByEvent.clear();
     }
 
     /**
@@ -401,10 +423,8 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.ScriptExecution);
 
         long timeStamp = CacheAdmin.getEnvironment().getTimeStamp();
-        if (timeStamp != scriptCacheTimestamp) {
-            scriptCacheTimestamp = timeStamp;
-            groovyScriptCache.clear();
-        }
+        if (timeStamp != scriptCacheTimestamp)
+            resetLocalCaches(timeStamp);
         Script script = groovyScriptCache.get(scriptId);
         if (script == null) {
             try {

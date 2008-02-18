@@ -42,7 +42,10 @@ import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.content.*;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.ContentEngine;
+import com.flexive.shared.interfaces.ScriptingEngine;
 import com.flexive.shared.interfaces.SequencerEngine;
+import com.flexive.shared.scripting.FxScriptBinding;
+import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.UserGroup;
 import com.flexive.shared.security.UserTicket;
@@ -988,6 +991,11 @@ public abstract class GenericTreeStorage implements TreeStorage {
         if (nodeId == FxTreeNode.ROOT_NODE)
             throw new FxNoAccessException("ex.tree.delete.root");
         FxTreeNodeInfo nodeInfo = getTreeNodeInfo(con, mode, nodeId);
+        ScriptingEngine scripting = EJBLookup.getScriptingEngine();
+        final List<Long> scriptBeforeIds = scripting.getByScriptEvent(FxScriptEvent.BeforeTreeNodeRemoved);
+        final List<Long> scriptAfterIds = scripting.getByScriptEvent(FxScriptEvent.AfterTreeNodeRemoved);
+        //warning: removedNodes will only be available if script mappings for event AfterTreeNodeRemoved exist!
+        List<FxTreeNode> removedNodes = scriptAfterIds.size() > 0 ? new ArrayList<FxTreeNode>(100) : null;
         try {
             stmt = con.createStatement();
 
@@ -1008,6 +1016,20 @@ public abstract class GenericTreeStorage implements TreeStorage {
                         references.add(new FxPK(rs.getLong(1)));
                     } catch (FxLoadException e) {
                         //ignore, might have been removed meanwhile
+                    }
+                }
+                // call BeforeTreeNodeRemoved scripts
+                if (scriptBeforeIds.size() > 0 || scriptAfterIds.size() > 0) {
+                    rs = stmt.executeQuery("SELECT DISTINCT ID FROM " + getTable(mode) + " WHERE " + INSIDE_NODE);
+                    final FxScriptBinding binding = new FxScriptBinding();
+                    while (rs != null && rs.next()) {
+                        final FxTreeNode n = getNode(con, mode, rs.getLong(1));
+                        if (removedNodes != null)
+                            removedNodes.add(n);
+                        for (long scriptId : scriptBeforeIds) {
+                            binding.setVariable("node", n);
+                            scripting.runScript(scriptId, binding);
+                        }
                     }
                 }
                 stmt.addBatch("DELETE FROM " + getTable(mode) + " WHERE " + INSIDE_NODE);
@@ -1051,20 +1073,30 @@ public abstract class GenericTreeStorage implements TreeStorage {
 //                stmt.addBatch("UPDATE " + getTable(FxTreeMode.Edit) + " SET DIRTY=TRUE WHERE ID=" + editNode.getId());
             }
             stmt.executeBatch();
-            if (ce == null)
-                return;
-            //if the referenced content is a folder, remove it
-            long folderTypeId = CacheAdmin.getEnvironment().getType(FxType.FOLDER).getId();
-            for (FxPK ref : references) {
-                FxContentSecurityInfo si = ce.getContentSecurityInfo(ref);
-                int contentCount = ce.getReferencedContentCount(si.getPk());
+            if (ce != null) {
+                //if the referenced content is a folder, remove it
+                long folderTypeId = CacheAdmin.getEnvironment().getType(FxType.FOLDER).getId();
+                for (FxPK ref : references) {
+                    FxContentSecurityInfo si = ce.getContentSecurityInfo(ref);
+                    int contentCount = ce.getReferencedContentCount(si.getPk());
 //                System.out.println("ContentCount for " + si.getPk() + ": " + contentCount);
-                if (si.getTypeId() == folderTypeId && contentCount == 0) {
+                    if (si.getTypeId() == folderTypeId && contentCount == 0) {
 //                    System.out.println("Removing "+ref);
-                    ce.remove(ref);
+                        ce.remove(ref);
+                    }
                 }
             }
             afterNodeRemoved(con, nodeInfo, removeChildren);
+            if (removedNodes != null) {
+                final FxScriptBinding binding = new FxScriptBinding();
+                for (long scriptId : scriptAfterIds) {
+                    for (FxTreeNode n : removedNodes) {
+                        binding.setVariable("node", n);
+                        scripting.runScript(scriptId, binding);
+                    }
+
+                }
+            }
         } catch (SQLException exc) {
             throw new FxRemoveException(LOG, "ex.tree.delete.failed", nodeId, exc.getMessage());
         } finally {
@@ -1276,7 +1308,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
      * Handle removal of a content instance
      *
      * @param con      an open and valid connection
-     * @param ce       a reference to the content instance
+     * @param ce       a reference to the content engine
      * @param folderPK folder pk (if null a new one will be created if needed)
      * @param typeId   type of the content
      * @param nodeInfo node info
@@ -1314,6 +1346,18 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 //ignore
             }
         }
+
+        //scripting
+        ScriptingEngine scripting = EJBLookup.getScriptingEngine();
+        List<Long> scriptIds = scripting.getByScriptEvent(FxScriptEvent.AfterTreeNodeFolderReplacement);
+        if (scriptIds.size() == 0)
+            return folderPK;
+        FxScriptBinding binding = new FxScriptBinding();
+        binding.setVariable("node", getNode(con, nodeInfo.getMode(), nodeInfo.getId()));
+        binding.setVariable("content", nodeInfo.getReference());
+        for (long scriptId : scriptIds)
+            scripting.runScript(scriptId, binding);
+
         return folderPK;
     }
 

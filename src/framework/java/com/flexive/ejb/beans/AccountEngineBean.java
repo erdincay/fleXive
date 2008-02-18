@@ -482,7 +482,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             stmt.executeUpdate();
 
             // call scripts
-            final List<Long> scriptIds = scripting.getByScriptType(FxScriptEvent.AfterAccountCreate);
+            final List<Long> scriptIds = scripting.getByScriptEvent(FxScriptEvent.AfterAccountCreate);
             final FxScriptBinding binding = new FxScriptBinding();
             binding.setVariable("accountId", newId);
             binding.setVariable("pk", contactDataPK);
