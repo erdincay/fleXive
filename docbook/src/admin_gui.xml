@@ -18,14 +18,20 @@
             start the administration GUI by starting your chosen webserver. You enter
             the administration GUI by opening your web browser and entering the address
             of the administration GUI startpage. By default the address is
-            <code>http://XXX.XXX.XXX.XXX:8080/flexive/adm/main.jsf</code>
+            <code>http://localhost:8080/flexive/adm/main.jsf</code>
             where
-            <code>XXX.XXX.XXX.XXX</code>
-            needs to be replaced by your ip address. After a few moments, you
+            <code>localhost</code>
+            can to be replaced by your IP address. The port (
+            <code>8080</code>
+            in the example) depends on your
+            Application Servers setting and is the default for e.g. JBoss. After a few moments, you
             will reach the login page. If you want to work with the administration
-            GUI in the role of supervisor, the default username to choose is
+            GUI as supervisor (a role that is allowed to do
+            <emphasis>everything</emphasis> without any security limitations), the default username to
+            choose is
             <code>supervisor</code>
-            and the default password is<code>supervisor</code>.
+            with its default password
+            <code>supervisor</code>.
         </para>
     </section>
 
@@ -37,17 +43,17 @@
             <itemizedlist>
                 <listitem>
                     <para>
-                        A type
+                        A <link linkend="core_structure_types">type</link>
                     </para>
                 </listitem>
                 <listitem>
                     <para>
-                        The type's assigned groups
+                        The type's assigned <link linkend="core_structure_groups">groups</link>
                     </para>
                 </listitem>
                 <listitem>
                     <para>
-                        The type's assigned properties
+                        The type's assigned <link linkend="core_structure_properties">properties</link>
                     </para>
                 </listitem>
             </itemizedlist>
@@ -56,17 +62,19 @@
             In order to make life easier, a specific set of properties can
             be grouped together into a group. A group can then be assigned to a different
             type later on, therefore saving you the trouble of manually assigning every single
-            property to the type all over again.
+            property to the type all over again. A more detailed explanation can be found in the chapter about
+            <link linkend="core_structure_overview">structures</link>.
         </para>
 
         <important>Please note that properties and groups on their own do not
             "belong to" types and also types do not "consist of" properties. Instead properties
             and groups need to be assigned to types. In practice this
-            means that, when you want to add a property or group to a type, what you really do
+            means that, when you want to add a property or a group to a type, what you really do
             is creating a property assignment or group assignment which acts as a "link" between
             the type and the actual property. Similarly, if you remove a property or group from a type,
-            what you really do is removing the assignment so that this specific property or group is
-            no longer assigned to the type anymore.
+            means removing the assignment so that this specific property or group is
+            no longer assigned to the type anymore. Also note that properties or groups that are not assigned to any
+            type or another group will be automatically removed from the system.
         </important>
     </section>
 
@@ -207,11 +215,13 @@
                                         For types it is possible to:
                                         <itemizedlist>
                                             <listitem>
-                                                <para>Open the type in<glossterm>view mode</glossterm>.
+                                                <para>Open the type in
+                                                    <glossterm>view mode</glossterm>.
                                                 </para>
                                             </listitem>
                                             <listitem>
-                                                <para>Open the type in<glossterm>edit mode</glossterm>.
+                                                <para>Open the type in
+                                                    <glossterm>edit mode</glossterm>.
                                                 </para>
                                             </listitem>
                                             <listitem>
@@ -255,11 +265,13 @@
                                         For group assignments it is possible to:
                                         <itemizedlist>
                                             <listitem>
-                                                <para>Open the group assignemnt in<glossterm>view mode</glossterm>.
+                                                <para>Open the group assignemnt in
+                                                    <glossterm>view mode</glossterm>.
                                                 </para>
                                             </listitem>
                                             <listitem>
-                                                <para>Open the group assignment in<glossterm>edit mode</glossterm>.
+                                                <para>Open the group assignment in
+                                                    <glossterm>edit mode</glossterm>.
                                                 </para>
                                             </listitem>
                                             <listitem>
@@ -294,11 +306,13 @@
                                         For property assignments it is possible to:
                                         <itemizedlist>
                                             <listitem>
-                                                <para>Open the property assignment in<glossterm>view mode</glossterm>.
+                                                <para>Open the property assignment in
+                                                    <glossterm>view mode</glossterm>.
                                                 </para>
                                             </listitem>
                                             <listitem>
-                                                <para>Open the assignment in<glossterm>edit mode</glossterm>.
+                                                <para>Open the assignment in
+                                                    <glossterm>edit mode</glossterm>.
                                                 </para>
                                             </listitem>
                                             <listitem>
@@ -505,60 +519,6 @@
                                        contentwidth="66%"/>
                         </imageobject>
                     </mediaobject>
-                </para>
-            </section>
-            <section xml:id="structure_editor_saving_deleting_types">
-                <title>Saving, creating and deleting types</title>
-                <para>
-                    In order to save changes to existing types,
-                    the type editor provides the
-                    <guibutton>"Save"</guibutton>
-                    button
-                    <inlinemediaobject>
-                        <imageobject>
-                            <imagedata fileref="images/structureEditor/save_button.png" format="PNG"
-                                       contentwidth="66%"/>
-                        </imageobject>
-                    </inlinemediaobject>
-                    at the bottom left of the type editor view. A shortcut to the button can also be
-                    found on top of the content frame.
-                </para>
-                <para>
-                    In order to create a new type, the "Create Type..." option has to be selected from
-                    the drop down menu of the
-                    <guimenuitem>"Structure"</guimenuitem>
-                    tab above the
-                    structure tree. Instead of a
-                    <guibutton>"Save"</guibutton>
-                    button, the type editor
-                    provides the
-                    <guibutton>"Create"</guibutton>
-                    button
-                    <inlinemediaobject>
-                        <imageobject>
-                            <imagedata fileref="images/structureEditor/create_button.png" format="PNG"
-                                       contentwidth="66%"/>
-                        </imageobject>
-                    </inlinemediaobject>
-                    at the bottom left of the type editor view, as well as a shortcut on top of the
-                    content frame.
-                </para>
-                <para>
-                    For deleting an existing type, the type editor provides the
-                    <guibutton>"Delete"</guibutton>
-                    button
-                    <inlinemediaobject>
-                        <imageobject>
-                            <imagedata fileref="images/structureEditor/delete_button_type.png" format="PNG"
-                                       contentwidth="66%"/>
-                        </imageobject>
-                    </inlinemediaobject>
-                    at the bottom right of the type editor view. A shortcut to the button can also be
-                    found on top of the content frame. Note that only existing types (types have already
-                    been saved into the database) can be deleted. Therefore, when creating a new type,
-                    the
-                    <guibutton>"Delete"</guibutton>
-                    is not displayed.
                 </para>
             </section>
             If you want more information on types and their specific settings please refer to
@@ -1482,6 +1442,17 @@
             <para>
                 <imagedata fileref="images/adm_ui_acl/acl_editor_saved.png"
                            format="PNG" contentwidth="100%"/>
+            </para>
+            <para>
+                In this example
+                <emphasis>everyone</emphasis> (a user group automatically containing every known account)
+                may read the ACL. Accounts that are a member of the user group
+                <emphasis>Account Managers</emphasis> may read and edit the ACL (please note that
+                <emphasis>Account Managers</emphasis> would already be allowed to read due to their membership to user group
+                <emphasis>Everyone</emphasis> but we added read permission here in case someone decides to remove group
+                <emphasis>Everyone</emphasis> from this ACL at a later date and we still want to keep read permission).
+                Members of the user group
+                <emphasis>Editors</emphasis> may additionally create, delete and export.
             </para>
         </section>
         <section xml:id="adm_acl_overview">
