@@ -497,7 +497,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                 sql.append("UPDATE ").append(TBL_STRUCT_TYPES).append(" SET WORKFLOW=? WHERE ID=?");
                 if (ps != null) ps.close();
                 ps = con.prepareStatement(sql.toString());
-                ps.setLong(1, type.getACL().getId());
+                ps.setLong(1, type.getWorkflow().getId());
                 ps.setLong(2, type.getId());
                 ps.executeUpdate();
                 htracker.track(type, "history.type.update.workflow", orgType.getWorkflow(), type.getWorkflow());
