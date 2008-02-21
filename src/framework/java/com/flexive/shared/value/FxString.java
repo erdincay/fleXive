@@ -48,6 +48,12 @@ public class FxString extends FxValue<String, FxString> implements Serializable 
     private static final long serialVersionUID = -1441854978719391696L;
     public final static String EMPTY = "";
 
+    /**
+     * Protected Ctor used for "re-constructing" from XML
+     */
+    protected FxString() {
+    }
+
     public FxString(boolean multiLanguage, Map<Long, String> translations) {
         super(multiLanguage, translations);
     }

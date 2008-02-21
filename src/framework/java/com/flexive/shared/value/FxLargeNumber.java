@@ -33,6 +33,8 @@
  ***************************************************************/
 package com.flexive.shared.value;
 
+import com.flexive.shared.FxFormatUtils;
+
 import java.io.Serializable;
 import java.util.Map;
 
@@ -45,6 +47,12 @@ public class FxLargeNumber extends FxValue<Long, FxLargeNumber> implements Seria
 
     private static final long serialVersionUID = 3429868264535549630L;
     public final static Long EMPTY = 0L;
+
+    /**
+     * Protected Ctor used for "re-constructing" from XML
+     */
+    protected FxLargeNumber() {
+    }
 
     /**
      * Constructor
@@ -165,7 +173,7 @@ public class FxLargeNumber extends FxValue<Long, FxLargeNumber> implements Seria
      */
     @Override
     public Long fromString(String value) {
-        return FxValueConverter.toLong(value);
+        return FxFormatUtils.toLong(value);
     }
 
     /**

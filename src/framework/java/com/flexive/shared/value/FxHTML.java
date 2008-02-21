@@ -59,6 +59,12 @@ public class FxHTML extends FxString {
     public boolean isTidyHTML() {
         return tidyHTML;
     }
+    
+    /**
+     * Protected Ctor used for "re-constructing" from XML
+     */
+    protected FxHTML() {
+    }
 
     /**
      * Enable or disable tidy before saving

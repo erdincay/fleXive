@@ -79,6 +79,7 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
      *
      * @param id               internal id
      * @param singleRowStorage can the underlying data be stored in a single db row?
+     * @param valueClass       class of the value object
      */
     FxDataType(long id, boolean singleRowStorage, Class<? extends FxValue> valueClass) {
         this.initialized = false;
@@ -132,8 +133,8 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
      * Initialized this data type by assigning the name and label as
      * stored in the database
      *
-     * @param name        name
-     * @param label       label
+     * @param name  name
+     * @param label label
      */
     public void initialize(String name, FxString label) {
         if (initialized)
@@ -152,7 +153,7 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
      * @return true if the given value is a valid representation for the datatype, false otherwise
      */
     public boolean isValid(Object value) {
-        if( value instanceof FxNoAccess )
+        if (value instanceof FxNoAccess)
             return true;
         if (value instanceof FxValue) {
             if (!((FxValue) value).isValid()) {
@@ -205,7 +206,7 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
     }
 
     /**
-     * Get an random FxValue instance for the data type
+     * Get an random FxValue instance for the assignments multilanguage and selectlist, etc. settings 
      *
      * @param rnd        random
      * @param assignment assignment
@@ -214,11 +215,11 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
     public FxValue getRandomValue(Random rnd, FxPropertyAssignment assignment) {
         switch (this) {
             case HTML:
-                return new FxHTML(getRandomString(assignment, rnd, 2048));
+                return new FxHTML(getRandomString(assignment.isMultiLang(), rnd, 2048));
             case String1024:
-                return new FxString(getRandomString(assignment, rnd, 1024));
+                return new FxString(getRandomString(assignment.isMultiLang(), rnd, 1024));
             case Text:
-                return new FxString(getRandomString(assignment, rnd, 4096));
+                return new FxString(getRandomString(assignment.isMultiLang(), rnd, 4096));
             case Number:
                 return new FxNumber(assignment.isMultiLang(), rnd.nextInt());
             case LargeNumber:
@@ -261,11 +262,57 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
         }
     }
 
+    /**
+     * Get an random FxValue instance for the data type
+     *
+     * @param rnd       random
+     * @param multilang multilanguage?
+     * @return random FxValue instance for the data type
+     */
+    public FxValue getRandomValue(Random rnd, boolean multilang) {
+        switch (this) {
+            case HTML:
+                return new FxHTML(getRandomString(multilang, rnd, 2048));
+            case String1024:
+                return new FxString(getRandomString(multilang, rnd, 1024));
+            case Text:
+                return new FxString(getRandomString(multilang, rnd, 4096));
+            case Number:
+                return new FxNumber(multilang, rnd.nextInt());
+            case LargeNumber:
+                return new FxLargeNumber(multilang, rnd.nextLong());
+            case Float:
+                return new FxFloat(multilang, rnd.nextFloat());
+            case Double:
+                return new FxDouble(multilang, rnd.nextDouble());
+            case Date:
+                return new FxDate(multilang, getRandomDate(rnd));
+            case DateTime:
+                return new FxDateTime(multilang, getRandomDate(rnd));
+            case DateRange:
+                final List<Date> dates = Arrays.asList(getRandomDate(rnd), getRandomDate(rnd));
+                return new FxDateRange(multilang, new DateRange(Collections.min(dates), Collections.max(dates)));
+            case DateTimeRange:
+                final List<Date> dates2 = Arrays.asList(getRandomDate(rnd), getRandomDate(rnd));
+                return new FxDateTimeRange(multilang, new DateRange(Collections.min(dates2), Collections.max(dates2)));
+            case Boolean:
+                return new FxBoolean(multilang, rnd.nextBoolean());
+            case Binary:
+                return new FxBinary(multilang, FxBinary.EMPTY);
+            case Reference:
+                return new FxReference(multilang, FxReference.EMPTY);
+            case SelectOne:
+            case SelectMany:
+            case InlineReference:
+            default:
+                throw new FxNotFoundException("ex.structure.datatype.notImplemented", this.name()).asRuntimeException();
+        }
+    }
+
     private Date getRandomDate(Random rnd) {
         final Calendar cal = Calendar.getInstance();
         cal.set(rnd.nextInt(3000), rnd.nextInt(12), rnd.nextInt(28));
-        final Date date = cal.getTime();
-        return date;
+        return cal.getTime();
     }
 
     /**
@@ -273,7 +320,7 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
      * datatype.
      *
      * @return the concrete {@link FxValue} implementation class for values of this
-     * datatype.
+     *         datatype.
      */
     public Class<? extends FxValue> getValueClass() {
         return valueClass;
@@ -282,18 +329,18 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
     /**
      * Get a random String
      *
-     * @param assignment used assignment
-     * @param rnd        Random to use
-     * @param maxLength  max. maxLength
+     * @param multilang multi language?
+     * @param rnd       Random to use
+     * @param maxLength max. maxLength
      * @return random string
      */
-    private FxString getRandomString(FxPropertyAssignment assignment, Random rnd, int maxLength) {
-        FxString ret = new FxString(assignment.isMultiLang(), FxLanguage.ENGLISH, getRandomText(rnd, maxLength));
-        if (assignment.isMultiLang()) {
+    private FxString getRandomString(boolean multilang, Random rnd, int maxLength) {
+        FxString ret = new FxString(multilang, FxLanguage.ENGLISH, getRandomText(rnd, maxLength));
+        if (multilang) {
             ret.setTranslation(FxLanguage.GERMAN, getRandomText(rnd, maxLength));
-            if( rnd.nextBoolean() )
+            if (rnd.nextBoolean())
                 ret.setTranslation(FxLanguage.FRENCH, getRandomText(rnd, maxLength));
-            if( rnd.nextBoolean() )
+            if (rnd.nextBoolean())
                 ret.setTranslation(FxLanguage.ITALIAN, getRandomText(rnd, maxLength));
         }
         return ret;
@@ -302,15 +349,15 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
     /**
      * Get a random text
      *
-     * @param rnd Random to use
+     * @param rnd       Random to use
      * @param maxLength max. length
      * @return random text
      */
     private String getRandomText(Random rnd, int maxLength) {
-        int start = rnd.nextInt(RANDOM_TEXT.length()-maxLength);
+        int start = rnd.nextInt(RANDOM_TEXT.length() - maxLength);
         int len = Math.max(15, rnd.nextInt(Math.min(RANDOM_TEXT.length() - start, maxLength)));
-        if( len > maxLength)
+        if (len > maxLength)
             len = maxLength;
-        return RANDOM_TEXT.substring(start, start+len);
+        return RANDOM_TEXT.substring(start, start + len);
     }
 }

@@ -34,12 +34,11 @@
 package com.flexive.shared;
 
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxConversionException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.structure.FxSelectListItem;
-import com.flexive.shared.value.FxString;
-import com.flexive.shared.value.SelectMany;
-import com.flexive.shared.value.FxValue;
+import com.flexive.shared.value.*;
 import org.apache.commons.lang.StringUtils;
 
 import java.text.ParseException;
@@ -56,23 +55,24 @@ import java.util.Locale;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public final class FxFormatUtils {
-    public final static String DEFAULT_COLOR="#000000";
+    public final static String DEFAULT_COLOR = "#000000";
+    public final static String UNIVERSAL_TIMEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
     /**
      * Private constructor to avoid instantiation
      */
     private FxFormatUtils() {
     }
-    
+
     /**
      * Returns true if the char is a valid RGB value.
      *
      * @param ch the character to check
-     * @return true if the char is a valid RGB value 
+     * @return true if the char is a valid RGB value
      */
     private static boolean isValidRGBChar(final char ch) {
-        return (Character.isDigit(ch) || ch == 'A' || ch == 'B' || ch == 'C' || ch == 'D' 
-            || ch == 'E' || ch == 'F');
+        return (Character.isDigit(ch) || ch == 'A' || ch == 'B' || ch == 'C' || ch == 'D'
+                || ch == 'E' || ch == 'F');
     }
 
     /**
@@ -166,7 +166,7 @@ public final class FxFormatUtils {
      * Checks the password and encodes it.
      *
      * @param accountId the account ID (needed for computing the hash)
-     * @param password unencoded the password
+     * @param password  unencoded the password
      * @return the encoded password
      * @throws FxInvalidParameterException if the password is invalid (too short, too simple, ..)
      */
@@ -458,7 +458,7 @@ public final class FxFormatUtils {
     /**
      * Returns a basic date/time format that is readable but not localized.
      *
-     * @return  a basic date/time format that is readable but not localized.
+     * @return a basic date/time format that is readable but not localized.
      */
     public static SimpleDateFormat getDateTimeFormat() {
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -467,9 +467,127 @@ public final class FxFormatUtils {
     /**
      * Returns a basic date format that is readable but not localized.
      *
-     * @return  a basic date format that is readable but not localized.
+     * @return a basic date format that is readable but not localized.
      */
     public static SimpleDateFormat getDateFormat() {
         return new SimpleDateFormat("yyyy-MM-dd");
+    }
+
+    /**
+     * Convert a String to Boolean
+     *
+     * @param value value to convert
+     * @return Boolean
+     */
+    public static Boolean toBoolean(String value) {
+        try {
+            value = unquote(value);
+            return Boolean.parseBoolean(value) || "1".equals(value);
+        } catch (Exception e) {
+            throw new FxConversionException(e, "ex.conversion.error", FxBoolean.class.getCanonicalName(), value,
+                    e.getMessage()).asRuntimeException();
+        }
+    }
+
+    /**
+     * Convert a String to Integer
+     *
+     * @param value value to convert
+     * @return Integer
+     */
+    public static Integer toInteger(String value) {
+        try {
+            return Integer.parseInt(unquote(value));
+        } catch (Exception e) {
+            throw new FxConversionException(e, "ex.conversion.error", FxNumber.class.getCanonicalName(), value,
+                    e.getMessage()).asRuntimeException();
+        }
+    }
+
+    /**
+     * Convert a String to Long
+     *
+     * @param value value to convert
+     * @return Long
+     */
+    public static Long toLong(String value) {
+        try {
+            return Long.parseLong(unquote(value));
+        } catch (Exception e) {
+            throw new FxConversionException(e, "ex.conversion.error", FxLargeNumber.class.getCanonicalName(), value,
+                    e.getMessage()).asRuntimeException();
+        }
+    }
+
+    /**
+     * Convert a String to Double
+     *
+     * @param value value to convert
+     * @return Double
+     */
+    public static Double toDouble(String value) {
+        try {
+            return Double.parseDouble(unquote(value));
+        } catch (Exception e) {
+            throw new FxConversionException(e, "ex.conversion.error", FxDouble.class.getCanonicalName(), value,
+                    e.getMessage()).asRuntimeException();
+        }
+    }
+
+    /**
+     * Convert a String to Float
+     *
+     * @param value value to convert
+     * @return Float
+     */
+    public static Float toFloat(String value) {
+        try {
+            return Float.parseFloat(unquote(value));
+        } catch (Exception e) {
+            throw new FxConversionException(e, "ex.conversion.error", FxFloat.class.getCanonicalName(), value,
+                    e.getMessage()).asRuntimeException();
+        }
+    }
+
+    /**
+     * Convert a String to Date
+     *
+     * @param value value to convert
+     * @return Date
+     */
+    public static Date toDate(String value) {
+        try {
+            //TODO: use a better date parser
+            try {
+                return getDateFormat().parse(unquote(value));
+            } catch (ParseException e) {
+                //fallback to universal format if "short" format is no match
+                return new SimpleDateFormat(UNIVERSAL_TIMEFORMAT).parse(unquote(value));
+            }
+        } catch (Exception e) {
+            throw new FxConversionException(e, "ex.conversion.error", FxDate.class.getCanonicalName(), value,
+                    e.getMessage()).asRuntimeException();
+        }
+    }
+
+    /**
+     * Convert a String to DateTime
+     *
+     * @param value value to convert
+     * @return Date
+     */
+    public static Date toDateTime(String value) {
+        try {
+            //TODO: use a better date parser
+            try {
+                return getDateTimeFormat().parse(unquote(value));
+            } catch (ParseException e) {
+                //fallback to universal format if "short" format is no match
+                return new SimpleDateFormat(UNIVERSAL_TIMEFORMAT).parse(unquote(value));
+            }
+        } catch (Exception e) {
+            throw new FxConversionException(e, "ex.conversion.error", FxDate.class.getCanonicalName(), value,
+                    e.getMessage()).asRuntimeException();
+        }
     }
 }

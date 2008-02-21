@@ -49,7 +49,6 @@ import com.flexive.shared.search.FxFoundType;
 import com.flexive.shared.search.query.VersionFilter;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.tree.FxTreeMode;
-import com.flexive.shared.value.FxValueConverter;
 import com.flexive.sqlParser.*;
 import static com.flexive.sqlParser.Condition.Comparator;
 import org.apache.commons.lang.StringUtils;
@@ -540,16 +539,16 @@ public class MySQLDataFilter extends DataFilter {
                 }
                 break;
             case LargeNumber:
-                value = "" + FxValueConverter.toLong(constant.getValue());
+                value = "" + FxFormatUtils.toLong(constant.getValue());
                 break;
             case Number:
-                value = "" + FxValueConverter.toInteger(constant.getValue());
+                value = "" + FxFormatUtils.toInteger(constant.getValue());
                 break;
             case Double:
-                value = "" + FxValueConverter.toDouble(constant.getValue());
+                value = "" + FxFormatUtils.toDouble(constant.getValue());
                 break;
             case Float:
-                value = "" + FxValueConverter.toFloat(constant.getValue());
+                value = "" + FxFormatUtils.toFloat(constant.getValue());
                 break;
             case SelectOne:
                 if (StringUtils.isNumeric(constant.getValue())) {
@@ -572,15 +571,15 @@ public class MySQLDataFilter extends DataFilter {
                 }
                 break;
             case Boolean:
-                value = FxValueConverter.toBoolean(constant.getValue()) ? "1" : "0";
+                value = FxFormatUtils.toBoolean(constant.getValue()) ? "1" : "0";
                 break;
             case Date:
             case DateRange:
-                value = constant.getValue() == null ? "NULL" : "'" + FxFormatUtils.getDateFormat().format(FxValueConverter.toDate(constant.getValue())) + "'";
+                value = constant.getValue() == null ? "NULL" : "'" + FxFormatUtils.getDateFormat().format(FxFormatUtils.toDate(constant.getValue())) + "'";
                 break;
             case DateTime:
             case DateTimeRange:
-                value = constant.getValue() == null ? "NULL" : "'" + FxFormatUtils.getDateTimeFormat().format(FxValueConverter.toDateTime(constant.getValue())) + "'";
+                value = constant.getValue() == null ? "NULL" : "'" + FxFormatUtils.getDateTimeFormat().format(FxFormatUtils.toDateTime(constant.getValue())) + "'";
                 break;
             case Binary:
                 if (cond.getComperator().equals(Comparator.IS_NOT) && constant.isNull()) {

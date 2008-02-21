@@ -38,6 +38,8 @@ import org.apache.commons.lang.math.NumberUtils;
 import java.io.Serializable;
 import java.util.Map;
 
+import com.flexive.shared.FxFormatUtils;
+
 /**
  * A multilingual Float, internally represented as Float
  *
@@ -48,6 +50,11 @@ public class FxFloat extends FxValue<Float, FxFloat> implements Serializable {
 
     public final static Float EMPTY = 0.0f;
 
+    /**
+     * Protected Ctor used for "re-constructing" from XML
+     */
+    protected FxFloat() {
+    }
 
     /**
      * Constructor
@@ -157,7 +164,7 @@ public class FxFloat extends FxValue<Float, FxFloat> implements Serializable {
      */
     @Override
     public Float fromString(String value) {
-        return FxValueConverter.toFloat(value);
+        return FxFormatUtils.toFloat(value);
     }
 
     /**

@@ -33,126 +33,70 @@
  ***************************************************************/
 package com.flexive.shared.value;
 
-import com.flexive.shared.FxFormatUtils;
-import com.flexive.shared.exceptions.FxConversionException;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 /**
- * Convert Strings to the data types used in FxValue
+ * XStream converter for FxValues
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class FxValueConverter {
+public class FxValueConverter implements Converter {
+    /*
+<val t="FxString" ml="1" dl="1">
+    <d l="1">text lang 1</d>
+    <d l="2">text lang 2</d>
+</val>
+
+     */
 
     /**
-     * Convert a String to Boolean
-     *
-     * @param value value to convert
-     * @return Boolean
+     * {@inheritDoc}
      */
-    public static Boolean toBoolean(String value) {
-        try {
-            value = FxFormatUtils.unquote(value);
-            return Boolean.parseBoolean(value) || "1".equals(value);
-        } catch (Exception e) {
-            throw new FxConversionException(e, "ex.conversion.error", FxBoolean.class.getCanonicalName(), value,
-                    e.getMessage()).asRuntimeException();
-        }
-    }
-
-
-    /**
-     * Convert a String to Integer
-     *
-     * @param value value to convert
-     * @return Integer
-     */
-    public static Integer toInteger(String value) {
-        try {
-            return Integer.parseInt(FxFormatUtils.unquote(value));
-        } catch (Exception e) {
-            throw new FxConversionException(e, "ex.conversion.error", FxNumber.class.getCanonicalName(), value,
-                    e.getMessage()).asRuntimeException();
+    public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext ctx) {
+        FxValue value = (FxValue) o;
+        writer.addAttribute("t", value.getClass().getSimpleName());
+        writer.addAttribute("ml", value.isMultiLanguage() ? "1" : "0");
+        writer.addAttribute("dl", "" + value.getDefaultLanguage());
+        for (long lang : value.getTranslatedLanguages()) {
+            writer.startNode("d");
+            writer.addAttribute("l", "" + lang);
+            writer.setValue(value.getStringValue(value.getTranslation(lang)));
+            writer.endNode();
         }
     }
 
     /**
-     * Convert a String to Long
-     *
-     * @param value value to convert
-     * @return Long
+     * {@inheritDoc}
      */
-    public static Long toLong(String value) {
+    @SuppressWarnings("unchecked")
+    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
+        FxValue v = null;
         try {
-            return Long.parseLong(FxFormatUtils.unquote(value));
+            v = (FxValue) Class.forName("com.flexive.shared.value." + reader.getAttribute("t")).newInstance();
+            v.multiLanguage = "1".equals(reader.getAttribute("ml"));
+            v.defaultLanguage = Long.valueOf(reader.getAttribute("dl"));
+            while( reader.hasMoreChildren() ) {
+                reader.moveDown();
+                if ("d".equals(reader.getNodeName())) {
+                    long lang = Long.valueOf(reader.getAttribute("l"));
+                    v.setTranslation(lang, v.fromString(reader.getValue()));
+                }
+                reader.moveUp();
+            }
         } catch (Exception e) {
-            throw new FxConversionException(e, "ex.conversion.error", FxLargeNumber.class.getCanonicalName(), value,
-                    e.getMessage()).asRuntimeException();
+            e.printStackTrace();
         }
+        return v;
     }
 
     /**
-     * Convert a String to Double
-     *
-     * @param value value to convert
-     * @return Double
+     * {@inheritDoc}
      */
-    public static Double toDouble(String value) {
-        try {
-            return Double.parseDouble(FxFormatUtils.unquote(value));
-        } catch (Exception e) {
-            throw new FxConversionException(e, "ex.conversion.error", FxDouble.class.getCanonicalName(), value,
-                    e.getMessage()).asRuntimeException();
-        }
-    }
-
-    /**
-     * Convert a String to Float
-     *
-     * @param value value to convert
-     * @return Float
-     */
-    public static Float toFloat(String value) {
-        try {
-            return Float.parseFloat(FxFormatUtils.unquote(value));
-        } catch (Exception e) {
-            throw new FxConversionException(e, "ex.conversion.error", FxFloat.class.getCanonicalName(), value,
-                    e.getMessage()).asRuntimeException();
-        }
-    }
-
-    /**
-     * Convert a String to Date
-     *
-     * @param value value to convert
-     * @return Date
-     */
-    public static Date toDate(String value) {
-        try {
-            //TODO: use a better date parser
-            return FxFormatUtils.getDateFormat().parse(FxFormatUtils.unquote(value));
-        } catch (Exception e) {
-            throw new FxConversionException(e, "ex.conversion.error", FxDate.class.getCanonicalName(), value,
-                    e.getMessage()).asRuntimeException();
-        }
-    }
-
-    /**
-     * Convert a String to DateTime
-     *
-     * @param value value to convert
-     * @return Date
-     */
-    public static Date toDateTime(String value) {
-        try {
-            //TODO: use a better date parser
-            return FxFormatUtils.getDateTimeFormat().parse(FxFormatUtils.unquote(value));
-        } catch (Exception e) {
-            throw new FxConversionException(e, "ex.conversion.error", FxDate.class.getCanonicalName(), value,
-                    e.getMessage()).asRuntimeException();
-        }
+    public boolean canConvert(Class aClass) {
+        return FxValue.class.isAssignableFrom(aClass);
     }
 }

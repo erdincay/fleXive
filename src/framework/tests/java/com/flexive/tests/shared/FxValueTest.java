@@ -36,12 +36,10 @@ package com.flexive.tests.shared;
 import com.flexive.shared.value.*;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-import org.apache.commons.lang.StringUtils;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.ArrayList;
 
 /**
  * Generic FxValue tests

@@ -52,6 +52,11 @@ public class FxDateRange extends FxValue<DateRange, FxDateRange> implements Seri
 
     public final static DateRange EMPTY = new DateRange(new Date(0), new Date(0));
 
+    /**
+     * Protected Ctor used for "re-constructing" from XML
+     */
+    protected FxDateRange() {
+    }
 
     /**
      * Constructor

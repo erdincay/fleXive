@@ -53,6 +53,12 @@ public class FxSelectOne extends FxValue<FxSelectListItem, FxSelectOne> implemen
     private FxSelectList list = null;
 
     /**
+     * Protected Ctor used for "re-constructing" from XML
+     */
+    protected FxSelectOne() {
+    }
+
+    /**
      * Constructor
      *
      * @param multiLanguage   multilanguage value?

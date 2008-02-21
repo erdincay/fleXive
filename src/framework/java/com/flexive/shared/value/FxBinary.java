@@ -47,6 +47,12 @@ public class FxBinary extends FxValue<BinaryDescriptor, FxBinary> implements Ser
     public final static BinaryDescriptor EMPTY = new BinaryDescriptor();
 
     /**
+     * Protected Ctor used for "re-constructing" from XML
+     */
+    protected FxBinary() {
+    }
+
+    /**
      * Constructor
      *
      * @param multiLanguage   multilanguage value?

@@ -33,6 +33,8 @@
  ***************************************************************/
 package com.flexive.shared.value;
 
+import com.flexive.shared.FxFormatUtils;
+
 import java.io.Serializable;
 import java.util.Map;
 
@@ -45,6 +47,12 @@ public class FxNumber extends FxValue<Integer, FxNumber> implements Serializable
 
     private static final long serialVersionUID = 1001999689516984420L;
     public final static Integer EMPTY = 0;
+
+    /**
+     * Protected Ctor used for "re-constructing" from XML
+     */
+    protected FxNumber() {
+    }
 
     /**
      * Constructor
@@ -154,7 +162,7 @@ public class FxNumber extends FxValue<Integer, FxNumber> implements Serializable
      */
     @Override
     public Integer fromString(String value) {
-        return FxValueConverter.toInteger(value);
+        return FxFormatUtils.toInteger(value);
     }
 
     /**

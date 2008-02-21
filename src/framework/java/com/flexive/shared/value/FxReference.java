@@ -50,6 +50,12 @@ public class FxReference extends FxValue<ReferencedContent, FxReference> impleme
     public final static ReferencedContent EMPTY = new ReferencedContent(new FxPK());
 
     /**
+     * Protected Ctor used for "re-constructing" from XML
+     */
+    protected FxReference() {
+    }
+
+    /**
      * Constructor
      *
      * @param multiLanguage   multilanguage value?

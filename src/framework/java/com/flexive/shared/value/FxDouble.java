@@ -38,6 +38,8 @@ import org.apache.commons.lang.math.NumberUtils;
 import java.io.Serializable;
 import java.util.Map;
 
+import com.flexive.shared.FxFormatUtils;
+
 /**
  * A multilingual Double, internally represented as Double
  *
@@ -48,6 +50,11 @@ public class FxDouble extends FxValue<Double, FxDouble> implements Serializable 
 
     public final static Double EMPTY = 0.0;
 
+    /**
+     * Protected Ctor used for "re-constructing" from XML
+     */
+    protected FxDouble() {
+    }
 
     /**
      * Constructor
@@ -157,7 +164,7 @@ public class FxDouble extends FxValue<Double, FxDouble> implements Serializable 
      */
     @Override
     public Double fromString(String value) {
-        return FxValueConverter.toDouble(value);
+        return FxFormatUtils.toDouble(value);
     }
 
     /**

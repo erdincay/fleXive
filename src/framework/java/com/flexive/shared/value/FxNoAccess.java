@@ -55,6 +55,12 @@ public final class FxNoAccess extends FxValue<Object, FxNoAccess> {
     private UserTicket ticket;
 
     /**
+     * Protected Ctor used for "re-constructing" from XML
+     */
+    protected FxNoAccess() {
+    }
+
+    /**
      * Constructor
      *
      * @param ticket       to get the correct tranlsation of the no access text (if null a fallback will be used)

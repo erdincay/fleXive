@@ -33,8 +33,10 @@
  ***************************************************************/
 package com.flexive.shared.value;
 
+import com.flexive.shared.FxFormatUtils;
+
 import java.io.Serializable;
-import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
@@ -48,6 +50,11 @@ public class FxDate extends FxValue<Date, FxDate> implements Serializable {
 
     public final static Date EMPTY = new Date(0);
 
+    /**
+     * Protected Ctor used for "re-constructing" from XML
+     */
+    protected FxDate() {
+    }
 
     /**
      * Constructor
@@ -168,7 +175,7 @@ public class FxDate extends FxValue<Date, FxDate> implements Serializable {
      */
     @Override
     public Date fromString(String value) {
-        return FxValueConverter.toDate(value);
+        return FxFormatUtils.toDate(value);
     }
 
     /**
@@ -177,7 +184,8 @@ public class FxDate extends FxValue<Date, FxDate> implements Serializable {
     @Override
     public String getStringValue(Date value) {
         //TODO: use a better date parser
-        return DateFormat.getDateInstance().format(value);
+        return new SimpleDateFormat(FxFormatUtils.UNIVERSAL_TIMEFORMAT).format(value);
+//        return DateFormat.getDateInstance().format(value);
     }
 
     /**

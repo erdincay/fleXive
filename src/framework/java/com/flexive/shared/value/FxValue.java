@@ -33,7 +33,10 @@
  ***************************************************************/
 package com.flexive.shared.value;
 
-import com.flexive.shared.*;
+import com.flexive.shared.FxContext;
+import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.FxLanguage;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxInvalidStateException;
 import com.flexive.shared.exceptions.FxNoAccessException;
@@ -60,8 +63,8 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     private static final long serialVersionUID = -5005063788615664383L;
 
     public static final boolean DEFAULT_MULTILANGUAGE = true;
-    private boolean multiLanguage;
-    private long defaultLanguage = FxLanguage.SYSTEM_ID;
+    protected boolean multiLanguage;
+    protected long defaultLanguage = FxLanguage.SYSTEM_ID;
     private long selectedLanguage;
     private int maxInputLength;
     private String XPath = "";
@@ -494,7 +497,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     public T getTranslation(FxLanguage lang) {
         if (!multiLanguage) //redundant but faster
             return singleValue;
-        return getTranslation((int)lang.getId());
+        return getTranslation((int) lang.getId());
     }
 
     /**
@@ -527,7 +530,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
             return singleValue;
         if (language == null)   // user ticket language
             return getBestTranslation();
-        return getBestTranslation((int)language.getId());
+        return getBestTranslation((int) language.getId());
     }
 
     /**
@@ -541,7 +544,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     public T getBestTranslation(UserTicket ticket) {
         if (!multiLanguage) //redundant but faster
             return singleValue;
-        return getBestTranslation((int)ticket.getLanguage().getId());
+        return getBestTranslation((int) ticket.getLanguage().getId());
     }
 
     /**
@@ -699,6 +702,11 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
             //noinspection unchecked
             return (TDerived) this;
         }
+        if (translations == null) {
+            //create an empty one, not yet initialized
+            this.translations = new HashMap<Long, T>(5);
+            this.emptyTranslations = new HashMap<Long, Boolean>(5);
+        }
         if (language == FxLanguage.SYSTEM_ID)
             throw new FxInvalidParameterException("language", "ex.content.value.invalid.multilanguage.sys").asRuntimeException();
         if (value == null) {
@@ -723,7 +731,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @return this
      */
     public TDerived setTranslation(FxLanguage lang, T translation) {
-        return setTranslation((int)lang.getId(), translation);
+        return setTranslation((int) lang.getId(), translation);
     }
 
     /**
@@ -934,66 +942,11 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         for (T translation : translations.values()) {
             hash = 31 * hash + translation.hashCode();
         }
-        hash = 31 * hash + (int)defaultLanguage;
+        hash = 31 * hash + (int) defaultLanguage;
         for (long language : translations.keySet()) {
-            hash = 31 * hash + (int)language;
+            hash = 31 * hash + (int) language;
         }
         return hash;
-    }
-
-    /**
-     * Convert to XML
-     *
-     * @return xml
-     */
-    public String toXML() {
-        StringBuilder sb = new StringBuilder(500);
-        sb.append("<").append(getClass().getName()).append(" m=\"").append(isMultiLanguage() ? "1" : "0").append("\"");
-        if (hasDefaultLanguage())
-            sb.append(" d=\"").append(getDefaultLanguage()).append("\"");
-        sb.append(">");
-        if (!isMultiLanguage())
-            sb.append(FxXMLUtils.toCData(getStringValue(singleValue)));
-        else
-            for (long i : getTranslatedLanguages())
-                sb.append("<data l=\"").append(i).append("\">").
-                        append(FxXMLUtils.toCData(getStringValue(getTranslation(i)))).
-                        append("</data>");
-        sb.append("</").append(getClass().getName()).append(">");
-        return sb.toString();
-    }
-
-    /**
-     * Get an FxValue from its XML representation
-     *
-     * @param xml XML representation
-     * @return FxValue instance
-     */
-    public static FxValue fromXML(String xml) {
-        String clazz = xml.substring(1, xml.indexOf(' '));
-        try {
-            FxValue v = (FxValue) Class.forName("com.flexive.shared.content.values." + clazz).newInstance();
-            v.multiLanguage = xml.indexOf("m=\"1\"") > 0;
-            int def;
-            if ((def = xml.indexOf("d=\"")) > 0)
-                v.defaultLanguage = Long.parseLong(xml.substring(def + 2, xml.indexOf("\"", def + 2)));
-
-            if (v.multiLanguage) {
-                StringBuilder data = new StringBuilder(xml.substring(xml.indexOf('>'), xml.lastIndexOf("</" + clazz + ">")));
-                int start = 0;
-                while ((start = data.indexOf("<data", start)) >= 0) {
-                    v.setTranslation(
-                            Long.parseLong(data.substring(data.indexOf("l=\"", start + 3), data.indexOf("\">"))),
-                            v.fromString(FxXMLUtils.fromCData(data.substring(data.indexOf(">", start), data.indexOf("</data>", start)))));
-                }
-            } else {
-                v.singleValue = v.fromString(xml.substring(xml.indexOf(">"), xml.lastIndexOf("</")));
-            }
-            return v;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     /**

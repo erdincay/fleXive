@@ -33,6 +33,8 @@
  ***************************************************************/
 package com.flexive.shared.value;
 
+import com.flexive.shared.FxFormatUtils;
+
 import java.io.Serializable;
 import java.util.Map;
 
@@ -46,6 +48,11 @@ public class FxBoolean extends FxValue<Boolean, FxBoolean> implements Serializab
 
     public final static Boolean EMPTY = Boolean.FALSE;
 
+    /**
+     * Protected Ctor used for "re-constructing" from XML
+     */
+    protected FxBoolean() {
+    }
 
     /**
      * Constructor
@@ -165,7 +172,7 @@ public class FxBoolean extends FxValue<Boolean, FxBoolean> implements Serializab
      */
     @Override
     public Boolean fromString(String value) {
-        return FxValueConverter.toBoolean(value);
+        return FxFormatUtils.toBoolean(value);
     }
 
 

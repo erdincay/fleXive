@@ -34,10 +34,13 @@
 package com.flexive.shared.value;
 
 import com.flexive.shared.exceptions.FxInvalidStateException;
+import com.flexive.shared.FxFormatUtils;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
 
 /**
  * A multilingual DateTime range, internally represented as java.util.Date; EMPTY is a Date range with a timestamp of <code>0</code> (usually 01/01/1970)
@@ -48,6 +51,12 @@ public class FxDateTimeRange extends FxValue<DateRange, FxDateTimeRange> impleme
     private static final long serialVersionUID = -6939627748513819758L;
 
     public final static DateRange EMPTY = new DateRange(new Date(0), new Date(0));
+
+    /**
+     * Protected Ctor used for "re-constructing" from XML
+     */
+    protected FxDateTimeRange() {
+    }
 
     /**
      * Constructor
@@ -168,7 +177,22 @@ public class FxDateTimeRange extends FxValue<DateRange, FxDateTimeRange> impleme
      */
     @Override
     public DateRange fromString(String value) {
-        return null; //TODO!!!
+        try {
+            String[] dates = value.split("\\$");
+            final SimpleDateFormat sdf = new SimpleDateFormat(FxFormatUtils.UNIVERSAL_TIMEFORMAT);
+            return new DateRange(sdf.parse(dates[0]), sdf.parse(dates[1]));
+        } catch (ParseException e) {
+            //TODO:throw exception!
+            return null;
+        }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public String getStringValue(DateRange value) {
+        final SimpleDateFormat sdf = new SimpleDateFormat(FxFormatUtils.UNIVERSAL_TIMEFORMAT);
+        return sdf.format(value.getLower())+"$"+sdf.format(value.getUpper());
+//        return DateFormat.getDateInstance().format(value);
     }
 
     /**
