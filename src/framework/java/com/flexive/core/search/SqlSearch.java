@@ -363,7 +363,7 @@ public class SqlSearch {
                     throw new FxSqlSearchException(LOG, "ex.db.selector.undefined", vendor);
             }
         } catch (SQLException e) {
-            throw new FxSqlSearchException(LOG, "ex.db.vendor.notFound", FxContext.get().getDivisionId());
+            throw new FxSqlSearchException(LOG, "ex.db.vendor.notFound", FxContext.get().getDivisionId(), e);
         }
     }
 
@@ -385,7 +385,7 @@ public class SqlSearch {
                     throw new FxSqlSearchException(LOG, "ex.db.filter.undefined", vendor);
             }
         } catch (SQLException e) {
-            throw new FxSqlSearchException(LOG, "ex.db.vendor.notFound", FxContext.get().getDivisionId());
+            throw new FxSqlSearchException(LOG, "ex.db.vendor.notFound", FxContext.get().getDivisionId(), e);
         }
     }
 

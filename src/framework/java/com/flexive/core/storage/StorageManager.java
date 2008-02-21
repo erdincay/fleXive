@@ -76,7 +76,7 @@ public class StorageManager {
                     throw new FxNotFoundException("ex.structure.typeStorageMode.notImplemented", mode);
             }
         } catch (SQLException e) {
-            throw new FxNotFoundException("ex.db.vendor.notFound", FxContext.get().getDivisionId());
+            throw new FxNotFoundException(e, "ex.db.vendor.notFound", FxContext.get().getDivisionId(), e);
         }
     }
 
@@ -120,7 +120,7 @@ public class StorageManager {
                     throw new FxNotFoundException("ex.db.treeStorage.undefined", vendor);
             }
         } catch (SQLException e) {
-            throw new FxNotFoundException("ex.db.vendor.notFound", FxContext.get().getDivisionId());
+            throw new FxNotFoundException(e, "ex.db.vendor.notFound", FxContext.get().getDivisionId(), e);
         }
     }
 
