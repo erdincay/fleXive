@@ -93,16 +93,18 @@ public interface TemplateEngine {
 
     public long create(String name, Type type, String contentType, String content) throws FxApplicationException;
 
+    public void remove(long id) throws FxApplicationException;
+
     /**
      * Sets the content of the template
      *
      * @param id      the templqates id
      * @param content the content to set
-     * @param type    the template type
+     * @param contentType    the content type
      * @param mode    tree mode
      * @throws FxApplicationException if the function fails
      */
-    public void setContent(long id, String content, String type, FxTreeMode mode) throws FxApplicationException;
+    public void setContent(long id, String content, String contentType, FxTreeMode mode) throws FxApplicationException;
 
 
     /**
@@ -134,7 +136,7 @@ public interface TemplateEngine {
      * @return the found templates
      * @throws FxApplicationException if a error occured
      */
-    public ArrayList<FxTemplateInfo> list(Type type) throws FxApplicationException;
+    public List<FxTemplateInfo> list(Type type) throws FxApplicationException;
 
     /**
      * Retrives the content from the template.
@@ -182,10 +184,11 @@ public interface TemplateEngine {
      *
      * @param templateName       the template name
      * @param masterTemplateFile The absolute filesystem name of the master template file
+     * @param mode              the tree mode
      * @return the final content
      * @throws FxApplicationException if the function fails
      */
-    public String getFinalContent(String templateName, String masterTemplateFile) throws FxApplicationException;
+    public String getFinalContent(String templateName, String masterTemplateFile, FxTreeMode mode) throws FxApplicationException;
 
     public ArrayList<FxTemplateMapping> getTemplateMappings(long treeNodeId, FxTreeMode mode) throws FxApplicationException;
 

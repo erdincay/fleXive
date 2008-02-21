@@ -43,7 +43,7 @@ BEGIN
     FXS_ACL acl
   where
     acl.id=ass.acl and
-    ass.usergroup in (select usergroup from FXS_USERGROUPMEMBERS where account=_userId union select GRP_OWNER from FXS_USERGROUPMEMBERS) and
+    ass.usergroup in (select usergroup from FXS_USERGROUPMEMBERS where account=_userId union select GRP_OWNER) and
     (ass.acl=dat.acl or ass.acl=dat.typeAcl or ass.acl=dat.stepAcl);
   DECLARE CONTINUE HANDLER FOR SQLSTATE '02000' SET done = TRUE;
 

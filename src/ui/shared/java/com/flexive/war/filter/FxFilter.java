@@ -376,10 +376,8 @@ public class FxFilter implements Filter {
                 return (new ResolvedPath("/" + PATH_DIVISION + si.getDivisionId() + nodeRootPath +
                         nodeFileNoExt + "." + contentType, HttpServletResponse.SC_OK));
             }
-        } catch (Throwable t) {
-            // TODO
-            t.printStackTrace();
-            System.err.print("Error: " + t.getMessage());
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
         } finally {
             if (out != null) {
                 try {
@@ -387,7 +385,7 @@ public class FxFilter implements Filter {
                 } catch (Throwable t) {/*ignore*/}
             }
         }
-        return (new ResolvedPath("/" + PATH_DIVISION + si.getDivisionId() + sRelURI, HttpServletResponse.SC_OK));
+        return (new ResolvedPath("/" + PATH_DIVISION + si.getDivisionId() + sRelURI, HttpServletResponse.SC_NOT_FOUND));
     }
 
     private long getNode(final FxContext si) throws FxApplicationException {

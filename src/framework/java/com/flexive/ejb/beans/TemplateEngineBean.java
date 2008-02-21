@@ -36,6 +36,7 @@ package com.flexive.ejb.beans;
 import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.storage.StorageManager;
+import com.flexive.core.storage.genericSQL.GenericTreeStorage;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -54,6 +55,7 @@ import static com.flexive.shared.tree.FxTreeMode.Live;
 import com.flexive.shared.tree.FxTreeNode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Resource;
 import javax.ejb.*;
@@ -82,8 +84,8 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
                     mode + "_" + type.toString(), java.lang.System.currentTimeMillis());
             CacheAdmin.getInstance().put(this.getClass().getName() + ".lastChange",
                     mode + "_" + "global", java.lang.System.currentTimeMillis());
-        } catch (Throwable t) {
-            LOG.error(t);
+        } catch (Exception e) {
+            LOG.error(e);
         }
     }
 
@@ -100,8 +102,8 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
                 lastChange = (Long) CacheAdmin.getInstance().get(this.getClass().getName() + ".lastChange", key);
             }
             return lastChange;
-        } catch (Throwable t) {
-            LOG.error(t);
+        } catch (Exception e) {
+            LOG.error(e);
             return java.lang.System.currentTimeMillis();
         }
     }
@@ -132,9 +134,9 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
             ps.close();
         } catch (FxApplicationException t) {
             throw t;
-        } catch (Throwable t) {
+        } catch (Exception e) {
             ctx.setRollbackOnly();
-            FxUpdateException exc = new FxUpdateException(t, "Template.err.create.failed", name);
+            FxUpdateException exc = new FxUpdateException(e, "ex.templateEngine.create", name);
             LOG.error(exc);
             throw exc;
         } finally {
@@ -204,13 +206,39 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
             registerChange(type, mode);
         } catch (FxApplicationException t) {
             throw t;
-        } catch (Throwable t) {
+        } catch (Exception e) {
             ctx.setRollbackOnly();
-            FxUpdateException exc = new FxUpdateException(t, "Template.err.create.failed", name);
+            FxUpdateException exc = new FxUpdateException(e, "ex.templateEngine.create", name);
             LOG.error(exc);
             throw exc;
         } finally {
-            Database.closeObjects(TreeEngineBean.class, con, ps);
+            Database.closeObjects(TemplateEngineBean.class, con, ps);
+        }
+    }
+
+    /**
+     * Removes the template with the given ID.
+     *
+     * @param id    the template ID
+     * @throws FxApplicationException   if the template could not be deleted
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void remove(long id) throws FxApplicationException {
+        // TODO: security!
+        Connection con = null;
+        PreparedStatement stmt = null;
+        try {
+            con = Database.getDbConnection();
+            stmt = con.prepareStatement("DELETE FROM " + TBL_TEMPLATE + " WHERE id=?");
+            stmt.setLong(1, id);
+            stmt.executeUpdate();
+        } catch (Exception e) {
+            ctx.setRollbackOnly();
+            FxUpdateException exc = new FxUpdateException(e, "ex.templateEngine.delete", id);
+            LOG.error(exc);
+            throw exc;
+        } finally {
+            Database.closeObjects(TemplateEngineBean.class, con, stmt);
         }
     }
 
@@ -226,7 +254,7 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
         // Check if the template exists at all
         FxTemplateInfo self = getInfo(id, Edit);
         if (self == null) {
-            throw new FxNotFoundException("Template.err.notFound", id);
+            throw new FxNotFoundException("ex.templateEngine.notFound", id);
         }
         // Activate the template
         Connection con = null;
@@ -244,13 +272,13 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
             _create(id, (int) info.getTypeId(), Live, info.getName(), info.getTemplateType(), info.getContentType(),
                     content, true);
 
-        } catch (Throwable t) {
+        } catch (Exception e) {
             ctx.setRollbackOnly();
-            FxUpdateException exc = new FxUpdateException(t, "Template.err.activate.failed", id);
+            FxUpdateException exc = new FxUpdateException(e, "ex.templateEngine.activate", id);
             LOG.error(exc);
             throw exc;
         } finally {
-            Database.closeObjects(TreeEngineBean.class, con, stmt);
+            Database.closeObjects(TemplateEngineBean.class, con, stmt);
         }
     }
 
@@ -305,13 +333,13 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
             registerChange(self.getTemplateType(), mode);
         } catch (FxApplicationException e) {
             throw e;
-        } catch (Throwable t) {
+        } catch (Exception e) {
             ctx.setRollbackOnly();
-            FxUpdateException exc = new FxUpdateException(t, "Template.err.setContent.failed", id);
+            FxUpdateException exc = new FxUpdateException(e, "ex.templateEngine.setContent", id);
             LOG.error(exc);
             throw exc;
         } finally {
-            Database.closeObjects(TreeEngineBean.class, con, ps);
+            Database.closeObjects(TemplateEngineBean.class, con, ps);
         }
     }
 
@@ -337,13 +365,13 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
                         " value (" + id + "," + tag.getId() + "," + (mode == Live) + ")");
                 stmt.close();
             }
-        } catch (Throwable t) {
+        } catch (Exception e) {
             ctx.setRollbackOnly();
-            FxUpdateException exc = new FxUpdateException(t, "Template.err.setTagRelations.failed", id, t.getMessage());
+            FxUpdateException exc = new FxUpdateException(e, "ex.templateEngine.setTagRelations", id, e.getMessage());
             LOG.error(exc);
             throw exc;
         } finally {
-            Database.closeObjects(TreeEngineBean.class, null, stmt);
+            Database.closeObjects(TemplateEngineBean.class, null, stmt);
         }
     }
 
@@ -364,13 +392,13 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
             rs.next();
             long count = rs.getLong(1);
             return count > 0;
-        } catch (Throwable t) {
+        } catch (Exception e) {
             ctx.setRollbackOnly();
-            FxLoadException exc = new FxLoadException(t, "Template.err.templateIsReferenced.failed", id, t.getMessage());
+            FxLoadException exc = new FxLoadException(e, "ex.templateEngine.templateIsReferenced", id, e.getMessage());
             LOG.error(exc);
             throw exc;
         } finally {
-            Database.closeObjects(TreeEngineBean.class, con, stmt);
+            Database.closeObjects(TemplateEngineBean.class, con, stmt);
         }
 
     }
@@ -408,8 +436,8 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
                     tags.add(nfo);
                 }
                 replace.put(matcher.group(), nfo);
-            } catch (Throwable t) {
-                FxUpdateException exc = new FxUpdateException(t, "Template.err.invalidTag", tagName);
+            } catch (Exception e) {
+                FxUpdateException exc = new FxUpdateException(e, "ex.templateEngine.invalidTag", tagName);
                 LOG.debug(exc);
                 throw exc;
             }
@@ -421,38 +449,13 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
             while (result.indexOf(userTag) != -1) {
                 String suffix = userTag.substring(replace.get(userTag).getName().length() + 5);
                 String prefix = "<cms:tag" + replace.get(userTag).getTypeId() + " ";
-                result = replace(result, userTag, prefix + suffix);
+                result = StringUtils.replace(result, userTag, prefix + suffix);
             }
         }
         content.delete(0, content.length());
         content.append(result);
 
         return tags;
-    }
-
-    public static String replace(final String aInput, final String aOldPattern, final String aNewPattern) {
-        if (aOldPattern.equals("")) {
-            throw new IllegalArgumentException("Old pattern must have content.");
-        }
-
-        final StringBuffer result = new StringBuffer();
-        //startIdx and idxOld delimit various chunks of aInput; these
-        //chunks always end where aOldPattern begins
-        int startIdx = 0;
-        int idxOld;
-        while ((idxOld = aInput.indexOf(aOldPattern, startIdx)) >= 0) {
-            //grab a part of aInput which does not include aOldPattern
-            result.append(aInput.substring(startIdx, idxOld));
-            //add aNewPattern to take place of aOldPattern
-            result.append(aNewPattern);
-
-            //reset the startIdx to just after the current match, to see
-            //if there are any further matches
-            startIdx = idxOld + aOldPattern.length();
-        }
-        //the final chunk will go to the end of aInput
-        result.append(aInput.substring(startIdx));
-        return result.toString();
     }
 
     /**
@@ -470,7 +473,7 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
         if (type == Type.CONTENT) try {
             // Extract the name of the master template
             sMaster = content.split("<ui:composition[\\s]*template[\\s]*=[\\s]*\"")[1].split("\"[\\s]*>")[0];
-        } catch (Throwable t) {
+        } catch (Exception e) {
             /* its okay */
         }
         if (sMaster != null) try {
@@ -478,8 +481,8 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
             master = getInfo(sMaster, mode);
             // Throw null pointer if the mast is not defined
             master.getName();
-        } catch (Throwable t) {
-            FxUpdateException exc = new FxUpdateException(t, "Template.err.invalidMasterTemplate", sMaster);
+        } catch (Exception e) {
+            FxUpdateException exc = new FxUpdateException(e, "ex.templateEngine.invalidMasterTemplate", sMaster);
             LOG.debug(exc);
             throw exc;
         }
@@ -508,20 +511,20 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
             registerChange(nfo.getTemplateType(), Edit);
         } catch (FxApplicationException t) {
             throw t;
-        } catch (Throwable t) {
+        } catch (Exception e) {
             ctx.setRollbackOnly();
-            FxUpdateException exc = new FxUpdateException(t, "Template.err.setName.failed", id);
+            FxUpdateException exc = new FxUpdateException(e, "ex.templateEngine.setName", id);
             LOG.error(exc);
             throw exc;
         } finally {
-            Database.closeObjects(TreeEngineBean.class, con, ps);
+            Database.closeObjects(TemplateEngineBean.class, con, ps);
         }
     }
 
     private void checkTagName(Type type, String name) throws FxUpdateException {
         if (type == Type.TAG) {
             if (name.split("\\s").length > 1) {
-                throw new FxUpdateException("Template.err.invalidTagNameNoWhitespace");
+                throw new FxUpdateException("ex.templateEngine.invalidTagNameNoWhitespace");
             }
         }
     }
@@ -593,14 +596,14 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
                 return new FxTemplateInfo(_id, _typeid, _name, _type, _modifiedAt, _modifiedBy, -1, _ttype, _master,
                         _masterMod, mode == Live, hasLive,inSync);
             } else {
-                return null;
+                throw new FxNotFoundException("ex.templateEngine.notFound.mode", id, mode);
             }
-        } catch (Throwable t) {
-            FxUpdateException exc = new FxUpdateException(t, "Template.err.load.failed", id);
+        } catch (Exception e) {
+            FxUpdateException exc = new FxUpdateException(e, "ex.templateEngine.load", id);
             LOG.error(exc);
             throw exc;
         } finally {
-            Database.closeObjects(TreeEngineBean.class, con, ps);
+            Database.closeObjects(TemplateEngineBean.class, con, ps);
         }
     }
 
@@ -609,7 +612,7 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
      * {@inheritDoc} *
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public ArrayList<FxTemplateInfo> list(Type type) throws FxApplicationException {
+    public List<FxTemplateInfo> list(Type type) throws FxApplicationException {
         Connection con = null;
         Statement stmt = null;
         ArrayList<FxTemplateInfo> result = new ArrayList<FxTemplateInfo>(250);
@@ -648,12 +651,12 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
                         -1, _ttype, _master, _masterMod, false, hasLive,inSync));
             }
             return result;
-        } catch (Throwable t) {
-            FxUpdateException exc = new FxUpdateException(t, "Template.err.list.failed");
+        } catch (Exception e) {
+            FxUpdateException exc = new FxUpdateException(e, "ex.templateEngine.list");
             LOG.error(exc);
             throw exc;
         } finally {
-            Database.closeObjects(TreeEngineBean.class, con, stmt);
+            Database.closeObjects(TemplateEngineBean.class, con, stmt);
         }
     }
 
@@ -673,12 +676,12 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
             } else {
                 return null;
             }
-        } catch (Throwable t) {
-            FxUpdateException exc = new FxUpdateException(t, "Template.err.loadContent.failed", id);
+        } catch (Exception e) {
+            FxUpdateException exc = new FxUpdateException(e, "ex.templateEngine.loadContent", id);
             LOG.error(exc);
             throw exc;
         } finally {
-            Database.closeObjects(TreeEngineBean.class, con, stmt);
+            Database.closeObjects(TemplateEngineBean.class, con, stmt);
         }
     }
 
@@ -703,7 +706,7 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public String getContent(String templateName, FxTreeMode mode) throws FxApplicationException {
-        return _getContent(templateName, false);
+        return _getContent(templateName, false, mode);
     }
 
     /**
@@ -711,8 +714,8 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     // TODO: ???
-    public String getFinalContent(String templateName, String masterTemplateFile) throws FxApplicationException {
-        return _setMasterTemplateFile(_getContent(templateName, true), masterTemplateFile);
+    public String getFinalContent(String templateName, String masterTemplateFile, FxTreeMode mode) throws FxApplicationException {
+        return _setMasterTemplateFile(_getContent(templateName, true, mode), masterTemplateFile);
     }
 
     /**
@@ -727,7 +730,7 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
             return content;
         }
         return content.replaceFirst("<ui:composition[\\s]*template[\\s]*=[\\s]*\"[^\"]*\">",
-                "<ui:composition template=\"/" + masterTemplateFile + "\">");
+                "<ui:composition template=\"" + masterTemplateFile + "\">");
     }
 
 
@@ -735,13 +738,14 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
      * {@inheritDoc} *
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    private String _getContent(String templateName, boolean getFinal) throws FxApplicationException {
+    private String _getContent(String templateName, boolean getFinal, FxTreeMode mode) throws FxApplicationException {
         Connection con = null;
         PreparedStatement ps = null;
         try {
             con = Database.getDbConnection();
             String selectCol = getFinal ? "ifnull(FINAL_CONTENT,content)" : "content";
-            ps = con.prepareStatement("SELECT " + selectCol + " FROM " + TBL_TEMPLATE + " where name=?");
+            ps = con.prepareStatement("SELECT " + selectCol + " FROM " + TBL_TEMPLATE + " where name=?"
+                    + " and islive=" + (mode == Live));
             ps.setString(1, templateName);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -749,12 +753,12 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
             } else {
                 return null;
             }
-        } catch (Throwable t) {
-            FxUpdateException exc = new FxUpdateException(t, "Template.err.loadContent.failed", templateName);
+        } catch (Exception e) {
+            FxUpdateException exc = new FxUpdateException(e, "ex.templateEngine.loadContent", templateName);
             LOG.error(exc);
             throw exc;
         } finally {
-            Database.closeObjects(TreeEngineBean.class, con, ps);
+            Database.closeObjects(TemplateEngineBean.class, con, ps);
         }
     }
 
@@ -776,13 +780,13 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
             con = Database.getDbConnection();
             //TODO: Edit Tree??
             StorageManager.getTreeStorage().setTemplate(con, FxTreeMode.Edit, nodeId, encodedTemplate);
-        } catch (Throwable t) {
+        } catch (Exception e) {
             ctx.setRollbackOnly();
-            FxUpdateException exc = new FxUpdateException(t, "ex.tree.setTemplate.failed", nodeId);  // TODO
+            FxUpdateException exc = new FxUpdateException(e, "ex.tree.setTemplate.failed", nodeId);  // TODO
             LOG.error(exc);
             throw exc;
         } finally {
-            Database.closeObjects(TreeEngineBean.class, con, null);
+            Database.closeObjects(TemplateEngineBean.class, con, null);
         }
     }
 
@@ -823,10 +827,9 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
         try {
             con = Database.getDbConnection();
             stmt = con.createStatement();
-            final String TBL_TREE = "FX_TREE" + (mode == Live ? "L" : "");
             final String VERSION = mode == Live ? "islive_ver=true" : "ismax_ver=true";
             ResultSet rs = stmt.executeQuery(" select c.tdef,t.ref, getTemplates(t.id,false),t.parent from " +
-                    TBL_CONTENT + " c," + TBL_TREE + " t where " +
+                    TBL_CONTENT + " c," + GenericTreeStorage.getTable(mode) + " t where " +
                     "t.id=" + treeNodeId + " and t.ref=c.id and c." + VERSION);
             if (rs.next()) {
                 contentType = rs.getLong(1);
@@ -876,12 +879,12 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
             result.setContentId(contentId);
             result.setTdef(contentType);
             return result;
-        } catch (Throwable t) {
-            FxUpdateException exc = new FxUpdateException(t, "Template.err.loadForTreeNode.failed", treeNodeId);
+        } catch (Exception e) {
+            FxUpdateException exc = new FxUpdateException(e, "ex.templateEngine.loadForTreeNode", treeNodeId);
             LOG.error(exc);
             throw exc;
         } finally {
-            Database.closeObjects(TreeEngineBean.class, con, stmt);
+            Database.closeObjects(TemplateEngineBean.class, con, stmt);
         }
     }
 
