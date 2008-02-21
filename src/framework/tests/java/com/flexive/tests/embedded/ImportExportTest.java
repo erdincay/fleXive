@@ -48,7 +48,7 @@ import java.util.Random;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev
  */
-@Test(groups = {"importexport"})
+@Test(groups = {"ejb", "importexport"})
 public class ImportExportTest {
 
     /**

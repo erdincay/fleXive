@@ -27,12 +27,12 @@
                 </adm:tab>
             </ui:fragment>
 
-            <fx:formRow label="#{fxMessageBean['StepDefinition.field.name']}" id="stepName">
-                <fx:fxValueInput id="stepName" value="#{stepDefinitionBean.stepDefinition.label}"/>
+            <fx:formRow label="#{fxMessageBean['StepDefinition.field.name']}" id="name">
+                <h:inputText id="stepDescription" value="#{stepDefinitionBean.stepDefinition.name}"/>
             </fx:formRow>
 
-            <fx:formRow label="#{fxMessageBean['StepDefinition.field.description']}" id="stepDescription">
-                <h:inputText id="stepDescription" value="#{stepDefinitionBean.stepDefinition.description}"/>
+            <fx:formRow label="#{fxMessageBean['StepDefinition.field.label']}" id="label">
+                <fx:fxValueInput id="stepName" value="#{stepDefinitionBean.stepDefinition.label}"/>
             </fx:formRow>
 
             <fx:formRow label="#{fxMessageBean['StepDefinition.field.unique']}" id="uniqueTarget">

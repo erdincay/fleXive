@@ -37,10 +37,10 @@ import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.ML;
 import static com.flexive.core.DatabaseConst.TBL_STEPDEFINITION;
 import com.flexive.core.structure.StructureLoader;
+import com.flexive.shared.CacheAdmin;
 import static com.flexive.shared.CacheAdmin.getEnvironment;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
@@ -77,14 +77,17 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
 
     private static final transient Log LOG = LogFactory.getLog(StepDefinitionEngineBean.class);
 
-    @EJB private StepEngineLocal stepEngine;
-    @EJB private SequencerEngineLocal seq;
-    @Resource private SessionContext ctx;
+    @EJB
+    private StepEngineLocal stepEngine;
+    @EJB
+    private SequencerEngineLocal seq;
+    @Resource
+    private SessionContext ctx;
 
     /**
      * Checks if a unique target id is valid to use.
      *
-     * @param id    the step definition ID to be checked
+     * @param id             the step definition ID to be checked
      * @param uniqueTargetId the unique target to be checked
      * @throws FxInvalidParameterException if the unique target may not be used
      */
@@ -120,17 +123,18 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
      * Follows the unique target of the current node and checks if there are cycles
      * in the step definition graph.
      *
-     * @param visitedStepDefinitions  a set storing already visited nodes
-     * @param stepDefinitionId the currently visited node ID
-     * @throws com.flexive.shared.exceptions.FxInvalidParameterException    if a cycle was detected
+     * @param visitedStepDefinitions a set storing already visited nodes
+     * @param stepDefinitionId       the currently visited node ID
+     * @throws com.flexive.shared.exceptions.FxInvalidParameterException
+     *          if a cycle was detected
      */
     private void checkForCycles(Set<Long> visitedStepDefinitions, long stepDefinitionId) throws FxInvalidParameterException {
         if (!visitedStepDefinitions.add(stepDefinitionId)) {
-            String id = ""+stepDefinitionId;
+            String id = "" + stepDefinitionId;
             try {
                 id = CacheAdmin.getEnvironment().getStepDefinition(stepDefinitionId).getLabel() +
                         " (Id: " + stepDefinitionId + ")";
-            } catch(Exception e) {
+            } catch (Exception e) {
                 //ignore
             }
             throw new FxInvalidParameterException("UNIQUETARGET", LOG,
@@ -142,7 +146,9 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long create(StepDefinition stepDefinition)
             throws FxApplicationException {
@@ -154,10 +160,12 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
         Connection con = null;
         PreparedStatement ps = null;
         String sql;
-        FxString name = stepDefinition.getLabel();
-        if (name.isEmpty())
+        FxString label = stepDefinition.getLabel();
+        if (StringUtils.isEmpty(stepDefinition.getName()))
             throw new FxInvalidParameterException("NAME", "ex.stepdefinition.name.empty");
-        String description = stepDefinition.getDescription();
+        if (label.isEmpty())
+            throw new FxInvalidParameterException("LABEL", "ex.stepdefinition.label.empty");
+        String name = stepDefinition.getName();
         long uniqueTargetId = stepDefinition.getUniqueTargetId();
         boolean success = false;
         long newId = -1;
@@ -165,7 +173,7 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
             // Check the unique target
             checkValidUniqueTarget(-1, uniqueTargetId);
 
-            if (StringUtils.isBlank(name.getDefaultTranslation())) {
+            if (StringUtils.isBlank(label.getDefaultTranslation())) {
                 FxInvalidParameterException ip = new FxInvalidParameterException(
                         "NAME", "ex.stepdefinition.name.empty");
                 if (LOG.isDebugEnabled()) LOG.debug(ip);
@@ -176,11 +184,11 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
             con = Database.getDbConnection();
 
             // Create the new workflow instance
-            sql = "INSERT INTO " + TBL_STEPDEFINITION + " (ID, DESCRIPTION,UNIQUE_TARGET) VALUES (?,?,?)";
+            sql = "INSERT INTO " + TBL_STEPDEFINITION + " (ID,NAME,UNIQUE_TARGET) VALUES (?,?,?)";
             ps = con.prepareStatement(sql);
             newId = seq.getId(SequencerEngine.System.STEPDEFINITION);
             ps.setLong(1, newId);
-            ps.setString(2, description);
+            ps.setString(2, name);
             if (uniqueTargetId != -1) {
                 ps.setLong(3, uniqueTargetId);
             } else {
@@ -188,14 +196,14 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
             }
             if (ps.executeUpdate() != 1)
                 throw new FxCreateException(LOG, "ex.stepdefinition.create");
-            Database.storeFxString(name, con, TBL_STEPDEFINITION, "name", "id", newId);
+            Database.storeFxString(label, con, TBL_STEPDEFINITION, "name", "id", newId);
             success = true;
         } catch (FxInvalidParameterException exc) {
             throw exc;
         } catch (Exception exc) {
             if (Database.isUniqueConstraintViolation(exc)) {
                 FxEntryExistsException ee = new FxEntryExistsException("ex.stepdefinition.name.exists",
-                        name.getDefaultTranslation());
+                        name);
                 if (LOG.isDebugEnabled()) LOG.debug(ee);
                 throw ee;
             } else {
@@ -215,7 +223,9 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
     }
 
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void update(StepDefinition stepDefinition)
             throws FxApplicationException {
@@ -261,9 +271,9 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
             Database.storeFxString(stepDefinition.getLabel(), con, TBL_STEPDEFINITION,
                     "name", "id", stepDefinition.getId());
 
-            sql = "UPDATE " + TBL_STEPDEFINITION + " SET DESCRIPTION=?,UNIQUE_TARGET=? WHERE ID=?";
+            sql = "UPDATE " + TBL_STEPDEFINITION + " SET NAME=?,UNIQUE_TARGET=? WHERE ID=?";
             stmt = con.prepareStatement(sql);
-            stmt.setString(1, stepDefinition.getDescription());
+            stmt.setString(1, stepDefinition.getName());
             if (stepDefinition.getUniqueTargetId() != -1) {
                 stmt.setLong(2, stepDefinition.getUniqueTargetId());
             } else {
@@ -298,8 +308,8 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
                         if (FxSharedUtils.getUsedStepDefinitions(workflow.getSteps(), stepDefinitionList).size() > 0) {
                             // create step IF the step definition is used by the workflow
                             stepEngine.createStep(new Step(-1, stepDefinition.getUniqueTargetId(),
-                            		workflowId,  getEnvironment().getStepByDefinition(workflowId,
-                                            stepDefinition.getId()).getAclId()));
+                                    workflowId, getEnvironment().getStepByDefinition(workflowId,
+                                    stepDefinition.getId()).getAclId()));
                         }
                     }
                 } catch (Exception exc) {
@@ -310,6 +320,12 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
             }
             success = true;
         } catch (SQLException exc) {
+            if (Database.isUniqueConstraintViolation(exc)) {
+                FxEntryExistsException ee = new FxEntryExistsException("ex.stepdefinition.name.exists",
+                        stepDefinition.getName());
+                if (LOG.isDebugEnabled()) LOG.debug(ee);
+                throw ee;
+            }
             throw new FxUpdateException(LOG, exc, "ex.db.sqlError", exc.getMessage());
         } finally {
             if (!success) {
@@ -321,7 +337,9 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void remove(long id)
             throws FxApplicationException {

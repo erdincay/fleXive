@@ -80,7 +80,7 @@ public class StepDefinitionBean {
      */
     public String delete() {
         try {
-            FxString name = CacheAdmin.getEnvironment().getStepDefinition(stepDefinitionId).getLabel();
+            String name = CacheAdmin.getEnvironment().getStepDefinition(stepDefinitionId).getName();
             getWorkflowStepDefinitionEngine().remove(stepDefinitionId);
             new FxFacesMsgInfo("StepDefinition.nfo.deleted", name).addToContext();
         } catch (Exception e) {
@@ -97,7 +97,7 @@ public class StepDefinitionBean {
     public String create() {
         try {
             stepDefinitionId = getWorkflowStepDefinitionEngine().create(stepDefinition);
-            new FxFacesMsgInfo("StepDefinition.nfo.created", stepDefinition.getLabel()).addToContext();
+            new FxFacesMsgInfo("StepDefinition.nfo.created", stepDefinition.getName()).addToContext();
             return overview();
         } catch (Exception e) {
             new FxFacesMsgErr(e, "StepDefinition.err.create", e).addToContext();
@@ -113,7 +113,7 @@ public class StepDefinitionBean {
     public String save() {
         try {
             getWorkflowStepDefinitionEngine().update(stepDefinition);
-            new FxFacesMsgInfo("StepDefinition.nfo.updated", stepDefinition.getLabel()).addToContext();
+            new FxFacesMsgInfo("StepDefinition.nfo.updated", stepDefinition.getName()).addToContext();
             return overview();
         } catch (Exception e) {
             new FxFacesMsgErr(e).addToContext();

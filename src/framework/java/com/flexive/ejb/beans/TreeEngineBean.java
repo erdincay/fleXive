@@ -229,7 +229,8 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
                 return StorageManager.getTreeStorage().createNode(con, seq, contentEngine, mode, -1,
                         parentNodeId, name, label, position, reference, template);
             } finally {
-                StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
+                if( !ctx.getRollbackOnly() )
+                    StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
             }
         } catch (FxApplicationException ae) {
             throw ae;
@@ -263,7 +264,8 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
                 }
                 return nodes;
             } finally {
-                StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
+                if( !ctx.getRollbackOnly() )
+                    StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
             }
         } catch (FxApplicationException ae) {
             ctx.setRollbackOnly();
@@ -462,7 +464,8 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
                     executeScript(scriptId, parent, binding);
                 return nodeId;
             } finally {
-                StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
+                if( !ctx.getRollbackOnly() )
+                    StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
             }
         } catch (FxApplicationException ae) {
             ctx.setRollbackOnly();

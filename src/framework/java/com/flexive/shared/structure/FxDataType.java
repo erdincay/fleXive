@@ -35,6 +35,7 @@ package com.flexive.shared.structure;
 
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.SelectableObjectWithName;
+import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.value.*;
 
@@ -286,11 +287,15 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
             case Double:
                 return new FxDouble(multilang, rnd.nextDouble());
             case Date:
-                return new FxDate(multilang, getRandomDate(rnd));
+                //make sure time is stripped
+                return new FxDate(multilang, FxFormatUtils.toDate(FxFormatUtils.getDateFormat().format(getRandomDate(rnd))));
             case DateTime:
                 return new FxDateTime(multilang, getRandomDate(rnd));
             case DateRange:
-                final List<Date> dates = Arrays.asList(getRandomDate(rnd), getRandomDate(rnd));
+                //make sure time is stripped
+                final List<Date> dates = Arrays.asList(
+                        FxFormatUtils.toDate(FxFormatUtils.getDateFormat().format(getRandomDate(rnd))),
+                        FxFormatUtils.toDate(FxFormatUtils.getDateFormat().format(getRandomDate(rnd))));
                 return new FxDateRange(multilang, new DateRange(Collections.min(dates), Collections.max(dates)));
             case DateTimeRange:
                 final List<Date> dates2 = Arrays.asList(getRandomDate(rnd), getRandomDate(rnd));

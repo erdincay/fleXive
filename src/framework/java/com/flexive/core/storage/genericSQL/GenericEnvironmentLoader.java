@@ -544,20 +544,20 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
         try {
             // Read all stepDefinitions from the database
             stmt = con.createStatement();
-            //                                             1  2           3
-            final ResultSet rs = stmt.executeQuery("SELECT ID,DESCRIPTION,UNIQUE_TARGET FROM " + TBL_STEPDEFINITION);
+            //                                             1  2    3
+            final ResultSet rs = stmt.executeQuery("SELECT ID,NAME,UNIQUE_TARGET FROM " + TBL_STEPDEFINITION);
             ArrayList<StepDefinition> tmp = new ArrayList<StepDefinition>(10);
 
             // Build the result array set
             while (rs != null && rs.next()) {
                 int id = rs.getInt(1);
-                String description = rs.getString(2);
+                String name = rs.getString(2);
                 int uniqueTargetId = rs.getInt(3);
                 if (rs.wasNull()) {
                     uniqueTargetId = -1;
                 }
-                FxString name = Database.loadFxString(con, TBL_STEPDEFINITION, "name", "id=" + id);
-                StepDefinition aStepDef = new StepDefinition(id, name, description, uniqueTargetId);
+                FxString label = Database.loadFxString(con, TBL_STEPDEFINITION, "name", "id=" + id);
+                StepDefinition aStepDef = new StepDefinition(id, label, name, uniqueTargetId);
                 tmp.add(aStepDef);
             }
             return tmp;

@@ -40,7 +40,7 @@ import java.io.Serializable;
 
 /**
  * Editable step definition.
- * 
+ *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class StepDefinitionEdit extends StepDefinition implements Serializable {
@@ -48,10 +48,11 @@ public class StepDefinitionEdit extends StepDefinition implements Serializable {
 
     /**
      * Copy constructor taking a step definition object
-     * @param stepDefinition    the source step definition
+     *
+     * @param stepDefinition the source step definition
      */
     public StepDefinitionEdit(StepDefinition stepDefinition) {
-        super(stepDefinition.getId(), stepDefinition.getLabel().copy(), stepDefinition.getDescription(),
+        super(stepDefinition.getId(), stepDefinition.getLabel().copy(), stepDefinition.getName(),
                 stepDefinition.getUniqueTargetId());
     }
 
@@ -62,17 +63,19 @@ public class StepDefinitionEdit extends StepDefinition implements Serializable {
     }
 
     /**
-     * Set the step definition description
-     * @param description   the step definition description
+     * Set the step definition name
+     *
+     * @param name the step definition name
      */
-    public void setDescription(String description) {
-        this.description = description;
+    public void setName(String name) {
+        this.name = name;
     }
 
 
     /**
      * Set the step definition id
-     * @param id    the step definition id
+     *
+     * @param id the step definition id
      */
     public void setId(long id) {
         this.id = id;
@@ -81,7 +84,8 @@ public class StepDefinitionEdit extends StepDefinition implements Serializable {
 
     /**
      * Set the step definition name
-     * @param name  the step definition name
+     *
+     * @param name the step definition name
      */
     public void setLabel(FxString name) {
         this.label = name;
@@ -90,7 +94,8 @@ public class StepDefinitionEdit extends StepDefinition implements Serializable {
 
     /**
      * Set the step definition's unique target step definition
-     * @param uniqueTarget  the step definition's unique target step definition
+     *
+     * @param uniqueTarget the step definition's unique target step definition
      */
     public void setUniqueTargetId(long uniqueTarget) {
         if (uniqueTarget != -1 && uniqueTarget == this.id) {

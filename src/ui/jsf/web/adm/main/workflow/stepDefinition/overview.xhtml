@@ -29,11 +29,11 @@
 
                 <thead>
                     <tr>
-                        <th class="tblHeader" dataType="String">
+                        <th class="tblHeader" dataType="String">   
                             #{fxMessageBean["StepDefinition.field.name"]}
                         </th>
                         <th class="tblHeader" dataType="String">
-                            #{fxMessageBean["StepDefinition.field.description"]}
+                            #{fxMessageBean["StepDefinition.field.label"]}
                         </th>
                         <th class="tblHeader" dataType="String">
                             #{fxMessageBean["StepDefinition.field.unique"]}
@@ -47,8 +47,8 @@
                 <tbody>
                     <ui:repeat var="stepDefinition" value="#{stepDefinitionBean.list}">
                         <tr value="#{stepDefinition.id}">
+                            <td class="tblColumn">#{stepDefinition.name}</td>
                             <td class="tblColumn">#{stepDefinition.label}</td>
-                            <td class="tblColumn">#{stepDefinition.description}</td>
                             <td class="tblColumn">
                                 <ui:fragment rendered="#{stepDefinition.uniqueTargetId != -1}">
                                     #{fxMapBean.stepDefinitions[stepDefinition.uniqueTargetId].label}

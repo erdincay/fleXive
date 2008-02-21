@@ -62,7 +62,7 @@
 				preserveDataModel="true" headerClass="tblHeader" rowClasses="tblRowEven, tblRowOdd" width="500">
 				<h:column>
 					<f:facet name="header">
-						#{fxMessageBean["Workflow.field.step.definition"]}
+						#{fxMessageBean["Workflow.field.step.label"]}
 					</f:facet>
 					<h:inputHidden value="#{step.id}"/>
 					<h:inputHidden value="#{step.workflowId}"/>
@@ -85,9 +85,9 @@
 				</h:column>
 				<h:column>
 					<f:facet name="header">
-						#{fxMessageBean["Workflow.field.step.description"]}
+						#{fxMessageBean["Workflow.field.step.name"]}
 					</f:facet>
-					#{fxMapBean.stepDefinitions[step.stepDefinitionId].description}
+					#{fxMapBean.stepDefinitions[step.stepDefinitionId].name}
 				</h:column>
 				<h:column>
                     <f:facet name="header">

@@ -47,7 +47,7 @@ import com.flexive.sqlParser.Property;
  * @version $Rev$
  */
 public class MySQLStepSelector extends MySQLGenericSelector {
-    private static final String ML_SEL = "(SELECT description FROM " + DatabaseConst.TBL_CONTENT + " ct," + DatabaseConst.TBL_STEP + " step, " +
+    private static final String ML_SEL = "(SELECT def.name FROM " + DatabaseConst.TBL_CONTENT + " ct," + DatabaseConst.TBL_STEP + " step, " +
             DatabaseConst.TBL_STEPDEFINITION + " def," + DatabaseConst.TBL_STEPDEFINITION + DatabaseConst.ML + " deft" +
             " WHERE \n" +
             "ct.id=filter.id AND ct.ver=filter.ver AND step.id=ct.step AND step.stepdef=def.id AND" +

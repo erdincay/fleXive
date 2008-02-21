@@ -58,7 +58,7 @@ public class StepDefinition extends AbstractSelectableObjectWithLabel implements
     public static final long EDIT_STEP_ID = 2;
 
     protected FxString label = null;
-    protected String description = null;
+    protected String name = null;
     protected long uniqueTargetId = -1;
     protected long id = -1;
 
@@ -66,13 +66,13 @@ public class StepDefinition extends AbstractSelectableObjectWithLabel implements
      * StepDefinition Constructor.
      *
      * @param label          the unique label of the step
-     * @param description    the description of the step
+     * @param name           the name of the step
      * @param id             the unique id of the step
      * @param uniqueTargetId the unique target id (-1 if it there is no unique target)
      */
-    public StepDefinition(long id, FxString label, String description, long uniqueTargetId) {
+    public StepDefinition(long id, FxString label, String name, long uniqueTargetId) {
         this.label = label;
-        this.description = description;
+        this.name = name;
         this.id = id;
         if (uniqueTargetId >= 0 && id == uniqueTargetId) {
             throw new FxInvalidParameterException("UNIQUETARGET", "ex.stepdefinition.uniqueTarget.circular.self",
@@ -84,12 +84,12 @@ public class StepDefinition extends AbstractSelectableObjectWithLabel implements
     /**
      * StepDefinition Constructor.
      *
-     * @param label          the unique name of the step
-     * @param description    the description of the step
+     * @param label          the label of the step
+     * @param name           the name of the step
      * @param uniqueTargetId the unique target id (-1 if it there is no unique target)
      */
-    public StepDefinition(FxString label, String description, long uniqueTargetId) {
-        this(-1, label, description, uniqueTargetId);
+    public StepDefinition(FxString label, String name, long uniqueTargetId) {
+        this(-1, label, name, uniqueTargetId);
     }
 
     /**
@@ -110,21 +110,21 @@ public class StepDefinition extends AbstractSelectableObjectWithLabel implements
 
 
     /**
-     * Returns the name of the step definition.
+     * Returns the label of the step definition.
      *
-     * @return the name of the step definition.
+     * @return the label of the step definition.
      */
     public FxString getLabel() {
         return this.label;
     }
 
     /**
-     * Returns the description of the step definition.
+     * Returns the name of the step definition.
      *
-     * @return the description of the step definition.
+     * @return the name of the step definition.
      */
-    public String getDescription() {
-        return this.description;
+    public String getName() {
+        return this.name;
     }
 
 

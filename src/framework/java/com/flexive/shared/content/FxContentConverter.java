@@ -31,43 +31,37 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.shared.value;
+package com.flexive.shared.content;
 
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.flexive.shared.structure.FxEnvironment;
+import com.flexive.shared.CacheAdmin;
 
 /**
- * XStream converter for FxValues
- * <p/>
- * XML format for e.g. a FxString:
- * <p/>
- * <code><val t="FxString" ml="1" dl="1">
- * <d l="1">text lang 1</d>
- * <d l="2">text lang 2</d>
- * </val></code>
- * 
+ * XStream converter for FxContent
+ *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @version $Rev
  */
-public class FxValueConverter implements Converter {
+public class FxContentConverter implements Converter {
 
     /**
      * {@inheritDoc}
      */
     @SuppressWarnings("unchecked")
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext ctx) {
-        FxValue value = (FxValue) o;
-        writer.addAttribute("t", value.getClass().getSimpleName());
-        writer.addAttribute("ml", value.isMultiLanguage() ? "1" : "0");
-        writer.addAttribute("dl", "" + value.getDefaultLanguage());
-        for (long lang : value.getTranslatedLanguages()) {
-            writer.startNode("d");
-            writer.addAttribute("l", "" + lang);
-            writer.setValue(value.getStringValue(value.getTranslation(lang)));
-            writer.endNode();
-        }
+        FxContent co = (FxContent)o;
+        FxEnvironment env = CacheAdmin.getEnvironment();
+        writer.addAttribute("pk", co.getPk().toString());
+        writer.addAttribute("type", env.getType(co.getTypeId()).getName());
+        writer.addAttribute("mandator", env.getMandator(co.getMandatorId()).getName());
+        writer.addAttribute("acl", env.getACL(co.getAclId()).getName());
+        writer.addAttribute("step", env.getStepDefinition(env.getStep(co.getStepId()).getStepDefinitionId()).getName());
+
     }
 
     /**
@@ -75,29 +69,16 @@ public class FxValueConverter implements Converter {
      */
     @SuppressWarnings("unchecked")
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
-        FxValue v = null;
-        try {
-            v = (FxValue) Class.forName("com.flexive.shared.value." + reader.getAttribute("t")).newInstance();
-            v.multiLanguage = "1".equals(reader.getAttribute("ml"));
-            v.defaultLanguage = Long.valueOf(reader.getAttribute("dl"));
-            while (reader.hasMoreChildren()) {
-                reader.moveDown();
-                if ("d".equals(reader.getNodeName())) {
-                    long lang = Long.valueOf(reader.getAttribute("l"));
-                    v.setTranslation(lang, v.fromString(reader.getValue()));
-                }
-                reader.moveUp();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return v;
+        return null;
     }
 
     /**
      * {@inheritDoc}
      */
     public boolean canConvert(Class aClass) {
-        return FxValue.class.isAssignableFrom(aClass);
+        return FxContent.class.isAssignableFrom(aClass);
     }
+
+
+
 }

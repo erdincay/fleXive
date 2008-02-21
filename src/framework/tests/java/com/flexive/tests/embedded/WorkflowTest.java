@@ -65,7 +65,6 @@ public class WorkflowTest {
     private static final String WORKFLOW_NAME = "Cactus test workflow";
     private static final String WORKFLOW_DESCRIPTION = "Test description";
     private static final String STEPDEF_NAME = "Cactus test step definition";
-    private static final String STEPDEF_DESCRIPTION = "Cactus test step definition description";
     private static final String ACL_NAME = "Cactus test ACL";
     private static final String ACL_LABEL = "Cactus test label";
 
@@ -330,8 +329,8 @@ public class WorkflowTest {
         try {
             // create two independent steps
             aclId = createAcl();
-            sd1 = stepDefinitionEngine.create(new StepDefinition(-1, new FxString("base"), "descr", -1));
-            sd2 = stepDefinitionEngine.create(new StepDefinition(-2, new FxString("derived"), "descr", -1));
+            sd1 = stepDefinitionEngine.create(new StepDefinition(-1, new FxString("base"), "base", -1));
+            sd2 = stepDefinitionEngine.create(new StepDefinition(-2, new FxString("derived"), "derived", -1));
             // create a workflow which uses only the first step definition
             workflowId = workflowEngine.create(new Workflow(-1, "test", "descr",
                     Arrays.asList(new Step(-1, sd1, -1, aclId)), new ArrayList<Route>()));
@@ -372,16 +371,16 @@ public class WorkflowTest {
             stepDefinitionId = createStepDefinition(null);
             assert stepDefinitionId != -1 : "Failed to create step definition";
             StepDefinition stepDefinition = getEnvironment().getStepDefinition(stepDefinitionId);
-            assert new FxString(STEPDEF_NAME).equals(stepDefinition.getLabel()) : "Invalid name: " + stepDefinition.getLabel();
-            assert STEPDEF_DESCRIPTION.equals(stepDefinition.getDescription()) : "Invalid description: " + stepDefinition.getDescription();
+            assert new FxString(STEPDEF_NAME).equals(stepDefinition.getLabel()) : "Invalid label: " + stepDefinition.getLabel();
+            assert STEPDEF_NAME.equals(stepDefinition.getName()) : "Invalid name: " + stepDefinition.getName();
             StepDefinitionEdit definitionEdit = new StepDefinitionEdit(stepDefinition);
-            definitionEdit.setDescription(StringUtils.reverse(stepDefinition.getDescription()));
+            definitionEdit.setName(StringUtils.reverse(stepDefinition.getName()));
             FxString label = new FxString(STEPDEF_NAME);
             label.setTranslation(label.getDefaultLanguage(), StringUtils.reverse(label.getDefaultTranslation()));
             definitionEdit.setLabel(label);
             stepDefinitionEngine.update(definitionEdit);
             stepDefinition = getEnvironment().getStepDefinition(stepDefinitionId);
-            assert StringUtils.reverse(STEPDEF_DESCRIPTION).equals(stepDefinition.getDescription()) : "Invalid description: " + stepDefinition.getDescription();
+            assert StringUtils.reverse(STEPDEF_NAME).equals(stepDefinition.getName()) : "Invalid name: " + stepDefinition.getName();
             assert label.equals(stepDefinition.getLabel()) : "Invalid label: " + stepDefinition.getLabel();
         } finally {
             if (stepDefinitionId != -1) {
@@ -470,7 +469,7 @@ public class WorkflowTest {
     public void stepDefinitionTargetCycle1() throws FxApplicationException {
         long id = -1;
         try {
-            id = stepDefinitionEngine.create(new StepDefinition(-1, new FxString("base"), "descr", -1));
+            id = stepDefinitionEngine.create(new StepDefinition(-1, new FxString("base"), "base", -1));
             assert getEnvironment().getStepDefinition(id).getUniqueTargetId() == -1;
             // set unique target to itself
             StepDefinitionEdit edit = new StepDefinitionEdit(getEnvironment().getStepDefinition(id));
@@ -485,7 +484,7 @@ public class WorkflowTest {
             try {
                 // second try: the stepdef constructor should catch this too
                 assert edit.getId() != -1;
-                new StepDefinition(edit.getId(), new FxString("test"), "descr", edit.getId());
+                new StepDefinition(edit.getId(), new FxString("test"), "test", edit.getId());
                 assert false : "The StepDefinition constructor should check if the unique target ID "
                         + " is equal to the step definition ID.";
             } catch (FxRuntimeException e) {
@@ -510,8 +509,8 @@ public class WorkflowTest {
         long sd2 = -1;
         boolean createdCycle = false;
         try {
-            sd1 = stepDefinitionEngine.create(new StepDefinition(-1, new FxString("base"), "descr", -1));
-            sd2 = stepDefinitionEngine.create(new StepDefinition(-1, new FxString("derived"), "descr", sd1));
+            sd1 = stepDefinitionEngine.create(new StepDefinition(-1, new FxString("base"), "base", -1));
+            sd2 = stepDefinitionEngine.create(new StepDefinition(-1, new FxString("derived"), "derived", sd1));
             // until now, the step definitions are valid and no cycle is created
             assert getEnvironment().getStepDefinition(sd2).getUniqueTargetId() == sd1
                     : "Invalid unique target: " + getEnvironment().getStepDefinition(sd2).getUniqueTargetId();
@@ -554,7 +553,7 @@ public class WorkflowTest {
         try {
             for (int i = 0; i < 10; i++) {
                 // create a new step definition, with the unique target pointing to the last one (except for the first)
-                ids.add(stepDefinitionEngine.create(new StepDefinition(-1, new FxString("test" + i), "descr",
+                ids.add(stepDefinitionEngine.create(new StepDefinition(-1, new FxString("test" + i), "test"+i,
                         i > 0 ? ids.get(i - 1) : -1)));
 
             }
@@ -648,10 +647,10 @@ public class WorkflowTest {
     private long createStepDefinition(String name) throws FxApplicationException {
         if (name == null)
             return stepDefinitionEngine.create(new StepDefinition(-1,
-                    new FxString(STEPDEF_NAME), STEPDEF_DESCRIPTION, -1));
+                    new FxString(STEPDEF_NAME), STEPDEF_NAME, -1));
         else
             return stepDefinitionEngine.create(new StepDefinition(-1,
-                    new FxString(name), STEPDEF_DESCRIPTION, -1));
+                    new FxString(name), name, -1));
     }
 
     /**
