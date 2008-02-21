@@ -37,7 +37,7 @@
 
     <fileset id="flexive.dist.jar.all" dir="${flexive.dist.dir}/lib" includes="flexive-*.jar"/>
     <fileset id="flexive.dist.jar.libs" dir="${flexive.lib.dir}"
-        includes="commons-*.jar, fxTree.jar, fxStream.jar, jbosscache-core.jar, jboss-common-core-42-compat.jar, javaee.jar, testNG/*.jar, mail/*.jar, xstream/*.jar, groovy/*.jar, selenium-java-client-driver.jar, text_extraction/*.jar, mysql-*.jar, jtidy.jar, commons-io-1.1.jar, sanselan.jar, jgroups.jar, concurrent.jar, jboss-common-core.jar, jboss-jmx.jar, jboss-system.jar"/>
+        includes="cglib*.jar, commons-*.jar, fxTree.jar, fxStream.jar, jbosscache-core.jar, jboss-common-core-42-compat.jar, javaee.jar, testNG/*.jar, mail/*.jar, xstream/*.jar, groovy/*.jar, selenium-java-client-driver.jar, text_extraction/*.jar, mysql-*.jar, jtidy.jar, commons-io-1.1.jar, sanselan.jar, jgroups.jar, concurrent.jar, jboss-common-core.jar, jboss-jmx.jar, jboss-system.jar"/>
     <fileset id="flexive.dist.appserver.libs" dir="${flexive.lib.dir}" includes="${flexive.global.include.appserverlibs}"/>
 
     <path id="flexive.shared-libs.path">
