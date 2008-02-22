@@ -340,7 +340,7 @@ public interface ScriptingEngine {
      * run-once scripts are only executed once in the lifetime of a division!
      * consecutive calls have no effect and nothing will be executed!
      */
-    void executeRunOnceScripts();
+    void executeRunOnceScripts() throws FxApplicationException;
 
     /**
      * Execute start up scripts.

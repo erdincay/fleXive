@@ -51,6 +51,7 @@ import org.apache.commons.lang.StringUtils;
  * @version $Rev
  */
 public abstract class FxMetadata {
+    private static XMLOutputFactory xmlOutputFactory;
 
     /**
      * An item holding metadata
@@ -140,7 +141,7 @@ public abstract class FxMetadata {
     public String toXML() throws FxApplicationException {
         StringWriter sw = new StringWriter(2000);
         try {
-            XMLStreamWriter writer = XMLOutputFactory.newInstance().createXMLStreamWriter(sw);
+            XMLStreamWriter writer = getXmlOutputFactory().createXMLStreamWriter(sw);
             writer.writeStartDocument();
             writer.writeStartElement("metadata");
             writer.writeAttribute("mediatype", getMediaType().name());
@@ -164,6 +165,14 @@ public abstract class FxMetadata {
             throw new FxApplicationException(e, "ex.general.xml", e.getMessage());
         }
         return sw.getBuffer().toString();
+    }
+
+    private static synchronized XMLOutputFactory getXmlOutputFactory() {
+        if (xmlOutputFactory == null) {
+            // cache the factory since profiling showed that this is a rather expensive call
+            xmlOutputFactory = XMLOutputFactory.newInstance();
+        }
+        return xmlOutputFactory;
     }
 
     /**

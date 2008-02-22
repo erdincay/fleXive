@@ -95,8 +95,9 @@ public class FxMediaNativeEngine {
         scaleWidth = (int) ((double) scaleWidth * scale);
         scaleHeight = (int) ((double) scaleHeight * scale);
         Image scaledImage;
-        GraphicsConfiguration gc = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
-        BufferedImage bi2 = gc.createCompatibleImage(scaleWidth, scaleHeight, bi.getTransparency());
+        // create a new buffered image, don't rely on a local graphics system (headless mode)
+        BufferedImage bi2 = new BufferedImage(scaleWidth, scaleHeight, BufferedImage.TYPE_INT_RGB);
+
         Graphics2D g = bi2.createGraphics();
         if (scale < 0.3) {
             scaledImage = bi.getScaledInstance(scaleWidth, scaleHeight, Image.SCALE_SMOOTH);

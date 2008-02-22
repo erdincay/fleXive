@@ -819,7 +819,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void executeRunOnceScripts() {
+    public void executeRunOnceScripts() throws FxApplicationException {
         final long start = System.currentTimeMillis();
         runOnce(SystemParameters.DIVISION_RUNONCE, "fxresources", "flexive");
         if (LOG.isInfoEnabled()) {
@@ -834,7 +834,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      * @param prefix          resource directory prefix
      * @param applicationName the corresponding application name (for debug messages)
      */
-    private void runOnce(Parameter<Boolean> param, String prefix, String applicationName) {
+    private void runOnce(Parameter<Boolean> param, String prefix, String applicationName) throws FxApplicationException {
         try {
             Boolean executed = EJBLookup.getDivisionConfigurationEngine().get(param);
             if (executed) {
@@ -880,14 +880,10 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                     LOG.error("Failed to run script " + file[0] + ": " + e.getMessage(), e);
                 }
             }
+            EJBLookup.getDivisionConfigurationEngine().put(param, true);
         } finally {
             FxContext.get().stopRunAsSystem();
             FxContext.get().overrideTicket(originalTicket);
-        }
-        try {
-            EJBLookup.getDivisionConfigurationEngine().put(param, true);
-        } catch (FxApplicationException e) {
-            LOG.error(e);
         }
     }
 
