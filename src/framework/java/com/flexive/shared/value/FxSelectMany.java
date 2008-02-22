@@ -57,9 +57,13 @@ public class FxSelectMany extends FxValue<SelectMany, FxSelectMany> implements S
     private FxSelectList list = null;
 
     /**
-     * Protected Ctor used for "re-constructing" from XML
+     * Constructor
+     *
+     * @param multiLanguage   multilanguage value?
+     * @param defaultLanguage the default language
      */
-    protected FxSelectMany() {
+    public FxSelectMany(long defaultLanguage, boolean multiLanguage) {
+        super(defaultLanguage, multiLanguage);
     }
 
     /**

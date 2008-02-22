@@ -50,7 +50,6 @@ public class FxHTML extends FxString {
      */
     private boolean tidyHTML = false;
 
-
     /**
      * Content is run through JTidy (http://jtidy.sourceforge.net) before its saved
      *
@@ -58,12 +57,6 @@ public class FxHTML extends FxString {
      */
     public boolean isTidyHTML() {
         return tidyHTML;
-    }
-    
-    /**
-     * Protected Ctor used for "re-constructing" from XML
-     */
-    protected FxHTML() {
     }
 
     /**
@@ -75,6 +68,16 @@ public class FxHTML extends FxString {
     public FxHTML setTidyHTML(boolean tidyHTML) {
         this.tidyHTML = tidyHTML;
         return this;
+    }
+
+    /**
+     * Constructor
+     *
+     * @param multiLanguage   multilanguage value?
+     * @param defaultLanguage the default language
+     */
+    public FxHTML(long defaultLanguage, boolean multiLanguage) {
+        super(defaultLanguage, multiLanguage);
     }
 
     public FxHTML(boolean multiLanguage, Map<Long, String> translations) {

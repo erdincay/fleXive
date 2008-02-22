@@ -33,14 +33,11 @@
  ***************************************************************/
 package com.flexive.shared.value;
 
-import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.exceptions.FxInvalidStateException;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
-import java.text.SimpleDateFormat;
 
 /**
  * A multilingual Date range, internally represented as java.util.Date; EMPTY is a Date with a timestamp of <code>0</code> (usually 01/01/1970)
@@ -53,9 +50,13 @@ public class FxDateRange extends FxValue<DateRange, FxDateRange> implements Seri
     public final static DateRange EMPTY = new DateRange(new Date(0), new Date(0));
 
     /**
-     * Protected Ctor used for "re-constructing" from XML
+     * Constructor
+     *
+     * @param multiLanguage   multilanguage value?
+     * @param defaultLanguage the default language
      */
-    protected FxDateRange() {
+    public FxDateRange(long defaultLanguage, boolean multiLanguage) {
+        super(defaultLanguage, multiLanguage);
     }
 
     /**

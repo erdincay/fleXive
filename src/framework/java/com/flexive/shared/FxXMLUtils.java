@@ -36,6 +36,8 @@ package com.flexive.shared;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.CompactWriter;
 import com.flexive.shared.value.*;
+import com.flexive.core.conversion.FxContentConverter;
+import com.flexive.shared.content.FxContent;
 
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
@@ -137,15 +139,4 @@ public class FxXMLUtils {
         writer.writeEndElement();
     }
 
-    /**
-     * Get a XStream instance with all registered converters and aliases
-     *
-     * @return XStream instance
-     */
-    public static XStream getXStream() {
-        XStream xs = new XStream();
-        xs.aliasType("val", FxValue.class);
-        xs.registerConverter(new FxValueConverter());
-        return xs;
-    }
 }

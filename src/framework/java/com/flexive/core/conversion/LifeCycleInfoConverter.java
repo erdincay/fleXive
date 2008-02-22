@@ -31,73 +31,54 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.shared.value;
+package com.flexive.core.conversion;
 
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.flexive.shared.security.LifeCycleInfo;
+import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.exceptions.FxApplicationException;
 
 /**
- * XStream converter for FxValues
- * <p/>
- * XML format for e.g. a FxString:
- * <p/>
- * <code><val t="FxString" ml="1" dl="1">
- * <d l="1">text lang 1</d>
- * <d l="2">text lang 2</d>
- * </val></code>
- * 
+ * XStream converter for LifeCycleInfo
+ *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @version $Rev
  */
-public class FxValueConverter implements Converter {
+public class LifeCycleInfoConverter implements Converter {
 
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings("unchecked")
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext ctx) {
-        FxValue value = (FxValue) o;
-        writer.addAttribute("t", value.getClass().getSimpleName());
-        writer.addAttribute("ml", value.isMultiLanguage() ? "1" : "0");
-        writer.addAttribute("dl", "" + value.getDefaultLanguage());
-        for (long lang : value.getTranslatedLanguages()) {
-            writer.startNode("d");
-            writer.addAttribute("l", "" + lang);
-            writer.setValue(value.getStringValue(value.getTranslation(lang)));
-            writer.endNode();
+        LifeCycleInfo li = (LifeCycleInfo)o;
+        writer.startNode("lci");
+        try {
+            writer.addAttribute("cr", EJBLookup.getAccountEngine().load(li.getCreatorId()).getLoginName());
+            writer.addAttribute("crAt", FxFormatUtils.getUniversalDateTimeFormat().format(li.getCreationTime()));
+            writer.addAttribute("mf", EJBLookup.getAccountEngine().load(li.getModificatorId()).getLoginName());
+            writer.addAttribute("mfAt", FxFormatUtils.getUniversalDateTimeFormat().format(li.getModificationTime()));
+        } catch (FxApplicationException e) {
+            throw e.asRuntimeException();
         }
+        writer.endNode();
     }
 
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings("unchecked")
-    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
-        FxValue v = null;
-        try {
-            v = (FxValue) Class.forName("com.flexive.shared.value." + reader.getAttribute("t")).newInstance();
-            v.multiLanguage = "1".equals(reader.getAttribute("ml"));
-            v.defaultLanguage = Long.valueOf(reader.getAttribute("dl"));
-            while (reader.hasMoreChildren()) {
-                reader.moveDown();
-                if ("d".equals(reader.getNodeName())) {
-                    long lang = Long.valueOf(reader.getAttribute("l"));
-                    v.setTranslation(lang, v.fromString(reader.getValue()));
-                }
-                reader.moveUp();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return v;
+    public Object unmarshal(HierarchicalStreamReader writer, UnmarshallingContext ctx) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     /**
      * {@inheritDoc}
      */
     public boolean canConvert(Class aClass) {
-        return FxValue.class.isAssignableFrom(aClass);
+        return LifeCycleInfo.class.isAssignableFrom(aClass);
     }
 }

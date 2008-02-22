@@ -37,7 +37,6 @@ import com.flexive.shared.exceptions.FxInvalidStateException;
 import com.flexive.shared.FxFormatUtils;
 
 import java.io.Serializable;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
@@ -52,9 +51,13 @@ public class FxDateTime extends FxValue<Date, FxDateTime> implements Serializabl
     public final static Date EMPTY = new Date(0);
 
     /**
-     * Protected Ctor used for "re-constructing" from XML
+     * Constructor
+     *
+     * @param multiLanguage   multilanguage value?
+     * @param defaultLanguage the default language
      */
-    protected FxDateTime() {
+    public FxDateTime(long defaultLanguage, boolean multiLanguage) {
+        super(defaultLanguage, multiLanguage);
     }
 
     /**

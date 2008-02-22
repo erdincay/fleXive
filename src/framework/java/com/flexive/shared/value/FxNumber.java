@@ -49,9 +49,13 @@ public class FxNumber extends FxValue<Integer, FxNumber> implements Serializable
     public final static Integer EMPTY = 0;
 
     /**
-     * Protected Ctor used for "re-constructing" from XML
+     * Constructor
+     *
+     * @param multiLanguage   multilanguage value?
+     * @param defaultLanguage the default language
      */
-    protected FxNumber() {
+    public FxNumber(long defaultLanguage, boolean multiLanguage) {
+        super(defaultLanguage, multiLanguage);
     }
 
     /**

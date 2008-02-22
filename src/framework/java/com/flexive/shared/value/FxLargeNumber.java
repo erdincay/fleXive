@@ -49,9 +49,13 @@ public class FxLargeNumber extends FxValue<Long, FxLargeNumber> implements Seria
     public final static Long EMPTY = 0L;
 
     /**
-     * Protected Ctor used for "re-constructing" from XML
+     * Constructor
+     *
+     * @param multiLanguage   multilanguage value?
+     * @param defaultLanguage the default language
      */
-    protected FxLargeNumber() {
+    public FxLargeNumber(long defaultLanguage, boolean multiLanguage) {
+        super(defaultLanguage, multiLanguage);
     }
 
     /**

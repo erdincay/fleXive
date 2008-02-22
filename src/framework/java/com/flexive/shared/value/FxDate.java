@@ -51,9 +51,13 @@ public class FxDate extends FxValue<Date, FxDate> implements Serializable {
     public final static Date EMPTY = new Date(0);
 
     /**
-     * Protected Ctor used for "re-constructing" from XML
+     * Constructor
+     *
+     * @param multiLanguage   multilanguage value?
+     * @param defaultLanguage the default language
      */
-    protected FxDate() {
+    public FxDate(long defaultLanguage, boolean multiLanguage) {
+        super(defaultLanguage, multiLanguage);
     }
 
     /**

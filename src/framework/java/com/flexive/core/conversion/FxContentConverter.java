@@ -31,7 +31,7 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.shared.content;
+package com.flexive.core.conversion;
 
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -40,6 +40,9 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.EJBLookup;
+import com.flexive.shared.content.FxContent;
+import com.flexive.shared.exceptions.FxApplicationException;
 
 /**
  * XStream converter for FxContent
@@ -52,22 +55,39 @@ public class FxContentConverter implements Converter {
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings("unchecked")
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext ctx) {
         FxContent co = (FxContent)o;
         FxEnvironment env = CacheAdmin.getEnvironment();
-        writer.addAttribute("pk", co.getPk().toString());
-        writer.addAttribute("type", env.getType(co.getTypeId()).getName());
-        writer.addAttribute("mandator", env.getMandator(co.getMandatorId()).getName());
-        writer.addAttribute("acl", env.getACL(co.getAclId()).getName());
-        writer.addAttribute("step", env.getStepDefinition(env.getStep(co.getStepId()).getStepDefinitionId()).getName());
-
+        try {
+            writer.addAttribute("pk", co.getPk().toString());
+            writer.addAttribute("type", env.getType(co.getTypeId()).getName());
+            writer.addAttribute("mandator", env.getMandator(co.getMandatorId()).getName());
+            writer.addAttribute("acl", env.getACL(co.getAclId()).getName());
+            writer.addAttribute("step", env.getStepDefinition(env.getStep(co.getStepId()).getStepDefinitionId()).getName());
+            writer.addAttribute("mainLanguage", EJBLookup.getLanguageEngine().load(co.getMainLanguage()).getIso2digit());
+            writer.addAttribute("relation", String.valueOf(co.isRelation()));
+            if( co.isRelation() ) {
+                writer.startNode("relation");
+                writer.startNode("source");
+                writer.addAttribute("pk", co.getRelatedSource().toString());
+                writer.addAttribute("pos", String.valueOf(co.getRelatedSourcePosition()));
+                writer.endNode();
+                writer.startNode("destination");
+                writer.addAttribute("pk", co.getRelatedDestination().toString());
+                writer.addAttribute("pos", String.valueOf(co.getRelatedDestinationPosition()));
+                writer.endNode();
+                writer.endNode();
+            }
+            ctx.convertAnother(co.getLifeCycleInfo());
+//            ctx.convertAnother(co.getRootGroup());
+        } catch (FxApplicationException e) {
+            throw e.asRuntimeException();
+        }
     }
 
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings("unchecked")
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
         return null;
     }

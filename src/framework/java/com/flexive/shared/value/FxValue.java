@@ -84,10 +84,6 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     private boolean singleValueEmpty;
     private boolean readOnly;
 
-    protected FxValue() {
-
-    }
-
     /**
      * Constructor
      *
@@ -129,6 +125,35 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
                 if (singleValue == null)
                     singleValue = translations.values().iterator().next();
             }
+            this.defaultLanguage = FxLanguage.SYSTEM_ID;
+            this.selectedLanguage = FxLanguage.SYSTEM_ID;
+            this.translations = null;
+            this.singleValueEmpty = false;
+        }
+    }
+
+    /**
+     * Initialize an empty FxValue (used for initalization for XML import, etc.)
+     *
+     * @param defaultLanguage default language
+     * @param multiLanguage   multilanguage value?
+     */
+    protected FxValue(long defaultLanguage, boolean multiLanguage) {
+        this.multiLanguage = multiLanguage;
+        this.defaultLanguage = defaultLanguage;
+        this.maxInputLength = -1;
+        this.readOnly = false;
+        if (this.multiLanguage) {
+            this.translations = new HashMap<Long, T>(5);
+            this.emptyTranslations = new HashMap<Long, Boolean>(5);
+            if (this.defaultLanguage < 0) {
+                this.defaultLanguage = FxLanguage.SYSTEM_ID;
+                this.selectedLanguage = FxLanguage.SYSTEM_ID;
+            } else
+                this.selectedLanguage = this.defaultLanguage;
+            for (Long lang : this.translations.keySet())
+                emptyTranslations.put(lang, this.translations.get(lang) == null);
+        } else {
             this.defaultLanguage = FxLanguage.SYSTEM_ID;
             this.selectedLanguage = FxLanguage.SYSTEM_ID;
             this.translations = null;

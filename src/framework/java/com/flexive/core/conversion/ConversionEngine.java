@@ -31,38 +31,33 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.shared.value;
+package com.flexive.core.conversion;
 
-import com.flexive.shared.FxLanguage;
+import com.thoughtworks.xstream.XStream;
+import com.flexive.shared.value.FxValue;
+import com.flexive.core.conversion.FxValueConverter;
+import com.flexive.shared.content.FxContent;
 
 /**
- * A "void" FxValue that cannot be read or written.
+ * Conversion Engine - responsible for XML Import/Export
  *
- * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
- * @version $Rev$
+ * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @version $Rev
  */
-public final class FxVoid extends FxValue<Object, FxVoid> {
-    private static final long serialVersionUID = 2014238959942835735L;
+public class ConversionEngine {
 
-    public FxVoid() {
-        super(FxLanguage.DEFAULT_ID, false);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Object fromString(String value) {
-        return null;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public FxVoid copy() {
-        return new FxVoid();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Class<Object> getValueClass() {
-        return Object.class;
+    /**
+     * Get a XStream instance with all registered converters and aliases
+     *
+     * @return XStream instance
+     */
+    public static XStream getXStream() {
+        XStream xs = new XStream();
+        xs.aliasType("val", FxValue.class);
+        xs.aliasType("co", FxContent.class);
+        xs.registerConverter(new FxValueConverter());
+        xs.registerConverter(new FxContentConverter());
+        xs.registerConverter(new LifeCycleInfoConverter());
+        return xs;
     }
 }

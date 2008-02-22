@@ -49,9 +49,13 @@ public class FxString extends FxValue<String, FxString> implements Serializable 
     public final static String EMPTY = "";
 
     /**
-     * Protected Ctor used for "re-constructing" from XML
+     * Constructor
+     *
+     * @param multiLanguage   multilanguage value?
+     * @param defaultLanguage the default language
      */
-    protected FxString() {
+    public FxString(long defaultLanguage, boolean multiLanguage) {
+        super(defaultLanguage, multiLanguage);
     }
 
     public FxString(boolean multiLanguage, Map<Long, String> translations) {

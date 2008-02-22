@@ -49,9 +49,13 @@ public class FxBoolean extends FxValue<Boolean, FxBoolean> implements Serializab
     public final static Boolean EMPTY = Boolean.FALSE;
 
     /**
-     * Protected Ctor used for "re-constructing" from XML
+     * Constructor
+     *
+     * @param multiLanguage   multilanguage value?
+     * @param defaultLanguage the default language
      */
-    protected FxBoolean() {
+    public FxBoolean(long defaultLanguage, boolean multiLanguage) {
+        super(defaultLanguage, multiLanguage);
     }
 
     /**

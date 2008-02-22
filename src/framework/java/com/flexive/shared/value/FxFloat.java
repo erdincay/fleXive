@@ -51,9 +51,13 @@ public class FxFloat extends FxValue<Float, FxFloat> implements Serializable {
     public final static Float EMPTY = 0.0f;
 
     /**
-     * Protected Ctor used for "re-constructing" from XML
+     * Constructor
+     *
+     * @param multiLanguage   multilanguage value?
+     * @param defaultLanguage the default language
      */
-    protected FxFloat() {
+    public FxFloat(long defaultLanguage, boolean multiLanguage) {
+        super(defaultLanguage, multiLanguage);
     }
 
     /**

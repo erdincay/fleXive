@@ -53,9 +53,13 @@ public class FxDateTimeRange extends FxValue<DateRange, FxDateTimeRange> impleme
     public final static DateRange EMPTY = new DateRange(new Date(0), new Date(0));
 
     /**
-     * Protected Ctor used for "re-constructing" from XML
+     * Constructor
+     *
+     * @param multiLanguage   multilanguage value?
+     * @param defaultLanguage the default language
      */
-    protected FxDateTimeRange() {
+    public FxDateTimeRange(long defaultLanguage, boolean multiLanguage) {
+        super(defaultLanguage, multiLanguage);
     }
 
     /**

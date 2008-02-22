@@ -465,6 +465,15 @@ public final class FxFormatUtils {
     }
 
     /**
+     * Returns a formatter for the universal date/time format
+     *
+     * @return formatter for the universal date/time format
+     */
+    public static SimpleDateFormat getUniversalDateTimeFormat() {
+        return new SimpleDateFormat(UNIVERSAL_TIMEFORMAT);
+    }
+
+    /**
      * Returns a basic date format that is readable but not localized.
      *
      * @return a basic date format that is readable but not localized.

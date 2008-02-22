@@ -51,9 +51,13 @@ public class FxDouble extends FxValue<Double, FxDouble> implements Serializable 
     public final static Double EMPTY = 0.0;
 
     /**
-     * Protected Ctor used for "re-constructing" from XML
+     * Constructor
+     *
+     * @param multiLanguage   multilanguage value?
+     * @param defaultLanguage the default language
      */
-    protected FxDouble() {
+    public FxDouble(long defaultLanguage, boolean multiLanguage) {
+        super(defaultLanguage, multiLanguage);
     }
 
     /**

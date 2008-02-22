@@ -33,12 +33,17 @@
  ***************************************************************/
 package com.flexive.tests.embedded;
 
+import com.flexive.shared.EJBLookup;
+import com.flexive.shared.content.FxContent;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.structure.FxDataType;
+import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxValue;
-import com.flexive.shared.FxXMLUtils;
+import com.flexive.core.conversion.ConversionEngine;
 import com.thoughtworks.xstream.XStream;
-import org.testng.annotations.Test;
 import org.testng.Assert;
+import org.testng.annotations.Test;
 
 import java.util.Random;
 
@@ -56,8 +61,8 @@ public class ImportExportTest {
      */
     @Test
     public void valueMarshalling() {
-        Random rnd = new Random(System.currentTimeMillis()+42);
-        XStream xs = FxXMLUtils.getXStream();
+        Random rnd = new Random(System.currentTimeMillis() + 42);
+        XStream xs = ConversionEngine.getXStream();
         for (FxDataType dt : FxDataType.values()) {
             switch (dt) {
                 case SelectOne:
@@ -67,12 +72,25 @@ public class ImportExportTest {
                     continue;
                 default:
                     FxValue ml = dt.getRandomValue(rnd, true);
-                    Assert.assertEquals(ml, xs.fromXML(xs.toXML(ml)), "Testing: "+dt.name());
+                    Assert.assertEquals(ml, xs.fromXML(xs.toXML(ml)), "Testing: " + dt.name());
                     FxValue sl = dt.getRandomValue(rnd, false);
-                    Assert.assertEquals(sl, xs.fromXML(xs.toXML(sl)), "Testing: "+dt.name());
-                    Assert.assertNotSame(xs.toXML(sl), xs.toXML(ml), "Testing: "+dt.name());
+                    Assert.assertEquals(sl, xs.fromXML(xs.toXML(sl)), "Testing: " + dt.name());
+                    Assert.assertNotSame(xs.toXML(sl), xs.toXML(ml), "Testing: " + dt.name());
             }
         }
+    }
+
+    /**
+     * Test FxContent
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test
+    public void contentMarshalling() throws FxApplicationException {
+        ContentEngine ce = EJBLookup.getContentEngine();
+        FxContent co = ce.initialize(FxType.ROOT_ID);
+        XStream xs = ConversionEngine.getXStream();
+        System.out.print("Content: \n" + xs.toXML(co));
     }
 
 }

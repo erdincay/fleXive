@@ -55,9 +55,13 @@ public final class FxNoAccess extends FxValue<Object, FxNoAccess> {
     private UserTicket ticket;
 
     /**
-     * Protected Ctor used for "re-constructing" from XML
+     * Constructor
+     *
+     * @param multiLanguage   multilanguage value?
+     * @param defaultLanguage the default language
      */
-    protected FxNoAccess() {
+    public FxNoAccess(long defaultLanguage, boolean multiLanguage) {
+        super(defaultLanguage, multiLanguage);
     }
 
     /**
@@ -67,6 +71,7 @@ public final class FxNoAccess extends FxValue<Object, FxNoAccess> {
      * @param wrappedValue FxValue to wrap
      */
     public FxNoAccess(UserTicket ticket, FxValue wrappedValue) {
+        super(wrappedValue.getDefaultLanguage(), wrappedValue.isMultiLanguage());
         this.wrappedValue = wrappedValue;
         this.ticket = ticket;
         if (ticket != null)

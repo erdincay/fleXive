@@ -47,9 +47,13 @@ public class FxBinary extends FxValue<BinaryDescriptor, FxBinary> implements Ser
     public final static BinaryDescriptor EMPTY = new BinaryDescriptor();
 
     /**
-     * Protected Ctor used for "re-constructing" from XML
+     * Constructor
+     *
+     * @param multiLanguage   multilanguage value?
+     * @param defaultLanguage the default language
      */
-    protected FxBinary() {
+    public FxBinary(long defaultLanguage, boolean multiLanguage) {
+        super(defaultLanguage, multiLanguage);
     }
 
     /**
@@ -174,7 +178,9 @@ public class FxBinary extends FxValue<BinaryDescriptor, FxBinary> implements Ser
         return new BinaryDescriptor(value);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getStringValue(BinaryDescriptor value) {
         return value.getHandle();

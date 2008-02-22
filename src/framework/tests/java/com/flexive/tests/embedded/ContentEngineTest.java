@@ -498,7 +498,7 @@ public class ContentEngineTest {
             test.getData("/MYTITLE");
             test.getData("/TEXT");
             //test if shared message loading works
-            FxNoAccess noAccess = new FxNoAccess(getUserTicket(), null);
+            FxNoAccess noAccess = new FxNoAccess(getUserTicket(), new FxString("test"));
             if (getUserTicket().getLanguage().getId() == FxLanguage.ENGLISH)
                 assert "Access denied!".equals(noAccess.getDefaultTranslation()) : "Shared message loading failed! Expected [Access denied!] got: [" + noAccess.getDefaultTranslation() + "]";
             else if (getUserTicket().getLanguage().getId() == FxLanguage.GERMAN)
