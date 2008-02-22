@@ -39,6 +39,9 @@ import com.flexive.shared.FxLanguage;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxLoginFailedException;
+import com.flexive.shared.exceptions.FxAccountInUseException;
+import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.ScriptingEngine;
 import com.flexive.shared.scripting.FxScriptBinding;
@@ -73,11 +76,16 @@ public class ScriptingTest {
     protected static FxScriptInfo removeScript = null;
 
     @BeforeSuite(dependsOnGroups = {"bootstrap"})
-    public void suiteSetup() throws FxApplicationException {
-        String codeLoad = "println \"[Groovy script]=== Loading Content \"+content.pk+\"(\"+environment.getType(content.getTypeId()).getName()+\") ===\"";
-        String codeRemove = "println \"[Groovy script]=== Before removal of content \"+pk+\"(\"+environment.getType(securityInfo.getTypeId()).getName()+\") ===\"";
-        loadScript = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.AfterContentLoad, "afterLoadTest.gy", "Test script", codeLoad);
-        removeScript = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.BeforeContentRemove, "beforeRemoveTest.gy", "Test script", codeRemove);
+    public void suiteSetup() throws FxApplicationException, FxLoginFailedException, FxAccountInUseException, FxLogoutFailedException {
+        login(TestUsers.SUPERVISOR);
+        try {
+            String codeLoad = "println \"[Groovy script]=== Loading Content \"+content.pk+\"(\"+environment.getType(content.getTypeId()).getName()+\") ===\"";
+            String codeRemove = "println \"[Groovy script]=== Before removal of content \"+pk+\"(\"+environment.getType(securityInfo.getTypeId()).getName()+\") ===\"";
+            loadScript = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.AfterContentLoad, "afterLoadTest.gy", "Test script", codeLoad);
+            removeScript = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.BeforeContentRemove, "beforeRemoveTest.gy", "Test script", codeRemove);
+        } finally {
+            logout();
+        }
     }
 
     public static void suiteShutDown() throws Exception {

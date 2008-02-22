@@ -99,8 +99,8 @@ INSERT INTO FXS_ACL_T VALUES (2, 1, TRUE, 'Default ACL for content instances (ma
 INSERT INTO FXS_ACL_T VALUES (2, 2, FALSE, 'Standard ACL fuer contents (Erstellen, Lese- und Bearbeitenberechtigung)');
 -- Assign group everyone to default content ACL, readonly
 INSERT INTO FXS_ACLASSIGNMENTS VALUES (1, 2, TRUE, FALSE, TRUE, FALSE, TRUE, TRUE, 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
--- Assign group "owner" to Default Instance ACL, read and editable
-INSERT INTO FXS_ACLASSIGNMENTS VALUES (2, 2, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
+-- Assign group "owner" to Default Instance ACL, read/edit/delete
+INSERT INTO FXS_ACLASSIGNMENTS VALUES (2, 2, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE, 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
 
 
 -- Default Workflow ACL
@@ -108,8 +108,8 @@ INSERT INTO FXS_ACL VALUES(3, 0, 'Default Workflow ACL', 'Default Workflow ACL',
 INSERT INTO FXS_ACL_T VALUES (3, 1, TRUE, 'Default Workflow ACL');
 -- Assign group everyone to default workflow ACL, readonly
 INSERT INTO FXS_ACLASSIGNMENTS VALUES (1, 3, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
--- Assign group "owner" to Default Workflow ACL, read and editable
-INSERT INTO FXS_ACLASSIGNMENTS VALUES (2, 3, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
+-- Assign group "owner" to Default Workflow ACL, read/edit/delete
+INSERT INTO FXS_ACLASSIGNMENTS VALUES (2, 3, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE, 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
 
 
 -- Public Briefcase ACL
@@ -137,8 +137,8 @@ INSERT INTO FXS_ACL_T VALUES (7, 1, TRUE, 'Default structure ACL');
 INSERT INTO FXS_ACL_T VALUES (7, 2, FALSE, 'Struktur ACL');
 -- Assign group everyone to Default Structure ACL
 INSERT INTO FXS_ACLASSIGNMENTS VALUES (1, 7, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
--- Assign group "owner" to Default Structure ACL, read and editable
-INSERT INTO FXS_ACLASSIGNMENTS VALUES (2, 7, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
+-- Assign group "owner" to Default Structure ACL, read/edit/delete
+INSERT INTO FXS_ACLASSIGNMENTS VALUES (2, 7, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE, 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
 
 
 -- Contact Data ACL

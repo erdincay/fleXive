@@ -315,7 +315,7 @@ public class UserTicketStore {
             }
         }
         if (LOG.isDebugEnabled()) LOG.debug("Done flagging dirty.");
-        if (FxContext.get() != null) {
+        if (FxContext.get() != null && !FxContext.get().getRunAsSystem()) {
             // update current user's ticket
             FxContext.get().setTicket(getTicket());
         }

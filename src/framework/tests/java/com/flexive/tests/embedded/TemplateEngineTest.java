@@ -43,6 +43,9 @@ import com.flexive.shared.tree.*;
 import static com.flexive.shared.tree.FxTreeMode.Edit;
 import static com.flexive.shared.tree.FxTreeMode.Live;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxLoginFailedException;
+import com.flexive.shared.exceptions.FxAccountInUseException;
+import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.interfaces.TemplateEngine;
 import static com.flexive.shared.interfaces.TemplateEngine.Type;
 
@@ -65,7 +68,8 @@ public class TemplateEngineTest {
     private List<Long> templateIds = new ArrayList<Long>();
 
     @BeforeClass
-    public void beforeClass() throws FxApplicationException {
+    public void beforeClass() throws FxApplicationException, FxLoginFailedException, FxAccountInUseException {
+        FxTestUtils.login(TestUsers.REGULAR);
         final TemplateEngine te = EJBLookup.getTemplateEngine();
         templateIds.add(te.create(T_CONTENT, Type.CONTENT, "text/html", "html template"));
         templateIds.add(te.create(T_MASTER, Type.MASTER, "text/html", "master template"));
@@ -73,10 +77,11 @@ public class TemplateEngineTest {
     }
 
     @AfterClass
-    public void afterClass() throws FxApplicationException {
+    public void afterClass() throws FxApplicationException, FxLogoutFailedException {
         for (Long id : templateIds) {
             EJBLookup.getTemplateEngine().remove(id);
         }
+        FxTestUtils.logout();
     }
 
     @Test

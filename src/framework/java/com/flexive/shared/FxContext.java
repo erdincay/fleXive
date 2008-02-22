@@ -184,7 +184,7 @@ public class FxContext implements Serializable {
         // Try the login
         AccountEngine acc = EJBLookup.getAccountEngine();
         acc.login(loginname, password, takeOver);
-        ticket = acc.getUserTicket();
+        setTicket(acc.getUserTicket());
     }
 
 
@@ -196,7 +196,7 @@ public class FxContext implements Serializable {
     public void logout() throws FxLogoutFailedException {
         AccountEngine acc = EJBLookup.getAccountEngine();
         acc.logout();
-        ticket = acc.getUserTicket();
+        setTicket(acc.getUserTicket());
     }
 
     /**
@@ -207,7 +207,9 @@ public class FxContext implements Serializable {
      * @param ticket ticket to override with
      */
     public void overrideTicket(UserTicket ticket) {
-        this.ticket = ticket;
+        if (!getRunAsSystem()) {
+            setTicket(ticket);
+        }
     }
 
     /**
@@ -472,7 +474,7 @@ public class FxContext implements Serializable {
      * Reload the UserTicket, needed i.e. when language settings change
      */
     public void _reloadUserTicket() {
-        ticket = EJBLookup.getAccountEngine().getUserTicket();
+        setTicket(EJBLookup.getAccountEngine().getUserTicket());
     }
 
     /**
@@ -541,7 +543,7 @@ public class FxContext implements Serializable {
             UserTicket last = getLastUserTicket(session);
             // Always determine the current user ticket for dynamic pages and webdav requests.
             // This takes about 1 x 5ms for every request on a development machine
-            si.ticket = getTicketFromEJB(session);
+            si.setTicket(getTicketFromEJB(session));
             if (si.ticket.isGuest()) {
                 try {
                     if (last == null)
@@ -557,16 +559,16 @@ public class FxContext implements Serializable {
         } else {
             // For static content like images we use the last user ticket stored in the session
             // to speed up the request.
-            si.ticket = getLastUserTicket(session);
+            si.setTicket(getLastUserTicket(session));
             if (si.ticket != null) {
                 if (si.ticket.isGuest() && (si.ticket.getACLAssignments() == null || si.ticket.getACLAssignments().length == 0)) {
                     //reload from EJB layer if we have a guest ticket with no ACL assignments
                     //this can happen during initial loading
-                    si.ticket = getTicketFromEJB(session);
+                    si.setTicket(getTicketFromEJB(session));
                 }
             }
             if (si.ticket == null) {
-                si.ticket = getTicketFromEJB(session);
+                si.setTicket(getTicketFromEJB(session));
             }
         }
         info.set(si);

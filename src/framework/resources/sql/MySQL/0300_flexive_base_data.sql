@@ -1,2 +1,193 @@
--- Optional data for a working base 
-
+--insert into FXS_TEMPLATE
+--  (id,TYPEID,name,template_type,content_type,created_by,created_at,modified_by,modified_at,master_template,islive,content)
+--values
+--  (1,1,'Master Template Example','M','xhtml',2,UNIX_TIMESTAMP()*1000,2,UNIX_TIMESTAMP()*1000,null,true,
+--'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+--<html xmlns="http://www.w3.org/1999/xhtml"
+--  xmlns:ui="http://java.sun.com/jsf/facelets"
+--  xmlns:fx="http://www.flexive.com/jsf"
+--  xmlns:cms="http://www.flexive.com/cms"
+--  xmlns:c="http://java.sun.com/jstl/core">
+--<head>
+--    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+--    <title>Master Template Example</title>
+--</head>
+--
+--<body>
+--
+--<table border="0" cellspacing="10" cellpadding="4">
+--    <tr>
+--     <td colspan="2" style="border-bottom:1px solid gray">
+--            <ui:repeat value="#{navigation[''/'']}" var="item">
+--                <fx:nodeLink value="#{item}"/|
+--            </ui:repeat>
+--     </td>
+--    </tr>
+--    <tr>
+--        <td valign="top" style="border-right:1px solid gray;width:150px;">
+--
+--            <c:set var="isempty" value="true"/>
+--
+--            <c:forEach items="#{navigation[''.'']}" var="item">
+--               <c:set var="isempty" value="false"/>
+--               <fx:nodeLink value="#{item}"/>  <br/>
+--            </c:forEach>
+--
+--            <c:if test="#{isempty}">
+--               <c:forEach items="#{navigation[''..'']}" var="item2">
+--                  <fx:nodeLink value="#{item2}"/>  <br/>
+--               </c:forEach>
+--            </c:if>
+--
+--        </td>
+--        <td valign="top">
+--            <b><ui:insert name="title">Default Title</ui:insert></b>
+--            <p><ui:insert name="body">Default Body</ui:insert></p>
+--        </td>
+--    </tr>
+--</table>
+--
+--</body>
+--
+--</html>'
+--);
+--
+--
+--insert into FXS_TEMPLATE
+--  (id,typeid,name,template_type,content_type,created_by,created_at,modified_by,modified_at,master_template,islive,content)
+--values
+--  (2,1,'Template Example','C','xhtml',2,UNIX_TIMESTAMP()*1000,2,UNIX_TIMESTAMP()*1000,1,true,
+--'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+--<html xmlns="http://www.w3.org/1999/xhtml"
+--      xmlns:ui="http://java.sun.com/jsf/facelets"
+--      xmlns:cms="http://www.flexive.com/cms"
+--      xmlns:h="http://java.sun.com/jsf/html">
+--<body>
+--
+--This text above will not be displayed.
+--
+--<ui:composition template="Master Template Example">
+--
+--    This text will not be displayed.
+--
+--    <ui:define name="title">
+--     #{content.caption}
+--    </ui:define>
+--
+--    This text will also not be displayed.
+--
+--    <ui:define name="body">
+--        This content has the id #{content.id} and the version #{content.version}.
+--    </ui:define>
+--
+--    This text will not be displayed.
+--
+--</ui:composition>
+--
+--This text below will also not be displayed.
+--
+--</body>
+--</html>'
+--);
+--
+--
+--
+--
+--
+--
+--insert into FXS_TEMPLATE
+--  (id,typeid,name,template_type,content_type,created_by,created_at,modified_by,modified_at,master_template,islive,content)
+--values
+--  (3,2,'Image','C','xhtml',2,UNIX_TIMESTAMP()*1000,2,UNIX_TIMESTAMP()*1000,1,true,
+--'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+--<html xmlns="http://www.w3.org/1999/xhtml"
+--      xmlns:ui="http://java.sun.com/jsf/facelets"
+--      xmlns:cms="http://www.flexive.com/cms"
+--      xmlns:h="http://java.sun.com/jsf/html">
+--<body>
+--
+--This text above will not be displayed.
+--
+--<ui:composition template="Master Template Example">
+--
+--    This text will not be displayed.
+--
+--    <ui:define name="title">
+--     #{content.caption}
+--    </ui:define>
+--
+--    This text will also not be displayed.
+--
+--    <ui:define name="body">
+--        <img src="thumbnail/pk#{content.id}.#{content.version}/s3" alt="image" title="image" border="0" style="border:1px solid gray"/>
+--    </ui:define>
+--
+--    This text will not be displayed.
+--
+--</ui:composition>
+--
+--This text below will also not be displayed.
+--
+--</body>
+--</html>'
+--);
+--
+--
+--insert into FXS_TEMPLATE
+--  (id,typeid,name,template_type,content_type,created_by,created_at,modified_by,modified_at,master_template,islive,content)
+--values
+--  (4,3,'Article','C','xhtml',2,UNIX_TIMESTAMP()*1000,2,UNIX_TIMESTAMP()*1000,1,true,
+--'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+--<html xmlns="http://www.w3.org/1999/xhtml"
+--      xmlns:ui="http://java.sun.com/jsf/facelets"
+--      xmlns:cms="http://www.flexive.com/cms"
+--      xmlns:h="http://java.sun.com/jsf/html">
+--<body>
+--
+--This text above will not be displayed.
+--
+--<ui:composition template="Master Template Example">
+--
+--    This text will not be displayed.
+--
+--    <ui:define name="title">
+--    #{content.caption}
+--    </ui:define>
+--
+--    This text will also not be displayed.
+--
+--    <ui:define name="body">
+--       <h:outputText value=" #{content.LongText}" escape="false"/>
+--    </ui:define>
+--
+--    This text will not be displayed.
+--
+--</ui:composition>
+--
+--This text below will also not be displayed.
+--
+--</body>
+--</html>'
+--);
+--
+--
+--insert into FXS_TEMPLATE
+--  (id,typeid,name,template_type,content_type,created_by,created_at,modified_by,modified_at,master_template,islive,content)
+--values
+--  (5,1,'myTag','T','xhtml',2,UNIX_TIMESTAMP()*1000,2,UNIX_TIMESTAMP()*1000,1,true,
+--'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+--        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+--<html xmlns="http://www.w3.org/1999/xhtml"
+--      xmlns:ui="http://java.sun.com/jsf/facelets"
+--      xmlns:h="http://java.sun.com/jsf/html"
+--      xmlns:f="http://java.sun.com/jsf/core"
+--      xmlns:cms="http://www.flexive.com/cms"
+--      xmlns:c="http://java.sun.com/jstl/core"
+--      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+--      xmlns:t="http://myfaces.apache.org/tomahawk">
+--<ui:composition>
+--    [ Your value: #{value}]
+--</ui:composition>
+--
+--</html>'
+--);

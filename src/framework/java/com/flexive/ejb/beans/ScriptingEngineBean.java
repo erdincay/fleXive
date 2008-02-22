@@ -859,8 +859,8 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         }
         String[] files = FxSharedUtils.loadFromInputStream(scriptIndex, -1).
                 replaceAll("\r", "").split("\n");
-        FxContext.get().runAsSystem();
         final UserTicket originalTicket = FxContext.get().getTicket();
+        FxContext.get().runAsSystem();
         try {
             FxScriptBinding binding = new FxScriptBinding();
             UserTicket ticket = ((UserTicketImpl) UserTicketImpl.getGuestTicket()).cloneAsGlobalSupervisor();
@@ -939,8 +939,8 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         }
         String[] files = FxSharedUtils.loadFromInputStream(scriptIndex, -1).
                 replaceAll("\r", "").split("\n");
-        FxContext.get().runAsSystem();
         final UserTicket originalTicket = FxContext.get().getTicket();
+        FxContext.get().runAsSystem();
         try {
             FxScriptBinding binding = new FxScriptBinding();
             UserTicket ticket = ((UserTicketImpl) UserTicketImpl.getGuestTicket()).cloneAsGlobalSupervisor();
