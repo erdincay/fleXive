@@ -8,7 +8,7 @@
     <title>Tree Engine</title>
     <para>
         &Flexive; comes with a tree component, accessible via the
-        <interfacename>FxTreeEngine</interfacename>
+        <interfacename>TreeEngine</interfacename>
         interface with means to create and manage tree based structures and attach FxContent instances to tree
         nodes. There are actually 2 logically (and physically in terms of used database tables) distinct trees: a
         <emphasis>live</emphasis>
@@ -89,7 +89,7 @@
             <example xml:id="core_tree_ex_newNode">
                 <title>Creating a new tree node attached to the root node</title>
                 <programlisting language="java"><![CDATA[//Lookup the tree interface
-FxTreeEngine tree = EJBLookup.getTreeEngine();
+TreeEngine tree = EJBLookup.getTreeEngine();
 //create new node
 FxTreeNodeEdit node = FxTreeNodeEdit.createNew("NodeName");
 FxString label = new FxString(false, "NodeLabel");
