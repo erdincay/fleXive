@@ -47,7 +47,7 @@ import org.apache.sanselan.common.ImageMetadata;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
+import java.awt.image.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,6 +63,10 @@ import java.util.List;
 public class FxMediaNativeEngine {
     private static final transient Log LOG = LogFactory.getLog(FxMediaNativeEngine.class);
 
+    /**
+     * Do we run in headless mode?
+     */
+    public final static boolean headless = "true".equals(System.getProperty("java.awt.headless"));
 
     /**
      * Scale an image and return the dimensions (width and height) as int array
@@ -76,6 +80,11 @@ public class FxMediaNativeEngine {
      * @throws FxApplicationException on errors
      */
     public static int[] scale(File original, File scaled, String extension, int width, int height) throws FxApplicationException {
+        if( headless && FxMediaImageMagickEngine.IM_AVAILABLE && ".GIF".equals(extension)) {
+            //native headless engine can't handle gif transparency ... so if we have IM we use it, else
+            //transparent pixels will be black
+            return FxMediaImageMagickEngine.scale(original, scaled, extension, width, height);
+        }
         BufferedImage bi;
         try {
             bi = ImageIO.read(original);
@@ -95,9 +104,14 @@ public class FxMediaNativeEngine {
         scaleWidth = (int) ((double) scaleWidth * scale);
         scaleHeight = (int) ((double) scaleHeight * scale);
         Image scaledImage;
-        // create a new buffered image, don't rely on a local graphics system (headless mode)
-        BufferedImage bi2 = new BufferedImage(scaleWidth, scaleHeight, BufferedImage.TYPE_INT_RGB);
-
+        BufferedImage bi2;
+        if (headless) {
+            // create a new buffered image, don't rely on a local graphics system (headless mode)
+            bi2 = new BufferedImage(scaleWidth, scaleHeight, BufferedImage.TYPE_INT_ARGB);
+        } else {
+            GraphicsConfiguration gc = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
+            bi2 = gc.createCompatibleImage(scaleWidth, scaleHeight, bi.getTransparency());
+        }
         Graphics2D g = bi2.createGraphics();
         if (scale < 0.3) {
             scaledImage = bi.getScaledInstance(scaleWidth, scaleHeight, Image.SCALE_SMOOTH);
@@ -107,6 +121,7 @@ public class FxMediaNativeEngine {
             g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
             g.drawImage(bi, 0, 0, scaleWidth, scaleHeight, null);
         }
+        g.dispose();
         String eMsg;
         boolean fallback;
         try {
@@ -123,7 +138,7 @@ public class FxMediaNativeEngine {
                     iFormat = ImageFormat.IMAGE_FORMAT_BMP;
                 else if (".TIF".equals(extension))
                     iFormat = ImageFormat.IMAGE_FORMAT_TIFF;
-                else if( ".PNG".equals(extension) )
+                else if (".PNG".equals(extension))
                     iFormat = ImageFormat.IMAGE_FORMAT_PNG;
                 else
                     iFormat = ImageFormat.IMAGE_FORMAT_GIF;
@@ -134,6 +149,34 @@ public class FxMediaNativeEngine {
             }
         }
         return new int[]{scaleWidth, scaleHeight};
+    }
+
+    public static BufferedImage convertRGBAToIndexed(BufferedImage src) {
+        BufferedImage dest = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_BYTE_INDEXED);
+        Graphics g = dest.getGraphics();
+        g.setColor(new Color(231, 20, 189));
+        g.fillRect(0, 0, dest.getWidth(), dest.getHeight()); //fill with a hideous color and make it transparent
+        dest = makeTransparent(dest, 0, 0);
+        dest.createGraphics().drawImage(src, 0, 0, null);
+        return dest;
+    }
+
+    public static BufferedImage makeTransparent(BufferedImage image, int x, int y) {
+        ColorModel cm = image.getColorModel();
+        if (!(cm instanceof IndexColorModel))
+            return image; //sorry...
+        IndexColorModel icm = (IndexColorModel) cm;
+        WritableRaster raster = image.getRaster();
+        int pixel = raster.getSample(x, y, 0); //pixel is offset in ICM's palette
+        int size = icm.getMapSize();
+        byte[] reds = new byte[size];
+        byte[] greens = new byte[size];
+        byte[] blues = new byte[size];
+        icm.getReds(reds);
+        icm.getGreens(greens);
+        icm.getBlues(blues);
+        IndexColorModel icm2 = new IndexColorModel(8, size, reds, greens, blues, pixel);
+        return new BufferedImage(icm2, raster, image.isAlphaPremultiplied(), null);
     }
 
     /**
