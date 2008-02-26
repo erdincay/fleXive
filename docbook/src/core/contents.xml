@@ -61,7 +61,7 @@ def person = CacheAdmin.environment.getType("Person")]]></programlisting>
             </example>
         </para>
         <para>
-            Lets have a loot at the following table, which is based on the XML data example, to visualize the mapping of
+            Lets have a look at the following table, which is based on the XML data example, to visualize the mapping of
             XPath's to values:
             <table xml:id="cc_xpathmapping_table" class="flexive">
                 <caption>XPath to value mapping</caption>
