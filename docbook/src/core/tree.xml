@@ -95,7 +95,7 @@ FxTreeNodeEdit node = FxTreeNodeEdit.createNew("NodeName");
 FxString label = new FxString(false, "NodeLabel");
 node.setLabel(label);
 //create the node
-long id1 = tree.save(node1);
+long id1 = tree.save(node);
 //load it
 FxTreeNode node_loaded = tree.getNode(id1);
 //delete it
