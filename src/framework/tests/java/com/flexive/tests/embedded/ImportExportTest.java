@@ -88,9 +88,12 @@ public class ImportExportTest {
     @Test
     public void contentMarshalling() throws FxApplicationException {
         ContentEngine ce = EJBLookup.getContentEngine();
-        FxContent co = ce.initialize(FxType.ROOT_ID);
+        FxContent co = ce.initialize(FxType.CONTACTDATA);
         XStream xs = ConversionEngine.getXStream();
-        System.out.print("Content: \n" + xs.toXML(co));
+        final String xml = xs.toXML(co);
+        System.out.print("Content:\n" + xml);
+        System.out.println("Reverted:\n" + xs.toXML(xs.fromXML(xml)));
+
     }
 
 }

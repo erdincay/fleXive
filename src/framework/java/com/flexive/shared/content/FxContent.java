@@ -391,6 +391,10 @@ public class FxContent implements Serializable, Cloneable {
         this.relatedDestinationPosition = relatedDestinationPosition;
     }
 
+    public void setRelatedSourcePosition(int relatedSourcePosition) {
+        this.relatedSourcePosition = relatedSourcePosition;
+    }
+
     /**
      * Get the lifecycle information
      *

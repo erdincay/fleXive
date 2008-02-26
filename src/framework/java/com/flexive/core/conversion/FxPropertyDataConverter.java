@@ -33,8 +33,11 @@
  ***************************************************************/
 package com.flexive.core.conversion;
 
+import com.flexive.shared.content.FxContent;
+import com.flexive.shared.content.FxData;
+import com.flexive.shared.content.FxPropertyData;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.value.FxValue;
-import com.flexive.shared.structure.FxSelectListItem;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
@@ -42,70 +45,50 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 /**
- * XStream converter for FxValues
- * <p/>
- * XML format for e.g. a FxString:
- * <p/>
- * <code><val t="FxString" ml="1" dl="1">
- * <d l="1">text lang 1</d>
- * <d l="2">text lang 2</d>
- * </val></code>
+ * XStream converter for FxPropertyData
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @version $Rev
  */
-public class FxValueConverter implements Converter {
+public class FxPropertyDataConverter implements Converter {
 
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings("unchecked")
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext ctx) {
-        FxValue value = (FxValue) o;
-        writer.addAttribute("t", value.getClass().getSimpleName());
-        writer.addAttribute("ml", value.isMultiLanguage() ? "1" : "0");
-        writer.addAttribute("dl", "" + value.getDefaultLanguage());
-        if (!value.isEmpty())
-            for (long lang : value.getTranslatedLanguages()) {
-                writer.startNode("d");
-                writer.addAttribute("l", "" + lang);
-                writer.setValue(value.getStringValue(value.getTranslation(lang)));
-                writer.endNode();
-            }
-        else
-            writer.addAttribute("empty", "true");
+        FxPropertyData pd = (FxPropertyData) o;
+        pd.compact(); //make sure all gaps are closed
+        writer.startNode("prop");
+        writer.addAttribute("xpath", pd.getXPathFull());
+        writer.addAttribute("pos", String.valueOf(pd.getPos()));
+        ctx.convertAnother(pd.getValue());
+        writer.endNode();
     }
 
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings("unchecked")
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
-        FxValue v = null;
+        FxContent co = (FxContent) ctx.get(ConversionEngine.KEY_CONTENT);
+        String xp = reader.getAttribute("xpath");
+        int pos = Integer.valueOf(reader.getAttribute("pos"));
+        FxValue val = (FxValue) ctx.convertAnother(this, FxValue.class);
+        FxData data;
         try {
-            boolean multiLanguage = "1".equals(reader.getAttribute("ml"));
-            long defaultLanguage = Long.valueOf(reader.getAttribute("dl"));
-            v = (FxValue) Class.forName("com.flexive.shared.value." + reader.getAttribute("t")).
-                    getConstructor(long.class, boolean.class).newInstance(defaultLanguage, multiLanguage);
-            if (reader.getAttribute("empty") != null && Boolean.valueOf(reader.getAttribute("empty")))
-                v.setEmpty();
-            while (reader.hasMoreChildren()) {
-                reader.moveDown();
-                if ("d".equals(reader.getNodeName())) {
-                    long lang = Long.valueOf(reader.getAttribute("l"));
-                    v.setTranslation(lang, v.fromString(reader.getValue()));
-                }
-                reader.moveUp();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+            co.setValue(xp, val);
+            data = co.getPropertyData(xp);
+            if (data.getPos() != pos)
+                data.setPos(pos);
+        } catch (FxApplicationException e) {
+            throw e.asRuntimeException();
         }
-        return v;
+        return data;
     }
 
     /**
      * {@inheritDoc}
      */
     public boolean canConvert(Class aClass) {
-        return FxValue.class.isAssignableFrom(aClass);
+        return FxPropertyData.class.isAssignableFrom(aClass);
     }
 }

@@ -33,16 +33,20 @@
  ***************************************************************/
 package com.flexive.core.conversion;
 
-import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.converters.MarshallingContext;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.content.FxContent;
+import com.flexive.shared.content.FxPK;
+import com.flexive.shared.content.FxGroupData;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.security.LifeCycleInfo;
+import com.flexive.shared.structure.FxEnvironment;
+import com.flexive.shared.workflow.Step;
+import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 /**
  * XStream converter for FxContent
@@ -56,17 +60,21 @@ public class FxContentConverter implements Converter {
      * {@inheritDoc}
      */
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext ctx) {
-        FxContent co = (FxContent)o;
+        FxContent co = ((FxContent) o).copy(); //remove/compacts will be performed -> so work on a copy
         FxEnvironment env = CacheAdmin.getEnvironment();
         try {
             writer.addAttribute("pk", co.getPk().toString());
             writer.addAttribute("type", env.getType(co.getTypeId()).getName());
             writer.addAttribute("mandator", env.getMandator(co.getMandatorId()).getName());
             writer.addAttribute("acl", env.getACL(co.getAclId()).getName());
-            writer.addAttribute("step", env.getStepDefinition(env.getStep(co.getStepId()).getStepDefinitionId()).getName());
+            final Step step = env.getStep(co.getStepId());
+            final String stepName = env.getStepDefinition(step.getStepDefinitionId()).getName();
+            final String wfName = env.getWorkflow(step.getWorkflowId()).getName();
+            writer.addAttribute("workflow", wfName);
+            writer.addAttribute("step", stepName);
             writer.addAttribute("mainLanguage", EJBLookup.getLanguageEngine().load(co.getMainLanguage()).getIso2digit());
             writer.addAttribute("relation", String.valueOf(co.isRelation()));
-            if( co.isRelation() ) {
+            if (co.isRelation()) {
                 writer.startNode("relation");
                 writer.startNode("source");
                 writer.addAttribute("pk", co.getRelatedSource().toString());
@@ -79,7 +87,7 @@ public class FxContentConverter implements Converter {
                 writer.endNode();
             }
             ctx.convertAnother(co.getLifeCycleInfo());
-//            ctx.convertAnother(co.getRootGroup());
+            ctx.convertAnother(co.getRootGroup());
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();
         }
@@ -89,7 +97,42 @@ public class FxContentConverter implements Converter {
      * {@inheritDoc}
      */
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
-        return null;
+        FxEnvironment env = CacheAdmin.getEnvironment();
+        FxContent co;
+        try {
+            co = EJBLookup.getContentEngine().initialize(env.getType(reader.getAttribute("type")).getId(),
+                    env.getMandator(reader.getAttribute("mandator")).getId(),
+                    env.getACL(reader.getAttribute("acl")).getId(),
+                    env.getStep(env.getWorkflow(reader.getAttribute("workflow")).getId(), reader.getAttribute("step")).getId(),
+                    EJBLookup.getLanguageEngine().load(reader.getAttribute("mainLanguage")).getId());
+            boolean relation = Boolean.valueOf(reader.getAttribute("relation"));
+            if (relation) {
+                //TODO: resolve relation pk's after import
+                reader.moveDown(); //relation
+                reader.moveDown(); //source
+                co.setRelatedSource(FxPK.fromString(reader.getAttribute("pk")));
+                co.setRelatedSourcePosition(Integer.valueOf(reader.getAttribute("pos")));
+                reader.moveUp(); //source
+                reader.moveDown(); //destination
+                co.setRelatedDestination(FxPK.fromString(reader.getAttribute("pk")));
+                co.setRelatedDestinationPosition(Integer.valueOf(reader.getAttribute("pos")));
+                reader.moveUp(); //destination
+                reader.moveUp(); //relation
+            }
+            ctx.put(ConversionEngine.KEY_CONTENT, co);
+            while (reader.hasMoreChildren()) {
+                reader.moveDown();
+                if ("lci".equals(reader.getNodeName())) {
+                    ctx.convertAnother(this, LifeCycleInfo.class);
+                } else if ("group".equals(reader.getNodeName())) {
+                    ctx.convertAnother(this, FxGroupData.class);
+                }
+                reader.moveUp();
+            }
+        } catch (FxApplicationException e) {
+            throw e.asRuntimeException();
+        }
+        return co;
     }
 
     /**
@@ -98,7 +141,6 @@ public class FxContentConverter implements Converter {
     public boolean canConvert(Class aClass) {
         return FxContent.class.isAssignableFrom(aClass);
     }
-
 
 
 }

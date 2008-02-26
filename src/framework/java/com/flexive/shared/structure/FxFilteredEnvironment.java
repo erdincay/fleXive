@@ -118,6 +118,13 @@ public final class FxFilteredEnvironment implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
+    public Step getStep(long workflowId, String stepName) {
+        return environment.getStep(workflowId, stepName);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public List<Step> getSteps() {
         return environment.getSteps();
     }
@@ -201,6 +208,13 @@ public final class FxFilteredEnvironment implements FxEnvironment {
      */
     public Workflow getWorkflow(long id) {
         return environment.getWorkflow(id);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Workflow getWorkflow(String name) {
+        return environment.getWorkflow(name);
     }
 
     /**

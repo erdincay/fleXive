@@ -209,6 +209,8 @@ public class FxSelectOne extends FxValue<FxSelectListItem, FxSelectOne> implemen
      */
     public FxSelectList getSelectList() {
         if (list == null) {
+            if( this.isEmpty() )
+                return null;
             if (this.isMultiLanguage()) {
                 list = this.getBestTranslation().getList();
             } else

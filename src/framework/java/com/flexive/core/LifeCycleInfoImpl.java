@@ -64,10 +64,10 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
      */
     private static final int NOT_DEFINED = -1;
 
-    private long iCreatorId;
-    private long lCreationTime;
-    private long iModifcatorId;
-    private long lModificationTime;
+    private long creatorId;
+    private long creationTime;
+    private long modifcatorId;
+    private long modificationTime;
 
     /**
      * Empty LifeCycleInfo for tables where undefined
@@ -80,7 +80,7 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
      * @return Id of the User that created this entry
      */
     public long getCreatorId() {
-        return iCreatorId;
+        return creatorId;
     }
 
     /**
@@ -89,7 +89,7 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
      * @return the timestamp when this object was created
      */
     public long getCreationTime() {
-        return lCreationTime;
+        return creationTime;
     }
 
     /**
@@ -98,7 +98,7 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
      * @return Id of the most recent User that modified this entry
      */
     public long getModificatorId() {
-        return iModifcatorId;
+        return modifcatorId;
     }
 
     /**
@@ -107,7 +107,24 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
      * @return timestamp of the most recent modification
      */
     public long getModificationTime() {
-        return lModificationTime;
+        return modificationTime;
+    }
+
+
+    public void setCreatorId(long creatorId) {
+        this.creatorId = creatorId;
+    }
+
+    public void setCreationTime(long creationTime) {
+        this.creationTime = creationTime;
+    }
+
+    public void setModifcatorId(long modifcatorId) {
+        this.modifcatorId = modifcatorId;
+    }
+
+    public void setModificationTime(long modificationTime) {
+        this.modificationTime = modificationTime;
     }
 
     /**
@@ -129,10 +146,10 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
      * @param modificationTime modification timestamp
      */
     public LifeCycleInfoImpl(long creatorId, long creationTime, long modificator, long modificationTime) {
-        this.iCreatorId = creatorId;
-        this.lCreationTime = creationTime;
-        this.iModifcatorId = modificator;
-        this.lModificationTime = modificationTime;
+        this.creatorId = creatorId;
+        this.creationTime = creationTime;
+        this.modifcatorId = modificator;
+        this.modificationTime = modificationTime;
     }
 
     /**

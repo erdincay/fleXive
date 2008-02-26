@@ -212,6 +212,17 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public Step getStep(long workflowId, String stepName) {
+        for (Step step : steps)
+            if (step.getWorkflowId() == workflowId)
+                if (stepName.equals(getStepDefinition(step.getStepDefinitionId()).getName()))
+                    return step;
+        throw new FxNotFoundException("ex.step.notFound.name", stepName).asRuntimeException();
+    }
+
+    /**
      * Assign all steps
      *
      * @param steps all steps
@@ -445,6 +456,16 @@ public final class FxEnvironmentImpl implements FxEnvironment {
             if (wf.getId() == id)
                 return wf;
         throw new FxNotFoundException("ex.structure.workflow.notFound.id", id).asRuntimeException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Workflow getWorkflow(String name) {
+        for (Workflow wf : workflows)
+            if (wf.getName().equals(name))
+                return wf;
+        throw new FxNotFoundException("ex.structure.workflow.notFound.id", name).asRuntimeException();
     }
 
     /**

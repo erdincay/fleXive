@@ -33,46 +33,55 @@
  ***************************************************************/
 package com.flexive.core.conversion;
 
-import com.flexive.core.LifeCycleInfoImpl;
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.content.FxData;
+import com.flexive.shared.content.FxGroupData;
 import com.flexive.shared.content.FxContent;
+import com.flexive.shared.content.FxPropertyData;
 import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.exceptions.FxConversionException;
-import com.flexive.shared.interfaces.AccountEngine;
-import com.flexive.shared.security.LifeCycleInfo;
+import com.flexive.shared.exceptions.FxNotFoundException;
+import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
-import java.text.ParseException;
-import java.util.Date;
-
 /**
- * XStream converter for LifeCycleInfo
+ * XStream converter for FxGroupData
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev
  */
-public class LifeCycleInfoConverter implements Converter {
+public class FxGroupDataConverter implements Converter {
 
     /**
      * {@inheritDoc}
      */
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext ctx) {
-        LifeCycleInfo li = (LifeCycleInfo) o;
-        writer.startNode("lci");
-        try {
-            final AccountEngine acc = EJBLookup.getAccountEngine();
-            writer.addAttribute("cr", acc.load(li.getCreatorId()).getLoginName());
-            writer.addAttribute("crAt", FxFormatUtils.getUniversalDateTimeFormat().format(li.getCreationTime()));
-            writer.addAttribute("mf", acc.load(li.getModificatorId()).getLoginName());
-            writer.addAttribute("mfAt", FxFormatUtils.getUniversalDateTimeFormat().format(li.getModificationTime()));
-        } catch (FxApplicationException e) {
-            throw e.asRuntimeException();
-        }
+        FxGroupData gd = (FxGroupData) o;
+        gd.compact(); //make sure all gaps are closed
+        writer.startNode("group");
+        writer.addAttribute("xpath", gd.getXPathFull());
+        if( gd.getPos() >= 0 ) //no position for root group
+            writer.addAttribute("pos", String.valueOf(gd.getPos()));
+
+        /* do {
+          boolean removed;
+          removed = false;
+          for (FxData data : gd.getChildren())
+              if (data.isEmpty() && data.isRemoveable()) {
+                  try {
+                      gd.removeChild(data);
+                  } catch (FxApplicationException e) {
+                      throw e.asRuntimeException();
+                  }
+                  removed = true;
+                  break;
+              }
+      } while (removed);*/
+        for (FxData data : gd.getChildren())
+            if (!data.isSystemInternal())
+                ctx.convertAnother(data);
         writer.endNode();
     }
 
@@ -80,36 +89,33 @@ public class LifeCycleInfoConverter implements Converter {
      * {@inheritDoc}
      */
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
-        final AccountEngine acc = EJBLookup.getAccountEngine();
-        String convDate = null;
-        try {
-            convDate = reader.getAttribute("crAt");
-            long crAt = FxFormatUtils.getUniversalDateTimeFormat().parse(convDate).getTime();
-            convDate = reader.getAttribute("mfAt");
-            long mfAt = FxFormatUtils.getUniversalDateTimeFormat().parse(convDate).getTime();
-            final long creatorId = acc.load(reader.getAttribute("cr")).getId();
-            final long modificator = acc.load(reader.getAttribute("mf")).getId();
-            if( ctx.get(ConversionEngine.KEY_CONTENT) instanceof FxContent) {
-                LifeCycleInfoImpl lci = (LifeCycleInfoImpl)((FxContent)ctx.get(ConversionEngine.KEY_CONTENT)).getLifeCycleInfo();
-                lci.setCreatorId(creatorId);
-                lci.setCreationTime(crAt);
-                lci.setModifcatorId(modificator);
-                lci.setModificationTime(mfAt);
-                return lci;
+        FxContent co = (FxContent)ctx.get(ConversionEngine.KEY_CONTENT);
+        String xp = reader.getAttribute("xpath");
+        int pos = -1;
+        if( reader.getAttribute("pos") != null )
+            pos = Integer.valueOf(reader.getAttribute("pos"));
+        while( reader.hasMoreChildren() ) {
+            reader.moveDown();
+            if( "prop".equals(reader.getNodeName())) {
+                ctx.convertAnother(this, FxPropertyData.class);
+            } else if ("group".equals(reader.getNodeName())) {
+                unmarshal(reader, ctx);
             }
-            return new LifeCycleInfoImpl(creatorId, crAt, modificator, mfAt);
+            reader.moveUp();
+        }
+        try {
+            if( pos >= 0 )
+                co.getGroupData(xp).setPos(pos);
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();
-        } catch (ParseException e) {
-            throw new FxConversionException(e, "ex.conversion.error", Date.class.getCanonicalName(), convDate,
-                    e.getMessage()).asRuntimeException();
         }
+        return null;
     }
 
     /**
      * {@inheritDoc}
      */
     public boolean canConvert(Class aClass) {
-        return LifeCycleInfo.class.isAssignableFrom(aClass);
+        return FxGroupData.class.isAssignableFrom(aClass);
     }
 }

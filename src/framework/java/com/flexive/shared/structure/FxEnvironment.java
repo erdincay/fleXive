@@ -147,6 +147,14 @@ public interface FxEnvironment extends Serializable {
     Workflow getWorkflow(long id);
 
     /**
+     * Get a Workflow by its name
+     *
+     * @param name workflow name
+     * @return Workflow
+     */
+    Workflow getWorkflow(String name);
+
+    /**
      * Get all workflows
      *
      * @return all workflows
@@ -384,6 +392,15 @@ public interface FxEnvironment extends Serializable {
      * @return Step
      */
     Step getStep(long stepId);
+
+    /**
+     * Get a Step by its name
+     *
+     * @param workflowId id of the workflow
+     * @param stepName name of the step
+     * @return Step
+     */
+    Step getStep(long workflowId, String stepName);
 
     /**
      * Load a given route.

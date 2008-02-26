@@ -37,6 +37,8 @@ import com.thoughtworks.xstream.XStream;
 import com.flexive.shared.value.FxValue;
 import com.flexive.core.conversion.FxValueConverter;
 import com.flexive.shared.content.FxContent;
+import com.flexive.shared.content.FxPropertyData;
+import com.flexive.shared.content.FxGroupData;
 
 /**
  * Conversion Engine - responsible for XML Import/Export
@@ -45,6 +47,8 @@ import com.flexive.shared.content.FxContent;
  * @version $Rev
  */
 public class ConversionEngine {
+
+    public final static String KEY_CONTENT = "content";
 
     /**
      * Get a XStream instance with all registered converters and aliases
@@ -55,7 +59,11 @@ public class ConversionEngine {
         XStream xs = new XStream();
         xs.aliasType("val", FxValue.class);
         xs.aliasType("co", FxContent.class);
+        xs.aliasType("prop", FxPropertyData.class);
+        xs.aliasType("group", FxGroupData.class);
         xs.registerConverter(new FxValueConverter());
+        xs.registerConverter(new FxPropertyDataConverter());
+        xs.registerConverter(new FxGroupDataConverter());
         xs.registerConverter(new FxContentConverter());
         xs.registerConverter(new LifeCycleInfoConverter());
         return xs;
