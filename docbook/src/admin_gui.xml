@@ -1897,7 +1897,7 @@
                 option to be able to delete languages which are already in use by
                 <link linkend="core_contents">content instances</link>, meaning a
                 <link linkend="structure_editor_property_editor">property</link>
-                has been filled out in this language by a user.
+                has been filled in by a user in this language.
             </para>
             <para>
                 <imagedata fileref="images/adm_ui_system/language_settings.png"
