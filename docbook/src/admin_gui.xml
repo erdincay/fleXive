@@ -1189,7 +1189,11 @@
             <title>Creating queries with the visual query editor</title>
             <para>To access the query editor go to the
                 <filename>Search</filename>
-                tab of the &Flexive; backend administration. Open the query editor and rightclick on nodes of the
+                tab of the &Flexive; backend administration. It is also accessible via the
+                <filename>FxSQL / Search</filename>
+                menu item in the
+                <filename>Administration</filename>
+                tab. Open the query editor and rightclick on nodes of the
                 <link linkend="adm_content_tree">content tree</link>
                 and
                 <link linkend="structure_editor_gui">structure tree</link>
@@ -1361,7 +1365,6 @@
                     </variablelist>
                 </para>
             </section>
-
             <section xml:id="adm_query_editor_queries_briefcases">
                 <title>Saved queries and briefcases</title>
                 <para>You can save your query or save the query result to a briefcase by checking the options in the
@@ -1377,6 +1380,38 @@
             </section>
         </section>
     </section>
+
+    <section xml:id="adm_fxsql">
+        <title>The FxSQL Search</title>
+        <para>In addition to the
+            <link linkend="adm_query_editor">visual query editor</link>
+            the &Flexive; administration UI provides an input mask,
+            shown on the following screen, to
+            execute
+            <link linkend="core_search_sqlintro">FxSQL</link>
+            statements directly. It is also possible to create
+            <link linkend="adm_query_editor_queries_briefcases">briefcases</link>
+            from the result set. The input mask
+            can be found in the
+            <filename>FxSQL / Search</filename>
+            menu item of the
+            <filename>Administration</filename>
+            tab.
+        </para>
+        <para>
+            <link linkend="core_search_sqlintro">FxSQL</link>
+            is a &Flexive; SQL (structured query language) dialect.
+        </para>
+        <para>In the following example on the screen the primary keys of all content instances are selected from
+            the table
+            <code>content</code>.
+        </para>
+        <para>
+            <imagedata fileref="images/adm_ui_query_editor/fxsql_search.png"
+                       format="PNG" contentwidth="100%"/>
+        </para>
+    </section>
+
     <section xml:id="adm_user">
         <title>User account administration</title>
         <para>
@@ -1627,22 +1662,247 @@
 
     <section xml:id="adm_workflow">
         <title>Workflow administration</title>
-        <section>
-        </section>
-    </section>
-    <section xml:id="adm_fxsql">
-        <title>FxSQL</title>
-        <section>
-        </section>
     </section>
     <section xml:id="adm_scripts">
         <title>Script administration</title>
-        <section>
+        The &Flexive; script administration allows you to create scripts in the script editor and to execute
+        scripts directly in the
+        <link linkend="adm_scripts_console">script console</link>. The scripting language of
+        choice is Groovy, but if JavaSE 6 or higher is
+        used any language supported by the Java Scripting API can be used. Please see the section
+        <link linkend="core_scripting">Scripting Engine</link>
+        for more information about scripting in &Flexive;.
+        <section xml:id="adm_scripts_create">
+            <title>Creating a script</title>
+            <para>The following screen shows the creation of a contact data verification script. You can see the
+                select box for the default script event (1) which can be bound to a script. In this case it is
+                <code>BeforeContentSave</code>.
+            </para>
+            <para>
+                <table class="flexive">
+                    <thead>
+                        <tr>
+                            <th>List of available events</th>
+                            <th>Script editor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <itemizedlist>
+                                    <listitem>
+                                        <code>Manual</code>
+                                    </listitem>
+                                </itemizedlist>
+                                <itemizedlist>
+                                    <listitem>
+                                        <code>BeforeContentSave</code>
+                                    </listitem>
+                                    <listitem>
+                                        <code>AfterContentSave</code>
+                                    </listitem>
+                                    <listitem>
+                                        <code>BeforeContentCreate</code>
+                                    </listitem>
+                                    <listitem>
+                                        <code>AfterContentCreate</code>
+                                    </listitem>
+                                </itemizedlist>
+                                <itemizedlist>
+                                    <listitem>
+                                        <code>BeforeContentRemove</code>
+                                    </listitem>
+                                    <listitem>
+                                        <code>AfterContentRemove</code>
+                                    </listitem>
+                                    <listitem>
+                                        <code>AfterContentLoad</code>
+                                    </listitem>
+                                    <listitem>
+                                        <code>AfterContentInitialize</code>
+                                    </listitem>
+                                    <listitem>
+                                        <code>PrepareContentCreate</code>
+                                    </listitem>
+                                    <listitem>
+                                        <code>PrepareContentSave</code>
+                                    </listitem>
+                                </itemizedlist>
+                                <itemizedlist>
+                                    <listitem>
+                                        <code>BeforeDataChangeUpdate</code>
+                                    </listitem>
+                                    <listitem>
+                                        <code>AfterDataChangeUpdate</code>
+                                    </listitem>
+                                    <listitem>
+                                        <code>BeforeDataChangeDelete</code>
+                                    </listitem>
+                                    <listitem>
+                                        <code>AfterDataChangeDelete</code>
+                                    </listitem>
+                                    <listitem>
+                                        <code>BeforeDataChangeAdd</code>
+                                    </listitem>
+                                    <listitem>
+                                        <code>AfterDataChangeAdd</code>
+                                    </listitem>
+                                </itemizedlist>
+                                <itemizedlist>
+                                    <listitem>
+                                        <code>BeforeAssignmentDataCreate</code>
+                                    </listitem>
+                                    <listitem>
+                                        <code>AfterAssignmentDataCreate</code>
+                                    </listitem>
+                                    <listitem>
+                                        <code>BeforeAssignmentDataSave</code>
+                                    </listitem>
+                                    <listitem>
+                                        <code>AfterAssignmentDataSave</code>
+                                    </listitem>
+                                    <listitem>
+                                        <code>BeforeAssignmentDataDelete</code>
+                                    </listitem>
+                                    <listitem>
+                                        <code>AfterAssignmentDataDelete</code>
+                                    </listitem>
+                                </itemizedlist>
+                                <itemizedlist>
+                                    <listitem>
+                                        <code>BinaryPreviewProcess</code>
+                                    </listitem>
+                                    <listitem>
+                                        <code>AfterAccountCreate</code>
+                                    </listitem>
+                                    <listitem>
+                                        <code>AfterTreeNodeAdded</code>
+                                    </listitem>
+                                    <listitem>
+                                        <code>AfterTreeNodeRemoved</code>
+                                    </listitem>
+                                    <listitem>
+                                        <code>BeforeTreeNodeRemoved</code>
+                                    </listitem>
+                                    <listitem>
+                                        <code>AfterTreeNodeActivated</code>
+                                    </listitem>
+                                </itemizedlist>
+                                <itemizedlist>
+                                    <listitem>
+                                        <code>BeforeTreeNodeActivated</code>
+                                    </listitem>
+                                    <listitem>
+                                        <code>AfterTreeNodeFolderReplacement</code>
+                                    </listitem>
+                                </itemizedlist>
+                            </td>
+                            <td>
+                                <imagedata fileref="images/adm_ui_scripts/create_script.png"
+                                           format="PNG" contentwidth="100%"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </para>
+            <para>If the default script event is set to
+                <code>Manual</code>, the script can be executed via the
+                administration UI in the
+                <link linkend="adm_scripts_overview">script overview</link>.
+            </para>
+        </section>
+        <section xml:id="adm_scripts_overview">
+            <title>The script overview</title>
+            <para>The following screen shows the script overview. You can see the script
+                <filename>ClearLiveTree.gy</filename>
+                (1), which can be executed manually via the administration UI,
+                and other scripts, bound to different
+                <link linkend="adm_scripts_create">events</link>.
+            </para>
+            <para>
+                <imagedata fileref="images/adm_ui_scripts/script_overview.png"
+                           format="PNG" contentwidth="100%"/>
+            </para>
+        </section>
+        <section xml:id="adm_scripts_console">
+            <title>The Script Console</title>
+            <para>The following screen shows the &Flexive; Script console. It allows you to execute scripts directly
+                at the EJB layer.
+            </para>
+            <para>You can choose between the following languages and file extensions (1):</para>
+            <para>
+                <itemizedlist>
+                    <listitem>
+                        <code>gy: Groovy v1.5.1 (Bundled GroovyShell v1.5.1)</code>
+                    </listitem>
+                    <listitem>
+                        <code>groovy: Groovy v1.5.1 (Bundled GroovyShell v1.5.1)</code>
+                    </listitem>
+                    <listitem>
+                        <code>js: ECMAScript v1.6 (Mozilla Rhino v1.6 release 2)</code>
+                    </listitem>
+                </itemizedlist>
+            </para>
+            <para>If you want to execute the script on the web layer, check the option
+                <code>Execute at Web layer</code>
+                (2). Mind that this feature is only available for bundled Groovy!
+            </para>
+            <para>The Groovy code in this example creates a new tree node in the
+                <link linkend="adm_content_tree_modes">Edit tree</link>
+                of the
+                <link linkend="adm_content_tree">Content Tree</link>. The
+                node's name is
+                <code>NodeName</code>
+                and its label
+                <code>NodeLabel</code>.
+            </para>
+            <para>You might want to copy paste it and try it out:</para>
+            <para>
+                <xi:include href="listings/adm_scripts_console_example.xml"></xi:include>
+            </para>
+            <para>
+                <imagedata fileref="images/adm_ui_scripts/script_console.png"
+                           format="PNG" contentwidth="100%"/>
+            </para>
         </section>
     </section>
     <section xml:id="adm_system">
-        <title>System information and settings</title>
-        <section>
+        <title>System information and language settings</title>
+        <para>The
+            <filename>System</filename>
+            menu item of the
+            <filename>Administration</filename>
+            tab contains the
+            <link linkend="adm_system_sysinfo">system information</link>
+            display
+            and the
+            <link linkend="adm_system_language">language settings</link>.
+        </para>
+        <section xml:id="adm_system_sysinfo">
+            <title>The System Information</title>
+            <para>The system information gives you a brief overview of the system &Flexive; is running on.</para>
+            <para>
+                <imagedata fileref="images/adm_ui_system/sysinfo.png"
+                           format="PNG" contentwidth="100%"/>
+            </para>
+        </section>
+        <section xml:id="adm_system_language">
+            <title>Language settings</title>
+            <para>In the language settings editor you can manage your system languages. Add a language from the list of
+                disabled languages, delete a language or change the list's order. The language at the first position on
+                the list becomes the default language. The following screen shows the language settings editor.
+            </para>
+            <para>Check the
+                <code>Ignore language usage (1)</code>
+                option to be able to delete languages which are already in use by
+                <link linkend="core_contents">content instances</link>, meaning a
+                <link linkend="structure_editor_property_editor">property</link>
+                has been filled out in this language by a user.
+            </para>
+            <para>
+                <imagedata fileref="images/adm_ui_system/language_settings.png"
+                           format="PNG" contentwidth="100%"/>
+            </para>
         </section>
     </section>
     <section xml:id="adm_selectlists">

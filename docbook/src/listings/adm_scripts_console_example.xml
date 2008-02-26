@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="groovy" id="adm_scripts_console_example"
+                xmlns="http://docbook.org/ns/docbook">
+import com.flexive.shared.EJBLookup;
+import com.flexive.shared.interfaces.TreeEngine;
+import com.flexive.shared.tree.FxTreeNodeEdit;
+import com.flexive.shared.value.FxString;
+
+//Lookup the tree interface
+TreeEngine tree = EJBLookup.getTreeEngine();
+//create new node
+FxTreeNodeEdit node = FxTreeNodeEdit.createNew("NodeName");
+FxString label = new FxString(false, "NodeLabel");
+node.setLabel(label);
+//create the node
+long id = tree.save(node);
+</programlisting>

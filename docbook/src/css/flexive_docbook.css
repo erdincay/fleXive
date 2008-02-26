@@ -100,5 +100,5 @@ table.flexive tbody {
 table.flexive tbody td {
     padding: 0.5em;
     border-bottom: 1px solid black;
-    vertical-align: text-top;
+    vertical-align: top;
 }
