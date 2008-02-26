@@ -43,8 +43,9 @@ import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import com.flexive.war.servlet.ThumbnailServlet;
 
 import javax.faces.component.html.HtmlGraphicImage;
+import javax.faces.component.html.HtmlOutputLink;
+import javax.faces.component.html.HtmlOutputText;
 import javax.faces.component.UIComponent;
-import javax.faces.context.ResponseWriter;
 import java.io.IOException;
 
 /**
@@ -55,8 +56,8 @@ import java.io.IOException;
  */
 class ReadOnlyModeHelper extends RenderHelper {
 
-    public ReadOnlyModeHelper(ResponseWriter writer, FxValueInput component, String clientId, FxValue value) {
-        super(writer, component, clientId, value);
+    public ReadOnlyModeHelper(FxValueInput component, String clientId, FxValue value) {
+        super(component, clientId, value);
     }
 
     /**
@@ -78,7 +79,7 @@ class ReadOnlyModeHelper extends RenderHelper {
             final FxLanguage outputLanguage = FxContext.get().getTicket().getLanguage();
             if (component.getValueFormatter() != null) {
                 // use custom formatter
-                writer.write(component.getValueFormatter().format(value, value.getBestTranslation(language), outputLanguage));
+                addOutputComponent(component.getValueFormatter().format(value, value.getBestTranslation(language), outputLanguage));
             } else if (value instanceof FxReference) {
                 // render preview
                 if (language == null || value.getTranslation(language) != null) {
@@ -87,10 +88,7 @@ class ReadOnlyModeHelper extends RenderHelper {
                 }
             } else if (value instanceof FxBinary && !value.isEmpty()) {
                 // render preview image
-                final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(component, HtmlGraphicImage.COMPONENT_TYPE);
-                final BinaryDescriptor descriptor = ((FxBinary) value).getTranslation(language);
-                image.setUrl(ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()),
-                        BinaryDescriptor.PreviewSizes.PREVIEW2, value.getXPath(), descriptor.getCreationTime()));
+                renderPreviewImage(language);
 /*
                 final BinaryDescriptor descriptor = ((FxBinary) value).getTranslation(language);
                 StringBuilder sb = new StringBuilder(1000);
@@ -113,10 +111,10 @@ class ReadOnlyModeHelper extends RenderHelper {
 */
             } else if (component.isFilter() && !(value instanceof FxHTML)) {
                 // escape HTML code and generate <br/> tags for newlines
-                writer.write(FxFormatUtils.escapeForJavaScript(FxValueRendererFactory.getInstance(outputLanguage).format(value, language), true, true));
+                addOutputComponent(FxFormatUtils.escapeForJavaScript(FxValueRendererFactory.getInstance(outputLanguage).format(value, language), true, true));
             } else {
                 // write the plain value
-                FxValueRendererFactory.getInstance(outputLanguage).render(writer, value, language);
+                addOutputComponent(FxValueRendererFactory.getInstance(outputLanguage).format(value, language));
             }
 //            final Object translation = language != null ? value.getBestTranslation(language) : value.getDefaultTranslation();
 //            if (value instanceof FxHTML) {
@@ -129,5 +127,41 @@ class ReadOnlyModeHelper extends RenderHelper {
 //                writer.writeText(translation, null);
 //            }
         }
+    }
+
+    private void addOutputComponent(String value) {
+        final HtmlOutputText output = (HtmlOutputText) FxJsfUtils.addChildComponent(component, HtmlOutputText.COMPONENT_TYPE);
+        output.setEscape(false);
+        output.setValue(value);
+    }
+
+    private void renderPreviewImage(FxLanguage language) {
+        final BinaryDescriptor descriptor = ((FxBinary) value).getTranslation(language);
+        if (component.isDisableLytebox()) {
+            addImageComponent(component, descriptor);
+            return;
+        }
+        final HtmlOutputLink link = (HtmlOutputLink) FxJsfUtils.addChildComponent(component, HtmlOutputLink.COMPONENT_TYPE);
+        final String urlOriginal = FxJsfUtils.getServletContext().getContextPath() +
+                ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()),
+                        BinaryDescriptor.PreviewSizes.ORIGINAL, value.getXPath(), descriptor.getCreationTime());
+        link.setValue(urlOriginal);
+        link.setRel("lytebox[ce]");
+        addImageComponent(link, descriptor);
+
+        // render lytebox include
+        final WebletIncludeWriter includeWriter = new WebletIncludeWriter();
+        includeWriter.setWeblets(
+                        "com.flexive.faces.weblets/js/lytebox.js",
+                        "com.flexive.faces.weblets/css/lytebox.css"
+                );
+        component.getChildren().add(includeWriter);
+    }
+
+    private void addImageComponent(UIComponent parent, BinaryDescriptor descriptor) {
+        final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(parent, HtmlGraphicImage.COMPONENT_TYPE);
+        image.setUrl(ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()),
+                        BinaryDescriptor.PreviewSizes.PREVIEW2, value.getXPath(), descriptor.getCreationTime()));
+        image.setStyle("border: none;");
     }
 }

@@ -11,13 +11,14 @@
     <c:if test="#{fxSystemBean.browserAsString=='IE'}">
         <t:stylesheet path="/adm/css/mainIE.css"/>
     </c:if>
-    <t:stylesheet path="/pub/css/lytebox.css"/>
     <fx:includes/>
+    <t:stylesheet path="weblet://com.flexive.faces.weblets/css/lytebox.css"/>
     <script type="text/javascript" src="adm/js/main.js"> </script>
     <script type="text/javascript" src="adm/js/shared.js"> </script>
     <script type="text/javascript" src="adm/js/commandElement.js"> </script>
     <script type="text/javascript" src="adm/js/admin.js"> </script>
     <script type="text/javascript" src="pub/js/dojo/dojo.js"> </script>
+    
 
     <script type="text/javascript">
         dojoInit();

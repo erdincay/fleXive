@@ -44,6 +44,8 @@ import javax.faces.component.UIOutput;
 import javax.faces.context.FacesContext;
 import java.io.IOException;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * <p>Renders a single result value returned from the flexive SQL search.
  * At some point in the future, this will also include support for
@@ -115,8 +117,11 @@ public class ResultValue extends UIOutput {
             } else {
                 input = (FxValueInput) FxJsfUtils.addChildComponent(this, FxValueInput.COMPONENT_TYPE);
             }
-            input.setValue(value);
+            input.setValueExpression("value", getValueExpression("value"));
             input.setReadOnly(true);
+            if (StringUtils.isNotBlank(getId())) {
+                input.setId(getId() + "_input");
+            }
         } else {
             FxSharedUtils.writeResultValue(context.getResponseWriter(), value, getLinkFormatter(),
                     getContentLinkFormat(), getItemLinkFormat());

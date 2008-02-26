@@ -30,18 +30,18 @@
     </ul>
 
     <!-- Render all available document objects, provided by #{tutorialBean.documents} -->
-    <h:form>
+    <h:form id="frm">
         <ul class="documents">
 
             <!-- Iterate over all document objects -->
             <ui:repeat var="row" value="#{tutorialBean.documents}">
                 <li>
                     <!-- Render the file (preview image) -->
-                    <fx:resultValue value="#{row[1]}"/>
+                    <fx:resultValue id="preview" value="#{row[1]}"/>
 
                     <!-- Render the document caption -->
                     <span class="caption">
-                        <fx:resultValue value="#{row[2]}"/>
+                        <fx:resultValue id="caption" value="#{row[2]}"/>
                     </span>
 
                     <!-- Add an edit button below the image -->

@@ -49,6 +49,7 @@ import org.apache.myfaces.custom.fileupload.UploadedFile;
 
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIInput;
+import javax.faces.component.NamingContainer;
 import javax.faces.context.FacesContext;
 import javax.faces.context.ResponseWriter;
 import javax.faces.render.Renderer;
@@ -86,28 +87,36 @@ public class FxValueInputRenderer extends Renderer {
     public void encodeBegin(FacesContext context, UIComponent input) throws IOException {
         FxValueInput component = (FxValueInput) input;
 
-        if (component.calcConfigurationMask() != component.getConfigurationMask()) {
-            ResponseWriter writer = context.getResponseWriter();
-            String clientId = input.getClientId(context);
-            //noinspection unchecked
-            FxValue value = component.getInputMapper().encode(getFxValue(context, component));
-            RenderHelper helper = component.isReadOnly()
-                    ? new ReadOnlyModeHelper(writer, component, clientId, value)
-                    : new EditModeHelper(writer, component, clientId, value);
-            if (!component.getChildren().isEmpty()) {
-                LOG.warn(DBG + "Component " + clientId + " already has " + component.getChildren().size()
-                        + " children which will be discarded. Please don't use fx:fxValueInput inside render-time tags like ui:repeat.");
+//        if (component.calcConfigurationMask() != component.getConfigurationMask()) {
+            buildComponent(context, component);
+//        }
+    }
+
+    public static void buildComponent(FacesContext context, FxValueInput component) {
+        ResponseWriter writer = context.getResponseWriter();
+        String clientId = component.getClientId(context);
+        //noinspection unchecked
+        FxValue value = component.getInputMapper().encode(getFxValue(context, component));
+        RenderHelper helper = component.isReadOnly()
+                ? new ReadOnlyModeHelper(component, clientId, value)
+                : new EditModeHelper(component, clientId, value);
+        /*if (!component.getChildren().isEmpty()) {
+            LOG.warn(DBG + "Component " + clientId + " already has " + component.getChildren().size()
+                    + " children which will be discarded. Please don't use fx:fxValueInput inside render-time tags like ui:repeat.");
+        }*/
+        component.getChildren().clear();
+        if (!(value instanceof FxVoid)) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(DBG + "Rendering " + (component.isReadOnly() ? "read only" : "editable")
+                    + " component " + clientId + " for value=" + value);
             }
-            component.getChildren().clear();
-            if (!(value instanceof FxVoid)) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(DBG + "Rendering " + (component.isReadOnly() ? "read only" : "editable")
-                        + " component " + clientId + " for value=" + value);
-                }
+            try {
                 helper.render();
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
             }
-            component.resetConfigurationMask();
         }
+        component.resetConfigurationMask();
     }
 
     /**
@@ -116,6 +125,7 @@ public class FxValueInputRenderer extends Renderer {
     @Override
     public void decode(FacesContext context, UIComponent component) {
         FxValueInput input = (FxValueInput) component;
+        buildComponent(context, input);
         if (!(input.getValue() instanceof FxVoid) && !input.isReadOnly()) {
             input.setSubmittedValue(decodeFxValue(context, component));
         }
@@ -128,7 +138,7 @@ public class FxValueInputRenderer extends Renderer {
      * @param input   the FxValueInput component @return the FxValue used as input for the component.
      * @return the FxValue stored in the input component
      */
-    private FxValue getFxValue(FacesContext context, UIInput input) {
+    private static FxValue getFxValue(FacesContext context, UIInput input) {
         Object o = input.getSubmittedValue() != null ? input.getSubmittedValue() : input.getValue();
         if (o == null) {
             throw new FxInvalidParameterException("VALUE", "ex.jsf.valueInput.null", input.getClientId(context)).asRuntimeException();
@@ -162,10 +172,10 @@ public class FxValueInputRenderer extends Renderer {
             // update all languages
             for (FxLanguage language : getLanguages()) {
                 final String inputId = clientId + INPUT + language.getId();
-                updateTranslation(input, value, inputId, language.getId(), parameters, parameterValues);
+                updateTranslation(context, input, value, inputId, language.getId(), parameters, parameterValues);
             }
         } else {
-            updateTranslation(input, value, clientId + FxValueInputRenderer.INPUT, value.getDefaultLanguage(), parameters, parameterValues);
+            updateTranslation(context, input, value, clientId + FxValueInputRenderer.INPUT, value.getDefaultLanguage(), parameters, parameterValues);
         }
         if (LOG.isDebugEnabled()) {
             LOG.debug(DBG + "Decoded value for " + clientId + ": " + value);
@@ -174,7 +184,7 @@ public class FxValueInputRenderer extends Renderer {
     }
 
     @SuppressWarnings({"unchecked"})
-    private void updateTranslation(FxValueInput input, FxValue value, String inputId, long languageId, Map parameters, Map parameterValues) {
+    private void updateTranslation(FacesContext context, FxValueInput input, FxValue value, String inputId, long languageId, Map parameters, Map parameterValues) {
         if (value instanceof FxSelectMany) {
             final String selectedOptions = StringUtils.join((String[]) parameterValues.get(inputId), ',');
             if (StringUtils.isNotBlank(selectedOptions)) {
@@ -187,10 +197,11 @@ public class FxValueInputRenderer extends Renderer {
         } else if (value instanceof FxDate || value instanceof FxDateTime) {
             // get date value from dateinput child
             //noinspection unchecked
-            final HtmlInputDate dateInput = FxJsfUtils.findChild(input, HtmlInputDate.class);
+            final HtmlInputDate dateInput = (HtmlInputDate) input.findComponent(stripNamingContainers(inputId));
             if (dateInput == null) {
                 throw new FxUpdateException(LOG, "ex.jsf.valueInput.date.input", inputId, value).asRuntimeException();
             }
+            dateInput.processDecodes(context);
             HtmlInputDate.UserData data = (HtmlInputDate.UserData) dateInput.getSubmittedValue();
             if (data != null) {
                 try {
@@ -205,9 +216,10 @@ public class FxValueInputRenderer extends Renderer {
                 }
             }
         } else if (value instanceof FxBinary) {
-            final HtmlInputFileUpload upload = (HtmlInputFileUpload) FacesContext.getCurrentInstance().getViewRoot().findComponent(inputId);
+            final HtmlInputFileUpload upload = (HtmlInputFileUpload) input.findComponent(stripNamingContainers(inputId));
             if (upload != null) {
                 try {
+                    upload.processDecodes(context);
                     final UploadedFile file = (UploadedFile) upload.getSubmittedValue();
                     if (file != null && file.getSize() > 0) {
                         //noinspection unchecked
@@ -246,5 +258,17 @@ public class FxValueInputRenderer extends Renderer {
             throw e.asRuntimeException();
         }
         return languages;
+    }
+
+    /**
+     * Strips all naming containers from our client ID (e.g. forms, iterator components).
+     * This is usful for finding components by id within our FxValueInput component.
+     *
+     * @param clientId  the client ID
+     * @return  the client ID without naming containers
+     */
+    private static String stripNamingContainers(String clientId) {
+        return clientId.indexOf(NamingContainer.SEPARATOR_CHAR) != -1
+                ? clientId.substring(clientId.lastIndexOf(NamingContainer.SEPARATOR_CHAR) + 1) : clientId;
     }
 }

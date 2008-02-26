@@ -66,6 +66,7 @@ public class FxValueInput extends UIInput {
     private InputMapper inputMapper;
     private String onchange;
     private FxValueFormatter valueFormatter;
+    private Boolean disableLytebox;
 
     private int configurationMask = -1;
 
@@ -89,6 +90,7 @@ public class FxValueInput extends UIInput {
         if (!validatorFound) {
             addValidator(new FxValueInputValidator());
         }
+        FxValueInputRenderer.buildComponent(context, this);
         super.validate(context);
     }
 
@@ -191,6 +193,23 @@ public class FxValueInput extends UIInput {
 
     public void setFilter(boolean filter) {
         this.filter = filter;
+    }
+
+    /**
+     * Returns true if the <a href="http://www.dolem.com/lytebox/">Lytebox</a> javascript library
+     * used for inline previews of images should not be used.
+     *
+     * @return  true if Lytebox is disabled
+     */
+    public boolean isDisableLytebox() {
+        if (disableLytebox == null) {
+            return FxJsfComponentUtils.getBooleanValue(this, "disableLytebox", false);
+        }
+        return disableLytebox;
+    }
+
+    public void setDisableLytebox(boolean disableLytebox) {
+        this.disableLytebox = disableLytebox;
     }
 
     /**

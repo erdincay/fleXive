@@ -43,6 +43,7 @@ import com.flexive.shared.value.*;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Miscellanous test methods for the fxValueInput test page (test_fxvalueinput.xhtml).
@@ -51,16 +52,39 @@ import java.util.List;
  * @version $Rev$
  */
 public class FxValueInputTestBean {
-    private List<FxValue> basicValues;
+    /**
+     * ui:repeat update workaround
+     */
+    public static class ValueHolder {
+        private FxValue value;
+
+        public ValueHolder(FxValue value) {
+            this.value = value;
+        }
+
+        public FxValue getValue() {
+            return value;
+        }
+
+        public void setValue(FxValue value) {
+            this.value = value;
+        }
+    }
+
+    private List<ValueHolder> basicValues;
     private List<FxValue> basicValues2;
 
     public void submit() {
         // TODO: evaluate input values
     }
 
-    public List<FxValue> getBasicValues() {
+    public List<ValueHolder> getBasicValues() {
         if (basicValues == null) {
-            basicValues = createFxValues();
+            final List<FxValue> values = createFxValues();
+            basicValues = new ArrayList<ValueHolder>(values.size());
+            for (FxValue value : values) {
+                basicValues.add(new ValueHolder(value));
+            }
         }
         return basicValues;
     }

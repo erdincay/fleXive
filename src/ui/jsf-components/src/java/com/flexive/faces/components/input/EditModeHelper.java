@@ -50,7 +50,6 @@ import org.apache.myfaces.custom.fileupload.HtmlInputFileUpload;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIInput;
 import javax.faces.component.UISelectItems;
-import javax.faces.component.UIOutput;
 import javax.faces.component.html.*;
 import javax.faces.context.ResponseWriter;
 import javax.faces.context.FacesContext;
@@ -72,8 +71,8 @@ class EditModeHelper extends RenderHelper {
     private static final String REQUEST_EDITORINIT = "REQUEST_EDITORINIT";
     private static final String JS_OBJECT = "fxValue";
 
-    public EditModeHelper(ResponseWriter writer, FxValueInput component, String clientId, FxValue value) {
-        super(writer, component, clientId, value);
+    public EditModeHelper( FxValueInput component, String clientId, FxValue value) {
+        super(component, clientId, value);
     }
 
     /**
@@ -399,57 +398,6 @@ class EditModeHelper extends RenderHelper {
 
     private static String getForm(String inputId) {
         return inputId.substring(0, inputId.indexOf(':'));
-    }
-
-    /**
-     * The base class of all primitive input renderer components.
-     * These inputs are not composed of more complex input elements (like date pickers),
-     * but render a single HTML form element with the given
-     * {@link com.flexive.faces.components.input.EditModeHelper.DeferredInputWriter#inputClientId}
-     * that will be decoded by the
-     * {@link com.flexive.faces.components.input.FxValueInputRenderer}.
-     */
-    public static abstract class DeferredInputWriter extends UIOutput {
-        protected String inputClientId;
-
-        public String getInputClientId() {
-            return inputClientId;
-        }
-
-        public void setInputClientId(String inputClientId) {
-            this.inputClientId = inputClientId;
-        }
-
-        protected FxValue getInputValue() {
-            final FxValueInput input = getInputComponent();
-            if (input != null) {
-                return input.getSubmittedValue() != null ? (FxValue) input.getSubmittedValue() : (FxValue) input.getValue();
-            }
-            throw new IllegalStateException("No enclosing fx:fxValueInput component found");
-        }
-
-        protected FxValueInput getInputComponent() {
-            UIComponent component = getParent();
-            while (component != null && !(component instanceof FxValueInput)) {
-                component = component.getParent();
-            }
-            return (FxValueInput) component;
-        }
-
-        @Override
-        public void restoreState(FacesContext context, Object stateValue) {
-            final Object[] state = (Object[]) stateValue;
-            super.restoreState(context, state[0]);
-            this.inputClientId = (String) state[1];
-        }
-
-        @Override
-        public Object saveState(FacesContext context) {
-            final Object[] state = new Object[2];
-            state[0] = super.saveState(context);
-            state[1] = inputClientId;
-            return state;
-        }
     }
 
     /**

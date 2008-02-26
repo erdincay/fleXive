@@ -35,10 +35,15 @@ package com.flexive.faces.components.input;
 
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.value.FxValue;
+import com.flexive.faces.components.WriteWebletIncludes;
 
 import javax.faces.context.ResponseWriter;
+import javax.faces.context.FacesContext;
 import javax.faces.component.UIComponent;
+import javax.faces.component.UIOutput;
 import java.io.IOException;
+
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Renders the given FxValue.
@@ -49,19 +54,16 @@ import java.io.IOException;
 abstract class RenderHelper {
 
     protected final FxValueInput component;
-    protected final ResponseWriter writer;
     protected final String clientId;
     protected final FxValue value;
 
     /**
-     * @param writer    the current response writer
      * @param clientId  the component's client ID
      * @param value     the initial input value
      * @param component the input component
      */
-    protected RenderHelper(ResponseWriter writer, FxValueInput component, String clientId, FxValue value) {
+    protected RenderHelper(FxValueInput component, String clientId, FxValue value) {
         this.component = component;
-        this.writer = writer;
         this.clientId = clientId;
         this.value = value;
     }
@@ -94,4 +96,89 @@ abstract class RenderHelper {
      * @param language the language for the input field, or null if the value is not multi-language. @throws IOException if the input could not be rendered
      */
     protected abstract void encodeField(UIComponent parent, String inputId, FxLanguage language) throws IOException;
+
+    /**
+     * The base class of all primitive input renderer components.
+     * These inputs are not composed of more complex input elements (like date pickers),
+     * but render a single HTML form element with the given
+     * {@link EditModeHelper.DeferredInputWriter#inputClientId}
+     * that will be decoded by the
+     * {@link FxValueInputRenderer}.
+     */
+    public static abstract class DeferredInputWriter extends UIOutput {
+        protected String inputClientId;
+
+        public String getInputClientId() {
+            return inputClientId;
+        }
+
+        public void setInputClientId(String inputClientId) {
+            this.inputClientId = inputClientId;
+        }
+
+        protected FxValue getInputValue() {
+            final FxValueInput input = getInputComponent();
+            if (input != null) {
+                return input.getSubmittedValue() != null ? (FxValue) input.getSubmittedValue() : (FxValue) input.getValue();
+            }
+            throw new IllegalStateException("No enclosing fx:fxValueInput component found");
+        }
+
+        protected FxValueInput getInputComponent() {
+            UIComponent component = getParent();
+            while (component != null && !(component instanceof FxValueInput)) {
+                component = component.getParent();
+            }
+            return (FxValueInput) component;
+        }
+
+        @Override
+        public void restoreState(FacesContext context, Object stateValue) {
+            final Object[] state = (Object[]) stateValue;
+            super.restoreState(context, state[0]);
+            this.inputClientId = (String) state[1];
+        }
+
+        @Override
+        public Object saveState(FacesContext context) {
+            final Object[] state = new Object[2];
+            state[0] = super.saveState(context);
+            state[1] = inputClientId;
+            return state;
+        }
+    }
+
+    public static class WebletIncludeWriter extends UIOutput {
+        private String[] weblets;
+
+        public void setWeblets(String... weblets) {
+            this.weblets = weblets;
+        }
+
+        @Override
+        public void encodeBegin(FacesContext facesContext) throws IOException {
+            if (weblets == null) {
+                return;
+            }
+            final ResponseWriter out = facesContext.getResponseWriter();
+            for (String weblet: weblets) {
+                out.write(StringUtils.defaultString(WriteWebletIncludes.renderWeblet(weblet)));
+            }
+        }
+
+        @Override
+        public Object saveState(FacesContext context) {
+            final Object[] state = new Object[2];
+            state[0] = super.saveState(context);
+            state[1] = weblets;
+            return state;
+        }
+
+        @Override
+        public void restoreState(FacesContext context, Object stateValue) {
+            final Object[] state = (Object[]) stateValue;
+            super.restoreState(context, state[0]);
+            weblets = (String[]) state[1];
+        }
+    }
 }

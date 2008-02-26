@@ -846,4 +846,14 @@ public class FxJsfUtils {
             throw new FxApplicationException("ex.structure.multiplicity.minimum.invalid", min, max);
     }
 
+    /**
+     * Returns the given component in the current view, or null if it does not exist.
+     *
+     * @param context   the current faces context
+     * @param clientId  the component's client ID
+     * @return  the given component in the current view, or null if it does not exist.
+     */
+    public static UIComponent findComponent(FacesContext context, String clientId) {
+        return context.getViewRoot().findComponent(clientId);
+    }
 }

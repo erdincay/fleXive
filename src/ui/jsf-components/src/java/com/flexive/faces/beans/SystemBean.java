@@ -434,6 +434,9 @@ public class SystemBean implements Serializable {
         if (counterValueMap == null) {
             counterValueMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Object, Integer>() {
                 public Integer get(Object key) {
+                    if (counters == null) {
+                        counters = new HashMap<Object, Integer>();
+                    }
                     return FxSharedUtils.get(counters, key, 0);
                 }
             });

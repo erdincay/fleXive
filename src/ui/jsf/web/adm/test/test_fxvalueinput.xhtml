@@ -16,6 +16,25 @@
 
     <h:form id="someFormId" enctype="multipart/form-data">
 
+        <h5>ui:repeat</h5>
+        <table id="ui_repeat_basic">
+            <ui:repeat var="holder" value="#{fxValueInputTestBean.basicValues}">
+                <tr>
+                    <td valign="top">
+                        #{value.valueClass.simpleName}
+                    </td>
+                    <td>
+                        <fx:fxValueInput id="basic" value="#{holder.value}"/>
+                    </td>
+                    <td valign="top">
+                        <span style="color:red">
+                            <h:message for="basic"/>
+                        </span>
+                    </td>
+                </tr>
+            </ui:repeat>
+        </table>
+
         <h5>c:forEach</h5>
         <table id="c_foreach_basic">
             <c:forEach var="value" items="#{fxValueInputTestBean.basicValues2}" varStatus="status">
@@ -34,7 +53,6 @@
                 </tr>
             </c:forEach>
         </table>
-
 
         <h:commandButton action="#{fxValueInputTestBean.submit}" value="Submit"/>
 
