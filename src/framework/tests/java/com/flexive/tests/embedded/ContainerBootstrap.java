@@ -34,6 +34,7 @@
 package com.flexive.tests.embedded;
 
 import com.flexive.core.security.UserTicketImpl;
+import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.configuration.DivisionData;
@@ -115,6 +116,7 @@ public class ContainerBootstrap {
             */
             FxContext.get().setDivisionId(DivisionData.DIVISION_TEST);
             FxContext.get().setContextPath("flexiveTests");
+            StructureLoader.load(DivisionData.DIVISION_TEST, true, null);
             FxContext.get().setTicket(UserTicketImpl.getGuestTicket());
             TestUsers.initializeUsers();
         } catch (Exception ex) {
