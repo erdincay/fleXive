@@ -190,9 +190,9 @@ public class FxValueInputRenderer extends Renderer {
             if (StringUtils.isNotBlank(selectedOptions)) {
                 // update selection
                 value.setTranslation(languageId, selectedOptions);
-            } else {
+            } else if (value.getTranslation(languageId) != null) {
                 // remove all selected items
-                ((FxSelectMany) value).getDefaultTranslation().deselectAll();
+                ((FxSelectMany) value).getTranslation(languageId).deselectAll();
             }
         } else if (value instanceof FxDate || value instanceof FxDateTime) {
             // get date value from dateinput child

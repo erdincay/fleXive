@@ -37,6 +37,7 @@ import com.flexive.core.security.UserTicketImpl;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.AccountEngine;
@@ -116,7 +117,7 @@ public class ContainerBootstrap {
             */
             FxContext.get().setDivisionId(DivisionData.DIVISION_TEST);
             FxContext.get().setContextPath("flexiveTests");
-            StructureLoader.load(DivisionData.DIVISION_TEST, true, null);
+            CacheAdmin.getEnvironment();
             FxContext.get().setTicket(UserTicketImpl.getGuestTicket());
             TestUsers.initializeUsers();
         } catch (Exception ex) {

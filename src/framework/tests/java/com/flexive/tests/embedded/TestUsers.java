@@ -128,7 +128,11 @@ public class TestUsers {
 
 
         } catch (Exception e) {
-            deleteUsers();      // cleanup
+            try {
+                deleteUsers();      // cleanup
+            } catch (Exception e2) {
+                // ignore, since setup probably wasn't complete
+            }
             e.printStackTrace();
             throw new RuntimeException("Failed to initialize test users: " + e.getMessage());
         } finally {
