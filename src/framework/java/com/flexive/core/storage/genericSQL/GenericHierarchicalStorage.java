@@ -147,9 +147,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     protected static final String SECURITY_INFO_LIVEVER = SECURITY_INFO_MAIN + "c.VER=c.LIVE_VER" + SECURITY_INFO_WHERE;
 
     //calculate max_ver and live_ver for a content instance
-    protected static final String CONTENT_VER_CALC = "SELECT MAX(VER) AS MAX_VER, COALESCE((SELECT s.VER FROM " + TBL_CONTENT + " s WHERE s.STEP=" +
-            "(SELECT w.ID FROM " + TBL_STEP + " w WHERE w.STEPDEF=" + StepDefinition.LIVE_STEP_ID + ") AND s.ID=c.ID),-1) AS LIVE_VER FROM " + TBL_CONTENT + " c WHERE c.ID=? " +
-            "GROUP BY c.ID";
+    protected static final String CONTENT_VER_CALC = "SELECT MAX(VER) AS MAX_VER, COALESCE((SELECT s.VER FROM " +
+            TBL_CONTENT + " s WHERE s.STEP=(SELECT w.ID FROM " + TBL_STEP + " w, " + TBL_STRUCT_TYPES + " t WHERE w.STEPDEF=" +
+            StepDefinition.LIVE_STEP_ID + " AND w.WORKFLOW=t.WORKFLOW AND t.ID=c.TDEF) AND s.ID=c.ID),-1) AS LIVE_VER FROM " + TBL_CONTENT + 
+            " c WHERE c.ID=? GROUP BY c.ID";
     protected static final String CONTENT_VER_UPDATE_1 = "UPDATE " + TBL_CONTENT + " SET MAX_VER=?, LIVE_VER=? WHERE ID=?";
     protected static final String CONTENT_VER_UPDATE_2 = "UPDATE " + TBL_CONTENT + " SET ISMAX_VER=(MAX_VER=VER), ISLIVE_VER=(LIVE_VER=VER) WHERE ID=?";
     protected static final String CONTENT_VER_UPDATE_3 = "UPDATE " + TBL_CONTENT_DATA + " SET ISMAX_VER=(VER=?), ISLIVE_VER=(VER=?) WHERE ID=?";
@@ -2566,9 +2567,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         append(") AND ccd.TPROP=").append(prop.getId()).
                         append(" AND ccd.TPROP=tcd.TPROP AND ccd.LANG=tcd.LANG").
                         //prevent checks across versions
-                        append(" AND NOT(ccd.ID=tcd.ID AND ccd.VER<>tcd.VER)").
+                                append(" AND NOT(ccd.ID=tcd.ID AND ccd.VER<>tcd.VER)").
                         //prevent self-references
-                        append(" AND NOT(ccd.ID=tcd.ID AND ccd.VER=tcd.VER AND ccd.ASSIGN=tcd.ASSIGN AND tcd.XMULT=ccd.XMULT)");
+                                append(" AND NOT(ccd.ID=tcd.ID AND ccd.VER=tcd.VER AND ccd.ASSIGN=tcd.ASSIGN AND tcd.XMULT=ccd.XMULT)");
                 break;
             case Instance:
                 sql.append("SELECT tcd.XPATHMULT FROM ").append(TBL_CONTENT_DATA).append(" ccd, ").
@@ -2587,7 +2588,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         try {
             doCheckUniqueConstraint(con, sql.toString(), prop.getUniqueMode());
         } catch (FxApplicationException e) {
-            LOG.warn("SQL:\n"+sql);
+            LOG.warn("SQL:\n" + sql);
             if (throwException)
                 throw e;
             return false;
