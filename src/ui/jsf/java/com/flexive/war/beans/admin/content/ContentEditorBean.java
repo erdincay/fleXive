@@ -95,6 +95,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
     private boolean readOnly;
     private boolean editAble;
     private boolean deleteAble;
+    private boolean versionDeleteAble;
     private long treeNodeParent;
     private FxTreeNode treeNode;
     private Hashtable<String, String> fileInputValues = new Hashtable<String, String>(10);
@@ -171,6 +172,10 @@ public class ContentEditorBean implements ActionBean, Serializable {
 
     public boolean isDeleteAble() {
         return deleteAble;
+    }
+
+    public boolean isVersionDeleteAble() {
+        return versionDeleteAble;
     }
 
     private void processAction() {
@@ -530,6 +535,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
                 _initSteps();
                 editAble = true;
                 deleteAble = true;
+                versionDeleteAble = false;
                 if( steps == null || steps.size() == 0 ) {
                     editAble = false;
                     readOnly = true;
@@ -550,6 +556,9 @@ public class ContentEditorBean implements ActionBean, Serializable {
                 if( fxType.usePermissions() && id != -1 )
                         deleteAble = FxPermissionUtils.checkPermission(FxContext.get().getTicket(), ACL.Permission.DELETE,
                                 si, false);
+                versionDeleteAble = deleteAble;
+                if( versionInfo.getVersionCount() <= 1)
+                    versionDeleteAble = false;
                 return true;
             } catch (Throwable t) {
                 release();
@@ -676,6 +685,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
         readOnly = false;
         editAble = false;
         deleteAble = false;
+        versionDeleteAble  = false;
         //return getEditorPage();
         return null;
     }
@@ -815,8 +825,27 @@ public class ContentEditorBean implements ActionBean, Serializable {
         } catch (Throwable t) {
             new FxFacesMsgErr(t).addToContext();
         }
-        //return getEditorPage();
         return null;
+    }
+
+    /**
+     * Deletes the current version
+     *
+     * @return the next page to render (= the content editor)
+     */
+    public String deleteVersion() {
+        try {
+            FxPK pk = content.getPk();
+            co.removeVersion(content.getPk());
+            content = null;
+            id = pk.getId();
+            version = FxPK.MAX;
+            _init();
+            new FxFacesMsgInfo("Content.nfo.deletedVersion", pk).addToContext();
+        } catch (Throwable t) {
+            new FxFacesMsgErr(t).addToContext();
+        }
+        return getEditorPage();
     }
 
 

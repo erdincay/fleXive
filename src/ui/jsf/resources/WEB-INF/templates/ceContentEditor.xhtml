@@ -95,7 +95,7 @@
                             <!-- ACL -->
                             <tr>
                                 <ui:fragment rendered="#{not srcEditor.supportSecurity}">
-                                    <td colspan="2">#{fxMessageBean['Content.msg.noSecurity']}</td>
+                                    <td colspan="2"><i>#{fxMessageBean['Content.msg.noSecurity']}</i></td>
                                 </ui:fragment>
                                 <ui:fragment rendered="#{srcEditor.supportSecurity}">
                                     <td>
@@ -173,6 +173,16 @@
                     <adm:commandButton labelKey="Content.button.edit" location="both"
                                       bean="#{srcEditor}"
                                       icon="edit" action="enableEdit" id="enableEditButton"/>
+                    <ui:fragment rendered="#{srcEditor.deleteAble}">
+                        <adm:commandButton labelKey="Content.button.delete" location="both"
+                                           bean="#{srcEditor}" confirm="Content.confirm.delete"
+                                           icon="delete" action="delete" id="deleteButtonRO"/>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{srcEditor.versionDeleteAble}">
+                        <adm:commandButton labelKey="Content.button.deleteVersion" location="both"
+                                           bean="#{srcEditor}" confirm="Content.confirm.deleteVersion"
+                                           icon="delete" action="deleteVersion" id="deleteVersionButtonRO"/>
+                    </ui:fragment>
                 </ui:fragment>
                 <ui:fragment rendered="#{srcEditor.readOnly==false}">
                     <!--
@@ -204,6 +214,11 @@
                             <adm:commandButton labelKey="Content.button.delete" location="both"
                                           bean="#{srcEditor}" confirm="Content.confirm.delete"
                                           icon="delete" action="delete" id="deleteButton"/>
+                        </ui:fragment>
+                        <ui:fragment rendered="#{srcEditor.versionDeleteAble}">
+                            <adm:commandButton labelKey="Content.button.deleteVersion" location="both"
+                                          bean="#{srcEditor}" confirm="Content.confirm.deleteVersion"
+                                          icon="delete" action="deleteVersion" id="deleteVersionButton"/>
                         </ui:fragment>
                     </ui:fragment>
 
