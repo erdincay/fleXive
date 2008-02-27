@@ -95,11 +95,11 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
     public static final String TYPE_CREATE =
             //                                     1   2     3       4             5         6
             "INSERT INTO " + TBL_STRUCT_TYPES + " (ID, NAME, PARENT, STORAGE_MODE, CATEGORY, TYPE_MODE, " +
-                    //7               8           9           10             11            12           13
-                    "VALIDITY_CHECKS, LANG_MODE,  TYPE_STATE, SECURITY_MODE, TRACKHISTORY, HISTORY_AGE, MAX_VERSIONS, " +
-                    //14                 15                16          17          18           19           20   21
+                    //7          8           9              10            11           12
+                    "LANG_MODE,  TYPE_STATE, SECURITY_MODE, TRACKHISTORY, HISTORY_AGE, MAX_VERSIONS, " +
+                    //13               14                15          16          17           18           19   20
                     "REL_TOTAL_MAXSRC, REL_TOTAL_MAXDST, CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT, ACL, WORKFLOW) VALUES " +
-                    "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     /**
      * {@inheritDoc}
@@ -146,21 +146,20 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             ps.setInt(4, type.getStorageMode().getId());
             ps.setInt(5, type.getCategory().getId());
             ps.setInt(6, type.getMode().getId());
-            ps.setBoolean(7, type.isCheckValidity());
-            ps.setInt(8, type.getLanguage().getId());
-            ps.setInt(9, type.getState().getId());
-            ps.setByte(10, type.getBitCodedPermissions());
-            ps.setBoolean(11, type.isTrackHistory());
-            ps.setLong(12, type.getHistoryAge());
-            ps.setLong(13, type.getMaxVersions());
-            ps.setInt(14, type.getMaxRelSource());
-            ps.setInt(15, type.getMaxRelDestination());
-            ps.setLong(16, ticket.getUserId());
-            ps.setLong(17, NOW);
-            ps.setLong(18, ticket.getUserId());
-            ps.setLong(19, NOW);
-            ps.setLong(20, type.getACL().getId());
-            ps.setLong(21, type.getWorkflow().getId());
+            ps.setInt(7, type.getLanguage().getId());
+            ps.setInt(8, type.getState().getId());
+            ps.setByte(9, type.getBitCodedPermissions());
+            ps.setBoolean(10, type.isTrackHistory());
+            ps.setLong(11, type.getHistoryAge());
+            ps.setLong(12, type.getMaxVersions());
+            ps.setInt(13, type.getMaxRelSource());
+            ps.setInt(14, type.getMaxRelDestination());
+            ps.setLong(15, ticket.getUserId());
+            ps.setLong(16, NOW);
+            ps.setLong(17, ticket.getUserId());
+            ps.setLong(18, NOW);
+            ps.setLong(19, type.getACL().getId());
+            ps.setLong(20, type.getWorkflow().getId());
             ps.executeUpdate();
             Database.storeFxString(type.getDescription(), con, TBL_STRUCT_TYPES, "DESCRIPTION", "ID", newId);
             //TODO: relations
@@ -518,19 +517,6 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             }
             //end Category changes
 
-            //start validity check changes
-            if (type.isCheckValidity() != orgType.isCheckValidity()) {
-                sql.setLength(0);
-                sql.append("UPDATE ").append(TBL_STRUCT_TYPES).append(" SET VALIDITY_CHECKS=? WHERE ID=?");
-                if (ps != null) ps.close();
-                ps = con.prepareStatement(sql.toString());
-                ps.setBoolean(1, type.isCheckValidity());
-                ps.setLong(2, type.getId());
-                ps.executeUpdate();
-                htracker.track(type, "history.type.update.validity", orgType.isCheckValidity(), type.isCheckValidity());
-            }
-            //end validity check changes
-
             //start language mode changes
             if (!type.getLanguage().equals(orgType.getLanguage())) {
                 if (instanceCount < 0)
@@ -842,11 +828,11 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
         try {
             //                                 1         2       3        4
             ps = con.prepareStatement("SELECT TYPESRC, TYPEDST, MAXSRC, MAXDST FROM " + TBL_STRUCT_TYPERELATIONS + " WHERE TYPEDEF=?");
-            //               1   2     3       4             5         6          7
-            curSql = "SELECT ID, NAME, PARENT, STORAGE_MODE, CATEGORY, TYPE_MODE, VALIDITY_CHECKS, " +
-                    //8         9           10             11            12           13
+            //               1   2     3       4             5         6
+            curSql = "SELECT ID, NAME, PARENT, STORAGE_MODE, CATEGORY, TYPE_MODE, " +
+                    //7         8           9              10            11           12
                     "LANG_MODE, TYPE_STATE, SECURITY_MODE, TRACKHISTORY, HISTORY_AGE, MAX_VERSIONS," +
-                    //14               15                16          17          18           19           20   21
+                    //13               14                15          16          17           18           19   20
                     "REL_TOTAL_MAXSRC, REL_TOTAL_MAXDST, CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT, ACL, WORKFLOW " +
                     " FROM " + TBL_STRUCT_TYPES + " WHERE ID=" + id;
 
@@ -861,14 +847,14 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                     while (rsRelations != null && rsRelations.next())
                         alRelations.add(new FxTypeRelation(new FxPreloadType(rsRelations.getLong(1)), new FxPreloadType(rsRelations.getLong(2)),
                                 rsRelations.getInt(3), rsRelations.getInt(4)));
-                    return new FxType(rs.getLong(1), environment.getACL(rs.getInt(20)),
-                            environment.getWorkflow(rs.getInt(21)), rs.getString(2),
+                    return new FxType(rs.getLong(1), environment.getACL(rs.getInt(19)),
+                            environment.getWorkflow(rs.getInt(20)), rs.getString(2),
                             Database.loadFxString(con, TBL_STRUCT_TYPES, "description", "id=" + rs.getLong(1)),
                             new FxPreloadType(rs.getLong(3)), TypeStorageMode.getById(rs.getInt(4)),
-                            TypeCategory.getById(rs.getInt(5)), TypeMode.getById(rs.getInt(6)), rs.getBoolean(7),
-                            LanguageMode.getById(rs.getInt(8)), TypeState.getById(rs.getInt(9)), rs.getByte(10),
-                            rs.getBoolean(11), rs.getLong(12), rs.getLong(13), rs.getInt(14), rs.getInt(15),
-                            LifeCycleInfoImpl.load(rs, 16, 17, 18, 19), new ArrayList<FxType>(5), alRelations);
+                            TypeCategory.getById(rs.getInt(5)), TypeMode.getById(rs.getInt(6)),
+                            LanguageMode.getById(rs.getInt(7)), TypeState.getById(rs.getInt(8)), rs.getByte(9),
+                            rs.getBoolean(10), rs.getLong(11), rs.getLong(12), rs.getInt(13), rs.getInt(14),
+                            LifeCycleInfoImpl.load(rs, 15, 16, 17, 18), new ArrayList<FxType>(5), alRelations);
                 } catch (FxNotFoundException e) {
                     throw new FxLoadException(LOG, e);
                 }

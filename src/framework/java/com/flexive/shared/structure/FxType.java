@@ -84,7 +84,6 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     protected TypeStorageMode storageMode;
     protected TypeCategory category;
     protected TypeMode mode;
-    protected boolean checkValidity;
     protected LanguageMode language;
     protected TypeState state;
     protected byte permissions;
@@ -103,7 +102,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     protected Map<FxScriptEvent, long[]> scriptMapping;
 
     public FxType(long id, ACL acl, Workflow workflow, String name, FxString description, FxType parent, TypeStorageMode storageMode,
-                  TypeCategory category, TypeMode mode, boolean checkValidity, LanguageMode language, TypeState state, byte permissions,
+                  TypeCategory category, TypeMode mode, LanguageMode language, TypeState state, byte permissions,
                   boolean trackHistory, long historyAge, long maxVersions, int maxRelSource, int maxRelDestination,
                   LifeCycleInfo lifeCycleInfo, List<FxType> derivedTypes, List<FxTypeRelation> relations) {
         this.id = id;
@@ -115,7 +114,6 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
         this.storageMode = storageMode;
         this.category = category;
         this.mode = mode;
-        this.checkValidity = checkValidity;
         this.language = language;
         this.state = state;
         this.permissions = permissions;
@@ -137,15 +135,6 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      */
     public TypeCategory getCategory() {
         return category;
-    }
-
-    /**
-     * Perform validity checks on instances?
-     *
-     * @return is validity checks are performed on instances
-     */
-    public boolean isCheckValidity() {
-        return checkValidity;
     }
 
     /**

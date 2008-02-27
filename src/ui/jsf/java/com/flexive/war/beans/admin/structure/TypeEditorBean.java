@@ -480,14 +480,6 @@ public class TypeEditorBean {
         return this.type.getACL().getId();
     }
 
-    public void setCheckValidity(boolean ck) {
-        this.type.setCheckValidity(ck);
-    }
-
-    public boolean isCheckValidity() {
-        return this.type.isCheckValidity();
-    }
-
     public void setDescription(FxString desc) {
         this.type.setDescription(desc);
     }

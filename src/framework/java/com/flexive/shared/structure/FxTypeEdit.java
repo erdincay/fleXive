@@ -71,7 +71,6 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param storageMode             the storage mode
      * @param category                category mode (system, user)
      * @param mode                    type mode (content, relation)
-     * @param checkValidity           check validity of contents in search operations
      * @param language                language mode
      * @param state                   type state (active, locked, etc)
      * @param permissions             permissions bit coded
@@ -84,11 +83,11 @@ public class FxTypeEdit extends FxType implements Serializable {
     private FxTypeEdit(String name, FxString description, ACL acl, Workflow workflow, FxType parent,
                        boolean enableParentAssignments,
                        TypeStorageMode storageMode, TypeCategory category, TypeMode mode,
-                       boolean checkValidity, LanguageMode language, TypeState state, byte permissions,
+                       LanguageMode language, TypeState state, byte permissions,
                        boolean trackHistory, long historyAge, long maxVersions, int maxRelSource,
                        int maxRelDestination) {
         super(-1, acl, workflow, name, description, parent, storageMode,
-                category, mode, checkValidity, language, state, permissions, trackHistory, historyAge,
+                category, mode, language, state, permissions, trackHistory, historyAge,
                 maxVersions, maxRelSource, maxRelDestination, null, null, new ArrayList<FxTypeRelation>(5));
         this.enableParentAssignments = enableParentAssignments;
         this.isNew = true;
@@ -106,7 +105,7 @@ public class FxTypeEdit extends FxType implements Serializable {
     public FxTypeEdit(FxType type) {
         super(type.getId(), type.getACL(), type.getWorkflow(), 
                 type.getName(), type.getDescription(), type.getParent(), type.getStorageMode(), type.getCategory(),
-                type.getMode(), type.isCheckValidity(), type.getLanguage(), type.getState(), type.permissions,
+                type.getMode(), type.getLanguage(), type.getState(), type.permissions,
                 type.isTrackHistory(), type.getHistoryAge(), type.getMaxVersions(), type.getMaxRelSource(),
                 type.getMaxRelDestination(), type.getLifeCycleInfo(), type.getDerivedTypes(), type.getRelations());
         this.isNew = false;
@@ -155,7 +154,7 @@ public class FxTypeEdit extends FxType implements Serializable {
     public static FxTypeEdit createNew(String name, FxString description, ACL acl, FxType parent) {
         return createNew(name, description, acl, CacheAdmin.getEnvironment().getWorkflows().get(0),
                 parent, parent != null, TypeStorageMode.Hierarchical,
-                TypeCategory.User, TypeMode.Content, false, LanguageMode.Multiple, TypeState.Available,
+                TypeCategory.User, TypeMode.Content, LanguageMode.Multiple, TypeState.Available,
                 getDefaultTypePermissions(), false, 0, -1, 0, 0);
     }
 
@@ -175,7 +174,6 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param storageMode             the storage mode
      * @param category                category mode (system, user)
      * @param mode                    type mode (content, relation)
-     * @param checkValidity           check validity of contents in search operations
      * @param language                language mode
      * @param state                   type state (active, locked, etc)
      * @param permissions             permissions bit coded
@@ -189,11 +187,11 @@ public class FxTypeEdit extends FxType implements Serializable {
     public static FxTypeEdit createNew(String name, FxString description, ACL acl, Workflow workflow,
                                        FxType parent, boolean enableParentAssignments,
                                        TypeStorageMode storageMode, TypeCategory category, TypeMode mode,
-                                       boolean checkValidity, LanguageMode language, TypeState state, byte permissions,
+                                       LanguageMode language, TypeState state, byte permissions,
                                        boolean trackHistory, long historyAge, long maxVersions, int maxRelSource,
                                        int maxRelDestination) {
         return new FxTypeEdit(name, description, acl, workflow, parent, enableParentAssignments,
-                storageMode, category, mode, checkValidity, language, state, permissions, trackHistory, historyAge,
+                storageMode, category, mode, language, state, permissions, trackHistory, historyAge,
                 maxVersions, maxRelSource, maxRelDestination);
     }
 
@@ -337,18 +335,6 @@ public class FxTypeEdit extends FxType implements Serializable {
      */
     public FxTypeEdit setMode(TypeMode mode) {
         this.mode = mode;
-        this.changed = true;
-        return this;
-    }
-
-    /**
-     * Check validity (valid from/to) in search operations?
-     *
-     * @param checkValidity check validity
-     * @return the type itself, useful for chained calls
-     */
-    public FxTypeEdit setCheckValidity(boolean checkValidity) {
-        this.checkValidity = checkValidity;
         this.changed = true;
         return this;
     }

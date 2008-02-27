@@ -382,11 +382,11 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
         try {
             //                                 1         2       3        4
             ps = con.prepareStatement("SELECT TYPESRC, TYPEDST, MAXSRC, MAXDST FROM " + TBL_STRUCT_TYPERELATIONS + " WHERE TYPEDEF=?");
-            //               1   2     3       4             5         6          7
-            curSql = "SELECT ID, NAME, PARENT, STORAGE_MODE, CATEGORY, TYPE_MODE, VALIDITY_CHECKS, " +
-                    //8         9           10             11            12           13
+            //               1   2     3       4             5         6
+            curSql = "SELECT ID, NAME, PARENT, STORAGE_MODE, CATEGORY, TYPE_MODE, " +
+                    //7         8           9              10            11           12
                     "LANG_MODE, TYPE_STATE, SECURITY_MODE, TRACKHISTORY, HISTORY_AGE, MAX_VERSIONS," +
-                    //14               15                16          17          18           19           20   21
+                    //13               14                15          16          17           18           19   20
                     "REL_TOTAL_MAXSRC, REL_TOTAL_MAXDST, CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT, ACL, WORKFLOW" +
                     " FROM " + TBL_STRUCT_TYPES + " ORDER BY NAME";
 
@@ -403,14 +403,14 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                                 rsRelations.getInt(3), rsRelations.getInt(4)));
                     long parentId = rs.getLong(3);
                     FxType parentType = rs.wasNull() ? null : new FxPreloadType(parentId);
-                    result.add(new FxType(rs.getLong(1), environment.getACL(rs.getInt(20)),
-                            environment.getWorkflow(rs.getInt(21)), rs.getString(2),
+                    result.add(new FxType(rs.getLong(1), environment.getACL(rs.getInt(19)),
+                            environment.getWorkflow(rs.getInt(20)), rs.getString(2),
                             Database.loadFxString(con, TBL_STRUCT_TYPES, "description", "id=" + rs.getLong(1)),
                             parentType, TypeStorageMode.getById(rs.getInt(4)),
-                            TypeCategory.getById(rs.getInt(5)), TypeMode.getById(rs.getInt(6)), rs.getBoolean(7),
-                            LanguageMode.getById(rs.getInt(8)), TypeState.getById(rs.getInt(9)), rs.getByte(10),
-                            rs.getBoolean(11), rs.getLong(12), rs.getLong(13), rs.getInt(14), rs.getInt(15),
-                            LifeCycleInfoImpl.load(rs, 16, 17, 18, 19), new ArrayList<FxType>(5), alRelations));
+                            TypeCategory.getById(rs.getInt(5)), TypeMode.getById(rs.getInt(6)),
+                            LanguageMode.getById(rs.getInt(7)), TypeState.getById(rs.getInt(8)), rs.getByte(9),
+                            rs.getBoolean(10), rs.getLong(11), rs.getLong(12), rs.getInt(13), rs.getInt(14),
+                            LifeCycleInfoImpl.load(rs, 15, 16, 17, 18), new ArrayList<FxType>(5), alRelations));
                 } catch (FxNotFoundException e) {
                     throw new FxLoadException(LOG, e);
                 }

@@ -346,7 +346,6 @@ CREATE TABLE FXS_TYPEDEF (
   STORAGE_MODE tinyint(4) unsigned NOT NULL COMMENT 'how are data tables organized \n0=inbound\n1=outbound\n2=external table (no versioning, permissions, etc)\n3=memory (nothing persisted, for small amounts of data only, no query engine available!)',
   CATEGORY tinyint(4) unsigned NOT NULL COMMENT '0=system,  1=user',
   TYPE_MODE tinyint(4) unsigned NOT NULL COMMENT '0=Content, 1=Relation',
-  VALIDITY_CHECKS BOOLEAN NOT NULL COMMENT '0=none, 1=perform validity checks',
   LANG_MODE tinyint(4) unsigned NOT NULL COMMENT '0=no multi language, 1=one language per instance, 2=multiple languages per field',
   TYPE_STATE tinyint(4) unsigned NOT NULL COMMENT '0=available, 1=temporary unavailable, 2=permanently unavailable\ntables can be unavailable if structural changes resulted in errors and manual intervention is needed',
   SECURITY_MODE tinyint(4) unsigned NOT NULL COMMENT 'Bit coded field that indicates which permissions are used. 0=none, 0x01=instance, 0x02=property, 0x04=step, 0x08=type',

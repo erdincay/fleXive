@@ -54,6 +54,6 @@ public class FxPreloadType extends FxType implements Serializable {
      */
     public FxPreloadType(long id) {
         super(id, null, null, "preloaded", null, null, null, null, TypeMode.Preload,
-                false, null, null, (byte) 0, false, 0, 0, 0, 0, null, null, null);
+                null, null, (byte) 0, false, 0, 0, 0, 0, null, null, null);
     }
 }

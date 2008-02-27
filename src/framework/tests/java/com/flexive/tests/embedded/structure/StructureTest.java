@@ -104,8 +104,7 @@ public class StructureTest {
         long testId = -1;
         try {
             testId = te.save(FxTypeEdit.createNew("TestCD", new FxString("description..."),
-                    CacheAdmin.getEnvironment().getACL(ACL.Category.STRUCTURE.getDefaultId()), null)
-                    .setCheckValidity(false));
+                    CacheAdmin.getEnvironment().getACL(ACL.Category.STRUCTURE.getDefaultId()), null));
 //            testId = te.create(1, 1, 1, new ArrayList<Mandator>(2), "TestCD",
 //                    new FxString("description..."), null, false,
 //                    TypeStorageMode.Hierarchical, TypeCategory.User, TypeMode.Content,
@@ -143,7 +142,6 @@ public class StructureTest {
         testEdit.setPermissions((byte) 0); //clear permissions
         testEdit.setUseInstancePermissions(true);
         testEdit.setDescription(new FxString("Changed description"));
-        testEdit.setCheckValidity(true);
         testEdit.setState(TypeState.Unavailable);
         te.save(testEdit);
         FxType testType = CacheAdmin.getEnvironment().getType("TestCDNewName");
@@ -155,7 +153,6 @@ public class StructureTest {
         assert !testType.usePropertyPermissions();
         assert !testType.useStepPermissions();
         assert !testType.useTypePermissions();
-        assert testType.isCheckValidity();
         assert testType.getState() == TypeState.Unavailable;
 
         try {
