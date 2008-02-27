@@ -1679,11 +1679,19 @@
                 <code>BeforeContentSave</code>.
             </para>
             <para>
+                <imagedata fileref="images/adm_ui_scripts/create_script.png"
+                           format="PNG" contentwidth="100%"/>
+            </para>
+            <para>If the default script event is set to
+                <code>Manual</code>, the script can be executed via the
+                administration UI in the
+                <link linkend="adm_scripts_overview">script overview</link>.
+            </para>
+            <para>
                 <table class="flexive">
                     <thead>
                         <tr>
-                            <th>List of available events</th>
-                            <th>Script editor</th>
+                            <th colspan="3">List of available events</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1728,6 +1736,8 @@
                                         <code>PrepareContentSave</code>
                                     </listitem>
                                 </itemizedlist>
+                            </td>
+                            <td>
                                 <itemizedlist>
                                     <listitem>
                                         <code>BeforeDataChangeUpdate</code>
@@ -1768,6 +1778,8 @@
                                         <code>AfterAssignmentDataDelete</code>
                                     </listitem>
                                 </itemizedlist>
+                            </td>
+                            <td>
                                 <itemizedlist>
                                     <listitem>
                                         <code>BinaryPreviewProcess</code>
@@ -1797,18 +1809,9 @@
                                     </listitem>
                                 </itemizedlist>
                             </td>
-                            <td>
-                                <imagedata fileref="images/adm_ui_scripts/create_script.png"
-                                           format="PNG" contentwidth="100%"/>
-                            </td>
                         </tr>
                     </tbody>
                 </table>
-            </para>
-            <para>If the default script event is set to
-                <code>Manual</code>, the script can be executed via the
-                administration UI in the
-                <link linkend="adm_scripts_overview">script overview</link>.
             </para>
         </section>
         <section xml:id="adm_scripts_overview">
@@ -1856,13 +1859,13 @@
                 and its label
                 <code>NodeLabel</code>.
             </para>
-            <para>You might want to copy paste it and try it out:</para>
-            <para>
-                <xi:include href="listings/adm_scripts_console_example.xml"></xi:include>
-            </para>
             <para>
                 <imagedata fileref="images/adm_ui_scripts/script_console.png"
                            format="PNG" contentwidth="100%"/>
+            </para>
+            <para>You might want to copy paste the example and try it out:</para>
+            <para>
+                <xi:include href="listings/adm_scripts_console_example.xml"></xi:include>
             </para>
         </section>
     </section>
