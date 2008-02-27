@@ -66,7 +66,22 @@ public class FxMediaNativeEngine {
     /**
      * Do we run in headless mode?
      */
-    public final static boolean headless = "true".equals(System.getProperty("java.awt.headless"));
+    private final static boolean headless;
+
+    static {
+        if ("true".equals(System.getProperty("java.awt.headless"))) {
+            headless = true;
+        } else {
+            // check if graphics environment is available
+            boolean caughtException = false;
+            try {
+                GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+            } catch (HeadlessException e) {
+                caughtException = true;
+            }
+            headless = caughtException;
+        }
+    }
 
     /**
      * Scale an image and return the dimensions (width and height) as int array
