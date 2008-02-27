@@ -51,7 +51,7 @@ def binValue = content.getPropertyData("/Document").value.defaultTranslation
 if( binValue.metadata == null || binValue.metadata.length() < 20) {
     println "No metadata present for document to process!"
     if( content.getValue("/TITLE").isEmpty() )
-        content.setValue("/TITLE", new FxString(false, binValue.name))
+        content.setValue("/TITLE", new FxString(true, (String)binValue.name))
     if( content.getValue("/ENCRYPTED").isEmpty() )
         content.setValue("/ENCRYPTED", new FxBoolean(false, false))
     return content
@@ -98,7 +98,7 @@ if( meta.summary ) {
     if( meta.summary.lastPrintedAt )
         process(cmap, 'DateTime|LastPrinted', meta.summary.lastPrintedAt)
     if( meta.summary.title )
-        process(cmap, 'String|Title', meta.summary.title)
+        process(cmap, 'MLString|Title', meta.summary.title)
     if( meta.summary.lastModifiedAt )
         process(cmap, 'DateTime|LastModified', meta.summary.lastModifiedAt)
     if( meta.summary.pageCount )
@@ -121,8 +121,9 @@ cmap.each() {key, value ->
     key = key.split("\\|")[1]
 //      println "${key} -> ${value} (${_type})"
     switch (_type) {
-        case "String": fxvalue = new FxString(false, value); break
-        case "Boolean": fxvalue = new FxBoolean(false, Boolean.valueOf(value)); break
+        case "String": fxvalue = new FxString(false, (String)value); break
+        case "MLString": fxvalue = new FxString(true, (String)value); break
+        case "Boolean": fxvalue = new FxBoolean(false, (Boolean)Boolean.valueOf(value)); break
         case "Number":
             if (value.endsWith("+0+0"))
                 value = value.substring(0, value.indexOf("+0+0"))
@@ -151,7 +152,7 @@ cmap.each() {key, value ->
 
 
 if( content.getValue("/TITLE").isEmpty() )
-    content.setValue("/TITLE", new FxString(false, binValue.name))
+    content.setValue("/TITLE", new FxString(true, (String)binValue.name))
 if( content.getValue("/ENCRYPTED").isEmpty() )
     content.setValue("/ENCRYPTED", new FxBoolean(false, false))
 return content

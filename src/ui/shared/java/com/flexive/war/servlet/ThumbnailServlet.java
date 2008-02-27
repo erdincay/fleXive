@@ -87,7 +87,7 @@ import java.net.URLEncoder;
  * <p/>
  * <br/>
  * Examples:
- * <code>/thumbnail/pk27.1/s21/test.jpg</code>
+ * <code>/thumbnail/pk27.1/s2/test.jpg</code>
  * <code>/thumbnail/s0/w100/h300/pk4711.MAX/vermax/rot90/test.jpg</code>
  *
  * TODO:

@@ -34,6 +34,13 @@
 import com.flexive.extractor.ExtractedData
 import com.flexive.extractor.Extractor
 import com.flexive.shared.value.BinaryDescriptor
+import com.flexive.shared.media.FxMediaEngine
+import java.nio.channels.FileChannel
+import java.nio.ByteBuffer
+import com.sun.pdfview.*
+import java.awt.image.BufferedImage
+import java.awt.*
+import javax.imageio.ImageIO
 
 if (processed) {
     println "already processed in documents ..."
@@ -83,4 +90,47 @@ try {
 processed = true
 useDefaultPreview = true
 defaultId = doc_previewId
+
+if( docType == Extractor.DocumentType.PDF ) {
+    //try to render the first PDF page as image
+    try {
+        String ext = ".PNG"
+        File imgFile = File.createTempFile("PDFIMG", ext)
+
+        // set up the PDF reading
+        RandomAccessFile raf = new RandomAccessFile((File)binaryFile, "r");
+        FileChannel channel = raf.getChannel();
+        ByteBuffer buf = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
+        PDFFile pdffile = new PDFFile(buf);
+
+        // get the first page
+        PDFPage page = pdffile.getPage(0);
+
+
+        // create and configure a graphics object
+        BufferedImage img = new BufferedImage((int)page.getBBox().getWidth(), (int)page.getBBox().getHeight(), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = img.createGraphics();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        // do the actual drawing
+        PDFRenderer renderer = new PDFRenderer(page, g2,
+                new Rectangle(0, 0, (int)page.getBBox().getWidth(), (int)page.getBBox().getHeight()), null, Color.WHITE);
+        page.waitForFinish();
+        renderer.run();
+        ImageIO.write(img, ext.substring(1), imgFile)
+
+        previewFile1 = File.createTempFile("PREV1", ext)
+        previewFile2 = File.createTempFile("PREV2", ext)
+        previewFile3 = File.createTempFile("PREV3", ext)
+        dimensionsPreview1 = FxMediaEngine.scale(imgFile, previewFile1, ext, BinaryDescriptor.PREVIEW1_BOX, BinaryDescriptor.PREVIEW1_BOX)
+        dimensionsPreview2 = FxMediaEngine.scale(imgFile, previewFile2, ext, BinaryDescriptor.PREVIEW2_BOX, BinaryDescriptor.PREVIEW2_BOX)
+        dimensionsPreview3 = FxMediaEngine.scale(imgFile, previewFile3, ext, BinaryDescriptor.PREVIEW3_BOX, BinaryDescriptor.PREVIEW3_BOX)
+        if( !imgFile.delete() )
+            imgFile.deleteOnExit()
+        useDefaultPreview = false
+    } catch (Exception e) {
+        println "PDFRenderer failed: "+e.message+" - using default preview"
+    }
+}
+
 println "Processed document ok"

@@ -5,6 +5,7 @@
 //  scriptname ... name of this script
 //author: Markus Plesser, Unique Computing Solutions GmbH
 import com.flexive.shared.*
+import com.flexive.shared.configuration.SystemParameters
 import com.flexive.shared.structure.*
 import com.flexive.shared.scripting.*
 import com.flexive.shared.security.ACL
@@ -45,7 +46,9 @@ class DocumentType {
         addProperty("Keywords", "Keywords", "Schl\u00fcsselw\u00f6rter", "", FxMultiplicity.MULT_0_1, FxDataType.Text, true)
         addProperty("LastEditor", "Last editor", "Letzter Bearbeiter", "", FxMultiplicity.MULT_0_1, FxDataType.String1024)
         addProperty("LastPrinted", "Last printed", "Zuletzt gedruckt", "", FxMultiplicity.MULT_0_1, FxDataType.DateTime)
-        addProperty("Title", "Document title", "Dokumenttitel", "", FxMultiplicity.MULT_0_1, FxDataType.String1024)
+        assignmentEngine.save(FxPropertyAssignmentEdit.createNew(CacheAdmin.getEnvironment().getAssignment((Long) EJBLookup.configurationEngine.get(SystemParameters.TREE_CAPTION_ROOTASSIGNMENT)),
+            type, "Title", "/").setLabel(new FxString(true, FxLanguage.ENGLISH, "Document title").setTranslation(FxLanguage.GERMAN, "Dokumenttitel")).setEnabled(true), false);        
+//        addProperty("Title", "Document title", "Dokumenttitel", "", FxMultiplicity.MULT_0_1, FxDataType.String1024)
         addProperty("LastModified", "Last modification", "Letzte \u00c4nderung", "", FxMultiplicity.MULT_0_1, FxDataType.DateTime)
         addProperty("Pages", "Number of pages", "Seitenanzahl", "", FxMultiplicity.MULT_0_1, FxDataType.Number)
         addProperty("RevNumber", "Revision number", "Revisionsnummer", "", FxMultiplicity.MULT_0_1, FxDataType.String1024)

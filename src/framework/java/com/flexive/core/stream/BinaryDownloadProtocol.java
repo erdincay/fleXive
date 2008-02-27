@@ -35,6 +35,7 @@ package com.flexive.core.stream;
 
 import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.TBL_CONTENT_BINARY;
+import com.flexive.shared.media.FxMediaEngine;
 import com.flexive.shared.stream.BinaryDownloadPayload;
 import com.flexive.stream.DataPacket;
 import com.flexive.stream.StreamException;
@@ -59,6 +60,7 @@ public class BinaryDownloadProtocol extends StreamProtocol<BinaryDownloadPayload
     private PreparedStatement ps = null;
     private InputStream bin = null;
     private byte[] _buffer;
+    private int pre_read = 0;
 
     public BinaryDownloadProtocol() {
         super(BinaryDownloadPayload.class);
@@ -130,6 +132,17 @@ public class BinaryDownloadProtocol extends StreamProtocol<BinaryDownloadPayload
                 mimeType = rs.getString(2);
                 datasize = rs.getInt(3);
                 _buffer = new byte[4096];
+                if (!mimeType.startsWith("image")) {
+                    try {
+                        pre_read = bin.read(_buffer, 0, 100);
+                    } catch (IOException e) {
+                        //silently ignore
+                    }
+                    String tmp = FxMediaEngine.detectMimeType(_buffer);
+                    if (tmp.startsWith("image"))
+                        mimeType = tmp;
+                } else
+                    pre_read = 0;
             } catch (SQLException e) {
                 return new DataPacket<BinaryDownloadPayload>(new BinaryDownloadPayload(true, "SQL Error: " + e.getMessage()), false);
             } finally {
@@ -160,6 +173,10 @@ public class BinaryDownloadProtocol extends StreamProtocol<BinaryDownloadPayload
     public boolean sendStream(ByteBuffer buffer) throws IOException {
         if (buffer.remaining() <= 0 || bin == null)
             return true; //should not happen but possible ...
+        if (pre_read > 0) {
+            buffer.put(_buffer, 0, pre_read); //size should not matter since its only 100 bytes
+            pre_read = 0;
+        }
         int max = Math.min(buffer.remaining(), _buffer.length);
         int read = bin.read(_buffer, 0, max);
         if (read == -1) {

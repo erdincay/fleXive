@@ -479,7 +479,7 @@
             <zipfileset prefix="lib" dir="${flexive.drop.dir}" includes="*.jar" excludes="*-ejb.jar"/>
 
             <!-- Shared libraries -->
-            <zipfileset prefix="lib" dir="${flexive.lib.dir}" includes="${sqlparser.jar},${extractor.jar},cglib*.jar,fxStream.jar,fxTree.jar,commons-io-1.1.jar,sanselan.jar,commons-*.jar,jbosscache-core.jar,jgroups.jar,jboss-common-core-42-compat.jar"/>
+            <zipfileset prefix="lib" dir="${flexive.lib.dir}" includes="${sqlparser.jar},${extractor.jar},cglib*.jar,fxStream.jar,fxTree.jar,commons-io-1.1.jar,sanselan.jar,PDFRenderer.jar,commons-*.jar,jbosscache-core.jar,jgroups.jar,jboss-common-core-42-compat.jar"/>
             <zipfileset prefix="lib" dir="${flexive.lib.dir}/groovy" includes="*.jar"/>
             <zipfileset prefix="lib" dir="${build.ui.jar.dir}" includes="*.jar"/>
             <zipfileset prefix="lib" dir="${flexive.lib.dir}/xstream" includes="*.jar"/>
