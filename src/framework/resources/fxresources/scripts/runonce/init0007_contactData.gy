@@ -81,17 +81,20 @@ FxScriptInfo si = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.Befo
         '''
 import com.flexive.shared.value.*
 //println "in contactdata create/save script ..."
-String display = content.getValue("/SURNAME").defaultTranslation
-if( content.containsValue("/NAME") ) {
+String display = ""
+if( content.containsValue("/SURNAME") )
+    display = content.getValue("/SURNAME").defaultTranslation
+if( content.containsValue("/NAME") ) 
     display = content.getValue("/NAME").defaultTranslation+" "+display
-}
 if( content.containsValue("/TITLE") )
     display = content.getValue("/TITLE").defaultTranslation+" "+display
 if( display.length() > 1024 )
     display = display.substring(0,1024)
-// TODO: get multilang info from content value    
-content.setValue("/FQN", new FxString(false, display))
-content.setValue("/DISPLAYNAME", new FxString(false, display))
+// TODO: get multilang info from content value
+if( !("".equals(display) ) ) {
+    content.setValue("/FQN", new FxString(false, display))
+    content.setValue("/DISPLAYNAME", new FxString(false, display))
+}
 return content
 ''')
 EJBLookup.getScriptingEngine().createTypeScriptMapping(si.id, typeId, true, true)

@@ -339,6 +339,8 @@ public interface ScriptingEngine {
      * If errors occur, they are written to the logfile.
      * run-once scripts are only executed once in the lifetime of a division!
      * consecutive calls have no effect and nothing will be executed!
+     *
+     * @throws FxApplicationException on errors
      */
     void executeRunOnceScripts() throws FxApplicationException;
 

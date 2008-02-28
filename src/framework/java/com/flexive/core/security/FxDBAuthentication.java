@@ -119,7 +119,8 @@ class FxDBAuthentication {
             final long mandator = rs.getLong(15);
 
             // Account active?
-            if (!active || !validated || !CacheAdmin.getEnvironment().getMandator(mandator).isActive()) {
+            if (!active || !validated ||
+                    (CacheAdmin.isEnvironmentLoaded() && !CacheAdmin.getEnvironment().getMandator(mandator).isActive()) ) {
                 if (LOG.isDebugEnabled()) LOG.debug("Login for user [" + username +
                         "] failed, account is inactive. Active=" + active + ", Validated=" + validated +
                         ", Mandator active: " + CacheAdmin.getEnvironment().getMandator(mandator).isActive());
