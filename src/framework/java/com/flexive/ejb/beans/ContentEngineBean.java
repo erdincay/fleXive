@@ -164,9 +164,15 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
     public FxContent initialize(long typeId) throws FxApplicationException {
         FxType type = CacheAdmin.getEnvironment().getType(typeId);
         UserTicket ticket = FxContext.get().getTicket();
+        long step;
+        try {
+            step = type.getWorkflow().getSteps().get(0).getId();
+        } catch (Exception e) {
+            throw new FxInvalidParameterException("STEP", "ex.workflow.noStepDefined", type.getWorkflow().getName());
+        }
         return initialize(type.getId(), ticket.getMandatorId(),
                 -1 /*invalid ACL will cause a lookup for best-fit ACL*/,
-                type.getWorkflow().getSteps().get(0).getId(), ticket.getLanguage().getId());
+                step, ticket.getLanguage().getId());
     }
 
     /**
