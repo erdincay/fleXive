@@ -39,7 +39,6 @@ import com.flexive.shared.content.FxContentVersionInfo;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.FxLanguage;
-import com.flexive.shared.structure.FxType;
 
 import javax.ejb.Remote;
 import java.util.List;

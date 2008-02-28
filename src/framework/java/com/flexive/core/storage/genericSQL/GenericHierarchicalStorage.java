@@ -50,7 +50,6 @@ import com.flexive.shared.scripting.FxScriptBinding;
 import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.scripting.FxScriptResult;
 import com.flexive.shared.security.ACL;
-import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.stream.BinaryUploadPayload;
 import com.flexive.shared.stream.FxStreamUtils;
@@ -149,7 +148,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     //calculate max_ver and live_ver for a content instance
     protected static final String CONTENT_VER_CALC = "SELECT MAX(VER) AS MAX_VER, COALESCE((SELECT s.VER FROM " +
             TBL_CONTENT + " s WHERE s.STEP=(SELECT w.ID FROM " + TBL_STEP + " w, " + TBL_STRUCT_TYPES + " t WHERE w.STEPDEF=" +
-            StepDefinition.LIVE_STEP_ID + " AND w.WORKFLOW=t.WORKFLOW AND t.ID=c.TDEF) AND s.ID=c.ID),-1) AS LIVE_VER FROM " + TBL_CONTENT + 
+            StepDefinition.LIVE_STEP_ID + " AND w.WORKFLOW=t.WORKFLOW AND t.ID=c.TDEF) AND s.ID=c.ID),-1) AS LIVE_VER FROM " + TBL_CONTENT +
             " c WHERE c.ID=? GROUP BY c.ID";
     protected static final String CONTENT_VER_UPDATE_1 = "UPDATE " + TBL_CONTENT + " SET MAX_VER=?, LIVE_VER=? WHERE ID=?";
     protected static final String CONTENT_VER_UPDATE_2 = "UPDATE " + TBL_CONTENT + " SET ISMAX_VER=(MAX_VER=VER), ISLIVE_VER=(LIVE_VER=VER) WHERE ID=?";
@@ -163,7 +162,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     protected static final String CONTENT_REFERENCE_CAPTION = "SELECT FTEXT1024 FROM " + TBL_CONTENT_DATA + " WHERE ID=? AND VER=? AND XPATHMULT='/CAPTION[1]'";
 
     //getContentVersionInfo() statement
-    protected static final String CONTENT_VER_INFO = "SELECT ID, VER, MAX_VER, LIVE_VER, CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT FROM " + TBL_CONTENT + " WHERE ID=?";
+    protected static final String CONTENT_VER_INFO = "SELECT ID, VER, MAX_VER, LIVE_VER, CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT, STEP FROM " + TBL_CONTENT + " WHERE ID=?";
 
     //security info property acl query
     protected static final String SECURITY_INFO_PROP = "SELECT DISTINCT a.ACL FROM " + TBL_STRUCT_ASSIGNMENTS + " a, " +
@@ -443,7 +442,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         PreparedStatement ps = null;
         int min_ver = -1, max_ver = 0, live_ver = 0, lastMod_ver = 0;
         long lastMod_time;
-        Map<Integer, LifeCycleInfo> versions = new HashMap<Integer, LifeCycleInfo>(5);
+        Map<Integer, FxContentVersionInfo.VersionData> versions = new HashMap<Integer, FxContentVersionInfo.VersionData>(5);
         try {
 
             ps = con.prepareStatement(CONTENT_VER_INFO);
@@ -453,17 +452,19 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 throw new FxNotFoundException("ex.content.notFound", new FxPK(id));
             max_ver = rs.getInt(3);
             live_ver = rs.getInt(4);
-            versions.put(rs.getInt(2), LifeCycleInfoImpl.load(rs, 5, 6, 7, 8));
+            versions.put(rs.getInt(2),
+                    new FxContentVersionInfo.VersionData(LifeCycleInfoImpl.load(rs, 5, 6, 7, 8), rs.getLong(9)));
             min_ver = rs.getInt(2);
             lastMod_ver = rs.getInt(2);
-            lastMod_time = versions.get(rs.getInt(2)).getModificationTime();
+            lastMod_time = versions.get(rs.getInt(2)).getLifeCycleInfo().getModificationTime();
             while (rs.next()) {
                 if (rs.getInt(2) < min_ver)
                     min_ver = rs.getInt(2);
-                versions.put(rs.getInt(2), LifeCycleInfoImpl.load(rs, 5, 6, 7, 8));
-                if (versions.get(rs.getInt(2)).getModificationTime() >= lastMod_time) {
+                versions.put(rs.getInt(2),
+                        new FxContentVersionInfo.VersionData(LifeCycleInfoImpl.load(rs, 5, 6, 7, 8), rs.getLong(9)));
+                if (versions.get(rs.getInt(2)).getLifeCycleInfo().getModificationTime() >= lastMod_time) {
                     lastMod_ver = rs.getInt(2);
-                    lastMod_time = versions.get(rs.getInt(2)).getModificationTime();
+                    lastMod_time = versions.get(rs.getInt(2)).getLifeCycleInfo().getModificationTime();
                 }
             }
         } catch (SQLException e) {
@@ -2126,11 +2127,13 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setInt(2, ver);
             ps.executeUpdate();
             ps.close();
+            String[] nodes = StorageManager.getTreeStorage().beforeContentVersionRemoved(con, pk.getId(), ver, cvi);
             ps = con.prepareStatement(CONTENT_MAIN_REMOVE_VER);
             ps.setLong(1, pk.getId());
             ps.setInt(2, ver);
             if (ps.executeUpdate() > 0)
                 fixContentVersionStats(con, pk.getId());
+            StorageManager.getTreeStorage().afterContentVersionRemoved(nodes, con, pk.getId(), ver, cvi);
         } catch (SQLException e) {
             throw new FxRemoveException(LOG, e, "ex.db.sqlError", e.getMessage());
         } catch (FxApplicationException e) {

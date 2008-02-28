@@ -34,6 +34,7 @@
 package com.flexive.core.storage;
 
 import com.flexive.shared.FxLanguage;
+import com.flexive.shared.content.FxContentVersionInfo;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxTreeException;
@@ -389,6 +390,32 @@ public interface TreeStorage {
      * @throws FxApplicationException on errors
      */
     void contentRemoved(Connection con, long contentId, boolean liveVersionRemovedOnly) throws FxApplicationException;
+
+    /**
+     * Call for housekeeping before a content version is removed
+     *
+     * @param con     an open and valid connection
+     * @param id      content id
+     * @param version content version
+     * @param cvi     content version information
+     * @return String array containing edit and live nodes affected (comma separated)
+     * @throws FxApplicationException on errors
+     * @see TreeStorage#afterContentVersionRemoved
+     */
+    String[] beforeContentVersionRemoved(Connection con, long id, int version, FxContentVersionInfo cvi) throws FxApplicationException;
+
+    /**
+     * Call for housekeeping after a content version is removed
+     *
+     * @param nodes   array containing edit and live nodes affected (comma separated)
+     * @param con     an open and valid connection
+     * @param id      content id
+     * @param version content version
+     * @param cvi     content version information
+     * @throws FxApplicationException on errors
+     * @see TreeStorage#beforeContentVersionRemoved
+     */
+    void afterContentVersionRemoved(String[] nodes, Connection con, long id, int version, FxContentVersionInfo cvi) throws FxApplicationException;
 
     /**
      * Perform a complete check on the given tree if checks are enabled

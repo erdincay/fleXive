@@ -54,13 +54,32 @@ public class FxContentVersionInfo implements Serializable {
     private int maxVersion;
     private int liveVersion;
     private int lastModifiedVersion;
-    private Map<Integer, LifeCycleInfo> versions;
+    private Map<Integer, VersionData> versions;
     private VersionSelector versionSelector;
+
+    public static final class VersionData {
+        private LifeCycleInfo lifeCycleInfo;
+        private long step;
+
+        public VersionData(LifeCycleInfo lifeCycleInfo, long step) {
+            this.lifeCycleInfo = lifeCycleInfo;
+            this.step = step;
+        }
+
+        public LifeCycleInfo getLifeCycleInfo() {
+            return lifeCycleInfo;
+        }
+
+        public long getStep() {
+            return step;
+        }
+
+    }
 
     /**
      * Selector for versions (helps with EL)
      */
-    public static final class VersionSelector extends Hashtable<Integer, LifeCycleInfo> {
+    public static final class VersionSelector extends Hashtable<Integer, VersionData> {
         FxContentVersionInfo versionInfo;
 
         /**
@@ -76,7 +95,7 @@ public class FxContentVersionInfo implements Serializable {
          * {@inheritDoc}
          */
         @Override
-        public LifeCycleInfo get(Object key) {
+        public VersionData get(Object key) {
             return versionInfo.versions.get(key);
         }
     }
@@ -91,7 +110,7 @@ public class FxContentVersionInfo implements Serializable {
      * @param lastModifiedVersion version that has the latest modification date
      * @param versions            map of version,LifeCycleInfo entries
      */
-    public FxContentVersionInfo(long id, int minVersion, int maxVersion, int liveVersion, int lastModifiedVersion, Map<Integer, LifeCycleInfo> versions) {
+    public FxContentVersionInfo(long id, int minVersion, int maxVersion, int liveVersion, int lastModifiedVersion, Map<Integer, VersionData> versions) {
         this.id = id;
         this.minVersion = minVersion;
         this.maxVersion = maxVersion;
@@ -194,6 +213,18 @@ public class FxContentVersionInfo implements Serializable {
     }
 
     /**
+     * Get the VersionData for a requested version or <code>null</code> if the
+     * requested version does not exist
+     *
+     * @param version the requested version
+     * @return VersionData for a requested version or <code>null</code> if the
+     *         requested version does not exist
+     */
+    public VersionData getVersionData(int version) {
+        return versions.get(version);
+    }
+
+    /**
      * Get the LifeCycleInfo for a requested version or <code>null</code> if the
      * requested version does not exist
      *
@@ -202,9 +233,20 @@ public class FxContentVersionInfo implements Serializable {
      *         requested version does not exist
      */
     public LifeCycleInfo getLifeCycleInfo(int version) {
-        return versions.get(version);
+        return getVersionData(version).getLifeCycleInfo();
     }
 
+    /**
+     * Get the step id for a requested version or <code>null</code> if the
+     * requested version does not exist
+     *
+     * @param version the requested version
+     * @return step id for a requested version or <code>null</code> if the
+     *         requested version does not exist
+     */
+    public long getStep(int version) {
+        return getVersionData(version).getStep();
+    }
 
     @Override
     public String toString() {
@@ -298,8 +340,8 @@ public class FxContentVersionInfo implements Serializable {
      * @return an empty version info for new FxContent instances
      */
     public static FxContentVersionInfo createEmpty() {
-        Map<Integer, LifeCycleInfo> versions = new HashMap<Integer, LifeCycleInfo>(1);
-        versions.put(1, new NewLifeCycleInfoImpl(FxContext.get().getTicket().getUserId()));
+        Map<Integer, VersionData> versions = new HashMap<Integer, VersionData>(1);
+        versions.put(1, new VersionData(new NewLifeCycleInfoImpl(FxContext.get().getTicket().getUserId()), 1));
         return new FxContentVersionInfo(FxPK.NEW_ID, 1, 1, -1, 1, versions);
     }
 }

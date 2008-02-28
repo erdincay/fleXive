@@ -134,9 +134,9 @@ public abstract class GenericTreeStorage implements TreeStorage {
             "FROM " + getTable(FxTreeMode.Edit) + " t, " + DatabaseConst.TBL_CONTENT + " c WHERE t.REF=? AND c.ID=t.REF AND c.ISMAX_VER=1";
 
     //1=id
-    private static final String TREE_REF_USAGE_EDIT = "SELECT c.TDEF, t.ID FROM " + DatabaseConst.TBL_CONTENT + " c," + getTable(FxTreeMode.Edit) + " t WHERE c.ID=? AND t.REF=c.ID";
+    private static final String TREE_REF_USAGE_EDIT = "SELECT DISTINCT c.TDEF, t.ID FROM " + DatabaseConst.TBL_CONTENT + " c," + getTable(FxTreeMode.Edit) + " t WHERE c.ID=? AND t.REF=c.ID";
     //1=id
-    private static final String TREE_REF_USAGE_LIVE = "SELECT c.TDEF, t.ID FROM " + DatabaseConst.TBL_CONTENT + " c," + getTable(FxTreeMode.Live) + " t WHERE c.ID=? AND t.REF=c.ID";
+    private static final String TREE_REF_USAGE_LIVE = "SELECT DISTINCT c.TDEF, t.ID FROM " + DatabaseConst.TBL_CONTENT + " c," + getTable(FxTreeMode.Live) + " t WHERE c.ID=? AND t.REF=c.ID";
 
     /**
      * Get the tree table for the requested mode
@@ -1237,6 +1237,19 @@ public abstract class GenericTreeStorage implements TreeStorage {
      * {@inheritDoc}
      */
     public void contentRemoved(Connection con, long contentId, boolean liveVersionRemovedOnly) throws FxApplicationException {
+        contentRemoved(con, contentId, liveVersionRemovedOnly, false);
+    }
+
+    /**
+     * Housekeeping for removed nodes
+     *
+     * @param con                    an open and valid connection
+     * @param contentId              referenced content id
+     * @param liveVersionRemovedOnly if just the live version was removed (other versions have no impact) @throws FxApplicationException on errors
+     * @param ignoreEditNodes        ignore any changes to edit tree nodes?
+     * @throws FxApplicationException on errors
+     */
+    public void contentRemoved(Connection con, long contentId, boolean liveVersionRemovedOnly, boolean ignoreEditNodes) throws FxApplicationException {
         PreparedStatement ps = null;
         try {
             //  nid
@@ -1272,7 +1285,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 else {
                     //if the node is a leaf then remove the node, else replace the referenced content with a new folder instance
                     try {
-                        if (inEdit)
+                        if (inEdit && !ignoreEditNodes)
                             folderPK = handleContentDeleted(con, ce, folderPK, typeId, getTreeNodeInfo(con, FxTreeMode.Edit, liveNode));
                     } catch (FxNotFoundException e) {
                         //ok, may be an already removed childnode
@@ -1284,14 +1297,16 @@ public abstract class GenericTreeStorage implements TreeStorage {
                     }
                 }
             }
-            edit.removeAll(live);
-            //remaining nodes only exist in edit tree
-            for (long editNode : edit)
-                try {
-                    folderPK = handleContentDeleted(con, ce, folderPK, typeId, getTreeNodeInfo(con, FxTreeMode.Edit, editNode));
-                } catch (FxNotFoundException e) {
-                    //ok, may be an already removed childnode
-                }
+            if (!ignoreEditNodes) {
+                edit.removeAll(live);
+                //remaining nodes only exist in edit tree
+                for (long editNode : edit)
+                    try {
+                        folderPK = handleContentDeleted(con, ce, folderPK, typeId, getTreeNodeInfo(con, FxTreeMode.Edit, editNode));
+                    } catch (FxNotFoundException e) {
+                        //ok, may be an already removed childnode
+                    }
+            }
         } catch (SQLException se) {
             throw new FxTreeException(LOG, "ex.db.sqlError", se.getMessage());
         } finally {
@@ -1359,6 +1374,86 @@ public abstract class GenericTreeStorage implements TreeStorage {
             scripting.runScript(scriptId, binding);
 
         return folderPK;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String[] beforeContentVersionRemoved(Connection con, long id, int version, FxContentVersionInfo cvi) throws FxApplicationException {
+        if (cvi.hasLiveVersion() && version == cvi.getLiveVersion()) {
+            contentRemoved(con, id, true, true);
+        }
+        if (cvi.getVersionCount() > 1) {
+            //deactivate ref. integrity to allow removal
+            Statement stmt = null;
+            try {
+                stmt = con.createStatement();
+                ResultSet rs = stmt.executeQuery("SELECT DISTINCT ID FROM " + getTable(FxTreeMode.Edit) + " WHERE REF=" + id);
+                StringBuilder sb = new StringBuilder(500);
+                while (rs != null && rs.next()) {
+                    if (sb.length() > 0)
+                        sb.append(",");
+                    sb.append(rs.getLong(1));
+                }
+                String[] nodes = new String[2];
+                nodes[0] = sb.toString();
+                sb.setLength(0);
+                rs = stmt.executeQuery("SELECT DISTINCT ID FROM " + getTable(FxTreeMode.Live) + " WHERE REF=" + id);
+                while (rs != null && rs.next()) {
+                    if (sb.length() > 0)
+                        sb.append(",");
+                    sb.append(rs.getLong(1));
+                }
+                nodes[1] = sb.toString();
+                if (nodes[0].length() == 0 && nodes[1].length() == 0)
+                    return null;
+                stmt.executeUpdate("UPDATE " + getTable(FxTreeMode.Edit) + " SET REF=(SELECT MIN(ID) FROM " +
+                        DatabaseConst.TBL_CONTENT + ") WHERE REF=" + id);
+                stmt.executeUpdate("UPDATE " + getTable(FxTreeMode.Live) + " SET REF=(SELECT MIN(ID) FROM " +
+                        DatabaseConst.TBL_CONTENT + ") WHERE REF=" + id);
+                return nodes;
+            } catch (SQLException e) {
+                throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage());
+            } finally {
+                try {
+                    if (stmt != null)
+                        stmt.close();
+                } catch (SQLException e) {
+                    //ignore
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void afterContentVersionRemoved(String[] nodes, Connection con, long id, int version, FxContentVersionInfo cvi) throws FxApplicationException {
+        if (nodes == null || nodes.length == 0)
+            return;
+        if (nodes.length == 2) {
+            //reactivate ref. integrity
+            Statement stmt = null;
+            try {
+                stmt = con.createStatement();
+                if (!StringUtils.isEmpty(nodes[0]))
+                    stmt.executeUpdate("UPDATE " + getTable(FxTreeMode.Edit) + " SET REF=" + id +
+                            " WHERE ID IN (" + nodes[0] + ")");
+                if (!StringUtils.isEmpty(nodes[1]))
+                    stmt.executeUpdate("UPDATE " + getTable(FxTreeMode.Live) + " SET REF=" + id +
+                            " WHERE ID IN (" + nodes[1] + ")");
+            } catch (SQLException e) {
+                throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage());
+            } finally {
+                try {
+                    if (stmt != null)
+                        stmt.close();
+                } catch (SQLException e) {
+                    //ignore
+                }
+            }
+        }
     }
 
     /**

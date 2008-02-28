@@ -833,7 +833,8 @@ public class ContentEditorBean implements ActionBean, Serializable {
      *
      * @return the next page to render (= the content editor)
      */
-    public String deleteVersion() {
+    public String deleteCurrentVersion() {
+        int _version = version;
         try {
             FxPK pk = content.getPk();
             co.removeVersion(content.getPk());
@@ -843,6 +844,30 @@ public class ContentEditorBean implements ActionBean, Serializable {
             _init();
             new FxFacesMsgInfo("Content.nfo.deletedVersion", pk).addToContext();
         } catch (Throwable t) {
+            version = FxPK.MAX;
+            load();
+            new FxFacesMsgErr(t).addToContext();
+        }
+        return getEditorPage();
+    }
+
+    /**
+     * Deletes a specific version set in "version"
+     *
+     * @return the next page to render (= the content editor)
+     */
+    public String deleteVersion() {
+        try {
+            FxPK pk = new FxPK(content.getPk().getId(), version);
+            co.removeVersion(pk);
+            content = null;
+            id = pk.getId();
+            version = FxPK.MAX;
+            _init();
+            new FxFacesMsgInfo("Content.nfo.deletedVersion", pk).addToContext();
+        } catch (Throwable t) {
+            version = FxPK.MAX;
+            load();
             new FxFacesMsgErr(t).addToContext();
         }
         return getEditorPage();

@@ -181,7 +181,7 @@
                     <ui:fragment rendered="#{srcEditor.versionDeleteAble}">
                         <adm:commandButton labelKey="Content.button.deleteVersion" location="both"
                                            bean="#{srcEditor}" confirm="Content.confirm.deleteVersion"
-                                           icon="delete" action="deleteVersion" id="deleteVersionButtonRO"/>
+                                           icon="delete" action="deleteCurrentVersion" id="deleteVersionButtonRO"/>
                     </ui:fragment>
                 </ui:fragment>
                 <ui:fragment rendered="#{srcEditor.readOnly==false}">
@@ -218,7 +218,7 @@
                         <ui:fragment rendered="#{srcEditor.versionDeleteAble}">
                             <adm:commandButton labelKey="Content.button.deleteVersion" location="both"
                                           bean="#{srcEditor}" confirm="Content.confirm.deleteVersion"
-                                          icon="delete" action="deleteVersion" id="deleteVersionButton"/>
+                                          icon="delete" action="deleteCurrentVersion" id="deleteVersionButton"/>
                         </ui:fragment>
                     </ui:fragment>
 

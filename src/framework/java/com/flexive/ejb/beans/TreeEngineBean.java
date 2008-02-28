@@ -505,9 +505,12 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
             if (mode == FxTreeMode.Live)
                 return;
             con = Database.getDbConnection();
+            final FxTreeNode srcNode = StorageManager.getTreeStorage().getNode(con, mode, nodeId);
+            if( !contentEngine.getContentVersionInfo(srcNode.getReference()).hasLiveVersion() )
+                throw new FxTreeException("ex.tree.activate.failed.noLiveContent", srcNode.getPath());
             if (!includeChildren) {
                 //if the node is a leaf node, always activate with children to propagate removed subnodes
-                if (StorageManager.getTreeStorage().getNode(con, mode, nodeId).isLeaf())
+                if (srcNode.isLeaf())
                     includeChildren = true;
             }
 

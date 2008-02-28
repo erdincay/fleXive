@@ -34,6 +34,7 @@
 package com.flexive.faces.beans;
 
 import com.flexive.shared.*;
+import com.flexive.shared.value.FxString;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Account;
@@ -72,6 +73,7 @@ public class MapBean implements Serializable {
     private Map<Long, Account> accountMap = null;
     private Map<Long, String> dateTimeMap = null;
     private Map<Long, FxLanguage> languagesMap = null;
+    private Map<Long, FxString> stepNameMap = null;
     private FxEnvironment environment;
 
     /**
@@ -221,6 +223,25 @@ public class MapBean implements Serializable {
             });
         }
         return assignmentsMap;
+    }
+
+    /**
+     * Return step label by id
+     *
+     * @return step label by id
+     */
+    public Map<Long, FxString> getStep() {
+        if (stepNameMap == null) {
+            stepNameMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Long, FxString>() {
+                public FxString get(Object key) {
+                    if (key == null) {
+                        return null;
+                    }
+                    return environment.getStepDefinition(environment.getStep((Long)key).getStepDefinitionId()).getLabel();
+                }
+            });
+        }
+        return stepNameMap;
     }
 
 

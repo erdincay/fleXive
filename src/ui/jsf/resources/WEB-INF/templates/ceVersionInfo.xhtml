@@ -50,17 +50,26 @@ for more info
             </ui:fragment>
             <ui:repeat var="ver" value="#{vi.versions}">
                 <hr/>
-                <b>#{fxMessageBean['Content.field.versionInfo.version,#{ver}']}</b><br/>
+                <b>#{fxMessageBean['Content.field.versionInfo.version,#{ver}']}</b>
+                #{fxMessageBean['Content.field.versionInfo.step,#{fxMapBean.step[vi.versionSelector[ver].step]}']}
+                <br/>
                 <ui:fragment rendered="#{ver!=srcEditor.version and srcEditor.readOnly}">
                     <adm:commandIcon labelKey="Content.button.loadVersion" location="content"
                                      icon="load" action="reload" bean="#{srcEditor}"
-                                     id="editVersion_#{ver}">
+                                     id="loadVersion_#{ver}">
                         <f:setPropertyActionListener target="#{srcEditor.version}" value="#{ver}"/>
                     </adm:commandIcon>
+                    <ui:fragment rendered="#{srcEditor.versionDeleteAble}">
+                        <adm:commandIcon labelKey="Content.button.deleteVersion" location="content"
+                                         icon="delete" action="deleteVersion" bean="#{srcEditor}"
+                                         id="removeVersion_#{ver}">
+                            <f:setPropertyActionListener target="#{srcEditor.version}" value="#{ver}"/>
+                        </adm:commandIcon>
+                    </ui:fragment>
                     <br/>
                 </ui:fragment>
-                #{fxMessageBean['Content.field.versionInfo.created,#{fxMapBean.dateTime[vi.versionSelector[ver].creationTime]},#{fxMapBean.account[vi.versionSelector[ver].creatorId].name}']}<br/>
-                #{fxMessageBean['Content.field.versionInfo.modified,#{fxMapBean.dateTime[vi.versionSelector[ver].modificationTime]},#{fxMapBean.account[vi.versionSelector[ver].modificatorId].name}']}<br/>
+                #{fxMessageBean['Content.field.versionInfo.created,#{fxMapBean.dateTime[vi.versionSelector[ver].lifeCycleInfo.creationTime]},#{fxMapBean.account[vi.versionSelector[ver].lifeCycleInfo.creatorId].name}']}<br/>
+                #{fxMessageBean['Content.field.versionInfo.modified,#{fxMapBean.dateTime[vi.versionSelector[ver].lifeCycleInfo.modificationTime]},#{fxMapBean.account[vi.versionSelector[ver].lifeCycleInfo.modificatorId].name}']}<br/>
             </ui:repeat>
         </ui:repeat>
     </rich:simpleTogglePanel>
