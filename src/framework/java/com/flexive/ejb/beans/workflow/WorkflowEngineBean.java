@@ -105,14 +105,11 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
             if (count == 0) {
                 throw new FxNotFoundException(LOG, "ex.workflow.notFound", workflowId);
             }
-
             success = true;
-            
-            // Refesh active UserTickets
-            // TODO
-            //UserTicketImpl.refreshHavingWorkflow(workflowId);
-
         } catch (SQLException exc) {
+            if( Database.isForeignKeyViolation(exc))
+                throw new FxRemoveException("ex.workflow.delete.inUse",
+                        CacheAdmin.getEnvironment().getWorkflow(workflowId).getName(), workflowId);
             throw new FxRemoveException(LOG, "ex.workflow.delete", exc, workflowId, exc.getMessage());
         } finally {
         	if (!success) {

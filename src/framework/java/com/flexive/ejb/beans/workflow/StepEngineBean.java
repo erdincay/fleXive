@@ -48,6 +48,7 @@ import com.flexive.shared.security.ACL.Category;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserGroup;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
 import com.flexive.shared.workflow.StepPermission;
@@ -80,15 +81,19 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
 
     private static final transient Log LOG = LogFactory.getLog(StepEngineBean.class);
 
-    @EJB private SequencerEngineLocal seq;
-    @Resource private SessionContext ctx;
+    @EJB
+    private SequencerEngineLocal seq;
+    @Resource
+    private SessionContext ctx;
 
     /**
      * Check relate permissions for steps?
      */
     public static final boolean USE_RELATE_PERM = false;
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long createStep(Step step)
             throws FxApplicationException {
@@ -132,8 +137,8 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
                     throw exc;
                 }
                 // get existing workflow, return its ID
-                sql = "SELECT ID FROM " + TBL_STEP + " WHERE STEPDEF=" 
-                	+ step.getStepDefinitionId() + " AND WORKFLOW=" + step.getWorkflowId();
+                sql = "SELECT ID FROM " + TBL_STEP + " WHERE STEPDEF="
+                        + step.getStepDefinitionId() + " AND WORKFLOW=" + step.getWorkflowId();
                 ResultSet rs = stmt.executeQuery(sql);
                 if (rs != null && rs.next()) {
                     // return existing step ID as "new step ID"
@@ -148,24 +153,26 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
             // have no effect.
             // TODO
             //UserTicketImpl.refreshHavingACL(ACLId);
-        	success = true;
-        	
+            success = true;
+
             // Return the new id
             return newStepId;
 
         } catch (SQLException exc) {
             throw new FxCreateException(LOG, "ex.step.create", exc, exc.getMessage());
         } finally {
-        	if (!success) {
-        		ctx.setRollbackOnly();
-        	} else {
+            if (!success) {
+                ctx.setRollbackOnly();
+            } else {
                 StructureLoader.reloadWorkflows(FxContext.get().getDivisionId());
-        	}
+            }
             Database.closeObjects(StepEngineBean.class, con, stmt);
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public List<StepPermission> loadAllStepsForUser(long userId) throws FxApplicationException {
         UserTicket ticket = FxContext.get().getTicket();
         // Select all step ids
@@ -240,13 +247,17 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
 
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void removeSteps(long workflowId) throws FxApplicationException {
         deleteStep(workflowId, true);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void removeStep(long stepId) throws FxApplicationException {
         deleteStep(stepId, false);
@@ -269,12 +280,12 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
         UserTicket ticket = FxContext.get().getTicket();
         // Security checks
         FxPermissionUtils.checkRole(ticket, Role.WorkflowManagement);
+        final FxEnvironment env = CacheAdmin.getEnvironment();
 
         long workflowId = -1;
         // Check if the workflow exists at all, throws FxNotFoundException
-        if (isWorkflow) {
-            workflowId = CacheAdmin.getEnvironment().getWorkflow(objectId).getId();
-        }
+        if (isWorkflow)
+            workflowId = env.getWorkflow(objectId).getId();
 
         // Create the new step
         Connection con = null;
@@ -288,7 +299,7 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
 
             // May only delete a single step if its not the unique target of a other step
             if (!isWorkflow) {
-                Step step = CacheAdmin.getEnvironment().getStep(objectId);
+                Step step = env.getStep(objectId);
                 stmt = con.createStatement();
                 sql = "SELECT COUNT(*) FROM " + TBL_STEP + " WHERE WORKFLOW=" + step.getWorkflowId()
                         + " AND STEPDEF IN (SELECT def.ID FROM " + TBL_STEPDEFINITION + " def, " + TBL_STEP
@@ -317,27 +328,38 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
             stmt = con.createStatement();
             sql = "DELETE FROM " + TBL_STEP + " WHERE " + (isWorkflow ? "WORKFLOW=" : "ID=") + objectId;
             stmt.executeUpdate(sql);
-            // Update the active UserTickets, only if commited or we get the old values anyway
-            // TODO
-            //UserTicketImpl.refreshHavingWorkflow(workflowId);
             success = true;
         } catch (SQLException exc) {
             if (isWorkflow) {
+                if (Database.isForeignKeyViolation(exc))
+                    throw new FxRemoveException("ex.step.delete.workflow.inUse", env.getWorkflow(objectId).getName());
                 throw new FxRemoveException(LOG, "ex.step.delete.workflow", exc, exc.getMessage());
             } else {
+                if (Database.isForeignKeyViolation(exc)) {
+                    String stepName;
+                    try {
+                        Step step = env.getStep(objectId);
+                        stepName = env.getStepDefinition(step.getStepDefinitionId()).getName();
+                    } catch (Exception e) {
+                        stepName = "unknown";
+                    }
+                    throw new FxRemoveException("ex.step.delete.inUse", stepName);
+                }
                 throw new FxRemoveException(LOG, "ex.step.delete", exc, exc.getMessage());
             }
         } finally {
-        	if (!success) {
-        		ctx.setRollbackOnly();
-        	} else {
+            if (!success) {
+                ctx.setRollbackOnly();
+            } else {
                 StructureLoader.reloadWorkflows(FxContext.get().getDivisionId());
-        	}
+            }
             Database.closeObjects(StepEngineBean.class, con, stmt);
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void updateStep(long stepId, long aclId)
             throws FxApplicationException {
