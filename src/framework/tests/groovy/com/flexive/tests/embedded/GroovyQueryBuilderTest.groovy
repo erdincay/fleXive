@@ -35,7 +35,9 @@ package com.flexive.tests.embedded
 
 import com.flexive.shared.scripting.groovy.GroovyQueryBuilder
 import com.flexive.shared.search.query.SqlQueryBuilder
+import com.flexive.shared.FxFormatUtils;
 import org.testng.annotations.Test
+import com.flexive.shared.value.FxDateTime
 
 /**
  * Test scripts for the query builder test bean
@@ -54,7 +56,7 @@ class GroovyQueryBuilderTest {
             }
             lt("created_at", new Date(0))
         }
-        def cond = "(co.CAPTION = 'bla' AND co.FILENAME IS NOT NULL AND (co.ID > 0 OR co.ID < 100) AND co.CREATED_AT < '1970-01-01 01:00:00.000')"
+        def cond = "(co.CAPTION = 'bla' AND co.FILENAME IS NOT NULL AND (co.ID > 0 OR co.ID < 100) AND co.CREATED_AT < " + FxFormatUtils.escapeForSql(new FxDateTime(new Date(0))) + ")"
         def result = root.sqlQuery
         assert result.indexOf(cond) > 0: "Expected condition: " + cond + ", \ngot:\n" + result
     }
