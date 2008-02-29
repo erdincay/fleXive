@@ -1237,19 +1237,6 @@ public abstract class GenericTreeStorage implements TreeStorage {
      * {@inheritDoc}
      */
     public void contentRemoved(Connection con, long contentId, boolean liveVersionRemovedOnly) throws FxApplicationException {
-        contentRemoved(con, contentId, liveVersionRemovedOnly, false);
-    }
-
-    /**
-     * Housekeeping for removed nodes
-     *
-     * @param con                    an open and valid connection
-     * @param contentId              referenced content id
-     * @param liveVersionRemovedOnly if just the live version was removed (other versions have no impact) @throws FxApplicationException on errors
-     * @param ignoreEditNodes        ignore any changes to edit tree nodes?
-     * @throws FxApplicationException on errors
-     */
-    public void contentRemoved(Connection con, long contentId, boolean liveVersionRemovedOnly, boolean ignoreEditNodes) throws FxApplicationException {
         PreparedStatement ps = null;
         try {
             //  nid
@@ -1285,7 +1272,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 else {
                     //if the node is a leaf then remove the node, else replace the referenced content with a new folder instance
                     try {
-                        if (inEdit && !ignoreEditNodes)
+                        if (inEdit)
                             folderPK = handleContentDeleted(con, ce, folderPK, typeId, getTreeNodeInfo(con, FxTreeMode.Edit, liveNode));
                     } catch (FxNotFoundException e) {
                         //ok, may be an already removed childnode
@@ -1293,20 +1280,25 @@ public abstract class GenericTreeStorage implements TreeStorage {
                     try {
                         folderPK = handleContentDeleted(con, ce, folderPK, typeId, getTreeNodeInfo(con, FxTreeMode.Live, liveNode));
                     } catch (FxNotFoundException e) {
+                        try {
+                            //try to remove even if not found since the node might exist but the
+                            //content may not exist in the live step
+                            removeNode(con, FxTreeMode.Live, ce, liveNode, true);
+                        } catch (FxApplicationException e1) {
+                            //ignore
+                        }
                         //ok, may be an already removed childnode
                     }
                 }
             }
-            if (!ignoreEditNodes) {
-                edit.removeAll(live);
-                //remaining nodes only exist in edit tree
-                for (long editNode : edit)
-                    try {
-                        folderPK = handleContentDeleted(con, ce, folderPK, typeId, getTreeNodeInfo(con, FxTreeMode.Edit, editNode));
-                    } catch (FxNotFoundException e) {
-                        //ok, may be an already removed childnode
-                    }
-            }
+            edit.removeAll(live);
+            //remaining nodes only exist in edit tree
+            for (long editNode : edit)
+                try {
+                    folderPK = handleContentDeleted(con, ce, folderPK, typeId, getTreeNodeInfo(con, FxTreeMode.Edit, editNode));
+                } catch (FxNotFoundException e) {
+                    //ok, may be an already removed childnode
+                }
         } catch (SQLException se) {
             throw new FxTreeException(LOG, "ex.db.sqlError", se.getMessage());
         } finally {
@@ -1380,9 +1372,9 @@ public abstract class GenericTreeStorage implements TreeStorage {
      * {@inheritDoc}
      */
     public String[] beforeContentVersionRemoved(Connection con, long id, int version, FxContentVersionInfo cvi) throws FxApplicationException {
-        if (cvi.hasLiveVersion() && version == cvi.getLiveVersion()) {
-            contentRemoved(con, id, true, true);
-        }
+//        if (cvi.hasLiveVersion() && version == cvi.getLiveVersion()) {
+//            contentRemoved(con, id, version != cvi.getMaxVersion(), true);
+//        }
         if (cvi.getVersionCount() > 1) {
             //deactivate ref. integrity to allow removal
             Statement stmt = null;
