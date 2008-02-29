@@ -1806,6 +1806,7 @@
             </para>
             <para>
                 <table class="flexive">
+                    <caption>FxScriptEvent list</caption>
                     <thead>
                         <tr>
                             <th colspan="3">List of available events</th>
