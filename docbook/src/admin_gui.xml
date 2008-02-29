@@ -1722,9 +1722,10 @@
                 <imagedata fileref="images/adm_ui_workflow/create_workflow.png"
                            format="PNG" contentwidth="100%"/>
             </para>
-            <para>After the creation of the workflow, the extended workflow editor will be loaded.
+            <para>After the creation of the workflow, the extended workflow editor, shown on the following screen, will
+                be loaded.
             </para>
-            <para>As mentioned above, the basic elements of a workflow, shown on the following screen, are:</para>
+            <para>As mentioned above, the basic elements of a workflow are:</para>
             <para>
                 <variablelist>
                     <varlistentry>
