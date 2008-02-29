@@ -1729,7 +1729,9 @@
             <para>
                 <variablelist>
                     <varlistentry>
-                        <term>Steps (1)</term>
+                        <term>
+                            <code>Steps (1)</code>
+                        </term>
                         <listitem>
                             <para>You have to define a
                                 <link linkend="adm_ACL_create">workflow ACL</link>
@@ -1740,7 +1742,9 @@
                         </listitem>
                     </varlistentry>
                     <varlistentry>
-                        <term>Routes (3)</term>
+                        <term>
+                            <code>Routes (3)</code>
+                        </term>
                         <listitem>
                             <para>The
                                 <link linkend="core_workflow_overview">routes</link>
