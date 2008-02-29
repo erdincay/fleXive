@@ -86,7 +86,7 @@
             <para>
                 <mediaobject>
                     <imageobject>
-                        <imagedata fileref="images/structureEditor/se_overview.png" format="PNG" scalefit="1"
+                        <imagedata fileref="images/adm_ui_structure_editor/se_overview.png" format="PNG" scalefit="1"
                                    width="100%"
                                    contentdepth="66%"/>
                     </imageobject>
@@ -106,7 +106,7 @@
                             <para>
                                 <inlinemediaobject>
                                     <imageobject>
-                                        <imagedata fileref="images/structureEditor/fxType.png" format="PNG"
+                                        <imagedata fileref="images/adm_ui_structure_editor/fxType.png" format="PNG"
                                                    contentwidth="66%"/>
                                     </imageobject>
                                 </inlinemediaobject>
@@ -119,7 +119,7 @@
                             <para>
                                 <inlinemediaobject>
                                     <imageobject>
-                                        <imagedata fileref="images/structureEditor/fxTypeRelation.png" format="PNG"
+                                        <imagedata fileref="images/adm_ui_structure_editor/fxTypeRelation.png" format="PNG"
                                                    contentwidth="66%"/>
                                     </imageobject>
                                 </inlinemediaobject>
@@ -132,7 +132,7 @@
                             <para>
                                 <inlinemediaobject>
                                     <imageobject>
-                                        <imagedata fileref="images/structureEditor/fxGroup.png" format="PNG"
+                                        <imagedata fileref="images/adm_ui_structure_editor/fxGroup.png" format="PNG"
                                                    contentwidth="66%"/>
                                     </imageobject>
                                 </inlinemediaobject>
@@ -145,7 +145,7 @@
                             <para>
                                 <inlinemediaobject>
                                     <imageobject>
-                                        <imagedata fileref="images/structureEditor/fxAssignedProperty.png" format="PNG"
+                                        <imagedata fileref="images/adm_ui_structure_editor/fxAssignedProperty.png" format="PNG"
                                                    contentwidth="66%"/>
                                     </imageobject>
                                 </inlinemediaobject>
@@ -158,7 +158,7 @@
                             <para>
                                 <inlinemediaobject>
                                     <imageobject>
-                                        <imagedata fileref="images/structureEditor/fxAssignedPropertySystemInternal.png"
+                                        <imagedata fileref="images/adm_ui_structure_editor/fxAssignedPropertySystemInternal.png"
                                                    format="PNG" contentwidth="66%"/>
                                     </imageobject>
                                 </inlinemediaobject>
@@ -204,7 +204,7 @@
                                 </itemizedlist>
                                 <inlinemediaobject>
                                     <imageobject>
-                                        <imagedata fileref="images/structureEditor/type_dropdown.png" format="PNG"
+                                        <imagedata fileref="images/adm_ui_structure_editor/type_dropdown.png" format="PNG"
                                                    contentwidth="66%"/>
                                     </imageobject>
                                 </inlinemediaobject>
@@ -263,7 +263,7 @@
                                             </itemizedlist>
                                             <mediaobject>
                                                 <imageobject>
-                                                    <imagedata fileref="images/structureEditor/context_menu_type.png"
+                                                    <imagedata fileref="images/adm_ui_structure_editor/context_menu_type.png"
                                                                format="PNG" contentwidth="66%"/>
                                                 </imageobject>
                                             </mediaobject>
@@ -483,7 +483,7 @@
                 <para>
                     <mediaobject>
                         <imageobject>
-                            <imagedata fileref="images/structureEditor/type_editor_general.png" format="PNG"
+                            <imagedata fileref="images/adm_ui_structure_editor/type_editor_general.png" format="PNG"
                                        contentwidth="66%"/>
                         </imageobject>
                     </mediaobject>
@@ -524,7 +524,7 @@
 
                         <mediaobject>
                             <imageobject>
-                                <imagedata fileref="images/structureEditor/type_editor_relations.png" format="PNG"
+                                <imagedata fileref="images/adm_ui_structure_editor/type_editor_relations.png" format="PNG"
                                            contentwidth="66%"/>
                             </imageobject>
                         </mediaobject>
@@ -543,7 +543,7 @@
                         become available that are hidden otherwise.
                         <mediaobject>
                             <imageobject>
-                                <imagedata fileref="images/structureEditor/type_editor_hidden_fields.png" format="PNG"
+                                <imagedata fileref="images/adm_ui_structure_editor/type_editor_hidden_fields.png" format="PNG"
                                            contentwidth="66%"/>
                             </imageobject>
                         </mediaobject>
@@ -558,7 +558,7 @@
                 <para>
                     <mediaobject>
                         <imageobject>
-                            <imagedata fileref="images/structureEditor/group_editor_assignment.png" format="PNG"
+                            <imagedata fileref="images/adm_ui_structure_editor/group_editor_assignment.png" format="PNG"
                                        contentwidth="66%"/>
                         </imageobject>
                     </mediaobject>
@@ -633,7 +633,7 @@
                         tab.
                         <mediaobject>
                             <imageobject>
-                                <imagedata fileref="images/structureEditor/group_options.png" format="PNG"
+                                <imagedata fileref="images/adm_ui_structure_editor/group_options.png" format="PNG"
                                            contentwidth="66%"/>
                             </imageobject>
                         </mediaobject>
@@ -694,7 +694,7 @@
                         In order to display the visual helpers, the "Validate" button
                         <inlinemediaobject>
                             <imageobject>
-                                <imagedata fileref="images/structureEditor/validate_button.png" format="PNG"
+                                <imagedata fileref="images/adm_ui_structure_editor/validate_button.png" format="PNG"
                                            contentwidth="66%"/>
                             </imageobject>
                         </inlinemediaobject>
@@ -711,7 +711,7 @@
                         button
                         <inlinemediaobject>
                             <imageobject>
-                                <imagedata fileref="images/structureEditor/save_button.png" format="PNG"
+                                <imagedata fileref="images/adm_ui_structure_editor/save_button.png" format="PNG"
                                            contentwidth="66%"/>
                             </imageobject>
                         </inlinemediaobject>
@@ -735,7 +735,7 @@
                         button
                         <inlinemediaobject>
                             <imageobject>
-                                <imagedata fileref="images/structureEditor/create_button.png" format="PNG"
+                                <imagedata fileref="images/adm_ui_structure_editor/create_button.png" format="PNG"
                                            contentwidth="66%"/>
                             </imageobject>
                         </inlinemediaobject>
@@ -749,7 +749,7 @@
                         button
                         <inlinemediaobject>
                             <imageobject>
-                                <imagedata fileref="images/structureEditor/delete_button_assignment.png" format="PNG"
+                                <imagedata fileref="images/adm_ui_structure_editor/delete_button_assignment.png" format="PNG"
                                            contentwidth="66%"/>
                             </imageobject>
                         </inlinemediaobject>
@@ -774,7 +774,7 @@
                 <para>
                     <mediaobject>
                         <imageobject>
-                            <imagedata fileref="images/structureEditor/property_editor_general.png" format="PNG"
+                            <imagedata fileref="images/adm_ui_structure_editor/property_editor_general.png" format="PNG"
                                        contentwidth="66%"/>
                         </imageobject>
                     </mediaobject>
@@ -816,7 +816,7 @@
                         System internal property assignments
                         <inlinemediaobject>
                             <imageobject>
-                                <imagedata fileref="images/structureEditor/fxAssignedPropertySystemInternal.png"
+                                <imagedata fileref="images/adm_ui_structure_editor/fxAssignedPropertySystemInternal.png"
                                            format="PNG" contentwidth="66%"/>
                             </imageobject>
                         </inlinemediaobject>
@@ -846,7 +846,7 @@
                             tab respectively.
                             <mediaobject>
                                 <imageobject>
-                                    <imagedata fileref="images/structureEditor/override_property_options.png"
+                                    <imagedata fileref="images/adm_ui_structure_editor/override_property_options.png"
                                                format="PNG"
                                                contentwidth="66%"/>
                                 </imageobject>
@@ -909,7 +909,7 @@
                     button
                     <inlinemediaobject>
                         <imageobject>
-                            <imagedata fileref="images/structureEditor/save_button.png" format="PNG"
+                            <imagedata fileref="images/adm_ui_structure_editor/save_button.png" format="PNG"
                                        contentwidth="66%"/>
                         </imageobject>
                     </inlinemediaobject>
@@ -1588,7 +1588,7 @@
             <title>Creating an ACL</title>
             <para>The following screen shows the ACL editor in create mode.</para>
             <para>
-                You can specify:
+                You can specify
                 <orderedlist>
                     <listitem>
                         <para>The
@@ -1689,21 +1689,21 @@
 
     <section xml:id="adm_workflow">
         <title>Workflow administration</title>
-        <para>The Workflow administration UI allows you to define
+        <para>The &Flexive; workflow administration UI allows you to define
             <link linkend="adm_workfow_step_definition">step definitions</link>
             and workflows. Step definitions
             are used as steps in one or more workflows. You can define
             <link linkend="core_workflow_overview">routes</link>
             between these steps.
             See the core component chapter
-            <link linkend="core_workflow">Worflow Engine</link>
+            <link linkend="core_workflow">Workflow Engine</link>
             for additional information about workflows in &Flexive;.
         </para>
         <section xml:id="adm_workfow_step_definition">
             <title>Step definitions</title>
             <para>The following screen shows the step definition editor. You can define a
                 <link linkend="core_workflow_overview">unique target</link>
-                for a step definition.
+                (1) for a step definition.
             </para>
             <para>
                 <imagedata fileref="images/adm_ui_workflow/create_step_def.png"
@@ -1725,7 +1725,7 @@
             <para>After the creation of the workflow, the extended workflow editor, shown on the following screen, will
                 be loaded.
             </para>
-            <para>As mentioned above, the basic elements of a workflow are:</para>
+            <para>The basic elements of a workflow are:</para>
             <para>
                 <variablelist>
                     <varlistentry>
@@ -1770,7 +1770,7 @@
             </para>
         </section>
         <section xml:id="adm_workflow_overview">
-            <title>The Workflow overview</title>
+            <title>The workflow overview</title>
             <para>The following screen shows the workflow overview where you can edit or delete existing workflows.
                 Mind that you cannot delete workflows which are already in use.
             </para>
@@ -2027,7 +2027,164 @@
     </section>
     <section xml:id="adm_selectlists">
         <title>Select list administration</title>
-        <section>
+        The &Flexive;
+        <link linkend="core_structure_selectlists">select list</link>
+        administration allows you to create and edit select lists.
+        <section xml:id="adm_selectlists_create">
+            <title>Creating a select list</title>
+            <para>The following screen shows the initial step of the select list creation process.</para>
+            <para>You can specify</para>
+            <para>
+                <variablelist>
+                    <varlistentry>
+                        <term>
+                            <code>Name</code>
+                        </term>
+                        <listitem>
+                            <para>The name of the select list</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <code>Label</code>
+                        </term>
+                        <listitem>
+                            <para>The label of the select list</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <code>Description</code>
+                        </term>
+                        <listitem>
+                            <para>A description of the select list's context.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <code>
+                                Dynamic item creation
+                            </code>
+                        </term>
+                        <listitem>
+                            <para>The option for
+                                <link linkend="core_structure_selectlist_parameters">dynamic item creation</link>
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <code>Create items ACL</code>
+                        </term>
+                        <listitem>
+                            <para>The permission matrix of the
+                                <code>Default SelectList Create
+                                    <link linkend="adm_ACL">ACL</link>
+                                </code>
+                                provides only permission settings for
+                            </para>
+                            <para>
+                                <itemizedlist>
+                                    <listitem>Create</listitem>
+                                </itemizedlist>
+                            </para>
+                            <para>
+                                <imagedata fileref="images/adm_ui_selectlists/def_selectlist_create_acl_matrix.png"
+                                           format="PNG" contentwidth="100%"/>
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <code>ACL for new items</code>
+                        </term>
+                        <listitem>
+                            <para>The permission matrix of the
+                                <code>Default SelectList item
+                                    <link linkend="adm_ACL">ACL</link>
+                                </code>
+                                provides only permission settings for
+                            </para>
+                            <para>
+                                <itemizedlist>
+                                    <listitem>Read</listitem>
+                                    <listitem>Edit</listitem>
+                                    <listitem>Delete</listitem>
+                                </itemizedlist>
+                            </para>
+                            <para>
+                                <imagedata fileref="images/adm_ui_selectlists/def_selectlist_item_acl_matrix.png"
+                                           format="PNG" contentwidth="100%"/>
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </para>
+            <para>Mind that you cannot change the ACL's and the
+                <code>Dynamic item creation</code>
+                option after creation of the select list.
+            </para>
+            <para>
+                <imagedata fileref="images/adm_ui_selectlists/create_selectlist.png"
+                           format="PNG" contentwidth="100%"/>
+            </para>
+        </section>
+        <section xml:id="adm_selectlists_edit">
+            <title>Editing a select list</title>
+            <para>A select list consists of
+                <link linkend="core_structure_selectlist_item_parameters">select list items</link>
+                . The select list editor allows you to add and delete
+                select list items. The following screen shows the select list editor.
+            </para>
+            <para>For a select list item (1) you can specify</para>
+            <para>
+                <variablelist>
+                    <varlistentry>
+                        <term>
+                            <code>Label</code>
+                        </term>
+                        <listitem>
+                            <para>A label for the select list item</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <code>Data</code>
+                        </term>
+                        <listitem>
+                            <para>Additional data stored in the select list item (i.e. a currency code, a picture ratio)
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <code>ACL</code>
+                        </term>
+                        <listitem>
+                            <para>The
+                                <link linkend="adm_ACL">ACL</link>
+                                for the select list item
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <code>Color</code>
+                        </term>
+                        <listitem>
+                            <para>A hex (i.e.
+                                <code>#0033CC</code>) or CSS color code (i.e.
+                                <code>red</code>) for the
+                                select list item
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </para>
+            <para>
+                <imagedata fileref="images/adm_ui_selectlists/edit_selectlist.png"
+                           format="PNG" contentwidth="100%"/>
+            </para>
         </section>
     </section>
 
