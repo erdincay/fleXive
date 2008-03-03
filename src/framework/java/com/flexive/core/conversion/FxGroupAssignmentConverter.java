@@ -33,62 +33,51 @@
  ***************************************************************/
 package com.flexive.core.conversion;
 
-import com.flexive.shared.content.FxContent;
-import com.flexive.shared.content.FxData;
-import com.flexive.shared.content.FxPropertyData;
-import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.value.FxValue;
-import com.thoughtworks.xstream.converters.Converter;
+import com.flexive.shared.structure.FxAssignment;
+import com.flexive.shared.structure.FxGroupAssignment;
 import com.thoughtworks.xstream.converters.MarshallingContext;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 /**
- * XStream converter for FxPropertyData
+ * XStream converter for FxGroupAssignment
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev
  */
-public class FxPropertyDataConverter implements Converter {
+public class FxGroupAssignmentConverter extends FxAssignmentConverter {
 
     /**
      * {@inheritDoc}
      */
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext ctx) {
-        FxPropertyData pd = (FxPropertyData) o;
-        pd.compact(); //make sure all gaps are closed
-        writer.startNode(ConversionEngine.KEY_PROPERTY);
-        writer.addAttribute("xpath", pd.getXPathFull());
-        writer.addAttribute("pos", String.valueOf(pd.getPos()));
-        ctx.convertAnother(pd.getValue());
+        writer.startNode(ConversionEngine.KEY_GROUP_AS);
+        FxGroupAssignment grp = (FxGroupAssignment) o;
+        writer.addAttribute("mode", grp.getMode().name());
+        super.marshal(o, writer, ctx);
+        if (!grp.isDerivedAssignment()) {
+            writer.startNode(ConversionEngine.KEY_GROUP);
+            writer.addAttribute("name", grp.getGroup().getName());
+            writer.addAttribute("multiplicity", grp.getGroup().getMultiplicity().toString());
+
+            writer.startNode("label");
+            ctx.convertAnother(grp.getGroup().getLabel());
+            writer.endNode();
+            writer.startNode("hint");
+            ctx.convertAnother(grp.getGroup().getHint());
+            writer.endNode();
+
+            marshallOptions(writer, grp.getGroup().getOptions());
+            writer.endNode();
+        }
+        for (FxAssignment as : grp.getAssignments())
+            ctx.convertAnother(as);
         writer.endNode();
     }
 
     /**
      * {@inheritDoc}
      */
-    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
-        FxContent co = (FxContent) ctx.get(ConversionEngine.KEY_CONTENT);
-        String xp = reader.getAttribute("xpath");
-        int pos = Integer.valueOf(reader.getAttribute("pos"));
-        FxValue val = (FxValue) ctx.convertAnother(this, FxValue.class);
-        FxData data;
-        try {
-            co.setValue(xp, val);
-            data = co.getPropertyData(xp);
-            if (data.getPos() != pos)
-                data.setPos(pos);
-        } catch (FxApplicationException e) {
-            throw e.asRuntimeException();
-        }
-        return data;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public boolean canConvert(Class aClass) {
-        return FxPropertyData.class.isAssignableFrom(aClass);
+    public boolean canConvert(Class type) {
+        return FxGroupAssignment.class.isAssignableFrom(type);
     }
 }

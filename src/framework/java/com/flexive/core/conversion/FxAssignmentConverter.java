@@ -33,62 +33,76 @@
  ***************************************************************/
 package com.flexive.core.conversion;
 
-import com.flexive.shared.content.FxContent;
-import com.flexive.shared.content.FxData;
-import com.flexive.shared.content.FxPropertyData;
-import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.value.FxValue;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.structure.FxAssignment;
+import com.flexive.shared.structure.FxStructureOption;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
+import java.util.List;
+
 /**
- * XStream converter for FxPropertyData
+ * XStream converter for assignments
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev
  */
-public class FxPropertyDataConverter implements Converter {
+public abstract class FxAssignmentConverter implements Converter {
 
     /**
      * {@inheritDoc}
      */
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext ctx) {
-        FxPropertyData pd = (FxPropertyData) o;
-        pd.compact(); //make sure all gaps are closed
-        writer.startNode(ConversionEngine.KEY_PROPERTY);
-        writer.addAttribute("xpath", pd.getXPathFull());
-        writer.addAttribute("pos", String.valueOf(pd.getPos()));
-        ctx.convertAnother(pd.getValue());
+        FxAssignment as = (FxAssignment) o;
+        writer.addAttribute("alias", as.getAlias());
+        writer.addAttribute("xpath", as.getXPath());
+        writer.addAttribute("pos", String.valueOf(as.getPosition()));
+        writer.addAttribute("enabled", String.valueOf(as.isEnabled()));
+        writer.addAttribute("multiplicity", as.getMultiplicity().toString());
+        writer.addAttribute("defaultMultiplicity", String.valueOf(as.getDefaultMultiplicity()));
+
+        if (as.isDerivedAssignment())
+            writer.addAttribute("parent", CacheAdmin.getEnvironment().getAssignment(as.getBaseAssignmentId()).getXPath());
+
+        writer.startNode("label");
+        ctx.convertAnother(as.getLabel());
         writer.endNode();
+        writer.startNode("hint");
+        ctx.convertAnother(as.getHint());
+        writer.endNode();
+
+        marshallOptions(writer, as.getOptions());
     }
 
     /**
-     * {@inheritDoc}
+     * Marshall FxStructureOption's
+     *
+     * @param writer  HierarchicalStreamWriter
+     * @param options List<FxStructureOption>
      */
-    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
-        FxContent co = (FxContent) ctx.get(ConversionEngine.KEY_CONTENT);
-        String xp = reader.getAttribute("xpath");
-        int pos = Integer.valueOf(reader.getAttribute("pos"));
-        FxValue val = (FxValue) ctx.convertAnother(this, FxValue.class);
-        FxData data;
-        try {
-            co.setValue(xp, val);
-            data = co.getPropertyData(xp);
-            if (data.getPos() != pos)
-                data.setPos(pos);
-        } catch (FxApplicationException e) {
-            throw e.asRuntimeException();
+    protected void marshallOptions(HierarchicalStreamWriter writer, List<FxStructureOption> options) {
+        if (options.size() > 0) {
+            writer.startNode("options");
+            for (FxStructureOption opt : options) {
+                writer.startNode("option");
+                writer.addAttribute("key", opt.getKey());
+                writer.addAttribute("value", opt.getValue());
+                writer.addAttribute("overrideable", String.valueOf(opt.isOverrideable()));
+                writer.addAttribute("set", String.valueOf(opt.isSet()));
+                writer.endNode();
+            }
+            writer.endNode();
         }
-        return data;
     }
 
     /**
      * {@inheritDoc}
      */
-    public boolean canConvert(Class aClass) {
-        return FxPropertyData.class.isAssignableFrom(aClass);
+    public Object unmarshal(HierarchicalStreamReader hierarchicalStreamReader, UnmarshallingContext unmarshallingContext) {
+        //TODO
+        return null;
     }
 }

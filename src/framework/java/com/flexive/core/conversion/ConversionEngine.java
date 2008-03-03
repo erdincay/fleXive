@@ -33,12 +33,16 @@
  ***************************************************************/
 package com.flexive.core.conversion;
 
-import com.thoughtworks.xstream.XStream;
-import com.flexive.shared.value.FxValue;
-import com.flexive.core.conversion.FxValueConverter;
 import com.flexive.shared.content.FxContent;
-import com.flexive.shared.content.FxPropertyData;
 import com.flexive.shared.content.FxGroupData;
+import com.flexive.shared.content.FxPropertyData;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.interfaces.LanguageEngine;
+import com.flexive.shared.structure.FxGroupAssignment;
+import com.flexive.shared.structure.FxPropertyAssignment;
+import com.flexive.shared.structure.FxType;
+import com.flexive.shared.value.FxValue;
+import com.thoughtworks.xstream.XStream;
 
 /**
  * Conversion Engine - responsible for XML Import/Export
@@ -48,7 +52,15 @@ import com.flexive.shared.content.FxGroupData;
  */
 public class ConversionEngine {
 
+    public final static String KEY_VALUE = "value";
     public final static String KEY_CONTENT = "content";
+    public static final String KEY_PROPERTY = "property";
+    public static final String KEY_GROUP = "group";
+    public static final String KEY_LCI = "lci";
+    public final static String KEY_TYPE = "type";
+    public static final String KEY_PROPERTY_AS = "propertyAssignment";
+    public static final String KEY_GROUP_AS = "groupAssignment";
+    public static final String SYS_LANG = "--";
 
     /**
      * Get a XStream instance with all registered converters and aliases
@@ -57,15 +69,45 @@ public class ConversionEngine {
      */
     public static XStream getXStream() {
         XStream xs = new XStream();
-        xs.aliasType("val", FxValue.class);
-        xs.aliasType("co", FxContent.class);
-        xs.aliasType("prop", FxPropertyData.class);
-        xs.aliasType("group", FxGroupData.class);
+        xs.aliasType(KEY_VALUE, FxValue.class);
+        xs.aliasType(KEY_CONTENT, FxContent.class);
+        xs.aliasType(KEY_PROPERTY, FxPropertyData.class);
+        xs.aliasType(KEY_GROUP, FxGroupData.class);
+        xs.aliasType(KEY_TYPE, FxType.class);
+        xs.aliasType(KEY_GROUP_AS, FxGroupAssignment.class);
+        xs.aliasType(KEY_PROPERTY_AS, FxPropertyAssignment.class);
         xs.registerConverter(new FxValueConverter());
         xs.registerConverter(new FxPropertyDataConverter());
         xs.registerConverter(new FxGroupDataConverter());
         xs.registerConverter(new FxContentConverter());
         xs.registerConverter(new LifeCycleInfoConverter());
+        xs.registerConverter(new FxTypeConverter());
+        xs.registerConverter(new FxPropertyAssignmentConverter());
+        xs.registerConverter(new FxGroupAssignmentConverter());
         return xs;
+    }
+
+    /**
+     * Get language code
+     *
+     * @param le   reference to the LanguageEngine
+     * @param code language code as long
+     * @return 2-digit ISO language code
+     * @throws FxApplicationException on errors
+     */
+    static String getLang(LanguageEngine le, long code) throws FxApplicationException {
+        return code == 0 ? SYS_LANG : le.load(code).getIso2digit();
+    }
+
+    /**
+     * Get language code
+     *
+     * @param le   reference to the LanguageEngine
+     * @param code 2-digit ISO language code
+     * @return language code as long
+     * @throws FxApplicationException on errors
+     */
+    static long getLang(LanguageEngine le, String code) throws FxApplicationException {
+        return SYS_LANG.equals(code) ? 0 : le.load(code).getId();
     }
 }

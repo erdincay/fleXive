@@ -448,15 +448,6 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
     }
 
     /**
-     * Get a (unmodifiable) list of all options set for this property assignment
-     *
-     * @return (unmodifiable) list of all options set for this property assignment
-     */
-    public List<FxStructureOption> getOptions() {
-        return FxStructureOption.getUnmodifieableOptions(options);
-    }
-
-    /**
      * Sets the parent group assignment.
      *
      * @param parent the parent group assignment.

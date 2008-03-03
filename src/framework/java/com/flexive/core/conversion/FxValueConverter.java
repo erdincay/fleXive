@@ -33,8 +33,11 @@
  ***************************************************************/
 package com.flexive.core.conversion;
 
+import com.flexive.shared.EJBLookup;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxConversionException;
+import com.flexive.shared.interfaces.LanguageEngine;
 import com.flexive.shared.value.FxValue;
-import com.flexive.shared.structure.FxSelectListItem;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
@@ -62,17 +65,22 @@ public class FxValueConverter implements Converter {
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext ctx) {
         FxValue value = (FxValue) o;
         writer.addAttribute("t", value.getClass().getSimpleName());
-        writer.addAttribute("ml", value.isMultiLanguage() ? "1" : "0");
-        writer.addAttribute("dl", "" + value.getDefaultLanguage());
-        if (!value.isEmpty())
-            for (long lang : value.getTranslatedLanguages()) {
-                writer.startNode("d");
-                writer.addAttribute("l", "" + lang);
-                writer.setValue(value.getStringValue(value.getTranslation(lang)));
-                writer.endNode();
-            }
-        else
-            writer.addAttribute("empty", "true");
+        writer.addAttribute("ml", String.valueOf(value.isMultiLanguage()));
+        final LanguageEngine le = EJBLookup.getLanguageEngine();
+        try {
+            writer.addAttribute("dl", ConversionEngine.getLang(le, value.getDefaultLanguage()));
+            if (!value.isEmpty())
+                for (long lang : value.getTranslatedLanguages()) {
+                    writer.startNode("d");
+                    writer.addAttribute("l", ConversionEngine.getLang(le, lang));
+                    writer.setValue(value.getStringValue(value.getTranslation(lang)));
+                    writer.endNode();
+                }
+            else
+                writer.addAttribute("empty", "true");
+        } catch (FxApplicationException e) {
+            throw e.asRuntimeException();
+        }
     }
 
     /**
@@ -80,24 +88,26 @@ public class FxValueConverter implements Converter {
      */
     @SuppressWarnings("unchecked")
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
-        FxValue v = null;
+        FxValue v;
+        final LanguageEngine le = EJBLookup.getLanguageEngine();
+        final String type = reader.getAttribute("t");
         try {
-            boolean multiLanguage = "1".equals(reader.getAttribute("ml"));
-            long defaultLanguage = Long.valueOf(reader.getAttribute("dl"));
-            v = (FxValue) Class.forName("com.flexive.shared.value." + reader.getAttribute("t")).
+            boolean multiLanguage = Boolean.valueOf(reader.getAttribute("ml"));
+            long defaultLanguage = ConversionEngine.getLang(le, reader.getAttribute("dl"));
+            v = (FxValue) Class.forName("com.flexive.shared.value." + type).
                     getConstructor(long.class, boolean.class).newInstance(defaultLanguage, multiLanguage);
             if (reader.getAttribute("empty") != null && Boolean.valueOf(reader.getAttribute("empty")))
                 v.setEmpty();
             while (reader.hasMoreChildren()) {
                 reader.moveDown();
-                if ("d".equals(reader.getNodeName())) {
-                    long lang = Long.valueOf(reader.getAttribute("l"));
-                    v.setTranslation(lang, v.fromString(reader.getValue()));
-                }
+                if ("d".equals(reader.getNodeName()))
+                    v.setTranslation(ConversionEngine.getLang(le, reader.getAttribute("l")), v.fromString(reader.getValue()));
                 reader.moveUp();
             }
+        } catch (FxApplicationException e) {
+            throw e.asRuntimeException();
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new FxConversionException(e, "ex.conversion.import.value", type, e.getMessage()).asRuntimeException();
         }
         return v;
     }

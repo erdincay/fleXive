@@ -37,8 +37,6 @@ import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.value.FxString;
 import org.apache.commons.lang.StringUtils;
 
-import java.util.List;
-
 /**
  * FxGroup used for structure editing
  *
@@ -221,15 +219,6 @@ public class FxGroupEdit extends FxGroup {
     public FxGroupEdit setOption(String key, boolean overrideable, boolean value) {
         FxStructureOption.setOption(options, key, overrideable, value);
         return this;
-    }
-
-    /**
-     * Get a (unmodifiable) list of all options set for this group
-     *
-     * @return (unmodifiable) list of all options set for this group
-     */
-    public List<FxStructureOption> getOptions() {
-        return FxStructureOption.getUnmodifieableOptions(options);
     }
 
     /**

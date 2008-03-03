@@ -518,15 +518,6 @@ public class FxPropertyEdit extends FxProperty {
     }
 
     /**
-     * Get a (unmodifiable) list of all options set for this property
-     *
-     * @return (unmodifiable) list of all options set for this property
-     */
-    public List<FxStructureOption> getOptions() {
-        return FxStructureOption.getUnmodifieableOptions(options);
-    }
-
-    /**
      * <b>This value set will only be used when creating a new property and will be set for the created assignment!</b>
      * Set the default multiplicity (used i.e. in user interfaces editors and determines the amount of values that will
      * be initialized when creating an empty element).

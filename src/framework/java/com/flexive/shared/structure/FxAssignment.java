@@ -390,6 +390,15 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
     }
 
     /**
+     * Get a (unmodifiable) list of all options set for this assignment
+     *
+     * @return (unmodifiable) list of all options set for this assignment
+     */
+    public List<FxStructureOption> getOptions() {
+        return FxStructureOption.getUnmodifieableOptions(options);
+    }
+
+    /**
      * Does this assignment have mappings for the requested script event?
      *
      * @param event requested script event

@@ -169,6 +169,17 @@ public class FxMultiplicity implements Serializable {
         return min + ".." + (isUnlimited() ? SYMBOL_UNLIMITED : max);
     }
 
+    /**
+     * Get an FxMultiplicity from a String representation
+     *
+     * @param s string representation
+     * @return FxMultiplicity
+     */
+    public static FxMultiplicity fromString(String s) {
+        String[] range = s.split("\\.\\.");
+        return new FxMultiplicity(getStringToInt(range[0]), getStringToInt(range[1]));
+    }
+
 
     /**
      * {@inheritDoc}
@@ -241,7 +252,7 @@ public class FxMultiplicity implements Serializable {
      * @return the number as int or Integer.MAX_VALUE
      */
     public static int getStringToInt(String m) {
-        int mul=-1;
+        int mul;
         if (SYMBOL_UNLIMITED.equals(m.toUpperCase())) {
             mul= N;
         }
@@ -258,13 +269,11 @@ public class FxMultiplicity implements Serializable {
      * @return the number as String
      */
     public static String getIntToString(int m) {
-        String mul=null;
-        if (m == FxMultiplicity.N) {
+        String mul;
+        if (m == FxMultiplicity.N)
             mul = FxMultiplicity.SYMBOL_UNLIMITED;
-        }
-        else {
+        else
             mul =String.valueOf(m);
-        }
         return mul;
     }
 }

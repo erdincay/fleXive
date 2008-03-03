@@ -35,6 +35,8 @@ package com.flexive.tests.shared;
 
 import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.flexive.shared.structure.FxMultiplicity;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
@@ -138,5 +140,21 @@ public class FormatUtilTest {
                 assert false : "Failed to recognize valid color string " + value;
             }
         }
+    }
+
+    /**
+     * Test FxMultiplicity conversions from and to String
+     */
+    @Test
+    public void testMultiplicity() {
+        FxMultiplicity[] TEST = {
+                FxMultiplicity.MULT_0_1,
+                FxMultiplicity.MULT_0_N,
+                FxMultiplicity.MULT_1_1,
+                FxMultiplicity.MULT_1_N,
+                new FxMultiplicity(3, 6)
+        };
+        for (FxMultiplicity test : TEST)
+            Assert.assertEquals(test, FxMultiplicity.fromString(test.toString()));
     }
 }

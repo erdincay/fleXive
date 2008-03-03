@@ -36,8 +36,8 @@ package com.flexive.core.conversion;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.content.FxContent;
-import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxGroupData;
+import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.structure.FxEnvironment;
@@ -122,9 +122,9 @@ public class FxContentConverter implements Converter {
             ctx.put(ConversionEngine.KEY_CONTENT, co);
             while (reader.hasMoreChildren()) {
                 reader.moveDown();
-                if ("lci".equals(reader.getNodeName())) {
+                if (ConversionEngine.KEY_LCI.equals(reader.getNodeName())) {
                     ctx.convertAnother(this, LifeCycleInfo.class);
-                } else if ("group".equals(reader.getNodeName())) {
+                } else if (ConversionEngine.KEY_GROUP.equals(reader.getNodeName())) {
                     ctx.convertAnother(this, FxGroupData.class);
                 }
                 reader.moveUp();

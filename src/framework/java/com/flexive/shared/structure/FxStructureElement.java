@@ -175,4 +175,13 @@ public abstract class FxStructureElement implements Serializable, SelectableObje
     public FxStructureOption getOption(String key) {
         return FxStructureOption.getOption(key, options);
     }
+
+    /**
+     * Get a (unmodifiable) list of all options set for this group
+     *
+     * @return (unmodifiable) list of all options set for this group
+     */
+    public List<FxStructureOption> getOptions() {
+        return FxStructureOption.getUnmodifieableOptions(options);
+    }
 }

@@ -33,6 +33,8 @@
  ***************************************************************/
 package com.flexive.tests.embedded;
 
+import com.flexive.core.conversion.ConversionEngine;
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -40,7 +42,6 @@ import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxValue;
-import com.flexive.core.conversion.ConversionEngine;
 import com.thoughtworks.xstream.XStream;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -93,7 +94,20 @@ public class ImportExportTest {
         final String xml = xs.toXML(co);
         System.out.print("Content:\n" + xml);
         System.out.println("Reverted:\n" + xs.toXML(xs.fromXML(xml)));
-
     }
+
+    /**
+     * Test FxType
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test
+    public void typeMarshalling() throws FxApplicationException {
+        XStream xs = ConversionEngine.getXStream();
+        FxType testType = CacheAdmin.getEnvironment().getType(FxType.FOLDER);
+        final String xml = xs.toXML(testType);
+        System.out.print("Type:\n" + xml);
+    }
+
 
 }

@@ -33,13 +33,11 @@
  ***************************************************************/
 package com.flexive.core.conversion;
 
+import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxData;
 import com.flexive.shared.content.FxGroupData;
-import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPropertyData;
 import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.exceptions.FxNotFoundException;
-import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
@@ -60,7 +58,7 @@ public class FxGroupDataConverter implements Converter {
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext ctx) {
         FxGroupData gd = (FxGroupData) o;
         gd.compact(); //make sure all gaps are closed
-        writer.startNode("group");
+        writer.startNode(ConversionEngine.KEY_GROUP);
         writer.addAttribute("xpath", gd.getXPathFull());
         if( gd.getPos() >= 0 ) //no position for root group
             writer.addAttribute("pos", String.valueOf(gd.getPos()));
@@ -96,9 +94,9 @@ public class FxGroupDataConverter implements Converter {
             pos = Integer.valueOf(reader.getAttribute("pos"));
         while( reader.hasMoreChildren() ) {
             reader.moveDown();
-            if( "prop".equals(reader.getNodeName())) {
+            if( ConversionEngine.KEY_PROPERTY.equals(reader.getNodeName())) {
                 ctx.convertAnother(this, FxPropertyData.class);
-            } else if ("group".equals(reader.getNodeName())) {
+            } else if (ConversionEngine.KEY_GROUP.equals(reader.getNodeName())) {
                 unmarshal(reader, ctx);
             }
             reader.moveUp();

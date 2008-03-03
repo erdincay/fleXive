@@ -474,6 +474,15 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     }
 
     /**
+     * Get a Set of all events that have script mappings for this type
+     *
+     * @return Set of all events that have script mappings for this type
+     */
+    public Set<FxScriptEvent> getScriptEvents() {
+        return scriptMapping.keySet();
+    }
+
+    /**
      * Get the permissions set for this type bit coded
      *
      * @return bit coded permissions

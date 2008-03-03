@@ -63,7 +63,7 @@ public class LifeCycleInfoConverter implements Converter {
      */
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext ctx) {
         LifeCycleInfo li = (LifeCycleInfo) o;
-        writer.startNode("lci");
+        writer.startNode(ConversionEngine.KEY_LCI);
         try {
             final AccountEngine acc = EJBLookup.getAccountEngine();
             writer.addAttribute("cr", acc.load(li.getCreatorId()).getLoginName());

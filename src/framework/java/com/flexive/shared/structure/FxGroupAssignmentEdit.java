@@ -276,16 +276,6 @@ public class FxGroupAssignmentEdit extends FxGroupAssignment {
         this.parentGroupAssignment = parent;
     }
 
-
-    /**
-     * Get a (unmodifiable) list of all options set for this group assignment
-     *
-     * @return (unmodifiable) list of all options set for this group assignment
-     */
-    public List<FxStructureOption> getOptions() {
-        return FxStructureOption.getUnmodifieableOptions(options);
-    }
-
     /**
      * Set an option
      *
