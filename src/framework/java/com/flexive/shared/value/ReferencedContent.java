@@ -162,7 +162,7 @@ public class ReferencedContent extends FxPK implements Serializable {
      */
     public Step getStep() {
         if (!hasStep())
-            throw new FxApplicationException("ex.content.reference.content.missing").asRuntimeException();
+            throw new FxApplicationException("ex.content.reference.step.missing").asRuntimeException();
         return step;
     }
 
@@ -173,7 +173,7 @@ public class ReferencedContent extends FxPK implements Serializable {
      */
     public ACL getAcl() {
         if (!hasACL())
-            throw new FxApplicationException("ex.content.reference.content.missing").asRuntimeException();
+            throw new FxApplicationException("ex.content.reference.ACL.missing").asRuntimeException();
         return acl;
     }
 
