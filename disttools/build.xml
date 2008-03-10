@@ -5,7 +5,6 @@
 <project name="flexive-disttool" default="info" basedir=".">
     <property name="dist.basedir" value="${basedir}"/>
 
-    <property name="applications.dir" value="${basedir}/applications" description="Directory to add compiled flexive applications"/>
     <property name="template-component.dir" value="${basedir}/templates/template-component"/>
     <property name="template-project.dir" value="${basedir}/templates/template-project"/>
     <property name="ear.build.dir" value="${basedir}/build"/>
@@ -166,13 +165,7 @@ Base directory:      ${project.basedir}]]>
         <jar jarfile="${ear.build.dir}/apps/flexive-drop-resources.jar">
             <fileset file="${applications.dir}/drops.archives"/>
         </jar>
-
-        <!-- Create a flat view on the application WAR and JAR files -->
-        <copy todir="${ear.build.dir}/apps">
-            <fileset dir="${applications.dir}" includes="**/*.war" excludes="disabled/**"/>
-            <fileset dir="${applications.dir}" includes="**/*.jar" excludes="disabled/**"/>
-            <mapper type="flatten"/>
-        </copy>
+        <collectApplications todir="${ear.build.dir}/apps"/>
 
         <ear earfile="flexive.ear" appxml="${ear.build.dir}/application.xml">
             <zipfileset prefix="lib" dir="${dist.lib.dir}" includes="**/*" excludes="flexive-ejb.jar,flexive-tests.jar"/>

@@ -125,13 +125,18 @@ db.config.create
     </target>
 
     <target name="package.ear" unless="${fxProject}.ear.disabled">
+        <collectApplications todir="${build.dir}/apps"/>
+        <copy todir="${build.dir}/apps">
+            <fileset file="${build.dist.dir}/${package.war}"/>
+            <fileset file="${build.dist.dir}/${package.ejb}"/>
+        </copy>
         <!-- Create a standalone EAR -->
-        <applicationDescriptorBuilder dropDir="${build.dist.dir}"
+        <applicationDescriptorBuilder dropDir="${build.dir}/apps"
                                       destFile="${build.dir}/application.xml"
                                       srcFile="${dist.basedir}/META-INF/application.xml"/>
         <!-- Create drops.archives -->
         <jar jarfile="${build.dir}/flexive-drop-resources.jar">
-            <fileset file="${build.dist.dir}/drops.archives"/>
+            <fileset file="${build.dir}/apps/drops.archives"/>
         </jar>
         <ear earfile="${build.dist.dir}/${package.ear}" appxml="${build.dir}/application.xml">
             <zipfileset prefix="lib" dir="${dist.lib.dir}" includes="**/*" excludes="flexive-ejb.jar, flexive-tests.jar"/>
@@ -139,10 +144,12 @@ db.config.create
             <zipfileset prefix="lib" dir="${build.dist.dir}" includes="**/*.jar" excludes="${package.ejb}"/>
             <zipfileset prefix="lib" dir="${basedir}/lib" includes="**/*.jar"/>
             <zipfileset prefix="lib" dir="${build.dir}" includes="flexive-drop-resources.jar"/>
-            <fileset file="${dist.basedir}/*.war"/>
             <fileset file="${dist.lib.dir}/flexive-ejb.jar"/>
-            <fileset file="${build.dist.dir}/${package.war}"/>
-            <fileset file="${build.dist.dir}/${package.ejb}"/>
+
+            <!-- Include flexive applications. The WAR and EJB files have been registered in
+                applications.xml by the applicationDescriptorBuilder task -->
+            <fileset dir="${build.dir}/apps" includes="*.war,*-ejb.jar"/>
+            <zipfileset prefix="lib" dir="${build.dir}/apps" includes="*.jar" excludes="*-ejb.jar"/>
         </ear>
         <delete file="${build.dist.dir}/drops.archives"/>
     </target>

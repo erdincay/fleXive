@@ -56,10 +56,10 @@
                     <listitem>
                         <para>
                             Contains all &flexive; applications that should be included in the
-                            <filename>flexive.ear</filename>
+                            <filename>EAR</filename>
                             file. The standard distribution includes the &backendGui; in this directory.
-                            To remove an application from
-                            <filename>flexive.ear</filename>,
+                            To remove an application from the
+                            <filename>EAR</filename>,
                             simply remove it from this directory and rebuild the EAR file.
                         </para>
                     </listitem>

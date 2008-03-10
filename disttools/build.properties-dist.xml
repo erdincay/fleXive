@@ -10,6 +10,7 @@
     <property name="dist.dir" value="${dist.basedir}"/>
     <property name="dist.lib.dir" value="${dist.basedir}/lib"/>
     <property name="dist.extlib.dir" value="${dist.basedir}/extlib"/>
+    <property name="applications.dir" value="${dist.basedir}/applications" description="Directory to add compiled flexive applications"/>
 
     <property name="flexive.ant.jar" value="${dist.lib.dir}/flexive-ant.jar"/>
     <property name="mysql.src.dir" value="${dist.dir}/lib/resources/sql/mysql"/>

@@ -19,4 +19,15 @@ you must shutdown flexive before the update and then restart flexive.
     <target name="db.config.create" description="(Re-)Initialize the global division configuration database. The database connection properties are retrieved from database.properties.">
         <globalconfig-setup/>
     </target>
+
+    <macrodef name="collectApplications" description="Copies all flexive applications to a single directory.">
+        <attribute name="todir" description="The target directory."/>
+        <sequential>
+            <copy todir="@{todir}">
+                <fileset dir="${applications.dir}" includes="**/*.war" excludes="disabled/**"/>
+                <fileset dir="${applications.dir}" includes="**/*.jar" excludes="disabled/**"/>
+                <mapper type="flatten"/>
+            </copy>
+        </sequential>
+    </macrodef>
 </project>
