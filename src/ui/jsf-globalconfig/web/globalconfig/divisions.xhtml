@@ -10,40 +10,7 @@
 <head>
     <title>#{fxMessageBean['GlobalConfig.title']}</title>
     <fx:includes/>
-    <style type="text/css">
-        table.divisions {
-            border: 1px solid black;
-            border-collapse: collapse;
-        }
-
-        table.divisions thead th {
-            background-color: #ebf5cc;
-            padding: 0.5em;
-            border-bottom: 1px solid black;
-            border-right: 1px solid black;
-        }
-
-        table.divisions tbody td {
-            padding: 3px;
-        }
-
-        table.divisions tbody {
-            background-color: #f9fcf1;
-        }
-
-        table.divisions input[type=text] {
-            width: 95%;
-            border: 1px solid gray;
-        }
-
-        span.regex, span.datasource, span.database {
-            font-family: monospace;
-        }
-
-        fieldset {
-            margin-top: 25px;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="#{fxSystemBean.weblet['divisions_plugin/css/divisions.css']}"/>
 </head>
 
 <body>

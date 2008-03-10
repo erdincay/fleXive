@@ -65,11 +65,14 @@ public class DistPackageTest {
         for (String requiredEntry: new String[] {
                 // flexive JAR distribution
                 "/lib/flexive-ant.jar", "/lib/flexive-ejb.jar", "/lib/flexive-extractor.jar",
-                "/lib/flexive-plugin-jsf-core.jar", "/lib/flexive-shared.jar",
+                "/lib/flexive-shared.jar",
                 "/lib/flexive-sqlParser.jar", "/lib/flexive-ui-shared.jar",
 
                 // basic build files
-                "/build.xml", "/build.project.xml", "/build.component.xml", "/database.properties"
+                "/build.xml", "/build.project.xml", "/build.component.xml", "/database.properties",
+
+                // basic plugins
+                "/applications/flexive-plugin-jsf-core.jar",
         }) {
             Assert.assertTrue(entryNames.contains("flexive-dist" + requiredEntry));
         }
