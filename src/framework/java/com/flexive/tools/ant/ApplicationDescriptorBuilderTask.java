@@ -47,6 +47,8 @@ import java.util.List;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class ApplicationDescriptorBuilderTask extends Task {
+    /** Disabled drop directory name */
+    private static final String DIR_DISABLED = "disabled";
 
     private String dropDir = null;
     private String srcFile = null;
@@ -153,21 +155,10 @@ public class ApplicationDescriptorBuilderTask extends Task {
         StringBuilder sb = new StringBuilder(500).append("\n");
         StringBuilder dropNames = new StringBuilder(100);
         File drops = new File(dropDir);
-        if (!drops.exists() || !drops.isDirectory())
-            throw new BuildException("argument dropDir (" + dropDir + ") is not a valid directory!");
         List<File> jar = new ArrayList<File>(5);
         List<File> ejb = new ArrayList<File>(5);
         List<File> war = new ArrayList<File>(5);
-        for (File f : drops.listFiles()) {
-            if (f.getAbsolutePath().toLowerCase().endsWith("-ejb.jar"))
-                ejb.add(f);
-            else if (f.getAbsolutePath().toLowerCase().endsWith(".jar"))
-                jar.add(f);
-            else if (f.getAbsolutePath().toLowerCase().endsWith(".war"))
-                war.add(f);
-            else if (!f.getName().startsWith(".") && !f.getName().equals("drops.archives")) //ignore .svn, .cvs etc files
-                System.out.println("Warning: Unrecognized drop file: " + f.getName());
-        }
+        processDirectory(drops, jar, ejb, war);
         // Currently, JARs will be copied to the ear/lib directory and do not have to be registered
 /*
         for (File f : jar) {
@@ -193,5 +184,25 @@ public class ApplicationDescriptorBuilderTask extends Task {
         }
         storeFile(dropNames.toString(), new File(drops.getAbsolutePath() + File.separatorChar + "drops.archives"));
         return sb.toString();
+    }
+
+    private void processDirectory(File directory, List<File> jars, List<File> ejbs, List<File> wars) {
+        if (!directory.exists() || !directory.isDirectory())
+            throw new BuildException("argument dropDir (" + directory.getAbsolutePath() + ") is not a valid directory!");
+        if (DIR_DISABLED.equals(directory.getName())) {
+            return; // ignore
+        }
+        for (File f : directory.listFiles()) {
+            if (f.isDirectory())
+                processDirectory(f, jars, ejbs, wars);
+            else if (f.getAbsolutePath().toLowerCase().endsWith("-ejb.jar"))
+                ejbs.add(f);
+            else if (f.getAbsolutePath().toLowerCase().endsWith(".jar"))
+                jars.add(f);
+            else if (f.getAbsolutePath().toLowerCase().endsWith(".war"))
+                wars.add(f);
+            else if (!f.getName().startsWith(".") && !f.getName().equals("drops.archives")) //ignore .svn, .cvs etc files
+                System.out.println("Warning: Unrecognized drop file: " + f.getName());
+        }
     }
 }

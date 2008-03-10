@@ -13,6 +13,8 @@
 
     <property name="flexive.dist.dir" value="${flexive.basedir}/flexive-dist"/>
     <property name="flexive.dist.lib.dir" value="${flexive.dist.dir}/lib"/>
+    <property name="flexive.dist.apps.dir" value="${flexive.dist.dir}/applications"/>
+    <property name="flexive.dist.apps.disabled.dir" value="${flexive.dist.dir}/applications/disabled"/>
     <property name="flexive.dist.extlib.dir" value="${flexive.dist.dir}/extlib"/>
     <property name="flexive.dist.meta.dir" value="${flexive.dist.dir}/META-INF"/>
     <property name="flexive.dist.templates.dir" value="${flexive.dist.dir}/templates"/>

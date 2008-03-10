@@ -130,9 +130,8 @@ db.config.create
                                       destFile="${build.dir}/application.xml"
                                       srcFile="${dist.basedir}/META-INF/application.xml"/>
         <!-- Create drops.archives -->
-        <echo file="${build.dir}/drops.archives">${fxProject}</echo>
         <jar jarfile="${build.dir}/flexive-drop-resources.jar">
-            <fileset file="${build.dir}/drops.archives"/>
+            <fileset file="${build.dist.dir}/drops.archives"/>
         </jar>
         <ear earfile="${build.dist.dir}/${package.ear}" appxml="${build.dir}/application.xml">
             <zipfileset prefix="lib" dir="${dist.lib.dir}" includes="**/*" excludes="flexive-ejb.jar, flexive-tests.jar"/>
@@ -145,6 +144,7 @@ db.config.create
             <fileset file="${build.dist.dir}/${package.war}"/>
             <fileset file="${build.dist.dir}/${package.ejb}"/>
         </ear>
+        <delete file="${build.dist.dir}/drops.archives"/>
     </target>
 
     <target name="package" depends="compile,package.shared,package.ejb,package.war,package.ear"/>

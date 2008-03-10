@@ -39,5 +39,6 @@
     <!-- Task definitions -->
     <taskdef name="makeMessages" classname="com.flexive.tools.ant.MakeMessagesTask" classpath="${flexive.ant.jar}"/>
     <taskdef name="scriptIndexBuilder" classname="com.flexive.tools.ant.ScriptIndexBuilderTask" classpath="${flexive.ant.jar}"/>
+    <taskdef name="applicationDescriptorBuilder" classname="com.flexive.tools.ant.ApplicationDescriptorBuilderTask" classpath="${flexive.ant.jar}"/>
 
 </project>

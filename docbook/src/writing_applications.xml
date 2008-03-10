@@ -27,6 +27,7 @@
             <programlisting><![CDATA[.
 |-- META-INF/
 |-- build.xml
+|-- applications/
 |-- extlib/
 |-- lib/
 |-- templates/]]></programlisting>
@@ -48,6 +49,21 @@
                     </listitem>
                 </varlistentry>
 
+                <varlistentry>
+                    <term>
+                        <filename>applications</filename>
+                    </term>
+                    <listitem>
+                        <para>
+                            Contains all &flexive; applications that should be included in the
+                            <filename>flexive.ear</filename>
+                            file. The standard distribution includes the &backendGui; in this directory.
+                            To remove an application from
+                            <filename>flexive.ear</filename>,
+                            simply remove it from this directory and rebuild the EAR file.
+                        </para>
+                    </listitem>
+                </varlistentry>
                 <varlistentry>
                     <term>
                         <filename>lib</filename>
@@ -137,12 +153,19 @@ info:
   [flexive]     Creates a new flexive UI component directory.
   [flexive]
   [flexive] db.create
-  [flexive]         Create or reset the database schema of a flexive division.
-  [flexive]         Warning: if the schema already exists, it will be dropped (i.e. you will lose all data
-  [flexive]         stored in the schema).
+  [flexive]     Create or reset the database schema of a flexive division.
+  [flexive]     Warning: if the schema already exists, it will be dropped (i.e. you will lose all data
+  [flexive]     stored in the schema).
   [flexive]
   [flexive] db.config.create
-  [flexive]         Create or reset the global flexive configuration schema.
+  [flexive]     Create or reset the global flexive configuration schema.
+  [flexive]
+  [flexive] ear
+  [flexive]     Create a flexive.ear distribution including any flexive application stored in
+  [flexive]     flexive-dist/applications.
+  [flexive]
+  [flexive] glassfish.libs
+  [flexive]     Copies libraries needed for Glassfish compatibility to a directory
   [flexive]
     [input] Please enter a target name, or quit to exit:
 ]]></screen>
@@ -160,8 +183,8 @@ info:
             same directory where the &flexive; distribution is stored, i.e. in the current parent directory.
             The major reason for this is that the project references the distribution directory, i.e.
             it includes all the libraries from the distribution directory and does not use its own copies.
-            Thus new &flexive; projects use little disk space, and you have to maintain only one &flexive;
-            directory for all your projects.
+            Thus new &flexive; projects use little disk space, and you need only one &flexive;
+            distribution for all your projects.
         </para>
         <para>
             After confirming your selection, the root directory layout for flexive-test will be created.
