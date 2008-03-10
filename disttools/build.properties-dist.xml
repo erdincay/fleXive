@@ -35,6 +35,7 @@
     <path id="dist.path">
         <fileset dir="${dist.lib.dir}" includes="*"/>
         <fileset dir="${dist.extlib.dir}" includes="*"/>
+        <fileset dir="${applications.dir}" includes="**/*"/>
     </path>
 
     <!-- Task definitions -->

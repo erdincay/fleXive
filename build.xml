@@ -548,13 +548,20 @@
 		<copy file="${flexive.build.framework.jar.dir}/flexive-ant.jar" tofile="${flexive.dist.lib.dir}/flexive-ant.jar"/>
         <copy file="${flexive.build.framework.jar.dir}/flexive-shared.jar" tofile="${flexive.dist.lib.dir}/flexive-shared.jar"/>
         <copy todir="${flexive.dist.lib.dir}">
-            <fileset dir="${build.ui.jar.dir}" includes="*.jar" excludes="flexive-ui.jar"/>
+            <fileset dir="${build.ui.jar.dir}" includes="*.jar" excludes="flexive-ui.jar,flexive-plugin-*.jar"/>
         </copy>
         <copy file="${flexive.build.framework.jar.dir}/flexive-ejb.jar" tofile="${flexive.dist.lib.dir}/flexive-ejb.jar"/>
 
         <!-- Copy backend administration to applications folder -->
         <copy file="${flexive.base.build.dir}/ui/flexive.war" todir="${flexive.dist.apps.dir}/flexive-backend"/>
         <copy file="${build.ui.jar.dir}/flexive-ui.jar" todir="${flexive.dist.apps.dir}/flexive-backend"/>
+        <!-- Include standard plugin setup -->
+        <copy todir="${flexive.dist.apps.dir}">
+            <fileset dir="${build.ui.jar.dir}" includes="flexive-plugin-*.jar" excludes="flexive-plugin-jsf-testrunner.jar"/>
+        </copy>
+        <copy todir="${flexive.dist.apps.disabled.dir}">
+            <fileset dir="${build.ui.jar.dir}" includes="flexive-plugin-jsf-testrunner.jar"/>
+        </copy>
 
         <!-- Copy build environment to root dist folder -->
         <copy todir="${flexive.dist.dir}">
