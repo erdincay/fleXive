@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application
+  xmlns="http://geronimo.apache.org/xml/ns/j2ee/application-1.1"
+  xmlns:sys="http://geronimo.apache.org/xml/ns/deployment-1.1"
+  xmlns:security="http://geronimo.apache.org/xml/ns/security-1.1"
+  >
+    <sys:environment>
+        <sys:moduleId>
+            <sys:artifactId>fleXive</sys:artifactId>
+        </sys:moduleId>
+        <sys:hidden-classes/>
+        <sys:non-overridable-classes/>
+        <!-- force loading our libraries first to avoid version conflicts -->
+        <sys:inverse-classloading/>
+    </sys:environment>
+</application>

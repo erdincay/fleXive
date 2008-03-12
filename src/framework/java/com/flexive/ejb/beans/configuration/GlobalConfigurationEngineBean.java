@@ -43,9 +43,7 @@ import com.flexive.shared.configuration.DBVendor;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.exceptions.FxLoadException;
 import com.flexive.shared.exceptions.FxNoAccessException;
-import com.flexive.shared.exceptions.FxUpdateException;
 import com.flexive.shared.interfaces.GlobalConfigurationEngine;
 import com.flexive.shared.interfaces.GlobalConfigurationEngineLocal;
 import com.flexive.shared.mbeans.FxCacheMBean;
@@ -59,11 +57,9 @@ import javax.management.MBeanRegistrationException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import java.io.Serializable;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -314,13 +310,29 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
         boolean available = false;
         Connection con = null;
         try {
-            Context c = new InitialContext();
+            Context c = EJBLookup.getInitialContext();
             try {
                 con = ((DataSource) c.lookup(dataSource)).getConnection();
             } catch (NamingException e) {
-                //one more try in java: private namespace
-                con = ((DataSource) c.lookup("java:" + dataSource)).getConnection();
-                dataSource = "java:" + dataSource;
+                try {
+                    //try in java: private namespace
+                    con = ((DataSource) c.lookup("java:" + dataSource)).getConnection();
+                    dataSource = "java:" + dataSource;
+                } catch (NamingException e1) {
+                    //last exit: geronimo global scope
+                    String name = dataSource;
+                    if (name.startsWith("jdbc/"))
+                        name = name.substring(5);
+                    Object o = c.lookup("jca:/console.dbpool/" + name + "/JCAManagedConnectionFactory/" + name);
+                    try {
+                        con = ((DataSource) o.getClass().getMethod("$getResource").invoke(o)).getConnection();
+                    } catch (Exception ex) {
+                        String sErr = "Unable to retrieve Connection to [" + dataSource
+                                + "]: " + ex.getMessage();
+                        LOG.error(sErr);
+                        throw new SQLException(sErr);
+                    }
+                }
             }
             DatabaseMetaData dbmd = con.getMetaData();
             dbVendor = dbmd.getDatabaseProductName();
@@ -536,8 +548,8 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
     /**
      * Compute the hashed password for the given input.
      *
-     * @param userPassword  the password to be hashed
-     * @return  the hashed password for the given input.
+     * @param userPassword the password to be hashed
+     * @return the hashed password for the given input.
      */
     private String getHashedPassword(String userPassword) {
         return FxSharedUtils.hashPassword(31289, userPassword);

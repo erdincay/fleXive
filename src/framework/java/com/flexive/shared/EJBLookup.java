@@ -35,15 +35,13 @@ package com.flexive.shared;
 
 import com.flexive.shared.exceptions.FxLookupException;
 import com.flexive.shared.interfaces.*;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.naming.NameClassPair;
-import javax.naming.NamingEnumeration;
-import javax.transaction.TransactionManager;
 import javax.ejb.SessionContext;
+import javax.naming.*;
+import javax.transaction.TransactionManager;
 import java.util.Hashtable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -66,6 +64,8 @@ public class EJBLookup {
         COMPLEXNAME,
         SIMPLENAME_LOCAL,
         SIMPLENAME_REMOTE,
+        GERONIMO_LOCAL,
+        GERONIMO_REMOTE,
         UNKNOWN
     }
 
@@ -339,7 +339,7 @@ public class EJBLookup {
     /**
      * Get a reference of the current EJB session context.
      *
-     * @return  the EJB session context
+     * @return the EJB session context
      */
     public static SessionContext getSessionContext() {
         try {
@@ -359,7 +359,7 @@ public class EJBLookup {
      * @param <T>         EJB interface type
      * @return a reference to the given EJB
      */
-    protected static <T> T getInterface(Class<T> type, String appName, Hashtable environment) {
+    protected static <T> T getInterface(Class<T> type, String appName, Hashtable<String, String> environment) {
         // Try to obtain interface from the lookup cache
         Object ointerface = ejbCache.get(type.getName());
         if (ointerface != null) {
@@ -368,19 +368,20 @@ public class EJBLookup {
 
         // Cache miss: obtain interface and store it in the cache
         synchronized (EJBLookup.class) {
-            String name = "<unknown>";
+            String name;
             try {
-                if (environment == null)
-                    environment = new Hashtable();
-                InitialContext ctx = new InitialContext(environment);
                 if (used_strategy == null) {
-                    appName = discoverStrategy(appName, ctx, type);
+                    appName = discoverStrategy(appName, environment, type);
                     if (used_strategy != null) {
                         LOG.info("Working lookup strategy: " + used_strategy);
                     } else {
                         LOG.error("No working lookup strategy found! Possibly because of pending redeployment.");
                     }
                 }
+                if (environment == null)
+                    environment = new Hashtable<String, String>();
+                prepareEnvironment(used_strategy, environment);
+                InitialContext ctx = new InitialContext(environment);
                 name = buildName(appName, type);
                 ointerface = ctx.lookup(name);
                 ejbCache.putIfAbsent(type.getName(), ointerface);
@@ -395,17 +396,22 @@ public class EJBLookup {
     /**
      * Discover which lookup strategy works for the given class
      *
-     * @param appName EJB application name
-     * @param ctx     InitialContext
-     * @param type    the class
+     * @param appName     EJB application name
+     * @param environment properties passed to the initial context
+     * @param type        the class
      * @return appName (may have changed)
      */
-    private static <T> String discoverStrategy(String appName, InitialContext ctx, Class<T> type) {
+    private static <T> String discoverStrategy(String appName, Hashtable<String, String> environment, Class<T> type) {
+        InitialContext ctx = null;
+        if (environment == null)
+            environment = new Hashtable<String, String>();
         for (STRATEGY strat : STRATEGY.values()) {
             if (strat == STRATEGY.UNKNOWN)
                 continue;
             used_strategy = strat;
             try {
+                prepareEnvironment(strat, environment);
+                ctx = new InitialContext(environment);
                 ctx.lookup(buildName(appName, type));
                 return appName;
             } catch (Exception e) {
@@ -415,27 +421,29 @@ public class EJBLookup {
         //houston, we have a problem - try locale and remote with appname again iterating through all "root" ctx bindings
         //this can happen if the ear is not named flexive.ear
         try {
+            if (ctx == null)
+                ctx = new InitialContext(environment);
             NamingEnumeration<NameClassPair> ncpe = ctx.list("");
-            while( ncpe.hasMore() ) {
+            while (ncpe.hasMore()) {
                 NameClassPair ncp = ncpe.next();
-                if( ncp.getClassName().endsWith("NamingContext") ) {
+                if (ncp.getClassName().endsWith("NamingContext")) {
                     appName = ncp.getName();
                     try {
                         used_strategy = STRATEGY.APP_SIMPLENAME_LOCAL;
                         ctx.lookup(buildName(ncp.getName(), type));
                         APPNAME = ncp.getName();
-                        LOG.info("Using application name ["+appName+"] for lookups!");
+                        LOG.info("Using application name [" + appName + "] for lookups!");
                         return APPNAME;
-                    } catch( Exception e) {
+                    } catch (Exception e) {
                         //ignore and try remote
                     }
                     try {
                         used_strategy = STRATEGY.APP_SIMPLENAME_REMOTE;
                         ctx.lookup(buildName(ncp.getName(), type));
                         APPNAME = ncp.getName();
-                        LOG.info("Using application name ["+appName+"] for lookups!");
+                        LOG.info("Using application name [" + appName + "] for lookups!");
                         return APPNAME;
-                    } catch( Exception e) {
+                    } catch (Exception e) {
                         //ignore and try remote
                     }
                 }
@@ -446,6 +454,39 @@ public class EJBLookup {
         }
         used_strategy = null;
         return appName;
+    }
+
+    /**
+     * Adjust the environment with strategy/application server specific settings
+     *
+     * @param strat       strategy
+     * @param environment environment
+     */
+    private static void prepareEnvironment(STRATEGY strat, Hashtable<String, String> environment) {
+        if (strat == STRATEGY.GERONIMO_LOCAL || strat == STRATEGY.GERONIMO_REMOTE) {
+            environment.put("java.naming.factory.initial", strat == STRATEGY.GERONIMO_LOCAL
+                    ? "org.apache.openejb.client.LocalInitialContextFactory"
+                    : "org.apache.openejb.client.RemoteInitialContextFactory");
+            if (!StringUtils.isEmpty(System.getProperty("java.naming.provider.url")))
+                environment.put("java.naming.provider.url", System.getProperty("java.naming.provider.url"));
+            else
+                environment.put("java.naming.provider.url", "localhost:4201");
+        }
+    }
+
+    /**
+     * Adjust the environment with strategy/application server specific settings
+     *
+     * @return Context
+     * @throws NamingException on errors
+     */
+    public static Context getInitialContext() throws NamingException {
+        if (used_strategy == STRATEGY.GERONIMO_LOCAL || used_strategy == STRATEGY.GERONIMO_REMOTE) {
+            Hashtable<String, String> env = new Hashtable<String, String>(2);
+            EJBLookup.prepareEnvironment(used_strategy, env);
+            return new InitialContext(env);
+        } else
+            return new InitialContext();
     }
 
     /**
@@ -469,6 +510,10 @@ public class EJBLookup {
                 return type.getSimpleName() + "/remote";
             case JAVA_COMP_ENV:
                 return "java:comp/env/" + type.getSimpleName();
+            case GERONIMO_LOCAL:
+                return "/" + type.getSimpleName() + "Local";
+            case GERONIMO_REMOTE:
+                return "/" + type.getSimpleName() + "Remote";
             default:
                 throw new FxLookupException("Unsupported/unknown lookup strategy " + used_strategy + "!").asRuntimeException();
         }

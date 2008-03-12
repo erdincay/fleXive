@@ -144,6 +144,7 @@ db.config.create
             <zipfileset prefix="lib" dir="${build.dist.dir}" includes="**/*.jar" excludes="${package.ejb}"/>
             <zipfileset prefix="lib" dir="${basedir}/lib" includes="**/*.jar"/>
             <zipfileset prefix="lib" dir="${build.dir}" includes="flexive-drop-resources.jar"/>
+            <zipfileset prefix="META-INF" file="${dist.basedir}/META-INF/geronimo-application.xml"/>
             <fileset file="${dist.lib.dir}/flexive-ejb.jar"/>
 
             <!-- Include flexive applications. The WAR and EJB files have been registered in

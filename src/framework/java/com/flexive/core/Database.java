@@ -47,10 +47,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import java.sql.*;
+import java.sql;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -158,7 +157,7 @@ public final class Database {
             // Try to obtain a connection
             String finalDsName = null;
             try {
-                Context c = new InitialContext();
+                Context c = EJBLookup.getInitialContext();
                 if (divisionId == DivisionData.DIVISION_GLOBAL) {
                     // Special case: global config database
                     finalDsName = DS_GLOBAL_CONFIG;
@@ -168,7 +167,23 @@ public final class Database {
                     finalDsName = globalConfiguration.getDivisionData(divisionId).getDataSource();
                 }
                 LOG.info("Looking up datasource for division " + divisionId + ": " + finalDsName);
-                DataSource dataSource = (DataSource) c.lookup(finalDsName);
+                DataSource dataSource;
+                try {
+                    dataSource = (DataSource) c.lookup(finalDsName);
+                } catch (NamingException e) {
+                    String name = finalDsName;
+                    if( name.startsWith("jdbc/"))
+                        name = name.substring(5);
+                    Object o = c.lookup("jca:/console.dbpool/"+name+"/JCAManagedConnectionFactory/"+name);
+                    try {
+                        dataSource = (DataSource) o.getClass().getMethod("$getResource").invoke(o);
+                    } catch (Exception ex) {
+                        String sErr = "Unable to retrieve Connection to [" + finalDsName
+                                + "]: " + ex.getMessage();
+                        LOG.error(sErr);
+                        throw new SQLException(sErr);
+                    }
+                }
                 if (divisionId == DivisionData.DIVISION_TEST) {
                     testDataSource = dataSource;
                     return testDataSource;
@@ -238,12 +253,25 @@ public final class Database {
             return globalDataSource;
         }
         try {
-            Context c = new InitialContext();
+            Context c = EJBLookup.getInitialContext();
             try {
                 globalDataSource = (DataSource) c.lookup(DS_GLOBAL_CONFIG);
             } catch (NamingException e) {
                 //try once more in local java namespace
-                globalDataSource = (DataSource) c.lookup("java:" + DS_GLOBAL_CONFIG);
+                try {
+                    globalDataSource = (DataSource) c.lookup("java:" + DS_GLOBAL_CONFIG);
+                } catch (NamingException e1) {
+                    //try the wierd geronimo logic as last resort
+                    Object o = c.lookup("jca:/console.dbpool/flexiveConfiguration/JCAManagedConnectionFactory/flexiveConfiguration");
+                    try {
+                        globalDataSource = (DataSource) o.getClass().getMethod("$getResource").invoke(o);
+                    } catch (Exception ex) {
+                        String sErr = "Unable to retrieve Connection to [" + DS_GLOBAL_CONFIG
+                                + "]: " + ex.getMessage();
+                        LOG.error(sErr);
+                        throw new SQLException(sErr);
+                    }
+                }
             }
             return globalDataSource;
         } catch (NamingException exc) {
@@ -536,7 +564,7 @@ public final class Database {
                 for (long lang : string.getTranslatedLanguages()) {
                     curr = string.getTranslation(lang);
                     if (curr != null && curr.trim().length() > 0) {
-                        ps.setInt(2, (int)lang);
+                        ps.setInt(2, (int) lang);
                         ps.setBoolean(3, lang == string.getDefaultLanguage());
                         ps.setString(4, curr);
                         ps.executeUpdate();
@@ -597,7 +625,7 @@ public final class Database {
 
                 for (long lang : langs) {
                     ps.setLong(1, id);
-                    ps.setInt(2, (int)lang);
+                    ps.setInt(2, (int) lang);
                     for (int i = 0; i < string.length; i++) {
                         if (FxString.EMPTY.equals(string[i].getTranslation(lang)))
                             ps.setNull(3 + i, java.sql.Types.VARCHAR);

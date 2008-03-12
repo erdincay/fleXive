@@ -57,7 +57,7 @@ public class FxContentVersionInfo implements Serializable {
     private Map<Integer, VersionData> versions;
     private VersionSelector versionSelector;
 
-    public static final class VersionData {
+    public static final class VersionData implements Serializable {
         private LifeCycleInfo lifeCycleInfo;
         private long step;
 

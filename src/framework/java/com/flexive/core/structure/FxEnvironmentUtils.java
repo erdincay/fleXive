@@ -43,10 +43,8 @@ import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.interfaces.GlobalConfigurationEngine;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jboss.cache.CacheException;
 
 import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -79,11 +77,11 @@ final class FxEnvironmentUtils {
     /**
      * Get an object from the cache
      *
-     * @param divisionId
-     * @param path
-     * @param key
+     * @param divisionId division
+     * @param path       path
+     * @param key        key
      * @return requested object or <code>null</code> if not found
-     * @throws CacheException on errors
+     * @throws FxCacheException on errors
      */
     protected static Object cacheGet(int divisionId, String path, Object key) throws FxCacheException {
         return CacheAdmin.getInstance().get(divisionEncodePath(divisionId, path), key);
@@ -92,11 +90,11 @@ final class FxEnvironmentUtils {
     /**
      * Put an object into the cache
      *
-     * @param divisionId
-     * @param path
-     * @param key
-     * @param value
-     * @throws FxCacheException
+     * @param divisionId division
+     * @param path       path
+     * @param key        key
+     * @param value      value
+     * @throws FxCacheException on errors
      */
     protected static void cachePut(int divisionId, String path, Object key, Object value) throws FxCacheException {
         if (CacheAdmin.ENVIRONMENT_RUNTIME.equals(key)) {
@@ -108,9 +106,9 @@ final class FxEnvironmentUtils {
     /**
      * Remove a path from the cache
      *
-     * @param divisionId
-     * @param path
-     * @throws FxCacheException
+     * @param divisionId division
+     * @param path       path
+     * @throws FxCacheException on errors
      */
     protected static void cacheRemove(int divisionId, String path) throws FxCacheException {
         CacheAdmin.getInstance().remove(divisionEncodePath(divisionId, path));
@@ -143,7 +141,7 @@ final class FxEnvironmentUtils {
         // Try to obtain a connection
         String finalDsName = null;
         try {
-            Context c = new InitialContext();
+            Context c = EJBLookup.getInitialContext();
             if (divisionId == DivisionData.DIVISION_GLOBAL) {
                 // Special case: global config database
                 finalDsName = DatabaseConst.DS_GLOBAL_CONFIG;
@@ -152,7 +150,22 @@ final class FxEnvironmentUtils {
                 GlobalConfigurationEngine globalConfiguration = EJBLookup.getGlobalConfigurationEngine();
                 finalDsName = globalConfiguration.getDivisionData(divisionId).getDataSource();
             }
-            return ((DataSource) c.lookup(finalDsName)).getConnection();
+            try {
+                return ((DataSource) c.lookup(finalDsName)).getConnection();
+            } catch (NamingException e) {
+                //last exit: geronimo global scope
+                String name = finalDsName;
+                if (name.startsWith("jdbc/"))
+                    name = name.substring(5);
+                Object o = c.lookup("jca:/console.dbpool/" + name + "/JCAManagedConnectionFactory/" + name);
+                try {
+                    return ((DataSource) o.getClass().getMethod("$getResource").invoke(o)).getConnection();
+                } catch (Exception e1) {
+                    String sErr = "Failed to load datasource: " + e1.getMessage();
+                    LOG.error(sErr);
+                    throw new SQLException(sErr);
+                }
+            }
         } catch (NamingException exc) {
             String sErr = "Naming Exception, unable to retrieve Connection to [" + finalDsName +
                     "]: " + exc.getMessage();
@@ -163,7 +176,7 @@ final class FxEnvironmentUtils {
             LOG.error(sErr);
             throw new SQLException(sErr);
         } catch (FxApplicationException exc) {
-            String sErr = "Failed to load datasource configuration: " + exc.getMessage();
+            String sErr = "Failed to load datasource: " + exc.getMessage();
             LOG.error(sErr);
             throw new SQLException(sErr);
         }
