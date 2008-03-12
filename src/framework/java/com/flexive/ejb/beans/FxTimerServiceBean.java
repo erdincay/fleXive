@@ -46,8 +46,6 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.annotation.Resource;
 import javax.ejb.*;
-import javax.naming.InitialContext;
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.util.Collection;
 
@@ -106,7 +104,7 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
                 for (Timer t : (Collection<Timer>) ctx.getTimerService().getTimers()) {
                     if (t.getInfo().equals(TIMER_SIGNATURE)) {
                         t.cancel();
-                        LOG.info(TIMER_SIGNATURE+ " canceled!");
+                        LOG.info(TIMER_SIGNATURE + " canceled!");
                     }
                 }
             }
@@ -148,7 +146,7 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
                     continue;
                 Connection con = null;
                 try {
-                    con = ((DataSource) new InitialContext().lookup(dd.getDataSource())).getConnection();
+                    con = Database.getDbConnection(dd.getId());
                     for (TypeStorageMode mode : TypeStorageMode.values()) {
                         if (!mode.isSupported())
                             continue;

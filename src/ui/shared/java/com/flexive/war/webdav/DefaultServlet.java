@@ -16,9 +16,9 @@ package com.flexive.war.webdav;
  * limitations under the License.
  */
 
+import com.flexive.shared.EJBLookup;
 import com.flexive.war.webdav.catalina.*;
 
-import javax.naming.InitialContext;
 import javax.naming.NameClassPair;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -264,9 +264,7 @@ public class DefaultServlet extends HttpServlet {
 
         if (resources == null) {
             try {
-                resources =
-                        (ProxyDirContext) new InitialContext()
-                                .lookup(RESOURCES_JNDI_NAME);
+                resources = (ProxyDirContext) EJBLookup.getInitialContext().lookup(RESOURCES_JNDI_NAME);
             } catch (NamingException e) {
                 // Failed
             } catch (ClassCastException e) {
