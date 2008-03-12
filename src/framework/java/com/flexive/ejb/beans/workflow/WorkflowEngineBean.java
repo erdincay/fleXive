@@ -40,11 +40,11 @@ import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.content.FxPermissionUtils;
-import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.workflow.Route;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.Workflow;
@@ -58,7 +58,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -75,12 +77,18 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
 
     private static final transient Log LOG = LogFactory.getLog(WorkflowEngineBean.class);
 
-    @Resource private SessionContext ctx;
-    @EJB private StepEngineLocal stepEngine;
-    @EJB private RouteEngineLocal routeEngine;
-    @EJB private SequencerEngineLocal seq;
+    @Resource
+    private SessionContext ctx;
+    @EJB
+    private StepEngineLocal stepEngine;
+    @EJB
+    private RouteEngineLocal routeEngine;
+    @EJB
+    private SequencerEngineLocal seq;
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void remove(long workflowId) throws FxApplicationException {
         UserTicket ticket = FxContext.get().getTicket();
@@ -107,16 +115,16 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
             }
             success = true;
         } catch (SQLException exc) {
-            if( Database.isForeignKeyViolation(exc))
+            if (Database.isForeignKeyViolation(exc))
                 throw new FxRemoveException("ex.workflow.delete.inUse",
                         CacheAdmin.getEnvironment().getWorkflow(workflowId).getName(), workflowId);
             throw new FxRemoveException(LOG, "ex.workflow.delete", exc, workflowId, exc.getMessage());
         } finally {
-        	if (!success) {
-        		ctx.setRollbackOnly();
-        	} else {
+            if (!success) {
+                ctx.setRollbackOnly();
+            } else {
                 StructureLoader.reloadWorkflows(FxContext.get().getDivisionId());
-        	}
+            }
             Database.closeObjects(WorkflowEngineBean.class, con, stmt);
         }
     }
@@ -148,7 +156,9 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void update(Workflow workflow)
             throws FxApplicationException {
@@ -158,6 +168,60 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
         // Permission checks
         FxPermissionUtils.checkRole(ticket, Role.WorkflowManagement);
 
+        Workflow org = CacheAdmin.getEnvironment().getWorkflow(workflow.getId());
+
+        List<Step> dups = new ArrayList<Step>(2); //duplicates (removed and re-added)
+        for (Step check : workflow.getSteps()) {
+            for (Step stp : org.getSteps())
+                if (check.getId() < 0 && stp.getStepDefinitionId() == check.getStepDefinitionId())
+                    dups.add(check);
+        }
+        if (dups.size() > 0) {
+            //sync steps
+            workflow.getSteps().removeAll(dups);
+            for (Step stp : org.getSteps())
+                for (Step dp : dups)
+                    if (dp.getStepDefinitionId() == stp.getStepDefinitionId()) {
+                        workflow.getSteps().add(stp);
+                        break;
+                    }
+            //sync routes
+            boolean changes = true;
+            while (changes) {
+                changes = false;
+                for (Route r : workflow.getRoutes()) {
+                    for (Step s : dups) {
+                        if (r.getFromStepId() == s.getId()) {
+                            long _from = r.getFromStepId();
+                            for (Step stp : org.getSteps())
+                                if (stp.getStepDefinitionId() == s.getStepDefinitionId()) {
+                                    _from = stp.getId();
+                                    break;
+                                }
+                            Route nr = new Route(r.getId(), r.getGroupId(), _from, r.getToStepId());
+                            workflow.getRoutes().remove(r);
+                            workflow.getRoutes().add(nr);
+                            changes = true;
+                            break;
+                        } else if (r.getToStepId() == s.getId()) {
+                            long _to = r.getToStepId();
+                            for (Step stp : org.getSteps())
+                                if (stp.getStepDefinitionId() == s.getStepDefinitionId()) {
+                                    _to = stp.getId();
+                                    break;
+                                }
+                            Route nr = new Route(r.getId(), r.getGroupId(), r.getFromStepId(), _to);
+                            workflow.getRoutes().remove(r);
+                            workflow.getRoutes().add(nr);
+                            changes = true;
+                            break;
+                        }
+                        if (changes) break;
+                    }
+                    if (changes) break;
+                }
+            }
+        }
         Connection con = null;
         PreparedStatement stmt = null;
         String sql = "UPDATE " + TBL_WORKFLOW + " SET NAME=?, DESCRIPTION=? WHERE ID=?";
@@ -180,10 +244,29 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
 
             FxEnvironment fxEnvironment = CacheAdmin.getEnvironment();
             // Remove steps?
+            List<Step> remove = new ArrayList<Step>(2);
             for (Step step : fxEnvironment.getStepsByWorkflow(workflow.getId())) {
                 if (!workflow.getSteps().contains(step)) {
                     // remove step
-                    stepEngine.removeStep(step.getId());
+                    remove.add(step);
+                }
+            }
+
+            if (remove.size() > 0) {
+                int tries = remove.size() * 2;
+                while (remove.size() > 0 && --tries > 0) {
+                    for (Step step : remove) {
+                        try {
+                            //remove affected routes as well
+                            for (Route route : org.getRoutes())
+                                if (route.getFromStepId() == step.getId() || route.getToStepId() == step.getId())
+                                    routeEngine.remove(route.getId());
+
+                            stepEngine.removeStep(step.getId());
+                        } catch (FxApplicationException e) {
+                            //ignore since rmeove order matters
+                        }
+                    }
                 }
             }
 
@@ -196,26 +279,34 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
                     createdSteps.put(step.getId(), new Step(newStepId, step));
                 } else {
                     //ACL changed?
-                    if(fxEnvironment.getStep(step.getId()).getAclId() != step.getAclId())
+                    if (fxEnvironment.getStep(step.getId()).getAclId() != step.getAclId())
                         stepEngine.updateStep(step.getId(), step.getAclId());
                 }
             }
 
-
             // Remove routes?
-            Route[] dbRoutes = routeEngine.loadRoutes(workflow.getId());
-            for (Route route : dbRoutes) {
-                if (!workflow.getRoutes().contains(route)) {
-                    // remove route
-                    routeEngine.remove(route.getId());
+            boolean found;
+            for (Route route : org.getRoutes()) {
+                found = false;
+                for( Route check: workflow.getRoutes() ) {
+                    if( check.getGroupId() == route.getGroupId() &&
+                            check.getFromStepId() == route.getFromStepId() &&
+                            check.getToStepId() == route.getToStepId() ) {
+                        workflow.getRoutes().remove(check); //dont add this one again
+                        found = true;
+                        break;
+                    }
                 }
+                // remove route if not found
+                if (!found)
+                    routeEngine.remove(route.getId());
             }
 
             // add routes
             for (Route route : workflow.getRoutes()) {
                 if (route.getId() < 0) {
-                	long fromStepId = resolveTemporaryStep(createdSteps, route.getFromStepId());
-                	long toStepId = resolveTemporaryStep(createdSteps, route.getToStepId());
+                    long fromStepId = resolveTemporaryStep(createdSteps, route.getFromStepId());
+                    long toStepId = resolveTemporaryStep(createdSteps, route.getToStepId());
                     routeEngine.create(fromStepId, toStepId, route.getGroupId());
                 }
             }
@@ -225,10 +316,10 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
             if (Database.isUniqueConstraintViolation(exc)) {
                 throw new FxEntryExistsException("ex.workflow.exists");
             } else {
-                throw new FxUpdateException(LOG, "ex.workflow.update", exc, workflow.getName(), exc.getMessage());
+                throw new FxUpdateException(LOG, exc, "ex.workflow.update", workflow.getName(), exc.getMessage());
             }
-        } catch (Exception exc) { 
-            throw new FxUpdateException(LOG, "ex.workflow.update", exc, workflow.getName(), exc.getMessage());
+        } catch (Exception exc) {
+            throw new FxUpdateException(LOG, exc, "ex.workflow.update", workflow.getName(), exc.getMessage());
         } finally {
             if (!success) {
                 ctx.setRollbackOnly();
@@ -244,25 +335,27 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
      * If a step is added, a temporary negative index is used for identifying
      * it in new routes. The createdSteps lookup table is used for mapping
      * these internal negative IDs to the database-generated, persisted step IDs.
-     * 
-     * @param createdSteps	mapping between internal step IDs and the created steps
-     * @param stepId		the step ID to be mapped (may be negative)
-     * @return			the (positive) step ID that actually exists in the database
-     * @throws FxInvalidParameterException	if the step could not be mapped
+     *
+     * @param createdSteps mapping between internal step IDs and the created steps
+     * @param stepId       the step ID to be mapped (may be negative)
+     * @return the (positive) step ID that actually exists in the database
+     * @throws FxInvalidParameterException if the step could not be mapped
      */
-	private long resolveTemporaryStep(Map<Long, Step> createdSteps, long stepId) 
-	throws FxInvalidParameterException {
-		if (stepId < 0) {
-			if (!createdSteps.containsKey(stepId)) {
-				throw new FxInvalidParameterException("ROUTES", "ex.workflow.route.referencedStep", stepId);
-			}
-			return createdSteps.get(stepId).getId();
-		} else {
-			return stepId;
-		}
-	}
+    private long resolveTemporaryStep(Map<Long, Step> createdSteps, long stepId)
+            throws FxInvalidParameterException {
+        if (stepId < 0) {
+            if (!createdSteps.containsKey(stepId)) {
+                throw new FxInvalidParameterException("ROUTES", "ex.workflow.route.referencedStep", stepId);
+            }
+            return createdSteps.get(stepId).getId();
+        } else {
+            return stepId;
+        }
+    }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long create(Workflow workflow) throws FxApplicationException {
         UserTicket ticket = FxContext.get().getTicket();
@@ -290,18 +383,18 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
             stmt.setString(2, workflow.getName());
             stmt.setString(3, StringUtils.defaultString(workflow.getDescription()));
             stmt.executeUpdate();
-            
+
             // create step(s)
             final Map<Long, Step> createdSteps = new HashMap<Long, Step>();
-            for (Step step: workflow.getSteps()) {
+            for (Step step : workflow.getSteps()) {
                 final Step wfstep = new Step(-1, step.getStepDefinitionId(), id, step.getAclId());
                 final long newStepId = stepEngine.createStep(wfstep);
                 createdSteps.put(step.getId(), new Step(newStepId, wfstep));
             }
 
             // create route(s)
-            for (Route route: workflow.getRoutes()) {
-            	routeEngine.create(
+            for (Route route : workflow.getRoutes()) {
+                routeEngine.create(
                         resolveTemporaryStep(createdSteps, route.getFromStepId()),
                         resolveTemporaryStep(createdSteps, route.getToStepId()),
                         route.getGroupId()

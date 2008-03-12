@@ -5,6 +5,7 @@
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:t="http://myfaces.apache.org/tomahawk"
       xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
       xmlns:adm="http://www.flexive.com/jsf/admin"
       xmlns:fx="http://www.flexive.com/jsf/core">
 <body>
@@ -18,8 +19,17 @@
     </ui:define>
 
     <ui:define name="body">
-        <h:form id="frm">
-        	<h:inputHidden value="#{workflowBean.workflow.id}"/>
+        <c:set var="wfBtnStyle" value="border:0;margin-left:3px;" />
+        <a4j:form id="frm">
+            <t:saveState value="#{workflowBean.steps}"/>
+            <t:saveState value="#{workflowBean.routes}"/>
+            <t:saveState value="#{workflowBean.workflow}"/>
+
+            <t:saveState value="#{workflowBean.fromStepId}"/>
+            <t:saveState value="#{workflowBean.toStepId}"/>
+            <t:saveState value="#{workflowBean.userGroup}"/>
+
+            <h:inputHidden value="#{workflowBean.workflow.id}"/>
         	
             <adm:tab label="#{fxMessageBean['Workflow.tabtitle.edit,#{workflowBean.workflow.name}']}" active="true" id="tab1"/>
 
@@ -32,35 +42,55 @@
 					<h:inputText id="workflowDescription" value="#{workflowBean.workflow.description}" required="false"/>
 				</fx:formRow>
 			</fx:fieldSet>
-			
-			<fx:fieldSet legend="#{fxMessageBean['Workflow.group.steps']}">
 
-            <c:if test="#{!(empty workflowBean.stepsForAdding)}">
-                <table width="500" style="margin-top:10px;">
-                    <!-- insert row -->
-                    <tr>
-                        <td>
-                            <h:selectOneListbox id="workflowStep" value="#{workflowBean.stepDefinitionId}" size="1">
-                                <f:selectItems value="#{workflowBean.stepsForAdding}" />
-                            </h:selectOneListbox>
-                        </td>
-                        <td> </td>
-                        <td>
-                            <h:selectOneListbox id="stepAcl" value="#{workflowBean.stepACL}" size="1">
-                                <f:selectItems value="#{fxSelectBean.workflowACLs}"/>
-                            </h:selectOneListbox>
-                        </td>
-                        <td>
-                            <adm:commandButton labelKey="Workflow.button.step.add" location="content"
-                                icon="new" bean="#{workflowBean}" action="addStep" id="addStepButton"/>
-                        </td>
-                    </tr>
-                </table>
-            </c:if>
+			<fx:fieldSet legend="#{fxMessageBean['Workflow.group.steps']}" width="500">
 
+                <a4j:outputPanel id="stepAdd">
+                    <ui:fragment rendered="#{!(empty workflowBean.stepsForAdding)}">
+                    <table width="500" style="margin-top:10px;">
+                        <thead>
+                            <tr>
+                                <td>
+                                    #{fxMessageBean["Workflow.field.step.label"]}
+                                </td>
+                                <td colspan="2">
+                                    #{fxMessageBean["Workflow.field.step.acl"]}
+                                </td>
+                            </tr>
+                        </thead>
+                        <tr class="tblRowEven">
+                            <td>
+                                <h:selectOneListbox id="workflowStep" value="#{workflowBean.stepDefinitionId}"
+                                                    size="1">
+                                    <f:selectItems value="#{workflowBean.stepsForAdding}"/>
+                                </h:selectOneListbox>
+                            </td>
+                            <td>
+                                <h:selectOneListbox id="stepAcl" value="#{workflowBean.stepACL}" size="1">
+                                    <f:selectItems value="#{fxSelectBean.workflowACLs}"/>
+                                </h:selectOneListbox>
+                            </td>
+                            <td width="100%">
+                                <a4j:commandLink reRender="stepAdd, stepList, routeAdd"
+                                                 actionListener="#{workflowBean.addStep}"
+                                                 onmouseover='ignoreEvent(event)'
+                                                 eventsQueue="stepQ"
+                                        >
+                                    <t:graphicImage alt="add"
+                                                    url="/adm/images/commandButton/new.png"
+                                                    style="#{wfBtnStyle}"
+                                            />
+                                </a4j:commandLink>
+                            </td>
+                        </tr>
+                    </table>
+                </ui:fragment>
+                </a4j:outputPanel>
+
+            <a4j:outputPanel id="stepList">
 			<t:dataTable value="#{workflowBean.steps}" var="step" rowIndexVar="rowIndex"
 				preserveDataModel="true" headerClass="tblHeader" rowClasses="tblRowEven, tblRowOdd" width="500">
-				<h:column>
+                <h:column>
 					<f:facet name="header">
 						#{fxMessageBean["Workflow.field.step.label"]}
 					</f:facet>
@@ -93,18 +123,79 @@
                     <f:facet name="header">
                         #{fxMessageBean['Workflow.field.step.actions']}
                     </f:facet>
-                    <adm:commandIcon labelKey="Workflow.button.step.remove" location="content"
-						icon="delete" bean="#{workflowBean}" action="removeStep" id="stepDeleteButton#{rowIndex}">
-						<f:setPropertyActionListener target="#{workflowBean.stepIndex}" value="#{rowIndex}"/>
-					</adm:commandIcon>
-				</h:column>
-			</t:dataTable>
-			
-			</fx:fieldSet>
+                    <a4j:commandLink reRender="stepAdd, stepList, routeAdd"
+                                     actionListener="#{workflowBean.removeStep}"
+                                     onmouseover='ignoreEvent(event)'
+                                     eventsQueue="stepQ"
+                                     rendered="#{workflowBean.canRemoveStep[step]}"
+                            >
+                        <f:setPropertyActionListener target="#{workflowBean.stepIndex}" value="#{rowIndex}"/>
+                        <t:graphicImage alt="delete"
+                                        url="/adm/images/commandButton/delete.png"
+                                        style="#{wfBtnStyle}"
+                                />
+                    </a4j:commandLink>
+                </h:column>
+            </t:dataTable>
 
-			<fx:fieldSet legend="#{fxMessageBean['Workflow.group.routes']}">
+            </a4j:outputPanel>
 
-			<t:dataTable value="#{workflowBean.routes}" var="route" rowIndexVar="rowIndex"
+            </fx:fieldSet>
+
+			<fx:fieldSet legend="#{fxMessageBean['Workflow.group.routes']}" width="500">
+
+            <a4j:outputPanel id="routeAdd">
+            <ui:fragment rendered="#{!(empty workflowBean.stepsForRoutes)}">
+	            <table width="500" style="margin-top:10px;">
+					<!-- insert row -->
+                    <thead>
+                        <tr>
+                            <td>
+                                #{fxMessageBean["Workflow.field.route.from"]}
+                            </td>
+                            <td>
+                                #{fxMessageBean["Workflow.field.route.to"]}
+                            </td>
+                            <td colspan="2">
+                                #{fxMessageBean["Workflow.field.route.group"]}
+                            </td>
+                        </tr>
+                    </thead>
+                    <tr>
+						<td>
+			                <h:selectOneListbox id="fromStepId" value="#{workflowBean.fromStepId}" size="1">
+								<f:selectItems value="#{workflowBean.stepsForRoutes}"/>
+			                </h:selectOneListbox>
+						</td>
+						<td>
+							<h:selectOneListbox id="toStepId" value="#{workflowBean.toStepId}" size="1">
+								<f:selectItems value="#{workflowBean.stepsForRoutes}"/>
+							</h:selectOneListbox>
+						</td>
+						<td>
+							<h:selectOneListbox id="userGroup" value="#{workflowBean.userGroup}" size="1" converter="SelectableConverter">
+								<f:selectItems value="#{fxSystemBean.userTicket.globalSupervisor ? fxSelectBean.globalUserGroups : fxSelectBean.userGroups}"/>
+							</h:selectOneListbox>
+						</td>
+						<td width="100%">
+                            <a4j:commandLink reRender="routeList, routeAdd, stepList"
+                                             actionListener="#{workflowBean.addRoute}"
+                                             onmouseover='ignoreEvent(event)'
+                                             eventsQueue="stepQ"
+                                    >
+                                <t:graphicImage alt="add"
+                                                url="/adm/images/commandButton/new.png"
+                                                style="#{wfBtnStyle}"
+                                        />
+                            </a4j:commandLink>
+                        </td>
+					</tr>
+				</table>
+			</ui:fragment>
+            </a4j:outputPanel>
+
+            <a4j:outputPanel id="routeList">
+            <t:dataTable value="#{workflowBean.routes}" var="route" rowIndexVar="rowIndex"
 				preserveDataModel="true" headerClass="tblHeader" rowClasses="tblRowEven, tblRowOdd" width="500">
 				<h:column>
 					<f:facet name="header">
@@ -126,48 +217,31 @@
 					<f:facet name="header">
 						#{fxMessageBean["Workflow.field.route.group"]}
 					</f:facet>
+                    <ui:fragment rendered="#{!fxMapBean.userGroups[route.groupId].system}">
                     #{fxMapBean.mandators[fxMapBean.userGroups[route.groupId].mandatorId].name}:
+                    </ui:fragment>
                     #{fxMapBean.userGroups[route.groupId].name}
 				</h:column>
 				<h:column>
                     <f:facet name="header">
                         #{fxMessageBean['Workflow.field.route.actions']}
                     </f:facet>
-                    <adm:commandIcon labelKey="Workflow.button.route.remove" location="content"
-						icon="delete" bean="#{workflowBean}" action="removeRoute" id="routeDeleteButton#{step.id}">
-						<f:setPropertyActionListener target="#{workflowBean.routeIndex}" value="#{rowIndex}"/>
-					</adm:commandIcon>
-				</h:column>
+                    <a4j:commandLink reRender="routeAdd, routeList, stepList"
+                                     actionListener="#{workflowBean.removeRoute}"
+                                     onmouseover='ignoreEvent(event)'
+                                     eventsQueue="stepQ"
+                            >
+                        <f:setPropertyActionListener target="#{workflowBean.routeIndex}" value="#{rowIndex}"/>
+                        <t:graphicImage alt="delete"
+                                        url="/adm/images/commandButton/delete.png"
+                                        style="#{wfBtnStyle}"
+                                />
+                    </a4j:commandLink>
+                </h:column>
 			</t:dataTable>
-			
-			<c:if test="#{!(empty workflowBean.stepsForRoutes)}">
-	            <table width="500" style="margin-top:10px;">
-					<!-- insert row -->
-					<tr>
-						<td>
-			                <h:selectOneListbox id="fromStepId" value="#{workflowBean.fromStepId}" size="1">
-								<f:selectItems value="#{workflowBean.stepsForRoutes}"/>
-			                </h:selectOneListbox>
-						</td>
-						<td>
-							<h:selectOneListbox id="toStepId" value="${workflowBean.toStepId}" size="1">
-								<f:selectItems value="#{workflowBean.stepsForRoutes}"/>
-							</h:selectOneListbox>
-						</td>
-						<td> 
-							<h:selectOneListbox id="userGroup" value="#{workflowBean.userGroup}" size="1" converter="SelectableConverter">
-								<f:selectItems value="#{fxSystemBean.userTicket.globalSupervisor ? fxSelectBean.globalUserGroups : fxSelectBean.userGroups}"/>
-							</h:selectOneListbox>
-						</td>
-						<td>
-							<adm:commandButton labelKey="Workflow.button.route.add" location="content"
-								icon="new" bean="#{workflowBean}" action="addRoute" id="addRouteButton"/>
-						</td>
-					</tr>
-				</table>
-			</c:if>
-			
-			</fx:fieldSet>
+            </a4j:outputPanel>
+
+            </fx:fieldSet>
 
             <adm:commandButton labelKey="Workflow.button.save" location="both"
                 icon="save"  bean="#{workflowBean}" action="save" id="saveButton"/>
@@ -176,7 +250,8 @@
                 icon="cancel"  action="workflowOverview" id="cancelButton" immediate="true"/>
 
             <adm:toolbarPluginButtons/>
-        </h:form>
+
+        </a4j:form>
     </ui:define>
 
 </ui:composition>

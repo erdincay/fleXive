@@ -44,6 +44,7 @@ import com.flexive.shared.security.UserGroup;
 import com.flexive.shared.workflow.*;
 import org.apache.commons.collections.CollectionUtils;
 
+import javax.faces.event.ActionEvent;
 import javax.faces.model.SelectItem;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -196,9 +197,24 @@ public class WorkflowBean {
      *
      * @return the next page
      */
-    public String addStep() {
+    public synchronized String addStep() {
         StepEdit step = new StepEdit(new Step(getNewStepId(), stepDefinitionId, workflow.getId(), stepACL));
         getSteps().add(step);
+        StepDefinition sd = CacheAdmin.getFilteredEnvironment().getStepDefinition(stepDefinitionId);
+        if( sd.isUnique() ) {
+            //make sure the unique target is added as well
+            boolean found = false;
+            for(StepEdit se: getSteps()) {
+                if( se.getStepDefinitionId() == sd.getUniqueTargetId() ) {
+                    found = true;
+                    break;
+                }
+            }
+            if( !found ) {
+                //add step definiton
+                getSteps().add(new StepEdit(new Step(getNewStepId(), sd.getUniqueTargetId(), workflow.getId(), stepACL)));
+            }
+        }
         workflow.setSteps(steps);
         return "workflowEdit";
     }
@@ -226,6 +242,45 @@ public class WorkflowBean {
         }
         workflow.setSteps(getSteps());
         return "workflowEdit";
+    }
+
+    /**
+     * Check if a step can be removed as mapped function
+     *
+     * @return if step can be removed
+     */
+    public Map<Step, Boolean> getCanRemoveStep() {
+        return FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Step, Boolean>() {
+                public Boolean get(Object key) {
+                    if (key == null) {
+                        return null;
+                    }
+                    Step s = (Step)key;
+                    for(Route r: getRoutes())
+                        if( r.getFromStepId() == s.getId() || r.getToStepId() == s.getId() )
+                            return false;
+                    for(Step _s: getSteps())
+                        if(CacheAdmin.getEnvironment().getStepDefinition(_s.getStepDefinitionId()).getUniqueTargetId() == s.getStepDefinitionId() )
+                            return false;
+                    return true;
+                }
+            });
+    }
+
+    public String addStep(ActionEvent evt) {
+        return addStep();
+    }
+
+    public String removeStep(ActionEvent evt) {
+        return removeStep();
+    }
+
+    public String addRoute(ActionEvent evt) {
+        return addRoute();
+    }
+
+    public String removeRoute(ActionEvent evt) {
+        return removeRoute();
     }
 
     /**
