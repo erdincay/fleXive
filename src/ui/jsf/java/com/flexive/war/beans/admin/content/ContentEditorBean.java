@@ -336,10 +336,10 @@ public class ContentEditorBean implements ActionBean, Serializable {
                 release();
                 setPk(newPk);
                 load();
-                setReadOnly(FxJsfUtils.getBooleanParameter("readOnly"));
-                if (this.readOnly) {
+                if( this.editAble )
+                    setReadOnly(FxJsfUtils.getBooleanParameter("readOnly"));
+                if (this.readOnly)
                     compact();
-                }
             }
             // hack!
             FxJsfUtils.resetFaceletsComponent("frm");
