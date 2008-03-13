@@ -289,7 +289,9 @@ public class SearchEngineTest {
     }
 
     private void setResultPreferences(SortDirection sortDirection) throws FxApplicationException {
-        final ResultPreferencesEdit prefs = new ResultPreferencesEdit(new ArrayList<ResultColumnInfo>(0), Arrays.asList(
+        final ResultPreferencesEdit prefs = new ResultPreferencesEdit(Arrays.asList(
+                new ResultColumnInfo(Table.CONTENT, getTestPropertyName("string"), "")
+        ), Arrays.asList(
                 new ResultOrderByInfo(Table.CONTENT, getTestPropertyName("string"), "", sortDirection)),
                 25, 100);
         EJBLookup.getResultPreferencesEngine().save(prefs, CacheAdmin.getEnvironment().getType(TEST_TYPE).getId(), ResultViewType.LIST, AdminResultLocations.DEFAULT);
