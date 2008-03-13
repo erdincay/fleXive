@@ -280,6 +280,8 @@
         //-->
 		</script>
 
+        <!--<adm:treeContextMenuItem treeActions="editNode" icon="edit" labelKey="ContentTree.menu.editNode" clickHandler="editNode"/>-->
+
         <adm:tree name="contentTree" targetId="contentTreeContainer"  extensionPoint="/tree/adm/content"
                  clickHandler="contentTreeClickHandler"
                  menuHandler="menuHandler"
@@ -289,7 +291,6 @@
                  docIcons="true"
                  editor="true"
                  selector="true">
-
             <adm:treeContextMenu showHandler="showTreeMenu">
                 <adm:treeContextMenuItem treeActions="attachNode" icon="attach" labelKey="ContentTree.menu.attachNode" clickHandler="attachNode"/>
                 <adm:treeContextMenuItem treeActions="showContent" icon="open" labelKey="ContentTree.menu.show" clickHandler="showContent"/>

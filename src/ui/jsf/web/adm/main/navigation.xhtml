@@ -14,90 +14,80 @@
     <ui:define name="content">
         <adm:tree name="admin" targetId="treeContent" extensionPoint="/tree/adm/main">
             <c:if test="#{fxSystemBean.isInRole['MandatorSupervisor'] or fxSystemBean.isInRole['AccountManagement']}">
-                <adm:treeNode id="accounts" icon="accounts" title="#{fxMessageBean['Admin.account.root']}">
-                    <adm:treeNode title="#{fxMessageBean['Admin.account.overview']}"
-                                  link="/adm/main/account/overview.jsf"/>
-                    <adm:treeNode title="#{fxMessageBean['Admin.account.create']}" link="/adm/main/account/create.jsf"/>
+                <adm:treeNode id="accounts" icon="accounts" titleKey="Admin.account.root">
+                    <adm:treeNode titleKey="Admin.account.overview" link="/adm/main/account/overview.jsf"/>
+                    <adm:treeNode titleKey="Admin.account.create" link="/adm/main/account/create.jsf"/>
                 </adm:treeNode>
 
-                <adm:treeNode id="usergroups" icon="userGroups" title="#{fxMessageBean['Admin.groups.root']}">
-                    <adm:treeNode title="#{fxMessageBean['Admin.groups.overview']}"
-                                  link="/adm/main/userGroup/overview.jsf"/>
-                    <adm:treeNode title="#{fxMessageBean['Admin.groups.create']}" link="/adm/main/userGroup/new.jsf"/>
+                <adm:treeNode id="usergroups" icon="userGroups" titleKey="Admin.groups.root">
+                    <adm:treeNode titleKey="Admin.groups.overview" link="/adm/main/userGroup/overview.jsf"/>
+                    <adm:treeNode titleKey="Admin.groups.create" link="/adm/main/userGroup/new.jsf"/>
                 </adm:treeNode>
             </c:if>
 
             <c:if test="#{fxSystemBean.isInRole['GlobalSupervisor']}">
-                <adm:treeNode id="mandtors" icon="mandators" title="#{fxMessageBean['Admin.mandators.root']}">
-                    <adm:treeNode title="#{fxMessageBean['Admin.mandators.overview']}"
-                                  link="/adm/main/mandator/overview.jsf"/>
-                    <adm:treeNode title="#{fxMessageBean['Admin.mandators.create']}"
-                                  link="/adm/main/mandator/create.jsf"/>
+                <adm:treeNode id="mandtors" icon="mandators" titleKey="Admin.mandators.root">
+                    <adm:treeNode titleKey="Admin.mandators.overview" link="/adm/main/mandator/overview.jsf"/>
+                    <adm:treeNode titleKey="Admin.mandators.create" link="/adm/main/mandator/create.jsf"/>
                 </adm:treeNode>
             </c:if>
 
             <c:if test="#{fxSystemBean.isInRole['MandatorSupervisor'] or fxSystemBean.isInRole['ACLManagement']}">
-                <adm:treeNode id="acls" icon="acls" title="#{fxMessageBean['Admin.acl.root']}">
-                    <adm:treeNode title="#{fxMessageBean['Admin.acl.overview']}" link="/adm/main/acl/aclOverview.jsf"/>
-                    <adm:treeNode title="#{fxMessageBean['Admin.acl.create']}" link="/adm/main/acl/aclCreate.jsf"/>
+                <adm:treeNode id="acls" icon="acls" titleKey="Admin.acl.root">
+                    <adm:treeNode titleKey="Admin.acl.overview" link="/adm/main/acl/aclOverview.jsf"/>
+                    <adm:treeNode titleKey="Admin.acl.create" link="/adm/main/acl/aclCreate.jsf"/>
                 </adm:treeNode>
             </c:if>
 
             <c:if test="#{fxSystemBean.isInRole['MandatorSupervisor'] or fxSystemBean.isInRole['WorkflowManagement']}">
-                <adm:treeNode id="workflows" icon="workflows" title="#{fxMessageBean['Admin.workflows.root']}">
-                    <adm:treeNode title="#{fxMessageBean['Admin.workflows.overview']}"
-                                  link="/adm/main/workflow/overview.jsf"/>
-                    <adm:treeNode title="#{fxMessageBean['Admin.workflows.create']}"
-                                  link="/adm/main/workflow/create.jsf"/>
-                    <adm:treeNode title="#{fxMessageBean['Admin.workflows.stepdefinitions']}"
-                                  link="/adm/main/workflow/stepDefinition/overview.jsf"/>
-                    <adm:treeNode title="#{fxMessageBean['Admin.workflows.stepdefinitions.create']}"
-                                  link="/adm/main/workflow/stepDefinition/edit.jsf"/>
+                <adm:treeNode id="workflows" icon="workflows" titleKey="Admin.workflows.root">
+                    <adm:treeNode titleKey="Admin.workflows.overview" link="/adm/main/workflow/overview.jsf"/>
+                    <adm:treeNode titleKey="Admin.workflows.create" link="/adm/main/workflow/create.jsf"/>
+                    <adm:treeNode titleKey="Admin.workflows.stepdefinitions" link="/adm/main/workflow/stepDefinition/overview.jsf"/>
+                    <adm:treeNode titleKey="Admin.workflows.stepdefinitions.create" link="/adm/main/workflow/stepDefinition/edit.jsf"/>
                 </adm:treeNode>
             </c:if>
 
             <c:if test="false"> <!--templates are disabled for now-->
-                <adm:treeNode id="templates" icon="templates" title="#{fxMessageBean['Admin.templates.root']}">
-                    <adm:treeNode title="#{fxMessageBean['Admin.templates.contentTemplateOverview']}"
-                                  link="/adm/main/template/contentTemplateOverview.jsf"/>
-                    <adm:treeNode title="#{fxMessageBean['Admin.templates.masterTemplateOverview']}"
-                                  link="/adm/main/template/masterTemplateOverview.jsf"/>
-                    <adm:treeNode title="#{fxMessageBean['Admin.templates.tagsOverview']}"
-                                  link="/adm/main/template/tagOverview.jsf"/>
+                <adm:treeNode id="templates" icon="templates" titleKey="Admin.templates.root">
+                    <adm:treeNode titleKey="Admin.templates.contentTemplateOverview" link="/adm/main/template/contentTemplateOverview.jsf"/>
+                    <adm:treeNode titleKey="Admin.templates.masterTemplateOverview" link="/adm/main/template/masterTemplateOverview.jsf"/>
+                    <adm:treeNode titleKey="Admin.templates.tagsOverview" link="/adm/main/template/tagOverview.jsf"/>
                 </adm:treeNode>
             </c:if>
 
-            <adm:treeNode id="search" icon="find" title="#{fxMessageBean['Admin.sqlSearch.root']}">
-                <adm:treeNode title="#{fxMessageBean['Admin.sqlSearch.query']}" link="/adm/main/sqlsearch/search.jsf" />
-                <adm:treeNode title="#{fxMessageBean['Admin.sqlSearch.editor']}" link="/adm/search/query.jsf" />
-                <adm:treeNode title="#{fxMessageBean['Admin.content.editor']}" link="/adm/content/contentEditor.jsf" />
-                <adm:treeNode title="#{fxMessageBean['Admin.content.testData']}" link="/adm/content/createTestData.jsf"/>
-            </adm:treeNode>
             <c:if test="#{fxSystemBean.isInRole['ScriptExecution'] or fxSystemBean.isInRole['ScriptManagement']}">
-                <adm:treeNode id="scripts" icon="scripts" title="#{fxMessageBean['Admin.scripts.root']}">
-                    <adm:treeNode title="#{fxMessageBean['Admin.scripts.overview']}" link="/adm/main/scripting/overview.jsf" />
+                <adm:treeNode id="scripts" icon="scripts" titleKey="Admin.scripts.root">
+                    <adm:treeNode titleKey="Admin.scripts.overview" link="/adm/main/scripting/overview.jsf" />
                     <c:if test="#{fxSystemBean.isInRole['ScriptManagement']}">
-                        <adm:treeNode title="#{fxMessageBean['Admin.scripts.create']}" link="/adm/main/scripting/create.jsf" />
+                        <adm:treeNode titleKey="Admin.scripts.create" link="/adm/main/scripting/create.jsf" />
                     </c:if>
                     <c:if test="#{fxSystemBean.isInRole['ScriptExecution']}">
-                        <adm:treeNode title="#{fxMessageBean['Admin.scripts.scriptConsole']}" link="/adm/main/scripting/scriptConsole.jsf"/>
+                        <adm:treeNode titleKey="Admin.scripts.scriptConsole" link="/adm/main/scripting/scriptConsole.jsf"/>
                     </c:if>
                 </adm:treeNode>
             </c:if>
-            <adm:treeNode id="system" icon="system" title="#{fxMessageBean['Admin.system.root']}">
-                <adm:treeNode title="#{fxMessageBean['Admin.system.info']}" link="/adm/main/system/systemInfo.jsf"/>
-                <c:if test="#{fxSystemBean.isInRole['GlobalSupervisor']}">
-                    <adm:treeNode title="#{fxMessageBean['Admin.system.languages']}" link="/adm/main/system/languages.jsf"/>
+
+            <adm:treeNode id="selectlists" icon="selectLists" titleKey="Admin.selectlists.root">
+                <adm:treeNode titleKey="Admin.selectlists.selectList.overview" link="/adm/main/selectList/overview.jsf"/>
+                <c:if test="#{fxSystemBean.isInRole['SelectListEditor']}">
+                    <adm:treeNode titleKey="Admin.selectlists.selectList.create" link="/adm/main/selectList/create.jsf"/>
                 </c:if>
             </adm:treeNode>
 
-            <adm:treeNode id="selectlists" icon="selectLists" title="#{fxMessageBean['Admin.selectlists.root']}">
-                <adm:treeNode title="#{fxMessageBean['Admin.selectlists.selectList.overview']}"
-                              link="/adm/main/selectList/overview.jsf"/>
-                <c:if test="#{fxSystemBean.isInRole['SelectListEditor']}">
-                    <adm:treeNode title="#{fxMessageBean['Admin.selectlists.selectList.create']}"
-                                  link="/adm/main/selectList/create.jsf"/>
+            <adm:treeNode id="system" icon="system" titleKey="Admin.system.root">
+                <adm:treeNode id="search" icon="find" titleKey="Admin.sqlSearch.root">
+                    <adm:treeNode titleKey="Admin.sqlSearch.query" link="/adm/main/sqlsearch/search.jsf" />
+                    <c:if test="#{fxSystemBean.isInRole['GlobalSupervisor']}">
+                        <adm:treeNode titleKey="Admin.sqlSearch.defaultQuery" link="javascript:invokeContentAction('/adm/main/sqlsearch/defaultQuery.jsf', 'loadSystemDefault', {})" />
+                        <adm:treeNode titleKey="Admin.sqlSearch.defaultResultPreferences" link="javascript:invokeContentAction('/adm/main/sqlsearch/defaultResultPreferences.jsf', 'loadSystemDefault', {})" />
+                    </c:if>
+                </adm:treeNode>
+                <adm:treeNode titleKey="Admin.system.info" link="/adm/main/system/systemInfo.jsf"/>
+                <c:if test="#{fxSystemBean.isInRole['GlobalSupervisor']}">
+                    <adm:treeNode titleKey="Admin.system.languages" link="/adm/main/system/languages.jsf"/>
                 </c:if>
+                <adm:treeNode titleKey="Admin.content.testData" link="/adm/content/createTestData.jsf"/>
             </adm:treeNode>
         </adm:tree>
 
