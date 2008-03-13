@@ -348,9 +348,7 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
                 throw new FxRemoveException(LOG, "ex.step.delete", exc, exc.getMessage());
             }
         } finally {
-            if (!success) {
-                ctx.setRollbackOnly();
-            } else {
+            if (success) {
                 if (!isWorkflow) //dont reload if removing for a workflow
                     StructureLoader.reloadWorkflows(FxContext.get().getDivisionId());
             }

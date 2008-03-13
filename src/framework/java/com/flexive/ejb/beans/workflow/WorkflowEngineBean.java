@@ -258,6 +258,7 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
 
             if (remove.size() > 0) {
                 int tries = remove.size() * 2;
+                List<Step> tmpRemove = new ArrayList<Step>(remove.size());
                 while (remove.size() > 0 && --tries > 0) {
                     for (Step step : remove) {
                         try {
@@ -267,10 +268,12 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
                                     routeEngine.remove(route.getId());
 
                             stepEngine.removeStep(step.getId());
+                            tmpRemove.add(step);
                         } catch (FxApplicationException e) {
                             //ignore since rmeove order matters
                         }
                     }
+                    remove.removeAll(tmpRemove);
                 }
             }
 
