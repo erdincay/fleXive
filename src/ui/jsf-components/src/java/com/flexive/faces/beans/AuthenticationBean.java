@@ -98,6 +98,7 @@ public class AuthenticationBean implements Serializable {
         try {
             FxRequest request = FxJsfUtils.getRequest();
             request.logout();
+            FxJsfUtils.getSession().invalidate();
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();
         }

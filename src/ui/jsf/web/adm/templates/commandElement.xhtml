@@ -14,7 +14,7 @@ It will lock the screen when the data is submitted, unless the lockscreen attrib
 Parameters:
 - label: the button label
 - labelKey: message key for the button label (overrides label when specified)
-- confirm: [optional] message key for a confirm dialog that will be displayed before the action is called
+- confirmKey: [optional] message key for a confirm dialog that will be displayed before the action is called
 - bean: the bean that the action belongs to
 - action: the action to call
 - immediate: [optional] the jsf immediate flag
@@ -60,7 +60,7 @@ Parameters:
     </div>
 
     <script type="text/javascript" language="javascript">
-        parent.registerCommandElement(this,'#{id}','#{fxMessageBean[confirm]}',#{lockscreen});
+        parent.registerCommandElement(this,'#{id}','#{fxMessageBean[confirmKey]}',#{lockscreen});
         function triggerCommandElement_#{id}() {
             eval(parent.getCommandElementScript(self,'#{id}'))
        }

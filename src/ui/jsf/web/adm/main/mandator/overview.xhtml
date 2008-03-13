@@ -56,7 +56,7 @@
                                 </adm:commandIcon>
                                 <adm:commandIcon labelKey="Mandator.button.delete" location="content"
                                                  icon="delete"  action="deleteMandator"  bean="#{mandatorBean}"
-                                                 id="deleteButton_#{item.id}" confirm="Mandator.confirm.delete">
+                                                 id="deleteButton_#{item.id}" confirmKey="Mandator.confirm.delete">
                                     <f:setPropertyActionListener target="#{mandatorBean.id}" value="#{item.id}"/>
                                 </adm:commandIcon>
                             </td>

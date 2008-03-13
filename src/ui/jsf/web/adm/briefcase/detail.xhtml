@@ -46,7 +46,7 @@
             <adm:commandButton id="saveButton" labelKey="Briefcase.button.save" location="content"
                               icon="save"  bean="#{briefcaseBean}" action="save"/>
             <adm:commandButton id="deleteButton" labelKey="Briefcase.button.delete"  location="content"
-                              confirm="Briefcase.confirm.delete,#{briefcaseBean.briefcase.name}"
+                              confirmKey="Briefcase.confirm.delete,#{briefcaseBean.briefcase.name}"
                               icon="delete"  bean="#{briefcaseBean}" action="delete" immediate="true"/>
             <adm:toolbarPluginButtons/>
         </a4j:form>

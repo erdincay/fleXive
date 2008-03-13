@@ -94,7 +94,7 @@
                                         <td align="left">
                                             <adm:commandButton labelKey="GroupEditor.table.button.delete" location="content"
                                                             icon="delete"  action="deleteGroupOption"  bean="#{groupEditorBean}"
-                                                            id="deleteGroupOptionButton_#{option.id}" confirm="GroupEditor.message.deleteOption">
+                                                            id="deleteGroupOptionButton_#{option.id}" confirmKey="GroupEditor.message.deleteOption">
                                                 <f:setPropertyActionListener target="#{groupEditorBean.optionFiler}" value="#{option}"/>
                                             </adm:commandButton>
                                         </td>
@@ -165,7 +165,7 @@
                                              <td align="left">
                                                 <adm:commandButton labelKey="GroupEditor.table.button.delete" location="content"
                                                                 icon="delete"  action="deleteAssignmentOption"  bean="#{groupEditorBean}"
-                                                                id="deleteAssignmentOptionButton_#{option.id}" confirm="GroupEditor.message.deleteOption">
+                                                                id="deleteAssignmentOptionButton_#{option.id}" confirmKey="GroupEditor.message.deleteOption">
                                                     <f:setPropertyActionListener target="#{groupEditorBean.optionFiler}" value="#{option}"/>
                                                 </adm:commandButton>
                                             </td>

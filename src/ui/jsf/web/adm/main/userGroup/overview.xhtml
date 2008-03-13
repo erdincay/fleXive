@@ -86,7 +86,7 @@
                                     <adm:commandIcon labelKey="User.button.delete" location="content"
                                                      icon="delete" action="delete" bean="#{userGroupBean}"
                                                      id="deleteButton_#{group.id}"
-                                                     confirm="UserGroup.confirm.delete,#{group.name}">
+                                                     confirmKey="UserGroup.confirm.delete,#{group.name}">
                                         <f:setPropertyActionListener target="#{userGroupBean.id}" value="#{group.id}"/>
                                     </adm:commandIcon>
                                 </ui:fragment>

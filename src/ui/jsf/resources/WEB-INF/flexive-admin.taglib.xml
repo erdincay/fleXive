@@ -68,6 +68,14 @@
         <source>templates/messages.xhtml</source>
     </tag>
     <tag>
+        <tag-name>infoBox</tag-name>
+        <source>templates/infoBox.xhtml</source>
+    </tag>
+    <tag>
+        <tag-name>resultPreferencesEditor</tag-name>
+        <source>templates/resultPreferencesEditor.xhtml</source>
+    </tag>
+    <tag>
         <tag-name>fxValueInput</tag-name>
         <component>
             <component-type>flexive.FxValueInput</component-type>

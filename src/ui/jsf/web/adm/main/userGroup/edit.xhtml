@@ -44,7 +44,7 @@
                               icon="save"  bean="#{userGroupBean}" action="update"/>
             <adm:commandButton id="refreshButton" labelKey="UserGroup.button.refresh"
                               icon="reload"  bean="#{userGroupBean}" action="edit" immediate="true"/>
-            <adm:commandButton id="deleteButton" labelKey="UserGroup.button.delete" confirm="UserGroup.confirm.delete,#{userGroupBean.name}"
+            <adm:commandButton id="deleteButton" labelKey="UserGroup.button.delete" confirmKey="UserGroup.confirm.delete,#{userGroupBean.name}"
                               icon="delete"  bean="#{userGroupBean}" action="delete" immediate="true"/>
             <adm:commandButton id="cancelButton" labelKey="UserGroup.button.cancel"
                               icon="cancel" action="userGroupOverview" immediate="true"/>

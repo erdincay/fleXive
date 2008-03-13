@@ -138,7 +138,7 @@ public class GroovyQueryBuilder extends BuilderSupport {
                 throw new FxInvalidParameterException("COMPARATOR", "ex.fxQueryBuilder.comparator.unknown",
                         name, Arrays.asList(PropertyValueComparator.values())).asRuntimeException();
             }
-            PropertyValueNode node = new PropertyValueNode(root.getNewId(), null);
+            PropertyValueNode node = new PropertyValueNode(root.getNewId(), -1);
             node.setComparator(comparator);
             return node;
         }
@@ -192,7 +192,7 @@ public class GroovyQueryBuilder extends BuilderSupport {
                         propertyNode.getComparator()).asRuntimeException();
             } else {
                 // comparator doesn't need input, property name supplied as scalar
-                propertyNode.setProperty(environment.getProperty((String) value));
+                propertyNode.setPropertyId(environment.getProperty((String) value).getId());
             }
             return node;
         }
@@ -212,7 +212,7 @@ public class GroovyQueryBuilder extends BuilderSupport {
                 throw new FxInvalidStateException("ex.fxQueryBuilder.node.value", propertyNode.getComparator()).asRuntimeException();
             }
             String propertyName = (String) attributes.get("property");
-            propertyNode.setProperty(environment.getProperty(propertyName));
+            propertyNode.setPropertyId(environment.getProperty(propertyName).getId());
             propertyNode.setValue(propertyNode.getProperty().getEmptyValue());
             Object value = attributes.get("value");
             //noinspection unchecked

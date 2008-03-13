@@ -79,6 +79,14 @@ a {
     color: red;
 }
 
+.infoBox {
+    width: 400px;
+    margin: 20px;
+    padding: 10px;
+    border: 1px outset #3D3D3D;
+    background-color: #F9FCF1;
+}
+
 textarea {
     border: 1px solid #bdbdbd;
     font-family: Arial, Helvetica, sans-serif;

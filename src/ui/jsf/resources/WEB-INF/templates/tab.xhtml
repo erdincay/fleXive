@@ -20,6 +20,9 @@ link on the tab bar.
         <c:if test="${empty active}">
             <c:set var="active" value="false" />
         </c:if>
+        <c:if test="#{!empty labelKey}">
+            <c:set var="label" value="#{fxMessageBean[labelKey]}"/>
+        </c:if>
         <c:if test="${empty label}">
             <c:set var="label" value="&nbsp;" />
         </c:if>

@@ -58,14 +58,13 @@ import javax.ejb.TransactionAttributeType;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.util.Collection;
 
 @javax.ejb.TransactionManagement(javax.ejb.TransactionManagementType.CONTAINER)
 @Stateless(name = "SearchEngine")
 public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     private static final Log LOG = LogFactory.getLog(SearchEngineBean.class);
-    private static final String DEFAULT_QUERY_NAME = SearchEngineBean.class + ".DEFAULTQUERY";
+    private static final String DEFAULT_QUERY_NAME = SearchEngineBean.class.getName() + ".DEFAULTQUERY";
 
 
     @Resource
@@ -73,13 +72,15 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     @EJB
     ResultPreferencesEngineLocal resultPreferences;
     @EJB
-    private SequencerEngine seq;
+    private SequencerEngineLocal seq;
     @EJB
-    private BriefcaseEngine briefcase;
+    private BriefcaseEngineLocal briefcase;
     @EJB
     private ConfigurationEngineLocal configuration;
     @EJB
-    private TreeEngine treeEngine;
+    private DivisionConfigurationEngineLocal divisionConfiguration;
+    @EJB
+    private TreeEngineLocal treeEngine;
 
     /**
      * {@inheritDoc}
@@ -150,6 +151,21 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     public QueryRootNode loadDefault(ResultLocation location) throws FxApplicationException {
         try {
             return load(location, DEFAULT_QUERY_NAME);
+        } catch (FxNotFoundException e) {
+            return new QueryRootNode(QueryRootNode.Type.CONTENTSEARCH, location);
+        } catch (FxApplicationException e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public QueryRootNode loadSystemDefault(ResultLocation location) throws FxApplicationException {
+        try {
+            return divisionConfiguration.get(getConfigurationParameter(location), DEFAULT_QUERY_NAME);
         } catch (FxNotFoundException e) {
             return new QueryRootNode(QueryRootNode.Type.CONTENTSEARCH, location);
         } catch (FxApplicationException e) {

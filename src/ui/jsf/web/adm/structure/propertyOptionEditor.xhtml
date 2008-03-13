@@ -96,7 +96,7 @@
                                     <td align="left">
                                         <adm:commandButton labelKey="PropertyEditor.table.button.delete" location="content"
                                                         icon="delete"  action="deletePropertyOption"  bean="#{propertyEditorBean}"
-                                                        id="deletePropertyOptionButton_#{option.id}" confirm="PropertyEditor.message.deleteOption">
+                                                        id="deletePropertyOptionButton_#{option.id}" confirmKey="PropertyEditor.message.deleteOption">
                                             <f:setPropertyActionListener target="#{propertyEditorBean.optionFiler}" value="#{option}"/>
                                         </adm:commandButton>
                                     </td>
@@ -166,7 +166,7 @@
                                          <td align="left">
                                             <adm:commandButton labelKey="PropertyEditor.table.button.delete" location="content"
                                                             icon="delete"  action="deleteAssignmentOption"  bean="#{propertyEditorBean}"
-                                                            id="deleteAssignmentOptionButton_#{option.id}" confirm="PropertyEditor.message.deleteOption">
+                                                            id="deleteAssignmentOptionButton_#{option.id}" confirmKey="PropertyEditor.message.deleteOption">
                                                 <f:setPropertyActionListener target="#{propertyEditorBean.optionFiler}" value="#{option}"/>
                                             </adm:commandButton>
                                          </td>

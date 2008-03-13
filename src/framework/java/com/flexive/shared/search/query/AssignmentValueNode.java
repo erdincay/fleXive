@@ -42,6 +42,8 @@ import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.mapper.IdentityInputMapper;
 import com.flexive.shared.value.mapper.InputMapper;
+import com.flexive.shared.CacheAdmin;
+import static com.flexive.shared.CacheAdmin.getEnvironment;
 
 import java.util.Arrays;
 import java.util.List;
@@ -54,18 +56,19 @@ import java.util.List;
 public class AssignmentValueNode extends QueryValueNode<FxValue, PropertyValueComparator> {
 
     private static final long serialVersionUID = 4285245221573681218L;
-    private FxAssignment assignment;
+    private long assignmentId;
 
     /**
      * Create a new property query node.
      * 
      * @param id    Internal and unique ID of the node
-     * @param assignment  the property to be set with this node
+     * @param assignmentId  the assignment to be set with this node
      */
-    public AssignmentValueNode(int id, FxAssignment assignment) {
+    public AssignmentValueNode(int id, long assignmentId) {
         super(id);
-        this.assignment = assignment;
+        this.assignmentId = assignmentId;
         this.comparator = PropertyValueComparator.EQ;
+        final FxAssignment assignment = getEnvironment().getAssignment(assignmentId);
         if (assignment instanceof FxPropertyAssignment) {
         	value = ((FxPropertyAssignment) assignment).getEmptyValue();
         }
@@ -75,20 +78,20 @@ public class AssignmentValueNode extends QueryValueNode<FxValue, PropertyValueCo
     }
 
     public FxAssignment getAssignment() {
-        return assignment;
+        return getEnvironment().getAssignment(assignmentId);
     }
 
-    public void setAssignment(FxAssignment property) {
-        this.assignment = property;
+    public void setAssignmentId(long assignmentId) {
+        this.assignmentId = assignmentId;
     }
     
  	/** {@inheritDoc} */
     @Override
     public boolean isValid() {
         try {
-            this.comparator.getSql(assignment, value);
+            this.comparator.getSql(getAssignment(), value);
             // if we can generate a SQL epxression, check additional assignment constraints
-            return assignment.isValid(value);
+            return getAssignment().isValid(value);
         } catch (RuntimeException e) {
             // if we can't generate a SQL expression, we aren't valid
             return false;
@@ -99,7 +102,7 @@ public class AssignmentValueNode extends QueryValueNode<FxValue, PropertyValueCo
     @Override
     public void buildSqlQuery(SqlQueryBuilder builder) {
         try {
-            builder.condition(assignment, comparator, value);
+            builder.condition(getAssignment(), comparator, value);
         } catch (FxRuntimeException e) {
             throw new FxInvalidQueryNodeException(getId(), e.getConverted()).asRuntimeException(); 
         }
@@ -108,27 +111,27 @@ public class AssignmentValueNode extends QueryValueNode<FxValue, PropertyValueCo
     /** {@inheritDoc} */
     @Override
     public FxString getLabel() {
-        final String typeLabel = assignment.getAssignedType().getId() != FxType.ROOT_ID
-                ? assignment.getAssignedType().getDisplayName() + "/" : "";
+        final String typeLabel = getAssignment().getAssignedType().getId() != FxType.ROOT_ID
+                ? getAssignment().getAssignedType().getDisplayName() + "/" : "";
         return new FxString(typeLabel
-                + (assignment.getParentGroupAssignment() != null
-                    ? assignment.getParentGroupAssignment().getDisplayName() + "/" : "")
-                + assignment.getDisplayName());
+                + (getAssignment().getParentGroupAssignment() != null
+                    ? getAssignment().getParentGroupAssignment().getDisplayName() + "/" : "")
+                + getAssignment().getDisplayName());
     }
 
     /** {@inheritDoc} */
     @Override
     public List<PropertyValueComparator> getNodeComparators() {
-        return assignment instanceof FxPropertyAssignment
-            ? PropertyValueComparator.getAvailable(((FxPropertyAssignment) assignment).getProperty().getDataType())
+        return getAssignment() instanceof FxPropertyAssignment
+            ? PropertyValueComparator.getAvailable(((FxPropertyAssignment) getAssignment()).getProperty().getDataType())
             : Arrays.asList(PropertyValueComparator.values());
     }
 
     /** {@inheritDoc} */
     @Override
     public InputMapper getInputMapper() {
-        return inputMapper != null ? inputMapper : assignment instanceof FxPropertyAssignment 
-                ? getPropertyInputMapper(((FxPropertyAssignment) assignment).getProperty())
+        return inputMapper != null ? inputMapper : getAssignment() instanceof FxPropertyAssignment
+                ? getPropertyInputMapper(((FxPropertyAssignment) getAssignment()).getProperty())
                 : IdentityInputMapper.getInstance();
     }
 

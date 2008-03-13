@@ -516,11 +516,11 @@ public class QueryNodeTreeTests {
     public void propertyValueNodeTest() {
         QueryRootNode root = new QueryRootNode(0, QueryRootNode.Type.CONTENTSEARCH);
         final FxProperty property = createAssignment().getProperty();
-        final PropertyValueNode child1 = new PropertyValueNode(root.getNewId(), property);
+        final PropertyValueNode child1 = new PropertyValueNode(root.getNewId(), property.getId());
         child1.setComparator(PropertyValueComparator.EQ);
         child1.setValue(new FxNumber(1));
         root.addChild(child1);
-        final PropertyValueNode child2 = new PropertyValueNode(root.getNewId(), property);
+        final PropertyValueNode child2 = new PropertyValueNode(root.getNewId(), property.getId());
         child2.setComparator(PropertyValueComparator.NE);
         child2.setValue(new FxNumber(2));
         root.addChild(child2);
@@ -667,7 +667,7 @@ public class QueryNodeTreeTests {
         }
 
         public AssignmentValueNode createNode(int nodeId) {
-            AssignmentValueNode node = new AssignmentValueNode(nodeId, assignment);
+            AssignmentValueNode node = new AssignmentValueNode(nodeId, assignment.getId());
             node.setValue(value != null ? value.copy() : null);
             return node;
         }

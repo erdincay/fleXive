@@ -44,6 +44,7 @@ import com.flexive.faces.messages.FxFacesMsgWarn;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxSharedUtils;
+import static com.flexive.shared.EJBLookup.getResultPreferencesEngine;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxRuntimeException;
@@ -52,6 +53,9 @@ import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
 import org.apache.myfaces.component.html.ext.HtmlDataTable;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIViewRoot;
@@ -70,6 +74,8 @@ import java.util.*;
  * @version $Rev$
  */
 public class ResultPreferencesBean {
+    private static final Log LOG = LogFactory.getLog(ResultPreferencesBean.class);
+
     /**
      * Tomahawk HtmlDataTable wrapper that exposes the internal data model.
      * We need this for other components depending on data tables that persist their
@@ -91,6 +97,7 @@ public class ResultPreferencesBean {
     private String addOrderByName = null;
     private SortDirection addOrderByDirection = SortDirection.ASCENDING;
     private int editColumnIndex = -1;
+    private boolean forceSystemDefault;
 
     // cached select list
     private List<SelectItem> properties = null;
@@ -101,19 +108,51 @@ public class ResultPreferencesBean {
     // form components
     private WrappedHtmlDataTable selectedColumnsTable = null;
 
+
+    public ResultPreferencesBean() {
+        parseRequestParameters();
+    }
+
+    /**
+     * Parse the request parameters and perform actions as requested.
+     * Works only if the ResultPreferencesBean remains request-scoped!
+     */
+    private void parseRequestParameters() {
+        try {
+            String action = FxJsfUtils.getParameter("action");
+            if (StringUtils.isBlank(action)) {
+                // no action requested
+                return;
+            }
+            if ("loadSystemDefault".equals(action)) {
+                forceSystemDefault = true;
+            }
+        } catch (Exception e) {
+            LOG.error("Failed to parse request parameters: " + e.getMessage(), e);
+        }
+    }
+
     public String show() {
         return "resultPreferences";
     }
 
     public String save() {
         try {
-            EJBLookup.getResultPreferencesEngine().save(getResultPreferences(),
-                    type, viewType, location);
+            getResultPreferencesEngine().save(getResultPreferences(), type, viewType, location);
             new FxFacesMsgInfo("ResultPreferences.nfo.saved").addToContext();
         } catch (FxApplicationException e) {
             new FxFacesMsgErr("ResultPreferences.err.save", e).addToContext();
         }
         return show();
+    }
+
+    public void saveSystemDefault() {
+        try {
+            getResultPreferencesEngine().saveSystemDefault(getResultPreferences(), type, viewType, location);
+            new FxFacesMsgInfo("ResultPreferences.nfo.savedSystemDefault").addToContext();
+        } catch (FxApplicationException e) {
+            new FxFacesMsgErr("ResultPreferences.err.save", e).addToContext();
+        }
     }
 
     public String cancel() {
@@ -282,13 +321,25 @@ public class ResultPreferencesBean {
     }
 
     public boolean isCustomized() throws FxApplicationException {
-        return EJBLookup.getResultPreferencesEngine().isCustomized(type, viewType, location);
+        return getResultPreferencesEngine().isCustomized(type, viewType, location);
+    }
+
+    public boolean isForceSystemDefault() {
+        return forceSystemDefault;
+    }
+
+    public void setForceSystemDefault(boolean forceSystemDefault) {
+        this.forceSystemDefault = forceSystemDefault;
     }
 
     public ResultPreferencesEdit getResultPreferences() {
         if (resultPreferences == null) {
             try {
-                resultPreferences = EJBLookup.getResultPreferencesEngine().load(type, viewType, location).getEditObject();
+                if (forceSystemDefault) {
+                    resultPreferences = getResultPreferencesEngine().loadSystemDefault(type, viewType, location).getEditObject();
+                } else {
+                    resultPreferences = getResultPreferencesEngine().load(type, viewType, location).getEditObject();
+                }
             } catch (FxNotFoundException e) {
                 new FxFacesMsgWarn("ResultPreferences.wng.notFound").addToContext();
                 resultPreferences = new ResultPreferences().getEditObject();

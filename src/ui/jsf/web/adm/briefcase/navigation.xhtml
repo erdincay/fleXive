@@ -147,6 +147,11 @@
                 invokeContentAction("adm/search/query.jsf", "new");
             }
 
+            // open the FxSQL console
+            function createSqlQuery() {
+                loadContentPage("adm/main/sqlsearch/search.jsf");
+            }
+
             // open an existing query
             function openQuery(name) {
                 invokeContentAction("adm/search/query.jsf", "load", {"name": name});
@@ -253,6 +258,7 @@
         <fx:menu name="mainMenu">
             <fx:menuItem id="createQuery" icon="query" labelKey="Briefcase.menu.createQuery" clickHandler="createQuery"/>
             <fx:menuItem id="createBriefcase" icon="createBriefcase" labelKey="Briefcase.menu.create" clickHandler="createBriefcase"/>
+            <fx:menuItem id="sqlQuery" icon="database" labelKey="Briefcase.menu.createSqlQuery" clickHandler="createSqlQuery"/>
 
             <fx:menuSeparator/>
 

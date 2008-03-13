@@ -62,6 +62,18 @@ public interface ResultPreferencesEngine {
     ResultPreferences load(long typeId, ResultViewType viewType, ResultLocation location) throws FxApplicationException;
 
     /**
+     * Loads the system default result preferences for the given type. When no preferences are
+     * defined for the given parameters, an empty {@link ResultPreferences} object is returned.
+     *
+     * @param typeId    the content type ID, or -1 for the "overall" properties
+     * @param viewType  the view type (list, thumbs)
+     * @param location      the "location" where the results will be displayed (e.g. the main admin result pages)
+     * @return  the system default result preferences for the given type.
+     * @throws com.flexive.shared.exceptions.FxApplicationException if the result preferences could not be loaded
+     */
+    ResultPreferences loadSystemDefault(long typeId, ResultViewType viewType, ResultLocation location) throws FxApplicationException;
+
+    /**
      * Returns true when the user actually stored a configuration for the given parameters. Used to check
      * if fallbacks were used when loading preferences via {@link #load}.
      *
@@ -94,7 +106,7 @@ public interface ResultPreferencesEngine {
      * @param location      the "location" where the results will be displayed
      * @throws FxApplicationException   if the result preferences could not be updated
      */
-    void saveDefaultPreferences(ResultPreferences preferences, long typeId, ResultViewType viewType, ResultLocation location) throws FxApplicationException;
+    void saveSystemDefault(ResultPreferences preferences, long typeId, ResultViewType viewType, ResultLocation location) throws FxApplicationException;
 
     /**
      * Remove the current user's preferences for the given parameters. If no preferences exist

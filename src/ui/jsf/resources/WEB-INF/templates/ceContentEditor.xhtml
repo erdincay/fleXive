@@ -175,12 +175,12 @@
                                       icon="edit" action="enableEdit" id="enableEditButton"/>
                     <ui:fragment rendered="#{srcEditor.deleteAble}">
                         <adm:commandButton labelKey="Content.button.delete" location="both"
-                                           bean="#{srcEditor}" confirm="Content.confirm.delete"
+                                           bean="#{srcEditor}" confirmKey="Content.confirm.delete"
                                            icon="delete" action="delete" id="deleteButtonRO"/>
                     </ui:fragment>
                     <ui:fragment rendered="#{srcEditor.versionDeleteAble}">
                         <adm:commandButton labelKey="Content.button.deleteVersion" location="both"
-                                           bean="#{srcEditor}" confirm="Content.confirm.deleteVersion"
+                                           bean="#{srcEditor}" confirmKey="Content.confirm.deleteVersion"
                                            icon="delete" action="deleteCurrentVersion" id="deleteVersionButtonRO"/>
                     </ui:fragment>
                 </ui:fragment>
@@ -207,17 +207,17 @@
                                           icon="newVersion" action="saveInNewVersion" id="saveInNewVersionButton"/>
 
                         <adm:commandButton labelKey="Content.button.refresh" location="both"
-                                          bean="#{srcEditor}" confirm="Content.confirm.refresh"
+                                          bean="#{srcEditor}" confirmKey="Content.confirm.refresh"
                                           icon="reload" action="reload" id="reloadButton"/>
 
                         <ui:fragment rendered="#{srcEditor.deleteAble}">
                             <adm:commandButton labelKey="Content.button.delete" location="both"
-                                          bean="#{srcEditor}" confirm="Content.confirm.delete"
+                                          bean="#{srcEditor}" confirmKey="Content.confirm.delete"
                                           icon="delete" action="delete" id="deleteButton"/>
                         </ui:fragment>
                         <ui:fragment rendered="#{srcEditor.versionDeleteAble}">
                             <adm:commandButton labelKey="Content.button.deleteVersion" location="both"
-                                          bean="#{srcEditor}" confirm="Content.confirm.deleteVersion"
+                                          bean="#{srcEditor}" confirmKey="Content.confirm.deleteVersion"
                                           icon="delete" action="deleteCurrentVersion" id="deleteVersionButton"/>
                         </ui:fragment>
                     </ui:fragment>
@@ -228,7 +228,7 @@
                                       icon="compact" action="compact" id="compactButton"/>
 
                     <adm:commandButton labelKey="Content.button.cancel" location="both"
-                                      bean="#{srcEditor}" confirm="Content.confirm.abort"
+                                      bean="#{srcEditor}" confirmKey="Content.confirm.abort"
                                       icon="cancel" action="cancel" id="cancelButton"/>
                 </ui:fragment>
             </ui:fragment>

@@ -86,7 +86,7 @@
                             </adm:commandIcon>
                             <adm:commandIcon labelKey="ACL.button.delete" location="content"
                                             icon="delete"  action="delete"  bean="#{aclBean}"
-                                            id="deleteButton_#{item.id}" confirm="ACL.confirm.delete">
+                                            id="deleteButton_#{item.id}" confirmKey="ACL.confirm.delete">
                                 <f:setPropertyActionListener target="#{aclBean.id}" value="#{item.id}"/>
                             </adm:commandIcon>
                         </td>
@@ -100,7 +100,7 @@
                           icon="new" action="aclCreate" id="createAclButton"/>
         <adm:commandButton labelKey="ACL.button.deleteSelected" location="both"
                           onclick="storeFromFilterTable('testTable','listForm:selectedIds')"
-                          confirm="ACL.confirm.deleteSelected"
+                          confirmKey="ACL.confirm.deleteSelected"
                           bean="#{aclBean}" icon="delete" action="deleteSelected" id="deleteAclButton"/>
         <t:inputHidden value="#{aclBean.selectedIds}" id="selectedIds"/>
         <adm:toolbarPluginButtons/>

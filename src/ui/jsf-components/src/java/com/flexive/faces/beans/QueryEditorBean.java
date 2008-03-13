@@ -57,6 +57,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
 import javax.faces.event.ActionEvent;
+import javax.faces.context.FacesContext;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -131,6 +132,8 @@ public class QueryEditorBean implements Serializable {
             } else if ("load".equals(action)) {
                 setRootNode(EJBLookup.getSearchEngine().load(AdminResultLocations.ADMIN,
                         FxJsfUtils.getParameter("name")));
+            } else if ("loadSystemDefault".equals(action)) {
+                setRootNode(EJBLookup.getSearchEngine().loadSystemDefault(AdminResultLocations.ADMIN));
             }
             FxJsfUtils.resetFaceletsComponent(RESET_COMPONENT_ID);
         } catch (Exception e) {
@@ -153,31 +156,10 @@ public class QueryEditorBean implements Serializable {
      * @return the outcome
      */
     public String executeSearch() {
-        SearchResultBean resultBean = (SearchResultBean) FxJsfUtils.getManagedBean("fxSearchResultBean");
-        SqlQueryBuilder builder = getQueryBuilder();
-        if (StringUtils.isNotBlank(filterTypeName)) {
-            builder.filterType(filterTypeName);
-        }
-        if (rootNode == null || rootNode.getChildren().size() == 0) {
-            new FxFacesMsgErr("QueryEditor.err.emptyQuery").addToContext();
+        final SearchResultBean resultBean = (SearchResultBean) FxJsfUtils.getManagedBean("fxSearchResultBean");
+        final SqlQueryBuilder builder = getQueryBuilder();
+        if (!buildQuery(builder)) {
             return null;
-        }
-        try {
-            rootNode.buildSqlQuery(builder);
-        } catch (FxRuntimeException e) {
-            if (e.getConverted() instanceof FxInvalidQueryNodeException) {
-                final FxInvalidQueryNodeException queryNodeException = (FxInvalidQueryNodeException) e.getConverted();
-                // add error message for node component
-                final FxFacesMsgErr msg = new FxFacesMsgErr(queryNodeException);
-                msg.setId(String.valueOf(queryNodeException.getTreeNodeId()));
-                msg.addToContext();
-            } else {
-                new FxFacesMsgErr("QueryEditor.err.buildQuery", e).addToContext();
-            }
-            return show();
-        } catch (Exception e) {
-            new FxFacesMsgErr("QueryEditor.err.buildQuery", e).addToContext();
-            return show();
         }
         if (saveQuery) {
             if (StringUtils.isBlank(rootNode.getName())) {
@@ -199,6 +181,75 @@ public class QueryEditorBean implements Serializable {
         return resultBean.show();
     }
 
+    private boolean buildQuery(SqlQueryBuilder builder) {
+        if (StringUtils.isNotBlank(filterTypeName)) {
+            builder.filterType(filterTypeName);
+        }
+        if (rootNode == null || rootNode.getChildren().size() == 0) {
+            new FxFacesMsgErr("QueryEditor.err.emptyQuery").addToContext();
+            return false;
+        }
+        try {
+            rootNode.buildSqlQuery(builder);
+        } catch (FxRuntimeException e) {
+            if (e.getConverted() instanceof FxInvalidQueryNodeException) {
+                final FxInvalidQueryNodeException queryNodeException = (FxInvalidQueryNodeException) e.getConverted();
+                // add error message for node component
+                final FxFacesMsgErr msg = new FxFacesMsgErr(queryNodeException);
+                msg.setId(String.valueOf(queryNodeException.getTreeNodeId()));
+                msg.addToContext();
+            } else {
+                new FxFacesMsgErr("QueryEditor.err.buildQuery", e).addToContext();
+            }
+            return false;
+        } catch (Exception e) {
+            new FxFacesMsgErr("QueryEditor.err.buildQuery", e).addToContext();
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Sets the current user's default query for the current location.
+     */
+    public void saveDefault() {
+        if (!buildQuery(new SqlQueryBuilder())) {
+            return;
+        }
+        try {
+            EJBLookup.getSearchEngine().saveDefault(rootNode);
+            new FxFacesMsgInfo("QueryEditor.nfo.saveDefault").addToContext();
+        } catch (FxApplicationException e) {
+            new FxFacesMsgErr("QueryEditor.err.saveSystemDefault", e).addToContext();
+        }
+    }
+
+    /**
+     * Save the system default query (only global supervisors may call this).
+     */
+    public void saveSystemDefault() {
+        if (!buildQuery(new SqlQueryBuilder())) {
+            return;
+        }
+        try {
+            EJBLookup.getSearchEngine().saveSystemDefault(rootNode);
+            new FxFacesMsgInfo("QueryEditor.nfo.saveSystemDefault").addToContext();
+        } catch (FxApplicationException e) {
+            new FxFacesMsgErr("QueryEditor.err.saveSystemDefault", e).addToContext();
+        }
+    }
+
+    /**
+     * Loads the system-wide default query.
+     */
+    public void loadSystemDefault() {
+        try {
+            setRootNode(EJBLookup.getSearchEngine().loadSystemDefault(location));
+        } catch (FxApplicationException e) {
+            new FxFacesMsgErr("QueryEditor.err.loadSystemDefault", e).addToContext();
+        }
+    }
+
     /**
      * Add the (property) assignment stored in addAssignmentId
      * to the node identified by addAssignmentNodeId.
@@ -206,8 +257,7 @@ public class QueryEditorBean implements Serializable {
      * @param event the action event
      */
     public void addProperty(ActionEvent event) {
-        final FxPropertyAssignment assignment = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(addAssignmentId);
-        addQueryNode(new AssignmentValueNode(getRootNode().getNewId(), assignment));
+        addQueryNode(new AssignmentValueNode(getRootNode().getNewId(), addAssignmentId));
     }
 
     /**
@@ -231,7 +281,7 @@ public class QueryEditorBean implements Serializable {
      */
     public void addTypeQuery(ActionEvent event) {
         final FxType type = CacheAdmin.getEnvironment().getType(addAssignmentId);
-        final AssignmentValueNode node = new AssignmentValueNode(getRootNode().getNewId(), CacheAdmin.getEnvironment().getAssignment("ROOT/TYPEDEF"));
+        final AssignmentValueNode node = new AssignmentValueNode(getRootNode().getNewId(), CacheAdmin.getEnvironment().getAssignment("ROOT/TYPEDEF").getId());
         node.setValue(new FxLargeNumber(false, type.getId()));
         addQueryNode(node);
     }
@@ -434,6 +484,7 @@ public class QueryEditorBean implements Serializable {
      * @return the session attribute key for storing the current query
      */
     private String getQueryTreeStore() {
-        return "FlexiveSearchQueryTree/" + location + "/" + QueryRootNode.Type.CONTENTSEARCH;
+        return "FlexiveSearchQueryTree/" + location + "/" + QueryRootNode.Type.CONTENTSEARCH
+                + FacesContext.getCurrentInstance().getViewRoot().getViewId();
     }
 }

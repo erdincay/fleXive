@@ -46,7 +46,7 @@ import com.flexive.shared.search.*;
 
 void setupResultPreferences() {
     // default list view
-    EJBLookup.getResultPreferencesEngine().saveDefaultPreferences(
+    EJBLookup.getResultPreferencesEngine().saveSystemDefault(
             new ResultPreferences(
                 [new ResultColumnInfo(Table.CONTENT, "@pk", null),
                  new ResultColumnInfo(Table.CONTENT, "caption", null)],
@@ -54,7 +54,7 @@ void setupResultPreferences() {
                 25, 0
             ), -1,
             ResultViewType.LIST, AdminResultLocations.DEFAULT);
-    EJBLookup.getResultPreferencesEngine().saveDefaultPreferences(
+    EJBLookup.getResultPreferencesEngine().saveSystemDefault(
             new ResultPreferences(
                 [new ResultColumnInfo(Table.CONTENT, "@pk", null),
                  new ResultColumnInfo(Table.CONTENT, "caption", null)],
@@ -63,14 +63,14 @@ void setupResultPreferences() {
             ), -1,
             ResultViewType.LIST, AdminResultLocations.ADMIN);
     // default thumbnail view
-    EJBLookup.getResultPreferencesEngine().saveDefaultPreferences(
+    EJBLookup.getResultPreferencesEngine().saveSystemDefault(
             new ResultPreferences(
                 [new ResultColumnInfo(Table.CONTENT, "@pk", null)],
                 [new ResultOrderByInfo(Table.CONTENT, "@pk", null, SortDirection.DESCENDING)],
                 25, 0
             ), -1,
             ResultViewType.THUMBNAILS, AdminResultLocations.DEFAULT);
-    EJBLookup.getResultPreferencesEngine().saveDefaultPreferences(
+    EJBLookup.getResultPreferencesEngine().saveSystemDefault(
             new ResultPreferences(
                 [new ResultColumnInfo(Table.CONTENT, "@pk", null)],
                 [new ResultOrderByInfo(Table.CONTENT, "@pk", null, SortDirection.DESCENDING)],

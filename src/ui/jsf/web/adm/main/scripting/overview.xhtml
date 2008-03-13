@@ -76,7 +76,7 @@
                                     <ui:fragment rendered="#{fxSystemBean.isInRole['ScriptManagement']}">
                                         <adm:commandIcon labelKey="Script.button.delete" location="content"
                                                          icon="delete" action="deleteScript" bean="#{scriptBean}"
-                                                         id="deleteButton_#{item.id}" confirm="Script.confirm.delete">
+                                                         id="deleteButton_#{item.id}" confirmKey="Script.confirm.delete">
                                             <f:setPropertyActionListener target="#{scriptBean.id}" value="#{item.id}"/>
                                         </adm:commandIcon>
                                     </ui:fragment>

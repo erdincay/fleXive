@@ -39,16 +39,14 @@ import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxRuntimeException;
+import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.search.*;
 import com.flexive.shared.structure.FxEnvironment;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.ejb.EJB;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionManagement;
-import javax.ejb.TransactionManagementType;
+import javax.ejb.*;
 import java.util.Arrays;
 
 /**
@@ -68,6 +66,7 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
     UserConfigurationEngineLocal userConfiguration;
 
     /** {@inheritDoc} */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public ResultPreferences load(long typeId, ResultViewType viewType, ResultLocation location) throws FxApplicationException {
         ResultPreferences preferences;
         try {
@@ -106,6 +105,18 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
     }
 
     /** {@inheritDoc} */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public ResultPreferences loadSystemDefault(long typeId, ResultViewType viewType, ResultLocation location) throws FxApplicationException {
+        try {
+            return divisionConfiguration.get(SystemParameters.USER_RESULT_PREFERENCES, getKey(typeId, viewType, location));
+        } catch (FxNotFoundException e) {
+            // return empty result preferences
+            return new ResultPreferences();
+        }
+    }
+
+    /** {@inheritDoc} */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public boolean isCustomized(long typeId, ResultViewType viewType, ResultLocation location) throws FxApplicationException {
         try {
             configuration.get(SystemParameters.USER_RESULT_PREFERENCES, getKey(typeId, viewType, location));
@@ -116,17 +127,26 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
     }
 
     /** {@inheritDoc} */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void save(ResultPreferences preferences, long typeId, ResultViewType viewType,ResultLocation location) throws FxApplicationException {
+        if (preferences.getSelectedColumns().isEmpty()) {
+            throw new FxInvalidParameterException("preferences", "ex.ResultPreferences.save.empty");
+        }
         configuration.put(SystemParameters.USER_RESULT_PREFERENCES, getKey(typeId, viewType, location), preferences);
     }
 
     /** {@inheritDoc} */
-    public void saveDefaultPreferences(ResultPreferences preferences, long typeId, ResultViewType viewType, ResultLocation location) throws FxApplicationException {
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void saveSystemDefault(ResultPreferences preferences, long typeId, ResultViewType viewType, ResultLocation location) throws FxApplicationException {
+        if (preferences.getSelectedColumns().isEmpty()) {
+            throw new FxInvalidParameterException("preferences", "ex.ResultPreferences.save.empty");
+        }
         // div conf already checks for supervisor access
         divisionConfiguration.put(SystemParameters.USER_RESULT_PREFERENCES, getKey(typeId, viewType, location), preferences);
     }
 
     /** {@inheritDoc} */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void remove(long typeId, ResultViewType viewType, ResultLocation location) throws FxApplicationException {
         configuration.remove(SystemParameters.USER_RESULT_PREFERENCES, getKey(typeId, viewType, location));
     }

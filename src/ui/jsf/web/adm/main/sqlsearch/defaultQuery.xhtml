@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+
+    <ui:define name="searchIds">"sqlPopupContainer"</ui:define>
+    
+    <ui:define name="body">
+        <a4j:form id="frm">
+            <adm:tab labelKey="SqlSearch.defaultQuery.title" active="true" id="tab1"/>
+
+            <script type="text/javascript" src="pub/js/queryEditor.js"/>
+            <script type="text/javascript" src="adm/js/adminQueryEditor.js"/>
+
+            <adm:infoBox>
+                #{fxMessageBean['SqlSearch.defaultQuery.info']}
+            </adm:infoBox>
+
+            <a4j:region>
+	            <h:inputHidden id="addAssignmentId" value="#{fxQueryEditorBean.addAssignmentId}"/>
+	            <h:inputHidden id="addAssignmentNodeId" value="#{fxQueryEditorBean.addAssignmentNodeId}"/>
+                <h:inputHidden id="nodeSelection" value="#{fxQueryEditorBean.nodeSelection}"/>
+                <h:inputHidden id="addNodeLive" value="#{fxQueryEditorBean.addNodeLive}"/>
+
+                <fx:queryEditor nodes="#{fxQueryEditorBean.rootNode.children}"
+                                addAssignmentNode="form['frm:addAssignmentNodeId']"
+                                addAssignmentNodeValue="#{fxQueryEditorBean.addAssignmentNodeId}"
+                                selectionNode="form['frm:nodeSelection']"
+                                emptyMessageKey="QueryEditor.label.emptyQuery.backend"/>
+            </a4j:region>
+
+            <br/>
+            <br/>
+
+            <adm:commandButton id="saveButton" bean="#{fxQueryEditorBean}" action="saveSystemDefault"
+                               labelKey="SqlSearch.defaultQuery.save" icon="save">
+                <f:setPropertyActionListener target="#{fxQueryEditorBean.location}" value="#{fxSystemBean.adminResultLocation}"/>
+           </adm:commandButton>
+
+            <adm:commandButton id="loadButton" bean="#{fxQueryEditorBean}" action="loadSystemDefault"
+                               labelKey="SqlSearch.defaultQuery.load" icon="reload">
+                <f:setPropertyActionListener target="#{fxQueryEditorBean.location}" value="#{fxSystemBean.adminResultLocation}"/>    
+           </adm:commandButton>
+
+            <adm:toolbarPluginButtons/>
+        </a4j:form>
+    </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

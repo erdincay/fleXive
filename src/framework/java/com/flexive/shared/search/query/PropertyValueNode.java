@@ -39,6 +39,8 @@ import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.mapper.InputMapper;
+import com.flexive.shared.CacheAdmin;
+import static com.flexive.shared.CacheAdmin.getEnvironment;
 
 import java.util.List;
 
@@ -50,38 +52,38 @@ import java.util.List;
  */
 public class PropertyValueNode extends QueryValueNode<FxValue, PropertyValueComparator> {
     private static final long serialVersionUID = -8094968229492570983L;
-    private FxProperty property;
+    private long propertyId;
 
     /**
      * Create a new property query node.
      *
      * @param id    Internal and unique ID of the node
-     * @param property the property to be set with this node
+     * @param propertyId the property to be set with this node
      */
-    public PropertyValueNode(int id, FxProperty property) {
+    public PropertyValueNode(int id, long propertyId) {
         super(id);
-        this.property = property;
+        this.propertyId = propertyId;
         this.comparator = PropertyValueComparator.EQ;
-        if (property != null) {
-            this.value = property.getEmptyValue();
+        if (propertyId != -1) {
+            this.value = getEnvironment().getProperty(propertyId).getEmptyValue();
         } else {
             setValue(new FxString(""));
         }
     }
 
     public FxProperty getProperty() {
-        return property;
+        return propertyId != -1 ? getEnvironment().getProperty(propertyId) : null;
     }
 
-    public void setProperty(FxProperty property) {
-        this.property = property;
+    public void setPropertyId(long propertyId) {
+        this.propertyId = propertyId;
     }
 
     /** {@inheritDoc} */
     @Override
     public boolean isValid() {
         try {
-            this.comparator.getSql(property, value);
+            this.comparator.getSql(getProperty(), value);
             // if we can generate a SQL epxression, check additional property constraints
             return true; // TODO property check //return property.isValid(value);
         } catch (RuntimeException e) {
@@ -94,7 +96,7 @@ public class PropertyValueNode extends QueryValueNode<FxValue, PropertyValueComp
     @Override
     public void buildSqlQuery(SqlQueryBuilder builder) {
         try {
-            builder.condition(property, comparator, value);
+            builder.condition(getProperty(), comparator, value);
         } catch (FxRuntimeException e) {
             throw new FxInvalidQueryNodeException(getId(), e.getConverted()).asRuntimeException();
         }
@@ -103,18 +105,18 @@ public class PropertyValueNode extends QueryValueNode<FxValue, PropertyValueComp
     /** {@inheritDoc} */
     @Override
     public FxString getLabel() {
-        return property.getLabel();
+        return getProperty() != null ? getProperty().getLabel() : new FxString("");
     }
 
     /** {@inheritDoc} */
     @Override
     public List<PropertyValueComparator> getNodeComparators() {
-        return PropertyValueComparator.getAvailable(property.getDataType());
+        return PropertyValueComparator.getAvailable(getProperty().getDataType());
     }
 
     /** {@inheritDoc} */
     @Override
     public InputMapper getInputMapper() {
-        return inputMapper != null ? inputMapper : getPropertyInputMapper(property);
+        return inputMapper != null ? inputMapper : getPropertyInputMapper(getProperty());
     }
 }

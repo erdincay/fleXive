@@ -134,6 +134,15 @@ public interface SearchEngine {
     QueryRootNode loadDefault(ResultLocation location) throws FxApplicationException;
 
     /**
+     * Load the system-wide default query for the given type/location. If none is set, an empty query is returned.
+     *
+     * @param location  the query location, usually matched to the location of its result
+     * @return  the default query for the given type/location
+     * @throws FxApplicationException   if the default query could not be loaded
+     */
+    QueryRootNode loadSystemDefault(ResultLocation location) throws FxApplicationException;
+
+    /**
      * Returns the names of the stored queries for the calling user/location. The query names
      * are also the keys for retrieving the actual search query via
      * {@link #load(com.flexive.shared.search.ResultLocation, String)}.

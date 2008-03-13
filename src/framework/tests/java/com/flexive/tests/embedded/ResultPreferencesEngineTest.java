@@ -138,7 +138,7 @@ public class ResultPreferencesEngineTest {
         final ResultPreferences rp = createResultPreferences();
         final UserTicket ticket = FxContext.get().getTicket();
         try {
-            EJBLookup.getResultPreferencesEngine().saveDefaultPreferences(rp, -10,
+            EJBLookup.getResultPreferencesEngine().saveSystemDefault(rp, -10,
                     ResultViewType.LIST, AdminResultLocations.ADMIN);
             assert ticket.isGlobalSupervisor() : "Only global supervisors might update the default result preferences.";
         } catch (FxNoAccessException e) {

@@ -473,11 +473,16 @@ TreeHandler.prototype = {
     onSelect: function(messages) {
         for (var i in messages) {
             var node = messages[i];
+            var link = node["link"];
             if (this.clickHandler) {
                 this.clickHandler(node, false);
-            } else if (node["link"]) {
-                // open link in other frame
-                parent.contentFrameObj.src = node["link"];
+            } else if (link) {
+                if (link.indexOf("javascript:") == 0) {
+                    eval(link.substr("javascript:".length));
+                } else {
+                    // open link in other frame
+                    parent.contentFrameObj.src = link;
+                }
             } else if (node.children.length > 0) {
                 // default action: toggle node
                 if (node.isExpanded) {

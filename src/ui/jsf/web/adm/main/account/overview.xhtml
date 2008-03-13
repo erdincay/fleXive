@@ -102,7 +102,7 @@
                                 <ui:fragment rendered="#{!item.systemInternalAccount}">
                                     <adm:commandIcon labelKey="User.button.delete" location="content"
                                                      icon="delete" action="deleteUser" bean="#{accountBean}"
-                                                     id="deleteButton_#{item.id}" confirm="User.confirm.delete">
+                                                     id="deleteButton_#{item.id}" confirmKey="User.confirm.delete">
                                         <f:setPropertyActionListener target="#{accountBean.accountIdFiler}"
                                                                      value="#{item.id}"/>
                                     </adm:commandIcon>

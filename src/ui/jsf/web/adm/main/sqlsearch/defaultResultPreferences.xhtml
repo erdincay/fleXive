@@ -14,14 +14,17 @@
 
     <ui:define name="body">
         <a4j:form id="frm">
-            <adm:resultTabs activeTab=""/>
-            <adm:tab label="#{fxMessageBean['ResultPreferences.tabtitle.edit']}" active="true" id="resultPreferences"/>
+            <adm:tab labelKey="SqlSearch.defaultResultPreferences.title" active="true" id="tab1"/>
+
+            <adm:infoBox>
+                #{fxMessageBean['SqlSearch.defaultPreferences.info']}
+            </adm:infoBox>
 
             <a4j:region>
                 <adm:resultPreferencesEditor/>
 
-                <adm:commandButton id="saveButton" icon="save" labelKey="ResultPreferences.button.save" bean="#{resultPreferencesBean}" action="save" location="both"/>
-                <adm:commandButton id="cancelButton" icon="cancel" labelKey="ResultPreferences.button.cancel" bean="#{resultPreferencesBean}" action="cancel" location="both"/>
+                <adm:commandButton id="saveButton" icon="save" labelKey="SqlSearch.defaultPreferences.save" bean="#{resultPreferencesBean}" action="saveSystemDefault" location="both"/>
+                <adm:commandButton id="loadButton" icon="cancel" labelKey="SqlSearch.defaultPreferences.load" bean="#{resultPreferencesBean}" action="loadSystemDefault" location="both"/>
 
             </a4j:region>
 
