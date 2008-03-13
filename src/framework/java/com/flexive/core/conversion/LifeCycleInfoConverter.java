@@ -101,7 +101,7 @@ public class LifeCycleInfoConverter implements Converter {
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();
         } catch (ParseException e) {
-            throw new FxConversionException(e, "ex.conversion.error", Date.class.getCanonicalName(), convDate,
+            throw new FxConversionException(e, "ex.conversion.value.error", Date.class.getCanonicalName(), convDate,
                     e.getMessage()).asRuntimeException();
         }
     }

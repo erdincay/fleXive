@@ -163,7 +163,7 @@ public class ScriptBean {
         ensureScriptIdSet();
         setSinfo(CacheAdmin.getEnvironment().getScript(id).asEditable());
         try {
-            this.mapping = scriptInterface.loadScriptMapping(null, id);
+            this.mapping = scriptInterface.loadScriptMapping(id);
             this.typeMappingNames = new HashMap<Long, String>();
             // we need the type names for the user interface and the type ids for the links
             for (FxScriptMappingEntry entry : this.mapping.getMappedTypes()) {

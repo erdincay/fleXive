@@ -201,7 +201,9 @@ public class ApplicationDescriptorBuilderTask extends Task {
                 jars.add(f);
             else if (f.getAbsolutePath().toLowerCase().endsWith(".war"))
                 wars.add(f);
-            else if (!f.getName().startsWith(".") && !f.getName().equals("drops.archives")) //ignore .svn, .cvs etc files
+            else if (!f.getName().startsWith(".") && !f.getName().equals("drops.archives")
+                    && !f.getName().equals("format") && !f.getName().equals("entries")
+                    && !f.getName().equals("all-wcprops")) //ignore .svn, .cvs etc files
                 System.out.println("Warning: Unrecognized drop file: " + f.getName());
         }
     }

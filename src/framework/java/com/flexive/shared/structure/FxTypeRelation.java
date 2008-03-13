@@ -46,8 +46,8 @@ public class FxTypeRelation implements Serializable {
     private static final long serialVersionUID = 5059296100111806264L;
     private FxType source;
     private FxType destination;
-    protected int maxSource;
-    protected int maxDestination;
+    protected long maxSource;
+    protected long maxDestination;
 
     /**
      * Constructor, only used internally.
@@ -58,7 +58,7 @@ public class FxTypeRelation implements Serializable {
      * @param maxSource      maximum number of allowed source instances, unlimited if 0
      * @param maxDestination maximum number of allowed destination instances, unlimited if 0
      */
-    public FxTypeRelation(FxType source, FxType destination, int maxSource, int maxDestination) {
+    public FxTypeRelation(FxType source, FxType destination, long maxSource, long maxDestination) {
         if( source == null || destination == null )
             throw new IllegalArgumentException("source and destination must not be null!");
         this.source = source;
@@ -90,7 +90,7 @@ public class FxTypeRelation implements Serializable {
      *
      * @return maximum number of allowed source instances, unlimited if 0
      */
-    public int getMaxSource() {
+    public long getMaxSource() {
         return maxSource;
     }
 
@@ -99,7 +99,7 @@ public class FxTypeRelation implements Serializable {
      *
      * @return maximum number of allowed destination instances, unlimited if 0
      */
-    public int getMaxDestination() {
+    public long getMaxDestination() {
         return maxDestination;
     }
 

@@ -404,8 +404,8 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                         throw new FxInvalidParameterException("ex.structure.type.relation.wrongTarget", type.getName(), rel.getDestination().getName());
                     ps.setLong(2, rel.getSource().getId());
                     ps.setLong(3, rel.getDestination().getId());
-                    ps.setInt(4, rel.getMaxSource());
-                    ps.setInt(5, rel.getMaxDestination());
+                    ps.setLong(4, rel.getMaxSource());
+                    ps.setLong(5, rel.getMaxDestination());
                     ps.addBatch();
                     htracker.track(type, "history.type.update.relation.add", type.getName(), rel.getSource().getName(),
                             rel.getMaxSource(), rel.getDestination().getName(), rel.getMaxDestination());
@@ -428,8 +428,8 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                     //TODO: check if maxSource/maxDestination is not violated if > 0
                     ps.setLong(4, rel.getSource().getId());
                     ps.setLong(5, rel.getDestination().getId());
-                    ps.setInt(1, rel.getMaxSource());
-                    ps.setInt(2, rel.getMaxDestination());
+                    ps.setLong(1, rel.getMaxSource());
+                    ps.setLong(2, rel.getMaxDestination());
                     ps.addBatch();
                     htracker.track(type, "history.type.update.relation.update", type.getName(), rel.getSource().getName(),
                             rel.getMaxSource(), rel.getDestination().getName(), rel.getMaxDestination());

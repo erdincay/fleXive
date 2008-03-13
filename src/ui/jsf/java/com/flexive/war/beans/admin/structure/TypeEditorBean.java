@@ -70,8 +70,8 @@ public class TypeEditorBean {
     private long defaultSelectListTypeId = CacheAdmin.getEnvironment().getTypes(true, true, true, false).get(0).getId();
     private long relSourceIdFiler = defaultSelectListTypeId;
     private long relDestIdFiler = defaultSelectListTypeId;
-    private int relMaxSourceFiler = DEFAULT_REL_MAX;
-    private int relMaxDestFiler = DEFAULT_REL_MAX;
+    private long relMaxSourceFiler = DEFAULT_REL_MAX;
+    private long relMaxDestFiler = DEFAULT_REL_MAX;
     private boolean relSourceUnlimitedFiler = true;
     private boolean relDestUnlimitedFiler = true;
 
@@ -349,19 +349,19 @@ public class TypeEditorBean {
         this.relDestIdFiler = relDestIdFiler;
     }
 
-    public int getRelMaxDestFiler() {
+    public long getRelMaxDestFiler() {
         return relMaxDestFiler;
     }
 
-    public void setRelMaxDestFiler(int relMaxDestFiler) {
+    public void setRelMaxDestFiler(long relMaxDestFiler) {
         this.relMaxDestFiler = relMaxDestFiler;
     }
 
-    public int getRelMaxSourceFiler() {
+    public long getRelMaxSourceFiler() {
         return relMaxSourceFiler;
     }
 
-    public void setRelMaxSourceFiler(int relMaxSourceFiler) {
+    public void setRelMaxSourceFiler(long relMaxSourceFiler) {
         this.relMaxSourceFiler = relMaxSourceFiler;
     }
 
@@ -583,8 +583,8 @@ public class TypeEditorBean {
     public class WrappedRelation {
         private long sourceId;
         private long destId;
-        protected int maxSource;
-        protected int maxDest;
+        protected long maxSource;
+        protected long maxDest;
 
         WrappedRelation(FxTypeRelation r) {
             this.sourceId = r.getSource().getId();
@@ -593,7 +593,7 @@ public class TypeEditorBean {
             this.maxDest = r.getMaxDestination();
         }
 
-        public WrappedRelation(long sourceId, long destId, int maxSource, int maxDest) {
+        public WrappedRelation(long sourceId, long destId, long maxSource, long maxDest) {
             this.sourceId = sourceId;
             this.destId = destId;
             this.maxSource = maxSource;
@@ -622,19 +622,19 @@ public class TypeEditorBean {
             this.destId = destinationId;
         }
 
-        public int getMaxSource() {
+        public long getMaxSource() {
             return maxSource;
         }
 
-        public void setMaxSource(int maxSource) {
+        public void setMaxSource(long maxSource) {
             this.maxSource = maxSource;
         }
 
-        public int getMaxDest() {
+        public long getMaxDest() {
             return maxDest;
         }
 
-        public void setMaxDest(int maxDestination) {
+        public void setMaxDest(long maxDestination) {
             this.maxDest = maxDestination;
         }
 

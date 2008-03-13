@@ -48,12 +48,22 @@ public class FxPreloadType extends FxType implements Serializable {
     private static final long serialVersionUID = -2090546406012929252L;
 
     /**
-     * Constructor
+     * Constructor - used for building the environment
      *
      * @param id id of the type
      */
     public FxPreloadType(long id) {
         super(id, null, null, "preloaded", null, null, null, null, TypeMode.Preload,
+                null, null, (byte) 0, false, 0, 0, 0, 0, null, null, null);
+    }
+
+    /**
+     * Constructor - used for import
+     *
+     * @param name name of the type
+     */
+    public FxPreloadType(String name) {
+        super(-1, null, null, name, null, null, null, null, TypeMode.Preload,
                 null, null, (byte) 0, false, 0, 0, 0, 0, null, null, null);
     }
 }

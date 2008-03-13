@@ -493,7 +493,7 @@ public final class FxFormatUtils {
             value = unquote(value);
             return Boolean.parseBoolean(value) || "1".equals(value);
         } catch (Exception e) {
-            throw new FxConversionException(e, "ex.conversion.error", FxBoolean.class.getCanonicalName(), value,
+            throw new FxConversionException(e, "ex.conversion.value.error", FxBoolean.class.getCanonicalName(), value,
                     e.getMessage()).asRuntimeException();
         }
     }
@@ -508,7 +508,7 @@ public final class FxFormatUtils {
         try {
             return Integer.parseInt(unquote(value));
         } catch (Exception e) {
-            throw new FxConversionException(e, "ex.conversion.error", FxNumber.class.getCanonicalName(), value,
+            throw new FxConversionException(e, "ex.conversion.value.error", FxNumber.class.getCanonicalName(), value,
                     e.getMessage()).asRuntimeException();
         }
     }
@@ -523,7 +523,7 @@ public final class FxFormatUtils {
         try {
             return Long.parseLong(unquote(value));
         } catch (Exception e) {
-            throw new FxConversionException(e, "ex.conversion.error", FxLargeNumber.class.getCanonicalName(), value,
+            throw new FxConversionException(e, "ex.conversion.value.error", FxLargeNumber.class.getCanonicalName(), value,
                     e.getMessage()).asRuntimeException();
         }
     }
@@ -538,7 +538,7 @@ public final class FxFormatUtils {
         try {
             return Double.parseDouble(unquote(value));
         } catch (Exception e) {
-            throw new FxConversionException(e, "ex.conversion.error", FxDouble.class.getCanonicalName(), value,
+            throw new FxConversionException(e, "ex.conversion.value.error", FxDouble.class.getCanonicalName(), value,
                     e.getMessage()).asRuntimeException();
         }
     }
@@ -553,7 +553,7 @@ public final class FxFormatUtils {
         try {
             return Float.parseFloat(unquote(value));
         } catch (Exception e) {
-            throw new FxConversionException(e, "ex.conversion.error", FxFloat.class.getCanonicalName(), value,
+            throw new FxConversionException(e, "ex.conversion.value.error", FxFloat.class.getCanonicalName(), value,
                     e.getMessage()).asRuntimeException();
         }
     }
@@ -574,7 +574,7 @@ public final class FxFormatUtils {
                 return new SimpleDateFormat(UNIVERSAL_TIMEFORMAT).parse(unquote(value));
             }
         } catch (Exception e) {
-            throw new FxConversionException(e, "ex.conversion.error", FxDate.class.getCanonicalName(), value,
+            throw new FxConversionException(e, "ex.conversion.value.error", FxDate.class.getCanonicalName(), value,
                     e.getMessage()).asRuntimeException();
         }
     }
@@ -595,7 +595,7 @@ public final class FxFormatUtils {
                 return new SimpleDateFormat(UNIVERSAL_TIMEFORMAT).parse(unquote(value));
             }
         } catch (Exception e) {
-            throw new FxConversionException(e, "ex.conversion.error", FxDate.class.getCanonicalName(), value,
+            throw new FxConversionException(e, "ex.conversion.value.error", FxDate.class.getCanonicalName(), value,
                     e.getMessage()).asRuntimeException();
         }
     }

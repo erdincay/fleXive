@@ -126,7 +126,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             ps.setLong(1, scriptId);
             ResultSet rs = ps.executeQuery();
             if (rs == null || !rs.next())
-                throw new FxNotFoundException("ex.scripting.notFound", scriptId);
+                throw new FxNotFoundException("ex.scripting.notFound.id", scriptId);
             code = rs.getString(1);
         } catch (SQLException exc) {
             ctx.setRollbackOnly();
@@ -155,7 +155,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             ps.setLong(1, scriptId);
             ResultSet rs = ps.executeQuery();
             if (rs == null || !rs.next())
-                throw new FxNotFoundException("ex.scripting.notFound", scriptId);
+                throw new FxNotFoundException("ex.scripting.notFound.id", scriptId);
             si = new FxScriptInfo(scriptId, FxScriptEvent.getById(rs.getLong(4)), rs.getString(1), rs.getString(2),
                     rs.getString(3), rs.getBoolean(5));
         } catch (SQLException exc) {
@@ -833,6 +833,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      * @param param           boolean parameter that will be flagged as "true" once the scripts are run
      * @param prefix          resource directory prefix
      * @param applicationName the corresponding application name (for debug messages)
+     * @throws FxApplicationException on errors
      */
     private void runOnce(Parameter<Boolean> param, String prefix, String applicationName) throws FxApplicationException {
         try {
@@ -1054,14 +1055,11 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
     /**
      * {@inheritDoc}
      */
-    public FxScriptMapping loadScriptMapping(Connection _con, long scriptId) throws FxLoadException, SQLException {
+    public FxScriptMapping loadScriptMapping(long scriptId) throws FxLoadException, SQLException {
         FxScriptMapping mapping;
         PreparedStatement ps_a = null, ps_t = null;
         String sql;
-        Connection con = _con;
-        if (con == null)
-            con = Database.getDbConnection();
-
+        Connection con = Database.getDbConnection();
 
         List<FxScriptMappingEntry> e_ass;
         List<FxScriptMappingEntry> e_types;
@@ -1119,9 +1117,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             } catch (SQLException e) {
                 //ignore
             }
-            if (_con == null) {
-                Database.closeObjects(ScriptingEngineBean.class, con, ps_a);
-            }
+            Database.closeObjects(ScriptingEngineBean.class, con, ps_a);
         }
         return mapping;
 

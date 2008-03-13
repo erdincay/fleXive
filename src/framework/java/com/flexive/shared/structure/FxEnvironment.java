@@ -397,7 +397,7 @@ public interface FxEnvironment extends Serializable {
      * Get a Step by its name
      *
      * @param workflowId id of the workflow
-     * @param stepName name of the step
+     * @param stepName   name of the step
      * @return Step
      */
     Step getStep(long workflowId, String stepName);
@@ -470,6 +470,14 @@ public interface FxEnvironment extends Serializable {
      * @return the script info object
      */
     FxScriptInfo getScript(long scriptId);
+
+    /**
+     * Get a script by its name (which is unique)
+     *
+     * @param name requested script name
+     * @return the script info object
+     */
+    FxScriptInfo getScript(String name);
 
     /**
      * Get the timestamp when this environment was loaded

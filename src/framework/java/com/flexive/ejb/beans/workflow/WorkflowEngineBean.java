@@ -168,7 +168,7 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
         // Permission checks
         FxPermissionUtils.checkRole(ticket, Role.WorkflowManagement);
 
-        Workflow org = CacheAdmin.getEnvironment().getWorkflow(workflow.getId());
+        Workflow org = CacheAdmin.getEnvironment().getWorkflow(workflow.getId()).asEditable();
 
         List<Step> dups = new ArrayList<Step>(2); //duplicates (removed and re-added)
         for (Step check : workflow.getSteps()) {
@@ -199,9 +199,11 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
                                     break;
                                 }
                             Route nr = new Route(r.getId(), r.getGroupId(), _from, r.getToStepId());
-                            workflow.getRoutes().remove(r);
-                            workflow.getRoutes().add(nr);
-                            changes = true;
+                            if (!workflow.getRoutes().contains(nr)) {
+                                workflow.getRoutes().remove(r);
+                                workflow.getRoutes().add(nr);
+                                changes = true;
+                            }
                             break;
                         } else if (r.getToStepId() == s.getId()) {
                             long _to = r.getToStepId();
@@ -211,9 +213,11 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
                                     break;
                                 }
                             Route nr = new Route(r.getId(), r.getGroupId(), r.getFromStepId(), _to);
-                            workflow.getRoutes().remove(r);
-                            workflow.getRoutes().add(nr);
-                            changes = true;
+                            if (!workflow.getRoutes().contains(nr)) {
+                                workflow.getRoutes().remove(r);
+                                workflow.getRoutes().add(nr);
+                                changes = true;
+                            }
                             break;
                         }
                         if (changes) break;

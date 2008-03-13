@@ -34,16 +34,29 @@
 package com.flexive.core.conversion;
 
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.EJBLookup;
+import com.flexive.shared.value.FxString;
+import com.flexive.shared.value.FxValue;
+import com.flexive.shared.content.FxPermissionUtils;
+import com.flexive.shared.workflow.Workflow;
+import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.LifeCycleInfo;
+import com.flexive.shared.exceptions.FxConversionException;
 import com.flexive.shared.scripting.FxScriptEvent;
-import com.flexive.shared.structure.FxAssignment;
-import com.flexive.shared.structure.FxEnvironment;
-import com.flexive.shared.structure.FxType;
-import com.flexive.shared.structure.FxTypeRelation;
+import com.flexive.shared.scripting.FxScriptMapping;
+import com.flexive.shared.scripting.FxScriptMappingEntry;
+import com.flexive.shared.structure.*;
+import com.flexive.core.structure.FxPreloadType;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+
+import java.util.List;
+import java.util.ArrayList;
+
+import org.apache.commons.lang.ArrayUtils;
 
 /**
  * XStream converter for FxType
@@ -107,9 +120,19 @@ public class FxTypeConverter implements Converter {
                 writer.startNode("scriptEvents");
                 for (FxScriptEvent event : type.getScriptEvents()) {
                     for (long script : type.getScriptMapping(event)) {
-                        writer.startNode("mapping");
+                        writer.startNode("scriptMapping");
                         writer.addAttribute("event", event.name());
                         writer.addAttribute("script", env.getScript(script).getName());
+                        for( FxScriptMappingEntry sme: env.getScriptMapping(script).getMappedTypes() ) {
+                            if( sme.getId() == type.getId() || ArrayUtils.contains(sme.getDerivedIds(), type.getId())) {
+                                writer.addAttribute("active", String.valueOf(sme.isActive()));
+                                writer.addAttribute("derivedUsage", String.valueOf(sme.isDerivedUsage()));
+                                writer.addAttribute("derived", String.valueOf(sme.getId() != type.getId()));
+                                if( sme.getId() != type.getId() )
+                                    writer.addAttribute("baseType", env.getType(sme.getId()).getName());
+                                break;
+                            }
+                        }
                         writer.endNode();
                     }
                 }
@@ -122,9 +145,8 @@ public class FxTypeConverter implements Converter {
                 ctx.convertAnother(as);
             }
 
-//        } catch (FxApplicationException e) {
         } catch (Exception e) {
-//            throw e.asRuntimeException();
+            throw new FxConversionException(e, "ex.conversion.type.error", type.getName(), e.getMessage()).asRuntimeException();
         }
     }
 
@@ -132,7 +154,69 @@ public class FxTypeConverter implements Converter {
      * {@inheritDoc}
      */
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
-        //TODO
+        final FxEnvironment env = CacheAdmin.getEnvironment();
+        String name = reader.getAttribute("name");
+        String parent = null;
+        if( Boolean.valueOf(reader.getAttribute("derived")))
+            parent = reader.getAttribute("parent");
+        ACL acl = env.getACL(reader.getAttribute("acl"));
+        TypeCategory cat = TypeCategory.valueOf(reader.getAttribute("category"));
+        LanguageMode langMode = LanguageMode.valueOf(reader.getAttribute("languageMode"));
+        long maxVersions = Long.valueOf(reader.getAttribute("maxVersions"));
+        TypeMode mode = TypeMode.valueOf(reader.getAttribute("mode"));
+        TypeState state = TypeState.valueOf(reader.getAttribute("state"));
+        TypeStorageMode storageMode = TypeStorageMode.valueOf(reader.getAttribute("storageMode"));
+        Workflow workflow = env.getWorkflow(reader.getAttribute("workflow"));
+        byte permissions = FxPermissionUtils.encodeTypePermissions(
+                Boolean.valueOf(reader.getAttribute("permInst")),
+                Boolean.valueOf(reader.getAttribute("permProp")),
+                Boolean.valueOf(reader.getAttribute("permStep")),
+                Boolean.valueOf(reader.getAttribute("permType")));
+        boolean trackHistory = Boolean.valueOf(reader.getAttribute("trackHistory"));
+        long historyAge = 0;
+        if( trackHistory )
+            historyAge = Long.valueOf(reader.getAttribute("historyAge"));
+        List<FxTypeRelation> rel = new ArrayList<FxTypeRelation>(mode == TypeMode.Relation ? 10 : 0);
+        long maxRelSource = -1;
+        long maxRelDest = -1;
+        FxString label = null;
+        LifeCycleInfo lci = null;
+        List<FxTypeScriptImportMapping> scriptMapping = null;
+        while( reader.hasMoreChildren() ) {
+            reader.moveDown();
+            String node = reader.getNodeName();
+            if( "relations".equals(node)) {
+                maxRelSource = Long.valueOf(reader.getAttribute("maxSrc"));
+                maxRelDest = Long.valueOf(reader.getAttribute("maxDst"));
+            } else if( "relation".equals(node)) {
+                rel.add(new FxTypeRelation(
+                        new FxPreloadType(reader.getAttribute("src")),
+                        new FxPreloadType(reader.getAttribute("dst")),
+                        Long.valueOf(reader.getAttribute("maxSrc")),
+                        Long.valueOf(reader.getAttribute("maxDst"))
+                        ));
+            } else if( "label".equals(node)) {
+                label = (FxString)ctx.convertAnother(this, FxValue.class);
+            } else if(ConversionEngine.KEY_LCI.equals(node)) {
+                lci = (LifeCycleInfo)ctx.convertAnother(this, LifeCycleInfo.class);
+            } else if( "scriptEvents".equals(node)) {
+                scriptMapping = new ArrayList<FxTypeScriptImportMapping>(5);
+            } else if( "scriptMapping".equals(node)) {
+                if( scriptMapping == null )
+                    throw new FxConversionException("ex.conversion.unexcpectedNode", node).asRuntimeException();
+                final Boolean derived = Boolean.valueOf(reader.getAttribute("derived"));
+                scriptMapping.add(new FxTypeScriptImportMapping(FxScriptEvent.valueOf(reader.getAttribute("event")),
+                        reader.getAttribute("script"),
+                        Boolean.valueOf(reader.getAttribute("active")),
+                        Boolean.valueOf(reader.getAttribute("derivedUsage")),
+                        derived,
+                        derived ? reader.getAttribute("baseType") : ""));
+
+            }
+            reader.moveUp();
+        }
+//        System.out.println("Found label: "+label);
+//        System.out.println("LCI: "+lci);
         return null;
     }
 

@@ -512,7 +512,6 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param rel      the relation to validate.
      * @throws FxInvalidParameterException if the relation is invalid.
      */
-
     private void validateRelation(FxTypeRelation rel) throws FxInvalidParameterException {
         if (rel.getSource().isRelation()) {
             throw new FxInvalidParameterException("ex.structure.type.relation.wrongTarget", this.getName(), rel.getSource().getName());
@@ -529,8 +528,8 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @throws  FxInvalidParameterException if (maxRelSource or maxRelDestination is exceeded.
      */
     private void validateRelationMultiplicity(FxTypeRelation newRelationToAdd) throws FxInvalidParameterException {
-        int source = newRelationToAdd.getMaxSource();
-        int dest = newRelationToAdd.getMaxDestination();
+        long source = newRelationToAdd.getMaxSource();
+        long dest = newRelationToAdd.getMaxDestination();
 
         if (source ==0 && getMaxRelSource() >=0)
             throw new FxInvalidParameterException("ex.structure.type.relation.maxRelSourceExceeded",

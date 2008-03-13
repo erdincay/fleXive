@@ -417,6 +417,13 @@ public final class FxFilteredEnvironment implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
+    public FxScriptInfo getScript(String name) {
+        return environment.getScript(name);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public List<FxScriptMapping> getScriptMappings() {
         return environment.getScriptMappings();
     }

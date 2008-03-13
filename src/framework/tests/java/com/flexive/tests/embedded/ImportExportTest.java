@@ -107,6 +107,7 @@ public class ImportExportTest {
         FxType testType = CacheAdmin.getEnvironment().getType(FxType.FOLDER);
         final String xml = xs.toXML(testType);
         System.out.print("Type:\n" + xml);
+        xs.fromXML(xml);
     }
 
 

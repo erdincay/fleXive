@@ -70,8 +70,12 @@ public class Workflow extends AbstractSelectableObjectWithName implements Serial
         this.id = id;
         this.name = name;
         this.description = (description == null) ? "" : description;
-        this.steps = steps;
-        this.routes = routes;
+        this.steps = new ArrayList<Step>(steps == null ? 0 : steps.size());
+        if (steps != null)
+            this.steps.addAll(steps);
+        this.routes = new ArrayList<Route>(routes == null ? 0 : routes.size());
+        if (routes != null)
+            this.routes.addAll(routes);
     }
 
     /**

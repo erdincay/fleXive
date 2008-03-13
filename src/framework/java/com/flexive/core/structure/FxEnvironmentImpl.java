@@ -821,7 +821,17 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         for (FxScriptInfo si : this.scripts)
             if (si.getId() == scriptId)
                 return si;
-        throw new FxNotFoundException("ex.scripting.notFound", scriptId).asRuntimeException();
+        throw new FxNotFoundException("ex.scripting.notFound.id", scriptId).asRuntimeException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public FxScriptInfo getScript(String name) {
+        for (FxScriptInfo si : this.scripts)
+            if (si.getName().equals(name))
+                return si;
+        throw new FxNotFoundException("ex.scripting.notFound.id", name).asRuntimeException();
     }
 
     /**

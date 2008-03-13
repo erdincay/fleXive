@@ -56,14 +56,14 @@ public class FxTypeRelationEdit extends FxTypeRelation implements Serializable {
     }
 
 
-    public void setMaxSource(int maxSource) {
+    public void setMaxSource(long maxSource) {
         if (maxSource < 0)
             maxSource = 0;
         if (maxSource != this.maxSource)
             this.maxSource = maxSource;
     }
 
-    public void setMaxDestination(int maxDestination) {
+    public void setMaxDestination(long maxDestination) {
         if (maxDestination < 0)
             maxDestination = 0;
         if (maxDestination != this.maxDestination)
@@ -95,7 +95,7 @@ public class FxTypeRelationEdit extends FxTypeRelation implements Serializable {
      * @param maxDestination maximum number of allowed destination instances, unlimited if 0
      * @return FxTypeRelationEdit
      */
-    public static FxTypeRelationEdit createNew(FxType source, FxType destination, int maxSource, int maxDestination) {
+    public static FxTypeRelationEdit createNew(FxType source, FxType destination, long maxSource, long maxDestination) {
         return new FxTypeRelationEdit(new FxTypeRelation(source, destination, maxSource, maxDestination));
     }
 }

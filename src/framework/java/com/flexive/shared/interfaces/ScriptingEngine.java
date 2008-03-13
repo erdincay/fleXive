@@ -39,7 +39,6 @@ import com.flexive.shared.exceptions.FxLoadException;
 import com.flexive.shared.scripting.*;
 
 import javax.ejb.Remote;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -235,13 +234,12 @@ public interface ScriptingEngine {
     /**
      * Loads all assignment mappings for a specified script
      *
-     * @param _con  the database connection
      * @param scriptId  the script
      * @return  the script mappings
      * @throws FxLoadException on errors
      * @throws SQLException on errors
      */
-    FxScriptMapping loadScriptMapping(Connection _con, long scriptId) throws FxLoadException, SQLException;
+    FxScriptMapping loadScriptMapping(long scriptId) throws FxLoadException, SQLException;
 
     /**
      * Create a new mapping for types with the default FxScriptEvent the script was created with
