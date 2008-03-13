@@ -351,7 +351,8 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
             if (!success) {
                 ctx.setRollbackOnly();
             } else {
-                StructureLoader.reloadWorkflows(FxContext.get().getDivisionId());
+                if (!isWorkflow) //dont reload if removing for a workflow
+                    StructureLoader.reloadWorkflows(FxContext.get().getDivisionId());
             }
             Database.closeObjects(StepEngineBean.class, con, stmt);
         }
