@@ -302,3 +302,59 @@ body a {
     border:0;
     width:100%;
 }
+
+.initTable {
+    /*border-style: solid;*/
+    border: 1px solid black;
+    border-spacing: 0;
+    /*border-width: 1px 0px 1px 1px;*/
+    border-collapse: collapse;
+}
+
+/* initialization screen style */
+
+.initHeader {
+    font-weight: bold;
+}
+
+.initHeader2 {
+    font-weight: bold;
+    text-align:center;
+    background-color:#cccccc;
+}
+
+.initRow {
+    border: 1px;
+    border-style: solid;
+}
+
+.initRowRunning {
+    border: 1px;
+    border-style: solid;
+    background-color: lawngreen;
+}
+
+.initStatusOK {
+    color: green;
+    text-align:center;
+}
+
+.initDrop {
+    text-align:center;
+}
+
+.initStatusError {
+    color: crimson;
+    text-align:center;
+    border: 1px solid black;
+}
+
+.initStatusRunning {
+    color: black;
+    font-style: italic;
+    text-decoration: blink;
+}
+
+.initDuration {
+    text-align:right;
+}

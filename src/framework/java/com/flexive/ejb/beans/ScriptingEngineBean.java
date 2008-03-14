@@ -108,6 +108,8 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     private static volatile Map<FxScriptEvent, List<Long>> scriptsByEvent = new HashMap<FxScriptEvent, List<Long>>(10);
 
+    private static volatile List<FxScriptRunInfo> runOnceInfos = new ArrayList<FxScriptRunInfo>(50);
+
     /**
      * {@inheritDoc}
      */
@@ -294,6 +296,14 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         scriptCacheTimestamp = timeStamp;
         groovyScriptCache.clear();
         scriptsByEvent.clear();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public List<FxScriptRunInfo> getRunOnceInformation() throws FxApplicationException {
+        return runOnceInfos;
     }
 
     /**
@@ -821,7 +831,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void executeRunOnceScripts() throws FxApplicationException {
         final long start = System.currentTimeMillis();
-        runOnce(SystemParameters.DIVISION_RUNONCE, "fxresources", "flexive");
+        runOnce(SystemParameters.DIVISION_RUNONCE, "fxresources", "[fleXive]");
         if (LOG.isInfoEnabled()) {
             LOG.info("Executed flexive run-once scripts in " + (System.currentTimeMillis() - start) + "ms");
         }
@@ -875,11 +885,15 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                 if (LOG.isInfoEnabled()) {
                     LOG.info("running run-once-script [" + file[0] + "] ...");
                 }
+                FxScriptRunInfo runInfo = new FxScriptRunInfo(System.currentTimeMillis(), applicationName, file[0]);
+                runOnceInfos.add(runInfo);
                 try {
                     internal_runScript(file[0], binding, FxSharedUtils.loadFromInputStream(cl.getResourceAsStream(prefix + "/scripts/runonce/" + file[0]), -1));
                 } catch (Throwable e) {
+                    runInfo.endExecution(false);
                     LOG.error("Failed to run script " + file[0] + ": " + e.getMessage(), e);
                 }
+                runInfo.endExecution(true);
             }
             EJBLookup.getDivisionConfigurationEngine().put(param, true);
         } finally {
@@ -895,7 +909,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
     public void executeDropRunOnceScripts(Parameter<Boolean> param, String dropName) throws FxApplicationException {
         if (!FxSharedUtils.getDrops().contains(dropName))
             throw new FxInvalidParameterException("dropName", "ex.scripting.drop.notFound", dropName);
-        runOnce(param, dropName + "Resources", "drop " + dropName);
+        runOnce(param, dropName + "Resources", dropName);
     }
 
     /**
@@ -903,7 +917,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void executeStartupScripts() {
-        executeStartupScripts("fxresources", "flexive");
+        executeStartupScripts("fxresources", "[fleXive]");
     }
 
     /**

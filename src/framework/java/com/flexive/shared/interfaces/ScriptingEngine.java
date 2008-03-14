@@ -72,7 +72,6 @@ public interface ScriptingEngine {
     /**
      * Get all available information for all existing scripts
      *
-     *
      * @return FxScriptInfo
      * @throws FxApplicationException on errors
      */
@@ -82,7 +81,7 @@ public interface ScriptingEngine {
      * Update a scripts info
      *
      * @param scriptId    requested script id
-     * @param event     requested script event
+     * @param event       requested script event
      * @param name        new name (or <code>null</code> if unchanged)
      * @param description new description (or <code>null</code> if unchanged)
      * @param code        the code
@@ -95,8 +94,9 @@ public interface ScriptingEngine {
     /**
      * Update script info
      *
-     * @param scriptInfo    the edited script info
-     * @throws com.flexive.shared.exceptions.FxApplicationException     on errors
+     * @param scriptInfo the edited script info
+     * @throws com.flexive.shared.exceptions.FxApplicationException
+     *          on errors
      */
     void updateScriptInfo(FxScriptInfoEdit scriptInfo) throws FxApplicationException;
 
@@ -113,7 +113,7 @@ public interface ScriptingEngine {
     /**
      * Get scripts by their event
      *
-     * @param scriptEvent     requested script event
+     * @param scriptEvent requested script event
      * @return array of id's by event
      */
     List<Long> getByScriptEvent(FxScriptEvent scriptEvent);
@@ -122,7 +122,7 @@ public interface ScriptingEngine {
      * Create a new script
      * (newly created scripts are set to active per default).
      *
-     * @param event     script event
+     * @param event       script event
      * @param name        (unique) name
      * @param description description
      * @param code        code
@@ -135,7 +135,8 @@ public interface ScriptingEngine {
     /**
      * Create a new script based on a script from the library
      * (newly created scripts are set to active per default).
-     * @param event     script event
+     *
+     * @param event       script event
      * @param libraryname name of the script in the script library
      * @param name        (unique) name
      * @param description description
@@ -150,7 +151,7 @@ public interface ScriptingEngine {
      * (newly created scripts are set to active per default).
      *
      * @param dropName    name of the drop to use as repository
-     * @param event     script event
+     * @param event       script event
      * @param libraryname name of the script in the script library
      * @param name        (unique) name
      * @param description description
@@ -234,10 +235,10 @@ public interface ScriptingEngine {
     /**
      * Loads all assignment mappings for a specified script
      *
-     * @param scriptId  the script
-     * @return  the script mappings
+     * @param scriptId the script
+     * @return the script mappings
      * @throws FxLoadException on errors
-     * @throws SQLException on errors
+     * @throws SQLException    on errors
      */
     FxScriptMapping loadScriptMapping(long scriptId) throws FxLoadException, SQLException;
 
@@ -256,7 +257,7 @@ public interface ScriptingEngine {
     /**
      * Create a new mapping for types with a given FxScriptEvent
      *
-     * @param scriptEvent   FxScriptEvent for this mapping (on create, save, remove, etc.)
+     * @param scriptEvent  FxScriptEvent for this mapping (on create, save, remove, etc.)
      * @param scriptId     id of the script
      * @param typeId       id of the type
      * @param active       mapping is active?
@@ -281,7 +282,7 @@ public interface ScriptingEngine {
      *
      * @param scriptId     id of the script
      * @param assignmentId id of the assignment
-     * @param event         the script event
+     * @param event        the script event
      * @throws FxApplicationException on errors
      */
     void removeAssignmentScriptMappingForEvent(long scriptId, long assignmentId, FxScriptEvent event) throws FxApplicationException;
@@ -321,11 +322,11 @@ public interface ScriptingEngine {
     /**
      * Update a mapping for types
      *
-     * @param scriptId      id of the script
-     * @param typeId        id of the type
-     * @param event         the script event
-     * @param active        mapping is active?
-     * @param derivedUsage  mapping used in derived types?
+     * @param scriptId     id of the script
+     * @param typeId       id of the type
+     * @param event        the script event
+     * @param active       mapping is active?
+     * @param derivedUsage mapping used in derived types?
      * @return the updated  entry
      * @throws FxApplicationException on errors
      */
@@ -374,4 +375,14 @@ public interface ScriptingEngine {
      * @throws FxApplicationException if the requested drop is unknown or invalid
      */
     void executeDropStartupScripts(String dropName) throws FxApplicationException;
+
+    /**
+     * Get information about running/executed runOnce scripts (including all drops)
+     * Please note that this method will only return entries if scripts have been executed in the current VM and in the
+     * current session (information is not persisted - yet!)
+     *
+     * @return information
+     * @throws FxApplicationException on errors
+     */
+    List<FxScriptRunInfo> getRunOnceInformation() throws FxApplicationException;
 }

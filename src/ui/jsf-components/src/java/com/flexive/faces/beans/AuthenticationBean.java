@@ -36,6 +36,7 @@ package com.flexive.faces.beans;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.war.FxRequest;
 
@@ -87,6 +88,8 @@ public class AuthenticationBean implements Serializable {
             FxRequest request = FxJsfUtils.getRequest();
             request.login(username, password, takeover);
             request.getUserTicket();
+            if( CacheAdmin.isNewInstallation() )
+                return "loginSuccessInit";
             return "loginSuccess";
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<head>
+    <title>Initializing [fleXive] ...</title>
+    <t:stylesheet path="/adm/css/main.css"/>
+</head>
+<body>
+
+<script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/flexiveRpc.js"></script>
+<script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/jsonrpc.js"></script>
+
+<div id="initStatus" style="height:1000px;margin-right:auto;margin-left:auto;">
+    <center>
+        <div class="initHeader"><br/><br/>#{fxMessageBean['Global.banner.initializing']}<br/><br/><br/>
+            #{fxMessageBean['Global.banner.runOnceScriptStatus']}<br/><br/></div>
+
+        <div id="msg">&nbsp;</div>
+        <br/>
+
+        <div id="continue" style="text-align: center; border:1px solid black; width:150px; background-color: #cccccc;">
+            <a href="../adm/main.jsf">Continue</a>
+        </div>
+    </center>
+</div>
+<script type="text/javascript">
+    document.getElementById('continue').style.display='none';
+    document.getElementById('initStatus').style.width = (window.innerWidth / 2) + 'px';
+    var polling = window.setInterval("updateStatus()", 1000);
+    JSONRpcClient.max_req_active = 2;
+    getJsonRpc().SystemInformation.initEnvironment(function (result, exception) {
+        window.clearInterval(polling);
+        updateStatus(); //"final" update
+        document.getElementById('continue').style.display='block';
+    });
+
+    updateStatus();
+    function updateStatus() {
+        document.getElementById('msg').innerHTML = getJsonRpc().SystemInformation.getInitializationStatus();
+    }
+</script>
+</body>
+</html>

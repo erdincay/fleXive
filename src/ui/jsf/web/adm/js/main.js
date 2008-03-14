@@ -76,7 +76,8 @@ function doDrag(event) {
 
 function init() {
     var loadingDiv = document.getElementById('loading');
-    loadingDiv.style.height=getWindowHeight()+"px";
+    if( loadingDiv )
+        loadingDiv.style.height=getWindowHeight()+"px";
     leftArea = document.getElementById('leftArea');
     dragArea = document.getElementById('dragArea');
     rightArea = document.getElementById('rightArea');
@@ -98,7 +99,8 @@ function init() {
     renderTabs();
 
     gotoNavMenu(0);
-    loadingDiv.style.display='none';
+    if( loadingDiv )
+        loadingDiv.style.display='none';
 }
 
 // Opens the given tab menu in the main navigation

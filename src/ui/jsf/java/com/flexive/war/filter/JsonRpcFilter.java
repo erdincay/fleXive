@@ -37,6 +37,7 @@ import com.flexive.faces.components.JsonRpcCallRenderer;
 import com.flexive.war.javascript.BriefcaseEditor;
 import com.flexive.war.javascript.ContentEditor;
 import com.flexive.war.javascript.SearchQueryEditor;
+import com.flexive.war.javascript.SystemInformation;
 import com.flexive.war.javascript.search.SearchResultWriter;
 import com.flexive.war.javascript.tree.ContentTreeEditor;
 import com.flexive.war.javascript.tree.ContentTreeWriter;
@@ -91,6 +92,7 @@ public class JsonRpcFilter implements Filter {
         bridge.registerObject("ContentEditor", new ContentEditor());
         bridge.registerObject("BriefcaseEditor", new BriefcaseEditor());
         bridge.registerObject("SearchQueryEditor", new SearchQueryEditor());
+        bridge.registerObject("SystemInformation", new SystemInformation());
         session.setAttribute(JsonRpcCallRenderer.SESSION_JSON_BRIDGE, bridge);
         return bridge;
     }

@@ -4,6 +4,7 @@
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:c="http://java.sun.com/jstl/core"
       xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j"
       xmlns:fx="http://www.flexive.com/jsf/core">
 <head>
     <base href="#{fxSystemBean.documentBase}"/>
@@ -50,10 +51,12 @@
 <body onload="init();" onmouseup="endDrag();">
 
 
+<ui:fragment rendered="#{!fxSystemBean.newInstallation}">
+    <div id="loading"><br/><br/>
+        <center>&nbsp;&nbsp;&nbsp;#{fxMessageBean['Global.banner.loading']}</center>
+    </div>
+</ui:fragment>
 
-<div id="loading"><br/><br/>
-    <center>&nbsp;&nbsp;&nbsp;#{fxSystemBean.newInstallation ? fxMessageBean['Global.banner.initializing'] : fxMessageBean['Global.banner.loading']}</center>
-</div>
 <div id='lock'>
     <iframe id="lockFrame" src="adm/lockScreen.jsf"
             frameborder="0" width="100%" scrolling="no" height="100%">lockFrame</iframe>
