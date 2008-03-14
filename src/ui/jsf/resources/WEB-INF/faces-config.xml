@@ -289,6 +289,12 @@
         <managed-bean-scope>request</managed-bean-scope>
     </managed-bean>
 
+    <managed-bean>
+        <managed-bean-name>adminConfigurationBean</managed-bean-name>
+        <managed-bean-class>com.flexive.war.beans.admin.AdminConfigurationBean</managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
     <navigation-rule>
         <from-view-id>*</from-view-id>
 

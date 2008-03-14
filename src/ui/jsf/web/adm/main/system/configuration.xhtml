@@ -1,0 +1,37 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:jstl="http://java.sun.com/jsp/jstl/functions"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+    <ui:define name="body">
+        <h:form id="frm">
+
+            <adm:tab labelKey="SystemConfiguration.tabtitle.main" active="true" id="tab1"/>
+
+            <fx:formRow id="treeLiveEnabled" labelKey="SystemConfiguration.label.treeLive">
+                <h:selectBooleanCheckbox id="treeLiveEnabled" value="#{adminConfigurationBean.treeLiveEnabled}"/>
+            </fx:formRow>
+
+            <br/>
+            
+            <adm:commandButton labelKey="SystemConfiguration.button.save" location="both" bean="#{adminConfigurationBean}"
+                               icon="save" action="updateConfiguration" id="saveButton"/>
+
+            <adm:toolbarPluginButtons/>
+
+        </h:form>
+    </ui:define>
+</ui:composition>
+
+</body>
+</html>

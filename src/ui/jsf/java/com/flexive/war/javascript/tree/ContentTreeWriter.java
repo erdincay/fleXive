@@ -38,6 +38,7 @@ import com.flexive.faces.components.TreeRenderer;
 import com.flexive.faces.javascript.tree.TreeNodeWriter;
 import static com.flexive.faces.javascript.tree.TreeNodeWriter.Node;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
@@ -115,16 +116,22 @@ public class ContentTreeWriter implements Serializable {
 
     private void writeContentNode(TreeNodeWriter writer, FxTreeNode node, Map<String, Object> properties,
                                   List<String> actionsDisabled, boolean pathMode) throws IOException {
+        final boolean liveTreeEnabled;
+        try {
+            liveTreeEnabled = EJBLookup.getConfigurationEngine().get(SystemParameters.TREE_LIVE_ENABLED);
+        } catch (FxApplicationException e) {
+            throw e.asRuntimeException();
+        }
         properties.clear();
         actionsDisabled.clear();
         properties.put("objectId", node.getId());
         properties.put("widgetId", "node_" + node.getId());
-        properties.put("isDirty", node.isDirty());
+        properties.put("isDirty", liveTreeEnabled && node.isDirty());
         properties.put("mayEdit", node.isMayEdit());
         if (node.hasReference())
             properties.put("referenceId", node.getReference().getId());
 
-        setAllowedActions(actionsDisabled, node);
+        setAllowedActions(actionsDisabled, node, liveTreeEnabled);
         if (actionsDisabled.size() > 0)
             properties.put("actionsDisabled", actionsDisabled);
 
@@ -152,16 +159,18 @@ public class ContentTreeWriter implements Serializable {
      *
      * @param actionsDisabled list of disabled actions
      * @param node            the node to be processed
+     * @param liveTreeEnabled if the live/edit tree switch is available (all treemode-related actions will be disabled
+     * if this parameter is false)
      */
-    private void setAllowedActions(List<String> actionsDisabled, FxTreeNode node) {
+    private void setAllowedActions(List<String> actionsDisabled, FxTreeNode node, boolean liveTreeEnabled) {
         final boolean contentAvailable = node.hasReference();
         enableAction(actionsDisabled, contentAvailable && node.isMayDelete(), "removeContent");
         enableAction(actionsDisabled, contentAvailable && node.isMayEdit(), "editContent", "rename");
         enableAction(actionsDisabled, node.isMayEdit(), "editNode", "cutNode");
         enableAction(actionsDisabled, node.getDirectChildCount() > 0, "searchSubtree");
-        enableAction(actionsDisabled, !node.isLive() && node.isMayEdit(), "activateNode", "activateNodeAndChildren", "removeNode");
+        enableAction(actionsDisabled, !node.isLive() && node.isMayEdit() && liveTreeEnabled, "activateNode", "activateNodeAndChildren", "removeNode");
         enableAction(actionsDisabled, !node.isLive(), "createContent", "createFolder");
-        enableAction(actionsDisabled, node.isLive(), "deactivateNode", "deactivateNodeAndChildren");
+        enableAction(actionsDisabled, node.isLive() && liveTreeEnabled, "deactivateNode", "deactivateNodeAndChildren");
     }
 
     /**

@@ -443,6 +443,23 @@ public class ConfigurationTest {
         }
     }
 
+    @Test
+    public void putInSourceTest() throws FxApplicationException {
+        final Parameter<Boolean> param = ParameterFactory.newInstance(Boolean.class, SystemParameterPaths.TEST_DIVISION_ONLY, "testKey", true);
+        try {
+            configuration.putInSource(param, false); // put in source without an existing database entry
+            assert !configuration.get(param);
+            configuration.putInSource(param, true);  // overwrite existing value
+            assert configuration.get(param);
+        } finally {
+            try {
+                EJBLookup.getConfigurationEngine().remove(param);
+            } catch (FxApplicationException e) {
+                // ignore
+            }
+        }
+    }
+
     /**
      * Generic configuration test. Tests all known types of parameters
      * for the given configuration.

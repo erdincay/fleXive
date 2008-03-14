@@ -59,34 +59,29 @@
             <c:if test="#{fxSystemBean.isInRole['ScriptExecution'] or fxSystemBean.isInRole['ScriptManagement']}">
                 <adm:treeNode id="scripts" icon="scripts" titleKey="Admin.scripts.root">
                     <adm:treeNode titleKey="Admin.scripts.overview" link="/adm/main/scripting/overview.jsf" />
-                    <c:if test="#{fxSystemBean.isInRole['ScriptManagement']}">
-                        <adm:treeNode titleKey="Admin.scripts.create" link="/adm/main/scripting/create.jsf" />
-                    </c:if>
-                    <c:if test="#{fxSystemBean.isInRole['ScriptExecution']}">
-                        <adm:treeNode titleKey="Admin.scripts.scriptConsole" link="/adm/main/scripting/scriptConsole.jsf"/>
-                    </c:if>
+                    <adm:treeNode titleKey="Admin.scripts.create" link="/adm/main/scripting/create.jsf" rendered="#{fxSystemBean.isInRole['ScriptManagement']}"/>
+                    <adm:treeNode titleKey="Admin.scripts.scriptConsole" link="/adm/main/scripting/scriptConsole.jsf" rendered="#{fxSystemBean.isInRole['ScriptExecution']}"/>
                 </adm:treeNode>
             </c:if>
 
             <adm:treeNode id="selectlists" icon="selectLists" titleKey="Admin.selectlists.root">
                 <adm:treeNode titleKey="Admin.selectlists.selectList.overview" link="/adm/main/selectList/overview.jsf"/>
-                <c:if test="#{fxSystemBean.isInRole['SelectListEditor']}">
-                    <adm:treeNode titleKey="Admin.selectlists.selectList.create" link="/adm/main/selectList/create.jsf"/>
-                </c:if>
+                <adm:treeNode titleKey="Admin.selectlists.selectList.create" link="/adm/main/selectList/create.jsf" rendered="#{fxSystemBean.isInRole['SelectListEditor']}"/>
             </adm:treeNode>
 
             <adm:treeNode id="system" icon="system" titleKey="Admin.system.root">
                 <adm:treeNode id="search" icon="find" titleKey="Admin.sqlSearch.root">
                     <adm:treeNode titleKey="Admin.sqlSearch.query" link="/adm/main/sqlsearch/search.jsf" />
-                    <c:if test="#{fxSystemBean.isInRole['GlobalSupervisor']}">
-                        <adm:treeNode titleKey="Admin.sqlSearch.defaultQuery" link="javascript:invokeContentAction('/adm/main/sqlsearch/defaultQuery.jsf', 'loadSystemDefault', {})" />
-                        <adm:treeNode titleKey="Admin.sqlSearch.defaultResultPreferences" link="javascript:invokeContentAction('/adm/main/sqlsearch/defaultResultPreferences.jsf', 'loadSystemDefault', {})" />
-                    </c:if>
+                    <adm:treeNode titleKey="Admin.sqlSearch.defaultQuery"
+                                  link="javascript:invokeContentAction('/adm/main/sqlsearch/defaultQuery.jsf', 'loadSystemDefault', {})"
+                                  rendered="#{fxSystemBean.isInRole['GlobalSupervisor']}"/>
+                    <adm:treeNode titleKey="Admin.sqlSearch.defaultResultPreferences"
+                                  link="javascript:invokeContentAction('/adm/main/sqlsearch/defaultResultPreferences.jsf', 'loadSystemDefault', {})"
+                                  rendered="#{fxSystemBean.isInRole['GlobalSupervisor']}"/>
                 </adm:treeNode>
+                <adm:treeNode titleKey="Admin.system.configuration" link="/adm/main/system/configuration.jsf" rendered="#{fxSystemBean.isInRole['GlobalSupervisor']}"/>
                 <adm:treeNode titleKey="Admin.system.info" link="/adm/main/system/systemInfo.jsf"/>
-                <c:if test="#{fxSystemBean.isInRole['GlobalSupervisor']}">
-                    <adm:treeNode titleKey="Admin.system.languages" link="/adm/main/system/languages.jsf"/>
-                </c:if>
+                <adm:treeNode titleKey="Admin.system.languages" link="/adm/main/system/languages.jsf" rendered="#{fxSystemBean.isInRole['GlobalSupervisor']}"/>
                 <adm:treeNode titleKey="Admin.content.testData" link="/adm/content/createTestData.jsf"/>
             </adm:treeNode>
         </adm:tree>

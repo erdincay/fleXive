@@ -35,6 +35,7 @@ package com.flexive.shared.configuration;
 
 import com.flexive.shared.search.ResultPreferences;
 import com.flexive.shared.search.query.QueryRootNode;
+import static com.flexive.shared.configuration.SystemParameterPaths.DIVISION_TREE;
 
 /**
  * Flexive system parameter definitions.
@@ -74,21 +75,25 @@ public class SystemParameters {
     /**
      * Tree Caption property id
      */
-    public static final Parameter<Long> TREE_CAPTION_PROPERTY = ParameterFactory.newInstance(Long.class, SystemParameterPaths.DIVISION_TREE, "caption", -1L);
+    public static final Parameter<Long> TREE_CAPTION_PROPERTY = ParameterFactory.newInstance(Long.class, DIVISION_TREE, "caption", -1L);
     /**
      * Tree Caption root assignment id
      */
-    public static final Parameter<Long> TREE_CAPTION_ROOTASSIGNMENT = ParameterFactory.newInstance(Long.class, SystemParameterPaths.DIVISION_TREE, "caption", -1L);
+    public static final Parameter<Long> TREE_CAPTION_ROOTASSIGNMENT = ParameterFactory.newInstance(Long.class, DIVISION_TREE, "caption", -1L);
     /**
      * Tree checks enabled
      */
-    public static final Parameter<Boolean> TREE_CHECKS_ENABLED = ParameterFactory.newInstance(Boolean.class, SystemParameterPaths.DIVISION_TREE, "treeChecks", false);
+    public static final Parameter<Boolean> TREE_CHECKS_ENABLED = ParameterFactory.newInstance(Boolean.class, DIVISION_TREE, "treeChecks", false);
     /**
      * Tree FQN property
      */
-    public static final Parameter<Long> TREE_FQN_PROPERTY = ParameterFactory.newInstance(Long.class, SystemParameterPaths.DIVISION_TREE, "fqn", -1L);
+    public static final Parameter<Long> TREE_FQN_PROPERTY = ParameterFactory.newInstance(Long.class, DIVISION_TREE, "fqn", -1L);
     /**
      * Tree FQN root assignment id
      */
-    public static final Parameter<Long> TREE_FQN_ROOTASSIGNMENT = ParameterFactory.newInstance(Long.class, SystemParameterPaths.DIVISION_TREE, "fqn", -1L);
+    public static final Parameter<Long> TREE_FQN_ROOTASSIGNMENT = ParameterFactory.newInstance(Long.class, DIVISION_TREE, "fqn", -1L);
+    /**
+     * Whether the live tree should be enabled in the backend content tree
+     */
+    public static final Parameter<Boolean> TREE_LIVE_ENABLED = ParameterFactory.newInstance(Boolean.class, DIVISION_TREE, "liveTree", true);
 }

@@ -118,7 +118,8 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
     }
 
     private <T extends Serializable> GenericConfigurationEngine getSource(Parameter<T> parameter, String key) throws FxApplicationException {
-        for (GenericConfigurationEngine config : getAvailableConfigurations(parameter.getScope())) {
+        final List<GenericConfigurationEngine> availableConfigurations = getAvailableConfigurations(parameter.getScope());
+        for (GenericConfigurationEngine config : availableConfigurations) {
             try {
                 config.get(parameter, key, true);
                 return config;
@@ -127,6 +128,10 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
                 // try next config
                 // CHECKSTYLE:ON
             }
+        }
+        if (!availableConfigurations.isEmpty()) {
+            // return last (= most general) configuration
+            return availableConfigurations.get(availableConfigurations.size() - 1);
         }
         throw new FxNotFoundException("ex.configuration.parameter.notfound", parameter.getPath().getValue(), key);
     }

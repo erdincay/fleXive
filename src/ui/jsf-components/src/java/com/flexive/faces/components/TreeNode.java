@@ -84,6 +84,9 @@ public class TreeNode extends UIOutput {
      * @throws IOException if the tree could not be written to the output writer
      */
     public void writeTreeNodes(TreeNodeWriter writer) throws IOException {
+        if (!isRendered()) {
+            return;
+        }
         List<TreeNode> childNodes = getNodeChildren();
         final String linkUrl = StringUtils.isNotBlank(getLink())
                 ? getLink().startsWith("javascript:")
