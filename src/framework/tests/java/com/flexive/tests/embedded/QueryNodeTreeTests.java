@@ -59,7 +59,7 @@ import java.util.List;
  */
 public class QueryNodeTreeTests {
     private static FxPropertyAssignment getTestAssignment() {
-        return (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment("root/id");
+        return (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment("root/caption");
     }
 
     /**
@@ -100,7 +100,7 @@ public class QueryNodeTreeTests {
      */
     private static int nodeId;
 
-    @Test(groups = {"shared"})
+    @Test(groups ={"ejb", "search"})
     public void testNodeEquals() {
         assert new InnerTestNode().equals(new InnerTestNode()) : "Two new node instances should be equal.";
         //noinspection ObjectEqualsNull
@@ -115,7 +115,7 @@ public class QueryNodeTreeTests {
      *
      * @param root the root node of the tree to be checked
      */
-    @Test(groups = {"shared"}, dataProvider = "basicQueries")
+    @Test(groups ={"ejb", "search"}, dataProvider = "basicQueries")
     public void checkTreeStore(QueryNode root) {
         try {
             QueryNode loadedRoot = (QueryNode) ObjectParameter.getDefaultXStream().fromXML(FxXMLUtils.toXML(ObjectParameter.getDefaultXStream(), root));
@@ -128,7 +128,7 @@ public class QueryNodeTreeTests {
     /**
      * Checks the tree validation with miscellaneous tree input.
      */
-    @Test(groups = {"shared"})
+    @Test(groups = {"ejb", "search"})
     public void checkTreeValidity() {
         assert buildFlatTree(
                 new AssignmentNodeGenerator(FxDataType.String1024, new FxString("Test")), 5)
