@@ -43,7 +43,7 @@ import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.value.FxDate;
 import com.flexive.shared.value.FxString;
-import com.flexive.tests.shared.QueryNodeTreeTests.AssignmentNodeGenerator;
+import com.flexive.tests.embedded.QueryNodeTreeTests.AssignmentNodeGenerator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
