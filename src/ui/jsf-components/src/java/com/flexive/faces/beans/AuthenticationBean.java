@@ -94,7 +94,7 @@ public class AuthenticationBean implements Serializable {
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();
         }
-        return "login";
+        return null;
     }
 
     public String logout() {
