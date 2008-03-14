@@ -669,6 +669,10 @@ public class QueryNodeTreeTests {
             node.setValue(value != null ? value.copy() : null);
             return node;
         }
+
+        public FxPropertyAssignment getAssignment() {
+            return assignment;
+        }
     }
 
     private static class CountingNodeVisitor implements QueryNodeVisitor {
