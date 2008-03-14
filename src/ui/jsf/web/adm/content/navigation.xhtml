@@ -212,17 +212,30 @@
                 cutNodeId = -1;
             }
 
-            // Paste a previously copied or cut tree node
+            // Paste a previously copied or cut tree node into the current node
             function pasteNode(menuItem) {
-                if (cutNodeId == -1 && copyNodeId == -1) {
-                    alert("#{fxMessageBean['ContentTree.dialog.noNodeSelected']}");
+                doPaste(menuItem, getJsonRpc().ContentTreeEditor.move, getJsonRpc().ContentTreeEditor.copy);
+            }
+
+            function pasteNodeAbove(menuItem) {
+                doPaste(menuItem, getJsonRpc().ContentTreeEditor.moveAbove, getJsonRpc().ContentTreeEditor.copyAbove);
+            }
+
+            function pasteNodeBelow(menuItem) {
+                doPaste(menuItem, getJsonRpc().ContentTreeEditor.moveBelow, getJsonRpc().ContentTreeEditor.copyBelow);
+            }
+
+            // pastes or moves a tree node. moveFun and copyFun are methods with the following signature:
+            // long nodeId, long newParentId, int index, boolean live
+            function doPaste(menuItem, moveFun, copyFun) {
+                if (!checkNodeSelected()) {
                     return;
                 }
                 try {
                     if (cutNodeId != -1) {
-                        getJsonRpc().ContentTreeEditor.move(cutNodeId, getObjectId(menuItem), 0, treeLiveMode);
+                        moveFun(cutNodeId, getObjectId(menuItem), 0, treeLiveMode);
                     } else if (copyNodeId != -1) {
-                        getJsonRpc().ContentTreeEditor.copy(copyNodeId, getObjectId(menuItem), 0, treeLiveMode);
+                        copyFun(copyNodeId, getObjectId(menuItem), 0, treeLiveMode);
                     }
                     reloadContentTree();
                 } catch (e) {
@@ -231,8 +244,15 @@
                 cutNodeId = copyNodeId = -1;
             }
 
+            function checkNodeSelected() {
+                if (cutNodeId == -1 && copyNodeId == -1) {
+                    alert("#{fxMessageBean['ContentTree.dialog.noNodeSelected']}");
+                    return false;
+                }
+                return true;
+            }
 
-        function menuHandler(menuItem) {
+            function menuHandler(menuItem) {
                 alert("Menu handler called: " + menuItem);
             }
 
@@ -316,6 +336,8 @@
                 <fx:menuSeparator/>
                 <adm:treeContextMenuItem treeActions="attachContentSelection" icon="paste" labelKey="ContentTree.menu.attachContentSelection" clickHandler="attachContentSelection"/>
                 <adm:treeContextMenuItem treeActions="pasteNode" icon="paste" labelKey="ContentTree.menu.pasteNode" clickHandler="pasteNode"/>
+                <adm:treeContextMenuItem treeActions="pasteNode" icon="paste" labelKey="ContentTree.menu.pasteNodeAbove" clickHandler="pasteNodeAbove"/>
+                <adm:treeContextMenuItem treeActions="pasteNode" icon="paste" labelKey="ContentTree.menu.pasteNodeBelow" clickHandler="pasteNodeBelow"/>
                 <adm:treeContextMenuItem treeActions="cutNode" icon="cut" labelKey="ContentTree.menu.cutNode" clickHandler="cutNode"/>
                 <adm:treeContextMenuItem treeActions="copyNode" icon="copy" labelKey="ContentTree.menu.copyNode" clickHandler="copyNode"/>
                 <adm:treeContextMenuItem treeActions="removeNode" icon="detach" labelKey="ContentTree.menu.removeNode" clickHandler="removeNode"/>

@@ -33,8 +33,10 @@
  ***************************************************************/
 package com.flexive.war.javascript.tree;
 
-import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxUpdateException;
+import static com.flexive.shared.EJBLookup.getTreeEngine;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.interfaces.TreeEngine;
 import com.flexive.shared.tree.FxTreeMode;
@@ -78,13 +80,13 @@ public class ContentTreeEditor implements Serializable {
             if (label.endsWith("<br>")) {
                 label = label.substring(0, label.length() - 4);
             }
-            final FxTreeNodeEdit node = EJBLookup.getTreeEngine().getNode(liveTree ? Live : Edit, nodeId).asEditable();
+            final FxTreeNodeEdit node = getTreeEngine().getNode(liveTree ? Live : Edit, nodeId).asEditable();
             if (pathMode) {
                 node.setName(label);
             } else {
                 node.getLabel().setTranslation(FxContext.get().getTicket().getLanguage(), label);
             }
-            EJBLookup.getTreeEngine().save(node);
+            getTreeEngine().save(node);
 //            EJBLookup.getTreeInterface().renameNode(nodeId,false,label,null);
         } catch (Exception e) {
             LOG.error("Failed to save label: " + e.getMessage(), e);
@@ -93,7 +95,7 @@ public class ContentTreeEditor implements Serializable {
         String title = StringUtils.defaultString(label).trim();
         try {
             // add subnode count
-            final FxTreeNode node = EJBLookup.getTreeEngine().getNode(Edit, nodeId);
+            final FxTreeNode node = getTreeEngine().getNode(Edit, nodeId);
             int totalChildren = node.getTotalChildCount();
             if (totalChildren > 0) {
                 title += " [" + totalChildren + "]";
@@ -120,17 +122,46 @@ public class ContentTreeEditor implements Serializable {
      * @param nodeId      the tree node to be moved
      * @param newParentId the the parent node
      * @param index       the new position
+     * @param live        if the live tree should be used
      * @return nothing
      * @throws Exception if an error occured
      */
     public String move(long nodeId, long newParentId, int index, boolean live) throws Exception {
         try {
-            EJBLookup.getTreeEngine().move(live ? Live : Edit, nodeId, newParentId, index);
+            getTreeEngine().move(live ? Live : Edit, nodeId, newParentId, index);
         } catch (Exception e) {
             LOG.error("Failed to move node: " + e, e);
             throw e;
         }
         return "[]";
+    }
+
+    /**
+     * Move the given node above the target node ID.
+     *
+     * @param nodeId      the tree node to be moved
+     * @param targetId    the target node ID
+     * @param index       (unused)
+     * @param live        if the live tree should be used
+     * @return nothing
+     * @throws Exception if an error occured
+     */
+    public String moveAbove(long nodeId, long targetId, int index, boolean live) throws Exception {
+        return moveNear(nodeId, targetId, live, -1, new MoveOp());
+    }
+
+    /**
+     * Move the given node below the target node ID.
+     *
+     * @param nodeId      the tree node to be moved
+     * @param targetId    the target node ID
+     * @param index       (unused)
+     * @param live        if the live tree should be used
+     * @return nothing
+     * @throws Exception if an error occured
+     */
+    public String moveBelow(long nodeId, long targetId, int index, boolean live) throws Exception {
+        return moveNear(nodeId, targetId, live, 1, new MoveOp());
     }
 
     /**
@@ -146,8 +177,8 @@ public class ContentTreeEditor implements Serializable {
      */
     public String remove(long nodeId, boolean removeContent, boolean live, boolean deleteChildren) throws Exception {
         try {
-            FxTreeNode node = EJBLookup.getTreeEngine().getNode(live ? Live : Edit, nodeId);
-            EJBLookup.getTreeEngine().remove(node, removeContent, deleteChildren);
+            FxTreeNode node = getTreeEngine().getNode(live ? Live : Edit, nodeId);
+            getTreeEngine().remove(node, removeContent, deleteChildren);
         } catch (Exception e) {
             LOG.error("Failed to delete node: " + e, e);
             throw e;
@@ -157,7 +188,7 @@ public class ContentTreeEditor implements Serializable {
 
     public String addReferences(long nodeId, long[] referenceIds) throws Exception {
         try {
-            TreeEngine tree = EJBLookup.getTreeEngine();
+            TreeEngine tree = getTreeEngine();
             for (long referenceId : referenceIds) {
                 tree.save(FxTreeNodeEdit.createNew(String.valueOf(referenceId)).setParentNodeId(nodeId).setReference(new FxPK(referenceId)));
 //                tree.createNode(nodeId, String.valueOf(referenceId), referenceId);
@@ -171,7 +202,7 @@ public class ContentTreeEditor implements Serializable {
 
     public String createFolder(long parentNodeId, String folderName) throws Exception {
         try {
-            EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew(folderName).setParentNodeId(parentNodeId));
+            getTreeEngine().save(FxTreeNodeEdit.createNew(folderName).setParentNodeId(parentNodeId));
         } catch (Exception e) {
             LOG.error("Failed to create tree folder: " + e.getMessage(), e);
             throw e;
@@ -181,7 +212,7 @@ public class ContentTreeEditor implements Serializable {
 
     public String activate(long nodeId, boolean includeChildren) throws Exception {
         try {
-            EJBLookup.getTreeEngine().activate(FxTreeMode.Edit, nodeId, includeChildren);
+            getTreeEngine().activate(FxTreeMode.Edit, nodeId, includeChildren);
         } catch (Exception e) {
             LOG.error("Failed to activate node: " + e.getMessage(), e);
             throw e;
@@ -191,11 +222,52 @@ public class ContentTreeEditor implements Serializable {
 
     public String copy(long nodeId, long newParentId, int index, boolean live) throws Exception {
         try {
-            EJBLookup.getTreeEngine().copy(live ? Live : Edit, nodeId, newParentId, index);
+            getTreeEngine().copy(live ? Live : Edit, nodeId, newParentId, index);
         } catch (Exception e) {
             LOG.error("Failed to copy node: " + e.getMessage(), e);
             throw e;
         }
         return "[]";
     }
+
+    public String copyAbove(long nodeId, long targetId, int index, boolean live) throws Exception {
+        return moveNear(nodeId, targetId, live, -1, new CopyOp());
+    }
+
+    public String copyBelow(long nodeId, long targetId, int index, boolean live) throws Exception {
+        return moveNear(nodeId, targetId, live, 1, new CopyOp());
+    }
+
+    private static interface TreeMoveOp {
+        void perform(FxTreeMode treeMode, long nodeId, long targetId, int position) throws FxApplicationException;
+    }
+
+    private static class MoveOp implements TreeMoveOp {
+        public void perform(FxTreeMode treeMode, long nodeId, long targetId, int position) throws FxApplicationException {
+            getTreeEngine().move(treeMode, nodeId, targetId, position);
+        }
+    }
+
+    private static class CopyOp implements TreeMoveOp {
+        public void perform(FxTreeMode treeMode, long nodeId, long targetId, int position) throws FxApplicationException {
+            getTreeEngine().copy(treeMode, nodeId, targetId, position);
+        }
+    }
+
+    private String moveNear(long nodeId, long targetId, boolean live, int deltaPos, TreeMoveOp op) throws Exception {
+        final FxTreeMode treeMode = live ? Live : Edit;
+        final FxTreeNode target = getTreeEngine().getNode(treeMode, targetId);
+        if (target.getParentNodeId() <= 0) {
+            throw new FxUpdateException("ex.jsf.contentTreeEditor.moveNear.noParent");
+        }
+        try {
+            op.perform(treeMode, nodeId, target.getParentNodeId(), target.getPosition() + deltaPos);
+        } catch (Exception e) {
+            LOG.error("failed to move node: " + e, e);
+            throw e;
+        }
+        return "[]";
+    }
+
+
 }
