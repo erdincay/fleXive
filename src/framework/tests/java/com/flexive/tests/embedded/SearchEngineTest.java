@@ -288,9 +288,40 @@ public class SearchEngineTest {
         assertDescendingOrder(descendingResult, 2);
     }
 
+    @Test
+    public void explicitOrderByResultPreferencesTest() throws FxApplicationException {
+        setResultPreferences(SortDirection.ASCENDING);
+        // sort by the second column taken from the result preferences - needs "virtual" columns
+        final FxResultSet result = EJBLookup.getSearchEngine().search(
+                "SELECT co.@pk, co.id, co.* FROM content CO FILTER co.type='" + TEST_TYPE + "' ORDER BY 4 DESC", 0, 9999, null);
+        assert result.getRowCount() > 0;
+        assertDescendingOrder(result, 4);
+
+        try {
+            EJBLookup.getSearchEngine().search(
+                    "SELECT co.@pk, co.id, co.* FROM content CO FILTER co.type='" + TEST_TYPE + "' ORDER BY 5 DESC", 0, 9999, null);
+            assert false : "Selected result preference column should not be present in result set";
+        } catch (FxApplicationException e) {
+            // pass
+        }
+
+        // also test using SqlQueryBuilder
+        assertDescendingOrder(new SqlQueryBuilder().select("@pk", "id", "*")
+                .orderBy(4, SortDirection.DESCENDING)
+                .filterType(TEST_TYPE).getResult(), 4);
+        try {
+            new SqlQueryBuilder().select("@pk", "id", "*").orderBy(5, SortDirection.ASCENDING).getResult();
+            assert false : "Selected result preference column should not be present in result set";
+        } catch (FxApplicationException e) {
+            // pass - the exception was thrown by the search engine, so it's a FxApplicationException
+            // instead of a FxRuntimeException
+        }
+    }
+
     private void setResultPreferences(SortDirection sortDirection) throws FxApplicationException {
         final ResultPreferencesEdit prefs = new ResultPreferencesEdit(Arrays.asList(
-                new ResultColumnInfo(Table.CONTENT, getTestPropertyName("string"), "")
+                new ResultColumnInfo(Table.CONTENT, getTestPropertyName("string"), ""),
+                new ResultColumnInfo(Table.CONTENT, getTestPropertyName("number"), "")
         ), Arrays.asList(
                 new ResultOrderByInfo(Table.CONTENT, getTestPropertyName("string"), "", sortDirection)),
                 25, 100);

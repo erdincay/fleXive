@@ -36,10 +36,7 @@ package com.flexive.war.javascript.search;
 import com.flexive.faces.beans.ResultSessionData;
 import com.flexive.faces.model.FxResultSetDataModel;
 import com.flexive.shared.EJBLookup;
-import com.flexive.shared.search.AdminResultLocations;
-import com.flexive.shared.search.FxFoundType;
-import com.flexive.shared.search.FxResultSet;
-import com.flexive.shared.search.ResultViewType;
+import com.flexive.shared.search.*;
 import static com.flexive.shared.search.ResultViewType.THUMBNAILS;
 import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.war.JsonWriter;
@@ -95,10 +92,14 @@ public class SearchResultWriter implements Serializable {
      * @param gridColumns  number of columns on the grid (for thumbnail views)
      * @param viewTypeName the view type
      * @param typeId       the type filter (-1 to show all types)
+     * @param sortIndex    column index (of the rendered columns) used for sorting. If set to -1, the
+     * sort order set in the result preferences will be used automatically.
+     * @param ascending    sort direction (only used if sortIndex is set)
      * @return the rows of the user's current search result (SearchResultBean).
+     * @throws Exception   if the search could not be submitted successfully
      */
     public String getCurrentResultRows(HttpSession session, String location, int startRow, int fetchRows,
-                                       int gridColumns, String viewTypeName, long typeId) {
+                                       int gridColumns, String viewTypeName, long typeId, int sortIndex, boolean ascending) throws Exception {
         StringWriter out = new StringWriter();
         try {
             if (viewTypeName.indexOf("::") != -1) {
@@ -114,6 +115,12 @@ public class SearchResultWriter implements Serializable {
             sessionData.setTypeId(typeId);
             SqlQueryBuilder queryBuilder = sessionData.getQueryBuilder();
             queryBuilder.filterType(typeId);
+            if (sortIndex != -1) {
+                queryBuilder.orderBy(SqlQueryBuilder.COL_USERPROPS + sortIndex + 1,
+                        ascending ? SortDirection.ASCENDING : SortDirection.DESCENDING);
+            } else {
+                queryBuilder.clearOrderBy();
+            }
             //queryBuilder.orderBy(sortColumn + SqlQueryBuilder.COL_USERPROPS, sortDirection == 0); 
             // execute search
             FxResultSetDataModel resultModel = new FxResultSetDataModel(EJBLookup.getSearchEngine(),
@@ -133,8 +140,8 @@ public class SearchResultWriter implements Serializable {
             sessionData.setContentTypes(resultModel.getResult().getContentTypes());
             return out.toString();
         } catch (Exception e) {
-            LOG.error(e, e);
-            return "[]";
+            LOG.error(e.getMessage(), e);
+            throw e;
         }
     }
 

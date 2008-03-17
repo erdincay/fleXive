@@ -94,7 +94,7 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long getLastChange(Type type, FxTreeMode mode) {    // TODO
-        String key = mode + "_" + type == null ? "global" : type.toString();
+        String key = mode + "_" + (type == null ? "global" : type.toString());
         try {
             Long lastChange = (Long) CacheAdmin.getInstance().get(this.getClass().getName() + ".lastChange", key);
             if (lastChange == null) {

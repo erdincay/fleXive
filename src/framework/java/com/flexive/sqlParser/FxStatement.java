@@ -441,12 +441,23 @@ public class FxStatement {
         }
     }
 
+    public boolean isWildcardSelected() {
+        for (SelectedValue sv: selected) {
+            if (sv.getAlias().endsWith(".*")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void computeOrderByColumn(OrderByValue ov) throws SqlParserException {
         if (StringUtils.isNumeric(ov.getValue())) {
             // column selected by index (1-based)
             final int index = Integer.valueOf(ov.getValue()) - 1;
             if (index >= 0 && selected.size() > index) {
-                ov.setSelectedValue(selected.get(index), index);
+                ov.setSelectedValue(index);
+            } else if (isWildcardSelected()) {
+                ov.setSelectedValue(0 - index);
             } else {
                 throw new SqlParserException("ex.sqlSearch.invalidOrderByIndex", ov.getValue(), selected.size());
             }
@@ -457,7 +468,7 @@ public class FxStatement {
             for (SelectedValue sv : selected) {
                 if (sv.getAlias().equalsIgnoreCase(ov.getValue())) {
                     found = true;
-                    ov.setSelectedValue(sv, pos);
+                    ov.setSelectedValue(pos);
                     break;
                 }
                 pos++;

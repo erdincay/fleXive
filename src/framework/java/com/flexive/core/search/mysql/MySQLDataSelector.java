@@ -141,6 +141,13 @@ public class MySQLDataSelector extends DataSelector {
             values[pos] = selectFromTbl(entry, value, pos);
             pos++;
         }
+        // need to check if any order bys from a wildcard selector have not been found
+        for (OrderByValue orderBy : search.getFxStatement().getOrderByValues()) {
+            if (orderBy.getColumnIndex() < 0 && Math.abs(orderBy.getColumnIndex()) >= pos) {
+                // column has not been selected, thus it is not present in the "ORDER BY" clause
+                throw new FxSqlSearchException("ex.sqlSearch.invalidOrderByIndex", orderBy.getColumnIndex(), pos);
+            }
+        }
 
         // Build the final select statement
 
@@ -301,7 +308,7 @@ public class MySQLDataSelector extends DataSelector {
     private SortDirection getSortDirection(int pos) {
         final List<OrderByValue> obvs = search.getFxStatement().getOrderByValues();
         for (OrderByValue obv : obvs) {
-            if (obv.getColumnIndex() == pos) {
+            if (Math.abs(obv.getColumnIndex()) == pos) {    // also check for negative (=wildcard) order bys
                 return obv.isAscending() ? SortDirection.ASCENDING : SortDirection.DESCENDING;
             }
         }

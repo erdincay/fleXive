@@ -31,7 +31,8 @@ Parameters:
 		        			document.getElementById("frm:#{id}_fetchRows") != null
                                     ? document.getElementById("frm:#{id}_fetchRows").value : #{resultModel.fetchRows},
 		        			#{resultModel.gridColumns}, "#{viewType}",
-                            document.getElementById("frm:#{id}_typeId").value);
+                            document.getElementById("frm:#{id}_typeId").value,
+                            #{id}_resultView.sortIndex, #{id}_resultView.sortAscending);
        	}
 
         function #{id}_listView() {
@@ -48,7 +49,7 @@ Parameters:
     <table border="0" width="90%">
     <tr>
         <td align="left">
-            <h:selectOneListbox id="#{id}_typeId" value="#{fxSearchResultBean.typeId}" size="1" onchange="#{id}_scroller.refresh()">
+            <h:selectOneListbox id="#{id}_typeId" value="#{fxSearchResultBean.typeId}" size="1" onchange="#{id}_resultView.sortIndex=-1;#{id}_scroller.refresh()">
                 <f:selectItems value="#{fxSearchResultBean.contentTypeItems}"/>
             </h:selectOneListbox>
             <h:selectOneListbox id="#{id}_fetchRows" value="#{fxSearchResultBean.fetchRows}" size="1"

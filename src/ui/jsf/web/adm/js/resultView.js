@@ -9,6 +9,8 @@ var ResultView = function(id, formName, tableWidget, dataScroller, rowSelection,
     this.dataScroller = dataScroller;
     this.rowSelection = rowSelection;
     this.viewType = viewType;
+    this.sortIndex = -1;
+    this.sortAscending = true;
 }
 
 ResultView.prototype = {

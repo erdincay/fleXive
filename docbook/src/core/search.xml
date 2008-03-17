@@ -564,6 +564,45 @@ ORDER BY co.priority DESC, co.caption]]></programlisting>
 FROM content co
 ORDER BY 3 DESC, 2]]></programlisting>
             </para>
+
+            <section xml:id="css_orderby_userdefined">
+                <title>Order by user-defined columns</title>
+
+                <para>
+                    As described in
+                    <xref linkend="css_feature_userdefined"/>,
+                    <code>co.*</code>
+                    expands to whatever columns the user defined for the result content type.
+                    This causes a problem when the result should be sorted manually by one of these columns,
+                    e.g. because the result table has sortable column headers
+                    (as in the result table in the &backendGui;): the &fxsql; parser has no way
+                    to expand
+                    <code>co.*</code>
+                    (because the search has not been submitted yet and thus the content type is unknown),
+                    but yet it must be possible to sort by one of these columns.
+                    For example, this query does not work:
+                </para>
+                <programlisting language="sql"><![CDATA[SELECT co.*
+FROM content co
+ORDER BY co.caption DESC     -- co.caption not found in SELECT clause]]></programlisting>
+                <para>
+                    As a workaround, it is possible to specify otherwise invalid column indices in the
+                    <code>ORDER BY</code>
+                    clause <emphasis>if</emphasis>
+                    <code>co.*</code>
+                    was selected. Of course this may lead to runtime errors if the user-defined columns
+                    are less than the ORDER BY index. In the most probable use case, on-the-fly
+                    sorting of a result table, this is not a problem, since the user
+                    can only sort by columns that have already been rendered.
+                </para>
+                <para>
+                    For example, the following is a valid &fxsql; query but relies on the user
+                    having defined at least 3 columns for the result type:
+                </para>
+                <programlisting language="sql"><![CDATA[SELECT co.*
+FROM content co
+ORDER BY 3 DESC     -- order by the third column of co.*]]></programlisting>
+            </section>
         </section>
 
         <section xml:id="css_comments">

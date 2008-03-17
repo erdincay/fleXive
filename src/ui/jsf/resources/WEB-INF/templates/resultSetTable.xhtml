@@ -104,9 +104,8 @@ Parameters:
     dojo.addOnLoad(function() {
 		#{name} = dojo.widget.createWidget("FilteringTable", 
 			{ valueField: "rowId", 
-			  maxSortable: 0,
-              // sort first column, ascending by default
-			  sortInformation: [ { index: 0, direction: 1 } ],
+			  maxSortable: 1,
+			  sortInformation: [],
               multiple: false,
               maxSelect: 0
              },
@@ -161,8 +160,14 @@ Parameters:
 		#{name}.originalSortFunction = #{name}.onSort;
 		#{name}.originalRenderFunction = #{name}.render;
 		#{name}.onSort = function(e) {
-			this.disableRender = true;
+            if (this.sortInformation.length == 0) {
+                this.sortInformation = [{ index: 0, direction: 1 }];
+            }
+            this.disableRender = true;
 			this.originalSortFunction(e);
+            #{name}_resultView.sortIndex = this.sortInformation[0].index;
+            #{name}_resultView.sortAscending = this.sortInformation[0].direction == 0;
+            #{name}_scroller.refresh();
         };
 		#{name}.render = function() {
 			if (!this.disableRender) {

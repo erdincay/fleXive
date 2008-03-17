@@ -41,7 +41,6 @@ package com.flexive.sqlParser;
 public class OrderByValue extends Constant {
 
     private boolean ascending;
-    private SelectedValue sv;
     private int columnIndex = -1;
 
     /**
@@ -57,25 +56,17 @@ public class OrderByValue extends Constant {
     }
 
     /**
-     * Internal setter for the selected value belonging to this order by.
+     * Internal setter for the selected value belonging to this order by. If the index
+     * is negative, it indicates a column selected through the "wildcard" selector, co.*.
+     * If a negative column index is not found in the actual result set, an exception
+     * is thrown when the final order by is assembled.
      *
-     * @param val the selected value
-     * @param columnIndex the index of the column to sort 
+     * @param columnIndex the index of the column to sort
      */
-    protected void setSelectedValue(SelectedValue val,int columnIndex) {
-        this.sv=val;
+    protected void setSelectedValue(int columnIndex) {
         this.columnIndex = columnIndex;
     }
 
-
-    /**
-     * Returns the selected value belonging to this order by.
-     *
-     * @return the selected value belonging to this order by
-     */
-    public SelectedValue getSelectedValue() {
-        return sv;
-    }
 
     /**
      * The position of the column to sort in the selected values list, 0 based.

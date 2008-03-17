@@ -188,8 +188,7 @@ public class SqlQueryBuilder implements Serializable {
      * @return  the order by columns defined for this query.
      */
     public String getOrderBy() {
-        return orderBy.isEmpty() ? "" : Table.CONTENT.getAlias() + "."
-                + StringUtils.join(orderBy.iterator(), ", " + Table.CONTENT.getAlias());
+        return orderBy.isEmpty() ? "" : StringUtils.join(orderBy.iterator(), ", ");
     }
 
     /**
@@ -462,12 +461,12 @@ public class SqlQueryBuilder implements Serializable {
      * @return  this
      */
     public SqlQueryBuilder orderBy(String column, SortDirection direction) {
-        orderBy.clear();
+        clearOrderBy();
         final int columnIndex = FxSharedUtils.getColumnIndex(getColumnNames(), column);
         if (columnIndex == -1) {
             throw new FxInvalidParameterException("column", "ex.sqlQueryBuilder.column.invalid", column).asRuntimeException();
         }
-        orderBy.add(getColumnNames().get(columnIndex - 1) + direction.getSqlSuffix());
+        orderBy.add(Table.CONTENT.getAlias() + "." + getColumnNames().get(columnIndex - 1) + direction.getSqlSuffix());
         return this;
     }
 
@@ -480,9 +479,25 @@ public class SqlQueryBuilder implements Serializable {
      * @return  this
      */
     public SqlQueryBuilder orderBy(int columnIndex, SortDirection direction) {
-        orderBy.clear();
-        orderBy(getColumnNames().get(columnIndex - 1), direction);
+        clearOrderBy();
+        final List<String> names = getColumnNames();
+        if (columnIndex <= names.size()) {
+            orderBy(names.get(columnIndex - 1), direction);
+        } else if (isWildcardSelected() && columnIndex > 0) {
+            // allow invalid index since it may become valid after the co.* wildcard is resolved
+            // (if it remains invalid, the search engine will throw an exception)
+            orderBy.add(String.valueOf(columnIndex) + " " + direction.getSqlSuffix());
+        } else {
+            throw new FxInvalidParameterException("column", "ex.sqlQueryBuilder.column.invalidIndex", columnIndex).asRuntimeException();
+        }
         return this;
+    }
+
+    /**
+     * Clears the current order by settings.
+     */
+    public void clearOrderBy() {
+        orderBy.clear();
     }
 
     /**
@@ -677,5 +692,9 @@ public class SqlQueryBuilder implements Serializable {
         if (frozen) {
             throw new FxInvalidStateException("ex.sqlQueryBuilder.query.frozen").asRuntimeException();
         }
+    }
+
+    private boolean isWildcardSelected() {
+        return getColumnNames().contains("*");
     }
 }

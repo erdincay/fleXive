@@ -216,8 +216,6 @@ public class SqlParserTest {
             final FxStatement stmt = parse(valid);
             assert stmt.getOrderByValues().get(0).getColumnIndex() == 0
                     : "Order by column index should be 0, was: " + stmt.getOrderByValues().get(0).getColumnIndex();
-            assert stmt.getOrderByValues().get(0).getSelectedValue() != null;
-            assert stmt.getOrderByValues().get(0).getSelectedValue().equals(stmt.getSelectedValues().get(0));
         }
         // some invalid queries
         for (String invalid : new String[]{
