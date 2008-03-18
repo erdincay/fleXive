@@ -133,7 +133,8 @@ Parameters:
 		if (showActionButtons) {
 			columns.push({"field": ResultSetTableHandler.COL_ACTIONS,
 				"label": "#{fxMessageBean['SearchResult.label.column.actions']}",
-				"dataType": "html"});
+                "noSort": "true", 
+                "dataType": "html"});
 		}
 		for (var i = 0; i < columns.length; i++) {
 			#{name}.columns.push(#{name}.createMetaData(columns[i]));
