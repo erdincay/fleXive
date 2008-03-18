@@ -362,7 +362,7 @@ public class SystemBean implements Serializable {
     public Map<String, String> getEscapeForJavaScript() {
         return FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<String, String>() {
             public String get(Object key) {
-                return FxFormatUtils.escapeForJavaScript((String) key, false, true);
+                return FxFormatUtils.escapeForJavaScript(String.valueOf(key), false, true);
             }
         });
     }

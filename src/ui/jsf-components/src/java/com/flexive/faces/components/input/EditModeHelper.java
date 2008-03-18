@@ -299,18 +299,31 @@ class EditModeHelper extends RenderHelper {
     }
 
     private void renderReferenceSelect(UIComponent parent, String inputId, FxLanguage language) throws IOException {
-        final FxReference referenceValue = (FxReference) value;
         final String popupLink = "javascript:openReferenceQueryPopup('" + value.getXPath() + "', '"
                 + inputId + "', '" + getForm(inputId) + "')";
         // render hidden input that contains the actual reference
         final HtmlInputHidden hidden = (HtmlInputHidden) FxJsfUtils.addChildComponent(parent, HtmlInputHidden.COMPONENT_TYPE);
         hidden.setId(stripForm(inputId));
+
+        // render popup button
+        final HtmlOutputLink link = (HtmlOutputLink) FxJsfUtils.addChildComponent(parent, HtmlOutputLink.COMPONENT_TYPE);
+        link.setValue(popupLink);
+        final HtmlGraphicImage button = (HtmlGraphicImage) FxJsfUtils.addChildComponent(link, HtmlGraphicImage.COMPONENT_TYPE);
+        button.setUrl("/adm/images/contentEditor/findReferences.png");
+        button.setStyle("border:0");
+
         // render image container (we need this since the image id attribute does not get rendered)
         final HtmlOutputLink imageContainer = (HtmlOutputLink) FxJsfUtils.addChildComponent(parent, HtmlOutputLink.COMPONENT_TYPE);
         imageContainer.setId(stripForm(inputId) + "_preview");
         imageContainer.setValue(popupLink);
+
+        // render caption
+        if (!value.isEmpty() && ((language != null && !value.isTranslationEmpty(language)) || language == null)) {
+            final HtmlOutputText caption = (HtmlOutputText) FxJsfUtils.addChildComponent(parent, HtmlOutputText.COMPONENT_TYPE);
+            caption.setValue(((FxReference) value).getTranslation(language).getCaption());
+        }
         // render the image itself
-        final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(imageContainer, HtmlGraphicImage.COMPONENT_TYPE);
+        /*final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(imageContainer, HtmlGraphicImage.COMPONENT_TYPE);
         image.setStyle("border:0");
         if (!value.isEmpty() && ((language != null && !value.isTranslationEmpty(language)) || language == null)) {
             // render preview image
@@ -319,13 +332,7 @@ class EditModeHelper extends RenderHelper {
             hidden.setValue(translation);
         } else {
             image.setUrl("/pub/images/empty.gif");
-        }
-        // render popup button
-        final HtmlOutputLink link = (HtmlOutputLink) FxJsfUtils.addChildComponent(parent, HtmlOutputLink.COMPONENT_TYPE);
-        link.setValue(popupLink);
-        final HtmlGraphicImage button = (HtmlGraphicImage) FxJsfUtils.addChildComponent(link, HtmlGraphicImage.COMPONENT_TYPE);
-        button.setUrl("/adm/images/contentEditor/findReferences.png");
-        button.setStyle("border:0");
+        }*/
     }
 
     private void renderBinary(UIComponent parent, String inputId, FxLanguage language) throws IOException {

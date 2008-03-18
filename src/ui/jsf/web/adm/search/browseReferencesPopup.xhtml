@@ -25,16 +25,15 @@
     <ui:define name="body">
         <a4j:form id="frm">
             <c:if test="#{empty browseReferencesBean.parseRequestParameters}"> </c:if>
-
             <script type="text/javascript">
             <!--
                 var formId = "#{browseReferencesBean.formName}";
                 var inputId = "#{browseReferencesBean.inputName}";
-                function selectReference(pk) {
+                function selectReference(pk, caption) {
                     try {
                         window.opener.document.forms[formId][inputId].value = pk;
-                        window.opener.document.getElementById(inputId + "_preview").innerHTML =
-                            "<img border=\"0\" src=\"" + getThumbnailURI(pk) + "\">";
+                        window.opener.document.getElementById(inputId + "_preview").innerHTML = pk + " " + caption;
+                            //"<img border=\"0\" src=\"" + getThumbnailURI(pk) + "\">";
                         window.close();
                     } catch (e) {
                         alert(e);
@@ -68,12 +67,12 @@
                     <h:dataTable var="row" value="#{browseReferencesBean.dataModel}">
                         <h:column>
                             <img id="loadrow#{index}" src="thumbnail/pk#{row[0]}/s1" alt="#{row[1]}" title="#{row[1]}"
-                                 border="0" onclick="return selectReference('#{row[0]}')" style="cursor: pointer"/>
+                                 border="0" onclick="return selectReference('#{row[0]}', '#{fxSystemBean.escapeForJavaScript[row[1]]}')" style="cursor: pointer"/>
                         </h:column>
-                        <c:forEach var="name" varStatus="status" begin="1"
+                        <c:forEach var="name" varStatus="status" begin="2"
                                    items="#{browseReferencesBean.dataModel.result.columnNames}">
                             <h:column>
-                                <span style="cursor: pointer" onclick="return selectReference('#{row[0]}')">
+                                <span style="cursor: pointer" onclick="return selectReference('#{row[0]}', '#{fxSystemBean.escapeForJavaScript[row[1]]}')">
                                     #{row[status.index]}
                                 </span>
                             </h:column>
