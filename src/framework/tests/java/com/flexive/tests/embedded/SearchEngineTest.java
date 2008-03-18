@@ -36,6 +36,8 @@ package com.flexive.tests.embedded;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
+import static com.flexive.shared.EJBLookup.getContentEngine;
+import static com.flexive.shared.EJBLookup.getMandatorEngine;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNodeEdit;
@@ -272,7 +274,7 @@ public class SearchEngineTest {
             final FxPK pk = row.getPk(1);
             final PermissionSet permissions = row.getPermissions(2);
             assert permissions.isMayRead();
-            final PermissionSet contentPerms = EJBLookup.getContentEngine().load(pk).getPermissions();
+            final PermissionSet contentPerms = getContentEngine().load(pk).getPermissions();
             assert contentPerms.equals(permissions) : "Permissions from search: " + permissions + ", content: " + contentPerms;
         }
     }
@@ -509,7 +511,7 @@ public class SearchEngineTest {
         assert result.getRowCount() > 0;
         for (FxResultRow row: result.getResultRows()) {
             final ACL acl = CacheAdmin.getEnvironment().getACL(row.getLong("acl"));
-            final FxContent content = EJBLookup.getContentEngine().load(row.getPk(1));
+            final FxContent content = getContentEngine().load(row.getPk(1));
             assert content.getAclId() == acl.getId()
                     : "Invalid ACL for instance " + row.getPk(1) + ": " + acl.getId()
                     + ", content engine returned " + content.getAclId();
@@ -539,7 +541,7 @@ public class SearchEngineTest {
             assert definition.getLabel().getBestTranslation().equals(row.getFxValue("step.label").getBestTranslation())
                     : "Invalid step label '" + row.getValue(3) + "', expected: '" + definition.getLabel() + "'";
             try {
-                final FxContent content = EJBLookup.getContentEngine().load(row.getPk(1));
+                final FxContent content = getContentEngine().load(row.getPk(1));
                 assert content.getStepId() == step.getId()
                         : "Invalid step for instance " + row.getPk(1) + ": " + step.getId()
                         + ", content engine returned " + content.getStepId();
@@ -561,7 +563,7 @@ public class SearchEngineTest {
         final FxResultSet result = new SqlQueryBuilder().select("@pk", "@permissions").type(FxType.CONTACTDATA).getResult();
         for (FxResultRow row: result.getResultRows()) {
             try {
-                final FxContent content = EJBLookup.getContentEngine().load(row.getPk(1));
+                final FxContent content = getContentEngine().load(row.getPk(1));
                 assert content.getPermissions().equals(row.getPermissions("@permissions"))
                         : "Content perm: " + content.getPermissions() + ", search perm: " + row.getPermissions(2);
             } catch (FxNoAccessException e) {
@@ -583,7 +585,7 @@ public class SearchEngineTest {
         final FxResultSet result = EJBLookup.getSearchEngine().search("SELECT co.@pk FROM content co", 0, 999999, null);
         for (FxResultRow row: result.getResultRows()) {
             try {
-                EJBLookup.getContentEngine().load(row.getPk(1));
+                getContentEngine().load(row.getPk(1));
             } catch (FxNoAccessException e) {
                 assert false : "Content engine denied read access to instance " + row.getPk(1) + " that was returned by search."; 
             }
@@ -598,7 +600,7 @@ public class SearchEngineTest {
         assert result.getRowCount() > 0;
         for (FxResultRow row: result.getResultRows()) {
             final Mandator mandator = CacheAdmin.getEnvironment().getMandator(row.getLong("mandator"));
-            final FxContent content = EJBLookup.getContentEngine().load(row.getPk(1));
+            final FxContent content = getContentEngine().load(row.getPk(1));
 
             assertEquals(mandator.getId(), content.getMandatorId(), "Search returned different mandator than content engine");
             assertEquals(row.getLong("mandator.id"), mandator.getId(), "Invalid value for field: id");
@@ -700,11 +702,11 @@ public class SearchEngineTest {
         assert allVersions.size() > maxVersions.size() : "Expected more than only max versions";
         assert !CollectionUtils.isEqualCollection(liveVersions, maxVersions) : "Expected different results for max and live version filter";
         for (FxPK pk: liveVersions) {
-            final FxContent content = EJBLookup.getContentEngine().load(pk);
+            final FxContent content = getContentEngine().load(pk);
             assert content.isLiveVersion() : "Expected live version for " + pk;
         }
         for (FxPK pk: maxVersions) {
-            final FxContent content = EJBLookup.getContentEngine().load(pk);
+            final FxContent content = getContentEngine().load(pk);
             assert content.isMaxVersion() : "Expected max version for " + pk;
             assert content.getVersion() == 1 || !content.isLiveVersion();
         }
@@ -714,20 +716,20 @@ public class SearchEngineTest {
     public void lastContentChangeTest() throws FxApplicationException {
         final long lastContentChange = EJBLookup.getSearchEngine().getLastContentChange(false);
         assert lastContentChange > 0;
-        final FxContent content = EJBLookup.getContentEngine().initialize(TEST_TYPE);
+        final FxContent content = getContentEngine().initialize(TEST_TYPE);
         content.setAclId(TestUsers.getInstanceAcl().getId());
         content.setValue("/" + getTestPropertyName("string"), new FxString(false, "lastContentChangeTest"));
         FxPK pk = null;
         try {
             assert EJBLookup.getSearchEngine().getLastContentChange(false) == lastContentChange
                     : "Didn't touch contents, but lastContentChange timestamp was increased";
-            pk = EJBLookup.getContentEngine().save(content);
+            pk = getContentEngine().save(content);
             assert EJBLookup.getSearchEngine().getLastContentChange(false) > lastContentChange
                     : "Saved content, but lastContentChange timestamp was not increased: "
                     + EJBLookup.getSearchEngine().getLastContentChange(false);
         } finally {
             if (pk != null) {
-                EJBLookup.getContentEngine().remove(pk);
+                getContentEngine().remove(pk);
             }
         }
     }
@@ -759,6 +761,48 @@ public class SearchEngineTest {
                     EJBLookup.getTreeEngine().remove(EJBLookup.getTreeEngine().getNode(FxTreeMode.Live, nodeId), true, false);
                 } catch (FxApplicationException e) {
                     // pass
+                }
+            } finally {
+                FxContext.get().stopRunAsSystem();
+            }
+        }
+    }
+
+    @Test
+    public void inactiveMandatorResultTest() throws FxApplicationException {
+        long mandatorId = -1;
+        FxPK pk = null;
+        try {
+            FxContext.get().runAsSystem();
+            mandatorId = getMandatorEngine().create("inactiveMandatorResultTest", true);
+            final FxContent content = getContentEngine().initialize(getTestTypeId(), mandatorId, -1, -1, -1);
+            content.setValue("/" + getTestPropertyName("string"), new FxString(false, "test value"));
+            pk = getContentEngine().save(content);
+
+            // content should be retrievable
+            assert new SqlQueryBuilder().condition("id", PropertyValueComparator.EQ, pk.getId()).getResult().getRowCount() > 0
+                    : "Test value from active mandator not found";
+
+            getMandatorEngine().deactivate(mandatorId);
+            // content should be removed from result
+            assert new SqlQueryBuilder().condition("id", PropertyValueComparator.EQ, pk.getId()).getResult().getRowCount() == 0 
+                    : "Content from deactivated mandators should not be retrievable";
+            try {
+                getContentEngine().load(pk);
+                assert false : "ContentEngine returned content from deactivated mandator.";
+            } catch (FxApplicationException e) {
+                // pass
+            }
+        } finally {
+            try {
+                if (mandatorId != -1) {
+                    getMandatorEngine().activate(mandatorId);   // active before removing content
+                }
+                if (pk != null) {
+                    getContentEngine().remove(pk);
+                }
+                if (mandatorId != -1) {
+                    getMandatorEngine().remove(mandatorId);
                 }
             } finally {
                 FxContext.get().stopRunAsSystem();
@@ -810,4 +854,7 @@ public class SearchEngineTest {
         }
     }
 
+    private long getTestTypeId() {
+        return CacheAdmin.getEnvironment().getType(TEST_TYPE).getId();
+    }
 }
