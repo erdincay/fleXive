@@ -25,6 +25,9 @@
     <property name="meta.dir" value="${resources.dir}/META-INF"/>
     <property name="templates.dir" value="${resources.dir}/templates"/>
 
+    <!-- Library filters for building the EAR lib directory -->
+    <property name="extlib.excludes" value="jsf-api.jar,jsf-impl.jar,javaee.jar,selenium-*,testng-*,jboss-common-core.jar,jboss-jmx.jar,jboss-system.jar,mysql-connector-*.jar,concurrent.jar"/>
+
     <!-- javac options -->
 	<property name="compiler.deprecation" value="on"/>
 	<property name="compiler.optimize" value="on"/>
