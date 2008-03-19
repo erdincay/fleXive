@@ -26,7 +26,7 @@
         <c:if test="#{empty contentEditorBean.userCd}"> </c:if>
 
         <h:form id="frm">
-            <adm:tab label="#{fxMessageBean['User.pref.show']}" active="false" id="tab1"
+            <adm:tab label="#{fxMessageBean['User.pref.show,#{fxSystemBean.userTicket.userName}']}" active="false" id="tab1"
                      bean="#{accountBean}" action="editUserPref"/>
             <!--<adm:tab label="#{fxMessageBean['User.pref.contactData']}" active="true" id="tab2"/>-->
             <adm:contentEditor srcEditor="#{contentEditorBean}"/>

@@ -44,7 +44,6 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.AccountEngine;
-import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.UserGroupEngine;
 import com.flexive.shared.security.*;
 import com.flexive.war.FxRequest;
@@ -83,7 +82,6 @@ public class AccountBean {
     private Mandator mandator;
     private Hashtable<String, ArrayList<Account>> listCache;
     private static final String ID_CACHE_KEY = AccountBean.class + "_id";
-    private ContentEngine contentInterface;
     private FxContent contactData;
 
 
@@ -273,6 +271,17 @@ public class AccountBean {
         return userGroupsNonSystem;
     }
 
+    /**
+     * Force an initialization of the current user preferences if the bean is not initialized
+     * 
+     * @return dummy
+     */
+    public String getEditUserPref() {
+        if( this.account == null || this.account.getId() == -1)
+            editUserPref();
+        return null;
+    }
+
     public String getParseRequestParameters() {
         try {
             String action = FxJsfUtils.getParameter("action");
@@ -412,7 +421,8 @@ public class AccountBean {
             new FxFacesMsgErr(e).addToContext();
             return editUserPref();
         }
-        return "contentPage";
+        FxContext.get()._reloadUserTicket();
+        return "editUserPref";
     }
 
     public String saveUser() {

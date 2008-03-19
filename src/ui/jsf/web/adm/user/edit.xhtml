@@ -20,35 +20,34 @@
 </ui:define>
 
 <ui:define name="body">
-    <c:if test="#{empty accountBean.parseRequestParameters}"> </c:if>
+    <c:if test="#{empty accountBean.editUserPref}"> </c:if>
 
     <h:form id="frm">
-        <!--<adm:tab label="Edit User Preferences" active="true" id="tab1"/> -->
 
-        <adm:tab label="#{fxMessageBean['User.pref.show']}" active="true" id="tab1"/>
+        <adm:tab label="#{fxMessageBean['User.pref.show,#{accountBean.account.name}']}" active="true" id="tab1"/>
       <!--  <c:if test="#{not empty accountBean.contactData}"> -->
             <adm:tab label="#{fxMessageBean['User.pref.contactData']}" active="false" id="tab2"
             	bean="#{accountBean}" action="showContactData"/>
       <!--  </c:if>  -->
-        <fx:formRow label="Account Name" id="name" newLine="false">
+        <fx:formRow label="#{fxMessageBean['Account.field.userName']}" id="name" newLine="false">
             <h:inputText id="name" value="#{accountBean.account.name}" readonly="true"/>
             <h:inputHidden value="#{accountBean.accountIdFiler}"/>
             <h:inputHidden value="#{accountBean.account.contactDataId}"/>
         </fx:formRow>
-        <fx:formRow label="Login Name" id="loginName">
+        <fx:formRow label="#{fxMessageBean['Account.field.loginName']}" id="loginName">
             <h:inputText id="loginName" value="#{accountBean.account.loginName}" readonly="true"/>
         </fx:formRow>
 
         <!-- ============================================ -->
-        <fx:formRow label="Password" id="password" newLine="false">
+        <fx:formRow label="#{fxMessageBean['Account.field.password']}" id="password" newLine="false">
             <h:inputSecret id="password" value="#{accountBean.password}"/>
         </fx:formRow>
-        <fx:formRow label="Confirm Password" id="passwordConfirm">
+        <fx:formRow label="#{fxMessageBean['Account.field.retypePassword']}" id="passwordConfirm">
             <h:inputSecret id="passwordConfirm" value="#{accountBean.passwordConfirm}"/>
         </fx:formRow>
 
         <!-- ============================================ -->
-        <fx:formRow label="Language" id="language">
+        <fx:formRow label="#{fxMessageBean['Account.field.language']}" id="language">
             <h:selectOneListbox id="language" value="#{accountBean.account.language}" size="1"
                                 converter="FxLanguageConverter">
                 <f:selectItems value="#{fxSelectBean.languages}" />
@@ -56,18 +55,18 @@
         </fx:formRow>
 
         <!-- ============================================ -->
-        <fx:formRow label="Email" id="email">
+        <fx:formRow label="#{fxMessageBean['Account.field.email']}" id="email">
             <h:inputText id="email" value="#{accountBean.account.email}"/>
         </fx:formRow>
 
-        <fx:formRow label="Groups" id="groups" height="85"  newLine="false">
+        <fx:formRow label="#{fxMessageBean['Account.field.groups']}" id="groups" height="85"  newLine="false">
             <ui:repeat value="#{accountBean.groups}" var="group">
                 <h:outputText value="#{group.name}"/>
                 <br/>
             </ui:repeat>    
         </fx:formRow>
         
-        <fx:formRow label="Roles" id="roles" height="85" readonly="true">
+        <fx:formRow label="#{fxMessageBean['Account.field.roles']}" id="roles" height="85" readonly="true">
             <ui:repeat value="#{accountBean.roles}" var="role">
                 <h:outputText value="#{role.name}"/>
                 <br/>
@@ -75,7 +74,7 @@
         </fx:formRow>
         
         <c:if test="${fxSystemBean.userTicket.globalSupervisor}">
-            <fx:formRow label="Mandator" id="mand"><h:outputText value="#{mandatorBean.mandatorsById[accountBean.account.mandatorId].name}"/></fx:formRow>
+            <fx:formRow label="#{fxMessageBean['Account.field.mandator']}" id="mand"><h:outputText value="#{mandatorBean.mandatorsById[accountBean.account.mandatorId].name}"/></fx:formRow>
         </c:if>
 
         <br />
