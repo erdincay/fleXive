@@ -9,9 +9,6 @@
         <webroots>
           <root url="file://$MODULE_DIR$/../../examples/helloworld/web" relative="/" />
         </webroots>
-        <sourceRoots>
-          <root url="file://$MODULE_DIR$/src/java" />
-        </sourceRoots>
         <building>
           <setting name="EXPLODED_URL" value="file://" />
           <setting name="EXPLODED_ENABLED" value="false" />
@@ -228,6 +225,9 @@
           </containerElement>
         </packaging>
       </configuration>
+      <facet type="jsf" name="JSF" implicit="true">
+        <configuration />
+      </facet>
     </facet>
   </component>
   <component name="NewModuleRootManager" inherit-compiler-output="true">

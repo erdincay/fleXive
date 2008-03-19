@@ -176,9 +176,7 @@ public class CacheAdmin {
                     throw new FxCacheException("Division Id missing in request information");
                 }
                 getInstance().reloadEnvironment(ri.getDivisionId());
-                if (!EJBLookup.getTimerService().isInstalled()) {
-                    EJBLookup.getTimerService().install();
-                }
+                EJBLookup.getTimerService().install(true);
                 //execute run-once scripts
                 EJBLookup.getScriptingEngine().executeRunOnceScripts();
                 //execute startup scripts

@@ -78,16 +78,21 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
     /**
      * {@inheritDoc}
      */
-    public boolean install() {
+    public boolean install(boolean reinstall) {
+        if( isInstalled() )
+            uninstall();
         //install a timer that runs every minute
-        if (ctx != null && ctx.getTimerService() != null) {
+        final boolean installed = isInstalled();
+        if (!installed) {
             ctx.getTimerService().createTimer(1000L * 60 * INTERVAL, 1000L * 60 * INTERVAL, TIMER_SIGNATURE);
             return true;
         } else {
             if (ctx != null)
                 LOG.fatal("TimerService is not available! (Still an alpha build?)");
-            else
-                LOG.fatal("@Resource injection failed! (Wrong package?)");
+            else {
+                LOG.warn("TimerService already installed!");
+                return true;
+            }
         }
         LOG.warn("Performing timer maintenance on startup due to failed service!");
         perform(null);

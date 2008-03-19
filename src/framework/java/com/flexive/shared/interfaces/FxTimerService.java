@@ -46,9 +46,10 @@ public interface FxTimerService {
     /**
      * Installs the timer service
      *
+     * @param reinstall reinstall the timer if it is already installed?
      * @return if successful (should only fail in early versions of embedded containers!)
      */
-    boolean install();
+    boolean install(boolean reinstall);
 
     /**
      * Uninstalls the timer service
