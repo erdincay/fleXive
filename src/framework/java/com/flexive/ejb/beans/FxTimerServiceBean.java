@@ -83,7 +83,7 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
             uninstall();
         //install a timer that runs every minute
         final boolean installed = isInstalled();
-        if (!installed) {
+        if (!installed && ctx != null && ctx.getTimerService() != null) {
             ctx.getTimerService().createTimer(1000L * 60 * INTERVAL, 1000L * 60 * INTERVAL, TIMER_SIGNATURE);
             return true;
         } else {
