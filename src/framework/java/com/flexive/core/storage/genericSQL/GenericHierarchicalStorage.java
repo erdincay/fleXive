@@ -41,6 +41,7 @@ import com.flexive.core.storage.StorageManager;
 import com.flexive.extractor.ExtractedData;
 import com.flexive.extractor.HtmlExtractor;
 import com.flexive.shared.*;
+import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.content.*;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.ScriptingEngine;
@@ -159,7 +160,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
     protected static final String CONTENT_REFERENCE_LIVE = "SELECT VER, ACL, STEP, TDEF, CREATED_BY FROM " + TBL_CONTENT + " WHERE ID=? AND ISLIVE_VER=TRUE";
     protected static final String CONTENT_REFERENCE_MAX = "SELECT VER, ACL, STEP, TDEF, CREATED_BY FROM " + TBL_CONTENT + " WHERE ID=? AND ISMAX_VER=TRUE";
-    protected static final String CONTENT_REFERENCE_CAPTION = "SELECT FTEXT1024 FROM " + TBL_CONTENT_DATA + " WHERE ID=? AND VER=? AND XPATHMULT='/CAPTION[1]'";
+    protected static final String CONTENT_REFERENCE_CAPTION = "SELECT FTEXT1024 FROM " + TBL_CONTENT_DATA + " WHERE ID=? AND VER=? AND TPROP=?";
 
     //getContentVersionInfo() statement
     protected static final String CONTENT_VER_INFO = "SELECT ID, VER, MAX_VER, LIVE_VER, CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT, STEP FROM " + TBL_CONTENT + " WHERE ID=?";
@@ -1579,6 +1580,11 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps = con.prepareStatement(CONTENT_REFERENCE_CAPTION);
             ps.setLong(1, referencedId);
             ps.setInt(2, referencedVersion);
+            try {
+                ps.setLong(3, EJBLookup.getConfigurationEngine().get(SystemParameters.TREE_CAPTION_PROPERTY));
+            } catch (FxApplicationException e) {
+                throw e.asRuntimeException();
+            }
             rs = ps.executeQuery();
             if (rs != null && rs.next())
                 caption = rs.getString(1);
