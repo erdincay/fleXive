@@ -891,6 +891,8 @@ public class SearchEngineTest {
         assertExactPkMatch(content.getPk(), new SqlQueryBuilder().select("@pk").condition("created_at", EQ, new FxDateTime(false, createdAt)).condition("id", EQ, content.getPk().getId()).getResult().<FxPK>collectColumn(1));
         assertExactPkMatch(content.getPk(), new SqlQueryBuilder().select("@pk").condition("created_at", PropertyValueComparator.LE, new FxDateTime(false, createdAt)).condition("id", EQ, content.getPk().getId()).getResult().<FxPK>collectColumn(1));
         assertExactPkMatch(content.getPk(), new SqlQueryBuilder().select("@pk").condition("created_at", PropertyValueComparator.GE, new FxDateTime(false, createdAt)).condition("id", EQ, content.getPk().getId()).getResult().<FxPK>collectColumn(1));
+        assert new SqlQueryBuilder().select("@pk").condition("created_at", PropertyValueComparator.LT, new FxDateTime(false, createdAt)).condition("id", EQ, content.getPk().getId()).getResult().getRowCount() == 0;
+        assert new SqlQueryBuilder().select("@pk").condition("created_at", PropertyValueComparator.GT, new FxDateTime(false, createdAt)).condition("id", EQ, content.getPk().getId()).getResult().getRowCount() == 0;
     }
 
     private void assertExactPkMatch(FxPK pk, List<FxPK> pks) {

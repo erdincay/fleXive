@@ -61,6 +61,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Date;
 
 // NVL --> IFNULL((select sub.id from FX_CONTENT_DATA sub where sub.id=filter.id),1)
 
@@ -580,7 +581,16 @@ public class MySQLDataFilter extends DataFilter {
                 break;
             case DateTime:
             case DateTimeRange:
-                value = constant.getValue() == null ? "NULL" : "'" + FxFormatUtils.getDateTimeFormat().format(FxFormatUtils.toDateTime(constant.getValue())) + "'";
+                if (constant.getValue() == null) {
+                    value = "NULL";
+                } else {
+                    final Date date = FxFormatUtils.toDateTime(constant.getValue());
+                    if ("CREATED_AT".equals(column) || "MODIFIED_AT".equals(column)) {
+                        value = String.valueOf(date.getTime());
+                    } else {
+                        value = "'" + FxFormatUtils.getDateTimeFormat().format(date) + "'";
+                    }
+                }
                 break;
             case Binary:
                 if (cond.getComperator().equals(Comparator.IS_NOT) && constant.isNull()) {

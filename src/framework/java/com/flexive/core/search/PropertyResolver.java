@@ -134,7 +134,7 @@ public class PropertyResolver {
         PropertyEntry entry = cache.get(key);
         if (entry == null) {
             // first check hardcoded virtual properties like @pk and @path
-            for (PropertyEntry.Type type: PropertyEntry.Type.values()) {
+            for (PropertyEntry.Type type : PropertyEntry.Type.values()) {
                 if (type.matchesProperty(property.getPropertyName())) {
                     entry = type.createEntry();
                     break;
@@ -151,7 +151,7 @@ public class PropertyResolver {
     /**
      * Initializes the column informations.
      *
-     * @param con   an existing connection
+     * @param con an existing connection
      * @throws FxSqlSearchException if the init fails
      */
     private synchronized void initColumnInformations(Connection con) throws FxSqlSearchException {
@@ -170,7 +170,7 @@ public class PropertyResolver {
                 final FxDataType dt;
                 switch (type) {
                     case java.sql.Types.BIGINT:
-                        if( columnName.endsWith("_ED_AT")) { //CREATED_AT, MODIFIED_AT
+                        if ("CREATED_AT".equals(columnName) || "MODIFIED_AT".equals(columnName)) {
                             dt = FxDataType.DateTime;
                             break;
                         }
