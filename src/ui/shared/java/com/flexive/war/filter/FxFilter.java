@@ -161,7 +161,14 @@ public class FxFilter implements Filter {
                     if (request.isSetupURL()) {
                         request.forward(response, "/" + FxRequestWrapper.PATH_SETUP + "/globalconfig.fx?action=showLogin");
                     } else {
-                        request.forward(response, "/" + FxRequestWrapper.PATH_PUBLIC + "/login.jsf");
+                        final String loginPath = "/" + FxRequestWrapper.PATH_PUBLIC + "/login.jsf";
+                        if( !loginPath.equals(request.getRealRequestUriNoContext()))
+                            request.forward(response, loginPath);
+                        else {
+                            final String msg = "Multiple redirects attempted to " + loginPath;
+                            LOG.warn(msg);
+                            response.sendError(HttpServletResponse.SC_NOT_FOUND, msg);
+                        }
                     }
                 } else if (restrictBackendAccess(request, si)) {
                     //user is in backend but may not access it
