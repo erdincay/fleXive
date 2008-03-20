@@ -236,9 +236,15 @@ public class FxValueInputRenderer extends Renderer {
         } else if (value instanceof FxBoolean) {
             value.setTranslation(languageId, StringUtils.isNotBlank((String) parameters.get(inputId)));
         } else {
+            // use FxValue string representation
             final String postedValue = (String) parameters.get(inputId);
             if (StringUtils.isNotBlank(postedValue)) {
                 value.setTranslation(languageId, postedValue);
+                if (value instanceof FxReference && value.isValid()) {
+                    // store translation
+                    final ReferencedContent reference = ((FxReference) value).getTranslation(languageId);
+                    value.setTranslation(languageId, new ReferencedContent(reference, (String) parameters.get(inputId + "_caption"), null, null));
+                }
             } else {
                 value.removeLanguage(languageId);
             }

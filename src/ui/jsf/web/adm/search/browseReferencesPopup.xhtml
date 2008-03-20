@@ -32,7 +32,8 @@
                 function selectReference(pk, caption) {
                     try {
                         window.opener.document.forms[formId][inputId].value = pk;
-                        window.opener.document.getElementById(inputId + "_preview").innerHTML = pk + " " + caption;
+                        window.opener.document.forms[formId][inputId + "_caption"].value = caption;
+                        window.opener.document.getElementById(inputId + "_preview").innerHTML = caption;
                             //"<img border=\"0\" src=\"" + getThumbnailURI(pk) + "\">";
                         window.close();
                     } catch (e) {

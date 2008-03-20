@@ -36,6 +36,7 @@ package com.flexive.tests.embedded;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxFormatUtils;
 import static com.flexive.shared.EJBLookup.getContentEngine;
 import static com.flexive.shared.EJBLookup.getMandatorEngine;
 import com.flexive.shared.tree.FxTreeNode;
@@ -52,6 +53,7 @@ import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.search.query.QueryOperatorNode;
 import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.search.query.VersionFilter;
+import static com.flexive.shared.search.query.PropertyValueComparator.EQ;
 import com.flexive.shared.security.*;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.structure.FxDataType;
@@ -70,6 +72,8 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.collections.CollectionUtils;
 
 import java.util.*;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
 
 /**
  * FxSQL search query engine tests.
@@ -330,6 +334,14 @@ public class SearchEngineTest {
         EJBLookup.getResultPreferencesEngine().save(prefs, CacheAdmin.getEnvironment().getType(TEST_TYPE).getId(), ResultViewType.LIST, AdminResultLocations.DEFAULT);
     }
 
+    private static List<FxPK> folderPks;
+    private static synchronized List<FxPK> getFolderPks() throws FxApplicationException {
+        if (folderPks == null) {
+            folderPks = new SqlQueryBuilder().select("@pk").type("folder").getResult().collectColumn(1);
+        }
+        return folderPks;
+    }
+
     /**
      * Tests all available value comparators for the given datatype. Note that no semantic
      * tests are performed, each comparator is executed with a random value.
@@ -345,7 +357,7 @@ public class SearchEngineTest {
         final Random random = new Random(0);
 
         // need to get some folder IDs for the reference property
-        final List<FxPK> folderPks = new SqlQueryBuilder().select("@pk").type("folder").getResult().collectColumn(1);
+        final List<FxPK> folderPks = getFolderPks();
 
         for (PropertyValueComparator comparator : PropertyValueComparator.getAvailable(dataType)) {
             for (String prefix : new String[]{
@@ -395,7 +407,7 @@ public class SearchEngineTest {
         final String propertyName = getTestPropertyName(name);
 
         for (PropertyValueComparator comparator : PropertyValueComparator.getAvailable(dataType)) {
-            if (!(comparator.equals(PropertyValueComparator.EQ) || comparator.equals(PropertyValueComparator.GE)
+            if (!(comparator.equals(EQ) || comparator.equals(PropertyValueComparator.GE)
                || comparator.equals(PropertyValueComparator.GT) || comparator.equals(PropertyValueComparator.LE)
                || comparator.equals(PropertyValueComparator.LT))) {
                 continue;
@@ -728,9 +740,7 @@ public class SearchEngineTest {
                     : "Saved content, but lastContentChange timestamp was not increased: "
                     + EJBLookup.getSearchEngine().getLastContentChange(false);
         } finally {
-            if (pk != null) {
-                getContentEngine().remove(pk);
-            }
+            removePk(pk);
         }
     }
 
@@ -780,12 +790,12 @@ public class SearchEngineTest {
             pk = getContentEngine().save(content);
 
             // content should be retrievable
-            assert new SqlQueryBuilder().condition("id", PropertyValueComparator.EQ, pk.getId()).getResult().getRowCount() > 0
+            assert new SqlQueryBuilder().condition("id", EQ, pk.getId()).getResult().getRowCount() > 0
                     : "Test value from active mandator not found";
 
             getMandatorEngine().deactivate(mandatorId);
             // content should be removed from result
-            assert new SqlQueryBuilder().condition("id", PropertyValueComparator.EQ, pk.getId()).getResult().getRowCount() == 0 
+            assert new SqlQueryBuilder().condition("id", EQ, pk.getId()).getResult().getRowCount() == 0
                     : "Content from deactivated mandators should not be retrievable";
             try {
                 getContentEngine().load(pk);
@@ -798,9 +808,7 @@ public class SearchEngineTest {
                 if (mandatorId != -1) {
                     getMandatorEngine().activate(mandatorId);   // active before removing content
                 }
-                if (pk != null) {
-                    getContentEngine().remove(pk);
-                }
+                removePk(pk);
                 if (mandatorId != -1) {
                     getMandatorEngine().remove(mandatorId);
                 }
@@ -808,6 +816,86 @@ public class SearchEngineTest {
                 FxContext.get().stopRunAsSystem();
             }
         }
+    }
+
+    @Test
+    public void stringEscapeTest() throws FxApplicationException {
+        FxPK pk = null;
+        try {
+            final FxContent content = getContentEngine().initialize(TEST_TYPE);
+            content.setValue("/" + getTestPropertyName("string"), new FxString(false, "te'st"));
+            pk = getContentEngine().save(content);
+            final FxResultSet result = EJBLookup.getSearchEngine().search("SELECT co.id FROM content co WHERE co."
+                    + getTestPropertyName("string") + " = 'te''st'", 0, 10, null);
+            assert result.getRowCount() == 1 : "Escaped string property not returned";
+            assert result.getResultRow(0).getLong(1) == pk.getId();
+        } finally {
+            removePk(pk);
+        }
+    }
+
+    private void removePk(FxPK pk) throws FxApplicationException {
+        if (pk != null) {
+            getContentEngine().remove(pk);
+        }
+    }
+
+    @Test
+    public void dateSearchTest() throws FxApplicationException, ParseException {
+        FxPK pk = null;
+        try {
+            final String dateProperty = getTestPropertyName("date");
+            final String dateTimeProperty = getTestPropertyName("dateTime");
+
+            final SimpleDateFormat dateFormat = FxFormatUtils.getDateFormat();
+            final SimpleDateFormat dateTimeFormat = FxFormatUtils.getDateTimeFormat();
+
+            final FxContent content = getContentEngine().initialize(TEST_TYPE);
+            content.setValue("/" + dateProperty, new FxDate(false,
+                    dateFormat.parse("2008-03-18")));
+            content.setValue("/" + dateTimeProperty, new FxDateTime(false,
+                    dateTimeFormat.parse("2008-03-18 15:43:25.123")));
+            pk = getContentEngine().save(content);
+
+            // date query
+            assertExactPkMatch(pk, new SqlQueryBuilder().select("@pk").condition(dateProperty, EQ, "2008-03-18").condition("id", EQ, pk.getId()).getResult().<FxPK>collectColumn(1));
+            assertExactPkMatch(pk, new SqlQueryBuilder().select("@pk").condition(dateProperty, PropertyValueComparator.LE, "2008-03-18").condition("id", EQ, pk.getId()).getResult().<FxPK>collectColumn(1));
+            assertExactPkMatch(pk, new SqlQueryBuilder().select("@pk").condition(dateProperty, PropertyValueComparator.GE, "2008-03-18").condition("id", EQ, pk.getId()).getResult().<FxPK>collectColumn(1));
+
+            assert new SqlQueryBuilder().select("@pk").condition(dateProperty, PropertyValueComparator.LT, "2008-03-18").condition("id", EQ, pk.getId()).getResult().getRowCount() == 0
+                    : "No rows should be returned because date condition doesn't match.";
+            assert new SqlQueryBuilder().select("@pk").condition(dateProperty, PropertyValueComparator.GT, "2008-03-18").condition("id", EQ, pk.getId()).getResult().getRowCount() == 0
+                    : "No rows should be returned because date condition doesn't match.";
+            assert new SqlQueryBuilder().select("@pk").condition(dateProperty, PropertyValueComparator.NE, "2008-03-18").condition("id", EQ, pk.getId()).getResult().getRowCount() == 0 
+                    : "No rows should be returned because date condition doesn't match.";
+
+            // datetime query
+            assertExactPkMatch(pk, new SqlQueryBuilder().select("@pk").condition(dateTimeProperty, EQ, "2008-03-18 15:43:25.123").condition("id", EQ, pk.getId()).getResult().<FxPK>collectColumn(1));
+            assertExactPkMatch(pk, new SqlQueryBuilder().select("@pk").condition(dateTimeProperty, PropertyValueComparator.LE, "2008-03-18 15:43:25.123").condition("id", EQ, pk.getId()).getResult().<FxPK>collectColumn(1));
+            assertExactPkMatch(pk, new SqlQueryBuilder().select("@pk").condition(dateTimeProperty, PropertyValueComparator.GE, "2008-03-18 15:43:25.123").condition("id", EQ, pk.getId()).getResult().<FxPK>collectColumn(1));
+            assert new SqlQueryBuilder().select("@pk").condition(dateTimeProperty, PropertyValueComparator.LT, "2008-03-18 15:43:25.123").condition("id", EQ, pk.getId()).getResult().getRowCount() == 0
+                : "No rows should be returned because date condition doesn't match.";
+            assert new SqlQueryBuilder().select("@pk").condition(dateTimeProperty, PropertyValueComparator.GT, "2008-03-18 15:43:25.123").condition("id", EQ, pk.getId()).getResult().getRowCount() == 0
+                : "No rows should be returned because date condition doesn't match.";
+            assert new SqlQueryBuilder().select("@pk").condition(dateTimeProperty, PropertyValueComparator.NE, "2008-03-18 15:43:25.123").condition("id", EQ, pk.getId()).getResult().getRowCount() == 0 
+                : "No rows should be returned because date condition doesn't match.";
+        } finally {
+            removePk(pk);
+        }
+    }
+
+    @Test
+    public void createdAtTest() throws FxApplicationException {
+        final FxContent content = getContentEngine().load(getFolderPks().get(0));
+        final Date createdAt = new Date(content.getLifeCycleInfo().getCreationTime());
+        assertExactPkMatch(content.getPk(), new SqlQueryBuilder().select("@pk").condition("created_at", EQ, new FxDateTime(false, createdAt)).condition("id", EQ, content.getPk().getId()).getResult().<FxPK>collectColumn(1));
+        assertExactPkMatch(content.getPk(), new SqlQueryBuilder().select("@pk").condition("created_at", PropertyValueComparator.LE, new FxDateTime(false, createdAt)).condition("id", EQ, content.getPk().getId()).getResult().<FxPK>collectColumn(1));
+        assertExactPkMatch(content.getPk(), new SqlQueryBuilder().select("@pk").condition("created_at", PropertyValueComparator.GE, new FxDateTime(false, createdAt)).condition("id", EQ, content.getPk().getId()).getResult().<FxPK>collectColumn(1));
+    }
+
+    private void assertExactPkMatch(FxPK pk, List<FxPK> pks) {
+        assert pks.size() == 1 : "No rows returned for exact match";
+        assert pks.get(0).equals(pk) : "Exact match did not return expected column - expected " + pk + ", got: " + pks.get(0);
     }
 
     private List<FxPK> getPksForVersion(VersionFilter versionFilter) throws FxApplicationException {

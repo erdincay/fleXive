@@ -532,8 +532,9 @@ public class MySQLDataFilter extends DataFilter {
                 } else {
                     // First remove surrounding "'" characters
                     value = FxFormatUtils.unquote(value);
-                    // Escape all remaining "'" characters
-                    value = value.replaceAll("'", "\\\\'");
+                    // single quotes ("'") should be quoted already, otherwise the
+                    // parser would have failed
+                    
                     // Convert back to an SQL string
                     value = "'" + value + "'";
                 }

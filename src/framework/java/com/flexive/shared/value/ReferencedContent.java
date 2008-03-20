@@ -41,6 +41,8 @@ import com.flexive.shared.workflow.Step;
 
 import java.io.Serializable;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * A referenced content - value class for FxReference
  *
@@ -237,6 +239,15 @@ public class ReferencedContent extends FxPK implements Serializable {
     @Override
     public int hashCode() {
         return super.hashCode() * 31 + caption.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        //noinspection SimplifiableIfStatement
+        if (!super.equals(obj) || !(obj instanceof ReferencedContent)) {
+            return false;
+        }
+        return StringUtils.equals(caption, ((ReferencedContent) obj).caption);
     }
 
     /**

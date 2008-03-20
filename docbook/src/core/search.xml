@@ -588,7 +588,8 @@ ORDER BY co.caption DESC     -- co.caption not found in SELECT clause]]></progra
                 <para>
                     As a workaround, it is possible to specify otherwise invalid column indices in the
                     <code>ORDER BY</code>
-                    clause <emphasis>if</emphasis>
+                    clause
+                    <emphasis>if</emphasis>
                     <code>co.*</code>
                     was selected. Of course this may lead to runtime errors if the user-defined columns
                     are less than the ORDER BY index. In the most probable use case, on-the-fly
@@ -699,6 +700,89 @@ WHERE co.id > 0    -- conditions]]></programlisting>
                         </td>
                         <td>
                             FxString
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section xml:id="css_literals">
+            <title>Literal value formatting</title>
+
+            <para>
+                Currently all conditions in &fxsql; queries involve at least one literal value, e.g.
+                <code>WHERE co.title = 'test'</code>. The following table lists all supported literal
+                value formats and the &flexive; types they may be applied to.
+            </para>
+
+            <table xml:id="cssl_table" class="flexive">
+                <caption>&fxsql; literal value formats</caption>
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Example</th>
+                        <th>Description</th>
+                        <th>&Flexive; Datatypes
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>String</td>
+                        <td>'string value'</td>
+                        <td>A simple string value. Single quotes are escaped like in SQL using double quotes,
+                            e.g. 'te''st' is the representation of the string value
+                            <code>te'st</code>.
+                        </td>
+                        <td>
+                            FxString, FxHTML
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Integer</td>
+                        <td>21</td>
+                        <td>Any integer number. The valid range depends on the property datatype, e.g.
+                        FxNumber (int) or FxLargeNumber (long).</td>
+                        <td>
+                            FxNumber, FxLargeNumber, FxSelectOne, FxSelectMany,
+                            internal referential datatypes (e.g. ACL, mandator)
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Date</td>
+                        <td>'2008-03-18'</td>
+                        <td>A date value. Note that in current &fxsql; you cannot use a date literal
+                            to compare against a DateTime value - you need to write a manual range
+                            condition for the given day instead, e.g.:
+                            <code>co.created_at > '2008-03-10 00:00:00.000' AND co.created_at &lt; '2008-03-11 00:00:00.000'</code>
+                            to find contents created on 2008/03/10.
+                        </td>
+                        <td>
+                            FxDate, FxDateRange
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>DateTime</td>
+                        <td>'2008-03-18 15:23:05.159'</td>
+                        <td>
+                            A precise time value with millisecond resolution.
+                        </td>
+                        <td>
+                            FxDateTime, FxDateTimeRange
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Boolean</td>
+                        <td>true</td>
+                        <td>
+                            A boolean value (true or false).
+                        </td>
+                        <td>
+                            FxBoolean
                         </td>
                     </tr>
                 </tbody>

@@ -38,7 +38,6 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.XPathElement;
-import com.flexive.shared.content.FxPK;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxSelectList;
 import com.flexive.shared.value.*;
@@ -302,8 +301,11 @@ class EditModeHelper extends RenderHelper {
         final String popupLink = "javascript:openReferenceQueryPopup('" + value.getXPath() + "', '"
                 + inputId + "', '" + getForm(inputId) + "')";
         // render hidden input that contains the actual reference
-        final HtmlInputHidden hidden = (HtmlInputHidden) FxJsfUtils.addChildComponent(parent, HtmlInputHidden.COMPONENT_TYPE);
-        hidden.setId(stripForm(inputId));
+        final HtmlInputHidden inputPk = (HtmlInputHidden) FxJsfUtils.addChildComponent(parent, HtmlInputHidden.COMPONENT_TYPE);
+        inputPk.setId(stripForm(inputId));
+        // render hidden input where the caption is stored
+        final HtmlInputHidden inputCaption = (HtmlInputHidden) FxJsfUtils.addChildComponent(parent, HtmlInputHidden.COMPONENT_TYPE);
+        inputCaption.setId(stripForm(inputId) + "_caption");
 
         // render popup button
         final HtmlOutputLink link = (HtmlOutputLink) FxJsfUtils.addChildComponent(parent, HtmlOutputLink.COMPONENT_TYPE);
@@ -313,17 +315,19 @@ class EditModeHelper extends RenderHelper {
         button.setStyle("border:0");
 
         // render image container (we need this since the image id attribute does not get rendered)
-        final HtmlOutputLink imageContainer = (HtmlOutputLink) FxJsfUtils.addChildComponent(parent, HtmlOutputLink.COMPONENT_TYPE);
-        imageContainer.setId(stripForm(inputId) + "_preview");
-        imageContainer.setValue(popupLink);
+        final HtmlOutputText captionContainer = (HtmlOutputText) FxJsfUtils.addChildComponent(parent, HtmlOutputText.COMPONENT_TYPE);
+        captionContainer.setId(stripForm(inputId) + "_preview");
 
         // render caption
         if (!value.isEmpty() && ((language != null && !value.isTranslationEmpty(language)) || language == null)) {
-            final HtmlOutputText caption = (HtmlOutputText) FxJsfUtils.addChildComponent(parent, HtmlOutputText.COMPONENT_TYPE);
-            caption.setValue(((FxReference) value).getTranslation(language).getCaption());
+            final ReferencedContent reference = ((FxReference) value).getTranslation(language);
+            final String caption = reference.getCaption();
+            captionContainer.setValue(caption);
+            inputCaption.setValue(caption);
+            inputPk.setValue(reference.toString());
         }
         // render the image itself
-        /*final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(imageContainer, HtmlGraphicImage.COMPONENT_TYPE);
+        /*final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(captionContainer, HtmlGraphicImage.COMPONENT_TYPE);
         image.setStyle("border:0");
         if (!value.isEmpty() && ((language != null && !value.isTranslationEmpty(language)) || language == null)) {
             // render preview image
