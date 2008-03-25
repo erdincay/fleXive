@@ -595,20 +595,29 @@ public class ContentEngineTest {
         assert titlePos + 2 == comp.getPropertyData("/TEXT[2]").getPos();
         FxPK pk2 = co.createNewVersion(comp);
         assert 2 == pk2.getVersion();
+        comp.setValue("/TEXT", new FxString(FxLanguage.GERMAN, "Different text"));
         FxPK pk3 = co.createNewVersion(comp);
         assert 3 == pk3.getVersion();
         FxContentVersionInfo cvi = co.getContentVersionInfo(pk3);
         assert 3 == cvi.getLastModifiedVersion();
         assert 3 == cvi.getLiveVersion();
         assert 1 == cvi.getMinVersion();
+
+        FxContentContainer cc = co.loadContainer(cvi.getId());
+        Assert.assertEquals(cc.getVersionInfo().getLastModifiedVersion(), cvi.getLastModifiedVersion());
+        Assert.assertEquals(cc.getVersionInfo().getLiveVersion(), cvi.getLiveVersion());
+        Assert.assertEquals(cc.getVersionInfo().getMinVersion(), cvi.getMinVersion());
+        Assert.assertEquals(cc.getVersion(2), co.load(pk2));
+        Assert.assertEquals(cc.getVersion(3), co.load(pk3));
+        Assert.assertNotSame(cc.getVersion(1), cc.getVersion(2));
+        Assert.assertNotSame(cc.getVersion(1), cc.getVersion(3));
+
         co.removeVersion(new FxPK(pk.getId(), 1));
         cvi = co.getContentVersionInfo(pk3);
-        System.out.println("After rm1: " + cvi);
         assert 2 == cvi.getMinVersion();
         assert 3 == cvi.getMaxVersion();
         co.removeVersion(new FxPK(pk.getId(), 3));
         cvi = co.getContentVersionInfo(pk3);
-        System.out.println("After rm3: " + cvi);
         assert 2 == cvi.getMinVersion();
         assert 2 == cvi.getMaxVersion();
         assert !cvi.hasLiveVersion();

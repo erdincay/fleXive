@@ -38,9 +38,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Content Container for the Cache to keep all versions for an id
+ * Content Container for the Cache to keep all versions for an id.
+ * This class is used internally and does only contain versions that have been previously requested!
+ * To load all available versions use <code>FxContentContainer</code>
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @version $Rev
+ * @see FxContentContainer
  */
 public class FxCachedContentContainer implements Serializable {
     private static final long serialVersionUID = -6810666943342672605L;

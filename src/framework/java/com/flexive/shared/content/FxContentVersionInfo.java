@@ -40,6 +40,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Arrays;
 
 /**
  * Information about a content's existing versions
@@ -56,6 +57,7 @@ public class FxContentVersionInfo implements Serializable {
     private int lastModifiedVersion;
     private Map<Integer, VersionData> versions;
     private VersionSelector versionSelector;
+    private Integer[] vers;
 
     public static final class VersionData implements Serializable {
         private LifeCycleInfo lifeCycleInfo;
@@ -118,6 +120,8 @@ public class FxContentVersionInfo implements Serializable {
         this.lastModifiedVersion = lastModifiedVersion;
         this.versions = versions;
         this.versionSelector = new VersionSelector(this);
+        this.vers = versions.keySet().toArray(new Integer[versions.keySet().size()]);
+        Arrays.sort(vers);
     }
 
     /**
@@ -186,12 +190,12 @@ public class FxContentVersionInfo implements Serializable {
     }
 
     /**
-     * Get an iterator for all available versions
+     * Get an array for all available versions (sorted)
      *
-     * @return iterator for all available versions
+     * @return array for all available versions (sorted)
      */
     public Integer[] getVersions() {
-        return versions.keySet().toArray(new Integer[versions.keySet().size()]);
+        return vers;
     }
 
     /**

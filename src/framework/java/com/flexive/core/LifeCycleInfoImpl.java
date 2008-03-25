@@ -300,4 +300,15 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
         return new LifeCycleInfoImpl(ticket.getUserId(), System.currentTimeMillis(),
                 ticket.getUserId(), System.currentTimeMillis());
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean equals(Object obj) {
+        if( obj == null || !(obj instanceof LifeCycleInfo))
+            return false;
+        LifeCycleInfo other = (LifeCycleInfo)obj;
+        return modifcatorId == other.getModificatorId() && modificationTime == other.getModificationTime() &&
+                creatorId == other.getCreatorId() && creationTime == other.getCreationTime();
+    }
 }

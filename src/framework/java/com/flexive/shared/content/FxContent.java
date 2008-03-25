@@ -1066,4 +1066,24 @@ public class FxContent implements Serializable, Cloneable {
             throw e.asRuntimeException();
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean equals(Object obj) {
+        if( obj == null || !(obj instanceof FxContent))
+            return false;
+        FxContent other = (FxContent)obj;
+        if( !pk.equals(other.pk))
+            return false;
+        if( active != other.active || relation != other.relation || !lifeCycleInfo.equals(other.lifeCycleInfo) )
+            return false;
+        FxDelta delta;
+        try {
+            delta = FxDelta.processDelta(this, other);
+        } catch (FxApplicationException e) {
+            return false;
+        }
+        return !delta.changes();
+    }
 }

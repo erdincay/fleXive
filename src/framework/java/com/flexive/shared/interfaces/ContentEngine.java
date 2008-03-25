@@ -33,12 +33,9 @@
  ***************************************************************/
 package com.flexive.shared.interfaces;
 
-import com.flexive.shared.content.FxContent;
-import com.flexive.shared.content.FxContentSecurityInfo;
-import com.flexive.shared.content.FxContentVersionInfo;
-import com.flexive.shared.content.FxPK;
-import com.flexive.shared.exceptions.*;
 import com.flexive.shared.FxLanguage;
+import com.flexive.shared.content.*;
+import com.flexive.shared.exceptions.*;
 
 import javax.ejb.Remote;
 import java.util.List;
@@ -96,6 +93,15 @@ public interface ContentEngine {
      * @throws FxNotFoundException    if no instance for this primary key was found
      */
     FxContent load(FxPK pk) throws FxApplicationException;
+
+    /**
+     * Load a content container (all versions of a content)
+     *
+     * @param id requested content id
+     * @return container with all versions of the content
+     * @throws FxApplicationException on errors
+     */
+    FxContentContainer loadContainer(long id) throws FxApplicationException;
 
     /**
      * Store an existing content or create a new one
@@ -209,7 +215,7 @@ public interface ContentEngine {
      * @param typeId           the type to request the primary keys for
      * @param onePkPerInstance return one primary key per instance (with max version) or one per actual version?
      * @return list containing the primary keys
-     * @throws FxApplicationException   on errors
+     * @throws FxApplicationException on errors
      */
     List<FxPK> getPKsForType(long typeId, boolean onePkPerInstance) throws FxApplicationException;
 
@@ -220,8 +226,8 @@ public interface ContentEngine {
      * FxInvalidParameterException.
      * Security will be checked and FxNoAccessException thrown if restricted.
      *
-     * @param pk    primary key
-     * @param xpath XPath
+     * @param pk       primary key
+     * @param xpath    XPath
      * @param language the language (if null, the user ticket language will be used)
      * @return binary id
      * @throws FxApplicationException on errors

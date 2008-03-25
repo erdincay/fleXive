@@ -62,6 +62,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Content Engine implementation
@@ -243,6 +244,18 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             Database.closeObjects(ContentEngineBean.class, con, ps);
 //            System.out.println("=> Load time: " + (System.currentTimeMillis() - time));
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public FxContentContainer loadContainer(long id) throws FxApplicationException {
+        FxContentVersionInfo vi = getContentVersionInfo(new FxPK(id));
+        List<FxContent> contents = new ArrayList<FxContent>(vi.getVersionCount());
+        for( int ver: vi.getVersions())
+            contents.add(load(new FxPK(id, ver)));
+        return new FxContentContainer(vi, contents);
     }
 
     /**
