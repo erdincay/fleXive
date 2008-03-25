@@ -161,7 +161,7 @@ Base directory:      ${project.basedir}]]>
     <target name="ear" description="Create a flexive.ear archive including the backend administration GUI">
         <delete dir="${ear.build.dir}" failonerror="false"/>
         <mkdir dir="${ear.build.dir}/apps"/>
-        <applicationDescriptorBuilder dropDir="${applications.dir}" destFile="${ear.build.dir}/application.xml" srcFile="META-INF/application.xml"/>
+        <applicationDescriptorBuilder dropDir="${applications.dir}" destFile="${ear.build.dir}/application.xml" srcFile="${basedir}/META-INF/application.xml"/>
         <jar jarfile="${ear.build.dir}/apps/flexive-drop-resources.jar">
             <fileset file="${applications.dir}/drops.archives"/>
         </jar>
