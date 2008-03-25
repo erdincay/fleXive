@@ -74,6 +74,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * ScriptingEngine implementation
@@ -108,7 +109,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     private static volatile Map<FxScriptEvent, List<Long>> scriptsByEvent = new HashMap<FxScriptEvent, List<Long>>(10);
 
-    private static volatile List<FxScriptRunInfo> runOnceInfos = new ArrayList<FxScriptRunInfo>(50);
+    private static volatile List<FxScriptRunInfo> runOnceInfos = new CopyOnWriteArrayList<FxScriptRunInfo>();
 
     /**
      * {@inheritDoc}
