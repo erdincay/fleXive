@@ -610,7 +610,9 @@ public class ContentEngineTest {
         Assert.assertEquals(cc.getVersion(2), co.load(pk2));
         Assert.assertEquals(cc.getVersion(3), co.load(pk3));
         Assert.assertNotSame(cc.getVersion(1), cc.getVersion(2));
+        Assert.assertTrue(FxDelta.processDelta(cc.getVersion(1), cc.getVersion(2)).isOnlyInternalPropertyChanges());
         Assert.assertNotSame(cc.getVersion(1), cc.getVersion(3));
+        Assert.assertFalse(FxDelta.processDelta(cc.getVersion(2), cc.getVersion(3)).isOnlyInternalPropertyChanges());
 
         co.removeVersion(new FxPK(pk.getId(), 1));
         cvi = co.getContentVersionInfo(pk3);

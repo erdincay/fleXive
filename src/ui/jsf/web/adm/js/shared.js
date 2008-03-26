@@ -36,7 +36,7 @@ function getFirstLinkElement(doc,elementName) {
             return null;
         }
         for (var i=0;i<childs.length;i++) {
-            if (childs[i].tagName=="A") {
+            if (childs[i].tagName=="A" || childs[i].tagName=="a") {
                 return childs[i];
             }
         }

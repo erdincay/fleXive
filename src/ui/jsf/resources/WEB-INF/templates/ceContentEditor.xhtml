@@ -7,6 +7,7 @@
       xmlns:c="http://java.sun.com/jstl/core"
       xmlns:fn="http://java.sun.com/jsp/jstl/functions"
       xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:rich="http://richfaces.org/rich"
       xmlns:fx="http://www.flexive.com/jsf/core"
       xmlns:adm="http://www.flexive.com/jsf/admin"
       xmlns:t="http://myfaces.apache.org/tomahawk"
@@ -28,25 +29,81 @@
                                   icon="save" action="initNew" id="initButton"/>
             </ui:fragment>
 
+
             <!-- Content editor screen -->
-            <ui:fragment rendered="#{srcEditor.initialized==true}">
+            <ui:fragment rendered="#{srcEditor.initialized}">
                 <c:set var="currentId" value="${srcEditor.id}"/>
                 <ui:fragment rendered="#{srcEditor.new}">
                     <adm:tab label="#{fxMessageBean['Content.tabtitle.new']}" active="true" id="tabEditNew"/>
                 </ui:fragment>
                 <ui:repeat var="srcEditor" value="#{srcEditor}">
-                    <ui:fragment rendered="#{srcEditor.new==false}">
-                        <ui:fragment rendered="#{srcEditor.readOnly==true}">
+                    <ui:fragment rendered="#{!srcEditor.new}">
+                        <ui:fragment rendered="#{srcEditor.readOnly}">
                             <adm:tab label="#{fxMessageBean['Content.tabtitle.readonly,#{srcEditor.id},#{srcEditor.version}']}"
                                     active="true" id="tabEditInit1"/>
                         </ui:fragment>
-                        <ui:fragment rendered="#{srcEditor.readOnly==false}">
+                        <ui:fragment rendered="#{!srcEditor.readOnly}">
                             <adm:tab label="#{fxMessageBean['Content.tabtitle.edit,#{srcEditor.id},#{srcEditor.version}']}"
                                     active="true" id="tabEditInit2"/>
                         </ui:fragment>
                     </ui:fragment>
                 </ui:repeat>
 
+                <ui:fragment rendered="#{!srcEditor.new}">
+                <a4j:outputPanel id="infoPanel">
+                    <a4j:commandLink reRender="infoPanel">
+                        <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='version'?'':'version'}" target="#{srcEditor.infoPanelState}"/>
+                        <span class="infoPanelButton">#{fxMessageBean['Content.field.info']}</span>
+                    </a4j:commandLink>&nbsp;
+                    <a4j:commandLink reRender="infoPanel" rendered="#{srcEditor.versionInfo.versionCount > 1}">
+                        <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='compare'?'':'compare'}" target="#{srcEditor.infoPanelState}"/>
+                        <span class="infoPanelButton">#{fxMessageBean['Content.field.versionCompare']}</span>
+                    </a4j:commandLink>
+                    <ui:fragment rendered="#{srcEditor.infoPanelState=='version'}">
+                        <span class="infoPanel"><adm:ceVersionInfo versionInfo="#{srcEditor.versionInfo}"/></span>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{srcEditor.infoPanelState=='compare'}">
+                        <span class="infoPanel">
+                            <table>
+                                <tr>
+                                    <td>
+                                        Source:
+                                    </td>
+                                    <td>
+                                        <h:selectOneListbox id="srcComp" value="#{srcEditor.compareSourceVersion}"
+                                                            size="1" required="true">
+                                        <f:selectItems value="#{srcEditor.compareVersions}"/>
+                                        </h:selectOneListbox>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        Destination:
+                                    </td>
+                                    <td>
+                                        <h:selectOneListbox id="dstComp" value="#{srcEditor.compareDestinationVersion}"
+                                                            size="1"
+                                                            required="true">
+                                            <f:selectItems value="#{srcEditor.compareVersions}"/>
+                                        </h:selectOneListbox>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <a4j:commandLink reRender="comparePanel" rendered="#{srcEditor.versionInfo.versionCount > 1}">
+                                <span class="infoPanelButton">Compare</span>
+                            </a4j:commandLink><br/><br/>
+
+                            <a4j:outputPanel id="comparePanel" rendered="#{srcEditor.compareSourceVersion > 0 and srcEditor.compareDestinationVersion > 0}">
+                                Comparing version #{srcEditor.compareSourceVersion} with #{srcEditor.compareDestinationVersion}:<br/>
+                                <ui:repeat var="change" value="#{srcEditor.compareEntries}">
+                                    #{change.changeType}: #{change.XPath}<br/>
+                                </ui:repeat>
+                            </a4j:outputPanel>
+                        </span>
+                    </ui:fragment>
+                </a4j:outputPanel>
+                </ui:fragment>
 
                     <a4j:outputPanel id="all">
 
@@ -140,15 +197,6 @@
                                     <adm:ceRenderTreeNodes srcEditor="#{srcEditor}"/>
                                 </td>
                             </tr>
-                            <tr>
-                                <!-- Version info -->
-                                <td valign="top">
-                                    #{fxMessageBean['Content.field.info']}
-                                </td>
-                                <td nowrap="nowrap">
-                                    <adm:ceVersionInfo versionInfo="#{srcEditor.versionInfo}"/>    
-                                </td>
-                            </tr>
                         </table>
 
                         <!-- binary support hack -->
@@ -181,7 +229,7 @@
                     <ui:fragment rendered="#{srcEditor.versionDeleteAble}">
                         <adm:commandButton labelKey="Content.button.deleteVersion" location="both"
                                            bean="#{srcEditor}" confirmKey="Content.confirm.deleteVersion"
-                                           icon="delete" action="deleteCurrentVersion" id="deleteVersionButtonRO"/>
+                                           icon="deleteVersion" action="deleteCurrentVersion" id="deleteVersionButtonRO"/>
                     </ui:fragment>
                 </ui:fragment>
                 <ui:fragment rendered="#{srcEditor.readOnly==false}">
@@ -218,7 +266,7 @@
                         <ui:fragment rendered="#{srcEditor.versionDeleteAble}">
                             <adm:commandButton labelKey="Content.button.deleteVersion" location="both"
                                           bean="#{srcEditor}" confirmKey="Content.confirm.deleteVersion"
-                                          icon="delete" action="deleteCurrentVersion" id="deleteVersionButton"/>
+                                          icon="deleteVersion" action="deleteCurrentVersion" id="deleteVersionButton"/>
                         </ui:fragment>
                     </ui:fragment>
 

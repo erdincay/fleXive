@@ -147,3 +147,26 @@
 .property div.fxValueInput {
     width: 400px;
 }
+
+.infoPanelButton {
+    text-align: center;
+    padding-left: 5px;
+    padding-right: 5px;
+    border:1px solid #CCCCCC;
+    background-color: #EFEFEF;
+    color: gray;
+    font-weight: bold;
+    margin-right: 2px;
+}
+
+.infoPanel {
+    position:relative;
+    top:5px;
+    padding-left:2px;
+    padding-right:2px;
+    border:1px solid #BDBDBD;
+    background-color:#F9FCF1;
+    display: block;
+    width: 550px;
+    margin-bottom: 5px;
+}

@@ -51,11 +51,16 @@ import java.util.List;
  */
 public class FxDelta implements Serializable {
     private static final long serialVersionUID = -6246822483703676822L;
+    private final static FxDeltaChange NO_CHANGE = new FxDeltaChange(FxDeltaChange.ChangeType.None, null, null, null);
 
     /**
      * A single delta change
      */
     public static class FxDeltaChange implements Serializable {
+        enum ChangeType {
+            Add, Remove, Update, None
+        }
+
         private static final long serialVersionUID = -9026076539541708345L;
 
         private String XPath;
@@ -67,16 +72,19 @@ public class FxDelta implements Serializable {
         private boolean languageSettingChanged;
         private int retryCount;
         private boolean multiColumn;
+        private ChangeType changeType;
 
         /**
          * Ctor
          *
+         * @param changeType   type of change
          * @param XPath        affected XPath
          * @param originalData original data
          * @param newData      new data
          */
         @SuppressWarnings({"ConstantConditions"})
-        public FxDeltaChange(String XPath, FxData originalData, FxData newData) {
+        public FxDeltaChange(ChangeType changeType, String XPath, FxData originalData, FxData newData) {
+            this.changeType = changeType;
             this.XPath = XPath;
             this.originalData = originalData;
             this.newData = newData;
@@ -104,6 +112,15 @@ public class FxDelta implements Serializable {
                 }
             } else
                 this.multiColumn = false;
+        }
+
+        /**
+         * Get the type of change
+         *
+         * @return type of change
+         */
+        public ChangeType getChangeType() {
+            return changeType;
         }
 
         /**
@@ -204,6 +221,7 @@ public class FxDelta implements Serializable {
 
     private List<FxDeltaChange> updates, adds, removes;
     private boolean internalPropertyChanged = false;
+    private boolean onlyInternalPropertyChanges = true;
 
     /**
      * Ctor
@@ -226,8 +244,10 @@ public class FxDelta implements Serializable {
             if (c.isProperty() && (
                     (c.getOriginalData() != null && c.getOriginalData().isSystemInternal()) || (c.getNewData() != null && c.getNewData().isSystemInternal()))) {
                 internalPropertyChanged = true;
-                break;
-            }
+                if (!onlyInternalPropertyChanges)
+                    break; //only break if we know that "other" properties changed as well
+            } else
+                onlyInternalPropertyChanges = false;
     }
 
     /**
@@ -264,6 +284,15 @@ public class FxDelta implements Serializable {
      */
     public boolean isInternalPropertyChanged() {
         return internalPropertyChanged;
+    }
+
+    /**
+     * Are there only internal property changes (like step, version) and no data changes?
+     *
+     * @return only internal property changes
+     */
+    public boolean isOnlyInternalPropertyChanges() {
+        return onlyInternalPropertyChanges;
     }
 
     /**
@@ -322,6 +351,35 @@ public class FxDelta implements Serializable {
     }
 
     /**
+     * Get all changes from <i>original</i> to <i>compare</i> in correct order (for display in UI's)
+     *
+     * @param original original content
+     * @param compare  content that original is compared against
+     * @return differences
+     */
+    public List<FxDeltaChange> getDiff(final FxContent original, final FxContent compare) {
+        List<FxDeltaChange> ret = new ArrayList<FxDeltaChange>(10);
+        //TODO: this is dummy code ...
+        ret.addAll(removes);
+        ret.addAll(adds);
+        ret.addAll(updates);
+        return ret;
+        /*
+        //This is not performant but since it should be rarely used in timecritical environments we don't care for now...
+        for (FxDeltaChange a : adds)
+            if (a.getXPath().equals(xpath))
+                return a;
+        for (FxDeltaChange u : updates)
+            if (u.getXPath().equals(xpath))
+                return u;
+        for (FxDeltaChange r : removes)
+            if (r.getXPath().equals(xpath))
+                return r;
+        return NO_CHANGE;
+        */
+    }
+
+    /**
      * Compare <code>original</code> to <code>compare</code> FxContent.
      * Both contents should be compacted and empty entries removed for correct results.
      *
@@ -335,7 +393,7 @@ public class FxDelta implements Serializable {
         List<String> org = original.getAllXPaths("/");
         List<String> comp = compare.getAllXPaths("/");
 
-        List<FxDeltaChange> updates = null, adds = null, deletes = null;
+        List<FxDeltaChange> updates = null, adds = null, removes = null;
 
         //remove all xpaths from comp that are not contained in org => updates
         List<String> update = new ArrayList<String>(comp);
@@ -347,12 +405,12 @@ public class FxDelta implements Serializable {
                 if (!compare.getGroupData(xp).equals(original.getGroupData(xp))) {
                     if (updates == null)
                         updates = new ArrayList<FxDeltaChange>(10);
-                    updates.add(new FxDeltaChange(xp, original.getGroupData(xp), compare.getGroupData(xp)));
+                    updates.add(new FxDeltaChange(FxDeltaChange.ChangeType.Update, xp, original.getGroupData(xp), compare.getGroupData(xp)));
                 }
             } else /*property*/ if (!compare.getData(xp).equals(original.getData(xp))) {
                 if (updates == null)
                     updates = new ArrayList<FxDeltaChange>(10);
-                updates.add(new FxDeltaChange(xp, original.getPropertyData(xp), compare.getPropertyData(xp)));
+                updates.add(new FxDeltaChange(FxDeltaChange.ChangeType.Update, xp, original.getPropertyData(xp), compare.getPropertyData(xp)));
             }
         }
 
@@ -363,22 +421,22 @@ public class FxDelta implements Serializable {
                 adds = new ArrayList<FxDeltaChange>(10);
             if (xp.endsWith("/")) {
                 xp = xp.substring(0, xp.length() - 1);
-                adds.add(new FxDeltaChange(xp, null, compare.getGroupData(xp)));
+                adds.add(new FxDeltaChange(FxDeltaChange.ChangeType.Add, xp, null, compare.getGroupData(xp)));
             } else
-                adds.add(new FxDeltaChange(xp, null, compare.getPropertyData(xp)));
+                adds.add(new FxDeltaChange(FxDeltaChange.ChangeType.Add, xp, null, compare.getPropertyData(xp)));
         }
 
         List<String> rem = new ArrayList<String>(org);
         rem.removeAll(comp);
         for (String xp : rem) {
-            if (deletes == null)
-                deletes = new ArrayList<FxDeltaChange>(10);
+            if (removes == null)
+                removes = new ArrayList<FxDeltaChange>(10);
             if (xp.endsWith("/")) {
                 xp = xp.substring(0, xp.length() - 1);
-                deletes.add(new FxDeltaChange(xp, original.getGroupData(xp), null));
+                removes.add(new FxDeltaChange(FxDeltaChange.ChangeType.Remove, xp, original.getGroupData(xp), null));
             } else
-                deletes.add(new FxDeltaChange(xp, original.getPropertyData(xp), null));
+                removes.add(new FxDeltaChange(FxDeltaChange.ChangeType.Remove, xp, original.getPropertyData(xp), null));
         }
-        return new FxDelta(updates, adds, deletes);
+        return new FxDelta(updates, adds, removes);
     }
 }

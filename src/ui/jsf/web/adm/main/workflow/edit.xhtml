@@ -20,15 +20,9 @@
 
     <ui:define name="body">
         <c:set var="wfBtnStyle" value="border:0;margin-left:3px;" />
+        <a4j:keepAlive beanName="workflowBean"/>
         <a4j:form id="frm">
-            <t:saveState value="#{workflowBean.steps}"/>
-            <t:saveState value="#{workflowBean.routes}"/>
-            <t:saveState value="#{workflowBean.workflow}"/>
-
-            <t:saveState value="#{workflowBean.fromStepId}"/>
-            <t:saveState value="#{workflowBean.toStepId}"/>
-            <t:saveState value="#{workflowBean.userGroup}"/>
-
+            
             <h:inputHidden value="#{workflowBean.workflow.id}"/>
         	
             <adm:tab label="#{fxMessageBean['Workflow.tabtitle.edit,#{workflowBean.workflow.name}']}" active="true" id="tab1"/>

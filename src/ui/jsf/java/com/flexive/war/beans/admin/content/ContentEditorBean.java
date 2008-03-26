@@ -37,16 +37,14 @@ import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.beans.ActionBean;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.FxArrayUtils;
-import com.flexive.shared.FxContext;
+import com.flexive.shared.*;
 import com.flexive.shared.content.*;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.TreeEngine;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
@@ -68,6 +66,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Date;
 
 public class ContentEditorBean implements ActionBean, Serializable {
     private static final Log LOG = LogFactory.getLog(ContentEditorBean.class);
@@ -102,6 +101,63 @@ public class ContentEditorBean implements ActionBean, Serializable {
     private String editorActionName;
     private String editorActionXpath;
     protected boolean isDummy;
+    private String infoPanelState;
+    private int compareSourceVersion;
+    private int compareDestinationVersion;
+
+    public List<SelectItem> getCompareVersions() {
+        List<SelectItem> items = new ArrayList<SelectItem>(versionInfo == null ? 0 : versionInfo.getVersionCount());
+        if( versionInfo != null && versionInfo.getVersionCount() > 0 ) {
+            for(int v: versionInfo.getVersions()) {
+                LifeCycleInfo lci = versionInfo.getVersionData(v).getLifeCycleInfo();
+                String name = "unknown";
+                try {
+                    name= EJBLookup.getAccountEngine().load(lci.getModificatorId()).getName();
+                } catch (FxApplicationException e) {
+                    //ignore
+                }
+                items.add(new SelectItem(v, "Version "+v+" by "+ name +" at "+ FxFormatUtils.getDateTimeFormat().format(new Date(lci.getModificationTime()))));
+            }
+        }
+        return items;
+    }
+
+    public List<FxDelta.FxDeltaChange> getCompareEntries() throws FxApplicationException {
+        if ( versionInfo != null && compareSourceVersion > 0 && compareSourceVersion <= versionInfo.getMaxVersion() &&
+                compareDestinationVersion > 0 && compareDestinationVersion <= versionInfo.getMaxVersion()) {
+            FxContent content1 = EJBLookup.getContentEngine().load(new FxPK(id, compareSourceVersion));
+            FxContent content2 = EJBLookup.getContentEngine().load(new FxPK(id, compareDestinationVersion));
+            FxDelta delta = FxDelta.processDelta(content1, content2);
+            return delta.getDiff(content1, content2);
+        } else {
+            return new ArrayList<FxDelta.FxDeltaChange>(0);
+        }
+
+    }
+
+    public int getCompareSourceVersion() {
+        return compareSourceVersion;
+    }
+
+    public void setCompareSourceVersion(int compareSourceVersion) {
+        this.compareSourceVersion = compareSourceVersion;
+    }
+
+    public int getCompareDestinationVersion() {
+        return compareDestinationVersion;
+    }
+
+    public void setCompareDestinationVersion(int compareDestinationVersion) {
+        this.compareDestinationVersion = compareDestinationVersion;
+    }
+
+    public String getInfoPanelState() {
+        return infoPanelState;
+    }
+
+    public void setInfoPanelState(String togglePanelState) {
+        this.infoPanelState = togglePanelState;
+    }
 
     public String getEditorType() {
         return "REGULAR";

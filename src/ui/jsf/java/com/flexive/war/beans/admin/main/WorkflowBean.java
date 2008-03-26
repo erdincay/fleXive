@@ -40,7 +40,9 @@ import com.flexive.faces.messages.FxFacesMsgWarn;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.security.UserGroup;
+import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.workflow.*;
 import org.apache.commons.collections.CollectionUtils;
 
@@ -201,16 +203,16 @@ public class WorkflowBean {
         StepEdit step = new StepEdit(new Step(getNewStepId(), stepDefinitionId, workflow.getId(), stepACL));
         getSteps().add(step);
         StepDefinition sd = CacheAdmin.getFilteredEnvironment().getStepDefinition(stepDefinitionId);
-        if( sd.isUnique() ) {
+        if (sd.isUnique()) {
             //make sure the unique target is added as well
             boolean found = false;
-            for(StepEdit se: getSteps()) {
-                if( se.getStepDefinitionId() == sd.getUniqueTargetId() ) {
+            for (StepEdit se : getSteps()) {
+                if (se.getStepDefinitionId() == sd.getUniqueTargetId()) {
                     found = true;
                     break;
                 }
             }
-            if( !found ) {
+            if (!found) {
                 //add step definiton
                 getSteps().add(new StepEdit(new Step(getNewStepId(), sd.getUniqueTargetId(), workflow.getId(), stepACL)));
             }
@@ -251,20 +253,20 @@ public class WorkflowBean {
      */
     public Map<Step, Boolean> getCanRemoveStep() {
         return FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Step, Boolean>() {
-                public Boolean get(Object key) {
-                    if (key == null) {
-                        return null;
-                    }
-                    Step s = (Step)key;
-                    for(Route r: getRoutes())
-                        if( r.getFromStepId() == s.getId() || r.getToStepId() == s.getId() )
-                            return false;
-                    for(Step _s: getSteps())
-                        if(CacheAdmin.getEnvironment().getStepDefinition(_s.getStepDefinitionId()).getUniqueTargetId() == s.getStepDefinitionId() )
-                            return false;
-                    return true;
+            public Boolean get(Object key) {
+                if (key == null) {
+                    return null;
                 }
-            });
+                Step s = (Step) key;
+                for (Route r : getRoutes())
+                    if (r.getFromStepId() == s.getId() || r.getToStepId() == s.getId())
+                        return false;
+                for (Step _s : getSteps())
+                    if (CacheAdmin.getEnvironment().getStepDefinition(_s.getStepDefinitionId()).getUniqueTargetId() == s.getStepDefinitionId())
+                        return false;
+                return true;
+            }
+        });
     }
 
     public String addStep(ActionEvent evt) {
@@ -302,6 +304,12 @@ public class WorkflowBean {
             new FxFacesMsgWarn("Workflow.wng.route.exists").addToContext();
         } else {
             routes.add(route);
+            final FxEnvironment env = CacheAdmin.getEnvironment();
+            String fromStepName = env.getStepDefinition(
+                    getStep(route.getFromStepId()).getStepDefinitionId()).getLabel().getBestTranslation();
+            String toStepName = env.getStepDefinition(
+                    getStep(route.getToStepId()).getStepDefinitionId()).getLabel().getBestTranslation();
+            new FxFacesMsgInfo("Workflow.nfo.route.added", fromStepName, toStepName, userGroup.getName()).addToContext();
         }
         return "workflowEdit";
     }
@@ -318,12 +326,19 @@ public class WorkflowBean {
         }
         Route route = routes.get(routeIndex);
         // TODO add convenience methods for route --> step --> stepdefinitionid --> stepdefinition
-        String fromStepName = CacheAdmin.getEnvironment().getStepDefinition(
+        final FxEnvironment env = CacheAdmin.getEnvironment();
+        String fromStepName = env.getStepDefinition(
                 getStep(route.getFromStepId()).getStepDefinitionId()).getLabel().getBestTranslation();
-        String toStepName = CacheAdmin.getEnvironment().getStepDefinition(
+        String toStepName = env.getStepDefinition(
                 getStep(route.getToStepId()).getStepDefinitionId()).getLabel().getBestTranslation();
         routes.remove(routeIndex);
-        new FxFacesMsgInfo("Workflow.nfo.route.removed", fromStepName, toStepName).addToContext();
+        String grp = "" + route.getGroupId();
+        try {
+            grp = EJBLookup.getUserGroupEngine().load(route.getGroupId()).getName();
+        } catch (FxApplicationException e) {
+            //ignore
+        }
+        new FxFacesMsgInfo("Workflow.nfo.route.removed", fromStepName, toStepName, grp).addToContext();
         return "workflowEdit";
     }
 

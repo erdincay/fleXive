@@ -5,7 +5,8 @@
       xmlns:adm="http://www.flexive.com/jsf/admin"
       xmlns:c="http://java.sun.com/jstl/core"
       xmlns:jsp="http://java.sun.com/JSP/Page"
-      xmlns:t="http://myfaces.apache.org/tomahawk">
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax">
 <t:document>
 <t:documentHead>
     <base href="#{fxSystemBean.documentBase}"/>
@@ -39,7 +40,7 @@
 <t:documentBody>
 <div id="fxMessages" style="display:none;"></div>
 <ui:insert name="body">Default Body</ui:insert>
-<div id="fxMessagesTmp" style="display:none"><ui:insert name="messages"><adm:messages/></ui:insert></div>
+<div id="fxMessagesTmp" style="display:none"><ui:insert name="messages"><a4j:outputPanel ajaxRendered="true"><adm:messages/></a4j:outputPanel></ui:insert></div>
 
 
 <script type="text/javascript">
