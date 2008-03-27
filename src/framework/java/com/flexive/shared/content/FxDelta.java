@@ -33,6 +33,7 @@
  ***************************************************************/
 package com.flexive.shared.content;
 
+import com.flexive.shared.FxDiff;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.structure.FxPropertyAssignment;
@@ -40,9 +41,7 @@ import com.flexive.shared.value.FxValue;
 import org.apache.commons.lang.ArrayUtils;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Compute Delta changes for FxContents
@@ -51,7 +50,6 @@ import java.util.List;
  */
 public class FxDelta implements Serializable {
     private static final long serialVersionUID = -6246822483703676822L;
-    private final static FxDeltaChange NO_CHANGE = new FxDeltaChange(FxDeltaChange.ChangeType.None, null, null, null);
 
     /**
      * A single delta change
@@ -160,6 +158,17 @@ public class FxDelta implements Serializable {
         }
 
         /**
+         * Is this a system internal property like version or step?
+         *
+         * @return is system internal
+         */
+        public boolean isInternal() {
+            if (originalData != null)
+                return originalData.isSystemInternal();
+            return newData != null && newData.isSystemInternal();
+        }
+
+        /**
          * Is the change affecting a group?
          *
          * @return group affected?
@@ -184,6 +193,15 @@ public class FxDelta implements Serializable {
          */
         public boolean isDataChange() {
             return dataChange;
+        }
+
+        /**
+         * Have language settings changed? (New or removed translationtions,etc)
+         *
+         * @return language settings changed
+         */
+        public boolean isLanguageSettingChanged() {
+            return languageSettingChanged;
         }
 
         /**
@@ -214,6 +232,13 @@ public class FxDelta implements Serializable {
          */
         public synchronized int _getRetryCount() {
             return retryCount;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public String toString() {
+            return XPath + ": " + changeType.name() + (isDataChange() ? " DATA" : "") + (isPositionChange() ? " POS" : "") + (languageSettingChanged ? " LANG" : "");
         }
     }
 
@@ -358,25 +383,74 @@ public class FxDelta implements Serializable {
      * @return differences
      */
     public List<FxDeltaChange> getDiff(final FxContent original, final FxContent compare) {
-        List<FxDeltaChange> ret = new ArrayList<FxDeltaChange>(10);
-        //TODO: this is dummy code ...
-        ret.addAll(removes);
-        ret.addAll(adds);
-        ret.addAll(updates);
-        return ret;
-        /*
         //This is not performant but since it should be rarely used in timecritical environments we don't care for now...
+        List<FxDeltaChange> ret = new ArrayList<FxDeltaChange>(10);
+        Map<String, FxDeltaChange> cache = new HashMap<String, FxDeltaChange>(removes.size() + adds.size() + updates.size());
         for (FxDeltaChange a : adds)
-            if (a.getXPath().equals(xpath))
-                return a;
-        for (FxDeltaChange u : updates)
-            if (u.getXPath().equals(xpath))
-                return u;
+            cache.put(a.getXPath(), a);
         for (FxDeltaChange r : removes)
-            if (r.getXPath().equals(xpath))
-                return r;
-        return NO_CHANGE;
-        */
+            cache.put(r.getXPath(), r);
+        for (FxDeltaChange u : updates)
+            cache.put(u.getXPath(), u);
+
+
+        String[] org = original.getAllXPaths("/").toArray(new String[0]);
+        String[] comp = compare.getAllXPaths("/").toArray(new String[0]);
+        FxDiff diff = new FxDiff(org, comp);
+        List<FxDiff.Difference> ld = diff.diff();
+
+        /*System.out.println("== ORG ==");
+        int i = 0;
+        for (String s : org)
+            System.out.println((i++) + ": " + s);
+        System.out.println("== COMP ==");
+        i = 0;
+        for (String s : comp)
+            System.out.println((i++) + ": " + s);
+
+        System.out.println("== DELTA ==");
+        for (FxDeltaChange c : cache.values())
+            System.out.println(c);
+        System.out.println("== DIFF ==");*/
+        int checked = 0; //index of last checked update
+        for (FxDiff.Difference d : ld) {
+            //check for any XPath "before" entry for a data change
+            checked = checkUpdated(d, ret, cache, org, checked);
+            System.out.println(d);
+            if (d.isDelete()) {
+                for (int pos = d.getDeletedStart(); pos <= d.getDeletedEnd(); pos++) {
+                    String delXP = org[pos];
+//                    System.out.println("Deleted: " + delXP);
+                    if (cache.containsKey(delXP))
+                        ret.add(cache.remove(delXP));
+                }
+            }
+            if (d.isAdd()) {
+                for (int pos = d.getAddedStart(); pos <= d.getAddedEnd(); pos++) {
+                    String addXP = comp[pos];
+//                    System.out.println("Added: " + addXP);
+                    if (cache.containsKey(addXP))
+                        ret.add(cache.remove(addXP));
+                }
+            }
+        }
+        checkUpdated(null, ret, cache, org, checked);
+        return ret;
+    }
+
+    private int checkUpdated(FxDiff.Difference d, List<FxDeltaChange> ret, Map<String, FxDeltaChange> cache, String[] org, int checked) {
+        if (checked >= org.length)
+            return checked;
+        int end = d == null ? org.length : (d.isAdd() ? d.getAddedEnd() - 1 : d.getDeletedEnd() - 1);
+        if (end > org.length)
+            end = org.length;
+        for (int i = 0; i < end; i++) {
+            if (cache.containsKey(org[i])) {
+                ret.add(cache.remove(org[i]));
+                System.out.println("Adding update: " + org[i]);
+            }
+        }
+        return checked;
     }
 
     /**
@@ -424,6 +498,7 @@ public class FxDelta implements Serializable {
                 adds.add(new FxDeltaChange(FxDeltaChange.ChangeType.Add, xp, null, compare.getGroupData(xp)));
             } else
                 adds.add(new FxDeltaChange(FxDeltaChange.ChangeType.Add, xp, null, compare.getPropertyData(xp)));
+
         }
 
         List<String> rem = new ArrayList<String>(org);

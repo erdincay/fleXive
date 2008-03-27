@@ -170,3 +170,21 @@
     width: 550px;
     margin-bottom: 5px;
 }
+
+.change_Update {
+    border-left: 4px solid lightgray;
+    padding: 1px 1px 1px 4px
+}
+
+.change_Add {
+    background: #DDFFDD none repeat scroll 0%;
+    border-left: 4px solid darkgreen;
+    padding: 1px 1px 1px 4px
+}
+
+.change_Remove {
+    background: #FFDDDD none repeat scroll 0%;
+    border-left: 4px solid darkred;
+    color: #999999;
+    padding: 1px 1px 1px 4px
+}

@@ -96,9 +96,20 @@
 
                             <a4j:outputPanel id="comparePanel" rendered="#{srcEditor.compareSourceVersion > 0 and srcEditor.compareDestinationVersion > 0}">
                                 Comparing version #{srcEditor.compareSourceVersion} with #{srcEditor.compareDestinationVersion}:<br/>
+                                <table>
                                 <ui:repeat var="change" value="#{srcEditor.compareEntries}">
-                                    #{change.changeType}: #{change.XPath}<br/>
+                                    <ui:fragment rendered="#{!change.internal}">
+                                    <tr>
+                                        <td>
+                                            <ui:fragment rendered="#{change.dataChange}">Data</ui:fragment>
+                                            <ui:fragment rendered="#{change.positionChange}"> Pos</ui:fragment>
+                                            <ui:fragment rendered="#{change.languageSettingChanged}"> Lang</ui:fragment>
+                                        </td>
+                                        <td class="change_#{change.changeType}">#{change.XPath}</td>
+                                    </tr>
+                                    </ui:fragment>
                                 </ui:repeat>
+                                </table>
                             </a4j:outputPanel>
                         </span>
                     </ui:fragment>

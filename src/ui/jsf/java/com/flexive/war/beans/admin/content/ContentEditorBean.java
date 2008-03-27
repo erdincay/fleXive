@@ -123,8 +123,11 @@ public class ContentEditorBean implements ActionBean, Serializable {
     }
 
     public List<FxDelta.FxDeltaChange> getCompareEntries() throws FxApplicationException {
-        if ( versionInfo != null && compareSourceVersion > 0 && compareSourceVersion <= versionInfo.getMaxVersion() &&
-                compareDestinationVersion > 0 && compareDestinationVersion <= versionInfo.getMaxVersion()) {
+        if ( "compare".equals(infoPanelState) &&
+                versionInfo != null && compareSourceVersion > 0 &&
+                compareSourceVersion <= versionInfo.getMaxVersion() &&
+                compareDestinationVersion > 0 &&
+                compareDestinationVersion <= versionInfo.getMaxVersion()) {
             FxContent content1 = EJBLookup.getContentEngine().load(new FxPK(id, compareSourceVersion));
             FxContent content2 = EJBLookup.getContentEngine().load(new FxPK(id, compareDestinationVersion));
             FxDelta delta = FxDelta.processDelta(content1, content2);
@@ -588,6 +591,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
                 displayProv = new CeDisplayProvider(this);
                 idGenerator = new CeIdGenerator();
                 addElementOptions = new CeAddElementOptions(this);
+                infoPanelState = null;
                 _initSteps();
                 editAble = true;
                 deleteAble = true;
@@ -742,6 +746,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
         editAble = false;
         deleteAble = false;
         versionDeleteAble  = false;
+        infoPanelState = null;
         //return getEditorPage();
         return null;
     }
