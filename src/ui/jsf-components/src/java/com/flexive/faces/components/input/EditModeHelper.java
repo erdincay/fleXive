@@ -283,7 +283,7 @@ class EditModeHelper extends RenderHelper {
     }
 
     private void renderDateTimeInput(UIComponent parent, String inputId, FxLanguage language) {
-        createInputDate(parent, inputId, language).setType("both");
+        createInputDate(parent, inputId, language).setType("full");
     }
 
     @SuppressWarnings({"unchecked"})

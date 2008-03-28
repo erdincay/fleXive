@@ -148,6 +148,8 @@
     width: 400px;
 }
 
+/* info panel */
+
 .infoPanelButton {
     text-align: center;
     padding-left: 5px;
@@ -171,20 +173,69 @@
     margin-bottom: 5px;
 }
 
-.change_Update {
-    border-left: 4px solid lightgray;
-    padding: 1px 1px 1px 4px
+/* version compare - changes */
+
+.changesTable {
+    border-width: 0;
+    border-spacing: 0 5px;
+    width: 540px;
 }
 
-.change_Add {
-    background: #DDFFDD none repeat scroll 0%;
-    border-left: 4px solid darkgreen;
-    padding: 1px 1px 1px 4px
+.changesTable TR TH {
+    text-align: left;
+    font-weight: bold;
 }
 
-.change_Remove {
-    background: #FFDDDD none repeat scroll 0%;
-    border-left: 4px solid darkred;
+.changeInfo {
+    vertical-align: top;
+    padding-top: 5px;
+    padding-right: 2px;
+}
+
+.changeInfo.img {
+    border: 0;
+}
+
+.changeLeft {
+    font-family: monospace;
+    vertical-align: top;
+    padding: 1px 1px 1px 4px;
+    border-style: solid;
+    border-width: 1px 0 1px 4px;
+    padding-right: 5px;
+}
+
+.changeMiddle {
+    vertical-align: top;
+    padding: 1px 1px 1px 1px;
+    border-style: solid;
+    border-width: 1px 0 1px 0;
+}
+
+.changeRight {
+    vertical-align: top;
+    padding: 1px 1px 1px 1px;
+    border-style: solid;
+    border-width: 1px 1px 1px 0;
+}
+
+.changeUpdate {
+    border-color: lightgray;
+}
+
+.changeAdd {
+    border-color: darkgreen;
+    background: #DDFFDD none repeat scroll 0;
+}
+
+.changeRemove {
     color: #999999;
-    padding: 1px 1px 1px 4px
+    border-color: darkred;
+    background: #FFDDDD none repeat scroll 0;
+}
+
+.changeData {
+    border: 1px solid #999999;
+    margin: 1px;
+    padding: 2px;
 }

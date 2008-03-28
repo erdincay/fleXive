@@ -304,10 +304,8 @@ body a {
 }
 
 .initTable {
-    /*border-style: solid;*/
     border: 1px solid black;
     border-spacing: 0;
-    /*border-width: 1px 0px 1px 1px;*/
     border-collapse: collapse;
 }
 

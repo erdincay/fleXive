@@ -169,6 +169,15 @@ public class FxDelta implements Serializable {
         }
 
         /**
+         * Is this a position change only?
+         *
+         * @return position change only?
+         */
+        public boolean isPositionChangeOnly() {
+            return positionChange && !dataChange;
+        }
+
+        /**
          * Is the change affecting a group?
          *
          * @return group affected?
@@ -394,8 +403,8 @@ public class FxDelta implements Serializable {
             cache.put(u.getXPath(), u);
 
 
-        String[] org = original.getAllXPaths("/").toArray(new String[0]);
-        String[] comp = compare.getAllXPaths("/").toArray(new String[0]);
+        List<String> org = original.getAllXPaths("/");
+        List<String> comp = compare.getAllXPaths("/");
         FxDiff diff = new FxDiff(org, comp);
         List<FxDiff.Difference> ld = diff.diff();
 
@@ -414,23 +423,27 @@ public class FxDelta implements Serializable {
         System.out.println("== DIFF ==");*/
         int checked = 0; //index of last checked update
         for (FxDiff.Difference d : ld) {
-            //check for any XPath "before" entry for a data change
-            checked = checkUpdated(d, ret, cache, org, checked);
-            System.out.println(d);
+//            System.out.println(d);
             if (d.isDelete()) {
                 for (int pos = d.getDeletedStart(); pos <= d.getDeletedEnd(); pos++) {
-                    String delXP = org[pos];
+                    String delXP = org.get(pos);
 //                    System.out.println("Deleted: " + delXP);
-                    if (cache.containsKey(delXP))
+                    if (cache.containsKey(delXP)) {
+                        //check for any XPath "before" entry for a data change
+                        checked = checkUpdated(d, ret, cache, org, checked);
                         ret.add(cache.remove(delXP));
+                    }
                 }
             }
             if (d.isAdd()) {
                 for (int pos = d.getAddedStart(); pos <= d.getAddedEnd(); pos++) {
-                    String addXP = comp[pos];
+                    String addXP = comp.get(pos);
 //                    System.out.println("Added: " + addXP);
-                    if (cache.containsKey(addXP))
+                    if (cache.containsKey(addXP)) {
+                        //check for any XPath "before" entry for a data change
+                        checked = checkUpdated(d, ret, cache, org, checked);
                         ret.add(cache.remove(addXP));
+                    }
                 }
             }
         }
@@ -438,16 +451,16 @@ public class FxDelta implements Serializable {
         return ret;
     }
 
-    private int checkUpdated(FxDiff.Difference d, List<FxDeltaChange> ret, Map<String, FxDeltaChange> cache, String[] org, int checked) {
-        if (checked >= org.length)
+    private int checkUpdated(FxDiff.Difference d, List<FxDeltaChange> ret, Map<String, FxDeltaChange> cache, List<String> org, int checked) {
+        if (checked >= org.size())
             return checked;
-        int end = d == null ? org.length : (d.isAdd() ? d.getAddedEnd() - 1 : d.getDeletedEnd() - 1);
-        if (end > org.length)
-            end = org.length;
+        int end = d == null ? org.size() : (d.isAdd() ? d.getAddedEnd() : d.getDeletedEnd() - 1);
+        if (end > org.size())
+            end = org.size();
         for (int i = 0; i < end; i++) {
-            if (cache.containsKey(org[i])) {
-                ret.add(cache.remove(org[i]));
-                System.out.println("Adding update: " + org[i]);
+            if (cache.containsKey(org.get(i))) {
+                ret.add(cache.remove(org.get(i)));
+//                System.out.println("Adding update: " + org.get(i));
             }
         }
         return checked;

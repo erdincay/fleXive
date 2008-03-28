@@ -67,7 +67,7 @@
                             <table>
                                 <tr>
                                     <td>
-                                        Source:
+                                        #{fxMessageBean['Content.field.compare.source']}
                                     </td>
                                     <td>
                                         <h:selectOneListbox id="srcComp" value="#{srcEditor.compareSourceVersion}"
@@ -78,7 +78,7 @@
                                 </tr>
                                 <tr>
                                     <td>
-                                        Destination:
+                                        #{fxMessageBean['Content.field.compare.destination']}
                                     </td>
                                     <td>
                                         <h:selectOneListbox id="dstComp" value="#{srcEditor.compareDestinationVersion}"
@@ -90,26 +90,56 @@
                                 </tr>
                             </table>
 
-                            <a4j:commandLink reRender="comparePanel" rendered="#{srcEditor.versionInfo.versionCount > 1}">
-                                <span class="infoPanelButton">Compare</span>
+                            <a4j:commandLink reRender="comparePanel, infoPanel" rendered="#{srcEditor.versionInfo.versionCount > 1}">
+                                <span class="infoPanelButton">#{fxMessageBean['Content.button.compare']}</span>
                             </a4j:commandLink><br/><br/>
-
                             <a4j:outputPanel id="comparePanel" rendered="#{srcEditor.compareSourceVersion > 0 and srcEditor.compareDestinationVersion > 0}">
-                                Comparing version #{srcEditor.compareSourceVersion} with #{srcEditor.compareDestinationVersion}:<br/>
-                                <table>
-                                <ui:repeat var="change" value="#{srcEditor.compareEntries}">
-                                    <ui:fragment rendered="#{!change.internal}">
+                                <c:set var="compEntries" value="#{srcEditor.compareEntries}"/>
+                                #{fxMessageBean['Content.field.compare.changeCount']} #{fn:length(compEntries)}
+                                <ui:fragment rendered="#{fn:length(compEntries) > 0}">
+                                <table class="changesTable">
                                     <tr>
-                                        <td>
-                                            <ui:fragment rendered="#{change.dataChange}">Data</ui:fragment>
-                                            <ui:fragment rendered="#{change.positionChange}"> Pos</ui:fragment>
-                                            <ui:fragment rendered="#{change.languageSettingChanged}"> Lang</ui:fragment>
-                                        </td>
-                                        <td class="change_#{change.changeType}">#{change.XPath}</td>
+                                        <th><!-- empty --></th>
+                                        <th>#{fxMessageBean['Content.field.compare.xpath']}</th>
+                                        <th>#{fxMessageBean['Content.field.compare.source.changes']}</th>
+                                        <th>#{fxMessageBean['Content.field.compare.destination.changes']}</th>
                                     </tr>
-                                    </ui:fragment>
-                                </ui:repeat>
+                                    <ui:repeat var="change" value="#{compEntries}">
+                                        <ui:fragment>
+                                            <tr>
+                                                <td class="changeInfo">
+                                                    <ui:fragment
+                                                            rendered="#{change.positionChange and change.changeType == 'Update'}">
+                                                        <t:graphicImage
+                                                                title="Position #{change.originalData.pos} -> #{change.newData.pos}"
+                                                                alt="position changed"
+                                                                url="/adm/images/contentEditor/change_position.png"/>
+                                                    </ui:fragment>
+                                                </td>
+                                                <td class="changeLeft change#{change.changeType}">#{change.XPath}</td>
+                                                <td class="changeMiddle change#{change.changeType}">
+                                                    <ui:fragment
+                                                            rendered="#{(change.changeType == 'Update' and change.dataChange) or change.changeType == 'Remove'}">
+                                                        <div class="changeData">
+                                                            <fx:fxValueInput value="#{change.originalData.value}"
+                                                                             readOnly="true"/>
+                                                        </div>
+                                                    </ui:fragment>
+                                                </td>
+                                                <td class="changeRight change#{change.changeType}">
+                                                    <ui:fragment
+                                                            rendered="#{(change.changeType == 'Update' and change.dataChange) or change.changeType == 'Add'}">
+                                                        <div class="changeData">
+                                                            <fx:fxValueInput value="#{change.newData.value}"
+                                                                             readOnly="true"/>
+                                                        </div>
+                                                    </ui:fragment>
+                                                </td>
+                                            </tr>
+                                        </ui:fragment>
+                                    </ui:repeat>
                                 </table>
+                                </ui:fragment>
                             </a4j:outputPanel>
                         </span>
                     </ui:fragment>

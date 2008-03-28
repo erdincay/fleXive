@@ -52,13 +52,5 @@ final FxContent article = EJBLookup.contentEngine.initialize("article")
 article.setValue("/caption", new FxString("Welcome to [flexive] 3.0"))
 article.setValue("/title", new FxString(false, "Welcome to [flexive] 3.0"))
 article.setValue("/longtexthtml", new FxHTML(false,
-"""<p>Welcome to your installation of [fleXive] 3.0.</p>
-<h3>What is [fleXive]?</h3>
-<p>
-[fleXive] is a <strong>JavaEE 5 open-source (GPL 2.0) framework</strong> for the development of
-complex and evolving (web-)applications. It <strong>speeds up development</strong>
-as it handles numerous important application issues and keeps your application flexible over
-the development-cycle.
-</p>
-"""))
+"""<p>Welcome to your installation of [fleXive] 3.0.</p><h3>What is [fleXive]?</h3><p>[fleXive] is a <strong>JavaEE 5 open-source (GPL 2.0) framework</strong> for the development of complex and evolving (web-)applications. It <strong>speeds up development</strong> as it handles numerous important application issues and keeps your application flexible over the development-cycle.</p>"""))
 EJBLookup.treeEngine.save(FxTreeNodeEdit.createNew("Welcome to [flexive] 3.0").setReference(EJBLookup.contentEngine.save(article)))

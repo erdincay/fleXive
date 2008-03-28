@@ -131,7 +131,14 @@ public class ContentEditorBean implements ActionBean, Serializable {
             FxContent content1 = EJBLookup.getContentEngine().load(new FxPK(id, compareSourceVersion));
             FxContent content2 = EJBLookup.getContentEngine().load(new FxPK(id, compareDestinationVersion));
             FxDelta delta = FxDelta.processDelta(content1, content2);
-            return delta.getDiff(content1, content2);
+            List<FxDelta.FxDeltaChange> changes = delta.getDiff(content1, content2);
+            //filter internal
+            List<FxDelta.FxDeltaChange> internal = new ArrayList<FxDelta.FxDeltaChange>(5);
+            for (FxDelta.FxDeltaChange d : changes)
+                if (d.isInternal())
+                    internal.add(d);
+            changes.removeAll(internal);
+            return changes;
         } else {
             return new ArrayList<FxDelta.FxDeltaChange>(0);
         }
@@ -592,6 +599,8 @@ public class ContentEditorBean implements ActionBean, Serializable {
                 idGenerator = new CeIdGenerator();
                 addElementOptions = new CeAddElementOptions(this);
                 infoPanelState = null;
+                compareSourceVersion = 0;
+                compareDestinationVersion = 0;
                 _initSteps();
                 editAble = true;
                 deleteAble = true;
@@ -747,6 +756,8 @@ public class ContentEditorBean implements ActionBean, Serializable {
         deleteAble = false;
         versionDeleteAble  = false;
         infoPanelState = null;
+        compareSourceVersion = 0;
+        compareDestinationVersion = 0;
         //return getEditorPage();
         return null;
     }
@@ -941,7 +952,13 @@ public class ContentEditorBean implements ActionBean, Serializable {
      * @return the next page to render (= the content editor)
      */
     public String saveInNewVersion() {
-        return _save(true);
+        try {
+            content = getContentEngine().prepareSave(content);
+            return _save(true);
+        } catch (FxApplicationException e) {
+            new FxFacesMsgErr(e).addToContext();
+        }
+        return null;
     }
 
     /**
