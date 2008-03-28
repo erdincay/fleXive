@@ -33,6 +33,8 @@
  ***************************************************************/
 package com.flexive.sqlParser;
 
+import org.apache.commons.lang.StringUtils;
+
 public class SelectedValue
 {
     private final String alias;
@@ -44,6 +46,19 @@ public class SelectedValue
     }
 
     public String getAlias() {
+        if (alias == null) {
+            String name = null;
+            if (value instanceof Property) {
+                final Property property = (Property) value;
+                name = property.getValue() + (StringUtils.isNotBlank(property.getField()) ? "." + property.getField() : "");
+            } else {
+                name = (value.getValue() instanceof String) ? (String) value.getValue() : String.valueOf(value.getValue());
+            }
+            if (value.hasFunction()) {
+                name = value.getFunctionsStart() + name + value.getFunctionsEnd();
+            }
+            return name;
+        }
         return alias;
     }
 

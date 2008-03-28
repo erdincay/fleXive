@@ -279,4 +279,11 @@ public class SqlQueryBuilderTest {
         final SqlQueryBuilder builder = new SqlQueryBuilder().select("mycontent/mycaption");
         assert builder.getQuery().contains("SELECT co.mycontent/mycaption") : "Expected assignment query: " + builder.getQuery();
     }
+
+    @Test
+    public void conditionFunctionsTest() {
+        final String query = new SqlQueryBuilder().select("id").condition("year(dateprop)", PropertyValueComparator.EQ, 2008).getQuery();
+        final String fun = "YEAR(CO.DATEPROP) = 2008";
+        assert query.toUpperCase().contains(fun) : "Expected query to contain " + fun + ", got: " + query;
+    }
 }

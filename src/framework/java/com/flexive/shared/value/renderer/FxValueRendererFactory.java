@@ -69,7 +69,9 @@ public class FxValueRendererFactory {
      */
     private static class FxDateFormatter implements FxValueFormatter<Date, FxDate> {
         public String format(FxDate value, Date translation, FxLanguage outputLanguage) {
-            return DateFormat.getDateInstance(DateFormat.MEDIUM, outputLanguage.getLocale()).format(translation);
+            return translation != null
+                    ? DateFormat.getDateInstance(DateFormat.MEDIUM, outputLanguage.getLocale()).format(translation)
+                    : getEmptyMessage(outputLanguage);
         }
     }
 
@@ -78,7 +80,9 @@ public class FxValueRendererFactory {
      */
     private static class FxDateTimeFormatter implements FxValueFormatter<Date, FxDateTime> {
         public String format(FxDateTime container, Date value, FxLanguage outputLanguage) {
-            return DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, outputLanguage.getLocale()).format(value);
+            return value != null
+                    ? DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, outputLanguage.getLocale()).format(value)
+                    : getEmptyMessage(outputLanguage);
         }
     }
 
@@ -87,7 +91,9 @@ public class FxValueRendererFactory {
      */
     private static class FxDoubleFormatter implements FxValueFormatter<Double, FxDouble> {
         public String format(FxDouble value, Double translation, FxLanguage outputLanguage) {
-            return NumberFormat.getNumberInstance(outputLanguage.getLocale()).format(translation);
+            return translation != null
+                    ? NumberFormat.getNumberInstance(outputLanguage.getLocale()).format(translation)
+                    : getEmptyMessage(outputLanguage);
         }
     }
 
@@ -96,7 +102,9 @@ public class FxValueRendererFactory {
      */
     private static class FxFloatFormatter implements FxValueFormatter<Float, FxFloat> {
         public String format(FxFloat value, Float translation, FxLanguage outputLanguage) {
-            return NumberFormat.getNumberInstance(outputLanguage.getLocale()).format(translation);
+            return value != null
+                    ? NumberFormat.getNumberInstance(outputLanguage.getLocale()).format(translation)
+                    : getEmptyMessage(outputLanguage);
         }
     }
 
@@ -105,7 +113,9 @@ public class FxValueRendererFactory {
      */
     private static class FxSelectOneFormatter implements FxValueFormatter<FxSelectListItem, FxSelectOne> {
         public String format(FxSelectOne value, FxSelectListItem translation, FxLanguage outputLanguage) {
-            return translation.getLabel().getBestTranslation(outputLanguage);
+            return translation != null
+                    ? translation.getLabel().getBestTranslation(outputLanguage)
+                    : getEmptyMessage(outputLanguage);
         }
     }
 
@@ -114,6 +124,9 @@ public class FxValueRendererFactory {
      */
     private static class FxSelectManyFormatter implements FxValueFormatter<SelectMany, FxSelectMany> {
         public String format(FxSelectMany value, SelectMany translation, FxLanguage outputLanguage) {
+            if (translation == null) {
+                return getEmptyMessage(outputLanguage);
+            }
             final List<String> out = new ArrayList<String>(translation.getSelected().size());
             for (FxSelectListItem item: translation.getSelected()) {
                 out.add(item.getLabel().getBestTranslation(outputLanguage));
@@ -128,8 +141,9 @@ public class FxValueRendererFactory {
      */
     private static class ObjectFormatter implements FxValueFormatter {
         public String format(FxValue value, Object translation, FxLanguage outputLanguage) {
-            return translation != null ? translation.toString() : "null";
+            return translation != null ? translation.toString() : getEmptyMessage(outputLanguage);
         }
+
     }
 
     static {
@@ -188,5 +202,9 @@ public class FxValueRendererFactory {
     void addRenderer(FxLanguage language, Class<T> valueType, FxValueFormatter<DT, T> formatter) {
         renderers.putIfAbsent(language, new FxValueRendererImpl(language));
         renderers.get(language).put(valueType, formatter);
+    }
+
+    private static String getEmptyMessage(FxLanguage outputLanguage) {
+        return "null"; // TODO
     }
 }

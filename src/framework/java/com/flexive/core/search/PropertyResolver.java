@@ -130,7 +130,8 @@ public class PropertyResolver {
 
     private PropertyEntry getByName(final FxStatement fx_stmt, final Property property) throws FxSqlSearchException {
         final String key = fx_stmt.getIgnoreCase() + "_" + property.getPropertyName() +
-                (property.hasField() ? "_" + property.getField() : "");
+                (property.hasField() ? "_" + property.getField() : "") +
+                (property.hasFunction() ? "_" + property.getFunctionsStart() : "");
         PropertyEntry entry = cache.get(key);
         if (entry == null) {
             // first check hardcoded virtual properties like @pk and @path

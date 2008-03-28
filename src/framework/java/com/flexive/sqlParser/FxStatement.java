@@ -176,14 +176,6 @@ public class FxStatement {
      * @param alias the alias
      */
     protected void addSelectedValue(final Value vi, String alias) {
-        if (alias == null) {
-            if (vi instanceof Property) {
-                final Property property = (Property) vi;
-                alias = property.getValue() + (StringUtils.isNotBlank(property.getField()) ? "." + property.getField() : "");
-            } else {
-                alias = (vi.getValue() instanceof String) ? (String) vi.getValue() : String.valueOf(vi.getValue());
-            }
-        }
         selected.add(new SelectedValue(vi, alias));
     }
 

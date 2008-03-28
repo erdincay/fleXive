@@ -395,6 +395,70 @@ public class SearchEngineTest {
     }
 
     /**
+     * Tests date and datetime queries with functions, e.g. YEAR(dateprop)=2008
+     *
+     * @throws FxApplicationException   on errors
+     */
+    @Test
+    public void dateConditionFunctionsTest() throws FxApplicationException {
+        for (String name: new String[] { "date", "datetime" }) {
+            testDateFunctionLT(name, 2020, DateFunction.YEAR, Calendar.YEAR);
+            testDateFunctionLT(name, 5, DateFunction.MONTH, Calendar.MONTH);
+            testDateFunctionLT(name, 15, DateFunction.DAY, Calendar.DAY_OF_MONTH);
+        }
+        testDateFunctionLT("datetime", 12, DateFunction.HOUR, Calendar.HOUR);
+        testDateFunctionLT("datetime", 30, DateFunction.MINUTE, Calendar.MINUTE);
+        testDateFunctionLT("datetime", 30, DateFunction.SECOND, Calendar.SECOND);
+    }
+
+    private void testDateFunctionLT(String name, int value, DateFunction dateFunction, int calendarField) throws FxApplicationException {
+        final String assignmentName = TEST_TYPE + "/" + getTestPropertyName(name);
+        final SqlQueryBuilder builder = getDateQuery(assignmentName, PropertyValueComparator.LT, value, dateFunction);
+        final FxResultSet result = builder.getResult();
+        assert result.getRowCount() > 0 : "Query returned no results:\n\n" + builder.getQuery();
+        final Calendar cal = Calendar.getInstance();
+        for (FxResultRow row: result.getResultRows()) {
+            cal.setTime(row.getDate(1));
+            assert cal.get(calendarField) < value : row.getDate(1) + " should be before " + value + ", data type = " + name;
+        }
+    }
+
+    private SqlQueryBuilder getDateQuery(String datePropertyName, PropertyValueComparator comparator, int year, DateFunction dateFunction) throws FxApplicationException {
+        return new SqlQueryBuilder().select(datePropertyName)
+                .condition(dateFunction.getSqlName() + "(" + datePropertyName + ")", comparator, year);
+    }
+
+    @Test
+    public void dateSelectFunctionsTest() throws FxApplicationException {
+        final int year = Calendar.getInstance().get(Calendar.YEAR);
+        // get objects created this year
+        FxResultSet result = new SqlQueryBuilder().select("year(created_at)").condition("year(created_at)", PropertyValueComparator.EQ, year).getResult();
+        assert result.getRowCount() > 0;
+        for (FxResultRow row: result.getResultRows()) {
+            assert row.getInt(1) == year : "Expected " + year + ", got: " + row.getInt(1);
+        }
+
+        // select a date from the details table
+        final String dateAssignmentName = TEST_TYPE + "/" + getTestPropertyName("date");
+        result = new SqlQueryBuilder().select(dateAssignmentName, "year(" + dateAssignmentName + ")")
+                .condition(dateAssignmentName, PropertyValueComparator.NOT_EMPTY, null).getResult();
+        assert result.getRowCount() > 0;
+        final Calendar cal = Calendar.getInstance();
+        for (FxResultRow row: result.getResultRows()) {
+            cal.setTime(row.getDate(1));
+            assert cal.get(Calendar.YEAR) == row.getInt(2) : "Expected year " + cal.get(Calendar.YEAR) + ", got: " + row.getInt(2);
+        }
+
+        // check if it is possible to select the same column twice, but with different functions
+        result = new SqlQueryBuilder().select("year(created_at)", "month(created_at)").condition("year(created_at)", PropertyValueComparator.EQ, year).getResult();
+        assert result.getRowCount() > 0;
+        for (FxResultRow row: result.getResultRows()) {
+            assert row.getInt(1) == year : "Expected " + year + ", got: " + row.getInt(1);
+            assert row.getInt(2) != year && row.getInt(2) < 12 : "Invalid month value: " + row.getInt(2);
+        }
+    }
+
+    /**
      * Tests relative comparators like &lt; and == for all datatypes that support them.
      *
      * @param name     the base property name
@@ -404,7 +468,7 @@ public class SearchEngineTest {
      */
     @Test(dataProvider = "testProperties")
     public void genericRelativeComparatorsTest(String name, FxDataType dataType) throws FxApplicationException {
-        final String propertyName = getTestPropertyName(name);
+        final String assignmentName = TEST_TYPE + "/" + getTestPropertyName(name);
 
         for (PropertyValueComparator comparator : PropertyValueComparator.getAvailable(dataType)) {
             if (!(comparator.equals(EQ) || comparator.equals(PropertyValueComparator.GE)
@@ -413,7 +477,7 @@ public class SearchEngineTest {
                 continue;
             }
             final FxValue value = getTestValue(name, comparator);
-            final SqlQueryBuilder builder = new SqlQueryBuilder().select("@pk", propertyName).condition(propertyName, comparator, value);
+            final SqlQueryBuilder builder = new SqlQueryBuilder().select("@pk", assignmentName).condition(assignmentName, comparator, value);
             final FxResultSet result = builder.getResult();
             assert result.getRowCount() > 0 : "Cannot test on empty result sets, query=\n" + builder.getQuery();
             for (FxResultRow row: result.getResultRows()) {
@@ -422,24 +486,24 @@ public class SearchEngineTest {
                     case EQ:
                         assert rowValue.compareTo(value) == 0
                                 : "Result value " + rowValue + " is not equal to " + value + " (compareTo = "
-                                + rowValue.compareTo(value) + ")";
+                                + rowValue.compareTo(value) + ")\n\nQuery:" + builder.getQuery();
                         assert rowValue.getBestTranslation().equals(value.getBestTranslation())
-                                : "Result value " + rowValue + " is not equal to " + value;
+                                : "Result value " + rowValue + " is not equal to " + value + "\n\nQuery:" + builder.getQuery();
                         break;
                     case LT:
-                        assert rowValue.compareTo(value) < 0 : "Result value " + rowValue + " is not less than " + value;
+                        assert rowValue.compareTo(value) < 0 : "Result value " + rowValue + " is not less than " + value + "\n\nQuery:" + builder.getQuery();
                         break;
                     case LE:
-                        assert rowValue.compareTo(value) <= 0 : "Result value " + rowValue + " is not less or equal to " + value;
+                        assert rowValue.compareTo(value) <= 0 : "Result value " + rowValue + " is not less or equal to " + value + "\n\nQuery:" + builder.getQuery();
                         break;
                     case GT:
-                        assert rowValue.compareTo(value) > 0 : "Result value " + rowValue + " is not greater than " + value;
+                        assert rowValue.compareTo(value) > 0 : "Result value " + rowValue + " is not greater than " + value + "\n\nQuery:" + builder.getQuery();
                         break;
                     case GE:
-                        assert rowValue.compareTo(value) >= 0 : "Result value " + rowValue + " is not greater or equal to " + value;
+                        assert rowValue.compareTo(value) >= 0 : "Result value " + rowValue + " is not greater or equal to " + value + "\n\nQuery:" + builder.getQuery();
                         break;
                     default:
-                        assert false : "Invalid comparator: " + comparator;
+                        assert false : "Invalid comparator: " + comparator + "\n\nQuery:" + builder.getQuery();
                 }
             }
         }

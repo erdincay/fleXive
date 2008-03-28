@@ -159,7 +159,8 @@ new GroovyTypeBuilder().SearchTest(acl: instanceACL, useTypePermissions: true, u
 int instanceCount = 50
 
 Date buildDate(int counter) {
-    return new Date(100 + counter, 10, 20, 12, 13, 14)
+    final Random random = new Random();
+    return new Date(100 + counter, random.nextInt(12), random.nextInt(28), random.nextInt(24), random.nextInt(60), random.nextInt(60))
 }
 
 DateRange buildDateRange(int counter) {

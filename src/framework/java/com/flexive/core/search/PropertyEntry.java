@@ -41,7 +41,9 @@ import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.value.*;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.Pair;
 import com.flexive.shared.search.FxPaths;
+import com.flexive.shared.search.FxSQLFunction;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.core.DatabaseConst;
@@ -56,7 +58,8 @@ import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.sql.SQLException;
 import java.util.Date;
-import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * <p>
@@ -269,9 +272,8 @@ public class PropertyEntry {
     protected final PropertyResolver.Table tbl;
     protected final Type type;
     protected final boolean multilanguage;
+    protected final List<FxSQLFunction> functions = new ArrayList<FxSQLFunction>();
     protected int positionInResultSet = -1;
-    protected FxPropertyAssignment assignment;
-    protected FxDataType overrideDataType;
 
     /**
      * Create a new instance based on the given (search) property.
@@ -310,8 +312,12 @@ public class PropertyEntry {
             this.assignment = null;
             this.property = CacheAdmin.getEnvironment().getProperty(searchProperty.getPropertyName());
         }
-
-        this.readColumns = storage.getColumns(this.property);
+        if (FxDataType.Date.equals(this.property.getDataType()) || FxDataType.DateTime.equals(this.property.getDataType())) {
+            // hardcoded: use only first column, otherwise date functions cannot be appliaed
+            this.readColumns = new String[] { storage.getColumns(this.property)[0] };
+        } else {
+            this.readColumns = storage.getColumns(this.property);
+        }
         String fcol = ignoreCase ? storage.getUppercaseColumn(this.property) : this.readColumns[0];
         if (fcol == null) {
             fcol = this.readColumns == null ? null : this.readColumns[0];
@@ -332,7 +338,16 @@ public class PropertyEntry {
             throw new FxSqlSearchException(LOG, "ex.sqlSearch.err.unknownPropertyTable", searchProperty, this.tableName);
         }
         this.multilanguage = this.property.isMultiLang();
+        this.functions.addAll(searchProperty.getFunctions());
+        if (this.functions.size() > 0) {
+            // use outmost function result type
+            this.overrideDataType = this.functions.get(0).getOverrideDataType();
+        }
     }
+
+    protected FxPropertyAssignment assignment;
+
+    protected FxDataType overrideDataType;
 
     protected PropertyEntry(Type type, PropertyResolver.Table tbl, String[] readColumns, String filterColumn, boolean multilanguage, FxDataType overrideDataType) {
         this.readColumns = readColumns;
@@ -365,23 +380,36 @@ public class PropertyEntry {
                         break;
                     }
                     Timestamp dttstp = rs.getTimestamp(pos);
-                    Date _dtdate = new Date(dttstp.getTime());
+                    Date _dtdate = dttstp != null ? new Date(dttstp.getTime()) : null;
                     result = new FxDateTime(multilanguage, FxLanguage.SYSTEM_ID, _dtdate);
+                    if (dttstp == null) {
+                        result.setEmpty(FxLanguage.SYSTEM_ID);
+                    }
                     break;
                 case Date:
                     Timestamp tstp = rs.getTimestamp(pos);
-                    Date _date = new Date(tstp.getTime());
-                    result = new FxDate(multilanguage, FxLanguage.SYSTEM_ID, _date);
+                    result = new FxDate(multilanguage, FxLanguage.SYSTEM_ID, tstp != null ? new Date(tstp.getTime()) : null);
+                    if (tstp == null) {
+                        result.setEmpty();
+                    }
                     break;
                 case DateRange:
-                    final Date from = new Date(rs.getTimestamp(pos).getTime());     // FDATE1
-                    final Date to = new Date(rs.getTimestamp(pos + 4).getTime());   // FDATE2
-                    result = new FxDateRange(new DateRange(from, to));
+                    final Pair<Date, Date> pair = decodeDateRange(rs, pos, 4);
+                    if (pair.getFirst() == null || pair.getSecond() == null) {
+                        result = new FxDateRange(multilanguage, FxLanguage.SYSTEM_ID, FxDateRange.EMPTY);
+                        result.setEmpty(FxLanguage.SYSTEM_ID);
+                    } else {
+                        result = new FxDateRange(multilanguage, FxLanguage.SYSTEM_ID, new DateRange(pair.getFirst(), pair.getSecond()));
+                    }
                     break;
                 case DateTimeRange:
-                    final Date from2 = new Date(rs.getTimestamp(pos).getTime());     // FDATE1
-                    final Date to2 = new Date(rs.getTimestamp(pos + 7).getTime());   // FDATE2
-                    result = new FxDateTimeRange(new DateRange(from2, to2));
+                    final Pair<Date, Date> pair2 = decodeDateRange(rs, pos, 7);
+                    if (pair2.getFirst() == null || pair2.getSecond() == null) {
+                        result = new FxDateTimeRange(multilanguage, FxLanguage.SYSTEM_ID, FxDateRange.EMPTY);
+                        result.setEmpty(FxLanguage.SYSTEM_ID);
+                    } else {
+                        result = new FxDateTimeRange(new DateRange(pair2.getFirst(), pair2.getSecond()));
+                    }
                     break;
                 case HTML:
                     result = new FxHTML(multilanguage, FxLanguage.SYSTEM_ID, rs.getString(pos));
@@ -439,6 +467,22 @@ public class PropertyEntry {
         } catch (SQLException e) {
             throw new FxSqlSearchException(e);
         }
+    }
+
+    /**
+     * Decodes a daterange result value consisting of two date columns.
+     * @param rs    the result set
+     * @param pos   the position of the first date column
+     * @param secondDateOffset  the offset for the second date column
+     * @return      the decoded dates. If a column is null, the corresponding entry is also null.
+     * @throws SQLException if the column datatypes don't match
+     */
+    private Pair<Date, Date> decodeDateRange(ResultSet rs, int pos, int secondDateOffset) throws SQLException {
+        final Timestamp fromTimestamp = rs.getTimestamp(pos);                   // FDATE1
+        final Timestamp toTimestamp = rs.getTimestamp(pos + secondDateOffset);  // FDATE2
+        final Date from = fromTimestamp != null ? new Date(fromTimestamp.getTime()) : null;
+        final Date to = toTimestamp != null ? new Date(toTimestamp.getTime()) : null;
+        return new Pair<Date, Date>(from, to);
     }
 
     /**
@@ -534,5 +578,17 @@ public class PropertyEntry {
      */
     public FxPropertyAssignment getAssignment() {
         return assignment;
+    }
+
+    /**
+     * Returns true if the given column is a date column with millisecond precision
+     * (i.e. a 'long' SQL type instead of a native date).
+     *
+     * @param columnName    the database column name
+     * @return  true if the given column is a date column with millisecond precision
+     */
+    public static boolean isDateMillisColumn(String columnName) {
+        return "CREATED_AT".equalsIgnoreCase(columnName)
+                || "MODIFIED_AT".equalsIgnoreCase(columnName);
     }
 }

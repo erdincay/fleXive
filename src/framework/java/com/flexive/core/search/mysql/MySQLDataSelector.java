@@ -276,7 +276,12 @@ public class MySQLDataSelector extends DataSelector {
                             final String val = FILTER_ALIAS + "." + CONTENT_DIRECT_SELECT_PROP[directSelect];
                             result.addItem(val, resultPos, false);
                         } else {
-                            final String val = "(SELECT " + SUBSEL_ALIAS + "." + column + " FROM " + DatabaseConst.TBL_CONTENT +
+                            String expr = SUBSEL_ALIAS + "." + column;
+                            if (!prop.getSqlFunctions().isEmpty() && PropertyEntry.isDateMillisColumn(column)) {
+                                // need to convert to date before applying a date function
+                                expr = "FROM_UNIXTIME(" + expr + "/1000)";
+                            } 
+                            final String val = "(SELECT " + expr + " FROM " + DatabaseConst.TBL_CONTENT +
                                     " " + SUBSEL_ALIAS + " WHERE " + SUBSEL_ALIAS + ".id=" + FILTER_ALIAS + ".id AND " +
                                     SUBSEL_ALIAS + ".ver=" + FILTER_ALIAS + ".ver)";
                             result.addItem(val, resultPos, false);

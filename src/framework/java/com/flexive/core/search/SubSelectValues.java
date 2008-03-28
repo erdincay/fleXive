@@ -166,8 +166,9 @@ public class SubSelectValues {
         if (prop.getFunctionsStart().length() == 0 && prop.getFunctionsEnd().length() == 0) return;
 
         if (isMultivalue()) {
-            throw new FxSqlSearchException(LOG, "ex.sqlSearch.query.fieldNotAllowedFor",
-                    (prop instanceof Property) ? ((Property) prop).getPropertyName() : "[constant]");
+            throw new FxSqlSearchException(LOG, "ex.sqlSearch.function.multipleColumns",
+                    (prop instanceof Property) ? ((Property) prop).getPropertyName() : "[constant]",
+                    prop.getFunctionsStart() + prop.getFunctionsEnd());
         }
         for (Item it : items) {
             if (it.isXpath()) continue;

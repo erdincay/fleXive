@@ -150,8 +150,7 @@ public class SqlQueryBuilder implements Serializable {
         }
         StringBuilder query = new StringBuilder();
         // build select
-        query.append("SELECT ").append(Table.CONTENT.getAlias()).append(".");
-        query.append(StringUtils.join(getColumnNames().iterator(), ", " + Table.CONTENT.getAlias() + "."));
+        query.append("SELECT ").append(buildSelect(getColumnNames()));
         // build from
         query.append("\nFROM ");
         for (Table table : tables) {
@@ -172,6 +171,38 @@ public class SqlQueryBuilder implements Serializable {
         }
         return query.toString();
     }
+
+    private String buildSelect(List<String> expressions) {
+        final StringBuilder out = new StringBuilder();
+        for (String column: expressions) {
+            if (out.length() > 0) {
+                out.append(", ");
+            }
+            out.append(injectTableAlias(column));
+        }
+        return out.toString();
+    }
+
+    /**
+     * Adds the table alias (e.g. "co.") to the given expression. Supports functions, i.e.
+     * "year(dateprop)" becomes "year(co.dateprop)".
+     *
+     * @param column    the column expression, e.g. "created_at" or "year(created_at)"
+     * @return  the input column name, including the table alias
+     */
+    private String injectTableAlias(String column) {
+        final StringBuilder out = new StringBuilder();
+        if (column.indexOf('(') > 0) {
+            // column has one or more functions
+            out.append(column.substring(0, column.lastIndexOf('(') + 1))
+               .append(Table.CONTENT.getAlias()).append('.')
+               .append(column.substring(column.lastIndexOf('(') + 1));
+        } else {
+            out.append(Table.CONTENT.getAlias()).append(".").append(column);
+        }
+        return out.toString();
+    }
+
 
     /**
      * Return the filters defined for this query (if any).
@@ -230,7 +261,7 @@ public class SqlQueryBuilder implements Serializable {
      * @return this
      */
     public SqlQueryBuilder condition(String propertyName, PropertyValueComparator comparator, FxValue<?, ?> value) {
-        renderCondition(comparator.getSql(Table.CONTENT.getColumnName(propertyName), value));
+        renderCondition(comparator.getSql(injectTableAlias(propertyName), value));
         tables.add(Table.CONTENT);
         return this;
     }
@@ -244,7 +275,7 @@ public class SqlQueryBuilder implements Serializable {
      * @return this
      */
     public SqlQueryBuilder condition(String propertyName, PropertyValueComparator comparator, Object value) {
-        renderCondition(comparator.getSql(Table.CONTENT.getColumnName(propertyName), value));
+        renderCondition(comparator.getSql(injectTableAlias(propertyName), value));
         tables.add(Table.CONTENT);
         return this;
     }

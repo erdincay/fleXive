@@ -46,6 +46,7 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.search.FxFoundType;
+import com.flexive.shared.search.DateFunction;
 import com.flexive.shared.search.query.VersionFilter;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.tree.FxTreeMode;
@@ -577,15 +578,31 @@ public class MySQLDataFilter extends DataFilter {
                 break;
             case Date:
             case DateRange:
-                value = constant.getValue() == null ? "NULL" : "'" + FxFormatUtils.getDateFormat().format(FxFormatUtils.toDate(constant.getValue())) + "'";
+                if (constant.getValue() == null) {
+                    value = "NULL";
+                } else if (isWithDateFunction(prop, constant)) {
+                    // use a date function - currently all MySQL date functions may be used
+                    value = constant.getValue();
+                } else {
+                    value = "'" + FxFormatUtils.getDateFormat().format(FxFormatUtils.toDate(constant.getValue())) + "'";
+                }
                 break;
             case DateTime:
             case DateTimeRange:
+                // CREATED_AT and MODIFIED_AT store the date in a "long" column with millisecond precision
+
                 if (constant.getValue() == null) {
                     value = "NULL";
+                } else if (isWithDateFunction(prop, constant)) {
+                    // use a date function - currently all MySQL date functions may be used
+                    value = constant.getValue();
+                    if (PropertyEntry.isDateMillisColumn(entry.getFilterColumn())) {
+                        // need to convert from milliseconds
+                        column = prop.getFunctionsStart() + "FROM_UNIXTIME(" + entry.getFilterColumn() + "/1000)" + prop.getFunctionsEnd();
+                    }
                 } else {
                     final Date date = FxFormatUtils.toDateTime(constant.getValue());
-                    if ("CREATED_AT".equals(column) || "MODIFIED_AT".equals(column)) {
+                    if (PropertyEntry.isDateMillisColumn(entry.getFilterColumn())) {
                         value = String.valueOf(date.getTime());
                     } else {
                         value = "'" + FxFormatUtils.getDateTimeFormat().format(date) + "'";
@@ -637,6 +654,14 @@ public class MySQLDataFilter extends DataFilter {
                     getSubQueryLimit() +
                     ") ";
         }
+    }
+
+    private boolean isWithDateFunction(Property property, Constant constant) {
+        // check if only valid date functions are present
+        for (String function: property.getSqlFunctions()) {
+            DateFunction.getBySqlName(function);
+        }
+        return StringUtils.isNumeric(constant.getValue()) && !property.getSqlFunctions().isEmpty();
     }
 
     /**

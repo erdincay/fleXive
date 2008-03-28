@@ -196,11 +196,11 @@ public class SqlParserTest {
 
     @Test(groups = {"shared", "search"})
     public void selectFunctions() throws SqlParserException {
-        assert parse("SELECT min(co.id) FROM content co").getSelectedValues().get(0)
-                .getValue().getFunctions()[0].equals("min");
-        final Value val1 = parse("SELECT co.id, min(max(avg(co.id))) FROM content co").getSelectedValues().get(1).getValue();
-        assert Arrays.equals(val1.getFunctions(), new String[]{"min", "max", "avg"})
-                : "Expected functions min, max, avg; got: " + Arrays.asList(val1.getFunctions());
+        assert parse("SELECT minute(co.created_at) FROM content co").getSelectedValues().get(0)
+                .getValue().getSqlFunctions().get(0).equalsIgnoreCase("minute");
+        final Value val1 = parse("SELECT co.id, year(month(day(co.created_at))) FROM content co").getSelectedValues().get(1).getValue();
+        assert val1.getSqlFunctions().equals(Arrays.asList("YEAR", "MONTH", "DAY"))
+                : "Expected functions year, month, day; got: " + Arrays.asList(val1.getSqlFunctions());
     }
 
     @Test(groups = {"shared", "search"})

@@ -33,7 +33,12 @@
  ***************************************************************/
 package com.flexive.sqlParser;
 
+import com.flexive.shared.search.FxSQLFunction;
+import com.flexive.shared.search.FxSQLFunctions;
+
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Collections;
 
 /**
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
@@ -41,7 +46,7 @@ import java.util.ArrayList;
 public class Value {
 
     private Object value;
-    private ArrayList<String> arFunctions = null;
+    private List<FxSQLFunction> functions = null;
 
     
     /**
@@ -98,10 +103,10 @@ public class Value {
         }
 
         // Add at beginning
-        if (arFunctions==null) {
-            arFunctions  = new ArrayList<String>(5);
+        if (functions == null) {
+            functions = new ArrayList<FxSQLFunction>();
         }
-        arFunctions.add(0,functionName);
+        functions.add(0, FxSQLFunctions.forName(functionName));
         return this;
     }
 
@@ -116,15 +121,28 @@ public class Value {
     }
 
     /**
-     * Returns all functions that wrapp the value in the correct order.
+     * Returns the FxSQL representaiton of all functions that wrap the value in the correct order.
      *
-     * @return all functions that wrapp the value.
+     * @return the FxSQL representaiton of all functions that wrap the value.
      */
-    public String[] getFunctions() {
-        if (arFunctions==null) {
-            return new String[0];
+    public List<String> getSqlFunctions() {
+        final List<String> result = new ArrayList<String>(getFunctions().size());
+        for (FxSQLFunction function: getFunctions()) {
+            result.add(function.getSqlName());
         }
-        return arFunctions.toArray(new String[arFunctions.size()]);
+        return result;
+    }
+
+    /**
+     * Returns all functions that wrap the value in the correct order.
+     *
+     * @return all functions that wrap the value.
+     */
+    public List<FxSQLFunction> getFunctions() {
+        if (functions == null) {
+            return new ArrayList<FxSQLFunction>(0);
+        }
+        return Collections.unmodifiableList(functions);
     }
 
     /**
@@ -133,10 +151,10 @@ public class Value {
      * @return the functions start
      */
     public String getFunctionsStart() {
-        if (arFunctions==null) return "";
+        if (functions ==null) return "";
         String result = "";
-        for (String fct:arFunctions) {
-            result+=fct+"(";
+        for (FxSQLFunction fct: functions) {
+            result+=fct.getSqlName()+"(";
         }
         return result;
     }
@@ -147,10 +165,10 @@ public class Value {
      * @return the functions start
      */
     public String getFunctionsEnd() {
-        if (arFunctions==null) return "";
+        if (functions ==null) return "";
         String result = "";
         //noinspection ForLoopReplaceableByForEach
-        for (int i=0;i<arFunctions.size();i++) {
+        for (int i=0;i< functions.size();i++) {
             result+=")";
         }
         return result;
@@ -162,7 +180,7 @@ public class Value {
      * @return true if the vlaue is wrapped by at least one function.
      */
     public boolean hasFunction() {
-        return (arFunctions!=null && arFunctions.size()>0);
+        return (functions !=null && functions.size()>0);
     }
 
     /**
