@@ -315,6 +315,15 @@ public class EJBLookup {
     }
 
     /**
+     * Lookup of the HistoryTrackerEngine EJB.
+     *
+     * @return a reference to the HistoryTrackerEngine EJB
+     */
+    public static HistoryTrackerEngine getHistoryTrackerEngine() {
+        return getEngine(HistoryTrackerEngine.class);
+    }
+
+    /**
      * Get a reference of the transaction manager
      *
      * @return TransactionManager

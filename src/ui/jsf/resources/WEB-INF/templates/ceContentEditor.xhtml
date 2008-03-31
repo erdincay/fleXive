@@ -59,8 +59,54 @@
                         <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='compare'?'':'compare'}" target="#{srcEditor.infoPanelState}"/>
                         <span class="infoPanelButton">#{fxMessageBean['Content.field.versionCompare']}</span>
                     </a4j:commandLink>
+                    <a4j:commandLink reRender="infoPanel" rendered="#{fxMapBean.types[srcEditor.type].trackHistory}">
+                        <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='history'?'':'history'}" target="#{srcEditor.infoPanelState}"/>
+                        <span class="infoPanelButton">#{fxMessageBean['Content.field.history']}</span>
+                    </a4j:commandLink>
                     <ui:fragment rendered="#{srcEditor.infoPanelState=='version'}">
                         <span class="infoPanel"><adm:ceVersionInfo versionInfo="#{srcEditor.versionInfo}"/></span>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{srcEditor.infoPanelState=='history'}">
+                        <span class="infoPanel">
+                            #{fxMessageBean['Content.label.history.info']}
+                            <table class="historyTable">
+                                <tr>
+                                    <th>#{fxMessageBean['Content.field.history.dateTime']}</th>
+                                    <th>#{fxMessageBean['Content.field.history.version']}</th>
+                                    <th>#{fxMessageBean['Content.field.history.account']}</th>
+                                    <th>#{fxMessageBean['Content.field.history.host']}</th>
+                                    <th>#{fxMessageBean['Content.field.history.application']}</th>
+                                </tr>
+                                <tr>
+                                    <th>&nbsp;</th>
+                                    <th class="action" colspan="4">#{fxMessageBean['Content.field.history.action']}</th>
+                                </tr>
+                            <ui:repeat var="entry" value="#{srcEditor.historyEntries}">
+                                <tr>
+                                    <td nowrap="nowrap">
+                                        #{fxMapBean.dateTime[entry.timestp]}
+                                    </td>
+                                    <td>
+                                        #{entry.contentVersion}
+                                    </td>
+                                    <td>
+                                        #{entry.loginName}
+                                    </td>
+                                    <td>
+                                        #{entry.host}
+                                    </td>
+                                    <td>
+                                        #{entry.application}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;</td>
+                                    <td class="action" colspan="4">#{entry.message}</td>
+                                </tr>
+                            </ui:repeat>
+
+                            </table>
+                        </span>
                     </ui:fragment>
                     <ui:fragment rendered="#{srcEditor.infoPanelState=='compare'}">
                         <span class="infoPanel">

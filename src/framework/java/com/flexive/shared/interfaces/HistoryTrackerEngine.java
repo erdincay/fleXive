@@ -33,10 +33,12 @@
  ***************************************************************/
 package com.flexive.shared.interfaces;
 
+import com.flexive.shared.FxHistory;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.structure.FxType;
 
 import javax.ejb.Remote;
+import java.util.List;
 
 /**
  * History tracker service
@@ -49,7 +51,7 @@ public interface HistoryTrackerEngine {
     /**
      * Write a history entry
      *
-     * @param key key of the message (history. ...)
+     * @param key  key of the message (history. ...)
      * @param args arguments needed by the key
      */
     void track(String key, Object... args);
@@ -58,7 +60,7 @@ public interface HistoryTrackerEngine {
      * Write a history entry for a type
      *
      * @param type affected type
-     * @param key key of the message (history. ...)
+     * @param key  key of the message (history. ...)
      * @param args arguments needed by the key
      */
     void track(FxType type, String key, Object... args);
@@ -67,9 +69,20 @@ public interface HistoryTrackerEngine {
      * Write a history entry for a content instance
      *
      * @param type affected type
-     * @param pk affected content
-     * @param key key of the message (history. ...)
+     * @param data (optional) data
+     * @param pk   affected content
+     * @param key  key of the message (history. ...)
      * @param args arguments needed by the key
      */
-    void track(FxType type, FxPK pk, String key, Object... args);
+    void track(FxType type, FxPK pk, String data, String key, Object... args);
+
+    /**
+     * Get a list of entries for a content identified by its id.
+     * If no content with this id exists, an empty list is returned.
+     *
+     * @param contentId requested content id
+     * @return date ordered list of entries for the requested content
+     */
+    List<FxHistory> getContentEntries(long contentId);
+
 }

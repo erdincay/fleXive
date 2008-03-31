@@ -161,25 +161,27 @@ public interface ContentStorage {
      * Remove a content instance and all its versions, will throw an
      * Exception if it is referenced from other contents.
      *
-     * @param con an open and valid connection
-     * @param pk  primary key
+     * @param con  an open and valid connection
+     * @param type FxType
+     * @param pk   primary key
      * @throws com.flexive.shared.exceptions.FxRemoveException
      *          on errors
      */
-    void contentRemove(Connection con, FxPK pk) throws FxRemoveException;
+    void contentRemove(Connection con, FxType type, FxPK pk) throws FxRemoveException;
 
     /**
      * Remove a content's version, will throw an
      * Exception if it is referenced from other contents.
      * If the content consists only of this specific version the whole content is removed
      *
-     * @param con an open and valid connection
-     * @param pk  primary key for a distinct version
-     * @throws com.flexive.shared.exceptions.FxRemoveException
-     *                             on errors
+     * @param con  an open and valid connection
+     * @param type FxType
+     * @param pk   primary key for a distinct version @throws com.flexive.shared.exceptions.FxRemoveException
+     *             on errors
      * @throws FxNotFoundException on errors
+     * @throws FxRemoveException on errors
      */
-    void contentRemoveVersion(Connection con, FxPK pk) throws FxRemoveException, FxNotFoundException;
+    void contentRemoveVersion(Connection con, FxType type, FxPK pk) throws FxRemoveException, FxNotFoundException;
 
     /**
      * Remove all instances of the given type.

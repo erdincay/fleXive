@@ -61,8 +61,8 @@ import javax.ejb.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Content Engine implementation
@@ -253,7 +253,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
     public FxContentContainer loadContainer(long id) throws FxApplicationException {
         FxContentVersionInfo vi = getContentVersionInfo(new FxPK(id));
         List<FxContent> contents = new ArrayList<FxContent>(vi.getVersionCount());
-        for( int ver: vi.getVersions())
+        for (int ver : vi.getVersions())
             contents.add(load(new FxPK(id, ver)));
         return new FxContentContainer(vi, contents);
     }
@@ -506,7 +506,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
 
             //scripting before start
             //type scripting
-            scripts = env.getType(typeId).getScriptMapping(FxScriptEvent.BeforeContentRemove);
+            scripts = type.getScriptMapping(FxScriptEvent.BeforeContentRemove);
             if (scripts != null)
                 for (long script : scripts) {
                     if (binding == null)
@@ -528,7 +528,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                 }
             }
             //scripting before end
-            storage.contentRemove(con, pk);
+            storage.contentRemove(con, type, pk);
             //scripting after start
             //assignment scripting
             if (type.hasScriptedAssignments()) {
@@ -542,7 +542,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                 }
             }
             //type scripting
-            scripts = env.getType(typeId).getScriptMapping(FxScriptEvent.AfterContentRemove);
+            scripts = type.getScriptMapping(FxScriptEvent.AfterContentRemove);
             if (scripts != null)
                 for (long script : scripts) {
                     if (binding == null)
@@ -580,12 +580,13 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             con = Database.getDbConnection();
             //security check start
             FxContentSecurityInfo si = StorageManager.getContentStorage(pk.getStorageMode()).getContentSecurityInfo(con, pk);
+            FxType type = CacheAdmin.getEnvironment().getType(si.getTypeId());
             FxPermissionUtils.checkMandatorExistance(si.getMandatorId());
-            FxPermissionUtils.checkTypeAvailable(si.getTypeId(), false);
+            FxPermissionUtils.checkTypeAvailable(type.getId(), false);
             FxPermissionUtils.checkPermission(FxContext.get().getTicket(), ACL.Permission.DELETE, si, true);
             //security check end
 
-            storage.contentRemoveVersion(con, pk);
+            storage.contentRemoveVersion(con, type, pk);
         } catch (FxNotFoundException e) {
             ctx.setRollbackOnly();
             throw e;
@@ -620,10 +621,10 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             if (CacheAdmin.getEnvironment().getType(typeId).getScriptMapping(FxScriptEvent.AfterContentRemove) != null)
                 scriptsAfter = CacheAdmin.getEnvironment().getType(typeId).getScriptMapping(FxScriptEvent.AfterContentRemove);
             List<FxPK> pks = null;
-            if (scriptsBefore != null || scriptsAfter != null || !ticket.isGlobalSupervisor()) {
+            if (scriptsBefore != null || scriptsAfter != null || !ticket.isGlobalSupervisor() || type.isTrackHistory()) {
                 binding = new FxScriptBinding();
+                pks = storage.getPKsForType(con, type, false);
                 if (!ticket.isGlobalSupervisor() || scriptsBefore != null) {
-                    pks = storage.getPKsForType(con, type, false);
                     for (FxPK pk : pks) {
                         //security check start
                         FxContentSecurityInfo si = storage.getContentSecurityInfo(con, pk);
@@ -680,6 +681,11 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                     }
                     //scripting after end
                 }
+            }
+            if( type.isTrackHistory() ) {
+                HistoryTrackerEngine trackerEngine = EJBLookup.getHistoryTrackerEngine();
+                for(FxPK pk: pks)
+                    trackerEngine.track(type, pk, null, "history.content.removed");
             }
             return removed;
         } catch (FxNotFoundException e) {

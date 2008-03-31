@@ -239,3 +239,26 @@
     margin: 1px;
     padding: 2px;
 }
+
+table.historyTable {
+    border: 1px solid #CCCCCC;
+    border-spacing: 0 0;
+    width: 540px;
+    margin: 5px;
+}
+
+table.historyTable TR TH {
+    text-align: left;
+    font-weight: bold;
+}
+
+table.historyTable TR TH.action {
+    text-align: center;
+    background: #EFEFEF none repeat scroll 0;
+    border: 1px 1px 1px 0 solid;
+}
+
+table.historyTable TR TD.action {
+    background: #EFEFEF none repeat scroll 0;
+    border: 1px 1px 1px 0 solid;
+}

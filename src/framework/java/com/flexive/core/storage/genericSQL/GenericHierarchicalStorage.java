@@ -36,6 +36,7 @@ package com.flexive.core.storage.genericSQL;
 import com.flexive.core.DatabaseConst;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.LifeCycleInfoImpl;
+import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.extractor.ExtractedData;
@@ -44,6 +45,7 @@ import com.flexive.shared.*;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.content.*;
 import com.flexive.shared.exceptions.*;
+import com.flexive.shared.interfaces.HistoryTrackerEngine;
 import com.flexive.shared.interfaces.ScriptingEngine;
 import com.flexive.shared.interfaces.SequencerEngine;
 import com.flexive.shared.media.FxMediaEngine;
@@ -60,6 +62,7 @@ import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
 import com.flexive.shared.workflow.Workflow;
 import com.flexive.stream.ServerLocation;
+import com.thoughtworks.xstream.XStream;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -297,13 +300,15 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             checkUniqueConstraints(con, env, sql, pk, content.getTypeId());
             content.resolveBinaryPreview();
             updateContentBinaryEntry(con, pk, content.getBinaryPreviewId(), content.getBinaryPreviewACL());
-        } catch (FxNotFoundException e) {
-            throw new FxCreateException(e);
-        } catch (FxDbException e) {
-            throw new FxCreateException(e);
-        } catch (FxUpdateException e) {
-            throw new FxCreateException(e);
+            FxType type = env.getType(content.getTypeId());
+            if (type.isTrackHistory())
+                EJBLookup.getHistoryTrackerEngine().track(type, pk, ConversionEngine.getXStream().toXML(content),
+                        "history.content.created");
         } catch (FxApplicationException e) {
+            if (e instanceof FxCreateException)
+                throw (FxCreateException) e;
+            if (e instanceof FxInvalidParameterException)
+                throw (FxInvalidParameterException) e;
             throw new FxCreateException(e);
         }
         return pk;
@@ -373,19 +378,17 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         FxPK pk;
         try {
             int new_version = getContentVersionInfo(con, content.getPk().getId()).getMaxVersion() + 1;
-            updateStepDependencies(con, content.getPk().getId(), new_version, env, content.getStepId());
+            updateStepDependencies(con, content.getPk().getId(), new_version, env, env.getType(content.getTypeId()), content.getStepId());
             pk = createMainEntry(con, content.getPk().getId(), new_version, content);
             if (sql == null)
                 sql = new StringBuilder(2000);
             createDetailEntries(con, env, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
             checkUniqueConstraints(con, env, sql, pk, content.getTypeId());
-        } catch (FxNotFoundException e) {
-            throw new FxCreateException(e);
-        } catch (FxDbException e) {
-            throw new FxCreateException(e);
-        } catch (FxUpdateException e) {
-            throw new FxCreateException(e);
         } catch (FxApplicationException e) {
+            if (e instanceof FxCreateException)
+                throw (FxCreateException) e;
+            if (e instanceof FxInvalidParameterException)
+                throw (FxInvalidParameterException) e;
             throw new FxCreateException(e);
         }
 
@@ -394,6 +397,19 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } catch (FxUpdateException e) {
             throw new FxCreateException(e);
         }
+
+        FxType type = env.getType(content.getTypeId());
+        if (type.isTrackHistory()) {
+            try {
+                sql.setLength(0);
+                EJBLookup.getHistoryTrackerEngine().track(type, pk,
+                        ConversionEngine.getXStream().toXML(contentLoad(con, pk, env, sql)),
+                        "history.content.created.version", pk.getVersion());
+            } catch (FxApplicationException e) {
+                LOG.error(e);
+            }
+        }
+
         return pk;
     }
 
@@ -404,18 +420,37 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @param id            content id
      * @param ignoreVersion the version to ignore on changes (=current version)
      * @param env           FxEnvironment
-     * @param stepId        the step id
-     * @throws FxNotFoundException on errors
+     * @param type          FxType
+     * @param stepId        the step id @throws FxNotFoundException on errors
      * @throws FxUpdateException   on errors
+     * @throws FxNotFoundException on errors
      */
-    protected void updateStepDependencies(Connection con, long id, int ignoreVersion, FxEnvironment env, long stepId) throws FxNotFoundException, FxUpdateException {
+    protected void updateStepDependencies(Connection con, long id, int ignoreVersion, FxEnvironment env, FxType type, long stepId) throws FxNotFoundException, FxUpdateException {
         Step step = env.getStep(stepId);
         StepDefinition stepDef = env.getStepDefinition(step.getStepDefinitionId());
         if (stepDef.isUnique()) {
             Step fallBackStep = env.getStepByDefinition(step.getWorkflowId(), stepDef.getUniqueTargetId());
-            updateStepDependencies(con, id, ignoreVersion, env, fallBackStep.getId()); //handle chained unique steps recursively
+            updateStepDependencies(con, id, ignoreVersion, env, type, fallBackStep.getId()); //handle chained unique steps recursively
             PreparedStatement ps = null;
             try {
+                if (type.isTrackHistory()) {
+                    ps = con.prepareStatement("SELECT VER FROM " + TBL_CONTENT + " WHERE STEP=? AND ID=? AND VER<>?");
+                    ps.setLong(1, stepId);
+                    ps.setLong(2, id);
+                    ps.setInt(3, ignoreVersion);
+                    ResultSet rs = ps.executeQuery();
+                    HistoryTrackerEngine tracker = null;
+                    String orgStep = null, newStep = null;
+                    while (rs != null && rs.next()) {
+                        if (tracker == null) {
+                            tracker = EJBLookup.getHistoryTrackerEngine();
+                            orgStep = env.getStepDefinition(env.getStep(stepId).getStepDefinitionId()).getName();
+                            newStep = env.getStepDefinition(fallBackStep.getStepDefinitionId()).getName();
+                        }
+                        tracker.track(type, new FxPK(id, rs.getInt(1)), null, "history.content.step.change", orgStep, newStep);
+                    }
+                    ps.close();
+                }
                 ps = con.prepareStatement(CONTENT_STEP_DEPENDENCIES);
                 ps.setLong(1, fallBackStep.getId());
                 ps.setLong(2, stepId);
@@ -1678,6 +1713,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             throw new FxInvalidParameterException("PK", "ex.content.pk.invalid.save", pk);
         FxDelta delta;
         FxContent original;
+        final FxType type = env.getType(content.getTypeId());
         try {
             original = contentLoad(con, content.getPk(), env, sql);
             original.getRootGroup().removeEmptyEntries();
@@ -1695,6 +1731,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         env.getStepDefinition(env.getStep(original.getStepId()).getStepDefinitionId()).getLabel().getBestTranslation(),
                         env.getStepDefinition(env.getStep(content.getStepId()).getStepDefinitionId()).getLabel().getBestTranslation());
             }
+            if (type.isTrackHistory())
+                EJBLookup.getHistoryTrackerEngine().track(type, content.getPk(), null, "history.content.step.change",
+                        env.getStepDefinition(env.getStep(original.getStepId()).getStepDefinitionId()).getName(),
+                        env.getStepDefinition(env.getStep(content.getStepId()).getStepDefinitionId()).getName());
         }
         if (!delta.changes()) {
             if (LOG.isDebugEnabled()) {
@@ -1715,7 +1755,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 //            removeDetailEntriesVersion(con, pk);
 //            createDetailEntries(con, env, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
             //full replace code end
-            boolean checkScripting = env.getType(content.getTypeId()).hasScriptedAssignments();
+            boolean checkScripting = type.hasScriptedAssignments();
             FxScriptBinding binding = null;
             ScriptingEngine scripting = null;
             if (checkScripting) {
@@ -1821,7 +1861,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
             checkUniqueConstraints(con, env, sql, pk, content.getTypeId());
             if (delta.isInternalPropertyChanged()) {
-                updateStepDependencies(con, content.getPk().getId(), content.getPk().getVersion(), env, content.getStepId());
+                updateStepDependencies(con, content.getPk().getId(), content.getPk().getVersion(), env, type, content.getStepId());
                 fixContentVersionStats(con, content.getPk().getId());
             }
             content.resolveBinaryPreview();
@@ -1831,6 +1871,39 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             enableDetailUniqueChecks(con);
             LifeCycleInfoImpl.updateLifeCycleInfo(TBL_CONTENT, "ID", "VER",
                     content.getPk().getId(), content.getPk().getVersion(), false, false);
+
+            if (type.isTrackHistory()) {
+                HistoryTrackerEngine tracker = EJBLookup.getHistoryTrackerEngine();
+                XStream xs = ConversionEngine.getXStream();
+                for (FxDelta.FxDeltaChange add : delta.getAdds())
+                    tracker.track(type, pk,
+                            add.getNewData().isGroup() ? null :
+                                    xs.toXML(((FxPropertyData) add.getNewData()).getValue()),
+                            "history.content.data.add", add.getXPath());
+                for (FxDelta.FxDeltaChange remove : delta.getRemoves())
+                    tracker.track(type, pk,
+                            remove.getOriginalData().isGroup() ? null :
+                                    xs.toXML(((FxPropertyData) remove.getOriginalData()).getValue()),
+                            "history.content.data.removed", remove.getXPath());
+                for (FxDelta.FxDeltaChange update : delta.getUpdates()) {
+                    if (update.isPositionChangeOnly())
+                        tracker.track(type, pk,
+                                null, "history.content.data.update.posOnly", update.getXPath(),
+                                update.getOriginalData().getPos(), update.getNewData().getPos());
+                    else if (update.isPositionChange())
+                        tracker.track(type, pk,
+                                update.getNewData().isGroup() ? null :
+                                        xs.toXML(((FxPropertyData) update.getNewData()).getValue()),
+                                "history.content.data.update.pos", update.getXPath(),
+                                update.getOriginalData().getPos(), update.getNewData().getPos());
+                    else
+                        tracker.track(type, pk,
+                                update.getNewData().isGroup() ? null :
+                                        xs.toXML(((FxPropertyData) update.getNewData()).getValue()),
+                                "history.content.data.update", update.getXPath());
+
+                }
+            }
         } catch (FxCreateException e) {
             throw new FxUpdateException(e);
         } catch (FxApplicationException e) {
@@ -2050,7 +2123,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     /**
      * {@inheritDoc}
      */
-    public void contentRemove(Connection con, FxPK pk) throws FxRemoveException {
+    public void contentRemove(Connection con, FxType type, FxPK pk) throws FxRemoveException {
         PreparedStatement ps = null;
         try {
             //sync with tree
@@ -2100,12 +2173,14 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     //ignore
                 }
         }
+        if (type.isTrackHistory())
+            EJBLookup.getHistoryTrackerEngine().track(type, pk, null, "history.content.removed");
     }
 
     /**
      * {@inheritDoc}
      */
-    public void contentRemoveVersion(Connection con, FxPK pk) throws FxRemoveException, FxNotFoundException {
+    public void contentRemoveVersion(Connection con, FxType type, FxPK pk) throws FxRemoveException, FxNotFoundException {
         FxContentVersionInfo cvi = getContentVersionInfo(con, pk.getId());
         if (!cvi.containsVersion(pk))
             return;
@@ -2152,6 +2227,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     //ignore
                 }
         }
+        if (type.isTrackHistory())
+            EJBLookup.getHistoryTrackerEngine().track(type, pk, null, "history.content.removed.version", ver);
     }
 
     /**

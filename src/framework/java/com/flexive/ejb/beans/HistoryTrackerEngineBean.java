@@ -36,6 +36,7 @@ package com.flexive.ejb.beans;
 import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.TBL_HISTORY;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxHistory;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.content.FxPK;
@@ -50,6 +51,9 @@ import org.apache.commons.logging.LogFactory;
 import javax.ejb.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * History tracker service
@@ -63,18 +67,23 @@ public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTr
     private static transient Log LOG = LogFactory.getLog(HistoryTrackerEngineBean.class);
 
     private static final String HISTORY_INSERT = "INSERT INTO " + TBL_HISTORY +
-            //1       2        3       4          5           6          7       8           9
+            //1       2         3       4          5           6          7       8           9
             "(ACCOUNT,LOGINNAME,TIMESTP,ACTION_KEY,ACTION_ARGS,EN_MESSAGE,SESSION,APPLICATION,REMOTEHOST," +
-            //10    11       12   13
-            "TYPEID,TYPENAME,PKID,PKVER)VALUES" +
-            "(?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            //10    11       12   13    14
+            "TYPEID,TYPENAME,PKID,PKVER,DATA)VALUES" +
+            "(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+    //                                                   1       2         3       4          5           6
+    private static final String HISTORY_SELECT = "SELECT ACCOUNT,LOGINNAME,TIMESTP,ACTION_KEY,ACTION_ARGS,APPLICATION," +
+            //7         8      9    10    11
+            "REMOTEHOST,TYPEID,PKID,PKVER,DATA FROM " + TBL_HISTORY;
 
     /**
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public void track(String key, Object... args) {
-        track(null, null, key, args);
+        track(null, null, null, key, args);
     }
 
     /**
@@ -82,14 +91,14 @@ public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTr
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public void track(FxType type, String key, Object... args) {
-        track(type, null, key, args);
+        track(type, null, null, key, args);
     }
 
     /**
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public void track(FxType type, FxPK pk, String key, Object... args) {
+    public void track(FxType type, FxPK pk, String data, String key, Object... args) {
         Connection con = null;
         PreparedStatement ps = null;
         try {
@@ -111,25 +120,55 @@ public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTr
             ps.setString(7, (si.getSessionId() == null ? "<unknown>" : si.getSessionId()));
             ps.setString(8, (si.getApplicationId() == null ? "<unknown>" : si.getApplicationId()));
             ps.setString(9, (si.getRemoteHost() == null ? "<unknown>" : si.getRemoteHost()));
-            if( type != null ) {
+            if (type != null) {
                 ps.setLong(10, type.getId());
                 ps.setString(11, type.getName());
             } else {
                 ps.setNull(10, java.sql.Types.NUMERIC);
                 ps.setNull(11, java.sql.Types.VARCHAR);
             }
-            if( pk != null ) {
+            if (pk != null) {
                 ps.setLong(12, pk.getId());
                 ps.setInt(13, pk.getVersion());
             } else {
                 ps.setNull(12, java.sql.Types.NUMERIC);
                 ps.setNull(13, java.sql.Types.NUMERIC);
             }
+            if (data != null)
+                ps.setString(14, data);
+            else
+                ps.setNull(14, java.sql.Types.VARCHAR);
             ps.executeUpdate();
         } catch (Exception ex) {
             LOG.error(ex.getMessage());
         } finally {
             Database.closeObjects(HistoryTrackerEngineBean.class, con, ps);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public List<FxHistory> getContentEntries(long contentId) {
+        List<FxHistory> ret = new ArrayList<FxHistory>(100);
+        Connection con = null;
+        PreparedStatement ps = null;
+        try {
+            con = Database.getDbConnection();
+            ps = con.prepareStatement(HISTORY_SELECT + " WHERE PKID=? ORDER BY TIMESTP");
+            ps.setLong(1, contentId);
+            ResultSet rs = ps.executeQuery();
+            boolean loadData = FxContext.get().getTicket().isGlobalSupervisor();
+            while (rs != null && rs.next())
+                ret.add(new FxHistory(rs.getLong(3), rs.getLong(1), rs.getString(2), rs.getString(4), rs.getString(5).split("\\|"),
+                        rs.getLong(8), rs.getLong(9), rs.getInt(10), rs.getString(6), rs.getString(7),
+                        loadData ? rs.getString(11) : "No permission to load to data!"
+                ));
+        } catch (Exception ex) {
+            LOG.error(ex.getMessage());
+        } finally {
+            Database.closeObjects(HistoryTrackerEngineBean.class, con, ps);
+        }
+        return ret;
     }
 }

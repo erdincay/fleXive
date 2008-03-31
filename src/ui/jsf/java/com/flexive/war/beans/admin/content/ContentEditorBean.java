@@ -102,6 +102,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
     private String editorActionXpath;
     protected boolean isDummy;
     private String infoPanelState;
+    private List<FxHistory> historyEntries;
     private int compareSourceVersion;
     private int compareDestinationVersion;
 
@@ -142,7 +143,14 @@ public class ContentEditorBean implements ActionBean, Serializable {
         } else {
             return new ArrayList<FxDelta.FxDeltaChange>(0);
         }
+    }
 
+    public List<FxHistory> getHistoryEntries() {
+        if( historyEntries != null || !"history".equals(infoPanelState))
+            return historyEntries;
+        System.out.println("==== LOADING HISTORY ====");
+        historyEntries = EJBLookup.getHistoryTrackerEngine().getContentEntries(id);
+        return historyEntries;
     }
 
     public int getCompareSourceVersion() {
@@ -599,6 +607,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
                 idGenerator = new CeIdGenerator();
                 addElementOptions = new CeAddElementOptions(this);
                 infoPanelState = null;
+                historyEntries = null;
                 compareSourceVersion = 0;
                 compareDestinationVersion = 0;
                 _initSteps();
@@ -756,6 +765,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
         deleteAble = false;
         versionDeleteAble  = false;
         infoPanelState = null;
+        historyEntries = null;
         compareSourceVersion = 0;
         compareDestinationVersion = 0;
         //return getEditorPage();
