@@ -73,7 +73,7 @@
                     <para>
                         The
                         <code>WHERE</code>
-                        clause support most standard SQL operators for string and numerical comparisons. Here
+                        clause supports most standard SQL operators for string and numerical comparisons. Here
                         we select all contents whose caption starts with "test". Note that string comparisons are case
                         insensitive.
                     </para>
@@ -239,6 +239,78 @@ FROM content co
 WHERE IS CHILD OF 1]]></programlisting>
                 </para>
             </section>
+        </section>
+
+        <section xml:id="css_datetime">
+            <title>Date and Time Functions</title>
+
+            <para>
+                &fxsql; supports date and time functions similar to MySQL for
+                <code>FxDate</code>
+                and
+                <code>FxDateTime</code>
+                properties. They can be used to select or query against a partial date value.
+                For example, this query selects all contents created in March 2008:
+                <programlisting language="sql"><![CDATA[SELECT co.created_at
+FROM content co
+WHERE YEAR(co.created_at) = 2008
+  AND MONTH(co.created_at) = 3]]></programlisting>
+            </para>
+            <para>
+                Date and time functions may be used both in the
+                <code>SELECT</code>
+                and
+                <code>WHERE</code>
+                clauses. When a function is used in a column select, it may also be used
+                for sorting if you specify the column index instead of the name, for example:
+                <programlisting language="sql"><![CDATA[SELECT co.created_at, SECOND(co.created_at)
+FROM content co
+ORDER BY 2]]></programlisting>
+            </para>
+            <table xml:id="css_datetime_functions" class="flexive">
+                <caption>Date and Time functions provided in &fxsql;</caption>
+                <thead>
+                    <tr>
+                        <th>Function</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>YEAR()</td>
+                        <td>Selects the year of a date.</td>
+                    </tr>
+                    <tr>
+                        <td>MONTH()</td>
+                        <td>Selects the month of a date, month 1 is january.</td>
+                    </tr>
+                    <tr>
+                        <td>DAY()</td>
+                        <td>Selects the day of the month of a date.</td>
+                    </tr>
+                    <tr>
+                        <td>HOUR()</td>
+                        <td>Selects the hour. This part is only defined for
+                            <code>FxDateTime</code>
+                            objects.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>MINUTE()</td>
+                        <td>Selects the minute. This part is only defined for
+                            <code>FxDateTime</code>
+                            objects.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>SECOND()</td>
+                        <td>Selects the second. This part is only defined for
+                            <code>FxDateTime</code>
+                            objects.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </section>
 
         <section xml:id="css_selectors">
@@ -743,7 +815,8 @@ WHERE co.id > 0    -- conditions]]></programlisting>
                         <td>Integer</td>
                         <td>21</td>
                         <td>Any integer number. The valid range depends on the property datatype, e.g.
-                        FxNumber (int) or FxLargeNumber (long).</td>
+                            FxNumber (int) or FxLargeNumber (long).
+                        </td>
                         <td>
                             FxNumber, FxLargeNumber, FxSelectOne, FxSelectMany,
                             internal referential datatypes (e.g. ACL, mandator)
@@ -756,7 +829,9 @@ WHERE co.id > 0    -- conditions]]></programlisting>
                         <td>A date value. Note that in current &fxsql; you cannot use a date literal
                             to compare against a DateTime value - you need to write a manual range
                             condition for the given day instead, e.g.:
-                            <code>co.created_at > '2008-03-10 00:00:00.000' AND co.created_at &lt; '2008-03-11 00:00:00.000'</code>
+                            <code>co.created_at > '2008-03-10 00:00:00.000' AND co.created_at &lt; '2008-03-11
+                                00:00:00.000'
+                            </code>
                             to find contents created on 2008/03/10.
                         </td>
                         <td>
@@ -768,7 +843,11 @@ WHERE co.id > 0    -- conditions]]></programlisting>
                         <td>DateTime</td>
                         <td>'2008-03-18 15:23:05.159'</td>
                         <td>
-                            A precise time value with millisecond resolution.
+                            A precise time value with millisecond resolution. Note that millisecond resolution
+                            is currently only supported for the system properties
+                            <code>CREATED_AT</code>
+                            and
+                            <code>MODIFIED_AT</code>. For other properties the millisecond part is always 0.
                         </td>
                         <td>
                             FxDateTime, FxDateTimeRange
@@ -891,7 +970,11 @@ ORDER BY co.created_at DESC]]></programlisting>
                             <para>
                                 Add a condition to the query. This method is overloaded to support both
                                 assignment and property queries, for the actual method signatures please refer
-                                to the &flexiveJavadoc;.
+                                to the &flexiveJavadoc;. If you want to apply a function (e.g.
+                                <code>YEAR(prop)</code>),
+                                you have to use the generic
+                                <code>condition(String, ...)</code>
+                                methods.
                             </para>
                         </listitem>
                     </varlistentry>
