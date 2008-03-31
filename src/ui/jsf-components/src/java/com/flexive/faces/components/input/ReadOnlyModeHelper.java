@@ -80,13 +80,13 @@ class ReadOnlyModeHelper extends RenderHelper {
             if (component.getValueFormatter() != null) {
                 // use custom formatter
                 addOutputComponent(component.getValueFormatter().format(value, value.getBestTranslation(language), outputLanguage));
-            } else if (value instanceof FxReference) {
+            } /*else if (value instanceof FxReference) {
                 // render preview
                 if (language == null || value.getTranslation(language) != null) {
                     final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(component, HtmlGraphicImage.COMPONENT_TYPE);
                     image.setUrl(ThumbnailServlet.getLink(((FxReference) value).getBestTranslation(language), BinaryDescriptor.PreviewSizes.PREVIEW2));
                 }
-            } else if (value instanceof FxBinary && !value.isEmpty()) {
+            } */else if (value instanceof FxBinary && !value.isEmpty()) {
                 // render preview image
                 renderPreviewImage(language);
 /*

@@ -45,8 +45,8 @@ public enum ParameterScope {
     DIVISION(ParameterScope.GLOBAL),
     /** Division parameter (without global configuration fallback) */
     DIVISION_ONLY,
-    /** User parameter (with division and global configuration fallback) */
-    USER(ParameterScope.DIVISION),
+    /** User parameter (with division configuration fallback) */
+    USER(ParameterScope.DIVISION_ONLY),
     /** User parameter (without fallback values) */
     USER_ONLY;
 

@@ -76,6 +76,22 @@ public interface FxResultSet {
     public String[] getColumnNames();
 
     /**
+     * Returns the column label of the given index in the calling user's language.
+     *
+     * @param index the column index (first column is 1)
+     * @return  the column label of the given index in the calling user's language.
+     * @throws ArrayIndexOutOfBoundsException if the given position is not valid
+     */
+    public String getColumnLabel(int index) throws ArrayIndexOutOfBoundsException;
+
+    /**
+     * Returns the column labels in the calling user's language.
+     *
+     * @return  the column labels in the calling user's language.
+     */
+    public String[] getColumnLabels();
+
+    /**
      * Returns all rows.
      *
      * @return the rows

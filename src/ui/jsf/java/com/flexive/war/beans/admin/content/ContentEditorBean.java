@@ -49,8 +49,9 @@ import com.flexive.shared.structure.*;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.tree.FxTreeNodeEdit;
-import com.flexive.shared.value.FxBinary;
-import com.flexive.shared.value.FxString;
+import com.flexive.shared.value.*;
+import com.flexive.shared.value.renderer.FxValueFormatter;
+import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
 import org.apache.commons.lang.StringUtils;
@@ -63,10 +64,7 @@ import javax.faces.model.SelectItem;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Date;
+import java.util.*;
 
 public class ContentEditorBean implements ActionBean, Serializable {
     private static final Log LOG = LogFactory.getLog(ContentEditorBean.class);
@@ -105,6 +103,19 @@ public class ContentEditorBean implements ActionBean, Serializable {
     private List<FxHistory> historyEntries;
     private int compareSourceVersion;
     private int compareDestinationVersion;
+    private Map<FxValue, FxValueFormatter> customValueFormatters;
+
+    /**
+     * A custom FxReference value formatter (applies only to read-only mode)
+     */
+    private static class ReferenceValueFormatter implements FxValueFormatter<ReferencedContent, FxReference> {
+        public String format(FxReference container, ReferencedContent value, FxLanguage outputLanguage) {
+            // render a reference select
+            return "<a href=\"adm/content/contentEditor.jsf?action=editInstance&readOnly=true&id="
+                    + value.getId() + "\">"
+                    + value.getCaption() + "</a>";
+        }
+    }
 
     public List<SelectItem> getCompareVersions() {
         List<SelectItem> items = new ArrayList<SelectItem>(versionInfo == null ? 0 : versionInfo.getVersionCount());
@@ -1154,5 +1165,25 @@ public class ContentEditorBean implements ActionBean, Serializable {
      */
     public void prepareSave() throws FxApplicationException {
         content = getContentEngine().prepareSave(content);
+    }
+
+    /**
+     * Return the value formatter for FxValueInput
+     *
+     * @return  the value formatter for FxValueInput
+     */
+    public Map<FxValue, FxValueFormatter> getValueFormatter() {
+        if (customValueFormatters == null) {
+            customValueFormatters = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<FxValue, FxValueFormatter>() {
+                public FxValueFormatter get(Object key) {
+                    if (key instanceof FxReference) {
+                        return new ReferenceValueFormatter();
+                    } else {
+                        return null;        // use FxValueInput's default formatting
+                    }
+                }
+            });
+        }
+        return customValueFormatters;
     }
 }

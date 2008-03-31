@@ -22,9 +22,10 @@ FxMultiLanguageValueInput.prototype = {
 }
 
 function openReferenceQueryPopup(xpath, updateInputId, formName) {
-    window.open(getBase() + "adm/search/browseReferencesPopup.jsf?xPath=" + xpath + "&inputName="
+    var win = window.open(getBase() + "adm/search/browseReferencesPopup.jsf?xPath=" + xpath + "&inputName="
             + updateInputId + "&formName=" + formName,
             "searchReferences", "scrollbars=yes,width=800,height=600,toolbar=no,menubar=no,location=no");
+    win.focus();
 }
 
 function storeFromFilterTable(filterTableName,destination) {

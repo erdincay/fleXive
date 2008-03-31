@@ -6,7 +6,7 @@ var isQueryEditor = true;
 // Add a query for a structure element of the given type (see StructureTreeWriter for possible values)
 function addQueryNode(id, nodeDocType) {
     if (nodeDocType.indexOf("Assignment") == 0) {
-        addProperty(id);
+        addAssignment(id);
     } else if (nodeDocType == "Type") {
         addTypeQuery(id);
     } else {
@@ -14,9 +14,15 @@ function addQueryNode(id, nodeDocType) {
     }
 }
 
-function addProperty(propertyId) {
+function addPropertyQueryNode(propertyId) {
     var button = document.getElementById("frm:addPropertyButton");
     form["frm:addAssignmentId"].value = propertyId;
+    button.onclick();
+}
+
+function addAssignment(assignmentId) {
+    var button = document.getElementById("frm:addAssignmentButton");
+    form["frm:addAssignmentId"].value = assignmentId;
     button.onclick();
 }
 

@@ -35,7 +35,10 @@ package com.flexive.core.search;
 
 import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.value.FxString;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.search.*;
 import com.flexive.sqlParser.FxStatement;
 import com.flexive.sqlParser.SelectedValue;
@@ -73,6 +76,9 @@ public class FxResultSetImpl implements Serializable, FxResultSet {
     private int totalRowCount;
     private boolean truncated;
     private Map<String, Integer> columnIndexMap;
+
+    // cached properties
+    private transient String[] columnLabels;
 
     private class RowIterator implements Iterator<FxResultRow> {
         int index = 0;
@@ -175,6 +181,46 @@ public class FxResultSetImpl implements Serializable, FxResultSet {
      */
     public int getColumnIndex(String name) {
         return FxSharedUtils.getColumnIndex(columnNames, name);
+    }
+
+    /**
+     * {@inheritDoc} *
+     */
+    public String getColumnLabel(int index) throws ArrayIndexOutOfBoundsException {
+        return getColumnLabels()[index - 1];
+    }
+
+    /**
+     * {@inheritDoc} *
+     */
+    public String[] getColumnLabels() {
+        if (columnLabels == null) {
+            columnLabels = new String[columnNames.length];
+            for (int i = 0; i < columnNames.length; i++) {
+                String name = columnNames[i];
+                if (name.indexOf('(') > 0) {
+                    // strip function calls
+                    name = name.substring(name.lastIndexOf('('), name.indexOf(')'));
+                }
+                if (name.indexOf('.') > 0) {
+                    // strip leading prefix
+                    name = name.substring(name.indexOf('.') + 1);
+                }
+                if (name.indexOf('@') != -1) {
+                    columnLabels[i] = name;     // don't translate virtual properties
+                } else {
+                    FxString label;
+                    try {
+                        label = CacheAdmin.getEnvironment().getAssignment(name).getLabel();
+                    } catch (FxRuntimeException e) {
+                        // assignment not found, try property
+                        label = CacheAdmin.getEnvironment().getProperty(name).getLabel();
+                    }
+                    columnLabels[i] = label.getBestTranslation();
+                }
+            }
+        }
+        return columnLabels.clone();
     }
 
     /**

@@ -77,9 +77,12 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
                 return load(-1, viewType, location);
             } else if (typeId == -1) {
                 // if no global default is defined, use hardcoded default settings
-                preferences = new ResultPreferences(Arrays.asList(new ResultColumnInfo(Table.CONTENT, "@pk", null)),
-                        Arrays.asList(new ResultOrderByInfo(Table.CONTENT, "@pk", null, SortDirection.ASCENDING)),
-                        25, 100);
+                preferences = new ResultPreferences(Arrays.asList(
+                        new ResultColumnInfo(Table.CONTENT, "@pk", null),
+                        new ResultColumnInfo(Table.CONTENT, "caption", null)
+                ), Arrays.asList(
+                        new ResultOrderByInfo(Table.CONTENT, "@pk", null, SortDirection.ASCENDING)
+                ), 25, 100);
             } else {
                 throw e;
             }

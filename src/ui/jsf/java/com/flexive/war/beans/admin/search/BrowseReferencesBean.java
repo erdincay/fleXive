@@ -40,6 +40,9 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.search.FxResultSet;
+import com.flexive.shared.search.SortDirection;
+import com.flexive.shared.search.AdminResultLocations;
+import com.flexive.shared.search.ResultViewType;
 import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.structure.FxAssignment;
@@ -78,13 +81,7 @@ public class BrowseReferencesBean implements ActionBean {
             if (StringUtils.isBlank(xPath)) {
                 return null;
             }
-            final FxAssignment fxAssignment = CacheAdmin.getEnvironment().getAssignment(xPath);
-            if (!(fxAssignment instanceof FxPropertyAssignment)) {
-                throw new FxInvalidParameterException("xPath", "ex.browseReferences.assignment.type", LOG,
-                        xPath, fxAssignment).asRuntimeException();
-            }
-            final FxPropertyAssignment assignment = (FxPropertyAssignment) fxAssignment;
-            final FxType referencedType = assignment.getProperty().getReferencedType();
+            final FxType referencedType = getReferencedType();
             if (referencedType == null) {
                 throw new FxInvalidParameterException("xPath", "ex.browseReferences.assignment.reference", LOG,
                         xPath).asRuntimeException();
@@ -94,11 +91,22 @@ public class BrowseReferencesBean implements ActionBean {
         return dataModel;
     }
 
+    public FxType getReferencedType() {
+        final FxAssignment fxAssignment = CacheAdmin.getEnvironment().getAssignment(xPath);
+        if (!(fxAssignment instanceof FxPropertyAssignment)) {
+            throw new FxInvalidParameterException("xPath", "ex.browseReferences.assignment.type", LOG,
+                    xPath, fxAssignment).asRuntimeException();
+        }
+        return ((FxPropertyAssignment) fxAssignment).getProperty().getReferencedType();
+    }
+
     private SqlQueryBuilder getQueryBuilder(FxType referencedType) {
-        final SqlQueryBuilder builder = new SqlQueryBuilder()
+        final SqlQueryBuilder builder = new SqlQueryBuilder(AdminResultLocations.BROWSE_REFERENCES, ResultViewType.LIST)
                 .select("@pk", "caption", "*")
-                .filterType(referencedType.getId())
-                .condition("TYPEDEF", PropertyValueComparator.EQ, referencedType.getId());
+                .type(referencedType.getId());
+        if (StringUtils.isNotBlank(query)) {
+            builder.condition("*", PropertyValueComparator.EQ, query.trim());
+        }
         return builder;
     }
 

@@ -12,16 +12,6 @@
 
 <ui:composition template="/adm/contentTemplate.xhtml">
 
-    <ui:define name="head">
-        <style type="text/css">
-        <!--
-            body {
-                /* Disable default content style */
-                overflow: scroll;
-            }
-        //-->
-        </style>
-    </ui:define>
     <ui:define name="body">
         <a4j:form id="frm">
             <c:if test="#{empty browseReferencesBean.parseRequestParameters}"> </c:if>
@@ -41,8 +31,14 @@
                     }
                     return false;
                 }
+                // set body style in JS (subtle firefox problem with <style> elements, CDATA and text/html encoding) 
+                document.body.style.overflow = "scroll";
             //-->
             </script>
+
+            <adm:infoBox>
+                <h:outputText value="#{fxMessageBean['BrowseReferences.label.info,#{browseReferencesBean.referencedType.label}']}" escape="false"/>
+            </adm:infoBox>
 
             <a4j:region>
                 <h:inputHidden value="#{browseReferencesBean.inputName}"/>
@@ -65,7 +61,7 @@
                 </table>
 
                 <a4j:outputPanel id="results">
-                    <h:dataTable var="row" value="#{browseReferencesBean.dataModel}">
+                    <h:dataTable var="row" value="#{browseReferencesBean.dataModel}" styleClass="dojoTable">
                         <h:column>
                             <img id="loadrow#{index}" src="thumbnail/pk#{row[0]}/s1" alt="#{row[1]}" title="#{row[1]}"
                                  border="0" onclick="return selectReference('#{row[0]}', '#{fxSystemBean.escapeForJavaScript[row[1]]}')" style="cursor: pointer"/>
@@ -73,12 +69,19 @@
                         <c:forEach var="name" varStatus="status" begin="2"
                                    items="#{browseReferencesBean.dataModel.result.columnNames}">
                             <h:column>
+                                <f:facet name="header">
+                                    #{browseReferencesBean.dataModel.result.columnLabels[status.index]}
+                                </f:facet>
                                 <span style="cursor: pointer" onclick="return selectReference('#{row[0]}', '#{fxSystemBean.escapeForJavaScript[row[1]]}')">
                                     #{row[status.index]}
                                 </span>
                             </h:column>
                         </c:forEach>
                     </h:dataTable>
+                    <ui:fragment rendered="#{browseReferencesBean.dataModel.rowCount == 0}">
+                        <br/>
+                        #{fxMessageBean['BrowseReferences.label.empty']}
+                    </ui:fragment>
                 </a4j:outputPanel>
             </a4j:region>
 

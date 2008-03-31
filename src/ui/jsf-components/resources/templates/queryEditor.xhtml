@@ -92,6 +92,11 @@ Parameters:
 
     <div style="display:none">
         <!-- Add property command link -->
+        <a4j:commandButton id="addAssignmentButton"
+                       reRender="queryEditor"
+                       actionListener="#{fxQueryEditorBean.addAssignment}"
+                       eventsQueue="queryEditor"
+                       value="Add property"/>
         <a4j:commandButton id="addPropertyButton"
                        reRender="queryEditor"
                        actionListener="#{fxQueryEditorBean.addProperty}"

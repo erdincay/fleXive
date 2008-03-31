@@ -46,7 +46,9 @@ public enum AdminResultLocations implements ResultLocation {
     /** Main admin search results */
     ADMIN,
     /** Default location to be used when no location is specified */
-    DEFAULT;
+    DEFAULT,
+    /** Browse references popup (FxReference input helper) */
+    BROWSE_REFERENCES;
 
     /** {@inheritDoc} */
     public FxString getLabel() {

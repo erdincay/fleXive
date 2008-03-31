@@ -459,7 +459,7 @@ public class SqlSearch {
                     // Wildcard, replace it with the correct values
                     for (ResultColumnInfo nfo : prefs.getSelectedColumns()) {
                         Property newProp = new Property(wildcard.getTableAlias(), nfo.getPropertyName(), nfo.getSuffix());
-                        SelectedValue newSel = new SelectedValue(newProp, nfo.getLabel(this.environment));
+                        SelectedValue newSel = new SelectedValue(newProp, nfo.getColumnName());
                         selValues.add(newSel);
                     }
                 } else {

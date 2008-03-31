@@ -95,6 +95,20 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    public String getColumnLabel(int index) throws ArrayIndexOutOfBoundsException {
+        return "";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String[] getColumnLabels() {
+        return new String[0];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public String getColumnName(int pos) throws ArrayIndexOutOfBoundsException {
         return "";
     }

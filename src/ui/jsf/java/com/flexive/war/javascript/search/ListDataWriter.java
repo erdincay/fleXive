@@ -64,7 +64,7 @@ class ListDataWriter extends TableDataWriter {
         List<Column> result = new ArrayList<Column>(rs.getColumnCount());
         for (int i = SqlQueryBuilder.COL_USERPROPS; i < rs.getColumnCount(); i++) {
             // TODO determine correct data type
-            result.add(new Column(rs.getColumnName(i + 1), null, i));
+            result.add(new Column(rs.getColumnLabel(i + 1), null, i));
         }
         return result;
     }

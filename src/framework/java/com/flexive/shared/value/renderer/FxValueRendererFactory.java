@@ -137,6 +137,18 @@ public class FxValueRendererFactory {
     }
 
     /**
+     * FxReference formatter
+     */
+    private static class FxReferenceFormatter implements FxValueFormatter<ReferencedContent, FxReference> {
+        public String format(FxReference container, ReferencedContent translation, FxLanguage outputLanguage) {
+            if (translation == null) {
+                return getEmptyMessage(outputLanguage);
+            }
+            return StringUtils.defaultIfEmpty(translation.getCaption(), translation.toString());
+        }
+    }
+
+    /**
      * Generic object formatter for all types that are not explicitly covered.
      */
     private static class ObjectFormatter implements FxValueFormatter {
@@ -153,6 +165,7 @@ public class FxValueRendererFactory {
         addRenderer(DEFAULT, FxFloat.class, new FxFloatFormatter());
         addRenderer(DEFAULT, FxSelectOne.class, new FxSelectOneFormatter());
         addRenderer(DEFAULT, FxSelectMany.class, new FxSelectManyFormatter());
+        addRenderer(DEFAULT, FxReference.class, new FxReferenceFormatter());
         //noinspection unchecked
         addRenderer(DEFAULT, FxValue.class, new ObjectFormatter());
     }

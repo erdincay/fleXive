@@ -47,7 +47,6 @@ import com.flexive.shared.search.ResultViewType;
 import com.flexive.shared.search.query.*;
 import static com.flexive.shared.search.query.QueryRootNode.Type.CONTENTSEARCH;
 import com.flexive.shared.structure.FxAssignment;
-import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
@@ -122,6 +121,12 @@ public class QueryEditorBean implements Serializable {
             } else if ("assignmentSearch".equals(action)) {
                 setRootNode(new QueryRootNode(QueryRootNode.Type.CONTENTSEARCH, location));
                 addAssignmentId = FxJsfUtils.getLongParameter("assignmentId", -1);
+                if (addAssignmentId != -1) {
+                    addAssignment(null);
+                }
+            } else if ("propertySearch".equals(action)) {
+                setRootNode(new QueryRootNode(QueryRootNode.Type.CONTENTSEARCH, location));
+                addAssignmentId = FxJsfUtils.getLongParameter("propertyId", -1);
                 if (addAssignmentId != -1) {
                     addProperty(null);
                 }
@@ -256,8 +261,17 @@ public class QueryEditorBean implements Serializable {
      *
      * @param event the action event
      */
-    public void addProperty(ActionEvent event) {
+    public void addAssignment(ActionEvent event) {
         addQueryNode(new AssignmentValueNode(getRootNode().getNewId(), addAssignmentId));
+    }
+
+    /**
+     * Add the property stored in addAssignmentId to the node identified
+     * by addAssignmentNodeId.
+     * @param event the action event
+     */
+    public void addProperty(ActionEvent event) {
+        addQueryNode(new PropertyValueNode(getRootNode().getNewId(), addAssignmentId));
     }
 
     /**
