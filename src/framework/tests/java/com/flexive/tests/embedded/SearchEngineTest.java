@@ -236,7 +236,6 @@ public class SearchEngineTest {
      */
     @Test(dataProvider = "testProperties")
     public void genericSelectTest(String name, FxDataType dataType) throws FxApplicationException {
-        // also select virtual properties to make sure they don't mess up the result
         final FxResultSet result = new SqlQueryBuilder().select(
                 getTestPropertyName(name)).type(TEST_TYPE).getResult();
         assert result.getRowCount() == testInstanceCount : "Expected all test instances to be returned, got "
@@ -247,6 +246,28 @@ public class SearchEngineTest {
                     : "Invalid class returned for datatype " + dataType + ": " + row.getFxValue(idx).getClass() + " instead of " + dataType.getValueClass();
             assert row.getFxValue(idx).getXPathName() != null : "XPath was null";
             assert row.getFxValue(idx).getXPathName().equalsIgnoreCase(getTestPropertyName(name)) : "Invalid property name: " + row.getFxValue(idx).getXPathName() + ", expected: " + getTestPropertyName(name);
+        }
+    }
+
+    /**
+     * Tests the selection of null values.
+     *
+     * @param name     the base property name
+     * @param dataType the datatype of the property
+     * @throws com.flexive.shared.exceptions.FxApplicationException
+     *          on search engine errors
+     */
+    @Test(dataProvider = "testProperties")
+    public void genericSelectNullTest(String name, FxDataType dataType) throws FxApplicationException {
+        final FxResultSet result = new SqlQueryBuilder().select(getTestPropertyName(name))
+                .condition("typedef", PropertyValueComparator.NE, CacheAdmin.getEnvironment().getType(TEST_TYPE).getId())
+                .getResult();
+        assert result.getRowCount() > 0;
+        final int idx = 1;
+        for (FxResultRow row: result.getResultRows()) {
+            assert dataType.getValueClass().isAssignableFrom(row.getFxValue(idx).getClass())
+                    : "Invalid class returned for datatype " + dataType + ": " + row.getFxValue(idx).getClass() + " instead of " + dataType.getValueClass();
+            assert row.getFxValue(idx).isEmpty() : "Value should be empty: " + row.getFxValue(idx); 
         }
     }
 

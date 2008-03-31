@@ -447,6 +447,7 @@ public class PropertyEntry {
                     result = new FxSelectMany(multilanguage, FxLanguage.SYSTEM_ID, valueMany);
                     break;
                 case Binary:
+                    rs.getLong(pos);  // read blob reference to trigger correct handling of null values below
                     result = new FxBinary(multilanguage, FxLanguage.SYSTEM_ID, new BinaryDescriptor());
                     break;
                 default:

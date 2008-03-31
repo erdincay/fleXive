@@ -136,6 +136,9 @@ class ReadOnlyModeHelper extends RenderHelper {
     }
 
     private void renderPreviewImage(FxLanguage language) {
+        if (value.isEmpty()) {
+            return;
+        }
         final BinaryDescriptor descriptor = ((FxBinary) value).getTranslation(language);
         if (component.isDisableLytebox()) {
             addImageComponent(component, descriptor);
