@@ -86,7 +86,7 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
         this.list = list;
         this.parentItemId = parentItemId;
         this.parentItem = null;
-        this.label = label==null? new FxString(""):label;
+        this.label = label == null ? new FxString("") : label;
         this.data = data;
         if (this.data == null)
             this.data = "";
@@ -95,7 +95,7 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
         this.iconVer = iconVer;
         this.iconQuality = iconQuality;
         this.lifeCycleInfo = lifeCycleInfo;
-        if( list != null )
+        if (list != null)
             list.getItemMap().put(this.id, this);
     }
 
@@ -103,13 +103,13 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
      * Creates a new in-memory select list item. Not suitable for select lists that should
      * be stored in the database.
      *
-     * @param id    the new select list item ID, possible some external ID
-     * @param list  the select list this item should be added to
-     * @param parentItemId  the parent item ID, if any
-     * @param label the select item label
+     * @param id           the new select list item ID, possible some external ID
+     * @param list         the select list this item should be added to
+     * @param parentItemId the parent item ID, if any
+     * @param label        the select item label
      */
     public FxSelectListItem(long id, FxSelectList list, long parentItemId, FxString label) {
-        this(id, null, list, parentItemId,  label, null, null, -1, -1, -1, null);
+        this(id, null, list, parentItemId, label, null, null, -1, -1, -1, null);
     }
 
     /**
@@ -270,9 +270,23 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
      */
     @Override
     public String toString() {
-        if( getData() != null )
+        if (getData() != null)
             return getData();
         else
             return super.toString();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int hashCode() {
+        return (int) id;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean equals(Object obj) {
+        return obj instanceof FxSelectListItem && this.id == ((FxSelectListItem) obj).id;
     }
 }
