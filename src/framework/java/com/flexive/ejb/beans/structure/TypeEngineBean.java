@@ -162,10 +162,31 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             ps.setLong(20, type.getWorkflow().getId());
             ps.executeUpdate();
             Database.storeFxString(type.getDescription(), con, TBL_STRUCT_TYPES, "DESCRIPTION", "ID", newId);
-            //TODO: relations
+
             StructureLoader.reload(con);
             FxType thisType = CacheAdmin.getEnvironment().getType(newId);
             htracker.track(thisType, "history.type.create", type.getName(), newId);
+
+            //store relations
+            ps.close();
+            if (type.getAddedRelations().size() > 0) {
+                ps = con.prepareStatement("INSERT INTO "+TBL_STRUCT_TYPERELATIONS+" (TYPEDEF,TYPESRC,TYPEDST,MAXSRC,MAXDST)VALUES(?,?,?,?,?)");
+                ps.setLong(1, thisType.getId());
+                for (FxTypeRelation rel : type.getAddedRelations()) {
+                    if (rel.getSource().isRelation())
+                        throw new FxInvalidParameterException("ex.structure.type.relation.wrongTarget", type.getName(), rel.getSource().getName());
+                    if (rel.getDestination().isRelation())
+                        throw new FxInvalidParameterException("ex.structure.type.relation.wrongTarget", type.getName(), rel.getDestination().getName());
+                    ps.setLong(2, rel.getSource().getId());
+                    ps.setLong(3, rel.getDestination().getId());
+                    ps.setLong(4, rel.getMaxSource());
+                    ps.setLong(5, rel.getMaxDestination());
+                    ps.addBatch();
+                    htracker.track(thisType, "history.type.create.relation.add", type.getName(), rel.getSource().getName(),
+                            rel.getMaxSource(), rel.getDestination().getName(), rel.getMaxDestination());
+                }
+                ps.executeBatch();
+            }
 
             if (type.getParent() == null) {
                 for (FxPropertyAssignment spa : environment.getSystemInternalRootPropertyAssignments()) {

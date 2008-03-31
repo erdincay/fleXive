@@ -40,6 +40,8 @@ import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.exceptions.FxNoAccessException;
+import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.flexive.shared.exceptions.FxEntryInUseException;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Role;
@@ -361,6 +363,11 @@ public class SelectListBean {
         setSelectListName(selectList.getName());
         setItemACL(selectList.getNewItemACL());
 
+        itemLabel = new FxString("");
+        itemACL = selectList.getNewItemACL();
+        itemData = null;
+        itemColor = FxFormatUtils.DEFAULT_COLOR;
+
         return showEditSelectList();
     }
 
@@ -378,6 +385,10 @@ public class SelectListBean {
         try {
             //check if the user has permission
             if (getMayDeleteItems()) {
+                //check if the item is used in content instances
+                if (EJBLookup.getSelectListEngine().getSelectListItemInstanceCount(listItemId) != 0)
+                    throw new FxEntryInUseException("ex.selectlist.item.itemInUse", selectList.getItem(listItemId).getLabel());
+
                 selectList.removeItem(listItemId);
                 FxJsfUtils.resetFaceletsComponent("frm");
             }
@@ -393,6 +404,14 @@ public class SelectListBean {
         try {
             //check if the user has permission
             if (getMayCreateItems().get(getSelectListId())) {
+                //check for empty label
+                if (itemLabel.getIsEmpty())
+                    throw new FxInvalidParameterException("Label", "ex.selectlist.item.label.empty");
+
+                //convert color string to uppercase
+                if (itemColor!= null)
+                    itemColor=itemColor.toUpperCase();
+                
                 new FxSelectListItemEdit(itemACL, selectList, itemLabel, itemData, FxFormatUtils.processColorString("Color",itemColor));
                 itemLabel = new FxString("");
                 itemACL = selectList.getNewItemACL();

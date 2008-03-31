@@ -83,4 +83,15 @@ public interface SelectListEngine {
      */
     void remove(FxSelectListItem item) throws FxApplicationException;
 
+
+     /**
+     * Get the number of content instances using a given select list item,
+     *
+     * @param selectListItemId id of the requested select list item
+     * @return number of content instances using the select list item
+     * @throws com.flexive.shared.exceptions.FxApplicationException
+     *          on errors
+     */
+    long getSelectListItemInstanceCount(long selectListItemId) throws FxApplicationException;
+
 }

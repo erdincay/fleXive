@@ -43,10 +43,7 @@ import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.cache.FxCacheException;
-import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.exceptions.FxCreateException;
-import com.flexive.shared.exceptions.FxInvalidParameterException;
-import com.flexive.shared.exceptions.FxNoAccessException;
+import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.SelectListEngine;
 import com.flexive.shared.interfaces.SelectListEngineLocal;
 import com.flexive.shared.interfaces.SequencerEngine;
@@ -64,6 +61,7 @@ import javax.ejb.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.ResultSet;
 import java.util.List;
 
 /**
@@ -487,7 +485,33 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
     private void checkValidItemParameters(FxSelectListItemEdit item) throws FxInvalidParameterException {
         //TODO: codeme!
         if (item.getLabel() == null || item.getLabel().getIsEmpty()) {
-            throw new FxInvalidParameterException("Label", "ex.selectlist.item.label.emty");
+            throw new FxInvalidParameterException("Label", "ex.selectlist.item.label.empty");
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public long getSelectListItemInstanceCount(long selectListItemId) throws FxApplicationException {
+        Connection con = null;
+        PreparedStatement ps = null;
+        long count = 0;
+        try {
+            con = Database.getDbConnection();
+            ps = con.prepareStatement("SELECT COUNT(*) FROM " + TBL_CONTENT_DATA + " WHERE FSELECT=?");
+            ps.setLong(1, selectListItemId);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            count = rs.getLong(1);
+            ps.close();
+        }
+        catch (SQLException e) {
+            throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage());
+        }
+        finally {
+            if (con != null)
+                Database.closeObjects(SelectListEngineBean.class, con, ps);
+        }
+        return count;
     }
 }
