@@ -41,8 +41,12 @@
             <ui:fragment rendered="#{not typeEditorBean.editMode}">
                 <adm:tab label="#{fxMessageBean['TypeEditor.tab.typeEditor.readonly']}" active="true" id="tab1ro"/>
             </ui:fragment>
-            <ui:fragment rendered="#{not typeEditorBean.type.new}">
+            <ui:fragment rendered="#{not typeEditorBean.type.new and typeEditorBean.editMode}">
                 <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor']} [#{typeEditorBean.scriptCount}]" active="false" id="tab2"
+                        bean="#{typeEditorBean}" action="showTypeScriptEditor"/>
+            </ui:fragment>
+            <ui:fragment rendered="#{not typeEditorBean.type.new and not typeEditorBean.editMode}">
+                <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor.readonly']} [#{typeEditorBean.scriptCount}]" active="false" id="tab2ro"
                         bean="#{typeEditorBean}" action="showTypeScriptEditor"/>
             </ui:fragment>
              <fx:formRow labelKey="TypeEditor.label.name" id="name">
