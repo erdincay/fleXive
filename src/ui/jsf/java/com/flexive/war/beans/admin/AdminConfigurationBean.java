@@ -13,6 +13,7 @@ import com.flexive.faces.messages.FxFacesMsgErr;
  */
 public class AdminConfigurationBean {
     private Boolean treeLiveEnabled;
+    private String exportURLprefix;
 
     /**
      * Updates the system configuration. Since all getters should use the actual configuration
@@ -21,6 +22,7 @@ public class AdminConfigurationBean {
     public void updateConfiguration() {
         try {
             EJBLookup.getConfigurationEngine().putInSource(SystemParameters.TREE_LIVE_ENABLED, isTreeLiveEnabled());
+            EJBLookup.getDivisionConfigurationEngine().put(SystemParameters.EXPORT_DOWNLOAD_URL, getExportURLprefix());
         } catch (FxApplicationException e) {
             new FxFacesMsgErr(e).addToContext();
         }
@@ -42,5 +44,15 @@ public class AdminConfigurationBean {
 
     public void setTreeLiveEnabled(boolean treeLiveEnabled) {
         this.treeLiveEnabled = treeLiveEnabled;
+    }
+
+    public String getExportURLprefix() throws FxApplicationException {
+        if( exportURLprefix == null )
+            return EJBLookup.getDivisionConfigurationEngine().get(SystemParameters.EXPORT_DOWNLOAD_URL);
+        return exportURLprefix;
+    }
+
+    public void setExportURLprefix(String exportURLprefix) {
+        this.exportURLprefix = exportURLprefix;
     }
 }

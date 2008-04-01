@@ -40,6 +40,7 @@ import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.*;
 import com.flexive.shared.content.*;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.TreeEngine;
 import com.flexive.shared.security.ACL;
@@ -51,9 +52,9 @@ import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.tree.FxTreeNodeEdit;
 import com.flexive.shared.value.*;
 import com.flexive.shared.value.renderer.FxValueFormatter;
-import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
+import com.flexive.core.conversion.ConversionEngine;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -156,10 +157,36 @@ public class ContentEditorBean implements ActionBean, Serializable {
         }
     }
 
+    /**
+     * Is the current user allowed to export the content that is being edited?
+     *
+     * @return if current user is allowed to export the content
+     */
+    public boolean isMayExport() {
+        try {
+            return FxPermissionUtils.checkPermission(FxContext.get().getTicket(), content.getLifeCycleInfo().getCreatorId(),
+                    ACL.Permission.EXPORT, environment.getType(content.getTypeId()),
+                    environment.getStep(content.getStepId()).getAclId(), content.getAclId(), false);
+        } catch (FxNoAccessException e) {
+            LOG.warn(e);
+            return false;
+        }
+    }
+
+    /**
+     * Get the content as XML
+     *
+     * @return content as XML
+     */
+    public String getExportData() {
+        if( "export".equals(infoPanelState))
+            return ConversionEngine.getXStream().toXML(content);
+        return "";
+    }
+
     public List<FxHistory> getHistoryEntries() {
         if( historyEntries != null || !"history".equals(infoPanelState))
             return historyEntries;
-        System.out.println("==== LOADING HISTORY ====");
         historyEntries = EJBLookup.getHistoryTrackerEngine().getContentEntries(id);
         return historyEntries;
     }

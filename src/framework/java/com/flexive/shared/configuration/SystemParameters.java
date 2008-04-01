@@ -35,7 +35,7 @@ package com.flexive.shared.configuration;
 
 import com.flexive.shared.search.ResultPreferences;
 import com.flexive.shared.search.query.QueryRootNode;
-import static com.flexive.shared.configuration.SystemParameterPaths.DIVISION_TREE;
+import static com.flexive.shared.configuration.SystemParameterPaths.*;
 
 /**
  * Flexive system parameter definitions.
@@ -96,4 +96,8 @@ public class SystemParameters {
      * Whether the live tree should be enabled in the backend content tree
      */
     public static final Parameter<Boolean> TREE_LIVE_ENABLED = ParameterFactory.newInstance(Boolean.class, DIVISION_TREE, "liveTree", true);
+    /**
+     * Download URL for exports
+     */
+    public static final Parameter<String> EXPORT_DOWNLOAD_URL = ParameterFactory.newInstance(String.class, DIVISION_CONFIG, "exportURL", "http://localhost:8080/flexive/download");
 }

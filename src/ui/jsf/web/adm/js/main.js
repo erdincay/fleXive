@@ -632,3 +632,4 @@ function reloadBriefcases() {
         getNavFrameWnd().reload();
     }
 }
+

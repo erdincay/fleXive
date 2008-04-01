@@ -62,6 +62,7 @@ public class FxContentConverter implements Converter {
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext ctx) {
         FxContent co = ((FxContent) o).copy(); //remove/compacts will be performed -> so work on a copy
         FxEnvironment env = CacheAdmin.getEnvironment();
+        ctx.put("pk", co.getPk());
         try {
             writer.addAttribute("pk", co.getPk().toString());
             writer.addAttribute("type", env.getType(co.getTypeId()).getName());

@@ -57,6 +57,9 @@ public enum SystemParameterPaths implements ParameterPath {
     /** Path for storing division specific stuff */
     DIVISION_RUNONCE_CONFIG("/division/runonce", ParameterScope.DIVISION_ONLY),
 
+    /** generic division specific parameters */
+    DIVISION_CONFIG("/division/config", ParameterScope.DIVISION_ONLY),
+
     /** Path for storing user search queries */
     USER_QUERIES_CONTENT("/search/content", ParameterScope.USER),
     /** Search result preferences */

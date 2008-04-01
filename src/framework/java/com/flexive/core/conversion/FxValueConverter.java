@@ -34,15 +34,24 @@
 package com.flexive.core.conversion;
 
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxConversionException;
 import com.flexive.shared.interfaces.LanguageEngine;
+import com.flexive.shared.value.BinaryDescriptor;
+import com.flexive.shared.value.FxBinary;
 import com.flexive.shared.value.FxValue;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import org.apache.commons.codec.binary.Base64;
+
+import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 /**
  * XStream converter for FxValues
@@ -57,6 +66,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class FxValueConverter implements Converter {
+    private String downloadURL = null;
 
     /**
      * {@inheritDoc}
@@ -73,7 +83,34 @@ public class FxValueConverter implements Converter {
                 for (long lang : value.getTranslatedLanguages()) {
                     writer.startNode("d");
                     writer.addAttribute("l", ConversionEngine.getLang(le, lang));
-                    writer.setValue(value.getStringValue(value.getTranslation(lang)));
+                    if (value instanceof FxBinary) {
+                        BinaryDescriptor desc = ((FxBinary) value).getTranslation(lang);
+                        writer.addAttribute("fileName", desc.getName());
+                        writer.addAttribute("image", String.valueOf(desc.isImage()));
+
+                        if (desc.getSize() > 500 * 1024 && ctx.get("pk") != null) {
+                            // > 500 KBytes add a download URL
+                            writer.addAttribute("content", "URL");
+                            try {
+                                writer.setValue(getDownloadURL() + "pk" + ctx.get("pk") + "/" + URLEncoder.encode(FxSharedUtils.escapeXPath(value.getXPath()), "UTF-8") + "/" + desc.getName());
+                            } catch (UnsupportedEncodingException e) {
+                                //unlikely to happen since UTF-8 should be available
+                                throw new RuntimeException(e);
+                            }
+                        } else {
+                            //add BASE64 encoded binary data
+                            writer.addAttribute("content", "Base64");
+                            ByteArrayOutputStream bos = new ByteArrayOutputStream((int) desc.getSize());
+                            desc.download(bos);
+                            try {
+                                writer.setValue(new String(Base64.encodeBase64(bos.toByteArray()), "UTF-8"));
+                            } catch (UnsupportedEncodingException e) {
+                                //unlikely to happen since UTF-8 should be available
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    } else
+                        writer.setValue(value.getStringValue(value.getTranslation(lang)));
                     writer.endNode();
                 }
             else
@@ -117,5 +154,23 @@ public class FxValueConverter implements Converter {
      */
     public boolean canConvert(Class aClass) {
         return FxValue.class.isAssignableFrom(aClass);
+    }
+
+    /**
+     * Get the download URL for binaries
+     *
+     * @return download URL for binaries
+     */
+    public String getDownloadURL() {
+        if (downloadURL != null)
+            return downloadURL;
+        try {
+            downloadURL = EJBLookup.getDivisionConfigurationEngine().get(SystemParameters.EXPORT_DOWNLOAD_URL);
+            if (!downloadURL.endsWith("/"))
+                downloadURL = downloadURL + "/";
+            return downloadURL;
+        } catch (FxApplicationException e) {
+            throw e.asRuntimeException();
+        }
     }
 }

@@ -49,6 +49,7 @@
                     </ui:fragment>
                 </ui:repeat>
 
+
                 <ui:fragment rendered="#{!srcEditor.new}">
                 <a4j:outputPanel id="infoPanel">
                     <a4j:commandLink reRender="infoPanel">
@@ -63,6 +64,17 @@
                         <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='history'?'':'history'}" target="#{srcEditor.infoPanelState}"/>
                         <span class="infoPanelButton">#{fxMessageBean['Content.field.history']}</span>
                     </a4j:commandLink>
+                    <a4j:commandLink reRender="infoPanel" rendered="#{srcEditor.mayExport}">
+                        <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='export'?'':'export'}" target="#{srcEditor.infoPanelState}"/>
+                        <span class="infoPanelButton">#{fxMessageBean['Content.field.export']}</span>
+                    </a4j:commandLink>
+                    <ui:fragment rendered="#{srcEditor.infoPanelState=='export'}">
+                        <span class="infoPanel">
+                            Export data:
+                            <a href="" onclick="copy2clipboard(document.getElementById('exportArea').value,'#{fxMessageBean['Global.clipboard.error']}','#{fxMessageBean['Global.clipboard.success']}')">copy</a>
+                            <textarea id="exportArea" readonly="true" wrap="off" rows="10" cols="80">#{srcEditor.exportData}</textarea>
+                        </span>
+                    </ui:fragment>
                     <ui:fragment rendered="#{srcEditor.infoPanelState=='version'}">
                         <span class="infoPanel"><adm:ceVersionInfo versionInfo="#{srcEditor.versionInfo}"/></span>
                     </ui:fragment>

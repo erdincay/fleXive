@@ -1,5 +1,5 @@
 /**
- * Stopes the propagation of the given event.
+ * Stops the propagation of the given event.
  */
 function ignoreEvent(e) {
     if (!e) return;
@@ -130,4 +130,49 @@ function getScrollHeight() {
 
 function escapeQuotes(string) {
     return string.replace("'", "\\'").replace('"', '\\"');
+}
+
+/**
+ * copy cliptext to the OS's clipboard
+ *
+ * @param cliptext text to copy to the clipboard
+ * @param errorMessage error message to display if copying failed (usually a how to enable the clipboard in mozilla/firefox)
+ * @param successMessage message to display in an alert box if copy operation was successful (if present)
+ */
+function copy2clipboard(cliptext, errorMessage, successMessage) {
+    if (window.clipboardData) {
+        window.clipboardData.setData("Text", cliptext);
+    } else if (window.netscape) {
+        try {
+            netscape.security.PrivilegeManager.enablePrivilege('UniversalXPConnect');
+        } catch(ex) {
+            if( errorMessage ) alert(errorMessage); else alert(ex);
+            return false;
+        }
+        var clip = Components.classes['@mozilla.org/widget/clipboard;1'].createInstance(Components.interfaces.nsIClipboard);
+        if (!clip) {
+            if( errorMessage ) alert(errorMessage);
+            return false;
+        }
+        var trans = Components.classes['@mozilla.org/widget/transferable;1'].createInstance(Components.interfaces.nsITransferable);
+        if (!trans) {
+            if( errorMessage ) alert(errorMessage);
+            return false;
+        }
+        trans.addDataFlavor('text/unicode');
+        var str = new Object();
+        var len = new Object();
+        var str = Components.classes["@mozilla.org/supports-string;1"].createInstance(Components.interfaces.nsISupportsString);
+        var copytext = cliptext;
+        str.data = copytext;
+        trans.setTransferData("text/unicode", str, copytext.length * 2);
+        var clipid = Components.interfaces.nsIClipboard;
+        if (!clip) {
+            if( errorMessage ) alert(errorMessage);
+            return false;
+        }
+        clip.setData(trans, null, clipid.kGlobalClipboard);
+    }
+    if( successMessage ) alert(successMessage);
+    return false;
 }
