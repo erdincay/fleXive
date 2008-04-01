@@ -74,7 +74,7 @@ public interface LanguageEngine {
      * @return an array with all available languages
      * @throws FxApplicationException on errors
      */
-    FxLanguage[] loadAvailable() throws FxApplicationException;
+    List<FxLanguage> loadAvailable() throws FxApplicationException;
 
     /**
      * Loads all disabled languages.

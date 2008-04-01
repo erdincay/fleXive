@@ -29,6 +29,12 @@
         <a4j:form id="frm" onmouseover='closeMenu(event,false)' enctype="multipart/form-data">
             <adm:resultTabs activeTab="content"/>
 
+            <ui:fragment rendered="#{!contentEditorBean.readOnly}">
+                <div style="float:right; padding: 5px;">
+                    <fx:fxValueInputLanguageSelect id="updateLanguage"/>
+                </div>
+            </ui:fragment>
+            
             <!-- Include the content editor -->
             <adm:contentEditor srcEditor="#{contentEditorBean}"/>
             <adm:toolbarPluginButtons/>

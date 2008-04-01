@@ -2,24 +2,76 @@
  * Miscellaneous classes and functions used by flexive JSF components.
  */
 
-var FxMultiLanguageValueInput = function(id, baseRowId, rowIds) {
+var fxValueInputList = [];   // a global list of all registered FxValueInput elements on the current page
+
+var FxMultiLanguageValueInput = function(id, baseRowId, rowIds, languageSelectId) {
     this.id = id;
     this.baseRowId = baseRowId;
     this.rowIds = rowIds;
+    this.languageSelectId = languageSelectId;
+    fxValueInputList.push(this);
 };
 
 FxMultiLanguageValueInput.prototype = {
     onLanguageChanged: function(languageSelect) {
-        this.showRow(this.baseRowId + languageSelect.options[languageSelect.selectedIndex].value);
+        this.showLanguage(languageSelect.options[languageSelect.selectedIndex].value);
     },
 
     showRow: function(rowId) {
         for (var i = 0; i < this.rowIds.length; i++) {
-            var enabled = this.rowIds[i] == rowId;
+            var enabled = rowId == null || this.rowIds[i] == rowId;
             document.getElementById(this.rowIds[i]).style.display = enabled ? "block" : "none";
+            // all languages / show language icon for each row
+            document.getElementById(this.rowIds[i] + "_language").style.display = (enabled && rowId == null) ? "block" : "none"; 
         }
+    },
+
+    showLanguage: function(languageId) {
+        // show row for this language
+        this.showRow(languageId >= 0 ? this.baseRowId + languageId : null);
+        // update language select
+        var options = document.getElementById(this.languageSelectId).options
+        for (var i = 0; i < options.length; i++) {
+            options[i].selected = (options[i].value == languageId);
+        }
+    },
+
+    onDefaultLanguageChanged: function(inputCheckbox) {
+        if (inputCheckbox.checked) {
+            // uncheck other languages since only one language may be the default
+            var languageCheckboxes = document.getElementsByName(inputCheckbox.name);
+            for (var i = 0; i < languageCheckboxes.length; i++) {
+                if (languageCheckboxes[i] != inputCheckbox) {
+                    languageCheckboxes[i].checked = false;
+                }
+            }
+        }
+    },
+
+    /**
+     * Returns true if the input elements assigned to this object are still present.
+     */
+    isValid: function() {
+        return document.getElementById(this.languageSelectId) != null;
     }
 }
+
+/**
+ * Updates the current language of all multilanguage inputs on the current page.
+ *
+ * @param languageId    the language ID
+ */
+function setLanguageOnAllInputs(languageId) {
+    var newList = [];
+    for (var i = 0; i < fxValueInputList.length; i++) {
+        if (fxValueInputList[i].isValid()) {
+            fxValueInputList[i].showLanguage(languageId);
+            newList.push(fxValueInputList[i]);
+        }
+    }
+    fxValueInputList = newList;     // store new list without defunct inputs
+}
+
 
 function openReferenceQueryPopup(xpath, updateInputId, formName) {
     var win = window.open(getBase() + "adm/search/browseReferencesPopup.jsf?xPath=" + xpath + "&inputName="

@@ -78,6 +78,7 @@ public class FxValueInputRenderer extends Renderer {
     protected static final String CSS_TEXTAREA = "fxValueTextArea";
     protected static final String CSS_TEXTAREA_HTML = "fxValueTextAreaHtml";
     protected static final String CSS_INPUTELEMENTWIDTH = "fxValueInputElementWidth";
+    protected static final String CSS_LANG_ICON = "fxValueInputLanguageIcon";
     private static final String DBG = "fxValueInput: ";
 
     /**
@@ -167,8 +168,14 @@ public class FxValueInputRenderer extends Renderer {
             LOG.debug(DBG + "Decoding value for " + clientId + ", component value=" + value);
         }
         if (value.isMultiLanguage() && !input.isDisableMultiLanguage()) {
-            final int defaultLanguageId = Integer.parseInt((String) parameters.get(clientId + DEFAULT_LANGUAGE));
-            value.setDefaultLanguage(defaultLanguageId, true);
+            // set the FxValue default language
+            final String defaultLanguage = (String) parameters.get(clientId + DEFAULT_LANGUAGE);
+            if (StringUtils.isNotBlank(defaultLanguage)) {
+                final int defaultLanguageId = Integer.parseInt(defaultLanguage);
+                value.setDefaultLanguage(defaultLanguageId, true);
+            } else {
+                value.clearDefaultLanguage();
+            }
             // update all languages
             for (FxLanguage language : getLanguages()) {
                 final String inputId = clientId + INPUT + language.getId();

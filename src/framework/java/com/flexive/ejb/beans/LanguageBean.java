@@ -134,13 +134,14 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings({"unchecked"})
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public FxLanguage[] loadAvailable() throws FxApplicationException {
+    public List<FxLanguage> loadAvailable() throws FxApplicationException {
         try {
-            FxLanguage[] available = (FxLanguage[]) CacheAdmin.getInstance().get(CacheAdmin.LANGUAGES_ALL, "id");
+            List<FxLanguage> available = (List<FxLanguage>) CacheAdmin.getInstance().get(CacheAdmin.LANGUAGES_ALL, "id");
             if (available == null) {
                 loadAll(true, true);
-                available = (FxLanguage[]) CacheAdmin.getInstance().get(CacheAdmin.LANGUAGES_ALL, "id");
+                available = (List<FxLanguage>) CacheAdmin.getInstance().get(CacheAdmin.LANGUAGES_ALL, "id");
                 if (available == null)
                     throw new FxInvalidLanguageException("ex.language.loadFailed");
             }
@@ -163,7 +164,7 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public List<FxLanguage> loadAvailable(boolean excludeSystemLanguage) throws FxApplicationException {
-        FxLanguage[] tmp = loadAvailable();
+        List<FxLanguage> tmp = loadAvailable();
         ArrayList<FxLanguage> result = new ArrayList<FxLanguage>();
         for (FxLanguage lang : tmp) {
             if (excludeSystemLanguage && lang.getId() == 0) continue;
@@ -236,7 +237,7 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
                 alLang.add(lang);
             }
             if (add2cache)
-                cache.put(CacheAdmin.LANGUAGES_ALL, "id", alLang.toArray(new FxLanguage[alLang.size()]));
+                cache.put(CacheAdmin.LANGUAGES_ALL, "id", alLang);
         } catch (SQLException e) {
             LOG.error(e, e);
         } catch (FxCacheException e) {

@@ -34,10 +34,11 @@
 package com.flexive.faces.components.input;
 
 import com.flexive.faces.FxJsfUtils;
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.FxFormatUtils;
-import com.flexive.shared.FxLanguage;
-import com.flexive.shared.XPathElement;
+import com.flexive.faces.beans.UserConfigurationBean;
+import com.flexive.faces.beans.MessageBean;
+import com.flexive.shared.*;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxSelectList;
 import com.flexive.shared.value.*;
@@ -82,7 +83,7 @@ class EditModeHelper extends RenderHelper {
     @Override
     protected void encodeMultiLanguageField() throws IOException {
         final List<FxLanguage> languages = FxValueInputRenderer.getLanguages();
-        ensureDefaultLanguageExists(value, languages);
+        //ensureDefaultLanguageExists(value, languages);
         final String radioName = clientId + FxValueInputRenderer.DEFAULT_LANGUAGE;
 
         final ContainerWriter container = new ContainerWriter();
@@ -101,7 +102,7 @@ class EditModeHelper extends RenderHelper {
             container.getChildren().add(languageContainer);
 
             encodeField(languageContainer, inputId, language);
-            encodeDefaultLanguageRadio(languageContainer, radioName, language);
+            encodeDefaultLanguageRadio(languageContainer, clientId, radioName, language);
         }
 
         final LanguageSelectWriter languageSelect = new LanguageSelectWriter();
@@ -135,13 +136,17 @@ class EditModeHelper extends RenderHelper {
      * Render the default language radiobutton for the given language.
      *
      * @param parent    the parent component
+     * @param clientId  the client ID
      * @param radioName name of the radio input control
      * @param language  the language for which this input should be rendered @throws IOException if a io error occured
      */
-    private void encodeDefaultLanguageRadio(UIComponent parent, final String radioName, final FxLanguage language) {
+    private void encodeDefaultLanguageRadio(LanguageContainerWriter parent, String clientId, final String radioName, final FxLanguage language) {
         final DefaultLanguageRadioWriter radio = new DefaultLanguageRadioWriter();
         radio.setRadioName(radioName);
         radio.setLanguageId(language.getId());
+        radio.setContainerId(parent.getContainerId());
+        radio.setLanguageCode(language.getIso2digit());
+        radio.setInputClientId(clientId);
         parent.getChildren().add(radio);
     }
 
@@ -509,16 +514,24 @@ class EditModeHelper extends RenderHelper {
             final String languageSelectId = inputClientId + FxValueInputRenderer.LANG_SELECT;
             writer.startElement("select", null);
             writer.writeAttribute("name", languageSelectId, null);
+            writer.writeAttribute("id", languageSelectId, null);
             writer.writeAttribute("class", "languages", null);
             writer.writeAttribute("onchange", "document.getElementById('" + inputClientId + "')."
                     + JS_OBJECT + ".onLanguageChanged(this)", null);
+            // use the current page input language 
+            final long inputLanguageId = FxJsfUtils.getManagedBean(UserConfigurationBean.class).getInputLanguageId();
+            writer.startElement("option", null);
+            writer.writeAttribute("value", "-2", null);
+            writer.writeText(MessageBean.getInstance().getMessage("FxValueInput.language.all.short"), null);
+            writer.endElement("option");
             for (FxLanguage language : FxValueInputRenderer.getLanguages()) {
                 writer.startElement("option", null);
                 writer.writeAttribute("value", language.getId(), null);
-                if (language.getId() == getInputValue().getDefaultLanguage()) {
+                if ((inputLanguageId == -1 && language.getId() == getInputValue().getDefaultLanguage())
+                    || (inputLanguageId == language.getId())) {
                     writer.writeAttribute("selected", "selected", null);
                 }
-                writer.writeText(language.getLabel().getBestTranslation(), null);
+                writer.writeText(language.getIso2digit(), null);
                 writer.endElement("option");
             }
             writer.endElement("select");
@@ -532,11 +545,13 @@ class EditModeHelper extends RenderHelper {
                     "<script language=\"javascript\">\n"
                             + "<!--\n"
                             + "  document.getElementById(''{0}'')." + JS_OBJECT
-                            + " = new FxMultiLanguageValueInput(''{0}'', ''{1}'', [{2}]);\n"
+                            + " = new FxMultiLanguageValueInput(''{0}'', ''{1}'', [{2}], ''{3}'');\n"
+                            + "  document.getElementById(''{3}'').onchange();\n"
                             + "//-->\n"
                             + "</script>",
                     inputClientId, inputClientId + FxValueInputRenderer.LANG_CONTAINER,
-                    StringUtils.join(rowIds.iterator(), ',')
+                    StringUtils.join(rowIds.iterator(), ','),
+                    languageSelectId
             ));
         }
 
@@ -563,6 +578,8 @@ class EditModeHelper extends RenderHelper {
     public static class DefaultLanguageRadioWriter extends DeferredInputWriter {
         private long languageId;
         private String radioName;
+        private String containerId;
+        private String languageCode;
 
         public long getLanguageId() {
             return languageId;
@@ -570,6 +587,14 @@ class EditModeHelper extends RenderHelper {
 
         public void setLanguageId(long languageId) {
             this.languageId = languageId;
+        }
+
+        public String getLanguageCode() {
+            return languageCode;
+        }
+
+        public void setLanguageCode(String languageCode) {
+            this.languageCode = languageCode;
         }
 
         public String getRadioName() {
@@ -580,26 +605,45 @@ class EditModeHelper extends RenderHelper {
             this.radioName = radioName;
         }
 
+        public String getContainerId() {
+            return containerId;
+        }
+
+        public void setContainerId(String containerId) {
+            this.containerId = containerId;
+        }
+
         @Override
         public void encodeBegin(FacesContext facesContext) throws IOException {
             final ResponseWriter writer = facesContext.getResponseWriter();
+
+            writer.startElement("div", null);
+            writer.writeAttribute("id", containerId + "_language", null);
+            writer.writeAttribute("class", FxValueInputRenderer.CSS_LANG_ICON, null);
+            writer.writeText(languageCode, null);
+            writer.endElement("div");
+
             writer.startElement("input", null);
-            writer.writeAttribute("type", "radio", null);
+            writer.writeAttribute("type", "checkbox", null);
             writer.writeAttribute("name", radioName, null);
             writer.writeAttribute("value", languageId, null);
             writer.writeAttribute("class", "fxValueDefaultLanguageRadio", null);
             if (languageId == getInputValue().getDefaultLanguage()) {
                 writer.writeAttribute("checked", "true", null);
             }
+            writer.writeAttribute("onchange", "document.getElementById('" + inputClientId
+                    + "')." + JS_OBJECT + ".onDefaultLanguageChanged(this)", null);
             writer.endElement("input");
         }
 
         @Override
         public Object saveState(FacesContext context) {
-            final Object[] state = new Object[3];
+            final Object[] state = new Object[5];
             state[0] = super.saveState(context);
             state[1] = languageId;
             state[2] = radioName;
+            state[3] = containerId;
+            state[4] = languageCode;
             return state;
         }
 
@@ -609,6 +653,8 @@ class EditModeHelper extends RenderHelper {
             super.restoreState(context, state[0]);
             languageId = (Long) state[1];
             radioName = (String) state[2];
+            containerId = (String) state[3];
+            languageCode = (String) state[4];
         }
     }
 

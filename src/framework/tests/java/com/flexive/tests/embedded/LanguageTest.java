@@ -41,6 +41,7 @@ import org.testng.annotations.Test;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.List;
 
 /**
  * Tests for the language beans.
@@ -58,7 +59,7 @@ public class LanguageTest {
     @Test
     public void testLanguageLabels() throws FxApplicationException {
         LanguageEngine languageBean = EJBLookup.getLanguageEngine();
-        FxLanguage[] languages = languageBean.loadAvailable();
+        List<FxLanguage> languages = languageBean.loadAvailable();
         Set<String> defaultTranslations = new HashSet<String>();
         for (FxLanguage language : languages) {
             String name = language.getLabel().getDefaultTranslation();

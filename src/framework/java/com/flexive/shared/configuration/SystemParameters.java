@@ -100,4 +100,8 @@ public class SystemParameters {
      * Download URL for exports
      */
     public static final Parameter<String> EXPORT_DOWNLOAD_URL = ParameterFactory.newInstance(String.class, DIVISION_CONFIG, "exportURL", "http://localhost:8080/flexive/download");
+    /**
+     * The default input language for multilingual input fields
+     */
+    public static final Parameter<Long> USER_DEFAULTINPUTLANGUAGE = ParameterFactory.newInstance(Long.class, SystemParameterPaths.USER_CONFIG, "input.defaultLanguage", -1L);
 }

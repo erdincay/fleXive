@@ -80,6 +80,7 @@ public class SelectBean implements Serializable {
     private List<SelectItem> globalUserGroups = null;
     private List<SelectItem> globalUserGroupsNonSystem = null;
     private List<SelectItem> languages = null;
+    private List<SelectItem> languagesById = null;
     private List<SelectItem> mandators = null;
     private List<SelectItem> mandatorsForEdit = null;
     private List<SelectItem> mandatorsForEditNoEmpty = null;
@@ -388,8 +389,8 @@ public class SelectBean implements Serializable {
         if (languages == null) {
             final UserTicket ticket = FxJsfUtils.getRequest().getUserTicket();
             try {
-                FxLanguage list[] = EJBLookup.getLanguageEngine().loadAvailable();
-                ArrayList<SelectItem> result = new ArrayList<SelectItem>(list.length);
+                List<FxLanguage> list = EJBLookup.getLanguageEngine().loadAvailable();
+                ArrayList<SelectItem> result = new ArrayList<SelectItem>(list.size());
                 for (FxLanguage item : list) {
                     String label = item.getLabel().getBestTranslation(ticket);
                     result.add(new SelectItem(item, label/*label*/, label/*description*/));
@@ -401,6 +402,18 @@ public class SelectBean implements Serializable {
             }
         }
         return languages;
+    }
+
+    public List<SelectItem> getLanguagesById() {
+        if (languagesById == null) {
+            try {
+                languagesById = FxJsfUtils.asIdSelectListWithLabel(EJBLookup.getLanguageEngine().loadAvailable());
+            } catch (FxApplicationException e) {
+                new FxFacesMsgErr(e).addToContext();
+                languagesById = new ArrayList<SelectItem>(0);
+            }
+        }
+        return languagesById;
     }
 
     /**

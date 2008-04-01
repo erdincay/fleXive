@@ -18,9 +18,7 @@ div.fxValueInputRow {
 }
 
 input.fxValueDefaultLanguageRadio {
-    position: absolute;
-    right: 0;
-    top: 0;
+    float: left;
 }
 
 div.FxHTMLInput div.fxValueInputRow {
@@ -28,7 +26,7 @@ div.FxHTMLInput div.fxValueInputRow {
 }
 
 input.fxValueTextInput, textarea.fxValueTextArea, select.fxValueSelectInput, .fxValueInputElementWidth {
-    width: 195px;
+    width: 170px;
 }
 
 input.fxValueTextInput, textarea.fxValueTextArea, select.fxValueSelectInput {
@@ -61,6 +59,13 @@ div.fxValueInput select.languages {
     right: 0;
     top: 0;
     width: 70px;
+}
+
+div.fxValueInputLanguageIcon {
+    float: left;
+    margin-left: 3px;
+    width: 15px;
+    display: none;
 }
 
 /* Query editor */

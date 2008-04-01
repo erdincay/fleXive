@@ -34,7 +34,10 @@
         <tag-name>downloadLink</tag-name>
         <source>../templates/downloadLink.xhtml</source>
     </tag>
-
+    <tag>
+        <tag-name>fxValueInputLanguageSelect</tag-name>
+        <source>../templates/fxValueInputLanguageSelect.xhtml</source>
+    </tag>
     <tag>
         <tag-name>includes</tag-name>
         <component>

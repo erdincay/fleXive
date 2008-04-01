@@ -37,10 +37,8 @@ package com.flexive.war.beans.admin.main;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.FxArrayUtils;
-import com.flexive.shared.FxContext;
-import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.*;
+import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.AccountEngine;
@@ -83,6 +81,9 @@ public class AccountBean {
     private Hashtable<String, ArrayList<Account>> listCache;
     private static final String ID_CACHE_KEY = AccountBean.class + "_id";
     private FxContent contactData;
+
+    // user preferences fields
+    private FxLanguage defaultInputLanguage;
 
 
     public List<Role> getRoles() {
@@ -245,6 +246,17 @@ public class AccountBean {
         this.validatedFilterCheckbox = validatedFilterCheckbox;
     }
 
+    public FxLanguage getDefaultInputLanguage() throws FxApplicationException {
+        if (defaultInputLanguage == null && account != null) {
+            return account.getLanguage();
+        }
+        return defaultInputLanguage;
+    }
+
+    public void setDefaultInputLanguage(FxLanguage defaultInputLanguage) {
+        this.defaultInputLanguage = defaultInputLanguage;
+    }
+
     /**
      * Returns all user groups defined for the current mandator that are not flagged as system.
      *
@@ -277,8 +289,9 @@ public class AccountBean {
      * @return dummy
      */
     public String getEditUserPref() {
-        if( this.account == null || this.account.getId() == -1)
+        if( this.account == null || this.account.getId() == -1) {
             editUserPref();
+        }
         return null;
     }
 
@@ -369,10 +382,11 @@ public class AccountBean {
             this.roles = accountInterface.getRoleList(this.accountIdFiler, AccountEngine.RoleLoadMode.ALL);
             this.groups = accountInterface.getGroupList(this.accountIdFiler);
             this.contactData = null;
-            try{
-                this.contactData = EJBLookup.getContentEngine().load(this.account.getContactData());
-            } catch(NullPointerException ex){
-                // ...
+            this.contactData = EJBLookup.getContentEngine().load(this.account.getContactData());
+            // load configuration parameters
+            final long inputLanguageId = EJBLookup.getConfigurationEngine().get(SystemParameters.USER_DEFAULTINPUTLANGUAGE);
+            if (inputLanguageId != -1) {
+                this.defaultInputLanguage = EJBLookup.getLanguageEngine().load(inputLanguageId);
             }
             return "userEdit";
         } catch (Throwable t) {
@@ -415,6 +429,11 @@ public class AccountBean {
                 newPasswd = password;
             }
             accountInterface.updateUser(this.accountIdFiler, newPasswd, null, null, this.account.getEmail(), this.account.getLanguage().getId());
+
+            // update user configuration
+            if (getDefaultInputLanguage() != null) {
+                EJBLookup.getUserConfigurationEngine().put(SystemParameters.USER_DEFAULTINPUTLANGUAGE, getDefaultInputLanguage().getId());
+            }
             new FxFacesMsgInfo("User.nfo.settingsSaved").addToContext();
         } catch (FxApplicationException e) {
             new FxFacesMsgErr("User.err.settingsNotSaved").addToContext();

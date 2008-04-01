@@ -64,6 +64,8 @@ public enum SystemParameterPaths implements ParameterPath {
     USER_QUERIES_CONTENT("/search/content", ParameterScope.USER),
     /** Search result preferences */
     USER_RESULT_PREFERENCES("/search/results", ParameterScope.USER),
+    /** Miscellaneous user preferences */
+    USER_CONFIG("/userPreferences", ParameterScope.USER),
 
     /** unit test entry */
     TEST_GLOBAL("/test/global", ParameterScope.GLOBAL),

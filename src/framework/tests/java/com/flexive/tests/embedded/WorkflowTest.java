@@ -395,11 +395,11 @@ public class WorkflowTest {
         try {
             stepDefinitionId = createStepDefinition(null);
             StepDefinition stepDefinition = getEnvironment().getStepDefinition(stepDefinitionId);
-            FxLanguage[] languages = EJBLookup.getLanguageEngine().loadAvailable();
+            List<FxLanguage> languages = EJBLookup.getLanguageEngine().loadAvailable();
             for (FxLanguage language : languages) {
                 stepDefinition.getLabel().setTranslation(language, "Translation " + language);
             }
-            long defaultLanguage = languages[languages.length - 1].getId();
+            long defaultLanguage = languages.get(languages.size() - 1).getId();
             stepDefinition.getLabel().setDefaultLanguage(defaultLanguage);
             stepDefinitionEngine.update(stepDefinition);
             assert getEnvironment().getStepDefinition(stepDefinitionId).getLabel().getDefaultLanguage() == defaultLanguage

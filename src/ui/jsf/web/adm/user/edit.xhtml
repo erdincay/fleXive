@@ -10,15 +10,6 @@
 <body>
 
 <ui:composition template="/adm/contentTemplate.xhtml">
-<ui:define name="head">
-
-    <script type="text/javascript">
-        dojo.require("dojo.widget.SortableTable");
-        function makeIt(){alert("eugos");}
-    </script>
-
-</ui:define>
-
 <ui:define name="body">
     <c:if test="#{empty accountBean.editUserPref}"> </c:if>
 
@@ -26,55 +17,62 @@
 
         <adm:tab label="#{fxMessageBean['User.pref.show,#{accountBean.account.name}']}" active="true" id="tab1"/>
       <!--  <c:if test="#{not empty accountBean.contactData}"> -->
-            <adm:tab label="#{fxMessageBean['User.pref.contactData']}" active="false" id="tab2"
+            <adm:tab labelKey="User.pref.contactData" active="false" id="tab2"
             	bean="#{accountBean}" action="showContactData"/>
       <!--  </c:if>  -->
-        <fx:formRow label="#{fxMessageBean['Account.field.userName']}" id="name" newLine="false">
+        <fx:formRow labelKey="Account.field.userName" id="name" newLine="false">
             <h:inputText id="name" value="#{accountBean.account.name}" readonly="true"/>
             <h:inputHidden value="#{accountBean.accountIdFiler}"/>
             <h:inputHidden value="#{accountBean.account.contactDataId}"/>
         </fx:formRow>
-        <fx:formRow label="#{fxMessageBean['Account.field.loginName']}" id="loginName">
+        <fx:formRow labelKey="Account.field.loginName" id="loginName">
             <h:inputText id="loginName" value="#{accountBean.account.loginName}" readonly="true"/>
         </fx:formRow>
 
         <!-- ============================================ -->
-        <fx:formRow label="#{fxMessageBean['Account.field.password']}" id="password" newLine="false">
-            <h:inputSecret id="password" value="#{accountBean.password}"/>
+        <fx:formRow labelKey="Account.field.password" id="updatePassword" newLine="false">
+            <h:inputSecret id="updatePassword" value="#{accountBean.password}"/>
         </fx:formRow>
-        <fx:formRow label="#{fxMessageBean['Account.field.retypePassword']}" id="passwordConfirm">
+        <fx:formRow labelKey="Account.field.retypePassword" id="passwordConfirm">
             <h:inputSecret id="passwordConfirm" value="#{accountBean.passwordConfirm}"/>
         </fx:formRow>
 
         <!-- ============================================ -->
-        <fx:formRow label="#{fxMessageBean['Account.field.language']}" id="language">
+        <fx:formRow labelKey="Account.field.language" id="language">
             <h:selectOneListbox id="language" value="#{accountBean.account.language}" size="1"
                                 converter="FxLanguageConverter">
                 <f:selectItems value="#{fxSelectBean.languages}" />
             </h:selectOneListbox>
         </fx:formRow>
 
+        <fx:formRow labelKey="Account.field.input.defaultLanguage" id="defaultInputLanguage">
+            <h:selectOneListbox id="defaultInputLanguage" value="#{accountBean.defaultInputLanguage}" size="1"
+                                converter="FxLanguageConverter">
+                <f:selectItems value="#{fxSelectBean.languages}" />
+            </h:selectOneListbox>
+        </fx:formRow>
+
         <!-- ============================================ -->
-        <fx:formRow label="#{fxMessageBean['Account.field.email']}" id="email">
+        <fx:formRow labelKey="Account.field.email" id="email">
             <h:inputText id="email" value="#{accountBean.account.email}"/>
         </fx:formRow>
 
-        <fx:formRow label="#{fxMessageBean['Account.field.groups']}" id="groups" height="85"  newLine="false">
+        <fx:formRow labelKey="Account.field.groups" id="groups" height="85"  newLine="false">
             <ui:repeat value="#{accountBean.groups}" var="group">
                 <h:outputText value="#{group.name}"/>
                 <br/>
             </ui:repeat>    
         </fx:formRow>
         
-        <fx:formRow label="#{fxMessageBean['Account.field.roles']}" id="roles" height="85" readonly="true">
+        <fx:formRow labelKey="Account.field.roles" id="roles" height="85" readonly="true">
             <ui:repeat value="#{accountBean.roles}" var="role">
                 <h:outputText value="#{role.name}"/>
                 <br/>
             </ui:repeat>
         </fx:formRow>
-        
+
         <c:if test="${fxSystemBean.userTicket.globalSupervisor}">
-            <fx:formRow label="#{fxMessageBean['Account.field.mandator']}" id="mand"><h:outputText value="#{mandatorBean.mandatorsById[accountBean.account.mandatorId].name}"/></fx:formRow>
+            <fx:formRow labelKey="Account.field.mandator" id="mand"><h:outputText value="#{mandatorBean.mandatorsById[accountBean.account.mandatorId].name}"/></fx:formRow>
         </c:if>
 
         <br />

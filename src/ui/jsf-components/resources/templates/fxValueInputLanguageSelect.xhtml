@@ -1,0 +1,29 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:t="http://myfaces.apache.org/tomahawk">
+
+A select list that toggles all fx:fxValueInput elements on the current page (client-side).
+
+Parameters:
+id - the input ID (required)
+
+<ui:composition>
+
+    <h:selectOneListbox id="#{id}" size="1" onchange="setLanguageOnAllInputs(this.value)"
+            value="#{fxUserConfigurationBean.inputLanguageId}">
+        <f:selectItem itemValue="-2" itemLabel="#{fxMessageBean['FxValueInput.language.all']}"/>
+        <c:forEach var="item" items="#{fxSelectBean.languages}">
+            <f:selectItem itemValue="#{item.value.id}" itemLabel="#{item.value.iso2digit} (#{item.value.label})"/>
+        </c:forEach>
+    </h:selectOneListbox>
+
+</ui:composition>
+
+
+</html>
