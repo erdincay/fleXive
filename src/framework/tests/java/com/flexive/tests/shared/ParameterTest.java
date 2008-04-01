@@ -85,7 +85,7 @@ public class ParameterTest {
      */
     @Test
     public void fallbackUser() throws Exception {
-        checkFallbacks(SystemParameterPaths.TEST_USER, ParameterScope.DIVISION);
+        checkFallbacks(SystemParameterPaths.TEST_USER, ParameterScope.DIVISION_ONLY);
     }
 
     /**
