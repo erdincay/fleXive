@@ -340,6 +340,8 @@ public class BinaryDescriptor implements Serializable {
     public boolean equals(Object obj) {
         if (!(obj instanceof BinaryDescriptor)) return false;
         BinaryDescriptor b = (BinaryDescriptor) obj;
+        if( this.isNewBinary() && b.isNewBinary() )
+            return true;
         return !(b.getMetadata() != null && !b.getMetadata().equals(this.getMetadata())) &&
                 !(this.getMetadata() != null && !this.getMetadata().equals(b.getMetadata())) &&
                 !(this.getMetadata() == null && b.getMetadata() != null) &&

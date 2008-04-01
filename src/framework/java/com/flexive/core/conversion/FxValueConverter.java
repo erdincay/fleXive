@@ -85,28 +85,32 @@ public class FxValueConverter implements Converter {
                     writer.addAttribute("l", ConversionEngine.getLang(le, lang));
                     if (value instanceof FxBinary) {
                         BinaryDescriptor desc = ((FxBinary) value).getTranslation(lang);
-                        writer.addAttribute("fileName", desc.getName());
-                        writer.addAttribute("image", String.valueOf(desc.isImage()));
-
-                        if (desc.getSize() > 500 * 1024 && ctx.get("pk") != null) {
-                            // > 500 KBytes add a download URL
-                            writer.addAttribute("content", "URL");
-                            try {
-                                writer.setValue(getDownloadURL() + "pk" + ctx.get("pk") + "/" + URLEncoder.encode(FxSharedUtils.escapeXPath(value.getXPath()), "UTF-8") + "/" + desc.getName());
-                            } catch (UnsupportedEncodingException e) {
-                                //unlikely to happen since UTF-8 should be available
-                                throw new RuntimeException(e);
-                            }
+                        if (desc.isNewBinary()) {
+                            writer.addAttribute("empty", String.valueOf(Boolean.TRUE));
                         } else {
-                            //add BASE64 encoded binary data
-                            writer.addAttribute("content", "Base64");
-                            ByteArrayOutputStream bos = new ByteArrayOutputStream((int) desc.getSize());
-                            desc.download(bos);
-                            try {
-                                writer.setValue(new String(Base64.encodeBase64(bos.toByteArray()), "UTF-8"));
-                            } catch (UnsupportedEncodingException e) {
-                                //unlikely to happen since UTF-8 should be available
-                                throw new RuntimeException(e);
+                            writer.addAttribute("fileName", desc.getName());
+                            writer.addAttribute("image", String.valueOf(desc.isImage()));
+
+                            if (desc.getSize() > 500 * 1024 && ctx.get("pk") != null) {
+                                // > 500 KBytes add a download URL
+                                writer.addAttribute("content", "URL");
+                                try {
+                                    writer.setValue(getDownloadURL() + "pk" + ctx.get("pk") + "/" + URLEncoder.encode(FxSharedUtils.escapeXPath(value.getXPath()), "UTF-8") + "/" + desc.getName());
+                                } catch (UnsupportedEncodingException e) {
+                                    //unlikely to happen since UTF-8 should be available
+                                    throw new RuntimeException(e);
+                                }
+                            } else {
+                                //add BASE64 encoded binary data
+                                writer.addAttribute("content", "Base64");
+                                ByteArrayOutputStream bos = new ByteArrayOutputStream((int) desc.getSize());
+                                desc.download(bos);
+                                try {
+                                    writer.setValue(new String(Base64.encodeBase64(bos.toByteArray()), "UTF-8"));
+                                } catch (UnsupportedEncodingException e) {
+                                    //unlikely to happen since UTF-8 should be available
+                                    throw new RuntimeException(e);
+                                }
                             }
                         }
                     } else
