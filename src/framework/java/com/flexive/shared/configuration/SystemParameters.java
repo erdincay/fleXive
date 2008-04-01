@@ -36,6 +36,10 @@ package com.flexive.shared.configuration;
 import com.flexive.shared.search.ResultPreferences;
 import com.flexive.shared.search.query.QueryRootNode;
 import static com.flexive.shared.configuration.SystemParameterPaths.*;
+import com.flexive.shared.scripting.FxScriptRunInfo;
+
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Flexive system parameter definitions.
@@ -44,6 +48,10 @@ import static com.flexive.shared.configuration.SystemParameterPaths.*;
  * @version $Rev$
  */
 public class SystemParameters {
+    /**
+     * Detailed information about the execution of run-once scripts
+     */
+    public static final Parameter<ArrayList> DIVISION_RUNONCE_INFOS = ParameterFactory.newInstance(ArrayList.class, SystemParameterPaths.DIVISION_RUNONCE_CONFIG, "run.once.infos", new ArrayList(0));
     /**
      * Boolean parameter to determine if run-once scripts have been executed
      */

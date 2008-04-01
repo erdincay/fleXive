@@ -353,6 +353,18 @@ public class ScriptBean {
         return mapping;
     }
 
+    public List<WrappedRunOnceInfo> getRunOnceInformation() {
+        List<WrappedRunOnceInfo>runInfo = new ArrayList<WrappedRunOnceInfo>();
+        try {
+            for (FxScriptRunInfo ri : EJBLookup.getScriptingEngine().getRunOnceInformation())
+                runInfo.add(new WrappedRunOnceInfo(ri)); 
+        }
+        catch (Throwable t) {
+            new FxFacesMsgErr(t.getMessage()).addToContext();
+        }
+        return runInfo;
+    }
+
     /**
      * called from the structure editor -> get the oid of the script to show from the request parameters
      *
@@ -368,6 +380,30 @@ public class ScriptBean {
         if (oid != -1) {
             // this specifies the script to work on...
             this.id = oid;
+        }
+    }
+
+    public class WrappedRunOnceInfo {
+        private FxScriptRunInfo runInfo;
+
+        public WrappedRunOnceInfo(FxScriptRunInfo runInfo) {
+            this.runInfo = runInfo;
+        }
+
+        public FxScriptRunInfo getRunInfo() {
+            return runInfo;
+        }
+
+        public void setRunInfo(FxScriptRunInfo runInfo) {
+            this.runInfo = runInfo;
+        }
+
+        public String getShortErrorMessage() {
+            if (runInfo.getErrorMessage() != null && runInfo.getErrorMessage().length() >25) {
+                return runInfo.getErrorMessage().substring(0,25)+"..";
+            }
+            else
+                return runInfo.getErrorMessage();
         }
     }
 

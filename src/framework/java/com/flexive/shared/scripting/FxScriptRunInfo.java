@@ -47,6 +47,7 @@ public class FxScriptRunInfo implements Serializable {
     private String drop;
     private String name;
     private boolean successful;
+    private String errorMessage;
 
     public FxScriptRunInfo(long startTime, String drop, String name) {
         this.startTime = startTime;
@@ -93,5 +94,13 @@ public class FxScriptRunInfo implements Serializable {
 
     public boolean isSuccessful() {
         return successful;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 }
