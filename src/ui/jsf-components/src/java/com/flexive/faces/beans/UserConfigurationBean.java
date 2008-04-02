@@ -4,6 +4,7 @@ import com.flexive.shared.configuration.ParameterMap;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.configuration.Parameter;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxContext;
 import com.flexive.shared.exceptions.FxApplicationException;
 
 import java.io.Serializable;
@@ -29,7 +30,8 @@ public class UserConfigurationBean {
      */
     public long getInputLanguageId() {
         if (inputLanguageId == -1) {
-            return getDefaultInputLanguageId();
+            final long defaultLanguageId = getDefaultInputLanguageId();
+            return defaultLanguageId != -1 ? defaultLanguageId : FxContext.get().getTicket().getLanguage().getId();
         }
         return inputLanguageId;
     }
