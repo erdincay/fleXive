@@ -303,7 +303,7 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
             case Boolean:
                 return new FxBoolean(multilang, rnd.nextBoolean());
             case Binary:
-                return new FxBinary(multilang, FxBinary.EMPTY);
+                return new FxBinary(multilang, new BinaryDescriptor(getRandomText(rnd, 15), getRandomText(rnd, 8), 0, "application/binary", ""));
             case Reference:
                 return new FxReference(multilang, FxReference.EMPTY);
             case SelectOne:

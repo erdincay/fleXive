@@ -48,6 +48,7 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
@@ -79,45 +80,51 @@ public class FxValueConverter implements Converter {
         final LanguageEngine le = EJBLookup.getLanguageEngine();
         try {
             writer.addAttribute("dl", ConversionEngine.getLang(le, value.getDefaultLanguage()));
-            if (!value.isEmpty())
+            if (!value.isEmpty()) {
                 for (long lang : value.getTranslatedLanguages()) {
                     writer.startNode("d");
                     writer.addAttribute("l", ConversionEngine.getLang(le, lang));
                     if (value instanceof FxBinary) {
                         BinaryDescriptor desc = ((FxBinary) value).getTranslation(lang);
-                        if (desc.isNewBinary()) {
-                            writer.addAttribute("empty", String.valueOf(Boolean.TRUE));
+                        writer.addAttribute("fileName", desc.getName());
+                        writer.addAttribute("image", String.valueOf(desc.isImage()));
+                        writer.addAttribute("mimeType", desc.getMimeType());
+                        writer.addAttribute("size", String.valueOf(desc.getSize()));
+                        if( !StringUtils.isEmpty(desc.getMetadata())) {
+                            writer.startNode("meta");
+                            writer.setValue(desc.getMetadata());
+                            writer.endNode();
+                        }
+                        writer.startNode("content");
+                        if( desc.isNewBinary() ) {
+                            writer.addAttribute("content", "EMPTY");
+                        } else if (desc.getSize() > 500 * 1024 && ctx.get("pk") != null) {
+                            // > 500 KBytes add a download URL
+                            writer.addAttribute("content", "URL");
+                            try {
+                                writer.setValue(getDownloadURL() + "pk" + ctx.get("pk") + "/" + URLEncoder.encode(FxSharedUtils.escapeXPath(value.getXPath()), "UTF-8") + "/" + desc.getName());
+                            } catch (UnsupportedEncodingException e) {
+                                //unlikely to happen since UTF-8 should be available
+                                throw new RuntimeException(e);
+                            }
                         } else {
-                            writer.addAttribute("fileName", desc.getName());
-                            writer.addAttribute("image", String.valueOf(desc.isImage()));
-
-                            if (desc.getSize() > 500 * 1024 && ctx.get("pk") != null) {
-                                // > 500 KBytes add a download URL
-                                writer.addAttribute("content", "URL");
-                                try {
-                                    writer.setValue(getDownloadURL() + "pk" + ctx.get("pk") + "/" + URLEncoder.encode(FxSharedUtils.escapeXPath(value.getXPath()), "UTF-8") + "/" + desc.getName());
-                                } catch (UnsupportedEncodingException e) {
-                                    //unlikely to happen since UTF-8 should be available
-                                    throw new RuntimeException(e);
-                                }
-                            } else {
-                                //add BASE64 encoded binary data
-                                writer.addAttribute("content", "Base64");
-                                ByteArrayOutputStream bos = new ByteArrayOutputStream((int) desc.getSize());
-                                desc.download(bos);
-                                try {
-                                    writer.setValue(new String(Base64.encodeBase64(bos.toByteArray()), "UTF-8"));
-                                } catch (UnsupportedEncodingException e) {
-                                    //unlikely to happen since UTF-8 should be available
-                                    throw new RuntimeException(e);
-                                }
+                            //add BASE64 encoded binary data
+                            writer.addAttribute("content", "Base64");
+                            ByteArrayOutputStream bos = new ByteArrayOutputStream((int) desc.getSize());
+                            desc.download(bos);
+                            try {
+                                writer.setValue(new String(Base64.encodeBase64(bos.toByteArray()), "UTF-8"));
+                            } catch (UnsupportedEncodingException e) {
+                                //unlikely to happen since UTF-8 should be available
+                                throw new RuntimeException(e);
                             }
                         }
+                        writer.endNode();
                     } else
                         writer.setValue(value.getStringValue(value.getTranslation(lang)));
                     writer.endNode();
                 }
-            else
+            } else
                 writer.addAttribute("empty", "true");
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();
@@ -141,8 +148,16 @@ public class FxValueConverter implements Converter {
                 v.setEmpty();
             while (reader.hasMoreChildren()) {
                 reader.moveDown();
-                if ("d".equals(reader.getNodeName()))
-                    v.setTranslation(ConversionEngine.getLang(le, reader.getAttribute("l")), v.fromString(reader.getValue()));
+
+                if ("d".equals(reader.getNodeName())) {
+                    final long lang = ConversionEngine.getLang(le, reader.getAttribute("l"));
+                    Object value;
+                    if (v instanceof FxBinary) {
+                        value = new BinaryDescriptor(); //TODO ...
+                    } else
+                        value = v.fromString(reader.getValue());
+                    v.setTranslation(lang, value);
+                }
                 reader.moveUp();
             }
         } catch (FxApplicationException e) {

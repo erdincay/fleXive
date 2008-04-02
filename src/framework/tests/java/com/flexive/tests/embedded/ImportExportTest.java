@@ -71,6 +71,9 @@ public class ImportExportTest {
                 case InlineReference:
                     //these datatypes are not implemented for random values
                     continue;
+                case Binary:
+                    //TODO: unmarshalling is not implemented yet
+                    continue;
                 default:
                     FxValue ml = dt.getRandomValue(rnd, true);
                     Assert.assertEquals(ml, xs.fromXML(xs.toXML(ml)), "Testing: " + dt.name());

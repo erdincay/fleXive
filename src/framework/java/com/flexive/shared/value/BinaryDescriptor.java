@@ -161,6 +161,9 @@ public class BinaryDescriptor implements Serializable {
      */
     public BinaryDescriptor() {
         this.handle = EMPTY;
+        this.mimeType = "unknown/unknown";
+        this.metadata = EMPTY;
+        this.name = EMPTY;
         this.newBinary = true;
     }
 
@@ -340,8 +343,8 @@ public class BinaryDescriptor implements Serializable {
     public boolean equals(Object obj) {
         if (!(obj instanceof BinaryDescriptor)) return false;
         BinaryDescriptor b = (BinaryDescriptor) obj;
-        if( this.isNewBinary() && b.isNewBinary() )
-            return true;
+//        if( this.isNewBinary() && b.isNewBinary() )
+//            return true;
         return !(b.getMetadata() != null && !b.getMetadata().equals(this.getMetadata())) &&
                 !(this.getMetadata() != null && !this.getMetadata().equals(b.getMetadata())) &&
                 !(this.getMetadata() == null && b.getMetadata() != null) &&
