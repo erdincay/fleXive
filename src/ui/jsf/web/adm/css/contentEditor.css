@@ -159,6 +159,7 @@
     color: gray;
     font-weight: bold;
     margin-right: 2px;
+    cursor: pointer;
 }
 
 .infoPanel {
@@ -261,4 +262,14 @@ table.historyTable TR TH.action {
 table.historyTable TR TD.action {
     background: #EFEFEF none repeat scroll 0;
     border: 1px 1px 1px 0 solid;
+}
+
+#exportArea {
+    width:500px;
+    height:200px;
+    overflow: auto;
+    border: 1px solid #CCCCCC;
+    background-color: #EFEFEF;
+    color: gray;
+    margin: 12px;
 }

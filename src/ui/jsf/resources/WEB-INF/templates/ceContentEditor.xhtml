@@ -70,9 +70,8 @@
                     </a4j:commandLink>
                     <ui:fragment rendered="#{srcEditor.infoPanelState=='export'}">
                         <span class="infoPanel">
-                            Export data:
-                            <a href="" onclick="copy2clipboard(document.getElementById('exportArea').value,'#{fxMessageBean['Global.clipboard.error']}','#{fxMessageBean['Global.clipboard.success']}')">copy</a>
-                            <textarea id="exportArea" readonly="true" wrap="off" rows="10" cols="80">#{srcEditor.exportData}</textarea>
+                            <span class="infoPanelButton" style="margin: 12px; display: block; float: left;" onclick="copy2clipboard(getPreElementContent('exportArea'),'#{fxMessageBean['Global.clipboard.error']}','#{fxMessageBean['Global.clipboard.success']}')">Copy to clipboard</span>
+                            <pre id="exportArea">#{srcEditor.exportData}</pre>
                         </span>
                     </ui:fragment>
                     <ui:fragment rendered="#{srcEditor.infoPanelState=='version'}">

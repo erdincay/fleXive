@@ -141,7 +141,7 @@ function escapeQuotes(string) {
  */
 function copy2clipboard(cliptext, errorMessage, successMessage) {
     if (window.clipboardData) {
-        window.clipboardData.setData("Text", cliptext);
+        window.clipboardData.setData("Text", ""+cliptext);
     } else if (window.netscape) {
         try {
             netscape.security.PrivilegeManager.enablePrivilege('UniversalXPConnect');
@@ -175,4 +175,11 @@ function copy2clipboard(cliptext, errorMessage, successMessage) {
     }
     if( successMessage ) alert(successMessage);
     return false;
+}
+
+function getPreElementContent(elementName) {
+    if( window.netscape )
+        return document.getElementById(elementName).textContent;
+    else
+        return document.getElementById(elementName).innerText;
 }
