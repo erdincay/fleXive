@@ -227,7 +227,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
     public void patchDatabase() throws FxApplicationException {
         long dbVersion = EJBLookup.getDivisionConfigurationEngine().get(SystemParameters.DB_VERSION);
         if (dbVersion == -1) {
-            EJBLookup.getDivisionConfigurationEngine().put(SystemParameters.DB_VERSION, FxSharedUtils.getDBVersion());
+            put(SystemParameters.DB_VERSION, FxSharedUtils.getDBVersion());
             return; //no need to patch
         } else if (dbVersion == FxSharedUtils.getDBVersion()) {
             //nothing to do
@@ -296,7 +296,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
                     }
                 }
                 if (currentVersion != dbVersion) {
-                    EJBLookup.getDivisionConfigurationEngine().put(SystemParameters.DB_VERSION, currentVersion);
+                    put(SystemParameters.DB_VERSION, currentVersion);
                     if (currentVersion < maxVersion)
                         LOG.warn("Failed to patch to maximum available database schema version (" + maxVersion + "). Current database schema version: " + currentVersion);
                 }

@@ -117,7 +117,13 @@ public class ContainerBootstrap {
             */
             FxContext.get().setDivisionId(DivisionData.DIVISION_TEST);
             FxContext.get().setContextPath("flexiveTests");
-            CacheAdmin.getEnvironment();
+            FxContext.get().setTicket(UserTicketImpl.getGuestTicket());
+            FxContext.get().runAsSystem();
+            try {
+                CacheAdmin.getEnvironment();
+            } finally {
+                FxContext.get().stopRunAsSystem();
+            }
             FxContext.get().setTicket(UserTicketImpl.getGuestTicket());
             TestUsers.initializeUsers();
         } catch (Exception ex) {

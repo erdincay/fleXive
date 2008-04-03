@@ -111,7 +111,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     private static volatile Map<FxScriptEvent, List<Long>> scriptsByEvent = new HashMap<FxScriptEvent, List<Long>>(10);
 
-    //private static volatile List<FxScriptRunInfo> runOnceInfos = new CopyOnWriteArrayList<FxScriptRunInfo>();
+    private static volatile List<FxScriptRunInfo> runOnceInfos = null;
 
     /**
      * {@inheritDoc}
@@ -306,7 +306,11 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public List<FxScriptRunInfo> getRunOnceInformation() throws FxApplicationException {
-        return EJBLookup.getDivisionConfigurationEngine().get(SystemParameters.DIVISION_RUNONCE_INFOS);
+        if( runOnceInfos != null ) {
+            return runOnceInfos;
+        } else {
+            return EJBLookup.getDivisionConfigurationEngine().get(SystemParameters.DIVISION_RUNONCE_INFOS);
+        }
     }
 
     /**
@@ -864,10 +868,12 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         ArrayList<FxScriptRunInfo> divisionRunOnceInfos;
         try {
             divisionRunOnceInfos=EJBLookup.getDivisionConfigurationEngine().get(SystemParameters.DIVISION_RUNONCE_INFOS);
-        }
-        catch (FxApplicationException e) {
+        } catch (FxApplicationException e) {
             divisionRunOnceInfos = new ArrayList<FxScriptRunInfo>();
         }
+
+        runOnceInfos = new CopyOnWriteArrayList<FxScriptRunInfo>();
+        runOnceInfos.addAll(divisionRunOnceInfos);
 
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         final InputStream scriptIndex = cl.getResourceAsStream(prefix + "/scripts/runonce/scriptindex.flexive");
@@ -898,7 +904,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                     LOG.info("running run-once-script [" + file[0] + "] ...");
                 }
                 FxScriptRunInfo runInfo = new FxScriptRunInfo(System.currentTimeMillis(), applicationName, file[0]);
-                //runOnceInfos.add(runInfo);
+                runOnceInfos.add(runInfo);
                 try {
                     internal_runScript(file[0], binding, FxSharedUtils.loadFromInputStream(cl.getResourceAsStream(prefix + "/scripts/runonce/" + file[0]), -1));
                 } catch (Throwable e) {
@@ -908,25 +914,18 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                     runInfo.setErrorMessage(sw.toString());
                     LOG.error("Failed to run script " + file[0] + ": " + e.getMessage(), e);
                 }
+                try {
+                    Thread.sleep(100); //play nice ...
+                } catch (InterruptedException e) {
+                    //ignore
+                }
                 runInfo.endExecution(true);
-
-                int idx = -1;
-                for (FxScriptRunInfo s :divisionRunOnceInfos) {
-                    if (s.getName().equals(runInfo.getName())) {
-                        idx=divisionRunOnceInfos.indexOf(s);
-                        break;
-                    }
-                }
-                //runInfo is not contained in the list
-                if (idx == -1)
-                    divisionRunOnceInfos.add(runInfo);
-                //runInfo is contained in the list and needs to be updated
-                else {
-                    divisionRunOnceInfos.set(idx,runInfo);
-                }
             }
-            EJBLookup.getDivisionConfigurationEngine().put(param, true);
+            divisionRunOnceInfos.clear();
+            divisionRunOnceInfos.addAll(runOnceInfos);
             EJBLookup.getDivisionConfigurationEngine().put(SystemParameters.DIVISION_RUNONCE_INFOS, divisionRunOnceInfos);
+            EJBLookup.getDivisionConfigurationEngine().put(param, true);
+            runOnceInfos = null;
         } finally {
             FxContext.get().stopRunAsSystem();
             FxContext.get().overrideTicket(originalTicket);
