@@ -51,8 +51,8 @@ import org.apache.commons.logging.LogFactory;
 import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
 import java.text.Collator;
+import java.util.*;
 
 /**
  * Flexive shared utility functions.
@@ -71,6 +71,7 @@ public final class FxSharedUtils {
     private static String fxEdition = "framework";
     private static String fxProduct = "[fleXive]";
     private static String fxBuild = "unknown";
+    private static long fxDBVersion = -1L;
     private static String fxBuildDate = "unknown";
     private static String fxBuildUser = "unknown";
     private static String fxHeader = "[fleXive]";
@@ -96,6 +97,7 @@ public final class FxSharedUtils {
      * Are JDK 6+ extensions allowed to be run on the current VM?
      */
     public final static boolean USE_JDK6_EXTENSION;
+    public final static boolean WINDOWS = System.getProperty("os.name").indexOf("Windows") >= 0;
 
     static {
         int major = -1, minor = -1;
@@ -109,6 +111,29 @@ public final class FxSharedUtils {
             LOG.error(e);
         }
         USE_JDK6_EXTENSION = major > 1 || (major == 1 && minor >= 6);
+
+        try {
+            PropertyResourceBundle bundle = (PropertyResourceBundle) PropertyResourceBundle.getBundle("flexive");
+            fxVersion = bundle.getString("flexive.version");
+            fxEdition = bundle.getString("flexive.edition");
+            fxProduct = bundle.getString("flexive.product");
+            fxBuild = bundle.getString("flexive.buildnumber");
+            fxDBVersion = Long.valueOf(bundle.getString("flexive.dbversion"));
+            fxBuildDate = bundle.getString("flexive.builddate");
+            fxBuildUser = bundle.getString("flexive.builduser");
+            fxHeader = bundle.getString("flexive.header");
+            bundledGroovyVersion = bundle.getString("flexive.bundledGroovyVersion");
+            final String languagesValue = bundle.getString("flexive.translatedLocales");
+            if (StringUtils.isNotBlank(languagesValue)) {
+                final String[] languages = StringUtils.split(languagesValue, ",");
+                for (int i = 0; i < languages.length; i++) {
+                    languages[i] = languages[i].trim();
+                }
+                translatedLocales = Arrays.asList(languages);
+            }
+        } catch (Exception e) {
+            LOG.error(e);
+        }
     }
 
     /**
@@ -185,7 +210,7 @@ public final class FxSharedUtils {
     /**
      * Returns a collator for the calling user's locale.
      *
-     * @return  a collator for the calling user's locale.
+     * @return a collator for the calling user's locale.
      */
     public static Collator getCollator() {
         return Collator.getInstance(FxContext.get().getTicket().getLanguage().getLocale());
@@ -207,32 +232,6 @@ public final class FxSharedUtils {
      */
     public static interface ParameterMapper<K, V> extends Serializable {
         V get(Object key);
-    }
-
-    public final static boolean WINDOWS = System.getProperty("os.name").indexOf("Windows") >= 0;
-
-    static {
-        try {
-            PropertyResourceBundle bundle = (PropertyResourceBundle) PropertyResourceBundle.getBundle("flexive");
-            fxVersion = bundle.getString("flexive.version");
-            fxEdition = bundle.getString("flexive.edition");
-            fxProduct = bundle.getString("flexive.product");
-            fxBuild = bundle.getString("flexive.buildnumber");
-            fxBuildDate = bundle.getString("flexive.builddate");
-            fxBuildUser = bundle.getString("flexive.builduser");
-            fxHeader = bundle.getString("flexive.header");
-            bundledGroovyVersion = bundle.getString("flexive.bundledGroovyVersion");
-            final String languagesValue = bundle.getString("flexive.translatedLocales");
-            if (StringUtils.isNotBlank(languagesValue)) {
-                final String[] languages = StringUtils.split(languagesValue, ",");
-                for (int i = 0; i < languages.length; i++) {
-                    languages[i] = languages[i].trim();
-                }
-                translatedLocales = Arrays.asList(languages);
-            }
-        } catch (Exception e) {
-            //ignore
-        }
     }
 
     /**
@@ -511,6 +510,15 @@ public final class FxSharedUtils {
      */
     public static String getBuildNumber() {
         return fxBuild;
+    }
+
+    /**
+     * Get the database version
+     *
+     * @return database version
+     */
+    public static long getDBVersion() {
+        return fxDBVersion;
     }
 
     /**
@@ -891,9 +899,9 @@ public final class FxSharedUtils {
     /**
      * Returns true if the given string value is quoted with the given character (e.g. 'value').
      *
-     * @param value the string value to be checked
+     * @param value     the string value to be checked
      * @param quoteChar the quote character, for example '
-     * @return  true if the given string value is quoted with the given character (e.g. 'value').
+     * @return true if the given string value is quoted with the given character (e.g. 'value').
      */
     public static boolean isQuoted(String value, char quoteChar) {
         return value != null && value.length() >= 2
@@ -904,9 +912,9 @@ public final class FxSharedUtils {
      * Strips the quotes from the given string if it is quoted, otherwise it returns
      * the input value itself.
      *
-     * @param value the value to be "unquoted"
+     * @param value     the value to be "unquoted"
      * @param quoteChar the quote character, for example '
-     * @return  the unquoted string, or <code>value</code>, if it was not quoted
+     * @return the unquoted string, or <code>value</code>, if it was not quoted
      */
     public static String stripQuotes(String value, char quoteChar) {
         if (isQuoted(value, quoteChar)) {

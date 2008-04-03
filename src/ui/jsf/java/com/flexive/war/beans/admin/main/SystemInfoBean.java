@@ -34,6 +34,10 @@
 package com.flexive.war.beans.admin.main;
 
 import com.flexive.shared.media.FxMediaEngine;
+import com.flexive.shared.EJBLookup;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.configuration.SystemParameters;
+import com.flexive.core.Database;
 
 import java.util.Date;
 import java.util.Formatter;
@@ -89,5 +93,13 @@ public class SystemInfoBean {
         } else {
             return "unknown";
         }
+    }
+
+    public String getDatabaseInfo() {
+        return EJBLookup.getDivisionConfigurationEngine().getDatabaseInfo();
+    }
+
+    public Long getDatabaseSchemaVersion() throws FxApplicationException {
+        return EJBLookup.getDivisionConfigurationEngine().get(SystemParameters.DB_VERSION);
     }
 }

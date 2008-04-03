@@ -38,8 +38,12 @@ import static com.flexive.core.DatabaseConst.TBL_DIVISION_CONFIG;
 import com.flexive.core.configuration.GenericConfigurationImpl;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.configuration.DBVendor;
+import com.flexive.shared.configuration.DivisionData;
+import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxDbException;
 import com.flexive.shared.exceptions.FxNoAccessException;
@@ -50,9 +54,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Division configuration implementation.
@@ -173,15 +181,15 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
             String subdir = "";
             if (binaryName.indexOf('/') > 0) {
                 binaryName = binaryName.substring(binaryName.lastIndexOf('/') + 1);
-                subdir = resourceName.substring(0, resourceName.lastIndexOf('/')+1);
+                subdir = resourceName.substring(0, resourceName.lastIndexOf('/') + 1);
             }
             ClassLoader cl = Thread.currentThread().getContextClassLoader();
             con = getConnection();
             long length = 0;
-            String[] files = FxSharedUtils.loadFromInputStream(cl.getResourceAsStream("fxresources/binaries/"+subdir+"resourceindex.flexive"), -1).
-                replaceAll("\r", "").split("\n");
-            for( String file: files ) {
-                if( file.startsWith(binaryName+"|")) {
+            String[] files = FxSharedUtils.loadFromInputStream(cl.getResourceAsStream("fxresources/binaries/" + subdir + "resourceindex.flexive"), -1).
+                    replaceAll("\r", "").split("\n");
+            for (String file : files) {
+                if (file.startsWith(binaryName + "|")) {
                     length = Long.parseLong(file.split("\\|")[1]);
                     break;
                 }
@@ -197,6 +205,119 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
             } catch (SQLException e) {
                 //ignore
             }
+        }
+    }
+
+    class SQLPatchScript {
+        long from;
+        long to;
+        String script;
+
+        SQLPatchScript(long from, long to, String script) {
+            this.from = from;
+            this.to = to;
+            this.script = script;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.NEVER)
+    public void patchDatabase() throws FxApplicationException {
+        long dbVersion = EJBLookup.getDivisionConfigurationEngine().get(SystemParameters.DB_VERSION);
+        if (dbVersion == -1) {
+            EJBLookup.getDivisionConfigurationEngine().put(SystemParameters.DB_VERSION, FxSharedUtils.getDBVersion());
+            return; //no need to patch
+        } else if (dbVersion == FxSharedUtils.getDBVersion()) {
+            //nothing to do
+            return;
+        } else if (dbVersion > FxSharedUtils.getDBVersion()) {
+            //the database is more current than the EAR!
+            LOG.warn("This [fleXive] build is intended for database schema version #" + FxSharedUtils.getDBVersion() + " but the database reports a higher schema version! (database schema version: " + dbVersion + ")");
+            return;
+        }
+        //lets see if we have a patch we can apply
+        try {
+            final DBVendor dbVendor = Database.getDivisionData().getDbVendor();
+            final String dir = "fxresources/sql/" + dbVendor + "/";
+            String idxFile = dir + "resourceindex.flexive";
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
+            final InputStream scriptIndex = cl.getResourceAsStream(idxFile);
+            if (scriptIndex == null) {
+                LOG.info("No patches available for " + dbVendor);
+                return;
+            }
+            String[] files = FxSharedUtils.loadFromInputStream(scriptIndex, -1).replaceAll("\r", "").split("\n");
+            Connection con = null;
+            Statement stmt = null;
+            try {
+                con = Database.getDbConnection();
+                stmt = con.createStatement();
+                List<SQLPatchScript> scripts = new ArrayList<SQLPatchScript>(50);
+                for (String file : files) {
+                    String[] f = file.split("\\|");
+                    int size = Integer.valueOf(f[1]);
+                    String[] data = f[0].split("_");
+                    if (data.length != 3) {
+                        LOG.warn("Expected " + f[0] + " to have format xxx_yyy_zzz.sql");
+                        continue;
+                    }
+                    if (!"patch".equals(data[0])) {
+                        LOG.info("Expected a patch file, but got: " + data[0]);
+                        continue;
+                    }
+                    if (!data[2].endsWith(".sql")) {
+                        LOG.info("Expected an sql file, but got: " + data[2]);
+                        continue;
+                    }
+                    long fromVersion = Long.parseLong(data[1]);
+                    long toVersion = Long.parseLong(data[2].substring(0, data[2].indexOf('.')));
+                    String code = FxSharedUtils.loadFromInputStream(cl.getResourceAsStream(dir + f[0]), size);
+                    scripts.add(new SQLPatchScript(fromVersion, toVersion, code));
+                }
+//                LOG.info("Patch available from version " + fromVersion + " to " + toVersion);
+//                    stmt.executeUpdate(code);
+                boolean patching = true;
+                long currentVersion = dbVersion;
+                long maxVersion = currentVersion;
+                while (patching) {
+                    patching = false;
+                    for (SQLPatchScript ps : scripts) {
+                        if (ps.from == currentVersion) {
+                            LOG.info("Patching from version [" + ps.from + "] to [" + ps.to + "] ... ");
+                            stmt.executeUpdate(ps.script);
+                            currentVersion = ps.to;
+                            patching = true;
+                            if (ps.to > maxVersion)
+                                ps.to = maxVersion;
+                            break;
+                        }
+                    }
+                }
+                if (currentVersion != dbVersion) {
+                    EJBLookup.getDivisionConfigurationEngine().put(SystemParameters.DB_VERSION, currentVersion);
+                    if (currentVersion < maxVersion)
+                        LOG.warn("Failed to patch to maximum available database schema version (" + maxVersion + "). Current database schema version: " + currentVersion);
+                }
+            } finally {
+                Database.closeObjects(DivisionConfigurationEngineBean.class, con, stmt);
+            }
+        } catch (SQLException e) {
+            LOG.fatal(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getDatabaseInfo() {
+        try {
+            final DivisionData divisionData = Database.getDivisionData();
+            return "Division #" + divisionData.getId() + " - " + divisionData.getDbVendor().name() + " " + divisionData.getDbVersion();
+        } catch (SQLException e) {
+            LOG.error(e);
+            return "unknown";
         }
     }
 }

@@ -18,9 +18,18 @@
 
             <a4j:outputPanel id="systemInfos">
                 <!-- General system/runtime information  -->
-                <fx:fieldSet legendKey="SystemInfo.group.general">
+                <fx:fieldSet legendKey="SystemInfo.group.general" width="550">
                     <fx:formRow labelKey="SystemInfo.field.dateTime">
                         #{systemInfoBean.dateTime}
+                    </fx:formRow>
+                    <fx:formRow labelKey="SystemInfo.field.flexiveVersion">
+                        #{fxSystemBean.buildInfoVerbose}
+                    </fx:formRow>
+                    <fx:formRow labelKey="SystemInfo.field.database">
+                        #{systemInfoBean.databaseInfo}
+                    </fx:formRow>
+                    <fx:formRow labelKey="SystemInfo.field.dbVersion">
+                        #{systemInfoBean.databaseSchemaVersion}
                     </fx:formRow>
                     <fx:formRow labelKey="SystemInfo.field.os">
                         #{systemInfoBean.operatingSystem}

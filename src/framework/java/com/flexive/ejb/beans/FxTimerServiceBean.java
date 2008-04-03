@@ -85,6 +85,7 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
         final boolean installed = isInstalled();
         if (!installed && ctx != null && ctx.getTimerService() != null) {
             ctx.getTimerService().createTimer(1000L * 60 * INTERVAL, 1000L * 60 * INTERVAL, TIMER_SIGNATURE);
+            LOG.info("FxTimer created");
             return true;
         } else {
             if (ctx != null)

@@ -71,6 +71,7 @@
 		<include name="com/flexive/ejb/**"/>
 		<include name="*.properties"/>
         <include name="**/*.flexive"/>
+        <include name="**/*.sql"/>
     </fileset>
     <fileset id="jar.ejb.resources" dir="${flexive.resources.framework.dir}">
 		<include name="embeddedJBossCacheConfig.xml"/>
@@ -434,6 +435,9 @@
                             scriptDir="${flexive.resources.framework.dir}/fxresources/scripts/library"/>
         <scriptIndexBuilder indexFile="${build.framework.classes.dir}/fxresources/binaries/thumbs/resourceindex.flexive"
                             scriptDir="${flexive.resources.framework.dir}/fxresources/binaries/thumbs"/>
+        <scriptIndexBuilder indexFile="${build.framework.classes.dir}/fxresources/sql/MySQL/resourceindex.flexive"
+                            scriptDir="${flexive.resources.framework.dir}/sql/MySQL/patch"
+                            copyFiles="true"/>
         <jar jarfile="${flexive.build.framework.jar.dir}/flexive-ejb.jar">
 			<fileset refid="jar.ejb.classes"/>
 			<fileset refid="jar.ejb.resources"/>

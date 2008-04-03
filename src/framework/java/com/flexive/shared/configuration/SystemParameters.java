@@ -36,9 +36,7 @@ package com.flexive.shared.configuration;
 import com.flexive.shared.search.ResultPreferences;
 import com.flexive.shared.search.query.QueryRootNode;
 import static com.flexive.shared.configuration.SystemParameterPaths.*;
-import com.flexive.shared.scripting.FxScriptRunInfo;
 
-import java.util.List;
 import java.util.ArrayList;
 
 /**
@@ -80,6 +78,10 @@ public class SystemParameters {
      * Divison domain matcher parameter
      */
     public static final Parameter<String> GLOBAL_DIVISIONS_DOMAINS = ParameterFactory.newInstance(String.class, SystemParameterPaths.GLOBAL_DIVISIONS_DOMAINS, "", "");
+    /**
+     * Database version
+     */
+    public static final Parameter<Long> DB_VERSION = ParameterFactory.newInstance(Long.class, DIVISION_CONFIG, "dbversion", -1L);
     /**
      * Tree Caption property id
      */

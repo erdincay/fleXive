@@ -39,9 +39,11 @@ import org.apache.tools.ant.Task;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.nio.channels.FileChannel;
 
 /**
  * ANT task to build an index file (line seperated) for a script directory to be used by
@@ -53,6 +55,7 @@ public class ScriptIndexBuilderTask extends Task {
 
     private String scriptDir = null;
     private String indexFile = null;
+    private boolean copyFiles = false;
 
     public void setScriptDir(String scriptDir) {
         this.scriptDir = scriptDir;
@@ -60,6 +63,10 @@ public class ScriptIndexBuilderTask extends Task {
 
     public void setIndexFile(String indexFile) {
         this.indexFile = indexFile;
+    }
+
+    public void setCopyFiles(boolean copyFiles) {
+        this.copyFiles = copyFiles;
     }
 
     public String getTaskName() {
@@ -119,6 +126,18 @@ public class ScriptIndexBuilderTask extends Task {
             if (!f.isFile() || ".".equals(f.getName()) || "..".equals(f.getName()) || index.getName().equals(f.getName()))
                 continue;
             scriptlist.add(f.getName()+"|"+f.length());
+            if( copyFiles ) {
+                try {
+                    System.out.println("Copying "+f.getName()+" -> "+idxDir.getAbsolutePath()+File.separator+f.getName());
+                    FileChannel ic = new FileInputStream(f).getChannel();
+                    FileChannel oc = new FileOutputStream(idxDir.getAbsolutePath()+File.separator+f.getName()).getChannel();
+                    ic.transferTo(0, ic.size(), oc);
+                    ic.close();
+                    oc.close();
+                } catch (IOException e) {
+                    throw new BuildException("Failed to copy file!", e);
+                }
+            }
         }
         Collections.sort(scriptlist);
         StringBuilder sb = new StringBuilder(5000);

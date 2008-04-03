@@ -56,4 +56,18 @@ public interface DivisionConfigurationEngine extends GenericConfigurationEngine 
      * @throws FxApplicationException on errors
      */
     void installBinary(long binaryId, String resourceName) throws FxApplicationException;
+
+    /**
+     * Perform a database patch if needed
+     *
+     * @throws FxApplicationException on errors
+     */
+    void patchDatabase() throws FxApplicationException;
+
+    /**
+     * Get information about the used database (name and version)
+     *
+     * @return information about the used database (name and version)
+     */
+    String getDatabaseInfo();
 }
