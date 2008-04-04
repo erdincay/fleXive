@@ -452,7 +452,7 @@
 
             function createContent(menuItem) {
                 var menu = dojo.widget.byId("structureTreeMenu");
-                var parentId = menu.getTreeNode().assignmentId;
+                var parentId = menu.getTreeNode().typeId;
 
                 invokeContentAction("adm/content/contentEditor.jsf", "newInstance", {typeId: parentId});
                 //contentPage=null;
