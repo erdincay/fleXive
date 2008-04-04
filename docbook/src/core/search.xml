@@ -42,7 +42,7 @@
                         <code>caption</code>.
                     </para>
                 </callout>
-
+<!--
                 <callout arearefs="csq_intro_from">
                     <para>
                         Here we specify the (virtual) source table. Currently, this is always
@@ -52,7 +52,7 @@
                         although you can choose any identifier you like.
                     </para>
                 </callout>
-
+-->
                 <callout arearefs="csq_intro_filter">
                     <para>
                         Filters work similar to the SQL
@@ -86,7 +86,7 @@
                         clause. By default an ascending sort is used, to sort by descending values add
                         <code>DESC</code>
                         to the column alias (e.g.
-                        <code>ORDER BY co.id DESC</code>). Note that you can only use columns that
+                        <code>ORDER BY id DESC</code>). Note that you can only use columns that
                         are specified in the
                         <code>SELECT</code>
                         clause.
@@ -105,12 +105,11 @@
                 displayed columns. For this purpose, the
                 <interfacename>ResultPreferencesEngine</interfacename>
                 provides a simple API for retrieving
-                and setting the preferred column layout based on the result type (e.g. Articles or Images). For
-                selecting these user-defined column layouts, select the
-                <code>co.*</code>
+                and setting the preferred column layout based on the result type (e.g. Articles or Images). To
+                select these user-defined column layouts, add the
+                <code>*</code>
                 virtual property:
-                <programlisting language="sql"><![CDATA[SELECT co.caption, co.*
-FROM content co]]></programlisting>
+                <programlisting language="sql"><![CDATA[SELECT caption, *]]></programlisting>
                 This is the only virtual property that actually expands to multiple columns, so it should
                 appear at the end of the select clause.
             </para>
@@ -122,9 +121,8 @@ FROM content co]]></programlisting>
             <para>
                 A main feature of the &flexive; search engine is full-text indexing. By specifying the "*" property in
                 the where clause, you will search across all indexed properties of a content.
-                <programlisting language="sql"><![CDATA[SELECT co.@pk, co.caption
-FROM content co
-WHERE co.* = 'test']]></programlisting>
+                <programlisting language="sql"><![CDATA[SELECT @pk, caption
+WHERE * = 'test']]></programlisting>
                 Note that the only supported operator for full-text queries is "=" (equals) and that properties have to
                 be enabled for fulltext indexing (See
                 <xref linkend="core_structures_property_parameters"/>).
@@ -145,9 +143,8 @@ WHERE co.* = 'test']]></programlisting>
                 <emphasis>property</emphasis>
                 <code>caption</code>
                 and search in the assignment with ID=25 for main street:
-                <programlisting language="sql"><![CDATA[SELECT co.@pk, co.caption
-FROM content co
-WHERE co.#25 like 'main street']]></programlisting>
+                <programlisting language="sql"><![CDATA[SELECT @pk, caption
+WHERE #25 like 'main street']]></programlisting>
             </para>
 
             <para>
@@ -158,9 +155,8 @@ WHERE co.#25 like 'main street']]></programlisting>
                 <code>ARTICLE/TITLE</code>
                 starts with Earthquake:
 
-                <programlisting language="sql"><![CDATA[SELECT co.@pk, co.ARTICLE/TEASER/TEASER_TITLE
-FROM content co
-WHERE co.ARTICLE/TITLE LIKE 'Earthquake%']]></programlisting>
+                <programlisting language="sql"><![CDATA[SELECT @pk, #ARTICLE/TEASER/TEASER_TITLE
+WHERE #ARTICLE/TITLE LIKE 'Earthquake%']]></programlisting>
             </para>
         </section>
 
@@ -172,8 +168,7 @@ WHERE co.ARTICLE/TITLE LIKE 'Earthquake%']]></programlisting>
                 <code>@permissions</code>
                 selects the permissions of the calling user on the content instance:
 
-                <programlisting language="sql"><![CDATA[SELECT co.@pk, co.@permissions
-FROM content co]]></programlisting>
+                <programlisting language="sql"><![CDATA[SELECT @pk, @permissions]]></programlisting>
 
                 The column returns instances of
                 <link href="http://www.flexive.org/docs/javadoc/shared/com/flexive/shared/security/PermissionSet.html">
@@ -198,8 +193,7 @@ FROM content co]]></programlisting>
                     condition and specify
                     the tree node ID (the root node is always 1).
 
-                    <programlisting language="sql"><![CDATA[SELECT co.@pk
-FROM content co
+                    <programlisting language="sql"><![CDATA[SELECT @pk
 WHERE IS CHILD OF 1]]></programlisting>
                 </para>
             </section>
@@ -210,8 +204,7 @@ WHERE IS CHILD OF 1]]></programlisting>
                     To include only contents attached directly to a given tree node, use
                     <code>IS DIRECT CHILD OF</code>.
 
-                    <programlisting language="sql"><![CDATA[SELECT co.@pk
-FROM content co
+                    <programlisting language="sql"><![CDATA[SELECT @pk
 WHERE IS DIRECT CHILD OF 1]]></programlisting>
                 </para>
             </section>
@@ -228,15 +221,12 @@ WHERE IS DIRECT CHILD OF 1]]></programlisting>
                     including their content captions. The standard search result table renders these objects as
                     <glossterm>breadcrumbs</glossterm>.
 
-                    <programlisting language="sql"><![CDATA[SELECT co.@path
-FROM content co]]></programlisting>
+                    <programlisting language="sql"><![CDATA[SELECT @path]]></programlisting>
 
                     Note that this also returns contents not linked in the tree, so you may want to limit your search to
                     children of the root node:
 
-                    <programlisting language="sql"><![CDATA[SELECT co.@path
-FROM content co
-WHERE IS CHILD OF 1]]></programlisting>
+                    <programlisting language="sql"><![CDATA[SELECT @path WHERE IS CHILD OF 1]]></programlisting>
                 </para>
             </section>
         </section>
@@ -251,10 +241,9 @@ WHERE IS CHILD OF 1]]></programlisting>
                 <code>FxDateTime</code>
                 properties. They can be used to select or query against a partial date value.
                 For example, this query selects all contents created in March 2008:
-                <programlisting language="sql"><![CDATA[SELECT co.created_at
-FROM content co
-WHERE YEAR(co.created_at) = 2008
-  AND MONTH(co.created_at) = 3]]></programlisting>
+                <programlisting language="sql"><![CDATA[SELECT created_at
+WHERE YEAR(created_at) = 2008
+  AND MONTH(created_at) = 3]]></programlisting>
             </para>
             <para>
                 Date and time functions may be used both in the
@@ -263,8 +252,7 @@ WHERE YEAR(co.created_at) = 2008
                 <code>WHERE</code>
                 clauses. When a function is used in a column select, it may also be used
                 for sorting if you specify the column index instead of the name, for example:
-                <programlisting language="sql"><![CDATA[SELECT co.created_at, SECOND(co.created_at)
-FROM content co
+                <programlisting language="sql"><![CDATA[SELECT created_at, SECOND(created_at)
 ORDER BY 2]]></programlisting>
             </para>
             <table xml:id="css_datetime_functions" class="flexive">
@@ -337,8 +325,7 @@ ORDER BY 2]]></programlisting>
                 Another useful example is to select the user name that created a content, instead
                 of the account ID:
 
-                <programlisting language="sql"><![CDATA[SELECT co.@pk, co.created_by.username
-FROM content co]]></programlisting>
+                <programlisting language="sql"><![CDATA[SELECT @pk, created_by.username]]></programlisting>
             </para>
             <para>
                 The following table contains all system properties that are linked to their backing table,
@@ -528,11 +515,11 @@ FROM content co]]></programlisting>
                 the query cache, whereas changing the WHERE clause always does.
             </para>
             <para>
-                Filters applicable to table aliases:
+                Filters applicable to the &flexive; content table:
                 <variablelist>
                     <varlistentry>
                         <term>
-                            <code>alias.TYPE=type</code>
+                            <code>TYPE=type</code>
                         </term>
                         <listitem>
                             <para>
@@ -544,11 +531,11 @@ FROM content co]]></programlisting>
 
                     <varlistentry>
                         <term>
-                            <code>alias.VERSION=AUTO|MAX|LIVE|ALL</code>
+                            <code>VERSION=AUTO|MAX|LIVE|ALL</code>
                         </term>
                         <listitem>
                             <para>
-                                Restricts the Version, AUTO defaults to MAX. If co.version=live is selected and an
+                                Restricts the Version, AUTO defaults to MAX. If version=live is selected and an
                                 object has no live version, it is omitted.
                             </para>
                         </listitem>
@@ -556,7 +543,7 @@ FROM content co]]></programlisting>
 
                     <varlistentry>
                         <term>
-                            <code>alias.SEARCH_LANGUAGES=languageId[,languageId]?</code>
+                            <code>SEARCH_LANGUAGES=languageId[,languageId]?</code>
                         </term>
                         <listitem>
                             <para>
@@ -628,12 +615,10 @@ FROM content co]]></programlisting>
                 (i.e. first the result is sorted by priority, then by caption), the first
                 uses named columns, the second specifies the column indices instead:
 
-                <programlisting language="sql"><![CDATA[SELECT co.@pk, co.caption, co.priority
-FROM content co
-ORDER BY co.priority DESC, co.caption]]></programlisting>
+                <programlisting language="sql"><![CDATA[SELECT @pk, caption, priority
+ORDER BY priority DESC, caption]]></programlisting>
 
-                <programlisting language="sql"><![CDATA[SELECT co.@pk, co.caption, co.priority
-FROM content co
+                <programlisting language="sql"><![CDATA[SELECT @pk, caption, priority
 ORDER BY 3 DESC, 2]]></programlisting>
             </para>
 
@@ -643,26 +628,25 @@ ORDER BY 3 DESC, 2]]></programlisting>
                 <para>
                     As described in
                     <xref linkend="css_feature_userdefined"/>,
-                    <code>co.*</code>
+                    <code>*</code>
                     expands to whatever columns the user defined for the result content type.
                     This causes a problem when the result should be sorted manually by one of these columns,
                     e.g. because the result table has sortable column headers
                     (as in the result table in the &backendGui;): the &fxsql; parser has no way
                     to expand
-                    <code>co.*</code>
+                    <code>*</code>
                     (because the search has not been submitted yet and thus the content type is unknown),
                     but yet it must be possible to sort by one of these columns.
                     For example, this query does not work:
                 </para>
-                <programlisting language="sql"><![CDATA[SELECT co.*
-FROM content co
-ORDER BY co.caption DESC     -- co.caption not found in SELECT clause]]></programlisting>
+                <programlisting language="sql"><![CDATA[SELECT *
+ORDER BY caption DESC     -- caption not found in SELECT clause]]></programlisting>
                 <para>
                     As a workaround, it is possible to specify otherwise invalid column indices in the
                     <code>ORDER BY</code>
                     clause
                     <emphasis>if</emphasis>
-                    <code>co.*</code>
+                    <code>*</code>
                     was selected. Of course this may lead to runtime errors if the user-defined columns
                     are less than the ORDER BY index. In the most probable use case, on-the-fly
                     sorting of a result table, this is not a problem, since the user
@@ -672,9 +656,8 @@ ORDER BY co.caption DESC     -- co.caption not found in SELECT clause]]></progra
                     For example, the following is a valid &fxsql; query but relies on the user
                     having defined at least 3 columns for the result type:
                 </para>
-                <programlisting language="sql"><![CDATA[SELECT co.*
-FROM content co
-ORDER BY 3 DESC     -- order by the third column of co.*]]></programlisting>
+                <programlisting language="sql"><![CDATA[SELECT *
+ORDER BY 3 DESC     -- order by the third column of *]]></programlisting>
             </section>
         </section>
 
@@ -688,9 +671,8 @@ ORDER BY 3 DESC     -- order by the third column of co.*]]></programlisting>
                 for an inline or multiline comment use C-style comments in the form of
                 "<code>/*...*/</code>"
 
-                <programlisting language="sql"><![CDATA[SELECT /* inline comment */ co.id
-FROM content co    -- specify tables
-WHERE co.id > 0    -- conditions]]></programlisting>
+                <programlisting language="sql"><![CDATA[SELECT /* inline comment */ id
+WHERE id > 0    -- conditions]]></programlisting>
             </para>
         </section>
 
@@ -783,7 +765,7 @@ WHERE co.id > 0    -- conditions]]></programlisting>
 
             <para>
                 Currently all conditions in &fxsql; queries involve at least one literal value, e.g.
-                <code>WHERE co.title = 'test'</code>. The following table lists all supported literal
+                <code>WHERE title = 'test'</code>. The following table lists all supported literal
                 value formats and the &flexive; types they may be applied to.
             </para>
 
@@ -829,7 +811,7 @@ WHERE co.id > 0    -- conditions]]></programlisting>
                         <td>A date value. Note that in current &fxsql; you cannot use a date literal
                             to compare against a DateTime value - you need to write a manual range
                             condition for the given day instead, e.g.:
-                            <code>co.created_at > '2008-03-10 00:00:00.000' AND co.created_at &lt; '2008-03-11
+                            <code>created_at > '2008-03-10 00:00:00.000' AND created_at &lt; '2008-03-11
                                 00:00:00.000'
                             </code>
                             to find contents created on 2008/03/10.
@@ -922,10 +904,9 @@ WHERE co.id > 0    -- conditions]]></programlisting>
             A call to
             <methodname>SqlQueryBuilder#getQuery()</methodname>
             returns the actual &fxsql; query, for example, the code snippet above built this &fxsql; query:
-            <programlisting language="sql"><![CDATA[SELECT co.@pk, co.created_at, co.caption
-FROM content co
-WHERE (co.typedef = 3)
-ORDER BY co.created_at DESC]]></programlisting>
+            <programlisting language="sql"><![CDATA[SELECT @pk, created_at, caption
+WHERE (typedef = 3)
+ORDER BY created_at DESC]]></programlisting>
         </para>
 
         <section xml:id="csj_conditions">
@@ -1066,7 +1047,7 @@ ORDER BY co.created_at DESC]]></programlisting>
                 The
                 <interfacename>SqlQueryBuilder</interfacename>
                 provides support for building nested conditions like
-                <code>co.caption LIKE 'Test%' AND (co.created_by = 21 OR co.created_by = 22)</code>.
+                <code>caption LIKE 'Test%' AND (created_by = 21 OR created_by = 22)</code>.
             </para>
 
             <variablelist>
@@ -1114,9 +1095,8 @@ ORDER BY co.created_at DESC]]></programlisting>
     .getQuery();]]></programlisting>
 
                 Result:
-                <programlisting language="sql"><![CDATA[SELECT co.@pk
-FROM content co
-WHERE (co.typedef = 3 AND (co.caption = 'Test caption' OR co.caption = 'Another test caption'))]]>
+                <programlisting language="sql"><![CDATA[SELECT @pk
+WHERE (typedef = 3 AND (caption = 'Test caption' OR caption = 'Another test caption'))]]>
                 </programlisting>
             </example>
         </section>
@@ -1165,7 +1145,7 @@ WHERE (co.typedef = 3 AND (co.caption = 'Test caption' OR co.caption = 'Another 
                         <para>
                             Sets the view type (list or thumbnails) when displaying the results to the
                             user. This is only relevant when you select the
-                            <code>co.*</code>
+                            <code>*</code>
                             property, which will select the user's predefined result columns
                             and sort settings based on this view type. The view type as well as the
                             location can also be specified in the constructor.
@@ -1215,12 +1195,11 @@ WHERE (co.typedef = 3 AND (co.caption = 'Test caption' OR co.caption = 'Another 
 }.sqlQuery
 ]]></programlisting>
             Result:
-            <programlisting language="sql"><![CDATA[SELECT co.@pk, co.caption, co.*
-FROM content co
+            <programlisting language="sql"><![CDATA[SELECT @pk, caption, *
 FILTER briefcase=21
-WHERE (co.CAPTION = 'test' AND co.FILENAME IS NOT NULL AND
-       (co.ID > 0 OR co.ID < 100) 
-       AND co.CREATED_AT < '2007-11-13')
+WHERE (CAPTION = 'test' AND FILENAME IS NOT NULL AND
+       (ID > 0 OR ID < 100)
+       AND CREATED_AT < '2008-04-04 11:17:27.886')
 ]]></programlisting>
             <para>
                 The method names (except

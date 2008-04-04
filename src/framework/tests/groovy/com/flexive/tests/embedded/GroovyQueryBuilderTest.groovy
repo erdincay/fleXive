@@ -56,9 +56,9 @@ class GroovyQueryBuilderTest {
             }
             lt("created_at", new Date(0))
         }
-        def cond = "(co.CAPTION = 'bla' AND co.FILENAME IS NOT NULL AND (co.ID > 0 OR co.ID < 100) AND co.CREATED_AT < " + FxFormatUtils.escapeForSql(new FxDateTime(new Date(0))) + ")"
+        def cond = "(CAPTION = 'bla' AND FILENAME IS NOT NULL AND (ID > 0 OR ID < 100) AND CREATED_AT < " + FxFormatUtils.escapeForSql(new FxDateTime(new Date(0))) + ")"
         def result = root.sqlQuery
-        assert result.indexOf(cond) > 0: "Expected condition: " + cond + ", \ngot:\n" + result
+        assert result.toUpperCase().indexOf(cond.toUpperCase()) > 0: "Expected condition: " + cond + ", \ngot:\n" + result
     }
 
     @Test (groups = ["scripting", "ejb", "search"])

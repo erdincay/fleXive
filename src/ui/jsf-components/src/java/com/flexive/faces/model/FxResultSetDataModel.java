@@ -113,7 +113,7 @@ public class FxResultSetDataModel extends DataModel {
             return rowCount;
         }
         if (result == null) {
-            fetchResult(rowIndex);
+            fetchResult(startRow);
         }
         rowCount = result.getTotalRowCount();
         return rowCount;

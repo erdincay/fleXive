@@ -116,7 +116,7 @@ class MySQLGenericSelector implements FieldSelector {
                     default:
                         columnType = FxDataType.String1024;
                 }
-                columns.put(columnName, columnType);
+                columns.put(columnName.toUpperCase(), columnType);
             }
 
         } catch (Throwable t) {
@@ -133,7 +133,7 @@ class MySQLGenericSelector implements FieldSelector {
      * {@inheritDoc}
      */
     public void apply(Property prop, PropertyEntry entry, StringBuffer statement) throws FxSqlSearchException {
-        FxDataType type = columns.get(prop.getField());
+        FxDataType type = columns.get(prop.getField().toUpperCase());
         if (type == null) {
             // This field does not exist
             throw new FxSqlSearchException(LOG, "ex.sqlSearch.query.undefinedField", prop.getField(), prop.getPropertyName(),

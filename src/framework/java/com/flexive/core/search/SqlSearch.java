@@ -186,9 +186,9 @@ public class SqlSearch {
             // Init
             switch (params.getCacheMode()) {
                 case ON:
-                    cacheTbl = DatabaseConst.TBL_SEARCHCACHE_PERM;
+                    /*cacheTbl = DatabaseConst.TBL_SEARCHCACHE_PERM;
                     searchId = seq.getId(SequencerEngine.System.SEARCHCACHE_PERM);
-                    break;
+                    break;*/
                 case OFF:
                 case READ_ONLY:
                     cacheTbl = DatabaseConst.TBL_SEARCHCACHE_MEMORY;

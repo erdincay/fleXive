@@ -26,9 +26,16 @@ public class SqlParserTest {
 
     @Test(groups = {"shared", "search"})
     public void emptyWhereClause() throws SqlParserException {
-        parse("SELECT co.id FROM content co", new String[]{"co.id"});
+        parse("SELECT co.id FROM content co", "co.id");
+        parse("SELECT id", "id");
         try {
-            parse("SELECT co.id FROM content co WHERE", new String[]{"co.id"});
+            parse("SELECT co.id FROM content co WHERE", "co.id");
+            assert false : "WHERE specified, but no conditions - expected failure";
+        } catch (SqlParserException e) {
+            // pass
+        }
+        try {
+            parse("SELECT id WHERE", "id");
             assert false : "WHERE specified, but no conditions - expected failure";
         } catch (SqlParserException e) {
             // pass
@@ -36,11 +43,30 @@ public class SqlParserTest {
     }
 
     @Test(groups = {"shared", "search"})
+    public void queryWithoutAliasTest() throws SqlParserException {
+        parse("SELECT id", "id");
+        parse("SELECT id WHERE id < 10", "id");
+        parse("SELECT id WHERE id < 10 AND caption IS NOT NULL ORDER BY id", "id");
+        parse("SELECT #type/property", "type/property");
+        parse("SELECT #type/property WHERE #type/property > 0", "type/property");
+    }
+
+    @Test(groups = {"shared", "search"})
+    public void nestedAssignmentTest() throws SqlParserException {
+        parse("SELECT co.@pk, #co.ARTICLE/TEASER/TEASER_TITLE\n" +
+                "FROM content co\n" +
+                "WHERE #co.ARTICLE/TITLE LIKE 'Earthquake%'",
+                "co.@pk", 
+                "co.ARTICLE/TEASER/TEASER_TITLE"
+        );
+    }
+
+    @Test(groups = {"shared", "search"})
     public void contentTypeFilter() throws SqlParserException {
-        final FxStatement stmt1 = parse("SELECT co.id FROM content co FILTER co.TYPE=21", new String[]{"co.id"});
+        final FxStatement stmt1 = parse("SELECT co.id FROM content co FILTER co.TYPE=21", "co.id");
         assert stmt1.getContentTypeFilter().equals("21") : "Content type filter was " + stmt1.getContentTypeFilter() + ", expected: 21";
 
-        final FxStatement stmt2 = parse("SELECT co.id FROM content co FILTER co.TYPE=mytype", new String[]{"co.id"});
+        final FxStatement stmt2 = parse("SELECT co.id FROM content co FILTER co.TYPE=mytype", "co.id");
         assert stmt2.getContentTypeFilter().equalsIgnoreCase("mytype") : "Content type filter was " + stmt2.getContentTypeFilter() + ", expected: mytype";
     }
 
@@ -87,12 +113,6 @@ public class SqlParserTest {
         assert parse("SELECT co.id FROM content co FILTER co.SEARCH_LANGUAGES=de").getTableByAlias("co").getSearchLanguages()[0].equals("de");
         assert parse("SELECT co.id FROM content co FILTER co.SEARCH_LANGUAGES=de|en").getTableByAlias("co").getSearchLanguages()[0].equals("de");
         assert parse("SELECT co.id FROM content co FILTER co.SEARCH_LANGUAGES=de|en").getTableByAlias("co").getSearchLanguages()[1].equals("en");
-        try {
-            parse("SELECT co.id FROM content co FILTER SEARCH_LANGUAGES=de");
-            assert false : "Filter SEARCH_LANGUAGES illegally specified without a table alias.";
-        } catch (SqlParserException e) {
-            // pass
-        }
     }
 
     @Test(groups = {"shared", "search"})
@@ -285,7 +305,7 @@ public class SqlParserTest {
      * @throws com.flexive.sqlParser.SqlParserException
      *          on parser errors
      */
-    private FxStatement parse(String query, String[] selectedColumns) throws SqlParserException {
+    private FxStatement parse(String query, String... selectedColumns) throws SqlParserException {
         final FxStatement stmt2 = FxStatement.parseSql(query);
         checkStatement(stmt2, selectedColumns);
         return stmt2;

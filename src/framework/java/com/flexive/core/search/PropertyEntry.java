@@ -288,12 +288,12 @@ public class PropertyEntry {
 
         if (searchProperty.isAssignment()) {
             try {
-                if (searchProperty.getPropertyName().indexOf('/') > 0) {
+                if (StringUtils.isNumeric(searchProperty.getPropertyName())) {
+                    //#<id>
+                    this.assignment = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(Long.valueOf(searchProperty.getPropertyName()));
+                } else {
                     //XPath
                     this.assignment = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(searchProperty.getPropertyName());
-                } else {
-                    //#<id>
-                    this.assignment = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(Long.valueOf(searchProperty.getPropertyName().substring(1)));
                 }
             } catch (ClassCastException ce) {
                 throw new FxSqlSearchException(LOG, ce, "ex.sqlSearch.query.unknownAssignment",

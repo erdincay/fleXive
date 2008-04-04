@@ -505,8 +505,8 @@ public class QueryNodeTreeTests {
         child2.setComparator(PropertyValueComparator.NE);
         root.addChild(child2);
         assert root.isValid();
-        assert root.getSqlQuery().contains("co.#" + assignment.getId() + " = " + item1.getId());
-        assert root.getSqlQuery().contains("co.#" + assignment.getId() + " != " + item2.getId());
+        assert root.getSqlQuery().toUpperCase().contains("#" + assignment.getXPath().toUpperCase() + " = " + item1.getId());
+        assert root.getSqlQuery().toUpperCase().contains("#" + assignment.getXPath().toUpperCase() + " != " + item2.getId());
     }
 
     @Test(groups = {"ejb", "search"})
@@ -522,8 +522,9 @@ public class QueryNodeTreeTests {
         child2.setValue(new FxNumber(2));
         root.addChild(child2);
         assert root.isValid();
-        final String conditions = "co." + property.getName() + " = 1 AND co." + property.getName() + " != 2";
-        assert root.getSqlQuery().contains(conditions) : "Expected conditions: " + conditions + ", got: " + root.getSqlQuery();
+        final String conditions = property.getName() + " = 1 AND " + property.getName() + " != 2";
+        assert root.getSqlQuery().toUpperCase().contains(conditions.toUpperCase())
+                : "Expected conditions: " + conditions + ", got: " + root.getSqlQuery();
     }
 
     @Test(groups = {"ejb", "search"})

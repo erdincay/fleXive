@@ -35,11 +35,13 @@ package com.flexive.sqlParser;
 
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.search.query.VersionFilter;
+import com.flexive.shared.FxSharedUtils;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -65,12 +67,12 @@ public class FxStatement {
     private HashMap<String, Table> tables;
     private Brace currentBrace;
     private Brace rootBrace;
-    private HashMap<Filter.TYPE, Filter> filters;
-    private boolean bDebug = false;
-    private int iBraceElementIdGenerator = 1;
+    private Map<Filter.TYPE, Filter> filters;
+    private boolean debug = false;
+    private int braceElementIdGenerator = 1;
     private Type type = Type.FILTER;
-    private ArrayList<SelectedValue> selected;
-    private ArrayList<OrderByValue> order;
+    private List<SelectedValue> selected;
+    private List<OrderByValue> order;
     private int parserExecutionTime = -1;
     private int maxResultRows = -1;
     private String cacheKey;
@@ -79,6 +81,16 @@ public class FxStatement {
     private VersionFilter versionFilter = null;
     private long[] briefcaseFilter = null;
     private String contentType;
+
+    protected FxStatement() throws SqlParserException {
+        this.rootBrace = new Brace(this);
+        this.currentBrace = this.rootBrace;
+        this.tables = new HashMap<String, Table>(10);
+        this.filters = new HashMap<Filter.TYPE, Filter>(5);
+        this.selected = new ArrayList<SelectedValue>(50);
+        this.order = new ArrayList<OrderByValue>(5);
+        addTable(new Table("content", "co"));
+    }
 
     protected void setBriefcaseFilter(long[] bf) {
         briefcaseFilter = bf;
@@ -166,7 +178,7 @@ public class FxStatement {
      * @return a new brace id
      */
     protected int getNewBraceElementId() {
-        return iBraceElementIdGenerator++;
+        return braceElementIdGenerator++;
     }
 
     /**
@@ -329,16 +341,6 @@ public class FxStatement {
         return this.parserExecutionTime;
     }
 
-    // Protected section
-    protected FxStatement() {
-        this.rootBrace = new Brace(this);
-        this.currentBrace = this.rootBrace;
-        this.tables = new HashMap<String, Table>(10);
-        this.filters = new HashMap<Filter.TYPE, Filter>(5);
-        this.selected = new ArrayList<SelectedValue>(50);
-        this.order = new ArrayList<OrderByValue>(5);
-    }
-
     protected void addFilter(Filter f) {
         this.filters.put(f.getType(), f);
     }
@@ -356,8 +358,29 @@ public class FxStatement {
 
 
     protected void addTable(Table table) {
-        if (bDebug) System.out.println("Adding table: " + table);
+        if (debug) System.out.println("Adding table: " + table);
         this.tables.put(table.getAlias(), table);
+    }
+    
+    protected boolean isTableAlias(String value) {
+        for (String alias: this.tables.keySet()) {
+            if (StringUtils.equalsIgnoreCase(alias, value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Notifies selected properties when all table aliases have been set.
+     * parser
+     */
+    private void publishTableAliases() {
+        for (SelectedValue selectedValue: selected) {
+            if (selectedValue.getValue() instanceof Property) {
+                ((Property) selectedValue.getValue()).publishTableAliases(this.tables.keySet());
+            }
+        }
     }
 
 
@@ -391,7 +414,7 @@ public class FxStatement {
      * @throws SqlParserException if the function fails
      */
     protected void cleanup() throws SqlParserException {
-
+        publishTableAliases();
         // Check if all referenced tables are present
         for (SelectedValue val : selected) {
             if (!(val.getValue() instanceof Property)) continue;
@@ -458,7 +481,7 @@ public class FxStatement {
             boolean found = false;
             int pos = 0;
             for (SelectedValue sv : selected) {
-                if (sv.getAlias().equalsIgnoreCase(ov.getValue())) {
+                if (ov.isUsableForSorting(sv)) {
                     found = true;
                     ov.setSelectedValue(pos);
                     break;
@@ -557,7 +580,7 @@ public class FxStatement {
 
     private void removeWholeBrace(Brace br, boolean alwaysTrue) {
         try {
-            if (bDebug) System.out.println("Removing whole brace because of always " + alwaysTrue + " cond");
+            if (debug) System.out.println("Removing whole brace because of always " + alwaysTrue + " cond");
         } catch (Exception exc) {
             System.err.println("###Y" + exc.getMessage());
         }
@@ -656,7 +679,7 @@ public class FxStatement {
             Brace parent = br.getParent();
             if (parent != null) {
                 BraceElement be = br.removeLastElement();
-                if (bDebug)
+                if (debug)
                     System.out.println("Moving element to parent since its the only one left in the brace: " + be);
                 parent.removeElement(br);
                 parent.addElement(be);
@@ -667,7 +690,7 @@ public class FxStatement {
                 }
             }
         } else if (br.size() == 0 && br.getParent() != null) {
-            if (bDebug) System.out.println("Removing empty brace: " + br);
+            if (debug) System.out.println("Removing empty brace: " + br);
             br.getParent().removeElement(br);
         }
     }
@@ -774,5 +797,4 @@ public class FxStatement {
         if (query.charAt(query.length() - 1) != ';') query += ";";
         return query;
     }
-
 }

@@ -150,14 +150,16 @@ public class SqlQueryBuilder implements Serializable {
         }
         StringBuilder query = new StringBuilder();
         // build select
-        query.append("SELECT ").append(buildSelect(getColumnNames()));
+        query.append("SELECT ").append(buildSelect(getColumnNames())).append(' ');
         // build from
-        query.append("\nFROM ");
-        for (Table table : tables) {
-            query.append(table.getName()).append(' ').append(table.getAlias());
-            query.append(',');
+        if (tables.size() > 1) {
+            query.append("\nFROM ");
+            for (Table table : tables) {
+                query.append(table.getName()).append(' ').append(table.getAlias());
+                query.append(',');
+            }
+            query.setCharAt(query.length() - 1, ' ');    // replace last comma
         }
-        query.setCharAt(query.length() - 1, ' ');    // replace last comma
         // build filters
         if (!filters.isEmpty()) {
             query.append("\nFILTER ").append(getFilters());
@@ -178,27 +180,31 @@ public class SqlQueryBuilder implements Serializable {
             if (out.length() > 0) {
                 out.append(", ");
             }
-            out.append(injectTableAlias(column));
+            out.append(injectQuotes(column));
         }
         return out.toString();
     }
 
     /**
-     * Adds the table alias (e.g. "co.") to the given expression. Supports functions, i.e.
-     * "year(dateprop)" becomes "year(co.dateprop)".
+     * Adds quotes around the selected property to the given expression. Supports functions, i.e.
+     * "year(article/caption)" becomes "year(#article/caption)".
      *
      * @param column    the column expression, e.g. "created_at" or "year(created_at)"
      * @return  the input column name, including the table alias
      */
-    private String injectTableAlias(String column) {
+    private String injectQuotes(String column) {
+        if (column.indexOf('/') == -1) {
+            return column;
+        }
         final StringBuilder out = new StringBuilder();
         if (column.indexOf('(') > 0) {
             // column has one or more functions
-            out.append(column.substring(0, column.lastIndexOf('(') + 1))
-               .append(Table.CONTENT.getAlias()).append('.')
-               .append(column.substring(column.lastIndexOf('(') + 1));
+            final int propertyStart = column.lastIndexOf('(') + 1;
+            out.append(column.substring(0, propertyStart))
+               .append('#')
+               .append(column.substring(propertyStart));
         } else {
-            out.append(Table.CONTENT.getAlias()).append(".").append(column);
+            out.append('#').append(column);
         }
         return out.toString();
     }
@@ -261,7 +267,7 @@ public class SqlQueryBuilder implements Serializable {
      * @return this
      */
     public SqlQueryBuilder condition(String propertyName, PropertyValueComparator comparator, FxValue<?, ?> value) {
-        renderCondition(comparator.getSql(injectTableAlias(propertyName), value));
+        renderCondition(comparator.getSql(injectQuotes(propertyName), value));
         tables.add(Table.CONTENT);
         return this;
     }
@@ -275,7 +281,7 @@ public class SqlQueryBuilder implements Serializable {
      * @return this
      */
     public SqlQueryBuilder condition(String propertyName, PropertyValueComparator comparator, Object value) {
-        renderCondition(comparator.getSql(injectTableAlias(propertyName), value));
+        renderCondition(comparator.getSql(injectQuotes(propertyName), value));
         tables.add(Table.CONTENT);
         return this;
     }
@@ -450,7 +456,7 @@ public class SqlQueryBuilder implements Serializable {
     }
 
     private SqlQueryBuilder setTypeFilter(Object value) {
-        final String filter = Table.CONTENT.getAlias() + ".TYPE";
+        final String filter = "TYPE";
         removeFilter(filter);
         if (value != null) {
             uniqueFilter(filter, value);
@@ -497,7 +503,7 @@ public class SqlQueryBuilder implements Serializable {
         if (columnIndex == -1) {
             throw new FxInvalidParameterException("column", "ex.sqlQueryBuilder.column.invalid", column).asRuntimeException();
         }
-        orderBy.add(Table.CONTENT.getAlias() + "." + getColumnNames().get(columnIndex - 1) + direction.getSqlSuffix());
+        orderBy.add(injectQuotes(getColumnNames().get(columnIndex - 1)) + direction.getSqlSuffix());
         return this;
     }
 

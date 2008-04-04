@@ -75,33 +75,7 @@ public class Filter {
         this.value = value;
 
         if (type.indexOf(".")>0) {
-            StringTokenizer st = new StringTokenizer(type,".",false);
-            String sTable = st.nextToken().toUpperCase();
-            this.table = stmt.getTableByAlias(sTable);
-            type = st.nextToken();
-            type = type.toUpperCase();
-            if (this.table ==null) {
-                throw new SqlParserException("ex.sqlSearch.filter.unknownTable",sTable,type);
-            }
-            // ----------- VERSION -------------------------------------------------------------------------------------
-            if (type.equalsIgnoreCase(String.valueOf(TYPE.VERSION))) {
-                _processVersionFilter(stmt);
-            }
-            // ----------- CONTENT -------------------------------------------------------------------------------------
-            else if (type.equalsIgnoreCase("TYPE")) {
-                stmt.setContentTypeFilter(value);
-            }
-            // ----------- LANGUAGES -----------------------------------------------------------------------------------
-            else if (type.equalsIgnoreCase(String.valueOf(TYPE.SEARCH_LANGUAGES))) {
-                this.type = TYPE.SEARCH_LANGUAGES;
-                table.setSearchLanguages(value.split(","));
-            }
-            // ----------- INVALID -------------------------------------------------------------------------------------            
-            else {
-                throw new SqlParserException("ex.sqlSearch.filter.unknownTableFilter",
-                        type,String.valueOf(TYPE.SEARCH_LANGUAGES));
-            }
-            this.table.addFilter(this);
+            initTableFilter(stmt, type, value);
         } else {
             type=type.toUpperCase();
             if (type.equalsIgnoreCase(String.valueOf(TYPE.BRIEFCASE))) {
@@ -126,14 +100,49 @@ public class Filter {
                             type,String.valueOf(TYPE.MAX_RESULTROWS));
                 }
             } else {
-                throw new SqlParserException("ex.sqlSearch.filter.unknownGlobalFilter",
-                        type,
-                        String.valueOf(TYPE.MAX_RESULTROWS)+","+
-                        String.valueOf(TYPE.IGNORE_CASE));
+                try {
+                    // use content filters as fallback
+                    initTableFilter(stmt, "co." + type, value);
+                } catch (SqlParserException e) {
+                    throw new SqlParserException("ex.sqlSearch.filter.unknownGlobalFilter",
+                            type,
+                            String.valueOf(TYPE.MAX_RESULTROWS)+","+
+                            String.valueOf(TYPE.IGNORE_CASE));
+                }
             }
             stmt.addFilter(this);
         }
 
+    }
+
+    private void initTableFilter(FxStatement stmt, String type, String value) throws SqlParserException {
+        StringTokenizer st = new StringTokenizer(type,".",false);
+        String sTable = st.nextToken().toUpperCase();
+        this.table = stmt.getTableByAlias(sTable);
+        type = st.nextToken();
+        type = type.toUpperCase();
+        if (this.table ==null) {
+            throw new SqlParserException("ex.sqlSearch.filter.unknownTable",sTable,type);
+        }
+        // ----------- VERSION -------------------------------------------------------------------------------------
+        if (type.equalsIgnoreCase(String.valueOf(TYPE.VERSION))) {
+            _processVersionFilter(stmt);
+        }
+        // ----------- CONTENT -------------------------------------------------------------------------------------
+        else if (type.equalsIgnoreCase("TYPE")) {
+            stmt.setContentTypeFilter(value);
+        }
+        // ----------- LANGUAGES -----------------------------------------------------------------------------------
+        else if (type.equalsIgnoreCase(String.valueOf(TYPE.SEARCH_LANGUAGES))) {
+            this.type = TYPE.SEARCH_LANGUAGES;
+            table.setSearchLanguages(value.split(","));
+        }
+        // ----------- INVALID -------------------------------------------------------------------------------------
+        else {
+            throw new SqlParserException("ex.sqlSearch.filter.unknownTableFilter",
+                    type,String.valueOf(TYPE.SEARCH_LANGUAGES));
+        }
+        this.table.addFilter(this);
     }
 
     /**

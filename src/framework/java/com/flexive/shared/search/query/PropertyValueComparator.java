@@ -120,8 +120,8 @@ public enum PropertyValueComparator implements ValueComparator {
         } else {
             sqlValue = null;
         }
-        return "/*" + assignment.getAlias() + "*/ " // include assignment alias in comment for better readability
-                + getSql(Table.CONTENT.getColumnName("#" + assignment.getId()), sqlValue);
+        // select assignment by XPath
+        return getSql(Table.CONTENT.getColumnName("#" + assignment.getXPath()), sqlValue);
 	}
 
     public final String getSql(FxProperty property, FxValue value) {

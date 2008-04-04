@@ -3,9 +3,8 @@
         <!ENTITY % global_entities SYSTEM "../global.ent">
         %global_entities;
         ]>
-<programlisting language="xhtml" xml:id="core_search_intro" xmlns="http://docbook.org/ns/docbook">SELECT co.@pk, co.caption           -- <co xml:id="csq_intro_select"/>
-FROM content co                     -- <co xml:id="csq_intro_from"/>
-FILTER co.version=live              -- <co xml:id="csq_intro_filter"/>
-WHERE co.caption LIKE 'test%'       -- <co xml:id="csq_intro_where"/>
-ORDER BY co.caption                 -- <co xml:id="csq_intro_order"/>
+<programlisting language="xhtml" xml:id="core_search_intro" xmlns="http://docbook.org/ns/docbook">SELECT @pk, caption           -- <co xml:id="csq_intro_select"/>
+FILTER version=live              -- <co xml:id="csq_intro_filter"/>
+WHERE caption LIKE 'test%'       -- <co xml:id="csq_intro_where"/>
+ORDER BY caption                 -- <co xml:id="csq_intro_order"/>
 </programlisting>

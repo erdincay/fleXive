@@ -62,7 +62,7 @@ public class MySQLStepSelector extends MySQLGenericSelector {
      */
     @Override
     public void apply(Property prop, PropertyEntry entry, StringBuffer statement) throws FxSqlSearchException {
-        if (prop.getField().equals("LABEL")) {
+        if ("LABEL".equalsIgnoreCase(prop.getField())) {
             statement.delete(0, statement.length());
             final long lang = FxContext.get().getTicket().getLanguage().getId();
             statement.append(("ifnull(\n" +
@@ -80,6 +80,6 @@ public class MySQLStepSelector extends MySQLGenericSelector {
      */
     @Override
     public String getAllowedFields() {
-        return super.getAllowedFields() + ",label";
+        return super.getAllowedFields() + ",LABEL";
     }
 }

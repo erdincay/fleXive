@@ -115,8 +115,9 @@ public class FxResultSetDataModelTest extends AbstractSqlQueryTest {
 		assert model.isRowAvailable() : "Last row should be available";
 		model.setRowIndex(startIndex + maxRows);
 		assert !model.isRowAvailable() : "Row after last row should not be available";
-        assert model.getWrappedData() == model.getResult() : "Result set should be wrapped data";
         assert model.getRowCount() == TOTALROWS : "Total row count should be " + TOTALROWS + ", got: " + model.getRowCount();
+        assert model.getResult() != null;
+        assert model.getWrappedData() == model.getResult() : "Result set should be wrapped data";
         assert model.getFetchRows() == maxRows : "FetchRows should be " + maxRows + ", got: " + model.getFetchRows();
         assertEqualResults(model, refResult, startIndex, maxRows);
     }

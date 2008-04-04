@@ -119,11 +119,21 @@ TOKEN [IGNORE_CASE] :
 | < INTEGER   : ("-"|"")["0"-"9"] (["0"-"9"])* >
 | < FLOAT     : ("-"|"")(["0"-"9"])*(".")(["0"-"9"])+>
 | < FXPK      : (["0"-"9"])+(".")("MAX"|"LIVE") >
-| < STRING:    ("'"(~["'"]|"''")*"'" | "\""(~["\""]|"\"\"")*"\"") >
+| < STRING:    ("'"(~["'"]|"''")*"'") >
 | < BOOLEAN   : ("TRUE" | "FALSE") >
 | < LIST_SEPERATOR : "," >
 | < IDENTIFIER: ["@","a"-"z","A"-"Z","_"] ( ["!","a"-"z","A"-"Z","_","0"-"9"] )* >
-| < SYM_SELECT_ITEM: ["a"-"z","A"-"Z","_"] ( ["a"-"z","A"-"Z","_","0"-"9"] )*"."((["*","@","#","a"-"z","A"-"Z","_"] ( [".","a"-"z","A"-"Z","_","0"-"9"] )*)|(((["a"-"z","A"-"Z"])(["a"-"z","_","A"-"Z","0"-"9"])*)+("/"["a"-"z","A"-"Z"])(["a"-"z","_","A"-"Z","0"-"9"])*)+) >
+| < SYM_SELECT_ITEM: (  // Table alias + property name, e.g. co.propname or propname.field or "co.propname"
+                        ( ["a"-"z","A"-"Z","_","0"-"9"] )* (["."])?       // table alias
+                        ((["*","@","#","a"-"z","A"-"Z","_"]               // name
+                         ( [".","a"-"z","A"-"Z","_","0"-"9"] )*) )
+
+                        |   // quoted property XPath, e.g. #article/caption
+                        ("#"
+                            ["a"-"z","A"-"Z","_"]
+                            (["a"-"z","A"-"Z","_","0"-"9","/","."])* 
+                        )
+                     ) >
 }
 
 
@@ -156,7 +166,7 @@ FxStatement select(final FxStatement PI) throws SqlParserException :  {
 	    PI.setDistinct(true);
 	}
 	]
-	selectedValues(PI) from_clause(PI) [ <FILTER> filterList(PI) ]
+	selectedValues(PI) [ from_clause(PI) ] [ <FILTER> filterList(PI) ]
 	[ <WHERE> where(PI) ]
 	grp=group_by_clause(PI)
 	[ order_by(PI) ]
@@ -206,7 +216,7 @@ void symItemListOrder(final FxStatement PI) throws SqlParserException :
 	Token ascDesc = null;
 }
 {
-	(tk=<SYM_SELECT_ITEM> | tk=<INTEGER>) [ascDesc=<ASC_DESC>] [ <LIST_SEPERATOR> symItemListOrder(PI) ]
+	(tk=<SYM_SELECT_ITEM> | tk=<INTEGER> | tk=<IDENTIFIER>) [ascDesc=<ASC_DESC>] [ <LIST_SEPERATOR> symItemListOrder(PI) ]
 	{
 		String _sAsc = (ascDesc==null)?null:ascDesc.image.toUpperCase();
 		final boolean asc = (_sAsc==null || _sAsc.indexOf("ASC")!=-1)?true:false;
@@ -228,7 +238,7 @@ String symItemList(final FxStatement PI) :
 {
 	tk=<SYM_SELECT_ITEM> [ sep=<LIST_SEPERATOR> list=symItemList(PI) ]
 	{ 
-		return tk.image+((sep!=null)?sep.image:"")+list; 
+		return tk.image+((sep!=null)?sep.image:"")+list;
 	}
 	|
 	tk=<INTEGER> [ sep=<LIST_SEPERATOR> list=symItemList(PI) ]
@@ -248,7 +258,8 @@ void selectedValues(final FxStatement PI) throws SqlParserException :
 {
 	<WILDCARD>
 	{
-		throw new SqlParserException("ex.sqlSearch.selectAllNotSupported");
+	    final Property p = new Property("co", "*", null);
+		PI.addSelectedValue(p, null);
 	}
 	|
 	vi=selectedValue(PI) [ <LIST_SEPERATOR> selectedValues(PI) ]
@@ -271,17 +282,16 @@ Value selectedValue(final FxStatement PI)  throws SqlParserException  :
 	}
 	| t1=<SYM_SELECT_ITEM> [alias=<IDENTIFIER>]
 	{
-		// A property with table alias is referenced
-		java.util.StringTokenizer st = new java.util.StringTokenizer(t1.image,".",false);
-		String table = st.nextToken();
-		String property = st.nextToken();
-		String field = null;
-		if (st.hasMoreTokens()) {
-		  field = st.nextToken();
-		}
-		Property p = new Property(table,property,field);
+		Property p = new Property(PI, t1.image);
 		PI.addSelectedValue(p,alias==null?null:alias.image);
 		return p;
+	}
+	| t1=<IDENTIFIER> [alias=<IDENTIFIER>]
+	{
+	    // a property without table alias
+        Property p2 = new Property("co",t1.image,null);
+        PI.addSelectedValue(p2,alias != null ? alias.image : t1.image);
+        return p2;
 	}
 	| con=constantValue() [alias=<IDENTIFIER>]
 	{
@@ -464,7 +474,7 @@ Condition condition(final FxStatement PI) throws SqlParserException: {
 	String relationFroms = null;
 }{
 	LOOKAHEAD(3)
-	vi1=value() fct=comperator(PI) vi2=valueOrSubselect(PI)
+	vi1=value(PI) fct=comperator(PI) vi2=valueOrSubselect(PI)
 	{
 		return new Condition(PI,vi1,fct,vi2);
 	}
@@ -477,7 +487,7 @@ Condition condition(final FxStatement PI) throws SqlParserException: {
 		return new Condition(PI,vi1,Condition.Comparator.IS_DIRECT_CHILD_OF,null);
         }
 	|
-	vi1=value() inNotIn=<IN_OR_NOTIN> <BRACE_OPEN> arr=constantArray() <BRACE_CLOSE>
+	vi1=value(PI) inNotIn=<IN_OR_NOTIN> <BRACE_OPEN> arr=constantArray() <BRACE_CLOSE>
 	{
 		return new Condition(PI,vi1,
 		inNotIn.image.equalsIgnoreCase("IN")?Condition.Comparator.IN:Condition.Comparator.NOT_IN,
@@ -526,7 +536,7 @@ Value valueOrSubselect(final FxStatement PI) throws SqlParserException :
 { 
 	Value vi;
 }{
-	vi=value ()
+	vi=value (PI)
 	{ 
 		return vi; 
 	}
@@ -543,39 +553,34 @@ Value valueOrSubselect(final FxStatement PI) throws SqlParserException :
 /**
  * Value may be a property, number, or string with our without enclosing functions
  */
-Value value()  throws SqlParserException  :
+Value value(final FxStatement PI)  throws SqlParserException  :
 { 
 	Value vi;
 	Token t1,nr1,nr2; 
 	String sel;
 	Constant con;
 }{
-	t1=<FUNCTION> vi=value() <BRACE_CLOSE>
+	t1=<FUNCTION> vi=value(PI) <BRACE_CLOSE>
 	{
 		return vi.addFunction(t1.image);
 	}
-	|
-	<SUBSTRING> <BRACE_OPEN> vi=value() <LIST_SEPERATOR> nr1=<INTEGER> <LIST_SEPERATOR> nr2=<INTEGER> <BRACE_CLOSE>
+	| <SUBSTRING> <BRACE_OPEN> vi=value(PI) <LIST_SEPERATOR> nr1=<INTEGER> <LIST_SEPERATOR> nr2=<INTEGER> <BRACE_CLOSE>
 	{
 		throw new SqlParserException("ex.sqlSearch.substringNotSupported");
 	}
-	|
-	t1=<IDENTIFIER>
+	| t1=<IDENTIFIER>
 	{
 		// A property with NO table alias is referenced
-		throw new SqlParserException("ex.sqlSearch.identifierIsNotAllowedHere",t1.image);
+		return new Property("co", t1.image, null);
+	}
+	| <WILDCARD>
+	{
+	    // fulltext query
+	    return new Property("co", "*", null);
 	}
 	| t1=<SYM_SELECT_ITEM> 
 	{
-		// A property with table alias is referenced
-		java.util.StringTokenizer st = new java.util.StringTokenizer(t1.image,".",false);
-		String table = st.nextToken();
-		String property = st.nextToken();
-		String field = null;
-		if (st.hasMoreTokens()) {
-		  field = st.nextToken();
-		}
-		return new Property(table,property,field);
+		return new Property(PI, t1.image);
 	}
 	| LOOKAHEAD(3) <BRACE_OPEN> con=constantArray() <BRACE_CLOSE> {
 	    return con;

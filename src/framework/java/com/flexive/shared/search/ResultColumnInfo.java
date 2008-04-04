@@ -100,11 +100,11 @@ public class ResultColumnInfo implements Serializable {
     /**
      * Return the full column name to be used in SQL queries.
      * For example:<br/>
-     * <code>new ColumnInfo(Table.CONTENT, "mandator", "name").getColumnName() -> co.mandator.name</code>
+     * <code>new ColumnInfo(Table.CONTENT, "mandator", "name").getColumnName() -> mandator.name</code>
      * @return the full column name to be used in SQL queries.
      */
     public String getColumnName() {
-        return table.getAlias() + "." + propertyName + (StringUtils.isNotBlank(suffix) ? "." + suffix : "");
+        return (!Table.CONTENT.equals(table) ? table.getAlias() + "." : "") + propertyName + (StringUtils.isNotBlank(suffix) ? "." + suffix : "");
     }
 
     /**

@@ -39,6 +39,7 @@ import com.flexive.shared.FxContext;
 import com.flexive.shared.FxFormatUtils;
 import static com.flexive.shared.EJBLookup.getContentEngine;
 import static com.flexive.shared.EJBLookup.getMandatorEngine;
+import static com.flexive.shared.EJBLookup.getSearchEngine;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNodeEdit;
@@ -143,8 +144,8 @@ public class SearchEngineTest {
                 .condition("comment", PropertyValueComparator.LIKE, "folder comment%")
                 .closeSub().getResult();
         assert result.getRowCount() == 25 : "Expected to fetch 25 rows, got: " + result.getRowCount();
-        assert result.getColumnIndex("co.caption") == 1 : "Unexpected column index for co.caption: " + result.getColumnIndex("co.caption");
-        assert result.getColumnIndex("co.comment") == 2 : "Unexpected column index for co.comment: " + result.getColumnIndex("co.comment");
+        assert result.getColumnIndex("caption") == 1 : "Unexpected column index for caption: " + result.getColumnIndex("caption");
+        assert result.getColumnIndex("comment") == 2 : "Unexpected column index for comment: " + result.getColumnIndex("comment");
         for (int i = 1; i <= result.getRowCount(); i++) {
             assert result.getString(i, 1).startsWith("test caption") : "Unexpected column value: " + result.getString(i, 1);
             assert result.getString(i, 2).startsWith("folder comment") : "Unexpected column value: " + result.getString(i, 2);
@@ -201,7 +202,7 @@ public class SearchEngineTest {
         // create briefcase
         final String selectFolders = new SqlQueryBuilder().filterType("FOLDER").getQuery();
         final FxSQLSearchParams params = new FxSQLSearchParams().saveResultInBriefcase("test briefcase", "description", (Long) null);
-        final FxResultSet result = EJBLookup.getSearchEngine().search(selectFolders, 0, Integer.MAX_VALUE, params);
+        final FxResultSet result = getSearchEngine().search(selectFolders, 0, Integer.MAX_VALUE, params);
         long bcId = result.getCreatedBriefcaseId();
         try {
             assert result.getRowCount() > 0;
@@ -319,13 +320,13 @@ public class SearchEngineTest {
     public void explicitOrderByResultPreferencesTest() throws FxApplicationException {
         setResultPreferences(SortDirection.ASCENDING);
         // sort by the second column taken from the result preferences - needs "virtual" columns
-        final FxResultSet result = EJBLookup.getSearchEngine().search(
-                "SELECT co.@pk, co.id, co.* FROM content CO FILTER co.type='" + TEST_TYPE + "' ORDER BY 4 DESC", 0, 9999, null);
+        final FxResultSet result = getSearchEngine().search(
+                "SELECT @pk, id, * FROM content CO FILTER type='" + TEST_TYPE + "' ORDER BY 4 DESC", 0, 9999, null);
         assert result.getRowCount() > 0;
         assertDescendingOrder(result, 4);
 
         try {
-            EJBLookup.getSearchEngine().search(
+            getSearchEngine().search(
                     "SELECT co.@pk, co.id, co.* FROM content CO FILTER co.type='" + TEST_TYPE + "' ORDER BY 5 DESC", 0, 9999, null);
             assert false : "Selected result preference column should not be present in result set";
         } catch (FxApplicationException e) {
@@ -679,7 +680,8 @@ public class SearchEngineTest {
      */
     @Test
     public void selectAllPermissionsTest() throws FxApplicationException {
-        final FxResultSet result = EJBLookup.getSearchEngine().search("SELECT co.@pk FROM content co", 0, 999999, null);
+        final FxResultSet result = getSearchEngine().search("SELECT @pk", 0, 999999, null);
+        assert result.getRowCount() > 0;
         for (FxResultRow row: result.getResultRows()) {
             try {
                 getContentEngine().load(row.getPk(1));
@@ -811,19 +813,19 @@ public class SearchEngineTest {
 
     @Test
     public void lastContentChangeTest() throws FxApplicationException {
-        final long lastContentChange = EJBLookup.getSearchEngine().getLastContentChange(false);
+        final long lastContentChange = getSearchEngine().getLastContentChange(false);
         assert lastContentChange > 0;
         final FxContent content = getContentEngine().initialize(TEST_TYPE);
         content.setAclId(TestUsers.getInstanceAcl().getId());
         content.setValue("/" + getTestPropertyName("string"), new FxString(false, "lastContentChangeTest"));
         FxPK pk = null;
         try {
-            assert EJBLookup.getSearchEngine().getLastContentChange(false) == lastContentChange
+            assert getSearchEngine().getLastContentChange(false) == lastContentChange
                     : "Didn't touch contents, but lastContentChange timestamp was increased";
             pk = getContentEngine().save(content);
-            assert EJBLookup.getSearchEngine().getLastContentChange(false) > lastContentChange
+            assert getSearchEngine().getLastContentChange(false) > lastContentChange
                     : "Saved content, but lastContentChange timestamp was not increased: "
-                    + EJBLookup.getSearchEngine().getLastContentChange(false);
+                    + getSearchEngine().getLastContentChange(false);
         } finally {
             removePk(pk);
         }
@@ -831,18 +833,18 @@ public class SearchEngineTest {
 
     @Test
     public void lastContentChangeTreeTest() throws FxApplicationException {
-        final long lastContentChange = EJBLookup.getSearchEngine().getLastContentChange(false);
+        final long lastContentChange = getSearchEngine().getLastContentChange(false);
         assert lastContentChange > 0;
         final long nodeId = EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("lastContentChangeTreeTest"));
         try {
-            final long editContentChange = EJBLookup.getSearchEngine().getLastContentChange(false);
+            final long editContentChange = getSearchEngine().getLastContentChange(false);
             assert editContentChange > lastContentChange
                     : "Saved content, but lastContentChange timestamp was not increased: " + editContentChange;
             EJBLookup.getTreeEngine().activate(FxTreeMode.Edit, nodeId, false);
-            assert EJBLookup.getSearchEngine().getLastContentChange(true) > editContentChange
+            assert getSearchEngine().getLastContentChange(true) > editContentChange
                     : "Activated content, but live mode lastContentChange timestamp was not increased: "
-                        + EJBLookup.getSearchEngine().getLastContentChange(true);
-            assert EJBLookup.getSearchEngine().getLastContentChange(false) == editContentChange
+                        + getSearchEngine().getLastContentChange(true);
+            assert getSearchEngine().getLastContentChange(false) == editContentChange
                     : "Edit tree didn't change, but lastContentChange timestamp was updated";
         } finally {
             FxContext.get().runAsSystem();
@@ -910,7 +912,7 @@ public class SearchEngineTest {
             final FxContent content = getContentEngine().initialize(TEST_TYPE);
             content.setValue("/" + getTestPropertyName("string"), new FxString(false, "te'st"));
             pk = getContentEngine().save(content);
-            final FxResultSet result = EJBLookup.getSearchEngine().search("SELECT co.id FROM content co WHERE co."
+            final FxResultSet result = getSearchEngine().search("SELECT id WHERE "
                     + getTestPropertyName("string") + " = 'te''st'", 0, 10, null);
             assert result.getRowCount() == 1 : "Escaped string property not returned";
             assert result.getResultRow(0).getLong(1) == pk.getId();
@@ -978,6 +980,61 @@ public class SearchEngineTest {
         assertExactPkMatch(content.getPk(), new SqlQueryBuilder().select("@pk").condition("created_at", PropertyValueComparator.GE, new FxDateTime(false, createdAt)).condition("id", EQ, content.getPk().getId()).getResult().<FxPK>collectColumn(1));
         assert new SqlQueryBuilder().select("@pk").condition("created_at", PropertyValueComparator.LT, new FxDateTime(false, createdAt)).condition("id", EQ, content.getPk().getId()).getResult().getRowCount() == 0;
         assert new SqlQueryBuilder().select("@pk").condition("created_at", PropertyValueComparator.GT, new FxDateTime(false, createdAt)).condition("id", EQ, content.getPk().getId()).getResult().getRowCount() == 0;
+    }
+
+    @Test
+    public void assignmentQueryTest() throws FxApplicationException {
+        final FxPropertyAssignment assignment = getTestPropertyAssignment("string");
+        final FxResultSet result = getSearchEngine().search("SELECT #" + assignment.getId() + " WHERE #" + assignment.getId() + " IS NOT NULL",
+                0, 10, null);
+        assert result.getRowCount() > 0;
+    }
+
+    @Test
+    public void assignmentBuilderQueryTest() throws FxApplicationException {
+        final FxPropertyAssignment assignment = getTestPropertyAssignment("string");
+        final String dateProperty = getTestPropertyName("date");
+        final FxResultSet result = new SqlQueryBuilder().select("@pk")
+                .condition(assignment, PropertyValueComparator.NOT_EMPTY, null)
+                .condition("YEAR(" + dateProperty + ")", PropertyValueComparator.GT, 0)
+                .condition(TEST_TYPE + "/grouptop/" + dateProperty, PropertyValueComparator.NOT_EMPTY, null)
+                .condition("YEAR(" + TEST_TYPE + "/grouptop/" + dateProperty + ")", PropertyValueComparator.GT, 0)
+                .getResult();
+        assert result.getRowCount() > 0;
+    }
+
+
+    @Test
+    public void commentTest() throws FxApplicationException {
+        final FxPropertyAssignment assignment = getTestPropertyAssignment("string");
+        final FxResultSet result = getSearchEngine().search("SELECT /* field1 */ id, * \n" +
+                "WHERE -- line comment\n" +
+                "/* comment */ (/* comment*/ id != 0) or (/*comment*/#" + assignment.getId() + " IS NULL)", 0, 10, null);
+        assert result.getRowCount() > 0;
+
+    }
+
+    @Test
+    public void tableAliasTest() throws FxApplicationException {
+        final FxResultSet result = getSearchEngine().search("SELECT tbl.@pk, tbl.caption\n" +
+                "FROM content tbl\n" +
+                "WHERE tbl.id > 0", 0, 10, null);
+        assert result.getRowCount() > 0;
+    }
+
+    @Test
+    public void selectEmptyPathTest() throws FxApplicationException {
+        // select path for all items, will include empty paths like contact data
+        final FxResultSet result = getSearchEngine().search("SELECT @path", 0, 99999, null);
+        assert result.getRowCount() > 0;
+    }
+
+    @Test
+    public void orderByAssignmentTest() throws FxApplicationException {
+        final FxPropertyAssignment assignment = getTestPropertyAssignment("number");
+        final FxResultSet result = new SqlQueryBuilder().select("id", assignment.getXPath())
+                .orderBy(assignment.getXPath(), SortDirection.ASCENDING).getResult();
+        assert result.getRowCount() > 0;
     }
 
     private void assertExactPkMatch(FxPK pk, List<FxPK> pks) {

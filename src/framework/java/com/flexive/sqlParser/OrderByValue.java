@@ -86,6 +86,20 @@ public class OrderByValue extends Constant {
         return ascending;
     }
 
+    /**
+     * Returns true if the given {@link SelectedValue} can be used for sorting.
+     *
+     * @param sv    the selected value
+     * @return  true if the given {@link SelectedValue} can be used for sorting.
+     */
+    public boolean isUsableForSorting(SelectedValue sv) {
+        if (getValue().charAt(0) == '#') {
+            return sv.getAlias().equals(getValue().substring(1));
+        }
+        return sv.getAlias().equals(getValue());
+    }
+
+    @Override
     public String toString() {
         return super.toString()+" "+(this.ascending?"asc":"desc");
     }

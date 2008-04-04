@@ -140,7 +140,7 @@ public class SubSelectValues {
         if (isMultivalue() || entry.getTableType() != PropertyResolver.Table.T_CONTENT) {
             throw new FxSqlSearchException(LOG, "ex.sqlSearch.query.fieldNotAllowedFor", prop.getPropertyName());
         }
-        final FieldSelector selector = ds.getSelectors().get(prop.getPropertyName());
+        final FieldSelector selector = ds.getSelectors().get(prop.getPropertyName().toUpperCase());
         if (selector == null) {
             throw new FxSqlSearchException(LOG, "ex.sqlSearch.query.noFieldsForProp",
                     prop.getField(), prop.getPropertyName());

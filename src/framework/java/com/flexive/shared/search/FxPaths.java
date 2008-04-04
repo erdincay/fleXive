@@ -65,6 +65,9 @@ public class FxPaths implements Serializable {
             String split[] = encoded.substring(1).split("/");
             items = new ArrayList<Item>(split.length);
             for (String item : split) {
+                if (StringUtils.isBlank(item)) {
+                    continue;
+                }
                 final Item aItem = new Item(item);
                 items.add(aItem);
                 caption += "/" + aItem.getCaption();

@@ -33,6 +33,10 @@
  ***************************************************************/
 package com.flexive.sqlParser;
 
+import java.util.StringTokenizer;
+import java.util.List;
+import java.util.Collection;
+
 /**
  * Property reference class.
  *
@@ -60,7 +64,37 @@ public class Property extends Value {
         this.field = field == null ? null : field.trim().toUpperCase();
     }
 
+    public Property(FxStatement stmt, String value) {
+        super(value.indexOf('#') == -1 ? value : value.substring(1));
+        // decode value
+        assignment = value.charAt(0) == '#';
+        final StringTokenizer st = new StringTokenizer(assignment ? value.substring(1) : value, ".", false);
+        tableAlias = st.nextToken().toUpperCase();
+        property = st.hasMoreTokens() ? st.nextToken().toUpperCase() : null;
+        field = st.hasMoreTokens() ? st.nextToken().toUpperCase() : null;
+        if (property == null) {
+            // only a property name was specified, use default table
+            property = tableAlias;
+            tableAlias = "co";
+        }
+    }
 
+    public void publishTableAliases(Collection<String> aliases) {
+        // treat unknown table aliases as property names
+        for (String stmtAlias: aliases) {
+            if (tableAlias.equalsIgnoreCase(stmtAlias)) {
+                return; // table alias ok
+            }
+        }
+        if (field == null) {
+            // table --> property, property --> field
+            field = property;
+            property = tableAlias;
+            tableAlias = "co";
+        }
+        // do nothing if tableAlias, property and field are set - in this case
+        // the alias is actually invalid and an error message should be displayed
+    }
     /**
      * The field that should be used from the property, or null.
      * <p/>
@@ -105,9 +139,9 @@ public class Property extends Value {
      *
      * @return property or assignment?
      */
-    public synchronized boolean isAssignment() {
+    public boolean isAssignment() {
         if( assignment == null )
-            this.assignment = property.indexOf('/') > 0 || property.charAt(0) == '#';
+            this.assignment = property.charAt(0) == '#';
         return assignment;
     }
 

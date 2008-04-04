@@ -40,7 +40,12 @@ package com.flexive.shared.search;
  * @version $Rev$
  */
 public enum Table {
-    CONTENT("co", "content");
+    CONTENT("co", "content") {
+        @Override
+        public String getColumnName(String columnName) {
+            return columnName.toLowerCase();  // never include the standard content alias, user lowercase 
+        }
+    };
 
     private final String alias;
     private final String name;
