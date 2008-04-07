@@ -113,6 +113,8 @@ public class FxValueInputTestBean {
                 new FxDouble(ENGLISH, Math.PI).setTranslation(GERMAN, Math.PI - 0.1),
                 new FxDate(false, new Date()),
                 new FxDate(ENGLISH, new Date()).setTranslation(GERMAN, new Date(new Date().getTime() - 24*3600*1000)),
+                new FxDateTime(false, new Date()),
+                new FxDateTime(ENGLISH, new Date()).setTranslation(GERMAN, new Date(new Date().getTime() - 24*3600*1000)),
                 new FxHTML(false, "HTML value"),
                 new FxHTML(ENGLISH, "english HTML").setTranslation(GERMAN, "deutsches HTML"),
                 new FxSelectOne(false, countries.get(0)),

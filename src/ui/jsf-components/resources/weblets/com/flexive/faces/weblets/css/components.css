@@ -12,21 +12,29 @@ div.fxValueInput {
 /* An input row containing the input element and the default language checkbox */
 div.fxValueInputRow {
     position: relative;
-    left: 0;
-    top: 0;
     width: 225px;
+    clear: both;
+    padding: 1px 1px 1px 0;
 }
 
 input.fxValueDefaultLanguageRadio {
-    float: left;
 }
 
 div.FxHTMLInput div.fxValueInputRow {
     padding-top: 20px;
 }
 
+/* Limit width of the month select list*/
+.FxDateInput select {
+    width: 90px;
+}
+
+.FxDateTimeInput select {
+    width: 80px;
+}
+
 input.fxValueTextInput, textarea.fxValueTextArea, select.fxValueSelectInput, .fxValueInputElementWidth {
-    width: 170px;
+    width: 175px;
 }
 
 input.fxValueTextInput, textarea.fxValueTextArea, select.fxValueSelectInput {
@@ -62,10 +70,9 @@ div.fxValueInput select.languages {
 }
 
 div.fxValueInputLanguageIcon {
-    float: left;
     margin-left: 3px;
     width: 15px;
-    display: none;
+    display: inline;
 }
 
 /* Query editor */

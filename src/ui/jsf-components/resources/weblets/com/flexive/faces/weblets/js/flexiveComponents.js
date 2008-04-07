@@ -22,7 +22,7 @@ FxMultiLanguageValueInput.prototype = {
             var enabled = rowId == null || this.rowIds[i] == rowId;
             document.getElementById(this.rowIds[i]).style.display = enabled ? "block" : "none";
             // all languages / show language icon for each row
-            document.getElementById(this.rowIds[i] + "_language").style.display = (enabled && rowId == null) ? "block" : "none"; 
+            document.getElementById(this.rowIds[i] + "_language").style.display = (enabled && rowId == null) ? "inline" : "none"; 
         }
     },
 

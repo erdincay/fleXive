@@ -507,6 +507,11 @@
                     where a FxValue needs to be edited. It also includes multilanguage support
                     by providing a language select list next to the input elements.
                 </para>
+                <para>
+                    The default input language of multi-language values can be set in the user preferences
+                    of the &backendGui; or programmatically through the user configuration parameter
+                    <constant>com.flexive.shared.configuration.SystemParameters.USER_DEFAULTINPUTLANGUAGE</constant>.
+                </para>
                 <section xml:id="jcl_fx_value_input_synopsis">
                     <title>Synopsis</title>
                     <programlisting language="xhtml"><![CDATA[<fx:fxValueInput value="fxvalue" [id="clientid"] [externalId="externalId"] [readOnly="true|false"]
@@ -633,6 +638,39 @@
                         <title>An input row for editing a FxString value</title>
                         <xi:include href="listings/jsfsupport_valueinput_groupname.xml"/>
                     </example>
+                </section>
+            </section>
+
+            <section xml:id="jcl_fx_value_input_languageselect">
+                <title>
+                    <code language="xhtml">&lt;fx:fxValueInputLanguageSelect></code>
+                </title>
+
+                <para>
+                    Provides a select list that switches the input language of all
+                    <code>&lt;fx:fxValueInput/&gt;</code>
+                    components on the current page. This tag is implemented in JavaScript,
+                    and it does not cause an extra round-trip to the server.
+                </para>
+
+
+                <section xml:id="jcl_fx_value_input_languageselect_synopsis">
+                    <title>Synopsis</title>
+                    <programlisting language="xhtml"><![CDATA[<fx:fxValueInputLanguageSelect id="clientid"/>]]></programlisting>
+                </section>
+
+                <section xml:id="jcl_fx_value_input_languageselect_parameters">
+                    <title>Parameters</title>
+                    <variablelist>
+                        <varlistentry>
+                            <term>id</term>
+                            <listitem>
+                                <para>
+                                    The client ID of the select input component.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
                 </section>
             </section>
 

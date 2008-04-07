@@ -617,12 +617,6 @@ class EditModeHelper extends RenderHelper {
         public void encodeBegin(FacesContext facesContext) throws IOException {
             final ResponseWriter writer = facesContext.getResponseWriter();
 
-            writer.startElement("div", null);
-            writer.writeAttribute("id", containerId + "_language", null);
-            writer.writeAttribute("class", FxValueInputRenderer.CSS_LANG_ICON, null);
-            writer.writeText(languageCode, null);
-            writer.endElement("div");
-
             writer.startElement("input", null);
             writer.writeAttribute("type", "checkbox", null);
             writer.writeAttribute("name", radioName, null);
@@ -631,9 +625,15 @@ class EditModeHelper extends RenderHelper {
             if (languageId == getInputValue().getDefaultLanguage()) {
                 writer.writeAttribute("checked", "true", null);
             }
-            writer.writeAttribute("onchange", "document.getElementById('" + inputClientId
+            writer.writeAttribute("onclick", "document.getElementById('" + inputClientId
                     + "')." + JS_OBJECT + ".onDefaultLanguageChanged(this)", null);
             writer.endElement("input");
+
+            writer.startElement("div", null);
+            writer.writeAttribute("id", containerId + "_language", null);
+            writer.writeAttribute("class", FxValueInputRenderer.CSS_LANG_ICON, null);
+            writer.writeText(languageCode, null);
+            writer.endElement("div");
         }
 
         @Override
