@@ -47,6 +47,7 @@ import java.util.Map;
 import java.util.HashMap;
 
 import org.apache.commons.lang.StringUtils;
+import net.java.dev.weblets.FacesWebletUtils;
 
 /**
  * Renders all weblet resources required by the current page.
@@ -102,8 +103,10 @@ public class WriteWebletIncludes extends UIOutput {
         if (!addWebletInclude(weblet) && getRequestWebletMap().get(weblet)) {
             return null;    // weblet already rendered
         }
-        final ViewHandler viewHandler = FacesContext.getCurrentInstance().getApplication().getViewHandler();
-        final String url = viewHandler.getResourceURL(getCurrentInstance(), "weblet://" + weblet);
+        //final ViewHandler viewHandler = FacesContext.getCurrentInstance().getApplication().getViewHandler();
+        final int idx = weblet.indexOf("/");
+        final String url = FacesWebletUtils.getURL(FacesContext.getCurrentInstance(), weblet.substring(0,idx), weblet.substring(idx, weblet.length()));
+        //final String url = viewHandler.getResourceURL(getCurrentInstance(), "weblet://" + weblet);
         getRequestWebletMap().put(weblet, true);    // set rendered flag for this weblet
         if (weblet.endsWith(".js")) {
             return "<script type=\"text/javascript\" src=\"" + url + "\"> </script>";

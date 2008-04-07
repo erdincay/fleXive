@@ -278,4 +278,8 @@
         <welcome-file>main.xhtml</welcome-file>
     </welcome-file-list>
 
+    <listener>
+        <listener-class>net.java.dev.weblets.WebletsContextListener</listener-class>
+    </listener>
+
 </web-app>

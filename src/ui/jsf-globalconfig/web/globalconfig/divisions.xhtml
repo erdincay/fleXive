@@ -6,11 +6,12 @@
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:c="http://java.sun.com/jstl/core"
       xmlns:t="http://myfaces.apache.org/tomahawk"
-      xmlns:fx="http://www.flexive.com/jsf/core">
+      xmlns:fx="http://www.flexive.com/jsf/core"
+      xmlns:weblet="http://weblets.dev.java.net/tags_jsp2">
 <head>
     <title>#{fxMessageBean['GlobalConfig.title']}</title>
     <fx:includes/>
-    <link rel="stylesheet" type="text/css" href="#{fxSystemBean.weblet['divisions_plugin/css/divisions.css']}"/>
+    <link rel="stylesheet" type="text/css" href="#{weblet:url('divisions_plugin','/css/divisions.css')}"/>
 </head>
 
 <body>

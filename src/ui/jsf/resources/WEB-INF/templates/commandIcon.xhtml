@@ -15,7 +15,12 @@ See commandElement template for the parameter documentation
 <ui:composition template="/adm/templates/commandElement.xhtml">
 
     <ui:define name="content">
-        <t:graphicImage url="/adm/images/commandButton/${icon}.png" style="border:0; margin-left:5px;"/>
+
+        <c:if test="#{empty iconUrl}">
+            <c:set var="iconUrl" value="/adm/images/commandButton/#{icon}.png"/>
+        </c:if>
+        <img alt="#{id}_icon" src="#{iconUrl}" style="border:0; margin-left:5px;"/>
+
     </ui:define>
 
 </ui:composition>

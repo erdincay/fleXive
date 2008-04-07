@@ -434,7 +434,7 @@ function getCallerElement(caller,id) {
 // @url: the url to cal (not used at the moment)
 // @icon: the icon to use in the toolbar
 //======================================================================================================================
-function addToolbarItem(responseId,caller,id,helpTxt,url,icon) {
+function addToolbarItem(responseId,caller,id,helpTxt,url,iconUrl) {
     try {
         _caller = caller;
 
@@ -446,7 +446,7 @@ function addToolbarItem(responseId,caller,id,helpTxt,url,icon) {
 
         // Add the new element
         var pos = toolbarImages.length;
-        toolbarImages[pos]=icon;
+        toolbarImages[pos]=iconUrl;
         toolbarHelp[pos]=helpTxt;
         toolbarClick[pos]="_caller.triggerCommandElement_"+id+"()";
         toolbarIds[pos]=id;
@@ -475,8 +475,8 @@ function renderToolbar() {
     var html = "";
     var pos;
     for (pos = 0; pos < toolbarImages.length; pos++) {
-        html += "<img id=\"" + toolbarIds[pos] + "_toolbarIcon\" src=\"adm/images/toolbar/" + toolbarImages[pos] + ".png\" " +
-                "class=\"fxToolbarIcon\" onClick=\"" + toolbarClick[pos] + "\" alt=\"" + toolbarHelp[pos]
+        html += "<img id=\"" + toolbarIds[pos] + "_toolbarIcon\" src=\"" + toolbarImages[pos] +
+                "\" class=\"fxToolbarIcon\" onClick=\"" + toolbarClick[pos] + "\" alt=\"" + toolbarHelp[pos]
                 + "\" title=\"" + toolbarHelp[pos] + "\"/>";
     }
     html+="<span id='toolbarMessage'> </span>";

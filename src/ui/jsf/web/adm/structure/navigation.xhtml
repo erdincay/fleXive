@@ -195,14 +195,10 @@
                            foundnode=searchNode(node.children, harray, id, isType);
                         }
                     }
-                    if(node["assignmentId"]== id) {
-                        if ( (isType && ("Type" == node.nodeDocType || "TypeRelation" == node.nodeDocType)) ||
-                             (!isType && ("Assignment" == node.nodeDocType || "AssignmentSystemInternal" == node.nodeDocType || "Group" == node.nodeDocType))
-                           ) {
-                                foundnode=node;
-                                historyarray.push(new Array(node,i));
-                                return historyarray;
-                            }
+                    if(isType && node["typeId"]== id || !isType && node["assignmentId"]==id) {
+                        foundnode=node;
+                        historyarray.push(new Array(node,i));
+                        return historyarray;
                     }
                 }
                 return foundnode;

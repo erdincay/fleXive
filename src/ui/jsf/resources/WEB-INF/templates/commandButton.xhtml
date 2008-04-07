@@ -18,16 +18,21 @@ See commandElement template for the parameter documentation
         <c:if test="#{!empty labelKey}">
             <c:set var="label" value="#{fxMessageBean[labelKey]}"/>
         </c:if>
+        <c:if test="#{empty iconUrl}">
+            <c:set var="iconUrl" value="/adm/images/commandButton/#{icon}.png"/>
+        </c:if>
+
         <table border="0" cellpadding="0" cellspacing="0" class="commandButton">
             <tr>
-                <td class="commandButtonIcon"><t:graphicImage id="#{id}_icon" url="/adm/images/commandButton/${icon}.png" border="0"/></td>
+                <td class="commandButtonIcon"><img alt="#{id}_icon" id="#{id}_icon" src="#{iconUrl}" border="0"/></td>
                 <td class="commandButtonLabel" nowrap="true">#{label}</td>
                 <td class="commandButtonRight"> </td>
             </tr>
         </table>
+
     </ui:define>
 
-</ui:composition>
+        </ui:composition>
 
 
-</html>
+        </html>

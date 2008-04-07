@@ -85,7 +85,7 @@
                     <tbody>
                         <ui:repeat value="#{groupEditorBean.referencingGroupAssignments}" var="ga">
                             <h:commandLink id="gotoGroupAssignmentButton_#{pa.id}" action="#{groupEditorBean.showGroupAssignmentEditor}"
-                                 onclick="var treeframe=parent.getStructureNavFrame(); treeframe.selectNode(#{ga.id});">
+                                 onclick="var treeframe=parent.getStructureNavFrame(); treeframe.selectNode(#{ga.id}, false);">
                                     <h:outputText value="#{ga.XPath}"/>
                             </h:commandLink>
                             <br/>

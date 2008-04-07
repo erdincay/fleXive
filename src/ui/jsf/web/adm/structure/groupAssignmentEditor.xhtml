@@ -51,7 +51,7 @@
                 <fx:formRow labelKey="GroupEditor.label.xPathBase" id="xPathBase">
                     <h:commandLink id="gotoGroupAssignmentButton_#{groupEditorBean.assignment.baseAssignmentId}"
                                    action="#{groupEditorBean.showGroupAssignmentEditor}"
-                                   onclick="var treeframe=parent.getStructureNavFrame(); treeframe.selectNode(#{groupEditorBean.assignment.baseAssignmentId});">
+                                   onclick="var treeframe=parent.getStructureNavFrame(); treeframe.selectNode(#{groupEditorBean.assignment.baseAssignmentId}, false);">
                         <h:outputText id="xPathBase" value="#{groupEditorBean.baseAssignmentXPath}"/>
                     </h:commandLink>
                 </fx:formRow>

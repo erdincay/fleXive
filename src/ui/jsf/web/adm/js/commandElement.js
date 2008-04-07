@@ -33,7 +33,7 @@ function registerCommandElement(callerWindow,id,confirmTxt,lockscreen) {
 //======================================================================================================================
 // Returns the javascript of a command element, which can then be called by using eval(__).
 //
-// The command element has to be register in order for this function to work.
+// The command element has to be registered in order for this function to work.
 // @callerWindow: the calling window
 // @id: the unique id of the command element
 //======================================================================================================================

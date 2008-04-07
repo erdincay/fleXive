@@ -85,6 +85,10 @@ public interface ToolbarPluginExecutor extends PluginExecutor {
      * a concrete JSF action outcome in "action", or supply a EL-binding for "beans" and
      * the name of a method in "action". Javascript or absolute URI requests are currently
      * not supported.
+     * The url of the icon to be displayed in the toolbar can be set via <code>setIconUrl(String iconUrl)</code>
+     * (i.e /flexive/myImages/myIcon.png).
+     * Alternatively as shorthand, the icon can be set via <code>setIcon(String iconName)</code> which
+     * is mapped to the url adm/images/toolbar/iconName.png.
      */
     public static class Button {
         private final String id;
@@ -92,6 +96,7 @@ public interface ToolbarPluginExecutor extends PluginExecutor {
         private String bean;
         private String action;
         private String icon;
+        private String iconUrl;
 
         public Button(String id) {
             this.id = id;
@@ -124,6 +129,15 @@ public interface ToolbarPluginExecutor extends PluginExecutor {
         public Button setIcon(String icon) {
             this.icon = icon;
             return this;
+        }
+
+        public Button setIconUrl(String iconUrl) {
+            this.iconUrl = iconUrl;
+            return this;
+        }
+
+        public String getIconUrl() {
+            return iconUrl;
         }
 
         public String getLabel() {

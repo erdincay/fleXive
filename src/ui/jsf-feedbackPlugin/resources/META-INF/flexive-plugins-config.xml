@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<plugins-config xmlns="http://www.flexive.com/plugins-config">
+
+    <plugin-factory>
+        com.flexive.faces.plugin.FeedbackPluginFactory
+    </plugin-factory>
+
+</plugins-config>

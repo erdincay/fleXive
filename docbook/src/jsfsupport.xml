@@ -1805,7 +1805,7 @@ component.create:
                 internal data structure. Why do we specify an interface instead
                 of a concrete implementation class? The actual plugin executor implementation depends
                 on the code being extended, and may contain private classes that are not
-                (or should not) be visible to the plugin developer. Also, sometimes it is convenient to
+                (or should not be) visible to the plugin developer. Also, sometimes it is convenient to
                 implement the executor as an anonymous inner class that has access to the
                 surrounding method's variables, without publishing the actual implementation
                 to somebody else.
@@ -1816,7 +1816,7 @@ component.create:
                 <programlisting language="java"><![CDATA[public static final ExtensionPoint<TestExecutor> EXTENSIONPOINT =
         new ExtensionPoint<TestExecutor>("ourapp.extensionpoint") { };
 ]]></programlisting>
-                We bind the extension point to our executor interface, and specify an unique identifier
+                We bind the extension point to our executor interface, and specify a unique identifier
                 (<literal>ourapp.extensionpoint</literal>).
                 When a plugin developer does not want to or cannot reference the
                 <constant>EXTENSIONPOINT</constant>

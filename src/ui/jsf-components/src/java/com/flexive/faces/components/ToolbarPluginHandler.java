@@ -117,6 +117,7 @@ public class ToolbarPluginHandler extends TagHandler implements TemplateClient {
                 mapper.setVariable("bean", factory.createValueExpression(ctx, "#{" + button.getBean() + "}", Object.class));
                 mapper.setVariable("action", factory.createValueExpression(button.getAction(), String.class));
                 mapper.setVariable("icon", factory.createValueExpression(button.getIcon(), String.class));
+                mapper.setVariable("iconUrl", factory.createValueExpression(button.getIconUrl(), String.class));
                 mapper.setVariable("location", factory.createValueExpression("toolbar", String.class));
 
                 // include template
