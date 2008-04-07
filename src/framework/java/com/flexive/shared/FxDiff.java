@@ -47,7 +47,7 @@ public class FxDiff {
      * if <code>getDeletedEnd()</code> returns -1, then the difference represents an
      * addition.
      */
-    public class Difference {
+    public static class Difference {
         public static final int NONE = -1;
 
         /**
@@ -170,6 +170,7 @@ public class FxDiff {
          * Compares this object to the other for equality. Both objects must be of
          * type Difference, with the same starting and ending points.
          */
+        @Override
         public boolean equals(Object obj) {
             if (obj instanceof Difference) {
                 Difference other = (Difference) obj;
@@ -183,9 +184,20 @@ public class FxDiff {
             }
         }
 
+        @Override
+        public int hashCode() {
+            int result;
+            result = delStart;
+            result = 31 * result + delEnd;
+            result = 31 * result + addStart;
+            result = 31 * result + addEnd;
+            return result;
+        }
+
         /**
          * Returns a string representation of this difference.
          */
+        @Override
         public String toString() {
             StringBuffer buf = new StringBuffer();
             buf.append("del: [").append(delStart).append(", ").append(delEnd).append("]");

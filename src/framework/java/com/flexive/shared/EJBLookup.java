@@ -55,7 +55,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class EJBLookup {
     private static transient Log LOG = LogFactory.getLog(EJBLookup.class);
-    public static String APPNAME = "flexive";
+    private static String APPNAME = "flexive";
 
     private enum STRATEGY {
         APP_SIMPLENAME_LOCAL,

@@ -195,7 +195,7 @@ public class FxContentVersionInfo implements Serializable {
      * @return array for all available versions (sorted)
      */
     public Integer[] getVersions() {
-        return vers;
+        return vers.clone();
     }
 
     /**

@@ -1070,6 +1070,7 @@ public class FxContent implements Serializable, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean equals(Object obj) {
         if( obj == null || !(obj instanceof FxContent))
             return false;
@@ -1085,5 +1086,15 @@ public class FxContent implements Serializable, Cloneable {
             return false;
         }
         return !delta.changes();
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        result = pk.hashCode();
+        result = 31 * result + (active ? 1 : 0);
+        result = 31 * result + (relation ? 1 : 0);
+        result = 31 * result + lifeCycleInfo.hashCode();
+        return result;
     }
 }

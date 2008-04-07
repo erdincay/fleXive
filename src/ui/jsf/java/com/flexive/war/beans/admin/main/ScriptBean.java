@@ -383,7 +383,7 @@ public class ScriptBean {
         }
     }
 
-    public class WrappedRunOnceInfo {
+    public static class WrappedRunOnceInfo {
         private FxScriptRunInfo runInfo;
 
         public WrappedRunOnceInfo(FxScriptRunInfo runInfo) {

@@ -386,7 +386,7 @@ public class OptionWrapper {
     /**
      *  Wraps the GUI relevant information of FxStructureOption Objects and provides convenient setters and getters
      */
-    public class WrappedOption {
+    public static class WrappedOption {
 
         private String key;
         private String value;

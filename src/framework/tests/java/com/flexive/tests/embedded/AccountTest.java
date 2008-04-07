@@ -182,7 +182,7 @@ public class AccountTest {
      */
     private long createAccount(int deltaDays, int validDays, boolean active, boolean confirmed)
             throws FxApplicationException {
-        Date begin = new Date(System.currentTimeMillis() + deltaDays * 24 * 3600 * 1000);
+        Date begin = new Date(System.currentTimeMillis() + (long) deltaDays * 24 * 3600 * 1000);
         Date end = new Date(System.currentTimeMillis() + ((long) deltaDays + validDays) * 24 * 3600 * 1000);
         return accountEngine.create(COUNT + USERNAME, COUNT + LOGINNAME, COUNT + PASSWORD, (COUNT++) + EMAIL, language.load("en").getId(),
                 getUserTicket().getMandatorId(), active, confirmed, begin, end, -1, "", false, true);

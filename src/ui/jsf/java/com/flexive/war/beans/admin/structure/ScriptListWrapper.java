@@ -52,7 +52,8 @@ import java.text.Collator;
  *
  * @author Gerhard Glos (gerhard.glos@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class ScriptListWrapper {
+public class ScriptListWrapper implements Serializable {
+    private static final long serialVersionUID = 7620819571266609753L;
     public final static int ID_SCRIPT_REMOVED=-1;
     public final static int ID_SCRIPT_ADDED=-2;
     public final static int ID_SCRIPT_UPDATED=-3;
@@ -62,7 +63,7 @@ public class ScriptListWrapper {
     private int sortStatusScriptInfo=-1;
     private int sortStatusEvent=-1;
 
-    public class ScriptListEntry {
+    public static class ScriptListEntry {
         private int id;
         private FxScriptInfo scriptInfo=null;
         private FxScriptEvent scriptEvent=null;
@@ -337,7 +338,8 @@ public class ScriptListWrapper {
      * compares script list entries, priorizes the script name and if equal the event name
      */
     private class ScriptInfoSorter implements Comparator<ScriptListEntry>, Serializable {
-    private final Collator collator = FxSharedUtils.getCollator();
+        private static final long serialVersionUID = -330634661618248486L;
+        private final Collator collator = FxSharedUtils.getCollator();
 
         public int compare(ScriptListEntry o1, ScriptListEntry o2) {
             int multiplicator =1;
@@ -355,7 +357,8 @@ public class ScriptListWrapper {
      * compares script list entries, priorizes the script event name and if equal the script name
      */
     private class ScriptEventSorter implements Comparator<ScriptListEntry>, Serializable {
-    private final Collator collator = FxSharedUtils.getCollator();
+        private static final long serialVersionUID = -1285682507584328636L;
+        private final Collator collator = FxSharedUtils.getCollator();
 
         public int compare(ScriptListEntry o1, ScriptListEntry o2) {
             int multiplicator =1;

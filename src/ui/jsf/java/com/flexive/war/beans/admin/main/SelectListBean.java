@@ -267,7 +267,7 @@ public class SelectListBean {
         return FxJsfUtils.asSelectList(CacheAdmin.getEnvironment().getACLs(ACL.Category.SELECTLISTITEM), false);
     }
 
-    private class ItemIdSorter implements Comparator<FxSelectListItemEdit> {
+    private static class ItemIdSorter implements Comparator<FxSelectListItemEdit> {
         public int compare(FxSelectListItemEdit i1, FxSelectListItemEdit i2) {
             if ( i1.getId() >=0 && i2.getId() >=0)
                 return (int) (i1.getId() - i2.getId());

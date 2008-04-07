@@ -106,7 +106,7 @@ public class ThumbnailServlet implements Servlet {
     /**
      * Callback to set mimetype and size
      */
-    private class ThumbnailBinaryCallback implements BinaryDownloadCallback {
+    private static class ThumbnailBinaryCallback implements BinaryDownloadCallback {
 
         /**
          * current response

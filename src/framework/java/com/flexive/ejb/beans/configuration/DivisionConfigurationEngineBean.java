@@ -208,7 +208,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
         }
     }
 
-    class SQLPatchScript {
+    private static class SQLPatchScript {
         long from;
         long to;
         String script;

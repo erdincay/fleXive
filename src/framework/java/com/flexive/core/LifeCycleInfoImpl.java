@@ -304,11 +304,22 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean equals(Object obj) {
         if( obj == null || !(obj instanceof LifeCycleInfo))
             return false;
         LifeCycleInfo other = (LifeCycleInfo)obj;
         return modifcatorId == other.getModificatorId() && modificationTime == other.getModificationTime() &&
                 creatorId == other.getCreatorId() && creationTime == other.getCreationTime();
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        result = (int) (creatorId ^ (creatorId >>> 32));
+        result = 31 * result + (int) (creationTime ^ (creationTime >>> 32));
+        result = 31 * result + (int) (modifcatorId ^ (modifcatorId >>> 32));
+        result = 31 * result + (int) (modificationTime ^ (modificationTime >>> 32));
+        return result;
     }
 }

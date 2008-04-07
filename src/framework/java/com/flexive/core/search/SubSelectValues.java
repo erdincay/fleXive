@@ -111,7 +111,9 @@ public class SubSelectValues {
      * @throws FxSqlSearchException if the function fails
      */
     public SubSelectValues prepare(DataSelector ds, Value prop, PropertyEntry entry) throws FxSqlSearchException {
-        applySelector(ds, (Property) prop, entry);
+        if (prop instanceof Property) {
+            applySelector(ds, (Property) prop, entry);
+        }
         applyWrapper(prop);
         this.value = prop;
         return this;
