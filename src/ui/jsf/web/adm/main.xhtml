@@ -5,7 +5,8 @@
       xmlns:c="http://java.sun.com/jstl/core"
       xmlns:t="http://myfaces.apache.org/tomahawk"
       xmlns:a4j="http://richfaces.org/a4j"
-      xmlns:fx="http://www.flexive.com/jsf/core">
+      xmlns:fx="http://www.flexive.com/jsf/core"
+      xmlns:weblet="http://weblets.dev.java.net/tags_jsp2">
 <head>
     <base href="#{fxSystemBean.documentBase}"/>
     <t:stylesheet path="/adm/css/main.css"/>
@@ -13,7 +14,7 @@
         <t:stylesheet path="/adm/css/mainIE.css"/>
     </c:if>
     <fx:includes/>
-    <t:stylesheet path="weblet://com.flexive.faces.weblets/css/lytebox.css"/>
+    <link rel="stylesheet" type="text/css" href="#{weblet:url('com.flexive.faces.weblets','/css/lytebox.css')}"/>
     <script type="text/javascript" src="adm/js/main.js"> </script>
     <script type="text/javascript" src="adm/js/shared.js"> </script>
     <script type="text/javascript" src="adm/js/commandElement.js"> </script>

@@ -7,7 +7,8 @@
       xmlns:c="http://java.sun.com/jstl/core"
       xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
       xmlns:adm="http://www.flexive.com/jsf/admin"
-      xmlns:fx="http://www.flexive.com/jsf/core">
+      xmlns:fx="http://www.flexive.com/jsf/core"
+      xmlns:weblet="http://weblets.dev.java.net/tags_jsp2">
 <body>
 
 <ui:composition template="/adm/contentTemplate.xhtml">
@@ -15,6 +16,7 @@
         <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/flexiveRpc.js"> </script>
         <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/jsonrpc.js"> </script>
         <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/selection.js"> </script>
+        <script type="text/javascript" src="#{weblet:url('com.flexive.faces.weblets','/js/lytebox.js')}"/>
     </ui:define>
 
     <ui:define name="searchIds">"searchResults_screenviewContainer"</ui:define>
