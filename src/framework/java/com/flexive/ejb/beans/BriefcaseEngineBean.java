@@ -90,7 +90,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
         if (name == null || name.trim().length() == 0) {
             throw new FxInvalidParameterException("ex.briefcase.nameMissing", "name");
         }
-        if (aclId != null) {
+        if (aclId != null && aclId != -1) {
             ACL acl;
             try {
                 acl = new ACLEngineBean().load(aclId);
@@ -124,7 +124,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
             ps.setString(2, name);
             ps.setString(3, description);
             ps.setString(4, sourceQuery);
-            if (aclId != null) {
+            if (aclId != null && aclId != -1) {
                 ps.setLong(5, aclId);
             } else {
                 ps.setNull(5, java.sql.Types.NUMERIC);
