@@ -340,42 +340,44 @@
                     <ui:fragment rendered="#{srcEditor.new}">
                         <adm:commandButton labelKey="Content.button.create" location="both"
                                           bean="#{srcEditor}"
-                                          icon="new" action="save" id="createButton"/>
+                                          icon="new" action="save" id="createButton" onclick="preSubmit()"/>
                     </ui:fragment>
 
                     <ui:fragment rendered="#{srcEditor.new==false}">
                         <adm:commandButton labelKey="Content.button.save" location="both"
                                           bean="#{srcEditor}"
-                                          icon="save" action="save" id="saveButton"/>
+                                          icon="save" action="save" id="saveButton" onclick="preSubmit()"/>
 
                         <adm:commandButton labelKey="Content.button.saveInNewVersion" location="both"
                                           bean="#{srcEditor}"
-                                          icon="newVersion" action="saveInNewVersion" id="saveInNewVersionButton"/>
+                                          icon="newVersion" action="saveInNewVersion" id="saveInNewVersionButton"
+                                          onclick="preSubmit()"/>
 
                         <adm:commandButton labelKey="Content.button.refresh" location="both"
                                           bean="#{srcEditor}" confirmKey="Content.confirm.refresh"
-                                          icon="reload" action="reload" id="reloadButton"/>
+                                          icon="reload" action="reload" id="reloadButton" onclick="preSubmit()"/>
 
                         <ui:fragment rendered="#{srcEditor.deleteAble}">
                             <adm:commandButton labelKey="Content.button.delete" location="both"
                                           bean="#{srcEditor}" confirmKey="Content.confirm.delete"
-                                          icon="delete" action="delete" id="deleteButton"/>
+                                          icon="delete" action="delete" id="deleteButton" onclick="preSubmit()"/>
                         </ui:fragment>
                         <ui:fragment rendered="#{srcEditor.versionDeleteAble}">
                             <adm:commandButton labelKey="Content.button.deleteVersion" location="both"
                                           bean="#{srcEditor}" confirmKey="Content.confirm.deleteVersion"
-                                          icon="deleteVersion" action="deleteCurrentVersion" id="deleteVersionButton"/>
+                                          icon="deleteVersion" action="deleteCurrentVersion" id="deleteVersionButton"
+                                          onclick="preSubmit()"/>
                         </ui:fragment>
                     </ui:fragment>
 
 
                     <adm:commandButton labelKey="Content.button.compact" location="toolbar"
                                       bean="#{srcEditor}"
-                                      icon="compact" action="compact" id="compactButton"/>
+                                      icon="compact" action="compact" id="compactButton" onclick="preSubmit()"/>
 
                     <adm:commandButton labelKey="Content.button.cancel" location="both"
                                       bean="#{srcEditor}" confirmKey="Content.confirm.abort"
-                                      icon="cancel" action="cancel" id="cancelButton"/>
+                                      icon="cancel" action="cancel" id="cancelButton" onclick="preSubmit()"/>
                 </ui:fragment>
             </ui:fragment>
 </ui:composition>

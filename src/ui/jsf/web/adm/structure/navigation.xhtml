@@ -148,7 +148,7 @@
                 for (var i=0;i<childArray.length;i++) {
                     var node = childArray[i];
                     if (node.isExpanded) {
-                       harray.push(new Array(node.assignmentId, node.nodeDocType));
+                       harray.push(new Array(getNodeId(node), node.nodeDocType));
                        harray = _buildExpandedArray(node.children, harray)
                     }
                 }
@@ -256,7 +256,7 @@
             // create a new property as child of the current node
             function createProperty(menuItem) {
                 var menu = dojo.widget.byId("structureTreeMenu");
-                var parentId = menu.getTreeNode().assignmentId;
+                var parentId = getNodeId(menu.getTreeNode());
 
                 invokeContentAction("adm/structure/propertyEditor.jsf", "createProperty", {id: parentId, nodeType: menu.getTreeNode().nodeDocType});
                 //contentPage=null;
@@ -265,7 +265,7 @@
              // create a new group as child of the current node
             function createGroup(menuItem) {
                 var menu = dojo.widget.byId("structureTreeMenu");
-                var parentId = menu.getTreeNode().assignmentId;
+                var parentId = getNodeId(menu.getTreeNode());
 
                 invokeContentAction("adm/structure/groupEditor.jsf", "createGroup", {id: parentId, nodeType: menu.getTreeNode().nodeDocType});
                 //contentPage=null;
@@ -326,7 +326,7 @@
 
             function deleteType(menuItem) {
                 var menu = dojo.widget.byId("structureTreeMenu");
-                var id = menu.getTreeNode().assignmentId;
+                var id = menu.getTreeNode().typeId;
                 _deleteType(id);
             }
 
@@ -375,18 +375,18 @@
 
             function pasteBelow(menuItem, alias) {
                 var menu = dojo.widget.byId("structureTreeMenu");
-                var destId = menu.getTreeNode().assignmentId;
+                var destId = getNodeId(menu.getTreeNode());
                 var destDocType=menu.getTreeNode().nodeDocType;
                 try {
                     if (copyMode) {
-                        var newAssignmentId = getJsonRpc().StructureTreeEditor.pasteAssignmentRelative(copyNode.assignmentId, copyNode.nodeDocType , destId, destDocType ,alias, 1);
+                        var newAssignmentId = getJsonRpc().StructureTreeEditor.pasteAssignmentRelative(getNodeId(copyNode), copyNode.nodeDocType , destId, destDocType ,alias, 1);
                         reloadAndKeepExpanded();
                         expandToNodeWithId(newAssignmentId, false);
                     }
                     else {
-                        getJsonRpc().StructureTreeEditor.moveAssignmentRelative(copyNode.assignmentId, copyNode.nodeDocType, destId, 1);
+                        getJsonRpc().StructureTreeEditor.moveAssignmentRelative(getNodeId(copyNode), copyNode.nodeDocType, destId, 1);
                         reloadAndKeepExpanded();
-                        expandToNodeWithId(copyNode.assignmentId, false);
+                        expandToNodeWithId(getNodeId(copyNode), false);
                     }
                 }
                 catch (e) {
@@ -403,18 +403,18 @@
 
             function pasteAbove(menuItem, alias) {
                 var menu = dojo.widget.byId("structureTreeMenu");
-                var destId = menu.getTreeNode().assignmentId;
+                var destId = getNodeId(menu.getTreeNode());
                 var destDocType=menu.getTreeNode().nodeDocType;
                 try {
                     if (copyMode) {
-                        var newAssignmentId = getJsonRpc().StructureTreeEditor.pasteAssignmentRelative(copyNode.assignmentId, copyNode.nodeDocType , destId, destDocType, alias, 0);
+                        var newAssignmentId = getJsonRpc().StructureTreeEditor.pasteAssignmentRelative(getNodeId(copyNode), copyNode.nodeDocType , destId, destDocType, alias, 0);
                         reloadAndKeepExpanded();
                         expandToNodeWithId(newAssignmentId, false);
                     }
                     else {
-                        getJsonRpc().StructureTreeEditor.moveAssignmentRelative(copyNode.assignmentId, copyNode.nodeDocType, destId, 0);
+                        getJsonRpc().StructureTreeEditor.moveAssignmentRelative(getNodeId(copyNode), copyNode.nodeDocType, destId, 0);
                         reloadAndKeepExpanded();
-                        expandToNodeWithId(copyNode.assignmentId, false);
+                        expandToNodeWithId(getNodeId(copyNode), false);
                     }
                 }
                 catch (e) {
@@ -431,10 +431,10 @@
 
             function pasteInto(menuItem, alias) {
                 var menu = dojo.widget.byId("structureTreeMenu");
-                var parentId = menu.getTreeNode().assignmentId;
+                var parentId = getNodeId(menu.getTreeNode());
                 var parentType= menu.getTreeNode().nodeDocType;
                 try {
-                    var newAssignmentId = getJsonRpc().StructureTreeEditor.pasteAssignmentInto(copyNode.assignmentId, copyNode.nodeDocType , parentId, parentType, alias);
+                    var newAssignmentId = getJsonRpc().StructureTreeEditor.pasteAssignmentInto(getNodeId(copyNode), copyNode.nodeDocType , parentId, parentType, alias);
                     reloadAndKeepExpanded();
                     expandToNodeWithId(newAssignmentId, false);
                 }
@@ -458,9 +458,15 @@
                 //contentPage=null;
             }
 
+            function getNodeId(node) {
+                return node.assignmentId != null
+                        ? node.assignmentId
+                        : node.typeId;
+            }
+
             function searchContents(menuItem) {
                 var menu = dojo.widget.byId("structureTreeMenu");
-                var nodeId = menu.getTreeNode().assignmentId != null ? menu.getTreeNode().assignmentId : menu.getTreeNode().typeId;
+                var nodeId = getNodeId(menu.getTreeNode());
                 var docType = menu.getTreeNode().nodeDocType;
 
                 if (parent.frames["contentFrame"].isQueryEditor) {
@@ -492,7 +498,7 @@
 
             function createTestData(menuItem) {
                 var menu = dojo.widget.byId("structureTreeMenu");
-                var nodeId = menu.getTreeNode().assignmentId;
+                var nodeId = getNodeId(menu.getTreeNode());
                 if (menu.getTreeNode().nodeDocType == "Type")
                     invokeContentAction("adm/content/createTestData.jsf", "setTypeId", {typeId: nodeId});
             }
