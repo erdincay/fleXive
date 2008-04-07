@@ -34,10 +34,7 @@
 package com.flexive.tests.shared;
 
 import com.flexive.shared.FxLanguage;
-import com.flexive.shared.value.FxDate;
-import com.flexive.shared.value.FxDouble;
-import com.flexive.shared.value.FxFloat;
-import com.flexive.shared.value.FxString;
+import com.flexive.shared.value.*;
 import com.flexive.shared.value.renderer.FxValueRenderer;
 import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import org.testng.annotations.Test;
@@ -106,5 +103,31 @@ public class FxValueRendererTest {
         assert FORMAT_EN.format(empty).equals("") : "Empty string translation should be empty";
         assert FORMAT_DE.format(empty).equals("") : "Empty string translation should be empty";
         assert empty.toString().equals("") : "Empty string translation should be empty";
+    }
+
+    @Test
+    @SuppressWarnings({"unchecked"})
+    public void invalidInputTest() {
+        // form inputs must be returned in their string representation
+        final String input = "invalid value";
+        for (FxValue fxValue: new FxValue[] {
+                ((FxValue) new FxNumber(false, 21)).setDefaultTranslation(input),
+                ((FxValue) new FxFloat(false, 21f)).setDefaultTranslation(input),
+                ((FxValue) new FxDouble(false, 21.)).setDefaultTranslation(input),
+                ((FxValue) new FxDate(false, new Date())).setDefaultTranslation(input),
+                ((FxValue) new FxDateRange(false, new DateRange(new Date(), new Date()))).setDefaultTranslation(input),
+                ((FxValue) new FxDateTime(false, new Date())).setDefaultTranslation(input),
+                ((FxValue) new FxDateTimeRange(false, new DateRange(new Date(), new Date()))).setDefaultTranslation(input),
+        }) {
+            try {
+                final String output = FxValueRendererFactory.getInstance().format(fxValue);
+                assert output.equals(input) : "Expected output '" + input + "', got: '" + output + "'"
+                        + ", class: " + fxValue.getClass().getName();
+            } catch (Exception e) {
+                assert false : "Failed to format invalid input value in "
+                        + fxValue.getClass().getName() + ": " + e.getMessage();
+            }
+        }
+
     }
 }

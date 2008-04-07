@@ -34,6 +34,7 @@
 package com.flexive.shared.value;
 
 import com.flexive.shared.exceptions.FxInvalidStateException;
+import com.flexive.shared.exceptions.FxConversionException;
 import com.flexive.shared.FxFormatUtils;
 
 import java.io.Serializable;
@@ -186,8 +187,8 @@ public class FxDateTimeRange extends FxValue<DateRange, FxDateTimeRange> impleme
             final SimpleDateFormat sdf = new SimpleDateFormat(FxFormatUtils.UNIVERSAL_TIMEFORMAT);
             return new DateRange(sdf.parse(dates[0]), sdf.parse(dates[1]));
         } catch (ParseException e) {
-            //TODO:throw exception!
-            return null;
+            throw new FxConversionException("ex.conversion.value.error", FxDateTimeRange.class.getCanonicalName(), value,
+                    e.getMessage()).asRuntimeException();
         }
     }
 

@@ -536,7 +536,7 @@ public final class FxFormatUtils {
      */
     public static Double toDouble(String value) {
         try {
-            return Double.parseDouble(unquote(value));
+            return Double.parseDouble(unquote(value).replace(',', '.'));
         } catch (Exception e) {
             throw new FxConversionException(e, "ex.conversion.value.error", FxDouble.class.getCanonicalName(), value,
                     e.getMessage()).asRuntimeException();
@@ -551,7 +551,7 @@ public final class FxFormatUtils {
      */
     public static Float toFloat(String value) {
         try {
-            return Float.parseFloat(unquote(value));
+            return Float.parseFloat(unquote(value).replace(',', '.'));
         } catch (Exception e) {
             throw new FxConversionException(e, "ex.conversion.value.error", FxFloat.class.getCanonicalName(), value,
                     e.getMessage()).asRuntimeException();

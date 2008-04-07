@@ -88,11 +88,17 @@ class FxValueRendererImpl implements FxValueRenderer {
     @SuppressWarnings({"unchecked"})
     public String format(FxValue value, FxLanguage translationLanguage) {
         final FxValueFormatter formatter = get(value.getClass());
+        final Object translation = value.getBestTranslation(translationLanguage);
+        if (translation instanceof String && value.getValueClass() != String.class) {
+            // string translation, but no string container --> treat as plain string,
+            // the value formatter has no way of handling this
+            return translation.toString();
+        }
         if (formatter != null) {
-            return formatter.format(value, value.getBestTranslation(translationLanguage), language);
+            return formatter.format(value, translation, language);
         }
         // use generic object formatter as fallback
-        return get(FxValue.class).format(value, value.getBestTranslation(translationLanguage), language);
+        return get(FxValue.class).format(value, translation, language);
     }
 
     /** {@inheritDoc} */
