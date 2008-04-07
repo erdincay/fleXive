@@ -137,6 +137,8 @@ dojo.widget.defineWidget(
         if (!save) {
             // restore old label (with child count)
             node.labelNode.innerHTML = node.title;
+        } else {
+            node.nodeText = this.editor.getContents();
         }
         return result;
     },
