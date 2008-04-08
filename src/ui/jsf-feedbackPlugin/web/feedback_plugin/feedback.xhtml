@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core"
+      xmlns:weblet="http://weblets.dev.java.net/tags_jsp2">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+    <ui:define name="head">
+        <t:stylesheet path="/adm/css/content.css"/>
+        <link rel="stylesheet" type="text/css" href="#{weblet:url('feedback_plugin.weblet','/css/feedback.css')}"/>
+    </ui:define>
+
+
+<ui:define name="body">
+    <form method="post" action="http://www.flexive.org/feedback/feedback.php">
+        <h:inputHidden id="build" value="#{feedbackPluginBean.buildInfo}"/>
+        <h:inputHidden id="page" value="#{feedbackPluginBean.refPage}"/>
+        <h:inputHidden id="feedbackType" value="#{feedbackPluginBean.feedback}"/>
+
+        <div class="header">
+            <h:outputText value="#{feedbackPluginBean.header}!"/>
+        </div>
+        <br/>
+        <div class="build">
+            <h:outputText value="#{fxMessageBean['FeedbackPlugin.label.build']}: "/>
+            <h:outputText value="#{feedbackPluginBean.buildInfo}"/>
+        </div>
+        <div class="page">
+            <h:outputText value="#{fxMessageBean['FeedbackPlugin.label.page']}: "/>
+            <h:outputText value="#{feedbackPluginBean.refPage}"/>
+        </div>
+        <br clear="all"/>
+        <div class="comment">
+            <h:inputTextarea rows="10" cols="50" value="#{feedbackPluginBean.comment}"/>
+        </div>
+        <input type="submit" value="#{fxMessageBean['FeedbackPlugin.button.submit']}"/>
+    </form>
+    </ui:define>
+</ui:composition>
+</body>
+</html>

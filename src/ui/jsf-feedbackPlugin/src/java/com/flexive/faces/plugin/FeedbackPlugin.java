@@ -52,28 +52,28 @@ public class FeedbackPlugin implements Plugin<ToolbarPluginExecutor>{
 
     private ToolbarPluginExecutor.Button getGoodFeedbackButton() {
         ToolbarPluginExecutor.Button b = new ToolbarPluginExecutor.Button("goodFeedbackButton");
-        b.setBean("FeedbackPluginBean");
+        b.setBean("feedbackPluginBean");
         b.setAction("sendGoodFeedback");
         b.setIconUrl(FacesWebletUtils.getURL(FacesContext.getCurrentInstance(), "feedback_plugin.weblet", "/images/feedback_good.png"));
-        b.setLabelKey("FeedbackPlugin.button.label.goodFeedback");
+        b.setLabelKey("FeedbackPlugin.button.tooltip.goodFeedback");
         return b;
     }
 
     private ToolbarPluginExecutor.Button getModerateFeedbackButton() {
         ToolbarPluginExecutor.Button b = new ToolbarPluginExecutor.Button("moderateFeedbackButton");
-        b.setBean("FeedbackPluginBean");
+        b.setBean("feedbackPluginBean");
         b.setAction("sendModerateFeedback");
         b.setIconUrl(FacesWebletUtils.getURL(FacesContext.getCurrentInstance(), "feedback_plugin.weblet", "/images/feedback_moderate.png"));
-        b.setLabelKey("FeedbackPlugin.button.label.moderateFeedback");
+        b.setLabelKey("FeedbackPlugin.button.tooltip.moderateFeedback");
         return b;
     }
 
     private ToolbarPluginExecutor.Button getBadFeedbackButton() {
         ToolbarPluginExecutor.Button b = new ToolbarPluginExecutor.Button("badFeedbackButton");
-        b.setBean("FeedbackPluginBean");
+        b.setBean("feedbackPluginBean");
         b.setAction("sendBadFeedback");
         b.setIconUrl(FacesWebletUtils.getURL(FacesContext.getCurrentInstance(), "feedback_plugin.weblet", "/images/feedback_bad.png"));
-        b.setLabelKey("FeedbackPlugin.button.label.badFeedback");
+        b.setLabelKey("FeedbackPlugin.button.tooltip.badFeedback");
         return b;
     }
 }

@@ -5,11 +5,18 @@
 <faces-config>
 
     <managed-bean>
-        <managed-bean-name>FeedbackPluginBean</managed-bean-name>
+        <managed-bean-name>feedbackPluginBean</managed-bean-name>
         <managed-bean-class>
             com.flexive.faces.beans.plugin.FeedbackPluginBean
         </managed-bean-class>
         <managed-bean-scope>request</managed-bean-scope>
     </managed-bean>
+
+     <navigation-rule>
+        <navigation-case>
+            <from-outcome>feedback</from-outcome>
+            <to-view-id>/feedback_plugin/feedback.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
 
 </faces-config>

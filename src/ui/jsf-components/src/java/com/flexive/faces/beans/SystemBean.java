@@ -442,23 +442,6 @@ public class SystemBean implements Serializable {
     }
 
     /**
-     * Returns the URL of the weblet mapping of the given resource name (e.g. "com.flexive.faces.web/js/flexiveComponents.js").
-     *
-     * @return the URL of the weblet mapping of the given resource name (e.g. "com.flexive.faces.web/js/flexiveComponents.js").
-     */
-    public Map<String, String> getWeblet() {
-        if (webletMap == null) {
-            webletMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<String, String>() {
-                public String get(Object key) {
-                    return getCurrentInstance().getApplication().getViewHandler().getResourceURL(getCurrentInstance(),
-                            "weblet://" + key);
-                }
-            });
-        }
-        return webletMap;
-    }
-
-    /**
      * Returns the unique page ID generated for flexive responses.
      *
      * @return the unique page ID generated for flexive responses.

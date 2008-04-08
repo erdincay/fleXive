@@ -35,6 +35,12 @@ package com.flexive.faces.beans.plugin;
 
 import net.java.dev.weblets.FacesWebletUtils;
 
+import javax.faces.context.FacesContext;
+
+import com.flexive.faces.beans.MessageBean;
+import com.flexive.faces.FxJsfUtils;
+import com.flexive.shared.FxSharedUtils;
+
 /**
  * Backing bean for feedback buttons and feedback forms of feedback plugin
  *
@@ -43,15 +49,80 @@ import net.java.dev.weblets.FacesWebletUtils;
 
 public class FeedbackPluginBean {
 
-    public void sendGoodFeedback() {
-        System.out.println("feedback!");
+    private String refPage;
+    private String comment=null;
+    private int feedback=-1;
+    private static final int FEEDBACK_POSITIVE=0;
+    private static final int FEEDBACK_MODERATE=1;
+    private static final int FEEDBACK_NEGATIVE=2;
+
+
+    public String sendGoodFeedback() {
+        refPage=FacesContext.getCurrentInstance().getViewRoot().getViewId();
+        feedback=FEEDBACK_POSITIVE;
+        return showFeedback();
     }
 
-    public void sendModerateFeedback() {
-        System.out.println("feedback!");
+    public String sendModerateFeedback() {
+        refPage=FacesContext.getCurrentInstance().getViewRoot().getViewId();
+        feedback=FEEDBACK_MODERATE;
+        return showFeedback();
     }
 
-    public void sendBadFeedback() {
-        System.out.println("feedback!");
+    public String sendBadFeedback() {
+        refPage=FacesContext.getCurrentInstance().getViewRoot().getViewId();
+        feedback=FEEDBACK_NEGATIVE;
+        return showFeedback();
+    }
+
+    private String showFeedback() {
+        return "feedback";
+    }
+
+    public String getRefPage() {
+        return refPage;
+    }
+
+    public void setRefPage(String refPage) {
+        this.refPage = refPage;
+    }
+
+    public int getFeedback() {
+        return feedback;
+    }
+
+    public void setFeedback(int feedback) {
+        this.feedback = feedback;
+    }
+
+    public String getHeader() {
+        if (feedback == FEEDBACK_POSITIVE)
+            return FxJsfUtils.getLocalizedMessage("FeedbackPlugin.header.positiveFeedback");
+        else if (feedback == FEEDBACK_MODERATE)
+            return FxJsfUtils.getLocalizedMessage("FeedbackPlugin.header.moderateFeedback");
+        else if (feedback == FEEDBACK_NEGATIVE)
+            return FxJsfUtils.getLocalizedMessage("FeedbackPlugin.header.negativeFeedback");
+
+        else
+            return FxJsfUtils.getLocalizedMessage("FeedbackPlugin.err.internal");
+    }
+
+    public String getComment() {
+        if (comment==null)
+            return FxJsfUtils.getLocalizedMessage("FeedbackPlugin.pretext.comment");
+        else
+            return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public String getBuildInfo() {
+        return FxSharedUtils.getFlexiveVersion() + "/build #" + FxSharedUtils.getBuildNumber();
+    }
+
+    public void setBuildInfo(String buildInfo) {
+
     }
 }
