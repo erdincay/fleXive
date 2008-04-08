@@ -321,13 +321,13 @@ public class SearchEngineTest {
         setResultPreferences(SortDirection.ASCENDING);
         // sort by the second column taken from the result preferences - needs "virtual" columns
         final FxResultSet result = getSearchEngine().search(
-                "SELECT @pk, id, * FROM content CO FILTER type='" + TEST_TYPE + "' ORDER BY 4 DESC", 0, 9999, null);
+                "SELECT @pk, id, @* FROM content CO FILTER type='" + TEST_TYPE + "' ORDER BY 4 DESC", 0, 9999, null);
         assert result.getRowCount() > 0;
         assertDescendingOrder(result, 4);
 
         try {
             getSearchEngine().search(
-                    "SELECT co.@pk, co.id, co.* FROM content CO FILTER co.type='" + TEST_TYPE + "' ORDER BY 5 DESC", 0, 9999, null);
+                    "SELECT co.@pk, co.id, co.@* FROM content CO FILTER co.type='" + TEST_TYPE + "' ORDER BY 5 DESC", 0, 9999, null);
             assert false : "Selected result preference column should not be present in result set";
         } catch (FxApplicationException e) {
             // pass
@@ -338,7 +338,7 @@ public class SearchEngineTest {
                 .orderBy(4, SortDirection.DESCENDING)
                 .filterType(TEST_TYPE).getResult(), 4);
         try {
-            new SqlQueryBuilder().select("@pk", "id", "*").orderBy(5, SortDirection.ASCENDING).getResult();
+            new SqlQueryBuilder().select("@pk", "id", "@*").orderBy(5, SortDirection.ASCENDING).getResult();
             assert false : "Selected result preference column should not be present in result set";
         } catch (FxApplicationException e) {
             // pass - the exception was thrown by the search engine, so it's a FxApplicationException

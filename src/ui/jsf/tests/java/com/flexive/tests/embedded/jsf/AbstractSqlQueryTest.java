@@ -67,7 +67,7 @@ public class AbstractSqlQueryTest {
     protected static final int TOTALROWS = 25;
     protected static final String TEST_TYPE = "FXRESULTSET_TYPE";
     protected final static String TEST_PROPERTY = "FXRESULTSET_TESTPROPERTY";
-    protected static final String SELECT_ALL = "SELECT co.@PK, * FROM content co WHERE co." + TEST_PROPERTY + " like 'testValue%'";
+    protected static final String SELECT_ALL = "SELECT co.@PK, @* FROM content co WHERE co." + TEST_PROPERTY + " like 'testValue%'";
 
     protected ACL structureAcl;
     protected ACL contentAcl;

@@ -458,8 +458,11 @@ public class FxStatement {
 
     public boolean isWildcardSelected() {
         for (SelectedValue sv: selected) {
-            if (sv.getAlias().endsWith(".*")) {
-                return true;
+            if (sv.getValue() instanceof Property) {
+                final Property prop = (Property) sv.getValue();
+                if (prop.isWildcard() || prop.isUserPropsWildcard()) {
+                    return true;
+                }
             }
         }
         return false;

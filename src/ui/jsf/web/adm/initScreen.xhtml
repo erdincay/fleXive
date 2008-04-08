@@ -44,7 +44,9 @@
 
     updateStatus();
     function updateStatus() {
-        document.getElementById('msg').innerHTML = getJsonRpc().SystemInformation.getInitializationStatus();
+        getJsonRpc().SystemInformation.getInitializationStatus(function (result, exception) {
+            document.getElementById('msg').innerHTML = result;
+        });
     }
 </script>
 </body>

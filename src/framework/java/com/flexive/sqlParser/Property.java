@@ -33,6 +33,8 @@
  ***************************************************************/
 package com.flexive.sqlParser;
 
+import com.flexive.shared.interfaces.SearchEngine;
+
 import java.util.StringTokenizer;
 import java.util.List;
 import java.util.Collection;
@@ -160,7 +162,17 @@ public class Property extends Value {
      * @return true if this property is a wildcard
      */
     public boolean isWildcard() {
-        return this.property.equals("*");
+        return SearchEngine.PROP_WILDCARD.equals(this.property);
+    }
+
+    /**
+     * Returns true if this property is the "user properties wildcard" that selects all
+     * user-defined propertie.s
+     *
+     * @return  true if this property is the "user properties wildcard" 
+     */
+    public boolean isUserPropsWildcard() {
+        return SearchEngine.PROP_USERWILDCARD.equals(this.property);
     }
 
 }

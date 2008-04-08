@@ -37,6 +37,7 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.interfaces.SearchEngine;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxInvalidStateException;
@@ -62,11 +63,11 @@ public class SqlQueryBuilder implements Serializable {
     static final long serialVersionUID = -4805627533111750389L;
 
     private static final String[] BASIC_SELECTS = new String[]{"@pk", "mandator",
-            "created_by", "acl", "step", "*"};
+            "created_by", "acl", "step", SearchEngine.PROP_USERWILDCARD};
     /**
      * Start column for user defined properties
      */
-    public static final int COL_USERPROPS = ArrayUtils.indexOf(BASIC_SELECTS, "*");
+    public static final int COL_USERPROPS = ArrayUtils.indexOf(BASIC_SELECTS, SearchEngine.PROP_USERWILDCARD);
 
     private final ResultLocation location;
     private ResultViewType viewType;
@@ -732,6 +733,7 @@ public class SqlQueryBuilder implements Serializable {
     }
 
     private boolean isWildcardSelected() {
-        return getColumnNames().contains("*");
+        final List<String> names = getColumnNames();
+        return names.contains(SearchEngine.PROP_WILDCARD) || names.contains(SearchEngine.PROP_USERWILDCARD);
     }
 }

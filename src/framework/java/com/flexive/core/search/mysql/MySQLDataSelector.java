@@ -71,8 +71,8 @@ public class MySQLDataSelector extends DataSelector {
         SELECTORS.put("STEP", new MySQLStepSelector());
     }
 
-    private static final String[] CONTENT_DIRECT_SELECT = {"ID", "VERSION", "MAINLANG"};
-    private static final String[] CONTENT_DIRECT_SELECT_PROP = {"ID", "VER", "MAINLANG"};
+    private static final String[] CONTENT_DIRECT_SELECT = {"ID", "VERSION"};
+    private static final String[] CONTENT_DIRECT_SELECT_PROP = {"ID", "VER"};
     private static final String FILTER_ALIAS = "filter";
     private static final String SUBSEL_ALIAS = "sub";
 

@@ -116,6 +116,7 @@ TOKEN [IGNORE_CASE] :
 | < END_STMT  : ";"([" ","\n"])* >
 | < FUNCTION  : (["a"-"z","A"-"Z"])+"(">
 | < WILDCARD  : "*" >
+| < USERWILDCARD : "@*" >
 | < INTEGER   : ("-"|"")["0"-"9"] (["0"-"9"])* >
 | < FLOAT     : ("-"|"")(["0"-"9"])*(".")(["0"-"9"])+>
 | < FXPK      : (["0"-"9"])+(".")("MAX"|"LIVE") >
@@ -254,11 +255,14 @@ String symItemList(final FxStatement PI) :
  * <value>, <value>, ...
  */
 void selectedValues(final FxStatement PI) throws SqlParserException :
-{ Value vi; }
 {
-	<WILDCARD>
+    Token t1;
+    Value vi;
+}
+{
+	(t1 = <WILDCARD> | t1 = <USERWILDCARD>)
 	{
-	    final Property p = new Property("co", "*", null);
+	    final Property p = new Property("co", t1.image, null);
 		PI.addSelectedValue(p, null);
 	}
 	|

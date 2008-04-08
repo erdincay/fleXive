@@ -45,6 +45,17 @@ import java.util.Collection;
 
 @Remote
 public interface SearchEngine {
+    /**
+     * The wildcard character selects all properties of the result content type.
+     */
+    String PROP_WILDCARD = "*";
+
+    /**
+     * The user wildcard selects the properties predefined by the user through the
+     * {@link com.flexive.shared.interfaces.ResultPreferencesEngine}.
+     *
+     */
+    String PROP_USERWILDCARD = "@*";
 
     /**
      * Executes a query.
@@ -56,7 +67,7 @@ public interface SearchEngine {
      * @return the result set
      * @throws FxApplicationException if the search failed
      */
-    public FxResultSet search(String query, final int startIndex, final Integer fetchRows, FxSQLSearchParams params)
+    FxResultSet search(String query, final int startIndex, final Integer fetchRows, FxSQLSearchParams params)
             throws FxApplicationException;
 
     /**
@@ -71,7 +82,7 @@ public interface SearchEngine {
      * @return the result set
      * @throws FxApplicationException if the search failed
      */
-    public FxResultSet search(String query, final int startIndex, final Integer fetchRows, FxSQLSearchParams params,
+    FxResultSet search(String query, final int startIndex, final Integer fetchRows, FxSQLSearchParams params,
                               ResultLocation location, ResultViewType viewType)
             throws FxApplicationException;
 
@@ -81,7 +92,7 @@ public interface SearchEngine {
      * @param live if true only the last changes of live contents are checked
      * @return the last time that any content that affects queries was changed
      */
-    public long getLastContentChange(boolean live);
+    long getLastContentChange(boolean live);
 
     /**
      * Store the given query for the current user.

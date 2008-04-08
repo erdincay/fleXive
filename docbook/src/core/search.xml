@@ -42,17 +42,17 @@
                         <code>caption</code>.
                     </para>
                 </callout>
-<!--
-                <callout arearefs="csq_intro_from">
-                    <para>
-                        Here we specify the (virtual) source table. Currently, this is always
-                        <code>content</code>. The alias is
-                        mandatory and is usually
-                        "<code>co</code>",
-                        although you can choose any identifier you like.
-                    </para>
-                </callout>
--->
+                <!--
+                                <callout arearefs="csq_intro_from">
+                                    <para>
+                                        Here we specify the (virtual) source table. Currently, this is always
+                                        <code>content</code>. The alias is
+                                        mandatory and is usually
+                                        "<code>co</code>",
+                                        although you can choose any identifier you like.
+                                    </para>
+                                </callout>
+                -->
                 <callout arearefs="csq_intro_filter">
                     <para>
                         Filters work similar to the SQL
@@ -107,11 +107,26 @@
                 provides a simple API for retrieving
                 and setting the preferred column layout based on the result type (e.g. Articles or Images). To
                 select these user-defined column layouts, add the
-                <code>*</code>
+                <code>@*</code>
                 virtual property:
-                <programlisting language="sql"><![CDATA[SELECT caption, *]]></programlisting>
+                <programlisting language="sql"><![CDATA[SELECT caption, @*]]></programlisting>
                 This is the only virtual property that actually expands to multiple columns, so it should
                 appear at the end of the select clause.
+            </para>
+        </section>
+
+        <section xml:id="css_feature_wildcard">
+            <title>Select all columns</title>
+            <para>
+                To select all available columns, use the wildcard selector
+                <code>*</code>.
+                The wildcard expands to all properties of the content type returned to the user.
+                When the result rows contain objects of more than one type, only the properties assigned
+                to the root type are selected (i.e. properties that are defined for all types).
+                This example selects all properties of the article type, since only articles
+                (with a caption) will be returned:
+                <programlisting language="sql"><![CDATA[SELECT *
+WHERE #article/caption IS NOT NULL]]></programlisting>
             </para>
         </section>
 
@@ -628,25 +643,25 @@ ORDER BY 3 DESC, 2]]></programlisting>
                 <para>
                     As described in
                     <xref linkend="css_feature_userdefined"/>,
-                    <code>*</code>
+                    <code>@*</code>
                     expands to whatever columns the user defined for the result content type.
                     This causes a problem when the result should be sorted manually by one of these columns,
                     e.g. because the result table has sortable column headers
                     (as in the result table in the &backendGui;): the &fxsql; parser has no way
                     to expand
-                    <code>*</code>
+                    <code>@*</code>
                     (because the search has not been submitted yet and thus the content type is unknown),
                     but yet it must be possible to sort by one of these columns.
                     For example, this query does not work:
                 </para>
-                <programlisting language="sql"><![CDATA[SELECT *
+                <programlisting language="sql"><![CDATA[SELECT @*
 ORDER BY caption DESC     -- caption not found in SELECT clause]]></programlisting>
                 <para>
                     As a workaround, it is possible to specify otherwise invalid column indices in the
                     <code>ORDER BY</code>
                     clause
                     <emphasis>if</emphasis>
-                    <code>*</code>
+                    <code>@*</code>
                     was selected. Of course this may lead to runtime errors if the user-defined columns
                     are less than the ORDER BY index. In the most probable use case, on-the-fly
                     sorting of a result table, this is not a problem, since the user
@@ -656,8 +671,8 @@ ORDER BY caption DESC     -- caption not found in SELECT clause]]></programlisti
                     For example, the following is a valid &fxsql; query but relies on the user
                     having defined at least 3 columns for the result type:
                 </para>
-                <programlisting language="sql"><![CDATA[SELECT *
-ORDER BY 3 DESC     -- order by the third column of *]]></programlisting>
+                <programlisting language="sql"><![CDATA[SELECT @*
+ORDER BY 3 DESC     -- order by the third column of @*]]></programlisting>
             </section>
         </section>
 
@@ -1145,7 +1160,7 @@ WHERE (typedef = 3 AND (caption = 'Test caption' OR caption = 'Another test capt
                         <para>
                             Sets the view type (list or thumbnails) when displaying the results to the
                             user. This is only relevant when you select the
-                            <code>*</code>
+                            <code>@*</code>
                             property, which will select the user's predefined result columns
                             and sort settings based on this view type. The view type as well as the
                             location can also be specified in the constructor.
@@ -1183,7 +1198,7 @@ WHERE (typedef = 3 AND (caption = 'Test caption' OR caption = 'Another test capt
             <title>Specifying a query with the
                 <classname>GroovyQueryBuilder</classname>
             </title>
-            <programlisting language="groovy"><![CDATA[new GroovyQueryBuilder().select(["@pk", "caption", "*"]) {
+            <programlisting language="groovy"><![CDATA[new GroovyQueryBuilder().select(["@pk", "caption", "@*"]) {
     filterBriefcase(21)
     eq("caption", "test")
     not_empty("filename")
@@ -1195,7 +1210,7 @@ WHERE (typedef = 3 AND (caption = 'Test caption' OR caption = 'Another test capt
 }.sqlQuery
 ]]></programlisting>
             Result:
-            <programlisting language="sql"><![CDATA[SELECT @pk, caption, *
+            <programlisting language="sql"><![CDATA[SELECT @pk, caption, @*
 FILTER briefcase=21
 WHERE (CAPTION = 'test' AND FILENAME IS NOT NULL AND
        (ID > 0 OR ID < 100)

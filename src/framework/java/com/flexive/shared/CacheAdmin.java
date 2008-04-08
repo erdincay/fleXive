@@ -79,7 +79,9 @@ public class CacheAdmin {
 
     // "cached" cache beans
     private static FxCacheMBean cache = null;
-//    private static ThreadLocal<FxEnvironment> requestEnvironment = new ThreadLocal<FxEnvironment>();
+    //    private static ThreadLocal<FxEnvironment> requestEnvironment = new ThreadLocal<FxEnvironment>();
+    // environment loader lock
+    private static final Object ENV_LOCK = new Object();
 
 
     /**
@@ -180,52 +182,54 @@ public class CacheAdmin {
      *
      * @return FxEnvironment
      */
-    public static synchronized FxEnvironment getEnvironment() {
-        try {
+    public static FxEnvironment getEnvironment() {
+        synchronized (ENV_LOCK) {
+            try {
 //            if (requestEnvironment.get() != null) {
 //                return requestEnvironment.get();
 //            }
-            FxEnvironment ret = (FxEnvironment) getInstance().get(ENVIRONMENT_BASE, ENVIRONMENT_RUNTIME);
-            if (ret == null) {
-                FxContext ri = FxContext.get();
-                if (!DivisionData.isValidDivisionId(ri.getDivisionId())) {
-                    throw new FxCacheException("Division Id missing in request information");
+                FxEnvironment ret = (FxEnvironment) getInstance().get(ENVIRONMENT_BASE, ENVIRONMENT_RUNTIME);
+                if (ret == null) {
+                    FxContext ri = FxContext.get();
+                    if (!DivisionData.isValidDivisionId(ri.getDivisionId())) {
+                        throw new FxCacheException("Division Id missing in request information");
+                    }
+                    EJBLookup.getDivisionConfigurationEngine().patchDatabase();
+                    getInstance().reloadEnvironment(ri.getDivisionId());
+                    //execute run-once scripts
+                    EJBLookup.getScriptingEngine().executeRunOnceScripts();
+                    //execute startup scripts
+                    EJBLookup.getScriptingEngine().executeStartupScripts();
+                    EJBLookup.getTimerService().install(true);
+
+                    for (String dropName : FxSharedUtils.getDrops()) {
+                        // set the drop name as key on the DROP_RUNONCE parameter
+                        final Parameter<Boolean> dropParameter = DROP_RUNONCE.copy().setData(
+                                new ParameterDataEditBean<Boolean>(DROP_RUNONCE.getData()).setKey(dropName));
+                        EJBLookup.getScriptingEngine().executeDropRunOnceScripts(dropParameter, dropName);
+
+                        // also run startup-scripts now
+                        EJBLookup.getScriptingEngine().executeDropStartupScripts(dropName);
+                    }
+                    //Create eviction strategy if supported
+                    cache.setEvictionStrategy(ri.getDivisionId(), CONTENTCACHE_BASE, 5000, 0, 120);
+
+                    // make sure we don't miss any updates in the environment
+                    getInstance().reloadEnvironment(ri.getDivisionId());
+                    ret = (FxEnvironment) getInstance().get(ENVIRONMENT_BASE, ENVIRONMENT_RUNTIME);
+                    if (ret == null)
+                        throw new FxLoadException("ex.structure.runtime.cache.notFound");
                 }
-                EJBLookup.getDivisionConfigurationEngine().patchDatabase();
-                getInstance().reloadEnvironment(ri.getDivisionId());
-                //execute run-once scripts
-                EJBLookup.getScriptingEngine().executeRunOnceScripts();
-                //execute startup scripts
-                EJBLookup.getScriptingEngine().executeStartupScripts();
-                EJBLookup.getTimerService().install(true);
-
-                for (String dropName : FxSharedUtils.getDrops()) {
-                    // set the drop name as key on the DROP_RUNONCE parameter
-                    final Parameter<Boolean> dropParameter = DROP_RUNONCE.copy().setData(
-                            new ParameterDataEditBean<Boolean>(DROP_RUNONCE.getData()).setKey(dropName));
-                    EJBLookup.getScriptingEngine().executeDropRunOnceScripts(dropParameter, dropName);
-
-                    // also run startup-scripts now
-                    EJBLookup.getScriptingEngine().executeDropStartupScripts(dropName);
-                }
-                //Create eviction strategy if supported
-                cache.setEvictionStrategy(ri.getDivisionId(), CONTENTCACHE_BASE, 5000, 0, 120);
-
-                // make sure we don't miss any updates in the environment
-                getInstance().reloadEnvironment(ri.getDivisionId());
-                ret = (FxEnvironment) getInstance().get(ENVIRONMENT_BASE, ENVIRONMENT_RUNTIME);
-                if (ret == null)
-                    throw new FxLoadException("ex.structure.runtime.cache.notFound");
+                //            requestEnvironment.set(ret);
+                return ret;
+            } catch (FxCacheException e) {
+                throw new FxLoadException(LOG, e, "ex.cache.access.error", e.getMessage()).asRuntimeException();
+            } catch (FxLoadException f) {
+                throw f.asRuntimeException(); //pass thru
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new FxLoadException(LOG, e, "ex.cache.access.error", e.getClass().getName() + ": " + e.getMessage()).asRuntimeException();
             }
-//            requestEnvironment.set(ret);
-            return ret;
-        } catch (FxCacheException e) {
-            throw new FxLoadException(LOG, e, "ex.cache.access.error", e.getMessage()).asRuntimeException();
-        } catch (FxLoadException f) {
-            throw f.asRuntimeException(); //pass thru
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new FxLoadException(LOG, e, "ex.cache.access.error", e.getClass().getName() + ": " + e.getMessage()).asRuntimeException();
         }
     }
 

@@ -51,6 +51,8 @@ import com.flexive.shared.interfaces.TreeEngine;
 import com.flexive.shared.search.*;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxType;
+import com.flexive.shared.structure.FxProperty;
+import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.sqlParser.*;
 
 import java.sql.Connection;
@@ -59,7 +61,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -90,7 +91,7 @@ public class SqlSearch {
     private long searchId = -1;
     private String cacheTbl;
     private final FxSQLSearchParams params;
-    private boolean hasWildcard = false;
+    private boolean hasUserPropsWildcard = false;
     private FxEnvironment environment;
     private final ResultPreferencesEngine conf;
     private FxLanguage language;
@@ -207,9 +208,7 @@ public class SqlSearch {
             df.build();
 
             // Wildcard handling depending on the found entries
-            if (this.hasWildcard) {
-                replaceWildcard(df);
-            }
+            replaceWildcard(df);
             if (statement.getOrderByValues().isEmpty()) {
                 // add user-defined order by
                 final ResultPreferences resultPreferences = getResultPreferences(df);
@@ -299,7 +298,7 @@ public class SqlSearch {
         try {
             final long start = java.lang.System.currentTimeMillis();
             statement = FxStatement.parseSql(query);
-            this.hasWildcard = this.hasWildcard();
+            this.hasUserPropsWildcard = this.hasUserPropsWildcard();
             this.parserExecutionTime = (int) (java.lang.System.currentTimeMillis() - start);
         } catch (SqlParserException pe) {
             // Catch the parse exception and convert it to an localized one
@@ -423,13 +422,13 @@ public class SqlSearch {
         return searchId;
     }
 
-    private boolean hasWildcard() throws FxSqlSearchException {
+    private boolean hasUserPropsWildcard() throws FxSqlSearchException {
         // Find out if we have to deal with a wildcard
         boolean hasWildcard = false;
         for (SelectedValue value : statement.getSelectedValues()) {
             if (value.getValue() instanceof Property) {
                 Property prop = ((Property) value.getValue());
-                if (prop.isWildcard()) {
+                if (prop.isUserPropsWildcard()) {
                     if (hasWildcard) {
                         // Only one wildcard may be used per statement
                         throw new FxSqlSearchException(LOG, "ex.sqlSearch.onlyOneWildcardPermitted");
@@ -454,11 +453,17 @@ public class SqlSearch {
             ArrayList<SelectedValue> selValues = new ArrayList<SelectedValue>(
                     (statement.getSelectedValues().size() - 1) + prefs.getSelectedColumns().size());
             for (SelectedValue _value : statement.getSelectedValues()) {
-                if (_value.getValue() instanceof Property && ((Property) _value.getValue()).isWildcard()) {
-                    Property wildcard = (Property) _value.getValue();
-                    // Wildcard, replace it with the correct values
+                final Property propValue = _value.getValue() instanceof Property ? (Property) _value.getValue() : null;
+                if (propValue != null && propValue.isWildcard()) {
+                    // Wildcard, select all properties of the result type
+                    for (FxProperty property: getAllProperties(df)) {
+                        final Property prop = new Property(propValue.getTableAlias(), property.getName(), null);
+                        selValues.add(new SelectedValue(prop, property.getName()));
+                    }
+                } else if (propValue != null && propValue.isUserPropsWildcard()) {
+                    // User preferences wildcard
                     for (ResultColumnInfo nfo : prefs.getSelectedColumns()) {
-                        Property newProp = new Property(wildcard.getTableAlias(), nfo.getPropertyName(), nfo.getSuffix());
+                        Property newProp = new Property(propValue.getTableAlias(), nfo.getPropertyName(), nfo.getSuffix());
                         SelectedValue newSel = new SelectedValue(newProp, nfo.getColumnName());
                         selValues.add(newSel);
                     }
@@ -474,14 +479,31 @@ public class SqlSearch {
     }
 
     private ResultPreferences getResultPreferences(DataFilter df) throws FxApplicationException {
-        long cType = getTypeFilter() != null ?
+        return conf.load(getContentTypeId(df), viewType, location);
+    }
+
+    private long getContentTypeId(DataFilter df) {
+        return getTypeFilter() != null ?
                 // Type filter: only one type is contained in the search, use it
                 getTypeFilter().getId() :
                 // No Type filter: see if we got only one type in the result, or use the default for all types
                 df.getContentTypes().size() == 1 ? df.getContentTypes().get(0).getContentTypeId() : -1;
+    }
 
-        //ArrayList<SelectedValue> selValues = new ArrayList<SelectedValue>(statement.getSelectedValues().size()+25);
-        return conf.load(cType, viewType, location);
+    private List<FxProperty> getAllProperties(DataFilter df) {
+        long typeId = getContentTypeId(df);
+        if (typeId == -1) {
+            // return all properties attached to the root
+            typeId = FxType.ROOT_ID;
+        }
+        final List<FxProperty> result = new ArrayList<FxProperty>();
+        // return all properties of the type
+        for (FxPropertyAssignment assignment : environment.getType(typeId).getAssignedProperties()) {
+            if (assignment.getProperty().isSearchable()) {
+                result.add(assignment.getProperty());
+            }
+        }
+        return result;
     }
 
     public String getQuery() {
