@@ -36,6 +36,7 @@ package com.flexive.ejb.beans;
 import com.flexive.core.Database;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.FxTimerService;
@@ -145,6 +146,10 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
     @Timeout
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void perform(Timer timer) {
+        if(!CacheAdmin.isCacheMBeanInstalled()) {
+            System.out.println("No CacheMBean installed, exiting!!!");
+            return;
+        } //TODO: this is where cache errors occur due to serialized timers that are restarted in jboss
         //place periodic maintenance code here ...
         try {
             for (DivisionData dd : EJBLookup.getGlobalConfigurationEngine().getDivisions()) {

@@ -44,13 +44,14 @@ import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.mbeans.FxCacheMBean;
 import com.flexive.shared.mbeans.FxCacheProxy;
 import com.flexive.shared.mbeans.MBeanHelper;
-import com.flexive.shared.structure.FxFilteredEnvironment;
 import com.flexive.shared.structure.FxEnvironment;
+import com.flexive.shared.structure.FxFilteredEnvironment;
 import com.flexive.stream.ServerLocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
 import java.util.List;
 
 /**
@@ -130,6 +131,21 @@ public class CacheAdmin {
     }
 
     /**
+     * Check if the cache MBean is installed in the application server
+     *
+     * @return cache MBean installed
+     */
+    public static boolean isCacheMBeanInstalled() {
+        MBeanServer server = MBeanHelper.locateServer();
+        try {
+            return server.isRegistered((new FxCacheProxy(server)).getName());
+        } catch (MalformedObjectNameException e) {
+            LOG.error(e);
+            return false;
+        }
+    }
+
+    /**
      * Is this a new and uninitialized flexive installation?
      * Useful to display splashscreens etc.
      *
@@ -177,11 +193,11 @@ public class CacheAdmin {
                 }
                 EJBLookup.getDivisionConfigurationEngine().patchDatabase();
                 getInstance().reloadEnvironment(ri.getDivisionId());
-                EJBLookup.getTimerService().install(true);
                 //execute run-once scripts
                 EJBLookup.getScriptingEngine().executeRunOnceScripts();
                 //execute startup scripts
                 EJBLookup.getScriptingEngine().executeStartupScripts();
+                EJBLookup.getTimerService().install(true);
 
                 for (String dropName : FxSharedUtils.getDrops()) {
                     // set the drop name as key on the DROP_RUNONCE parameter

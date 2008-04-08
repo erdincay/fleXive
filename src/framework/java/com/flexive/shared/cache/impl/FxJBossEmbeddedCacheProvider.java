@@ -71,8 +71,9 @@ public class FxJBossEmbeddedCacheProvider extends AbstractBackingCacheProvider<F
             cache = new FxJBossTreeCacheWrapper(tc);
         } catch (Exception e) {
             LOG.error("Failed to start TreeCache. Error: " + e.getMessage(), e);
-            System.err.println("!!! Failed to start TreeCache !!!! Error: " + e.getMessage());
-            e.printStackTrace();
+            throw new FxCacheException(e);
+//            System.err.println("!!! Failed to start TreeCache !!!! Error: " + e.getMessage());
+//            e.printStackTrace();
         }
     }
 
