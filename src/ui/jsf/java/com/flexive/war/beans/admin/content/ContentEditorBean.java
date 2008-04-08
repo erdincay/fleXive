@@ -180,7 +180,11 @@ public class ContentEditorBean implements ActionBean, Serializable {
      */
     public String getExportData() {
         if( "export".equals(infoPanelState))
-            return ConversionEngine.getXStream().toXML(content);
+            try {
+                return co.exportContent(content);
+            } catch (FxApplicationException e) {
+                LOG.error(e);
+            }
         return "";
     }
 

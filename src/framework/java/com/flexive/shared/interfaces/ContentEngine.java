@@ -233,4 +233,23 @@ public interface ContentEngine {
      * @throws FxApplicationException on errors
      */
     long getBinaryId(FxPK pk, String xpath, FxLanguage language) throws FxApplicationException;
+
+    /**
+     * Import a content from XML
+     *
+     * @param content the content as XML
+     * @param createNewInstance create a new instance or overwrite an existing instance (type has to match) 
+     * @return pk
+     * @throws FxApplicationException on errors
+     */
+    FxPK importContent(String content, boolean createNewInstance) throws FxApplicationException;
+
+    /**
+     * Export a content instance
+     *
+     * @param content content instance to export
+     * @return content as XML
+     * @throws FxApplicationException on errors
+     */
+    String exportContent(FxContent content) throws FxApplicationException;
 }

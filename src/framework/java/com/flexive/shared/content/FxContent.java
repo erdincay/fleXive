@@ -1022,6 +1022,19 @@ public class FxContent implements Serializable, Cloneable {
     }
 
     /**
+     * Get an independent copy of this FxContent which is a new instance (can be saved as a copy)
+     *
+     * @return a copy of this FxContent with a new pk
+     */
+    public FxContent copyAsNewInstance() {
+        FxContent clone;
+        clone = new FxContent(new FxPK(), typeId, relation, mandatorId, aclId, stepId, maxVersion, liveVersion, active,
+                mainLanguage, relatedSource, relatedDestination, relatedSourcePosition, relatedDestinationPosition,
+                lifeCycleInfo, data.copy(null), binaryPreviewId, binaryPreviewACL);
+        return clone;
+    }
+
+    /**
      * Load all FxContent instances from properties of type FxReference
      *
      * @param ce ContentEngine

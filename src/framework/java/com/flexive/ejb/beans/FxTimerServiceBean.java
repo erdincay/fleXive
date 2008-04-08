@@ -35,8 +35,8 @@ package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
 import com.flexive.core.storage.StorageManager;
-import com.flexive.shared.EJBLookup;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.FxTimerService;
@@ -72,6 +72,8 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
      */
     private final static String TIMER_SIGNATURE = "FxTimer";
 
+    private volatile boolean foundMBean = false;
+
     @Resource
     SessionContext ctx;
 
@@ -80,7 +82,7 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
      * {@inheritDoc}
      */
     public boolean install(boolean reinstall) {
-        if( isInstalled() )
+        if (isInstalled())
             uninstall();
         //install a timer that runs every minute
         final boolean installed = isInstalled();
@@ -146,10 +148,13 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
     @Timeout
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void perform(Timer timer) {
-        if(!CacheAdmin.isCacheMBeanInstalled()) {
-            System.out.println("No CacheMBean installed, exiting!!!");
-            return;
-        } //TODO: this is where cache errors occur due to serialized timers that are restarted in jboss
+        if (!foundMBean) {
+            if (!CacheAdmin.isCacheMBeanInstalled()) {
+                //this is where cache errors would occur due to serialized timers that are restarted in jboss
+                return;
+            } else
+                foundMBean = true;
+        }
         //place periodic maintenance code here ...
         try {
             for (DivisionData dd : EJBLookup.getGlobalConfigurationEngine().getDivisions()) {

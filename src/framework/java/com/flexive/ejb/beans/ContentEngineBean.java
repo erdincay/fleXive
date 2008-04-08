@@ -35,6 +35,7 @@ package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
 import com.flexive.core.LifeCycleInfoImpl;
+import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.*;
@@ -682,9 +683,9 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                     //scripting after end
                 }
             }
-            if( type.isTrackHistory() ) {
+            if (type.isTrackHistory()) {
                 HistoryTrackerEngine trackerEngine = EJBLookup.getHistoryTrackerEngine();
-                for(FxPK pk: pks)
+                for (FxPK pk : pks)
                     trackerEngine.track(type, pk, null, "history.content.removed");
             }
             return removed;
@@ -815,5 +816,26 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
         } finally {
             Database.closeObjects(ContentEngineBean.class, con, null);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public FxPK importContent(String content, boolean createNewInstance) throws FxApplicationException {
+        FxContent co = (FxContent) ConversionEngine.getXStream().fromXML(content);
+        //the bean has to be looked up again for proper tx handling ...
+        if (createNewInstance)
+            return EJBLookup.getContentEngine().save(co.copyAsNewInstance());
+        else
+            return EJBLookup.getContentEngine().save(co);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public String exportContent(FxContent content) throws FxApplicationException {
+        return ConversionEngine.getXStream().toXML(content);
     }
 }

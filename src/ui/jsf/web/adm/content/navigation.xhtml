@@ -121,6 +121,11 @@
                 }
             }
 
+           // import a content
+           function importContent(menuItem) {
+               invokeContentAction("adm/content/contentImport.jsf", "importFromTree", {nodeId: getObjectId(menuItem)});
+           }
+
            function querySubTree(menuItem) {
                 var nodeId = getObjectId(menuItem);
                 if (parent.frames["contentFrame"].isQueryEditor) {
@@ -328,6 +333,7 @@
                         </c:if>
                     </c:forEach>
                 </adm:treeContextMenuItem>
+                <adm:treeContextMenuItem icon="importContent" treeActions="importContent" labelKey="ContentTree.menu.importContent" clickHandler="importContent"/>
                 <fx:menuSeparator/>
                 <adm:treeContextMenuItem treeActions="activateNode" icon="activate" labelKey="ContentTree.menu.activateNode" clickHandler="activateNode"/>
                 <adm:treeContextMenuItem treeActions="activateNodeAndChildren" icon="activateWithChildren" labelKey="ContentTree.menu.activateWithChildren" clickHandler="activateNodeAndChildren"/>

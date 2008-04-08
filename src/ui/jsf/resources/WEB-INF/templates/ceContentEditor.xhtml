@@ -71,6 +71,7 @@
                     <ui:fragment rendered="#{srcEditor.infoPanelState=='export'}">
                         <span class="infoPanel">
                             <span class="infoPanelButton" style="margin: 12px; display: block; float: left;" onclick="copy2clipboard(getPreElementContent('exportArea'),'#{fxMessageBean['Global.clipboard.error']}','#{fxMessageBean['Global.clipboard.success']}')">Copy to clipboard</span>
+                            <br clear="both"/>
                             <pre id="exportArea">#{srcEditor.exportData}</pre>
                         </span>
                     </ui:fragment>
