@@ -619,10 +619,84 @@ public class ContentEditorBean implements ActionBean, Serializable {
         this.version = version;
     }
 
+    private void _initVariables() throws FxApplicationException {
+        environment = CacheAdmin.getFilteredEnvironment();
+        FxType fxType = environment.getType(type);
+        properties = fxType.getAssignedProperties();
+        groups = fxType.getAssignedGroups();
+        acl = CacheAdmin.getEnvironment().getACL(content.getAclId());
+        data = new CeDataWrapper(this);
+        displayProv = new CeDisplayProvider(this);
+        idGenerator = new CeIdGenerator();
+        addElementOptions = new CeAddElementOptions(this);
+        infoPanelState = null;
+        historyEntries = null;
+        compareSourceVersion = 0;
+        compareDestinationVersion = 0;
+        _initSteps();
+        editAble = true;
+        deleteAble = true;
+        versionDeleteAble = false;
+        if (steps == null || steps.size() == 0) {
+            editAble = false;
+            readOnly = true;
+            if (id == -1) {
+                new FxFacesMsgErr("Content.err.noStepAccess").addToContext();
+                release();
+                return;
+            }
+        }
+        FxContentSecurityInfo si = fxType.usePermissions() && id != -1
+                ? co.getContentSecurityInfo(content.getPk())
+                : null;
+        if (editAble && id != -1) {
+            if (fxType.usePermissions())
+                editAble = FxPermissionUtils.checkPermission(FxContext.get().getTicket(), ACL.Permission.EDIT,
+                        si, false);
+        }
+        if (fxType.usePermissions() && id != -1)
+            deleteAble = FxPermissionUtils.checkPermission(FxContext.get().getTicket(), ACL.Permission.DELETE,
+                    si, false);
+        versionDeleteAble = deleteAble;
+        if (versionInfo.getVersionCount() <= 1)
+            versionDeleteAble = false;
+    }
+
+    /**
+     * Initialize for an existing content instance
+     *
+     * @param con content instance
+     * @return success
+     */
+    public boolean init(FxContent con) {
+        try {
+            release();
+            id = con.getId();
+            version = con.getVersion();
+            pk = con.getPk();
+            content = con;
+            content.loadReferences(co);
+            type = content.getTypeId();
+            if (content.getPk().isNew()) {
+                versionInfo = FxContentVersionInfo.createEmpty();
+                treeNodes = new ArrayList<FxTreeNode>(5);
+            } else {
+                versionInfo = co.getContentVersionInfo(pk);
+                initTreeData(pk.getId());
+            }
+            _initVariables();
+            return true;
+        } catch (Exception e) {
+            release();
+            new FxFacesMsgErr(e).addToContext();
+        }
+        return false;
+    }
+
+
     public Boolean _init() {
         if (!isInitialized()) {
             try {
-                environment = CacheAdmin.getFilteredEnvironment();
                 if (id != -1) {
                     FxPK pk = (version == -1) ? new FxPK(id, FxPK.MAX) : new FxPK(id, version);
                     // Load the content itself
@@ -640,45 +714,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
                     version = FxPK.MAX;
                     treeNodes = new ArrayList<FxTreeNode>(5);
                 }
-                FxType fxType = environment.getType(type);
-                properties = fxType.getAssignedProperties();
-                groups = fxType.getAssignedGroups();
-                acl = CacheAdmin.getEnvironment().getACL(content.getAclId());
-                data = new CeDataWrapper(this);
-                displayProv = new CeDisplayProvider(this);
-                idGenerator = new CeIdGenerator();
-                addElementOptions = new CeAddElementOptions(this);
-                infoPanelState = null;
-                historyEntries = null;
-                compareSourceVersion = 0;
-                compareDestinationVersion = 0;
-                _initSteps();
-                editAble = true;
-                deleteAble = true;
-                versionDeleteAble = false;
-                if( steps == null || steps.size() == 0 ) {
-                    editAble = false;
-                    readOnly = true;
-                    if (id == -1) {
-                        new FxFacesMsgErr("Content.err.noStepAccess").addToContext();
-                        release();
-                        return null;
-                    }
-                }
-                FxContentSecurityInfo si = fxType.usePermissions() && id != -1
-                        ? co.getContentSecurityInfo(content.getPk())
-                        : null;
-                if( editAble && id != -1 ) {
-                    if( fxType.usePermissions() )
-                        editAble = FxPermissionUtils.checkPermission(FxContext.get().getTicket(), ACL.Permission.EDIT,
-                                si, false);
-                }
-                if( fxType.usePermissions() && id != -1 )
-                        deleteAble = FxPermissionUtils.checkPermission(FxContext.get().getTicket(), ACL.Permission.DELETE,
-                                si, false);
-                versionDeleteAble = deleteAble;
-                if( versionInfo.getVersionCount() <= 1)
-                    versionDeleteAble = false;
+                _initVariables();
                 return true;
             } catch (Throwable t) {
                 release();

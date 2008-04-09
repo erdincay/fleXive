@@ -19,7 +19,6 @@
 
             <adm:tab label="#{fxMessageBean['Content.tabtitle.import']}" active="true" id="tabChoose"/>
             <c:if test="#{empty contentImportBean.parseRequestParameters}"/>
-
             <fx:formRow labelKey="Content.field.node" id="node">
                 <h:outputText value="#{contentImportBean.nodePath}"/>
             </fx:formRow>

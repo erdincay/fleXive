@@ -237,12 +237,12 @@ public interface ContentEngine {
     /**
      * Import a content from XML
      *
-     * @param content the content as XML
-     * @param createNewInstance create a new instance or overwrite an existing instance (type has to match) 
-     * @return pk
+     * @param xml the content as XML
+     * @param newInstance modify the content to be treated like a new instance
+     * @return FxContent
      * @throws FxApplicationException on errors
      */
-    FxPK importContent(String content, boolean createNewInstance) throws FxApplicationException;
+    FxContent importContent(String xml, boolean newInstance) throws FxApplicationException;
 
     /**
      * Export a content instance

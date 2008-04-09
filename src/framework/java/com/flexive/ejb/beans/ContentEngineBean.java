@@ -54,6 +54,7 @@ import com.flexive.shared.structure.TypeStorageMode;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxBinary;
 import com.flexive.shared.workflow.Step;
+import com.thoughtworks.xstream.converters.ConversionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -64,6 +65,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Iterator;
 
 /**
  * Content Engine implementation
@@ -822,13 +824,28 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public FxPK importContent(String content, boolean createNewInstance) throws FxApplicationException {
-        FxContent co = (FxContent) ConversionEngine.getXStream().fromXML(content);
-        //the bean has to be looked up again for proper tx handling ...
-        if (createNewInstance)
-            return EJBLookup.getContentEngine().save(co.copyAsNewInstance());
-        else
-            return EJBLookup.getContentEngine().save(co);
+    public FxContent importContent(String xml, boolean newInstance) throws FxApplicationException {
+        FxContent co;
+        try {
+            co = (FxContent) ConversionEngine.getXStream().fromXML(xml);
+        } catch (ConversionException e) {
+            String key;
+            Iterator i = e.keys();
+            String path = "unknown";
+            String line = "unknown";
+            while( i.hasNext() ) {
+                key = (String)i.next();
+                if( "path".equals(key))
+                    path = e.get(key);
+                else if("line number".equals(key))
+                    line = e.get(key);
+//                System.out.println("Key ["+key+"] -> "+e.get(key));
+            }
+            throw new FxApplicationException("ex.content.import.conversionError", path, line, e.getShortMessage());
+        } catch(Exception e) {
+            throw new FxApplicationException("ex.content.import.error", e.getMessage());
+        }
+        return co;
     }
 
     /**

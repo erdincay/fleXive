@@ -34,11 +34,13 @@
 package com.flexive.war.beans.admin.content;
 
 import com.flexive.faces.FxJsfUtils;
+import com.flexive.faces.messages.FxFacesMsgInfo;
+import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.beans.ActionBean;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.tree.FxTreeMode;
-import com.flexive.shared.tree.FxTreeNodeEdit;
 import com.flexive.shared.content.FxPK;
+import com.flexive.shared.content.FxContent;
 import com.flexive.shared.exceptions.FxApplicationException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.myfaces.custom.fileupload.UploadedFile;
@@ -106,20 +108,28 @@ public class ContentImportBean implements ActionBean, Serializable {
     }
 
     public String doImport() {
-        FxPK pk = null;
+        FxContent content = null;
         if (uploadContent != null && uploadContent.getSize() > 0) {
             System.out.println("Uploaded " + uploadContent.getSize() + " bytes for " + uploadContent.getName());
             try {
-                pk = performImport(new String(uploadContent.getBytes(), "UTF-8"));
+                content = performImport(new String(uploadContent.getBytes(), "UTF-8"));
             } catch (IOException e) {
                 System.out.println("IO-Error: " + e.getMessage());
             }
-            System.out.println("Saved as PK: " + pk);
         } else if (!StringUtils.isEmpty(pasteContent)) {
-            pk = performImport(pasteContent);
-            System.out.println("Saved as PK: " + pk);
+            content = performImport(pasteContent);
         } else {
-            System.out.println("Nothing found to import!");
+            new FxFacesMsgInfo("Content.nfo.import.noData").addToContext();
+            return "";
+        }
+        if (content != null) {
+            ContentEditorBean ce = (ContentEditorBean) FxJsfUtils.getManagedBean("contentEditorBean");
+            ce.init(content);
+            ce.compact();
+            if( nodeId >= 0 )
+                ce.addTreeNode(nodeId);
+            new FxFacesMsgInfo("Content.nfo.imported").addToContext();
+            return "contentEditor";
         }
         return "";
     }
@@ -128,17 +138,13 @@ public class ContentImportBean implements ActionBean, Serializable {
      * Perform the actual import
      *
      * @param content content as XML
-     * @return pk
+     * @return FxContent
      */
-    private FxPK performImport(String content) {
+    private FxContent performImport(String content) {
         try {
-            FxPK pk =  EJBLookup.getContentEngine().importContent(content, true);
-            if( nodeId > 0 )
-                EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNewChildNode(EJBLookup.getTreeEngine().getNode(FxTreeMode.Edit, nodeId)).setReference(pk));
-            return pk;
+            return  EJBLookup.getContentEngine().importContent(content, true);
         } catch (FxApplicationException e) {
-            System.out.println("Error: " + e.getMessage());
-            e.printStackTrace();
+            new FxFacesMsgErr(e).addToContext();
             return null;
         }
     }
