@@ -178,6 +178,14 @@ public class FxSelectOne extends FxValue<FxSelectListItem, FxSelectOne> implemen
      * {@inheritDoc}
      */
     @Override
+    public String getStringValue(FxSelectListItem value) {
+        return ""+value.getId();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public FxSelectListItem fromString(String value) {
         list = null;
         return CacheAdmin.getEnvironment().getSelectListItem(Long.parseLong(value));

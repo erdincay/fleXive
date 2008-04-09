@@ -38,6 +38,7 @@ import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxConversionException;
+import com.flexive.shared.exceptions.FxStreamException;
 import com.flexive.shared.interfaces.LanguageEngine;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxBinary;
@@ -50,8 +51,12 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 
 /**
@@ -70,6 +75,114 @@ public class FxValueConverter implements Converter {
     private String downloadURL = null;
 
     /**
+     * Get the download URL for binaries
+     *
+     * @return download URL for binaries
+     */
+    public String getDownloadURL() {
+        if (downloadURL != null)
+            return downloadURL;
+        try {
+            downloadURL = EJBLookup.getDivisionConfigurationEngine().get(SystemParameters.EXPORT_DOWNLOAD_URL);
+            if (!downloadURL.endsWith("/"))
+                downloadURL = downloadURL + "/";
+            return downloadURL;
+        } catch (FxApplicationException e) {
+            throw e.asRuntimeException();
+        }
+    }
+
+    /**
+     * Marshall a FxBinary
+     *
+     * @param writer writer
+     * @param ctx    context
+     * @param value  FxBinary
+     * @param lang   current language
+     * @throws FxStreamException on errors
+     */
+    private void marshalBinary(HierarchicalStreamWriter writer, MarshallingContext ctx, FxBinary value, long lang) throws FxStreamException {
+        BinaryDescriptor desc = value.getTranslation(lang);
+        writer.addAttribute("fileName", desc.getName());
+        writer.addAttribute("size", String.valueOf(desc.getSize()));
+        writer.startNode("content");
+        if (desc.isNewBinary()) {
+            writer.addAttribute("content", "EMPTY");
+        } else if (desc.getSize() > 500 * 1024 && ctx.get("pk") != null) {
+            // > 500 KBytes add a download URL
+            writer.addAttribute("content", "URL");
+            try {
+                writer.setValue(getDownloadURL() + "pk" + ctx.get("pk") + "/" +
+                        URLEncoder.encode(FxSharedUtils.escapeXPath(value.getXPath()), "UTF-8") + "/" +
+                        desc.getName());
+            } catch (UnsupportedEncodingException e) {
+                //unlikely to happen since UTF-8 should be available
+                throw new RuntimeException(e);
+            }
+        } else {
+            //add BASE64 encoded binary data
+            writer.addAttribute("content", "Base64");
+            ByteArrayOutputStream bos = new ByteArrayOutputStream((int) desc.getSize());
+            desc.download(bos);
+            try {
+                writer.setValue(new String(Base64.encodeBase64(bos.toByteArray()), "UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                //unlikely to happen since UTF-8 should be available
+                throw new RuntimeException(e);
+            }
+        }
+        writer.endNode();
+    }
+
+    /**
+     * Unmarshal a binary value
+     *
+     * @param reader XStream reader
+     * @param ctx    context
+     * @param v      value being processed
+     * @return BinaryDescriptor
+     * @throws FxStreamException on errors
+     */
+    private BinaryDescriptor unmarshalBinary(HierarchicalStreamReader reader, UnmarshallingContext ctx, FxValue v) throws FxStreamException {
+        String fileName = reader.getAttribute("fileName");
+        long size = Long.valueOf(reader.getAttribute("size"));
+        BinaryDescriptor binary = null;
+        while (reader.hasMoreChildren()) {
+            reader.moveDown();
+            if ("content".equals(reader.getNodeName())) {
+                String content = reader.getAttribute("content");
+                if (StringUtils.isEmpty(content) || "EMPTY".equalsIgnoreCase(content)) {
+                    binary = new BinaryDescriptor();
+                } else if ("Base64".equals(content)) {
+                    try {
+                        binary = new BinaryDescriptor(fileName, size, new ByteArrayInputStream(Base64.decodeBase64(reader.getValue().getBytes("UTF-8"))));
+                    } catch (UnsupportedEncodingException e) {
+                        //can not happen really ...
+                    }
+                } else if ("URL".equals(content)) {
+                    try {
+                        URL url = new URL(reader.getValue());
+                        InputStream in = null;
+                        try {
+                            URLConnection con = url.openConnection();
+                            in = con.getInputStream();
+                            binary = new BinaryDescriptor(fileName, size, in);
+                        } finally {
+                            if (in != null)
+                                in.close();
+                        }
+                    } catch (Exception e) {
+                        throw new FxApplicationException("ex.conversion.unmarshal.error", v.getXPath(),
+                                e.getMessage() + " (" + reader.getValue() + ")").asRuntimeException();
+                    }
+                }
+            }
+            reader.moveUp();
+        }
+        return binary;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @SuppressWarnings("unchecked")
@@ -85,41 +198,7 @@ public class FxValueConverter implements Converter {
                     writer.startNode("d");
                     writer.addAttribute("l", ConversionEngine.getLang(le, lang));
                     if (value instanceof FxBinary) {
-                        BinaryDescriptor desc = ((FxBinary) value).getTranslation(lang);
-                        writer.addAttribute("fileName", desc.getName());
-                        writer.addAttribute("image", String.valueOf(desc.isImage()));
-                        writer.addAttribute("mimeType", desc.getMimeType());
-                        writer.addAttribute("size", String.valueOf(desc.getSize()));
-                        if( !StringUtils.isEmpty(desc.getMetadata())) {
-                            writer.startNode("meta");
-                            writer.setValue(desc.getMetadata());
-                            writer.endNode();
-                        }
-                        writer.startNode("content");
-                        if( desc.isNewBinary() ) {
-                            writer.addAttribute("content", "EMPTY");
-                        } else if (desc.getSize() > 500 * 1024 && ctx.get("pk") != null) {
-                            // > 500 KBytes add a download URL
-                            writer.addAttribute("content", "URL");
-                            try {
-                                writer.setValue(getDownloadURL() + "pk" + ctx.get("pk") + "/" + URLEncoder.encode(FxSharedUtils.escapeXPath(value.getXPath()), "UTF-8") + "/" + desc.getName());
-                            } catch (UnsupportedEncodingException e) {
-                                //unlikely to happen since UTF-8 should be available
-                                throw new RuntimeException(e);
-                            }
-                        } else {
-                            //add BASE64 encoded binary data
-                            writer.addAttribute("content", "Base64");
-                            ByteArrayOutputStream bos = new ByteArrayOutputStream((int) desc.getSize());
-                            desc.download(bos);
-                            try {
-                                writer.setValue(new String(Base64.encodeBase64(bos.toByteArray()), "UTF-8"));
-                            } catch (UnsupportedEncodingException e) {
-                                //unlikely to happen since UTF-8 should be available
-                                throw new RuntimeException(e);
-                            }
-                        }
-                        writer.endNode();
+                        marshalBinary(writer, ctx, (FxBinary) value, lang);
                     } else
                         writer.setValue(value.getStringValue(value.getTranslation(lang)));
                     writer.endNode();
@@ -144,6 +223,7 @@ public class FxValueConverter implements Converter {
             long defaultLanguage = ConversionEngine.getLang(le, reader.getAttribute("dl"));
             v = (FxValue) Class.forName("com.flexive.shared.value." + type).
                     getConstructor(long.class, boolean.class).newInstance(defaultLanguage, multiLanguage);
+            v.setXPath(reader.getAttribute("xpath"));
             if (reader.getAttribute("empty") != null && Boolean.valueOf(reader.getAttribute("empty")))
                 v.setEmpty();
             while (reader.hasMoreChildren()) {
@@ -153,7 +233,7 @@ public class FxValueConverter implements Converter {
                     final long lang = ConversionEngine.getLang(le, reader.getAttribute("l"));
                     Object value;
                     if (v instanceof FxBinary) {
-                        value = new BinaryDescriptor(); //TODO ...
+                        value = unmarshalBinary(reader, ctx, v);
                     } else
                         value = v.fromString(reader.getValue());
                     v.setTranslation(lang, value);
@@ -173,23 +253,5 @@ public class FxValueConverter implements Converter {
      */
     public boolean canConvert(Class aClass) {
         return FxValue.class.isAssignableFrom(aClass);
-    }
-
-    /**
-     * Get the download URL for binaries
-     *
-     * @return download URL for binaries
-     */
-    public String getDownloadURL() {
-        if (downloadURL != null)
-            return downloadURL;
-        try {
-            downloadURL = EJBLookup.getDivisionConfigurationEngine().get(SystemParameters.EXPORT_DOWNLOAD_URL);
-            if (!downloadURL.endsWith("/"))
-                downloadURL = downloadURL + "/";
-            return downloadURL;
-        } catch (FxApplicationException e) {
-            throw e.asRuntimeException();
-        }
     }
 }
