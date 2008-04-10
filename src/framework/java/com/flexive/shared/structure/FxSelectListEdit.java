@@ -186,7 +186,7 @@ public class FxSelectListEdit extends FxSelectList implements Serializable {
      */
 
     public void addItem(FxSelectListItem item) {
-        new FxSelectListItemEdit(item.acl, this, item.label, item.data, item.color);
+        new FxSelectListItemEdit(item.name, item.acl, this, item.label, item.data, item.color);
     }
 
     /**
@@ -206,7 +206,7 @@ public class FxSelectListEdit extends FxSelectList implements Serializable {
      */
     public void addAll(List<? extends SelectableObjectWithLabel> items) {
         for (SelectableObjectWithLabel item : items) {
-            new FxSelectListItem(item.getId(), this, -1, item.getLabel());
+            new FxSelectListItem(item.getId(), item.getLabel().getDefaultTranslation(), this, -1, item.getLabel());
         }
     }
 
@@ -217,7 +217,7 @@ public class FxSelectListEdit extends FxSelectList implements Serializable {
      */
     public void addAllWithName(List<? extends SelectableObjectWithName> items) {
         for (SelectableObjectWithName item : items) {
-            new FxSelectListItem(item.getId(), this, -1, new FxString(false, item.getName()));
+            new FxSelectListItem(item.getId(), null, this, -1, new FxString(false, item.getName()));
         }
     }
 

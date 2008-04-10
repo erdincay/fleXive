@@ -36,7 +36,6 @@ package com.flexive.tests.embedded.structure;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxLanguage;
-import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.interfaces.SelectListEngine;
@@ -61,8 +60,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.util.Iterator;
-import java.util.List;
-import java.util.Collections;
 
 /**
  * FxSelectList and FxSelectListItem tests
@@ -113,11 +110,12 @@ public class SelectListTest {
         final String TEST_NAME2 = "List2_" + RandomStringUtils.random(16, true, true);
         FxSelectListEdit list = FxSelectListEdit.createNew(TEST_NAME1, new FxString("label"), new FxString("description"),
                 false, aclList, aclItem);
-        FxSelectListItem item1_1 = new FxSelectListItemEdit(aclItem, list, new FxString("item1.label"), "item1.data", "item1.color");
-        new FxSelectListItemEdit(aclItem, list, new FxString("item2.label"), "item2.data", "item2.color");
+//        FxSelectListItem item1_1 =
+        new FxSelectListItemEdit("item1", aclItem, list, new FxString("item1.label"), "item1.data", "item1.color");
+        new FxSelectListItemEdit("item2", aclItem, list, new FxString("item2.label"), "item2.data", "item2.color");
         long list1Id = le.save(list);
         FxSelectList list1_load = CacheAdmin.getEnvironment().getSelectList(list1Id);
-        new FxSelectListItemEdit(aclItem, list1_load, new FxString("item3.label"), "item3.data", "item3.color");
+        new FxSelectListItemEdit("item3", aclItem, list1_load, new FxString("item3.label"), "item3.data", "item3.color");
         le.save(list1_load.asEditable());
         assert !CacheAdmin.getEnvironment().getSelectList(list1Id).hasDefaultItem() : "No default item expected for list 1!";
         boolean found = false;
@@ -130,7 +128,8 @@ public class SelectListTest {
 
         FxSelectListEdit list2 = FxSelectListEdit.createNew(list1_load, TEST_NAME2, new FxString("label2"), new FxString("description2"),
                 false, aclList, aclItem);
-        FxSelectListItem defItem = new FxSelectListItemEdit(aclItem, list2, new FxString("list2.item1.label"),
+//        FxSelectListItem defItem =
+        new FxSelectListItemEdit("item2", aclItem, list2, new FxString("list2.item1.label"),
                 "list2.item1.data", "list2.item1.color")
 //                .setParentItem(item1_1)
                 .setDefaultItem();
@@ -152,10 +151,10 @@ public class SelectListTest {
         FxSelectListEdit list = FxSelectListEdit.createNew("selectListValueTest",
                 new FxString("label"), new FxString("description"),
                 false, aclList, aclItem);
-        new FxSelectListItemEdit(aclItem, list,
+        new FxSelectListItemEdit("item1", aclItem, list,
                 new FxString("default label").setTranslation(FxLanguage.ENGLISH, "english item")
                         .setTranslation(FxLanguage.GERMAN, "deutscher eintrag"), "item1.data", "item1.color");
-        new FxSelectListItemEdit(aclItem, list,
+        new FxSelectListItemEdit("item2", aclItem, list,
                 new FxString("default label").setTranslation(FxLanguage.ENGLISH, "english item 2")
                         .setTranslation(FxLanguage.GERMAN, "deutscher eintrag 2"), "item2.data", "item2.color");
         final long selectListId = le.save(list);

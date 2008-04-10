@@ -747,21 +747,21 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                         rs.getLong(7)));
             }
             ps.close();
-            //            1  2   3        4    5     6          7          8           9           10      11       12
-            sql = "SELECT ID,ACL,PARENTID,DATA,COLOR,CREATED_BY,CREATED_AT,MODIFIED_BY,MODIFIED_AT,DBIN_ID,DBIN_VER,DBIN_QUALITY FROM " +
+            //            1  2    3   4        5    6     7          8          9           10          11      12       13
+            sql = "SELECT ID,NAME,ACL,PARENTID,DATA,COLOR,CREATED_BY,CREATED_AT,MODIFIED_BY,MODIFIED_AT,DBIN_ID,DBIN_VER,DBIN_QUALITY FROM " +
                     TBL_SELECTLIST_ITEM + " WHERE LISTID=? ORDER BY ID";
             ps = con.prepareStatement(sql);
             for (FxSelectList list : lists) {
                 ps.setLong(1, list.getId());
                 rs = ps.executeQuery();
                 while (rs != null && rs.next()) {
-                    long parent = rs.getLong(3);
+                    long parent = rs.getLong(4);
                     if (rs.wasNull())
                         parent = -1;
-                    new FxSelectListItem(rs.getLong(1), environment.getACL(rs.getLong(2)), list, parent,
+                    new FxSelectListItem(rs.getLong(1), rs.getString(2), environment.getACL(rs.getLong(3)), list, parent,
                             FxSharedUtils.get(itemTranslations, rs.getLong(1), emptyItemTranslation)[0],
-                            rs.getString(4), rs.getString(5), rs.getLong(10), rs.getInt(11), rs.getInt(12),
-                            LifeCycleInfoImpl.load(rs, 6, 7, 8, 9));
+                            rs.getString(5), rs.getString(6), rs.getLong(11), rs.getInt(12), rs.getInt(13),
+                            LifeCycleInfoImpl.load(rs, 7, 8, 9, 10));
                 }
             }
         } catch (SQLException exc) {

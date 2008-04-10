@@ -64,7 +64,7 @@ public class FxSelectListItemEdit extends FxSelectListItem implements Serializab
      * @param item the item to make editable
      */
     public FxSelectListItemEdit(FxSelectListItem item) {
-        super(item.id, item.acl, item.list, item.parentItemId, item.label, item.data, item.color, item.iconId, item.iconVer, item.iconQuality, item.lifeCycleInfo);
+        super(item.id, item.name, item.acl, item.list, item.parentItemId, item.label, item.data, item.color, item.iconId, item.iconVer, item.iconQuality, item.lifeCycleInfo);
         this.isNew = false;
         this.original = item;
         this.parentItem = item.parentItem;
@@ -73,11 +73,11 @@ public class FxSelectListItemEdit extends FxSelectListItem implements Serializab
     /**
      * Internal constructor to make an existing list item editable and add it to an editable select list.
      *
-     * @param item  the item to make editable
-     * @param list  the new list to add the item to
+     * @param item the item to make editable
+     * @param list the new list to add the item to
      */
     FxSelectListItemEdit(FxSelectListItem item, FxSelectListEdit list) {
-        super(item.id, item.acl, list, item.parentItemId, item.label, item.data, item.color, item.iconId, item.iconVer, item.iconQuality, item.lifeCycleInfo);
+        super(item.id, item.name, item.acl, list, item.parentItemId, item.label, item.data, item.color, item.iconId, item.iconVer, item.iconQuality, item.lifeCycleInfo);
         this.isNew = false;
         this.original = item;
         this.parentItem = item.parentItem;
@@ -86,14 +86,15 @@ public class FxSelectListItemEdit extends FxSelectListItem implements Serializab
     /**
      * Constructor for creating a new list item
      *
+     * @param name  unique name of the item (within the list)
      * @param acl   the items ACL
      * @param list  the list this item belongs to
      * @param label this items label
      * @param data  optional data
      * @param color color for display
      */
-    public FxSelectListItemEdit(ACL acl, FxSelectList list, FxString label, String data, String color) {
-        super(calcId(list), acl, list, -1, label, data, color, BinaryDescriptor.SYS_SELECTLIST_DEFAULT, 1, 1, null);
+    public FxSelectListItemEdit(String name, ACL acl, FxSelectList list, FxString label, String data, String color) {
+        super(calcId(list), name, acl, list, -1, label, data, color, BinaryDescriptor.SYS_SELECTLIST_DEFAULT, 1, 1, null);
         this.isNew = true;
         this.original = null;
     }
@@ -126,10 +127,21 @@ public class FxSelectListItemEdit extends FxSelectListItem implements Serializab
      * @return changes made?
      */
     public boolean changes() {
-        return isNew || original == null || !this.data.equals(original.data) || !this.color.equals(original.color) ||
+        return isNew || original == null || !this.name.equals(original.name) || !this.data.equals(original.data) || !this.color.equals(original.color) ||
                 this.iconId != original.iconId || this.iconVer != original.iconVer ||
                 this.iconQuality != original.iconQuality || !this.label.equals(original.label) ||
-                this.parentItemId != original.parentItemId || this.acl.getId()!=original.acl.getId();
+                this.parentItemId != original.parentItemId || this.acl.getId() != original.acl.getId();
+    }
+
+    /**
+     * Set item name (has to be unique for the list)
+     *
+     * @param name item name (has to be unique for the list)
+     */
+    public void setName(String name) {
+        this.name = name;
+        if (this.name == null)
+            this.name = "";
     }
 
     /**
@@ -209,6 +221,7 @@ public class FxSelectListItemEdit extends FxSelectListItem implements Serializab
     /**
      * Helper method to create a new FxSelectListItemEdit instance
      *
+     * @param name  unique name of the item (within the list)
      * @param acl   the items ACL
      * @param list  the list this item belongs to
      * @param label this items label
@@ -216,8 +229,8 @@ public class FxSelectListItemEdit extends FxSelectListItem implements Serializab
      * @param color color for display
      * @return FxSelectListItemEdit
      */
-    public static FxSelectListItemEdit createNew(ACL acl, FxSelectList list, FxString label, String data, String color) {
-        return new FxSelectListItemEdit(acl, list, label, data, color);
+    public static FxSelectListItemEdit createNew(String name, ACL acl, FxSelectList list, FxString label, String data, String color) {
+        return new FxSelectListItemEdit(name, acl, list, label, data, color);
     }
 
     /**
@@ -228,11 +241,11 @@ public class FxSelectListItemEdit extends FxSelectListItem implements Serializab
      * @throws FxInvalidParameterException if the parent item is not valid for this item
      */
     public FxSelectListItemEdit setParentItem(FxSelectListItem item) throws FxInvalidParameterException {
-        if( item == null )
+        if (item == null)
             return this;
-        if( !this.getList().hasParentList() )
+        if (!this.getList().hasParentList())
             throw new FxInvalidParameterException("item", "ex.structure.list.item.noParentList", this.getLabel().getBestTranslation());
-        if( item.getList().getId() != this.getList().getId())
+        if (item.getList().getId() != this.getList().getId())
             throw new FxInvalidParameterException("item", "ex.structure.list.item.invalidParent", this.getList().getId(), item.getList().getId());
         this.parentItem = item;
         return this;

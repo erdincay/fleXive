@@ -494,8 +494,8 @@ public class QueryNodeTreeTests {
     @Test(groups = {"ejb", "search"})
     public void selectListNodeTest() {
         FxSelectList list = new FxSelectList("test");
-        final FxSelectListItem item1 = new FxSelectListItem(1, list, -1, new FxString("item 1"));
-        final FxSelectListItem item2 = new FxSelectListItem(2, list, -1, new FxString("item 2"));
+        final FxSelectListItem item1 = new FxSelectListItem(1, "item1", list, -1, new FxString("item 1"));
+        final FxSelectListItem item2 = new FxSelectListItem(2, "item2", list, -1, new FxString("item 2"));
         QueryRootNode root = new QueryRootNode(0, QueryRootNode.Type.CONTENTSEARCH);
         final FxPropertyAssignment assignment = getTestAssignment();
         final SelectValueNode child1 = new SelectValueNode(root.getNewId(), assignment, item1);

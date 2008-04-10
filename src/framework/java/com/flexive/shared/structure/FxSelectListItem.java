@@ -54,6 +54,7 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
     protected FxSelectList list;
     protected FxSelectListItem parentItem;
     protected long parentItemId;
+    protected String name;
     protected FxString label;
     protected String data;
     protected String color;
@@ -62,12 +63,13 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
     protected int iconQuality;
     protected LifeCycleInfo lifeCycleInfo;
 
-    public static final FxSelectListItem EMPTY = new FxSelectListItem(-1, null, null, -1, new FxString("-"), "", "", -11, 1, 1, null);
+    public static final FxSelectListItem EMPTY = new FxSelectListItem(-1, "-", null, null, -1, new FxString("-"), "", "", -11, 1, 1, null);
 
     /**
      * Internal(!) Constructor to be used while loading from storage
      *
      * @param id            id
+     * @param name          name (unique within the list)
      * @param acl           the items acl
      * @param list          the list this item belongs to
      * @param parentItemId  parent item id if >= 0
@@ -79,9 +81,10 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
      * @param iconQuality   quality of icon (binary reference)
      * @param lifeCycleInfo life cycle
      */
-    public FxSelectListItem(long id, ACL acl, FxSelectList list, long parentItemId, FxString label, String data, String color, long iconId,
+    public FxSelectListItem(long id, String name, ACL acl, FxSelectList list, long parentItemId, FxString label, String data, String color, long iconId,
                             int iconVer, int iconQuality, LifeCycleInfo lifeCycleInfo) {
         this.id = id;
+        this.name = name;
         this.acl = acl;
         this.list = list;
         this.parentItemId = parentItemId;
@@ -104,12 +107,13 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
      * be stored in the database.
      *
      * @param id           the new select list item ID, possible some external ID
+     * @param name         name (unique within the list)
      * @param list         the select list this item should be added to
      * @param parentItemId the parent item ID, if any
      * @param label        the select item label
      */
-    public FxSelectListItem(long id, FxSelectList list, long parentItemId, FxString label) {
-        this(id, null, list, parentItemId, label, null, null, -1, -1, -1, null);
+    public FxSelectListItem(long id, String name, FxSelectList list, long parentItemId, FxString label) {
+        this(id, name, null, list, parentItemId, label, null, null, -1, -1, -1, null);
     }
 
     /**
@@ -142,6 +146,16 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
      */
     public long getId() {
         return id;
+    }
+
+    /**
+     * Get the name of the item.
+     * The name is unique within the list and can be used as identifier
+     *
+     * @return name of the item
+     */
+    public String getName() {
+        return name;
     }
 
     /**

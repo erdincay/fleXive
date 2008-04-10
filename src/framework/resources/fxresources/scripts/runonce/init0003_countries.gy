@@ -73,7 +73,7 @@ FxSelectListEdit selectList = FxSelectListEdit.createNew("COUNTRIES",
         new FxString(true, FxLanguage.ENGLISH, "Countries").setTranslation(FxLanguage.GERMAN, "L\u00e4nder"),
         true, itemAcl, itemAcl)
 def createItem = { trans ->
-    new FxSelectListItemEdit(itemAcl, selectList, trans.value, trans.key, "#000000")
+    new FxSelectListItemEdit(trans.key.toUpperCase(), itemAcl, selectList, trans.value, trans.key, "#000000")
 }
 // put preferred countries first
 /*["de", "at", "ch"].each { cc ->

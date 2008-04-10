@@ -188,8 +188,8 @@ public class SqlParserTest {
     @Test(groups = {"shared", "search"})
     public void dataTypeSupport() throws SqlParserException {
         final FxSelectListEdit selectList = new FxSelectList("test").asEditable();
-        final FxSelectListItem item1 = new FxSelectListItem(25, selectList, -1, new FxString("label1"));
-        final FxSelectListItem item2 = new FxSelectListItem(28, selectList, -1, new FxString("label2"));
+        final FxSelectListItem item1 = new FxSelectListItem(25, "item1", selectList, -1, new FxString("label1"));
+        final FxSelectListItem item2 = new FxSelectListItem(28, "item2", selectList, -1, new FxString("label2"));
         final FxValue[] testData = {
                 new FxString("som'e test string"),
                 new FxHTML("<h1>\"HTML c'aption\"</h1>"),
@@ -319,6 +319,7 @@ public class SqlParserTest {
      * @throws SqlParserException on parser errors
      */
     private FxStatement parse(String query) throws SqlParserException {
+        //noinspection NullArgumentToVariableArgMethod
         return parse(query, null);
     }
 

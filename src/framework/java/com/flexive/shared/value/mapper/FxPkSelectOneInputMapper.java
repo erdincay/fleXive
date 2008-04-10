@@ -70,7 +70,7 @@ public class FxPkSelectOneInputMapper extends InputMapper<FxReference, FxSelectO
             throw new FxInvalidParameterException("SELECTLIST", "ex.content.value.mapper.select.empty").asRuntimeException();
         } else if (selectList.getItems().isEmpty()) {
             // we need an "empty" element
-            new FxSelectListItem(-1, selectList, -1, new FxString(""));
+            new FxSelectListItem(-1, "", selectList, -1, new FxString(""));
         }
         this.selectList = selectList;
     }

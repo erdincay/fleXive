@@ -39,15 +39,15 @@ import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
-import com.flexive.shared.content.FxPermissionUtils;
-import com.flexive.shared.security.Role;
-import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.cache.FxCacheException;
+import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.SelectListEngine;
 import com.flexive.shared.interfaces.SelectListEngineLocal;
 import com.flexive.shared.interfaces.SequencerEngine;
 import com.flexive.shared.interfaces.SequencerEngineLocal;
+import com.flexive.shared.security.Role;
+import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxSelectList;
 import com.flexive.shared.structure.FxSelectListEdit;
 import com.flexive.shared.structure.FxSelectListItem;
@@ -55,13 +55,14 @@ import com.flexive.shared.structure.FxSelectListItemEdit;
 import com.flexive.shared.value.FxString;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Resource;
 import javax.ejb.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -98,14 +99,14 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
                 changes = true;
             }
         }
-        
+
         if (!newList) {
             //remove selct items that are no longer referenced by this list
             List<FxSelectListItem> originalItems = CacheAdmin.getEnvironment().getSelectList(list.getId()).getItems();
             List<FxSelectListItem> editedItems = list.getItems();
             for (FxSelectListItem i : originalItems) {
-               boolean found = false;
-               for (FxSelectListItem j: editedItems){
+                boolean found = false;
+                for (FxSelectListItem j : editedItems) {
                     if (i.getId() == j.getId()) {
                         found = true;
                         break;
@@ -128,16 +129,15 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
                 //get the new created default item id
                 if (defaultItemId < 0 && e.getId() == defaultItemId)
                     defaultItemId = currentItemId;
-            } else if( e.isNew() ) {
-                    createItem(e);
-                    changes = true;
+            } else if (e.isNew()) {
+                createItem(e);
+                changes = true;
             } else if (e.changes()) {
                 //check if the user is permitted to edit this specific item
                 if (FxContext.get().getTicket().isInRole(Role.SelectListEditor) || FxContext.get().getTicket().mayCreateACL(e.getAcl().getId(), -1)) {
                     updateItem(e);
                     changes = true;
-                }
-                 else
+                } else
                     throw new FxNoAccessException("ex.role.notInRole", Role.SelectListEditor.getName());
             }
         }
@@ -256,7 +256,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
 //        System.out.println("Removing item " + item.getLabel());
         if (!(FxContext.get().getTicket().isInRole(Role.SelectListEditor) || FxContext.get().getTicket().mayDeleteACL(item.getList().getCreateItemACL().getId(), FxContext.get().getTicket().getUserId())))
             throw new FxNoAccessException("ex.selectlist.item.remove.noPerm", item.getList().getLabel(),
-                        item.getAcl().getLabel());
+                    item.getAcl().getLabel());
         Connection con = null;
         PreparedStatement ps = null;
         try {
@@ -392,13 +392,20 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
 
     }
 
+    /**
+     * Create a new item
+     *
+     * @param item the item to create
+     * @return id
+     * @throws FxApplicationException on errors
+     */
     private long createItem(FxSelectListItemEdit item) throws FxApplicationException {
         checkValidItemParameters(item);
         UserTicket ticket = FxContext.get().getTicket();
-        if(!ticket.isInRole(Role.SelectListEditor)) {
+        if (!ticket.isInRole(Role.SelectListEditor)) {
             //check the lists ACL
-            if(! (ticket.mayCreateACL(item.getList().getCreateItemACL().getId(), ticket.getUserId())) )
-                throw new FxNoAccessException("ex.selectlist.item.create.noPerm", item.getList().getLabel(), 
+            if (!(ticket.mayCreateACL(item.getList().getCreateItemACL().getId(), ticket.getUserId())))
+                throw new FxNoAccessException("ex.selectlist.item.create.noPerm", item.getList().getLabel(),
                         item.getList().getCreateItemACL().getLabel());
         }
         long newId = seq.getId(SequencerEngine.System.SELECTLIST_ITEM);
@@ -407,86 +414,103 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
         PreparedStatement ps = null;
         try {
             con = Database.getDbConnection();
-            //                                                                 1  2   3        4      5    6
-            ps = con.prepareStatement("INSERT INTO " + TBL_SELECTLIST_ITEM + "(ID,ACL,PARENTID,LISTID,DATA,COLOR," +
-                    //7         8          9           10          11      12       13
+            //                                                                 1  2    3   4        5      6    7
+            ps = con.prepareStatement("INSERT INTO " + TBL_SELECTLIST_ITEM + "(ID,NAME,ACL,PARENTID,LISTID,DATA,COLOR," +
+                    //8         9          10          11          12      13       14
                     "CREATED_BY,CREATED_AT,MODIFIED_BY,MODIFIED_AT,DBIN_ID,DBIN_VER,DBIN_QUALITY)VALUES" +
-                    "(?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                    "(?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
             ps.setLong(1, newId);
-            ps.setLong(2, item.getAcl().getId());
+            ps.setString(2, item.getName());
+            ps.setLong(3, item.getAcl().getId());
             if (item.hasParentItem())
-                ps.setLong(3, item.getParentItem().getId());
+                ps.setLong(4, item.getParentItem().getId());
             else
-                ps.setNull(3, java.sql.Types.INTEGER);
-            ps.setLong(4, item.getList().getId());
-            ps.setString(5, item.getData());
-            ps.setString(6, item.getColor());
-            LifeCycleInfoImpl.store(ps, 7, 8, 9, 10);
-            ps.setLong(11, item.getIconId());
-            ps.setInt(12, item.getIconVer());
-            ps.setInt(13, item.getIconQuality());
+                ps.setNull(4, java.sql.Types.INTEGER);
+            ps.setLong(5, item.getList().getId());
+            ps.setString(6, item.getData());
+            ps.setString(7, item.getColor());
+            LifeCycleInfoImpl.store(ps, 8, 9, 10, 11);
+            ps.setLong(12, item.getIconId());
+            ps.setInt(13, item.getIconVer());
+            ps.setInt(14, item.getIconQuality());
             ps.executeUpdate();
             Database.storeFxString(item.getLabel(),
                     con, TBL_SELECTLIST_ITEM, "LABEL", "ID", newId);
             return newId;
         } catch (SQLException e) {
-            ctx.setRollbackOnly();
-            throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
+            try {
+                if( Database.isUniqueConstraintViolation(e))
+                    throw new FxCreateException(LOG, e, "ex.selectlist.item.name.notUnique", item.getName());
+                throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
+            } finally {
+                ctx.setRollbackOnly();
+            }
         } finally {
             Database.closeObjects(TypeEngineBean.class, con, ps);
         }
     }
 
+    /**
+     * Update an existing item
+     *
+     * @param item the item to update
+     * @throws FxApplicationException on errors
+     */
     private void updateItem(FxSelectListItemEdit item) throws FxApplicationException {
         if (!item.changes())
             return;
         checkValidItemParameters(item);
 //        System.out.println("Updating item " + item.getLabel());
         if (!(FxContext.get().getTicket().isInRole(Role.SelectListEditor) || FxContext.get().getTicket().mayEditACL(item.getAcl().getId(), FxContext.get().getTicket().getUserId())))
-            throw new FxNoAccessException("ex.selectlist.item.update.noPerm", item.getList().getLabel(), 
-                        item.getAcl().getLabel());
+            throw new FxNoAccessException("ex.selectlist.item.update.noPerm", item.getList().getLabel(),
+                    item.getAcl().getLabel());
         Connection con = null;
         PreparedStatement ps = null;
         try {
             con = Database.getDbConnection();
-            //                                                                   1          2      3       4
-            ps = con.prepareStatement("UPDATE " + TBL_SELECTLIST_ITEM + " SET ACL=?,PARENTID=?,DATA=?,COLOR=?," +
-                    //           5             6         7          8              9          10
+            //                                                                     1      2          3      4       5
+            ps = con.prepareStatement("UPDATE " + TBL_SELECTLIST_ITEM + " SET NAME=?, ACL=?,PARENTID=?,DATA=?,COLOR=?," +
+                    //           6             7         8          9              10         11
                     "MODIFIED_BY=?,MODIFIED_AT=?,DBIN_ID=?,DBIN_VER=?,DBIN_QUALITY=? WHERE ID=?");
-            ps.setLong(1, item.getAcl().getId());
+            ps.setString(1, item.getName());
+            ps.setLong(2, item.getAcl().getId());
             if (item.hasParentItem())
-                ps.setLong(2, item.getParentItem().getId());
+                ps.setLong(3, item.getParentItem().getId());
             else
-                ps.setNull(2, java.sql.Types.INTEGER);
-            ps.setString(3, item.getData());
-            ps.setString(4, item.getColor());
-            LifeCycleInfoImpl.updateLifeCycleInfo(ps, 5, 6);
-            ps.setLong(7, item.getIconId());
-            ps.setInt(8, item.getIconVer());
-            ps.setInt(9, item.getIconQuality());
-            ps.setLong(10, item.getId());
+                ps.setNull(3, java.sql.Types.INTEGER);
+            ps.setString(4, item.getData());
+            ps.setString(5, item.getColor());
+            LifeCycleInfoImpl.updateLifeCycleInfo(ps, 6, 7);
+            ps.setLong(8, item.getIconId());
+            ps.setInt(9, item.getIconVer());
+            ps.setInt(10, item.getIconQuality());
+            ps.setLong(11, item.getId());
             ps.executeUpdate();
             Database.storeFxString(item.getLabel(),
                     con, TBL_SELECTLIST_ITEM, "LABEL", "ID", item.getId());
         } catch (SQLException e) {
-            ctx.setRollbackOnly();
-            throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
+            try {
+                if( Database.isUniqueConstraintViolation(e))
+                    throw new FxUpdateException(LOG, e, "ex.selectlist.item.name.notUnique", item.getName());
+                throw new FxUpdateException(LOG, e, "ex.db.sqlError", e.getMessage());
+            } finally {
+                ctx.setRollbackOnly();
+            }
         } finally {
             Database.closeObjects(TypeEngineBean.class, con, ps);
         }
     }
 
     private void checkValidListParameters(FxSelectListEdit list) throws FxInvalidParameterException {
-        //TODO: codeme!
         if (list.getName() == null || list.getName().equals(""))
             throw new FxInvalidParameterException("Name", "ex.selectlist.name.empty");
     }
 
     private void checkValidItemParameters(FxSelectListItemEdit item) throws FxInvalidParameterException {
-        //TODO: codeme!
-        if (item.getLabel() == null || item.getLabel().getIsEmpty()) {
+        if (StringUtils.isEmpty(item.getName()))
+            throw new FxInvalidParameterException("Name", "ex.selectlist.item.name.empty");
+        if (item.getLabel() == null || item.getLabel().getIsEmpty())
             throw new FxInvalidParameterException("Label", "ex.selectlist.item.label.empty");
-        }
     }
 
     /**

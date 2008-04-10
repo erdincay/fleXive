@@ -33,8 +33,13 @@
  ***************************************************************/
 package com.flexive.faces.messages;
 
+import com.flexive.shared.exceptions.FxApplicationException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class FxFacesMsgErr extends FxFacesMessage {
 
+    private static transient Log LOG = LogFactory.getLog(FxFacesMsgErr.class);
     private static final long serialVersionUID = -3804224752720667187L;
     private static final Severity SEVERITY = SEVERITY_ERROR;
 
@@ -44,10 +49,24 @@ public class FxFacesMsgErr extends FxFacesMessage {
 
     public FxFacesMsgErr(Throwable exc, String summaryKey, Object... summaryParams) {
         super(exc, SEVERITY, summaryKey, summaryParams);
+        logMessage(exc);
     }
 
     public FxFacesMsgErr(Throwable exc) {
         super(exc, SEVERITY);
+        logMessage(exc);
+    }
+
+    /**
+     * Log the exception if it has not been already
+     *
+     * @param exc exception
+     */
+    private void logMessage(Throwable exc) {
+        if (exc instanceof FxApplicationException)
+            if (((FxApplicationException) exc).isMessageLogged())
+                return;
+        LOG.warn("Faces error:" + exc.getMessage(), exc);
     }
 
     /**

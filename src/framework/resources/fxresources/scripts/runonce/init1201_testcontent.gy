@@ -47,8 +47,6 @@ import com.flexive.shared.workflow.Workflow
 import com.flexive.shared.workflow.Step
 import com.flexive.shared.workflow.StepDefinition
 import com.flexive.shared.FxLanguage
-import com.flexive.shared.security.ACLAssignment
-import java.util.concurrent.atomic.AtomicInteger;
 
 
 
@@ -80,7 +78,7 @@ ACL aclItem = CacheAdmin.getEnvironment().getDefaultACL(ACL.Category.SELECTLISTI
 FxSelectListEdit searchTestList = FxSelectListEdit.createNew("SearchTest SelectList", new FxString("SearchTest SelectList"), new FxString("SelectList used for search testcases"),
         false, aclList, aclItem);
 10.times {i ->
-    new FxSelectListItemEdit(aclItem, searchTestList, new FxString("Label_$i"), "ListItem$i", "#FFFFFF");
+    new FxSelectListItemEdit("Item$i", aclItem, searchTestList, new FxString("Label_$i"), "ListItem$i", "#FFFFFF");
 }
 EJBLookup.getSelectListEngine().save(searchTestList);
 

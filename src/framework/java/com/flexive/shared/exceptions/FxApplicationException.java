@@ -163,6 +163,15 @@ public class FxApplicationException extends Exception implements FxLocalizedExce
     }
 
     /**
+     * Has the message been logged?
+     *
+     * @return message logged
+     */
+    public boolean isMessageLogged() {
+        return messageLogged;
+    }
+
+    /**
      * Localized exception constructor
      *
      * @param key    exception messge resource key

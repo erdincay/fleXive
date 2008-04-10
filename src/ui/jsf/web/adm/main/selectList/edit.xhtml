@@ -52,6 +52,9 @@
                     class="dojoTable">
                 <thead>
                     <tr>
+                        <th class="tblHeader" dataType="String" field="name" align="left">
+                            #{fxMessageBean["SelectList.table.name"]}
+                        </th>
                         <th class="tblHeader" dataType="String" field="label" align="left">
                             #{fxMessageBean["SelectList.table.label"]}
                         </th>
@@ -72,6 +75,8 @@
                 <tbody>
                     <c:forEach var="item" items="#{selectListBean.items}">
                         <tr value="#{selectListBean.idMap[item.id]}">
+                            <td align="left"><h:inputText id="itemName_#{selectListBean.idMap[item.id]}" value="#{item.name}"
+                                    disabled="#{not (fxSystemBean.isInRole['SelectListEditor'] or selectListBean.mayEditItem[item])}"/></td>
                             <td align="left"><fx:fxValueInput id="itemLabel_#{selectListBean.idMap[item.id]}" value="#{item.label}" readOnly="#{not (fxSystemBean.isInRole['SelectListEditor'] or selectListBean.mayEditItem[item])}"/></td>
                             <td align="left"><h:inputText id="itemData_#{selectListBean.idMap[item.id]}" value="#{item.data}" disabled="#{not (fxSystemBean.isInRole['SelectListEditor'] or selectListBean.mayEditItem[item])}"/></td>
                             <td align="left">
@@ -79,7 +84,7 @@
                                     <f:selectItems value="#{selectListBean.selectListItemACLs}"/>
                                 </t:selectOneListbox>
                             </td>
-                            <td align="left"><h:inputText id="itemColor_#{selectListBean.idMap[item.id]}" style="color:#{selectListBean.color[item.color]};" value="#{selectListBean.color[item.color]}"
+                            <td align="left"><h:inputText id="itemColor_#{selectListBean.idMap[item.id]}" value="#{selectListBean.color[item.color]}"
                                     disabled="#{not (fxSystemBean.isInRole['SelectListEditor'] or selectListBean.mayEditItem[item])}"/></td>
                             <td align="left">
                                 <c:if test="#{selectListBean.mayDeleteItems}">
@@ -93,6 +98,7 @@
                     </c:forEach>
                     <c:if test="#{selectListBean.mayCreateItems[selectListBean.selectListId]}">
                         <tr>
+                            <td align="left"><h:inputText id="newItemName" value="#{selectListBean.itemName}"/> </td>
                             <td align="left"><fx:fxValueInput id="newItemLabel" value="#{selectListBean.itemLabel}"/></td>
                             <td align="left"><h:inputText id="newItemData" value="#{selectListBean.itemData}"/></td>
                             <td align="left">
