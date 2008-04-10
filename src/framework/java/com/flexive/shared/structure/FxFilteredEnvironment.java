@@ -473,6 +473,13 @@ public final class FxFilteredEnvironment implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
+    public FxSelectListItem getSelectListItem(FxSelectList list, String name) {
+        return environment.getSelectListItem(list, name);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public String getInactiveMandatorList() {
         return environment.getInactiveMandatorList();
     }

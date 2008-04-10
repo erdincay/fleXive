@@ -870,7 +870,8 @@
             Select lists usually contain a set of related select items, which are used in GUIs
             to enable the user to make a selection of one or more of these items. &flexive; allows
             in-memory creation of slim select lists for quick GUI display, as well as defining and
-            persisting fully fledged deeply nested select lists.
+            persisting fully fledged deeply nested select lists. Names of selectlist items have to be unique
+            within their respective list.
         </para>
 
         <section xml:id="core_structure_selectlist_parameters">
@@ -990,6 +991,14 @@
                             <methodname>&list_no;</methodname>
                         </td>
                         <td>The select list to which this select item belongs.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Name</td>
+                        <td>
+                            <methodname>setName(String name)</methodname>
+                        </td>
+                        <td>Set the name of the item (has to be unique within the assigned list).
                         </td>
                     </tr>
                     <tr>

@@ -1055,6 +1055,15 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
+    public FxSelectListItem getSelectListItem(FxSelectList list, String name) {
+        if (list.containsItem(name))
+            return list.getItem(name);
+        throw new FxNotFoundException("ex.structure.list.item.notFound.name", name).asRuntimeException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public String getInactiveMandatorList() {
         if (inactiveMandators != null)
             return inactiveMandators;

@@ -34,8 +34,8 @@
 package com.flexive.shared.structure;
 
 import com.flexive.shared.ObjectWithLabel;
-import com.flexive.shared.SelectableObjectWithName;
 import com.flexive.shared.SelectableObjectWithLabel;
+import com.flexive.shared.SelectableObjectWithName;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.security.ACL;
@@ -59,7 +59,7 @@ public class FxSelectList implements Serializable, ObjectWithLabel {
      * A select list containing all countries and their codes.
      */
     public static final String COUNTRIES = "COUNTRIES";
-    
+
     protected long id;
     protected FxSelectList parentList;
     protected long parentListId;
@@ -248,6 +248,19 @@ public class FxSelectList implements Serializable, ObjectWithLabel {
     }
 
     /**
+     * Get the selectlist item with the given id
+     *
+     * @param name requested select list item name
+     * @return select list item
+     */
+    public FxSelectListItem getItem(String name) {
+        for (FxSelectListItem item : items.values())
+            if (item.getName().equals(name))
+                return item;
+        throw new FxNotFoundException("ex.structure.list.item.notFound.name", name).asRuntimeException();
+    }
+
+    /**
      * Get the (first) selectlist item with the given data
      *
      * @param data requested select list item data
@@ -255,7 +268,7 @@ public class FxSelectList implements Serializable, ObjectWithLabel {
      */
     public FxSelectListItem getItemByData(String data) {
         for (FxSelectListItem item : items.values())
-            if (item.getData().equals(data))
+            if (item.getData() != null && item.getData().equals(data))
                 return item;
         throw new FxNotFoundException("ex.structure.list.item.notFound.data", data).asRuntimeException();
     }
@@ -290,6 +303,19 @@ public class FxSelectList implements Serializable, ObjectWithLabel {
      */
     public boolean containsItem(long id) {
         return this.items.containsKey(id);
+    }
+
+    /**
+     * Check if this list contains an selectlist item with the requested name
+     *
+     * @param name requested item name
+     * @return if the requested item is contained in this list
+     */
+    public boolean containsItem(String name) {
+        for (FxSelectListItem item : items.values())
+            if (item.getName().equals(name))
+                return true;
+        return false;
     }
 
     /**

@@ -33,6 +33,7 @@
  ***************************************************************/
 package com.flexive.core.conversion;
 
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.configuration.SystemParameters;
@@ -40,9 +41,10 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxConversionException;
 import com.flexive.shared.exceptions.FxStreamException;
 import com.flexive.shared.interfaces.LanguageEngine;
-import com.flexive.shared.value.BinaryDescriptor;
-import com.flexive.shared.value.FxBinary;
-import com.flexive.shared.value.FxValue;
+import com.flexive.shared.structure.FxEnvironment;
+import com.flexive.shared.structure.FxSelectList;
+import com.flexive.shared.structure.FxSelectListItem;
+import com.flexive.shared.value.*;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
@@ -199,6 +201,17 @@ public class FxValueConverter implements Converter {
                     writer.addAttribute("l", ConversionEngine.getLang(le, lang));
                     if (value instanceof FxBinary) {
                         marshalBinary(writer, ctx, (FxBinary) value, lang);
+                    } else if (value instanceof FxSelectOne) { //format LISTNAME.ITEMNAME
+                        final FxSelectOne v = (FxSelectOne) value;
+                        writer.setValue(v.getSelectList().getName() + "." + v.getTranslation(lang).getName());
+                    } else if (value instanceof FxSelectMany) { //format LISTNAME.ITEMNAME, LISTNAME.ITEMNAME
+                        final FxSelectMany v = (FxSelectMany) value;
+                        StringBuilder sb = new StringBuilder(500);
+                        for (FxSelectListItem item : v.getTranslation(lang).getSelected())
+                            sb.append(item.getList().getName()).append('.').append(item.getName()).append(", ");
+                        if (sb.length() > 0)
+                            sb.delete(sb.length() - 2, sb.length());
+                        writer.setValue(sb.toString());
                     } else
                         writer.setValue(value.getStringValue(value.getTranslation(lang)));
                     writer.endNode();
@@ -234,6 +247,23 @@ public class FxValueConverter implements Converter {
                     Object value;
                     if (v instanceof FxBinary) {
                         value = unmarshalBinary(reader, ctx, v);
+                    } else if (v instanceof FxSelectOne) { //format LISTNAME.ITEMNAME
+                        String desc = reader.getValue();
+                        FxSelectList list = CacheAdmin.getEnvironment().getSelectList(desc.substring(0, desc.indexOf('.')));
+                        value = list.getItem(desc.substring(desc.indexOf('.') + 1, desc.length()));
+                    } else if (v instanceof FxSelectMany) { //format LISTNAME.ITEMNAME, LISTNAME.ITEMNAME, ...
+                        String[] descs = reader.getValue().split(",");
+                        final FxEnvironment environment = CacheAdmin.getEnvironment();
+                        FxSelectList list = null;
+                        SelectMany m = null;
+                        for (String desc : descs) {
+                            if (list == null) { //has to be the same list ....
+                                list = environment.getSelectList(desc.substring(0, desc.indexOf('.')));
+                                m = new SelectMany(list);
+                            }
+                            m.selectItem(list.getItem(desc.substring(desc.indexOf('.') + 1, desc.length())));
+                        }
+                        value = m;
                     } else
                         value = v.fromString(reader.getValue());
                     v.setTranslation(lang, value);

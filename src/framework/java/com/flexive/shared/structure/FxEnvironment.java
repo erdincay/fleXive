@@ -442,6 +442,15 @@ public interface FxEnvironment extends Serializable {
     FxSelectListItem getSelectListItem(long id);
 
     /**
+     * Get the selectlist item with the given name in the given list
+     *
+     * @param list the list containing the item
+     * @param name requested select list item name
+     * @return select list item
+     */
+    FxSelectListItem getSelectListItem(FxSelectList list, String name);
+
+    /**
      * Get all scripts
      *
      * @return all scripts
