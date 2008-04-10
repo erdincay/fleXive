@@ -19,10 +19,11 @@
 
 
 <ui:define name="body">
-    <form method="post" action="http://www.flexive.org/feedback/feedback.php">
+    <form method="post" action="http://www.flexive.org/feedback/script/index.php">
         <h:inputHidden id="build" value="#{feedbackPluginBean.buildInfo}"/>
         <h:inputHidden id="page" value="#{feedbackPluginBean.refPage}"/>
         <h:inputHidden id="feedbackType" value="#{feedbackPluginBean.feedback}"/>
+        <h:inputHidden id="language" value="#{fxSystemBean.userTicket.language.iso2digit}"/>        
 
         <div class="header">
             <h:outputText value="#{feedbackPluginBean.header}!"/>
@@ -38,7 +39,7 @@
         </div>
         <br clear="all"/>
         <div class="comment">
-            <h:inputTextarea rows="10" cols="50" value="#{feedbackPluginBean.comment}"/>
+            <h:inputTextarea id="comment" rows="10" cols="50" value="#{feedbackPluginBean.comment}"/>
         </div>
         <input type="submit" value="#{fxMessageBean['FeedbackPlugin.button.submit']}"/>
     </form>
