@@ -76,7 +76,7 @@
                                         <h:outputText value="#{info.runInfo.errorMessage}"/>
                                     </div>
                                 </rich:modalPanel>
-                                <h:outputLink value="javascript:void(0)" id="link">
+                                <h:outputLink style="color:red;" value="javascript:void(0)" id="link">
                                     #{info.shortErrorMessage}
                                     <rich:componentControl for="panel" attachTo="link" operation="show" event="onclick"/>
                                 </h:outputLink>
