@@ -69,6 +69,7 @@ import java.util.List;
  */
 
 @TransactionManagement(TransactionManagementType.CONTAINER)
+@TransactionAttribute(TransactionAttributeType.REQUIRED)
 @Stateless(name = "DivisionConfigurationEngine")
 public class DivisionConfigurationEngineBean extends GenericConfigurationImpl implements DivisionConfigurationEngine, DivisionConfigurationEngineLocal {
     private static final transient Log LOG = LogFactory.getLog(DivisionConfigurationEngineBean.class);
@@ -223,13 +224,13 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
     /**
      * {@inheritDoc}
      */
-    @TransactionAttribute(TransactionAttributeType.NEVER)
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void patchDatabase() throws FxApplicationException {
         FxContext.get().runAsSystem();
         try {
             long dbVersion = EJBLookup.getDivisionConfigurationEngine().get(SystemParameters.DB_VERSION);
             if (dbVersion == -1) {
-                put(SystemParameters.DB_VERSION, FxSharedUtils.getDBVersion());
+                EJBLookup.getDivisionConfigurationEngine().put(SystemParameters.DB_VERSION, FxSharedUtils.getDBVersion());
                 return; //no need to patch
             } else if (dbVersion == FxSharedUtils.getDBVersion()) {
                 //nothing to do
@@ -254,7 +255,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
                 Connection con = null;
                 Statement stmt = null;
                 try {
-                    con = Database.getDbConnection();
+                    con = Database.getNonTXDataSource().getConnection();
                     stmt = con.createStatement();
                     List<SQLPatchScript> scripts = new ArrayList<SQLPatchScript>(50);
                     for (String file : files) {
@@ -298,7 +299,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
                         }
                     }
                     if (currentVersion != dbVersion) {
-                        put(SystemParameters.DB_VERSION, currentVersion);
+                        EJBLookup.getDivisionConfigurationEngine().put(SystemParameters.DB_VERSION, currentVersion);
                         if (currentVersion < maxVersion)
                             LOG.warn("Failed to patch to maximum available database schema version (" + maxVersion + "). Current database schema version: " + currentVersion);
                     }

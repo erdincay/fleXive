@@ -1,5 +1,13 @@
+
+<!--
+ See http://www.redhat.com/docs/manuals/jboss/jboss-eap-4.3/doc/Server_Configuration_Guide/html/Connectors_on_JBoss-Configuring_JDBC_DataSources.html
+ for detailed configuration infos
+-->
 <datasources>
 
+    <!--
+        transactional datasource, as configured in the global configuration
+    -->
     <xa-datasource>
         <jndi-name>jdbc/flexiveDivision1</jndi-name>
         <xa-datasource-class>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</xa-datasource-class>
@@ -20,23 +28,52 @@
         <blocking-timeout-millis>5000</blocking-timeout-millis>
         <idle-timeout-minutes>15</idle-timeout-minutes>
 
-        <!-- pooling criteria.  USE AT MOST ONE-->
-        <!--  If you don't use JAAS login modules or explicit login
-    getConnection(usr,pw) but rely on user/pw specified above,
-    don't specify anything here -->
-
         <!-- If you supply the usr/pw from a JAAS login module -->
         <security-domain/>
-
-        <!-- if your app supplies the usr/pw explicitly getConnection(usr, pw) -->
-        <application-managed-security/>
-        <exception-sorter-class-name>org.jboss.resource.adapter.jdbc.vendor.MySQLExceptionSorter
+>
+        <exception-sorter-class-name>
+            com.mysql.jdbc.integration.jboss.ExtendedMysqlExceptionSorter
         </exception-sorter-class-name>
+        <valid-connection-checker-class-name>
+            com.mysql.jdbc.integration.jboss.MysqlValidConnectionChecker
+        </valid-connection-checker-class-name>
         <metadata>
             <type-mapping>mySQL</type-mapping>
         </metadata>
     </xa-datasource>
 
+    <!--
+        non-transactional datasource for database structure patches, Quartz, etc.
+        As per convention, non-transactional datasources have the same name like
+        transactional but use the suffix "NoTX"
+    -->
+    <no-tx-datasource>
+        <jndi-name>jdbc/flexiveDivision1NoTX</jndi-name>
+        <driver-class>com.mysql.jdbc.Driver</driver-class>
+        <!-- Note: "&amp;" has to be used instead of "&" for parameters -->
+        <connection-url>jdbc:mysql://localhost:3306/flexive?useUnicode=true&amp;characterEncoding=utf8&amp;characterResultSets=utf8</connection-url>
+        <user-name>root</user-name>
+        <password>a</password>
+
+        <!--pooling parameters-->
+        <min-pool-size>5</min-pool-size>
+        <max-pool-size>20</max-pool-size>
+        <blocking-timeout-millis>5000</blocking-timeout-millis>
+        <idle-timeout-minutes>15</idle-timeout-minutes>
+
+        <!-- If you supply the usr/pw from a JAAS login module -->
+        <security-domain/>
+
+        <exception-sorter-class-name>
+            com.mysql.jdbc.integration.jboss.ExtendedMysqlExceptionSorter
+        </exception-sorter-class-name>
+        <valid-connection-checker-class-name>
+            com.mysql.jdbc.integration.jboss.MysqlValidConnectionChecker
+        </valid-connection-checker-class-name>
+        <metadata>
+            <type-mapping>mySQL</type-mapping>
+        </metadata>
+    </no-tx-datasource>
 
     <xa-datasource>
         <jndi-name>jdbc/flexiveConfiguration</jndi-name>
@@ -58,18 +95,15 @@
         <blocking-timeout-millis>5000</blocking-timeout-millis>
         <idle-timeout-minutes>15</idle-timeout-minutes>
 
-        <!-- pooling criteria.  USE AT MOST ONE-->
-        <!--  If you don't use JAAS login modules or explicit login
-    getConnection(usr,pw) but rely on user/pw specified above,
-    don't specify anything here -->
-
         <!-- If you supply the usr/pw from a JAAS login module -->
         <security-domain/>
 
-        <!-- if your app supplies the usr/pw explicitly getConnection(usr, pw) -->
-        <application-managed-security/>
-        <exception-sorter-class-name>org.jboss.resource.adapter.jdbc.vendor.MySQLExceptionSorter
+        <exception-sorter-class-name>
+            com.mysql.jdbc.integration.jboss.ExtendedMysqlExceptionSorter
         </exception-sorter-class-name>
+        <valid-connection-checker-class-name>
+            com.mysql.jdbc.integration.jboss.MysqlValidConnectionChecker
+        </valid-connection-checker-class-name>
         <metadata>
             <type-mapping>mySQL</type-mapping>
         </metadata>

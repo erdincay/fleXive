@@ -67,11 +67,18 @@ public final class Database {
      */
     public static final int MAX_DIVISIONS = 256;
 
+    /**
+     * Suffix for non-transactional data sources
+     */
+    static final String NO_TX_SUFFIX = "NoTX";
+
     private static final transient Log LOG = LogFactory.getLog(Database.class);
     private static DataSource globalDataSource = null;
     private static DataSource testDataSource = null;
     // cached data source references - index = division ID
     private static DataSource[] dataSources = new DataSource[MAX_DIVISIONS];
+    // cached data sources without transaction support
+    private static DataSource[] dataSourcesNoTX = new DataSource[MAX_DIVISIONS];
 
     /**
      * Empty default constructor.
@@ -90,7 +97,7 @@ public final class Database {
     public static Connection getDbConnection(int divisionId) throws SQLException {
         // Try to obtain a connection
         try {
-            return getDataSource(divisionId).getConnection();
+            return getDataSource(divisionId, true).getConnection();
         } catch (SQLException exc) {
             String sErr = "FxDbException, unable to retrieve DB Connection: " + exc.getMessage();
             LOG.error(sErr);
@@ -132,26 +139,38 @@ public final class Database {
      * @throws SQLException if a DB error occured
      */
     public static DataSource getDataSource() throws SQLException {
-        return getDataSource(FxContext.get().getDivisionId());
+        return getDataSource(FxContext.get().getDivisionId(), true);
+    }
+
+    /**
+     * Returns the non-transactional data source for the calling user's division.
+     *
+     * @return the non-transactional data source for the calling user's division
+     * @throws SQLException if a DB error occured
+     */
+    public static DataSource getNonTXDataSource() throws SQLException {
+        return getDataSource(FxContext.get().getDivisionId(), false);
     }
 
     /**
      * Retrieves a database connection.
      *
      * @param divisionId the division id
+     * @param useTX request transaction support?
      * @return a database connection
      * @throws SQLException If no connection could be retrieved
      */
-    public static DataSource getDataSource(int divisionId) throws SQLException {
+    private static DataSource getDataSource(int divisionId, boolean useTX) throws SQLException {
         // Check division
         if (!DivisionData.isValidDivisionId(divisionId)) {
             throw new SQLException("Unable to obtain connection: Division not defined (" + divisionId + ").");
         }
+        DataSource[] dataSourceCache = useTX ? dataSources : dataSourcesNoTX;
         // use cached datasource, if available
         if (divisionId == DivisionData.DIVISION_TEST && testDataSource != null) {
             return testDataSource;
-        } else if (divisionId != DivisionData.DIVISION_TEST && dataSources[divisionId] != null) {
-            return dataSources[divisionId];
+        } else if (divisionId != DivisionData.DIVISION_TEST && dataSourceCache[divisionId] != null) {
+            return dataSourceCache[divisionId];
         }
         synchronized (Database.class) {
             // Try to obtain a connection
@@ -165,6 +184,8 @@ public final class Database {
                     // else: get data source from global configuration
                     GlobalConfigurationEngine globalConfiguration = EJBLookup.getGlobalConfigurationEngine();
                     finalDsName = globalConfiguration.getDivisionData(divisionId).getDataSource();
+                    if( !useTX )
+                        finalDsName += NO_TX_SUFFIX;
                 }
                 LOG.info("Looking up datasource for division " + divisionId + ": " + finalDsName);
                 DataSource dataSource;
@@ -188,8 +209,8 @@ public final class Database {
                     testDataSource = dataSource;
                     return testDataSource;
                 } else {
-                    dataSources[divisionId] = dataSource;
-                    return dataSources[divisionId];
+                    dataSourceCache[divisionId] = dataSource;
+                    return dataSourceCache[divisionId];
                 }
             } catch (NamingException exc) {
                 String sErr = "Naming Exception, unable to retrieve Connection to [" + finalDsName

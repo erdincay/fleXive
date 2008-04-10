@@ -3,12 +3,24 @@
         <!ENTITY % global_entities SYSTEM "../global.ent">
         %global_entities;
         ]>
-<programlisting language="xml" xmlns="http://docbook.org/ns/docbook"><![CDATA[
+<programlisting language="xml" xmlns="http://docbook.org/ns/docbook"><![CDATA[<!-- transactional datasource -->
 <xa-datasource>
-<jndi-name>jdbc/flexiveDivision1</jndi-name>
-<xa-datasource-class>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</xa-datasource-class>
-<!-- Note: "&amp;" has to be used instead of "&" for parameters -->
-<xa-datasource-property name="URL">]]><emphasis>jdbc:mysql://localhost:3306/flexive?useUnicode=true&amp;characterEncoding=utf8&amp;characterResultSets=utf8</emphasis><![CDATA[</xa-datasource-property>
-<user-name>]]><emphasis>root</emphasis><![CDATA[</user-name>
-<password>]]><emphasis>a</emphasis><![CDATA[</password>]]>
+    <jndi-name>jdbc/flexiveDivision1</jndi-name>
+    <xa-datasource-class>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</xa-datasource-class>
+    <!-- Note: "&amp;" has to be used instead of "&" for parameters -->
+    <xa-datasource-property name="URL">]]><emphasis>jdbc:mysql://localhost:3306/flexive?useUnicode=true&amp;characterEncoding=utf8&amp;characterResultSets=utf8</emphasis><![CDATA[</xa-datasource-property>
+    <user-name>]]><emphasis>root</emphasis><![CDATA[</user-name>
+    <password>]]><emphasis>a</emphasis><![CDATA[</password>
+</xa-datasource>
+
+<!-- non-transactional datasource for database structure patches, Quartz, etc. -->
+<no-tx-datasource>
+    <jndi-name>jdbc/flexiveDivision1NoTX</jndi-name>
+    <driver-class>com.mysql.jdbc.Driver</driver-class>
+    <!-- Note: "&amp;" has to be used instead of "&" for parameters -->
+    <connection-url>]]><emphasis>jdbc:mysql://localhost:3306/flexive?useUnicode=true&amp;characterEncoding=utf8&amp;characterResultSets=utf8</emphasis><![CDATA[</xa-datasource-property>
+    <user-name>]]><emphasis>root</emphasis><![CDATA[</user-name>
+    <password>]]><emphasis>a</emphasis><![CDATA[</password>
+</no-tx-datasource>
+]]>
 </programlisting>

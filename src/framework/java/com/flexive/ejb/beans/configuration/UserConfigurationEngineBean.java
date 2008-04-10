@@ -41,9 +41,7 @@ import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.interfaces.UserConfigurationEngine;
 import com.flexive.shared.interfaces.UserConfigurationEngineLocal;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionManagement;
-import javax.ejb.TransactionManagementType;
+import javax.ejb.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -56,6 +54,7 @@ import java.sql.SQLException;
  */
 
 @TransactionManagement(TransactionManagementType.CONTAINER)
+@TransactionAttribute(TransactionAttributeType.REQUIRED)
 @Stateless(name = "UserConfigurationEngine")
 public class UserConfigurationEngineBean extends GenericConfigurationImpl implements UserConfigurationEngine, UserConfigurationEngineLocal {
     /**

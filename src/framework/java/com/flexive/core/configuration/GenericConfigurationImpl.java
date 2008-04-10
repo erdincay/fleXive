@@ -44,8 +44,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.lang.SerializationUtils;
 
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -217,7 +215,6 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> void put(Parameter<T> parameter, String key, T value)
             throws FxApplicationException {
 
@@ -266,7 +263,6 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public final <T extends Serializable> void put(Parameter<T> parameter, T value) throws FxApplicationException {
         put(parameter, parameter.getData().getKey(), value);
     }
@@ -316,7 +312,6 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public final <T extends Serializable> T get(Parameter<T> parameter) throws FxApplicationException {
         return get(parameter, parameter.getData().getKey());
     }
@@ -324,7 +319,6 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public final <T extends Serializable> T get(Parameter<T> parameter, String key)
             throws FxApplicationException {
         try {
@@ -341,7 +335,6 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public final <T extends Serializable> T get(Parameter<T> parameter, String key, boolean ignoreDefault)
             throws FxApplicationException {
         try {
@@ -358,7 +351,6 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public final <T extends Serializable> Map<String, T> getAll(Parameter<T> parameter) throws FxApplicationException {
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -383,7 +375,6 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public final <T extends Serializable> Collection<String> getKeys(Parameter<T> parameter) throws FxApplicationException {
         return getAll(parameter).keySet();
     }
@@ -391,7 +382,6 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> void remove(Parameter<T> parameter, String key)
             throws FxApplicationException {
         Connection conn = null;
@@ -421,7 +411,6 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public final <T extends Serializable> void remove(Parameter<T> parameter)
             throws FxApplicationException {
         remove(parameter, parameter.getKey());
@@ -430,7 +419,6 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public final <T extends Serializable> void removeAll(Parameter<T> parameter)
             throws FxApplicationException {
         remove(parameter, null);

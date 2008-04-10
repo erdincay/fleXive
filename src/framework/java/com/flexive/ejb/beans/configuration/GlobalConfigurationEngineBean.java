@@ -73,6 +73,7 @@ import java.util.*;
  */
 
 @TransactionManagement(TransactionManagementType.CONTAINER)
+@TransactionAttribute(TransactionAttributeType.REQUIRED)
 @Stateless(name = "GlobalConfigurationEngine")
 public class GlobalConfigurationEngineBean extends GenericConfigurationImpl implements GlobalConfigurationEngine, GlobalConfigurationEngineLocal {
     /**
