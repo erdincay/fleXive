@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+    Defines additional targets that integrate flexive libs in the Seam build process.
+
+    @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+    @version $Rev: 374 $
+-->
+<project name="flexive-seam-project" basedir=".">
+    <!-- Get our directory (basedir references to the project base directory) -->
+    <dirname property="dist.basedir" file="${ant.file.flexive-seam-project}"/>
+
+    <import file="${dist.basedir}/build.properties-dist.xml"/>
+
+    <target name="copyflexive" description="Copies the [fleXive] libraries to the exploded-archives folders.">
+        <!-- Copy the flexive core and shared libs to ${ear.dir}/lib -->
+        <copy todir="${ear.dir}/lib">
+            <fileset dir="${dist.lib.dir}" includes="*.jar"
+                     excludes="flexive-ui-shared.jar,flexive-tests.jar,flexive-webdav.jar,flexive-ejb.jar"/>
+            <fileset dir="${dist.extlib.dir}" excludes="${extlib.excludes},tomahawk*.jar,weblets-impl*.jar">
+                <include name="*"/>
+                <exclude name="richfaces*.jar"/>
+            </fileset>
+            <!-- Copy the core components to EAR/lib as well, since they will be referenced from Seam beans -->
+            <fileset dir="${applications.dir}" includes="flexive-plugin-jsf-core.jar"/>
+        </copy>
+        <!-- Copy the EJB-jar to the EAR core dir -->
+        <copy todir="${ear.dir}">
+            <fileset dir="${dist.lib.dir}" includes="flexive-ejb.jar"/>
+        </copy>
+
+        <!-- Copy the view-only JSF jars to WEB-INF/lib -->
+        <copy todir="${war.dir}/WEB-INF/lib">
+            <fileset dir="${dist.extlib.dir}" includes="weblets-impl*.jar,tomahawk*.jar"/>
+            <fileset dir="${dist.lib.dir}" includes="flexive-ui*.jar"/>
+            <fileset dir="${applications.dir}" includes="flexive-plugin-jsf-core.jar"/>
+            <fileset dir="${applications.dir}" includes="flexive-plugin-jsf-globalconfig.jar"/>
+        </copy>
+    </target>
+</project>

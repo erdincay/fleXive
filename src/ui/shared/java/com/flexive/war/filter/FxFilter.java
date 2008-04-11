@@ -138,7 +138,13 @@ public class FxFilter implements Filter {
             }
 
             // Cache data for jsp,jsf,and xhtml pages only
-            final boolean catchData = request.isDynamicContent();
+            /* TODO: fix/implements response caching.
+               The 'catchData' mode doesn't work for static 
+               resources like images or CSS files served by servlets, like for example Seam/Richfaces
+               includes. Besides, since caching has not been implemented yet, 'catchData' doesn't do much
+               except rendering our own error page when the page threw an exception.
+            */
+            final boolean catchData = false; //request.isDynamicContent();
 
             // Wrap the response to provide additional features (content length counting, caching)
             final FxResponseWrapper response =

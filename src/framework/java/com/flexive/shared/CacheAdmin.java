@@ -212,7 +212,7 @@ public class CacheAdmin {
                         EJBLookup.getScriptingEngine().executeDropStartupScripts(dropName);
                     }
                     //Create eviction strategy if supported
-                    cache.setEvictionStrategy(ri.getDivisionId(), CONTENTCACHE_BASE, 5000, 0, 120);
+                    getInstance().setEvictionStrategy(ri.getDivisionId(), CONTENTCACHE_BASE, 5000, 0, 120);
 
                     // make sure we don't miss any updates in the environment
                     getInstance().reloadEnvironment(ri.getDivisionId());

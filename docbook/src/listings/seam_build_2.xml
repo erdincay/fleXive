@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="xhtml" xml:id="seam_build_2"
+                xmlns="http://docbook.org/ns/docbook"><![CDATA[<target name="archive" depends="jar,war,ear,]]><emphasis>copyflexive</emphasis><![CDATA[" description="Package the archives">]]></programlisting>

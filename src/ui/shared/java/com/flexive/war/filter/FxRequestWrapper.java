@@ -346,8 +346,10 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
      * @return true if the request is a dynamic content
      */
     public boolean isDynamicContent() {
-        return "jsf".equals(pageType) || "xhtml".equals(pageType) || "jsp".equals(pageType) || "fx".equals(pageType)
-                || "faces".equals(pageType);
+        // list only resources that are known to be static, otherwise we'll run into troubles
+        // when flexive is integrated in other applications/frameworks (e.g. Seam)
+        return !("jpg".equals(pageType) || "css".equals(pageType) || "gif".equals(pageType) || "png".equals(pageType)
+            || "js".equals(pageType));
     }
 
     /**

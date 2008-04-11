@@ -32,6 +32,7 @@
     <xi:include href="big_picture.xml"/> 
     <xi:include href="core.xml"/>
     <xi:include href="jsfsupport.xml"/>
+    <xi:include href="seam.xml"/>
     <xi:include href="admin_gui.xml"/>
     <xi:include href="glossary.xml"/>
     <xi:include href="bibliography.xml"/>

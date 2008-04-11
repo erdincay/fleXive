@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="xml" xml:id="seam_build_1"
+                xmlns="http://docbook.org/ns/docbook"><![CDATA[<project name="myseamproject" default="deploy" basedir=".">
+    ]]><emphasis><![CDATA[<import file="FLEXIVE-DIST/build.seam-project.xml"/>]]></emphasis></programlisting>

@@ -201,9 +201,13 @@ public class SqlQueryBuilder implements Serializable {
         if (column.indexOf('(') > 0) {
             // column has one or more functions
             final int propertyStart = column.lastIndexOf('(') + 1;
-            out.append(column.substring(0, propertyStart))
-               .append('#')
-               .append(column.substring(propertyStart));
+            out.append(column.substring(0, propertyStart));
+            if (column.charAt(propertyStart) != '#') {
+               out.append('#');
+            }
+            out.append(column.substring(propertyStart));
+        } else if (column.startsWith("#")) {
+            return column;
         } else {
             out.append('#').append(column);
         }

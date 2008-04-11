@@ -274,8 +274,12 @@ public class SqlQueryBuilderTest {
 
     @Test
     public void selectAssignmentTest() {
-        final SqlQueryBuilder builder = new SqlQueryBuilder().select("mycontent/mycaption");
-        assert builder.getQuery().contains("SELECT #mycontent/mycaption") : "Expected assignment query: " + builder.getQuery();
+        for (SqlQueryBuilder builder: new SqlQueryBuilder[] {
+                new SqlQueryBuilder().select("mycontent/mycaption"),
+                new SqlQueryBuilder().select("#mycontent/mycaption")
+        }) {
+            assert builder.getQuery().contains("SELECT #mycontent/mycaption") : "Expected assignment query: " + builder.getQuery();
+        }
     }
 
     @Test

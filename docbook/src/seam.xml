@@ -1,0 +1,207 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE chapter [
+        <!ENTITY % global_entities SYSTEM "global.ent">
+        %global_entities;
+        <!ENTITY pkParameter "May be supplied as an FxPK object, a long ID, a String containing a primary key (e.g. &quot;5&quot;, &quot;5.1&quot;, &quot;5.MAX&quot;), a FxReference, or a FxSelectListItem whose ID will be interpreted as a content ID.">
+        ]>
+<chapter xml:id="seam" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude">
+
+    <title>JBoss Seam and &flexive;</title>
+
+    <xi:include href="includes/author_dlichtenberger.xml"/>
+
+    <para>
+        <link xlink:href="http://www.jboss.com/products/seam">JBoss Seam</link>
+        is a widespread framework for rapid development of applications with &jee5;.
+        It provides a neat wrapper around JSF and EJB that removes most of the "glue code"
+        prevalent in many JSF applications that use EJB.
+        Main features include a close integration of EJB persistence (JPA), a conversation scope for JSF,
+        or business process management via jBPM.
+    </para>
+
+    <para>
+        This chapter is a quick guide to integrating &flexive; into an existing Seam application.
+    </para>
+
+    <section xml:id="seam_integration">
+        <title>Integration guide</title>
+
+        <para>
+            To integrate &flexive; with Seam, you need to
+
+            <orderedlist>
+                <listitem>
+                    <para>modify your build file to add the &flexive; libraries to the
+                        packages EAR file, and
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>modify your
+                        <filename>web.xml</filename>
+                        and
+                        <filename>application.xml</filename>
+                        deployment descriptors.
+                    </para>
+                </listitem>
+            </orderedlist>
+
+            Both tasks shouldn't take you more than a few minutes, and both are easy to undo.
+        </para>
+
+        <para>
+            First of all, you need unpack a &flexive; distribution as described in
+            <xref linkend="writing_applications"/>.
+            You don't need to actually start &flexive;, but you need access to the distribution directory.
+        </para>
+
+        <para>
+            When you have a local &flexive; distribution installed, go to you Seam project directory and
+            perform the following tasks:
+
+            <itemizedlist>
+                <listitem>
+                    <para>
+                        Modify your
+                        <filename>build.xml</filename>:
+                        &Flexive; will copy all required libraries to the
+                        <filename>exploded-archives</filename>
+                        folder every time your application is built.
+
+                        <orderedlist>
+                            <listitem>
+                                <para>Include
+                                    <filename>build.seam-project.xml</filename>
+                                    at the top of
+                                    <filename>build.xml</filename>.
+                                    <emphasis>FLEXIVE-DIST</emphasis>
+                                    is the path to your local &flexive; distribution.
+
+                                    <xi:include href="listings/seam_build_1.xml"/>
+                                </para>
+                            </listitem>
+
+                            <listitem>
+                                <para>Add a dependency for
+                                    <code>copyflexive</code>
+                                    to the
+                                    <code>archive</code>
+                                    target:
+
+                                    <xi:include href="listings/seam_build_2.xml"/>
+                                </para>
+                            </listitem>
+                        </orderedlist>
+
+                        To check if everything still works, you should build and deploy your application now.
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>
+                        Add a reference to
+                        <filename>flexive-ejb.jar</filename>
+                        to
+                        <filename>resources/META-INF/application.xml</filename>:
+
+                        <programlisting language="xml"><![CDATA[    <!-- Flexive EJBs -->
+    <module>
+        <ejb>flexive-ejb.jar</ejb>
+    </module>]]></programlisting>
+                    </para>
+                </listitem>
+
+                <listitem>
+                    <para>
+                        Add the &flexive; filter and the &weblets; listener to
+                        <filename>resources/WEB-INF/web.xml</filename>:
+
+                        <programlisting language="xml"><![CDATA[    <filter>
+        <filter-name>FlexFilter</filter-name>
+        <filter-class>com.flexive.war.filter.FxFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>FlexFilter</filter-name>
+        <url-pattern>*.seam</url-pattern>
+    </filter-mapping>
+
+    <listener>
+        <listener-class>net.java.dev.weblets.WebletsContextListener</listener-class>
+    </listener>]]></programlisting>
+                    </para>
+
+                    <para>
+                        The
+                        <code>FlexFilter</code>
+                        is needed to provide the &flexive; context (e.g. the current user ticket)
+                        for every request, and &weblets; is used to serve Javascript and CSS files needed by
+                        the JSF components.
+                    </para>
+                </listitem>
+            </itemizedlist>
+        </para>
+
+        <para>
+            To test if the &flexive; integration was sucessful, add the following code snippet to one of your
+            front-end pages:
+
+            <programlisting language="xhtml">#{fxSystemBean.buildInfoVerbose}</programlisting>
+
+            It should render the &flexive; version and build number. If no text is rendered, please check
+            the logfile for error messages during the application startup. &Flexive; writes several
+            status log messages on application startup, so you should see at least some messages
+            originating from &flexive;.
+        </para>
+        <para>
+            When using &flexive; UI tags on your pages, be sure to declare the
+            <code>fx</code>
+            namespace in your XHTML root element:
+
+            <programlisting><![CDATA[xmlns:fx="http://www.flexive.com/jsf/core"]]></programlisting>
+        </para>
+    </section>
+
+    <section xml:id="seam_programming">
+        <title>Programming &flexive; in Seam</title>
+
+        <para>
+            You can use all the &flexive; JSF and EJB components just like in a stand-alone
+            application. There are, however, some issues where extra thought is required
+            for seamless integration between both frameworks.
+        </para>
+
+        <section xml:id="seam_programming_security">
+            <title>Authorization and Authentication</title>
+
+            <para>
+                To use &flexive; security features, you need to combine the Seam and &flexive; logins.
+                This also means that any user that should have more than guest user rights must have
+                a valid &flexive; account.
+            </para>
+            <para>
+                For example, this code requires a valid &flexive; account for the authentication to succeed.
+                You could also ignore the exception, which will leave guest user rights if your own
+                authentication succeeds. In a default Seam application,
+                <methodname>Authenticator#authenticate</methodname>
+                might look like this:
+
+                <programlisting language="java"><![CDATA[public boolean authenticate() {
+    log.info("authenticating #0", identity.getUsername());
+    //write your authentication logic here,
+    //return true if the authentication was
+    //successful, false otherwise
+    try {
+       FxContext.get().login(identity.getUsername(), identity.getPassword(), true);
+    } catch (LoginException e) {
+        facesMessages.add("Failed to perform [fleXive] login: " + e.getMessage());
+        return false;
+    }
+    return true;
+}]]></programlisting>
+            </para>
+        </section>
+    </section>
+
+</chapter>

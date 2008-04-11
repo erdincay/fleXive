@@ -87,4 +87,9 @@
     <welcome-file-list>
         <welcome-file>index.xhtml</welcome-file>
     </welcome-file-list>
+
+    <listener>
+        <listener-class>net.java.dev.weblets.WebletsContextListener</listener-class>
+    </listener>
+
 </web-app>
