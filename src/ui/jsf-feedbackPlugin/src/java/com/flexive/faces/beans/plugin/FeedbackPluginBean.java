@@ -50,7 +50,7 @@ import com.flexive.shared.FxSharedUtils;
 public class FeedbackPluginBean {
 
     private String refPage;
-    private String comment=null;
+    private String comment="";
     private int feedback=-1;
     private static final int FEEDBACK_POSITIVE=0;
     private static final int FEEDBACK_MODERATE=1;
@@ -108,10 +108,7 @@ public class FeedbackPluginBean {
     }
 
     public String getComment() {
-        if (comment==null)
-            return FxJsfUtils.getLocalizedMessage("FeedbackPlugin.pretext.comment");
-        else
-            return comment;
+        return comment;
     }
 
     public void setComment(String comment) {

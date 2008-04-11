@@ -26,7 +26,7 @@
         <h:inputHidden id="language" value="#{fxSystemBean.userTicket.language.iso2digit}"/>        
 
         <div class="header">
-            <h:outputText value="#{feedbackPluginBean.header}!"/>
+            <h:outputText escape="false" value="#{feedbackPluginBean.header}!"/>
         </div>
         <br/>
         <div class="build">
@@ -39,6 +39,7 @@
         </div>
         <br clear="all"/>
         <div class="comment">
+            <h:outputText value="#{fxMessageBean['FeedbackPlugin.label.comment']}"/><br/>
             <h:inputTextarea id="comment" rows="10" cols="50" value="#{feedbackPluginBean.comment}"/>
         </div>
         <input type="submit" value="#{fxMessageBean['FeedbackPlugin.button.submit']}"/>
