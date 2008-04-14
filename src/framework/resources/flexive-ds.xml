@@ -30,7 +30,7 @@
 
         <!-- If you supply the usr/pw from a JAAS login module -->
         <security-domain/>
->
+
         <exception-sorter-class-name>
             com.mysql.jdbc.integration.jboss.ExtendedMysqlExceptionSorter
         </exception-sorter-class-name>

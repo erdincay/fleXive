@@ -22,10 +22,10 @@
             </title>
             <para>
                 If you are interested in developing &Flexive;, you will need the
-                <link href="http://www.flexive.org/download">&Flexive; source code
+                <link xlink:href="http://www.flexive.org/download">&Flexive; source code
                 </link>
                 and an IDE like
-                <link href="http://www.eclipse.org/">Eclipse</link>
+                <link xlink:href="http://www.eclipse.org/">Eclipse</link>
                 or a proprietary solution.
             </para>
             <para>The following sections are good starting points for future &Flexive; developers:</para>
@@ -47,13 +47,12 @@
                         </para>
                     </listitem>
                 </itemizedlist>
-                <para>We provide the current generated
-                    <link href="http://www.flexive.org/documentation/api-documentation.html">&Flexive; API
-                        Documentation
-                    </link>
-                    for you on our
-                    <link href="http://www.flexive.org">website</link>.
-                </para>
+                We provide the current generated
+                <link xlink:href="http://www.flexive.org/documentation/api-documentation.html">&Flexive; API
+                    Documentation
+                </link>
+                for you on our
+                <link xlink:href="http://www.flexive.org">website</link>.
             </para>
         </section>
     </section>
@@ -70,10 +69,12 @@
             </para>
             <itemizedlist>
                 <listitem>
-                    <filename>mysql-connector-java-*.jar</filename>
-                    (Alternatively you can download the latest stable
-                    <link href="http://dev.mysql.com/downloads/connector/j/5.0.html">MySQL JDBC
-                        driver</link>)
+                    <para>
+                        <filename>mysql-connector-java-*.jar</filename>
+                        (Alternatively you can download the latest stable
+                        <link xlink:href="http://dev.mysql.com/downloads/connector/j/5.0.html">MySQL JDBC
+                            driver</link>)
+                    </para>
                 </listitem>
             </itemizedlist>
         </section>
@@ -88,20 +89,11 @@
                             <filename>${jboss.home}/server/default/deploy/</filename>
                             and adapt to your datasource(s)
                             or simply copy it from the &Flexive; source tree, if available.
-                            <para>In the
-                                <filename>flexive-ds.xml</filename>
-                                configure your database connections as follows:
-                            </para>
-                            <para>For the
-                                <code>flexive</code>
-                                database
-                                <xi:include href="listings/installation_flexive-ds_config_flexive.xml"/>
-                            </para>
-                            <para>For the
-                                <code>flexiveConfiguration</code>
-                                database
-                                <xi:include href="listings/installation_flexive-ds_config_flexiveConfiguration.xml"/>
-                            </para>
+                            In the <filename>flexive-ds.xml</filename> configure your database connections as follows:
+                            For the <code>flexive</code> database
+                            <xi:include href="listings/installation_flexive-ds_config_flexive.xml"/>
+                            For the <code>flexiveConfiguration</code> database
+                            <xi:include href="listings/installation_flexive-ds_config_flexiveConfiguration.xml"/>
                             <filename>flexive-ds.xml</filename>
                             <programlisting language="xml">
                                 <xi:include href="../../src/framework/resources/flexive-ds.xml" parse="text"/>
@@ -164,13 +156,10 @@ database.password=a]]></programlisting>
                 <filename>flexive.ear</filename>
                 file inside the
                 <filename>flexive-dist</filename>
-                directory.
-                <para>
-                    Copy
-                    <filename>flexive.ear</filename>
-                    to
-                    <filename>${jboss.home}/server/default/deploy</filename>.
-                </para>
+                directory. Copy
+                <filename>flexive.ear</filename>
+                to
+                <filename>${jboss.home}/server/default/deploy</filename>.
             </para>
         </section>
         <section xml:id="jboss_installation_starting_flexive">
@@ -208,7 +197,7 @@ database.password=a]]></programlisting>
                 </listitem>
                 <listitem>
                     <para>To access the backend point your browser to
-                        <link href="http://localhost:8080/flexive/adm/">http://localhost:8080/flexive/adm/</link>
+                        <link xlink:href="http://localhost:8080/flexive/adm/">http://localhost:8080/flexive/adm/</link>
                     </para>
                     <para>Alternatively you can specify your server's IP address, which is supported by default,
                         too.
@@ -374,36 +363,48 @@ database.password=a]]></programlisting>
             </para>
             <orderedlist>
                 <listitem>
-                    <code>bin/asadmin start-domain domain1</code>
-                    starts the Glassfish server
+                    <para>
+                        <code>bin/asadmin start-domain domain1</code>
+                        starts the Glassfish server
+                    </para>
                 </listitem>
                 <listitem>Open the URL
-                    <link href="http://localhost:4848/">http://localhost:4848/</link>
-                    and login using default credentials
-                    <code>admin/adminadmin</code>.
+                    <para>
+                        <link xlink:href="http://localhost:4848/">http://localhost:4848/</link>
+                        and login using default credentials
+                        <code>admin/adminadmin</code>.
+                    </para>
                 </listitem>
             </orderedlist>
             <para>Additional information</para>
             <orderedlist>
-                <listitem>To stop the Glassfish instance execute
-                    <code>${glassfish.home}/bin/asadmin stop-domain domain1</code>
+                <listitem>
+                    <para>To stop the Glassfish instance execute
+                        <code>${glassfish.home}/bin/asadmin stop-domain domain1</code>
+                    </para>
                 </listitem>
-                <listitem>Admin UI Port: 4848</listitem>
-                <listitem>HTTP Port: 8080</listitem>
-                <listitem>HTTPS Port: 8181</listitem>
+                <listitem>
+                    <para>Admin UI Port: 4848</para>
+                </listitem>
+                <listitem>
+                    <para>HTTP Port: 8080</para>
+                </listitem>
+                <listitem>
+                    <para>HTTPS Port: 8181</para>
+                </listitem>
             </orderedlist>
         </section>
         <section xml:id="glassfish_installation_conn_pools">
             <title>Creating the Connection pools
             </title>
-            <para>Two connection pools, one for the division and one for the configuration database, have to be set
-                up.
+            <para>Three connection pools, two for the division (transactional and non-transactional)
+                and one for the configuration database, have to be set up.
             </para>
 
             <section xml:id="glassfish_installation_conn_pools_division">
-                <title>Division connection pool</title>
+                <title>Division connection pools</title>
                 <para>In the
-                    <link href="http://localhost:4848/">Admin Console</link>
+                    <link xlink:href="http://localhost:4848/">Admin Console</link>
                     navigate to
                     <code>Resources > JDBC > Connection Pools</code>
                     and click
@@ -415,14 +416,20 @@ database.password=a]]></programlisting>
                 </para>
                 <para>
                     <itemizedlist>
-                        <listitem>Name:
-                            <code>flexiveDivision1</code>
+                        <listitem>
+                            <para>Name:
+                                <code>flexiveDivision1</code>
+                            </para>
                         </listitem>
-                        <listitem>ResourceType:
-                            <code>javax.sql.XADataSource</code>
+                        <listitem>
+                            <para>ResourceType:
+                                <code>javax.sql.XADataSource</code>
+                            </para>
                         </listitem>
-                        <listitem>Database Vendor:
-                            <code>MySQL</code>
+                        <listitem>
+                            <para>Database Vendor:
+                                <code>MySQL</code>
+                            </para>
                         </listitem>
                     </itemizedlist>
                 </para>
@@ -434,26 +441,36 @@ database.password=a]]></programlisting>
                 </para>
                 <para>
                     <itemizedlist>
-                        <listitem>Datasource Classname:
-                            <code>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</code>
+                        <listitem>
+                            <para>Datasource Classname:
+                                <code>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</code>
+                            </para>
                         </listitem>
-                        <listitem>Resource Type:
-                            <code>javax.sql.XADataSource</code>
+                        <listitem>
+                            <para>Resource Type:
+                                <code>javax.sql.XADataSource</code>
+                            </para>
                         </listitem>
-                        <listitem>Check
-                            <code>Required</code>
-                            for
-                            <code>Connection Validation</code>
+                        <listitem>
+                            <para>Check
+                                <code>Required</code>
+                                for
+                                <code>Connection Validation</code>
+                            </para>
                         </listitem>
-                        <listitem>Check
-                            <code>Enabled</code>
-                            for
-                            <code>Allow Non Component Callers</code>
+                        <listitem>
+                            <para>Check
+                                <code>Enabled</code>
+                                for
+                                <code>Allow Non Component Callers</code>
+                            </para>
                         </listitem>
-                        <listitem>Set Transaction Isolation to
-                            <code>read-committed</code>
-                            and check Isolation Level as
-                            <code>Guaranteed</code>
+                        <listitem>
+                            <para>Set Transaction Isolation to
+                                <code>read-committed</code>
+                                and check Isolation Level as
+                                <code>Guaranteed</code>
+                            </para>
                         </listitem>
                     </itemizedlist>
                 </para>
@@ -462,28 +479,40 @@ database.password=a]]></programlisting>
                 </para>
                 <para>
                     <itemizedlist>
-                        <listitem>DatabaseName:
-                            <code>flexive</code>
+                        <listitem>
+                            <para>DatabaseName:
+                                <code>flexive</code>
+                            </para>
                         </listitem>
-                        <listitem>serverName:
-                            <code><![CDATA[<your mysql server ip>]]></code>
+                        <listitem>
+                            <para>serverName:
+                                <code><![CDATA[<your mysql server ip>]]></code>
+                            </para>
                         </listitem>
-                        <listitem>port:
-                            <code>3306</code>
+                        <listitem>
+                            <para>port:
+                                <code>3306</code>
+                            </para>
                         </listitem>
-                        <listitem>userName:
-                            <code><![CDATA[<your mysql user>]]></code>
+                        <listitem>
+                            <para>userName:
+                                <code><![CDATA[<your mysql user>]]></code>
+                            </para>
                         </listitem>
-                        <listitem>password:
-                            <code><![CDATA[<your mysql password>]]></code>
+                        <listitem>
+                            <para>password:
+                                <code><![CDATA[<your mysql password>]]></code>
+                            </para>
                         </listitem>
-                        <listitem>Url:
-                            <code>
-                                <![CDATA[jdbc:mysql://localhost:3306/flexive?useUnicode=true&characterEncoding=utf8&characterResultSets=utf8]]></code>
+                        <listitem>
+                            <para>Url:
+                                <code><![CDATA[jdbc:mysql://localhost:3306/flexive?useUnicode=true&characterEncoding=utf8&characterResultSets=utf8]]></code>
+                            </para>
                         </listitem>
-                        <listitem>URL:
-                            <code>
-                                <![CDATA[jdbc:mysql://localhost:3306/flexive?useUnicode=true&characterEncoding=utf8&characterResultSets=utf8]]></code>
+                        <listitem>
+                            <para>URL:
+                                <code><![CDATA[jdbc:mysql://localhost:3306/flexive?useUnicode=true&characterEncoding=utf8&characterResultSets=utf8]]></code>
+                            </para>
                         </listitem>
                     </itemizedlist>
                 </para>
@@ -502,54 +531,92 @@ database.password=a]]></programlisting>
                         </code>
                         and clicking
                         <code>New</code>:
-                        <para>
-                            <itemizedlist>
-                                <listitem>JNDI Name:
+                        <itemizedlist>
+                            <listitem>
+                                <para>JNDI Name:
                                     <code>jdbc/flexiveDivision1</code>
-                                </listitem>
-                                <listitem>Pool Name:
+                                </para>
+                            </listitem>
+                            <listitem>
+                                <para>Pool Name:
                                     <code>flexiveDivision1</code>
-                                </listitem>
-                            </itemizedlist>
-                        </para>
+                                </para>
+                            </listitem>
+                        </itemizedlist>
                         Click
                         <code>OK</code>
                     </para>
+                </section>
+
+                <section xml:id="glassfish_installation_conn_pools_division_nontx">
+                    <title>Setting up the non-transactional connection pool</title>
+
+                    <para>
+                        Please repeat the
+                        <link linkend="glassfish_installation_conn_pools_division">above steps</link>
+                        but change the datasource name and the driver class:
+                    </para>
+
+                    <itemizedlist>
+                        <listitem>
+                            <para>
+                                Name:
+                                <code>flexiveDivision1NoTX</code>
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Datasource Classname:
+                                <code>com.mysql.jdbc.jdbc2.optional.MysqlDataSource</code>
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Resource type:
+                                <code>javax.sql.DataSource</code>
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                JNDI name:
+                                <code>jdbc/flexiveDivision1NoTX</code>
+                            </para>
+                        </listitem>
+                    </itemizedlist>
                 </section>
             </section>
 
             <section xml:id="glassfish_installation_conn_pools_config">
                 <title>Configuration connection pool</title>
                 <para>In the
-                    <link href="http://localhost:4848/">Admin Console</link>
+                    <link xlink:href="http://localhost:4848/">Admin Console</link>
                     navigate to
                     <code>Resources > JDBC > Connection Pools</code>
                     and click
                     <code>New</code>
                 </para>
-            </section>
 
-            <para>Repeat the above steps as explained in section
-                <link linkend="glassfish_installation_conn_pools_division">Division connection pool</link>
-                for the configuration connection pool.
-            </para>
-            <para>
+                <para>Repeat the above steps as explained in section
+                    <link linkend="glassfish_installation_conn_pools_division">Division connection pool</link>
+                    for the configuration connection pool.
+                </para>
                 <para>
                     For the connection pool use the same settings as above except:
                     <itemizedlist>
                         <listitem>
-                            DatabaseName:
-                            <code>flexiveConfiguration</code>
+                            <para>DatabaseName:
+                                <code>flexiveConfiguration</code>
+                            </para>
                         </listitem>
                         <listitem>
-                            Url:
-                            <code>
-                                <![CDATA[jdbc:mysql://localhost:3306/flexiveConfiguration?useUnicode=true&characterEncoding=utf8&characterResultSets=utf8]]></code>
+                            <para>Url:
+                                <code><![CDATA[jdbc:mysql://localhost:3306/flexiveConfiguration?useUnicode=true&characterEncoding=utf8&characterResultSets=utf8]]></code>
+                            </para>
                         </listitem>
                         <listitem>
-                            URL:
-                            <code>
-                                <![CDATA[jdbc:mysql://localhost:3306/flexiveConfiguration?useUnicode=true&characterEncoding=utf8&characterResultSets=utf8]]></code>
+                            <para>URL:
+                                <code><![CDATA[jdbc:mysql://localhost:3306/flexiveConfiguration?useUnicode=true&characterEncoding=utf8&characterResultSets=utf8]]></code>
+                            </para>
                         </listitem>
                     </itemizedlist>
                 </para>
@@ -559,16 +626,20 @@ database.password=a]]></programlisting>
                         <link linkend="glassfish_installation_conn_pools_division">Division connection pool
                         </link>, using these settings:
                         <itemizedlist>
-                            <listitem>JNDI Name:
-                                <code>jdbc/flexiveConfiguration</code>
+                            <listitem>
+                                <para>JNDI Name:
+                                    <code>jdbc/flexiveConfiguration</code>
+                                </para>
                             </listitem>
-                            <listitem>Pool Name:
-                                <code>flexiveConfiguration</code>
+                            <listitem>
+                                <para>Pool Name:
+                                    <code>flexiveConfiguration</code>
+                                </para>
                             </listitem>
                         </itemizedlist>
                     </para>
                 </section>
-            </para>
+            </section>
         </section>
         <section xml:id="glassfish_installation_deployment">
             <title>Deployment</title>
@@ -583,45 +654,43 @@ database.password=a]]></programlisting>
             </para>
             <para>
                 <emphasis>Using the autodeploy directory:</emphasis>
-                <para>
-                    <orderedlist>
-                        <listitem>Copy the
+                <orderedlist>
+                    <listitem>
+                        <para>Copy the
                             <filename>flexive.ear</filename>
                             to
                             <filename>${glassfish.home}/domains/domain1/autodeploy</filename>
-                        </listitem>
-                    </orderedlist>
-                </para>
+                        </para>
+                    </listitem>
+                </orderedlist>
             </para>
             <para>
                 <emphasis>Using the Admin UI:</emphasis>
-                <para>
-                    <orderedlist>
-                        <listitem>In the Admin Console, go to
+                <orderedlist>
+                    <listitem>
+                        <para>In the Admin Console, go to
                             <code>Applications > Enterprise Applications</code>
-                        </listitem>
-                        <listitem>Click
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>Click
                             <code>Deploy...</code>
                             and upload the
                             <filename>flexive.ear</filename>
                             file.
-                        </listitem>
-                        <listitem>Click
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>Click
                             <code>OK</code>
-                        </listitem>
-                    </orderedlist>
-                    <para>To access the backend point your browser to
-                        <link href="http://localhost:8080/flexive/adm/">http://localhost:8080/flexive/adm/
-                        </link>
-                    </para>
-                    <para>Alternatively you can specify your server's IP address, which is supported by default,
-                        too.
-                    </para>
-                    <para>
-                        The default superuser's username and password for the Backend Administration are:
-                    </para>
-                    <para>username: supervisor, password: supervisor</para>
-                </para>
+                        </para>
+                    </listitem>
+                </orderedlist>
+                To access the backend point your browser to
+                <link xlink:href="http://localhost:8080/flexive/adm/">http://localhost:8080/flexive/adm/</link>
+                Alternatively you can specify your server's IP address, which is supported by default, too.
+                The default superuser's username and password for the Backend Administration are
+                username: supervisor, password: supervisor.
             </para>
         </section>
     </section>
@@ -660,7 +729,7 @@ database.password=a]]></programlisting>
             <itemizedlist>
                 <listitem>
                     <para>If an ant-task fails, make sure you have
-                        <link href="http://ant.apache.org">Apache ANT 1.7</link>
+                        <link xlink:href="http://ant.apache.org">Apache ANT 1.7</link>
                         installed.
                     </para>
                 </listitem>
