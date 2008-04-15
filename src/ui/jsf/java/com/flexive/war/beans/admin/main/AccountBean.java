@@ -81,6 +81,7 @@ public class AccountBean {
     private Hashtable<String, ArrayList<Account>> listCache;
     private static final String ID_CACHE_KEY = AccountBean.class + "_id";
     private FxContent contactData;
+    private boolean languageChanged;
 
     // user preferences fields
     private FxLanguage defaultInputLanguage;
@@ -88,6 +89,26 @@ public class AccountBean {
 
     public List<Role> getRoles() {
         return roles == null ? new ArrayList<Role>(0) : roles;
+    }
+
+    /**
+     * Has the language setting changed?
+     * USed to reload the whole UI after changes
+     *
+     * @return language setting changed
+     */
+    public boolean isLanguageChanged() {
+        return languageChanged;
+    }
+
+    /**
+     * Reset the languageChanged flag to false
+     *
+     * @return reset the languageChanged flag
+     */
+    public boolean isResetLanguageChanged() {
+        languageChanged = false;
+        return languageChanged;
     }
 
     /**
@@ -429,7 +450,7 @@ public class AccountBean {
                 newPasswd = password;
             }
             accountInterface.updateUser(this.accountIdFiler, newPasswd, null, null, this.account.getEmail(), this.account.getLanguage().getId());
-
+            languageChanged = true; //currently a "fake" ...
             // update user configuration
             if (getDefaultInputLanguage() != null) {
                 EJBLookup.getUserConfigurationEngine().put(SystemParameters.USER_DEFAULTINPUTLANGUAGE, getDefaultInputLanguage().getId());

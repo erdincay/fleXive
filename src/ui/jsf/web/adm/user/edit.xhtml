@@ -12,7 +12,15 @@
 <ui:composition template="/adm/contentTemplate.xhtml">
 <ui:define name="body">
     <c:if test="#{empty accountBean.editUserPref}"> </c:if>
-
+    <c:if test="#{accountBean.languageChanged}">
+        <c:if test="#{accountBean.resetLanguageChanged}"> </c:if>
+        <script type="text/javascript">
+            parent.treeNavFrame_0.location.reload();
+            parent.treeNavFrame_1.location.reload();
+            parent.treeNavFrame_2.location.reload();
+            parent.treeNavFrame_3.location.reload();
+        </script>
+    </c:if>
     <h:form id="frm">
 
         <adm:tab label="#{fxMessageBean['User.pref.show,#{accountBean.account.name}']}" active="true" id="tab1"/>

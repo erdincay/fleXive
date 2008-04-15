@@ -84,7 +84,7 @@
                                     <f:selectItems value="#{selectListBean.selectListItemACLs}"/>
                                 </t:selectOneListbox>
                             </td>
-                            <td align="left"><h:inputText id="itemColor_#{selectListBean.idMap[item.id]}" value="#{selectListBean.color[item.color]}"
+                            <td align="left"><h:inputText id="itemColor_#{selectListBean.idMap[item.id]}" value="#{item.color}"
                                     disabled="#{not (fxSystemBean.isInRole['SelectListEditor'] or selectListBean.mayEditItem[item])}"/></td>
                             <td align="left">
                                 <c:if test="#{selectListBean.mayDeleteItems}">
