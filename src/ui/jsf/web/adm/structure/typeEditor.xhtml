@@ -15,11 +15,20 @@
         <t:stylesheet path="/adm/css/content.css"/>
         <t:stylesheet path="/adm/css/structureEditor.css"/>
         <script type="text/javascript">
-           dojo.require("dojo.widget.FilteringTable");
+            dojo.require("dojo.widget.FilteringTable");
+
+            function exportType(type) {
+                try {
+                    document.getElementById('exportFrame').src = getBase() + "export/type/" + type;
+                } catch(ex) {
+                    alert(ex)
+                }
+            }
         </script>
       </ui:define>
 
     <ui:define name="body">
+        <div style="display:none;"><iframe id="exportFrame" ><!--empty--></iframe></div>
         <h:form id="frm" enctype="multipart/form-data">
             <c:if test="#{structureTreeControllerBean.doAction}">
                 <script type="text/javascript">
@@ -356,6 +365,11 @@
                 <adm:commandButton labelKey="TypeEditor.button.cancel" location="both" lockscreen="false"
                         icon="cancel" id="cancelButton"
                         onclick="parent.getStructureNavFrame().openNode(#{typeEditorBean.type.id}, true);return false;"/>
+            </ui:fragment>
+
+            <ui:fragment rendered="#{not typeEditorBean.type.new}">
+                <adm:commandButton labelKey="TypeEditor.button.export" location="both" separator="before" lockscreen="false"
+                        icon="export" onclick="exportType('#{typeEditorBean.name}');return false;" id="exportButton"/>
             </ui:fragment>
 
             <adm:toolbarPluginButtons/>

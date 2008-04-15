@@ -176,6 +176,12 @@
         <load-on-startup>1</load-on-startup>
     </servlet>
 
+    <servlet>
+        <servlet-name>Export</servlet-name>
+        <servlet-class>com.flexive.war.servlet.ExportServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
 
     <servlet>
         <servlet-name>FlexiveWebDav</servlet-name>
@@ -222,6 +228,10 @@
     <servlet-mapping>
         <servlet-name>Download</servlet-name>
         <url-pattern>/download/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Export</servlet-name>
+        <url-pattern>/export/*</url-pattern>
     </servlet-mapping>
 
     <!-- WebDav -->

@@ -36,6 +36,7 @@ package com.flexive.ejb.beans.structure;
 import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.LifeCycleInfoImpl;
+import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.core.structure.FxPreloadType;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
@@ -894,5 +895,10 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
         }
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
+    public String export(long id) throws FxApplicationException {
+        return ConversionEngine.getXStream().toXML(CacheAdmin.getEnvironment().getType(id));
+    }
 }

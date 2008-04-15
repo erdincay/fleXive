@@ -62,4 +62,13 @@ public interface TypeEngine {
      * @throws FxApplicationException on errors
      */
     void remove(long id) throws FxApplicationException;
+
+    /**
+     * Export the type with the requested id as XML
+     *
+     * @param id requested type id
+     * @return XML export
+     * @throws FxApplicationException on errors
+     */
+    String export(long id) throws FxApplicationException;
 }
