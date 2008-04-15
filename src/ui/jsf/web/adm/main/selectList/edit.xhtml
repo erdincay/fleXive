@@ -23,6 +23,10 @@
         <h:form id="frm" enctype="multipart/form-data">
             <adm:tab label="#{fxMessageBean['SelectList.tab.editSelectList,#{selectListBean.selectListName}']}" active="true" id="tab1"/>
 
+            <div style="float:right">
+                <fx:fxValueInputLanguageSelect id="updateLanguages"/>
+            </div>
+            
             <fx:formRow labelKey="SelectList.label.selectList.name" id="name">
                 <h:inputText id="name" value="#{selectListBean.selectListName}" disabled="#{not fxSystemBean.isInRole['SelectListEditor']}"/>
             </fx:formRow>

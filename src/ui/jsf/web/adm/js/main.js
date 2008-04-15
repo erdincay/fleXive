@@ -115,6 +115,11 @@ function gotoNavMenu(id) {
         getNavFrameWnd().document.location.href = getBase() + "/" + getNavFrameObj().getAttribute("navigationSrc");
         getNavFrameObj().setAttribute("loaded", true)
         loaded = false;
+    } else {
+        if (getNavFrameWnd().onShow) {
+            // call custom onShow handler
+            getNavFrameWnd().onShow();
+        }
     }
     // show new menu
     getNavFrameObj().style.display = "block";

@@ -23,6 +23,11 @@
             var contextBriefcaseId = null;
             var contextQueryName = null;
 
+            // Called when this page is brought to the foreground by parent.gotoNavMenu
+            function onShow() {
+                reload();
+            }
+
             function selectBriefcase(caller) {
                 if (activeItem!=null) {
                     if (activeItem.src.indexOf("shared")==-1) {

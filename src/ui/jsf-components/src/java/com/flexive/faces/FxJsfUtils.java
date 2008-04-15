@@ -765,6 +765,7 @@ public class FxJsfUtils {
         for (SelectableObjectWithLabel item : items) {
             result.add(new SelectItem(item.getId(), item.getLabel().getBestTranslation(ticket)));
         }
+        Collections.sort(result, new SelectItemSorter());
         return result;
     }
 
@@ -779,6 +780,7 @@ public class FxJsfUtils {
         for (FxSelectListItem item : list.getItems()) {
             result.add(new SelectItem(item.getId(), item.getLabel().getBestTranslation()));
         }
+        Collections.sort(result, new SelectItemSorter());
         return result;
     }
 
@@ -795,6 +797,7 @@ public class FxJsfUtils {
                 continue;
             result.add(new SelectItem(item[0], item[1]));
         }
+        Collections.sort(result, new SelectItemSorter());
         return result;
     }
 
