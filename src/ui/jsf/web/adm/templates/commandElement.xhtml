@@ -20,6 +20,7 @@ Parameters:
 - immediate: [optional] the jsf immediate flag
 - page: [optional] the page to render when the button is clicked
 - location: [optional] The location where the icon is displayed [content|toolbar|both]. The default is content
+- separator: [optional], [before|after|none] If displayed in the toolbar a separator will be placed before or after the icon.
 - onclick: [optional] the onClick event of the action link
 - lockscreen: [optional] if false, the screen will not be locked when clicking this button
 - icon: [optional] the name of the icon to be displayed. the icon name is mapped to the url "adm/images/commandButton/${icon}.png"
@@ -75,11 +76,20 @@ Parameters:
         <a href="javascript:void(0)" onclick="triggerCommandElement_#{id}();return false" ><ui:insert name="content">Content</ui:insert></a>
     </c:if>
 
-
     <c:if test="${location=='both' || location=='toolbar'}">
+        <c:if test="${separator=='before'}">
+            <script type="text/javascript" language="javascript">
+                parent.addToolbarSeparator();
+            </script>
+        </c:if>
         <script type="text/javascript" language="javascript">
             parent.addToolbarItem('#{fxSystemBean.response.id}',this,'#{id}','#{label}','','#{iconUrl}');
         </script>
+        <c:if test="${separator=='after'}">
+            <script type="text/javascript" language="javascript">
+                parent.addToolbarSeparator();
+            </script>
+        </c:if>
     </c:if>
 
 </ui:composition>

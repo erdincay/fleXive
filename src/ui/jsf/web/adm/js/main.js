@@ -485,7 +485,8 @@ function renderToolbar() {
     var html = "";
     var pos;
     for (pos = 0; pos < toolbarImages.length; pos++) {
-        
+        if( pos > 0 && toolbarIds[pos] == '' && toolbarIds[pos-1] == '' )
+            continue; //prevent double separators
         html += "<img "+
                 (toolbarIds[pos] != '' ? "id=\"" + toolbarIds[pos] + "_toolbarIcon\" " : "")+
                 "src=\"" + toolbarImages[pos] +
