@@ -43,6 +43,10 @@
         function logout() {
             invokeContentAction("adm/logout.xhtml");
         }
+
+        function welcomeScreen() {
+            invokeContentAction("adm/content.jsf");
+        }
     </script>
     <link rel="shortcut icon" href="#{fxSystemBean.contextPath}/pub/images/favicon.ico" type="image/vnd.microsoft.icon" />
     <title>#{fxSystemBean.header}</title>
@@ -65,7 +69,7 @@
 <table id="mainTbl" border="0" cellpadding="0" cellspacing="0">
     <tr>
         <td id="header1">
-            <div id="header1Div"><a href="http://www.flexive.org" target="flexive.org"><t:graphicImage
+            <div id="header1Div"><a style="cursor:pointer;" onclick="welcomeScreen();"><t:graphicImage
                 style="cursor:uri;" border="none" url="adm/images/layout/Logo_Flexive.gif" alt="[fleXive] Logo"/></a></div>
         </td>
         <td id="header2"/>

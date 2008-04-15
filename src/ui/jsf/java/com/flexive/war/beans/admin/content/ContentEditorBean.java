@@ -564,6 +564,17 @@ public class ContentEditorBean implements ActionBean, Serializable {
         this.type = type;
     }
 
+    /**
+     * To be used from external pages to create a new instance.
+     * The "type" property of this bean is used to determine the requested FxType to use
+     *
+     * @return contentEditor navigation case
+     */
+    public String createNewContent() {
+        initNew();
+        return "contentEditor";
+    }
+
     public String initNew() {
         release();
         _init();

@@ -284,3 +284,19 @@ div.dojoDialog {
     z-index:10;
     overflow:hidden;
 }
+
+table.welcometbl tbody tr td table tr td,  table.welcometbl tbody tr td table thead tr th{
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+    padding: 5px;
+
+}
+table.welcometbl tbody tr td {
+    vertical-align: top;
+}
+table.welcometbl tbody tr td table.links tbody tr td {
+    background-image: url("../../adm/images/contentEditor/arrow_green16x16.png");
+    background-repeat: no-repeat;
+    background-position: 4px 50%;
+    padding-left: 22px;
+}

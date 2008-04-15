@@ -1,32 +1,146 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:t="http://myfaces.apache.org/tomahawk"
       xmlns:adm="http://www.flexive.com/jsf/admin"
       xmlns:fx="http://www.flexive.com/jsf/core">
 <head>
     <t:stylesheet path="/adm/css/content.css"/>
+    <script type="text/javascript">
+        <!--
+        if( parent != null && parent.beginPage)
+            parent.beginPage();
+
+        function gotoAdmin() {
+            if( parent != null && parent.gotoNavMenu )
+                parent.gotoNavMenu(3);
+        }
+
+        function createType() {
+            if( parent == null || !parent.invokeContentAction )
+                return;
+            parent.invokeContentAction('adm/structure/typeEditor.jsf', 'createType');
+            parent.gotoNavMenu(1);
+        }
+
+        function createQuery() {
+            if( parent == null || !parent.invokeContentAction )
+                return;
+            parent.invokeContentAction("adm/search/query.jsf", "new");
+            parent.gotoNavMenu(1);
+        }
+
+        function submitSearch() {
+            if( parent == null || !parent.invokeContentAction )
+                return;
+            parent.invokeContentAction("adm/search/searchResult.jsf", "fulltextSearch", {query: document.searchForm.query.value});
+        }
+        -->
+    </script>
 </head>
 <body>
+
     <!--
         Don't use the contentTemplate.xhtml and don't include dojo.js on this page,
         otherwise we run into Dojo concurrency issues in IE7
     -->
         <adm:messages/>
+        <h:form>
+            <adm:toolbarPluginButtons/>
+        </h:form>
 
     <!--
         Access the environment to keep the loading message until the environment has been initialized
         after the first login:
         #{fxSystemBean.environment}
     -->
-        #{fxMessageBean['Global.welcome']} #{fxSystemBean.buildInfoVerbose}
-        
+        #{fxMessageBean['Welcome.welcome']} #{fxSystemBean.buildInfoVerbose}<br/>
+
         <ui:fragment rendered="#{fxSystemBean.failedLoginAttempts > 0}">
             <div class="errorMessage">
                 <br/><br/>#{fxMessageBean['Global.failedLoginAttempts,#{fxSystemBean.failedLoginAttempts}']}<br/>
             </div>
         </ui:fragment>
+        <br/>
+
+        <table class="welcometbl">
+            <tr>
+                <td>
+                    <table class="dojoTable">
+                        <thead>
+                            <tr>
+                                <th>#{fxMessageBean['Welcome.label.shortcuts']}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><a href="#" onclick="gotoAdmin();">#{fxMessageBean['Welcome.label.administration']}</a></td>
+                        </tr>
+                        <tr>
+                            <td><a href="#" onclick="createType();">#{fxMessageBean['Welcome.label.newType']}</a></td>
+                        </tr>
+                        <tr>
+                            <td><a href="#" onclick="createQuery();">#{fxMessageBean['Welcome.label.createQuery']}</a></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <h:form>
+                                    <t:selectOneListbox size="1" id="type" value="#{contentEditorBean.type}">
+                                        <f:selectItems value="#{contentEditorBean.editableTypes}"/>
+                                    </t:selectOneListbox>
+                                    <h:commandLink action="#{contentEditorBean.createNewContent}">
+                                        <t:graphicImage id="submitQueryButton"
+                                                    style="position:relative;top:3px;cursor:pointer;border:none;" alt="search"
+                                                    url="/adm/images/toolbar/new.png"/>
+                                    </h:commandLink>
+                                </h:form>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <h:form id="searchForm">
+                                    <input type="text" name="query"
+                                           onkeypress="return parent.onReturnEval(event, 'submitSearch();')"
+                                           style="margin-right:3px;width:120px;padding-left:2px;height:16px;border:1px solid #d4d9c4;"/>
+                                    <t:graphicImage id="submitQueryButton"
+                                                    style="position:relative;top:3px;cursor:pointer;" alt="search"
+                                                    url="/adm/images/toolbar/search.png" onclick="submitSearch();"/>
+
+                                </h:form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </td>
+                <td>
+                    <table class="dojoTable links">
+                        <thead>
+                            <tr>
+                                <th>#{fxMessageBean['Welcome.label.links']}</th>
+                            </tr>
+                        </thead>
+                        <tr>
+                            <td><a href="http://www.flexive.org" target="flexive.org">#{fxMessageBean['Welcome.link.home']}</a></td>
+                        </tr>
+                        <tr>
+                            <td><a href="http://www.flexive.org/docs/website/" target="flexive.org.refdoc">#{fxMessageBean['Welcome.link.refDoc']}</a></td>
+                        </tr>
+                        <tr>
+                            <td><a href="http://wiki.flexive.org" target="wiki.flexive.org">#{fxMessageBean['Welcome.link.wiki']}</a></td>
+                        </tr>
+                        <tr>
+                            <td><a href="http://issuetracker.flexive.org" target="issuetracker.flexive.org">#{fxMessageBean['Welcome.link.issuetracker']}</a></td>
+                        </tr>
+                        <tr>
+                            <td><a href="http://forum.flexive.org" target="forum.flexive.org">#{fxMessageBean['Welcome.link.forum']}</a></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+
 
     <script type="text/javascript">
     <!--
