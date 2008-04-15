@@ -68,6 +68,7 @@ public class ToolbarPluginHandler extends TagHandler implements TemplateClient {
     private static final transient Log LOG = LogFactory.getLog(ToolbarPluginHandler.class);
 
     private static final String COMMAND_TEMPLATE = "/adm/templates/commandElement.xhtml";
+    private static final String SEPARATOR_TEMPLATE = "/adm/templates/toolbarSeparator.xhtml";
 
     /**
      * A {@link ToolbarPluginExecutor} that collects all buttons matching the current URI.
@@ -85,6 +86,10 @@ public class ToolbarPluginHandler extends TagHandler implements TemplateClient {
             if (matcher.find()) {
                 buttons.add(button);
             }
+        }
+
+        public void addToolbarSeparatorButton() {
+            buttons.add(SEPARATOR);
         }
 
         public List<Button> getButtons() {
@@ -105,23 +110,29 @@ public class ToolbarPluginHandler extends TagHandler implements TemplateClient {
         }
 
         final VariableMapper origMapper = ctx.getVariableMapper();
-        final VariableMapperWrapper mapper = new VariableMapperWrapper(origMapper);
         try {
             ctx.pushClient(this);           // register ourselve to serve ui:insert requests by the template
-            ctx.setVariableMapper(mapper);
             final ExpressionFactory factory = ctx.getExpressionFactory();
             for (ToolbarPluginExecutor.Button button : executor.getButtons()) {
-                // set options for commandElement
-                mapper.setVariable("id", factory.createValueExpression(button.getId(), String.class));
-                mapper.setVariable("label", factory.createValueExpression(button.getLabel(), String.class));
-                mapper.setVariable("bean", factory.createValueExpression(ctx, "#{" + button.getBean() + "}", Object.class));
-                mapper.setVariable("action", factory.createValueExpression(button.getAction(), String.class));
-                mapper.setVariable("icon", factory.createValueExpression(button.getIcon(), String.class));
-                mapper.setVariable("iconUrl", factory.createValueExpression(button.getIconUrl(), String.class));
-                mapper.setVariable("location", factory.createValueExpression("toolbar", String.class));
+                VariableMapperWrapper mapper = new VariableMapperWrapper(origMapper);
+                ctx.setVariableMapper(mapper);
 
-                // include template
-                ctx.includeFacelet(parent, COMMAND_TEMPLATE);
+                if( button.isSeparator() ) {
+                    // include template
+                    ctx.includeFacelet(parent, SEPARATOR_TEMPLATE);
+                } else {
+                    // set options for commandElement
+                    mapper.setVariable("id", factory.createValueExpression(button.getId(), String.class));
+                    mapper.setVariable("label", factory.createValueExpression(button.getLabel(), String.class));
+                    mapper.setVariable("bean", factory.createValueExpression(ctx, "#{" + button.getBean() + "}", Object.class));
+                    mapper.setVariable("action", factory.createValueExpression(button.getAction(), String.class));
+                    mapper.setVariable("icon", factory.createValueExpression(button.getIcon(), String.class));
+                    mapper.setVariable("iconUrl", factory.createValueExpression(button.getIconUrl(), String.class));
+                    mapper.setVariable("location", factory.createValueExpression("toolbar", String.class));
+
+                    // include template
+                    ctx.includeFacelet(parent, COMMAND_TEMPLATE);
+                }
             }
         } finally {
             ctx.popClient(this);

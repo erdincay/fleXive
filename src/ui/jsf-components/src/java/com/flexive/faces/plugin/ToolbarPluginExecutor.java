@@ -81,6 +81,19 @@ public interface ToolbarPluginExecutor extends PluginExecutor {
     void addToolbarButton(String target, Button button);
 
     /**
+     * Add a separator button
+     */
+    void addToolbarSeparatorButton();
+
+    final static String SEPARATOR_ID = "@@separator@@";
+
+    /**
+     * A toolbar separator
+     */
+    public final static Button SEPARATOR = new Button(SEPARATOR_ID);
+
+
+    /**
      * Contains a definition of a single toolbar button. Currently you must either define
      * a concrete JSF action outcome in "action", or supply a EL-binding for "beans" and
      * the name of a method in "action". Javascript or absolute URI requests are currently
@@ -97,9 +110,11 @@ public interface ToolbarPluginExecutor extends PluginExecutor {
         private String action;
         private String icon;
         private String iconUrl;
+        private boolean separator;
 
         public Button(String id) {
             this.id = id;
+            this.separator = SEPARATOR_ID.equals(id);
         }
 
         public boolean isValid() {
@@ -158,6 +173,10 @@ public interface ToolbarPluginExecutor extends PluginExecutor {
 
         public String getId() {
             return id;
+        }
+
+        public boolean isSeparator() {
+            return separator;
         }
     }
 }

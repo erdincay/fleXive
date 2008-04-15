@@ -10,8 +10,10 @@
     <t:stylesheet path="/adm/css/content.css"/>
     <script type="text/javascript">
         <!--
-        if( parent != null && parent.beginPage)
+        if( parent != null && parent.beginPage) {
+            parent.init();
             parent.beginPage();
+        }
 
         function gotoAdmin() {
             if( parent != null && parent.gotoNavMenu )
@@ -61,7 +63,7 @@
         <ui:fragment rendered="#{fxSystemBean.failedLoginAttempts > 0}">
             <div class="errorMessage">
                 <br/><br/>#{fxMessageBean['Global.failedLoginAttempts,#{fxSystemBean.failedLoginAttempts}']}<br/>
-            </div>
+            </div>     
         </ui:fragment>
         <br/>
 
@@ -146,6 +148,7 @@
     <!--
         if (parent && parent.pageLoaded) {
             parent.pageLoaded(#{fxSystemBean.pageId}, #{fxSystemBean.pageRenderTime}, #{fxSystemBean.treeModified});
+
         }
     -->
     </script>

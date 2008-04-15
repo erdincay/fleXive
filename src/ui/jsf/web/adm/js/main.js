@@ -455,6 +455,16 @@ function addToolbarItem(responseId,caller,id,helpTxt,url,iconUrl) {
     }
 }
 
+//Add a toolbar separator
+//a separator can never be the first item (responseId wont match which is a desired sideffect!)
+function addToolbarSeparator() {
+    var pos = toolbarImages.length;
+    toolbarImages[pos] = getBase()+'/adm/images/toolbar/separator.png';
+    toolbarHelp[pos] = '';
+    toolbarClick[pos] = '';
+    toolbarIds[pos] = '';
+}
+
 
 function setActionClickScript(caller,id) {
     try {
@@ -475,8 +485,13 @@ function renderToolbar() {
     var html = "";
     var pos;
     for (pos = 0; pos < toolbarImages.length; pos++) {
-        html += "<img id=\"" + toolbarIds[pos] + "_toolbarIcon\" src=\"" + toolbarImages[pos] +
-                "\" class=\"fxToolbarIcon\" onClick=\"" + toolbarClick[pos] + "\" alt=\"" + toolbarHelp[pos]
+        
+        html += "<img "+
+                (toolbarIds[pos] != '' ? "id=\"" + toolbarIds[pos] + "_toolbarIcon\" " : "")+
+                "src=\"" + toolbarImages[pos] +
+                "\" class=\"fxToolbarIcon\" "+
+                (toolbarClick[pos] != '' ? "onClick=\"" + toolbarClick[pos] + "\" ":"")+
+                "alt=\"" + toolbarHelp[pos]
                 + "\" title=\"" + toolbarHelp[pos] + "\"/>";
     }
     html+="<span id='toolbarMessage'> </span>";

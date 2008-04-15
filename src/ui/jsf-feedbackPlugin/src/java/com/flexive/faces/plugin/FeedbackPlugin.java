@@ -45,6 +45,7 @@ public class FeedbackPlugin implements Plugin<ToolbarPluginExecutor>{
 
 
     public void apply(ToolbarPluginExecutor executor) {
+        executor.addToolbarSeparatorButton();
         executor.addToolbarButton("*", getGoodFeedbackButton());
         executor.addToolbarButton("*", getModerateFeedbackButton());
         executor.addToolbarButton("*", getBadFeedbackButton());
