@@ -152,6 +152,10 @@ public final class FxSharedUtils {
             drops = new ArrayList<String>(0);
             return drops;
         }
+        if( StringUtils.isEmpty(dropsList)) {
+            drops = new ArrayList<String>(0);
+            return drops;
+        }
         String[] d = dropsList.split(",");
         drops = new ArrayList<String>(d.length);
         drops.addAll(Arrays.asList(d));

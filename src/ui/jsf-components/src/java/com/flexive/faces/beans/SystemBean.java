@@ -38,7 +38,6 @@ import com.flexive.faces.messages.FxFacesMessage;
 import com.flexive.faces.messages.FxFacesMessages;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.shared.*;
-import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -46,6 +45,7 @@ import com.flexive.shared.search.AdminResultLocations;
 import com.flexive.shared.search.ResultLocation;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.war.FxRequest;
 import com.flexive.war.filter.FxResponseWrapper;
 
@@ -57,7 +57,10 @@ import static javax.faces.context.FacesContext.getCurrentInstance;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.Serializable;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.MissingResourceException;
 
 public class SystemBean implements Serializable {
     private static final long serialVersionUID = 6592229045042549537L;
@@ -197,27 +200,57 @@ public class SystemBean implements Serializable {
     }
 
 
+    /**
+     * Get a handle to the response
+     *
+     * @return response
+     */
     public FxResponseWrapper getResponse() {
         return FxJsfUtils.getResponse();
     }
 
+    /**
+     * Get a handle to the request
+     *
+     * @return request
+     */
     public FxRequest getRequest() {
         return FxJsfUtils.getRequest();
     }
 
+    /**
+     * Get the current context path
+     *
+     * @return current context path
+     */
     public String getContextPath() {
         return FxJsfUtils.getRequest().getContextPath();
     }
 
+    /**
+     * Get the context path for the (optional!) backend application
+     *
+     * @return context path for the (optional!) backend application
+     */
     public String getFlexiveContextPath() {
         return "/flexive";
     }
 
-    public String getDocumentBase() {
+    /**
+     * Get the protocol, servername and (optional if non-standard) port
+     *
+     * @return server base
+     */
+    public String getServerBase() {
         HttpServletRequest request = FxJsfUtils.getRequest().getRequest();
-        return "http://" + request.getServerName()
-                + (request.getServerPort() != 80 ? ":" + request.getServerPort() : "")
-                + getContextPath() + "/";
+        return "http" + (request.isSecure() ? "s://" : "://") + request.getServerName()
+                + (request.getServerPort() == 80 || (request.isSecure() && request.getServerPort() == 443)
+                ? ""
+                : ":" + request.getServerPort());
+    }
+
+    public String getDocumentBase() {
+        return getServerBase() + getContextPath() + "/";
     }
 
     private static class FacesMessageMap extends HashMap<String, List<FacesMessage>> {
@@ -559,7 +592,7 @@ public class SystemBean implements Serializable {
     /**
      * Returns the current system timestamp.
      *
-     * @return  the current system timestamp.
+     * @return the current system timestamp.
      */
     public long getCurrentTimeMillis() {
         return System.currentTimeMillis();
@@ -577,7 +610,7 @@ public class SystemBean implements Serializable {
     /**
      * Return the structure envirnoment (filtered for the current user).
      *
-     * @return  the structure envirnoment (filtered for the current user).
+     * @return the structure envirnoment (filtered for the current user).
      */
     public FxEnvironment getEnvironment() {
         return CacheAdmin.getFilteredEnvironment();
