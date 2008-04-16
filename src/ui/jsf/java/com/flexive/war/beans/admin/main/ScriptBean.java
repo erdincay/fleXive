@@ -177,8 +177,8 @@ public class ScriptBean {
                 for (long id : entry.getDerivedIds())
                     this.assignmentMappingNames.put(id, CacheAdmin.getEnvironment().getAssignment(id).getXPath());
             }
-        } catch (FxLoadException e) {
-            new FxFacesMsgErr("Script.err.loadMap").addToContext();
+        } catch (FxApplicationException e) {
+            new FxFacesMsgErr(e).addToContext();
         } catch (SQLException e) {
             new FxFacesMsgErr("Script.err.loadMap").addToContext();
         }
@@ -247,7 +247,7 @@ public class ScriptBean {
             //updateScriptList();  -->handled via a4j now
             new FxFacesMsgInfo("Script.nfo.deleted").addToContext();
         } catch (FxApplicationException e) {
-            new FxFacesMsgErr("Script.err.delete").addToContext();
+            new FxFacesMsgErr(e).addToContext();
         }
         return "scriptOverview";
     }
@@ -301,7 +301,7 @@ public class ScriptBean {
             //updateScriptList();
             new FxFacesMsgInfo("Script.nfo.created", sinfo.getName()).addToContext();
         } catch (FxApplicationException e) {
-            new FxFacesMsgErr("Script.err.create").addToContext();
+            new FxFacesMsgErr(e).addToContext();
         }
         return "scriptOverview";
     }
@@ -328,7 +328,7 @@ public class ScriptBean {
             new FxFacesMsgInfo("Script.nfo.updated").addToContext();
             return "scriptOverview";
         } catch (FxApplicationException e) {
-            new FxFacesMsgErr("Script.err.save").addToContext();
+            new FxFacesMsgErr(e).addToContext();
             return "scriptOverview";
         }
     }

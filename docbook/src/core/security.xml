@@ -7,6 +7,7 @@
          xmlns:xi="http://www.w3.org/2001/XInclude">
     <title>Security</title>
     <xi:include href="../includes/author_mplesser.xml"/>
+    <xi:include href="../includes/author_dlichtenberger.xml"/>
 
     <section xml:id="core_security_overview">
         <title>Overview</title>
@@ -89,11 +90,11 @@
         <para>
             Divisions are mapped to server names using regular expressions. A web based user interface can be reached
             using the the URL
-            <uri>http://ip-address/flexive/globalconfig/index.faces</uri>
+            <uri>http://ip-address:port/flexive/globalconfig/index.faces</uri>
             using the username
             <constant>administrator</constant>
             and default password
-            <constant>abc</constant>
+            <constant>adminadmin</constant>
             (which should be changed immediatly!). This configuration is stored in its own database called
             <constant>flexiveConfiguration</constant>.
         </para>
