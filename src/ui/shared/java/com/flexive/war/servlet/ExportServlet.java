@@ -130,10 +130,10 @@ public class ExportServlet implements Servlet {
             return;
         }
         response.setContentType("text/xml");
-        response.setContentLength(xml.length());
+        response.setCharacterEncoding("UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=\"" + type + ".xml\";");
         try {
-            response.getOutputStream().print(xml);
+            response.getOutputStream().write(xml.getBytes("UTF-8"));
         } finally {
             response.getOutputStream().close();
         }
