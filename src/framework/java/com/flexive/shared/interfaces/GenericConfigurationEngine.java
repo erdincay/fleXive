@@ -61,7 +61,7 @@ public abstract interface GenericConfigurationEngine {
 	 * @throws FxUpdateException	if the value could not be set or updated
      * @throws FxNoAccessException  if the caller is not allowed to update/set this parameter
 	 */
-	<T extends Serializable> void put(Parameter<T> parameter, T value) 
+	<T> void put(Parameter<T> parameter, T value)
     throws FxApplicationException;
 	
 	/**
@@ -79,7 +79,7 @@ public abstract interface GenericConfigurationEngine {
 	 * @throws FxUpdateException	if the value could not be updated
      * @throws FxNoAccessException  if the caller is not allowed to update/set this parameter
 	 */
-	<T extends Serializable> void put(Parameter<T> parameter, String key, T value) 
+	<T> void put(Parameter<T> parameter, String key, T value)
     throws FxApplicationException;
 	
 	/**
@@ -92,7 +92,7 @@ public abstract interface GenericConfigurationEngine {
 	 * @throws FxLoadException		if the value could not be loaded 
 	 * @throws FxNotFoundException	if the parameter is not set
 	 */
-	<T extends Serializable> T get(Parameter<T> parameter) throws FxApplicationException;
+	<T> T get(Parameter<T> parameter) throws FxApplicationException;
 	
 	/**
 	 * Retrieves the value for the given parameter using the given key. This method is
@@ -107,7 +107,7 @@ public abstract interface GenericConfigurationEngine {
 	 * @throws FxLoadException		if the value could not be loaded
 	 * @throws FxNotFoundException	if the parameter is not set
 	 */
-	<T extends Serializable> T get(Parameter<T> parameter, String key) throws FxApplicationException;
+	<T> T get(Parameter<T> parameter, String key) throws FxApplicationException;
 
     /**
      * Retrieves the value for the given parameter using the given key. This method is
@@ -125,7 +125,7 @@ public abstract interface GenericConfigurationEngine {
      * @throws FxLoadException      if the value could not be loaded
      * @throws FxNotFoundException  if the parameter is not set
      */
-    <T extends Serializable> T get(Parameter<T> parameter, String key, boolean ignoreDefault)
+    <T> T get(Parameter<T> parameter, String key, boolean ignoreDefault)
         throws FxApplicationException;
 	
 	/**
@@ -137,7 +137,7 @@ public abstract interface GenericConfigurationEngine {
 	 * @throws FxApplicationException TODO
 	 * @throws FxLoadException	when an error occured reading the keys
 	 */
-	<T extends Serializable> Map<String, T> getAll(Parameter<T> parameter) throws FxApplicationException;
+	<T> Map<String, T> getAll(Parameter<T> parameter) throws FxApplicationException;
 
     /**
      * Retrieves all keys stored under the path of the given parameter.
@@ -147,7 +147,7 @@ public abstract interface GenericConfigurationEngine {
      * @return  all keys stored under the path of the given parameter.
      * @throws FxApplicationException   TODO
      */
-    <T extends Serializable> Collection<String> getKeys(Parameter<T> parameter) throws FxApplicationException;
+    <T> Collection<String> getKeys(Parameter<T> parameter) throws FxApplicationException;
     
     /**
      * Removes a parameter from the database.
@@ -157,7 +157,7 @@ public abstract interface GenericConfigurationEngine {
      * @throws com.flexive.shared.exceptions.FxRemoveException    if the parameter could not be removed
      * @throws FxNoAccessException  if the caller is not allowed to remove this parameter
      */
-    <T extends Serializable> void remove(Parameter<T> parameter) throws FxApplicationException;
+    <T> void remove(Parameter<T> parameter) throws FxApplicationException;
 
     /**
      * Removes a parameter from the database using the given key.
@@ -168,7 +168,7 @@ public abstract interface GenericConfigurationEngine {
      * @throws com.flexive.shared.exceptions.FxRemoveException    if the parameter could not be removed
      * @throws FxNoAccessException  if the caller is not allowed to remove this parameter
      */
-    <T extends Serializable> void remove(Parameter<T> parameter, String key) throws FxApplicationException;
+    <T> void remove(Parameter<T> parameter, String key) throws FxApplicationException;
 
     /**
      * Remove all parameters stored under this parameter's path.
@@ -178,6 +178,6 @@ public abstract interface GenericConfigurationEngine {
      * @throws com.flexive.shared.exceptions.FxRemoveException    if the parameters could not be removed
      * @throws FxNoAccessException  if the caller is not allowed to remove this parameter
      */
-    <T extends Serializable> void removeAll(Parameter<T> parameter) throws FxApplicationException;
+    <T> void removeAll(Parameter<T> parameter) throws FxApplicationException;
 
 }

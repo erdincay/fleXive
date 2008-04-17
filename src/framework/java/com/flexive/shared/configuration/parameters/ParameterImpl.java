@@ -48,7 +48,7 @@ import java.util.List;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @param <T> value type of the parameter
  */
-public abstract class ParameterImpl<T, TParameter extends ParameterImpl<T, TParameter>>  implements Parameter<T>, Serializable {
+public abstract class ParameterImpl<T>  implements Parameter<T>, Serializable {
     private static final long serialVersionUID = -2727270342944531283L;
 
     /** Parameter data */

@@ -40,7 +40,7 @@ import com.flexive.shared.configuration.ParameterData;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class LongParameter extends ParameterImpl<Long, LongParameter> {
+class LongParameter extends ParameterImpl<Long> {
     private static final long serialVersionUID = 2825266889079075475L;
 
     public LongParameter() {

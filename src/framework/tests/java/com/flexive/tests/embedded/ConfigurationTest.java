@@ -36,8 +36,7 @@ package com.flexive.tests.embedded;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.configuration.*;
-import com.flexive.shared.configuration.parameters.IntegerParameter;
-import com.flexive.shared.configuration.parameters.ObjectParameter;
+import com.flexive.shared.configuration.parameters.ParameterFactory;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
@@ -473,10 +472,10 @@ public class ConfigurationTest {
         new GenericConfigurationTest<String>(configuration, TestParameters.CACTUS_TEST, "").runTests();
         new GenericConfigurationTest<String>(configuration, TestParameters.CACTUS_TEST, null).runTests();
         // test int parameters
-        new GenericConfigurationTest<Integer>(configuration, IntegerParameter.CACTUS_TEST_INT, 255329).runTests();
-        new GenericConfigurationTest<Integer>(configuration, IntegerParameter.CACTUS_TEST_INT, -1032412).runTests();
+        new GenericConfigurationTest<Integer>(configuration, TestParameters.CACTUS_TEST_INT, 255329).runTests();
+        new GenericConfigurationTest<Integer>(configuration, TestParameters.CACTUS_TEST_INT, -1032412).runTests();
         try {
-            new GenericConfigurationTest<Integer>(configuration, IntegerParameter.CACTUS_TEST_INT, null).runTests();
+            new GenericConfigurationTest<Integer>(configuration, TestParameters.CACTUS_TEST_INT, null).runTests();
             assert false : "Should not be able to put null values in int parameters.";
         } catch (Exception e) {
             // pass
@@ -504,9 +503,9 @@ public class ConfigurationTest {
             // pass
         }
         // test object parameters with a simple POJO
-        new GenericConfigurationTest<FxPK>(configuration, ObjectParameter.TEST_OBJ, new FxPK(5, 1)).runTests();
+        new GenericConfigurationTest<FxPK>(configuration, TestParameters.TEST_OBJ, new FxPK(5, 1)).runTests();
         try {
-            new GenericConfigurationTest<FxPK>(configuration, ObjectParameter.TEST_OBJ, null).runTests();
+            new GenericConfigurationTest<FxPK>(configuration, TestParameters.TEST_OBJ, null).runTests();
             assert false : "Should not be able to put null values in object parameters.";
         } catch (Exception e) {
             // pass

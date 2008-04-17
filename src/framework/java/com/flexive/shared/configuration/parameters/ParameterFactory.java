@@ -31,9 +31,10 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.shared.configuration;
+package com.flexive.shared.configuration.parameters;
 
 import com.flexive.shared.configuration.parameters.*;
+import com.flexive.shared.configuration.*;
 import com.flexive.shared.exceptions.FxCreateException;
 
 import java.util.HashMap;
@@ -58,7 +59,7 @@ import java.util.Map;
  * // define an object parameter for QueryRootNode.class with no default value that works by serializing the objects via XStream
  * Parameter&lt;QueryRootNode> DEFAULT_QUERY = ParameterFactory.newInstance(QueryRootNode.class, "/configuration", ParameterScope.USER, "defaultQuery", null);
  * </pre>
- * More examples can be found in {@link SystemParameters}.
+ * More examples can be found in {@link com.flexive.shared.configuration.SystemParameters}.
  * </p>
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$

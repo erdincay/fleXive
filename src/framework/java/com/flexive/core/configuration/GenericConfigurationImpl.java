@@ -215,7 +215,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
-    public <T extends Serializable> void put(Parameter<T> parameter, String key, T value)
+    public <T> void put(Parameter<T> parameter, String key, T value)
             throws FxApplicationException {
 
         if (!parameter.isValid(value)) {
@@ -248,7 +248,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
             String cachePath = getCachePath(data.getPath().getValue());
             if (cachePath != null) {
                 putCache(cachePath, key, value != null ?
-                        (Serializable) SerializationUtils.clone(value)
+                        (Serializable) SerializationUtils.clone((Serializable) value)
                         : new NullParameter());
             }
         } catch (SQLException se) {
@@ -263,7 +263,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
-    public final <T extends Serializable> void put(Parameter<T> parameter, T value) throws FxApplicationException {
+    public final <T> void put(Parameter<T> parameter, T value) throws FxApplicationException {
         put(parameter, parameter.getData().getKey(), value);
     }
 
@@ -277,7 +277,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
      * @throws FxLoadException     if the parameter could not be loaded
      * @throws FxNotFoundException if the parameter does not exist
      */
-    protected <T extends Serializable> Object getParameter(Parameter<T> parameter, String path, String key) throws FxLoadException, FxNotFoundException {
+    protected <T> Object getParameter(Parameter<T> parameter, String path, String key) throws FxLoadException, FxNotFoundException {
         String cachePath = getCachePath(path);
         if (cachePath != null) {
             // try cache first
@@ -303,7 +303,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
         Serializable value = loadParameterFromDb(path, key);
         if (cachePath != null) {
             // add value to cache
-            putCache(cachePath, key, parameter.getValue(value));
+            putCache(cachePath, key, (Serializable) parameter.getValue(value));
         }
         return value;
     }
@@ -312,14 +312,14 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
-    public final <T extends Serializable> T get(Parameter<T> parameter) throws FxApplicationException {
+    public final <T> T get(Parameter<T> parameter) throws FxApplicationException {
         return get(parameter, parameter.getData().getKey());
     }
 
     /**
      * {@inheritDoc}
      */
-    public final <T extends Serializable> T get(Parameter<T> parameter, String key)
+    public final <T> T get(Parameter<T> parameter, String key)
             throws FxApplicationException {
         try {
             return parameter.getValue(getParameter(parameter, parameter.getPath().getValue(), key));
@@ -335,7 +335,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
-    public final <T extends Serializable> T get(Parameter<T> parameter, String key, boolean ignoreDefault)
+    public final <T> T get(Parameter<T> parameter, String key, boolean ignoreDefault)
             throws FxApplicationException {
         try {
             return parameter.getValue(getParameter(parameter, parameter.getPath().getValue(), key));
@@ -351,7 +351,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
-    public final <T extends Serializable> Map<String, T> getAll(Parameter<T> parameter) throws FxApplicationException {
+    public final <T> Map<String, T> getAll(Parameter<T> parameter) throws FxApplicationException {
         Connection conn = null;
         PreparedStatement stmt = null;
         ParameterData<T> data = parameter.getData();
@@ -375,14 +375,14 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
-    public final <T extends Serializable> Collection<String> getKeys(Parameter<T> parameter) throws FxApplicationException {
+    public final <T> Collection<String> getKeys(Parameter<T> parameter) throws FxApplicationException {
         return getAll(parameter).keySet();
     }
 
     /**
      * {@inheritDoc}
      */
-    public <T extends Serializable> void remove(Parameter<T> parameter, String key)
+    public <T> void remove(Parameter<T> parameter, String key)
             throws FxApplicationException {
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -411,7 +411,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
-    public final <T extends Serializable> void remove(Parameter<T> parameter)
+    public final <T> void remove(Parameter<T> parameter)
             throws FxApplicationException {
         remove(parameter, parameter.getKey());
     }
@@ -419,7 +419,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
-    public final <T extends Serializable> void removeAll(Parameter<T> parameter)
+    public final <T> void removeAll(Parameter<T> parameter)
             throws FxApplicationException {
         remove(parameter, null);
     }

@@ -50,7 +50,7 @@ import com.thoughtworks.xstream.XStream;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @param <T> type of the object stored in the parameter
  */
-public class ObjectParameter<T> extends ParameterImpl<T, ObjectParameter<T>> {
+class ObjectParameter<T> extends ParameterImpl<T> {
     private static final long serialVersionUID = -1843420825643455601L;
     
     // global parameters
@@ -59,14 +59,11 @@ public class ObjectParameter<T> extends ParameterImpl<T, ObjectParameter<T>> {
     
     // per-user configuration parameters
 
-    public static final Parameter<FxPK> TEST_OBJ = ParameterFactory.newInstance(FxPK.class,
-            new ParameterDataEditBean<FxPK>(SystemParameterPaths.GLOBAL_CONFIG, "cactus.test.obj", new FxPK(0, 0)));
-
     private Class<T> cls;       // the value object's class
     private transient XStream instanceStream;     // overrides default static xstream instance
 
     /** xstream instance used for serializing all parameters - aliases added in static constructor */
-    private static XStream xStream;
+    private static final XStream xStream;
 
     static {
     	xStream = new XStream();

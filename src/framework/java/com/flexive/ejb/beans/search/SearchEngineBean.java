@@ -42,7 +42,7 @@ import com.flexive.shared.configuration.Parameter;
 import com.flexive.shared.configuration.ParameterDataBean;
 import com.flexive.shared.configuration.ParameterPathBean;
 import com.flexive.shared.configuration.SystemParameters;
-import com.flexive.shared.configuration.parameters.ObjectParameter;
+import com.flexive.shared.configuration.parameters.ParameterFactory;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.search.*;
@@ -231,12 +231,11 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
      * @param location the result location
      * @return the appropriate string parameter for the given query type.
      */
-    private ObjectParameter<QueryRootNode> getConfigurationParameter(ResultLocation location) {
+    private Parameter<QueryRootNode> getConfigurationParameter(ResultLocation location) {
         final Parameter<QueryRootNode> parameter = SystemParameters.USER_QUERIES_CONTENT;
         // append the location name to the parameter path
         final ParameterPathBean locationPath = new ParameterPathBean(parameter.getPath().getValue() + "/" + location.getName(), parameter.getScope());
-        return new ObjectParameter<QueryRootNode>(
-                new ParameterDataBean<QueryRootNode>(locationPath, null), QueryRootNode.class, false);
+        return ParameterFactory.newInstance(QueryRootNode.class, new ParameterDataBean<QueryRootNode>(locationPath, null));
     }
 
 }

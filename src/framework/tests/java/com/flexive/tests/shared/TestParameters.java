@@ -35,8 +35,9 @@ package com.flexive.tests.shared;
 
 import com.flexive.shared.configuration.Parameter;
 import com.flexive.shared.configuration.ParameterDataEditBean;
-import com.flexive.shared.configuration.ParameterFactory;
+import com.flexive.shared.configuration.parameters.ParameterFactory;
 import com.flexive.shared.configuration.SystemParameterPaths;
+import com.flexive.shared.content.FxPK;
 
 /**
  * Configuration parameter definitions used for testing.
@@ -60,4 +61,9 @@ public class TestParameters {
      */
     public static final Parameter<Long> CACTUS_TEST_LONG = ParameterFactory.newInstance(Long.class,
             new ParameterDataEditBean<Long>(SystemParameterPaths.GLOBAL_CONFIG, "cactus.test.long", 42L));
+    /** Test parameter */
+    public static final Parameter<Integer> CACTUS_TEST_INT = ParameterFactory.newInstance(Integer.class,
+            new ParameterDataEditBean<Integer>(SystemParameterPaths.GLOBAL_CONFIG, "cactus.test.int", 42));
+    public static final Parameter<FxPK> TEST_OBJ = ParameterFactory.newInstance(FxPK.class,
+            new ParameterDataEditBean<FxPK>(SystemParameterPaths.GLOBAL_CONFIG, "cactus.test.obj", new FxPK(0, 0)));
 }

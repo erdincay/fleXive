@@ -35,6 +35,7 @@ package com.flexive.shared;
 
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.configuration.*;
+import com.flexive.shared.configuration.parameters.ParameterFactory;
 import com.flexive.shared.content.FxCachedContent;
 import com.flexive.shared.content.FxCachedContentContainer;
 import com.flexive.shared.content.FxPK;

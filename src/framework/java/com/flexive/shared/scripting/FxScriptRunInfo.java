@@ -42,7 +42,8 @@ import java.io.Serializable;
  * @version $Rev
  */
 public class FxScriptRunInfo implements Serializable {
-
+    private static final long serialVersionUID = 2668881060310417915L;
+    
     private long startTime, endTime;
     private String drop;
     private String name;

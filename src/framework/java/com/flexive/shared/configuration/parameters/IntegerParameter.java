@@ -41,12 +41,8 @@ import com.flexive.shared.configuration.*;
  * 
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class IntegerParameter extends ParameterImpl<Integer, IntegerParameter> {
+class IntegerParameter extends ParameterImpl<Integer> {
     private static final long serialVersionUID = 578895943701005401L;
-
-    /** Test parameter */ 
-    public static final Parameter<Integer> CACTUS_TEST_INT = ParameterFactory.newInstance(Integer.class,
-            new ParameterDataEditBean<Integer>(SystemParameterPaths.GLOBAL_CONFIG, "cactus.test.int", 42));
 
     public IntegerParameter() {
         this(null, false);

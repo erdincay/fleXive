@@ -33,9 +33,10 @@
  ***************************************************************/
 package com.flexive.tests.embedded;
 
-import com.flexive.shared.FxXMLUtils;
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.configuration.parameters.ObjectParameter;
+import com.flexive.shared.configuration.Parameter;
+import com.flexive.shared.configuration.ParameterScope;
+import com.flexive.shared.configuration.parameters.ParameterFactory;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.search.query.*;
 import com.flexive.shared.structure.*;
@@ -118,7 +119,8 @@ public class QueryNodeTreeTests {
     @Test(groups ={"ejb", "search"}, dataProvider = "basicQueries")
     public void checkTreeStore(QueryNode root) {
         try {
-            QueryNode loadedRoot = (QueryNode) ObjectParameter.getDefaultXStream().fromXML(FxXMLUtils.toXML(ObjectParameter.getDefaultXStream(), root));
+            final Parameter<QueryNode> param = ParameterFactory.newInstance(QueryNode.class, "", ParameterScope.USER, "", null);
+            QueryNode loadedRoot = param.getValue(param.getDatabaseValue(root));
             assertEqualTrees(root, loadedRoot);
         } catch (Exception e) {
             throw new RuntimeException(e);

@@ -60,7 +60,7 @@ public interface ConfigurationEngine extends GenericConfigurationEngine {
      * @param value     the value to be stored
      * @throws com.flexive.shared.exceptions.FxApplicationException if the parameter value could not be updated
      */
-    <T extends Serializable> void putInSource(Parameter<T> parameter, String key, T value) throws FxApplicationException;
+    <T> void putInSource(Parameter<T> parameter, String key, T value) throws FxApplicationException;
 
     /**
      * <p>Store the value in the source configuration EJB for the given parameter. For example, if
@@ -73,5 +73,5 @@ public interface ConfigurationEngine extends GenericConfigurationEngine {
      * @param value     the value to be stored
      * @throws com.flexive.shared.exceptions.FxApplicationException if the parameter value could not be updated
      */
-    <T extends Serializable> void putInSource(Parameter<T> parameter, T value) throws FxApplicationException;
+    <T> void putInSource(Parameter<T> parameter, T value) throws FxApplicationException;
 }

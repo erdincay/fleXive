@@ -41,7 +41,7 @@ import com.flexive.shared.configuration.ParameterData;
  * 
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class BooleanParameter extends ParameterImpl<Boolean, BooleanParameter> {
+class BooleanParameter extends ParameterImpl<Boolean> {
     private static final long serialVersionUID = -7485943734106339003L;
 
     public BooleanParameter() {

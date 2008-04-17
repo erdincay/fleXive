@@ -42,6 +42,7 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
+import static com.flexive.shared.EJBLookup.getDivisionConfigurationEngine;
 import com.flexive.shared.configuration.Parameter;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.content.FxPermissionUtils;
@@ -304,12 +305,13 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings({"unchecked"})
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public List<FxScriptRunInfo> getRunOnceInformation() throws FxApplicationException {
         if( runOnceInfos != null ) {
             return runOnceInfos;
         } else {
-            return EJBLookup.getDivisionConfigurationEngine().get(SystemParameters.DIVISION_RUNONCE_INFOS);
+            return getDivisionConfigurationEngine().get(SystemParameters.DIVISION_RUNONCE_INFOS);
         }
     }
 
@@ -853,9 +855,9 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      * @param applicationName the corresponding application name (for debug messages)
      * @throws FxApplicationException on errors
      */
-    private void runOnce(Parameter<Boolean> param, String prefix, String applicationName) throws FxApplicationException {
+    private static synchronized void runOnce(Parameter<Boolean> param, String prefix, String applicationName) throws FxApplicationException {
         try {
-            Boolean executed = EJBLookup.getDivisionConfigurationEngine().get(param);
+            Boolean executed = getDivisionConfigurationEngine().get(param);
             if (executed) {
 //                System.out.println("=============> skip run-once <==============");
                 return;
@@ -865,12 +867,8 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             return;
         }
 //        System.out.println("<=============> run run-once <==============>");
-        ArrayList<FxScriptRunInfo> divisionRunOnceInfos;
-        try {
-            divisionRunOnceInfos=EJBLookup.getDivisionConfigurationEngine().get(SystemParameters.DIVISION_RUNONCE_INFOS);
-        } catch (FxApplicationException e) {
-            divisionRunOnceInfos = new ArrayList<FxScriptRunInfo>();
-        }
+        //noinspection unchecked
+        final List<FxScriptRunInfo> divisionRunOnceInfos = getDivisionConfigurationEngine().get(SystemParameters.DIVISION_RUNONCE_INFOS);
 
         runOnceInfos = new CopyOnWriteArrayList<FxScriptRunInfo>();
         runOnceInfos.addAll(divisionRunOnceInfos);
@@ -923,8 +921,8 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             }
             divisionRunOnceInfos.clear();
             divisionRunOnceInfos.addAll(runOnceInfos);
-            EJBLookup.getDivisionConfigurationEngine().put(SystemParameters.DIVISION_RUNONCE_INFOS, divisionRunOnceInfos);
-            EJBLookup.getDivisionConfigurationEngine().put(param, true);
+            getDivisionConfigurationEngine().put(SystemParameters.DIVISION_RUNONCE_INFOS, divisionRunOnceInfos);
+            getDivisionConfigurationEngine().put(param, true);
             runOnceInfos = null;
         } finally {
             FxContext.get().stopRunAsSystem();
@@ -1049,7 +1047,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      * @return last script evaluation result
      * @throws FxApplicationException on errors
      */
-    private FxScriptResult internal_runScript(String name, FxScriptBinding binding, String code) throws FxApplicationException {
+    private static FxScriptResult internal_runScript(String name, FxScriptBinding binding, String code) throws FxApplicationException {
         if (name == null)
             name = "unknown";
         if (name.indexOf('.') < 0)
