@@ -132,7 +132,7 @@ Base directory:      ${project.basedir}]]>
             <!-- Copy the whole template dir, exclude only the root readme.txt file -->
             <fileset dir="${template-project.dir}" includes="**/*" excludes="readme.txt,*.iml,build.xml"/>
             <!-- Copy eclipse builder directory -->
-            <fileset dir="${template-project.dir}/.externalToolBuilders" includes="**/*"/>
+            <fileset dir="${template-project.dir}" includes=".externalToolBuilders/*"/>
             <!-- Copy dist database setup -->
             <fileset file="${basedir}/database.properties"/>
         </copy>

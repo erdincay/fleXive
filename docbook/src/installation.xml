@@ -89,14 +89,20 @@
                             <filename>${jboss.home}/server/default/deploy/</filename>
                             and adapt to your datasource(s)
                             or simply copy it from the &Flexive; source tree, if available.
-                            In the <filename>flexive-ds.xml</filename> configure your database connections as follows:
-                            For the <code>flexive</code> database
+                            In the
+                            <filename>flexive-ds.xml</filename>
+                            configure your database connections as follows:
+                            For the
+                            <code>flexive</code>
+                            database
                             <xi:include href="listings/installation_flexive-ds_config_flexive.xml"/>
-                            For the <code>flexiveConfiguration</code> database
+                            For the
+                            <code>flexiveConfiguration</code>
+                            database
                             <xi:include href="listings/installation_flexive-ds_config_flexiveConfiguration.xml"/>
                             <filename>flexive-ds.xml</filename>
                             <programlisting language="xml">
-                                <xi:include href="../../src/framework/resources/flexive-ds.xml" parse="text"/>
+                                <xi:include href="../../src/framework/resources/jboss/flexive-ds.xml" parse="text"/>
                             </programlisting>
                         </para>
                     </listitem>
@@ -135,7 +141,7 @@ database.password=a]]></programlisting>
                     <para>Change to the
                         <filename>flexive-dist</filename>
                         directory of your &Flexive; distribution and run
-                        <code>ant db.create db.config.create</code>
+                        <command>ant db.create db.config.create</command>
                     </para>
                     <para>You will be prompted to enter a name for your division database (simply hit enter to keep
                         <filename>flexive</filename>).
@@ -152,7 +158,7 @@ database.password=a]]></programlisting>
             <para>Change to the
                 <filename>flexive-dist</filename>
                 directory of your &Flexive; distribution and run
-                <code>ant ear</code>. This will create the
+                <command>ant ear</command>. This will create the
                 <filename>flexive.ear</filename>
                 file inside the
                 <filename>flexive-dist</filename>
@@ -237,7 +243,7 @@ database.password=a]]></programlisting>
                         or simply copy it from the &flexive; source tree, if available:
 
                         <programlisting language="xml">
-                            <xi:include href="../../src/framework/resources/99_JBossCacheJNDI42-service.xml"
+                            <xi:include href="../../src/framework/resources/jboss/99_JBossCacheJNDI42-service.xml"
                                         parse="text"/>
                         </programlisting>
                     </para>
@@ -273,7 +279,7 @@ database.password=a]]></programlisting>
             <section xml:id="glassfish_installation_required_libs_ant_task">
                 <title>Running the ant task</title>
                 <para>We provide an
-                    <code>ant</code>
+                    <command>ant</command>
                     task for you which copies all libraries needed
                     to deploy &Flexive; on Glassfish V2 to the specified directory.
                 </para>
@@ -282,13 +288,13 @@ database.password=a]]></programlisting>
                         <para>Change to the
                             <filename>flexive-dist</filename>
                             directory of your [fleXive] distribution and run
-                            <code>ant glassfish.libs</code>.
+                            <command>ant glassfish.libs</command>.
                         </para>
                         <para>You will be prompted to specify your
                             <filename>${glassfish.home}/domains/domain1/lib/ext</filename>
                             directory.
                             The
-                            <code>ant</code>
+                            <command>ant</command>
                             task will copy all required libraries to this directory.
                         </para>
                     </listitem>
@@ -323,19 +329,19 @@ database.password=a]]></programlisting>
                 </listitem>
                 <listitem>
                     <para>
-                        <code><![CDATA[java -Xmx256m -jar <<path-to-downloaded-jar>>]]></code>
+                        <command><![CDATA[java -Xmx256m -jar <<path-to-downloaded-jar>>]]></command>
                         extracts the installation JAR to
                         <filename>./glassfish</filename>
                     </para>
                 </listitem>
                 <listitem>
                     <para>
-                        <code>cd glassfish</code>
+                        <command>cd glassfish</command>
                     </para>
                 </listitem>
                 <listitem>
                     <para>On Unix:
-                        <code>chmod -R +x lib/ant/bin</code>
+                        <command>chmod -R +x lib/ant/bin</command>
                     </para>
                 </listitem>
                 <listitem>
@@ -346,12 +352,12 @@ database.password=a]]></programlisting>
                         <itemizedlist>
                             <listitem>
                                 <para>Unix:
-                                    <code>lib/ant/bin/ant -f setup.xml</code>
+                                    <command>lib/ant/bin/ant -f setup.xml</command>
                                 </para>
                             </listitem>
                             <listitem>
                                 <para>Windows:
-                                    <code>lib\ant\bin\ant -f setup.xml</code>
+                                    <command>lib\ant\bin\ant -f setup.xml</command>
                                 </para>
                             </listitem>
                         </itemizedlist>
@@ -364,7 +370,7 @@ database.password=a]]></programlisting>
             <orderedlist>
                 <listitem>
                     <para>
-                        <code>bin/asadmin start-domain domain1</code>
+                        <command>bin/asadmin start-domain domain1</command>
                         starts the Glassfish server
                     </para>
                 </listitem>
@@ -372,7 +378,7 @@ database.password=a]]></programlisting>
                     <para>
                         <link xlink:href="http://localhost:4848/">http://localhost:4848/</link>
                         and login using default credentials
-                        <code>admin/adminadmin</code>.
+                        <command>admin/adminadmin</command>.
                     </para>
                 </listitem>
             </orderedlist>
@@ -380,7 +386,7 @@ database.password=a]]></programlisting>
             <orderedlist>
                 <listitem>
                     <para>To stop the Glassfish instance execute
-                        <code>${glassfish.home}/bin/asadmin stop-domain domain1</code>
+                        <command>${glassfish.home}/bin/asadmin stop-domain domain1</command>
                     </para>
                 </listitem>
                 <listitem>
@@ -400,253 +406,36 @@ database.password=a]]></programlisting>
             <para>Three connection pools, two for the division (transactional and non-transactional)
                 and one for the configuration database, have to be set up.
             </para>
-
-            <section xml:id="glassfish_installation_conn_pools_division">
-                <title>Division connection pools</title>
-                <para>In the
-                    <link xlink:href="http://localhost:4848/">Admin Console</link>
-                    navigate to
-                    <code>Resources > JDBC > Connection Pools</code>
-                    and click
-                    <code>New</code>
-                </para>
-
-                <para>
-                    <emphasis>Step 1</emphasis>
-                </para>
-                <para>
-                    <itemizedlist>
-                        <listitem>
-                            <para>Name:
-                                <code>flexiveDivision1</code>
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>ResourceType:
-                                <code>javax.sql.XADataSource</code>
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>Database Vendor:
-                                <code>MySQL</code>
-                            </para>
-                        </listitem>
-                    </itemizedlist>
-                </para>
-                <para>Click
-                    <code>Next</code>
-                </para>
-                <para>
-                    <emphasis>Step 2</emphasis>
-                </para>
-                <para>
-                    <itemizedlist>
-                        <listitem>
-                            <para>Datasource Classname:
-                                <code>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</code>
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>Resource Type:
-                                <code>javax.sql.XADataSource</code>
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>Check
-                                <code>Required</code>
-                                for
-                                <code>Connection Validation</code>
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>Check
-                                <code>Enabled</code>
-                                for
-                                <code>Allow Non Component Callers</code>
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>Set Transaction Isolation to
-                                <code>read-committed</code>
-                                and check Isolation Level as
-                                <code>Guaranteed</code>
-                            </para>
-                        </listitem>
-                    </itemizedlist>
-                </para>
-                <para>
-                    <emphasis>Additional properties</emphasis>
-                </para>
-                <para>
-                    <itemizedlist>
-                        <listitem>
-                            <para>DatabaseName:
-                                <code>flexive</code>
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>serverName:
-                                <code><![CDATA[<your mysql server ip>]]></code>
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>port:
-                                <code>3306</code>
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>userName:
-                                <code><![CDATA[<your mysql user>]]></code>
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>password:
-                                <code><![CDATA[<your mysql password>]]></code>
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>Url:
-                                <code><![CDATA[jdbc:mysql://localhost:3306/flexive?useUnicode=true&characterEncoding=utf8&characterResultSets=utf8]]></code>
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>URL:
-                                <code><![CDATA[jdbc:mysql://localhost:3306/flexive?useUnicode=true&characterEncoding=utf8&characterResultSets=utf8]]></code>
-                            </para>
-                        </listitem>
-                    </itemizedlist>
-                </para>
-                <para>Click
-                    <code>Finish</code>.
-                </para>
-                <section xml:id="glassfish_installation_conn_pools_division_jdbc">
-                    <title>JDBC Resource</title>
-                    <para>Try to ping the server.</para>
-                    <para>If you have troubles connecting, please make sure you have the correct server IP set!</para>
-                    <para>You have to create the
-                        <code>JDBC Resource</code>
-                        by selecting
-                        <code>Resources > JDBC >
-                            JDBC Resources
-                        </code>
-                        and clicking
-                        <code>New</code>:
-                        <itemizedlist>
-                            <listitem>
-                                <para>JNDI Name:
-                                    <code>jdbc/flexiveDivision1</code>
-                                </para>
-                            </listitem>
-                            <listitem>
-                                <para>Pool Name:
-                                    <code>flexiveDivision1</code>
-                                </para>
-                            </listitem>
-                        </itemizedlist>
-                        Click
-                        <code>OK</code>
-                    </para>
-                </section>
-
-                <section xml:id="glassfish_installation_conn_pools_division_nontx">
-                    <title>Setting up the non-transactional connection pool</title>
-
-                    <para>
-                        Please repeat the
-                        <link linkend="glassfish_installation_conn_pools_division">above steps</link>
-                        but change the datasource name and the driver class:
-                    </para>
-
-                    <itemizedlist>
-                        <listitem>
-                            <para>
-                                Name:
-                                <code>flexiveDivision1NoTX</code>
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>
-                                Datasource Classname:
-                                <code>com.mysql.jdbc.jdbc2.optional.MysqlDataSource</code>
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>
-                                Resource type:
-                                <code>javax.sql.DataSource</code>
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>
-                                JNDI name:
-                                <code>jdbc/flexiveDivision1NoTX</code>
-                            </para>
-                        </listitem>
-                    </itemizedlist>
-                </section>
-            </section>
-
-            <section xml:id="glassfish_installation_conn_pools_config">
-                <title>Configuration connection pool</title>
-                <para>In the
-                    <link xlink:href="http://localhost:4848/">Admin Console</link>
-                    navigate to
-                    <code>Resources > JDBC > Connection Pools</code>
-                    and click
-                    <code>New</code>
-                </para>
-
-                <para>Repeat the above steps as explained in section
-                    <link linkend="glassfish_installation_conn_pools_division">Division connection pool</link>
-                    for the configuration connection pool.
-                </para>
-                <para>
-                    For the connection pool use the same settings as above except:
-                    <itemizedlist>
-                        <listitem>
-                            <para>DatabaseName:
-                                <code>flexiveConfiguration</code>
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>Url:
-                                <code><![CDATA[jdbc:mysql://localhost:3306/flexiveConfiguration?useUnicode=true&characterEncoding=utf8&characterResultSets=utf8]]></code>
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>URL:
-                                <code><![CDATA[jdbc:mysql://localhost:3306/flexiveConfiguration?useUnicode=true&characterEncoding=utf8&characterResultSets=utf8]]></code>
-                            </para>
-                        </listitem>
-                    </itemizedlist>
-                </para>
-                <section xml:id="glassfish_installation_conn_pools_config_jdbc">
-                    <title>JDBC Resource</title>
-                    <para>To create the JDBC resource, also follow the procedure in section
-                        <link linkend="glassfish_installation_conn_pools_division">Division connection pool
-                        </link>, using these settings:
-                        <itemizedlist>
-                            <listitem>
-                                <para>JNDI Name:
-                                    <code>jdbc/flexiveConfiguration</code>
-                                </para>
-                            </listitem>
-                            <listitem>
-                                <para>Pool Name:
-                                    <code>flexiveConfiguration</code>
-                                </para>
-                            </listitem>
-                        </itemizedlist>
-                    </para>
-                </section>
-            </section>
+            <para>
+                Copy and paste the following data-source definitions to a file (e.g.
+                <code>flexive-ds.xml</code>)
+                and update your database connection settings:
+            </para>
+            <programlisting language="xml">
+                <xi:include parse="text" href="../../src/framework/resources/glassfish/flexive-ds.xml"/>
+            </programlisting>
+            <para>
+                While Glassfish is running, execute
+                <command>${glassfish.home}/bin/asadmin add-resources /path/to/flexive-ds.xml</command>
+                to create the connection pools and JDBC resources.
+                You have to pass the absolute path to your XML file, otherwise Glassfish looks
+                in its own config directory.
+            </para>
+            <para>
+                Should you need to edit or reset your datasources, you can do so in the
+                Glassfish administration console under
+                <menuchoice>
+                    <guimenuitem>Resources</guimenuitem>
+                    <guimenuitem>JDBC.</guimenuitem>
+                </menuchoice>
+            </para>
         </section>
         <section xml:id="glassfish_installation_deployment">
             <title>Deployment</title>
             <para>Change to the
                 <filename>flexive-dist</filename>
                 directory of your &Flexive; distribution and run
-                <code>ant ear</code>. This will create the
+                <command>ant ear</command>. This will create the
                 <filename>flexive.ear</filename>
                 file inside the
                 <filename>flexive-dist</filename>
@@ -669,7 +458,10 @@ database.password=a]]></programlisting>
                 <orderedlist>
                     <listitem>
                         <para>In the Admin Console, go to
-                            <code>Applications > Enterprise Applications</code>
+                            <menuchoice>
+                                <guimenuitem>Applications</guimenuitem>
+                                <guimenuitem>Enterprise Applications</guimenuitem>
+                            </menuchoice>
                         </para>
                     </listitem>
                     <listitem>
@@ -713,7 +505,11 @@ database.password=a]]></programlisting>
             <title>JBossCache, Linux and IPv6</title>
             <para>In order to run JBossCache on Linux IPv4 needs to be defined as the preferred IP stack.
                 In the Glassfish admin console, go to
-                <code>Application Server > JVM Settings > JVM Options</code>
+                <menuchoice>
+                    <guimenuitem>Application Server</guimenuitem>
+                    <guimenuitem>JVM Settings</guimenuitem>
+                    <guimenuitem>JVM Options</guimenuitem>
+                </menuchoice>
                 and add the following option:
                 <itemizedlist>
                     <listitem>
