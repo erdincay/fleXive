@@ -114,6 +114,8 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
 
     private static volatile List<FxScriptRunInfo> runOnceInfos = null;
 
+    private static final Object RUNONCE_LOCK = new Object();
+
     /**
      * {@inheritDoc}
      */
@@ -855,78 +857,80 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      * @param applicationName the corresponding application name (for debug messages)
      * @throws FxApplicationException on errors
      */
-    private static synchronized void runOnce(Parameter<Boolean> param, String prefix, String applicationName) throws FxApplicationException {
-        try {
-            Boolean executed = getDivisionConfigurationEngine().get(param);
-            if (executed) {
-//                System.out.println("=============> skip run-once <==============");
+    private static void runOnce(Parameter<Boolean> param, String prefix, String applicationName) throws FxApplicationException {
+        synchronized(RUNONCE_LOCK) {
+            try {
+                Boolean executed = getDivisionConfigurationEngine().get(param);
+                if (executed) {
+    //                System.out.println("=============> skip run-once <==============");
+                    return;
+                }
+            } catch (FxApplicationException e) {
+                LOG.error(e);
                 return;
             }
-        } catch (FxApplicationException e) {
-            LOG.error(e);
-            return;
-        }
-//        System.out.println("<=============> run run-once <==============>");
-        //noinspection unchecked
-        final List<FxScriptRunInfo> divisionRunOnceInfos = getDivisionConfigurationEngine().get(SystemParameters.DIVISION_RUNONCE_INFOS);
+    //        System.out.println("<=============> run run-once <==============>");
+            //noinspection unchecked
+            final List<FxScriptRunInfo> divisionRunOnceInfos = getDivisionConfigurationEngine().get(SystemParameters.DIVISION_RUNONCE_INFOS);
 
-        runOnceInfos = new CopyOnWriteArrayList<FxScriptRunInfo>();
-        runOnceInfos.addAll(divisionRunOnceInfos);
+            runOnceInfos = new CopyOnWriteArrayList<FxScriptRunInfo>();
+            runOnceInfos.addAll(divisionRunOnceInfos);
 
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        final InputStream scriptIndex = cl.getResourceAsStream(prefix + "/scripts/runonce/scriptindex.flexive");
-        if (scriptIndex == null) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("No run-once scripts defined for " + applicationName);
-            }
-            return;
-        }
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Executing run-once scripts for " + applicationName);
-        }
-        String[] files = FxSharedUtils.loadFromInputStream(scriptIndex, -1).
-                replaceAll("\r", "").split("\n");
-        final UserTicket originalTicket = FxContext.get().getTicket();
-        FxContext.get().runAsSystem();
-        try {
-            FxScriptBinding binding = new FxScriptBinding();
-            UserTicket ticket = ((UserTicketImpl) UserTicketImpl.getGuestTicket()).cloneAsGlobalSupervisor();
-            binding.setVariable("ticket", ticket);
-            FxContext.get().overrideTicket(ticket);
-            for (String temp : files) {
-                String[] file = temp.split("\\|");
-                if (StringUtils.isBlank(file[0])) {
-                    continue;
-                }
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
+            final InputStream scriptIndex = cl.getResourceAsStream(prefix + "/scripts/runonce/scriptindex.flexive");
+            if (scriptIndex == null) {
                 if (LOG.isInfoEnabled()) {
-                    LOG.info("running run-once-script [" + file[0] + "] ...");
+                    LOG.info("No run-once scripts defined for " + applicationName);
                 }
-                FxScriptRunInfo runInfo = new FxScriptRunInfo(System.currentTimeMillis(), applicationName, file[0]);
-                runOnceInfos.add(runInfo);
-                try {
-                    internal_runScript(file[0], binding, FxSharedUtils.loadFromInputStream(cl.getResourceAsStream(prefix + "/scripts/runonce/" + file[0]), -1));
-                } catch (Throwable e) {
-                    runInfo.endExecution(false);
-                    StringWriter sw = new StringWriter();
-                    e.printStackTrace(new PrintWriter(sw));
-                    runInfo.setErrorMessage(sw.toString());
-                    LOG.error("Failed to run script " + file[0] + ": " + e.getMessage(), e);
-                }
-                try {
-                    Thread.sleep(100); //play nice ...
-                } catch (InterruptedException e) {
-                    //ignore
-                }
-                runInfo.endExecution(true);
+                return;
             }
-            divisionRunOnceInfos.clear();
-            divisionRunOnceInfos.addAll(runOnceInfos);
-            getDivisionConfigurationEngine().put(SystemParameters.DIVISION_RUNONCE_INFOS, divisionRunOnceInfos);
-            getDivisionConfigurationEngine().put(param, true);
-            runOnceInfos = null;
-        } finally {
-            FxContext.get().stopRunAsSystem();
-            FxContext.get().overrideTicket(originalTicket);
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Executing run-once scripts for " + applicationName);
+            }
+            String[] files = FxSharedUtils.loadFromInputStream(scriptIndex, -1).
+                    replaceAll("\r", "").split("\n");
+            final UserTicket originalTicket = FxContext.get().getTicket();
+            FxContext.get().runAsSystem();
+            try {
+                FxScriptBinding binding = new FxScriptBinding();
+                UserTicket ticket = ((UserTicketImpl) UserTicketImpl.getGuestTicket()).cloneAsGlobalSupervisor();
+                binding.setVariable("ticket", ticket);
+                FxContext.get().overrideTicket(ticket);
+                for (String temp : files) {
+                    String[] file = temp.split("\\|");
+                    if (StringUtils.isBlank(file[0])) {
+                        continue;
+                    }
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("running run-once-script [" + file[0] + "] ...");
+                    }
+                    FxScriptRunInfo runInfo = new FxScriptRunInfo(System.currentTimeMillis(), applicationName, file[0]);
+                    runOnceInfos.add(runInfo);
+                    try {
+                        internal_runScript(file[0], binding, FxSharedUtils.loadFromInputStream(cl.getResourceAsStream(prefix + "/scripts/runonce/" + file[0]), -1));
+                    } catch (Throwable e) {
+                        runInfo.endExecution(false);
+                        StringWriter sw = new StringWriter();
+                        e.printStackTrace(new PrintWriter(sw));
+                        runInfo.setErrorMessage(sw.toString());
+                        LOG.error("Failed to run script " + file[0] + ": " + e.getMessage(), e);
+                    }
+                    try {
+                        Thread.sleep(100); //play nice ...
+                    } catch (InterruptedException e) {
+                        //ignore
+                    }
+                    runInfo.endExecution(true);
+                }
+                divisionRunOnceInfos.clear();
+                divisionRunOnceInfos.addAll(runOnceInfos);
+                getDivisionConfigurationEngine().put(SystemParameters.DIVISION_RUNONCE_INFOS, divisionRunOnceInfos);
+                getDivisionConfigurationEngine().put(param, true);
+                runOnceInfos = null;
+            } finally {
+                FxContext.get().stopRunAsSystem();
+                FxContext.get().overrideTicket(originalTicket);
+            }
         }
     }
 
