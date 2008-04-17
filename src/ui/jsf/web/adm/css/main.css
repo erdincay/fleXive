@@ -200,7 +200,15 @@ body a {
 .fxToolbarIcon {
     margin-top:7px;
     margin-left:3px;
+    padding: 2px;
     cursor:pointer;
+    opacity: 0.75;
+    border: 0;
+}
+
+.fxToolbarIcon:hover {
+    opacity: 1;
+    background-image:url('../images/toolbar/background-hl.png');
 }
 
 .menuItem {
