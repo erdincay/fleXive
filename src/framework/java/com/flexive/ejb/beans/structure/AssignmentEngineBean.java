@@ -1456,21 +1456,6 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     changes = true;
                 }
 
-                //must not change
-                /*
-                if (org.getAssignedType().getId() != prop.getAssignedType().getId()) {
-                    if (ps != null) ps.close();
-                    ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET TYPEDEF=? WHERE ID=?");
-                    ps.setLong(1, prop.getAssignedType().getId());
-                    ps.setLong(2, prop.getId());
-                    ps.executeUpdate();
-                    if (changes)
-                        changesDesc.append(',');
-                    changesDesc.append("assignedType=").append(prop.getAssignedType());
-                    changes = true;
-                }
-                */
-
                 if (original.getMultiplicity().getMin() != modified.getMultiplicity().getMin() ||
                         original.getMultiplicity().getMax() != modified.getMultiplicity().getMax()) {
                     if (modified.getProperty().mayOverrideBaseMultiplicity()) {
@@ -1588,25 +1573,21 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     changes = true;
                 }
 
-                /* options are stored via storeOption method
-                if (org.isMultiLang() != prop.isMultiLang()) {
-                    //TODO: only allow changes from multi to single lingual if no contents exist or all are of the same language
-                    //Multi->Single: lang=system
+                // options are stored via storeOption method
+                if (original.isMultiLang() != modified.isMultiLang()) {
+                    //Multi->Single: lang=system, values of the def. lang. are used, other are discarded
                     //Single->Multi: lang=default language
-                    if( !org.getProperty().mayOverrideMultiLang() )
-                        throw new FxUpdateException("ex.structure.assignment.overrideNotAllowed.multiLang", org.getXPath(),
-                                org.getProperty().getName()).setAffectedXPath(org.getXPath());
-                    if (ps != null) ps.close();
-                    ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET ISMULTILANG=? WHERE ID=?");
-                    ps.setBoolean(1, prop.isMultiLang());
-                    ps.setLong(2, prop.getId());
-                    ps.executeUpdate();
+                    if( !original.getProperty().mayOverrideMultiLang() )
+                        throw new FxUpdateException("ex.structure.assignment.overrideNotAllowed.multiLang", original.getXPath(),
+                                original.getProperty().getName()).setAffectedXPath(original.getXPath());
+                    StorageManager.getContentStorage(TypeStorageMode.Hierarchical).
+                            updateMultilanguageSettings(con, original.getId(), original.isMultiLang(), modified.isMultiLang(), modified.getDefaultLanguage());
                     if (changes)
                         changesDesc.append(',');
-                    changesDesc.append("multiLang=").append(prop.isMultiLang());
+                    changesDesc.append("multiLang=").append(modified.isMultiLang());
                     changes = true;
                 }
-                */
+
                 if (original.getLabel() != null && !original.getLabel().equals(modified.getLabel()) ||
                         original.getLabel() == null && modified.getLabel() != null ||
                         original.getHint() != null && !original.getHint().equals(modified.getHint()) ||
@@ -1991,12 +1972,12 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 }
                 if (!disableAssignment) {
                     psML.executeBatch();
+                    psPropertyOptionRemove.executeBatch();
+                    psGroupOptionRemove.executeBatch();
+                    psBinaryRemove.executeBatch();
+                    psDataFT.executeBatch();
+                    psData.executeBatch();
                 }
-                psPropertyOptionRemove.executeBatch();
-                psGroupOptionRemove.executeBatch();
-                psBinaryRemove.executeBatch();
-                psDataFT.executeBatch();
-                psData.executeBatch();
             } finally {
                 if (psML != null)
                     psML.close();

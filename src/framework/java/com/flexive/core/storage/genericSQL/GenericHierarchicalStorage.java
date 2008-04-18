@@ -2696,6 +2696,56 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public void updateMultilanguageSettings(Connection con, long assignmentId, boolean orgMultiLang,
+                                            boolean newMultiLang, long defaultLanguage)
+            throws FxUpdateException, SQLException {
+        if (orgMultiLang == newMultiLang)
+            return;
+        PreparedStatement ps = null;
+        try {
+            if (!orgMultiLang && newMultiLang) {
+                //Single to Multi: lang=default language
+                ps = con.prepareStatement("UPDATE " + TBL_CONTENT_DATA + " SET LANG=? WHERE ASSIGN=?");
+                ps.setLong(1, defaultLanguage);
+                ps.setLong(2, assignmentId);
+                ps.executeUpdate();
+                ps.close();
+                ps = con.prepareStatement("UPDATE " + TBL_CONTENT_DATA_FT + " SET LANG=? WHERE ASSIGN=?");
+                ps.setLong(1, defaultLanguage);
+                ps.setLong(2, assignmentId);
+                ps.executeUpdate();
+            } else {
+                //Multi to Single: lang=system, values of the def. lang. are used, if other translations exist an exception will be raised
+                ps = con.prepareStatement("UPDATE " + TBL_CONTENT_DATA + " SET LANG=? WHERE LANG=? AND ASSIGN=?");
+                ps.setLong(1, FxLanguage.SYSTEM_ID);
+                ps.setLong(2, defaultLanguage);
+                ps.setLong(3, assignmentId);
+                ps.executeUpdate();
+                ps.close();
+                ps = con.prepareStatement("UPDATE " + TBL_CONTENT_DATA_FT + " SET LANG=? WHERE LANG=? AND ASSIGN=?");
+                ps.setLong(1, FxLanguage.SYSTEM_ID);
+                ps.setLong(2, defaultLanguage);
+                ps.setLong(3, assignmentId);
+                ps.executeUpdate();
+                ps.close();
+                ps = con.prepareStatement("SELECT COUNT(*) FROM " + TBL_CONTENT_DATA + " WHERE ASSIGN=? AND LANG<>?");
+                ps.setLong(1, assignmentId);
+                ps.setLong(2, FxLanguage.SYSTEM_ID);
+                ResultSet rs = ps.executeQuery();
+                long count = 0;
+                if (rs != null && rs.next())
+                    if ((count = rs.getLong(1)) > 0)
+                        throw new FxUpdateException("ex.content.update.multi2single.contentExist", CacheAdmin.getEnvironment().getAssignment(assignmentId).getXPath(), count);
+            }
+        } finally {
+            if (ps != null)
+                ps.close();
+        }
+    }
+
+    /**
      * Helper to build a comma seperated list of all parent and child types and the current type
      *
      * @param type current type to examine

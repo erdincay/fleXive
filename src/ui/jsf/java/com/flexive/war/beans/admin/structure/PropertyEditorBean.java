@@ -633,19 +633,19 @@ public class PropertyEditorBean implements ActionBean {
                 return null;
             } else if ("openInstance".equals(action)) {
                 editMode = false;
-                long propId = FxJsfUtils.getLongParameter("id", -1);
-                setPropertyId(propId);
-                FxPropertyAssignmentEdit assignment = ((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(propId)).asEditable();
+                long assId = FxJsfUtils.getLongParameter("id", -1);
+                FxPropertyAssignmentEdit assignment = ((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(assId)).asEditable();
                 setAssignment(assignment);
                 setProperty(assignment.getPropertyEdit());
+                setPropertyId(assignment.getProperty().getId());
                 initEditing();
             } else if ("editInstance".equals(action)) {
                 editMode = true;
-                long propId = FxJsfUtils.getLongParameter("id", -1);
-                setPropertyId(propId);
-                FxPropertyAssignmentEdit assignment = ((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(propId)).asEditable();
+                long assId = FxJsfUtils.getLongParameter("id", -1);
+                FxPropertyAssignmentEdit assignment = ((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(assId)).asEditable();
                 setAssignment(assignment);
                 setProperty(assignment.getPropertyEdit());
+                setPropertyId(assignment.getProperty().getId());
                 initEditing();
             } else if ("createProperty".equals(action)) {
                 editMode = true;
@@ -744,9 +744,7 @@ public class PropertyEditorBean implements ActionBean {
                 originalLanguageSystemLanguage = true;
                 setDefaultLanguage(FxLanguage.DEFAULT);
             } else {
-                FxLanguage language = EJBLookup.getLanguageEngine().load(assignment.getDefaultLanguage());
-                setMultiLang(true);
-                setDefaultLanguage(language);
+                setDefaultLanguage(EJBLookup.getLanguageEngine().load(assignment.getDefaultLanguage()));
             }
         } catch (Throwable t) {
             LOG.error("Failed to initialize the Editing process: " + t.getMessage(), t);

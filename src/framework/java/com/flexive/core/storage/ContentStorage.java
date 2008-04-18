@@ -45,6 +45,7 @@ import com.flexive.shared.structure.UniqueMode;
 
 import java.io.InputStream;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -179,7 +180,7 @@ public interface ContentStorage {
      * @param pk   primary key for a distinct version @throws com.flexive.shared.exceptions.FxRemoveException
      *             on errors
      * @throws FxNotFoundException on errors
-     * @throws FxRemoveException on errors
+     * @throws FxRemoveException   on errors
      */
     void contentRemoveVersion(Connection con, FxType type, FxPK pk) throws FxRemoveException, FxNotFoundException;
 
@@ -288,4 +289,19 @@ public interface ContentStorage {
      * @return if mode would be valid
      */
     boolean uniqueConditionValid(Connection con, UniqueMode mode, FxProperty prop, long typeId, FxPK pk);
+
+    /**
+     * Change an assignments multilanguage setting.
+     * Multi to Single: lang=system, values of the def. lang. are used, if other translations exist an exception will be raised
+     * Single to Multi: lang=default language
+     *
+     * @param con             an open and valid Connection
+     * @param assignmentId    affected assignment
+     * @param orgMultiLang    original multilanguage setting
+     * @param newMultiLang    new multilanguage setting
+     * @param defaultLanguage default language
+     * @throws FxUpdateException on errors
+     * @throws SQLException      on errors
+     */
+    void updateMultilanguageSettings(Connection con, long assignmentId, boolean orgMultiLang, boolean newMultiLang, long defaultLanguage) throws FxUpdateException, SQLException;
 }
