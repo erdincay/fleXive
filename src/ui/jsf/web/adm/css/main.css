@@ -211,6 +211,14 @@ body a {
     background-image:url('../images/toolbar/background-hl.png');
 }
 
+.fxToolbarSeparator {
+    margin-top:7px;
+    margin-left:3px;
+    padding: 2px;
+    opacity: 0.75;
+    border: 0;
+}
+
 .menuItem {
     width:100%;
     background-color:white;

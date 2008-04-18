@@ -489,13 +489,15 @@ function renderToolbar() {
     }
     var html = "";
     var pos;
+    var clazz = "";
     for (pos = 0; pos < toolbarImages.length; pos++) {
         if( pos > 0 && toolbarIds[pos] == '' && toolbarIds[pos-1] == '' )
             continue; //prevent double separators
+        clazz = toolbarIds[pos] == '' ? "fxToolbarSeparator" : "fxToolbarIcon";
         html += "<img "+
                 (toolbarIds[pos] != '' ? "id=\"" + toolbarIds[pos] + "_toolbarIcon\" " : "")+
                 "src=\"" + toolbarImages[pos] +
-                "\" class=\"fxToolbarIcon\" "+
+                "\" class=\"" + clazz + "\" " +
                 (toolbarClick[pos] != '' ? "onClick=\"" + toolbarClick[pos] + "\" ":"")+
                 "alt=\"" + toolbarHelp[pos]
                 + "\" title=\"" + toolbarHelp[pos] + "\"/>";
