@@ -23,6 +23,9 @@
             var copyMode=false;
             //cutMode->cut was selected in context menu
             var cutMode=false;
+            //flag indicating if the content tree nav frame needs reloading
+            //at the moment this is the case when a type has been created or deleted
+            var reloadContentTreeNavFrame=false;
 
                 //actions defined in StructureTreeControllerBean
             function doTreeAction(action, id, value) {
@@ -56,14 +59,6 @@
                     reloadStructureTree();
                     expandToNodeWithId(id, false);
                 }
-            }
-
-            // quickfix for reloading the content frame context menu after deletion or
-            // creation of a type
-            function reloadContentTreeNavFrame() {
-                var ctnf = parent.getContentNavFrame();
-                if (ctnf != null && ctnf.document !=null && ctnf.document.location != null)
-                    ctnf.document.location.reload();
             }
 
             /* expands the tree and selects the node with ID id
@@ -310,12 +305,13 @@
                         if (copyNode!=null && copyNode.assignmentId ==id && (copyNode.nodeDocType=="Group" || copyNode.nodeDocType=="Assignment"))
                             copyNode=null;
                         reloadStructureTree();
-                        loadContentPage("adm/content.jsf");
+                        loadContentPage("adm/structure/content.jsf");
+                        parent.gotoNavMenu(1);
                     }
                     catch (e) {
                         alert(e.message);
                         reloadStructureTree();
-                        loadContentPage("adm/content.jsf");
+                        loadContentPage("adm/structure/content.jsf");
                     }
                 }
             }
@@ -332,13 +328,13 @@
                     try {
                         getJsonRpc().StructureTreeEditor.deleteType(id);
                         reloadStructureTree();
-                        reloadContentTreeNavFrame();
-                        loadContentPage("adm/content.jsf");
+                        reloadContentTreeNavFrame=true;
+                        loadContentPage("adm/structure/content.jsf");
                     }
                     catch (e) {
                         alert(e.message);
                         reloadStructureTree();
-                        loadContentPage("adm/content.jsf");
+                        loadContentPage("adm/structure/content.jsf");
                     }
                 }
             }
@@ -610,7 +606,9 @@
                 <fx:menuItem rendered="#{fxSystemBean.isInRole['StructureManagement']}" labelKey="StructureTree.menu.createType" icon="windowNew" clickHandler="function(menuItem) { createType(menuItem); }"/>
 
                 <fx:menuItem labelKey="StructureTree.menu.createTypeRelation" icon="fxTypeRelation" clickHandler="function(menuItem) { createTypeRelation(menuItem); }"/>
-                
+
+                <fx:menuSeparator/>
+
                 <ui:include src="/adm/templates/navigation.menu.tabs.xhtml"/>
             </fx:menu>
         </div>

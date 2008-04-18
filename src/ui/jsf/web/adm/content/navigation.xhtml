@@ -20,6 +20,17 @@
             var cutNodeId = -1;
             var copyNodeId = -1;
 
+            // Called when this page is brought to the foreground by parent.gotoNavMenu
+            function onShow() {
+                //contains a quick fix to reload the content tree navigation menu
+                //in order to "update" the context menu with newly created or deleted types
+                var stnf = parent.getStructureNavFrame();
+                if (stnf != null && stnf.reloadContentTreeNavFrame) {
+                    stnf.reloadContentTreeNavFrame=false;
+                    parent.getContentNavFrame().document.location.reload();
+                }
+            }
+
             function toggleLiveMode() {
                 treeLiveMode = !treeLiveMode;
                 setImage("mainNavForm:imgTreeLive", "adm/images/layout/" + (treeLiveMode ? "tree_live.png" : "tree_edit.png"));

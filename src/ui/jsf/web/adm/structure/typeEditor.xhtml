@@ -39,7 +39,7 @@
             <!-- quickfix for reloading the content frame context menu after creating a new type -->
             <c:if test="#{typeEditorBean.reloadContentTree}">
                 <script type="text/javascript">
-                    parent.getStructureNavFrame().reloadContentTreeNavFrame();
+                    parent.getStructureNavFrame().reloadContentTreeNavFrame=true;
                 </script>
             </c:if>
             <c:if test="#{empty typeEditorBean.parseRequestParameters}"> </c:if>
