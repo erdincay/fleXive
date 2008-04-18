@@ -55,7 +55,7 @@ import java.util.List;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-@Test(groups = "benchmark")
+@Test(groups = "benchmark", enabled = false)
 public class ContentBenchmark {
     public static int scriptCtr1 = 0;
     public static int scriptCtr2 = 0;

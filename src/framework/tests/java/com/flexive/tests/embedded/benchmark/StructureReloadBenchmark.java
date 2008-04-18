@@ -44,7 +44,7 @@ import org.testng.annotations.Test;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-@Test(groups = "benchmark")
+@Test(groups = "benchmark", enabled = true)
 public class StructureReloadBenchmark {
 
     public void benchStructureReload() throws Exception {
@@ -53,10 +53,10 @@ public class StructureReloadBenchmark {
             CacheAdmin.reloadEnvironment(); // warm up
             CacheAdmin.reloadEnvironment();
             long start = System.currentTimeMillis();
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 200; i++) {
                 CacheAdmin.reloadEnvironment();
             }
-            FxBenchmarkUtils.logExecutionTime("reloadEnvironment", start, 10, "reload");
+            FxBenchmarkUtils.logExecutionTime("reloadEnvironment", start, 200, "reload");
         } finally {
             FxContext.get().stopRunAsSystem();
         }

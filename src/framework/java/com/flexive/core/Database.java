@@ -469,47 +469,6 @@ public final class Database {
     }
 
     /**
-     * Load an FxString array from multiple fields
-     *
-     * @param con         open and valid connection
-     * @param table       table to use
-     * @param columns     names of the columns containing the translations
-     * @param whereClause where clause for the table (like id=x)
-     * @return FxString array   a string array representing <code>columns</code>
-     * @throws SQLException if a database error occured
-     */
-    public static FxString[] loadFxString(Connection con, String table, String[] columns, String whereClause)
-            throws SQLException {
-        Statement stmt = null;
-        Map<Long, String[]> hmTrans = new HashMap<Long, String[]>(10);
-        StringBuffer sql = new StringBuffer(200);
-        try {
-            sql.append("SELECT LANG");
-            for (String column : columns)
-                sql.append(',').append(column);
-            sql.append(" FROM ").append(table).append(ML).append(" WHERE ").append(whereClause);
-            stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery(sql.toString());
-            while (rs != null && rs.next()) {
-                String[] curr = new String[columns.length];
-                for (int i = 0; i < columns.length; i++) {
-                    curr[i] = rs.getString(2 + i);
-                    if (rs.wasNull())
-                        curr[i] = null;
-                }
-                hmTrans.put(rs.getLong(1), curr);
-            }
-        } finally {
-            if (stmt != null)
-                stmt.close();
-        }
-        FxString[] ret = new FxString[columns.length];
-        for (int i = 0; i < ret.length; i++)
-            ret[i] = new FxString(hmTrans, i);
-        return ret;
-    }
-
-    /**
      * Loads all FxString entries stored in the given table.
      *
      * @param con     an existing connection
@@ -518,35 +477,44 @@ public final class Database {
      * @return all FxString entries stored in the given table, indexed by the ID field.
      * @throws SQLException if the query was not successful
      */
-    public static Map<Long, FxString[]> loadFxStrings(Connection con, String table, String[] columns) throws SQLException {
+    public static Map<Long, FxString[]> loadFxStrings(Connection con, String table, String... columns) throws SQLException {
         Statement stmt = null;
         final StringBuilder sql = new StringBuilder();
         final Map<Long, FxString[]> result = new HashMap<Long, FxString[]>();
         try {
             sql.append("SELECT id, lang");
+            final boolean hasDefLang = columns.length == 1; // deflang is only meaningful for single-column tables
+            if (hasDefLang) {
+                sql.append(", deflang");
+            }
             for (String column : columns) {
                 sql.append(',').append(column);
             }
-            sql.append(" FROM ").append(table).append(ML).append(" ORDER BY id");
+            sql.append(" FROM ").append(table).append(ML);
+            final int startIndex = hasDefLang ? 4 : 3;
             stmt = con.createStatement();
             final ResultSet rs = stmt.executeQuery(sql.toString());
             while (rs.next()) {
                 final long id = rs.getLong(1);
                 final int lang = rs.getInt(2);
+                final boolean  defLang = hasDefLang && rs.getBoolean(3);
                 if (lang == FxLanguage.SYSTEM_ID) {
                     continue;   // TODO how to deal with system language? 
                 }
-                if (!result.containsKey(id)) {
-                    final FxString[] newValues = new FxString[columns.length];
-                    for (int i = 0; i < newValues.length; i++) {
-                        newValues[i] = new FxString(true, "");
+                FxString[] entry = result.get(id);
+                if (entry == null) {
+                    entry = new FxString[columns.length];
+                    for (int i = 0; i < entry.length; i++) {
+                        entry[i] = new FxString(true, "");
                     }
-                    result.put(id, newValues);
+                    result.put(id, entry);
                 }
-                final FxString[] entry = result.get(id);
                 for (int i = 0; i < columns.length; i++) {
-                    final String translation = rs.getString(3 + i);
+                    final String translation = rs.getString(startIndex + i);
                     entry[i].setTranslation(lang, translation);
+                    if (defLang) {
+                        entry[i].setDefaultLanguage(lang);
+                    }
                 }
             }
         } finally {

@@ -83,6 +83,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
         String curSql;
         ArrayList<ACL> result = new ArrayList<ACL>(250);
         try {
+            final Map<Long, FxString[]> labels = Database.loadFxStrings(con, TBL_ACLS, "LABEL");
             //                            1      2          3             4                5          6                 7
             curSql = "SELECT DISTINCT acl.ID, acl.NAME, acl.CAT_TYPE, acl.DESCRIPTION, acl.COLOR, acl.MANDATOR, mand.NAME, " +
                     //    8               9               10               11
@@ -91,8 +92,9 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(curSql);
             while (rs != null && rs.next()) {
-                result.add(new ACL(rs.getInt(1), rs.getString(2),
-                        Database.loadFxString(con, TBL_ACLS, "LABEL", "ID=" + rs.getInt(1)),
+                final long id = rs.getLong(1);
+                result.add(new ACL(id, rs.getString(2),
+                        getTranslation(labels, id, 0),
                         rs.getInt(6), rs.getString(7), rs.getString(4), rs.getString(5), ACL.Category.getById(rs.getInt(3)),
                         LifeCycleInfoImpl.load(rs, 8, 9, 10, 11)));
             }
@@ -393,9 +395,11 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(curSql);
             ResultSet rsRelations;
+            final Map<Long, FxString[]> labels = Database.loadFxStrings(con, TBL_STRUCT_TYPES, "description");
             while (rs != null && rs.next()) {
                 try {
-                    ps.setLong(1, rs.getLong(1));
+                    final long id = rs.getLong(1);
+                    ps.setLong(1, id);
                     ArrayList<FxTypeRelation> alRelations = new ArrayList<FxTypeRelation>(10);
                     rsRelations = ps.executeQuery();
                     while (rsRelations != null && rsRelations.next())
@@ -403,9 +407,9 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                                 rsRelations.getInt(3), rsRelations.getInt(4)));
                     long parentId = rs.getLong(3);
                     FxType parentType = rs.wasNull() ? null : new FxPreloadType(parentId);
-                    result.add(new FxType(rs.getLong(1), environment.getACL(rs.getInt(19)),
+                    result.add(new FxType(id, environment.getACL(rs.getInt(19)),
                             environment.getWorkflow(rs.getInt(20)), rs.getString(2),
-                            Database.loadFxString(con, TBL_STRUCT_TYPES, "description", "id=" + rs.getLong(1)),
+                            getTranslation(labels, id, 0),
                             parentType, TypeStorageMode.getById(rs.getInt(4)),
                             TypeCategory.getById(rs.getInt(5)), TypeMode.getById(rs.getInt(6)),
                             LanguageMode.getById(rs.getInt(7)), TypeState.getById(rs.getInt(8)), rs.getByte(9),
@@ -437,8 +441,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
         String curSql;
         ArrayList<FxAssignment> result = new ArrayList<FxAssignment>(250);
         try {
-            final Map<Long, FxString[]> translations = Database.loadFxStrings(con, TBL_STRUCT_ASSIGNMENTS, new String[]{"DESCRIPTION", "HINT", "DEFAULT_VALUE"});
-            final FxString[] emptyTranslation = new FxString[]{new FxString(""), new FxString(""), new FxString("")};
+            final Map<Long, FxString[]> translations = Database.loadFxStrings(con, TBL_STRUCT_ASSIGNMENTS, "DESCRIPTION", "HINT", "DEFAULT_VALUE");
             final Map<Long, List<FxStructureOption>> propertyAssignmentOptions = loadAllPropertyAssignmentOptions(con);
             final Map<Long, List<FxStructureOption>> groupAssignmentOptions = loadAllGroupAssignmentOptions(con);
             //final List<FxStructureOption> emptyOptions = new ArrayList<FxStructureOption>(0);
@@ -452,16 +455,17 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(curSql);
             while (rs != null && rs.next()) {
+                final long id = rs.getLong(1);
                 switch (rs.getInt(2)) {   //ATYPE
                     case FxAssignment.TYPE_GROUP:
-                        if (rs.getLong(1) == FxAssignment.NO_PARENT)
+                        if (id == FxAssignment.NO_PARENT)
                             break;
-                        final FxString[] desc_hint = FxSharedUtils.get(translations, rs.getLong(1), emptyTranslation);
                         FxGroupAssignment ga = new FxGroupAssignment(rs.getLong(1), rs.getBoolean(3), environment.getType(rs.getLong(4)),
                                 rs.getString(9), rs.getString(8), rs.getInt(7),
                                 new FxMultiplicity(rs.getInt(5), rs.getInt(6)), rs.getInt(18),
                                 new FxPreloadGroupAssignment(rs.getLong(10)),
-                                rs.getLong(14), desc_hint[0], desc_hint[1],
+                                rs.getLong(14), getTranslation(translations, id, 0),
+                                getTranslation(translations, id, 1),
                                 environment.getGroup(rs.getLong(11)), GroupMode.getById(rs.getInt(17)),
                                 FxSharedUtils.get(groupAssignmentOptions, rs.getLong(1), new ArrayList<FxStructureOption>(0)));
                         if (rs.getBoolean(16))
@@ -469,13 +473,14 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                         result.add(ga);
                         break;
                     case FxAssignment.TYPE_PROPERTY:
-                        final FxString[] desc_hint_def = FxSharedUtils.get(translations, rs.getLong(1), emptyTranslation);
                         FxPropertyAssignment pa = new FxPropertyAssignment(rs.getLong(1), rs.getBoolean(3), environment.getType(rs.getLong(4)),
                                 rs.getString(9), rs.getString(8), rs.getInt(7),
                                 new FxMultiplicity(rs.getInt(5), rs.getInt(6)), rs.getInt(18),
                                 new FxPreloadGroupAssignment(rs.getLong(10)),
                                 rs.getLong(14),
-                                desc_hint_def[0], desc_hint_def[1], desc_hint_def[2],
+                                getTranslation(translations, id, 0),
+                                getTranslation(translations, id, 1),
+                                getTranslation(translations, id, 2),
                                 environment.getProperty(rs.getLong(12)),
                                 environment.getACL(rs.getInt(13)), rs.getInt(15),
                                 FxSharedUtils.get(propertyAssignmentOptions, rs.getLong(1), new ArrayList<FxStructureOption>(0)));
@@ -547,17 +552,17 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
             //                                             1  2    3
             final ResultSet rs = stmt.executeQuery("SELECT ID,NAME,UNIQUE_TARGET FROM " + TBL_STEPDEFINITION);
             ArrayList<StepDefinition> tmp = new ArrayList<StepDefinition>(10);
+            final Map<Long, FxString[]> labels = Database.loadFxStrings(con, TBL_STEPDEFINITION, "name");
 
             // Build the result array set
             while (rs != null && rs.next()) {
-                int id = rs.getInt(1);
+                long id = rs.getLong(1);
                 String name = rs.getString(2);
                 int uniqueTargetId = rs.getInt(3);
                 if (rs.wasNull()) {
                     uniqueTargetId = -1;
                 }
-                FxString label = Database.loadFxString(con, TBL_STEPDEFINITION, "name", "id=" + id);
-                StepDefinition aStepDef = new StepDefinition(id, label, name, uniqueTargetId);
+                StepDefinition aStepDef = new StepDefinition(id, getTranslation(labels, id, 0), name, uniqueTargetId);
                 tmp.add(aStepDef);
             }
             return tmp;
@@ -727,10 +732,8 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
         String sql;
         List<FxSelectList> lists = new ArrayList<FxSelectList>(10);
         try {
-            final Map<Long, FxString[]> translations = Database.loadFxStrings(con, TBL_SELECTLIST, new String[]{"LABEL", "DESCRIPTION"});
-            final FxString[] emptyTranslation = new FxString[]{new FxString(""), new FxString("")};
-            final Map<Long, FxString[]> itemTranslations = Database.loadFxStrings(con, TBL_SELECTLIST_ITEM, new String[]{"LABEL"});
-            final FxString[] emptyItemTranslation = new FxString[]{new FxString(""), new FxString(""), new FxString("")};
+            final Map<Long, FxString[]> translations = Database.loadFxStrings(con, TBL_SELECTLIST, "LABEL", "DESCRIPTION");
+            final Map<Long, FxString[]> itemTranslations = Database.loadFxStrings(con, TBL_SELECTLIST_ITEM, "LABEL");
 
             //            1  2        3    4                 5               6            7
             sql = "SELECT ID,PARENTID,NAME,ALLOW_ITEM_CREATE,ACL_CREATE_ITEM,ACL_ITEM_NEW,DEFAULT_ITEM FROM " +
@@ -738,11 +741,13 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
             ps = con.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
             while (rs != null && rs.next()) {
-                FxString[] strings = FxSharedUtils.get(translations, rs.getLong(1), emptyTranslation);
+                final long id = rs.getLong(1);
                 long parent = rs.getLong(2);
                 if (rs.wasNull())
                     parent = -1;
-                lists.add(new FxSelectList(rs.getLong(1), parent, rs.getString(3), strings[0], strings[1],
+                lists.add(new FxSelectList(id, parent, rs.getString(3),
+                        getTranslation(translations, id, 0),
+                        getTranslation(translations, id, 1),
                         rs.getBoolean(5), environment.getACL(rs.getLong(5)), environment.getACL(rs.getLong(6)),
                         rs.getLong(7)));
             }
@@ -755,11 +760,12 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                 ps.setLong(1, list.getId());
                 rs = ps.executeQuery();
                 while (rs != null && rs.next()) {
+                    final long id = rs.getLong(1);
                     long parent = rs.getLong(4);
                     if (rs.wasNull())
                         parent = -1;
-                    new FxSelectListItem(rs.getLong(1), rs.getString(2), environment.getACL(rs.getLong(3)), list, parent,
-                            FxSharedUtils.get(itemTranslations, rs.getLong(1), emptyItemTranslation)[0],
+                    new FxSelectListItem(id, rs.getString(2), environment.getACL(rs.getLong(3)), list, parent,
+                            getTranslation(itemTranslations, id, 0),
                             rs.getString(5), rs.getString(6), rs.getLong(11), rs.getInt(12), rs.getInt(13),
                             LifeCycleInfoImpl.load(rs, 7, 8, 9, 10));
                 }
@@ -770,5 +776,13 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
             Database.closeObjects(GenericEnvironmentLoader.class, null, ps);
         }
         return lists;
+    }
+
+    private FxString getTranslation(final Map<Long, FxString[]> translations, final long id, final int index) {
+        final FxString[] values = translations.get(id);
+        if (values == null) {
+            return new FxString("").setEmpty();
+        }
+        return values[index];
     }
 }

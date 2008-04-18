@@ -216,7 +216,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @param value           single initializing value
      */
     protected FxValue(boolean multiLanguage, long defaultLanguage, T value) {
-        this(multiLanguage, defaultLanguage, new HashMap<Long, T>(5));
+        this(multiLanguage, defaultLanguage, (Map<Long, T>) null);
         if (multiLanguage)
             this.translations.put(defaultLanguage, value);
         else

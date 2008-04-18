@@ -19,7 +19,7 @@ import java.util.List;
  * @author Daniel Lichtenberger, UCS
  * @version $Rev$
  */
-@Test(groups = "benchmark")
+@Test(groups = "benchmark", enabled = false)
 public class SearchBenchmark {
 
     public void selectTreePathsBenchmark() throws FxApplicationException {
