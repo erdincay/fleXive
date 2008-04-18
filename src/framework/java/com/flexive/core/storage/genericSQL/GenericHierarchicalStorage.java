@@ -1693,6 +1693,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      */
     protected void addValue(FxGroupData root, String xPath, FxAssignment assignment,
                             int pos, FxValue value) throws FxInvalidParameterException, FxNotFoundException, FxCreateException {
+        if( !assignment.isEnabled() )
+            return;
         if (assignment instanceof FxGroupAssignment) {
             root.addGroup(xPath, (FxGroupAssignment) assignment, pos);
             root.getGroup(xPath.substring(0, xPath.length() - 1)).removeEmptyEntries(true);
