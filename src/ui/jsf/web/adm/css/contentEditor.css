@@ -88,15 +88,6 @@
     clear: both;
 }
 
-.property .iconPlaceholder {
-    height:16px;
-    width:16px;
-    float:left;
-    margin-left:2px;
-    position:relative;
-    top:-2px;
-    background-color:#dfdfdf;
-}
 
 .popupMenu {
     position:absolute;

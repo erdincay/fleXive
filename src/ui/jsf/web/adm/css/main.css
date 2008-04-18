@@ -198,9 +198,9 @@ body a {
 }
 
 .fxToolbarIcon {
-    margin-top:7px;
+    margin-top:5px;
     margin-left:3px;
-    padding: 2px;
+    padding: 3px;
     cursor:pointer;
     opacity: 0.75;
     border: 0;

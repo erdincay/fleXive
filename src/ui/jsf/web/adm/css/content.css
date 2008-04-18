@@ -63,6 +63,17 @@ a {
     background-image: url("../images/commandButton/buttonRight_hover.gif");
 }
 
+.commandIcon {
+    cursor: pointer;
+    padding: 3px;
+    border: 0;
+}
+
+.commandIcon:hover {
+    opacity: 1;
+    background-image:url('../images/toolbar/background-hl.png');
+}
+
 .errorMessage {
     color: red;
 }
