@@ -3,7 +3,7 @@
     Defines additional targets that integrate flexive libs in the Seam build process.
 
     @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
-    @version $Rev: 374 $
+    @version $Rev$
 -->
 <project name="flexive-seam-project" basedir=".">
     <!-- Get our directory (basedir references to the project base directory) -->

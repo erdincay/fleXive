@@ -120,13 +120,13 @@
              properties['dir.deploy.jboss'] = jbossDir
         </groovy>
         <copy todir="${dir.deploy.jboss}/flexive-exp.war/adm" verbose="true" >
-            <fileset dir="${basedir}/src/ui/jsf/web/adm"/>
+            <fileset dir="${basedir}/src/ui/jsf-backend/web/adm"/>
         </copy>
         <copy todir="${dir.deploy.jboss}/flexive-exp.war/pub" verbose="true" >
-            <fileset dir="${basedir}/src/ui/jsf/web/pub"/>
+            <fileset dir="${basedir}/src/ui/jsf-backend/web/pub"/>
         </copy>
         <copy todir="${dir.deploy.jboss}/flexive-exp.war/WEB-INF" verbose="true" >
-            <fileset dir="${basedir}/src/ui/jsf/resources/WEB-INF"/>
+            <fileset dir="${basedir}/src/ui/jsf-backend/resources/WEB-INF"/>
         </copy>
     </target>
 
@@ -269,7 +269,7 @@
 
     <target name="jar.framework" depends="jar.framework.shared, jar.ejb" description="Package the complete core framework">
 	</target>
-	
+
 	<target name="jar.framework.shared.prepare">
 		<uptodate property="jar.framework.shared.skip" targetfile="${flexive.build.framework.jar.dir}/flexive-shared.jar">
 			<srcfiles dir="${shared.meta.dir}" includes="**/*"/>
@@ -277,7 +277,7 @@
 			<srcfiles dir="${build.framework.classes.dir}" includes="com/flexive/shared/**"/>
 		</uptodate>
 	</target>
-	
+
 	<target name="jar.framework.shared" depends="compile.framework,jar.framework.shared.prepare" unless="jar.framework.shared.skip" description="Package the shared part of the framework">
 		<tstamp>
 			<format property="build.time" pattern="yyyy/MM/dd HH:mm" unit="hour"/>
@@ -342,7 +342,7 @@
     </target>
 
 	<target name="jar.ui" depends="compile.ui,jar.jsf.components">
-		<jar jarfile="${build.ui.jar.dir}/flexive-ui.jar">
+		<jar jarfile="${build.ui.jar.dir}/flexive-backend.jar">
 			<fileset dir="${build.ui.classes.dir}">
                 <include name="com/flexive/war/**/*"/>
                 <include name="org/apache/myfaces/webapp/filter/**/*"/>
@@ -352,13 +352,13 @@
                 <include name="ApplicationMessages*.properties"/>
             </fileset>
         </jar>
-        <jar jarfile="${build.ui.jar.dir}/flexive-ui-shared.jar">
+        <jar jarfile="${build.ui.jar.dir}/flexive-web-shared.jar">
 			<fileset dir="${build.ui.shared.classes.dir}">
 			</fileset>
 		</jar>
         <emma enabled="${emma.enabled}">
 			<instr
-				instrpath="${build.ui.jar.dir}/flexive-ui.jar"
+				instrpath="${build.ui.jar.dir}/flexive-backend.jar"
 				mode="overwrite"
 				merge="true"
 				metadatafile="${coverage.dir}/coverage.em">
@@ -367,7 +367,7 @@
 		</emma>
         <emma enabled="${emma.enabled}">
 			<instr
-				instrpath="${build.ui.jar.dir}/flexive-ui-shared.jar"
+				instrpath="${build.ui.jar.dir}/flexive-web-shared.jar"
 				mode="overwrite"
 				merge="true"
 				metadatafile="${coverage.dir}/coverage.em">
@@ -425,7 +425,7 @@
 			<srcfiles refid="jar.ejb.resources"/>
         </uptodate>
 	</target>
-		
+
 	<target name="jar.ejb" depends="compile.framework, jar.ejb.prepare" unless="jar.ejb.skip">
         <scriptIndexBuilder indexFile="${build.framework.classes.dir}/fxresources/scripts/runonce/scriptindex.flexive"
                             scriptDir="${flexive.resources.framework.dir}/fxresources/scripts/runonce"/>
@@ -462,7 +462,7 @@
 
     <!--<target name="jar.all" depends="jar.framework, jar.ui, jar.tests"/>-->
     <target name="jar.all" depends="jar.framework, jar.ui"/>
-    
+
     <target name="jar.ear" depends="prepare" description="Assemble flexive.ear">
         <mkdir dir="${flexive.drop.dir}"/>
         <applicationDescriptorBuilder dropDir="${flexive.drop.dir}" destFile="${flexive.base.build.dir}/application.xml" srcFile="${resources.ui.shared.dir}/application.xml"/>
@@ -493,10 +493,10 @@
             <zipfileset prefix="lib" file="${flexive.lib.dir}/fxStream.jar" includes="fxTree.jar,jsf173_1.0_api.jar,jtidy.jar"/>
             <zipfileset prefix="lib" dir="${flexive.lib.dir}/mail" includes="*.jar"/>
             <zipfileset prefix="lib" dir="${flexive.lib.dir}/text_extraction" includes="*.jar"/>
-            
+
             <zipfileset prefix="lib" dir="${flexive.lib.dir}/jsf" includes="*.jar" excludes="jsf-api.jar, jsf-impl.jar,el-*.jar"/>
             <zipfileset prefix="lib" refid="flexive.lib.ui.ajax4jsf"/>
-            
+
             <!-- uncomment to create lib folder in ear -->
             <!--<zipfileset dir="${lib.dir}" prefix="lib">
 				<include name="${sqlparser.jar}"/>
@@ -507,7 +507,7 @@
 			</zipfileset>
             <zipfileset dir="${build.ui.jar.dir}" prefix="lib">
 				<include name="flexive-webdav.jar"/>
-                <include name="flexive-ui-shared.jar"/>
+                <include name="flexive-web-shared.jar"/>
             </zipfileset>-->
         </jar>
 	</target>
@@ -548,6 +548,7 @@
         <svnVersion property="dist.build.number"/>
         <groovy>
             properties['dist.bin.file'] = properties['flexive.dist'].replaceAll("@@build.number@@", properties['dist.build.number'])+"-bin.zip"
+            properties['dist.bin-all.file'] = properties['flexive.dist'].replaceAll("@@build.number@@", properties['dist.build.number'])+"-bin-all.zip"
         </groovy>
         <!-- Create flexive distribution -->
         <copy file="${flexive.lib.dir}/${sqlparser.jar}" tofile="${flexive.dist.lib.dir}/${sqlparser.jar}"/>
@@ -555,13 +556,13 @@
 		<copy file="${flexive.build.framework.jar.dir}/flexive-ant.jar" tofile="${flexive.dist.lib.dir}/flexive-ant.jar"/>
         <copy file="${flexive.build.framework.jar.dir}/flexive-shared.jar" tofile="${flexive.dist.lib.dir}/flexive-shared.jar"/>
         <copy todir="${flexive.dist.lib.dir}">
-            <fileset dir="${build.ui.jar.dir}" includes="*.jar" excludes="flexive-ui.jar,flexive-plugin-*.jar"/>
+            <fileset dir="${build.ui.jar.dir}" includes="*.jar" excludes="flexive-backend.jar,flexive-plugin-*.jar"/>
         </copy>
         <copy file="${flexive.build.framework.jar.dir}/flexive-ejb.jar" tofile="${flexive.dist.lib.dir}/flexive-ejb.jar"/>
 
         <!-- Copy backend administration to applications folder -->
         <copy file="${flexive.base.build.dir}/ui/flexive.war" todir="${flexive.dist.apps.dir}/flexive-backend"/>
-        <copy file="${build.ui.jar.dir}/flexive-ui.jar" todir="${flexive.dist.apps.dir}/flexive-backend"/>
+        <copy file="${build.ui.jar.dir}/flexive-backend.jar" todir="${flexive.dist.apps.dir}/flexive-backend"/>
         <!-- Include standard plugin setup -->
         <copy todir="${flexive.dist.apps.dir}">
             <fileset dir="${build.ui.jar.dir}" includes="flexive-plugin-*.jar" excludes="flexive-plugin-jsf-testrunner.jar"/>
@@ -602,7 +603,7 @@
         <copy todir="${flexive.dist.sql.dir}">
             <fileset dir="${mysql.src.dir}" includes="**/*"/>
         </copy>
-        
+
         <!-- Create a sample database.properties file -->
         <echo file="${flexive.dist.dir}/database.properties">
 # This is the database configuration file used by the flexive setup tasks.
@@ -622,13 +623,18 @@ database.password=a
         <copy todir="${flexive.dist.dir}">
             <fileset file="${flexive.base.build.dir}/flexive-srcOnly.zip"/>
         </copy>
-        
-        <!-- Create flexive ZIP file -->
-        <zip destfile="${flexive.base.build.dir}/${dist.bin.file}">
+
+        <!-- Create flexive distribution w/ backend ZIP file -->
+        <zip destfile="${flexive.base.build.dir}/${dist.bin-all.file}">
             <fileset dir="${basedir}" includes="flexive-dist/**"/>
-            <zipfileset prefix="flexive-dist" dir="${basedir}/legal" includes="LICENSE.txt,GPL.txt"/>
+            <zipfileset prefix="flexive-dist" dir="${basedir}/legal" includes="LICENSE.txt,LGPL.txt,GPL.txt"/>
         </zip>
-	    <copy file="${flexive.base.build.dir}/${dist.bin.file}" toFile="${flexive.base.build.dir}/flexive-dist.zip"/>
+        <copy file="${flexive.base.build.dir}/${dist.bin-all.file}" toFile="${flexive.base.build.dir}/flexive-dist.zip"/>
+        <!-- Create flexive distribution w/o backend and GPL'd files -->
+        <zip destfile="${flexive.base.build.dir}/${dist.bin.file}">
+            <fileset dir="${basedir}" includes="flexive-dist/**" excludes="**/flexive-backend/, **/extlib/mysql-connector*"/>
+            <zipfileset prefix="flexive-dist" dir="${basedir}/legal" includes="LICENSE.txt,LGPL.txt"/>
+        </zip>
     </target>
 
     <target name="dist.srcOnly" depends="prepare" description="Create a ZIP file with all sources of the current flexive installation (excluding build files and libraries)">

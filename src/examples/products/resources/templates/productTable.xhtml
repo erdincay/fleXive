@@ -1,0 +1,46 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:c="http://java.sun.com/jstl/core"
+    xmlns:fx="http://www.flexive.com/jsf/core">
+
+Renders a product overview table.
+
+Parameters:
+	value - a data model that yields the result rows of a product query.
+            The first selected columns must be @pk, product/name, product/price,
+            and product/variant/articleNumber.
+
+<ui:composition>
+
+    <h:dataTable var="row" value="#{value}" styleClass="products">
+        <h:column>
+            <fx:thumbnail pk="#{row[0]}"/>
+        </h:column>
+        <h:column>
+            <f:facet name="header">
+                #{fxMessageBean['products.productTable.column.product']}
+            </f:facet>
+            <fx:resultValue value="#{row[1]}"/>
+        </h:column>
+        <h:column>
+            <f:facet name="header">
+                #{fxMessageBean['products.productTable.column.price']}
+            </f:facet>
+            <fx:resultValue value="#{row[2]}"/> EUR
+        </h:column>
+        <h:column>
+            <h:commandLink action="productDetails">
+                <f:setPropertyActionListener value="#{row[0]}" target="#{productBean.pk}"/>
+                <f:setPropertyActionListener value="#{row[3]}" target="#{productBean.articleNumber}"/>
+                #{fxMessageBean['products.productTable.button.details']}
+            </h:commandLink>
+        </h:column>
+    </h:dataTable>
+
+</ui:composition>
+
+</html>

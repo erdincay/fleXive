@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src/java/ejb"/>
+	<classpathentry kind="src" path="src/java/shared"/>
+	<classpathentry kind="src" path="src/java/war"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/flexive"/>
+    <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+    <classpathentry kind="output" path="bin"/>
+</classpath>

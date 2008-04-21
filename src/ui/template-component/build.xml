@@ -3,7 +3,7 @@
     Basic flexive component buildfile.
 
     @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
-    @version $Rev: 1418 $
+    @version $Rev$
 -->
 <project name="template-component" basedir="." default="package">
     <property name="fxComponent" value="template-component"/>

@@ -1,0 +1,28 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:fx="http://www.flexive.com/jsf/core"
+      xmlns:products="http://www.flexive.com/jsf/examples/products">
+<head>
+    <fx:includes/>
+    <t:stylesheet path="/products.css"/>
+</head>
+
+<body>
+
+    <h:form>
+
+        <products:productTable value="#{productBean.products}"/>
+
+    </h:form>
+
+    <products:footer/>
+
+</body>
+
+</html>

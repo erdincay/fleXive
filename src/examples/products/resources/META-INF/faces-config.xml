@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE faces-config
+        PUBLIC "-//Sun Microsystems, Inc.//DTD JavaServer Faces Config 1.0//EN"
+        "http://java.sun.com/dtd/web-facesconfig_1_0.dtd">
+<faces-config>
+
+    <!-- Add your JSF beans and components to this file -->
+
+    <!-- Facelets View Handler Definition. Never remove this one. -->
+    <application>
+        <view-handler>
+            com.sun.facelets.FaceletViewHandler
+        </view-handler>
+    </application>
+
+    <!-- Our demo managed beans -->
+    <managed-bean>
+        <managed-bean-name>productBean</managed-bean-name>
+        <managed-bean-class>com.flexive.example.war.ProductBean</managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>manufacturerBean</managed-bean-name>
+        <managed-bean-class>com.flexive.example.war.ManufacturerBean</managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <navigation-rule>
+        <from-view-id>*</from-view-id>
+
+        <navigation-case>
+            <from-outcome>productDetails</from-outcome>
+            <to-view-id>/productDetails.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>manufacturerDetails</from-outcome>
+            <to-view-id>/manufacturerDetails.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>home</from-outcome>
+            <to-view-id>/index.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+</faces-config>

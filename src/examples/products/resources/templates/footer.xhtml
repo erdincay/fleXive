@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:c="http://java.sun.com/jstl/core"
+    xmlns:fx="http://www.flexive.com/jsf/core">
+
+Renders the page footer.
+
+<ui:composition>
+
+    <hr width="80%"/>
+
+    <!-- Language select -->
+    <h:form>
+        <h:panelGrid columns="2">
+            <h:column>
+                <h:selectOneRadio value="${fxSystemBean.updateLanguageId}">
+                    <f:selectItem itemValue="1" itemLabel="#{fxMapBean.language[1].label}"/>
+                    <f:selectItem itemValue="2" itemLabel="#{fxMapBean.language[2].label}"/>
+                </h:selectOneRadio>
+            </h:column>
+            <h:column>
+                <h:commandButton action="#{fxSystemBean.updateLanguage}" value="#{fxMessageBean['products.footer.button.changeLanguage']}"/>
+            </h:column>
+        </h:panelGrid>
+    </h:form>
+
+</ui:composition>
+
+</html>

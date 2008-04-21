@@ -1,0 +1,25 @@
+/* Stylesheet for the products flexive application */
+
+body {
+    font-family: Verdana, Arial, sans-serif;
+}
+
+table.products td {
+    padding: 1em;
+}
+
+h1 {
+    margin-bottom: 0.5em;
+}
+
+.price {
+    font-style: italic;
+}
+
+.description {
+    margin: 1em;
+}
+
+.images {
+    margin: 1em;
+}

@@ -6,7 +6,7 @@
     fxComponent - name of the component, basename of the generated files
 
     @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
-    @version $Rev: 1422 $
+    @version $Rev$
 -->
 <project name="flexive-component" basedir=".">
     <!-- Get our directory (basedir references to the project base directory) -->

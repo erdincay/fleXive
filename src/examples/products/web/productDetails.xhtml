@@ -1,0 +1,88 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:fx="http://www.flexive.com/jsf/core"
+      xmlns:products="http://www.flexive.com/jsf/examples/products">
+<head>
+    <fx:includes/>
+    <t:stylesheet path="/products.css"/>
+</head>
+
+<body>
+
+    <h:form>
+        <t:saveState value="#{productBean.pk}"/>
+        <t:saveState value="#{productBean.articleNumber}"/>
+
+        <h:commandLink action="home">#{fxMessageBean['products.button.backToProducts']}</h:commandLink>
+
+        <fx:content var="product" pk="#{productBean.pk}">
+            <div class="product">
+                <h1>
+                    #{product.name}
+                </h1>
+
+                <ui:fragment rendered="#{!empty product.manufacturer}">
+                    <div class="manufacturer">
+                        <h:commandLink action="manufacturerDetails">#{product.manufacturer$.name}
+                            <f:setPropertyActionListener value="#{product.manufacturer.defaultTranslation}"
+                                                         target="#{manufacturerBean.pk}"/>
+                        </h:commandLink>
+                    </div>
+                </ui:fragment>
+
+                <div class="articleNumber">
+                    #{fxMessageBean['products.product.articleNumber']}: #{productBean.articleNumber}
+                </div>
+
+                <div class="price">
+                    #{product.price} EUR
+                </div>
+
+                <div class="images">
+                    <!-- Render the generic product image -->
+                    <ui:repeat var="image" value="#{product.image$list}">
+                        <fx:thumbnail binary="#{image}"/>
+                    </ui:repeat>
+
+                    <!-- Add the current variant's images -->
+                    <ui:repeat var="variant" value="#{product.variant$list}">
+                        <ui:fragment rendered="#{variant.articleNumber eq productBean.articleNumber}">
+                            <ui:repeat var="image" value="#{variant.image$list}">
+                                <fx:thumbnail binary="#{image}"/>
+                            </ui:repeat>
+                        </ui:fragment>
+                    </ui:repeat>
+                </div>
+
+                <div class="variants">
+                    <ul>
+                        <ui:repeat var="variant" value="#{product.variant$list}">
+                            <li>
+                                <h:commandLink>#{variant.color}
+                                    <f:setPropertyActionListener value="#{variant.articleNumber}" target="#{productBean.articleNumber}"/>
+                                </h:commandLink>
+
+                                (#{variant.articleNumber})
+                            </li>
+                        </ui:repeat>
+                    </ul>
+                </div>
+
+                <div class="description">
+                    #{product.description}
+                </div>
+            </div>
+        </fx:content>
+    </h:form>
+
+    <products:footer/>
+
+</body>
+
+</html>

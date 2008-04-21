@@ -1,17 +1,30 @@
 /***************************************************************
- *  This file is part of the [fleXive](R) project.
+ *  This file is part of the [fleXive](R) framework.
  *
- *  The original implementation is based on java-diff to be found
- *  at http://www.incava.org/projects/java/java-diff
- *  java-diff is licensed under the LGPL v2.1 as is this file.
- *  It is basically a "generified" version using auto-boxing
- *  of the original version.
+ *  Copyright (c) 1999-2008
+ *  UCS - unique computing solutions gmbh (http://www.ucs.at)
+ *  All rights reserved
+ *
+ *  The [fleXive](R) project is free software; you can redistribute
+ *  it and/or modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation.
+ *
+ *  The GNU Lesser General Public License can be found at
+ *  http://www.gnu.org/licenses/lgpl.html.
+ *  A copy is found in the textfile LGPL.txt and important notices to the
+ *  license from the author are found in LICENSE.txt distributed with
+ *  these libraries.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  For further information about UCS - unique computing solutions gmbh,
+ *  please see the company website: http://www.ucs.at
  *
  *  For further information about [fleXive](R), please see the
  *  project website: http://www.flexive.org
- *
- *  For further information about java-diff, please see the
- *  project website: http://www.incava.org/projects/java/java-diff
  *
  *
  *  This copyright notice MUST APPEAR in all copies of the file!

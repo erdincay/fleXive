@@ -3,7 +3,7 @@
     Shared dist buildfile properties
 
     @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
-    @version $Rev: 1422 $
+    @version $Rev$
 -->
 <project name="flexive-properties-dist" basedir=".">
 
