@@ -17,10 +17,16 @@
     </para>
 
     <para>
-        &Flexive; is a JavaEE 5 open-source (GPL 2.0) framework for the development of complex and evolving
+        &Flexive; is a JavaEE 5 open-source (LGPL) framework for the development of complex and evolving
         (web-)applications. It speeds up development as it handles numerous important application issues and keeps your
         application flexible over the development-cycle. It is based on the lastest industry-standards like EJB 3, JSF,
         etc.
+    </para>
+
+    <para>
+        The &Flexive; backend application is an optional application built on top of the framework and is licensed under the
+        GNU General Public License (GPL). It helps you to visually manage most aspects of &flexive; - like defining data structures,
+        building queries, manage users and security, etc. 
     </para>
 
     <para>

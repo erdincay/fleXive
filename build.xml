@@ -320,7 +320,7 @@
 				<path path="${build.framework.classes.dir}"/>
 			</classpath>
 		</javac-call>
-        <makeMessages srcDir="${resources.ui.shared.dir}/messages" dest="${build.ui.meta.dir}/ApplicationMessages"/>
+        <makeMessages srcDir="${resources.ui.jsf.dir}/messages" dest="${build.ui.meta.dir}/ApplicationMessages"/>
 	</target>
 
     <target name="compile.ui" depends="compile.ui.shared,jar.jsf.components">
