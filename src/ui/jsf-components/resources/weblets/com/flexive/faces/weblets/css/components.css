@@ -178,9 +178,13 @@ select.queryValueComparator {
     width: 150px;
 }
 
-.queryRoot input.fxValueTextInput, .queryRoot .fxValueInputElementWidth {
-    width: 120px;
+.queryRoot .fxValueInputElementWidth {
+    width: 122px;
     overflow: hidden;
+}
+
+.queryRoot input.fxValueTextInput {
+    width: 120px;
 }
 
 .queryRoot textarea.fxValueTextArea, .queryRoot textarea.fxValueTextAreaHtml {

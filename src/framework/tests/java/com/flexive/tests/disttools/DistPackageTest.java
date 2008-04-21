@@ -97,7 +97,7 @@ public class DistPackageTest {
                 // flexive JAR distribution
                 "/lib/flexive-ant.jar", "/lib/flexive-ejb.jar", "/lib/flexive-extractor.jar",
                 "/lib/flexive-shared.jar",
-                "/lib/flexive-sqlParser.jar", "/lib/flexive-ui-shared.jar",
+                "/lib/flexive-sqlParser.jar", "/lib/flexive-web-shared.jar",
 
                 // basic build files
                 "/build.xml", "/build.project.xml", "/build.component.xml", "/database.properties",

@@ -424,8 +424,8 @@
         	<sourcePath path="${flexive.src.ui.shared.dir}"/>
             <class location="${flexive.build.framework.jar.dir}/flexive-shared.jar"/>
             <class location="${flexive.build.framework.jar.dir}/flexive-ejb.jar"/>
-            <class location="${build.ui.jar.dir}/flexive-ui.jar"/>
-            <class location="${build.ui.jar.dir}/flexive-ui-shared.jar"/>
+            <class location="${build.ui.jar.dir}/flexive-backend.jar"/>
+            <class location="${build.ui.jar.dir}/flexive-web-shared.jar"/>
             <class location="${build.ui.jar.dir}/flexive-plugin-jsf-core.jar"/>
             <class location="${build.ui.jar.dir}/flexive-plugin-jsf-globalconfig.jar"/>
             <auxClasspath refid="classpath.build.framework"/>
