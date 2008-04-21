@@ -15,6 +15,7 @@ var FxMultiLanguageValueInput = function(id, baseRowId, rowIds, languageSelectId
 FxMultiLanguageValueInput.prototype = {
     onLanguageChanged: function(languageSelect) {
         this.showLanguage(languageSelect.options[languageSelect.selectedIndex].value);
+        _fixHtmlEditorsIE();
     },
 
     showRow: function(rowId) {
@@ -70,6 +71,18 @@ function setLanguageOnAllInputs(languageId) {
         }
     }
     fxValueInputList = newList;     // store new list without defunct inputs
+    _fixHtmlEditorsIE();
+}
+
+// trigger tinyMCE repaint on IE
+function _fixHtmlEditorsIE() {
+    if (typeof(window.tinyMCE) != 'undefined' && tinyMCE.isIE) {
+        for (var instanceName in tinyMCE.instances) {
+            if (tinyMCE.isInstance(tinyMCE.instances[instanceName])) {
+                tinyMCE.execInstanceCommand(instanceName, "mceCleanup");
+            }
+        }
+    }
 }
 
 
