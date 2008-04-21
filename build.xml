@@ -536,6 +536,12 @@
         <division-setup database="flexiveTest"/>
     </target>
 
+    <target name="examples">
+        <ant antfile="${basedir}/src/examples/helloworld/build.xml" inheritAll="false"/>
+        <ant antfile="${basedir}/src/examples/products/build.xml" inheritAll="false"/>
+        <ant antfile="${basedir}/src/examples/tutorial01-documentstore/build.xml" inheritAll="false"/>
+    </target>
+
     <target name="dist.prepare">
         <delete dir="${flexive.dist.dir}"/>
         <mkdir dir="${flexive.dist.dir}"/>
@@ -544,7 +550,10 @@
         <echo file="${flexive.dist.apps.disabled.dir}/README.txt">Use this directory for flexive applications that should not be included in flexive.ear.</echo>
     </target>
 
-    <target name="dist" depends="jar.all,dist.prepare,tests.package.dist,dist.srcOnly" description="Build a distribution of all jars, wars and ears">
+    <target name="dist" depends="jar.all,dist.prepare,tests.package.dist,dist.srcOnly,dist.assemble,examples,dist.package" description="Build a distribution of all jars, wars and ears">
+    </target>
+
+    <target name="dist.assemble">
         <svnVersion property="dist.build.number"/>
         <groovy>
             properties['dist.bin.file'] = properties['flexive.dist'].replaceAll("@@build.number@@", properties['dist.build.number'])+"-bin.zip"
@@ -623,11 +632,18 @@ database.password=a
         <copy todir="${flexive.dist.dir}">
             <fileset file="${flexive.base.build.dir}/flexive-srcOnly.zip"/>
         </copy>
+    </target>
 
-        <!-- Create flexive distribution w/ backend ZIP file -->
+    <target name="dist.package">
+        <!-- Create flexive distribution w/ backend and examples ZIP file -->
         <zip destfile="${flexive.base.build.dir}/${dist.bin-all.file}">
             <fileset dir="${basedir}" includes="flexive-dist/**"/>
             <zipfileset prefix="flexive-dist" dir="${basedir}/legal" includes="LICENSE.txt,LGPL.txt,GPL.txt"/>
+
+            <!-- Package examples in the applications folder -->
+            <zipfileset prefix="flexive-dist/applications/helloworld" dir="${flexive.drop.dir}" includes="helloworld*"/>
+            <zipfileset prefix="flexive-dist/applications/tutorial01-documentstore" dir="${flexive.drop.dir}" includes="tutorial01-documentstore*"/>
+            <zipfileset prefix="flexive-dist/applications/products" dir="${flexive.drop.dir}" includes="products*"/>
         </zip>
         <copy file="${flexive.base.build.dir}/${dist.bin-all.file}" toFile="${flexive.base.build.dir}/flexive-dist.zip"/>
         <!-- Create flexive distribution w/o backend and GPL'd files -->
