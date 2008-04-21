@@ -96,7 +96,7 @@
 
               <!-- help button -->
             <adm:commandButton labelKey="StructureEditor.button.help" location="toolbar" lockscreen="false"
-                        icon="help" onclick="loadContentPage('adm/structure/content.jsf');return false;" id="helpButton"/>
+                        icon="help" onclick="window.open('adm/structure/content.jsf', 'structureEditorHelp').focus();return false;" id="helpButton"/>
 
             <ui:fragment rendered="#{groupEditorBean.group.new}">
                 <fx:formRow labelKey="GroupEditor.label.assignmentGroupMode" id="assignmentGroupMode">
