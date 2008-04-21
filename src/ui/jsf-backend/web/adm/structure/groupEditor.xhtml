@@ -94,9 +94,7 @@
                   </table>
            </fx:fieldSet>
 
-              <!-- help button -->
-            <adm:commandButton labelKey="StructureEditor.button.help" location="toolbar" lockscreen="false"
-                        icon="help" onclick="window.open('adm/structure/content.jsf', 'structureEditorHelp').focus();return false;" id="helpButton"/>
+            <ui:include src="../templates/structureEditorHelpButton.xhtml"/>
 
             <ui:fragment rendered="#{groupEditorBean.group.new}">
                 <fx:formRow labelKey="GroupEditor.label.assignmentGroupMode" id="assignmentGroupMode">

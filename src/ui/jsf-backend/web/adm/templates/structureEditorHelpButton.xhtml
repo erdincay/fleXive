@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin">
+
+Adds a help button to the toolbar which pops up help for the structure editor.
+For appropriate rendering, the including page should also include content.css
+
+<ui:composition>
+    <!-- help popup -->
+    <rich:modalPanel id="helpPanel" height="250" width="250" resizeable="true" top="10" left="15">
+        <f:facet name="header">
+            <h:panelGroup>
+                <h:outputText value="#{fxMessageBean['StructureEditor.help.title']}"/>
+            </h:panelGroup>
+        </f:facet>
+        <f:facet name="controls">
+           <h:panelGroup>
+                <h:graphicImage value="/adm/images/toolbar/close.png" style="cursor:pointer" id="closeIcon"/>
+                <rich:componentControl for="helpPanel" attachTo="closeIcon" operation="hide" event="onclick"/>
+            </h:panelGroup>
+        </f:facet>
+
+            <h:outputLink value="javascript:void(0)" id="closeLink">
+                #{fxMessageBean['StructureEditor.help.close']}
+                <rich:componentControl for="helpPanel" attachTo="closeLink" operation="hide" event="onclick"/>
+            </h:outputLink>
+            <br/>
+            <br/>
+            <ui:include src="structureEditorHelpContent.xhtml"/>
+    </rich:modalPanel>
+
+
+      <!-- help button -->
+    <adm:commandButton labelKey="StructureEditor.button.help" location="toolbar" lockscreen="false"
+                icon="help" onclick="Richfaces.showModalPanel('frm:helpPanel');return false" id="helpButton">
+    </adm:commandButton>
+
+</ui:composition>
+</html>

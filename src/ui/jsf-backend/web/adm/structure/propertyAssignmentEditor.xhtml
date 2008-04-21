@@ -145,9 +145,7 @@
                 </ui:fragment>
             </fx:fieldSet>
 
-              <!-- help button -->
-            <adm:commandButton labelKey="StructureEditor.button.help" location="toolbar" lockscreen="false"
-                        icon="help" onclick="window.open('adm/structure/content.jsf', 'structureEditorHelp').focus();return false;" id="helpButton"/>
+            <ui:include src="../templates/structureEditorHelpButton.xhtml"/>
 
             <ui:fragment rendered="#{propertyEditorBean.structureManagement and not propertyEditorBean.editMode}">
                 <adm:commandButton labelKey="PropertyEditor.button.editMode" location="both"

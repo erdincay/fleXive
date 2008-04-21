@@ -190,9 +190,7 @@
                     </fx:fieldSet>
                 </ui:fragment>
 
-                  <!-- help button -->
-            <adm:commandButton labelKey="StructureEditor.button.help" location="toolbar" lockscreen="false"
-                        icon="help" onclick="window.open('adm/structure/content.jsf', 'structureEditorHelp').focus();return false;" id="helpButton"/>
+                <ui:include src="../templates/structureEditorHelpButton.xhtml"/>   
 
                 <ui:fragment rendered="#{not groupEditorBean.group.new and not groupEditorBean.editMode and groupEditorBean.structureManagement}">
                     <adm:commandButton labelKey="GroupEditor.button.editMode" location="both"
