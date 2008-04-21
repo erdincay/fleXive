@@ -131,8 +131,6 @@
             </fx:fieldSet>
         </div>
 
-        <ui:include src="../templates/structureEditorHelpButton.xhtml"/>
-
         <ui:fragment rendered="#{not typeEditorBean.type.new and not typeEditorBean.editMode and (typeEditorBean.structureManagement or fxSystemBean.isInRole['ScriptManagement'])}">
                 <adm:commandButton labelKey="TypeEditor.button.editMode" location="both"
                         icon="edit"  action="toggleEditMode"  bean="#{typeEditorBean}" id="editModeButton"/>
@@ -149,6 +147,10 @@
                         icon="cancel" id="cancelButton"
                         onclick="parent.getStructureNavFrame().openNode(#{typeEditorBean.type.id}, true);return false;"/>
         </ui:fragment>
+
+        <!-- help button-->
+        <ui:include src="../templates/structureEditorHelpButton.xhtml"/>
+
         <adm:toolbarPluginButtons/>
      </h:form>
 </ui:define>

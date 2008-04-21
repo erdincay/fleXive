@@ -339,8 +339,6 @@
                 <fx:resultValue id="storageMode" value="#{typeEditorBean.type.storageMode.label}"/>
             </fx:formRow>
 
-            <ui:include src="../templates/structureEditorHelpButton.xhtml"/>
-
             <ui:fragment rendered="#{not typeEditorBean.type.new and not typeEditorBean.editMode and typeEditorBean.structureManagement}">
                 <adm:commandButton labelKey="TypeEditor.button.editMode" location="both"
                         icon="edit"  action="toggleEditMode"  bean="#{typeEditorBean}" id="editModeButton"/>
@@ -370,9 +368,12 @@
             </ui:fragment>
 
             <ui:fragment rendered="#{not typeEditorBean.type.new}">
-                <adm:commandButton labelKey="TypeEditor.button.export" location="both" separator="before" lockscreen="false"
+                <adm:commandButton labelKey="TypeEditor.button.export" location="both" lockscreen="false"
                         icon="export" onclick="exportType('#{typeEditorBean.name}');return false;" id="exportButton"/>
             </ui:fragment>
+
+            <!-- help button-->
+            <ui:include src="../templates/structureEditorHelpButton.xhtml"/>
 
             <adm:toolbarPluginButtons/>
 

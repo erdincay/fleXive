@@ -24,17 +24,17 @@ For appropriate rendering, the including page should also include content.css
         </f:facet>
         <f:facet name="controls">
            <h:panelGroup>
-                <h:graphicImage value="/adm/images/toolbar/close.png" style="cursor:pointer" id="closeIcon"/>
+                <h:graphicImage value="/adm/images/toolbar/close.png" style="cursor:pointer" id="closeIcon" alt="#{fxMessageBean['StructureEditor.help.close']}"/>
                 <rich:componentControl for="helpPanel" attachTo="closeIcon" operation="hide" event="onclick"/>
             </h:panelGroup>
         </f:facet>
 
-            <h:outputLink value="javascript:void(0)" id="closeLink">
+            <!--h:outputLink value="javascript:void(0)" id="closeLink">
                 #{fxMessageBean['StructureEditor.help.close']}
                 <rich:componentControl for="helpPanel" attachTo="closeLink" operation="hide" event="onclick"/>
             </h:outputLink>
             <br/>
-            <br/>
+            <br/-->
             <ui:include src="structureEditorHelpContent.xhtml"/>
     </rich:modalPanel>
 

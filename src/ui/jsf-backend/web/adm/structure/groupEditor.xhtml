@@ -94,8 +94,6 @@
                   </table>
            </fx:fieldSet>
 
-            <ui:include src="../templates/structureEditorHelpButton.xhtml"/>
-
             <ui:fragment rendered="#{groupEditorBean.group.new}">
                 <fx:formRow labelKey="GroupEditor.label.assignmentGroupMode" id="assignmentGroupMode">
                     <t:selectOneListbox size="1" id="assignmentGroupMode" value="#{groupEditorBean.groupAssignmentGroupMode}"
@@ -127,6 +125,9 @@
                         icon="cancel" id="cancelButton"
                         onclick="parent.getStructureNavFrame().openNode(#{groupEditorBean.assignment.id}, false);return false;"/>
             </ui:fragment>
+
+            <!-- help button-->
+             <ui:include src="../templates/structureEditorHelpButton.xhtml"/>
 
             <adm:toolbarPluginButtons/>
         </h:form>

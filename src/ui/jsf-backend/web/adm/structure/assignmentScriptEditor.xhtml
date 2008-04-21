@@ -145,8 +145,6 @@
             </fx:fieldSet>
         </div>
     
-        <ui:include src="../templates/structureEditorHelpButton.xhtml"/>
-
         <ui:fragment rendered="#{(not propertyEditorBean.property.new) and (not propertyEditorBean.editMode) and (propertyEditorBean.structureManagement || fxSystemBean.isInRole['ScriptManagement'])}">
                 <adm:commandButton labelKey="PropertyEditor.button.editMode" location="both"
                         icon="edit"  action="toggleEditMode"  bean="#{propertyEditorBean}" id="editModeButton"/>
@@ -163,6 +161,10 @@
                         icon="cancel" id="cancelButton"
                         onclick="parent.getStructureNavFrame().openNode(#{propertyEditorBean.assignment.id}, false);return false;"/>
         </ui:fragment>
+
+        <!-- help button-->
+        <ui:include src="../templates/structureEditorHelpButton.xhtml"/>
+
         <adm:toolbarPluginButtons/>
      </h:form>
 </ui:define>

@@ -108,8 +108,6 @@
                 </div>
             </fx:fieldSet>
 
-            <ui:include src="../templates/structureEditorHelpButton.xhtml"/>
-
             <ui:fragment rendered="#{not groupEditorBean.editMode and groupEditorBean.structureManagement}">
                <adm:commandButton labelKey="GroupEditor.button.editMode" location="both"
                         icon="edit"  action="toggleEditMode"  bean="#{groupEditorBean}" id="editModeButton"/>
@@ -130,6 +128,9 @@
                         icon="cancel" id="cancelButton"
                         onclick="parent.getStructureNavFrame().openNode(#{groupEditorBean.assignment.id}, false);return false;"/>
            </ui:fragment>
+
+            <!-- help button-->
+            <ui:include src="../templates/structureEditorHelpButton.xhtml"/>
 
             <adm:toolbarPluginButtons/>
         </h:form>
