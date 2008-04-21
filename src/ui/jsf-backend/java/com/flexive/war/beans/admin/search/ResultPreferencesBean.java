@@ -155,6 +155,11 @@ public class ResultPreferencesBean {
         }
     }
 
+    public void loadSystemDefault() {
+        forceSystemDefault = true;
+        resultPreferences = null;
+    }
+
     public String cancel() {
         return ((SearchResultBean) FxJsfUtils.getManagedBean("fxSearchResultBean")).show();
     }

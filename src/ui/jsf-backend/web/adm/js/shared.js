@@ -84,7 +84,7 @@ function getWindowWidth() {
         //Non-IE
         myWidth = window.innerWidth;
     } else if( document.documentElement && ( document.documentElement.clientWidth || document.documentElement.clientHeight ) ) {
-        //IE 6+ in 'standards compliant mode'
+        //IE 6+ in 'standards compliance mode'
         myWidth = document.documentElement.clientWidth;
     } else if( document.body && ( document.body.clientWidth || document.body.clientHeight ) ) {
         //IE 4 compatible

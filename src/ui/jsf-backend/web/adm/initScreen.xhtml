@@ -17,6 +17,7 @@
 
 <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/flexiveRpc.js"></script>
 <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/jsonrpc.js"></script>
+<script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/shared.js"></script>
 
 <div id="initStatus" style="height:1000px;margin-right:auto;margin-left:auto;">
     <center>
@@ -33,7 +34,7 @@
 </div>
 <script type="text/javascript">
     document.getElementById('continue').style.display='none';
-    document.getElementById('initStatus').style.width = (window.innerWidth / 2) + 'px';
+    document.getElementById('initStatus').style.width = (getWindowWidth() / 2) + 'px';
     var polling = window.setInterval("updateStatus()", 1000);
     JSONRpcClient.max_req_active = 2;
     getJsonRpc().SystemInformation.initEnvironment(function (result, exception) {
