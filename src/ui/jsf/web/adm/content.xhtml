@@ -38,9 +38,17 @@
         }
 
         function submitSearch() {
-            if( parent == null || !parent.invokeContentAction )
+            if( parent == null || !parent.invokeContentAction ) {
                 return;
-            parent.invokeContentAction("adm/search/searchResult.jsf", "fulltextSearch", {query: document.searchForm.query.value});
+            }
+            var input = document.searchForm.query;
+            var query = input.value;
+            if (query == null || query.length == 0) {
+                alert("#{fxMessageBean['Global.dialog.emptyQuery']}");
+                input.focus();
+                return;
+            }
+            parent.invokeContentAction("adm/search/searchResult.jsf", "fulltextSearch", {query: query});
         }
         -->
     </script>

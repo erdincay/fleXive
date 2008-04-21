@@ -37,7 +37,14 @@
         }
 
         function submitSearch() {
-            invokeContentAction("adm/search/searchResult.jsf", "fulltextSearch", {query: document.searchForm.query.value});
+            var input = document.searchForm.query;
+            var query = input.value;
+            if (query == null || query.length == 0) {
+                alert("#{fxMessageBean['Global.dialog.emptyQuery']}");
+                input.focus();
+                return;
+            }
+            invokeContentAction("adm/search/searchResult.jsf", "fulltextSearch", {query: query});
         }
 
         function logout() {
@@ -78,7 +85,7 @@
             <div style="position:absolute;right:15px;top:0;" id="fxFastSearch">
                 <h:form id="searchForm">
                     <input type="text" name="query" onkeypress="return onReturnEval(event, 'submitSearch();')"
-                           style="float:left;margin-top:7px;margin-right:3px;width:120px;padding-left:2px;height:16px;border:1px solid #d4d9c4;"/>
+                           style="float:left;margin-top:5px;margin-right:3px;width:120px;padding-left:2px;height:16px;border:1px solid #d4d9c4;"/>
                     <t:graphicImage id="submitQueryButton" styleClass="fxToolbarIcon"
                                     alt="#{fxMessageBean['Global.button.fulltextSearch']}"
                                     title="#{fxMessageBean['Global.button.fulltextSearch']}"
