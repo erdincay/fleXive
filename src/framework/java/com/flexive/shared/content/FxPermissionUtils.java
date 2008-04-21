@@ -174,7 +174,7 @@ public class FxPermissionUtils {
     private static void addACLName(List<String> list, FxLanguage lang, long acl) {
         String name;
         try {
-            name = CacheAdmin.getEnvironment().getACL(acl).getLabel().getTranslation(lang);
+            name = CacheAdmin.getEnvironment().getACL(acl).getLabel().getBestTranslation(lang);
         } catch (Exception e) {
             name = "#" + acl;
         }

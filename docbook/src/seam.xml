@@ -140,6 +140,30 @@
                         the JSF components.
                     </para>
                 </listitem>
+
+                <listitem>
+                    <para>
+                        Add a suffix pattern for the
+                        <code>Faces Servlet</code>
+                        as the
+                        <emphasis>last</emphasis>
+                        servlet mapping to
+                        <filename>resources/WEB-INF/web.xml</filename>.
+                        Otherwise all Weblets resources will have a
+                        <code>.seam</code>
+                        prefix instead of the original file extension.
+
+                        <programlisting language="xml"><![CDATA[   <servlet-mapping>
+      <servlet-name>Faces Servlet</servlet-name>
+      <url-pattern>*.seam</url-pattern>
+   </servlet-mapping>
+
+   <servlet-mapping>
+      <servlet-name>Faces Servlet</servlet-name>
+      <url-pattern>/faces/*</url-pattern>
+   </servlet-mapping>]]></programlisting>
+                    </para>
+                </listitem>
             </itemizedlist>
         </para>
 
