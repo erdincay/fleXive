@@ -4,7 +4,8 @@ All rights reserved
 
 The [fleXive](R) framework is free software; you can redistribute
 it and/or modify it under the terms of the GNU Lesser General Public
-License (LGPL) as published by the Free Software Foundation.
+License (LGPL) version 2.1 or higher as published by the 
+Free Software Foundation.
 
 The GNU Lesser General Public License can be found at
 http://www.gnu.org/licenses/lgpl.html.
@@ -14,7 +15,9 @@ these libraries.
 
 The [fleXive](R) backend application is free software; you can redistribute
 it and/or modify it under the terms of the GNU General Public
-License (GPL) as published by the Free Software Foundation.
+License (GPL) as published by the Free Software Foundation;
+either version 2 of the License, or (at your option) any
+later version.
 
 The GNU General Public License can be found at
 http://www.gnu.org/licenses/gpl.html.
