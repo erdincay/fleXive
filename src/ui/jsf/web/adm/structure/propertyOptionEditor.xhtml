@@ -190,6 +190,10 @@
                 </fx:fieldSet>
             </ui:fragment>
 
+              <!-- help button -->
+            <adm:commandButton labelKey="StructureEditor.button.help" location="toolbar" lockscreen="false"
+                        icon="help" onclick="loadContentPage('adm/structure/content.jsf');return false;" id="helpButton"/>
+
             <ui:fragment rendered="#{not propertyEditorBean.property.new and not propertyEditorBean.editMode and propertyEditorBean.structureManagement}">
                 <adm:commandButton labelKey="PropertyEditor.button.editMode" location="both"
                 icon="edit"  action="toggleEditMode"  bean="#{propertyEditorBean}" id="editModeButton"/>

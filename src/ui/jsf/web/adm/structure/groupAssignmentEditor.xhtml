@@ -108,6 +108,10 @@
                 </div>
             </fx:fieldSet>
 
+              <!-- help button -->
+            <adm:commandButton labelKey="StructureEditor.button.help" location="toolbar" lockscreen="false"
+                icon="help" onclick="loadContentPage('adm/structure/content.jsf');return false;" id="helpButton"/>
+
             <ui:fragment rendered="#{not groupEditorBean.editMode and groupEditorBean.structureManagement}">
                <adm:commandButton labelKey="GroupEditor.button.editMode" location="both"
                         icon="edit"  action="toggleEditMode"  bean="#{groupEditorBean}" id="editModeButton"/>

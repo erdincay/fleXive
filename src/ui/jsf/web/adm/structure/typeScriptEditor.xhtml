@@ -130,6 +130,11 @@
                 </a4j:outputPanel>
             </fx:fieldSet>
         </div>
+
+          <!-- help button -->
+        <adm:commandButton labelKey="StructureEditor.button.help" location="toolbar" lockscreen="false"
+                    icon="help" onclick="loadContentPage('adm/structure/content.jsf');return false;" id="helpButton"/>
+
         <ui:fragment rendered="#{not typeEditorBean.type.new and not typeEditorBean.editMode and (typeEditorBean.structureManagement or fxSystemBean.isInRole['ScriptManagement'])}">
                 <adm:commandButton labelKey="TypeEditor.button.editMode" location="both"
                         icon="edit"  action="toggleEditMode"  bean="#{typeEditorBean}" id="editModeButton"/>
@@ -146,7 +151,7 @@
                         icon="cancel" id="cancelButton"
                         onclick="parent.getStructureNavFrame().openNode(#{typeEditorBean.type.id}, true);return false;"/>
         </ui:fragment>
-
+        <adm:toolbarPluginButtons/>
      </h:form>
 </ui:define>
 </ui:composition>
