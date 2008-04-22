@@ -274,7 +274,10 @@ div.formLabel {
     width: 120px;
     height: 12px;
     padding: 2px;
-    white-space: nowrap;
+}
+
+div.formLabel label {
+    white-space: normal;
 }
 
 div.formInputElement {

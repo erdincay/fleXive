@@ -40,7 +40,7 @@
                 </ui:fragment>
 
                 <div class="description">
-                    #{manufacturer.description}
+                    <h:outputText value="#{manufacturer.description}" escape="false"/>
                 </div>
 
                 <h3>#{fxMessageBean['products.manufacturer.products']} #{manufacturer.name}:</h3>
