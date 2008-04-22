@@ -62,7 +62,7 @@
                 <!-- Save query options -->
                 <fx:formRow labelKey="QueryEditor.label.query.save" id="saveQuery">
                     <t:selectBooleanCheckbox id="saveQuery" value="#{fxQueryEditorBean.saveQuery}"
-                                             onchange="toggleSaveQuery(this)"/>
+                                             onclick="toggleSaveQuery(this)"/>
                 </fx:formRow>
 
                 <h:panelGroup id="saveQueryData" style="display:#{fxQueryEditorBean.saveQuery ? 'block' : 'none'}">
@@ -75,7 +75,7 @@
 
                 <fx:formRow labelKey="QueryEditor.label.briefcase.create" id="createBriefcase">
                     <t:selectBooleanCheckbox id="createBriefcase" value="#{fxSearchResultBean.createBriefcase}"
-                                             onchange="toggleBriefcase(this)"/>
+                                             onclick="toggleBriefcase(this)"/>
                 </fx:formRow>
 
                 <h:panelGroup id="briefcaseData" style="display:#{fxSearchResultBean.createBriefcase ? 'block' : 'none'}">
