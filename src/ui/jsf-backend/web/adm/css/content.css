@@ -306,8 +306,8 @@ table.welcometbl tbody tr td {
     vertical-align: top;
 }
 table.welcometbl tbody tr td table.links tbody tr td {
-    background-image: url("../../adm/images/contentEditor/arrow_green16x16.png");
+    background-image: url("../../adm/images/commandButton/flexive_arrow.png");
     background-repeat: no-repeat;
     background-position: 4px 50%;
-    padding-left: 22px;
+    padding-left: 26px;
 }

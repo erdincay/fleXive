@@ -78,10 +78,11 @@
         </ui:fragment>
         <br/>
 
-        <table class="welcometbl">
+        <h:form id="searchForm">
+        <table class="welcometbl" width="100%">
             <tr>
                 <td>
-                    <table class="dojoTable">
+                    <table class="dojoTable" width="100%">
                         <thead>
                             <tr>
                                 <th>#{fxMessageBean['Welcome.label.shortcuts']}</th>
@@ -92,36 +93,37 @@
                             <td><a href="javascript:gotoAdmin();">#{fxMessageBean['Welcome.label.administration']}</a></td>
                         </tr>
                         <tr>
-                            <td><a href="javascript:createType();">#{fxMessageBean['Welcome.label.newType']}</a></td>
-                        </tr>
-                        <tr>
                             <td><a href="javascript:createQuery();">#{fxMessageBean['Welcome.label.createQuery']}</a></td>
                         </tr>
                         <tr>
+                            <td><a href="javascript:createType();">#{fxMessageBean['Welcome.label.newType']}</a></td>
+                        </tr>
+                        <tr>
                             <td>
-                                <h:form>
+                                #{fxMessageBean['Welcome.label.createContent']}<br/>
+                                <div style="margin-top:3px;">
                                     <t:selectOneListbox size="1" id="type" value="#{contentEditorBean.type}">
                                         <f:selectItems value="#{contentEditorBean.editableTypes}"/>
                                     </t:selectOneListbox>
                                     <h:commandLink action="#{contentEditorBean.createNewContent}">
-                                        <t:graphicImage id="submitQueryButton"
-                                                    style="position:relative;top:3px;cursor:pointer;border:none;" alt="search"
+                                        <t:graphicImage id="createContentButton"
+                                                    style="position:relative;top:3px;cursor:pointer;border:none;left:5px;" alt="search"
                                                     url="/adm/images/toolbar/new.png"/>
                                     </h:commandLink>
-                                </h:form>
+                                </div>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <h:form id="searchForm">
+                                #{fxMessageBean['Welcome.label.submitFTSearch']}<br/>
+                                <div style="margin-top:3px;">
                                     <input type="text" name="query"
                                            onkeypress="return onReturnEval(event, 'submitSearch();')"
                                            style="margin-right:3px;width:120px;padding-left:2px;height:16px;border:1px solid #d4d9c4;"/>
                                     <t:graphicImage id="submitQueryButton"
-                                                    style="position:relative;top:3px;cursor:pointer;" alt="search"
+                                                    style="position:relative;top:3px;cursor:pointer;left:5px;" alt="search"
                                                     url="/adm/images/toolbar/search.png" onclick="submitSearch();"/>
-
-                                </h:form>
+                                </div>
                             </td>
                         </tr>
                         <tr>
@@ -131,7 +133,7 @@
                     </table>
                 </td>
                 <td>
-                    <table class="dojoTable links">
+                    <table class="dojoTable links" width="100%">
                         <thead>
                             <tr>
                                 <th>#{fxMessageBean['Welcome.label.links']}</th>
@@ -157,11 +159,9 @@
                         </tr>
                     </table>
                 </td>
-            </tr>
-            <tr>
                 <td>
                     <c:if test="#{fn:length(fxSystemBean.drops) > 0 }">
-                        <table class="dojoTable links">
+                        <table class="dojoTable links" width="100%">
                             <thead>
                                 <tr>
                                     <th>#{fxMessageBean['Welcome.label.drops']}</th>
@@ -178,7 +178,7 @@
                 <td>&nbsp;</td>
             </tr>
         </table>
-
+    </h:form>
 
     <script type="text/javascript">
     <!--
