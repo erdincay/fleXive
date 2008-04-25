@@ -33,11 +33,17 @@ div.FxHTMLInput div.fxValueInputRow {
     width: 80px;
 }
 
-input.fxValueTextInput, textarea.fxValueTextArea, select.fxValueSelectInput, .fxValueInputElementWidth {
+select.fxValueSelectInput, .fxValueInputElementWidth, input.fxValueTextInput, textarea.fxValueTextArea  {
     width: 175px;
 }
 
-input.fxValueTextInput, textarea.fxValueTextArea, select.fxValueSelectInput {
+/* Stretch single-language inputs over space normally occupied by the language select */
+.fxValueInput input[type="text"].singleLanguage,
+.fxValueInput textarea.singleLanguage {
+    width: 100%;
+}
+
+input.fxValueTextInput, textarea.fxValueTextArea, textarea.fxValueTextAreaHtml, select.fxValueSelectInput {
     border: 1px solid gray;
 }
 
@@ -46,7 +52,7 @@ textarea.fxValueTextArea, textarea.fxValueTextAreaHtml {
 }
 
 textarea.fxValueTextAreaHtml {
-    width: 400px;
+    width: 100%;
 }
 
 input.fxValueTextInput {
@@ -271,10 +277,12 @@ div.formRow {
 div.formLabel {
     float: left;
     margin-top: 2px;
+    margin-right: 3px;
     width: 120px;
-    height: 12px;
     padding: 2px;
+
     white-space: nowrap;
+    overflow: hidden;
 }
 
 div.formLabel label {

@@ -37,7 +37,6 @@ import com.flexive.core.security.UserTicketImpl;
 import com.flexive.core.structure.FxEnvironmentImpl;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
 import static com.flexive.shared.EJBLookup.getDivisionConfigurationEngine;
@@ -143,36 +142,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         return code;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public FxScriptInfo getScriptInfo(long scriptId) throws FxApplicationException {
-        Connection con = null;
-        PreparedStatement ps = null;
-        String sql;
-        FxScriptInfo si;
-        try {
-            // Obtain a database connection
-            con = Database.getDbConnection();
-            //            1     2     3     4        5
-            sql = "SELECT SNAME,SDESC,SDATA,STYPE,ACTIVE FROM " + TBL_SCRIPTS + " WHERE ID=?";
-            ps = con.prepareStatement(sql);
-            ps.setLong(1, scriptId);
-            ResultSet rs = ps.executeQuery();
-            if (rs == null || !rs.next())
-                throw new FxNotFoundException("ex.scripting.notFound.id", scriptId);
-            si = new FxScriptInfo(scriptId, FxScriptEvent.getById(rs.getLong(4)), rs.getString(1), rs.getString(2),
-                    rs.getString(3), rs.getBoolean(5));
-        } catch (SQLException exc) {
-            ctx.setRollbackOnly();
-            throw new FxLoadException(LOG, exc, "ex.scripting.load.failed", scriptId, exc.getMessage());
-        } finally {
-            Database.closeObjects(ScriptingEngineBean.class, con, ps);
-        }
-        return si;
-    }
-
+    /** {@inheritDoc} */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public FxScriptInfo[] getScriptInfos() throws FxApplicationException {
         Connection con = null;
@@ -252,7 +222,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void updateScriptCode(long scriptId, String code) throws FxApplicationException {
-        FxScriptInfo si = getScriptInfo(scriptId);
+        FxScriptInfo si = CacheAdmin.getEnvironment().getScript(scriptId);
         updateScriptInfo(si.getId(), si.getEvent(), si.getName(), si.getDescription(), code, si.isActive());
     }
 
@@ -427,6 +397,14 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public FxScriptResult runScript(String scriptName, FxScriptBinding binding) throws FxApplicationException {
+        return runScript(CacheAdmin.getEnvironment().getScript(scriptName).getId(), binding);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public FxScriptResult runScript(long scriptId, FxScriptBinding binding) throws FxApplicationException {
         FxScriptInfo si = CacheAdmin.getEnvironment().getScript(scriptId);
 
@@ -500,7 +478,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         String sql;
         boolean success = false;
         //check existance
-        getScriptInfo(scriptId);
+        CacheAdmin.getEnvironment().getScript(scriptId);
         try {
             long[] derived;
             if (!derivedUsage)
@@ -544,7 +522,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxScriptMappingEntry createAssignmentScriptMapping(long scriptId, long typeId, boolean active, boolean derivedUsage) throws FxApplicationException {
-        FxScriptInfo si = getScriptInfo(scriptId);
+        FxScriptInfo si = CacheAdmin.getEnvironment().getScript(scriptId);
         return createAssignmentScriptMapping(si.getEvent(), scriptId, typeId, active, derivedUsage);
     }
 
@@ -560,7 +538,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         String sql;
         boolean success = false;
         //check existance
-        getScriptInfo(scriptId);
+        CacheAdmin.getEnvironment().getScript(scriptId);
         try {
             long[] derived;
             if (!derivedUsage)
@@ -604,7 +582,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxScriptMappingEntry createTypeScriptMapping(long scriptId, long typeId, boolean active, boolean derivedUsage) throws FxApplicationException {
-        FxScriptInfo si = getScriptInfo(scriptId);
+        FxScriptInfo si = CacheAdmin.getEnvironment().getScript(scriptId);
         return createTypeScriptMapping(si.getEvent(), scriptId, typeId, active, derivedUsage);
     }
 
@@ -746,7 +724,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         String sql;
         boolean success = false;
         //check existance
-        getScriptInfo(scriptId);
+        CacheAdmin.getEnvironment().getScript(scriptId);
         try {
             long[] derived;
             if (!derivedUsage)
@@ -796,7 +774,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         String sql;
         boolean success = false;
         //check existance
-        getScriptInfo(scriptId);
+        CacheAdmin.getEnvironment().getScript(scriptId);
         try {
             long[] derived;
             if (!derivedUsage)

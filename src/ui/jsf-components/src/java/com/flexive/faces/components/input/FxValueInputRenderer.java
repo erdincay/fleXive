@@ -77,6 +77,7 @@ public class FxValueInputRenderer extends Renderer {
     protected static final String CSS_TEXTAREA_HTML = "fxValueTextAreaHtml";
     protected static final String CSS_INPUTELEMENTWIDTH = "fxValueInputElementWidth";
     protected static final String CSS_LANG_ICON = "fxValueInputLanguageIcon";
+    protected static final String CSS_SINGLE_LANG = "singleLanguage";
     private static final String DBG = "fxValueInput: ";
 
     /**

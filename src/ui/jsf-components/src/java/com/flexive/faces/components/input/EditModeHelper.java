@@ -35,8 +35,6 @@ import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.beans.UserConfigurationBean;
 import com.flexive.faces.beans.MessageBean;
 import com.flexive.shared.*;
-import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxSelectList;
 import com.flexive.shared.value.*;
@@ -110,27 +108,6 @@ class EditModeHelper extends RenderHelper {
     }
 
     /**
-     * Ensure that the default language of the given value exists in languages.
-     * If it does not exist and languages is not empty, the first language is chosen
-     * as default language.
-     *
-     * @param value     the FxValue to be checked
-     * @param languages the available languages
-     */
-    private void ensureDefaultLanguageExists(FxValue value, List<FxLanguage> languages) {
-        boolean defaultLanguageExists = false;
-        for (FxLanguage language : languages) {
-            if (language.getId() == value.getDefaultLanguage()) {
-                defaultLanguageExists = true;
-                break;
-            }
-        }
-        if (!defaultLanguageExists && languages.size() > 0) {
-            value.setDefaultLanguage((int)languages.get(0).getId(), true);
-        }
-    }
-
-    /**
      * Render the default language radiobutton for the given language.
      *
      * @param parent    the parent component
@@ -193,7 +170,7 @@ class EditModeHelper extends RenderHelper {
             input.setMaxlength(value.getMaxInputLength());
         }
         input.setValue(getTextValue(value, languageId));
-        input.setStyleClass(FxValueInputRenderer.CSS_TEXT_INPUT);
+        input.setStyleClass(FxValueInputRenderer.CSS_TEXT_INPUT + singleLanguageStyle(languageId));
     }
 
     private void renderTextArea(UIComponent parent, final String inputId, final FxLanguage language) throws IOException {
@@ -221,7 +198,7 @@ class EditModeHelper extends RenderHelper {
         // create selectone component
         final HtmlSelectOneListbox listbox = (HtmlSelectOneListbox) createUISelect(parent, inputId, HtmlSelectOneListbox.COMPONENT_TYPE);
         listbox.setSize(1);
-        listbox.setStyleClass(FxValueInputRenderer.CSS_INPUTELEMENTWIDTH);
+        listbox.setStyleClass(FxValueInputRenderer.CSS_INPUTELEMENTWIDTH + singleLanguageStyle(language));
         // update posted value
         if (selectValue.getTranslation(language) != null) {
             listbox.setValue(String.valueOf(selectValue.getTranslation(language).getId()));
@@ -240,7 +217,7 @@ class EditModeHelper extends RenderHelper {
             // render a single line dropdown
             final HtmlSelectOneListbox listbox = (HtmlSelectOneListbox) createUISelect(parent, inputId, HtmlSelectOneListbox.COMPONENT_TYPE);
             listbox.setSize(1);
-            listbox.setStyleClass(FxValueInputRenderer.CSS_INPUTELEMENTWIDTH);
+            listbox.setStyleClass(FxValueInputRenderer.CSS_INPUTELEMENTWIDTH + singleLanguageStyle(language));
             if (selected.length > 0) {
                 // choose first selected element - other selections get discarded
                 listbox.setValue(selected[0]);
@@ -249,7 +226,7 @@ class EditModeHelper extends RenderHelper {
         } else {
             // render a "multiple" select list
             final HtmlSelectManyListbox listbox = (HtmlSelectManyListbox) createUISelect(parent, inputId, HtmlSelectManyListbox.COMPONENT_TYPE);
-            listbox.setStyleClass(FxValueInputRenderer.CSS_INPUTELEMENTWIDTH);
+            listbox.setStyleClass(FxValueInputRenderer.CSS_INPUTELEMENTWIDTH + singleLanguageStyle(language));
             listbox.setSelectedValues(selected);
             storeSelectItems(listbox, selectValue.getSelectList());
             // automatically limit select list rows for very long lists
@@ -412,6 +389,14 @@ class EditModeHelper extends RenderHelper {
 
     private static String getForm(String inputId) {
         return inputId.substring(0, inputId.indexOf(':'));
+    }
+
+    private static String singleLanguageStyle(long languageId) {
+        return (languageId == -1 ? " " + FxValueInputRenderer.CSS_SINGLE_LANG : "");
+    }
+
+    private static String singleLanguageStyle(FxLanguage language) {
+        return singleLanguageStyle(language != null ? language.getId() : -1);
     }
 
     /**
@@ -688,7 +673,7 @@ class EditModeHelper extends RenderHelper {
                     // and the text area is essential an anonymous div container (not sure why)
                     writer.writeAttribute("name", inputClientId, null);
 //                    }
-                writer.writeAttribute("class", FxValueInputRenderer.CSS_TEXTAREA_HTML, null);
+                writer.writeAttribute("class", FxValueInputRenderer.CSS_TEXTAREA_HTML + singleLanguageStyle(languageId), null);
                 writer.writeText(getTextValue(value, languageId), null);
                 writer.endElement("textarea");
                 writer.startElement("script", null);
@@ -711,7 +696,7 @@ class EditModeHelper extends RenderHelper {
             } else {
                 // render standard text area
                 writer.writeAttribute("name", inputClientId, null);
-                writer.writeAttribute("class", FxValueInputRenderer.CSS_TEXTAREA, null);
+                writer.writeAttribute("class", FxValueInputRenderer.CSS_TEXTAREA + singleLanguageStyle(languageId), null);
                 writer.writeText(getTextValue(value, languageId), null);
                 writer.endElement("textarea");
             }

@@ -64,7 +64,7 @@ public abstract class AbstractSelectableObjectWithLabel implements SelectableObj
      */
     @Override
     public String toString() {
-        return this.getClass().getName() + "[id=" + getId() + "]";
+        return this.getClass().getName() + "[id=" + getId() + ", label=" + getLabel().getBestTranslation() + "]";
     }
 
 }

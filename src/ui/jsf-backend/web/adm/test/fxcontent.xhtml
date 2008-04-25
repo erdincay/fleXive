@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<head>
+    <title>fx:content test cases</title>
+    <fx:includes/>
+</head>
+<body>
+
+    <h:messages/>
+
+    <pre><h:outputText value="#{fxContentViewTestBean.savedXML}" escape="true"/></pre>    
+
+    <h3>fx:content testcases</h3>
+
+    <h4>Create a new content instance</h4>
+
+    <h:form id="createContent" enctype="multipart/form-data">
+        <fx:content var="test" typeName="#{fxContentViewTestBean.typeName}">
+            <c:forEach var="propertyName" items="#{fxContentViewTestBean.testPropertyNames}">
+                <fx:value property="#{propertyName}"/>
+            </c:forEach>
+
+            <fx:fieldSet legend="groupTop">
+                <c:forEach var="propertyName" items="#{fxContentViewTestBean.testPropertyNames}">
+                    <fx:value property="groupTop/#{propertyName}"/>
+                </c:forEach>
+
+                <fx:fieldSet legend="groupNested">
+                    <c:forEach var="propertyName" items="#{fxContentViewTestBean.testPropertyNames}">
+                        <fx:value property="groupTop/groupNested/#{propertyName}"/>
+                    </c:forEach>
+                </fx:fieldSet>
+            </fx:fieldSet>
+
+            <br clear="all"/>
+            <h:commandButton action="#{fxContentViewBean.save}" value="Save">
+                <f:setPropertyActionListener target="#{fxContentViewBean.content}" value="#{test_content}"/>
+                <f:setPropertyActionListener target="#{fxContentViewBean.successMessage}" value="Saved content."/>
+            </h:commandButton>
+        </fx:content>
+    </h:form>
+    
+</body>
+</html>

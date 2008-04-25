@@ -40,9 +40,10 @@ filter = filter HTML output?
     <c:if test="#{empty filter}">
         <c:set var="filter" value="true"/>
     </c:if>
+    <c:set var="inputId" value="#{id}"/>
     <c:if test="#{decorate}">
-        <fx:formRow id="#{id}" label="#{label}">
-            <fx:fxValueInput id="#{id}" value="#{value}" inputMapper="#{inputMapper}" onchange="#{onchange}" readOnly="#{readOnly}" filter="#{filter}"/>
+        <fx:formRow id="#{id}_input_" label="#{label}">
+            <fx:fxValueInput id="#{inputId}" value="#{value}" inputMapper="#{inputMapper}" onchange="#{onchange}" readOnly="#{readOnly}" filter="#{filter}"/>
         </fx:formRow>
     </c:if>
     <c:if test="#{!decorate}"><fx:fxValueInput id="#{id}" value="#{value}" inputMapper="#{inputMapper}" onchange="#{onchange}" readOnly="#{readOnly}" filter="#{filter}"/></c:if>

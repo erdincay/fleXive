@@ -47,6 +47,8 @@ import javax.faces.FacesException;
 import javax.faces.component.UIComponent;
 import java.io.IOException;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * A facelets handler that renders a complete form element for editing or displaying
  * a property of a content instance provided by {@link FxContentView}. The output template
@@ -91,10 +93,8 @@ public class FxValueHandler extends TagHandler {
             final String property = (String) propertyExpression.getValue(ctx);
 
             // assign id, label/labelKey and value based on the enclosing FxContentView instance
-            // if the property contains a slash, return the part after the last slash character as unique ID
             mapper.setVariable("id", ctx.getExpressionFactory().createValueExpression(
-                    property.indexOf('/') != -1 ? property.substring(property.lastIndexOf('/') + 1) : property,
-                    String.class
+                    StringUtils.replace(property, "/", "_"), String.class
             ));
             if (this.getAttribute("labelKey") == null) {
                 // use property label

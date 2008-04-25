@@ -59,21 +59,12 @@ public interface ScriptingEngine {
     String loadScriptCode(long scriptId) throws FxApplicationException;
 
     /**
-     * Get all available information about a script
-     *
-     * @param scriptId id of the requested script
-     * @return FxScriptInfo
-     * @throws FxApplicationException on errors
-     */
-    public FxScriptInfo getScriptInfo(long scriptId) throws FxApplicationException;
-
-    /**
      * Get all available information for all existing scripts
      *
      * @return FxScriptInfo
      * @throws FxApplicationException on errors
      */
-    public FxScriptInfo[] getScriptInfos() throws FxApplicationException;
+    FxScriptInfo[] getScriptInfos() throws FxApplicationException;
 
     /**
      * Update a scripts info
@@ -170,6 +161,16 @@ public interface ScriptingEngine {
     /**
      * Run a script with the given variable binding
      *
+     * @param scriptName name of the script to run
+     * @param binding  variable binding to use (all bound variables have to be serializable!)
+     * @return script result
+     * @throws FxApplicationException on errors
+     */
+    FxScriptResult runScript(String scriptName, FxScriptBinding binding) throws FxApplicationException;
+
+    /**
+     * Run a script with the given variable binding
+     *
      * @param scriptId id of the script to run
      * @param binding  variable binding to use (all bound variables have to be serializable!)
      * @return script result
@@ -186,7 +187,7 @@ public interface ScriptingEngine {
      * @return last script evaluation result
      * @throws FxApplicationException on errors
      */
-    public FxScriptResult runScript(String name, FxScriptBinding binding, String code) throws FxApplicationException;
+    FxScriptResult runScript(String name, FxScriptBinding binding, String code) throws FxApplicationException;
 
     /**
      * Get a list containing script extension and script engine info as 2-dimensional String array
@@ -194,7 +195,7 @@ public interface ScriptingEngine {
      * @return list containing script extension and script engine info as 2-dimensional String array
      * @throws FxApplicationException on errors
      */
-    public List<String[]> getAvailableScriptEngines() throws FxApplicationException;
+    List<String[]> getAvailableScriptEngines() throws FxApplicationException;
 
     /**
      * Run a script

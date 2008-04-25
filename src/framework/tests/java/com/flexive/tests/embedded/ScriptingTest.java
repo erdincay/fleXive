@@ -205,7 +205,6 @@ public class ScriptingTest {
             for (FxScriptInfo si : scripts)
                 se.removeScript(si.getId());
         }
-
     }
 
     private FxScriptInfo createScript(FxAssignment asssignment, FxScriptEvent event) throws FxApplicationException {

@@ -46,7 +46,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 /**
- * Miscellanous test methods for the fxValueInput test page (test_fxvalueinput.xhtml).
+ * Miscellanous test methods for the fxValueInput test page (/adm/test/fxvalueinput.xhtml).
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$

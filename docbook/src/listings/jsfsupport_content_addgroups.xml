@@ -16,15 +16,13 @@
     </ui:repeat>
 
     <!-- Render a button to add a new contact person group to the "data" content instance -->
-    <h:commandLink action="#{fxContentViewBean.add}">
+    <h:commandButton action="#{fxContentViewBean.add}" value="Add another person">
         <!-- Pass the content instance to the JSF bean -->
         <f:setPropertyActionListener value="#{data_content}" target="#{fxContentViewBean.content}"/>
 
         <!-- Specify the XPath of the element to be added -->
         <f:setPropertyActionListener value="/CONTACTPERSON" target="#{fxContentViewBean.xpath}"/>
-
-        Add another person
-    </h:commandLink>
+    </h:commandButton>
 
 </fx:content>
 ]]></programlisting>        
