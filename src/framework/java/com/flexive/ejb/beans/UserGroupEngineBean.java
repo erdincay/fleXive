@@ -405,7 +405,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             UserTicketStore.flagDirtyHavingGroupId(groupId);
 
             // Log
-            if (LOG.isInfoEnabled()) LOG.info("Group [" + theGroup + "] was successfully deleted.");
+            if (LOG.isDebugEnabled()) LOG.debug("Group [" + theGroup + "] was successfully deleted.");
 
         } catch (SQLException exc) {
             ctx.setRollbackOnly();

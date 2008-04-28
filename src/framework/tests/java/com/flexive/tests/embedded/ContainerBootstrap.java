@@ -62,7 +62,8 @@ import java.util.List;
  */
 @Test(groups = {"bootstrap", "ejb", "configuration", "content", "structure", "jsf", "security",
         "workflow", "streaming", "scripting", "valuetest", "cache", "image", "tree", "relation",
-        "search", "tutorial", "benchmark", "environment", "mandator", "templates", "importexport"})
+        "search", "tutorial", "benchmark", "environment", "mandator", "templates", "importexport",
+        "roles"})
 public class ContainerBootstrap {
     private static final transient Log LOG = LogFactory.getLog(ContainerBootstrap.class);
 

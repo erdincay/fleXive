@@ -191,7 +191,7 @@ public enum Role implements SelectableObjectWithName, SelectableObjectWithLabel,
      */
     @Override
     public String toString() {
-        return Role.class + "@[id=" + this.id + ",desc=" + this.getName() + "]";
+        return Role.class + "[id=" + this.id + ",desc=" + this.getName() + "]";
     }
 
     /**

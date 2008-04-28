@@ -951,6 +951,21 @@ public final class FxSharedUtils {
     }
 
     /**
+     * Extracts the names of the given enum elements and returns them as string.
+     * Useful if the toString() method of the Enum class was overwritten.
+     *
+     * @param values    the enum values
+     * @return  the names of the given enum elements
+     */
+    public static List<String> getEnumNames(Collection<? extends Enum> values) {
+        final List<String> result = new ArrayList<String>(values.size());
+        for (final Enum value : values) {
+            result.add(value.name());
+        }
+        return result;
+    }
+
+    /**
      * Comparator for sorting Assignments according to their position.
      */
     public static class AssignmentPositionSorter implements Comparator<FxAssignment>, Serializable {

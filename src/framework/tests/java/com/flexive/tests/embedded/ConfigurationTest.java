@@ -93,13 +93,13 @@ public class ConfigurationTest {
 
     @BeforeMethod
     public void beforeTestMethod() throws FxLoginFailedException, FxAccountInUseException {
-        System.out.println("Login: " + user.getUserName());
+        //System.out.println("Login: " + user.getUserName());
         login(user);
     }
 
     @AfterMethod
     public void afterTestMethod() throws Exception {
-        System.out.println("Logout: " + user.getUserName());
+        //System.out.println("Logout: " + user.getUserName());
         logout();
     }
 
