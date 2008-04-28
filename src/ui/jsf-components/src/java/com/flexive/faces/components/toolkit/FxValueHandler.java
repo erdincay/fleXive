@@ -34,6 +34,7 @@ package com.flexive.faces.components.toolkit;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.mapper.InputMapper;
+import com.flexive.faces.FxJsfComponentUtils;
 import com.sun.facelets.FaceletContext;
 import com.sun.facelets.el.VariableMapperWrapper;
 import com.sun.facelets.tag.TagAttribute;
@@ -89,8 +90,15 @@ public class FxValueHandler extends TagHandler {
             ctx.setVariableMapper(mapper);
 
             // get property attribute
-            final ValueExpression propertyExpression = this.getAttribute("property").getValueExpression(ctx, String.class);
-            final String property = (String) propertyExpression.getValue(ctx);
+            final String property;
+            final TagAttribute propertyAttribute = this.getAttribute("property");
+            if (propertyAttribute != null) {
+                final ValueExpression propertyExpression = propertyAttribute.getValueExpression(ctx, String.class);
+                property = (String) propertyExpression.getValue(ctx);
+            } else {
+                property = null;
+            }
+            FxJsfComponentUtils.requireAttribute("fx:value", "property", property);
 
             // assign id, label/labelKey and value based on the enclosing FxContentView instance
             mapper.setVariable("id", ctx.getExpressionFactory().createValueExpression(

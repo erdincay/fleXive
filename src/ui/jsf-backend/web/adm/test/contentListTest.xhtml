@@ -1,0 +1,84 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<head>
+    <title>fx:contentList test cases</title>
+    <fx:includes/>
+</head>
+<body>
+
+    <h:messages/>
+
+    <h3>fx:contentList testcases</h3>
+
+    <!-- Trigger test type init #{fxContentViewTestBean.typeName} -->
+
+    <h4>groovyQuery</h4>
+    <table>
+    <fx:contentList var="content" indexVar="index">
+        <f:facet name="groovyQuery">
+            not_empty("stringSearchProp")
+        </f:facet>
+        <f:facet name="empty">
+            <tr>
+                <td colspan="3">
+                    This message should not be shown.
+                </td>
+            </tr>
+        </f:facet>
+        <f:facet name="header">
+            <tr>
+                <td colspan="3">
+                    This message only shown because content instances were returned.
+                </td>
+            </tr>
+        </f:facet>
+        <tr>
+            <td>
+                #{index}
+            </td>
+            <td>
+                <fx:value var="content" property="stringSearchProp"/>
+            </td>
+            <td>
+                <fx:value var="content" property="dateSearchProp"/>
+            </td>
+        </tr>
+    </fx:contentList>
+    </table>
+
+    <h4>queryBuilder</h4>
+    <table>
+    <fx:contentList var="content" queryBuilder="#{fxContentViewTestBean.searchTestBuilder}">
+        <tr>
+            <td>
+                <fx:value var="content" property="stringSearchProp"/>
+            </td>
+            <td>
+                <fx:value var="content" property="dateSearchProp"/>
+            </td>
+        </tr>
+    </fx:contentList>
+    </table>
+
+    <h4>empty</h4>
+    <fx:contentList var="content">
+        <f:facet name="groovyQuery">
+            eq("stringSearchProp", "xxx")
+        </f:facet>
+        <f:facet name="empty">
+            This message is shown because fx:contentList returned no instances.
+        </f:facet>
+        <f:facet name="header">
+            This header message should not be shown.
+        </f:facet>
+    </fx:contentList>
+</body>
+</html>

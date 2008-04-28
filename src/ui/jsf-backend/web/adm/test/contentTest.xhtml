@@ -16,6 +16,8 @@
 
     <h:messages/>
 
+    <!-- Trigger test type init #{fxContentViewTestBean.typeName} -->
+
     <pre><h:outputText value="#{fxContentViewTestBean.savedXML}" escape="true"/></pre>    
 
     <h3>fx:content testcases</h3>
@@ -23,9 +25,11 @@
     <h4>Create a new content instance</h4>
 
     <h:form id="createContent" enctype="multipart/form-data">
+        <fx:fxValueInputLanguageSelect id="switchLanguage"/>
+        
         <fx:content var="test" typeName="#{fxContentViewTestBean.typeName}">
             <c:forEach var="propertyName" items="#{fxContentViewTestBean.testPropertyNames}">
-                <fx:value property="#{propertyName}"/>
+                <fx:value property="#{propertyName}"/> 
             </c:forEach>
 
             <fx:fieldSet legend="groupTop">
@@ -47,6 +51,13 @@
             </h:commandButton>
         </fx:content>
     </h:form>
+
+    <h4>Edit an existing content instance (#{fxContentViewTestBean.searchTestPK})</h4>
+
+    <fx:content var="test" pk="#{fxContentViewTestBean.searchTestPK}">
+        <fx:value property="stringSearchProp"/>
+        <fx:value property="stringSearchPropML"/>
+    </fx:content>
     
 </body>
 </html>

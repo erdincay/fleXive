@@ -835,16 +835,23 @@ public final class FxSharedUtils {
 
     /**
      * Projects a single-parameter function on a hashmap.
-     * Useful for calling parameterized functions from JSF-EL.
+     * Useful for calling parameterized functions from JSF-EL. Values returned by the mapper
+     * are cached in the hash map.
      *
      * @param mapper the parameter mapper wrapping the function to be called
      * @return a hashmap projected on the given parameter mapper
      */
     public static <K, V> Map<K, V> getMappedFunction(final ParameterMapper<K, V> mapper) {
         return new HashMap<K, V>() {
+            private static final long serialVersionUID = 1051489436850755246L;
+
+            @SuppressWarnings({"unchecked"})
             @Override
             public V get(Object key) {
-                return mapper.get(key);
+                if (!containsKey(key)) {
+                    put((K) key, mapper.get(key));
+                }
+                return super.get(key);
             }
         };
     }

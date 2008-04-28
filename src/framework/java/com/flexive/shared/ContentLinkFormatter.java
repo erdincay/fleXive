@@ -116,6 +116,10 @@ public class ContentLinkFormatter {
      * <th>%{caption}</th>
      * <td>The item caption (will be URL-escaped).</td>
      * </tr>
+     * <tr>
+     * <th>%{caption20}</th>
+     * <td>The item caption, abbreviated to max. 20 characters (will be URL-escaped).</td>
+     * </tr>
      * </table>
      *
      * @param formatString  the input format string. For example, <code>"/content/%{id}.html"</code>
@@ -140,6 +144,7 @@ public class ContentLinkFormatter {
         final String result = format(StringUtils.defaultString(formatString, DEFAULT_ADMIN_ITEM),
                 new FxPK(item.getReferenceId()))
                 .replace("%{nodeId}", String.valueOf(item.getNodeId()));
-        return result.replace("%{caption}", StringUtils.abbreviate(item.getCaption(), MAX_CAPTION_LEN));
+        return result.replace("%{caption20}", StringUtils.abbreviate(item.getCaption(), MAX_CAPTION_LEN))
+                     .replace("%{caption}", item.getCaption());
     }
 }

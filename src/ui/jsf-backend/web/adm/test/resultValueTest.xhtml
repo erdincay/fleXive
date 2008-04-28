@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<head>
+    <title>fx:resultValue test cases</title>
+    <fx:includes/>
+</head>
+<body>
+
+    <h:messages/>
+
+    <h3>fx:resultValue testcases</h3>
+
+    <c:set var="query" value="#{fxSystemBean.query['SELECT * FILTER TYPE=\'SearchTest\'']}"/>
+
+    <h4>SELECT * FILTER TYPE='SearchTest'</h4>
+
+    <h:dataTable var="row" value="#{query}" rows="2">
+        <c:forEach var="columnName" items="#{query.result.columnLabels}" varStatus="status">
+            <h:column>
+                <f:facet name="header">
+                    <h:outputText value="#{columnName}" escape="false"/>
+                </f:facet>
+
+                <div style="height:2em;overflow:hidden">
+                    <fx:resultValue value="#{row[status.index]}"/>
+                </div>
+            </h:column>
+        </c:forEach>
+    </h:dataTable>
+
+    <h4>contentLinkFormat</h4>
+
+    <h:dataTable var="row" first="0" rows="5" value="#{fxSystemBean.query['SELECT @pk']}">
+        <h:column>
+            <fx:resultValue value="#{row[0]}" contentLinkFormat="&lt;a href='/%{pk}'&gt;pk:%{pk}&lt;/a&gt;"/>
+        </h:column>
+    </h:dataTable>
+
+    <h4>itemLinkFormat</h4>
+
+    <h:dataTable var="row" rows="5" value="#{fxSystemBean.query['SELECT @path WHERE IS CHILD OF 1']}">
+        <h:column>
+            <f:facet name="header">
+                caption
+            </f:facet>
+            <fx:resultValue value="#{row[0]}" itemLinkFormat="&lt;a href='/%{pk}'&gt;%{caption}&lt;/a&gt;"/>
+        </h:column>
+        <h:column>
+            <f:facet name="header">
+                caption20
+            </f:facet>
+            <fx:resultValue value="#{row[0]}" itemLinkFormat="&lt;a href='/%{pk}'&gt;%{caption20}&lt;/a&gt;"/>
+        </h:column>
+    </h:dataTable>
+
+</body>
+</html>

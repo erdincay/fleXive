@@ -31,9 +31,12 @@
  ***************************************************************/
 package com.flexive.faces;
 
+import org.apache.commons.lang.StringUtils;
+
 import javax.el.ValueExpression;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
+import javax.faces.FacesException;
 
 /**
  * Utility functions for JSF/Facelets components.
@@ -139,4 +142,18 @@ public class FxJsfComponentUtils {
 		} 
 		return null;
 	}
+
+    /**
+     * Throws a FacesException if the given value is not set.
+     *
+     * @param attributeName the attribute name, e.g. "var"
+     * @param componentName the component name, e.g. "fx:value"
+     * @param value the value set on the component
+     * @throws javax.faces.FacesException   if value is null or a blank string
+     */
+    public static void requireAttribute(String componentName, String attributeName, Object value) throws FacesException {
+        if (value == null || (value instanceof String && StringUtils.isBlank((String) value))) {
+            throw new FacesException("Attribute '" + attributeName + "' of " + componentName + " not set.");
+        }
+    }
 }

@@ -430,6 +430,16 @@
                     <code language="xhtml">&lt;fx:value></code>, except those that control the actual value being
                     rendered.
                 </para>
+                <para>
+                    <emphasis>Note:</emphasis>
+                    <code>&lt;fx:value&gt;</code>
+                    is a Facelets compile-time component, this means that its input variables must be bound during
+                    view creation. Data exposed by components like
+                    <code>&lt;ui:repeat&gt;</code>
+                    is not available during "compile time" and cannot be used as input for
+                    <code>&lt;fx:value&gt;</code>. Use compile-time iterators such as
+                    <code>&lt;c:forEach&gt;</code> instead.
+                </para>
 
                 <section xml:id="jcl_fx_value_synopsis">
                     <title>Synopsis</title>
@@ -656,7 +666,8 @@
 
                 <section xml:id="jcl_fx_value_input_languageselect_synopsis">
                     <title>Synopsis</title>
-                    <programlisting language="xhtml"><![CDATA[<fx:fxValueInputLanguageSelect id="clientid"/>]]></programlisting>
+                    <programlisting language="xhtml">
+                        <![CDATA[<fx:fxValueInputLanguageSelect id="clientid"/>]]></programlisting>
                 </section>
 
                 <section xml:id="jcl_fx_value_input_languageselect_parameters">
@@ -947,6 +958,15 @@
                         </varlistentry>
 
                         <varlistentry>
+                            <term>tooltip</term>
+                            <listitem>
+                                <para>
+                                    The input label tooltip.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
                             <term>labelKey</term>
                             <listitem>
                                 <para>
@@ -959,7 +979,7 @@
                             <term>tooltipKey</term>
                             <listitem>
                                 <para>
-                                    Message key of the tooltip (if not specified and labelKey is set,
+                                    Message key of the tooltip (overrides tooltip, if not specified and labelKey is set,
                                     it defaults to<code language="jsfel">#{labelKey}.tooltip</code>)
                                 </para>
                             </listitem>

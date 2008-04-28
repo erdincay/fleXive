@@ -32,6 +32,7 @@
 package com.flexive.faces.beans;
 
 import com.flexive.faces.FxJsfUtils;
+import com.flexive.faces.model.FxResultSetDataModel;
 import com.flexive.faces.messages.FxFacesMessage;
 import com.flexive.faces.messages.FxFacesMessages;
 import com.flexive.faces.messages.FxFacesMsgErr;
@@ -41,6 +42,7 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.search.AdminResultLocations;
 import com.flexive.shared.search.ResultLocation;
+import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxEnvironment;
@@ -52,6 +54,7 @@ import javax.faces.component.UIComponent;
 import javax.faces.component.UIInput;
 import javax.faces.context.FacesContext;
 import static javax.faces.context.FacesContext.getCurrentInstance;
+import javax.faces.model.DataModel;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.Serializable;
@@ -72,6 +75,7 @@ public class SystemBean implements Serializable {
     private Map<String, Boolean> messageExistsMap;
     private Map<Object, FxContent> contentMap;
     private Map<Object, FxContent> explodedContentMap;
+    private Map<String, DataModel> queries;
 
     /**
      * Resets all counters between phases.
@@ -585,6 +589,22 @@ public class SystemBean implements Serializable {
             });
         }
         return explodedContentMap;
+    }
+
+    public Map<String, DataModel> getQuery() {
+        if (queries == null) {
+            queries = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<String, DataModel>() {
+                public DataModel get(Object key) {
+                    try {
+                        final FxResultSet result = EJBLookup.getSearchEngine().search((String) key, 0, null, null);
+                        return new FxResultSetDataModel(result);
+                    } catch (FxApplicationException e) {
+                        throw e.asRuntimeException();
+                    }
+                }
+            });
+        }
+        return queries;
     }
 
     /**

@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<head>
+    <title>fx:formRow test cases</title>
+    <fx:includes/>
+</head>
+<body>
+
+    <h:messages/>
+
+    <h3>fx:formRow testcases</h3>
+
+    <h4>Custom formrow with label</h4>
+
+    <fx:formRow id="fr1" label="Custom label">
+        <h:inputText id="fr1"/>
+    </fx:formRow>
+
+    <h4>Label with tooltip</h4>
+    <fx:formRow id="fr2" labelKey="QueryEditor.label.briefcase.create">
+        <h:inputText id="fr2"/>
+    </fx:formRow>
+
+    <h4>Label with custom tooltip</h4>
+    <fx:formRow id="fr3" labelKey="QueryEditor.label.briefcase.create" tooltip="Custom tooltip">
+        <h:inputText id="fr3"/>
+    </fx:formRow>
+
+    <h4>Two formRows without a line break</h4>
+    <fx:formRow id="fr4" label="Input 1" newLine="false">
+        <h:inputText id="fr4"/>
+    </fx:formRow>
+    <fx:formRow id="fr5" label="Input 2" newLine="true">
+        <h:inputText id="fr5"/>
+    </fx:formRow>
+    <fx:formRow id="fr6" label="Input 3" newLine="false">
+        <h:inputText id="fr6"/>
+    </fx:formRow>
+    <fx:formRow id="fr7" label="Input 4" newLine="true">
+        <h:inputText id="fr7"/>
+    </fx:formRow>
+
+    <h4>Explicit width</h4>
+
+    <fx:formRow id="fr8" label="A very long input row" width="500">
+        <h:inputText id="fr8" style="width:300px"/>
+    </fx:formRow>
+
+
+</body>
+</html>

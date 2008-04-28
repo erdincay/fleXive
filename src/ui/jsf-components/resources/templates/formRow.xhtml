@@ -30,7 +30,7 @@ height = overrides the default height (value in pixel, eg height="80")
 <c:if test="#{!empty labelKey}">
     <c:set var="label" value="#{fxMessageBean[labelKey]}"/>
 </c:if>
-<c:if test="#{empty tooltipKey and not empty labelKey}">
+<c:if test="#{empty tooltipKey and not empty labelKey and empty tooltip}">
     <c:set var="tooltipKey" value="#{labelKey}.tooltip"/>
 </c:if>
 <c:if test="#{!empty tooltipKey and fxSystemBean.messageExists[tooltipKey]}">
@@ -40,7 +40,7 @@ height = overrides the default height (value in pixel, eg height="80")
 <div class="formRow" style="#{overideStyle}">
 
     <div class="formLabel">
-        <div class="#{empty tooltip ? '' : ' tooltip'}">
+        <div class="#{empty tooltip ? '' : 'tooltip'}">
             <c:if test="#{!empty id}">
                 <h:outputLabel id="#{id}Label" for="#{id}">#{label}</h:outputLabel>
             </c:if>

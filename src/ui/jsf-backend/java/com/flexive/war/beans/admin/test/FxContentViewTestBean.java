@@ -2,10 +2,16 @@ package com.flexive.war.beans.admin.test;
 
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.search.query.SqlQueryBuilder;
+import com.flexive.shared.search.FxResultSet;
+import static com.flexive.shared.EJBLookup.getContentEngine;
+import static com.flexive.shared.EJBLookup.getScriptingEngine;
 import com.flexive.shared.content.FxContent;
+import com.flexive.shared.content.FxPK;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.scripting.FxScriptBinding;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.beans.FxContentViewBean;
@@ -23,13 +29,23 @@ import java.util.Map;
  */
 public class FxContentViewTestBean {
     private List<String> testPropertyNames;
+    private FxPK searchTestPK;
 
     public FxContentViewTestBean() {
-        // ensure that the SearchTest type exists
         try {
-            EJBLookup.getScriptingEngine().runScript("SearchTestType.gy", new FxScriptBinding());
-        } catch (FxApplicationException e) {
-            new FxFacesMsgErr(e).addToContext();
+            CacheAdmin.getEnvironment().getType("SearchTest");
+        } catch (FxRuntimeException e) {
+            // ensure that the SearchTest type exists
+            try {
+                getScriptingEngine().runScript("SearchTestType.gy", new FxScriptBinding());
+                for (int i = 0; i < 5; i++) {
+                    final FxContent co = getContentEngine().initialize("SearchTest");
+                    co.randomize(1);
+                    getContentEngine().save(co);
+                }
+            } catch (FxApplicationException e2) {
+                new FxFacesMsgErr(e2).addToContext();
+            }
         }
     }
 
@@ -60,11 +76,27 @@ public class FxContentViewTestBean {
         final FxContent savedContent = (FxContent) requestMap.get(FxContentViewBean.REQUEST_CONTENT);
         if (savedContent != null) {
             try {
-                return EJBLookup.getContentEngine().exportContent(savedContent);
+                return getContentEngine().exportContent(savedContent);
             } catch (FxApplicationException e) {
                 throw e.asRuntimeException();
             }
         }
         return null;
+    }
+
+    public SqlQueryBuilder getSearchTestBuilder() {
+        return new SqlQueryBuilder().select("@pk").type("SearchTest");
+    }
+
+    public FxPK getSearchTestPK() {
+        if (searchTestPK == null) {
+            try {
+                final FxResultSet result = new SqlQueryBuilder().select("@pk").type("SearchTest").getResult();
+                searchTestPK = result.<FxPK>collectColumn(1).get(0);
+            } catch (FxApplicationException e) {
+                throw e.asRuntimeException();
+            }
+        }
+        return searchTestPK;
     }
 }

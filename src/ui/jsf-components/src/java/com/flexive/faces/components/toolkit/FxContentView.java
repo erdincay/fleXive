@@ -32,6 +32,7 @@
 package com.flexive.faces.components.toolkit;
 
 import com.flexive.faces.FxJsfComponentUtils;
+import static com.flexive.faces.FxJsfComponentUtils.requireAttribute;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.content.FxContent;
@@ -58,6 +59,7 @@ import javax.faces.event.FacesEvent;
 import javax.faces.event.FacesListener;
 import javax.faces.event.PhaseId;
 import javax.faces.event.AbortProcessingException;
+import javax.faces.FacesException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -227,6 +229,7 @@ public class FxContentView extends UIOutput {
         if (var == null) {
             var = FxJsfComponentUtils.getStringValue(this, "var");
         }
+        requireAttribute("fx:contentView", "var", var);
         return var;
     }
 
