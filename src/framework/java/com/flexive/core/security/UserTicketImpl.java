@@ -419,7 +419,9 @@ public class UserTicketImpl implements UserTicket, Serializable {
 
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     public UserTicketImpl cloneAsGlobalSupervisor() {
         UserTicketImpl clone = new UserTicketImpl(this.applicationId, this.webDav, this.userName, this.loginName,
                 this.userId, this.contactData, this.mandator, this.multiLogin, this.groups.clone(), this.roles.clone(),

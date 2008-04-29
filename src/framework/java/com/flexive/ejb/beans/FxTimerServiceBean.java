@@ -31,25 +31,18 @@
  ***************************************************************/
 package com.flexive.ejb.beans;
 
-import com.flexive.core.Database;
-import com.flexive.core.storage.StorageManager;
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.configuration.DivisionData;
-import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.core.timer.FxQuartz;
 import com.flexive.shared.interfaces.FxTimerService;
 import com.flexive.shared.interfaces.FxTimerServiceLocal;
-import com.flexive.shared.structure.TypeStorageMode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.quartz.SchedulerException;
 
 import javax.annotation.Resource;
 import javax.ejb.*;
-import java.sql.Connection;
-import java.util.Collection;
 
 /**
- * Periodical timer service
+ * Timer- and scheduling service based on Quartz
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
@@ -63,14 +56,14 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
     /**
      * timer interval in minutes
      */
-    private static int INTERVAL = 10;
+//    private static int INTERVAL = 10;
 
     /**
      * Signature used to check if the timer is installed
      */
-    private final static String TIMER_SIGNATURE = "FxTimer";
+//    private final static String TIMER_SIGNATURE = "FxTimer";
 
-    private volatile boolean foundMBean = false;
+//    private volatile boolean foundMBean = false;
 
     @Resource
     SessionContext ctx;
@@ -80,6 +73,15 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
      * {@inheritDoc}
      */
     public boolean install(boolean reinstall) {
+        try {
+            FxQuartz.startup();
+        } catch (SchedulerException e) {
+            LOG.error("Failed to start Quartz scheduler: " + e.getMessage(), e);
+            return false;
+        }
+        return true;
+        /*
+        //original EJB timer code ...
         if (isInstalled())
             uninstall();
         //install a timer that runs every minute
@@ -98,14 +100,21 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
         }
         LOG.warn("Performing timer maintenance on startup due to failed service!");
         perform(null);
-        return false;
+        return false;*/
     }
 
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings("unchecked")
     public void uninstall() {
+        try {
+            FxQuartz.shutdown();
+        } catch (SchedulerException e) {
+            LOG.error("Failed to shutdown Quartz scheduler: " + e.getMessage(), e);
+        }
+        /*
+        //original EJB timer code ...
+
         try {
             if (ctx != null && ctx.getTimerService() != null) {
                 for (Timer t : (Collection<Timer>) ctx.getTimerService().getTimers()) {
@@ -117,7 +126,7 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
             }
         } catch (Exception e) {
             LOG.error(e.getClass().getSimpleName() + ": " + e.getMessage(), e);
-        }
+        }*/
     }
 
     /**
@@ -125,6 +134,10 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
      */
     @SuppressWarnings("unchecked")
     public boolean isInstalled() {
+        return FxQuartz.isInstalled();
+        /*
+
+        //original EJB timer code ...
         try {
             if (ctx != null && ctx.getTimerService() != null) {
                 for (Timer t : (Collection<Timer>) ctx.getTimerService().getTimers()) {
@@ -135,17 +148,25 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
         } catch (Exception e) {
             LOG.error(e.getClass().getSimpleName() + ": " + e.getMessage(), e);
         }
-        return false;
+        return false;*/
     }
 
-    /**
+/*
+
+  //original EJB timer code ...
+
+    / **
      * Timer function, calls periodical tasks for all active divisions
      *
      * @param timer the timer
-     */
+     * /
     @Timeout
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void perform(Timer timer) {
+        if( true) {
+            System.out.println("Skipping EJB Timer ...");
+            return;
+        }
         if (!foundMBean) {
             if (!CacheAdmin.isCacheMBeanInstalled()) {
                 //this is where cache errors would occur due to serialized timers that are restarted in jboss
@@ -176,4 +197,5 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
             LOG.error("Maintenance error: " + e.getMessage(), e);
         }
     }
+*/
 }

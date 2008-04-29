@@ -29,35 +29,48 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.shared.interfaces;
+package com.flexive.core.timer;
 
-import javax.ejb.Remote;
+import com.flexive.core.Database;
+import com.flexive.shared.FxContext;
+import org.quartz.utils.ConnectionProvider;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
- * Timer- and scheduling service based on Quartz
+ * A connection provider for the Quartz scheduler that serves non tx managed connections
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @version $Rev
  */
-@Remote
-public interface FxTimerService {
+public class FxQuartzConnectionProviderNonTX implements ConnectionProvider {
 
     /**
-     * Installs the timer service
-     *
-     * @param reinstall reinstall the timer if it is already installed?
-     * @return if successful (should only fail in early versions of embedded containers!)
+     * Context from the parent thread
      */
-    boolean install(boolean reinstall);
+    private volatile FxContext savedCtx = null;
 
     /**
-     * Uninstalls the timer service
+     * {@inheritDoc}
      */
-    void uninstall();
+    public Connection getConnection() throws SQLException {
+        if( savedCtx == null )
+            savedCtx = FxContext.get();
+        if(FxContext.get().getTicket() == null ) {
+            System.out.println("Replacing context");
+            FxContext.replace(savedCtx);
+        }
+//        System.out.println("Quartz requested a non-TX connection ... Thread: " + Thread.currentThread() + "; I am: " + this);
+//        System.out.println("Ctx-Info -> Division: " + FxContext.get().getDivisionId() + " Ticket: " + FxContext.get().getTicket());
+
+        return Database.getNonTXDataSource().getConnection();
+    }
 
     /**
-     * Check if the timer service is installed
-     *
-     * @return <code>true</code> if timer service is installed
+     * {@inheritDoc}
      */
-    boolean isInstalled();
+    public void shutdown() throws SQLException {
+        //nothing to do for us
+    }
 }

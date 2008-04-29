@@ -29,35 +29,44 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.shared.interfaces;
+package com.flexive.core.timer;
 
-import javax.ejb.Remote;
+import com.flexive.core.Database;
+import com.flexive.shared.FxContext;
+
+import java.sql.SQLException;
+import java.sql.Connection;
+
+import org.quartz.utils.ConnectionProvider;
 
 /**
- * Timer- and scheduling service based on Quartz
+ * A connection provider for the Quartz scheduler
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @version $Rev
  */
-@Remote
-public interface FxTimerService {
+public class FxQuartzConnectionProvider implements ConnectionProvider {
+
+    private FxContext savedCtx;
 
     /**
-     * Installs the timer service
-     *
-     * @param reinstall reinstall the timer if it is already installed?
-     * @return if successful (should only fail in early versions of embedded containers!)
+     * {@inheritDoc}
      */
-    boolean install(boolean reinstall);
+    public Connection getConnection() throws SQLException {
+//        System.out.println("Quartz requested a TX connection ... Thread: " + Thread.currentThread() + "; I am: " + this);
+        if( savedCtx == null )
+            savedCtx = FxContext.get();
+        if(FxContext.get().getTicket() == null ) {
+            FxContext.replace(savedCtx);
+        }
+
+        return Database.getDbConnection();
+    }
 
     /**
-     * Uninstalls the timer service
+     * {@inheritDoc}
      */
-    void uninstall();
-
-    /**
-     * Check if the timer service is installed
-     *
-     * @return <code>true</code> if timer service is installed
-     */
-    boolean isInstalled();
+    public void shutdown() throws SQLException {
+        //nothing to do for us
+    }
 }

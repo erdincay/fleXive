@@ -200,7 +200,7 @@ public class FxContext implements Serializable {
     /**
      * Override the used ticket.
      * Please do not use this method! Its only purpose is to feed FxContext with a
-     * USerTicket when no user is logged in - ie during system startup
+     * UserTicket when no user is logged in - ie during system startup
      *
      * @param ticket ticket to override with
      */
@@ -466,6 +466,32 @@ public class FxContext implements Serializable {
             info.set(result);
         }
         return result;
+    }
+
+    /**
+     * Replace the threadlocal context with another one.
+     * This method provides a mean to escalate the current context to other threads.
+     * As a safeguard, the context can only be replaced if the current UserTicket is <code>null</code>
+     *
+     * @param context the FxContext to use as replacement
+     */
+    public static void replace(FxContext context) {
+        if (FxContext.get().getTicket() == null)
+            info.set(context);
+    }
+
+    /**
+     * Get a FxContext instance to use at the EJB layer.
+     * The returned context is a guest user only!
+     * This method should only be used internally (for use in different threads, etc.)
+     *
+     * @param template the template to use for the division
+     * @return FxContext
+     */
+    public static FxContext _getEJBContext(FxContext template) {
+        FxContext ctx = new FxContext();
+        ctx.division = template.division;
+        return ctx;
     }
 
     /**
