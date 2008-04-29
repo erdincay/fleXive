@@ -56,10 +56,22 @@ public class StructureTreeEditor implements Serializable {
     private static final long serialVersionUID = -2853036616736591794L;
     private static Pattern aliasPattern = Pattern.compile("[a-zA-Z][a-zA-Z_0-9]*");
 
+    /**
+     * Remove an assignment, breaking inheritance if needed
+     *
+     * @param id the assignment id to remove
+     * @throws FxApplicationException on errors
+     */
     public void deleteAssignment(long id) throws FxApplicationException {
-        EJBLookup.getAssignmentEngine().removeAssignment(id, true, false);
+        EJBLookup.getAssignmentEngine().removeAssignment(id);
     }
 
+    /**
+     * Remove a type
+     *
+     * @param id id of the type to remove
+     * @throws FxApplicationException on errors
+     */
     public void deleteType(long id) throws FxApplicationException {
         EJBLookup.getTypeEngine().remove(id);
     }
@@ -183,26 +195,25 @@ public class StructureTreeEditor implements Serializable {
      * If steps is -1,-2..n the source assignment will be moved 1,2..n positions before the destination assignment.
      * If steps is 1,2..n the source assignment will be moved 1,2..n positions after the destination assignment.
      *
-     * @param srcId     the id of the assignment that shall be moved.
-     * @param srcNodeType   the node type of the assignment to be moved.
-     * @param destId    the id of the destination assignment relative to which the source assignment will be moved.
-     * @param steps     relative position offset.
-     * @throws com.flexive.shared.exceptions.FxApplicationException     if the node type doesn't match StructureTreeWriter.DOC_TYPE_GROUP or StructureTreeWriter.DOC_TYPE_ASSIGNMENT
+     * @param srcId       the id of the assignment that shall be moved.
+     * @param srcNodeType the node type of the assignment to be moved.
+     * @param destId      the id of the destination assignment relative to which the source assignment will be moved.
+     * @param steps       relative position offset.
+     * @throws com.flexive.shared.exceptions.FxApplicationException
+     *          if the node type doesn't match StructureTreeWriter.DOC_TYPE_GROUP or StructureTreeWriter.DOC_TYPE_ASSIGNMENT
      */
     public void moveAssignmentRelative(long srcId, String srcNodeType, long destId, int steps) throws FxApplicationException {
         FxAssignment dest = CacheAdmin.getEnvironment().getAssignment(destId);
         if (StructureTreeWriter.DOC_TYPE_GROUP.equals(srcNodeType)) {
-            FxGroupAssignmentEdit src = ((FxGroupAssignment)CacheAdmin.getEnvironment().getAssignment(srcId)).asEditable();
-            src.setPosition(dest.getPosition()+steps);
+            FxGroupAssignmentEdit src = ((FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(srcId)).asEditable();
+            src.setPosition(dest.getPosition() + steps);
             EJBLookup.getAssignmentEngine().save(src, true);
 
-        }
-        else if (StructureTreeWriter.DOC_TYPE_ASSIGNMENT.equals(srcNodeType)) {
-            FxPropertyAssignmentEdit src = ((FxPropertyAssignment)CacheAdmin.getEnvironment().getAssignment(srcId)).asEditable();
-            src.setPosition(dest.getPosition()+steps);
+        } else if (StructureTreeWriter.DOC_TYPE_ASSIGNMENT.equals(srcNodeType)) {
+            FxPropertyAssignmentEdit src = ((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(srcId)).asEditable();
+            src.setPosition(dest.getPosition() + steps);
             EJBLookup.getAssignmentEngine().save(src, false);
-        }
-        else
+        } else
             throw new FxInvalidParameterException("nodeType", "ex.structureTreeEditor.nodeType.invalid", srcNodeType);
     }
 
@@ -218,8 +229,8 @@ public class StructureTreeEditor implements Serializable {
     /**
      * Compares if two assignments are positioned at the same hierarchy level.
      *
-     * @param id1      id of first assignment
-     * @param id2      id of second assignment
+     * @param id1 id of first assignment
+     * @param id2 id of second assignment
      * @return true if they have the same parent type, or if parent group assignments exist, true if they have the same parent group assignment
      */
 
@@ -244,7 +255,8 @@ public class StructureTreeEditor implements Serializable {
      * @param parentNodeType the nodeDocType  (i.e. StructureTreeWriter.DOC_TYPE_GROUP, StructureTreeWriter.DOC_TYPE_TYPE) of the parent
      * @return true if the assignment is a direct child of the type or group
      * @throws FxInvalidParameterException for invalid nodeDocTypes
-     * @throws com.flexive.shared.exceptions.FxNotFoundException  on errors
+     * @throws com.flexive.shared.exceptions.FxNotFoundException
+     *                                     on errors
      */
 
     public boolean isChild(long assId, long parentId, String parentNodeType) throws FxInvalidParameterException, FxNotFoundException {
@@ -267,13 +279,13 @@ public class StructureTreeEditor implements Serializable {
         return false;
     }
 
-     /**
+    /**
      * Returns if an FxPropertyAssignment has set OPTION_SEARCHABLE to true
      *
-     * @param assId     assignment id
-     * @return  if an assignment is searchable
+     * @param assId assignment id
+     * @return if an assignment is searchable
      */
     public boolean isSearchable(long assId) {
-        return ((FxPropertyAssignment)CacheAdmin.getFilteredEnvironment().getAssignment(assId)).isSearchable();
+        return ((FxPropertyAssignment) CacheAdmin.getFilteredEnvironment().getAssignment(assId)).isSearchable();
     }
 }

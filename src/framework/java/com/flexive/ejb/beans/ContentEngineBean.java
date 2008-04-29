@@ -62,8 +62,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Content Engine implementation
@@ -381,7 +381,10 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             throw new FxCreateException(e);
         } catch (Throwable t) {
             ctx.setRollbackOnly();
-            throw new FxCreateException(LOG, t);
+            if( t instanceof FxApplicationException )
+                throw new FxCreateException(t); //no logging
+            else
+                throw new FxCreateException(LOG, t);
         } finally {
             Database.closeObjects(ContentEngineBean.class, con, ps);
             if (!ctx.getRollbackOnly())
@@ -831,16 +834,16 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             Iterator i = e.keys();
             String path = "unknown";
             String line = "unknown";
-            while( i.hasNext() ) {
-                key = (String)i.next();
-                if( "path".equals(key))
+            while (i.hasNext()) {
+                key = (String) i.next();
+                if ("path".equals(key))
                     path = e.get(key);
-                else if("line number".equals(key))
+                else if ("line number".equals(key))
                     line = e.get(key);
 //                System.out.println("Key ["+key+"] -> "+e.get(key));
             }
             throw new FxApplicationException("ex.content.import.conversionError", path, line, e.getShortMessage());
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new FxApplicationException("ex.content.import.error", e.getMessage());
         }
         return co;

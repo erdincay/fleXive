@@ -151,6 +151,18 @@ public interface AssignmentEngine {
             throws FxApplicationException;
 
     /**
+     * Remove an assignment and all sub-assignments if the assignment is a group.
+     * In case the assignment is derived, it will be removed as well - beware of breaking inheritance!
+     * All assignments derived from this assignment will *not* be removed as but converted to regular assignments.
+     * This method is rather "brute-force" - you should prefer calling #removeAssignment(long assignmentId, boolean removeSubAssignments, boolean removeDerivedAssignments)
+     *
+     * @param assignmentId the assignment to (completely) remove
+     * @throws FxApplicationException on errors
+     * @see #removeAssignment(long, boolean, boolean) 
+     */
+    void removeAssignment(long assignmentId) throws FxApplicationException;
+
+    /**
      * Save an existing property.
      *
      * @param property instance of FxPropertyEdit

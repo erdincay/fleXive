@@ -278,6 +278,7 @@ public class InheritanceTest extends StructureTestBase {
             assert !pa_d1.isDerivedAssignment() : DERIVED1_NAME + "/A_P3 must not be a derived assignment!";
             assert pa_d2.isDerivedAssignment() : DERIVED2_NAME + "/A_P3 expected be a derived assignment!";
             assert pa_d2.getBaseAssignmentId() == pa_d1.getId() : "Expected " + DERIVED2_NAME + "/A_P3 to be derived from " + DERIVED1_NAME + "/A_P3!";
+            removeAndCheckDerived(CacheAdmin.getEnvironment().getType(DERIVED2_NAME), "/A_P3");
         } finally {
             if (derived2Id != -1) {
                 co.removeForType(derived2Id);
@@ -334,4 +335,31 @@ public class InheritanceTest extends StructureTestBase {
         }
     }
 
+    /**
+     * Check if the given xpath's are marked as derived and not ("normal") removable, then remove it
+     *
+     * @param derived the type to check against
+     * @param xpaths  xpath's that have to be derived
+     * @throws FxApplicationException on errors
+     */
+    private void removeAndCheckDerived(FxType derived, String... xpaths) throws FxApplicationException {
+        for (String xpath : xpaths) {
+            FxAssignment fxa = derived.getAssignment(xpath);
+            assert fxa.isDerivedAssignment() : "Expected [" + xpath + "] to be a derived assignment!";
+            try {
+                ass.removeAssignment(fxa.getId(), true, false);
+                assert false : "Removal of derived assignment [" + xpath + "] should not be possible!";
+            } catch (FxApplicationException e) {
+                if (!(e instanceof FxRemoveException))
+                    throw e;
+            }
+            ass.removeAssignment(fxa.getId());
+            try {
+                CacheAdmin.getEnvironment().getType(derived.getId()).getAssignment(xpath);
+                assert false : "Expected that [" + xpath + "] has been removed!";
+            } catch (FxNotFoundException e) {
+                //expected
+            }
+        }
+    }
 }

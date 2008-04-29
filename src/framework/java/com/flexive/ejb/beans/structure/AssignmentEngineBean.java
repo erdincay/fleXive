@@ -759,7 +759,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 if (changesDesc.charAt(changesDesc.length() - 1) == ',')
                     changesDesc.deleteCharAt(changesDesc.length() - 1);
                 if (!group.isEnabled())
-                    removeAssignment(org.getId(), true, false, true);
+                    removeAssignment(org.getId(), true, false, true, false);
                 else {
                     StringBuilder affectedAssignment = new StringBuilder(500);
                     affectedAssignment.append(org.getId());
@@ -1429,7 +1429,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             if (!original.isSystemInternal() || FxContext.get().getTicket().isGlobalSupervisor()) {
                 if (original.isEnabled() != modified.isEnabled()) {
                     if (!modified.isEnabled())
-                        removeAssignment(original.getId(), true, false, true);
+                        removeAssignment(original.getId(), true, false, true, false);
                     else {
                         if (ps != null) ps.close();
                         ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET ENABLED=? WHERE ID=?");
@@ -1575,7 +1575,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 if (original.isMultiLang() != modified.isMultiLang()) {
                     //Multi->Single: lang=system, values of the def. lang. are used, other are discarded
                     //Single->Multi: lang=default language
-                    if( !original.getProperty().mayOverrideMultiLang() )
+                    if (!original.getProperty().mayOverrideMultiLang())
                         throw new FxUpdateException("ex.structure.assignment.overrideNotAllowed.multiLang", original.getXPath(),
                                 original.getProperty().getName()).setAffectedXPath(original.getXPath());
                     StorageManager.getContentStorage(TypeStorageMode.Hierarchical).
@@ -1820,11 +1820,28 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void removeAssignment(long assignmentId, boolean removeSubAssignments, boolean removeDerivedAssignments)
             throws FxApplicationException {
-        removeAssignment(assignmentId, removeSubAssignments, removeDerivedAssignments, false);
+        removeAssignment(assignmentId, removeSubAssignments, removeDerivedAssignments, false, false);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void removeAssignment(long assignmentId) throws FxApplicationException {
+        removeAssignment(assignmentId, true, false, false, true);
+    }
+
+    /**
+     * Remove an assignment
+     *
+     * @param assignmentId             assignment to remove
+     * @param removeSubAssignments     if assignment is a group, remove all attached properties and groups?
+     * @param removeDerivedAssignments if derivates of this assignment in derived types exist, remove them as well?
+     * @param allowDerivedRemoval      allow removal of derived assignments
+     * @throws FxApplicationException on errors
+     */
     private void removeAssignment(long assignmentId, boolean removeSubAssignments, boolean removeDerivedAssignments,
-                                  boolean disableAssignment) throws FxApplicationException {
+                                  boolean disableAssignment, boolean allowDerivedRemoval) throws FxApplicationException {
         final UserTicket ticket = FxContext.get().getTicket();
         FxPermissionUtils.checkRole(ticket, Role.StructureManagement);
         FxAssignment assignment;
@@ -1832,7 +1849,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         assert assignment != null : "Assignment retrieved was null";
         if (!disableAssignment) {
             //if removal, check if its a derived assignment which may not be removed
-            if (assignment.isDerivedAssignment())
+            if (!allowDerivedRemoval && assignment.isDerivedAssignment())
                 throw new FxRemoveException("ex.structure.assignment.delete.derived", assignment.getXPath());
         }
 

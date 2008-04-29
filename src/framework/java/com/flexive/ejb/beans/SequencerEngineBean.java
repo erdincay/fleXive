@@ -242,7 +242,7 @@ public class SequencerEngineBean implements SequencerEngine, SequencerEngineLoca
                     allowRollover = rso.getBoolean(1);
                 }
                 if (!allowRollover)
-                    throw new FxCreateException(LOG, "ex.sequencer.exhausted", name);
+                    throw new FxCreateException("ex.sequencer.exhausted", name);
                 ps.close();
                 ps = con.prepareStatement(SQL_RESET);
                 ps.setString(1, name);
