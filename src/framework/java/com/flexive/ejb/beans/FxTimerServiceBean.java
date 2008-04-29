@@ -32,14 +32,22 @@
 package com.flexive.ejb.beans;
 
 import com.flexive.core.timer.FxQuartz;
+import com.flexive.core.Database;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.interfaces.FxTimerService;
 import com.flexive.shared.interfaces.FxTimerServiceLocal;
+import com.flexive.shared.configuration.DivisionData;
+import com.flexive.shared.EJBLookup;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.structure.TypeStorageMode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.SchedulerException;
+import org.quartz.SimpleTrigger;
 
 import javax.annotation.Resource;
 import javax.ejb.*;
+import java.sql.Connection;
 
 /**
  * Timer- and scheduling service based on Quartz
@@ -47,7 +55,7 @@ import javax.ejb.*;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 @Stateless(name = "FxTimerService")
-@TransactionAttribute(TransactionAttributeType.REQUIRED)
+@TransactionAttribute(TransactionAttributeType.NEVER)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
 
@@ -151,34 +159,65 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
         return false;*/
     }
 
-/*
+    /*
 
-  //original EJB timer code ...
+      //original EJB timer code ...
 
-    / **
-     * Timer function, calls periodical tasks for all active divisions
-     *
-     * @param timer the timer
-     * /
-    @Timeout
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void perform(Timer timer) {
-        if( true) {
-            System.out.println("Skipping EJB Timer ...");
-            return;
-        }
-        if (!foundMBean) {
-            if (!CacheAdmin.isCacheMBeanInstalled()) {
-                //this is where cache errors would occur due to serialized timers that are restarted in jboss
+        / **
+         * Timer function, calls periodical tasks for all active divisions
+         *
+         * @param timer the timer
+         * /
+        @Timeout
+        @TransactionAttribute(TransactionAttributeType.REQUIRED)
+        public void perform(Timer timer) {
+            if( true) {
+                System.out.println("Skipping EJB Timer ...");
                 return;
-            } else
-                foundMBean = true;
+            }
+            if (!foundMBean) {
+                if (!CacheAdmin.isCacheMBeanInstalled()) {
+                    //this is where cache errors would occur due to serialized timers that are restarted in jboss
+                    return;
+                } else
+                    foundMBean = true;
+            }
+            //place periodic maintenance code here ...
+            try {
+                for (DivisionData dd : EJBLookup.getGlobalConfigurationEngine().getDivisions()) {
+                    if (dd.getId() <= 0 || !dd.isAvailable())
+                        continue;
+                    Connection con = null;
+                    try {
+                        con = Database.getDbConnection(dd.getId());
+                        for (TypeStorageMode mode : TypeStorageMode.values()) {
+                            if (!mode.isSupported())
+                                continue;
+                            StorageManager.getContentStorage(dd, mode).maintenance(con);
+                        }
+                    } catch (Exception e) {
+                        LOG.error("Failed to perform maintenance for division #" + dd.getId() + ": " + e.getMessage(), e);
+                    } finally {
+                        Database.closeObjects(FxTimerServiceBean.class, con, null);
+                    }
+                }
+            } catch (FxApplicationException e) {
+                LOG.error("Maintenance error: " + e.getMessage(), e);
+            }
         }
-        //place periodic maintenance code here ...
+    */
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void maintenance() {
         try {
             for (DivisionData dd : EJBLookup.getGlobalConfigurationEngine().getDivisions()) {
                 if (dd.getId() <= 0 || !dd.isAvailable())
                     continue;
+                if (LOG.isDebugEnabled())
+                    LOG.debug("Performing maintenance for division #" + dd.getId() + " ... ");
                 Connection con = null;
                 try {
                     con = Database.getDbConnection(dd.getId());
@@ -196,6 +235,6 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
         } catch (FxApplicationException e) {
             LOG.error("Maintenance error: " + e.getMessage(), e);
         }
+
     }
-*/
 }

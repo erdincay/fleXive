@@ -67,29 +67,6 @@ public class MaintenanceJob implements Job {
             LOG.error("Failed to replace FxContext: " + e.getMessage(), e);
         }
 
-        try {
-            for (DivisionData dd : EJBLookup.getGlobalConfigurationEngine().getDivisions()) {
-                if (dd.getId() <= 0 || !dd.isAvailable())
-                    continue;
-                if (LOG.isDebugEnabled())
-                    LOG.debug("Performing maintenance for division #" + dd.getId() + " ... (times triggered: " +
-                            ((SimpleTrigger) context.getTrigger()).getTimesTriggered() + ")");
-                Connection con = null;
-                try {
-                    con = Database.getDbConnection(dd.getId());
-                    for (TypeStorageMode mode : TypeStorageMode.values()) {
-                        if (!mode.isSupported())
-                            continue;
-                        StorageManager.getContentStorage(dd, mode).maintenance(con);
-                    }
-                } catch (Exception e) {
-                    LOG.error("Failed to perform maintenance for division #" + dd.getId() + ": " + e.getMessage(), e);
-                } finally {
-                    Database.closeObjects(MaintenanceJob.class, con, null);
-                }
-            }
-        } catch (FxApplicationException e) {
-            LOG.error("Maintenance error: " + e.getMessage(), e);
-        }
+        EJBLookup.getTimerService().maintenance();
     }
 }

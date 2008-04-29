@@ -51,21 +51,21 @@ import org.testng.annotations.Test;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-@Test(groups = {"security", "roles"})
+@Test(groups = {"ejb", "security", "roles"})
 public class StructureManagementTest extends AbstractRoleTest {
     private long typeId = -1;
     private FxType type;
     private long assignmentId = -1;
     private boolean forced = false;
 
-    @AfterMethod(groups = {"security", "roles"})
+    @AfterMethod(groups = {"ejb", "security", "roles"})
     public void cleanup() throws FxApplicationException {
         if (forced) {
             FxContext.get().runAsSystem();
         }
         try {
             if (assignmentId != -1) {
-                getAssignmentEngine().removeAssignment(assignmentId, false, false);
+                getAssignmentEngine().removeAssignment(assignmentId);
             }
             if (typeId != -1) {
                 getTypeEngine().remove(typeId);

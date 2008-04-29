@@ -60,4 +60,9 @@ public interface FxTimerService {
      * @return <code>true</code> if timer service is installed
      */
     boolean isInstalled();
+
+    /**
+     * perform maintenance
+     */
+    void maintenance();
 }

@@ -57,11 +57,11 @@ import java.util.ArrayList;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-@Test(groups = {"security", "roles", "workflow"})
+@Test(groups = {"ejb", "security", "roles", "workflow"})
 public class WorkflowManagementTest extends AbstractRoleTest {
     private long workflowId = -1;
 
-    @AfterMethod(groups = {"security", "roles", "workflow"})
+    @AfterMethod(groups = {"ejb", "security", "roles", "workflow"})
     private void cleanup() throws FxApplicationException {
         if (workflowId != -1) {
             getWorkflowEngine().remove(workflowId);

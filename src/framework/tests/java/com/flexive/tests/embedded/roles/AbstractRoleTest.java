@@ -57,7 +57,7 @@ public abstract class AbstractRoleTest {
         this.user = user;
     }
 
-    @BeforeMethod(groups = {"security", "roles"})
+    @BeforeMethod(groups = {"ejb", "security", "roles"})
     public void beforeTestMethod() throws FxLoginFailedException, FxAccountInUseException {
         if (user != null) {
             login(user);
@@ -65,7 +65,7 @@ public abstract class AbstractRoleTest {
         }
     }
 
-    @AfterMethod(groups = {"security", "roles"})
+    @AfterMethod(groups = {"ejb", "security", "roles"})
     public void afterTestMethod() throws Exception {
         logout();
     }

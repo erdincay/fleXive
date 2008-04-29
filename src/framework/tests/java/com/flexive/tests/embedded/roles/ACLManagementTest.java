@@ -53,11 +53,11 @@ import java.util.Arrays;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-@Test(groups = {"security", "roles"})
+@Test(groups = {"ejb", "security", "roles"})
 public class ACLManagementTest extends AbstractRoleTest {
     private long aclId = -1;
 
-    @AfterMethod(groups = {"security", "roles"})
+    @AfterMethod(groups = {"ejb", "security", "roles"})
     public void cleanup() throws FxApplicationException {
         if (aclId != -1) {
             EJBLookup.getAclEngine().remove(aclId);

@@ -51,12 +51,12 @@ import java.util.List;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-@Test(groups = {"security", "roles"})
+@Test(groups = {"ejb", "security", "roles"})
 public class AccountManagementTest extends AbstractRoleTest {
     long accountId = -1;
     boolean forced = false;
 
-    @AfterMethod(groups = {"security", "roles"})
+    @AfterMethod(groups = {"ejb", "security", "roles"})
     public void cleanup() throws FxApplicationException {
         if (accountId != -1) {
             if (forced) {
