@@ -73,7 +73,7 @@ public class AccountBean {
     private boolean validatedFilter = true;
     private String password;
     private String passwordConfirm;
-    private Account account;
+    private AccountEditBean account;
     private final SimpleDateFormat SDF = new SimpleDateFormat("dd-MM-yyyy");
     private List<UserGroup> groups;
     private List<Role> roles;
@@ -86,6 +86,81 @@ public class AccountBean {
     // user preferences fields
     private FxLanguage defaultInputLanguage;
 
+
+    public static class AccountEditBean extends Account {
+        private static final long serialVersionUID = -5550483398375933412L;
+
+        private AccountEditBean() {
+        }
+
+        public AccountEditBean(Account other) {
+            super(other);
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public void setLoginName(String loginName) {
+            this.loginName = loginName;
+        }
+
+        public void setId(long id) {
+            this.id = id;
+        }
+
+        public void setMandatorId(long mandatorId) {
+            this.mandatorId = mandatorId;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public void setLanguage(FxLanguage language) {
+            this.language = language;
+        }
+
+        public void setActive(boolean active) {
+            this.active = active;
+        }
+
+        public void setValidated(boolean validated) {
+            this.validated = validated;
+        }
+
+        public void setValidFrom(Date validFrom) {
+            this.validFrom = validFrom;
+        }
+
+        public void setValidTo(Date validTo) {
+            this.validTo = validTo;
+        }
+
+        public void setDefaultNodeId(long defaultNodeId) {
+            this.defaultNodeId = defaultNodeId;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public void setContactDataId(long contactDataId) {
+            this.contactDataId = contactDataId;
+        }
+
+        public void setAllowMultiLogin(boolean allowMultiLogin) {
+            this.allowMultiLogin = allowMultiLogin;
+        }
+
+        public void setUpdateToken(String updateToken) {
+            this.updateToken = updateToken;
+        }
+
+        public void setLifeCycleInfo(LifeCycleInfo lifeCycleInfo) {
+            this.lifeCycleInfo = lifeCycleInfo;
+        }
+    }
 
     public List<Role> getRoles() {
         return roles == null ? new ArrayList<Role>(0) : roles;
@@ -161,7 +236,7 @@ public class AccountBean {
     }
 
     private void resetAccount() {
-        account = new Account();
+        account = new AccountEditBean();
     }
 
     private void resetFilter() {
@@ -248,7 +323,7 @@ public class AccountBean {
 
 
     public void setAccount(Account account) {
-        this.account = account;
+        this.account = new AccountEditBean(account);
     }
 
     public UISelectBoolean getActiveFilterCheckbox() {
@@ -381,7 +456,7 @@ public class AccountBean {
     public String editUser() {
         try {
             ensureAccountIdSet();
-            this.account = accountInterface.load(this.accountIdFiler);
+            this.account = new AccountEditBean(accountInterface.load(this.accountIdFiler));
             this.roles = accountInterface.getRoleList(this.accountIdFiler, AccountEngine.RoleLoadMode.FROM_USER_ONLY);
             this.groups = accountInterface.getGroupList(this.accountIdFiler);
             return "accountEdit";
@@ -398,7 +473,7 @@ public class AccountBean {
      */
     public String editUserPref() {
         try {
-            this.account = accountInterface.load(FxContext.get().getTicket().getUserId());
+            this.account = new AccountEditBean(accountInterface.load(FxContext.get().getTicket().getUserId()));
             setAccountIdFiler(this.account.getId());
             this.roles = accountInterface.getRoleList(this.accountIdFiler, AccountEngine.RoleLoadMode.ALL);
             this.groups = accountInterface.getGroupList(this.accountIdFiler);
@@ -542,12 +617,8 @@ public class AccountBean {
 
         // Create the new account itself
         try {
-            setAccountIdFiler(accountInterface.create(account.getName(), account.getLoginName(),
-                    password, account.getEmail(),
-                    account.getLanguage().getId(), mandatorId,
-                    account.isActive(), account.isValidated(),
-                    account.getValidFrom(), account.getValidTo(), -1, account.getDescription(), false, true));
-            account = accountInterface.load(this.accountIdFiler);
+            setAccountIdFiler(accountInterface.create(account, password));
+            account = new AccountEditBean(accountInterface.load(this.accountIdFiler));
             new FxFacesMsgInfo("User.nfo.saved", account.getName()).addToContext();
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();

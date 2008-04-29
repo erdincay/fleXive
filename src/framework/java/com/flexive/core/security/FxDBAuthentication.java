@@ -123,7 +123,7 @@ class FxDBAuthentication {
                         "] failed, account is inactive. Active=" + active + ", Validated=" + validated +
                         ", Mandator active: " + CacheAdmin.getEnvironment().getMandator(mandator).isActive());
                 increaseFailedLoginAttempts(con, id);
-                throw new FxLoginFailedException("Login failed", FxLoginFailedException.TYPE_INACTIVE_ACCOUNT);
+                throw new FxLoginFailedException("Login failed, account is inactive.", FxLoginFailedException.TYPE_INACTIVE_ACCOUNT);
             }
 
             // Account date from-to valid?

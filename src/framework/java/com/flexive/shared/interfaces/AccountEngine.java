@@ -187,7 +187,7 @@ public interface AccountEngine {
      * @throws FxNoAccessException    if the caller lacks the permissions to load the roles
      * @throws FxApplicationException on errors
      */
-    public List<Role> getRoleList(long accountId, RoleLoadMode mode) throws FxApplicationException;
+    List<Role> getRoleList(long accountId, RoleLoadMode mode) throws FxApplicationException;
 
 
     /**
@@ -197,21 +197,8 @@ public interface AccountEngine {
      * Only callers in ROLE_USER_MANAGEMENTS may create users, and only for their mandatorId.<br>
      * GLOBAL_SUPERVISOR may create users for all mandators.
      *
-     * @param userName        the name of the user, not unique
-     * @param loginName       the unqiue (over all mandators) login name of the user
-     * @param password        the password of the user
-     * @param email           the email of the user
-     * @param lang            the language of the user
-     * @param mandatorId      the mandatorId of the user
-     * @param isActive        the active flag of the user
-     * @param isConfirmed     the confirmed flag of the user
-     * @param validFrom       the valid from date
-     * @param validTo         the valid to date
-     * @param defaultNode     the desired start node in the tree for the user
-     * @param description     description for the user
-     * @param allowMultiLogin if true more than one client may login with this account at the same time
-     * @param checkUserRoles  perform checks if the calling user is a member of valid roles, should only be disabled if
-     *                        called from run-once scripts or the like
+     * @param account the account to be created. Use an {@link AccountEdit} object for easier account creation.
+     * @param password the user's password
      * @return the ID of the created user
      * @throws FxCreateException           if the create failed
      * @throws FxInvalidParameterException if a parameter is invalid (mandatorId, guiLanguage, contentLanguage)
@@ -219,10 +206,7 @@ public interface AccountEngine {
      * @throws FxEntryExistsException      if a user with the given login name already exists
      * @throws FxApplicationException      on errors
      */
-    long create(String userName, String loginName, String password, String email, long lang,
-                long mandatorId, boolean isActive, boolean isConfirmed, Date validFrom, Date validTo, long defaultNode,
-                String description, boolean allowMultiLogin, boolean checkUserRoles)
-            throws FxApplicationException;
+    long create(Account account, String password) throws FxApplicationException;
 
     /**
      * Removes a user.
@@ -301,7 +285,7 @@ public interface AccountEngine {
      * @throws FxUpdateException      if setting the groups failed
      * @throws FxApplicationException on errors
      */
-    void setGroups(long accountId, long[] groups) throws FxApplicationException;
+    void setGroups(long accountId, long... groups) throws FxApplicationException;
 
     /**
      * Adds a usergroup to a user.

@@ -242,7 +242,7 @@ public class ScriptBean {
 
         ensureScriptIdSet();
         try {
-            scriptInterface.removeScript(id);
+            scriptInterface.remove(id);
             // display updated script list  -->handled via a4j now
             //updateScriptList();  -->handled via a4j now
             new FxFacesMsgInfo("Script.nfo.deleted").addToContext();

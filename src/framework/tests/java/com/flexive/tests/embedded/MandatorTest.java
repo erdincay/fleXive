@@ -43,6 +43,7 @@ import com.flexive.shared.interfaces.TypeEngine;
 import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.security.Account;
 import com.flexive.shared.security.Mandator;
+import com.flexive.shared.security.AccountEdit;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.structure.FxTypeEdit;
 import com.flexive.shared.tree.FxTreeMode;
@@ -289,8 +290,12 @@ public class MandatorTest {
     public void activeLogin() throws Exception {
         String name = "USR_" + RandomStringUtils.randomAlphanumeric(10);
         String pwd = RandomStringUtils.randomAlphanumeric(10);
-        long accountId = EJBLookup.getAccountEngine().create(name, name, pwd, "test@flexive.org", FxLanguage.ENGLISH, testMandator, true, true,
-                new Date(), Account.VALID_FOREVER, 0, "", false, true);
+        final AccountEdit account = new AccountEdit()
+                .setName(name)
+                .setLoginName(name)
+                .setEmail("test@flexive.org")
+                .setMandatorId(testMandator);
+        long accountId = EJBLookup.getAccountEngine().create(account, pwd);
         try {
             me.activate(testMandator);
             logout();

@@ -91,9 +91,9 @@ public class ScriptingTest {
             return;
         login(TestUsers.SUPERVISOR);
         if (loadScript != null)
-            EJBLookup.getScriptingEngine().removeScript(loadScript.getId());
+            EJBLookup.getScriptingEngine().remove(loadScript.getId());
         if (removeScript != null)
-            EJBLookup.getScriptingEngine().removeScript(removeScript.getId());
+            EJBLookup.getScriptingEngine().remove(removeScript.getId());
         logout();
     }
 
@@ -122,7 +122,7 @@ public class ScriptingTest {
         assert si.getDescription().equals(desc) : "Invalid description";
         assert si.getEvent().equals(FxScriptEvent.Manual) : "Invalid script type";
         assert se.runScript(si.getId(), new FxScriptBinding()).getResult().equals(result) : "Invalid result from script!";
-        se.removeScript(si.getId());
+        se.remove(si.getId());
     }
 
     @Test
@@ -135,7 +135,7 @@ public class ScriptingTest {
             se.updateScriptInfo(inactive);
             Assert.assertEquals(se.runScript(si.getId()).getResult(), null, "Inactive scripts must not be runnable!");
         } finally {
-            se.removeScript(si.getId());
+            se.remove(si.getId());
         }
     }
 
@@ -203,7 +203,7 @@ public class ScriptingTest {
         } finally {
             EJBLookup.getTypeEngine().remove(typeId);
             for (FxScriptInfo si : scripts)
-                se.removeScript(si.getId());
+                se.remove(si.getId());
         }
     }
 

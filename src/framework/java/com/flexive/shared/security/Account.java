@@ -70,23 +70,22 @@ public class Account extends AbstractSelectableObjectWithName implements Seriali
     public static final Date VALID_FOREVER = new Date(32503676400000L);
 
 
-    private String name = null;
-    private String loginName = null;
-    private long id = -1;
-    private long mandatorId = -1;
-    private String email = null;
-    private FxLanguage language = FxLanguage.DEFAULT;
-    private boolean active = false;
-    private boolean validated = false;
-    private Date validFrom = null;
-    private Date validTo = null;
-    private long defaultNodeId = 0;
-    private String description = null;
-    private long contactDataId = -1;
-    private boolean allowMultiLogin = false;
-    private String updateToken;
-    private FxPK contactData;
-    private LifeCycleInfo lifeCycleInfo = null;
+    protected String name = null;
+    protected String loginName = null;
+    protected long id = -1;
+    protected long mandatorId = -1;
+    protected String email = null;
+    protected FxLanguage language = FxLanguage.DEFAULT;
+    protected boolean active = true;
+    protected boolean validated = true;
+    protected Date validFrom = null;
+    protected Date validTo = null;
+    protected long defaultNodeId = 0;
+    protected String description = null;
+    protected long contactDataId = -1;
+    protected boolean allowMultiLogin = false;
+    protected String updateToken;
+    protected LifeCycleInfo lifeCycleInfo = null;
 
     public Account() {
         /* empty constructor */
@@ -110,10 +109,15 @@ public class Account extends AbstractSelectableObjectWithName implements Seriali
         this.defaultNodeId = defaultNode;
         this.description = description;
         this.contactDataId = contactDataId;
-        this.contactData = new FxPK(this.contactDataId);
         this.allowMultiLogin = allowMultiLogin;
         this.updateToken = updateToken;
         this.lifeCycleInfo = lifeCycleInfo;
+    }
+
+    public Account(Account other) {
+        this(other.id, other.name, other.loginName, other.mandatorId, other.email, other.language,
+                other.active, other.validated, other.validFrom, other.validTo, other.defaultNodeId,
+                other.description, other.contactDataId, other.allowMultiLogin, other.updateToken, other.lifeCycleInfo);
     }
 
     /**
@@ -218,7 +222,7 @@ public class Account extends AbstractSelectableObjectWithName implements Seriali
      * @return the valid from date of the user
      */
     public Date getValidFrom() {
-        return (Date) this.validFrom.clone();
+        return validFrom != null ? (Date) this.validFrom.clone() : null;
     }
 
     /**
@@ -230,7 +234,7 @@ public class Account extends AbstractSelectableObjectWithName implements Seriali
      * @return the valid to date of the user
      */
     public Date getValidTo() {
-        return (Date) this.validTo.clone();
+        return validTo != null ? (Date) this.validTo.clone() : null;
     }
 
     /**
@@ -275,7 +279,7 @@ public class Account extends AbstractSelectableObjectWithName implements Seriali
      * @return the id of the contact data object
      */
     public FxPK getContactData() {
-        return this.contactData;
+        return new FxPK(this.contactDataId);
     }
 
     /**
@@ -325,56 +329,7 @@ public class Account extends AbstractSelectableObjectWithName implements Seriali
         return lifeCycleInfo;
     }
 
-    public void setName(String sName) {
-        this.name = sName;
-    }
-
-    public void setLoginName(String sLoginName) {
-        this.loginName = sLoginName;
-    }
-
-    public void setMandatorId(long iMandator) {
-        this.mandatorId = iMandator;
-    }
-
-    public void setEmail(String sEmail) {
-        this.email = sEmail;
-    }
-
-    public void setLanguage(FxLanguage language) {
-        this.language = language;
-    }
-
-    public void setActive(boolean bActive) {
-        this.active = bActive;
-    }
-
-    public void setValidated(boolean bValidated) {
-        this.validated = bValidated;
-    }
-
-    public void setValidFrom(Date dValidFrom) {
-        this.validFrom = (Date) dValidFrom.clone();
-    }
-
-    public void setValidTo(Date dValidTo) {
-        this.validTo = (Date) dValidTo.clone();
-    }
-
-    public void setDefaultNode(long lDefaultNode) {
-        this.defaultNodeId = lDefaultNode;
-    }
-
-    public void setDescription(String sDescription) {
-        this.description = sDescription;
-    }
-
-    public void setContactDataId(long lContactDataId) {
-        this.contactDataId = lContactDataId;
-        this.contactData = new FxPK(contactDataId);
-    }
-
-    public void setAllowMultiLogin(boolean bAllowMultiLogin) {
-        this.allowMultiLogin = bAllowMultiLogin;
+    public AccountEdit asEditable() {
+        return new AccountEdit(this);
     }
 }

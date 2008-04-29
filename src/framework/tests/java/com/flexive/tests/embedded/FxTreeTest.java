@@ -401,9 +401,9 @@ public class FxTreeTest {
             tree.remove(tree.getNode(mode, nodeId), true, true);
             Assert.assertEquals(scriptCounter, 0);
         } finally {
-            scripting.removeScript(siAdd.getId());
-            scripting.removeScript(siBeforeRemove.getId());
-            scripting.removeScript(siAfterRemove.getId());
+            scripting.remove(siAdd.getId());
+            scripting.remove(siBeforeRemove.getId());
+            scripting.remove(siAfterRemove.getId());
         }
     }
 
@@ -435,8 +435,8 @@ public class FxTreeTest {
             tree.activate(FxTreeMode.Edit, topNode, true);
             Assert.assertEquals(scriptCounter, 4);
         } finally {
-            scripting.removeScript(siBeforeActivate.getId());
-            scripting.removeScript(siAfterActivate.getId());
+            scripting.remove(siBeforeActivate.getId());
+            scripting.remove(siAfterActivate.getId());
             tree.clear(FxTreeMode.Edit);
             tree.clear(FxTreeMode.Live);
         }
@@ -469,7 +469,7 @@ public class FxTreeTest {
             co.remove(testContent);
             Assert.assertEquals(scriptCounter, 42);
         } finally {
-            scripting.removeScript(siAfterTreeNodeFolderReplacement.getId());
+            scripting.remove(siAfterTreeNodeFolderReplacement.getId());
             tree.clear(mode);
             try {
                 co.remove(testContent);

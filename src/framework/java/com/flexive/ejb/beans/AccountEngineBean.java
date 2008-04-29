@@ -368,11 +368,22 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+
+    /** {@inheritDoc} */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public long create(String userName, String loginName, String password, String email, long lang,
+    public long create(Account account, String password) throws FxApplicationException {
+        final UserTicket ticket = FxContext.get().getTicket();
+        return create(account.getName(), account.getLoginName(), password, account.getEmail(),
+                account.getLanguage() != null ? account.getLanguage().getId() : FxLanguage.DEFAULT.getId(),
+                account.getMandatorId() != -1 ? account.getMandatorId() : ticket.getMandatorId(),
+                account.isActive(), account.isValidated(),
+                account.getValidFrom() != null ? account.getValidFrom() : new Date(),
+                account.getValidTo() != null ? account.getValidTo() : Account.VALID_FOREVER,
+                account.getDefaultNode(), account.getDescription(), account.isAllowMultiLogin(),
+                true);
+    }
+
+    private long create(String userName, String loginName, String password, String email, long lang,
                        long mandatorId, boolean isActive, boolean isConfirmed, Date validFrom, Date validTo, long defaultNode,
                        String description, boolean allowMultiLogin, boolean checkUserRoles)
             throws FxApplicationException {
@@ -393,7 +404,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             userName = checkUserName(userName);
             checkDates(validFrom, validTo);
             if (description == null) description = "";
-            email = FxFormatUtils.isEmail(email);
+            email = FxFormatUtils.checkEmail(email);
             if (!language.isValid(lang))
                 throw new FxInvalidParameterException("LANGUAGE", "ex.account.languageInvalid", lang);
         } catch (FxInvalidParameterException pe) {
@@ -603,7 +614,15 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             UserTicketStore.removeUserId(accountId, null);
 
             // delete contact data
-            co.remove(account.getContactData());
+            try {
+                // disable security since the contact data ACL prevents foreign users from deleting
+                // CD instances. However, in this case the user has the role AccountManagement
+                // which overrules the ACL permissions.
+                FxContext.get().runAsSystem();
+                co.remove(account.getContactData());
+            } finally {
+                FxContext.get().stopRunAsSystem();
+            }
         } catch (SQLException exc) {
             ctx.setRollbackOnly();
             throw new FxRemoveException(LOG, exc, "ex.account.delete.failed.sql", accountId, exc.getMessage(), curSql);
@@ -683,7 +702,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             }
             setGroups(accountId, groupIds);
         } else {
-            setGroups(accountId, new long[0]);
+            setGroups(accountId);
         }
     }
 
@@ -691,7 +710,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void setGroups(long accountId, long[] groups) throws FxApplicationException {
+    public void setGroups(long accountId, long... groups) throws FxApplicationException {
         // Handle null params
         if (groups == null)
             groups = new long[0];
@@ -798,31 +817,24 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void setRoles(long accountId, long... roles) throws FxApplicationException {
-        // Handle null params
         if (roles == null)
             roles = new long[0];
+        final Account account = load(accountId);
 
-        // Permission checks
-        try {
-            if (!checkPermissions(accountId)[MAY_SET_ROLES])
-                throw new FxNoAccessException(LOG, "ex.account.roles.noAssignPermission", accountId);
-        } catch (FxLoadException le) {
-            throw new FxUpdateException(le);
-        }
+        if (!_checkPermissions(account)[MAY_SET_ROLES])
+            throw new FxNoAccessException(LOG, "ex.account.roles.noAssignPermission", accountId);
 
         // Write roles to database
         Connection con = null;
         PreparedStatement ps = null;
 
         try {
-            // Remove duplicated role entries
             roles = FxArrayUtils.removeDuplicates(roles);
-            // Obtain a database connection
             con = Database.getDbConnection();
 
             UserTicket ticket = FxContext.get().getTicket();
             //only allow to assign roles which the calling user is a member of (unless it is a global supervisor)
-            if (!ticket.isGlobalSupervisor()) {
+            if (!ticket.isGlobalSupervisor() && !(ticket.isMandatorSupervisor() && account.getMandatorId() == ticket.getMandatorId())) {
                 Role[] orgRoles = getRoles(accountId, RoleLoadMode.FROM_USER_ONLY);
                 long[] orgRoleIds = new long[orgRoles.length];
                 for (int i = 0; i < orgRoles.length; i++)
@@ -1130,7 +1142,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         // Parameter checks
         try {
             if (loginName != null) loginName = checkLoginName(loginName);
-            if (email != null) email = FxFormatUtils.isEmail(email);
+            if (email != null) email = FxFormatUtils.checkEmail(email);
             if (password != null) {
                 password = FxFormatUtils.encodePassword(accountId, password.trim());
             }
@@ -1239,7 +1251,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
 
         // Parameter checks
         if (loginName != null) loginName = checkLoginName(loginName);
-        if (email != null) email = FxFormatUtils.isEmail(email);
+        if (email != null) email = FxFormatUtils.checkEmail(email);
         if (password != null) {
             password = FxFormatUtils.encodePassword(accountId, password.trim());
         }

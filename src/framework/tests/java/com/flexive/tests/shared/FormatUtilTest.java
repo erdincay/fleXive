@@ -103,7 +103,7 @@ public class FormatUtilTest {
      */
     private void checkEmail(String eMail, boolean valid) {
         try {
-            assert FxFormatUtils.isEmail(eMail).equals((eMail != null) ? eMail.trim() : "INV") : "Failed to return valid email address: " + eMail;
+            assert FxFormatUtils.checkEmail(eMail).equals((eMail != null) ? eMail.trim() : "INV") : "Failed to return valid email address: " + eMail;
         } catch (FxInvalidParameterException e) {
             if (valid) {
                 assert false : "Failed to recognize valid email address: " + eMail;

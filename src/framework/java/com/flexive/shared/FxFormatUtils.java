@@ -121,38 +121,17 @@ public final class FxFormatUtils {
     }
 
     /**
-     * Checks the email.
+     * Checks the email. Also allows local email addresses without a domain (e.g. 'root@localhost').
      *
      * @param email the email to check
      * @return the email without whitespaces
      * @throws com.flexive.shared.exceptions.FxInvalidParameterException
      *          if the email is invalid
      */
-    public static String isEmail(String email) throws FxInvalidParameterException {
-        boolean valid = true;
-        if (email == null) {
-            valid = false;
-        } else {
-            int pointPos = email.lastIndexOf('.');
-            int affenPos = email.indexOf('@');
-            if (pointPos == -1) valid = false;
-            if (affenPos == -1) valid = false;
-            if (valid) {
-                try {
-                    // string between '@' und '.'   ...
-                    String subStr1 = email.substring(affenPos + 1, pointPos);
-                    // and string after '.' ....
-                    String substr2 = email.substring(pointPos + 1);
-                    // and string before '@' ...
-                    String substr3 = email.substring(0, affenPos);
-                    // must all must contain characters
-                    if (subStr1.length() == 0 || substr2.length() == 0 || substr3.length() == 0) valid = false;
-                } catch (Exception exc) {
-                    // array index exception = invalid
-                    valid = false;
-                }
-            }
-        }
+    public static String checkEmail(String email) throws FxInvalidParameterException {
+        final boolean valid = email != null && email.indexOf('@') > 0
+                && (StringUtils.countMatches(email, "@") == 1)
+                && (email.indexOf('@') < email.length() - 1);
         if (!valid) {
             throw new FxInvalidParameterException("EMAIL", "ex.account.email.invalid", email);
         }

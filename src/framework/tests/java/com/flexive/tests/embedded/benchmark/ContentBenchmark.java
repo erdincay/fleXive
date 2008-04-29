@@ -92,8 +92,8 @@ public class ContentBenchmark {
                 }
             }
             FxBenchmarkUtils.logExecutionTime("deleteContactData", deleteStart, 100, "instance");
-            EJBLookup.getScriptingEngine().removeScript(script1.getId());
-            EJBLookup.getScriptingEngine().removeScript(script2.getId());
+            EJBLookup.getScriptingEngine().remove(script1.getId());
+            EJBLookup.getScriptingEngine().remove(script2.getId());
         }
     }
 

@@ -357,7 +357,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void removeScript(long scriptId) throws FxApplicationException {
+    public void remove(long scriptId) throws FxApplicationException {
         FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
         Connection con = null;
         PreparedStatement ps = null;

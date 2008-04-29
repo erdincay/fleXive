@@ -39,6 +39,7 @@ import com.flexive.shared.interfaces.LanguageEngine;
 import com.flexive.shared.security.Account;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.security.AccountEdit;
 import static com.flexive.tests.embedded.FxTestUtils.*;
 import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.AfterClass;
@@ -182,8 +183,15 @@ public class AccountTest {
             throws FxApplicationException {
         Date begin = new Date(System.currentTimeMillis() + (long) deltaDays * 24 * 3600 * 1000);
         Date end = new Date(System.currentTimeMillis() + ((long) deltaDays + validDays) * 24 * 3600 * 1000);
-        return accountEngine.create(COUNT + USERNAME, COUNT + LOGINNAME, COUNT + PASSWORD, (COUNT++) + EMAIL, language.load("en").getId(),
-                getUserTicket().getMandatorId(), active, confirmed, begin, end, -1, "", false, true);
+        final AccountEdit account = new AccountEdit()
+                .setName(COUNT + USERNAME)
+                .setLoginName(COUNT + LOGINNAME)
+                .setEmail((COUNT++) + EMAIL)
+                .setActive(active)
+                .setValidated(confirmed)
+                .setValidFrom(begin)
+                .setValidTo(end);
+        return accountEngine.create(account, COUNT + PASSWORD);
     }
 
 }

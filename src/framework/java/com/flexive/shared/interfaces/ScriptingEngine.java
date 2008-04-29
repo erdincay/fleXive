@@ -156,7 +156,7 @@ public interface ScriptingEngine {
      * @param scriptId id of the script and its mappings to remove
      * @throws FxApplicationException on errors
      */
-    void removeScript(long scriptId) throws FxApplicationException;
+    void remove(long scriptId) throws FxApplicationException;
 
     /**
      * Run a script with the given variable binding

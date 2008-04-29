@@ -35,6 +35,7 @@ import com.flexive.shared.EJBLookup;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.AccountEngine;
 import com.flexive.shared.security.Role;
+import com.flexive.shared.security.AccountEdit;
 import org.apache.commons.lang.RandomStringUtils;
 
 import java.util.Date;
@@ -77,15 +78,19 @@ public class TestUser {
         if (userId != -1) {
             throw new RuntimeException("Account already exists");
         }
-        userId = accounts.create(this.userName, this.userName, this.password, this.email,
-                languageId, mandatorId, true, true, new Date(System.currentTimeMillis()-1000), new Date(new Date().getTime() + 60 * 60 * 1000),
-                -1, null, false, true);
+        final AccountEdit account = new AccountEdit()
+                .setName(userName)
+                .setLoginName(userName)
+                .setEmail(email)
+                .setLanguage(EJBLookup.getLanguageEngine().load(languageId))
+                .setMandatorId(mandatorId);
+        userId = accounts.create(account, password);
         if (roles != null) {
             // set user-defined roles
             accounts.setRoles(userId, Role.toIdArray(roles));
         }
         this.userGroupId = EJBLookup.getUserGroupEngine().create(this.userGroup, "#112233", mandatorId);
-        accounts.setGroups(this.userId, new long[]{this.userGroupId});
+        accounts.setGroups(this.userId, this.userGroupId);
     }
 
     /**
