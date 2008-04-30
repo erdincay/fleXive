@@ -962,13 +962,15 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     @Override
     public int hashCode() {
         int hash = 7;
-        for (T translation : translations.values()) {
-            hash = 31 * hash + translation.hashCode();
+        if (translations != null) {
+            for (T translation : translations.values()) {
+                hash = 31 * hash + translation.hashCode();
+            }
+            for (long language : translations.keySet()) {
+                hash = 31 * hash + (int) language;
+            }
         }
         hash = 31 * hash + (int) defaultLanguage;
-        for (long language : translations.keySet()) {
-            hash = 31 * hash + (int) language;
-        }
         return hash;
     }
 

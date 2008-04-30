@@ -97,6 +97,7 @@ public class FxQuartz {
         props.put("org.quartz.jobStore.nonManagedTXDataSource", "fxQuartzNoTXDS");
         props.put("org.quartz.dataSource.fxQuartzNoTXDS." + StdSchedulerFactory.PROP_CONNECTION_PROVIDER_CLASS, FxQuartzConnectionProviderNonTX.class.getCanonicalName());
         props.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, "FxQuartzScheduler_Division_" + FxContext.get().getDivisionId());
+        props.put("org.quartz.jobStore.isClustered", "true");
 
         Scheduler scheduler = new StdSchedulerFactory(props).getScheduler();
         FxContext ctx = FxContext._getEJBContext(currCtx);
