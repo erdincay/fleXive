@@ -55,7 +55,7 @@ import java.sql.Connection;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 @Stateless(name = "FxTimerService")
-@TransactionAttribute(TransactionAttributeType.NEVER)
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
 
@@ -210,7 +210,7 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
     /**
      * {@inheritDoc}
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public void maintenance() {
         try {
             for (DivisionData dd : EJBLookup.getGlobalConfigurationEngine().getDivisions()) {

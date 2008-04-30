@@ -86,7 +86,7 @@ public class FxQuartz {
         // Grab the Scheduler instance from the Factory
         Properties props = new Properties();
         props.put(StdSchedulerFactory.PROP_DATASOURCE_PREFIX, "fxQuartzDS");
-        props.put("org.quartz.dataSource.fxQuartzDS." + StdSchedulerFactory.PROP_CONNECTION_PROVIDER_CLASS, FxQuartzConnectionProvider.class.getCanonicalName());
+        props.put("org.quartz.dataSource.fxQuartzDS." + StdSchedulerFactory.PROP_CONNECTION_PROVIDER_CLASS, FxQuartzConnectionProviderNonTX.class.getCanonicalName());
         props.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, "FxScheduler");
         props.put(StdSchedulerFactory.PROP_JOB_STORE_CLASS, JobStoreCMT.class.getCanonicalName());
         props.put(StdSchedulerFactory.PROP_JOB_STORE_PREFIX, "QRTZ_");
