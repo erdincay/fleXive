@@ -364,7 +364,7 @@ public class FxPermissionUtils {
             return;
         for (Role role : roles)
             if (!ticket.isInRole(role)) {
-                throw new FxNoAccessException(LOG, "ex.role.notInRole", role.getName());
+                throw new FxNoAccessException("ex.role.notInRole", role.getName());
             }
     }
 

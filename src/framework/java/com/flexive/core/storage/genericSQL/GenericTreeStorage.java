@@ -692,7 +692,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                         _pos, new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), _depth, _totalChilds, _directChilds,
                         _directChilds == 0, _dirty, _modified, _template, _edit, _create, _delete, _relate, _export);
             } else
-                throw new FxLoadException(LOG, "ex.tree.node.notFound", nodeId, mode);
+                throw new FxLoadException("ex.tree.node.notFound", nodeId, mode);
         } catch (SQLException exc) {
             throw new FxLoadException(LOG, "ex.tree.load.failed.node", nodeId, mode, exc.getMessage());
         } finally {

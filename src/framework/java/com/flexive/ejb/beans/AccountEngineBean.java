@@ -341,7 +341,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             // Permission checks (2)
             if (!ticket.isGlobalSupervisor()) {
                 if (mandator != ticket.getMandatorId())
-                    throw new FxNoAccessException(LOG, "ex.account.roles.wrongMandator", accountId);
+                    throw new FxNoAccessException("ex.account.roles.wrongMandator", accountId);
             }
 
             // Load the roles

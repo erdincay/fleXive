@@ -408,7 +408,7 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
             success = true;
         } catch (Exception exc) {
             if (Database.isUniqueConstraintViolation(exc)) {
-                throw new FxEntryExistsException(LOG, "ex.workflow.exists", workflow.getName());
+                throw new FxEntryExistsException("ex.workflow.exists", workflow.getName());
             } else {
                 throw new FxCreateException(LOG, "ex.workflow.create", exc, exc.getMessage());
             }

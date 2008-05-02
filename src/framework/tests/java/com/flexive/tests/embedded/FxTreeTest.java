@@ -416,6 +416,7 @@ public class FxTreeTest {
     public void scriptingActivateTest() throws FxApplicationException {
         FxTreeMode mode = FxTreeMode.Edit;
         tree.clear(mode);
+        tree.clear(FxTreeMode.Live);
         scriptCounter = 0;
         String code = "println \"[Groovy script]=== Before activating node ${node.id}: ${node.path} ===\"\n" +
                 "com.flexive.tests.embedded.FxTreeTest.scriptCounter+=2";

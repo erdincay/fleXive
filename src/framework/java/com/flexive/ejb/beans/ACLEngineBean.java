@@ -196,7 +196,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(exc);
             ctx.setRollbackOnly();
             if (uniqueConstraintViolation) {
-                throw new FxEntryExistsException(LOG, "ex.acl.aclAlreadyExists", name);
+                throw new FxEntryExistsException("ex.acl.aclAlreadyExists", name);
             } else {
                 throw new FxCreateException(LOG, exc, "ex.acl.createFailed", exc.getMessage());
             }
