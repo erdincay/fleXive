@@ -25,7 +25,7 @@ height = overrides the default height (value in pixel, eg height="80")
 </c:if>
 <c:if test="${!empty width}">
     <c:set var="overideStyle" value="#{overideStyle};width:#{width}px" />
-    <c:set var="overrideInputStyle" value="#{overrideInputStyle};width:#{width-130}px"/>
+    <c:set var="overrideInputStyle" value="#{overrideInputStyle};width:#{width-140}px"/>
 </c:if>
 <c:if test="#{!empty labelKey}">
     <c:set var="label" value="#{fxMessageBean[labelKey]}"/>
