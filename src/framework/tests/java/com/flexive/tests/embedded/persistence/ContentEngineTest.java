@@ -29,7 +29,7 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.tests.embedded;
+package com.flexive.tests.embedded.persistence;
 
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
@@ -49,6 +49,8 @@ import com.flexive.shared.value.FxNoAccess;
 import com.flexive.shared.value.FxNumber;
 import com.flexive.shared.value.FxString;
 import static com.flexive.tests.embedded.FxTestUtils.*;
+import com.flexive.tests.embedded.TestUsers;
+import com.flexive.tests.embedded.ScriptingTest;
 import org.apache.commons.lang.RandomStringUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;

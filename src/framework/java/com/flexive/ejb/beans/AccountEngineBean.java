@@ -720,7 +720,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         // Permission checks
         try {
             if (!checkPermissions(accountId)[MAY_SET_GROUPS])
-                throw new FxNoAccessException(LOG, "ex.account.groups.noAssignPermission", accountId);
+                throw new FxNoAccessException("ex.account.groups.noAssignPermission", accountId);
         } catch (FxLoadException le) {
             throw new FxUpdateException(le.getMessage());
         }
@@ -822,7 +822,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         final Account account = load(accountId);
 
         if (!_checkPermissions(account)[MAY_SET_ROLES])
-            throw new FxNoAccessException(LOG, "ex.account.roles.noAssignPermission", accountId);
+            throw new FxNoAccessException("ex.account.roles.noAssignPermission", accountId);
 
         // Write roles to database
         Connection con = null;

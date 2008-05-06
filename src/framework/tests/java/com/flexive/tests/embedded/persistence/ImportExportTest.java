@@ -29,7 +29,7 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.tests.embedded;
+package com.flexive.tests.embedded.persistence;
 
 import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.shared.CacheAdmin;

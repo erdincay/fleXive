@@ -35,7 +35,7 @@ import java.io.Serializable;
 
 /**
  * Editable route class.
- * 
+ *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @see Route
  */
@@ -44,6 +44,7 @@ public class RouteEdit extends Route implements Serializable {
 
     /**
      * Constructor
+     *
      * @param route source route
      */
     public RouteEdit(Route route) {
@@ -55,11 +56,23 @@ public class RouteEdit extends Route implements Serializable {
      */
     public RouteEdit() {
     }
-    
+
+    /**
+     * Ctor to create a new route
+     *
+     * @param userGroupId user group
+     * @param fromStepId  from step
+     * @param toStepId    to step
+     */
+    public RouteEdit(long userGroupId, long fromStepId, long toStepId) {
+        super(-1, userGroupId, fromStepId, toStepId);
+    }
+
 
     /**
      * Sets the source step of the route.
-     * @param fromStepId    the source step of the route.
+     *
+     * @param fromStepId the source step of the route.
      */
     public void setFromStepId(long fromStepId) {
         this.fromStepId = fromStepId;
@@ -67,7 +80,8 @@ public class RouteEdit extends Route implements Serializable {
 
     /**
      * Sets the group ID of the route.
-     * @param groupId   the group ID of the route.
+     *
+     * @param groupId the group ID of the route.
      */
     public void setGroupId(long groupId) {
         this.groupId = groupId;
@@ -75,7 +89,8 @@ public class RouteEdit extends Route implements Serializable {
 
     /**
      * Sets the unique ID of the route.
-     * @param id    the unique ID of the route.
+     *
+     * @param id the unique ID of the route.
      */
     public void setId(long id) {
         this.id = id;
@@ -83,9 +98,22 @@ public class RouteEdit extends Route implements Serializable {
 
     /**
      * Sets the destination step ID of the route.
-     * @param toStepId  the destination step ID of the route.
+     *
+     * @param toStepId the destination step ID of the route.
      */
     public void setToStepId(long toStepId) {
         this.toStepId = toStepId;
+    }
+
+    /**
+     * Convenience method to create a new route
+     *
+     * @param userGroupId user group
+     * @param fromStepId  from step
+     * @param toStepId    to step
+     * @return RouteEdit
+     */
+    public static RouteEdit createNew(long userGroupId, long fromStepId, long toStepId) {
+        return new RouteEdit(userGroupId, fromStepId, toStepId);
     }
 }

@@ -323,5 +323,46 @@ public class ACLAssignment implements Serializable, Cloneable {
         }
     }
 
+    /**
+     * Create a new ACLAssignment using permission sets
+     *
+     * @param acl         affected ACL
+     * @param groupId     usergroup
+     * @param permissions set of permissions
+     * @return ACLAssignment
+     */
+    public static ACLAssignment createNew(ACL acl, long groupId, ACL.Permission... permissions) {
+        boolean mayRead = false;
+        boolean mayEdit = false;
+        boolean mayRelate = false;
+        boolean mayCreate = false;
+        boolean mayDelete = false;
+        boolean mayExport = false;
+        for (ACL.Permission perm : permissions) {
+            switch (perm) {
+                case READ:
+                    mayRead = true;
+                    break;
+                case EDIT:
+                    mayEdit = true;
+                    break;
+                case RELATE:
+                    mayRelate = true;
+                    break;
+                case CREATE:
+                    mayCreate = true;
+                    break;
+                case DELETE:
+                    mayDelete = true;
+                    break;
+                case EXPORT:
+                    mayExport = true;
+                    break;
+            }
+        }
+        return new ACLAssignment(acl.getId(), groupId, mayRead, mayEdit, mayRelate, mayDelete, mayExport, mayCreate,
+                acl.getCategory(), acl.getLifeCycleInfo());
+    }
+
 
 }

@@ -37,7 +37,7 @@ import java.util.List;
 
 /**
  * Editable workflow class.
- * 
+ *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class WorkflowEdit extends Workflow implements Serializable {
@@ -45,22 +45,24 @@ public class WorkflowEdit extends Workflow implements Serializable {
 
     /**
      * Copy constructor.
-     * @param workflow  the source workflow
+     *
+     * @param workflow the source workflow
      */
     public WorkflowEdit(Workflow workflow) {
-        super(workflow.getId(), workflow.getName(), workflow.getDescription(), workflow.getSteps(), 
+        super(workflow.getId(), workflow.getName(), workflow.getDescription(), workflow.getSteps(),
                 workflow.getRoutes());
     }
-    
+
     /**
      * Default constructor.
      */
     public WorkflowEdit() {
     }
-    
+
     /**
      * Set the workflow ID.
-     * @param id    the workflow ID.
+     *
+     * @param id the workflow ID.
      */
     public void setId(long id) {
         this.id = id;
@@ -68,7 +70,8 @@ public class WorkflowEdit extends Workflow implements Serializable {
 
     /**
      * Set the workflow name.
-     * @param name  the workflow name.
+     *
+     * @param name the workflow name.
      */
     public void setName(String name) {
         this.name = name;
@@ -77,7 +80,8 @@ public class WorkflowEdit extends Workflow implements Serializable {
 
     /**
      * Set the workflow description.
-     * @param description   the workflow description.
+     *
+     * @param description the workflow description.
      */
     public void setDescription(String description) {
         this.description = description;
@@ -86,6 +90,7 @@ public class WorkflowEdit extends Workflow implements Serializable {
 
     /**
      * Set the workflow steps.
+     *
      * @param steps the workflow steps.
      */
     public void setSteps(List<? extends StepEdit> steps) {
@@ -96,11 +101,31 @@ public class WorkflowEdit extends Workflow implements Serializable {
 
     /**
      * Set the workflow routes.
-     * @param routes    the workflow routes.
+     *
+     * @param routes the workflow routes.
      */
     public void setRoutes(List<? extends Route> routes) {
         List<Route> list = new ArrayList<Route>(routes.size());
         list.addAll(routes);
         this.routes = list;
+    }
+
+    /**
+     * Ctor to create a new WorkflowEdit instance
+     *
+     * @param name workflow name
+     */
+    public WorkflowEdit(String name) {
+        super(-1, name, "", null, null);
+    }
+
+    /**
+     * Convenience method to create a new WorkflowEdit instance
+     *
+     * @param name workflow name
+     * @return WorkflowEdit instance
+     */
+    public static WorkflowEdit createNew(String name) {
+        return new WorkflowEdit(name);
     }
 }

@@ -70,8 +70,8 @@ public class ScriptingTest {
     public static boolean allowTearDown = false;
 
     ScriptingEngine se;
-    protected static FxScriptInfo loadScript = null;
-    protected static FxScriptInfo removeScript = null;
+    public static FxScriptInfo loadScript = null;
+    public static FxScriptInfo removeScript = null;
 
     @BeforeSuite(dependsOnGroups = {"bootstrap"})
     public void suiteSetup() throws FxApplicationException, FxLoginFailedException, FxAccountInUseException, FxLogoutFailedException {

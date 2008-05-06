@@ -31,11 +31,13 @@
  ***************************************************************/
 package com.flexive.shared.workflow;
 
+import com.flexive.shared.security.ACL;
+
 import java.io.Serializable;
 
 /**
  * Editable workflow step.
- * 
+ *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class StepEdit extends Step implements Serializable {
@@ -43,20 +45,22 @@ public class StepEdit extends Step implements Serializable {
 
     /**
      * Constructor from a Step
-     * @param step  the source step
+     *
+     * @param step the source step
      */
     public StepEdit(Step step) {
         super(step);
     }
-    
+
     /**
      * Default constructor
      */
     public StepEdit() {
     }
-    
+
     /**
      * Sets the ACL ID to be used for this step.
+     *
      * @param aclId the ACL ID to be used for this step.
      */
     public void setAclId(long aclId) {
@@ -65,7 +69,8 @@ public class StepEdit extends Step implements Serializable {
 
     /**
      * Sets the ID for this step.
-     * @param id    the ID for this step.
+     *
+     * @param id the ID for this step.
      */
     public void setId(long id) {
         this.id = id;
@@ -73,7 +78,8 @@ public class StepEdit extends Step implements Serializable {
 
     /**
      * Sets the step definition ID to be used for this step.
-     * @param stepDefinitionId  the step definition ID to be used for this step.
+     *
+     * @param stepDefinitionId the step definition ID to be used for this step.
      */
     public void setStepDefinitionId(long stepDefinitionId) {
         this.stepDefinitionId = stepDefinitionId;
@@ -81,9 +87,29 @@ public class StepEdit extends Step implements Serializable {
 
     /**
      * Sets the workflow ID for this step.
-     * @param workflowId    the workflow ID for this step.
+     *
+     * @param workflowId the workflow ID for this step.
      */
     public void setWorkflowId(long workflowId) {
         this.workflowId = workflowId;
+    }
+
+    /**
+     * Ctor for a new step based on a step definition using the default ACL
+     *
+     * @param stepDefinitionId step definition to use
+     */
+    public StepEdit(long stepDefinitionId) {
+        super(-1, stepDefinitionId, -1, ACL.Category.WORKFLOW.getDefaultId());
+    }
+
+    /**
+     * Convenience method to create new step based on a step definition using the default ACL
+     *
+     * @param stepDefinitionId step definition to use
+     * @return StepEdit
+     */
+    public static StepEdit createNew(long stepDefinitionId) {
+        return new StepEdit(stepDefinitionId);
     }
 }

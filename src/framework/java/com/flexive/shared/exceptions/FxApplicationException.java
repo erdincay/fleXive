@@ -33,6 +33,7 @@ package com.flexive.shared.exceptions;
 
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.LogLevel;
+import com.flexive.shared.FxContext;
 import com.flexive.shared.security.UserTicket;
 import org.apache.commons.logging.Log;
 
@@ -131,6 +132,8 @@ public class FxApplicationException extends Exception implements FxLocalizedExce
      */
     private void logMessage(Log log, String message, LogLevel level) {
         this.messageLogged = true;
+        if( FxContext.get() != null && FxContext.get().isTestDivision())
+            return; //dont log exception traces during automated tests
         final Throwable cause = getCause() != null ? getCause() : this;
         if (level == null)
             log.error(message, cause);

@@ -140,9 +140,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
         if (!ticket.isGlobalSupervisor()) {
             if (ticket.getMandatorId() != mandatorId) {
                 String mandatorName = environment.getMandator(mandatorId).getName();
-                FxNoAccessException na = new FxNoAccessException("ex.acl.mayNotCreateForForeignMandator", mandatorName);
-                if (LOG.isInfoEnabled()) LOG.info(na, na);
-                throw na;
+                throw new FxNoAccessException("ex.acl.mayNotCreateForForeignMandator", mandatorName);
             }
         }
 
@@ -281,6 +279,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
         // Load the current version of the ACL
         ACL theACL = load(id);
 
+        boolean keepAssignment = assignments == null;
         // Check the assignments array: Every group may only be contained once
         if (assignments == null) {
             assignments = new ArrayList<ACLAssignment>(0);
@@ -347,34 +346,36 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
                 throw new SQLException(uCount + " rows affected instead of 1");
             }
             Database.storeFxString(theACL.getLabel(), con, TBL_ACLS, "LABEL", "ID", theACL.getId());
-            //remove assignments
-            curSql = "DELETE FROM " + TBL_ASSIGN_ACLS + " WHERE ACL=?";
-            stmt = con.prepareStatement(curSql);
-            stmt.setLong(1, theACL.getId());
-            stmt.executeUpdate();
-            if (assignments.size() > 0) {
-                stmt.close();
-                //                                             1          2    3      4        5        6     7      8
-                curSql = "INSERT INTO " + TBL_ASSIGN_ACLS + " (USERGROUP, ACL, PEDIT, PREMOVE, PEXPORT, PREL, PREAD, PCREATE, " +
-                        //9          10          11           12
-                        "CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+            if (!keepAssignment) {
+                //remove assignments
+                curSql = "DELETE FROM " + TBL_ASSIGN_ACLS + " WHERE ACL=?";
                 stmt = con.prepareStatement(curSql);
-                stmt.setLong(2, theACL.getId());
-                stmt.setLong(9, ticket.getUserId());
-                stmt.setLong(10, NOW);
-                stmt.setLong(11, ticket.getUserId());
-                stmt.setLong(12, NOW);
-                for (ACLAssignment assignment : assignments) {
-                    stmt.setLong(1, assignment.getGroupId());
-                    stmt.setBoolean(3, assignment.getMayEdit());
-                    stmt.setBoolean(4, assignment.getMayDelete());
-                    stmt.setBoolean(5, assignment.getMayExport());
-                    stmt.setBoolean(6, assignment.getMayRelate());
-                    stmt.setBoolean(7, assignment.getMayRead());
-                    stmt.setBoolean(8, assignment.getMayCreate());
-                    if (assignment.getMayCreate() || assignment.getMayDelete() || assignment.getMayEdit() ||
-                            assignment.getMayExport() || assignment.getMayRelate() || assignment.getMayRead())
-                        stmt.executeUpdate();
+                stmt.setLong(1, theACL.getId());
+                stmt.executeUpdate();
+                if (assignments.size() > 0) {
+                    stmt.close();
+                    //                                             1          2    3      4        5        6     7      8
+                    curSql = "INSERT INTO " + TBL_ASSIGN_ACLS + " (USERGROUP, ACL, PEDIT, PREMOVE, PEXPORT, PREL, PREAD, PCREATE, " +
+                            //9          10          11           12
+                            "CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+                    stmt = con.prepareStatement(curSql);
+                    stmt.setLong(2, theACL.getId());
+                    stmt.setLong(9, ticket.getUserId());
+                    stmt.setLong(10, NOW);
+                    stmt.setLong(11, ticket.getUserId());
+                    stmt.setLong(12, NOW);
+                    for (ACLAssignment assignment : assignments) {
+                        stmt.setLong(1, assignment.getGroupId());
+                        stmt.setBoolean(3, assignment.getMayEdit());
+                        stmt.setBoolean(4, assignment.getMayDelete());
+                        stmt.setBoolean(5, assignment.getMayExport());
+                        stmt.setBoolean(6, assignment.getMayRelate());
+                        stmt.setBoolean(7, assignment.getMayRead());
+                        stmt.setBoolean(8, assignment.getMayCreate());
+                        if (assignment.getMayCreate() || assignment.getMayDelete() || assignment.getMayEdit() ||
+                                assignment.getMayExport() || assignment.getMayRelate() || assignment.getMayRead())
+                            stmt.executeUpdate();
+                    }
                 }
             }
             try {
@@ -515,9 +516,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             UserTicketStore.flagDirtyHavingGroupId(groupId);
         } catch (Exception exc) {
             ctx.setRollbackOnly();
-            FxCreateException dbe = new FxCreateException(exc, "ex.aclAssignment.createFailed");
-            LOG.error(dbe, exc);
-            throw dbe;
+            throw new FxCreateException(LOG, exc, "ex.aclAssignment.createFailed");
         } finally {
             Database.closeObjects(ACLEngineBean.class, con, stmt);
         }
@@ -594,11 +593,8 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             // Delete any old assignments
             curSql = "DELETE FROM " + TBL_ASSIGN_ACLS + " WHERE USERGROUP=" + groupId + " AND ACL=" + aclId;
             stmt = con.createStatement();
-            if (stmt.executeUpdate(curSql) == 0) {
-                FxNotFoundException nfe = new FxNotFoundException("ex.aclAssignment.notFound", aclId, groupId);
-                if (LOG.isInfoEnabled()) LOG.info(nfe, nfe);
-                throw nfe;
-            }
+            if (stmt.executeUpdate(curSql) == 0)
+                throw new FxNotFoundException(LOG, "ex.aclAssignment.notFound", aclId, groupId);
 
             // Update active UserTickets
             UserTicketStore.flagDirtyHavingGroupId(groupId);
@@ -606,9 +602,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             throw e;
         } catch (Exception exc) {
             ctx.setRollbackOnly();
-            FxRemoveException dbe = new FxRemoveException(exc, "ex.aclAssignment.unassigneFailed", aclId, groupId);
-            LOG.error(dbe, exc);
-            throw dbe;
+            throw new FxRemoveException(LOG, exc, "ex.aclAssignment.unassigneFailed", aclId, groupId);
         } finally {
             Database.closeObjects(ACLEngineBean.class, con, stmt);
         }
@@ -634,7 +628,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
         if (groupId != null) {
             UserGroup grp = group.load(groupId);
             if (!grp.mayAccessGroup(ticket))
-                throw new FxNoAccessException(LOG, "ex.acl.noAccess.foreignMandator");
+                throw new FxNoAccessException("ex.acl.noAccess.foreignMandator");
         }
 
         if (aclId != null) {
