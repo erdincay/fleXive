@@ -181,7 +181,7 @@ public class ThumbnailServlet implements Servlet {
                     CacheAdmin.getStreamServers(), response.getOutputStream(), binaryId, conf.getSize());
         } catch (FxStreamException e) {
             LOG.error(e);
-            response.sendRedirect(request.getContextPath() + "/adm/images/layout/Logo_Flexive.gif");
+            throw new ServletException(e);
         }
     }
 

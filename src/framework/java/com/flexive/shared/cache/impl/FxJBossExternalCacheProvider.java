@@ -34,6 +34,7 @@ package com.flexive.shared.cache.impl;
 import com.flexive.shared.cache.FxBackingCache;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.mbeans.MBeanHelper;
+import com.flexive.shared.Pair;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,6 +44,8 @@ import org.jboss.cache.jmx.CacheJmxWrapperMBean;
 
 import javax.management.MBeanServerInvocationHandler;
 import javax.management.ObjectName;
+import javax.management.MBeanServer;
+import javax.management.MBeanInfo;
 
 /**
  * FxBackingCache Provider for a JBossCache instance registered via an external -service.xml deployment
@@ -69,10 +72,11 @@ public class FxJBossExternalCacheProvider extends AbstractBackingCacheProvider<F
             return;
         try {
             // first check if the cache MBean exists
-            MBeanHelper.locateServer().getMBeanInfo(new ObjectName("jboss.cache:service=JNDITreeCache"));
+            final ObjectName objectName = new ObjectName("jboss.cache:service=JNDITreeCache");
+            final Pair<MBeanServer,MBeanInfo> beanInfo = MBeanHelper.getMBeanInfo(objectName);
             // create wrapper MBean (cast necessary for java 1.5)
-            final CacheJmxWrapperMBean wrapper = (CacheJmxWrapperMBean) MBeanServerInvocationHandler.newProxyInstance(MBeanHelper.locateServer(),
-                    new ObjectName("jboss.cache:service=JNDITreeCache"), CacheJmxWrapperMBean.class, false);
+            final CacheJmxWrapperMBean wrapper = (CacheJmxWrapperMBean) MBeanServerInvocationHandler.newProxyInstance(
+                    beanInfo.getFirst(), objectName, CacheJmxWrapperMBean.class, false);
             cache = new FxJBossTreeCacheMBeanWrapper(wrapper);
             evictChildren("");  // clean up possible leftovers from previous deployment
             LOG.trace(Fqn.class);

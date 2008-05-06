@@ -34,10 +34,12 @@ package com.flexive.shared.mbeans;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
+import javax.management.*;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
+import com.flexive.shared.Pair;
 
 /**
  * MBean Helper class
@@ -55,7 +57,7 @@ public final class MBeanHelper {
     }
 
     public static MBeanServer locateServer() {
-        ArrayList<MBeanServer> servers = MBeanServerFactory.findMBeanServer(null);
+        final List<MBeanServer> servers = findMBeanServers();
         if (LOG.isInfoEnabled())
             for (MBeanServer server : servers) {
                 LOG.info("MBeanServer: " + server.getDefaultDomain() + "/" + server.getMBeanCount());
@@ -63,5 +65,29 @@ public final class MBeanHelper {
         return servers.get(0);
     }
 
+    /**
+     * Searches all available MBean servers for the given object name.
+     *
+     * @param name  the object name
+     * @return  the MBeanInfo of the first server that contains an entry of this name
+     * @throws javax.management.InstanceNotFoundException   if the given object was not found on any server
+     * @throws javax.management.IntrospectionException  thrown by server factory
+     * @throws javax.management.ReflectionException thrown by server factory
+     */
+    public static Pair<MBeanServer, MBeanInfo> getMBeanInfo(ObjectName name) throws ReflectionException, IntrospectionException, InstanceNotFoundException {
+        InstanceNotFoundException notFoundException = null;
+        for (MBeanServer server: findMBeanServers()) {
+            try {
+                return new Pair<MBeanServer, MBeanInfo>(server, server.getMBeanInfo(name));
+            } catch (InstanceNotFoundException e) {
+                notFoundException = e;
+            }
+        }
+        throw notFoundException;
+    }
+
+    private static List<MBeanServer> findMBeanServers() {
+        return MBeanServerFactory.findMBeanServer(null);
+    }
 
 }

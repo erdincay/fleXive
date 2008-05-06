@@ -182,13 +182,19 @@ public class CacheAdmin {
      * @return FxEnvironment
      */
     public static FxEnvironment getEnvironment() {
-        synchronized (ENV_LOCK) {
-            try {
+        try {
 //            if (requestEnvironment.get() != null) {
 //                return requestEnvironment.get();
 //            }
-                FxEnvironment ret = (FxEnvironment) getInstance().get(ENVIRONMENT_BASE, ENVIRONMENT_RUNTIME);
-                if (ret == null) {
+            FxEnvironment ret = (FxEnvironment) getInstance().get(ENVIRONMENT_BASE, ENVIRONMENT_RUNTIME);
+            if (ret == null) {
+                synchronized (ENV_LOCK) {
+                    // try to get the environment again. We may have blocked for a long time on ENV_LOCK
+                    // if another thread started the environment initialization
+                    ret = (FxEnvironment) getInstance().get(ENVIRONMENT_BASE, ENVIRONMENT_RUNTIME);
+                    if (ret != null) {
+                        return ret;
+                    }
                     FxContext ri = FxContext.get();
                     if (!DivisionData.isValidDivisionId(ri.getDivisionId())) {
                         throw new FxCacheException("Division Id missing in request information");
@@ -219,16 +225,16 @@ public class CacheAdmin {
                     if (ret == null)
                         throw new FxLoadException("ex.structure.runtime.cache.notFound");
                 }
-                //            requestEnvironment.set(ret);
-                return ret;
-            } catch (FxCacheException e) {
-                throw new FxLoadException(LOG, e, "ex.cache.access.error", e.getMessage()).asRuntimeException();
-            } catch (FxLoadException f) {
-                throw f.asRuntimeException(); //pass thru
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new FxLoadException(LOG, e, "ex.cache.access.error", e.getClass().getName() + ": " + e.getMessage()).asRuntimeException();
             }
+            //            requestEnvironment.set(ret);
+            return ret;
+        } catch (FxCacheException e) {
+            throw new FxLoadException(LOG, e, "ex.cache.access.error", e.getMessage()).asRuntimeException();
+        } catch (FxLoadException f) {
+            throw f.asRuntimeException(); //pass thru
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new FxLoadException(LOG, e, "ex.cache.access.error", e.getClass().getName() + ": " + e.getMessage()).asRuntimeException();
         }
     }
 

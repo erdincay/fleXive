@@ -87,10 +87,9 @@ public class FxQuartz {
         Properties props = new Properties();
         props.put(StdSchedulerFactory.PROP_DATASOURCE_PREFIX, "fxQuartzDS");
         props.put("org.quartz.dataSource.fxQuartzDS." + StdSchedulerFactory.PROP_CONNECTION_PROVIDER_CLASS, FxQuartzConnectionProviderNonTX.class.getCanonicalName());
-        props.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, "FxScheduler");
         props.put(StdSchedulerFactory.PROP_JOB_STORE_CLASS, JobStoreCMT.class.getCanonicalName());
         props.put(StdSchedulerFactory.PROP_JOB_STORE_PREFIX, "QRTZ_");
-        props.put(StdSchedulerFactory.AUTO_GENERATE_INSTANCE_ID, true);
+        props.put("org.quartz.scheduler.instanceId", StdSchedulerFactory.AUTO_GENERATE_INSTANCE_ID);
         props.put(StdSchedulerFactory.PROP_THREAD_POOL_CLASS, SimpleThreadPool.class.getCanonicalName());
         props.put("org.quartz.threadPool.threadCount", String.valueOf(5));
         props.put("org.quartz.jobStore.dataSource", "fxQuartzDS");
