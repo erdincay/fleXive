@@ -35,6 +35,7 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.content.FxContent;
+import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.FxAccountInUseException;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -49,6 +50,7 @@ import com.flexive.shared.security.ACLAssignment;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserGroup;
 import com.flexive.shared.structure.*;
+import com.flexive.shared.value.FxNoAccess;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.workflow.*;
 import static com.flexive.tests.embedded.FxTestUtils.login;
@@ -312,6 +314,86 @@ public class ContentSecurityTest {
     }
 
     /**
+     * Run a series of instance and type related tests
+     *
+     * @throws FxApplicationException on errors
+     */
+    private void instanceTests() throws FxApplicationException {
+        FxContent refContent = createReferenceContent();
+        ContentEngine ce = EJBLookup.getContentEngine();
+        FxContent compare;
+        //1..10: Load ref, error expected for 2,4,5
+        for (int grp = 1; grp <= 10; grp++) {
+            assignGroup(grp);
+            try {
+                compare = ce.load(refContent.getPk());
+                Assert.assertEquals(refContent, compare);
+                Assert.assertFalse(containsGroup(grp, 2, 4, 5), "Test should have failed for group " + grp);
+            } catch (FxApplicationException e) {
+                switch (grp) {
+                    case 2:
+                    case 4:
+                    case 5:
+                        //expected
+                        break;
+                    default:
+                        Assert.assertFalse(true, "Group " + grp + " should not have failed!");
+                }
+            }
+        }
+        //Save ref, error expected for 1
+        for (int grp = 1; grp <= 10; grp++) {
+            if (containsGroup(grp, 2, 4, 5))
+                continue;
+            assignGroup(grp);
+            try {
+                ce.save(refContent);
+                Assert.assertFalse(containsGroup(grp, 1), "Test should have failed for group " + grp);
+            } catch (FxApplicationException e) {
+                switch (grp) {
+                    case 1:
+                        //expected
+                        break;
+                    default:
+                        Assert.assertFalse(true, "Group " + grp + " should not have failed!");
+                }
+            }
+        }
+        //Create a clone of ref and remove it, error expected for 3, 6
+        for (int grp = 1; grp <= 10; grp++) {
+            if (containsGroup(grp, 1, 2, 4, 5))
+                continue;
+            FxContent clone;
+            FxContext.get().runAsSystem();
+            try {
+                clone = ce.load(ce.save(refContent.copyAsNewInstance()));
+            } finally {
+                FxContext.get().stopRunAsSystem();
+            }
+            assignGroup(grp);
+            try {
+                ce.remove(clone.getPk());
+                Assert.assertFalse(containsGroup(grp, 3, 6), "Test should have failed for group " + grp);
+            } catch (FxApplicationException e) {
+                switch (grp) {
+                    case 3:
+                    case 6:
+                        //expected
+                        FxContext.get().runAsSystem();
+                        try {
+                            ce.remove(clone.getPk());
+                        } finally {
+                            FxContext.get().stopRunAsSystem();
+                        }
+                        break;
+                    default:
+                        Assert.assertFalse(true, "Group " + grp + " should not have failed!");
+                }
+            }
+        }
+    }
+
+    /**
      * Test 1 - Type permissions
      *
      * @throws FxApplicationException on errors
@@ -396,80 +478,123 @@ public class ContentSecurityTest {
     }
 
     /**
-     * Run a series of instance and type related tests
+     * Test 4 - Property permissions
      *
      * @throws FxApplicationException on errors
      */
-    private void instanceTests() throws FxApplicationException {
+    @Test
+    public void test4_Properties() throws FxApplicationException {
+        //setup ACL test matrices
+        assignMatrix(0, typeACL);
+        assignMatrix(0, instanceACL);
+        assignMatrix(0, property1ACL);
+        assignMatrix(2, property2ACL);
+        assignMatrix(0, editACL);
+        assignMatrix(0, liveACL);
+
+        FxTypeEdit te = type.asEditable();
+        te.setPermissions(FxPermissionUtils.encodeTypePermissions(false, true, false, false));
+        FxContext.get().runAsSystem();
+        try {
+            EJBLookup.getTypeEngine().save(te);
+        } finally {
+            FxContext.get().stopRunAsSystem();
+        }
+        type = CacheAdmin.getEnvironment().getType(type.getId());
+        //run the test series
         FxContent refContent = createReferenceContent();
         ContentEngine ce = EJBLookup.getContentEngine();
         FxContent compare;
-        //1..10: Load ref, error expected for 2,4,5
-        for (int grp = 1; grp <= 10; grp++) {
+
+        for (int grp = 11; grp <= 17; grp++) {
             assignGroup(grp);
+            compare = ce.load(refContent.getPk());
+            //11..17: Load ref, P2 should be FxNoAccess for 12,16
+            if (containsGroup(grp, 12, 16)) {
+                Assert.assertTrue(compare.getPropertyData("/P2").getValue() instanceof FxNoAccess, "/P2 expected to be FxNoAccess for group " + grp);
+                Assert.assertNotSame(refContent, compare, "Group: " + grp);
+            } else
+                Assert.assertEquals(refContent, compare, "Group: " + grp);
+            //11..17: change value, error expected for 11,16
             try {
-                compare = ce.load(refContent.getPk());
-                Assert.assertEquals(refContent, compare);
-                Assert.assertFalse(containsGroup(grp, 2, 4, 5), "Test should have failed for group " + grp);
+                compare.setValue("/P2", PROP1_VALUE);
+                Assert.assertFalse(containsGroup(grp, 11, 16), "Group " + grp + " should have thrown an exception trying to override a FxNoAccess value");
             } catch (FxApplicationException e) {
-                switch (grp) {
-                    case 2:
-                    case 4:
-                    case 5:
-                        //expected
-                        break;
-                    default:
-                        Assert.assertFalse(true, "Group " + grp + " should not have failed!");
+                if (!containsGroup(grp, 11, 16))
+                    Assert.assertTrue(true, "Group " + grp + " should be allowed to modify /P2");
+                else {
+                    //force change for next test
+                    FxContext.get().runAsSystem();
+                    try {
+                        compare.setValue("/P2", PROP1_VALUE);
+                    } finally {
+                        FxContext.get().stopRunAsSystem();
+                    }
                 }
             }
-        }
-        //Save ref, error expected for 1
-        for (int grp = 1; grp <= 10; grp++) {
-            if (containsGroup(grp, 2, 4, 5))
-                continue;
-            assignGroup(grp);
-            try {
-                ce.save(refContent);
-                Assert.assertFalse(containsGroup(grp, 1), "Test should have failed for group " + grp);
-            } catch (FxApplicationException e) {
-                switch (grp) {
-                    case 1:
-                        //expected
-                        break;
-                    default:
-                        Assert.assertFalse(true, "Group " + grp + " should not have failed!");
+            //11,13-15,17: save changed value, error expected for 11
+            if (containsGroup(grp, 11, 13, 14, 15, 17)) {
+                try {
+                    FxPK pk = null;
+                    try {
+                        pk = ce.save(compare.copyAsNewInstance());
+                    } finally {
+                        if (pk != null) {
+                            FxContext.get().runAsSystem();
+                            try {
+                                ce.remove(pk);
+                            } finally {
+                                FxContext.get().stopRunAsSystem();
+                            }
+                        }
+                    }
+                    Assert.assertFalse(containsGroup(grp, 11), "Group " + grp + " should have thrown an exception trying to save an instance");
+                } catch (FxApplicationException e) {
+                    if (!containsGroup(grp, 11))
+                        Assert.assertTrue(true, "Group " + grp + " should be allowed to save a modified /P2");
                 }
             }
-        }
-        //Create a clone of ref and remove it, error expected for 3, 6
-        for (int grp = 1; grp <= 10; grp++) {
-            if (containsGroup(grp, 1, 2, 4, 5))
-                continue;
-            FxContent clone;
-            FxContext.get().runAsSystem();
-            try {
-                clone = ce.load(ce.save(refContent.copyAsNewInstance()));
-            } finally {
-                FxContext.get().stopRunAsSystem();
-            }
-            assignGroup(grp);
-            try {
-                ce.remove(clone.getPk());
-                Assert.assertFalse(containsGroup(grp, 3, 6), "Test should have failed for group " + grp);
-            } catch (FxApplicationException e) {
-                switch (grp) {
-                    case 3:
-                    case 6:
-                        //expected
+            //13-15,17: remove /P2 and save the instance, error expected for 13,14
+            if (containsGroup(grp, 13, 14, 15, 17)) {
+                try {
+                    FxPK pk = null;
+                    try {
+                        FxContent co = compare.copyAsNewInstance();
                         FxContext.get().runAsSystem();
                         try {
-                            ce.remove(clone.getPk());
+                            pk = ce.save(co);
+                            co = ce.load(pk);
                         } finally {
                             FxContext.get().stopRunAsSystem();
                         }
-                        break;
-                    default:
-                        Assert.assertFalse(true, "Group " + grp + " should not have failed!");
+                        co.remove("/P2");
+                        ce.save(co);
+                        if (containsGroup(grp, 15, 17)) {
+                            //try to re-add /P2, error expected for 15
+                            try {
+                                co.setValue("/P2", PROP2_VALUE);
+                                ce.save(co);
+                                if (grp == 15)
+                                    Assert.assertFalse(true, "Group 15 should not be able to add /P2");
+                            } catch (FxApplicationException e) {
+                                if (grp != 15)
+                                    Assert.assertFalse(true, "Only Group 15 and not " + grp + " should not be able to add /P2");
+                            }
+                        }
+                    } finally {
+                        if (pk != null) {
+                            FxContext.get().runAsSystem();
+                            try {
+                                ce.remove(pk);
+                            } finally {
+                                FxContext.get().stopRunAsSystem();
+                            }
+                        }
+                    }
+                    Assert.assertFalse(containsGroup(grp, 13, 14), "Group " + grp + " should have thrown an exception trying to save an instance with a removed /P2");
+                } catch (FxApplicationException e) {
+                    if (!containsGroup(grp, 13, 14))
+                        Assert.assertTrue(true, "Group " + grp + " should be allowed to save an instance with a removed /P2");
                 }
             }
         }

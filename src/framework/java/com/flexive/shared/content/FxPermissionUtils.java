@@ -246,6 +246,7 @@ public class FxPermissionUtils {
     /**
      * Check if the calling user has the requested permission for all properties in this content.
      * Call only if the assigned type uses propery permissions!
+     * Delete permission can not be checked using this method since it can't be determined if a property has been removed!
      *
      * @param content content to check
      * @param perm    requested permission
@@ -269,9 +270,6 @@ public class FxPermissionUtils {
             else
             if (perm == ACL.Permission.READ && !ticket.mayReadACL(((FxPropertyAssignment) pdata.getAssignment()).getACL().getId(), content.getLifeCycleInfo().getCreatorId()))
                 throw new FxNoAccessException("ex.acl.noAccess.property.read", xpath);
-            else
-            if (perm == ACL.Permission.DELETE && !ticket.mayDeleteACL(((FxPropertyAssignment) pdata.getAssignment()).getACL().getId(), content.getLifeCycleInfo().getCreatorId()))
-                throw new FxNoAccessException("ex.acl.noAccess.property.delete", xpath);
         }
     }
 

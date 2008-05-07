@@ -52,6 +52,7 @@ import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.scripting.FxScriptResult;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Mandator;
+import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.stream.BinaryUploadPayload;
 import com.flexive.shared.stream.FxStreamUtils;
 import com.flexive.shared.structure.*;
@@ -1691,7 +1692,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      */
     protected void addValue(FxGroupData root, String xPath, FxAssignment assignment,
                             int pos, FxValue value) throws FxInvalidParameterException, FxNotFoundException, FxCreateException {
-        if( !assignment.isEnabled() )
+        if (!assignment.isEnabled())
             return;
         if (assignment instanceof FxGroupAssignment) {
             root.addGroup(xPath, (FxGroupAssignment) assignment, pos);
@@ -1714,6 +1715,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         FxDelta delta;
         FxContent original;
         final FxType type = env.getType(content.getTypeId());
+        final UserTicket ticket = FxContext.get().getTicket();
         try {
             original = contentLoad(con, content.getPk(), env, sql);
             original.getRootGroup().removeEmptyEntries();
@@ -1765,6 +1767,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             }
             //delta-deletes:
             for (FxDelta.FxDeltaChange change : delta.getRemoves()) {
+                if (type.usePropertyPermissions()) {
+                    if (!ticket.mayDeleteACL(type.getPropertyAssignment(change.getXPath()).getACL().getId(), content.getLifeCycleInfo().getCreatorId()))
+                        throw new FxNoAccessException("ex.acl.noAccess.property.delete", change.getXPath());
+                }
                 if (checkScripting)
                     for (long scriptId : change.getOriginalData().getAssignment().
                             getScriptMapping(FxScriptEvent.BeforeDataChangeDelete)) {
@@ -1837,6 +1843,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
             //delta-adds:
             for (FxDelta.FxDeltaChange change : delta.getAdds()) {
+                if (type.usePropertyPermissions()) {
+                    if (!ticket.mayCreateACL(type.getPropertyAssignment(change.getXPath()).getACL().getId(), content.getLifeCycleInfo().getCreatorId()))
+                        throw new FxNoAccessException("ex.acl.noAccess.property.create", change.getXPath());
+                }
                 if (checkScripting)
                     for (long scriptId : change.getNewData().getAssignment().
                             getScriptMapping(FxScriptEvent.BeforeDataChangeAdd)) {
@@ -2734,7 +2744,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 ps.setLong(1, assignmentId);
                 ps.setLong(2, FxLanguage.SYSTEM_ID);
                 ResultSet rs = ps.executeQuery();
-                long count = 0;
+                long count;
                 if (rs != null && rs.next())
                     if ((count = rs.getLong(1)) > 0)
                         throw new FxUpdateException("ex.content.update.multi2single.contentExist", CacheAdmin.getEnvironment().getAssignment(assignmentId).getXPath(), count);
