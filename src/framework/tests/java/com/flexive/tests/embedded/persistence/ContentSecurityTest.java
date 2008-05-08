@@ -131,6 +131,7 @@ public class ContentSecurityTest {
             }
             EJBLookup.getWorkflowStepEngine().updateStep(edit.getId(), editACL.getId());
             EJBLookup.getWorkflowStepEngine().updateStep(live.getId(), liveACL.getId());
+            workflow = CacheAdmin.getEnvironment().getWorkflow(wf);
             //create routes for the route test
             wfEdit = workflow.asEditable();
             wfEdit.getRoutes().add(RouteEdit.createNew(getGroup(25), edit.getId(), live.getId()));
@@ -595,6 +596,115 @@ public class ContentSecurityTest {
                 } catch (FxApplicationException e) {
                     if (!containsGroup(grp, 13, 14))
                         Assert.assertTrue(true, "Group " + grp + " should be allowed to save an instance with a removed /P2");
+                }
+            }
+        }
+    }
+
+    /**
+     * Test 5 - Workflow steps
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test
+    public void test5_WFSteps() throws FxApplicationException {
+        //setup ACL test matrices
+        assignMatrix(0, typeACL);
+        assignMatrix(0, instanceACL);
+        assignMatrix(0, property1ACL);
+        assignMatrix(0, property2ACL);
+        assignMatrix(3, editACL);
+        assignMatrix(0, liveACL);
+
+        FxTypeEdit te = type.asEditable();
+        te.setPermissions(FxPermissionUtils.encodeTypePermissions(false, false, true, false));
+        FxContext.get().runAsSystem();
+        try {
+            EJBLookup.getTypeEngine().save(te);
+        } finally {
+            FxContext.get().stopRunAsSystem();
+        }
+        type = CacheAdmin.getEnvironment().getType(type.getId());
+        //run the test series
+        FxContent refContent = createReferenceContent();
+        ContentEngine ce = EJBLookup.getContentEngine();
+        FxContent compare = null;
+
+        for (int grp = 18; grp <= 24; grp++) {
+            assignGroup(grp);
+            //18..24: Load ref, error expected for 19,23
+            try {
+                compare = ce.load(refContent.getPk());
+                Assert.assertFalse(containsGroup(grp, 19, 23), "Group " + grp + " should have thrown an exception trying to load the reference instance");
+            } catch (FxApplicationException e) {
+                Assert.assertTrue(containsGroup(grp, 19, 23), "Group " + grp + " should not have thrown an exception trying to load the reference instance");
+            }
+
+            //18,20-22,24: save ref instance, error expected for 18
+            if (!containsGroup(grp, 19, 23)) {
+                try {
+                    ce.save(compare);
+                    Assert.assertFalse(containsGroup(grp, 18), "Group " + grp + " should have thrown an exception trying to save the reference instance");
+                } catch (FxApplicationException e) {
+                    Assert.assertTrue(containsGroup(grp, 18), "Group " + grp + " should not have thrown an exception trying to save the reference instance");
+                }
+            }
+
+            //20-22,24: clone ref. instance and save as supervisor, remove instance with test user - error expected for 20,21
+            if (!containsGroup(grp, 18, 19, 23)) {
+                FxPK pk;
+                try {
+                    FxContext.get().runAsSystem();
+                    compare = refContent.copyAsNewInstance();
+                    pk = ce.save(compare);
+                } finally {
+                    FxContext.get().stopRunAsSystem();
+                }
+                boolean removed = false;
+                try {
+                    ce.remove(pk);
+                    Assert.assertFalse(containsGroup(grp, 20, 21), "Group " + grp + " should have thrown an exception trying to remove the reference instance");
+                    removed = true;
+                } catch (FxApplicationException e) {
+                    Assert.assertTrue(containsGroup(grp, 20, 21), "Group " + grp + " should not have thrown an exception trying to remove the reference instance");
+                } finally {
+                    if (!removed) {
+                        try {
+                            FxContext.get().runAsSystem();
+                            ce.remove(pk);
+                        } finally {
+                            FxContext.get().stopRunAsSystem();
+                        }
+                    }
+                }
+            }
+
+            //18-24: create a new instance in edit step, error expected for 18,19,20,22
+            compare = ce.initialize(type.getId());
+            compare.setValue("/P1", PROP1_VALUE);
+            compare.setValue("/P2", PROP2_VALUE);
+            compare.setAclId(instanceACL.getId());
+            long stepId = -1;
+            for (Step s : workflow.getSteps())
+                if (s.isEditStep())
+                    stepId = s.getId();
+            Assert.assertFalse(stepId == -1, "Failed to find edit step!");
+            compare.setStepId(stepId);
+            boolean created = false;
+            FxPK pk = null;
+            try {
+                pk = ce.save(compare);
+                Assert.assertFalse(containsGroup(grp, 18, 19, 20, 22), "Group " + grp + " should have thrown an exception trying to create an edit instance");
+            } catch (FxApplicationException e) {
+                Assert.assertTrue(containsGroup(grp, 18, 19, 20, 22), "Group " + grp + " should not have thrown an exception trying to create an edit instance");
+            } finally {
+                if (!created && pk != null) {
+                    try {
+                        FxContext.get().runAsSystem();
+                        ce.remove(pk);
+                    } finally {
+                        FxContext.get().stopRunAsSystem();
+                    }
                 }
             }
         }

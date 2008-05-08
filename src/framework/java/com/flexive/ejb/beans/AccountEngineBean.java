@@ -1405,9 +1405,9 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             // Obtain a database connection
             con = Database.getDbConnection();
 
-            // Delete any old assignments
-            //                    1          2           3        4        5       6          7
-            curSql = "SELECT ass.USERGROUP,ass.ACL,ass.PREAD,ass.PEDIT,ass.PREMOVE,ass.PEXPORT,ass.PREL," +
+            // Fetch assignments
+            //                            1             2       3         4         5           6           7
+            curSql = "SELECT DISTINCT ass.USERGROUP,ass.ACL,ass.PREAD,ass.PEDIT,ass.PREMOVE,ass.PEXPORT,ass.PREL," +
                     //   8            9            10             11             12              13
                     "ass.PCREATE, acl.CAT_TYPE,ass.CREATED_BY,ass.CREATED_AT,ass.MODIFIED_BY,ass.MODIFIED_AT " +
                     "FROM " + TBL_ASSIGN_ACLS + " ass, " + TBL_ASSIGN_GROUPS + " grp, " + TBL_ACLS + " acl " +
