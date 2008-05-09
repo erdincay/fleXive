@@ -35,7 +35,6 @@ import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.shared.*;
 import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.interfaces.TemplateEngine;
 import com.flexive.shared.interfaces.UserGroupEngine;
 import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.scripting.FxScriptInfo;
@@ -48,7 +47,6 @@ import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.search.query.QueryOperatorNode;
 import com.flexive.shared.security.*;
 import com.flexive.shared.structure.*;
-import com.flexive.shared.tree.FxTemplateInfo;
 import com.flexive.shared.value.BinaryDescriptor;
 
 import javax.faces.model.SelectItem;
@@ -89,9 +87,6 @@ public class SelectBean implements Serializable {
     private List<SelectItem> structureACLs = null;
     private List<SelectItem> workflowACLs = null;
     private List<SelectItem> acls = null;
-    private List<SelectItem> templates = null;
-    private List<SelectItem> masterTemplates = null;
-    private List<SelectItem> contentTemplates = null;
     private List<SelectItem> resultViewTypes = null;
     private List<SelectItem> resultLocations = null;
     private List<SelectItem> resultDirections = null;
@@ -187,51 +182,6 @@ public class SelectBean implements Serializable {
             }
         }
         return userGroupsNonSystem;
-    }
-
-    /**
-     * Returns all CONTENT templates.
-     *
-     * @return all CONTENT templates
-     * @throws FxApplicationException if the function failed
-     */
-    public List<SelectItem> getTemplates() throws FxApplicationException {
-        if (templates == null) {
-            TemplateEngine templateEngine = EJBLookup.getTemplateEngine();
-            List<FxTemplateInfo> list = templateEngine.list(null);
-            templates = FxJsfUtils.asSelectList(list, false);
-        }
-        return templates;
-    }
-
-    /**
-     * Returns all CONTENT templates.
-     *
-     * @return all CONTENT templates
-     * @throws FxApplicationException if the function failed
-     */
-    public List<SelectItem> getContentTemplates() throws FxApplicationException {
-        if (contentTemplates == null) {
-            TemplateEngine templateEngine = EJBLookup.getTemplateEngine();
-            List<FxTemplateInfo> list = templateEngine.list(TemplateEngine.Type.CONTENT);
-            contentTemplates = FxJsfUtils.asSelectList(list, false);
-        }
-        return contentTemplates;
-    }
-
-    /**
-     * Returns all MASTER templates.
-     *
-     * @return all CONTENT templates
-     * @throws FxApplicationException if the function failed
-     */
-    public List<SelectItem> getMasterTemplates() throws FxApplicationException {
-        if (masterTemplates == null) {
-            TemplateEngine templateEngine = EJBLookup.getTemplateEngine();
-            List<FxTemplateInfo> list = templateEngine.list(TemplateEngine.Type.MASTER);
-            masterTemplates = FxJsfUtils.asSelectList(list, false);
-        }
-        return masterTemplates;
     }
 
     /**

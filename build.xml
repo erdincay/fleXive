@@ -393,10 +393,8 @@
 			<zipfileset dir="${resources.ui.jsf.dir}/WEB-INF" prefix="WEB-INF">
 	            <include name="faces-config.xml"/>
 	            <include name="flexive-admin.taglib.xml"/>
-                <include name="cms.taglib.xml"/>
                 <include name="flexive_jsf.tld"/>
 	            <include name="templates/**/*"/>
-                <include name="cmsTemplates/**/*"/>
             </zipfileset>
             <!-- richfaces skins -->
 			<zipfileset dir="${resources.ui.jsf.dir}/WEB-INF" prefix="WEB-INF/classes">

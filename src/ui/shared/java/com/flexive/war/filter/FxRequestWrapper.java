@@ -36,7 +36,6 @@ import com.flexive.shared.exceptions.FxAccountInUseException;
 import com.flexive.shared.exceptions.FxLoginFailedException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.security.UserTicket;
-import com.flexive.shared.tree.FxTemplateInfo;
 import com.flexive.war.FxRequest;
 import com.flexive.war.webdav.FxWebDavUtils;
 
@@ -54,7 +53,6 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
     public static final String PATH_ADMIN = "adm";
     public static final String PATH_PUBLIC = "pub";
     public static final String PATH_SETUP = "config";
-    public static final String PATH_CMS = "cms";
     private static final String PATH_TESTS = "tests";
 
     private final static String[] SERVLETS = {"cefileupload", "cefiledownload", "thumbnail", "faces"};
@@ -66,7 +64,6 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
     private String pageType;
     private boolean isWebdavRequest = false;
     private String realRequestUriNoContext = null;
-    private FxTemplateInfo templateInfo = null;
     private long nodeId = -1;
     private long[] idChain;
 
@@ -77,15 +74,6 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
 
     public void setNodeId(long nodeId) {
         this.nodeId = nodeId;
-    }
-
-
-    public FxTemplateInfo getTemplateInfo() {
-        return templateInfo;
-    }
-
-    protected void setTemplateInfo(FxTemplateInfo treeNodeInfo) {
-        this.templateInfo = treeNodeInfo;
     }
 
     protected void setIdChain(long chain[]) {
@@ -263,10 +251,6 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
      */
     public boolean isServletRedirectorURL() {
         return requestUriNoContext.endsWith("ServletRedirector");
-    }
-
-    public boolean isCmsUrl() {
-        return requestUriNoContext.startsWith("/+") || requestUriNoContext.startsWith("/" + PATH_CMS + "/");
     }
 
     /**

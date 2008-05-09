@@ -35,7 +35,6 @@ import com.flexive.shared.exceptions.FxAccountInUseException;
 import com.flexive.shared.exceptions.FxLoginFailedException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.security.UserTicket;
-import com.flexive.shared.tree.FxTemplateInfo;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -80,8 +79,6 @@ public interface FxRequest {
      * @return the division the request was started in
      */
     int getDivisionId();
-
-    public FxTemplateInfo getTemplateInfo();
 
     public long getNodeId();
 

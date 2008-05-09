@@ -31,30 +31,20 @@
  ***************************************************************/
 package com.flexive.war.filter;
 
-import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.configuration.DivisionData;
-import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.exceptions.FxInvalidParameterException;
-import com.flexive.shared.interfaces.TemplateEngine;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
-import com.flexive.shared.tree.FxTemplateInfo;
-import com.flexive.shared.tree.FxTreeMode;
-import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.war.webdav.FxWebDavUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.lang.StringUtils;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.util.List;
 
 public class FxFilter implements Filter {
     private static final Log LOG = LogFactory.getLog(FxFilter.class);
@@ -63,10 +53,7 @@ public class FxFilter implements Filter {
 
     private String FILESYSTEM_WAR_ROOT = null;
     private FilterConfig config = null;
-    private static String PATH_DIVISION = "division_";
     private static final String X_POWERED_BY_VALUE = "[fleXive]";
-    private static volatile long lastTagChange = -1;
-    private final static long CONTENT_TYPE_IMAGE = 2;//TODO
 
     /**
      * Returns the root of the war directory on the filesystem.
@@ -142,52 +129,41 @@ public class FxFilter implements Filter {
                includes. Besides, since caching has not been implemented yet, 'catchData' doesn't do much
                except rendering our own error page when the page threw an exception.
             */
-            final boolean catchData = false; //request.isDynamicContent();
+            final boolean cacheData = false; //request.isDynamicContent();
 
             // Wrap the response to provide additional features (content length counting, caching)
             final FxResponseWrapper response =
                     (servletResponse instanceof FxResponseWrapper)
                             ? (FxResponseWrapper) servletResponse
-                            : new FxResponseWrapper(servletResponse, catchData);
+                            : new FxResponseWrapper(servletResponse, cacheData);
 
-//            if (isFinalPath(request)) {
-            if (request.isCmsUrl()) {
-                // Resolve CMS request
-                ResolvedPath rp = processPage(request, si, FILESYSTEM_WAR_ROOT);
-                if (rp.getStatus() != HttpServletResponse.SC_OK) {
-                    response.sendError(rp.getStatus());
-                    return;
-                }
-                request.forward(response, rp.getPath());
-            } else {
-                // resolve standard application request
-                if (needsLogin(request, si)) {
-                    if (request.isSetupURL()) {
-                        request.forward(response, "/" + FxRequestWrapper.PATH_SETUP + "/globalconfig.fx?action=showLogin");
-                    } else {
-                        final String loginPath = "/" + FxRequestWrapper.PATH_PUBLIC + "/login.jsf";
-                        if( !loginPath.equals(request.getRealRequestUriNoContext()))
-                            request.forward(response, loginPath);
-                        else {
-                            final String msg = "Multiple redirects attempted to " + loginPath;
-                            LOG.warn(msg);
-                            response.sendError(HttpServletResponse.SC_NOT_FOUND, msg);
-                        }
-                    }
-                } else if (restrictBackendAccess(request, si)) {
-                    //user is in backend but may not access it
-                    request.forward(response, "/" + FxRequestWrapper.PATH_PUBLIC + "/backendRestricted.jsf");
+            // resolve standard application request
+            if (needsLogin(request, si)) {
+                if (request.isSetupURL()) {
+                    request.forward(response, "/" + FxRequestWrapper.PATH_SETUP + "/globalconfig.fx?action=showLogin");
                 } else {
-                    try {
-                        filterChain.doFilter(request, response);
-                    } catch (ServletException e) {
-                        LOG.error(e, e.getRootCause());
-                        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getRootCause());
-                    } catch (Throwable t) {
-                        // Failed to process the page
-                        LOG.error(t, t);
-                        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t);
+                    final String loginPath = "/" + FxRequestWrapper.PATH_PUBLIC + "/login.jsf";
+                    if (!loginPath.equals(request.getRealRequestUriNoContext()))
+                        request.forward(response, loginPath);
+                    else {
+                        final String msg = "Multiple redirects attempted to " + loginPath;
+                        LOG.warn(msg);
+                        response.sendError(HttpServletResponse.SC_NOT_FOUND, msg);
                     }
+                }
+            } else if (restrictBackendAccess(request, si)) {
+                //user is in backend but may not access it
+                request.forward(response, "/" + FxRequestWrapper.PATH_PUBLIC + "/backendRestricted.jsf");
+            } else {
+                try {
+                    filterChain.doFilter(request, response);
+                } catch (ServletException e) {
+                    LOG.error(e, e.getRootCause());
+                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getRootCause());
+                } catch (Throwable t) {
+                    // Failed to process the page
+                    LOG.error(t, t);
+                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t);
                 }
             }
             try {
@@ -307,185 +283,6 @@ public class FxFilter implements Filter {
             return true;*/
         boolean inAdminArea = request.isAdminURL() && !request.isServletRedirectorURL();
         return inAdminArea && !ticket.isInRole(Role.BackendAccess);
-    }
-
-
-    public ResolvedPath processPage(final FxRequestWrapper request, final FxContext si,
-                                    final String fsRoot) {
-        String sRelURI = si.getRelativeRequestURI();
-        if (sRelURI.equals("/")) {
-            return getNotFoundUri(si);
-        }
-
-        String DIVPATH = "/webdav/division_" + si.getDivisionId() + "/";
-        if (sRelURI.startsWith(DIVPATH)) {
-            sRelURI = sRelURI.substring(DIVPATH.length() - 1);
-        }
-
-        FileWriter out = null;
-        try {
-            long nodeId = getNode(si);
-            if (nodeId == -1) {
-                LOG.error("Failed to map content URL (" + si.getRelativeRequestURI() + "): "
-                        + si.getRelativeRequestURI());
-                return getNotFoundUri(si);
-            }
-
-            FxTemplateInfo template = EJBLookup.getTemplateEngine().getTemplate(nodeId, FxTreeMode.Edit);
-            long idchain[] = EJBLookup.getTreeEngine().getIdChain(FxTreeMode.Edit, nodeId);
-            request.setIdChain(idchain);
-            request.setTemplateInfo(template);
-            request.setNodeId(nodeId);
-            si.setNodeId(nodeId);
-
-            if (template == null || template.getId() == -1) {
-
-                // If this is a image, and no template is set, we just deliver it to the client
-                if (template.getTdef() == CONTENT_TYPE_IMAGE) {
-                    return (new ResolvedPath("/thumbnail/pk" + template.getContentId(), HttpServletResponse.SC_OK));
-                }
-
-                // TODO: handle other case!
-
-            } else {
-                // Taglib up-to-date check
-                taglibUpToDateCheck();
-
-                // Template
-                String divRootPath = fsRoot + "division_" + si.getDivisionId();
-                String nodeRootPath = "/" + nodeId + "/";
-                String contentType = template.getContentType();
-                String fileType = contentType.equalsIgnoreCase("JSF") ? "xhtml" : contentType;
-                String nodeFileNoExt = template.getModifiedAt() + "_" + template.getMasterTemplateModifiedAt();
-                File file;
-
-                // Master template
-                String masterTemplateURI = null;
-                if (template.hasMasterTemplate()) {
-                    String baseDir = "division_" +
-                            si.getDivisionId() + "/masterTemplates/" + template.getMasterTemplate();
-                    masterTemplateURI = baseDir + "/" + template.getMasterTemplateModifiedAt() + ".xhtml";
-                    file = new File(fsRoot + masterTemplateURI);
-                    if (!file.exists()) {
-                        recreateDir(fsRoot + baseDir);
-                        file.createNewFile();
-                        out = new FileWriter(file);
-                        out.write(EJBLookup.getTemplateEngine().getFinalContent(template.getMasterTemplate(), null, FxTreeMode.Edit)); // TODO LIVE/EDIT
-                        out.close();
-                    }
-                }
-
-                // Main template
-                file = new File(divRootPath + nodeRootPath + nodeFileNoExt + "." + fileType);
-                if (!file.exists()) {
-                    recreateDir(divRootPath + nodeRootPath);
-                    file.createNewFile();
-                    out = new FileWriter(file);
-                    out.write(EJBLookup.getTemplateEngine().getFinalContent(template.getId(), masterTemplateURI, FxTreeMode.Edit)); // TODO: LIVE/EDIT
-                }
-                //System.out.println("Time needed for CMS node resolve logic: "+(System.currentTimeMillis()-time));
-                return (new ResolvedPath("/" + PATH_DIVISION + si.getDivisionId() + nodeRootPath +
-                        nodeFileNoExt + "." + contentType, HttpServletResponse.SC_OK));
-            }
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        } finally {
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (Throwable t) {/*ignore*/}
-            }
-        }
-        return (new ResolvedPath("/" + PATH_DIVISION + si.getDivisionId() + sRelURI, HttpServletResponse.SC_NOT_FOUND));
-    }
-
-    private long getNode(final FxContext si) throws FxApplicationException {
-        if (si.getRelativeRequestURI(false).startsWith("/+")) {
-            final String nodeId = si.getRelativeRequestURI().substring(2);
-            try {
-                return Long.parseLong(nodeId);
-            } catch (NumberFormatException e) {
-                throw new FxInvalidParameterException("url", "ex.cms.request.invalidId", nodeId).asRuntimeException();
-            }
-        } else if (si.getRelativeRequestURI(false).startsWith(FxRequestWrapper.PATH_CMS)) {
-            return EJBLookup.getTreeEngine().getIdByFQNPath(FxTreeMode.Edit, FxTreeNode.ROOT_NODE,
-                    si.getRelativeRequestURI().substring(FxRequestWrapper.PATH_CMS.length()));
-        }
-        return -1;
-    }
-
-
-    /**
-     * Ensures that the taglibs are up-to-date
-     */
-    private synchronized void taglibUpToDateCheck() {
-        long tagChange = EJBLookup.getTemplateEngine().getLastChange(TemplateEngine.Type.TAG, FxTreeMode.Edit);
-        if (tagChange != lastTagChange) {
-            lastTagChange = tagChange;
-            _writeCmsTagLibs(FILESYSTEM_WAR_ROOT);
-        }
-    }
-
-    /**
-     * Rewrites all TAG files to the application servers filesystem.
-     *
-     * @param _FILESYSTEM_WAR_ROOT the root directory of the WAR layer
-     */
-    private synchronized void _writeCmsTagLibs(String _FILESYSTEM_WAR_ROOT) {
-        // Determine the directory that holds all tag files
-        String temlateDir = _FILESYSTEM_WAR_ROOT + "WEB-INF/cmsTemplates";
-        // Delete the whole directory containing the cms tags
-        recreateDir(temlateDir);
-        // Retrieve all tags and write them to the filesystem
-        FileWriter out = null;
-        try {
-            List<FxTemplateInfo> tags = EJBLookup.getTemplateEngine().list(TemplateEngine.Type.TAG);
-            for (FxTemplateInfo tag : tags) {
-                String content = EJBLookup.getTemplateEngine().getFinalContent(tag.getId(), null, FxTreeMode.Edit); // TODO: LIVE/EDIT
-                File file = new File(temlateDir + "/tag" + tag.getTypeId() + ".xhtml");
-                file.createNewFile();
-                out = new FileWriter(file);
-                out.write(content);
-                out.close();
-                out = null;
-            }
-        } catch (Throwable t) {
-            System.err.println(t.getMessage());
-            t.printStackTrace();
-        } finally {
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (Throwable t) {/*ignore*/}
-            }
-        }
-    }
-
-    private static ResolvedPath getNotFoundUri(FxContext si) {
-        return new ResolvedPath("/" + PATH_DIVISION + si.getDivisionId(), HttpServletResponse.SC_NOT_FOUND);
-    }
-
-    public static void recreateDir(String path) {
-        File _dir = new File(path);
-        deleteDir(_dir);
-        _dir.mkdirs();
-    }
-
-    public static boolean deleteDir(File dir) {
-        if (!dir.exists()) {
-            return false;
-        }
-        if (dir.isDirectory()) {
-            String[] children = dir.list();
-            for (String aChildren : children) {
-                boolean success = deleteDir(new File(dir, aChildren));
-                if (!success) {
-                    return false;
-                }
-            }
-        }
-        // The directory is now empty so delete it
-        return dir.delete();
     }
 
 }

@@ -104,16 +104,6 @@ public class EJBLookup {
     }
 
     /**
-     * Lookup of the Template EJB.
-     *
-     * @return a reference to the Briefcase EJB
-     */
-    public static TemplateEngine getTemplateEngine() {
-        return getEngine(TemplateEngine.class);
-    }
-
-
-    /**
      * Lookup of the GroupEngine EJB.
      *
      * @return a reference to the GroupEngine EJB

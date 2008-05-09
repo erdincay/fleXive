@@ -42,7 +42,6 @@ import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserGroup;
 import com.flexive.shared.structure.FxType;
-import com.flexive.shared.tree.FxTemplateInfo;
 
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -107,8 +106,6 @@ public class SelectableObjectConverter implements Converter {
                 return sb.getMandators();
             } else if (c.equals(Role.class)) {
                 return sb.getRoles();
-            } else if (c.equals(FxTemplateInfo.class)) {
-                return sb.getTemplates();
             } else if (c.equals(FxScriptInfo.class)) {
                 return sb.getAllScripts();
             } else {
