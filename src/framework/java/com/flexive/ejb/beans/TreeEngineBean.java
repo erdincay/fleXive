@@ -347,7 +347,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
                 }
                 //if we reach this, no caption property exists
                 if (!nameChanged && !label.equals(node.getLabel())) {
-                    StorageManager.getTreeStorage().updateName(con, mode, contentEngine, nodeId, node.getLabel().getBestTranslation());
+                    StorageManager.getTreeStorage().updateName(con, mode, contentEngine, nodeId, label.getBestTranslation());
                 }
             }
             StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
