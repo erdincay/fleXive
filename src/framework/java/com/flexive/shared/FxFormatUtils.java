@@ -198,8 +198,10 @@ public final class FxFormatUtils {
             c = path.charAt(i);
             if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '/')
                 sb.append(c);
-            else
-                sb.append('_');
+            else {
+                if (i > 0 && path.charAt(i - 1) != '_')
+                    sb.append('_');
+            }
         }
         return sb.toString();
     }

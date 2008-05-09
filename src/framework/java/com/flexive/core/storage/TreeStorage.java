@@ -88,12 +88,12 @@ public interface TreeStorage {
      * @param label        label for Caption property (only used if new reference is created)
      * @param position     position
      * @param reference    referenced content id
-     * @param template     optional template to assign @return id of the created node
+     * @param data         optional data to assign
      * @return id of the node created
      * @throws FxApplicationException on errors
      */
     long createNode(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, long nodeId, long parentNodeId, String name,
-                    FxString label, int position, FxPK reference, String template) throws FxApplicationException;
+                    FxString label, int position, FxPK reference, String data) throws FxApplicationException;
 
     /**
      * Create a set of nodes and attach new Folder instances to them

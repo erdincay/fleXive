@@ -153,8 +153,8 @@ public class GenericTreeStorageSimple extends GenericTreeStorage {
      * {@inheritDoc}
      */
     public long createNode(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, long nodeId,
-                           long parentNodeId, String name, FxString label, int position, FxPK reference, String template) throws FxApplicationException {
-        checkDataValue(template);
+                           long parentNodeId, String name, FxString label, int position, FxPK reference, String data) throws FxApplicationException {
+        checkDataValue(data);
         NodeCreateInfo nci = getNodeCreateInfo(mode, seq, ce, nodeId, name, label, reference);
         FxTreeNodeInfo parentNode = getTreeNodeInfo(con, mode, parentNodeId);
         long left, right;
@@ -203,10 +203,10 @@ public class GenericTreeStorageSimple extends GenericTreeStorage {
             ps.setLong(2, left);
             ps.setLong(3, right);
             ps.setString(4, nci.name);
-            if (StringUtils.isEmpty(template)) {
+            if (StringUtils.isEmpty(data)) {
                 ps.setNull(5, java.sql.Types.VARCHAR);
             } else {
-                ps.setString(6, template);
+                ps.setString(6, data);
             }
             ps.executeUpdate();
             ps.close();

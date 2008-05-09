@@ -318,7 +318,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             BigDecimal _rgt;
             BigDecimal _lft;
             Long ref = null;
-            String template = null;
+            String data = null;
             String name = "";
 
             Stack<Long> currentParent = null;
@@ -341,8 +341,8 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                     ref = rs.getLong(8);
                     if (rs.wasNull()) ref = null;
                     name = rs.getString(9);
-                    template = rs.getString(10);
-                    if (rs.wasNull()) template = null;
+                    data = rs.getString(10);
+                    if (rs.wasNull()) data = null;
                 }
                 left = left.add(SPACING).add(BigDecimal.ONE);
 
@@ -399,10 +399,10 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                     } else {
                         ps.setLong(5, ref);
                     }
-                    if (template == null) {
+                    if (data == null) {
                         ps.setNull(6, java.sql.Types.VARCHAR);
                     } else {
-                        ps.setString(6, template);
+                        ps.setString(6, data);
                     }
 //                    System.out.println("=> id:"+newId+" left:"+left+" right:"+right);
                     ps.setBigDecimal(7, left);
@@ -468,12 +468,12 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
      *                     append to the end)
      * @param reference    a reference to an existing content (must exist!)
      * @param nodeId       the id to use or create a new one if < 0
-     * @param template     the template reference id, or null
+     * @param data         the optional data
      * @return the used or created node id
      * @throws FxTreeException if the function fails
      */
     private long _createNode(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, long parentNodeId, String name,
-                             FxString label, int position, FxPK reference, String template, long nodeId)
+                             FxString label, int position, FxPK reference, String data, long nodeId)
             throws FxApplicationException {
 //        makeSpace(con, seq/*irrelevant*/, mode, parentNodeId, position/*irrelevant*/, 1);
         FxTreeNodeInfoSpreaded parentNode = (FxTreeNodeInfoSpreaded) getTreeNodeInfo(con, mode, parentNodeId);
@@ -508,10 +508,10 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             ps.setBigDecimal(2, left);
             ps.setBigDecimal(3, right);
             ps.setString(4, nci.name);
-            if (StringUtils.isEmpty(template)) {
+            if (StringUtils.isEmpty(data)) {
                 ps.setNull(5, java.sql.Types.VARCHAR);
             } else {
-                ps.setString(6, template);
+                ps.setString(6, data);
             }
             ps.executeUpdate();
             ps.close();
@@ -542,14 +542,14 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
      * {@inheritDoc}
      */
     public long createNode(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, long nodeId, long parentNodeId, String name,
-                           FxString label, int position, FxPK reference, String template) throws FxApplicationException {
-        checkDataValue(template);
+                           FxString label, int position, FxPK reference, String data) throws FxApplicationException {
+        checkDataValue(data);
         try {
-            return _createNode(con, seq, ce, mode, parentNodeId, name, label, position, reference, template, nodeId);
+            return _createNode(con, seq, ce, mode, parentNodeId, name, label, position, reference, data, nodeId);
         } catch (FxTreeException e) {
             if ("ex.tree.create.noSpace".equals(e.getExceptionMessage().getKey())) {
                 reorganizeSpace(con, seq, mode, mode, parentNodeId, false, null, null, null, -1, null, null, 0, null, false, false);
-                return _createNode(con, seq, ce, mode, parentNodeId, name, label, position, reference, template, nodeId);
+                return _createNode(con, seq, ce, mode, parentNodeId, name, label, position, reference, data, nodeId);
             } else
                 throw e;
         }
