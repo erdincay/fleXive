@@ -44,6 +44,10 @@ import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.interfaces.ACLEngine;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.UserGroupEngine;
+import com.flexive.shared.search.FxResultSet;
+import com.flexive.shared.search.query.PropertyValueComparator;
+import com.flexive.shared.search.query.QueryOperatorNode;
+import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.security.ACL;
 import static com.flexive.shared.security.ACL.Permission.*;
 import com.flexive.shared.security.ACLAssignment;
@@ -246,8 +250,10 @@ public class ContentSecurityTest {
                     break;
                 case 4: //Workflow Route matrix - Edit
                     as.add(ACLAssignment.createNew(acl, groups[24].getId(), READ, EDIT, CREATE, DELETE));
+                    as.add(ACLAssignment.createNew(acl, groups[25].getId(), READ, EDIT));
                     break;
                 case 5: //Workflow Route matrix - Live
+                    as.add(ACLAssignment.createNew(acl, groups[24].getId(), READ, EDIT));
                     as.add(ACLAssignment.createNew(acl, groups[25].getId(), READ, EDIT));
                     break;
                 default:
@@ -315,6 +321,25 @@ public class ContentSecurityTest {
     }
 
     /**
+     * Query for the given id to check if the searchengine results are identical to loading a content
+     *
+     * @param shouldExist  should the requested id be found?
+     * @param grp          testgroup
+     * @param id           id of the instance
+     * @param p2isNoAccess should P2 be FxNoAccess (if results are found)
+     * @throws FxApplicationException on errors
+     */
+    private void queryTest(boolean shouldExist, int grp, long id, boolean p2isNoAccess) throws FxApplicationException {
+        final FxResultSet result = new SqlQueryBuilder().select("P1", "P2").enterSub(QueryOperatorNode.Operator.AND)
+                .condition("ID", PropertyValueComparator.EQ, id)
+                .closeSub().getResult();
+        long expectedRows = shouldExist ? 1 : 0;
+        Assert.assertTrue(expectedRows == result.getRowCount(), "Group: " + grp + ", Rows found: " + result.getRowCount() + ", expected: " + expectedRows);
+        if (result.getRowCount() != 0)
+            Assert.assertTrue(result.getResultRow(0).getFxValue("P2") instanceof FxNoAccess == p2isNoAccess, "Expected P2 " + (p2isNoAccess ? "" : "not ") + "to be FxNoaccess for group " + grp);
+    }
+
+    /**
      * Run a series of instance and type related tests
      *
      * @throws FxApplicationException on errors
@@ -341,6 +366,7 @@ public class ContentSecurityTest {
                         Assert.assertFalse(true, "Group " + grp + " should not have failed!");
                 }
             }
+            queryTest(!containsGroup(grp, 2, 4, 5), grp, refContent.getPk().getId(), false);
         }
         //Save ref, error expected for 1
         for (int grp = 1; grp <= 10; grp++) {
@@ -516,6 +542,7 @@ public class ContentSecurityTest {
                 Assert.assertNotSame(refContent, compare, "Group: " + grp);
             } else
                 Assert.assertEquals(refContent, compare, "Group: " + grp);
+            queryTest(true, grp, refContent.getPk().getId(), containsGroup(grp, 12, 16));
             //11..17: change value, error expected for 11,16
             try {
                 compare.setValue("/P2", PROP1_VALUE);
@@ -639,6 +666,7 @@ public class ContentSecurityTest {
             } catch (FxApplicationException e) {
                 Assert.assertTrue(containsGroup(grp, 19, 23), "Group " + grp + " should not have thrown an exception trying to load the reference instance");
             }
+            queryTest(!containsGroup(grp, 19, 23), grp, refContent.getPk().getId(), false);
 
             //18,20-22,24: save ref instance, error expected for 18
             if (!containsGroup(grp, 19, 23)) {
@@ -707,6 +735,138 @@ public class ContentSecurityTest {
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Test 6 - Workflow routes
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test
+    public void test6_WFRoutes() throws FxApplicationException {
+        //setup ACL test matrices
+        assignMatrix(0, typeACL);
+        assignMatrix(0, instanceACL);
+        assignMatrix(0, property1ACL);
+        assignMatrix(0, property2ACL);
+        assignMatrix(4, editACL);
+        assignMatrix(5, liveACL);
+        //Routes are:
+        //25: Edit->Live
+        //26: Live->Edit
+
+        FxTypeEdit te = type.asEditable();
+        te.setPermissions(FxPermissionUtils.encodeTypePermissions(false, false, true, false));
+        FxContext.get().runAsSystem();
+        try {
+            EJBLookup.getTypeEngine().save(te);
+        } finally {
+            FxContext.get().stopRunAsSystem();
+        }
+        type = CacheAdmin.getEnvironment().getType(type.getId());
+        //run the test series
+        ContentEngine ce = EJBLookup.getContentEngine();
+        FxContent ref;
+        FxContent test;
+        long edit = -1, live = -1;
+        for (Step s : workflow.getSteps())
+            if (s.isEditStep())
+                edit = s.getId();
+            else if (s.isLiveStep())
+                live = s.getId();
+        Assert.assertTrue(edit != -1 && live != -1);
+
+
+        for (int grp = 25; grp <= 26; grp++) {
+            assignGroup(grp);
+
+            //create instance in edit step, error expected for 26
+            ref = ce.initialize(type.getId());
+            ref.setValue("/P1", PROP1_VALUE);
+            ref.setValue("/P2", PROP2_VALUE);
+            ref.setAclId(instanceACL.getId());
+            ref.setStepId(edit);
+            try {
+                FxPK pk = ce.save(ref);
+                Assert.assertTrue(grp == 25, "Only group 25 expected to succeed! Grp:" + grp);
+                //cleanup
+                FxContext.get().runAsSystem();
+                try {
+                    ce.remove(pk);
+                } finally {
+                    FxContext.get().stopRunAsSystem();
+                }
+            } catch (FxApplicationException e) {
+                Assert.assertTrue(grp == 26, "Only group 26 expected to fail! Grp:" + grp);
+            }
+
+            //create instance in edit step, error expected for 25, 26
+            ref.setStepId(live);
+            try {
+                FxPK pk = ce.save(ref);
+                Assert.assertTrue(false, "No group expected to succeed! Grp:" + grp);
+                //cleanup
+                FxContext.get().runAsSystem();
+                try {
+                    ce.remove(pk);
+                } finally {
+                    FxContext.get().stopRunAsSystem();
+                }
+            } catch (FxApplicationException e) {
+                //expected
+            }
+
+            //use existing instance with step=edit and change it to live, error expected for 26
+            ref.setStepId(edit);
+            FxContext.get().runAsSystem();
+            try {
+                test = ce.load(ce.save(ref));
+            } finally {
+                FxContext.get().stopRunAsSystem();
+            }
+            try {
+                test.setStepId(live);
+                ce.save(test);
+                Assert.assertTrue(grp == 25, "Only group 25 expected to succeed! Grp:" + grp);
+            } catch (FxApplicationException e) {
+                Assert.assertTrue(grp == 26, "Only group 26 expected to fail! Grp:" + grp + " Error: " + e.getMessage());
+            } finally {
+                if (test != null) {
+                    FxContext.get().runAsSystem();
+                    try {
+                        ce.remove(test.getPk());
+                    } finally {
+                        FxContext.get().stopRunAsSystem();
+                    }
+                }
+            }
+
+            //use existing instance with step=live and change it to edit, error expected for 25
+            ref.setStepId(live);
+            FxContext.get().runAsSystem();
+            try {
+                test = ce.load(ce.save(ref));
+            } finally {
+                FxContext.get().stopRunAsSystem();
+            }
+            try {
+                test.setStepId(edit);
+                ce.save(test);
+                Assert.assertTrue(grp == 26, "Only group 26 expected to succeed! Grp:" + grp);
+            } catch (FxApplicationException e) {
+                Assert.assertTrue(grp == 25, "Only group 25 expected to fail! Grp:" + grp + " Error: " + e.getMessage());
+            } finally {
+                if (test != null) {
+                    FxContext.get().runAsSystem();
+                    try {
+                        ce.remove(test.getPk());
+                    } finally {
+                        FxContext.get().stopRunAsSystem();
+                    }
+                }
+            }
+
         }
     }
 
