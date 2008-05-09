@@ -543,7 +543,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
      */
     public long createNode(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, long nodeId, long parentNodeId, String name,
                            FxString label, int position, FxPK reference, String template) throws FxApplicationException {
-        checkTemplateValue(template);
+        checkDataValue(template);
         try {
             return _createNode(con, seq, ce, mode, parentNodeId, name, label, position, reference, template, nodeId);
         } catch (FxTreeException e) {
@@ -719,13 +719,13 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             FxTreeNode srcNode = getNode(con, mode, id);
             //check if the node already exists in the live tree
             if (exists(con, FxTreeMode.Live, id)) {
-                //Move and setTemplate will not do anything if the node is already in its correct place and
+                //Move and setData will not do anything if the node is already in its correct place and
                 move(con, seq, FxTreeMode.Live, id, srcNode.getParentNodeId(), srcNode.getPosition());
-                setTemplate(con, FxTreeMode.Live, id, srcNode.getTemplate());
+                setData(con, FxTreeMode.Live, id, srcNode.getData());
             } else {
                 createNode(con, seq, ce, FxTreeMode.Live, srcNode.getId(), srcNode.getParentNodeId(),
                         srcNode.getName(), srcNode.getLabel(), srcNode.getPosition(),
-                        srcNode.getReference(), srcNode.getTemplate());
+                        srcNode.getReference(), srcNode.getData());
             }
 
             // Remove all deleted direct child nodes

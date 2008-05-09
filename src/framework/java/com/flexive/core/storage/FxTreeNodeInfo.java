@@ -32,9 +32,9 @@
 package com.flexive.core.storage;
 
 import com.flexive.shared.content.FxPK;
+import com.flexive.shared.security.PermissionSet;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
-import com.flexive.shared.security.PermissionSet;
 
 import java.io.Serializable;
 
@@ -58,7 +58,7 @@ public abstract class FxTreeNodeInfo implements Serializable {
     protected long ACLId;
     protected FxTreeMode mode;
     protected int position;
-    protected String template;
+    protected String data;
     protected long modifiedAt;
     protected PermissionSet permissions;
 
@@ -75,12 +75,12 @@ public abstract class FxTreeNodeInfo implements Serializable {
      * @param ACLId            ACL of the referenced content
      * @param mode             tree mode
      * @param position         position
-     * @param template         template
+     * @param data             data
      * @param modifiedAt       last modified at
      * @param permissions      the node permissions of the calling user
      */
     protected FxTreeNodeInfo(int totalChildCount, int directChildCount, int depth, long parentId, long id, String name,
-                             FxPK reference, long ACLId, FxTreeMode mode, int position, String template, long modifiedAt,
+                             FxPK reference, long ACLId, FxTreeMode mode, int position, String data, long modifiedAt,
                              PermissionSet permissions) {
         this.totalChildCount = totalChildCount;
         this.directChildCount = directChildCount;
@@ -92,7 +92,7 @@ public abstract class FxTreeNodeInfo implements Serializable {
         this.ACLId = ACLId;
         this.mode = mode;
         this.position = position;
-        this.template = template;
+        this.data = data;
         this.modifiedAt = modifiedAt;
         this.permissions = permissions;
     }
@@ -267,24 +267,24 @@ public abstract class FxTreeNodeInfo implements Serializable {
     }
 
     /**
-     * Get the assigned template
+     * Get the assigned data
      *
-     * @return assigned template
+     * @return assigned data
      */
-    public String getTemplate() {
-        return template;
+    public String getData() {
+        return data;
     }
 
     /**
-     * Comparator for the template
+     * Comparator for the data
      *
-     * @param compareTo template to compare to
-     * @return has template
+     * @param compareTo data to compare to
+     * @return has data
      */
-    public boolean hasTemplate(String compareTo) {
-        return !((template == null && compareTo != null) ||
-                (template != null && compareTo == null)) &&
-                (template == null || template.equals(compareTo));
+    public boolean hasData(String compareTo) {
+        return !((data == null && compareTo != null) ||
+                (data != null && compareTo == null)) &&
+                (data == null || data.equals(compareTo));
     }
 
     /**

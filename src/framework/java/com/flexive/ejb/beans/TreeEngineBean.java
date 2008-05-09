@@ -669,7 +669,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public String[] getTemplates(FxTreeMode mode, long id) {
+    public String[] getDatas(FxTreeMode mode, long id) {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
@@ -685,7 +685,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void setTemplate(FxTreeMode mode, long nodeId, String template) {
+    public void setData(FxTreeMode mode, long nodeId, String data) {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
@@ -738,7 +738,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
             throw new FxTreeException("ex.tree.partialnode.notAllowed", node.getMode(), node.getId());
         if (node.isNew()) {
             long nodeId = createNode(node.getParentNodeId(), node.getName(), node.getLabel(), node.getPosition(),
-                    node.getReference(), node.getTemplate(), node.getMode());
+                    node.getReference(), node.getData(), node.getMode());
             if ((node.getReference() == null || node.getReference().isNew()) &&
                     node.getACLId() != ACL.Category.INSTANCE.getDefaultId()) {
                 //requested a non-default ACL for a folder

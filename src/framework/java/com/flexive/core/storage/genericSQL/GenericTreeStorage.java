@@ -150,14 +150,14 @@ public abstract class GenericTreeStorage implements TreeStorage {
     }
 
     /**
-     * Check if the template contains valid characters
+     * Check if data contains valid characters
      *
-     * @param template the template to check
+     * @param data the data to check
      * @throws FxTreeException on errors
      */
-    protected void checkTemplateValue(String template) throws FxTreeException {
-        if (!StringUtils.isEmpty(template) && template.indexOf(',') >= 0) {
-            throw new FxTreeException("Templates may not contain the comma character [,]");
+    protected void checkDataValue(String data) throws FxTreeException {
+        if (!StringUtils.isEmpty(data) && data.indexOf(',') >= 0) {
+            throw new FxTreeException("Data may not contain the comma character [,]");
         }
     }
 
@@ -654,9 +654,9 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 String _name = rs.getString(6);
                 long _parent = rs.getLong(7);
                 boolean _dirty = rs.getBoolean(8);
-                String _template = rs.getString(9);
+                String _data = rs.getString(9);
                 if (rs.wasNull())
-                    _template = null;
+                    _data = null;
                 long _modified = rs.getLong(10);
                 int _pos = rs.getInt(11);
                 long _acl = rs.getLong(12);
@@ -690,7 +690,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                         (mode == FxTreeMode.Live ? "ISMAX_VER=1" : "ISLIVE_VER=1") + " AND TPROP=" + EJBLookup.getConfigurationEngine().get(SystemParameters.TREE_CAPTION_PROPERTY));
                 return new FxTreeNode(mode, _id, _parent, _ref, _acl, _name, getPathById(con, mode, _id), label,
                         _pos, new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), _depth, _totalChilds, _directChilds,
-                        _directChilds == 0, _dirty, _modified, _template, _edit, _create, _delete, _relate, _export);
+                        _directChilds == 0, _dirty, _modified, _data, _edit, _create, _delete, _relate, _export);
             } else
                 throw new FxLoadException("ex.tree.node.notFound", nodeId, mode);
         } catch (SQLException exc) {
@@ -721,9 +721,9 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 String _name = rs.getString(6);
                 long _parent = rs.getLong(7);
                 boolean _dirty = rs.getBoolean(8);
-                String _template = rs.getString(9);
+                String _data = rs.getString(9);
                 if (rs.wasNull())
-                    _template = null;
+                    _data = null;
                 long _modified = rs.getLong(10);
                 int _pos = rs.getInt(11);
                 long _acl = rs.getLong(12);
@@ -759,7 +759,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
 
                 FxTreeNode node = new FxTreeNode(mode, _id, _parent, _ref, rs.getLong(12), _name, getPathById(con, mode, _id), label,
                         _pos, new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), _depth, _totalChilds, _directChilds,
-                        _directChilds == 0, _dirty, _modified, _template, _edit, _create, _delete, _relate, _export);
+                        _directChilds == 0, _dirty, _modified, _data, _edit, _create, _delete, _relate, _export);
                 ret.add(node);
             }
         } catch (SQLException exc) {
@@ -815,9 +815,9 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 String _name = rs.getString(6);
                 long _parent = rs.getLong(7);
                 boolean _dirty = rs.getBoolean(8);
-                String _template = rs.getString(9);
+                String _data = rs.getString(9);
                 if (rs.wasNull())
-                    _template = null;
+                    _data = null;
                 long _modified = rs.getLong(10);
                 int _pos;
                 FxString label;
@@ -871,7 +871,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 if (_read) {
                     FxTreeNode node = new FxTreeNode(mode, _id, _parent, _ref, _acl, _name, FxTreeNode.PATH_NOT_LOADED, label,
                             _pos, new ArrayList<FxTreeNode>(10), new ArrayList<Long>(10), _depth, _totalChilds, _directChilds,
-                            _directChilds == 0, _dirty, _modified, _template, _edit, _create, _delete, _relate, _export);
+                            _directChilds == 0, _dirty, _modified, _data, _edit, _create, _delete, _relate, _export);
                     FxTreeNode parent = data.get(node.getParentNodeId());
                     data.put(_id, node);
                     if (parent != null)
@@ -1119,23 +1119,23 @@ public abstract class GenericTreeStorage implements TreeStorage {
     /**
      * {@inheritDoc}
      */
-    public void setTemplate(Connection con, FxTreeMode mode, long nodeId, String template) throws FxApplicationException {
-        checkTemplateValue(template);
+    public void setData(Connection con, FxTreeMode mode, long nodeId, String data) throws FxApplicationException {
+        checkDataValue(data);
 
         FxTreeNodeInfo node = getTreeNodeInfo(con, mode, nodeId);
         // Any changes at all?
-        if (node.hasTemplate(template)) return;
-        // Set the template
+        if (node.hasData(data)) return;
+        // Set the data
         PreparedStatement ps = null;
         try {
             ps = con.prepareStatement("UPDATE " + getTable(mode) + " SET TEMPLATE=?,DIRTY=TRUE,MODIFIED_AT=UNIX_TIMESTAMP()*1000 WHERE ID=" + nodeId);
-            if (template == null)
+            if (data == null)
                 ps.setNull(1, java.sql.Types.VARCHAR);
             else
-                ps.setString(1, template);
+                ps.setString(1, data);
             ps.executeUpdate();
         } catch (Throwable t) {
-            throw new FxUpdateException(LOG, "ex.tree.setTemplate.failed", template, nodeId, t.getMessage());
+            throw new FxUpdateException(LOG, "ex.tree.setData.failed", data, nodeId, t.getMessage());
         } finally {
             try {
                 if (ps != null) ps.close();
@@ -1143,7 +1143,6 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 //ignore
             }
         }
-
     }
 
     /**

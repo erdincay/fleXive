@@ -123,13 +123,13 @@ public interface TreeEngine {
     long copy(FxTreeMode mode, long source, long destination, int destinationPosition) throws FxApplicationException;
 
     /**
-     * Sets the template of the node.
+     * Sets the data of the node.
      *
-     * @param mode     tree mode to use (Live or Edit tree)
-     * @param nodeId   the node id
-     * @param template the tamplate, or null for no template
+     * @param mode   tree mode to use (Live or Edit tree)
+     * @param nodeId the node id
+     * @param data   the data, or null for no data
      */
-    void setTemplate(FxTreeMode mode, long nodeId, String template);
+    void setData(FxTreeMode mode, long nodeId, String data);
 
     /**
      * Activates a node - copying it from the "Edit" to the "Live" tree
@@ -180,13 +180,13 @@ public interface TreeEngine {
     FxTreeNode getTree(FxTreeMode mode, long nodeId, int depth) throws FxApplicationException;
 
     /**
-     * Returns all the templates to use for this node ordered by relevance.
+     * Returns all the data to use for this node ordered by relevance.
      *
      * @param mode tree mode to use (Live or Edit tree)
-     * @param id   the id to get the templates for
-     * @return the templates, or null if the node does not exist
+     * @param id   the id to get the datas for
+     * @return the data, or null if the node does not exist
      */
-    String[] getTemplates(FxTreeMode mode, long id);
+    String[] getDatas(FxTreeMode mode, long id);
 
     //----------------------
     //- Finders/Search

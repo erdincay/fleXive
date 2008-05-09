@@ -63,7 +63,7 @@ public class FxTreeNodeEdit extends FxTreeNode implements Serializable {
         super(node.getMode(), node.getId(), node.getParentNodeId(), node.getReference(), node.getACLId(), node.getName(), node.getPath(),
                 node.getLabel(), node.getPosition(), node.getChildren(), node.getChildIds(), node.getDepth(),
                 node.getTotalChildCount(), node.getDirectChildCount(), node.isLeaf(), node.isDirty(),
-                node.getModifiedAt(), node.getTemplate(), true, true, true, true, true);
+                node.getModifiedAt(), node.getData(), true, true, true, true, true);
         this.isNew = false;
         this.newName = node.getName();
         this.originalMode = node.getMode();
@@ -113,8 +113,8 @@ public class FxTreeNodeEdit extends FxTreeNode implements Serializable {
     /**
      * Sets the node ID to the given value.
      *
-     * @param id    the node ID
-     * @return      this
+     * @param id the node ID
+     * @return this
      */
     public FxTreeNodeEdit setId(long id) {
         this.id = id;
@@ -250,18 +250,18 @@ public class FxTreeNodeEdit extends FxTreeNode implements Serializable {
      * {@inheritDoc}
      */
     @Override
-    public String getTemplate() {
-        if (this.template == null)
-            return super.getTemplate();
-        return template;
+    public String getData() {
+        if (this.data == null)
+            return super.getData();
+        return data;
     }
 
     /**
-     * Set the template
+     * Set additional data
      *
-     * @param template template
+     * @param data additional data
      */
-    public void setTemplate(String template) {
-        this.template = template;
+    public void setData(String data) {
+        this.data = data;
     }
 }

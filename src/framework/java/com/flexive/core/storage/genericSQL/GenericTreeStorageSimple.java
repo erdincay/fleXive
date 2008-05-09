@@ -34,7 +34,6 @@ package com.flexive.core.storage.genericSQL;
 import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.FxTreeNodeInfoSimple;
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.security.PermissionSet;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -155,7 +154,7 @@ public class GenericTreeStorageSimple extends GenericTreeStorage {
      */
     public long createNode(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, long nodeId,
                            long parentNodeId, String name, FxString label, int position, FxPK reference, String template) throws FxApplicationException {
-        checkTemplateValue(template);
+        checkDataValue(template);
         NodeCreateInfo nci = getNodeCreateInfo(mode, seq, ce, nodeId, name, label, reference);
         FxTreeNodeInfo parentNode = getTreeNodeInfo(con, mode, parentNodeId);
         long left, right;

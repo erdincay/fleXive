@@ -32,9 +32,9 @@
 package com.flexive.shared.tree;
 
 import com.flexive.shared.FxFormatUtils;
-import com.flexive.shared.SelectableObjectWithName;
-import com.flexive.shared.SelectableObjectWithLabel;
 import com.flexive.shared.SelectableObject;
+import com.flexive.shared.SelectableObjectWithLabel;
+import com.flexive.shared.SelectableObjectWithName;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.value.FxString;
@@ -66,7 +66,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
     protected long parentNodeId;
     protected String name;
     private long modifiedAt;
-    protected String template;
+    protected String data;
     private int depth;
     private int totalChildCount;
     private int directChildCount;
@@ -110,7 +110,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
      * @param leaf             is this node a leaf?
      * @param dirty            dirty flag
      * @param modifiedAt       timestamp of last modification
-     * @param template         template
+     * @param data             optional data
      * @param mayEdit          edit permission for the calling user
      * @param mayCreate        create permission for the calling user
      * @param mayDelete        delete permission for the calling user
@@ -120,7 +120,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
     public FxTreeNode(FxTreeMode mode, long id, long parentNodeId, FxPK reference, long ACLId, String name, String path,
                       FxString label, int position, List<FxTreeNode> children, List<Long> childIds, int depth,
                       int totalChildCount, int directChildCount, boolean leaf, boolean dirty, long modifiedAt,
-                      String template, boolean mayEdit, boolean mayCreate, boolean mayDelete, boolean mayRelate, boolean mayExport) {
+                      String data, boolean mayEdit, boolean mayCreate, boolean mayDelete, boolean mayRelate, boolean mayExport) {
         this.path = FxFormatUtils.escapeTreePath(path);
         this.label = label;
         this.reference = reference;
@@ -134,7 +134,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
         this.parentNodeId = parentNodeId;
         this.name = FxFormatUtils.escapeTreePath(name);
         this.modifiedAt = modifiedAt;
-        this.template = template;
+        this.data = data;
         this.depth = depth;
         this.totalChildCount = totalChildCount;
         this.directChildCount = directChildCount;
@@ -249,12 +249,12 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
     }
 
     /**
-     * Is a template assigned to this node?
+     * Is data assigned to this node?
      *
-     * @return if a template is assigned to this node
+     * @return if data is assigned to this node
      */
-    public boolean hasTemplate() {
-        return template != null;
+    public boolean hasData() {
+        return data != null;
     }
 
     /**
@@ -262,8 +262,8 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
      *
      * @return template assigned to this node, can be <code>null</code>
      */
-    public String getTemplate() {
-        return template;
+    public String getData() {
+        return data;
     }
 
     /**

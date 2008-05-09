@@ -32,8 +32,8 @@
 package com.flexive.core.storage;
 
 import com.flexive.shared.content.FxPK;
-import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.security.PermissionSet;
+import com.flexive.shared.tree.FxTreeMode;
 
 import java.io.Serializable;
 
@@ -68,16 +68,16 @@ public class FxTreeNodeInfoSimple extends FxTreeNodeInfo implements Serializable
      * @param ACLId            ACL of the referenced content
      * @param mode             tree mode
      * @param position         position
-     * @param template         template
+     * @param data             data
      * @param modifiedAt       last modified at
      * @param permissions      the node permissions of the calling user
      */
     public FxTreeNodeInfoSimple(long left, long right, long parentLeft, long parentRight,
                                 int totalChildCount, int directChildCount, int depth, long parentId, long id, String name,
-                                FxPK reference, long ACLId, FxTreeMode mode, int position, String template, long modifiedAt,
+                                FxPK reference, long ACLId, FxTreeMode mode, int position, String data, long modifiedAt,
                                 PermissionSet permissions) {
         super(totalChildCount, directChildCount, depth, parentId, id, name, reference, ACLId,
-                mode, position, template, modifiedAt, permissions);
+                mode, position, data, modifiedAt, permissions);
         this.left = left;
         this.right = right;
         this.parentLeft = parentLeft;

@@ -51,13 +51,16 @@ import com.flexive.shared.tree.FxTreeMode;
 import static com.flexive.shared.tree.FxTreeMode.Edit;
 import static com.flexive.shared.tree.FxTreeMode.Live;
 import com.flexive.shared.tree.FxTreeNode;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Resource;
 import javax.ejb.*;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -197,7 +200,7 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
             ps.close();
 
             // Update inSync in Edit AND Live version (if available)
-            ps = con.prepareStatement("UPDATE "+TBL_TEMPLATE+" SET INSYNC="+inSync+" WHERE ID="+id);
+            ps = con.prepareStatement("UPDATE " + TBL_TEMPLATE + " SET INSYNC=" + inSync + " WHERE ID=" + id);
             ps.executeUpdate();
 
             registerTagRelations(con, id, mode, tags);
@@ -217,8 +220,8 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
     /**
      * Removes the template with the given ID.
      *
-     * @param id    the template ID
-     * @throws FxApplicationException   if the template could not be deleted
+     * @param id the template ID
+     * @throws FxApplicationException if the template could not be deleted
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void remove(long id) throws FxApplicationException {
@@ -407,7 +410,7 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
      * final_content.
      *
      * @param content the content
-     * @param mode tree mode
+     * @param mode    tree mode
      * @return the tag list and a modified content
      * @throws FxApplicationException if the function fails
      */
@@ -461,7 +464,7 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
      *
      * @param type    the template type
      * @param content the content
-     * @param mode tree mode
+     * @param mode    tree mode
      * @return the name of the master template
      * @throws FxApplicationException when the referenced master template is invalid
      */
@@ -561,7 +564,7 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
                     TBL_TEMPLATE + " sub where sub.id=t.master_template)),\n" +
                     // Does this template have an LIVE version?
                     "(select 1 from " + TBL_TEMPLATE + " where " + condition + " and islive=true),\n" +
-                    "INSYNC \n"+
+                    "INSYNC \n" +
                     " FROM " + TBL_TEMPLATE + " t where islive=" + (mode == Live) + " and " + condition;
 
 
@@ -592,7 +595,7 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
                 boolean inSync = rs.getBoolean(11);
 
                 return new FxTemplateInfo(_id, _typeid, _name, _type, _modifiedAt, _modifiedBy, -1, _ttype, _master,
-                        _masterMod, mode == Live, hasLive,inSync);
+                        _masterMod, mode == Live, hasLive, inSync);
             } else {
                 throw new FxNotFoundException("ex.templateEngine.notFound.mode", id, mode);
             }
@@ -620,7 +623,7 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
             String sSql = "SELECT id,typeid,CONTENT_TYPE,MODIFIED_BY,MODIFIED_AT,NAME,TEMPLATE_TYPE,MASTER_TEMPLATE,\n" +
                     "IF(master_template is null,-1,(select sub.modified_at from " + TBL_TEMPLATE + " sub where sub.id=t.master_template)),\n" +
                     "(select 1 from " + TBL_TEMPLATE + " sub where sub.id=t.id and islive=true),\n " +
-                    "INSYNC\n"+
+                    "INSYNC\n" +
                     " FROM " +
                     TBL_TEMPLATE + " t ";
             if (type != null) {
@@ -644,9 +647,9 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
                 if (!rs.wasNull())
                     _masterMod = tstp;
                 boolean hasLive = rs.getInt(10) == 1;
-                boolean inSync  = rs.getBoolean(11);
+                boolean inSync = rs.getBoolean(11);
                 result.add(new FxTemplateInfo(id, typeid, name, contentType, modifiedAt, modifiedBy,
-                        -1, _ttype, _master, _masterMod, false, hasLive,inSync));
+                        -1, _ttype, _master, _masterMod, false, hasLive, inSync));
             }
             return result;
         } catch (Exception e) {
@@ -777,7 +780,7 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
         try {
             con = Database.getDbConnection();
             //TODO: Edit Tree??
-            StorageManager.getTreeStorage().setTemplate(con, FxTreeMode.Edit, nodeId, encodedTemplate);
+            StorageManager.getTreeStorage().setData(con, FxTreeMode.Edit, nodeId, encodedTemplate);
         } catch (Exception e) {
             ctx.setRollbackOnly();
             FxUpdateException exc = new FxUpdateException(e, "ex.tree.setTemplate.failed", nodeId);  // TODO
@@ -794,12 +797,12 @@ public class TemplateEngineBean implements TemplateEngine, TemplateEngineLocal {
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public ArrayList<FxTemplateMapping> getTemplateMappings(long treeNodeId, FxTreeMode mode) throws FxApplicationException {
         FxTreeNode node = new TreeEngineBean().getNode(mode, treeNodeId);
-        if (node.getTemplate() == null || node.getTemplate().length() == 0) {
+        if (node.getData() == null || node.getData().length() == 0) {
             return new ArrayList<FxTemplateMapping>(0);
         }
 
         ArrayList<FxTemplateMapping> result = new ArrayList<FxTemplateMapping>(25);
-        for (String templateMap : node.getTemplate().split(";")) {
+        for (String templateMap : node.getData().split(";")) {
             String decode[] = templateMap.split(":");
             FxTemplateMapping mp = new FxTemplateMapping(
                     decode[0].equals("*") ? null : Long.valueOf(decode[0]),

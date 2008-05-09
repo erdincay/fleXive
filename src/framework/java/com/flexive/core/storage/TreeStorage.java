@@ -292,15 +292,15 @@ public interface TreeStorage {
     long[] getIdChain(Connection con, FxTreeMode mode, long nodeId) throws FxApplicationException;
 
     /**
-     * Sets the template of the node.
+     * Sets the additional data of the node.
      *
-     * @param con      an open and valid connection
-     * @param mode     tree mode
-     * @param nodeId   the node id
-     * @param template the tamplate, or null for no template
+     * @param con    an open and valid connection
+     * @param mode   tree mode
+     * @param nodeId the node id
+     * @param data   the data, or null for no data
      * @throws FxApplicationException on errors
      */
-    void setTemplate(Connection con, FxTreeMode mode, long nodeId, String template) throws FxApplicationException;
+    void setData(Connection con, FxTreeMode mode, long nodeId, String data) throws FxApplicationException;
 
     /**
      * Activate a single node (and all its parents if necessary)
