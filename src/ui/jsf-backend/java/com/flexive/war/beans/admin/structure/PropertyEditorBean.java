@@ -571,6 +571,14 @@ public class PropertyEditorBean implements ActionBean {
         return optionWrapper.getOption(true, FxStructureOption.OPTION_MULTILANG).isOverridable();
     }
 
+    public boolean isPropertyMultiLanguage() {
+        return optionWrapper.getOption(true, FxStructureOption.OPTION_MULTILANG).getBooleanValue();
+    }
+
+    public void setPropertyMultiLanguage(boolean b) {
+        optionWrapper.getOption(true, FxStructureOption.OPTION_MULTILANG).setValue(b);
+    }
+
     /**
      * Returns if the generic option FxStructureOption.OPTION_MULTILANG is set.
      * This option controls the multilingualism of a property.

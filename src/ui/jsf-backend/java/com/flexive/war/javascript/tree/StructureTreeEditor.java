@@ -100,37 +100,46 @@ public class StructureTreeEditor implements Serializable {
 
     /**
      * Creates a derived assignment from a given assignment and pastes it into the
-     * the parent group or type. A new alias can also be specified.
+     * the target group or type at the first position. A new alias can also be specified.
      *
-     * @param assId          the id from which the assignment will be derived
-     * @param childNodeType  the nodeType from which the assignment will be derivedt (i.e. StructureTreeWriter.DOC_TYPE_GROUP, StructureTreeWriter.DOC_TYPE_ASSIGNMENT)
-     * @param parentId       the id of the parent group or type.
-     * @param parentNodeType the node type of the parent (i.e. StructureTreeWriter.DOC_TYPE_GROUP, StructureTreeWriter.DOC_TYPE_TYPE).
+     * @param parentAssId          the id from which the assignment will be derived
+     * @param parentNodeType  the nodeType from which the assignment will be derived (i.e. StructureTreeWriter.DOC_TYPE_GROUP, StructureTreeWriter.DOC_TYPE_ASSIGNMENT)
+     * @param targetId       the id of the group or type the assignment will be pasted into.
+     * @param targetNodeType the node type of the target (i.e. StructureTreeWriter.DOC_TYPE_GROUP, StructureTreeWriter.DOC_TYPE_TYPE).
      * @param newName        the new alias. if ==null the old will be taken.
      * @return the id of the newly created assignment
      * @throws com.flexive.shared.exceptions.FxApplicationException
      *          on errors
      */
-    public long pasteAssignmentInto(long assId, String childNodeType, long parentId, String parentNodeType, String newName) throws FxApplicationException {
-        String parentXPath = "/";
-        FxType parentType = null;
+    public long pasteAssignmentInto(long parentAssId, String parentNodeType, long targetId, String targetNodeType, String newName) throws FxApplicationException {
+        String targetXPath = "/";
+        FxType targetType = null;
         long assignmentId = -1;
 
-        if (StructureTreeWriter.DOC_TYPE_GROUP.equals(parentNodeType)) {
-            FxGroupAssignment ga = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(parentId);
-            parentType = ga.getAssignedType();
-            parentXPath = ga.getXPath();
-        } else if (StructureTreeWriter.DOC_TYPE_TYPE.equals(parentNodeType) ||
-                StructureTreeWriter.DOC_TYPE_TYPE_RELATION.equals(parentNodeType)) {
-            parentType = CacheAdmin.getEnvironment().getType(parentId);
+        if (StructureTreeWriter.DOC_TYPE_GROUP.equals(targetNodeType)) {
+            FxGroupAssignment ga = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(targetId);
+            targetType = ga.getAssignedType();
+            targetXPath = ga.getXPath();
+        } else if (StructureTreeWriter.DOC_TYPE_TYPE.equals(targetNodeType) ||
+                StructureTreeWriter.DOC_TYPE_TYPE_RELATION.equals(targetNodeType)) {
+            targetType = CacheAdmin.getEnvironment().getType(targetId);
         }
 
-        if (StructureTreeWriter.DOC_TYPE_ASSIGNMENT.equals(childNodeType)) {
+        //paste assignment into the target group/type
+        if (StructureTreeWriter.DOC_TYPE_ASSIGNMENT.equals(parentNodeType)) {
             assignmentId = EJBLookup.getAssignmentEngine().
-                    save(createReusedPropertyAssignment(assId, newName, parentXPath, parentType), false);
-        } else if (StructureTreeWriter.DOC_TYPE_GROUP.equals(childNodeType)) {
-            FxGroupAssignment assignment = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(assId);
-            assignmentId = EJBLookup.getAssignmentEngine().save(FxGroupAssignmentEdit.createNew(assignment, parentType, newName == null ? assignment.getAlias() : newName, parentXPath), true);
+                    save(createReusedPropertyAssignment(parentAssId, newName, targetXPath, targetType).setPosition(0), false);
+            //move property assignment to first position
+            //FxPropertyAssignmentEdit pa = ((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(assignmentId)).asEditable();
+            //pa.setPosition(0);
+            //EJBLookup.getAssignmentEngine().save(pa, false);
+        } else if (StructureTreeWriter.DOC_TYPE_GROUP.equals(parentNodeType)) {
+            FxGroupAssignment assignment = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(parentAssId);
+            assignmentId = EJBLookup.getAssignmentEngine().save(FxGroupAssignmentEdit.createNew(assignment, targetType, newName == null ? assignment.getAlias() : newName, targetXPath).setPosition(0), true);
+            //move group assignment to first position
+            //FxGroupAssignmentEdit ga = ((FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(assignmentId)).asEditable();
+            //ga.setPosition(0);
+            //EJBLookup.getAssignmentEngine().save(ga, false);
         }
         return assignmentId;
     }
@@ -191,7 +200,6 @@ public class StructureTreeEditor implements Serializable {
      * Moves a source assignment to a relative position of another destination assignment.
      * The assignments need to be at the same hierarchy level for positioning to work properly.
      * Steps indicates the relative position offset:
-     * If steps is 0, the source assignment moves to the current position of the destination assignment.
      * If steps is -1,-2..n the source assignment will be moved 1,2..n positions before the destination assignment.
      * If steps is 1,2..n the source assignment will be moved 1,2..n positions after the destination assignment.
      *
@@ -206,11 +214,17 @@ public class StructureTreeEditor implements Serializable {
         FxAssignment dest = CacheAdmin.getEnvironment().getAssignment(destId);
         if (StructureTreeWriter.DOC_TYPE_GROUP.equals(srcNodeType)) {
             FxGroupAssignmentEdit src = ((FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(srcId)).asEditable();
+             //if the source position is smaller than the destination position, an offset of -1 needs to be added
+            if (src.getPosition() < dest.getPosition())
+                steps=steps-1;
             src.setPosition(dest.getPosition() + steps);
-            EJBLookup.getAssignmentEngine().save(src, true);
+            EJBLookup.getAssignmentEngine().save(src, false);
 
         } else if (StructureTreeWriter.DOC_TYPE_ASSIGNMENT.equals(srcNodeType)) {
             FxPropertyAssignmentEdit src = ((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(srcId)).asEditable();
+             //if the source position is smaller than the destination position, an offset of -1 needs to be added
+            if (src.getPosition() < dest.getPosition())
+                steps=steps-1;
             src.setPosition(dest.getPosition() + steps);
             EJBLookup.getAssignmentEngine().save(src, false);
         } else

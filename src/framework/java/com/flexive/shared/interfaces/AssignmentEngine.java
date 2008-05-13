@@ -124,7 +124,7 @@ public interface AssignmentEngine {
      * Save an existing or create a new assignment.
      *
      * @param assignment           instance of FxPropertyAssignmentEdit or FxGroupAssignmentEdit
-     * @param createSubAssignments only used if creating a new group assignment
+     * @param createSubAssignments only used when creating a new group assignment, indicates if sub assignments of FxGroupAssignmentEdit should also be created.
      * @return the id of the created or saved assignment
      * @throws FxApplicationException      on errors
      * @throws FxInvalidParameterException

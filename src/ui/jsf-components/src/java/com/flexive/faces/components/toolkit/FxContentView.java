@@ -118,7 +118,7 @@ public class FxContentView extends UIOutput {
 
     public void provideContent(FacesContext context) {
         final Map requestMap = context.getExternalContext().getRequestMap();
-        try {
+        try {                                    
             final FxPK pk = (FxPK) getPk();
             getContent();
             if (content == null || (pk != null && !content.matchesPk(pk))) {

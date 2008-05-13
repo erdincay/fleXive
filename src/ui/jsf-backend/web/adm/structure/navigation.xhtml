@@ -516,16 +516,20 @@
                 setActionDisabled(menu.getTreeNode(), "searchContents", !isType(node.nodeDocType) && !isAssignment(node.nodeDocType));
                 setActionDisabled(menu.getTreeNode(), "searchPropertyContents", !isAssignment(node.nodeDocType));
                 setActionDisabled(menu.getTreeNode(), "cutAssignment", lackRole || node.nodeDocType!="Assignment" && node.nodeDocType!="Group");
+                //paste a copied assignment node into a different Type below another assignment
                 setActionDisabled(menu.getTreeNode(), "pasteBelow", lackRole || copyNode==null || cutMode || (copyMode && (node.nodeDocType!="Assignment" && node.nodeDocType!="Group") ||
                                 getJsonRpc().StructureTreeEditor.isSameLevel(copyNode.assignmentId, node.assignmentId)));
+                //only allowed at same level/Type and if the node is different than the right clicked node
                 setActionDisabled(menu.getTreeNode(), "pasteBelowAfterCut", lackRole || copyNode==null || copyMode || (node.nodeDocType!="Assignment" && node.nodeDocType!="Group") ||
-                                (cutMode && !getJsonRpc().StructureTreeEditor.isSameLevel(copyNode.assignmentId, node.assignmentId)));
+                                getNodeId(copyNode) == getNodeId(node) ||(cutMode && !getJsonRpc().StructureTreeEditor.isSameLevel(copyNode.assignmentId, node.assignmentId)));
+                //paste a copied assignment node into a different Type above another assignment
                 setActionDisabled(menu.getTreeNode(), "pasteAbove", lackRole || copyNode==null || cutMode || (copyMode && (node.nodeDocType!="Assignment" && node.nodeDocType!="Group") ||
                                 getJsonRpc().StructureTreeEditor.isSameLevel(copyNode.assignmentId, node.assignmentId)));
+                //only allowed at same level/Type and if the node is different than the right clicked node
                 setActionDisabled(menu.getTreeNode(), "pasteAboveAfterCut", lackRole || copyNode==null || copyMode || (node.nodeDocType!="Assignment" && node.nodeDocType!="Group") ||
-                                (cutMode && !getJsonRpc().StructureTreeEditor.isSameLevel(copyNode.assignmentId, node.assignmentId)));
+                                getNodeId(copyNode) == getNodeId(node) || (cutMode && !getJsonRpc().StructureTreeEditor.isSameLevel(copyNode.assignmentId, node.assignmentId)));
                 setActionDisabled(menu.getTreeNode(), "pasteInto", lackRole || copyNode==null || cutMode || (!isType(node.nodeDocType) && node.nodeDocType!="Group") ||
-                                getJsonRpc().StructureTreeEditor.isChild(copyNode.assignmentId, node.assignmentId, node.nodeDocType));
+                                getJsonRpc().StructureTreeEditor.isChild(copyNode.assignmentId, getNodeId(node), node.nodeDocType));
                 setActionDisabled(menu.getTreeNode(), "pasteBelowAs", lackRole || copyNode==null || cutMode ||(node.nodeDocType!="Assignment" && node.nodeDocType!="Group"));
                 setActionDisabled(menu.getTreeNode(), "pasteAboveAs", lackRole || copyNode==null || cutMode ||(node.nodeDocType!="Assignment" && node.nodeDocType!="Group"));
                 setActionDisabled(menu.getTreeNode(), "pasteIntoAs", lackRole || copyNode==null || cutMode || (!isType(node.nodeDocType) && node.nodeDocType!="Group"));

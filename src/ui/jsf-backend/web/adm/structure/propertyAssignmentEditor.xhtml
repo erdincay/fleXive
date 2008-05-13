@@ -73,6 +73,10 @@
                              readOnly="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
             </fx:formRow>
 
+            <fx:formRow labelKey="PropertyEditor.label.propertyDataType" id="propertyDataType">
+                <fx:resultValue id="propertyDataType" value="#{propertyEditorBean.property.dataType.name}"/>
+            </fx:formRow>
+
              <fx:formRow labelKey="PropertyEditor.label.defaultValue" id="defaultValue">
                 <fx:fxValueInput id="defaultValue" value="#{propertyEditorBean.defaultValue}"
                          readOnly="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>

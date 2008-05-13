@@ -67,6 +67,10 @@
 					<fx:fxValueInput id="hint" value="#{propertyEditorBean.propertyHint}"
                          readOnly="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
 			</fx:formRow>
+            <fx:formRow labelKey="PropertyEditor.label.multiLang" id="multiLang">
+					<h:selectBooleanCheckbox id="multiLang" value="#{propertyEditorBean.propertyMultiLanguage}"
+                         disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
+			</fx:formRow>
              <fx:formRow labelKey="PropertyEditor.label.fulltextIndexed" id="fulltextIndexed">
                     <h:selectBooleanCheckbox id="fulltextIndexed" value="#{propertyEditorBean.propertyFulltextIndexed}"
                          disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
