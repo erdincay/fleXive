@@ -31,17 +31,21 @@
  ***************************************************************/
 package com.flexive.faces.components.input;
 
-import com.flexive.shared.FxLanguage;
-import com.flexive.shared.value.FxValue;
+import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.components.WriteWebletIncludes;
+import com.flexive.shared.FxLanguage;
+import com.flexive.shared.value.BinaryDescriptor;
+import com.flexive.shared.value.FxBinary;
+import com.flexive.shared.value.FxValue;
+import org.apache.commons.lang.StringUtils;
 
-import javax.faces.context.ResponseWriter;
-import javax.faces.context.FacesContext;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIOutput;
+import javax.faces.component.html.HtmlGraphicImage;
+import javax.faces.component.html.HtmlOutputLink;
+import javax.faces.context.FacesContext;
+import javax.faces.context.ResponseWriter;
 import java.io.IOException;
-
-import org.apache.commons.lang.StringUtils;
 
 /**
  * Renders the given FxValue.
@@ -89,9 +93,10 @@ abstract class RenderHelper {
     /**
      * Render a input field for the given language.
      *
-     * @param parent  the parent component
+     * @param parent   the parent component
      * @param inputId  the input element ID (= form name)
      * @param language the language for the input field, or null if the value is not multi-language. @throws IOException if the input could not be rendered
+     * @throws java.io.IOException on errors
      */
     protected abstract void encodeField(UIComponent parent, String inputId, FxLanguage language) throws IOException;
 
@@ -159,7 +164,7 @@ abstract class RenderHelper {
                 return;
             }
             final ResponseWriter out = facesContext.getResponseWriter();
-            for (String weblet: weblets) {
+            for (String weblet : weblets) {
                 out.write(StringUtils.defaultString(WriteWebletIncludes.renderWeblet(weblet)));
             }
         }
@@ -178,5 +183,75 @@ abstract class RenderHelper {
             super.restoreState(context, state[0]);
             weblets = (String[]) state[1];
         }
+    }
+
+    /**
+     * Render an image description and download link
+     */
+    public static class ImageDescription extends UIOutput {
+        private FxLanguage language = FxLanguage.DEFAULT;
+
+
+        public void setLanguage(FxLanguage language) {
+            this.language = language;
+        }
+
+        protected FxValueInput getInputComponent() {
+            UIComponent component = getParent();
+            while (component != null && !(component instanceof FxValueInput)) {
+                component = component.getParent();
+            }
+            return (FxValueInput) component;
+        }
+
+        public void encodeEnd(FacesContext facesContext) throws IOException {
+            final FxValueInput input = getInputComponent();
+            FxValue value = input.getUIValue();
+            if (value == null)
+                return;
+            if (value instanceof FxBinary && !value.isEmpty()) {
+                final ResponseWriter writer = facesContext.getResponseWriter();
+                final BinaryDescriptor descriptor = ((FxBinary) value).getTranslation(language);
+                writer.startElement("br", null);
+                writer.writeAttribute("clear", "all", null);
+                writer.endElement("br");
+
+                writer.startElement("span", null);
+                writer.writeAttribute("class", "binaryDescription", null);
+                StringBuilder sb = new StringBuilder(500);
+                if (input.isReadOnly() && input.isReadOnlyShowTranslations() && value.isMultiLanguage())
+                    sb.append(language.getLabel().getBestTranslation()).append(": ");
+                sb.append(descriptor.getName()).append(", ").append(descriptor.getSize()).append(" byte");
+                if (descriptor.isImage())
+                    sb.append(",").append(descriptor.getWidth()).append("x").append(descriptor.getHeight()).append(" pixel");
+                writer.writeText(sb.toString(), null);
+                writer.endElement("span");
+
+                if (!descriptor.isNewBinary()) {
+                    final HtmlOutputLink link = (HtmlOutputLink) FxJsfUtils.createComponent(HtmlOutputLink.COMPONENT_TYPE);
+                    final String downloadURL = FxJsfUtils.getServletContext().getContextPath() +
+                            "/cefiledownload/" +
+                            (value.isMultiLanguage() ? "lang:" + language.getIso2digit() : "") +
+                            "/xpath:" + value.getXPath().replaceAll("\\/", "|") + "/" + descriptor.getName();
+                    link.setValue(downloadURL);
+
+                    final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(link, HtmlGraphicImage.COMPONENT_TYPE);
+                    image.setUrl("/adm/images/contentEditor/download.png");
+                    image.setStyleClass("binaryDownloadIcon");
+                    link.encodeAll(facesContext);
+                }
+
+                writer.startElement("br", null);
+                writer.writeAttribute("clear", "all", null);
+                writer.endElement("br");
+            }
+        }
+    }
+
+    protected UIComponent addImageDescriptionComponent(UIComponent parent, FxLanguage language) {
+        RenderHelper.ImageDescription desc = new ImageDescription();
+        desc.setLanguage(language);
+        parent.getChildren().add(desc);
+        return desc;
     }
 }

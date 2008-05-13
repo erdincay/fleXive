@@ -326,6 +326,11 @@ class EditModeHelper extends RenderHelper {
                 final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(parent, HtmlGraphicImage.COMPONENT_TYPE);
                 image.setUrl(ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()),
                         BinaryDescriptor.PreviewSizes.PREVIEW2, value.getXPath(), descriptor.getCreationTime(), language));
+                if (component.isReadOnlyShowTranslations()) {
+                    //TODO: might add another attribute to indicate if description should be visible
+                    image.setStyle("padding: 5px;");
+                    addImageDescriptionComponent(parent, language);
+                }
                 // render preview image
 /*
                 StringBuilder sb = new StringBuilder(1000);

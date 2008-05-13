@@ -36,14 +36,17 @@ import com.flexive.shared.FxContext;
 import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.XPathElement;
-import com.flexive.shared.value.*;
+import com.flexive.shared.value.BinaryDescriptor;
+import com.flexive.shared.value.FxBinary;
+import com.flexive.shared.value.FxHTML;
+import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import com.flexive.war.servlet.ThumbnailServlet;
 
+import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlGraphicImage;
 import javax.faces.component.html.HtmlOutputLink;
 import javax.faces.component.html.HtmlOutputText;
-import javax.faces.component.UIComponent;
 import java.io.IOException;
 
 /**
@@ -63,7 +66,13 @@ class ReadOnlyModeHelper extends RenderHelper {
      */
     @Override
     protected void encodeMultiLanguageField() throws IOException {
-        encodeField(component, clientId, FxContext.get().getTicket().getLanguage());
+        if (component.isReadOnlyShowTranslations() && value instanceof FxBinary) {
+            //TODO: for now only binaries are implemented correctly
+            for (FxLanguage language : FxValueInputRenderer.getLanguages()) {
+                encodeField(component, clientId, language);
+            }
+        } else
+            encodeField(component, clientId, FxContext.get().getTicket().getLanguage());
     }
 
     /**
@@ -75,38 +84,14 @@ class ReadOnlyModeHelper extends RenderHelper {
         if (!value.isEmpty()) {
             // TODO: optional "empty" message
             final FxLanguage outputLanguage = FxContext.get().getTicket().getLanguage();
+            if (language == null)
+                language = outputLanguage;
             if (component.getValueFormatter() != null) {
                 // use custom formatter
                 addOutputComponent(component.getValueFormatter().format(value, value.getBestTranslation(language), outputLanguage));
-            } /*else if (value instanceof FxReference) {
-                // render preview
-                if (language == null || value.getTranslation(language) != null) {
-                    final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(component, HtmlGraphicImage.COMPONENT_TYPE);
-                    image.setUrl(ThumbnailServlet.getLink(((FxReference) value).getBestTranslation(language), BinaryDescriptor.PreviewSizes.PREVIEW2));
-                }
-            } */else if (value instanceof FxBinary && !value.isEmpty()) {
+            } else if (value instanceof FxBinary && !value.isEmpty()) {
                 // render preview image
                 renderPreviewImage(language);
-/*
-                final BinaryDescriptor descriptor = ((FxBinary) value).getTranslation(language);
-                StringBuilder sb = new StringBuilder(1000);
-                String urlThumb = FxJsfUtils.getServletContext().getContextPath() +
-                        ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()),
-                                BinaryDescriptor.PreviewSizes.PREVIEW2, value.getXPath(), descriptor.getCreationTime());
-                String urlOriginal = FxJsfUtils.getServerURL() + FxJsfUtils.getServletContext().getContextPath() +
-                        ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()),
-                                BinaryDescriptor.PreviewSizes.ORIGINAL, value.getXPath(), descriptor.getCreationTime());
-                final String text = descriptor.getName()+", "+descriptor.getSize()+" byte"+(descriptor.isImage()
-                        ? ", "+descriptor.getWidth()+"x"+descriptor.getHeight()
-                        : "");
-                sb.append("<a title=\"").append(text).append("\" href=\"").append(urlOriginal).
-                        append("\" rel=\"lytebox[ce]\"><img style=\"border-style:none;\" alt=\"").
-                        append(text).
-                        append("\" src=\"").
-                        append(urlThumb).
-                        append("\"/></a>");
-                writer.write(sb.toString());
-*/
             } else if (component.isFilter() && !(value instanceof FxHTML)) {
                 // escape HTML code and generate <br/> tags for newlines
                 addOutputComponent(FxFormatUtils.escapeForJavaScript(FxValueRendererFactory.getInstance(outputLanguage).format(value, language), true, true));
@@ -134,36 +119,41 @@ class ReadOnlyModeHelper extends RenderHelper {
     }
 
     private void renderPreviewImage(FxLanguage language) {
-        if (value.isEmpty()) {
+        if (value.isEmpty() || !value.translationExists(language.getId())) {
             return;
         }
         final BinaryDescriptor descriptor = ((FxBinary) value).getTranslation(language);
         if (component.isDisableLytebox()) {
-            addImageComponent(component, descriptor);
+            addImageComponent(component, descriptor, language);
             return;
         }
         final HtmlOutputLink link = (HtmlOutputLink) FxJsfUtils.addChildComponent(component, HtmlOutputLink.COMPONENT_TYPE);
         final String urlOriginal = FxJsfUtils.getServletContext().getContextPath() +
                 ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()),
                         descriptor.isImage() ? BinaryDescriptor.PreviewSizes.ORIGINAL : BinaryDescriptor.PreviewSizes.PREVIEW3,
-                        value.getXPath(), descriptor.getCreationTime());
+                        value.getXPath(), descriptor.getCreationTime(), language);
         link.setValue(urlOriginal);
         link.setRel("lytebox[ce]");
-        addImageComponent(link, descriptor);
+        addImageComponent(link, descriptor, language);
+        if (component.isReadOnlyShowTranslations()) //TODO: might use another attribute to determine if this should be rendered
+            addImageDescriptionComponent(component, language);
 
         // render lytebox include
         final WebletIncludeWriter includeWriter = new WebletIncludeWriter();
         includeWriter.setWeblets(
-                        "com.flexive.faces.weblets/js/lytebox.js",
-                        "com.flexive.faces.weblets/css/lytebox.css"
-                );
+                "com.flexive.faces.weblets/js/lytebox.js",
+                "com.flexive.faces.weblets/css/lytebox.css"
+        );
         component.getChildren().add(includeWriter);
     }
 
-    private void addImageComponent(UIComponent parent, BinaryDescriptor descriptor) {
+    private void addImageComponent(UIComponent parent, BinaryDescriptor descriptor, FxLanguage language) {
         final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(parent, HtmlGraphicImage.COMPONENT_TYPE);
         image.setUrl(ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()),
-                        BinaryDescriptor.PreviewSizes.PREVIEW2, value.getXPath(), descriptor.getCreationTime()));
-        image.setStyle("border: none;");
+                BinaryDescriptor.PreviewSizes.PREVIEW2, value.getXPath(), descriptor.getCreationTime(), language));
+        if (component.isReadOnlyShowTranslations()) //TODO: might use another attribute to determine if this should be rendered
+            image.setStyle("border: none; padding: 5px;");
+        else
+            image.setStyle("border: none;");
     }
 }

@@ -34,6 +34,7 @@
 package com.flexive.war.servlet;
 
 import com.flexive.shared.value.BinaryDescriptor;
+import com.flexive.shared.EJBLookup;
 import com.flexive.war.beans.admin.content.ContentEditorBean;
 
 import javax.servlet.*;
@@ -90,6 +91,7 @@ public class CeFileDownload implements Servlet {
 
         String downloadFileName = null;
         String xpath = null;
+        String lang = null;
         try {
             // Example URI: '/flexive/cefiledownload/xpath:|SUBGROUP[1]|FILE[1]/demo.jpg'
             String uri[] = URLDecoder.decode(request.getRequestURI(), "UTF8").split("/");
@@ -99,6 +101,8 @@ public class CeFileDownload implements Servlet {
                     String paramSplit[] = param.split(":");
                     if (paramSplit[0].equalsIgnoreCase("xpath")) {
                         xpath = paramSplit[1].replace('|', '/');
+                    } else if (paramSplit[0].equalsIgnoreCase("lang")) {
+                        lang = paramSplit[1];
                     }
                 } catch (Throwable t) {
                     System.err.println(this.getClass() + ": ignoring url parameter " + param);
@@ -111,7 +115,11 @@ public class CeFileDownload implements Servlet {
         // Send the data
         ServletOutputStream sos = null;
         try {
-            BinaryDescriptor bd = ((BinaryDescriptor) ceb.getContent().getValue(xpath).getBestTranslation());
+            BinaryDescriptor bd;
+            if( lang == null )
+                bd = ((BinaryDescriptor) ceb.getContent().getValue(xpath).getBestTranslation());
+            else
+                bd = ((BinaryDescriptor) ceb.getContent().getValue(xpath).getTranslation(EJBLookup.getLanguageEngine().load(lang)));
             response.setContentType(bd.getMimeType());
             response.setContentLength((int) bd.getSize());
             response.setHeader("Content-Disposition", "attachment; filename=\"" + bd.getName() + "\";");

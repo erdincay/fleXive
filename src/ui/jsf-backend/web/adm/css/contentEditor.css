@@ -69,6 +69,7 @@
     margin-bottom:4px;
     padding-left:2px;
     padding-right:2px;
+    padding-bottom: 2px;
     border:1px solid #bdbdbd;
     background-color:#f9fcf1
 }
@@ -263,4 +264,19 @@ table.historyTable TR TD.action {
     background-color: #EFEFEF;
     color: gray;
     margin: 12px;
+}
+
+.binaryDescription {
+    padding-left:3px;
+    border:1px solid #d3dcb7;
+    background-color:white;
+}
+
+.binaryDownloadIcon {
+    padding:0;
+    margin-left:5px;
+    border:0;
+    height:16px;
+    width:16px;
+    vertical-align:middle;
 }

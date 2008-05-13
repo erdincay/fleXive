@@ -32,36 +32,12 @@
                     <div class="display">
                         #{srcEditor.display[element.assignmentId]}
                     </div>
-                    <div class="value" readonly="#{srcEditor.readOnly or srcEditor.data[element.XPathFull].readOnly}">
-
-                        <fx:fxValueInput value="#{srcEditor.data[element.XPathFull]}" readOnly="#{srcEditor.readOnly or srcEditor.data[element.XPathFull].readOnly}"
-                                onchange="#{element.value.class=='class com.flexive.shared.value.FxBinary' ? 'fileInputChanged()' : ''}"
-                                valueFormatter="#{srcEditor.valueFormatter[srcEditor.data[element.XPathFull]]}"/>
-
-                        <c:if test="#{element.value.class=='class com.flexive.shared.value.FxBinary' and not srcEditor.data[element.XPathFull].isEmpty}">
-                            <br clear="all"/>
-                            <c:set var="binDesc" value="#{srcEditor.data[element.XPathFull].defaultTranslation}" />
-
-                            <span style="padding-left:3px;border:1px solid #d3dcb7;background-color:white">
-                            #{binDesc.name},
-                            #{binDesc.size} byte
-                            <c:if test="#{binDesc.image}">
-                                (#{binDesc.width}x#{binDesc.height} pixel)
-                            </c:if>
-                            </span>
-
-                            <c:if test="#{binDesc.newBinary==false}">
-                                <c:set var="find" value="/" />
-                                <c:set var="replace" value="|" />
-                                <c:set var="url" value="xpath:#{fn:replace(element.XPathFull,find,replace)}" />
-                                <a href="#{fxSystemBean.documentBase}cefiledownload/#{url}/#{binDesc.name}">
-                                    <t:graphicImage alt="download" url="/adm/images/contentEditor/download.png"
-                                        style="padding:0;margin-left:5px;border:0;height:16px;width:16px;vertical-align:middle;"/>
-                                </a>
-                            </c:if>
-                        </c:if>
-
-                    </div>
+                    <fx:fxValueInput value="#{srcEditor.data[element.XPathFull]}"
+                                     readOnly="#{srcEditor.readOnly or srcEditor.data[element.XPathFull].readOnly}"
+                                     readOnlyShowTranslations="true"
+                                     containerDivClass="value"
+                                     onchange="#{element.value.class=='class com.flexive.shared.value.FxBinary' ? 'fileInputChanged()' : ''}"
+                                     valueFormatter="#{srcEditor.valueFormatter[srcEditor.data[element.XPathFull]]}"/>
                 </div>
                 <br clear="all"/>
             </c:if>
