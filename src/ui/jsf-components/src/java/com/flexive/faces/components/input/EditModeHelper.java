@@ -331,26 +331,6 @@ class EditModeHelper extends RenderHelper {
                     image.setStyle("padding: 5px;");
                     addImageDescriptionComponent(parent, language);
                 }
-                // render preview image
-/*
-                StringBuilder sb = new StringBuilder(1000);
-                String urlThumb = FxJsfUtils.getServletContext().getContextPath() +
-                        ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()),
-                                BinaryDescriptor.PreviewSizes.PREVIEW2, value.getXPath(), descriptor.getCreationTime());
-                String urlOriginal = FxJsfUtils.getServerURL() + FxJsfUtils.getServletContext().getContextPath() +
-                        ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()),
-                                BinaryDescriptor.PreviewSizes.ORIGINAL, value.getXPath(), descriptor.getCreationTime());
-                final String text = descriptor.getName()+", "+descriptor.getSize()+" byte"+(descriptor.isImage()
-                        ? ", "+descriptor.getWidth()+"x"+descriptor.getHeight()
-                        : "");
-                sb.append("<a title=\"").append(text).append("\" href=\"").append(urlOriginal).
-                        append("\" rel=\"lytebox[ce]\"><img style=\"border-style:none;\" alt=\"").
-                        append(text).
-                        append("\" src=\"").
-                        append(urlThumb).
-                        append("\"/></a>");
-                writer.write(sb.toString());
-*/
             }
         }
         final HtmlInputFileUpload upload = (HtmlInputFileUpload) FxJsfUtils.addChildComponent(parent, HtmlInputFileUpload.COMPONENT_TYPE);
@@ -402,25 +382,6 @@ class EditModeHelper extends RenderHelper {
 
     private static String singleLanguageStyle(FxLanguage language) {
         return singleLanguageStyle(language != null ? language.getId() : -1);
-    }
-
-    /**
-     * Renders the container for the whole fxValueInput component.
-     */
-    public static class ContainerWriter extends DeferredInputWriter {
-        @Override
-        public void encodeBegin(FacesContext facesContext) throws IOException {
-            final ResponseWriter writer = facesContext.getResponseWriter();
-            writer.startElement("div", null);
-            writer.writeAttribute("id", inputClientId, null);
-            writer.writeAttribute("class", FxValueInputRenderer.CSS_CONTAINER + " "
-                    + getInputValue().getClass().getSimpleName() + "Input", null);
-        }
-
-        @Override
-        public void encodeEnd(FacesContext facesContext) throws IOException {
-            facesContext.getResponseWriter().endElement("div");
-        }
     }
 
     /**

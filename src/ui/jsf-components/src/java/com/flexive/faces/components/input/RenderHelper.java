@@ -186,6 +186,43 @@ abstract class RenderHelper {
     }
 
     /**
+     * Renders the container for the whole fxValueInput component.
+     */
+    public static class ContainerWriter extends DeferredInputWriter {
+
+        boolean displayLanguage = false;
+        FxLanguage language = null;
+
+        public void setDisplayLanguage(boolean displayLanguage) {
+            this.displayLanguage = displayLanguage;
+        }
+
+        public void setLanguage(FxLanguage language) {
+            this.language = language;
+        }
+
+        @Override
+        public void encodeBegin(FacesContext facesContext) throws IOException {
+            final ResponseWriter writer = facesContext.getResponseWriter();
+            StringBuilder styleClass = new StringBuilder(300);
+            styleClass.append(FxValueInputRenderer.CSS_CONTAINER).append(" ").append(getInputValue().getClass().getSimpleName()).
+                    append("Input");
+            if( displayLanguage && language != null )  {
+                writer.writeText(language.getLabel().getBestTranslation()+":", null);
+                styleClass.insert(0, FxValueInputRenderer.CSS_READONLYCONTAINER+" ");
+            }
+            writer.startElement("div", null);
+            writer.writeAttribute("id", inputClientId, null);
+            writer.writeAttribute("class", styleClass.toString(), null);
+        }
+
+        @Override
+        public void encodeEnd(FacesContext facesContext) throws IOException {
+            facesContext.getResponseWriter().endElement("div");
+        }
+    }
+
+    /**
      * Render an image description and download link
      */
     public static class ImageDescription extends UIOutput {

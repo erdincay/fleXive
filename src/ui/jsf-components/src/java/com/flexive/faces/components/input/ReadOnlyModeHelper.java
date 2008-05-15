@@ -66,9 +66,10 @@ class ReadOnlyModeHelper extends RenderHelper {
      */
     @Override
     protected void encodeMultiLanguageField() throws IOException {
-        if (component.isReadOnlyShowTranslations() && value instanceof FxBinary) {
+        if (component.isReadOnlyShowTranslations()) {
             //TODO: for now only binaries are implemented correctly
             for (FxLanguage language : FxValueInputRenderer.getLanguages()) {
+
                 encodeField(component, clientId, language);
             }
         } else
@@ -84,20 +85,22 @@ class ReadOnlyModeHelper extends RenderHelper {
         if (!value.isEmpty()) {
             // TODO: optional "empty" message
             final FxLanguage outputLanguage = FxContext.get().getTicket().getLanguage();
-            if (language == null)
+            if (language == null) //use the ticket's language
                 language = outputLanguage;
+            else if (!value.translationExists(language.getId()))
+                return; //dont render if not translated
             if (component.getValueFormatter() != null) {
                 // use custom formatter
-                addOutputComponent(component.getValueFormatter().format(value, value.getBestTranslation(language), outputLanguage));
+                addOutputComponent(component.getValueFormatter().format(value, value.getBestTranslation(language), outputLanguage), language);
             } else if (value instanceof FxBinary && !value.isEmpty()) {
                 // render preview image
                 renderPreviewImage(language);
             } else if (component.isFilter() && !(value instanceof FxHTML)) {
                 // escape HTML code and generate <br/> tags for newlines
-                addOutputComponent(FxFormatUtils.escapeForJavaScript(FxValueRendererFactory.getInstance(outputLanguage).format(value, language), true, true));
+                addOutputComponent(FxFormatUtils.escapeForJavaScript(FxValueRendererFactory.getInstance(outputLanguage).format(value, language), true, true), language);
             } else {
                 // write the plain value
-                addOutputComponent(FxValueRendererFactory.getInstance(outputLanguage).format(value, language));
+                addOutputComponent(FxValueRendererFactory.getInstance(outputLanguage).format(value, language), language);
             }
 //            final Object translation = language != null ? value.getBestTranslation(language) : value.getDefaultTranslation();
 //            if (value instanceof FxHTML) {
@@ -112,8 +115,18 @@ class ReadOnlyModeHelper extends RenderHelper {
         }
     }
 
-    private void addOutputComponent(String value) {
-        final HtmlOutputText output = (HtmlOutputText) FxJsfUtils.addChildComponent(component, HtmlOutputText.COMPONENT_TYPE);
+    private void addOutputComponent(String value, FxLanguage language) {
+        UIComponent parent = component;
+        if (component.isReadOnlyShowTranslations() && component.getUIValue().isMultiLanguage()) {
+            final ContainerWriter container = new ContainerWriter();
+            container.setDisplayLanguage(true);
+            container.setLanguage(language);
+            container.setInputClientId(clientId);
+            parent.getChildren().add(container);
+            // use container as parent for all subsequent operations
+            parent = container;
+        }
+        final HtmlOutputText output = (HtmlOutputText) FxJsfUtils.addChildComponent(parent, HtmlOutputText.COMPONENT_TYPE);
         output.setEscape(false);
         output.setValue(value);
     }

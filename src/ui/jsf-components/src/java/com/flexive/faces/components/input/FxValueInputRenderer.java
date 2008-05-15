@@ -71,6 +71,7 @@ public class FxValueInputRenderer extends Renderer {
     protected static final String LANG_SELECT = "_languageSelect";
     protected static final String INPUT = "_input_";
     protected static final String CSS_CONTAINER = "fxValueInput";
+    protected static final String CSS_READONLYCONTAINER = "fxValueInputReadOnly";
     protected static final String CSS_LANG_CONTAINER = "fxValueInputRow";
     protected static final String CSS_TEXT_INPUT = "fxValueTextInput";
     protected static final String CSS_TEXTAREA = "fxValueTextArea";

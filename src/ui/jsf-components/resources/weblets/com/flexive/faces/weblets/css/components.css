@@ -9,6 +9,13 @@ div.fxValueInput {
     width: 300px;
 }
 
+/* Container in ContentEditor used to show readonly properties */
+.property div.fxValueInputReadOnly {
+    border: 1px dashed #A0A0A0;
+    padding: 2px;
+    width: 394px !important;
+}
+
 /* An input row containing the input element and the default language checkbox */
 div.fxValueInputRow {
     position: relative;
