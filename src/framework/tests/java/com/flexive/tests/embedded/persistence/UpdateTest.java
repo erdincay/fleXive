@@ -62,7 +62,8 @@ public class UpdateTest extends StructureTestBase {
         ass.createProperty(
                 typeId,
                 FxPropertyEdit.createNew(name, new FxString("UpdateTest UnitTest property " + name),
-                        new FxString("hint..."), new FxMultiplicity(0, 5), acl, FxDataType.String1024).setMultiLang(true),
+                        new FxString("hint..."), new FxMultiplicity(0, 5), acl, FxDataType.String1024).
+                        setMultiLang(true).setAutoUniquePropertyName(true),
                 XPath);
     }
 
@@ -83,6 +84,9 @@ public class UpdateTest extends StructureTestBase {
         createGroup(typeId, "G2", "/G1");
         createProperty(typeId, structACL, "P1", "/G1/G2");
         createProperty(typeId, structACL, "P2", "/G1/G2");
+        createGroup(typeId, "T1", "/");
+        createProperty(typeId, structACL, "P1", "/T1");
+        createProperty(typeId, structACL, "P2", "/T1");
     }
 
     /**
@@ -115,7 +119,7 @@ public class UpdateTest extends StructureTestBase {
      * @throws FxApplicationException on errors
      */
     @Test
-    public void assignmentReposition() throws FxApplicationException {
+    public void simplePositioning() throws FxApplicationException {
         FxPropertyAssignmentEdit pa1 = ((FxPropertyAssignment) CacheAdmin.getEnvironment().getType(typeId).getAssignment("/G1/G2/P1")).asEditable();
         FxPropertyAssignmentEdit pa2 = ((FxPropertyAssignment) CacheAdmin.getEnvironment().getType(typeId).getAssignment("/G1/G2/P2")).asEditable();
         Assert.assertEquals(pa1.getPosition(), 0);
@@ -126,62 +130,65 @@ public class UpdateTest extends StructureTestBase {
         pa2 = ((FxPropertyAssignment) CacheAdmin.getEnvironment().getType(typeId).getAssignment("/G1/G2/P2")).asEditable();
         Assert.assertEquals(pa1.getPosition(), 1);
         Assert.assertEquals(pa2.getPosition(), 0);
+    }
 
-        //reset structures
-        try {
-            tearDownStructures();
-        }
-        catch (Exception e) {
-            Assert.fail("internal test error: failed to resest structures");
-        }
-        ACL structACL = CacheAdmin.getEnvironment().getACL(ACL.Category.STRUCTURE.getDefaultId());
-        typeId = type.save(FxTypeEdit.createNew(TEST_TYPE, new FxString("Test type"),
-                structACL, null));
-        createProperty(typeId, structACL, "T1_P1", "/");
-        createGroup(typeId, "G1", "/");
-        FxGroupAssignment g1 = (FxGroupAssignment) CacheAdmin.getEnvironment().getType(typeId).getAssignment("/G1");
-        createProperty(typeId, structACL, "P1", "/G1");
-        createProperty(typeId, structACL, "P2", "/G1");
-
+    /**
+     * Test position changes for groups and properties
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test
+    public void complexPositioning() throws FxApplicationException {
+        FxGroupAssignment t1 = (FxGroupAssignment) CacheAdmin.getEnvironment().getType(typeId).getAssignment("/T1");
         //create a derived property assignment, reset position and save it into existing group
-        FxPropertyAssignment p1 = (FxPropertyAssignment) CacheAdmin.getEnvironment().getType(typeId).getAssignment("/G1/P1");
-        FxPropertyAssignmentEdit p1_derived =FxPropertyAssignmentEdit.createNew(p1, CacheAdmin.getEnvironment().getType(typeId), "P1_Derived", TEST_TYPE+"/G1").setPosition(0);
+        FxPropertyAssignment p1 = (FxPropertyAssignment) CacheAdmin.getEnvironment().getType(typeId).getAssignment("/T1/P1");
+        FxPropertyAssignmentEdit p1_derived = FxPropertyAssignmentEdit.createNew(p1,
+                CacheAdmin.getEnvironment().getType(typeId), "P1_Derived", TEST_TYPE + "/T1").setPosition(0);
         long p1_derivedId = ass.save(p1_derived, false);
         //newly created property assignment should be positioned before the other (non system internal) assignments
-        Assert.assertTrue(CacheAdmin.getEnvironment().getAssignment(p1_derivedId).getPosition() < p1.getPosition() &&
-                          CacheAdmin.getEnvironment().getAssignment(p1_derivedId).getPosition() <
-                              CacheAdmin.getEnvironment().getType(typeId).getAssignment("/G1/P2").getPosition() );
-        p1_derived= ((FxPropertyAssignment)CacheAdmin.getEnvironment().getAssignment(p1_derivedId)).asEditable();
+        int derived_pos = CacheAdmin.getEnvironment().getAssignment(p1_derivedId).getPosition();
+        p1 = (FxPropertyAssignment) CacheAdmin.getEnvironment().getType(typeId).getAssignment("/T1/P1");
+        Assert.assertTrue(derived_pos < p1.getPosition(), "Expected derived (" + derived_pos + ") to be lower than p1 (" +
+                p1.getPosition() + ")");
+        Assert.assertTrue(derived_pos < CacheAdmin.getEnvironment().getType(typeId).getAssignment("/T1/P2").getPosition(),
+                "Expected derived_pos (" + derived_pos + ") < /T1/P2 pos (" +
+                        CacheAdmin.getEnvironment().getType(typeId).getAssignment("/T1/P2").getPosition() + ")");
+        p1_derived = ((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(p1_derivedId)).asEditable();
+
         //move after p1, save and check positions
-        int p1_old_pos= CacheAdmin.getEnvironment().getAssignment(p1.getId()).getPosition();
+        //P1D, P1, P2 => P1, P1D, P2
+        int p1_old_pos = CacheAdmin.getEnvironment().getAssignment(p1.getId()).getPosition();
         p1_derived.setPosition(p1_old_pos);
-        ass.save(p1_derived,false);
+        ass.save(p1_derived, false);
         Assert.assertEquals(CacheAdmin.getEnvironment().getAssignment(p1_derivedId).getPosition(), p1_old_pos);
-        Assert.assertEquals(CacheAdmin.getEnvironment().getAssignment(p1.getId()).getPosition(), p1_old_pos+1);
+        Assert.assertEquals(CacheAdmin.getEnvironment().getAssignment(p1.getId()).getPosition(), p1_old_pos - 1);
 
         //create a derived property assignment, explicitly set position before saving and check position after saving
         p1_old_pos = CacheAdmin.getEnvironment().getAssignment(p1.getId()).getPosition();
-        long p1_derived2 = ass.save(FxPropertyAssignmentEdit.createNew(p1, CacheAdmin.getEnvironment().getType(typeId), "P1_Derived2", TEST_TYPE+"/G1").setPosition(p1_old_pos), false);
+        long p1_derived2 = ass.save(FxPropertyAssignmentEdit.createNew(p1, CacheAdmin.getEnvironment().getType(typeId),
+                "P1_Derived2", TEST_TYPE + "/T1").setPosition(p1_old_pos), false);
         Assert.assertEquals(CacheAdmin.getEnvironment().getAssignment(p1_derived2).getPosition(), p1_old_pos);
-        Assert.assertEquals(CacheAdmin.getEnvironment().getAssignment(p1.getId()).getPosition(), p1_old_pos+1);
+        Assert.assertEquals(CacheAdmin.getEnvironment().getAssignment(p1.getId()).getPosition(), p1_old_pos + 1);
 
         //create new derived group assignment, reset position and save it into existing group
-        long g1_g2Id = ass.save(FxGroupAssignmentEdit.createNew(g1, CacheAdmin.getEnvironment().getType(typeId), "G1_G2", TEST_TYPE+"/G1").setPosition(0), true);
+        long g1_g2Id = ass.save(FxGroupAssignmentEdit.createNew(t1, CacheAdmin.getEnvironment().getType(typeId), "T1_G2",
+                TEST_TYPE + "/T1").setPosition(0), true);
         //newly created group assignment should be positioned before the other (non system internal) assignments
-        Assert.assertTrue(CacheAdmin.getEnvironment().getAssignment(g1_g2Id).getPosition()< g1.getPosition());
-        FxGroupAssignmentEdit g1_g2= ((FxGroupAssignment)CacheAdmin.getEnvironment().getAssignment(g1_g2Id)).asEditable();
+        Assert.assertTrue(CacheAdmin.getEnvironment().getAssignment(g1_g2Id).getPosition() < t1.getPosition());
+        FxGroupAssignmentEdit t1_g2 = ((FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(g1_g2Id)).asEditable();
         //move after p1, save and check positions
-        p1_old_pos= CacheAdmin.getEnvironment().getAssignment(p1.getId()).getPosition();
-        g1_g2.setPosition(p1_old_pos);
-        ass.save(g1_g2, true);
+        p1_old_pos = CacheAdmin.getEnvironment().getAssignment(p1.getId()).getPosition();
+        t1_g2.setPosition(p1_old_pos);
+        ass.save(t1_g2, true);
         Assert.assertEquals(CacheAdmin.getEnvironment().getAssignment(g1_g2Id).getPosition(), p1_old_pos);
-        Assert.assertEquals(CacheAdmin.getEnvironment().getAssignment(p1.getId()).getPosition(), p1_old_pos+1);
+        Assert.assertEquals(CacheAdmin.getEnvironment().getAssignment(p1.getId()).getPosition(), p1_old_pos - 1);
 
         //create a derived group assignment, explicitly set position before saving and check position after saving
-        p1_old_pos= CacheAdmin.getEnvironment().getAssignment(p1.getId()).getPosition();
-        long g1_g3Id = ass.save(FxGroupAssignmentEdit.createNew(g1, CacheAdmin.getEnvironment().getType(typeId), "G1_G3", TEST_TYPE+"/G1").setPosition(p1_old_pos), true);
+        p1_old_pos = CacheAdmin.getEnvironment().getAssignment(p1.getId()).getPosition();
+        long g1_g3Id = ass.save(FxGroupAssignmentEdit.createNew(t1, CacheAdmin.getEnvironment().getType(typeId), "T1_G3",
+                TEST_TYPE + "/T1").setPosition(p1_old_pos), true);
         Assert.assertEquals(CacheAdmin.getEnvironment().getAssignment(g1_g3Id).getPosition(), p1_old_pos);
-        Assert.assertEquals(CacheAdmin.getEnvironment().getAssignment(p1.getId()).getPosition(), p1_old_pos+1);
+        Assert.assertEquals(CacheAdmin.getEnvironment().getAssignment(p1.getId()).getPosition(), p1_old_pos + 1);
     }
 
     /**

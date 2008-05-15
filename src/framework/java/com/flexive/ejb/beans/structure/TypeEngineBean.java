@@ -718,6 +718,19 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             ps.executeBatch();
             ps.close();
 
+            //prevent base-related constraint issues by setting the base to null prior to removal
+            sql.setLength(0);
+            sql.append("UPDATE ").append(TBL_STRUCT_ASSIGNMENTS).append(" SET BASE=NULL WHERE TYPEDEF=? AND ID=?");
+            ps = con.prepareStatement(sql.toString());
+            ps.setLong(1, type.getId());
+            for (Long rmid : rmStack) {
+                ps.setLong(2, rmid);
+                ps.addBatch();
+            }
+            ps.executeBatch();
+            ps.close();
+
+            //remove the assignments
             sql.setLength(0);
             sql.append("DELETE FROM ").append(TBL_STRUCT_ASSIGNMENTS).append(" WHERE TYPEDEF=? AND ID=?");
             ps = con.prepareStatement(sql.toString());
@@ -816,7 +829,8 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
     }
 
     /**
-     * Build recursively a stack of group assignment id's to enable removal without violating dependencies
+     * Build recursively a stack of group assignment id's to enable removal without violating parentgroup dependencies
+     * Base dependencies can not be resolved using this method! Set them to <code>null</code> before removing!
      *
      * @param connectedAssignments list of assignments to inspect
      * @param rmStack              List being built by this method containing id's in the correct removal order

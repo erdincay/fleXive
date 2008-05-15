@@ -1105,7 +1105,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         group.getAlias(), XPath, position, group.getMultiplicity(), group.getDefaultMultiplicity(),
                         group.getParentGroupAssignment(), group.getBaseAssignmentId(),
                         group.getLabel(), group.getHint(), group.getGroup(), group.getMode(), null);
-                setAssignmentPosition(con, group.getId(), group.getPosition());
+                setAssignmentPosition(con, newAssignmentId, group.getPosition());
             } else {
                 thisGroupAssignment = null;
                 newAssignmentId = FxAssignment.NO_PARENT;
