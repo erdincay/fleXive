@@ -35,10 +35,7 @@ import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.search.mysql.MySQLDataFilter;
 import com.flexive.core.search.mysql.MySQLDataSelector;
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.FxContext;
-import com.flexive.shared.FxLanguage;
-import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.*;
 import com.flexive.shared.configuration.DBVendor;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
@@ -47,11 +44,17 @@ import com.flexive.shared.interfaces.ResultPreferencesEngine;
 import com.flexive.shared.interfaces.SequencerEngine;
 import com.flexive.shared.interfaces.TreeEngine;
 import com.flexive.shared.search.*;
+import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxEnvironment;
-import com.flexive.shared.structure.FxType;
 import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.structure.FxPropertyAssignment;
+import com.flexive.shared.structure.FxType;
+import com.flexive.shared.value.FxNoAccess;
+import com.flexive.shared.value.FxValue;
 import com.flexive.sqlParser.*;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -59,10 +62,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.lang.StringUtils;
 
 /**
  * The main search engine class
@@ -107,11 +106,12 @@ public class SqlSearch {
      * @param conf         the result set configuration
      * @param location     the location that started the search
      * @param viewType     the view type @throws com.flexive.shared.exceptions.FxSqlSearchException
-     *          if the search failed
-     * @throws com.flexive.shared.exceptions.FxSqlSearchException   if the search engine could not be initialized
+     *                     if the search failed
+     * @throws com.flexive.shared.exceptions.FxSqlSearchException
+     *          if the search engine could not be initialized
      */
     public SqlSearch(SequencerEngine seq, BriefcaseEngine briefcase, TreeEngine treeEngine, String query, int startIndex, Integer maxFetchRows, FxSQLSearchParams params,
-                    ResultPreferencesEngine conf, ResultLocation location, ResultViewType viewType) throws FxSqlSearchException {
+                     ResultPreferencesEngine conf, ResultLocation location, ResultViewType viewType) throws FxSqlSearchException {
         FxSharedUtils.checkParameterEmpty(query, "query");
         // Init
         this.seq = seq;
@@ -230,12 +230,30 @@ public class SqlSearch {
                 createdBriefcaseId = copyToBriefcase(con);
             }
 
+            final UserTicket ticket = FxContext.get().getTicket();
+
+            //list containing all used types with property permission checks enabled
+            final List<FxType> propertyPermTypes = new ArrayList<FxType>(df.getContentTypes().size());
+
+            //cache for assignments that are allowed/denied for types with property permission checks enabled
+            List<String> allowedAssignment = null;
+            List<String> deniedAssignment = null;
+
+            //gather all types with property permission checks enabled
+            if (!ticket.isGlobalSupervisor()) {
+                for (FxFoundType check : df.getContentTypes()) {
+                    FxType c = environment.getType(check.getContentTypeId());
+                    if (c.usePropertyPermissions())
+                        propertyPermTypes.add(c);
+                }
+            }
+
             // Select all desired rows for the resultset
             ds = getDataSelector();
             selectSql = ds.build(con);
 
             stmt = con.createStatement();
-            stmt.executeUpdate("set @rownr=1;");
+            stmt.executeUpdate("SET @rownr=1;");
             stmt.close();
 
             stmt = con.createStatement();
@@ -256,8 +274,30 @@ public class SqlSearch {
                 Object[] row = new Object[pr.getResultSetColumns().size()];
                 int i = 0;
                 for (PropertyEntry entry : pr.getResultSetColumns()) {
-                    //Object val =getValue(rs,entry);
                     Object val = entry.getResultValue(rs, language);
+
+                    //in case we have types with property permissions enabled, inaccessible
+                    //properties have to be wrapped with with FxNoAccess objects
+                    if (val instanceof FxValue && propertyPermTypes.size() > 0) {
+                        if (allowedAssignment == null)
+                            allowedAssignment = new ArrayList<String>(20);
+                        if (deniedAssignment == null)
+                            deniedAssignment = new ArrayList<String>(20);
+                        FxValue v = (FxValue) val;
+                        String xp = XPathElement.toXPathNoMult(v.getXPath());
+                        if (!allowedAssignment.contains(xp)) {
+                            if (!deniedAssignment.contains(xp)) {
+                                FxPropertyAssignment pa = (FxPropertyAssignment) environment.getAssignment(xp);
+                                if (pa.getAssignedType().usePropertyPermissions() && !ticket.mayReadACL(pa.getACL().getId(), ticket.getUserId())) {
+                                    deniedAssignment.add(xp);
+                                    val = new FxNoAccess(ticket, (FxValue) val);
+                                } else
+                                    allowedAssignment.add(xp);
+                            } else
+                                val = new FxNoAccess(ticket, (FxValue) val);
+                        }
+                    }
+
                     row[i] = val;
                     i++;
                 }
@@ -454,7 +494,7 @@ public class SqlSearch {
                 final Property propValue = _value.getValue() instanceof Property ? (Property) _value.getValue() : null;
                 if (propValue != null && propValue.isWildcard()) {
                     // Wildcard, select all properties of the result type
-                    for (FxProperty property: getAllProperties(df)) {
+                    for (FxProperty property : getAllProperties(df)) {
                         final Property prop = new Property(propValue.getTableAlias(), property.getName(), null);
                         selValues.add(new SelectedValue(prop, property.getName()));
                     }

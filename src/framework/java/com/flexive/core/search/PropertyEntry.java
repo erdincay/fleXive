@@ -247,7 +247,7 @@ public class PropertyEntry {
                 final long stepId = rs.getLong(positionInResultSet + getIndex("step"));
                 final long typeId = rs.getLong(positionInResultSet + getIndex("tdef"));
                 final long mandatorId = rs.getLong(positionInResultSet + getIndex("mandator"));
-                return FxPermissionUtils.getPermissions(aclId, environment.getType(typeId), 
+                return FxPermissionUtils.getPermissions(aclId, environment.getType(typeId),
                         environment.getStep(stepId).getAclId(), createdBy, mandatorId);
             } catch (SQLException e) {
                 throw new FxSqlSearchException(e);
@@ -461,7 +461,6 @@ public class PropertyEntry {
             if (getTableType() == PropertyResolver.Table.T_CONTENT_DATA) {
                 result.setXPath(rs.getString(positionInResultSet + getReadColumns().length));
             }
-
             return result;
         } catch (SQLException e) {
             throw new FxSqlSearchException(e);

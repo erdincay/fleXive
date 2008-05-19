@@ -508,6 +508,8 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
                 this.scriptMapping.put(event, ntypes);
             }
         }
+        //if the type has been updated, we need to replace the assigned with the most up-to-date one
+        this.assignedType = environment.getType(this.assignedType.getId());
     }
 
     /**
