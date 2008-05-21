@@ -187,4 +187,15 @@ public final class FxNoAccess extends FxValue<Object, FxNoAccess> {
     public Class getValueClass() {
         return wrappedValue.getValueClass();
     }
+
+    @Override
+    public boolean equals(Object other) {
+        // a no-access object should not be compared to other objects
+        return this == other;
+    }
+
+    @Override
+    public int hashCode() {
+        return System.identityHashCode(this);   // see equals
+    }
 }

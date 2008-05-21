@@ -288,7 +288,9 @@ public class SqlSearch {
                         if (!allowedAssignment.contains(xp)) {
                             if (!deniedAssignment.contains(xp)) {
                                 FxPropertyAssignment pa = (FxPropertyAssignment) environment.getAssignment(xp);
-                                if (pa.getAssignedType().usePropertyPermissions() && !ticket.mayReadACL(pa.getACL().getId(), ticket.getUserId())) {
+                                if (pa.getAssignedType().usePropertyPermissions()
+                                        && !ticket.mayReadACL(pa.getACL().getId(),
+                                        /* TODO: get actual object owner! */ ticket.getUserId())) {
                                     deniedAssignment.add(xp);
                                     val = new FxNoAccess(ticket, (FxValue) val);
                                 } else

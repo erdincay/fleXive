@@ -457,9 +457,13 @@ public class PropertyEntry {
                 result.setEmpty(language.getId());
             }
 
-            // Get the XPATH if we are reading from the content data table
+
             if (getTableType() == PropertyResolver.Table.T_CONTENT_DATA) {
+                // Get the XPATH if we are reading from the content data table
                 result.setXPath(rs.getString(positionInResultSet + getReadColumns().length));
+            } else if (getTableType() == PropertyResolver.Table.T_CONTENT && property != null) {
+                // set XPath for system-internal properties
+                result.setXPath("ROOT/" + property.getName());
             }
             return result;
         } catch (SQLException e) {

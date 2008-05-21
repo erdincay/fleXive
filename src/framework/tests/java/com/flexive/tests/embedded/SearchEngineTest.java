@@ -291,6 +291,25 @@ public class SearchEngineTest {
     }
 
     @Test
+    public void selectSystemPropertiesTest() throws FxApplicationException {
+        final String[] props = { "id", "version", "typedef", "mandator", "acl", "created_by",
+                "created_at", "modified_by", "modified_at" };
+        final FxResultSet result = new SqlQueryBuilder().select(props).maxRows(50).getResult();
+        assert result.getRowCount() > 0;
+        for (FxResultRow row : result.getResultRows()) {
+            for (String property: props) {
+                final Object value = row.getValue(property);
+                assert value != null;
+                if (value instanceof FxValue) {
+                    final FxValue fxValue = (FxValue) value;
+                    assert StringUtils.isNotBlank(fxValue.getXPath()) && !"/".equals(fxValue.getXPath())
+                            : "XPath not set in search result for system property " + property;
+                }
+            }
+        }
+    }
+
+    @Test
     public void selectPermissionsTest() throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().select("@pk", "@permissions").type(TEST_TYPE).getResult();
         assert result.getRowCount() > 0;

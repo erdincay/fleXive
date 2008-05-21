@@ -63,7 +63,7 @@ public class FxValueTest {
                     new String[]{"6789x", "", "abc", "123,456,000", "123,456.000"})},
             {new ValueTestBean<Boolean, FxBoolean>(new FxBoolean(false, true), false,
                     new String[]{"true", "false"},
-                    new String[]{})},
+                    new String[]{})}
             // TODO add test instances for FxDate, FxDateRange
     };
 
@@ -137,6 +137,16 @@ public class FxValueTest {
         assert number.isEmpty();
         number.setValue(0);
         assert !number.isEmpty() : "FxNumber still empty after explicit value update.";
+    }
+
+    /**
+     * Bug check: FxNoAccess should override equals, otherwise it will throw an NPE
+     */
+    @Test
+    public void testNoAccessEquals() {
+        final FxString value = new FxString(false, "test");
+        final FxNoAccess noAccess = new FxNoAccess(null, value);
+        assert !noAccess.equals(new FxNoAccess(null, value));
     }
 
     @DataProvider(name = "testInstances")
