@@ -153,8 +153,9 @@ public interface ContentStorage {
      * @return primary key of the saved content
      * @throws FxUpdateException           on errors
      * @throws FxInvalidParameterException on errors
+     * @throws FxNoAccessException if property permissions are violated
      */
-    FxPK contentSave(Connection con, FxEnvironment env, StringBuilder sql, FxContent content, long fqnPropertyId) throws FxUpdateException, FxInvalidParameterException;
+    FxPK contentSave(Connection con, FxEnvironment env, StringBuilder sql, FxContent content, long fqnPropertyId) throws FxUpdateException, FxInvalidParameterException, FxNoAccessException;
 
     /**
      * Remove a content instance and all its versions, will throw an

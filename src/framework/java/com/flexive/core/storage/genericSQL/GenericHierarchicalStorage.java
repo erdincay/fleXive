@@ -1705,7 +1705,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     /**
      * {@inheritDoc}
      */
-    public FxPK contentSave(Connection con, FxEnvironment env, StringBuilder sql, FxContent content, long fqnPropertyId) throws FxInvalidParameterException, FxUpdateException {
+    public FxPK contentSave(Connection con, FxEnvironment env, StringBuilder sql, FxContent content, long fqnPropertyId) throws FxInvalidParameterException, FxUpdateException, FxNoAccessException {
         content.getRootGroup().removeEmptyEntries();
         content.getRootGroup().compactPositions(true);
         content.checkValidity();
@@ -1748,6 +1748,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 LOG.debug(delta.dump());
             }
         }
+
+        if( type.usePropertyPermissions() && !ticket.isGlobalSupervisor() )
+            FxPermissionUtils.checkPropertyPermissions(content.getLifeCycleInfo().getCreatorId(), delta, ACL.Permission.EDIT);
 
         if (delta.isInternalPropertyChanged())
             updateMainEntry(con, content);

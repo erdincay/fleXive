@@ -162,7 +162,7 @@ public class MySQLDataFilter extends DataFilter {
                             ticket.getMandatorId() + "," + ticket.isMandatorSupervisor() + "," + ticket.isGlobalSupervisor() + ")\n";
             if (getStatement().getType() == FxStatement.Type.ALL) {
                 // The statement will not filter the data
-                dataSelect = "SELECT " + search.getSearchId() + " search_id,id,ver,tdef FROM " + tableMain + " data2 " +
+                dataSelect = "SELECT " + search.getSearchId() + " search_id,id,ver,tdef,created_by FROM " + tableMain + " data2 " +
                         securityFilter + " LIMIT " + maxRows;
             } else {
                 // The statement filters the data
@@ -173,7 +173,7 @@ public class MySQLDataFilter extends DataFilter {
                 result.deleteCharAt(result.length() - 1);
                 // Finalize the select
                 dataSelect = "SELECT * FROM (SELECT DISTINCT " + search.getSearchId() +
-                        " search_id,data.id,data.ver,main.tdef \n" +
+                        " search_id,data.id,data.ver,main.tdef,main.created_by \n" +
                         "FROM (" + result.toString() + ") data, " + DatabaseConst.TBL_CONTENT + " main\n" +
                         "WHERE data.ver=main.ver AND data.id=main.id) data2\n" + securityFilter +
                         // Limit by the specified max items

@@ -43,6 +43,7 @@ import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxNoAccess;
+import com.flexive.shared.value.FxValue;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -260,17 +261,54 @@ public class FxPermissionUtils {
         FxPropertyData pdata;
         for (String xpath : xpaths) {
             pdata = content.getPropertyData(xpath);
-            if (pdata.getValue() instanceof FxNoAccess || pdata.isEmpty() || pdata.getValue().isReadOnly())
-                continue; //dont touch NoAccess or readonly values
-            if (perm == ACL.Permission.EDIT && !ticket.mayEditACL(((FxPropertyAssignment) pdata.getAssignment()).getACL().getId(), content.getLifeCycleInfo().getCreatorId()))
-                throw new FxNoAccessException("ex.acl.noAccess.property.edit", xpath);
-            else
-            if (perm == ACL.Permission.CREATE && !ticket.mayCreateACL(((FxPropertyAssignment) pdata.getAssignment()).getACL().getId(), content.getLifeCycleInfo().getCreatorId()))
-                throw new FxNoAccessException("ex.acl.noAccess.property.create", xpath);
-            else
-            if (perm == ACL.Permission.READ && !ticket.mayReadACL(((FxPropertyAssignment) pdata.getAssignment()).getACL().getId(), content.getLifeCycleInfo().getCreatorId()))
-                throw new FxNoAccessException("ex.acl.noAccess.property.read", xpath);
+            checkPropertyPermission(pdata.getValue(), xpath, ticket, content.getLifeCycleInfo().getCreatorId(), ((FxPropertyAssignment) pdata.getAssignment()).getACL().getId(), perm);
         }
+    }
+
+    /**
+     * Check propery permissions for delta updates
+     *
+     * @param creatorId content instance creator
+     * @param delta     delta changes
+     * @param perm      permisson to check
+     * @throws FxNoAccessException if not accessible for the calling user
+     */
+    public static void checkPropertyPermissions(long creatorId, FxDelta delta, ACL.Permission perm) throws FxNoAccessException {
+        if (!delta.changes())
+            return;
+        final UserTicket ticket = FxContext.get().getTicket();
+        for (FxDelta.FxDeltaChange add : delta.getAdds())
+            checkPropertyPermission(((FxPropertyData) add.getNewData()).getValue(), add.getXPath(), ticket, creatorId,
+                    ((FxPropertyAssignment) add.getNewData().getAssignment()).getACL().getId(), perm);
+        for (FxDelta.FxDeltaChange rem : delta.getRemoves())
+            checkPropertyPermission(((FxPropertyData) rem.getOriginalData()).getValue(), rem.getXPath(), ticket, creatorId,
+                    ((FxPropertyAssignment) rem.getOriginalData().getAssignment()).getACL().getId(), perm);
+        for (FxDelta.FxDeltaChange upd : delta.getUpdates())
+            if (!upd.isPositionChangeOnly())
+                checkPropertyPermission(((FxPropertyData) upd.getNewData()).getValue(), upd.getXPath(), ticket, creatorId,
+                        ((FxPropertyAssignment) upd.getOriginalData().getAssignment()).getACL().getId(), perm);
+    }
+
+    /**
+     * Check a single property permission
+     *
+     * @param value     the affected value
+     * @param xpath     xpath of the property
+     * @param ticket    calling users ticket
+     * @param creatorId creator of the content instance
+     * @param aclId     acl id to check
+     * @param perm      permission to check
+     * @throws FxNoAccessException if not accessible for the calling user
+     */
+    protected static void checkPropertyPermission(FxValue value, String xpath, UserTicket ticket, long creatorId, long aclId, ACL.Permission perm) throws FxNoAccessException {
+        if (value instanceof FxNoAccess || value.isEmpty() || value.isReadOnly())
+            return; //dont touch NoAccess or readonly values
+        if (perm == ACL.Permission.EDIT && !ticket.mayEditACL(aclId, creatorId))
+            throw new FxNoAccessException("ex.acl.noAccess.property.edit", xpath);
+        else if (perm == ACL.Permission.CREATE && !ticket.mayCreateACL(aclId, creatorId))
+            throw new FxNoAccessException("ex.acl.noAccess.property.create", xpath);
+        else if (perm == ACL.Permission.READ && !ticket.mayReadACL(aclId, creatorId))
+            throw new FxNoAccessException("ex.acl.noAccess.property.read", xpath);
     }
 
     /**

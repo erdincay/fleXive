@@ -33,6 +33,7 @@ package com.flexive.shared.value.renderer;
 
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxLanguage;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.value.*;
@@ -146,6 +147,14 @@ public class FxValueRendererFactory {
         }
     }
 
+    private static class FxNoAccessFormatter implements FxValueFormatter<Object,FxNoAccess> {
+        public String format(FxNoAccess container, Object value, FxLanguage outputLanguage) {
+            final UserTicket ticket = FxContext.get().getTicket();
+            return FxSharedUtils.getLocalizedMessage(FxSharedUtils.SHARED_BUNDLE, ticket.getLanguage().getId(),
+                    ticket.getLanguage().getIso2digit(), "shared.noAccess");
+        }
+    }
+
     /**
      * Generic object formatter for all types that are not explicitly covered.
      */
@@ -164,6 +173,7 @@ public class FxValueRendererFactory {
         addRenderer(DEFAULT, FxSelectOne.class, new FxSelectOneFormatter());
         addRenderer(DEFAULT, FxSelectMany.class, new FxSelectManyFormatter());
         addRenderer(DEFAULT, FxReference.class, new FxReferenceFormatter());
+        addRenderer(DEFAULT, FxNoAccess.class, new FxNoAccessFormatter());
         //noinspection unchecked
         addRenderer(DEFAULT, FxValue.class, new ObjectFormatter());
     }

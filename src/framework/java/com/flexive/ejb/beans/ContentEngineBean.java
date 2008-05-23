@@ -288,8 +288,8 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                 beforeAssignmentScript = FxScriptEvent.BeforeAssignmentDataSave;
                 afterAssignmentScript = FxScriptEvent.AfterAssignmentDataSave;
             }
-            if (type.usePropertyPermissions() && !ticket.isGlobalSupervisor())
-                FxPermissionUtils.checkPropertyPermissions(content, content.getPk().isNew() ? ACL.Permission.CREATE : ACL.Permission.EDIT);
+            if (type.usePropertyPermissions() && !ticket.isGlobalSupervisor() && content.getPk().isNew())
+                FxPermissionUtils.checkPropertyPermissions(content, ACL.Permission.CREATE);
             //security check end
 
             storage.prepareSave(con, content);

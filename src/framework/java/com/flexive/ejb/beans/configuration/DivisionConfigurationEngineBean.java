@@ -52,7 +52,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -287,7 +290,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
                         for (SQLPatchScript ps : scripts) {
                             if (ps.from == currentVersion) {
                                 LOG.info("Patching from version [" + ps.from + "] to [" + ps.to + "] ... ");
-                                stmt.executeUpdate(ps.script);
+                                new SQLScriptExecutor(ps.script, stmt).execute();
                                 currentVersion = ps.to;
                                 patching = true;
                                 if (ps.to > maxVersion)
@@ -304,12 +307,87 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
                 } finally {
                     Database.closeObjects(DivisionConfigurationEngineBean.class, con, stmt);
                 }
+            } catch (IOException e) {
+                LOG.fatal(e);
             } catch (SQLException e) {
                 LOG.fatal(e);
             }
         } finally {
             FxContext.get().stopRunAsSystem();
         }
+    }
+
+    /**
+     * Helper class to execute an SQL script which contains of multiple statements and comments
+     */
+    static class SQLScriptExecutor {
+
+        /**
+         * Statement delimiter
+         */
+        public final static char DELIMITER = ';';
+
+        private Statement stmt;
+        private String script;
+
+        /**
+         * Ctor
+         *
+         * @param script the script to parse and execute
+         * @param stat   an open and valid statements
+         * @throws SQLException on errors
+         * @throws IOException  on errors
+         */
+        public SQLScriptExecutor(String script, Statement stat) throws SQLException, IOException {
+            this.stmt = stat;
+            this.script = script;
+            parse();
+        }
+
+        /**
+         * Parse the script
+         *
+         * @throws IOException  on errors
+         * @throws SQLException on errors
+         */
+        protected void parse() throws IOException, SQLException {
+            BufferedReader reader = new BufferedReader(new StringReader(script));
+            String currLine;
+            StringBuilder sb = new StringBuilder(500);
+            boolean eos;
+
+            while ((currLine = reader.readLine()) != null) {
+                if (isComment(currLine))
+                    continue;
+                eos = currLine.indexOf(DELIMITER) != -1;
+                sb.append(currLine);
+                if (eos) {
+                    stmt.addBatch(sb.toString());
+                    sb.setLength(0);
+                }
+            }
+        }
+
+        /**
+         * Is the passed line a comment?
+         * Only single line comments starting with "#" or "--" are supported!
+         *
+         * @param line line to examine
+         * @return is comment
+         */
+        private boolean isComment(String line) {
+            return (line != null) && (line.length() > 0) && (line.trim().charAt(0) == '#' || line.trim().startsWith("--"));
+        }
+
+        /**
+         * Execute the script
+         *
+         * @throws SQLException on errors
+         */
+        public void execute() throws SQLException {
+            stmt.executeBatch();
+        }
+
     }
 
     /**

@@ -51,7 +51,12 @@ public abstract class DataSelector {
      * the number of internal columns, but that changing the order will probably not work as intended
      * since the generated SQL requires that these internal properties are actually selected. 
      */
-    protected static final String[] INTERNAL_RESULTCOLS = new String[] { "rownr", "id", "ver" };
+    protected static final String[] INTERNAL_RESULTCOLS = new String[] { "rownr", "id", "ver", "created_by" };
+
+    protected static final int COL_ROWNR = 1;
+    protected static final int COL_ID = 2;
+    protected static final int COL_VER = 3;
+    protected static final int COL_CREATED_BY = 4;
 
     public abstract String build(final Connection con) throws FxSqlSearchException;
 
