@@ -31,7 +31,6 @@
  ***************************************************************/
 package com.flexive.shared.value;
 
-import com.flexive.shared.FxContext;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.security.UserTicket;
@@ -46,11 +45,12 @@ public final class FxNoAccess extends FxValue<Object, FxNoAccess> {
     private static final long serialVersionUID = 7693998143844598522L;
 
     private String noAccess;
-    /**
-     * the wrapped value
-     */
-    private FxValue wrappedValue;
-    private UserTicket ticket;
+    private String orgXPath;
+    private long defaultLanguage;
+    private Long[] translatedLanguages;
+    private boolean empty;
+    private boolean multilang;
+    private Class valueClass;
 
     /**
      * Constructor
@@ -70,8 +70,11 @@ public final class FxNoAccess extends FxValue<Object, FxNoAccess> {
      */
     public FxNoAccess(UserTicket ticket, FxValue wrappedValue) {
         super(wrappedValue.getDefaultLanguage(), wrappedValue.isMultiLanguage());
-        this.wrappedValue = wrappedValue;
-        this.ticket = ticket;
+        this.orgXPath = wrappedValue.getXPath();
+        this.defaultLanguage = wrappedValue.defaultLanguage;
+        this.translatedLanguages = wrappedValue.getTranslatedLanguages();
+        this.empty = wrappedValue.isEmpty();
+        this.multilang = wrappedValue.isMultiLanguage();
         if (ticket != null)
             this.noAccess = FxSharedUtils.getLocalizedMessage(FxSharedUtils.SHARED_BUNDLE, ticket.getLanguage().getId(),
                     ticket.getLanguage().getIso2digit(), "shared.noAccess");
@@ -80,14 +83,12 @@ public final class FxNoAccess extends FxValue<Object, FxNoAccess> {
     }
 
     /**
-     * Get the wrapped value ie for save operations.
-     * The real wrapped value is only returned if the calling user is a global supervisor, else the
-     * FxNoAccess value itself is returned
+     * Getter for the original XPath
      *
-     * @return wrapped value or this FxNoAccess value depending on the calling user
+     * @return original xpath
      */
-    public FxValue getWrappedValue() {
-        return FxContext.get().getRunAsSystem() ? wrappedValue : this;
+    public String getOriginalXPath() {
+        return orgXPath;
     }
 
     /**
@@ -104,7 +105,7 @@ public final class FxNoAccess extends FxValue<Object, FxNoAccess> {
      */
     @Override
     public long getDefaultLanguage() {
-        return wrappedValue.getDefaultLanguage();
+        return defaultLanguage;
     }
 
     /**
@@ -136,7 +137,7 @@ public final class FxNoAccess extends FxValue<Object, FxNoAccess> {
      */
     @Override
     public Long[] getTranslatedLanguages() {
-        return wrappedValue.getTranslatedLanguages();
+        return translatedLanguages;
     }
 
     /**
@@ -144,7 +145,10 @@ public final class FxNoAccess extends FxValue<Object, FxNoAccess> {
      */
     @Override
     public boolean translationExists(long languageId) {
-        return wrappedValue.translationExists(languageId);
+        for (Long check : translatedLanguages)
+            if (check == languageId)
+                return true;
+        return false;
     }
 
     /**
@@ -152,7 +156,7 @@ public final class FxNoAccess extends FxValue<Object, FxNoAccess> {
      */
     @Override
     public boolean isEmpty() {
-        return wrappedValue.isEmpty();
+        return empty;
     }
 
     /**
@@ -160,7 +164,7 @@ public final class FxNoAccess extends FxValue<Object, FxNoAccess> {
      */
     @Override
     public boolean isMultiLanguage() {
-        return wrappedValue.isMultiLanguage();
+        return multilang;
     }
 
     /**
@@ -176,7 +180,14 @@ public final class FxNoAccess extends FxValue<Object, FxNoAccess> {
      */
     @Override
     public FxNoAccess copy() {
-        return new FxNoAccess(ticket, wrappedValue);
+        FxNoAccess clone = new FxNoAccess(defaultLanguage, multilang);
+        clone.defaultLanguage = this.defaultLanguage;
+        clone.translatedLanguages = new Long[translatedLanguages.length];
+        System.arraycopy(translatedLanguages, 0, clone.translatedLanguages, 0, translatedLanguages.length);
+        clone.empty = this.empty;
+        clone.multilang = this.multilang;
+        clone.valueClass = this.valueClass;
+        return clone;
     }
 
     /**
@@ -185,15 +196,22 @@ public final class FxNoAccess extends FxValue<Object, FxNoAccess> {
     @SuppressWarnings({"unchecked"})
     @Override
     public Class getValueClass() {
-        return wrappedValue.getValueClass();
+        return valueClass;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @SuppressWarnings({"EqualsWhichDoesntCheckParameterClass"})
     @Override
     public boolean equals(Object other) {
         // a no-access object should not be compared to other objects
         return this == other;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int hashCode() {
         return System.identityHashCode(this);   // see equals

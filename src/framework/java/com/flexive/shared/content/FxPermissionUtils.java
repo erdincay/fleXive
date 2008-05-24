@@ -229,18 +229,19 @@ public class FxPermissionUtils {
      * Unwrap all FxNoAccess values to their original values.
      * Must be called as supervisor to work ...
      *
-     * @param content the FxContent to process
+     * @param content  the FxContent to process
+     * @param original the original content to get the wrapped values from
      * @throws FxNotFoundException         on errors
      * @throws FxInvalidParameterException on errors
      * @throws FxNoAccessException         on errors
      */
-    public static void unwrapNoAccessValues(FxContent content) throws FxNotFoundException, FxInvalidParameterException, FxNoAccessException {
+    public static void unwrapNoAccessValues(FxContent content, FxContent original) throws FxNotFoundException, FxInvalidParameterException, FxNoAccessException {
         List<String> xpaths = content.getAllPropertyXPaths();
         FxPropertyData pdata;
         for (String xpath : xpaths) {
             pdata = content.getPropertyData(xpath);
             if (pdata.getValue() instanceof FxNoAccess)
-                pdata.setValue(((FxNoAccess) pdata.getValue()).getWrappedValue());
+                pdata.setValue(original.getValue(((FxNoAccess) pdata.getValue()).getOriginalXPath()));
         }
     }
 

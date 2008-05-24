@@ -607,6 +607,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             }
         } catch (SQLException e) {
             throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage());
+        } catch (FxNoAccessException e) {
+            throw new FxCreateException(e);
         } catch (FxUpdateException e) {
             throw new FxCreateException(e);
         }
@@ -646,12 +648,13 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @param data      the value
      * @param isMaxVer  is this content in the max. version?
      * @param isLiveVer is this content in the live version?
-     * @throws SQLException      on errors
-     * @throws FxDbException     on errors
-     * @throws FxUpdateException on errors
+     * @throws SQLException        on errors
+     * @throws FxDbException       on errors
+     * @throws FxUpdateException   on errors
+     * @throws FxNoAccessException for FxNoAccess values
      */
     protected void insertPropertyData(FxProperty prop, List<FxData> allData, Connection con, StringBuilder sql, FxPK pk,
-                                      FxPropertyData data, boolean isMaxVer, boolean isLiveVer) throws SQLException, FxDbException, FxUpdateException {
+                                      FxPropertyData data, boolean isMaxVer, boolean isLiveVer) throws SQLException, FxDbException, FxUpdateException, FxNoAccessException {
         if (data == null || data.isEmpty())
             return;
         PreparedStatement ps = null, ps_ft = null;
@@ -733,13 +736,14 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @param sql     sql
      * @param pk      primary key
      * @param data    property data unless change is a group change
-     * @throws SQLException      on errors
-     * @throws FxDbException     on errors
-     * @throws FxUpdateException on errors
+     * @throws SQLException        on errors
+     * @throws FxDbException       on errors
+     * @throws FxUpdateException   on errors
+     * @throws FxNoAccessException for FxNoAccess values
      */
     protected void updatePropertyData(FxDelta.FxDeltaChange change, FxProperty prop, List<FxData> allData,
                                       Connection con, StringBuilder sql, FxPK pk, FxPropertyData data)
-            throws SQLException, FxDbException, FxUpdateException {
+            throws SQLException, FxDbException, FxUpdateException, FxNoAccessException {
         if ((change.isProperty() && (data == null || data.isEmpty())) || !(change.isDataChange() || change.isPositionChange()))
             return;
         PreparedStatement ps = null, ps_ft = null;
@@ -829,18 +833,20 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @param ps                  prepared statement for the data table
      * @param ps_ft               prepared statement for the fulltext table
      * @param upperColumn         name of the uppercase column (if present)
-     * @throws SQLException      on errors
-     * @throws FxUpdateException on errors
-     * @throws FxDbException     on errors
+     * @throws SQLException        on errors
+     * @throws FxUpdateException   on errors
+     * @throws FxDbException       on errors
+     * @throws FxNoAccessException for FxNoAccess values
      */
     private void setPropertyData(boolean insert, int update_position_idx, FxProperty prop, List<FxData> allData,
                                  Connection con, FxPropertyData data, PreparedStatement ps, PreparedStatement ps_ft,
-                                 String upperColumn) throws SQLException, FxUpdateException, FxDbException {
+                                 String upperColumn) throws SQLException, FxUpdateException, FxDbException, FxNoAccessException {
         FxValue value = data.getValue();
         if (value instanceof FxNoAccess) {
-            FxContext.get().runAsSystem();
+            throw new FxNoAccessException("ex.content.value.noaccess");
+            /*FxContext.get().runAsSystem();
             value = ((FxNoAccess) value).getWrappedValue();
-            FxContext.get().stopRunAsSystem();
+            FxContext.get().stopRunAsSystem();*/
         }
         if (value.isMultiLanguage() != ((FxPropertyAssignment) data.getAssignment()).isMultiLang()) {
             if (((FxPropertyAssignment) data.getAssignment()).isMultiLang())
@@ -1720,6 +1726,18 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             original = contentLoad(con, content.getPk(), env, sql);
             original.getRootGroup().removeEmptyEntries();
             original.getRootGroup().compactPositions(true);
+
+            //unwrap all no access values so they can be saved
+            if (type.usePropertyPermissions() && !ticket.isGlobalSupervisor()) {
+                FxContext.get().runAsSystem();
+                try {
+                    FxPermissionUtils.unwrapNoAccessValues(content, original);
+                } finally {
+                    FxContext.get().stopRunAsSystem();
+                }
+            }
+
+
             delta = FxDelta.processDelta(original, content);
         } catch (FxLoadException e) {
             throw new FxUpdateException(e);
@@ -1749,7 +1767,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             }
         }
 
-        if( type.usePropertyPermissions() && !ticket.isGlobalSupervisor() )
+        if (type.usePropertyPermissions() && !ticket.isGlobalSupervisor())
             FxPermissionUtils.checkPropertyPermissions(content.getLifeCycleInfo().getCreatorId(), delta, ACL.Permission.EDIT);
 
         if (delta.isInternalPropertyChanged())

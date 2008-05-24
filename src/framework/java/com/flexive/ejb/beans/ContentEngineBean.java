@@ -329,12 +329,6 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                 }
             }
             //scripting before end
-            //unwrap all no access values so they can be saved
-            if (type.usePropertyPermissions() && !ticket.isGlobalSupervisor()) {
-                FxContext.get().runAsSystem();
-                FxPermissionUtils.unwrapNoAccessValues(content);
-                FxContext.get().stopRunAsSystem();
-            }
             if (content.getPk().isNew()) {
                 pk = storage.contentCreate(con, env, null, seq.getId(SequencerEngine.System.CONTENT), content);
                 if (LOG.isDebugEnabled())

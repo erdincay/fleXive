@@ -288,7 +288,6 @@ public class SqlSearch {
                         if (!allowedAssignment.contains(xp)) {
                             if (!deniedAssignment.contains(xp)) {
                                 FxPropertyAssignment pa = (FxPropertyAssignment) environment.getAssignment(xp);
-                                System.out.println("Id="+rs.getLong(2)+" Created_by="+rs.getLong(4)+" Caller="+ticket.getUserId());
                                 if (pa.getAssignedType().usePropertyPermissions()
                                         && !ticket.mayReadACL(pa.getACL().getId(), rs.getLong(DataSelector.COL_CREATED_BY))) {
                                     deniedAssignment.add(xp);
