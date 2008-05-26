@@ -346,6 +346,29 @@ public class FxPropertyEdit extends FxProperty {
     }
 
     /**
+     * Shortcut to set the maximum input length (if applicable to the component)
+     *
+     * @param maxLength desired maximum input length
+     * @return the property itself, useful for chained calls
+     * @throws FxInvalidParameterException on errors
+     */
+    public FxPropertyEdit setMaxLength(int maxLength) throws FxInvalidParameterException {
+        FxStructureOption.setOption(options, FxStructureOption.OPTION_MAXLENGTH, mayOverrideMaxLength(), String.valueOf(maxLength));
+        return this;
+    }
+
+    /**
+     * Set if assignments are allowed to override this properties maxLength setting?
+     *
+     * @param overrideMaxLEngth are assignments allowed to override this properties maxLength setting?
+     * @return the property itself, useful for chained calls
+     */
+    public FxPropertyEdit setOverrideMaxLength(boolean overrideMaxLEngth) {
+        FxStructureOption.setOption(options, FxStructureOption.OPTION_MAXLENGTH, overrideMaxLEngth, String.valueOf(getMaxLength()));
+        return this;
+    }
+
+    /**
      * Set if  this property be used in the visual query editor (UI hint)
      *
      * @param searchable property can be used in the visual query editor

@@ -177,12 +177,55 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
     }
 
     /**
+     * Shortcut to determine if a max. input length has been set
+     *
+     * @return has a max. input length been set?
+     */
+    public boolean hasMaxLength() {
+        return hasOption(FxStructureOption.OPTION_MAXLENGTH);
+    }
+
+    /**
+     * Shortcut to get the maximum input length
+     *
+     * @return maximum input length
+     */
+    public int getMaxLength() {
+        return getOption(FxStructureOption.OPTION_MAXLENGTH).getIntValue();
+    }
+
+    /**
      * Show as multiple lines in editors?
      *
      * @return if this property appears in multiple lines
      */
     public boolean isMultiLine() {
-        return getOption(FxStructureOption.OPTION_MULTILINE).isValueTrue();
+        FxStructureOption opt = getOption(FxStructureOption.OPTION_MULTILINE);
+        if( opt.isSet() ) {
+            try {
+                return  opt.getIntValue() > 0;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Get the number of multilines to display or 0 if multiline is not set
+     *
+     * @return number of multilines to display or 0 if multiline is not set
+     */
+    public int getMultiLines() {
+        FxStructureOption opt = getOption(FxStructureOption.OPTION_MULTILINE);
+        if (opt.isSet()) {
+            try {
+                return opt.getIntValue();
+            } catch (Exception e) {
+                return 0;
+            }
+        }
+        return 0;
     }
 
     /**
@@ -207,6 +250,12 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
             value = this.getProperty().getEmptyValue(this.isMultiLang()).setXPath(getXPath());
         if (value.isMultiLanguage() == this.getDefaultValue().isMultiLanguage() && !this.getDefaultValue().isEmpty())
             value = this.getDefaultValue().copy();
+        if (this.hasMaxLength()) {
+            value.setMaxInputLength(this.getMaxLength());
+            if (this.getProperty().getDataType() == FxDataType.String1024 && value.getMaxInputLength() > 1024)
+                value.setMaxInputLength(1024);
+        } else if (this.getProperty().getDataType() == FxDataType.String1024)
+            value.setMaxInputLength(1024);
         return value;
     }
 

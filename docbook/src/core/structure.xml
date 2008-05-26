@@ -1270,6 +1270,89 @@
             must be unique.
             See the API documentation of class <classname>FxStructureOption</classname> for more details.
         </para>
+        <para>
+            The following options are currently actively supported:
+            <table xml:id="cssopt_table" class="flexive">
+                <caption>Supported options</caption>
+                <thead>
+                    <tr>
+                        <th>Constant Value</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            MULTILANG
+                        </td>
+                        <td>
+                            Value supports multiple languages (
+                            <code>true</code>
+                            /
+                            <code>false</code>
+                            )
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            SHOW.OVERVIEW
+                        </td>
+                        <td>
+                            Values are shown in UI overview components (
+                            <code>true</code>
+                            /
+                            <code>false</code>
+                            )
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            HTML.EDITOR
+                        </td>
+                        <td>
+                            Value can be edited using an HTML editor in user interfaces (
+                            <code>true</code>
+                            /
+                            <code>false</code>
+                            )
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            SEARCHABLE
+                        </td>
+                        <td>
+                            Values can be queried (this is just a hint for user interfaces!) (
+                            <code>true</code>
+                            /
+                            <code>false</code>
+                            )
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            MAXLENGTH
+                        </td>
+                        <td>
+                            Values that support a maximum input length (currently only
+                            <code>String1024</code>
+                            and
+                            <code>Text</code>
+                            ) will be rendered with input length restrictions when editing.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            MULTILINE
+                        </td>
+                        <td>
+                            Render a textarea instead of a single input line.
+                            If the value is greater than 1 it determines the number of rows.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </para>
     </section>
 
 </section>

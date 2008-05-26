@@ -131,6 +131,7 @@ class EditModeHelper extends RenderHelper {
     @Override
     protected void encodeField(UIComponent parent, String inputId, FxLanguage language) throws IOException {
         boolean multiLine = false;
+        int rows = -1;
         if (language == null) {
             final ContainerWriter container = new ContainerWriter();
             container.setInputClientId(clientId);
@@ -139,10 +140,16 @@ class EditModeHelper extends RenderHelper {
             parent = container;
         }
         if (value != null && StringUtils.isNotBlank(value.getXPath()) && value instanceof FxString) {
-            multiLine = ((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(value.getXPath())).isMultiLine();
+            FxPropertyAssignment pa = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(value.getXPath());
+            multiLine = pa.isMultiLine();
+            if( multiLine ) {
+                rows = pa.getMultiLines();
+                if( rows <= 1 )
+                    rows = -1;
+            }
         }
         if (value instanceof FxHTML || multiLine) {
-            renderTextArea(parent, inputId, language);
+            renderTextArea(parent, inputId, language, rows);
         } else if (value instanceof FxSelectOne) {
             renderSelectOne(parent, inputId, language);
         } else if (value instanceof FxSelectMany) {
@@ -173,10 +180,11 @@ class EditModeHelper extends RenderHelper {
         input.setStyleClass(FxValueInputRenderer.CSS_TEXT_INPUT + singleLanguageStyle(languageId));
     }
 
-    private void renderTextArea(UIComponent parent, final String inputId, final FxLanguage language) throws IOException {
+    private void renderTextArea(UIComponent parent, final String inputId, final FxLanguage language, final int rows) throws IOException {
         final TextAreaWriter textArea = new TextAreaWriter();
         textArea.setInputClientId(inputId);
         textArea.setLanguageId(language != null ? language.getId() : -1);
+        textArea.setRows(rows);
         parent.getChildren().add(textArea);
     }
 
@@ -612,6 +620,7 @@ class EditModeHelper extends RenderHelper {
      */
     public static class TextAreaWriter extends DeferredInputWriter {
         private long languageId;
+        private int rows=-1;
 
         public long getLanguageId() {
             return languageId;
@@ -619,6 +628,10 @@ class EditModeHelper extends RenderHelper {
 
         public void setLanguageId(long languageId) {
             this.languageId = languageId;
+        }
+
+        public void setRows(int rows) {
+            this.rows = rows;
         }
 
         @Override
@@ -663,6 +676,8 @@ class EditModeHelper extends RenderHelper {
                 // render standard text area
                 writer.writeAttribute("name", inputClientId, null);
                 writer.writeAttribute("class", FxValueInputRenderer.CSS_TEXTAREA + singleLanguageStyle(languageId), null);
+                if( rows > 0 )
+                    writer.writeAttribute("rows", String.valueOf(rows), null);
                 writer.writeText(getTextValue(value, languageId), null);
                 writer.endElement("textarea");
             }

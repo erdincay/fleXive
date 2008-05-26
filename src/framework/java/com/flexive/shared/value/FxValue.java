@@ -259,6 +259,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     protected FxValue(FxValue<T, TDerived> clone) {
         this(clone.isMultiLanguage(), clone.getDefaultLanguage(), new HashMap<Long, T>((clone.translations != null ? clone.translations.size() : 1)));
         this.XPath = clone.XPath;
+        this.maxInputLength = clone.maxInputLength;
         if (clone.isImmutableValueType()) {
             if (multiLanguage) {
                 // clone only hashmap

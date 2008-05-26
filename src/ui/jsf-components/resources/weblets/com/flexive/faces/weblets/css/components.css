@@ -47,14 +47,15 @@ select.fxValueSelectInput, .fxValueInputElementWidth, input.fxValueTextInput, te
 /* Stretch single-language inputs over space normally occupied by the language select */
 .fxValueInput input[type="text"].singleLanguage,
 .fxValueInput textarea.singleLanguage {
-    width: 100%;
+    width: 100% !important;;
 }
 
 input.fxValueTextInput, textarea.fxValueTextArea, textarea.fxValueTextAreaHtml, select.fxValueSelectInput {
     border: 1px solid gray;
 }
 
-textarea.fxValueTextArea, textarea.fxValueTextAreaHtml {
+/*textarea.fxValueTextArea, */
+textarea.fxValueTextAreaHtml {
     height: 150px;
 }
 

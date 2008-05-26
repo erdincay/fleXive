@@ -1427,9 +1427,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
 
                 if (!isGroup) {
-                    FxDataType dataType = ((FxPropertyAssignment) currAssignment).getProperty().getDataType();
+                    final FxPropertyAssignment propAssignment = (FxPropertyAssignment) currAssignment;
+                    FxDataType dataType = propAssignment.getProperty().getDataType();
                     if (currValue == null)
-                        multiLang = ((FxPropertyAssignment) currAssignment).isMultiLang();
+                        multiLang = propAssignment.isMultiLang();
                     switch (dataType) {
                         case Float:
                             if (currValue == null)
@@ -1466,7 +1467,11 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         case Text:
                             if (currValue == null) {
                                 currValue = new FxString(multiLang, currLang, rs.getString(columns[0]));
-                                if (dataType == FxDataType.String1024)
+                                if (propAssignment.hasMaxLength()) {
+                                    currValue.setMaxInputLength(propAssignment.getMaxLength());
+                                    if (dataType == FxDataType.String1024 && currValue.getMaxInputLength() > 1024)
+                                        currValue.setMaxInputLength(1024);
+                                } else if (dataType == FxDataType.String1024)
                                     currValue.setMaxInputLength(1024);
                             } else
                                 currValue.setTranslation(currLang, rs.getString(columns[0]));

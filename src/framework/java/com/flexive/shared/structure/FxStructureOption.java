@@ -50,6 +50,7 @@ public class FxStructureOption implements Serializable {
     public final static String OPTION_SHOW_OVERVIEW = "SHOW.OVERVIEW";
     public final static String OPTION_HTML_EDITOR = "HTML.EDITOR";
     public final static String OPTION_SEARCHABLE = "SEARCHABLE";
+    public final static String OPTION_MAXLENGTH = "MAXLENGTH";
 
     public final static String OPTION_MULTILINE = "MULTILINE";
     public final static String VALUE_TRUE = "1";
@@ -122,6 +123,20 @@ public class FxStructureOption implements Serializable {
      */
     public String getValue() {
         return value;
+    }
+
+    /**
+     * Get the value as integer
+     *
+     * @return value as integer
+     */
+    public int getIntValue() {
+        String value = getValue();
+        try {
+            return Integer.valueOf(value);
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     /**
@@ -275,6 +290,7 @@ public class FxStructureOption implements Serializable {
 
     /**
      * Checks for equality
+     *
      * @return if the option's values equal this
      */
     @Override
@@ -284,9 +300,8 @@ public class FxStructureOption implements Serializable {
         if (o == this)
             return true;
         final FxStructureOption other = (FxStructureOption) o;
-        if (!this.key.equals(other.key) || !this.value.equals(other.value) || this.overrideable != other.overrideable || this.set != other.set)
-            return false;
-        return true;
+        return !(!this.key.equals(other.key) || !this.value.equals(other.value) ||
+                this.overrideable != other.overrideable || this.set != other.set);
     }
 
     /**

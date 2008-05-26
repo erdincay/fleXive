@@ -114,8 +114,8 @@ public class FxProperty extends FxStructureElement implements Serializable {
      * @return default value
      */
     public FxValue getDefaultValue() {
-        if( defaultValue == null )
-            defaultValue =  getEmptyValue();
+        if (defaultValue == null)
+            defaultValue = getEmptyValue();
         return defaultValue;
     }
 
@@ -215,7 +215,59 @@ public class FxProperty extends FxStructureElement implements Serializable {
      * @return if this property appears in multiple lines
      */
     public boolean isMultiLine() {
-        return getOption(FxStructureOption.OPTION_MULTILINE).isValueTrue();
+        FxStructureOption opt = getOption(FxStructureOption.OPTION_MULTILINE);
+        if (opt.isSet()) {
+            try {
+                return opt.getIntValue() > 0;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Get the number of multilines to display or 0 if multiline is not set
+     *
+     * @return number of multilines to display or 0 if multiline is not set
+     */
+    public int getMultiLines() {
+        FxStructureOption opt = getOption(FxStructureOption.OPTION_MULTILINE);
+        if (opt.isSet()) {
+            try {
+                return opt.getIntValue();
+            } catch (Exception e) {
+                return 0;
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Shortcut to determine if a max. input length has been set
+     *
+     * @return has a max. input length been set?
+     */
+    public boolean hasMaxLength() {
+        return hasOption(FxStructureOption.OPTION_MAXLENGTH);
+    }
+
+    /**
+     * Shortcut to get the maximum input length
+     *
+     * @return maximum input length
+     */
+    public int getMaxLength() {
+        return getOption(FxStructureOption.OPTION_MAXLENGTH).getIntValue();
+    }
+
+    /**
+     * May assignments override this properties maxLength setting?
+     *
+     * @return if assignments may override this properties maxLength setting?
+     */
+    public boolean mayOverrideMaxLength() {
+        return getOption(FxStructureOption.OPTION_MAXLENGTH).isOverrideable();
     }
 
     /**

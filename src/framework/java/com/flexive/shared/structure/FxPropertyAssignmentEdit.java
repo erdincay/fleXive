@@ -250,6 +250,17 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
     }
 
     /**
+     * Shortcut to set the maximum input length (if applicable to the component)
+     *
+     * @param maxLength desired maximum input length
+     * @return the property itself, useful for chained calls
+     * @throws FxInvalidParameterException on errors
+     */
+    public FxPropertyAssignmentEdit setMaxLength(int maxLength) throws FxInvalidParameterException {
+        return setOption(FxStructureOption.OPTION_MAXLENGTH, String.valueOf(maxLength));
+    }
+
+    /**
      * Set this property assignment as (temporary) disabled - it will not be initialized when creating new instances, etc.
      *
      * @param enabled enabled flag
@@ -278,18 +289,17 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
      * Set the default multiplicity (used i.e. in user interfaces editors and determines the amount of values that will
      * be initialized when creating an empty element).
      *
-     *
-     *
      * @param defaultMultiplicity the default multiplicity
      * @return this
-     * @throws com.flexive.shared.exceptions.FxInvalidParameterException    if the defaultMultiplicity is not within the range of min and max
+     * @throws com.flexive.shared.exceptions.FxInvalidParameterException
+     *          if the defaultMultiplicity is not within the range of min and max
      */
     public FxPropertyAssignmentEdit setDefaultMultiplicity(int defaultMultiplicity) throws FxInvalidParameterException {
         if (this.getMultiplicity().isValid(defaultMultiplicity)) {
             this.defaultMultiplicity = defaultMultiplicity;
             return this;
-        }
-        else throw new FxInvalidParameterException("default multiplicity", "ex.structure.modificaiton.defaultMultiplicity.invalid");
+        } else
+            throw new FxInvalidParameterException("default multiplicity", "ex.structure.modificaiton.defaultMultiplicity.invalid");
         /*
          *If the set value is &lt; min or &gt; max multiplicity of this assignment it will
          * be auto adjusted to the next valid value without throwing an exception
