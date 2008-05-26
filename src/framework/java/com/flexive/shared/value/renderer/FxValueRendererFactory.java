@@ -101,7 +101,7 @@ public class FxValueRendererFactory {
      */
     private static class FxFloatFormatter implements FxValueFormatter<Float, FxFloat> {
         public String format(FxFloat value, Float translation, FxLanguage outputLanguage) {
-            return value != null
+            return translation != null
                     ? NumberFormat.getNumberInstance(outputLanguage.getLocale()).format(translation)
                     : getEmptyMessage(outputLanguage);
         }

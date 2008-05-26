@@ -48,7 +48,7 @@ import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 
 /**
-* Tests for the {@link com.flexive.shared.scripting.groovy.FxTypeBuilder FxTypeBuilder} class.
+* Tests for the {@link com.flexive.shared.scripting.groovy.GroovyTypeBuilder GroovyTypeBuilder} class.
 *
 * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
 * @version $Rev$

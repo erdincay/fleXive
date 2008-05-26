@@ -240,6 +240,15 @@ public class FxFacesMessage extends FacesMessage implements Serializable {
     }
 
     /**
+     * Set the form name
+     *
+     * @param form name of the form
+     */
+    public void setForm(String form) {
+        this.form = form;
+    }
+
+    /**
      * Sets the client id that the message belongs to.
      *
      * @param id the client id to set

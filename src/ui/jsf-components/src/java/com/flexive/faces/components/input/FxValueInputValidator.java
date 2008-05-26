@@ -32,7 +32,9 @@
 package com.flexive.faces.components.input;
 
 import com.flexive.faces.messages.FxFacesMsgErr;
+import com.flexive.shared.XPathElement;
 import com.flexive.shared.value.FxValue;
+import org.apache.commons.lang.StringUtils;
 
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -57,9 +59,21 @@ public class FxValueInputValidator implements Validator {
         }
         FxValue fxValue = (FxValue) value;
         if (!fxValue.isValid()) {
-            // TODO: add input component label to the error message
-            FxFacesMsgErr message = new FxFacesMsgErr("FxValueInput.err.invalid", fxValue.getErrorValue());
-            message.setId(input.getExternalId() == -1 ? input.getClientId(context) : String.valueOf(input.getExternalId()));
+            FxFacesMsgErr message = new FxFacesMsgErr("FxValueInput.err.invalid", prepareXPath(fxValue), fxValue.getErrorValue());
+            String clientId = input.getExternalId() == -1 ? input.getClientId(context) : String.valueOf(input.getExternalId());
+            if (!StringUtils.isEmpty(clientId) && clientId.indexOf(':') > 0) {
+                String[] cid = clientId.split(":");
+                message.setForm(cid[0]);
+                if (input.isReadOnly())
+                    message.setId(cid[1]);
+                else {
+                    //make sure _input_ is appended
+                    if (cid[1].endsWith("_input_"))
+                        message.setId(cid[1]);
+                    else
+                        message.setId(cid[1] + "_input_");
+                }
+            }
             message.setLocalizedDetail("FxValueInput.err.invalid.detail", fxValue.getErrorValue());
             throw new ValidatorException(message);
         }
@@ -69,5 +83,17 @@ public class FxValueInputValidator implements Validator {
             message.setLocalizedDetail("FxValueInput.err.emptyDefaultLanguage");
             throw new ValidatorException(message);
         }
+    }
+
+    /**
+     * Prepare an xpath for output
+     *
+     * @param fxValue value with an xpath
+     * @return xpath
+     */
+    private String prepareXPath(FxValue fxValue) {
+        if (StringUtils.isEmpty(fxValue.getXPath()))
+            return "?";
+        return XPathElement.stripType(fxValue.getXPath());
     }
 }

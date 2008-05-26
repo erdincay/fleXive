@@ -62,7 +62,7 @@ public class FxPropertyData extends FxData {
         this.value = value;
         this.propertyId = propertyId;
         if (this.value != null)
-            this.value.setXPath(xpPrefix + xPathFull);
+            this.value.setXPath(xpPrefix + this.getXPathFull());
     }
 
     /**
