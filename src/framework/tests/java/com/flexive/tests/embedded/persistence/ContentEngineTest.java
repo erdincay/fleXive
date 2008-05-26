@@ -163,7 +163,7 @@ public class ContentEngineTest {
             FxGroupEdit ge = FxGroupEdit.createNew(TEST_GROUP, desc, hint, true, new FxMultiplicity(0, 1));
             ass.createGroup(ge, "/");
             FxPropertyEdit pe = FxPropertyEdit.createNew("TestProperty1", desc, hint, true, new FxMultiplicity(0, 1),
-                    true, structACL, FxDataType.String1024, new FxString(FxString.EMPTY),
+                    true, structACL, FxDataType.String1024, null,
                     true, null, null, null).setMultiLang(true).setOverrideMultiLang(true);
             pe.setAutoUniquePropertyName(true);
             ass.createProperty(pe, "/" + TEST_GROUP);

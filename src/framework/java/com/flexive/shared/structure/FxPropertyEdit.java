@@ -34,6 +34,7 @@ package com.flexive.shared.structure;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.value.FxString;
+import com.flexive.shared.value.FxValue;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.List;
@@ -231,6 +232,17 @@ public class FxPropertyEdit extends FxProperty {
      */
     public FxPropertyEdit setHint(FxString hint) {
         this.hint = hint;
+        return this;
+    }
+
+    /**
+     * Set the default value
+     *
+     * @param defaultValue the new default value
+     * @return the property itself, useful for chained calls
+     */
+    public FxPropertyEdit setHint(FxValue defaultValue) {
+        this.defaultValue = defaultValue;
         return this;
     }
 

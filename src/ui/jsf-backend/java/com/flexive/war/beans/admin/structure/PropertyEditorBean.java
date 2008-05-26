@@ -39,6 +39,7 @@ import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.*;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Role;
@@ -189,6 +190,9 @@ public class PropertyEditorBean implements ActionBean {
     }
 
     public FxValue getDefaultValue() {
+        //check if multi language settings have changed and adjust the default value
+        if( assignment.isMultiLang() != assignment.getDefaultValue().isMultiLanguage() )
+            assignment.setDefaultValue(assignment.getEmptyValue());
         return assignment.getDefaultValue();
     }
 
@@ -605,8 +609,9 @@ public class PropertyEditorBean implements ActionBean {
      * option overriding.
      *
      * @param b boolean to set the option
+     * @throws FxInvalidParameterException on errors
      */
-    public void setMultiLang(boolean b) {
+    public void setMultiLang(boolean b) throws FxInvalidParameterException {
         if (b) {
             if (isPropertyMayOverrideMultiLang() && optionWrapper.getOption(true, FxStructureOption.OPTION_MULTILANG).getBooleanValue()) {
                 optionWrapper.deleteOption(optionWrapper.getAssignmentOptions(), optionWrapper.getOption(false, FxStructureOption.OPTION_MULTILANG));
@@ -632,6 +637,7 @@ public class PropertyEditorBean implements ActionBean {
             } else
                 optionWrapper.deleteOption(optionWrapper.getAssignmentOptions(), optionWrapper.getOption(false, FxStructureOption.OPTION_MULTILANG));
         }
+        assignment.setMultiLang(b);
     }
 
     public String getParseRequestParameters() {

@@ -52,7 +52,7 @@ public class FxProperty extends FxStructureElement implements Serializable {
     protected boolean fulltextIndexed;
     protected FxType referencedType;
     protected FxSelectList referencedList;
-    protected FxString defaultValue;
+    protected FxValue defaultValue;
     protected boolean systemInternal;
     protected UniqueMode uniqueMode;
 
@@ -62,7 +62,7 @@ public class FxProperty extends FxStructureElement implements Serializable {
     }
 
     public FxProperty(long id, String name, FxString label, FxString hint, boolean systemInternal, boolean overrideBaseMultiplicity, FxMultiplicity multiplicity,
-                      boolean overrideACL, ACL ACL, FxDataType dataType, FxString defaultValue, boolean fulltextIndexed,
+                      boolean overrideACL, ACL ACL, FxDataType dataType, FxValue defaultValue, boolean fulltextIndexed,
                       FxType referencedType, FxSelectList referencedList, UniqueMode uniqueMode, List<FxStructureOption> options) {
         super(id, name, label, hint, overrideBaseMultiplicity, multiplicity, options);
         this.systemInternal = systemInternal;
@@ -109,11 +109,13 @@ public class FxProperty extends FxStructureElement implements Serializable {
     }
 
     /**
-     * Default value as string representation
+     * Get the default value
      *
-     * @return default value as string representation
+     * @return default value
      */
-    public FxString getDefaultValue() {
+    public FxValue getDefaultValue() {
+        if( defaultValue == null )
+            defaultValue =  getEmptyValue();
         return defaultValue;
     }
 

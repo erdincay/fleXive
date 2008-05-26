@@ -32,6 +32,7 @@
 package com.flexive.ejb.beans.structure;
 
 import com.flexive.core.Database;
+import com.flexive.core.conversion.ConversionEngine;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
@@ -120,6 +121,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             property.checkConsistency();
             //parentXPath is valid, create the property, then assign it to root
             newPropertyId = seq.getId(SequencerEngine.System.TYPEPROP);
+            final String _def = ConversionEngine.getXStream().toXML(property.getDefaultValue());
             con = Database.getDbConnection();
             //create property, no checks for existing names are performed as this is handled with unique keys
             sql.append("INSERT INTO ").append(TBL_STRUCT_PROPERTIES).
@@ -127,9 +129,10 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                             append("(ID,NAME,DEFMINMULT,DEFMAXMULT,MAYOVERRIDEMULT,DATATYPE,REFTYPE," +
                             //8                9   10             11      12
                             "ISFULLTEXTINDEXED,ACL,MAYOVERRIDEACL,REFLIST,UNIQUEMODE," +
-                            "SYSINTERNAL)VALUES(" +
+                            //           13
+                            "SYSINTERNAL,DEFAULT_VALUE)VALUES(" +
                             "?,?,?,?,?," +
-                            "?,?,?,?,?,?,?,FALSE)");
+                            "?,?,?,?,?,?,?,FALSE,?)");
             ps = con.prepareStatement(sql.toString());
             ps.setLong(1, newPropertyId);
             ps.setString(2, property.getName());
@@ -149,6 +152,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             else
                 ps.setNull(11, java.sql.Types.NUMERIC);
             ps.setInt(12, property.getUniqueMode().getId());
+            ps.setString(13, _def);
             if (!property.isAutoUniquePropertyName())
                 ps.executeUpdate();
             else {
@@ -168,8 +172,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     counter++;
                 }
             }
-            Database.storeFxString(new FxString[]{property.getLabel(), property.getHint(), property.getDefaultValue()},
-                    con, TBL_STRUCT_PROPERTIES, new String[]{"DESCRIPTION", "HINT", "DEFAULT_VALUE"}, "ID", newPropertyId);
+            Database.storeFxString(new FxString[]{property.getLabel(), property.getHint()},
+                    con, TBL_STRUCT_PROPERTIES, new String[]{"DESCRIPTION", "HINT"}, "ID", newPropertyId);
             ps.close();
             sql.setLength(0);
             //calc new position
@@ -193,9 +197,9 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             sql.append("INSERT INTO ").append(TBL_STRUCT_ASSIGNMENTS).
                     //               1  2     3       4       5       6       7       8   9     10    11    12          13
                             append("(ID,ATYPE,ENABLED,TYPEDEF,MINMULT,MAXMULT,DEFMULT,POS,XPATH,XALIAS,BASE,PARENTGROUP,APROPERTY," +
-                            //14
-                            "ACL)" +
-                            "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                            //14 15
+                            "ACL,DEFAULT_VALUE)" +
+                            "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
             ps = con.prepareStatement(sql.toString());
             newAssignmentId = seq.getId(SequencerEngine.System.ASSIGNMENT);
             ps.setLong(1, newAssignmentId);
@@ -222,9 +226,10 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 ps.setLong(12, tmp.getId());
             ps.setLong(13, newPropertyId);
             ps.setLong(14, property.getACL().getId());
+            ps.setString(15, _def);
             ps.executeUpdate();
-            Database.storeFxString(new FxString[]{property.getLabel(), property.getHint(), property.getDefaultValue()}, con,
-                    TBL_STRUCT_ASSIGNMENTS, new String[]{"DESCRIPTION", "HINT", "DEFAULT_VALUE"}, "ID", newAssignmentId);
+            Database.storeFxString(new FxString[]{property.getLabel(), property.getHint()}, con,
+                    TBL_STRUCT_ASSIGNMENTS, new String[]{"DESCRIPTION", "HINT"}, "ID", newAssignmentId);
             StructureLoader.reload(con);
             htracker.track(type, "history.assignment.createProperty", property.getName(), type.getId(), type.getName());
             createInheritedAssignments(CacheAdmin.getEnvironment().getAssignment(newAssignmentId), con, ps, sql, type.getDerivedTypes());
@@ -1342,15 +1347,26 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 if (org.getLabel() != null && !org.getLabel().equals(prop.getLabel()) ||
                         org.getLabel() == null && prop.getLabel() != null ||
                         org.getHint() != null && !org.getHint().equals(prop.getHint()) ||
-                        org.getHint() == null && prop.getHint() != null ||
-                        org.getDefaultValue() != null && !org.getDefaultValue().equals(prop.getDefaultValue()) ||
-                        org.getDefaultValue() == null && prop.getDefaultValue() != null) {
-                    Database.storeFxString(new FxString[]{prop.getLabel(), prop.getHint(), prop.getDefaultValue()}, con,
-                            TBL_STRUCT_PROPERTIES, new String[]{"DESCRIPTION", "HINT", "DEFAULT_VALUE"}, "ID", prop.getId());
+                        org.getHint() == null && prop.getHint() != null) {
+                    Database.storeFxString(new FxString[]{prop.getLabel(), prop.getHint()}, con,
+                            TBL_STRUCT_PROPERTIES, new String[]{"DESCRIPTION", "HINT"}, "ID", prop.getId());
                     if (changes)
                         changesDesc.append(',');
                     changesDesc.append("label=").append(prop.getLabel()).append(',');
                     changesDesc.append("hint=").append(prop.getHint()).append(',');
+                    changes = true;
+                }
+
+                if(org.getDefaultValue() != null && !org.getDefaultValue().equals(prop.getDefaultValue()) ||
+                        org.getDefaultValue() == null && prop.getDefaultValue() != null) {
+                    if (changes)
+                        changesDesc.append(',');
+                    if (ps != null) ps.close();
+                        ps = con.prepareStatement("UPDATE " + TBL_STRUCT_PROPERTIES + " SET DEFAULT_VALUE=? WHERE ID=?");
+                        String _def = ConversionEngine.getXStream().toXML(prop.getDefaultValue());
+                        ps.setString(1, _def);
+                        ps.setLong(2, prop.getId());
+                        ps.executeUpdate();
                     changesDesc.append("defaultValue=").append(prop.getDefaultValue());
                     changes = true;
                 }
@@ -1589,16 +1605,26 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 if (original.getLabel() != null && !original.getLabel().equals(modified.getLabel()) ||
                         original.getLabel() == null && modified.getLabel() != null ||
                         original.getHint() != null && !original.getHint().equals(modified.getHint()) ||
-                        original.getHint() == null && modified.getHint() != null ||
-                        original.getDefaultValue() != null && !original.getDefaultValue().equals(modified.getDefaultValue()) ||
-                        original.getDefaultValue() == null && modified.getDefaultValue() != null) {
-                    Database.storeFxString(new FxString[]{modified.getLabel(), modified.getHint(), (FxString) modified.getDefaultValue()}, con,
-                            TBL_STRUCT_ASSIGNMENTS, new String[]{"DESCRIPTION", "HINT", "DEFAULT_VALUE"}, "ID", original.getId());
+                        original.getHint() == null && modified.getHint() != null ) {
+                    Database.storeFxString(new FxString[]{modified.getLabel(), modified.getHint()}, con,
+                            TBL_STRUCT_ASSIGNMENTS, new String[]{"DESCRIPTION", "HINT"}, "ID", original.getId());
                     if (changes)
                         changesDesc.append(',');
                     changesDesc.append("label=").append(modified.getLabel()).append(',');
                     changesDesc.append("hint=").append(modified.getHint()).append(',');
-                    changesDesc.append("defaultValue=").append(modified.getDefaultValue());
+                    changes = true;
+                }
+                if(original.getDefaultValue() != null && !original.getDefaultValue().equals(modified.getDefaultValue()) ||
+                        original.getDefaultValue() == null && modified.getDefaultValue() != null) {
+                    if (changes)
+                        changesDesc.append(',');
+                    if (ps != null) ps.close();
+                        ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET DEFAULT_VALUE=? WHERE ID=?");
+                        String _def = ConversionEngine.getXStream().toXML(modified.getDefaultValue());
+                        ps.setString(1, _def);
+                        ps.setLong(2, original.getId());
+                        ps.executeUpdate();
+                    changesDesc.append("defaultValue=").append(original.getDefaultValue());
                     changes = true;
                 }
                 if (original.getDefaultLanguage() != modified.getDefaultLanguage()) {
@@ -1711,9 +1737,9 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             sql.append("INSERT INTO ").append(TBL_STRUCT_ASSIGNMENTS).
                     //               1  2     3       4       5       6       7       8   9     10     11   12          13
                             append("(ID,ATYPE,ENABLED,TYPEDEF,MINMULT,MAXMULT,DEFMULT,POS,XPATH,XALIAS,BASE,PARENTGROUP,APROPERTY," +
-                            //14 15      16
-                            "ACL,DEFLANG,SYSINTERNAL)" +
-                            "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                            //14 15      16          17
+                            "ACL,DEFLANG,SYSINTERNAL,DEFAULT_VALUE)" +
+                            "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
             if (ps != null)
                 ps.close();
             ps = con.prepareStatement(sql.toString());
@@ -1740,9 +1766,10 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             ps.setLong(14, prop.getACL().getId());
             ps.setInt(15, prop.hasDefaultLanguage() ? (int) prop.getDefaultLanguage() : (int) FxLanguage.SYSTEM_ID);
             ps.setBoolean(16, prop.isSystemInternal());
+            ps.setString(17, ConversionEngine.getXStream().toXML(prop.getDefaultValue()));
             ps.executeUpdate();
-            Database.storeFxString(new FxString[]{prop.getLabel(), prop.getHint(), (FxString) prop.getDefaultValue()}, con,
-                    TBL_STRUCT_ASSIGNMENTS, new String[]{"DESCRIPTION", "HINT", "DEFAULT_VALUE"}, "ID", newAssignmentId);
+            Database.storeFxString(new FxString[]{prop.getLabel(), prop.getHint()}, con,
+                    TBL_STRUCT_ASSIGNMENTS, new String[]{"DESCRIPTION", "HINT"}, "ID", newAssignmentId);
             htracker.track(prop.getAssignedType(), "history.assignment.createPropertyAssignment", XPath, prop.getAssignedType().getId(), prop.getAssignedType().getName(),
                     prop.getProperty().getId(), prop.getProperty().getName());
             storeOptions(con, TBL_PROPERTY_OPTIONS, "ID", prop.getProperty().getId(), newAssignmentId, prop.getOptions());

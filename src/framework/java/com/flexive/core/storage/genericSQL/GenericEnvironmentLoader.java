@@ -34,6 +34,7 @@ package com.flexive.core.storage.genericSQL;
 import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.LifeCycleInfoImpl;
+import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.core.storage.EnvironmentLoader;
 import com.flexive.core.structure.FxEnvironmentImpl;
 import com.flexive.core.structure.FxPreloadGroupAssignment;
@@ -51,10 +52,13 @@ import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
+import com.flexive.shared.value.FxValue;
 import com.flexive.shared.workflow.Route;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
 import com.flexive.shared.workflow.Workflow;
+import com.thoughtworks.xstream.XStream;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -242,7 +246,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                     // 8      9                 10          11
                     "p.ACL, p.MAYOVERRIDEACL, p.DATATYPE, p.REFTYPE, " +
                     // 12                   13               14     15
-                    "p.ISFULLTEXTINDEXED, t.DEFAULT_VALUE, t.HINT, p.SYSINTERNAL, " +
+                    "p.ISFULLTEXTINDEXED, p.DEFAULT_VALUE, t.HINT, p.SYSINTERNAL, " +
                     //16          17
                     "p.REFLIST, p.UNIQUEMODE FROM " +
                     TBL_STRUCT_PROPERTIES + " p, " + TBL_STRUCT_PROPERTIES + ML + " t WHERE t.ID=p.ID ORDER BY p.ID, t.LANG ASC";
@@ -250,7 +254,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
             ResultSet rs = stmt.executeQuery(sql);
             Map<Long, String> hmDesc = new HashMap<Long, String>(5);
             Map<Long, String> hmHint = new HashMap<Long, String>(5);
-            Map<Long, String> hmDefault = new HashMap<Long, String>(5);
+            FxValue defaultValue = null;
             String name = null;
             long id = -1;
             int minMult = -1;
@@ -264,6 +268,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
             long refListId = -1;
             boolean systemInternal = false;
             UniqueMode uniqueMode = UniqueMode.None;
+            final XStream xStream = ConversionEngine.getXStream();
 
             while (rs != null && rs.next()) {
                 if (name != null && rs.getLong(1) != id) {
@@ -272,7 +277,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                     alRet.add(new FxProperty(id, name, new FxString(FxLanguage.DEFAULT_ID, hmDesc),
                             new FxString(FxLanguage.DEFAULT_ID, hmHint), systemInternal, mayOverrideMult,
                             new FxMultiplicity(minMult, maxMult), mayOverrideACL, acl, dataType,
-                            new FxString(FxLanguage.DEFAULT_ID, hmDefault),
+                            defaultValue,
                             fulltextIndexed, (refTypeId == -1 ? null : environment.getType(refTypeId)),
                             (refListId == -1 ? null : environment.getSelectList(refListId)), uniqueMode,
                             FxSharedUtils.get(propertyOptions, id, new ArrayList<FxStructureOption>(0))));
@@ -297,9 +302,18 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                     fulltextIndexed = rs.getBoolean(12);
                     systemInternal = rs.getBoolean(15);
                     uniqueMode = UniqueMode.getById(rs.getInt(17));
+                    String _def = rs.getString(13);
+                    defaultValue = null;
+                    if (!StringUtils.isEmpty(_def)) {
+                        try {
+                            defaultValue = (FxValue) xStream.fromXML(_def);
+                        } catch (Exception e) {
+                            defaultValue = null;
+                            LOG.warn("Failed to unmarshall default value for propery " + name + ": " + e.getMessage(), e);
+                        }
+                    }
                 }
                 hmDesc.put(rs.getLong(6), rs.getString(7));
-                hmDefault.put(rs.getLong(6), rs.getString(13));
                 hmHint.put(rs.getLong(6), rs.getString(14));
             }
             if (hmDesc.size() > 0) {
@@ -308,7 +322,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                 alRet.add(new FxProperty(id, name, new FxString(FxLanguage.DEFAULT_ID, hmDesc),
                         new FxString(FxLanguage.DEFAULT_ID, hmHint), systemInternal, mayOverrideMult,
                         new FxMultiplicity(minMult, maxMult), mayOverrideACL, acl, dataType,
-                        new FxString(FxLanguage.DEFAULT_ID, hmDefault),
+                        defaultValue,
                         fulltextIndexed, (refTypeId == -1 ? null : environment.getType(refTypeId)),
                         (refListId == -1 ? null : environment.getSelectList(refListId)), uniqueMode,
                         FxSharedUtils.get(propertyOptions, id, new ArrayList<FxStructureOption>(0))));
@@ -439,19 +453,20 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
         String curSql;
         ArrayList<FxAssignment> result = new ArrayList<FxAssignment>(250);
         try {
-            final Map<Long, FxString[]> translations = Database.loadFxStrings(con, TBL_STRUCT_ASSIGNMENTS, "DESCRIPTION", "HINT", "DEFAULT_VALUE");
+            final Map<Long, FxString[]> translations = Database.loadFxStrings(con, TBL_STRUCT_ASSIGNMENTS, "DESCRIPTION", "HINT");
             final Map<Long, List<FxStructureOption>> propertyAssignmentOptions = loadAllPropertyAssignmentOptions(con);
             final Map<Long, List<FxStructureOption>> groupAssignmentOptions = loadAllGroupAssignmentOptions(con);
             //final List<FxStructureOption> emptyOptions = new ArrayList<FxStructureOption>(0);
 
             //               1   2      3        4        5        6        7    8      9
             curSql = "SELECT ID, ATYPE, ENABLED, TYPEDEF, MINMULT, MAXMULT, POS, XPATH, XALIAS, " +
-                    //10          11      12         13   14    15       16           17         18
-                    "PARENTGROUP, AGROUP, APROPERTY, ACL, BASE, DEFLANG, SYSINTERNAL, GROUPMODE, DEFMULT FROM " +
+                    //10          11      12         13   14    15       16           17         18       19
+                    "PARENTGROUP, AGROUP, APROPERTY, ACL, BASE, DEFLANG, SYSINTERNAL, GROUPMODE, DEFMULT, DEFAULT_VALUE FROM " +
                     TBL_STRUCT_ASSIGNMENTS + " ORDER BY TYPEDEF, PARENTGROUP, POS";
 
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(curSql);
+            final XStream xStream = ConversionEngine.getXStream();
             while (rs != null && rs.next()) {
                 final long id = rs.getLong(1);
                 switch (rs.getInt(2)) {   //ATYPE
@@ -471,6 +486,16 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                         result.add(ga);
                         break;
                     case FxAssignment.TYPE_PROPERTY:
+                        FxValue defaultValue = null;
+                        String _def = rs.getString(19);
+                        if (!StringUtils.isEmpty(_def)) {
+                            try {
+                                defaultValue = (FxValue) xStream.fromXML(_def);
+                            } catch (Exception e) {
+                                defaultValue = null;
+                                LOG.warn("Failed to unmarshall default value for assignment " + rs.getString(8) + ": " + e.getMessage(), e);
+                            }
+                        }
                         FxPropertyAssignment pa = new FxPropertyAssignment(rs.getLong(1), rs.getBoolean(3), environment.getType(rs.getLong(4)),
                                 rs.getString(9), rs.getString(8), rs.getInt(7),
                                 new FxMultiplicity(rs.getInt(5), rs.getInt(6)), rs.getInt(18),
@@ -478,7 +503,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                                 rs.getLong(14),
                                 getTranslation(translations, id, 0),
                                 getTranslation(translations, id, 1),
-                                getTranslation(translations, id, 2),
+                                defaultValue,
                                 environment.getProperty(rs.getLong(12)),
                                 environment.getACL(rs.getInt(13)), rs.getInt(15),
                                 FxSharedUtils.get(propertyAssignmentOptions, rs.getLong(1), new ArrayList<FxStructureOption>(0)));

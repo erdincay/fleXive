@@ -96,6 +96,8 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
         super(assignmentId, enabled, assignedType, alias, xpath, position, multiplicity, defaultMultiplicity, parentGroupAssignment,
                 baseAssignment, label, hint, options);
         this.defaultValue = defaultValue;
+        if (defaultValue == null)
+            this.defaultValue = property.getDefaultValue().copy();
         this.property = property;
         if (alias == null || alias.trim().length() == 0)
             this.alias = property.getName();
@@ -198,10 +200,14 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
      * @return empty FxValue object
      */
     public FxValue getEmptyValue() {
+        FxValue value;
         if (hasDefaultLanguage())
-            return this.getProperty().getEmptyValue(this.isMultiLang(), this.getDefaultLanguage()).setXPath(getXPath());
+            value = this.getProperty().getEmptyValue(this.isMultiLang(), this.getDefaultLanguage()).setXPath(getXPath());
         else
-            return this.getProperty().getEmptyValue(this.isMultiLang()).setXPath(getXPath());
+            value = this.getProperty().getEmptyValue(this.isMultiLang()).setXPath(getXPath());
+        if (value.isMultiLanguage() == this.getDefaultValue().isMultiLanguage() && !this.getDefaultValue().isEmpty())
+            value = this.getDefaultValue().copy();
+        return value;
     }
 
     /**
