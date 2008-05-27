@@ -14,6 +14,13 @@
 
       <attribute name="TransactionManagerLookupClass">org.jboss.cache.transaction.GenericTransactionManagerLookup</attribute>
         
+       <!--
+               Node locking scheme :
+                                   PESSIMISTIC (default)
+                                   OPTIMISTIC
+       -->
+      <attribute name="NodeLockingScheme">OPTIMISTIC</attribute>
+       
       <attribute name="ClusterName">[fleXive]-Cache-JNDI</attribute>
       
       <!--
