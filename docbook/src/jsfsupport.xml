@@ -438,7 +438,8 @@
                     <code>&lt;ui:repeat&gt;</code>
                     is not available during "compile time" and cannot be used as input for
                     <code>&lt;fx:value&gt;</code>. Use compile-time iterators such as
-                    <code>&lt;c:forEach&gt;</code> instead.
+                    <code>&lt;c:forEach&gt;</code>
+                    instead.
                 </para>
 
                 <section xml:id="jcl_fx_value_synopsis">
@@ -1204,6 +1205,17 @@
                     as a result.
                     Logging out always succeeds (except for internal errors), so no other navigation
                     case is necessary.
+                    Be sure to perform a redirect on the navigation target since the HTTP session
+                    is invalidated on logout (otherwise you may get
+                    "<computeroutput>Session already invalidated</computeroutput>"
+                    errors). For example:
+
+                    <programlisting language="xml"><![CDATA[<navigation-case>
+    <from-outcome>login</from-outcome>
+    <to-view-id>/pub/login.xhtml</to-view-id>
+    <redirect/>
+</navigation-case>
+]]></programlisting>
                 </para>
 
             </section>

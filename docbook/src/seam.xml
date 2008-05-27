@@ -225,6 +225,31 @@
     return true;
 }]]></programlisting>
             </para>
+
+            <para>
+                To ensure that the user is logged out from &flexive;, you need to extend Seam's
+                <code>Identity</code>
+                component. For example:
+            </para>
+            <programlisting language="java"><![CDATA[@Name("org.jboss.seam.security.identity")
+@Scope(ScopeType.SESSION)
+@Install(precedence = Install.APPLICATION)
+@BypassInterceptors
+@Startup
+public class FlexiveIdentity extends RuleBasedIdentity {
+    @In
+    FacesMessages facesMessages;
+
+    @Override
+    public void logout() {
+        super.logout();
+        try {
+            FxContext.get().logout();
+        } catch (FxLogoutFailedException e) {
+            facesMessages.add("Failed to perform [fleXive] logout: " + e.getMessage());
+        }
+    }
+}]]></programlisting>
         </section>
     </section>
 
