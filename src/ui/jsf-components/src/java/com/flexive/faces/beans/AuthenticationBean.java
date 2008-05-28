@@ -53,7 +53,7 @@ public class AuthenticationBean implements Serializable {
     }
 
     public boolean getIsLoggedIn() {
-        return FxContext.get().getTicket().isGuest();
+        return !FxContext.get().getTicket().isGuest();
     }
 
 
