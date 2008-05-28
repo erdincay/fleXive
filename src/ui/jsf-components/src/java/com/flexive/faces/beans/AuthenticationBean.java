@@ -86,8 +86,6 @@ public class AuthenticationBean implements Serializable {
             FxRequest request = FxJsfUtils.getRequest();
             request.login(username, password, takeover);
             request.getUserTicket();
-            if( CacheAdmin.isNewInstallation() )
-                return "loginSuccessInit";
             return "loginSuccess";
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();

@@ -4,7 +4,7 @@
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:t="http://myfaces.apache.org/tomahawk">
 <head>
-    <meta HTTP-EQUIV="REFRESH" content="0; url=../adm/main.jsf" />
+    <meta HTTP-EQUIV="REFRESH" content="0; url=../adm/#{fxSystemBean.newInstallation ? 'initScreen.jsf' : 'main.jsf'}" />
 </head>
 <body style="background-color:#F9FCF1">
   <!-- redirect to the main page -->
