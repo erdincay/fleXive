@@ -205,7 +205,9 @@ public class CacheAdmin {
                     EJBLookup.getScriptingEngine().executeRunOnceScripts();
                     //execute startup scripts
                     EJBLookup.getScriptingEngine().executeStartupScripts();
-                    EJBLookup.getTimerService().install(true);
+                    if (!EJBLookup.getTimerService().isInstalled()) {
+                        EJBLookup.getTimerService().install(true);
+                    }
 
                     for (String dropName : FxSharedUtils.getDrops()) {
                         // set the drop name as key on the DROP_RUNONCE parameter

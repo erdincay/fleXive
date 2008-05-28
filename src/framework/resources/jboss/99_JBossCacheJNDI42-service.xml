@@ -19,7 +19,7 @@
                                    PESSIMISTIC (default)
                                    OPTIMISTIC
        -->
-      <attribute name="NodeLockingScheme">OPTIMISTIC</attribute>
+      <attribute name="NodeLockingScheme">PESSIMISTIC</attribute>
        
       <attribute name="ClusterName">[fleXive]-Cache-JNDI</attribute>
       
@@ -30,7 +30,7 @@
                                    READ_UNCOMMITTED
                                    NONE
       -->
-      <attribute name="IsolationLevel">REPEATABLE_READ</attribute>
+      <attribute name="IsolationLevel">READ_COMMITTED</attribute>
 
       <!--     Valid modes are LOCAL
                                REPL_ASYNC

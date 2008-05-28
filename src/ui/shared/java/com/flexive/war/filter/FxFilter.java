@@ -33,6 +33,8 @@ package com.flexive.war.filter;
 
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
@@ -54,6 +56,7 @@ public class FxFilter implements Filter {
     private String FILESYSTEM_WAR_ROOT = null;
     private FilterConfig config = null;
     private static final String X_POWERED_BY_VALUE = "[fleXive]";
+    private static volatile boolean installedTimerService = false;
 
     /**
      * Returns the root of the war directory on the filesystem.
@@ -108,6 +111,16 @@ public class FxFilter implements Filter {
             request.setCharacterEncoding("UTF-8");
 
             final FxContext si = FxContext.storeInfos(request, request.isDynamicContent(), divisionId, isWebdav);
+
+            if (!installedTimerService) {
+                synchronized(FxFilter.class) {
+                    installedTimerService = EJBLookup.getTimerService().isInstalled();
+                    if (!installedTimerService) {
+                        EJBLookup.getTimerService().install(true);
+                        installedTimerService = true;
+                    }
+                }
+            }
 
             if (!isWebdav && FxWebDavUtils.isWebDavPropertyMethod((HttpServletRequest) servletRequest)) {
                 // This is an invalid webdav request - send a not allowed flag and kill the session immediatly

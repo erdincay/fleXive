@@ -18,7 +18,7 @@
 								PESSIMISTIC (default)
 								OPTIMISTIC
 	-->
-	<attribute name="NodeLockingScheme">OPTIMISTIC</attribute>
+	<attribute name="NodeLockingScheme">PESSIMISTIC</attribute>
 
     <!--
             Node locking isolation level :
