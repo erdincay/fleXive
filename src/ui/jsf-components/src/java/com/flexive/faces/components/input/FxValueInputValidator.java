@@ -64,15 +64,7 @@ public class FxValueInputValidator implements Validator {
             if (!StringUtils.isEmpty(clientId) && clientId.indexOf(':') > 0) {
                 String[] cid = clientId.split(":");
                 message.setForm(cid[0]);
-                if (input.isReadOnly())
-                    message.setId(cid[1]);
-                else {
-                    //make sure _input_ is appended
-                    if (cid[1].endsWith("_input_"))
-                        message.setId(cid[1]);
-                    else
-                        message.setId(cid[1] + "_input_");
-                }
+                message.setId(cid[1]);
             }
             message.setLocalizedDetail("FxValueInput.err.invalid.detail", fxValue.getErrorValue());
             throw new ValidatorException(message);

@@ -318,6 +318,16 @@
                             <br clear="both"/>
                             <adm:ceRenderFields data="#{srcEditor.content.rootGroup.children}" srcEditor="#{srcEditor}"/>
                         </div>
+                        <ui:repeat value="#{fxSystemBean.groupedFxMessages}" var="msg">
+                            <ui:repeat value="#{msg.messages}" var="item">
+                                    <script type="text/javascript">
+                                        parent.addClientIdWithError(this, '#{item.clientId}', '#{item.detailForJavascript}');
+                                    </script>
+                            </ui:repeat>
+                        </ui:repeat>
+                        <script type="text/javascript">
+                            parent.renderErrors();
+                        </script>
                     </a4j:outputPanel>
 
                 <div style="clear:both;height:20px"><!-- __ --></div>

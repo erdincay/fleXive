@@ -568,6 +568,14 @@ function clearclientIdsWithError() {
 function addClientIdWithError(caller,clientId,detailTxt) {
     if (!clientId || clientId=='') return;
     _caller = caller;
+    var i;
+    var clientIdInput = clientId + '_input_';
+    for( i=0; i<clientIdsWithError.length; i++ ) {
+        if( clientIdsWithError[i][0] == clientId || clientIdsWithError[i][0] == clientIdInput ) {
+            clientIdsWithError[i][1] = detailTxt;
+            return;
+        }
+    }
     clientIdsWithError[clientIdsWithError.length]=[clientId,detailTxt];
 }
 
@@ -584,7 +592,9 @@ function renderErrors() {
             errorObj = clientIdsWithError[i];
             elementId = errorObj[0];
             errorTxt = errorObj[1];
-            ele = findElementById(elementId);
+            ele = findElementById(elementId+"_input_");
+            if( ele == null ) 
+                ele = findElementById(elementId);
             if (ele !=null) {
                 // Write back the whole element id, might have been incomplete before
                 errorObj[0] = ele.id;
