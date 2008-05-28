@@ -108,6 +108,8 @@ public abstract class InputMapper<BaseType extends FxValue, MappedType extends F
             mapper = new SelectOneInputMapper(FxSelectList.createList("TYPEDEF", environment.getTypes(true, true, true, false)));
         } else if ("MANDATOR".equals(name)) {
             mapper = new SelectOneInputMapper(FxSelectList.createListWithName("MANDATOR", environment.getMandators(true, false)));
+        } else if ("STEP".equals(name)) {
+            mapper = new SelectOneInputMapper(FxSelectList.createList("STEP", environment.getStepDefinitions()));
         } else {
             mapper = IdentityInputMapper.getInstance();
         }

@@ -1054,6 +1054,12 @@ public class SearchEngineTest {
         assert result.getRowCount() > 0;
     }
 
+    @Test
+    public void searchForStepTest() throws FxApplicationException {
+        final FxResultSet result = getSearchEngine().search("SELECT step WHERE step=" + StepDefinition.EDIT_STEP_ID, 0, 10, null);
+        assert result.getRowCount() > 0 : "At least one instance expected to be in the 'edit' step";
+    }
+
     private void assertExactPkMatch(FxPK pk, List<FxPK> pks) {
         assert pks.size() == 1 : "No rows returned for exact match";
         assert pks.get(0).equals(pk) : "Exact match did not return expected column - expected " + pk + ", got: " + pks.get(0);

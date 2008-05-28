@@ -540,6 +540,11 @@ public class MySQLDataFilter extends DataFilter {
                 }
                 break;
             case LargeNumber:
+                if ("STEP".equals(column)) {
+                    // filter by workflow step definition, not internal step ID
+                    column = "(SELECT sd.stepdef FROM " + DatabaseConst.TBL_STEP + " sd " +
+                            " WHERE sd.id=cd." + column + ")";
+                }
                 value = "" + FxFormatUtils.toLong(constant.getValue());
                 break;
             case Number:
