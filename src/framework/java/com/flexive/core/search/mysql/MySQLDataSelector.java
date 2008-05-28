@@ -36,6 +36,7 @@ import com.flexive.core.search.*;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.search.SortDirection;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.tree.FxTreeNode;
@@ -43,6 +44,7 @@ import com.flexive.sqlParser.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.ArrayUtils;
 
 import java.sql.Connection;
 import java.util.*;
@@ -288,10 +290,10 @@ public class MySQLDataSelector extends DataSelector {
                     break;
                 case T_CONTENT_DATA:
                     for (String column : entry.getReadColumns()) {
-                        final String val = _hlp_content_data(column, entry);
+                        final String val = getContentDataSubselect(column, entry, false);
                         result.addItem(val, resultPos, false);
                     }
-                    String xpath = "concat(filter.xpathPref," + _hlp_content_data("XPATHMULT", entry) + ")";
+                    String xpath = "concat(filter.xpathPref," + getContentDataSubselect("XPATHMULT", entry, true) + ")";
                     result.addItem(xpath, resultPos, true);
                     break;
                 default:
@@ -319,15 +321,16 @@ public class MySQLDataSelector extends DataSelector {
     }
 
     /**
-     * Helper function.
+     * Returns the subselect for FX_CONTENT_DATA.
      *
      * @param column the column that is being procesed
      * @param entry  the entry
-     * @return the subselect string for the value
+     * @param xpath  if true, the XPath (and not the actual value column(s)) will be selected
+     * @return the subselect for FX_CONTENT_DATA.
      */
-    private String _hlp_content_data(String column, PropertyEntry entry) {
+    private String getContentDataSubselect(String column, PropertyEntry entry, boolean xpath) {
         // TODO: lang fallback
-        return "(SELECT " + SUBSEL_ALIAS + "." + column +
+        String select = "(SELECT " + SUBSEL_ALIAS + "." + column +
                 " FROM " + DatabaseConst.TBL_CONTENT_DATA + " " +
                 SUBSEL_ALIAS + " WHERE " +
                 SUBSEL_ALIAS + ".id=" +
@@ -338,6 +341,16 @@ public class MySQLDataSelector extends DataSelector {
                         ? "ASSIGN=" + entry.getAssignment().getId()
                         : "TPROP=" + entry.getProperty().getId()) +
                 " LIMIT 1 " + ")";
+        if (!xpath && entry.getProperty().getDataType() == FxDataType.Binary) {
+            // select string-coded form of the BLOB properties
+            // TODO link version/quality filtering to the main object version
+            select = "(SELECT CONCAT_WS('" + BINARY_DELIM + "'," +
+                    StringUtils.join(BINARY_COLUMNS, ',') + ") " +
+                    "FROM " + DatabaseConst.TBL_CONTENT_BINARY + " " +
+                    "WHERE id=" + select + " " +
+                    " AND ver=1 AND quality=1)";
+        }
+        return select;
     }
 
 

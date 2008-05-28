@@ -37,9 +37,15 @@ import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxLoginFailedException;
+import com.flexive.shared.exceptions.FxAccountInUseException;
+import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.tree.FxTreeNodeEdit;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
+import com.flexive.tests.embedded.TestUsers;
+import com.flexive.tests.embedded.FxTestUtils;
+import static com.flexive.tests.embedded.FxTestUtils.login;
 import org.testng.annotations.Test;
 
 import java.util.List;
@@ -53,10 +59,11 @@ import java.util.List;
 @Test(groups = "benchmark", enabled = false)
 public class SearchBenchmark {
 
-    public void selectTreePathsBenchmark() throws FxApplicationException {
+    public void selectTreePathsBenchmark() throws FxApplicationException, FxLoginFailedException, FxAccountInUseException, FxLogoutFailedException {
         final int numNodes = 2000;
         long rootNode = -1;
         try {
+            FxTestUtils.login(TestUsers.SUPERVISOR);
             // create a lot of nodes
             long startCreateNode = System.currentTimeMillis();
             rootNode = EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("selectTreePathsBenchmark"));
@@ -84,7 +91,7 @@ public class SearchBenchmark {
             if (rootNode != -1) {
                 EJBLookup.getTreeEngine().remove(FxTreeNodeEdit.createNew("").setId(rootNode), true, true);
             }
+            FxTestUtils.logout();
         }
-
     }
 }

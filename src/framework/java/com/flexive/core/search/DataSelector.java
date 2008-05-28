@@ -32,11 +32,17 @@
 package com.flexive.core.search;
 
 import com.flexive.shared.exceptions.FxSqlSearchException;
+import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.flexive.shared.value.BinaryDescriptor;
 
 import java.sql.Connection;
 import java.util.Map;
 import java.util.List;
 import java.util.Arrays;
+import java.util.HashMap;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Interface for DB specific DataSelectors
@@ -45,6 +51,20 @@ import java.util.Arrays;
  * @version $Rev$
  */
 public abstract class DataSelector {
+    private static final transient Log LOG = LogFactory.getLog(DataSelector.class);
+
+    /**
+     * The delimiter for the encoded binary column returned by the selector.
+     */
+    public static final String BINARY_DELIM = "||";
+    
+    /**
+     * The columns to be selected by the binary selector. The result will be returned in a single
+     * string column, the entries delimited by {@link #BINARY_DELIM}.
+     */
+    protected static final String[] BINARY_COLUMNS = {"ID", "NAME", "BLOBSIZE", "XMLMETA", "CREATED_AT", "MIMETYPE",
+            "ISIMAGE", "RESOLUTION", "WIDTH", "HEIGHT"};
+
     /**
      * All result columns that are selected for search-internal queries and are not
      * returned to the user. Note that this is mostly an informal listing and used to determine
@@ -58,11 +78,37 @@ public abstract class DataSelector {
     protected static final int COL_VER = 3;
     protected static final int COL_CREATED_BY = 4;
 
+    private static final Map<String, Integer> BINARY_COLUMN_INDICES = new HashMap<String, Integer>();
+    static {
+        // create a lookup cache for binary columns
+        for (int i = 0; i < BINARY_COLUMNS.length; i++) {
+            BINARY_COLUMN_INDICES.put(BINARY_COLUMNS[i], i);
+        }
+    }
+
     public abstract String build(final Connection con) throws FxSqlSearchException;
 
     public abstract void cleanup(Connection con) throws FxSqlSearchException;
 
     public abstract Map<String, FieldSelector> getSelectors();
 
+    /**
+     * Returns the index of the given column in a encoded binary result value.
+     *
+     * @param columnName    the column name (uppercase)
+     * @return  the index of the given column name
+     */
+    static int getBinaryIndex(String columnName) {
+        final Integer value = BINARY_COLUMN_INDICES.get(columnName);
+        return value != null ? value : -1;
+    }
 
+    static String getBinaryValue(String[] values, String columnName) {
+        final int index = getBinaryIndex(columnName);
+        if (index == -1) {
+            throw new FxInvalidParameterException("COLUMNNAME", LOG,
+                    "ex.sqlSearch.selector.binary.column", columnName).asRuntimeException();
+        }
+        return values[index];
+    }
 }

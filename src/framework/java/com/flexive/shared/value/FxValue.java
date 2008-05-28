@@ -992,8 +992,17 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         if (!isEmpty() && o.isEmpty()) {
             return 1;
         }
-        return FxSharedUtils.getCollator().compare(getStringValue(getBestTranslation()),
-                o.getStringValue(o.getBestTranslation()));
+        final String value = getStringValue(getBestTranslation());
+        final String oValue = o.getStringValue(o.getBestTranslation());
+        if (value == null && oValue == null) {
+            return 0;
+        } else if (value == null) {
+            return -1;
+        } else if (oValue == null) {
+            return 1;
+        } else {
+            return FxSharedUtils.getCollator().compare(value, oValue);
+        }
     }
 }
 

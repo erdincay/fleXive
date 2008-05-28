@@ -42,7 +42,7 @@ import org.testng.annotations.Test;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-@Test(groups = "benchmark", enabled = true)
+@Test(groups = "benchmark", enabled = false)
 public class StructureReloadBenchmark {
 
     public void benchStructureReload() throws Exception {
