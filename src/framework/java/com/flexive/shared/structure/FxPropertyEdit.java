@@ -528,6 +528,17 @@ public class FxPropertyEdit extends FxProperty {
     }
 
     /**
+     * Set the default value for this propery
+     *
+     * @param value default value
+     * @return the property itself, useful for chained calls
+     */
+    public FxPropertyEdit setDefaultValue(FxValue value) {
+        this.defaultValue = value;
+        return this;
+    }
+
+    /**
      * Perform some consistency checks, called internally!
      */
     public void checkConsistency() {

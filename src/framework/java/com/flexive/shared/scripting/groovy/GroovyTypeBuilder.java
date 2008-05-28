@@ -39,6 +39,7 @@ import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
+import com.flexive.shared.value.FxValue;
 import groovy.util.BuilderSupport;
 import org.apache.commons.lang.StringUtils;
 
@@ -254,6 +255,7 @@ public class GroovyTypeBuilder extends BuilderSupport {
             try {
                 element.setXPath((parent == null ? "" : getParent().getXPath()) + element.getXPath());
                 element.setParentGroupAssignment(parent != null ? parent.getAssignment() : null);
+                element.setPosition(9000); //set to the bottom-most position
                 EJBLookup.getAssignmentEngine().save(element, true);
             } catch (FxApplicationException e) {
                 throw e.asRuntimeException();
@@ -272,6 +274,7 @@ public class GroovyTypeBuilder extends BuilderSupport {
             try {
                 element.setXPath((parent == null ? "" : getParent().getXPath()) + element.getXPath());
                 element.setParentGroupAssignment(parent != null ? parent.getAssignment() : null);
+                element.setPosition(9000); //set to the bottom-most position
                 EJBLookup.getAssignmentEngine().save(element, true);
             } catch (FxApplicationException e) {
                 throw e.asRuntimeException();
@@ -375,6 +378,7 @@ public class GroovyTypeBuilder extends BuilderSupport {
         final String assignment = (String) FxSharedUtils.get(attributes, "assignment", null);
         final String alias = (String) FxSharedUtils.get(attributes, "alias", elementName);
         final int defaultMultiplicity = (Integer) FxSharedUtils.get(attributes, "defaultMultiplicity", 1);
+        final FxValue defaultValue = (FxValue)FxSharedUtils.get(attributes, "defaultValue", null);
         if (Character.isLowerCase(structureName.charAt(0))) {
             // name starts lowercase --> create property or property assignment
             if (assignment != null) {
@@ -421,6 +425,8 @@ public class GroovyTypeBuilder extends BuilderSupport {
                             property.setOption(optionKey, true, optionValue.toString());
                         }
                     }
+                    if( defaultValue != null )
+                        property.setDefaultValue(defaultValue);
                 }
                 return new PropertyNode(property, alias);
             }
@@ -436,6 +442,9 @@ public class GroovyTypeBuilder extends BuilderSupport {
                 try {
                     final FxGroupAssignmentEdit ga = FxGroupAssignmentEdit.createNew((FxGroupAssignment) fxAssignment,
                             type, alias, "/");
+                    ga.setLabel(description);
+                    ga.setHint(hint);
+                    ga.setAlias(alias);
                     ga.setDefaultMultiplicity(defaultMultiplicity);
                     return new GroupAssignmentNode(ga);
                 } catch (FxApplicationException e) {

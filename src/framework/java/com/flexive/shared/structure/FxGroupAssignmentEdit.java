@@ -173,7 +173,7 @@ public class FxGroupAssignmentEdit extends FxGroupAssignment {
         this.alias = alias.trim().toUpperCase();
         List<XPathElement> xpe = XPathElement.split(this.XPath);
         xpe.set(xpe.size() - 1, new XPathElement(this.alias, 1, true));
-        this.XPath = getAssignedType().getName() + XPathElement.toXPathNoMult(xpe);
+        this.XPath = XPathElement.toXPathNoMult(xpe);
         return this;
     }
 

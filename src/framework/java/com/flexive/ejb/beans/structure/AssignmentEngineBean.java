@@ -968,10 +968,13 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      * @param position     desired position
      * @return the position that "really" was assigned
      * @throws FxUpdateException on errors
+     * @throws FxInvalidParameterException if the position is too high
      */
-    private int setAssignmentPosition(Connection con, long assignmentId, int position) throws FxUpdateException {
+    private int setAssignmentPosition(Connection con, long assignmentId, int position) throws FxUpdateException, FxInvalidParameterException {
         if (position < 0)
             position = 0;
+        if( position > 9000 )
+            throw new FxInvalidParameterException("position", "ex.structure.assignment.pos.tooHigh", position, 9000);
         PreparedStatement ps = null, ps2 = null;
         int retPosition = position;
         try {
