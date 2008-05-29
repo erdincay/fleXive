@@ -197,13 +197,12 @@ function lockScreen() {
 
 function unlockScreen() {
     if (!SCREEN_LOCKED) {
-        return true;
+        return;
     }
     SCREEN_LOCKED = false;
     lock.style.display="none";
     greyOutInputs(getNavFrameWnd().document,false);
     greyOutInputs(frames['contentFrame'].document,false);
-    return false;
 }
 
 function greyOutInputs(_document,state) {
