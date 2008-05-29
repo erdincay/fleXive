@@ -313,9 +313,13 @@ public class UserTicketStore {
             }
         }
         if (LOG.isDebugEnabled()) LOG.debug("Done flagging dirty.");
-        if (FxContext.get() != null && !FxContext.get().getRunAsSystem()) {
-            // update current user's ticket
-            FxContext.get().setTicket(getTicket());
+        if (FxContext.get() != null) {
+            // update current user's ticket directly from the DB
+            try {
+                FxContext.get().setTicket(getUserTicket(FxContext.get().getTicket().getLoginName()));
+            } catch (FxApplicationException e) {
+                throw e.asRuntimeException();
+            }
         }
     }
 

@@ -38,6 +38,9 @@ import com.flexive.shared.FxFormatUtils;
 import static com.flexive.shared.EJBLookup.getContentEngine;
 import static com.flexive.shared.EJBLookup.getMandatorEngine;
 import static com.flexive.shared.EJBLookup.getSearchEngine;
+import static com.flexive.shared.EJBLookup.getAssignmentEngine;
+import static com.flexive.shared.EJBLookup.getTypeEngine;
+import static com.flexive.shared.EJBLookup.getAclEngine;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNodeEdit;
@@ -54,9 +57,8 @@ import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.search.query.VersionFilter;
 import static com.flexive.shared.search.query.PropertyValueComparator.EQ;
 import com.flexive.shared.security.*;
-import com.flexive.shared.structure.FxType;
-import com.flexive.shared.structure.FxDataType;
-import com.flexive.shared.structure.FxPropertyAssignment;
+import static com.flexive.shared.security.ACL.Permission;
+import com.flexive.shared.structure.*;
 import com.flexive.shared.value.*;
 import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
@@ -1058,6 +1060,87 @@ public class SearchEngineTest {
     public void searchForStepTest() throws FxApplicationException {
         final FxResultSet result = getSearchEngine().search("SELECT step WHERE step=" + StepDefinition.EDIT_STEP_ID, 0, 10, null);
         assert result.getRowCount() > 0 : "At least one instance expected to be in the 'edit' step";
+    }
+
+    @Test
+    public void searchPropertyPermissionDeleteTest() throws FxApplicationException {
+        // create a type with a property that cannot be deleted by other users
+        FxContext.get().runAsSystem();
+        final long typeId;
+        final long aclId;
+        try {
+            typeId = getTypeEngine().save(FxTypeEdit.createNew("prop_delete_test")
+                    .setUseInstancePermissions(false)
+                    .setUsePropertyPermissions(true)
+                    .setUseStepPermissions(false)
+                    .setUseTypePermissions(false));
+            aclId = getAclEngine().create("prop_no_delete", new FxString(""),
+                    TestUsers.getTestMandator(), "#000000", "property description", ACL.Category.STRUCTURE);
+            getAclEngine().assign(aclId, TestUsers.REGULAR.getUserGroupId(),
+                    Permission.CREATE, Permission.EDIT, Permission.READ);
+            getAssignmentEngine().createProperty(typeId,
+                    FxPropertyEdit.createNew(
+                            "prop_no_delete", new FxString(""), new FxString(""),
+                            FxMultiplicity.MULT_0_1,
+                            CacheAdmin.getEnvironment().getACL(aclId),
+                            FxDataType.String1024
+                    ),
+                    "/"
+            );
+        } finally {
+            FxContext.get().stopRunAsSystem();
+        }
+        FxPK pk = null;
+        try {
+            // create a test content instance
+            FxContent content = getContentEngine().initialize(typeId);
+            // don't set the value, removal should be ok
+            pk = getContentEngine().save(content);
+            // select permissions, delete perm should be set
+            assert new SqlQueryBuilder().select("@permissions")
+                    .condition("id", PropertyValueComparator.EQ, pk.getId())
+                    .getResult()
+                    .<PermissionSet>collectColumn(1)
+                    .get(0)
+                    .isMayDelete()
+                    : "Expected delete permission";
+            getContentEngine().remove(pk);
+
+            content = getContentEngine().initialize(typeId);
+            content.setValue("/prop_no_delete", new FxString(false, "test"));
+            pk = getContentEngine().save(content);
+            // removal should not work now
+            try {
+                getContentEngine().remove(pk);
+                assert false : "Content could be removed although delete property permission not set";
+            } catch (FxApplicationException e) {
+                // pass
+            }
+
+            // select this content instance and see if delete perm is set
+
+            // For performance reasons, property delete permissions are not used for the
+            // instance permission set. Thus this assert is expected to fail. 
+
+            /*assert !*/new SqlQueryBuilder().select("@permissions")
+                    .condition("id", PropertyValueComparator.EQ, pk.getId())
+                    .getResult()
+                    .<PermissionSet>collectColumn(1)
+                    .get(0)
+                    .isMayDelete();/*
+                    : "Delete permission should not be set because of property permissions";*/
+        } finally {
+            FxContext.get().runAsSystem();
+            try {
+                if (pk != null) {
+                    getContentEngine().remove(pk);
+                }
+                getTypeEngine().remove(typeId);
+                getAclEngine().remove(aclId);
+            } finally {
+                FxContext.get().stopRunAsSystem();
+            }
+        }
     }
 
     private void assertExactPkMatch(FxPK pk, List<FxPK> pks) {

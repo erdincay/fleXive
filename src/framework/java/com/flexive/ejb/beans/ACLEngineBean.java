@@ -35,6 +35,7 @@ import com.flexive.core.Database;
 import com.flexive.core.LifeCycleInfoImpl;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.security.UserTicketStore;
+import com.flexive.core.security.UserTicketImpl;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.*;
 import com.flexive.shared.content.FxPermissionUtils;
@@ -346,6 +347,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
                 throw new SQLException(uCount + " rows affected instead of 1");
             }
             Database.storeFxString(theACL.getLabel(), con, TBL_ACLS, "LABEL", "ID", theACL.getId());
+            final List<Long> affectedUserGroupIds = new ArrayList<Long>();
             if (!keepAssignment) {
                 //remove assignments
                 curSql = "DELETE FROM " + TBL_ASSIGN_ACLS + " WHERE ACL=?";
@@ -365,6 +367,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
                     stmt.setLong(11, ticket.getUserId());
                     stmt.setLong(12, NOW);
                     for (ACLAssignment assignment : assignments) {
+                        affectedUserGroupIds.add(assignment.getGroupId());
                         stmt.setLong(1, assignment.getGroupId());
                         stmt.setBoolean(3, assignment.getMayEdit());
                         stmt.setBoolean(4, assignment.getMayDelete());
@@ -375,6 +378,11 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
                         if (assignment.getMayCreate() || assignment.getMayDelete() || assignment.getMayEdit() ||
                                 assignment.getMayExport() || assignment.getMayRelate() || assignment.getMayRead())
                             stmt.executeUpdate();
+                    }
+
+                    // update usertickets of affected groups
+                    for (Long groupId : affectedUserGroupIds) {
+                        UserTicketStore.flagDirtyHavingGroupId(groupId);
                     }
                 }
             }
