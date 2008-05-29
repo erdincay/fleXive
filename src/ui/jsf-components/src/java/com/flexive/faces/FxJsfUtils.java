@@ -35,6 +35,12 @@ import com.flexive.faces.beans.MessageBean;
 import com.flexive.faces.messages.FxFacesMessage;
 import com.flexive.faces.messages.FxFacesMessages;
 import com.flexive.shared.*;
+import com.flexive.shared.search.FxPaths;
+import com.flexive.shared.content.FxPK;
+import com.flexive.shared.value.FxValue;
+import com.flexive.shared.value.FxBinary;
+import com.flexive.shared.value.BinaryDescriptor;
+import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.scripting.FxScriptInfo;
@@ -42,6 +48,7 @@ import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxSelectList;
 import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.war.FxRequest;
+import com.flexive.war.servlet.ThumbnailServlet;
 import com.flexive.war.filter.FxResponseWrapper;
 import com.sun.facelets.tag.jsf.ComponentSupport;
 import org.ajax4jsf.renderkit.AjaxContainerRenderer;
@@ -63,6 +70,8 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponseWrapper;
 import javax.servlet.http.HttpSession;
 import java.io.Serializable;
+import java.io.Writer;
+import java.io.IOException;
 import java.text.Collator;
 import java.util.*;
 
@@ -102,6 +111,51 @@ public class FxJsfUtils {
      */
     public static String decodeJSFIdentifier(String identifier) {
         return identifier.replaceAll(BRACKET_CLOSE, "]").replace(SLASH, "/").replace(BRACKET_OPEN, "[");
+    }
+
+    /**
+     * Renders the value as returned from a flexive search query to the
+     * given output writer.
+     *
+     * @param out   the output writer
+     * @param value the value to be formatted
+     * @throws java.io.IOException if the value could not be written
+     */
+    public static void writeResultValue(Writer out, Object value, ContentLinkFormatter linkFormatter, String linkFormat, String itemLinkFormat) throws IOException {
+        out.write(formatResultValue(value, linkFormatter, linkFormat, itemLinkFormat));
+    }
+
+    /**
+     * Formats the value as returned from a flexive search query.
+     *
+     * @param value the value to be formatted
+     * @return the formatted string value
+     */
+    public static String formatResultValue(Object value, ContentLinkFormatter linkFormatter, String linkFormat, String itemLinkFormat) {
+        linkFormatter = linkFormatter != null ? linkFormatter : ContentLinkFormatter.getInstance();
+        if (value == null || (value instanceof FxValue && ((FxValue) value).isEmpty())) {
+            return "<i>" + FxSharedUtils.getEmptyResultMessage() + "</i>";
+        } else if (value instanceof FxBinary) {
+            final FxBinary binary = (FxBinary) value;
+            return "<img src=\"" + FxContext.get().getContextPath() +
+                    ThumbnailServlet.getLink(XPathElement.getPK(binary.getXPath()),
+                            BinaryDescriptor.PreviewSizes.PREVIEW2,
+                            binary.getXPath(),
+                            binary.getBestTranslation().getCreationTime(),
+                            FxContext.get().getTicket().getLanguage())
+                    + "\" alt=\""
+                    + FxFormatUtils.escapeForJavaScript(binary.getBestTranslation().getName())
+                    + "\"/>";
+        } else if (value instanceof FxValue) {
+            //noinspection unchecked
+            return FxValueRendererFactory.getInstance().format((FxValue) value);
+        } else if (value instanceof FxPK) {
+            return linkFormatter.format(linkFormat, (FxPK) value);
+        } else if (value instanceof FxPaths) {
+            return linkFormatter.format(itemLinkFormat, (FxPaths) value);
+        } else {
+            return value.toString(); // unsupported type
+        }
     }
 
     private static class EmptySelectableObjectWithName extends AbstractSelectableObjectWithName implements Serializable {

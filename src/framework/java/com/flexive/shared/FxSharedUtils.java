@@ -578,40 +578,6 @@ public final class FxSharedUtils {
     }
 
     /**
-     * Renders the value as returned from a flexive search query to the
-     * given output writer.
-     *
-     * @param out   the output writer
-     * @param value the value to be formatted
-     * @throws IOException if the value could not be written
-     */
-    public static void writeResultValue(Writer out, Object value, ContentLinkFormatter linkFormatter, String linkFormat, String itemLinkFormat) throws IOException {
-        out.write(formatResultValue(value, linkFormatter, linkFormat, itemLinkFormat));
-    }
-
-    /**
-     * Formats the value as returned from a flexive search query.
-     *
-     * @param value the value to be formatted
-     * @return the formatted string value
-     */
-    public static String formatResultValue(Object value, ContentLinkFormatter linkFormatter, String linkFormat, String itemLinkFormat) {
-        linkFormatter = linkFormatter != null ? linkFormatter : ContentLinkFormatter.getInstance();
-        if (value == null || (value instanceof FxValue && ((FxValue) value).isEmpty())) {
-            return "<i>" + getEmptyResultMessage() + "</i>";
-        } else if (value instanceof FxValue) {
-            //noinspection unchecked
-            return FxValueRendererFactory.getInstance().format((FxValue) value);
-        } else if (value instanceof FxPK) {
-            return linkFormatter.format(linkFormat, (FxPK) value);
-        } else if (value instanceof FxPaths) {
-            return linkFormatter.format(itemLinkFormat, (FxPaths) value);
-        } else {
-            return value.toString(); // unsupported type
-        }
-    }
-
-    /**
      * Returns the localized "empty" message for empty result fields
      *
      * @return the localized "empty" message for empty result fields

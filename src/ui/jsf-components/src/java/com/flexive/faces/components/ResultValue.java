@@ -35,7 +35,6 @@ import com.flexive.faces.FxJsfComponentUtils;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.components.input.FxValueInput;
 import com.flexive.shared.ContentLinkFormatter;
-import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.value.FxValue;
 
 import javax.faces.component.UIOutput;
@@ -121,7 +120,7 @@ public class ResultValue extends UIOutput {
                 input.setId(getId() + "_input");
             }
         } else {
-            FxSharedUtils.writeResultValue(context.getResponseWriter(), value, getLinkFormatter(),
+            FxJsfUtils.writeResultValue(context.getResponseWriter(), value, getLinkFormatter(),
                     getContentLinkFormat(), getItemLinkFormat());
         }
 

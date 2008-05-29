@@ -34,6 +34,7 @@
 package com.flexive.war.javascript.search;
 
 import com.flexive.faces.model.FxResultSetDataModel;
+import com.flexive.faces.FxJsfUtils;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.search.FxResultSet;
@@ -80,7 +81,7 @@ class ListDataWriter extends TableDataWriter {
         out.writeAttribute("colorSet", rowCounter % 2);
 
         for (int i = SqlQueryBuilder.COL_USERPROPS; i < values.length; i++) {
-            out.writeAttribute(getColumnName(i), FxSharedUtils.formatResultValue(values[i], null, null, null));
+            out.writeAttribute(getColumnName(i), FxJsfUtils.formatResultValue(values[i], null, null, null));
             if (values[i] instanceof FxPK) {
                 // add oid/version columns
                 FxPK pk = (FxPK) values[i];

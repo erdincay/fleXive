@@ -35,6 +35,7 @@ package com.flexive.war.javascript.search;
 
 import com.flexive.faces.model.FxGridDataModel;
 import com.flexive.faces.model.FxResultSetDataModel;
+import com.flexive.faces.FxJsfUtils;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.search.FxResultSet;
@@ -87,7 +88,7 @@ class ThumbnailDataWriter extends TableDataWriter {
         if (values.length >= SqlQueryBuilder.COL_USERPROPS) {
             // render first user-defined property below image
             label = "<div class=\"label\">"
-                    + FxSharedUtils.formatResultValue(values[SqlQueryBuilder.COL_USERPROPS], null, null, null)
+                    + FxJsfUtils.formatResultValue(values[SqlQueryBuilder.COL_USERPROPS], null, null, null)
                     + "</div>";
         }
         cellBuilder.setLength(0);
