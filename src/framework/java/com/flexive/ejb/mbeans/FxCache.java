@@ -116,7 +116,8 @@ public class FxCache implements FxCacheMBean, DynamicMBean {
             if (servers == null)
                 servers = new ArrayList<ServerLocation>(5);
             ServerLocation thisServer = new ServerLocation(server.getAddress().getAddress(), server.getPort());
-            if (!servers.contains(thisServer))
+            if( !(thisServer.getAddress().isLinkLocalAddress() || thisServer.getAddress().isAnyLocalAddress() || thisServer.getAddress().isLoopbackAddress() )
+                    && !servers.contains(thisServer)) //only add if not contained already and not bound to a local address
                 servers.add(thisServer);
             globalPut(CacheAdmin.STREAMSERVER_BASE, CacheAdmin.STREAMSERVER_EJB_KEY, servers);
             LOG.info("Added " + thisServer + " to available StreamServers (" + servers.size() + " total)");
