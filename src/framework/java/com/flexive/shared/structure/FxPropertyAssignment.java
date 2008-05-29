@@ -201,9 +201,9 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
      */
     public boolean isMultiLine() {
         FxStructureOption opt = getOption(FxStructureOption.OPTION_MULTILINE);
-        if( opt.isSet() ) {
+        if (opt.isSet()) {
             try {
-                return  opt.getIntValue() > 0;
+                return opt.getIntValue() > 0;
             } catch (Exception e) {
                 return false;
             }
@@ -270,10 +270,12 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
             if (!this.getMultiplicity().isValid(index))
                 throw new FxCreateException("ex.content.xpath.index.invalid", index, this.getMultiplicity(), this.getXPath()).
                         setAffectedXPath(parent != null ? parent.getXPathFull() : this.getXPath());
-            //TODO: permission checks missing!
-            return new FxPropertyData(parent == null ? "" : parent.getXPathPrefix(), this.getAlias(), index, XPath, XPathElement.toXPathMult(XPathFull),
+            final FxPropertyData data = new FxPropertyData(parent == null ? "" : parent.getXPathPrefix(), this.getAlias(), index, XPath, XPathElement.toXPathMult(XPathFull),
                     XPathElement.getIndices(XPathFull), this.getId(), this.getProperty().getId(), this.getMultiplicity(),
                     this.getPosition(), parent, this.getEmptyValue(), this.isSystemInternal());
+            //Flag if the value is set from the assignments default value
+            data.setContainsDefaultValue(!data.getValue().isEmpty());
+            return data;
         } catch (FxInvalidParameterException e) {
             throw new FxCreateException(e);
         }

@@ -44,13 +44,10 @@ import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.stream.FxStreamUtils;
 import com.flexive.shared.structure.*;
-import com.flexive.shared.value.FxFloat;
-import com.flexive.shared.value.FxNoAccess;
-import com.flexive.shared.value.FxNumber;
-import com.flexive.shared.value.FxString;
+import com.flexive.shared.value.*;
 import static com.flexive.tests.embedded.FxTestUtils.*;
-import com.flexive.tests.embedded.TestUsers;
 import com.flexive.tests.embedded.ScriptingTest;
+import com.flexive.tests.embedded.TestUsers;
 import org.apache.commons.lang.RandomStringUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -81,6 +78,7 @@ public class ContentEngineTest {
     public static final String TEST_TYPE = "TEST_TYPE_" + RandomStringUtils.random(16, true, true);
     public static final String TEST_GROUP = "TEST_GROUP_" + RandomStringUtils.random(16, true, true);
     private static final String TYPE_ARTICLE = "__ArticleTest";
+    private final static FxString DEFAULT_STRING = new FxString(true, "ABC");
 
     /**
      * setup...
@@ -122,6 +120,7 @@ public class ContentEngineTest {
      * * TestProperty2 (String 1024) [1..1]
      * * TestProperty3 (String 255) [0..5]
      * * TestProperty4 (String 255) [1..N]
+     * * TestProperty5 (String 255) [0..1] default value: "ABC"
      * $ TestGroup1 [0..2]
      * $ * TestProperty1_1 (String 255) [0..1]
      * $ * TestProperty1_2 (String 255) [1..1]
@@ -178,6 +177,12 @@ public class ContentEngineTest {
             pe.setName("TestProperty4");
             pe.setMultiplicity(new FxMultiplicity(1, FxMultiplicity.N));
             ass.createProperty(pe, "/" + TEST_GROUP);
+            pe.setName("TestProperty5");
+            pe.setMultiplicity(FxMultiplicity.MULT_0_1);
+            FxValue orgDefault = pe.getDefaultValue();
+            pe.setDefaultValue(DEFAULT_STRING);
+            ass.createProperty(pe, "/" + TEST_GROUP);
+            pe.setDefaultValue(orgDefault);
             ge.setName("TestGroup1");
             ge.setMultiplicity(new FxMultiplicity(0, 2));
             ass.createGroup(ge, "/" + TEST_GROUP);
@@ -364,7 +369,7 @@ public class ContentEngineTest {
         FxContent test = co.initialize(testType.getId());
         test.setAclId(CacheAdmin.getEnvironment().getACL("Test ACL Content 1").getId());
         assert test != null;
-        int rootSize = 8 + CacheAdmin.getEnvironment().getSystemInternalRootPropertyAssignments().size();
+        int rootSize = 9 + CacheAdmin.getEnvironment().getSystemInternalRootPropertyAssignments().size();
         assert rootSize == test.getData("/").size() : "Root size expected " + rootSize + ", was " + test.getData("/").size();
 //        FxGroupData groot = test.getData("/").get(0).getParent();
         //basic sanity checks
@@ -748,5 +753,57 @@ public class ContentEngineTest {
         Assert.assertFalse(org.containsValue("/TestProperty4[2]"));
         Assert.assertEquals(org.getValue("/TestGroup1/TestProperty1_3[1]"), testValue3);
         Assert.assertFalse(org.containsValue("/TestGroup1/TestProperty1_3[4]"));
+    }
+
+    /**
+     * Check default value handling
+     *
+     * @throws Exception on errors
+     */
+    public void defaultValueTest() throws Exception {
+        final String defaultXPath = "/TestProperty5";
+        final String req1 = "/TestProperty2";
+        final String req2 = "/TestProperty4";
+        final FxString tmpValue = new FxString("xxxx");
+
+        FxPK pk = null;
+        try {
+            Assert.assertEquals(
+                    ((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + defaultXPath)).getDefaultValue(),
+                    DEFAULT_STRING);
+            Assert.assertEquals(
+                    CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + defaultXPath).getDefaultMultiplicity(),
+                    1);
+            FxContent c = co.initialize(TEST_TYPE);
+            Assert.assertEquals(c.getValue(defaultXPath), DEFAULT_STRING);
+            c.setValue(req1, tmpValue);
+            c.setValue(req2, tmpValue);
+            pk = co.save(c);
+            FxContent test = co.load(pk);
+            Assert.assertEquals(test.getValue(defaultXPath), DEFAULT_STRING);
+            test.setValue(defaultXPath, tmpValue);
+            Assert.assertEquals(test.getValue(defaultXPath), tmpValue);
+            co.save(test);
+            test = co.load(test.getPk());
+            Assert.assertEquals(test.getValue(defaultXPath), tmpValue, "Default value should have been overwritten.");
+            test.remove(defaultXPath);
+            Assert.assertFalse(test.containsValue(defaultXPath), "Default value should have been removed (before save)");
+            co.save(test);
+            test = co.load(test.getPk());
+            Assert.assertFalse(test.containsValue(defaultXPath), "Default value should have been removed (after save with a default multiplicity of 1)");
+
+            FxPropertyAssignment pa = (FxPropertyAssignment)CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + defaultXPath);
+            ass.save(pa.asEditable().setDefaultMultiplicity(0), false);
+            pa = (FxPropertyAssignment)CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + defaultXPath);
+            Assert.assertEquals(pa.getDefaultMultiplicity(), 0);
+            test = co.load(test.getPk());
+            Assert.assertFalse(test.containsValue(defaultXPath), "Default value should have been removed (after save with a default multiplicity of 0)");
+        } finally {
+            if (pk != null)
+                co.remove(pk);
+            FxPropertyAssignment pa = (FxPropertyAssignment)CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + defaultXPath);
+            //reset the def. multiplicity to 1
+            ass.save(pa.asEditable().setDefaultMultiplicity(1), false);
+        }
     }
 }

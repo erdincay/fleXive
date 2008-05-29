@@ -2406,9 +2406,12 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         if (data instanceof FxGroupData)
             for (FxData sub : ((FxGroupData) data).getChildren())
                 _prepareSave(mimeMetaMap, con, sub);
-        else {
-            if (!data.isEmpty() && ((FxPropertyData) data).getValue() instanceof FxBinary) {
-                FxBinary bin = (FxBinary) ((FxPropertyData) data).getValue();
+        else if (data instanceof FxPropertyData) {
+            FxPropertyData pdata = (FxPropertyData) data;
+            if (pdata.isContainsDefaultValue() && !pdata.isEmpty())
+                ((FxPropertyData) data).setContainsDefaultValue(false);
+            if (!pdata.isEmpty() && pdata.getValue() instanceof FxBinary) {
+                FxBinary bin = (FxBinary) pdata.getValue();
                 for (long lang : bin.getTranslatedLanguages()) {
                     BinaryDescriptor bd = bin.getTranslation(lang);
                     if (!bd.isNewBinary())

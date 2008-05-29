@@ -273,7 +273,6 @@ public class FxGroupData extends FxData implements Cloneable {
     /**
      * 'Fix' the indices of children after they have been added to reflect the parent groups index in
      * their XPath
-     *
      */
     public void fixChildIndices() {
         try {
@@ -322,10 +321,11 @@ public class FxGroupData extends FxData implements Cloneable {
      */
     public void removeEmptyEntries(boolean includeRequired) {
         for (FxData curr : data)
-            if (curr.isEmpty() && (curr.isGroup() || includeRequired || curr.isRemoveable()) && !curr.isSystemInternal()) {
+            if ((curr.isEmpty() || (curr.isProperty() && ((FxPropertyData) curr).isContainsDefaultValue()))
+                    && (curr.isGroup() || includeRequired || curr.isRemoveable()) && !curr.isSystemInternal()) {
                 data.remove(curr);
-                for(FxData com: data ) {
-                    if (com.getAssignmentId() == curr.getAssignmentId() ) {
+                for (FxData com : data) {
+                    if (com.getAssignmentId() == curr.getAssignmentId()) {
                         com.compact();
                         break;
                     }

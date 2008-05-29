@@ -54,6 +54,7 @@ public class FxPropertyData extends FxData {
     private static final long serialVersionUID = -8738710689160073148L;
     private FxValue value;
     private long propertyId;
+    private boolean containsDefaultValue;
 
     public FxPropertyData(String xpPrefix, String alias, int index, String xPath, String xPathFull, int[] indices,
                           long assignmentId, long propertyId, FxMultiplicity assignmentMultiplicity, int pos, FxGroupData parent,
@@ -61,6 +62,7 @@ public class FxPropertyData extends FxData {
         super(xpPrefix, alias, index, xPath, xPathFull, indices, assignmentId, assignmentMultiplicity, pos, parent, systemInternal);
         this.value = value;
         this.propertyId = propertyId;
+        this.containsDefaultValue = false;
         if (this.value != null)
             this.value.setXPath(xpPrefix + this.getXPathFull());
     }
@@ -110,11 +112,11 @@ public class FxPropertyData extends FxData {
         if (value == null)
             return;
         FxPropertyAssignment pa = (FxPropertyAssignment) this.getAssignment();
-        if( value.isMultiLanguage() != pa.isMultiLang() ) {
-            if( pa.isMultiLang() )
-                throw new FxInvalidParameterException("value","ex.content.value.invalid.multilanguage.ass.multi", this.getXPathFull());
+        if (value.isMultiLanguage() != pa.isMultiLang()) {
+            if (pa.isMultiLang())
+                throw new FxInvalidParameterException("value", "ex.content.value.invalid.multilanguage.ass.multi", this.getXPathFull());
             else
-                throw new FxInvalidParameterException("value","ex.content.value.invalid.multilanguage.ass.single", this.getXPathFull());
+                throw new FxInvalidParameterException("value", "ex.content.value.invalid.multilanguage.ass.single", this.getXPathFull());
         }
         if (pa.getProperty().isSystemInternal())
             throw new FxInvalidParameterException(pa.getAlias(), "ex.content.value.systemInternal").setAffectedXPath(this.getXPathFull());
@@ -149,6 +151,24 @@ public class FxPropertyData extends FxData {
     @Override
     public boolean isEmpty() {
         return this.value.isEmpty();
+    }
+
+    /**
+     * Is the value contained created from a default value?
+     *
+     * @return value contained created from a default value
+     */
+    public boolean isContainsDefaultValue() {
+        return containsDefaultValue;
+    }
+
+    /**
+     * Set if the value is created from a default value - <b>internal method!</b>
+     *
+     * @param containsDefaultValue if the value is created from a default value
+     */
+    public void setContainsDefaultValue(boolean containsDefaultValue) {
+        this.containsDefaultValue = containsDefaultValue;
     }
 
     /**
@@ -220,12 +240,12 @@ public class FxPropertyData extends FxData {
     /**
      * Return a list of all values of this assignment.
      *
-     * @param includeEmpty  true to include empty (i.e. newly initialized) values
-     * @return  a list of all values of this assignment.
+     * @param includeEmpty true to include empty (i.e. newly initialized) values
+     * @return a list of all values of this assignment.
      */
     public List<FxValue> getValues(boolean includeEmpty) {
         final List<FxValue> values = new ArrayList<FxValue>();
-        for (FxData data: getParent().getChildren()) {
+        for (FxData data : getParent().getChildren()) {
             if (data.getAssignmentId() == getAssignmentId()) {
                 final FxValue value = ((FxPropertyData) data).getValue();
                 if (includeEmpty || !value.isEmpty()) {
@@ -242,11 +262,11 @@ public class FxPropertyData extends FxData {
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if( !(obj instanceof FxPropertyData))
+        if (!(obj instanceof FxPropertyData))
             return false;
-        if( !super.equals(obj))
+        if (!super.equals(obj))
             return false;
-        FxPropertyData comp = (FxPropertyData)obj;
+        FxPropertyData comp = (FxPropertyData) obj;
         return this.value.equals(comp.value) && this.propertyId == comp.propertyId;
     }
 
