@@ -132,6 +132,10 @@ public class FxThumbnailURIConfigurator {
         return lang;
     }
 
+    public boolean useLangFallback() {
+        return langFallback != null && langFallback;
+    }
+
     public FxLanguage getLanguage() throws FxApplicationException {
         return StringUtils.isNotBlank(lang) ? EJBLookup.getLanguageEngine().load(lang) : null;
     }

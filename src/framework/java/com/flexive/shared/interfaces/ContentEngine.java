@@ -233,9 +233,26 @@ public interface ContentEngine {
     long getBinaryId(FxPK pk, String xpath, FxLanguage language) throws FxApplicationException;
 
     /**
+     * Get the binary id for the given XPath.
+     * If no binary exists for the requested language, the default language will be tried.
+     * The root ("/") XPath will return the contents preview binary id.
+     * An invalid XPath or no associated binary id will throw an FxNotFoundException or
+     * FxInvalidParameterException.
+     * Security will be checked and FxNoAccessException thrown if restricted.
+     *
+     * @param pk                primary key
+     * @param xpath             XPath
+     * @param language          the language (if null, the user ticket language will be used)
+     * @param fallbackToDefault fall back to the default language if the requested language is not null and not found?
+     * @return binary id
+     * @throws FxApplicationException on errors
+     */
+    long getBinaryId(FxPK pk, String xpath, FxLanguage language, boolean fallbackToDefault) throws FxApplicationException;
+
+    /**
      * Import a content from XML
      *
-     * @param xml the content as XML
+     * @param xml         the content as XML
      * @param newInstance modify the content to be treated like a new instance
      * @return FxContent
      * @throws FxApplicationException on errors

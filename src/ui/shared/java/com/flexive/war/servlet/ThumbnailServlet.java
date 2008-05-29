@@ -169,7 +169,7 @@ public class ThumbnailServlet implements Servlet {
         try {
             //authorization check and binary lookup
             binaryId = EJBLookup.getContentEngine().getBinaryId(conf.getPK(), XPathElement.stripType(conf.getXPath()),
-                    conf.getLanguage());
+                    conf.getLanguage(), conf.useLangFallback());
         } catch (FxNoAccessException na) {
             binaryId = BinaryDescriptor.SYS_NOACCESS;
         } catch (FxApplicationException e) {

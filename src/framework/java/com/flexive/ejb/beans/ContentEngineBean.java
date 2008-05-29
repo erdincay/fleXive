@@ -783,7 +783,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public long getBinaryId(FxPK pk, String xpath, FxLanguage language) throws FxApplicationException {
+    public long getBinaryId(FxPK pk, String xpath, FxLanguage language, boolean fallbackToDefault) throws FxApplicationException {
         FxSharedUtils.checkParameterNull(pk, "pk");
         FxSharedUtils.checkParameterNull(xpath, "xpath");
         Connection con = null;
@@ -803,8 +803,16 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                 return co.getBinaryPreviewId();
             }
             FxPropertyData pd = co.getPropertyData(xpath);
-            if (!pd.getValue().isEmpty() && pd.getValue() instanceof FxBinary)
-                return ((FxBinary) pd.getValue()).getBestTranslation(language != null ? language : ticket.getLanguage()).getId();
+            if (!pd.getValue().isEmpty() && pd.getValue() instanceof FxBinary) {
+                final FxBinary bin = (FxBinary) pd.getValue();
+                if( language == null )
+                    return bin.getBestTranslation(ticket.getLanguage()).getId();
+                if( fallbackToDefault )
+                    return bin.getBestTranslation(language).getId();
+                if( !bin.translationExists(language.getId()))
+                    throw new FxInvalidParameterException("language", "ex.content.value.notTranslated", language);    
+                return bin.getTranslation(language).getId();
+            }
             throw new FxInvalidParameterException("XPATH", "ex.content.binary.xpath.invalid", xpath);
         } catch (FxNotFoundException e) {
             throw new FxLoadException(e);
@@ -813,6 +821,15 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
         } finally {
             Database.closeObjects(ContentEngineBean.class, con, null);
         }
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public long getBinaryId(FxPK pk, String xpath, FxLanguage language) throws FxApplicationException {
+        return getBinaryId(pk, xpath, language, false);
     }
 
     /**
