@@ -307,7 +307,7 @@
                             Instead, render-time components must be used to achieve similar results - for example,
                             <code language="xhtml">&lt;ui:repeat></code>
                             to iterate over lists or
-                            <code language="xhtml">&lt;h:panelGroup rendered="..."></code>
+                            <code language="xhtml">&lt;ui:fragment rendered="..."></code>
                             for conditional page rendering.
                         </para>
                     </warning>
@@ -391,6 +391,147 @@
                 </section>
             </section>
 
+
+            <section xml:id="jcl_fx_children">
+                <title>
+                    <code language="xhtml">&lt;fx:children></code>
+                </title>
+                <para>
+                    The
+                    <code language="xhtml">&lt;fx:children></code>
+                    component provides an iterator over properties and groups of a content instance.
+                    The current value is stored in a variable with the same name as the property.
+                    The same can be achieved by using the
+                    <code>$list</code>
+                    JSF-EL suffix as described in
+                    <xref linkend="jcl_fx_content_jsfel"/>.
+                </para>
+                <section xml:id="jcl_fx_children_synopsis">
+                    <title>Synopsis</title>
+                    <programlisting language="xhtml"><![CDATA[<fx:content ...>
+    <fx:children value="content" property="xpath" [var="varname"]>
+        ...
+    </fx:children>
+</fx:conent>
+]]></programlisting>
+                </section>
+                <section xml:id="jcl_fx_children_parameters">
+                    <title>Parameters</title>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>property</term>
+                                <listitem>
+                                    <para>
+                                        The name or XPath of the property or group to be iterated upon.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                            <varlistentry>
+                                <term>value</term>
+                                <listitem>
+                                    <para>The content or group value holding the required property.</para>
+                                </listitem>
+                            </varlistentry>
+                            <varlistentry>
+                                <term>var</term>
+                                <listitem>
+                                    <para>
+                                        Name of the variable where the current value will be exposed in the tag body.
+                                        If not set, the property name will be used (i.e. the last part of the given
+                                        property XPath).
+                                    </para>
+                                    <para>
+                                        Note: due to its implementation, if a
+                                        <code>fx:children</code>
+                                        component is nested in another
+                                        <code>fx:children</code>
+                                        that has a var attribute, the inner
+                                        <code>fx:children</code>
+                                        instance also must specify the var attribute.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                </section>
+
+                <section xml:id="jcl_fx_children_ex">
+                    <title>Examples</title>
+
+                    <para>
+                        The following examples are based on the
+                        <productname>products</productname>
+                        demo application described in &productsArticle;.
+                    </para>
+
+                    <example xml:id="jcl_fx_children_ex_simple">
+                        <title>Iterating over property values</title>
+                        <para>
+                            In this example, we iterate over the
+                            <property>image</property>
+                            property of a product. The property is of type
+                            <code>Binary</code>
+                            and holds one or more images for the given product.
+                        </para>
+                        <programlisting language="xhtml"><![CDATA[<fx:content var="product" pk="#{productBean.pk}">
+    <fx:children value="#{product}" property="image">
+        <fx:thumbnail binary="#{image}"/>
+    </fx:children>
+</fx:content>]]></programlisting>
+                    </example>
+
+                    <example xml:id="jcl_fx_children_ex_nested">
+                        <title>Iterating over group values and nested iterators</title>
+
+                        <para>
+                            In this example, we create an outer loop for the group property
+                            <code>variant</code>
+                            and use a nested
+                            <code>&lt;fx:children></code>
+                            component to render the images for each group.
+                        </para>
+
+                        <para>
+                            Data structure (partial):
+                            <itemizedlist>
+                                <listitem>Product
+                                    <itemizedlist>
+                                        <listitem>
+                                            /variant [0..n]
+                                            <itemizedlist>
+                                                <listitem>/articleNumber</listitem>
+                                                <listitem>/color</listitem>
+                                                <listitem>/image [0..n]</listitem>
+                                            </itemizedlist>
+                                        </listitem>
+                                        <listitem>
+                                            ...
+                                        </listitem>
+                                    </itemizedlist>
+                                </listitem>
+                            </itemizedlist>
+                        </para>
+
+
+                        <programlisting language="xhtml"><![CDATA[<fx:content var="product" pk="#{productBean.pk}">
+
+    <!-- Iterate over the "variant" group of product -->
+
+    <fx:children value="#{product}" property="variant">
+
+        <!-- Iterate over the "image" property of the current variant -->
+        
+        <fx:children value="#{variant}" property="image">
+            <fx:thumbnail binary="#{image}"/>
+        </fx:children>
+        
+    </fx:children>
+    
+</fx:content>]]></programlisting>
+                    </example>
+                </section>
+            </section>
 
             <section xml:id="jcl_fx_value">
                 <title>
@@ -898,6 +1039,54 @@
                     </variablelist>
                 </section>
             </section>
+
+            <section xml:id="jcl_fx_thumbnail">
+                <title>
+                    <code language="xhtml">&lt;fx:thumbnail></code>
+                </title>
+
+                <para>
+                    Renders a thumbnail for a given
+                    <code>FxPK</code>
+                    or
+                    <code>FxBinary</code>
+                    reference.
+                </para>
+
+                <section xml:id="jcl_fx_thumbnail_synopsis">
+                    <title>Synopsis</title>
+                    <para>
+                        <programlisting language="xhtml">
+                            <![CDATA[<fx:thumbnail (pk="fxpk" | binary="fxbinary")/>]]></programlisting>
+                    </para>
+                </section>
+
+                <section xml:id="jcl_fx_thumbnail_parameters">
+                    <variablelist>
+                        <varlistentry>
+                            <term>pk</term>
+                            <listitem>
+                                <para>
+                                    The primary key of the content instance. If the PK is specified,
+                                    the default thumbnail of the content is rendered.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>binary</term>
+                            <listitem>
+                                <para>
+                                    A specific binary entry of type
+                                    <code>FxBinary</code>
+                                    to be rendered. This is useful for for content types with more than one binary
+                                    property. For an example, see
+                                    <xref linkend="jcl_fx_children"/>.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </section>
+            </section>
         </section>
 
         <section xml:id="jcl_search">
@@ -925,7 +1114,8 @@
                 <section xml:id="jcl_fx_includes_synopsis">
                     <title>Synopsis</title>
                     <para>
-                        <programlisting language="xhtml"><![CDATA[<fx:includes [htmlEditor="true|false"]/>]]></programlisting>
+                        <programlisting language="xhtml">
+                            <![CDATA[<fx:includes [htmlEditor="true|false"]/>]]></programlisting>
                     </para>
                 </section>
 

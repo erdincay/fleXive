@@ -82,7 +82,7 @@ public class FxJsfComponentUtils {
      * @param defaultValue  the default value to be used if no value is bound
      * @return the bound value, or <code>defaultValue</code> if no value is bound
      */
-    public static int getLongValue(UIComponent component, String attributeName, int defaultValue) {
+    public static int getIntegerValue(UIComponent component, String attributeName, int defaultValue) {
         final Integer intValue = (Integer) getValue(component, attributeName);
         return intValue != null ? intValue : defaultValue;
     }

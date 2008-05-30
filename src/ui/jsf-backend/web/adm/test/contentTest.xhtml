@@ -54,10 +54,16 @@
 
     <h4>Edit an existing content instance (#{fxContentViewTestBean.searchTestPK})</h4>
 
-    <fx:content var="test" pk="#{fxContentViewTestBean.searchTestPK}">
-        <fx:value property="stringSearchProp"/>
-        <fx:value property="stringSearchPropML"/>
-    </fx:content>
+    <h:form id="editContent" enctype="multipart/form-data">
+        <fx:content var="test" pk="#{fxContentViewTestBean.searchTestPK}">
+            <fx:value property="stringSearchProp"/>
+            <fx:value property="stringSearchPropML"/>
+
+            <fx:fieldSet legend="groupTop">
+                
+            </fx:fieldSet>
+        </fx:content>
+    </h:form>
     
 </body>
 </html>

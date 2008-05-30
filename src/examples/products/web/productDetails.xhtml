@@ -46,23 +46,24 @@
 
                 <div class="images">
                     <!-- Render the generic product image -->
-                    <ui:repeat var="image" value="#{product.image$list}">
+                    <fx:children value="#{product}" property="image">
                         <fx:thumbnail binary="#{image}"/>
-                    </ui:repeat>
+                    </fx:children>
 
                     <!-- Add the current variant's images -->
-                    <ui:repeat var="variant" value="#{product.variant$list}">
+                    <fx:children value="#{product}" property="variant">
                         <ui:fragment rendered="#{variant.articleNumber eq productBean.articleNumber}">
-                            <ui:repeat var="image" value="#{variant.image$list}">
+                            <fx:children value="#{variant}" property="image">
                                 <fx:thumbnail binary="#{image}"/>
-                            </ui:repeat>
+                            </fx:children>
                         </ui:fragment>
-                    </ui:repeat>
+                    </fx:children>
+
                 </div>
 
                 <div class="variants">
                     <ul>
-                        <ui:repeat var="variant" value="#{product.variant$list}">
+                        <fx:children value="#{product}" property="variant">
                             <li>
                                 <h:commandLink>#{variant.color}
                                     <f:setPropertyActionListener value="#{variant.articleNumber}" target="#{productBean.articleNumber}"/>
@@ -70,7 +71,7 @@
 
                                 (#{variant.articleNumber})
                             </li>
-                        </ui:repeat>
+                        </fx:children>
                     </ul>
                 </div>
 

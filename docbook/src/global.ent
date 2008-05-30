@@ -17,6 +17,7 @@
 <!ENTITY ant "<ulink url='http://ant.apache.org/'>Apache Ant</ulink>">
 <!ENTITY eclipse "<ulink url='http://www.eclipse.org/'>Eclipse</ulink>">
 <!ENTITY idea "<ulink url='http://www.jetbrains.com/idea/'>IntelliJ IDEA</ulink>">
+<!ENTITY productsArticle "<ulink url='http://www.onjava.com/pub/a/onjava/2008/04/30/introducing-flexive-a-complementary-approach-to-java-ee-5-web-development.html'>an ONJava.com article</ulink>"> 
 
 <!-- Website references -->
 <!ENTITY downloadsPage "<ulink url='http://www.flexive.org/downloads'>download page</ulink>">

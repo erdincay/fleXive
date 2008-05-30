@@ -239,7 +239,7 @@ public class FxContentList extends UIComponentBase implements NamingContainer {
         }
         final UIComponent groovyQuery = getFacet("groovyQuery");
         this.queryBuilder = this.getQueryBuilder() != null ? this.getQueryBuilder() : new SqlQueryBuilder();
-        if (queryBuilder.getColumnNames().indexOf("@pk") == -1) {
+        if (!queryBuilder.getColumnNames().contains("@pk")) {
             queryBuilder.select("@pk");
         }
         if (groovyQuery != null) {

@@ -1,0 +1,34 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:t="http://myfaces.apache.org/tomahawk">
+
+Iterator tag for properties and groups of a content instance.
+
+Parameters:
+value    - the content instance (provided by fx:content) or group (provided by fx:values)
+property - name/xpath of the property or group to be iterated
+var      - name of the variable where the current value will be exposed in the tag body.
+           If not set, the property name will be used (i.e. the last part of the given property XPath).
+           Note: due to its implementation, if a fx:children component is nested in another
+           fx:children component that has a var attribute, the inner fx:children component also
+           must specify the var attribute.
+
+<ui:composition>
+    <c:set var="xpath" value="#{property}$list"/>
+    <c:set var="outvar" value="#{empty var ? fxContentViewBean.propertyName[property] : var}"/>
+
+    <ui:repeat var="__value_iterator" value="#{value[xpath]}">
+        <c:set var="#{outvar}" value="#{__value_iterator}"/>
+        <ui:insert/>
+    </ui:repeat>
+
+</ui:composition>
+
+
+</html>

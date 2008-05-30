@@ -39,6 +39,10 @@
         <source>../templates/fxValueInputLanguageSelect.xhtml</source>
     </tag>
     <tag>
+        <tag-name>children</tag-name>
+        <source>../templates/children.xhtml</source>
+    </tag>
+    <tag>
         <tag-name>includes</tag-name>
         <component>
             <component-type>flexive.WriteWebletIncludes</component-type>

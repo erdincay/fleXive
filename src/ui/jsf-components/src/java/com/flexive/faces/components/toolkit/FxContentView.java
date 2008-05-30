@@ -59,7 +59,6 @@ import javax.faces.event.FacesEvent;
 import javax.faces.event.FacesListener;
 import javax.faces.event.PhaseId;
 import javax.faces.event.AbortProcessingException;
-import javax.faces.FacesException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -239,7 +238,7 @@ public class FxContentView extends UIOutput {
 
     public long getType() {
         if (type == -1) {
-            type = FxJsfComponentUtils.getLongValue(this, "type", -1);
+            type = FxJsfComponentUtils.getIntegerValue(this, "type", -1);
         }
         return type;
     }
@@ -481,7 +480,7 @@ public class FxContentView extends UIOutput {
         }
 
         private ContentMap getResolvedReference(String path) {
-            path = path.substring(0, path.length() - 1);    // stip trailing $
+            path = path.substring(0, path.length() - 1);    // strip trailing $
             // resolve referenced object
             try {
                 final FxPK pk = ((FxReference) content.getValue(path)).getDefaultTranslation();

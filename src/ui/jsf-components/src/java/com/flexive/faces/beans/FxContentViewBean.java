@@ -34,6 +34,7 @@ package com.flexive.faces.beans;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxData;
 import com.flexive.shared.content.FxPK;
@@ -69,6 +70,7 @@ public class FxContentViewBean implements Serializable {
     private FxContent content;
     private String xpath;
     private String successMessage;
+    private Map<String, String> propertyNameMapper;
 
     /**
      * Persist the instance stored in <code>fxContentViewBean.content</code> to the DB.
@@ -153,5 +155,28 @@ public class FxContentViewBean implements Serializable {
 
     public void setSuccessMessage(String successMessage) {
         this.successMessage = successMessage;
+    }
+
+    /**
+     * Returns only the property name of a given XPath.<br/>
+     * E.g. #{fxContentView.propertyName['id']} => 'id',<br/>
+     * #{fxContentView.propertyName['group/id']} => 'id'
+     *
+     * @return  the property name of a given XPath.
+     */
+    public Map<String, String> getPropertyName() {
+        if (propertyNameMapper == null) {
+            propertyNameMapper = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<String, String>() {
+                public String get(Object key) {
+                    if (!(key instanceof String)) {
+                        return null;
+                    }
+                    final String value = (String) key;
+                    final int pos = value.lastIndexOf('/');
+                    return pos != -1 ? value.substring(pos + 1) : value;
+                }
+            });
+        }
+        return propertyNameMapper;
     }
 }
