@@ -51,6 +51,17 @@
 
 
                 <ui:fragment rendered="#{!srcEditor.new}">
+                <div style="display:none;"><iframe id="exportFrame" ><!--empty--></iframe></div>
+                <script type="text/javascript">
+                    function exportContent(pk) {
+                        try {
+                            document.getElementById('exportFrame').src = getBase() + "export/content/" + pk;
+                        } catch(ex) {
+                            alert(ex)
+                        }
+                    }
+                </script>
+
                 <a4j:outputPanel id="infoPanel">
                     <a4j:commandLink reRender="infoPanel">
                         <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='version'?'':'version'}" target="#{srcEditor.infoPanelState}"/>
@@ -64,10 +75,33 @@
                         <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='history'?'':'history'}" target="#{srcEditor.infoPanelState}"/>
                         <span class="infoPanelButton">#{fxMessageBean['Content.field.history']}</span>
                     </a4j:commandLink>
+                    <a4j:commandLink reRender="infoPanel" rendered="#{srcEditor.mayImport}">
+                        <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='import'?'':'import'}" target="#{srcEditor.infoPanelState}"/>
+                        <span class="infoPanelButton">#{fxMessageBean['Content.field.import']}</span>
+                    </a4j:commandLink>
                     <a4j:commandLink reRender="infoPanel" rendered="#{srcEditor.mayExport}">
                         <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='export'?'':'export'}" target="#{srcEditor.infoPanelState}"/>
                         <span class="infoPanelButton">#{fxMessageBean['Content.field.export']}</span>
                     </a4j:commandLink>
+                    <ui:fragment rendered="#{srcEditor.infoPanelState=='import'}">
+                        <span class="infoPanel">
+                            <h:panelGrid columns="2" columnClasses="top">
+                                #{fxMessageBean['Content.field.importUpload']}
+                                <t:inputFileUpload id="importUpload"
+                                        value="#{srcEditor.importUpload}"
+                                        onchange="fileInputChanged();"/>
+                                #{fxMessageBean['Content.field.importPaste']}
+                                <h:inputTextarea id="importPaste" rows="6" cols="50" value="#{srcEditor.importPasted}" readonly="false"/>
+                                #{fxMessageBean['Content.field.importSave']}
+                                <h:selectBooleanCheckbox id="importSave" value="#{srcEditor.importSave}"/>
+                            </h:panelGrid>
+                            <br/>
+                            <h:commandLink actionListener="#{srcEditor.doImport}">
+                                <span class="infoPanelButton" style="margin: 12px;">#{fxMessageBean['Content.button.import']}</span>
+                            </h:commandLink>
+                            <br/><br/>
+                        </span>
+                    </ui:fragment>
                     <ui:fragment rendered="#{srcEditor.infoPanelState=='export'}">
                         <span class="infoPanel">
                             <span class="infoPanelButton" style="margin: 12px; display: block; float: left;" onclick="copy2clipboard(getPreElementContent('exportArea'),'#{fxMessageBean['Global.clipboard.error']}','#{fxMessageBean['Global.clipboard.success']}')">#{fxMessageBean['Content.button.copyToClipboard']}</span>
@@ -395,6 +429,12 @@
                     <adm:commandButton labelKey="Content.button.cancel" location="both"
                                       bean="#{srcEditor}" confirmKey="Content.confirm.abort"
                                       icon="cancel" action="cancel" id="cancelButton" onclick="preSubmit()"/>
+                </ui:fragment>
+                <ui:fragment rendered="#{!srcEditor.new and srcEditor.mayExport}">
+                    <adm:commandButton labelKey="Content.button.export" location="toolbar" lockscreen="false"
+                                       icon="export" separator="before"
+                                       onclick="exportContent('#{srcEditor.pk}');return false;"
+                                       id="exportButton"/>
                 </ui:fragment>
             </ui:fragment>
 </ui:composition>

@@ -34,7 +34,11 @@ package com.flexive.war.servlet;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.content.FxPK;
+import com.flexive.shared.content.FxContent;
+import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
 import org.apache.commons.logging.Log;
@@ -52,9 +56,9 @@ import java.net.URLDecoder;
  * Format:
  * <p/>
  * /export/type/name
+ * /export/content/pk
  * <p/>
  * TODO:
- * /export/content/pk
  * /export/tree/startnode
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
@@ -62,6 +66,9 @@ import java.net.URLDecoder;
  */
 public class ExportServlet implements Servlet {
     private static transient Log LOG = LogFactory.getLog(ExportServlet.class);
+
+    public final static String EXPORT_TYPE = "type";
+    public final static String EXPORT_CONTENT = "content";
 
     private final static String BASEURL = "/export/";
     private ServletConfig servletConfig;
@@ -97,8 +104,12 @@ public class ExportServlet implements Servlet {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         String[] params = URLDecoder.decode(request.getRequestURI().substring(request.getContextPath().length() + BASEURL.length()), "UTF-8").split("/");
-        if (params.length == 2 && "type".equals(params[0])) {
+
+        if (params.length == 2 && EXPORT_TYPE.equals(params[0])) {
             exportType(request, response, params[1]);
+            return;
+        } else if (params.length == 2 && EXPORT_CONTENT.equals(params[0])) {
+            exportContent(request, response, params[1]);
             return;
         }
         response.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED);
@@ -130,6 +141,40 @@ public class ExportServlet implements Servlet {
         response.setContentType("text/xml");
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=\"" + type + ".xml\";");
+        try {
+            response.getOutputStream().write(xml.getBytes("UTF-8"));
+        } finally {
+            response.getOutputStream().close();
+        }
+    }
+
+    /**
+     * Export a content (one version)
+     *
+     * @param request  request
+     * @param response reponse
+     * @param pk       primary key
+     * @throws IOException on errors
+     */
+    private void exportContent(HttpServletRequest request, HttpServletResponse response, String pk) throws IOException {
+        String xml;
+        try {
+            ContentEngine co = EJBLookup.getContentEngine();
+            final FxContent content = co.load(FxPK.fromString(pk));
+            xml = co.exportContent(content);
+            pk = content.getPk().toString(); //get exact version
+        } catch (FxNoAccessException e) {
+            LOG.warn("No access to export [" + pk + "]!");
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        } catch (FxApplicationException e) {
+            LOG.warn("Error exporting [" + pk + "]: "+e.getMessage(), e);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            return;
+        }
+        response.setContentType("text/xml");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=\"content_" + pk + ".xml\";");
         try {
             response.getOutputStream().write(xml.getBytes("UTF-8"));
         } finally {

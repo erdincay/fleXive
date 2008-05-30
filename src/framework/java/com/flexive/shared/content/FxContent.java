@@ -271,12 +271,12 @@ public class FxContent implements Serializable, Cloneable {
      * a distinct version, but {@link FxPK#LIVE} or {@link FxPK#MAX}), which the FxPK equals method
      * cannot do.
      *
-     * @param otherPk   the PK to be matched
-     * @return  true if otherPk matches this content
+     * @param otherPk the PK to be matched
+     * @return true if otherPk matches this content
      */
     public boolean matchesPk(FxPK otherPk) {
         return pk.equals(otherPk) || (pk.getId() == otherPk.getId()
-            && ((otherPk.getVersion() == FxPK.MAX && isMaxVersion()) || (otherPk.getVersion() == FxPK.LIVE && isLiveVersion())));
+                && ((otherPk.getVersion() == FxPK.MAX && isMaxVersion()) || (otherPk.getVersion() == FxPK.LIVE && isLiveVersion())));
     }
 
     /**
@@ -1065,7 +1065,7 @@ public class FxContent implements Serializable, Cloneable {
     /**
      * Returns the permission set for the calling user.
      *
-     * @return  the permission set for the calling user.
+     * @return the permission set for the calling user.
      */
     public PermissionSet getPermissions() {
         try {
@@ -1083,12 +1083,12 @@ public class FxContent implements Serializable, Cloneable {
      */
     @Override
     public boolean equals(Object obj) {
-        if( obj == null || !(obj instanceof FxContent))
+        if (obj == null || !(obj instanceof FxContent))
             return false;
-        FxContent other = (FxContent)obj;
-        if( !pk.equals(other.pk))
+        FxContent other = (FxContent) obj;
+        if (!pk.equals(other.pk))
             return false;
-        if( active != other.active || relation != other.relation || !lifeCycleInfo.equals(other.lifeCycleInfo) )
+        if (active != other.active || relation != other.relation || !lifeCycleInfo.equals(other.lifeCycleInfo))
             return false;
         FxDelta delta;
         try {
@@ -1107,5 +1107,49 @@ public class FxContent implements Serializable, Cloneable {
         result = 31 * result + (relation ? 1 : 0);
         result = 31 * result + lifeCycleInfo.hashCode();
         return result;
+    }
+
+    /**
+     * Replace our data with data from another content
+     *
+     * @param con other content to take data from
+     * @throws FxApplicationException on errors
+     */
+    public void replaceData(FxContent con) throws FxApplicationException {
+        if (con == null)
+            throw new FxInvalidParameterException("con", "ex.content.import.empty");
+        if (con.getTypeId() != this.getTypeId()) {
+            throw new FxInvalidParameterException("con", "ex.content.import.wrongType",
+                    CacheAdmin.getEnvironment().getType(con.getTypeId()).getLabel(),
+                    CacheAdmin.getEnvironment().getType(this.getTypeId()).getLabel());
+        }
+        removeData();
+        for (FxData d : con.data.getChildren()) {
+            if (d.isSystemInternal())
+                continue;
+            this.data.addChild(d);
+        }
+        this.setAclId(con.getAclId());
+        this.setActive(con.isActive());
+//        this.setBinaryPreview(con.getBinaryPreviewId()); //TODO: fix me
+        this.setMainLanguage(con.getMainLanguage());
+        this.setRelatedDestination(con.getRelatedDestination());
+        this.setRelatedDestinationPosition(con.getRelatedDestinationPosition());
+        this.setRelatedSource(con.getRelatedSource());
+        this.setRelatedSourcePosition(con.getRelatedSourcePosition());
+        this.setStepId(con.getStepId());
+    }
+
+    /**
+     * Remove all non-system data recursively
+     */
+    private void removeData() {
+        for (FxData d : data.getChildren()) {
+            if (d.isSystemInternal())
+                continue;
+            data.getChildren().remove(d);
+            removeData();
+            return;
+        }
     }
 }

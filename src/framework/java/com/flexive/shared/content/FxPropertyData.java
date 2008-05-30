@@ -132,6 +132,7 @@ public class FxPropertyData extends FxData {
                     throw new FxInvalidParameterException("value", "ex.content.xpath.group.oneof", this.getXPathFull(), this.getParent().getXPathFull());
             }
         }
+        this.containsDefaultValue = false;
         if (this.value == null || FxContext.get().getRunAsSystem()) {
             this.value = value;
             this.value.setXPath(this.xpPrefix + this.getXPathFull());

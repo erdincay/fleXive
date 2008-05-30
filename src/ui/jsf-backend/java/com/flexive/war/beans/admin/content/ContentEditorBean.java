@@ -65,6 +65,7 @@ import javax.faces.model.SelectItem;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.Serializable;
+import java.io.IOException;
 import java.util.*;
 
 public class ContentEditorBean implements ActionBean, Serializable {
@@ -105,6 +106,88 @@ public class ContentEditorBean implements ActionBean, Serializable {
     private int compareSourceVersion;
     private int compareDestinationVersion;
     private Map<FxValue, FxValueFormatter> customValueFormatters;
+
+    /**
+     * uploaded file for import
+     */
+    private UploadedFile importUpload;
+
+    /**
+     * Pasted content for import
+     */
+    private String importPasted;
+
+    /**
+     * Save after an import or keep editing?
+     */
+    private boolean importSave;
+
+    public UploadedFile getImportUpload() {
+        return importUpload;
+    }
+
+    public void setImportUpload(UploadedFile importUpload) {
+        this.importUpload = importUpload;
+    }
+
+    public String getImportPasted() {
+        return importPasted;
+    }
+
+    public void setImportPasted(String importPasted) {
+        this.importPasted = importPasted;
+    }
+
+    public boolean isImportSave() {
+        return importSave;
+    }
+
+    public void setImportSave(boolean importSave) {
+        this.importSave = importSave;
+    }
+
+    /**
+     * Import a content
+     *
+     * @param event action event
+     */
+    public void doImport(ActionEvent event) {
+        FxContent _con = null;
+        if (importUpload != null && importUpload.getSize() > 0) {
+            System.out.println("Uploaded " + importUpload.getSize() + " bytes for " + importUpload.getName());
+            try {
+                _con = EJBLookup.getContentEngine().importContent(new String(importUpload.getBytes(), "UTF-8"), true);
+            } catch (Exception e) {
+                new FxFacesMsgErr(e).addToContext();
+            }
+        } else if (!StringUtils.isEmpty(importPasted)) {
+            try {
+                _con = EJBLookup.getContentEngine().importContent(importPasted, true);
+            } catch (FxApplicationException e) {
+                new FxFacesMsgErr(e).addToContext();
+            }
+        } else {
+            new FxFacesMsgInfo("Content.nfo.import.noData").addToContext();
+            return;
+        }
+        if (_con != null) {
+            this.importPasted = "";
+            this.importUpload = null;
+            this.infoPanelState = "";
+            try {
+                this.content.replaceData(_con);
+                compact();
+                if( importSave ) {
+                    save();
+                } else {
+                    setReadOnly(false);
+                }
+                new FxFacesMsgInfo("Content.nfo.imported").addToContext();
+            } catch (FxApplicationException e) {
+                new FxFacesMsgErr(e).addToContext();
+            }
+        }
+    }
 
     /**
      * A custom FxReference value formatter (applies only to read-only mode)
@@ -166,6 +249,22 @@ public class ContentEditorBean implements ActionBean, Serializable {
         try {
             return FxPermissionUtils.checkPermission(FxContext.get().getTicket(), content.getLifeCycleInfo().getCreatorId(),
                     ACL.Permission.EXPORT, environment.getType(content.getTypeId()),
+                    environment.getStep(content.getStepId()).getAclId(), content.getAclId(), false);
+        } catch (FxNoAccessException e) {
+            LOG.warn(e);
+            return false;
+        }
+    }
+
+    /**
+     * Is the current user allowed to replace the edited content by an imported?
+     *
+     * @return if current user is allowed to import
+     */
+    public boolean isMayImport() {
+        try {
+            return FxPermissionUtils.checkPermission(FxContext.get().getTicket(), content.getLifeCycleInfo().getCreatorId(),
+                    ACL.Permission.EDIT, environment.getType(content.getTypeId()),
                     environment.getStep(content.getStepId()).getAclId(), content.getAclId(), false);
         } catch (FxNoAccessException e) {
             LOG.warn(e);
