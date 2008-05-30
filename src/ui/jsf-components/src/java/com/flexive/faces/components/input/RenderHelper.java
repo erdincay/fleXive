@@ -165,7 +165,7 @@ abstract class RenderHelper {
             }
             final ResponseWriter out = facesContext.getResponseWriter();
             for (String weblet : weblets) {
-                out.write(StringUtils.defaultString(WriteWebletIncludes.renderWeblet(weblet)));
+                out.write(StringUtils.defaultString(WriteWebletIncludes.getWebletInclude(weblet)));
             }
         }
 

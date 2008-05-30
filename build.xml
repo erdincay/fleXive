@@ -410,10 +410,6 @@
                 <include name="*"/>
                 <include name="src/**/*"/>
             </zipfileset>
-            <!-- explode TinyMCE editor files in /pub/js/tiny_mce -->
-            <zipfileset src="${flexive.base.ui.shared.dir}/resources/lib/tiny_mce.zip" prefix="pub/js">
-                <include name="**/*"/>
-            </zipfileset>
         </war>
 	</target>
 
@@ -701,6 +697,14 @@ database.password=a
 
     <target name="jar.jsf.components" depends="compile.ui.shared">
         <buildPlugin name="jsf-core" srcdir="${flexive.base.ui.components.dir}"/>
+
+        <!-- explode TinyMCE editor files in into jsf core plugins JAR under com/flexive/faces/weblets/js -->
+        <jar jarfile="${build.ui.jar.dir}/flexive-plugin-jsf-core.jar" update="true">
+            <zipfileset src="${flexive.base.ui.shared.dir}/resources/lib/tiny_mce.zip" prefix="com/flexive/faces/weblets/js">
+                <include name="**/*"/>
+            </zipfileset>
+        </jar>
+
         <buildPlugin name="jsf-testrunner" srcdir="${flexive.base.ui.dir}/jsf-testrunner"/>
         <buildPlugin name="jsf-globalconfig" srcdir="${flexive.base.ui.dir}/jsf-globalconfig"/>
         <buildPlugin name="jsf-feedbackPlugin" srcdir="${flexive.base.ui.dir}/jsf-feedbackPlugin"/>

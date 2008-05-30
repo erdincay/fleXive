@@ -16,12 +16,7 @@
         <t:stylesheet path="/adm/css/contentEditor.css"/>
         <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/shared.js"> </script>
         <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/contentEditor.js"> </script>
-        <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/tiny_mce/tiny_mce_src.js"> </script>
-
-        <script type="text/javascript">
-            initHtmlEditor(false);   // init TinyMCE
-        </script>
-
+        <fx:includes htmlEditor="true"/>
     </ui:define>
 
     <ui:define name="body">

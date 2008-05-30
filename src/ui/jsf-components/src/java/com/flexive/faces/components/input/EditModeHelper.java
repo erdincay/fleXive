@@ -32,6 +32,7 @@
 package com.flexive.faces.components.input;
 
 import com.flexive.faces.FxJsfUtils;
+import com.flexive.faces.components.WriteWebletIncludes;
 import com.flexive.faces.beans.UserConfigurationBean;
 import com.flexive.faces.beans.MessageBean;
 import com.flexive.shared.*;
@@ -39,6 +40,7 @@ import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxSelectList;
 import com.flexive.shared.value.*;
 import com.flexive.war.servlet.ThumbnailServlet;
+import com.flexive.war.FxRequest;
 import org.apache.commons.lang.StringUtils;
 import org.apache.myfaces.custom.date.HtmlInputDate;
 import org.apache.myfaces.custom.fileupload.HtmlInputFileUpload;
@@ -647,20 +649,17 @@ class EditModeHelper extends RenderHelper {
             writeHtmlAttributes(getInputComponent(), writer);
             if (value instanceof FxHTML) {
                 // render tinyMCE editor
-//                    if (!FxJsfUtils.isAjaxRequest()) {
-                    // when the page is updated via ajax, tinyMCE generates an additional hidden input
-                    // and the text area is essential an anonymous div container (not sure why)
-                    writer.writeAttribute("name", inputClientId, null);
-//                    }
+                writer.writeAttribute("name", inputClientId, null);
                 writer.writeAttribute("class", FxValueInputRenderer.CSS_TEXTAREA_HTML + singleLanguageStyle(languageId), null);
                 writer.writeText(getTextValue(value, languageId), null);
                 writer.endElement("textarea");
+                final FxRequest request = FxJsfUtils.getRequest();
                 writer.startElement("script", null);
                 writer.writeAttribute("type", "text/javascript", null);
-                if (FxJsfUtils.isAjaxRequest() && FxJsfUtils.getRequest().getAttribute(REQUEST_EDITORINIT) == null) {
+                if (FxJsfUtils.isAjaxRequest() && request.getAttribute(REQUEST_EDITORINIT) == null) {
                     // reset tinyMCE to avoid getDoc() error messages
                     writer.write("tinyMCE.idCounter = 0;\n");
-                    FxJsfUtils.getRequest().setAttribute(REQUEST_EDITORINIT, true);
+                    request.setAttribute(REQUEST_EDITORINIT, true);
                 }
                 writer.write("tinyMCE.execCommand('mceAddControl', false, '" + inputClientId + "');\n");
                 if (FxJsfUtils.isAjaxRequest()) {

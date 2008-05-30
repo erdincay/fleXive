@@ -906,6 +906,60 @@
             -->
         </section>
 
+        <section xml:id="jcl_framework">
+            <title>
+                Framework components
+            </title>
+
+            <section xml:id="jcl_fx_includes">
+                <title>
+                    <code language="xhtml">&lt;fx:includes></code>
+                </title>
+
+                <para>
+                    Includes external resources (CSS and JavaScripts) used by &flexive; components. Place this in the
+                    <code language="xhtml">&lt;head></code>
+                    section of your HTML page.
+                </para>
+
+                <section xml:id="jcl_fx_includes_synopsis">
+                    <title>Synopsis</title>
+                    <para>
+                        <programlisting language="xhtml"><![CDATA[<fx:includes [htmlEditor="true|false"]/>]]></programlisting>
+                    </para>
+                </section>
+
+                <section xml:id="jcl_fx_includes_parameters">
+                    <title>Parameters</title>
+                    <variablelist>
+                        <varlistentry>
+                            <term>htmlEditor</term>
+                            <listitem>
+                                <para>
+                                    If true, the HTML editor (currently TinyMCE) will be loaded and
+                                    initialized. Since TinyMCE must be initialized in the
+                                    <code language="xhtml">&lt;head></code>
+                                    section, unfortunately you have to set this attribute manually
+                                    when a
+                                    <code language="xhtml">&lt;fx:fxValueInput></code>
+                                    component is used for a HTML property.
+                                </para>
+                                <para>
+                                    Note that you can call the
+                                    <code language="xhtml">&lt;fx:includes></code>
+                                    tag more than once. This is useful if the HTML editor
+                                    is only needed on some pages and
+                                    <code language="xhtml">&lt;fx:includes></code>
+                                    is already included in the main page template.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </section>
+
+            </section>
+        </section>
+
         <section xml:id="jcl_forms">
             <title>
                 Form utility components

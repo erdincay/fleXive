@@ -32,13 +32,13 @@
 package com.flexive.faces.components;
 
 import com.flexive.faces.FxJsfUtils;
+import com.flexive.faces.FxJsfComponentUtils;
+import com.flexive.faces.javascript.FxJavascriptUtils;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 
-import javax.faces.application.ViewHandler;
 import javax.faces.component.UIOutput;
 import javax.faces.context.FacesContext;
-import static javax.faces.context.FacesContext.getCurrentInstance;
 import javax.faces.context.ResponseWriter;
 import java.io.IOException;
 import java.util.Map;
@@ -56,8 +56,10 @@ import net.java.dev.weblets.FacesWebletUtils;
 public class WriteWebletIncludes extends UIOutput {
     private static final String REQ_WEBLETS = WriteWebletIncludes.class.getName() + ".WEBLETS";
     private static final String REQ_RENDERED = WriteWebletIncludes.class.getName() + ".WEBLETS_RENDERED";
+    private static final String WEBLET_TINYMCE = "com.flexive.faces.weblets/js/tiny_mce/tiny_mce_src.js";
 
     private Map<String, Boolean> weblets = new HashMap<String, Boolean>();
+    private boolean htmlEditor = false;
 
     public WriteWebletIncludes() {
         weblets.put("com.flexive.faces.weblets/js/flexiveComponents.js", false);
@@ -97,7 +99,7 @@ public class WriteWebletIncludes extends UIOutput {
      * @param weblet    the weblet URI to be rendered (without weblet://)
      * @return  the HTML representation of the given weblet, or null if the weblet was already rendered.
      */
-    public static String renderWeblet(String weblet) {
+    public static String getWebletInclude(String weblet) {
         if (!addWebletInclude(weblet) && getRequestWebletMap().get(weblet)) {
             return null;    // weblet already rendered
         }
@@ -118,9 +120,48 @@ public class WriteWebletIncludes extends UIOutput {
     public void encodeBegin(FacesContext facesContext) throws IOException {
         super.encodeBegin(facesContext);
         final ResponseWriter out = facesContext.getResponseWriter();
-        for (String weblet : weblets.keySet()) {
-            out.write("\n    " + StringUtils.defaultString(renderWeblet(weblet)));
+        final String padding = "\n    ";
+        if (FxJsfUtils.getRequest().getAttribute(REQ_RENDERED) == null) {
+            // render weblet includes only once
+            for (String weblet : weblets.keySet()) {
+                out.write(padding);
+                out.write(StringUtils.defaultString(getWebletInclude(weblet)));
+            }
+            FxJsfUtils.getRequest().setAttribute(REQ_RENDERED, true);
         }
-        FxJsfUtils.getRequest().setAttribute(REQ_RENDERED, true);
+        if (isHtmlEditor()) {
+            out.write(padding);
+            out.write(getWebletInclude(WEBLET_TINYMCE));
+            out.write(padding);
+            FxJavascriptUtils.beginJavascript(out);
+            out.write("initHtmlEditor(false);");
+            FxJavascriptUtils.endJavascript(out);
+        }
+    }
+
+    public boolean isHtmlEditor() {
+        if (FxJsfComponentUtils.getBooleanValue(this, "htmlEditor") != null) {
+            return FxJsfComponentUtils.getBooleanValue(this, "htmlEditor");
+        }
+        return htmlEditor;
+    }
+
+    public void setHtmlEditor(boolean htmlEditor) {
+        this.htmlEditor = htmlEditor;
+    }
+
+    @Override
+    public Object saveState(FacesContext context) {
+        final Object[] state = new Object[2];
+        state[0] = super.saveState(context);
+        state[1] = this.htmlEditor;
+        return state;
+    }
+
+    @Override
+    public void restoreState(FacesContext context, Object oState) {
+        final Object[] state = (Object[]) oState;
+        super.restoreState(context, state[0]);
+        this.htmlEditor = (Boolean) state[1];
     }
 }

@@ -66,42 +66,6 @@ function onReturnEval(event, expression) {
     return false;   // don't "execute" the enter key
 }
 
-// initialize the TinyMCE HTML editor
-function initHtmlEditor(autoPopulate) {
-    try {
-        tinyMCE.baseURL = getBase() + "pub/js/tiny_mce";
-        tinyMCE.srcMode = ""; // "_src" to enable original sourcefiles
-        tinyMCE.init({
-                mode: autoPopulate ? "specific_textareas" : "exact",
-                dialog_type: "modal",
-                editor_selector: "fxValueTextAreaHtml",
-                theme: "advanced",
-                plugins: "paste,fullscreen,inlinepopups",
-                language: tinyMCE.guiLanguage ? tinyMCE.guiLanguage : "en",      
-                entity_encoding: "raw",     // don't replace special characters (like umlaut) with HTML entities
-
-                // general layout options
-                theme_advanced_layout_manager: "SimpleLayout",
-                theme_advanced_toolbar_location : "top",
-                theme_advanced_buttons1: "pastetext,pasteword,separator,undo,redo"
-                    + ",separator,link,unlink,separator,bullist,justifyleft,justifycenter,justifyright,justifyfull,separator,code,fullscreen",
-                theme_advanced_buttons2: "bold,italic,underline,strikethrough,sub,sup,separator,forecolor,fontsizeselect,removeformat",
-                theme_advanced_buttons3: "",
-                theme_advanced_toolbar_align: "left",
-                theme_advanced_resizing : true,
-                theme_advanced_statusbar_location: "bottom",
-
-                // fix alert when switching between multiple editors
-                focus_alert: false,
-                strict_loading_mode: true   /* Fixes Firefox HTML encoding problem with multiple editors */
-                /*width: "100%"*/
-        });
-    } catch (e) {
-        alert("initHtml exception: " + e);
-        // HTML editor component not configured
-    }
-}
-
 // writes the current document's size (width x height) in the given form variables
 function updateClientSize(varClientSizeX, varClientSizeY) {
     var clientSizeX = getWindowWidth();
