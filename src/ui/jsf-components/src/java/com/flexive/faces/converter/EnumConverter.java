@@ -48,8 +48,12 @@ public class EnumConverter implements Converter {
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings({"unchecked"})
     public Object getAsObject(FacesContext facesContext, UIComponent uiComponent, String value) {
+        return getValue(value);
+    }
+
+    @SuppressWarnings({"unchecked"})
+    public static Enum getValue(String value) {
         if (StringUtils.isBlank(value)) {
             return null;
         }

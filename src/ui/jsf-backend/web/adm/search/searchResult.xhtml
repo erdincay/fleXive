@@ -36,6 +36,7 @@
 
             <c:if test="#{fxSearchResultBean.queryBuilder != null}">
                 <h:inputHidden id="rowCount" value="#{fxSearchResultBean.rowCount}"/>
+                <h:inputHidden id="versionFilter" value="#{fxSearchResultBean.versionFilter}"/>
 
                 <adm:resultView id="searchResults" resultModel="#{fxSearchResultBean.resultModel}"
                     location="#{fxSearchResultBean.location}" viewType="#{fxSearchResultBean.viewType}"/>

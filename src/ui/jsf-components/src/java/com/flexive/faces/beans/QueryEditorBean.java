@@ -178,8 +178,7 @@ public class QueryEditorBean implements Serializable {
             }
         }
         resultBean.setQueryBuilder(builder);
-        resultBean.setStartRow(0);
-        resultBean.getSessionData().setBriefcaseId(-1); // TODO: open briefcases in own location
+        resultBean.resetFilters();
         updateQueryStore();
         return resultBean.show();
     }

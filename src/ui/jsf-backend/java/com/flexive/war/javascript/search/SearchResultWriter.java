@@ -35,10 +35,12 @@ package com.flexive.war.javascript.search;
 
 import com.flexive.faces.beans.ResultSessionData;
 import com.flexive.faces.model.FxResultSetDataModel;
+import com.flexive.faces.converter.EnumConverter;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.search.*;
 import static com.flexive.shared.search.ResultViewType.THUMBNAILS;
 import com.flexive.shared.search.query.SqlQueryBuilder;
+import com.flexive.shared.search.query.VersionFilter;
 import com.flexive.war.JsonWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -92,6 +94,7 @@ public class SearchResultWriter implements Serializable {
      * @param gridColumns  number of columns on the grid (for thumbnail views)
      * @param viewTypeName the view type
      * @param typeId       the type filter (-1 to show all types)
+     * @param versionFilter the version filter (JSF-converted {@link VersionFilter} enum value)
      * @param sortIndex    column index (of the rendered columns) used for sorting. If set to -1, the
      * sort order set in the result preferences will be used automatically.
      * @param ascending    sort direction (only used if sortIndex is set)
@@ -99,7 +102,8 @@ public class SearchResultWriter implements Serializable {
      * @throws Exception   if the search could not be submitted successfully
      */
     public String getCurrentResultRows(HttpSession session, String location, int startRow, int fetchRows,
-                                       int gridColumns, String viewTypeName, long typeId, int sortIndex, boolean ascending) throws Exception {
+                                       int gridColumns, String viewTypeName, long typeId, String versionFilter,
+                                       int sortIndex, boolean ascending) throws Exception {
         StringWriter out = new StringWriter();
         try {
             if (viewTypeName.indexOf("::") != -1) {
@@ -109,12 +113,15 @@ public class SearchResultWriter implements Serializable {
             final ResultViewType viewType = ResultViewType.valueOf(viewTypeName);
             // get session data from the HTTP session since the faces context is not available
             final ResultSessionData sessionData = ResultSessionData.getSessionData(session, AdminResultLocations.valueOf(location));
+            final VersionFilter version = (VersionFilter) EnumConverter.getValue(versionFilter);
             // update startrow and fetchrows
             sessionData.setStartRow(startRow);
             sessionData.setFetchRows(fetchRows);
             sessionData.setTypeId(typeId);
+            sessionData.setVersionFilter(version);
             SqlQueryBuilder queryBuilder = sessionData.getQueryBuilder();
             queryBuilder.filterType(typeId);
+            queryBuilder.filterVersion(version);
             if (sortIndex != -1) {
                 queryBuilder.orderBy(SqlQueryBuilder.COL_USERPROPS + sortIndex + 1,
                         ascending ? SortDirection.ASCENDING : SortDirection.DESCENDING);

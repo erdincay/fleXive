@@ -36,6 +36,7 @@ import com.flexive.shared.search.FxFoundType;
 import com.flexive.shared.search.ResultLocation;
 import com.flexive.shared.search.ResultViewType;
 import com.flexive.shared.search.query.SqlQueryBuilder;
+import com.flexive.shared.search.query.VersionFilter;
 import com.flexive.shared.value.BinaryDescriptor;
 
 import javax.servlet.http.HttpSession;
@@ -63,6 +64,7 @@ public class ResultSessionData implements Serializable {
     private int startRow;
     private int fetchRows = 25;
     private long typeId = -1;
+    private VersionFilter versionFilter = VersionFilter.MAX;
     private List<FxFoundType> contentTypes = new ArrayList<FxFoundType>(0);
 
     // Keep a reference on the current session if not retrieved from a JSF context
@@ -214,6 +216,15 @@ public class ResultSessionData implements Serializable {
 
     public void setContentTypes(List<FxFoundType> contentTypes) {
         this.contentTypes = contentTypes;
+        saveInSession();
+    }
+
+    public VersionFilter getVersionFilter() {
+        return versionFilter;
+    }
+
+    public void setVersionFilter(VersionFilter versionFilter) {
+        this.versionFilter = versionFilter;
         saveInSession();
     }
 }

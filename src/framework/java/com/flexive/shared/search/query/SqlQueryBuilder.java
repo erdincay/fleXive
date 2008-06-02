@@ -455,7 +455,8 @@ public class SqlQueryBuilder implements Serializable {
      * @return  this
      */
     public SqlQueryBuilder filterVersion(VersionFilter filter) {
-        return uniqueFilter("co.version", filter.name());
+        removeFilter("VERSION");
+        return uniqueFilter("VERSION", filter.name());
     }
 
     private SqlQueryBuilder setTypeFilter(Object value) {

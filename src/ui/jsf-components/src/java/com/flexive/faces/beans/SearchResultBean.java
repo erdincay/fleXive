@@ -38,11 +38,13 @@ import com.flexive.faces.model.FxGridDataModel;
 import com.flexive.faces.model.FxResultSetDataModel;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.search.*;
 import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.search.query.SqlQueryBuilder;
+import com.flexive.shared.search.query.VersionFilter;
 import com.flexive.shared.value.BinaryDescriptor;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -67,6 +69,7 @@ public class SearchResultBean implements ActionBean, Serializable {
     private HtmlDataTable resultDataTable = null;
     private ResultSessionData sessionData = null;
     private Briefcase briefcase = null; // cached briefcase object for briefcase queries
+    private VersionFilter versionFilter = VersionFilter.MAX;
 
     // cache settings
     private FxSQLSearchParams.CacheMode cacheMode = FxSQLSearchParams.CacheMode.ON;
@@ -96,9 +99,8 @@ public class SearchResultBean implements ActionBean, Serializable {
                     new FxFacesMsgErr("SearchResult.err.query.fulltext.empty").addToContext();
                     return null;
                 }
-                setQueryBuilder(new SqlQueryBuilder(location, getViewType()).condition("*", PropertyValueComparator.EQ, query));
-                setStartRow(0);
-                getSessionData().setBriefcaseId(-1);
+                resetFilters();
+                setQueryBuilder(getSqlQueryBuilder().condition("*", PropertyValueComparator.EQ, query));
                 show();
             } else if ("nodeSearch".equals(action)) {
                 // search in subtree
@@ -106,9 +108,8 @@ public class SearchResultBean implements ActionBean, Serializable {
                     new FxFacesMsgErr("SearchResult.err.query.node.empty").addToContext();
                     return null;
                 }
-                setQueryBuilder(new SqlQueryBuilder(location, getViewType()).isChild(FxJsfUtils.getLongParameter("nodeId")));
-                setStartRow(0);
-                getSessionData().setBriefcaseId(-1);
+                resetFilters();
+                setQueryBuilder(getSqlQueryBuilder().isChild(FxJsfUtils.getLongParameter("nodeId")));
                 show();
             } else if ("openBriefcase".equals(action) || "openBriefcaseDetails".equals(action)) {
                 if (StringUtils.isBlank(FxJsfUtils.getParameter("briefcaseId"))) {
@@ -117,9 +118,9 @@ public class SearchResultBean implements ActionBean, Serializable {
                 }
                 // TODO: open briefcase in own location
                 final long briefcaseId = FxJsfUtils.getLongParameter("briefcaseId");
+                resetFilters();
                 getSessionData().setBriefcaseId(briefcaseId);
-                setQueryBuilder(new SqlQueryBuilder(location, getViewType()).filterBriefcase(briefcaseId));
-                setStartRow(0);
+                setQueryBuilder(getSqlQueryBuilder().filterBriefcase(briefcaseId));
                 show();
             }
         } catch (Exception e) {
@@ -127,6 +128,19 @@ public class SearchResultBean implements ActionBean, Serializable {
             LOG.error("Failed to parse request parameters: " + e.getMessage(), e);
         }
         return null;
+    }
+
+    private SqlQueryBuilder getSqlQueryBuilder() {
+        final SqlQueryBuilder builder = new SqlQueryBuilder(location, getViewType());
+        builder.maxRows(getFetchRows());
+        return builder;
+    }
+
+    public void resetFilters() {
+        setStartRow(0);
+        getSessionData().setBriefcaseId(-1);
+        setTypeId(-1);
+        setVersionFilter(VersionFilter.MAX);
     }
 
     /**
@@ -506,5 +520,21 @@ public class SearchResultBean implements ActionBean, Serializable {
 
     public long getBriefcaseId() throws FxApplicationException {
         return getSessionData().getBriefcaseId();
+    }
+
+    public VersionFilter getVersionFilter() {
+        return getSessionData().getVersionFilter();
+    }
+
+    public void setVersionFilter(VersionFilter versionFilter) {
+        getSessionData().setVersionFilter(versionFilter);
+    }
+
+    public List<SelectItem> getVersionItems() {
+        final List<SelectItem> result = new ArrayList<SelectItem>(2);
+        final MessageBean mb = MessageBean.getInstance();
+        result.add(new SelectItem(VersionFilter.MAX, mb.getResource("SearchResult.label.version.max")));
+        result.add(new SelectItem(VersionFilter.LIVE, mb.getResource("SearchResult.label.version.live")));
+        return result;
     }
 }

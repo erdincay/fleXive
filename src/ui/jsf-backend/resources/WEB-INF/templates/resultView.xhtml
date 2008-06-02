@@ -32,6 +32,7 @@ Parameters:
                                     ? document.getElementById("frm:#{id}_fetchRows").value : #{resultModel.fetchRows},
 		        			#{resultModel.gridColumns}, "#{viewType}",
                             document.getElementById("frm:#{id}_typeId").value,
+                            document.getElementById("frm:#{id}_version").value,
                             #{id}_resultView.sortIndex, #{id}_resultView.sortAscending);
        	}
 
@@ -55,6 +56,10 @@ Parameters:
             <h:selectOneListbox id="#{id}_fetchRows" value="#{fxSearchResultBean.fetchRows}" size="1"
                                 onchange="#{id}_scroller.refresh()" rendered="#{fxSearchResultBean.listView}">
                 <f:selectItems value="#{fxSearchResultBean.fetchRowItems}"/>
+            </h:selectOneListbox>
+            <h:selectOneListbox id="#{id}_version" value="#{fxSearchResultBean.versionFilter}" size="1"
+                                onchange="#{id}_resultView.sortIndex=-1;#{id}_scroller.refresh()">
+                <f:selectItems value="#{fxSearchResultBean.versionItems}"/>
             </h:selectOneListbox>
         </td>
     </tr>

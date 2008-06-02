@@ -38,11 +38,13 @@ import com.flexive.shared.search.query.AssignmentValueNode;
 import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.search.query.QueryOperatorNode.Operator;
 import com.flexive.shared.search.query.SqlQueryBuilder;
+import com.flexive.shared.search.query.VersionFilter;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.value.FxDate;
 import com.flexive.shared.value.FxString;
 import com.flexive.tests.embedded.QueryNodeTreeTests.AssignmentNodeGenerator;
 import org.testng.Assert;
+import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Test;
 
 import java.util.Date;
@@ -224,16 +226,29 @@ public class SqlQueryBuilderTest {
     @Test
     public void filterTypeTest() {
         final SqlQueryBuilder builder = new SqlQueryBuilder().select("@pk").filterType("MYTYPE");
-        Assert.assertEquals(builder.getFilters(), "TYPE=MYTYPE");
+        assertEquals(builder.getFilters(), "TYPE=MYTYPE");
         assert builder.getQuery().contains("FILTER TYPE=MYTYPE") : "Filter not contained in getResult: " + builder.getQuery();
 
         final SqlQueryBuilder builder2 = new SqlQueryBuilder().select("@pk").filterType(21);
-        Assert.assertEquals(builder2.getFilters(), "TYPE=21");
+        assertEquals(builder2.getFilters(), "TYPE=21");
         assert builder2.getQuery().contains("FILTER TYPE=21") : "Filter not contained in getResult: " + builder2.getQuery();
         // remove filter
         builder2.filterType(-1);
-        Assert.assertEquals(builder2.getFilters(), "");
+        assertEquals(builder2.getFilters(), "");
         assert !builder2.getQuery().contains("FILTER TYPE=21") : "Filter still present in getResult: " + builder2.getQuery();
+    }
+
+    @Test
+    public void filterVersionTest() {
+        final SqlQueryBuilder builder = new SqlQueryBuilder().select("@pk").filterVersion(VersionFilter.ALL);
+        assertEquals(builder.getFilters(), "VERSION=ALL");
+        assert builder.getQuery().contains("FILTER VERSION=ALL") : "Filter no contained: " + builder.getQuery();
+
+        builder.filterVersion(VersionFilter.MAX);
+        assertEquals(builder.getFilters(), "VERSION=MAX");
+
+        builder.filterVersion(VersionFilter.LIVE);
+        assertEquals(builder.getFilters(), "VERSION=LIVE");
     }
 
     @Test
