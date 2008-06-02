@@ -666,9 +666,9 @@
                 </para>
                 <section xml:id="jcl_fx_value_input_synopsis">
                     <title>Synopsis</title>
-                    <programlisting language="xhtml"><![CDATA[<fx:fxValueInput value="fxvalue" [id="clientid"] [externalId="externalId"] [readOnly="true|false"]
-                 [forceLineInput="true|false"] [inputMapper="inputMapper"] [filter="true|false"]
-                 [onchange="onchange"] [disableMultiLanguage="true|false"]/>
+                    <programlisting language="xhtml"><![CDATA[<fx:fxValueInput value="fxvalue" [id="clientid"] [externalId="externalId"] [readOnly="true|false"] [readOnlyShowTranslations="true|false"]
+                 [forceLineInput="true|false"] [inputMapper="inputMapper"] [valueFormatter="valueFormatter"] [filter="true|false"]
+                 [containerDivClass="CSS class"] [disableMultiLanguage="true|false"] [disableLytebox="true|false] [onchange="onchange"] />
 ]]></programlisting>
                 </section>
 
@@ -711,6 +711,15 @@
                             <listitem>
                                 <para>
                                     If true, only the value itself will be rendered.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>readOnlyShowTranslations</term>
+                            <listitem>
+                                <para>
+                                    If true, all translations of a property will be shown, else only the best matching translation (in the calling users language or the language marked as default).
                                 </para>
                             </listitem>
                         </varlistentry>
@@ -763,6 +772,16 @@
                         </varlistentry>
 
                         <varlistentry>
+                            <term>containerDivClass</term>
+                            <listitem>
+                                <para>
+                                    If this CSS class property is set, the component will be embedded in a div-container
+                                    using this CSS class as style.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
                             <term>disableMultiLanguage</term>
                             <listitem>
                                 <para>
@@ -772,6 +791,16 @@
                             </listitem>
                         </varlistentry>
 
+                        <varlistentry>
+                            <term>disableLytebox</term>
+                            <listitem>
+                                <para>
+                                    Set this property to true if the
+                                    <link xlink:href="http://www.dolem.com/lytebox/">Lytebox</link>
+                                    javascript library used for rendering inline previews of images should not be used.
+                                </para>
+                            </listitem>
+                        </varlistentry>
 
                         <varlistentry>
                             <term>onchange</term>
