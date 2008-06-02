@@ -69,11 +69,13 @@ class ReadOnlyModeHelper extends RenderHelper {
         if (component.isReadOnlyShowTranslations()) {
             //TODO: for now only binaries are implemented correctly
             for (FxLanguage language : FxValueInputRenderer.getLanguages()) {
-
-                encodeField(component, clientId, language);
+                if (value.translationExists(language.getId())) {
+                    encodeField(component, clientId, language);
+                }
             }
-        } else
+        } else {
             encodeField(component, clientId, FxContext.get().getTicket().getLanguage());
+        }
     }
 
     /**
@@ -82,36 +84,23 @@ class ReadOnlyModeHelper extends RenderHelper {
     @Override
     @SuppressWarnings({"unchecked"})
     protected void encodeField(UIComponent parent, String inputId, FxLanguage language) throws IOException {
-        if (!value.isEmpty()) {
-            // TODO: optional "empty" message
-            final FxLanguage outputLanguage = FxContext.get().getTicket().getLanguage();
-            if (language == null) //use the ticket's language
-                language = outputLanguage;
-            else if (!value.translationExists(language.getId()))
-                return; //dont render if not translated
-            if (component.getValueFormatter() != null) {
-                // use custom formatter
-                addOutputComponent(component.getValueFormatter().format(value, value.getBestTranslation(language), outputLanguage), language);
-            } else if (value instanceof FxBinary && !value.isEmpty()) {
-                // render preview image
-                renderPreviewImage(language);
-            } else if (component.isFilter() && !(value instanceof FxHTML)) {
-                // escape HTML code and generate <br/> tags for newlines
-                addOutputComponent(FxFormatUtils.escapeForJavaScript(FxValueRendererFactory.getInstance(outputLanguage).format(value, language), true, true), language);
-            } else {
-                // write the plain value
-                addOutputComponent(FxValueRendererFactory.getInstance(outputLanguage).format(value, language), language);
-            }
-//            final Object translation = language != null ? value.getBestTranslation(language) : value.getDefaultTranslation();
-//            if (value instanceof FxHTML) {
-//                writer.write((String) translation);
-//            } else if (translation instanceof FxSelectListItem) {
-//                writer.write(((FxSelectListItem) translation).getLabel().getBestTranslation());
-//            } else if (translation instanceof SelectMany) {
-//                writer.write(StringUtils.join(((SelectMany) translation).getSelectedLabels().iterator(), ", "));
-//            } else {
-//                writer.writeText(translation, null);
-//            }
+        if (value.isEmpty()) {
+            return;
+        }
+        // TODO: optional "empty" message
+        final FxLanguage outputLanguage = FxContext.get().getTicket().getLanguage();
+        if (component.getValueFormatter() != null) {
+            // use custom formatter
+            addOutputComponent(component.getValueFormatter().format(value, value.getBestTranslation(language), outputLanguage), language);
+        } else if (value instanceof FxBinary && !value.isEmpty()) {
+            // render preview image
+            renderPreviewImage(language);
+        } else if (component.isFilter() && !(value instanceof FxHTML)) {
+            // escape HTML code and generate <br/> tags for newlines
+            addOutputComponent(FxFormatUtils.escapeForJavaScript(FxValueRendererFactory.getInstance(outputLanguage).format(value, language), true, true), language);
+        } else {
+            // write the plain value
+            addOutputComponent(FxValueRendererFactory.getInstance(outputLanguage).format(value, language), language);
         }
     }
 
@@ -132,7 +121,7 @@ class ReadOnlyModeHelper extends RenderHelper {
     }
 
     private void renderPreviewImage(FxLanguage language) {
-        if (value.isEmpty() || !value.translationExists(language.getId())) {
+        if (value.isEmpty() || (language != null && !value.translationExists(language.getId()))) {
             return;
         }
         final BinaryDescriptor descriptor = ((FxBinary) value).getTranslation(language);
