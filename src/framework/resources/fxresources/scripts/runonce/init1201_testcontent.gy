@@ -33,6 +33,7 @@
 import com.flexive.shared.CacheAdmin
 import com.flexive.shared.EJBLookup
 import com.flexive.shared.FxContext
+import com.flexive.shared.FxLanguage
 import com.flexive.shared.content.FxContent
 import com.flexive.shared.content.FxPK
 import com.flexive.shared.security.ACL
@@ -113,7 +114,7 @@ BinaryDescriptor buildBinarySearchProp(int counter) {
 
 void buildGroupData(String prefix, FxContent co, int counter, folderPks) {
     co.setValue("$prefix/stringSearchProp", new FxString(false, "StringValue$counter"))
-    co.setValue("$prefix/stringSearchPropML", new FxString(true, "StringValueML$counter"))
+    co.setValue("$prefix/stringSearchPropML", new FxString(FxLanguage.ENGLISH, "StringValueML$counter").setTranslation(FxLanguage.GERMAN, "DE StringValueML" + counter))
     co.setValue("$prefix/textSearchProp", new FxString(false, "TextValue$counter"))
     co.setValue("$prefix/htmlSearchProp", new FxHTML(false, "HTMLValue$counter"))
     co.setValue("$prefix/numberSearchProp", new FxNumber(false, counter))

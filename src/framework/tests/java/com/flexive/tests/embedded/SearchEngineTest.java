@@ -31,10 +31,9 @@
  ***************************************************************/
 package com.flexive.tests.embedded;
 
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.FxContext;
-import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.*;
+import static com.flexive.shared.FxLanguage.ENGLISH;
+import static com.flexive.shared.FxLanguage.GERMAN;
 import static com.flexive.shared.EJBLookup.getContentEngine;
 import static com.flexive.shared.EJBLookup.getMandatorEngine;
 import static com.flexive.shared.EJBLookup.getSearchEngine;
@@ -42,6 +41,7 @@ import static com.flexive.shared.EJBLookup.getAssignmentEngine;
 import static com.flexive.shared.EJBLookup.getTypeEngine;
 import static com.flexive.shared.EJBLookup.getAclEngine;
 import static com.flexive.shared.EJBLookup.getTreeEngine;
+import static com.flexive.shared.EJBLookup.getLanguageEngine;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNodeEdit;
@@ -1172,6 +1172,53 @@ public class SearchEngineTest {
                 FxContext.get().stopRunAsSystem();
             }
         }
+    }
+
+    @Test
+    public void searchLanguageFallbackTest_FX260() throws FxApplicationException {
+        final int maxRows = 20;
+        final UserTicket ticket = FxContext.get().getTicket();
+        final FxLanguage oldLanguage = ticket.getLanguage();
+
+        try {
+            ticket.overrideLanguage(getLanguageEngine().load(ENGLISH));
+            final FxResultSet result = new SqlQueryBuilder()
+                    .select("@pk", TEST_TYPE + "/stringSearchPropML")
+                    .type(TEST_TYPE)
+                    .maxRows(maxRows)
+                    .getResult();
+            assert result.getRowCount() == maxRows;
+            final FxPK pk = result.getResultRow(0).getPk(1);
+
+            // get reference value from the content engine
+            final FxString reference = (FxString) getContentEngine().load(pk).getValue("/stringSearchPropML");
+            assert StringUtils.isNotBlank(reference.getTranslation(ENGLISH));
+            assert StringUtils.isNotBlank(reference.getTranslation(GERMAN));
+            assert !reference.getTranslation(ENGLISH).equals(reference.getTranslation(GERMAN));
+
+            // compare translated values in the search result
+            checkResultTranslation((FxString) result.getResultRow(0).getFxValue(2), reference, ENGLISH);
+
+            ticket.overrideLanguage(getLanguageEngine().load(GERMAN));
+            checkResultTranslation(new SqlQueryBuilder()
+                    .select(TEST_TYPE + "/stringSearchPropML")
+                    .condition("id", PropertyValueComparator.EQ, pk.getId())
+                    .getResult()
+                    .<FxString>collectColumn(1)
+                    .get(0),
+                    reference,
+                    GERMAN);
+        } finally {
+            ticket.overrideLanguage(oldLanguage);
+        }
+    }
+
+    private void checkResultTranslation(FxString resultValue, FxString reference, long language) {
+        assert reference.getTranslation(language).equals(resultValue.getBestTranslation())
+                : "bestTranslation of result value not equal to user translation, expected: "
+                + reference.getTranslation(language) + ", got: " + resultValue.getBestTranslation();
+        /*final String translationEn = resultValue.getTranslation(language);
+        assert StringUtils.isNotBlank(translationEn) : "Ticket language translation not returned";*/
     }
 
     private void assertExactPkMatch(FxPK pk, List<FxPK> pks) {

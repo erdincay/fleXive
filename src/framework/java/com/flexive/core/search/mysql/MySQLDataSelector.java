@@ -339,7 +339,11 @@ public class MySQLDataSelector extends DataSelector {
                 FILTER_ALIAS + ".ver AND " +
                 (entry.isAssignment()
                         ? "ASSIGN=" + entry.getAssignment().getId()
-                        : "TPROP=" + entry.getProperty().getId()) +
+                        : "TPROP=" + entry.getProperty().getId()) + " AND " +
+                "(" + SUBSEL_ALIAS + ".lang=" + search.getLanguage().getId() +
+                " OR " + SUBSEL_ALIAS + ".ismldef=true)" +
+                // fetch exact language match before default
+                " ORDER BY " + SUBSEL_ALIAS + ".ismldef " + 
                 " LIMIT 1 " + ")";
         if (!xpath && entry.getProperty().getDataType() == FxDataType.Binary) {
             // select string-coded form of the BLOB properties

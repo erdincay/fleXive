@@ -362,7 +362,7 @@ public class XPathElement implements Serializable {
      */
     public static String stripType(String XPath) {
         assert XPath != null : "XPath was null!";
-        if (!XPath.startsWith("/"))
+        if (!XPath.startsWith("/") && XPath.indexOf('/') > 0)
             return XPath.substring(XPath.indexOf('/')).toUpperCase();
         return XPath.toUpperCase();
     }
