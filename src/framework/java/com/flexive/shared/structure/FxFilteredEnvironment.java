@@ -380,6 +380,13 @@ public final class FxFilteredEnvironment implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
+    public boolean typeExists(String name) {
+        return environment.typeExists(name);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public FxType getType(long id) {
         return environment.getType(id);
     }

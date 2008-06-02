@@ -308,6 +308,14 @@ public interface FxEnvironment extends Serializable {
     FxType getType(String name);
 
     /**
+     * Check if a type with the given name exists
+     *
+     * @param name type name to check for
+     * @return true if the type exists
+     */
+    boolean typeExists(String name);
+
+    /**
      * Get types depending on selection criteria
      *
      * @param returnBaseTypes    return types that are not derived from another type

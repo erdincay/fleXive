@@ -34,6 +34,7 @@ package com.flexive.core.conversion;
 import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.structure.FxTypeEdit;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxConversionException;
@@ -89,6 +90,13 @@ public class LifeCycleInfoConverter implements Converter {
             final long modificator = acc.load(reader.getAttribute("mf")).getId();
             if( ctx.get(ConversionEngine.KEY_CONTENT) instanceof FxContent) {
                 LifeCycleInfoImpl lci = (LifeCycleInfoImpl)((FxContent)ctx.get(ConversionEngine.KEY_CONTENT)).getLifeCycleInfo();
+                lci.setCreatorId(creatorId);
+                lci.setCreationTime(crAt);
+                lci.setModifcatorId(modificator);
+                lci.setModificationTime(mfAt);
+                return lci;
+            } else if( ctx.get(ConversionEngine.KEY_TYPE) instanceof FxTypeEdit) {
+                LifeCycleInfoImpl lci = (LifeCycleInfoImpl)((FxTypeEdit)ctx.get(ConversionEngine.KEY_TYPE)).getLifeCycleInfo();
                 lci.setCreatorId(creatorId);
                 lci.setCreationTime(crAt);
                 lci.setModifcatorId(modificator);

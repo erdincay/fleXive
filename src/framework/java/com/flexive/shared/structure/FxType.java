@@ -208,12 +208,12 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     }
 
     /**
-     * Get the description of this FxType
+     * Get the description (=label) of this FxType
      *
-     * @return description
+     * @return description (=label)
      */
     public FxString getDescription() {
-        return description;
+        return  getLabel();
     }
 
     /**

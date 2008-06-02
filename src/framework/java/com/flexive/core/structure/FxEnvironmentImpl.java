@@ -769,6 +769,16 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
+    public boolean typeExists(String name) {
+        for (FxType type : types)
+            if (type.getName().equalsIgnoreCase(name))
+                return true;
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public FxType getType(long id) {
         for (FxType type : types)
             if (type.getId() == id)
