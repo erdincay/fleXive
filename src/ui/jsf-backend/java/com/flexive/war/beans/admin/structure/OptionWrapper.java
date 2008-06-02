@@ -41,6 +41,7 @@ import com.flexive.shared.structure.FxStructureOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
 
 /**
  * Conveniently wraps FxStructureOptions to simplify GUI Manipulaiton.
@@ -54,10 +55,13 @@ import java.util.Map;
 
 public class OptionWrapper {
     private static String[] standardOptionKeys = {FxStructureOption.OPTION_HTML_EDITOR,
-            FxStructureOption.OPTION_MULTILANG,
             FxStructureOption.OPTION_MULTILINE,
             FxStructureOption.OPTION_SEARCHABLE,
             FxStructureOption.OPTION_SHOW_OVERVIEW};
+
+    private static String[] blacklistedOptionKeys = {
+        FxStructureOption.OPTION_MULTILANG
+    };
 
     private List<WrappedOption> structureOptions = null;
     private List<WrappedOption> assignmentOptions = null;
@@ -77,19 +81,23 @@ public class OptionWrapper {
         this.structureOptions = new ArrayList<WrappedOption>();
         this.assignmentOptions = new ArrayList<WrappedOption>();
 
+        List<String> blacklisted = Arrays.asList(blacklistedOptionKeys);
+
         if (structureOptions != null)
             for (FxStructureOption o : structureOptions) {
-                this.structureOptions.add(new WrappedOption(o));
+                if (!blacklisted.contains(o.getKey()))
+                    this.structureOptions.add(new WrappedOption(o));
             }
         if (assignmentOptions != null)
             for (FxStructureOption o : assignmentOptions) {
-                this.assignmentOptions.add(new WrappedOption(o));
+                if (!blacklisted.contains(o.getKey()))
+                    this.assignmentOptions.add(new WrappedOption(o));
             }
 
         if (addStandardOptions) {
             List<WrappedOption> standardOptions = new ArrayList<WrappedOption>();
-            for (int i = 0; i < standardOptionKeys.length; i++) {
-                standardOptions.add(new WrappedOption(standardOptionKeys[i], FxStructureOption.VALUE_FALSE, true, true));
+            for (String standardOptionKey : standardOptionKeys) {
+                standardOptions.add(new WrappedOption(standardOptionKey, FxStructureOption.VALUE_FALSE, true, true));
             }
             for (WrappedOption o : standardOptions) {
                 if (!this.structureOptions.contains(o))

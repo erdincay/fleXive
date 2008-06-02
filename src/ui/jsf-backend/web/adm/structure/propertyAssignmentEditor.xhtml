@@ -77,10 +77,12 @@
                 <fx:resultValue id="propertyDataType" value="#{propertyEditorBean.property.dataType.name}"/>
             </fx:formRow>
 
-             <fx:formRow labelKey="PropertyEditor.label.defaultValue" id="defaultValue">
-                <fx:fxValueInput id="defaultValue" value="#{propertyEditorBean.defaultValue}"
-                         readOnly="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
-            </fx:formRow>
+             <a4j:outputPanel id="defaultValueInput">
+                 <fx:formRow labelKey="PropertyEditor.label.defaultValue" id="defaultValue">
+                    <fx:fxValueInput id="defaultValue" value="#{propertyEditorBean.defaultValue}"
+                             readOnly="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
+                </fx:formRow>
+            </a4j:outputPanel>
 
             <fx:formRow labelKey="PropertyEditor.label.defaultMultiplicity" id="defaultMultiplicity">
                 <h:inputText id="defaultMultiplicity" value="#{propertyEditorBean.defaultMultiplicity}"
@@ -97,20 +99,24 @@
                 <fx:formRow labelKey="PropertyEditor.label.multiLang" id="multiLang">
                         <h:selectBooleanCheckbox id="multiLang" value="#{propertyEditorBean.multiLang}"
                              disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
-                             onclick="confirmMultiLang(#{propertyEditorBean.multiLang});"/>
+                             onclick="confirmMultiLang(#{propertyEditorBean.multiLang});">
+                            <a4j:support event="onchange" reRender="defaultValueInput,defaultLanguageInput"/>
+                        </h:selectBooleanCheckbox>
                 </fx:formRow>
 
-                <ui:fragment rendered="#{propertyEditorBean.multiLang}">
-                    <div style="padding-left:17px">
-                        <fx:formRow labelKey="PropertyEditor.label.defaultLanguage" id="defaultLanguage">
-                         <t:selectOneListbox size="1" id="defaultLanguage" value="#{propertyEditorBean.defaultLanguage}"
-                                converter="FxLanguageConverter"
-                                disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
-                                <f:selectItems value="#{fxSelectBean.languages}" />
-                            </t:selectOneListbox>
-                        </fx:formRow>
-                    </div>
-                </ui:fragment>
+                <a4j:outputPanel id="defaultLanguageInput">
+                    <ui:fragment rendered="#{propertyEditorBean.multiLang}">
+                        <div style="padding-left:17px">
+                            <fx:formRow labelKey="PropertyEditor.label.defaultLanguage" id="defaultLanguage">
+                             <t:selectOneListbox size="1" id="defaultLanguage" value="#{propertyEditorBean.defaultLanguage}"
+                                    converter="FxLanguageConverter"
+                                    disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
+                                    <f:selectItems value="#{fxSelectBean.languages}" />
+                                </t:selectOneListbox>
+                            </fx:formRow>
+                        </div>
+                    </ui:fragment>
+                </a4j:outputPanel>
 
                 <fx:formRow labelKey="PropertyEditor.label.overrideBaseMultiplicity" id="mayOverrideBaseMultiplicity">
                         <h:selectBooleanCheckbox id="mayOverrideBaseMultiplicity" value="#{propertyEditorBean.propertyMayOverrideBaseMultiplicity}"
@@ -193,7 +199,8 @@
             function confirmMultiLang(value) {
                 choice = confirm("#{fxMessageBean['PropertyEditor.message.confirmMultiLang']}");
                 if (choice) {
-                    document.forms["frm"].submit();
+                    // not needed anymore, handled by ajax:support tag now
+                    // document.forms["frm"].submit();
                 }
                 else {
                     document.getElementById("frm:multiLang").checked = value;

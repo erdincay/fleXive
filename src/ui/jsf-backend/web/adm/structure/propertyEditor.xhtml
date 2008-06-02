@@ -20,7 +20,7 @@
       </ui:define>
 
     <ui:define name="body">
-        <h:form id="frm" enctype="multipart/form-data">
+        <a4j:form id="frm" enctype="multipart/form-data">
         <c:if test="#{empty propertyEditorBean.parseRequestParameters}"> </c:if>
         <c:if test="#{structureTreeControllerBean.doAction}">
             <script type="text/javascript">
@@ -67,25 +67,16 @@
 					<fx:fxValueInput id="hint" value="#{propertyEditorBean.propertyHint}"
                          readOnly="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
 			</fx:formRow>
-            <fx:formRow labelKey="PropertyEditor.label.multiLang" id="multiLang">
-					<h:selectBooleanCheckbox id="multiLang" value="#{propertyEditorBean.propertyMultiLanguage}"
-                         disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
-			</fx:formRow>
-             <fx:formRow labelKey="PropertyEditor.label.fulltextIndexed" id="fulltextIndexed">
-                    <h:selectBooleanCheckbox id="fulltextIndexed" value="#{propertyEditorBean.propertyFulltextIndexed}"
-                         disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
-            </fx:formRow>
             <c:if test="#{propertyEditorBean.property.new}">
                 <fx:formRow labelKey="PropertyEditor.label.autoUniquePropertyName" id="autoUniquePropertyName">
                     <h:selectBooleanCheckbox id="autoUniquePropertyName" value="#{propertyEditorBean.propertyAutoUniquePropertyName}"/>    
                 </fx:formRow>
             </c:if>
-            <fx:formRow labelKey="PropertyEditor.label.uniqueMode" id="uniqueMode">
-                <t:selectOneListbox size="1" id="uniqueMode" value="#{propertyEditorBean.propertyUniqueMode}"
-                     disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor']) or
-                     propertyEditorBean.propertyUsedInInstance}">
-                    <f:selectItems value="#{fxSelectBean.uniqueModes}" />
-                </t:selectOneListbox>
+            <fx:formRow labelKey="PropertyEditor.label.multiLang" id="multiLang">
+                <h:selectBooleanCheckbox id="multiLang" value="#{propertyEditorBean.propertyMultiLanguage}"
+                     disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
+                    <a4j:support event="onchange" reRender="defaultValueInput"/>
+                </h:selectBooleanCheckbox>
             </fx:formRow>
             <fx:formRow labelKey="PropertyEditor.label.dataType" id="dataType">
                 <t:selectOneListbox size="1" id="dataType" value="#{propertyEditorBean.propertyDataType}"
@@ -112,6 +103,12 @@
                     </fx:formRow>
                 </ui:fragment>
             </div>
+            <a4j:outputPanel id="defaultValueInput">
+                <fx:formRow labelKey="PropertyEditor.label.defaultValue" id="defaultValue">
+                    <fx:fxValueInput id="defaultValue" value="#{propertyEditorBean.propertyDefaultValue}"
+                             readOnly="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
+                </fx:formRow>
+            </a4j:outputPanel>
             <fx:formRow labelKey="PropertyEditor.label.multiplicity" id="multiplicity">
                 <h:inputText id="multiplicity" value="#{propertyEditorBean.propertyMinMultiplicity}"
                          disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
@@ -136,6 +133,17 @@
                          disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
                 </fx:formRow>
            </fx:fieldSet>
+            <fx:formRow labelKey="PropertyEditor.label.fulltextIndexed" id="fulltextIndexed">
+                    <h:selectBooleanCheckbox id="fulltextIndexed" value="#{propertyEditorBean.propertyFulltextIndexed}"
+                         disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
+            </fx:formRow>
+            <fx:formRow labelKey="PropertyEditor.label.uniqueMode" id="uniqueMode">
+                <t:selectOneListbox size="1" id="uniqueMode" value="#{propertyEditorBean.propertyUniqueMode}"
+                     disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor']) or
+                     propertyEditorBean.propertyUsedInInstance}">
+                    <f:selectItems value="#{fxSelectBean.uniqueModes}" />
+                </t:selectOneListbox>
+            </fx:formRow>
 
            <fx:fieldSet legend="#{fxMessageBean['PropertyEditor.label.referencingPropertyAssignments']}">
              <table dojoType="SortableTable" widgetId="referencingPropertyAssignments" enableMultipleSelect="true"
@@ -178,7 +186,7 @@
             <ui:include src="../templates/structureEditorHelpButton.xhtml"/>
 
         <adm:toolbarPluginButtons/>
-        </h:form>
+        </a4j:form>
 
 
 
