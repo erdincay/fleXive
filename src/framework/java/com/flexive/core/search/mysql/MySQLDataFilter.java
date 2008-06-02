@@ -394,11 +394,12 @@ public class MySQLDataFilter extends DataFilter {
             typeFilter = " AND cd.tdef NOT IN(" + types + ")";
         else
             typeFilter = types; //empty
+        final String versionFilter = " AND cd." + (mode.equals(FxTreeMode.Edit) ? "ismax_ver" : "islive_ver") + "=true";
         return "(SELECT DISTINCT cd.id,cd.ver,null lang FROM " + tableMain + " cd WHERE " +
                 "cd.id IN (SELECT ref FROM " + GenericTreeStorage.getTable(mode) + " WHERE " +
                 "LFT>" + nodeInfo.getLeft() + " AND RGT<" + nodeInfo.getRight() + " AND ref IS NOT NULL " +
                 (direct ? " AND depth=" + (nodeInfo.getDepth() + 1) : "") +
-                ")" + mandatorFilter + typeFilter + ")";
+                ")" + mandatorFilter + typeFilter + versionFilter + ")";
 
     }
 

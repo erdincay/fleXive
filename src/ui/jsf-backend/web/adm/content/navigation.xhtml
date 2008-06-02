@@ -142,7 +142,7 @@
 
             function querySubTreeImmediate(menuItem) {
                 // submit query
-                invokeContentAction("adm/search/searchResult.jsf", "nodeSearch", {nodeId: getObjectId(menuItem)});
+                invokeContentAction("adm/search/searchResult.jsf", "nodeSearch", {nodeId: getObjectId(menuItem), liveMode: treeLiveMode});
             }
 
             // attach the selected rows from the content frame

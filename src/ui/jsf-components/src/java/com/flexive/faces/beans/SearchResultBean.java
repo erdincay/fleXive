@@ -109,7 +109,10 @@ public class SearchResultBean implements ActionBean, Serializable {
                     return null;
                 }
                 resetFilters();
-                setQueryBuilder(getSqlQueryBuilder().isChild(FxJsfUtils.getLongParameter("nodeId")));
+                final long id = FxJsfUtils.getLongParameter("nodeId");
+                final boolean liveTree = FxJsfUtils.getBooleanParameter("liveMode", false);
+                setVersionFilter(liveTree ? VersionFilter.LIVE : VersionFilter.MAX);
+                setQueryBuilder(getSqlQueryBuilder().isChild(id));
                 show();
             } else if ("openBriefcase".equals(action) || "openBriefcaseDetails".equals(action)) {
                 if (StringUtils.isBlank(FxJsfUtils.getParameter("briefcaseId"))) {
@@ -133,6 +136,7 @@ public class SearchResultBean implements ActionBean, Serializable {
     private SqlQueryBuilder getSqlQueryBuilder() {
         final SqlQueryBuilder builder = new SqlQueryBuilder(location, getViewType());
         builder.maxRows(getFetchRows());
+        builder.filterVersion(getVersionFilter());
         return builder;
     }
 

@@ -41,6 +41,7 @@ import static com.flexive.shared.EJBLookup.getSearchEngine;
 import static com.flexive.shared.EJBLookup.getAssignmentEngine;
 import static com.flexive.shared.EJBLookup.getTypeEngine;
 import static com.flexive.shared.EJBLookup.getAclEngine;
+import static com.flexive.shared.EJBLookup.getTreeEngine;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNodeEdit;
@@ -121,7 +122,7 @@ public class SearchEngineTest {
         // link test instances in tree
         for (FxPK pk: testPks) {
             generatedNodeIds.add(
-                    EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("test" + pk)
+                    getTreeEngine().save(FxTreeNodeEdit.createNew("test" + pk)
                             .setReference(pk).setName(RandomStringUtils.random(new Random().nextInt(1024), true, true)))
             );
         }
@@ -130,7 +131,7 @@ public class SearchEngineTest {
     @AfterClass
     public void shutdown() throws Exception {
         for (long nodeId: generatedNodeIds) {
-            EJBLookup.getTreeEngine().remove(
+            getTreeEngine().remove(
                     FxTreeNodeEdit.createNew("").setId(nodeId).setMode(FxTreeMode.Edit),
                     false, true);
         }
@@ -779,7 +780,7 @@ public class SearchEngineTest {
                 assert leaf.getReferenceId() == row.getPk(1).getId() : "Expected reference ID " + row.getPk(1)
                         + ", got: " + leaf.getReferenceId() + " (nodeId=" + leaf.getNodeId() + ")";
 
-                final String treePath = StringUtils.join(EJBLookup.getTreeEngine().getLabels(FxTreeMode.Edit, leaf.getNodeId()), '/');
+                final String treePath = StringUtils.join(getTreeEngine().getLabels(FxTreeMode.Edit, leaf.getNodeId()), '/');
                 assert treePath.equals(path.getCaption()) : "Unexpected tree path '" + path.getCaption()
                         + "', expected: '" + treePath + "'";
 
@@ -790,7 +791,37 @@ public class SearchEngineTest {
         assert pathResult.getRowCount() == result.getRowCount() : "Path select returned " + pathResult.getRowCount()
                 + " rows, select by ID returned " + result.getRowCount() + " rows.";
         // query a leaf node
-        new SqlQueryBuilder().select("@pk").isChild(EJBLookup.getTreeEngine().getPathById(FxTreeMode.Edit, pathResult.getResultRow(0).getPk(1).getId()));
+        new SqlQueryBuilder().select("@pk").isChild(getTreeEngine().getPathById(FxTreeMode.Edit, pathResult.getResultRow(0).getPk(1).getId()));
+    }
+
+    @Test
+    public void treeConditionTest_FX263() throws FxApplicationException {
+        // Bug FX-263: all versions of a content are returned in the edit(=max version) tree
+
+        // find a suitable test content instance
+        FxResultSet result = new SqlQueryBuilder().select("@pk").condition("version", PropertyValueComparator.GT, 1).getResult();
+        assert result.getRowCount() > 0;
+        final FxPK pk = result.<FxPK>collectColumn(1).get(0);
+        assert pk.getVersion() > 1;
+
+        // create a test folder
+        long folderNodeId = -1;
+        try {
+            folderNodeId = getTreeEngine().save(FxTreeNodeEdit.createNew("treeConditionTest_FX263"));
+            // attach child content
+            getTreeEngine().save(FxTreeNodeEdit.createNew("").setReference(pk).setParentNodeId(folderNodeId));
+
+            // find children in default (=maximum) version filter mode, should return 1 row in maximum version
+            result = new SqlQueryBuilder().select("@pk").isChild(folderNodeId).getResult();
+            assert result.getRowCount() == 1 : "Expected one child, got: " + result.getRowCount()
+                    + " (" + result.collectColumn(1) + ")";
+            // should return maximum version
+            assert result.getResultRow(0).getPk(1).getVersion() == pk.getVersion();
+        } finally {
+            if (folderNodeId != -1) {
+                getTreeEngine().remove(FxTreeNodeEdit.createNew("").setId(folderNodeId), true, true);
+            }
+        }
     }
 
     @Test
@@ -854,12 +885,12 @@ public class SearchEngineTest {
     public void lastContentChangeTreeTest() throws FxApplicationException {
         final long lastContentChange = getSearchEngine().getLastContentChange(false);
         assert lastContentChange > 0;
-        final long nodeId = EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("lastContentChangeTreeTest"));
+        final long nodeId = getTreeEngine().save(FxTreeNodeEdit.createNew("lastContentChangeTreeTest"));
         try {
             final long editContentChange = getSearchEngine().getLastContentChange(false);
             assert editContentChange > lastContentChange
                     : "Saved content, but lastContentChange timestamp was not increased: " + editContentChange;
-            EJBLookup.getTreeEngine().activate(FxTreeMode.Edit, nodeId, false);
+            getTreeEngine().activate(FxTreeMode.Edit, nodeId, false);
             assert getSearchEngine().getLastContentChange(true) > editContentChange
                     : "Activated content, but live mode lastContentChange timestamp was not increased: "
                         + getSearchEngine().getLastContentChange(true);
@@ -869,12 +900,12 @@ public class SearchEngineTest {
             FxContext.get().runAsSystem();
             try {
                 try {
-                    EJBLookup.getTreeEngine().remove(EJBLookup.getTreeEngine().getNode(FxTreeMode.Edit, nodeId), true, false);
+                    getTreeEngine().remove(getTreeEngine().getNode(FxTreeMode.Edit, nodeId), true, false);
                 } catch (FxApplicationException e) {
                     // pass
                 }
                 try {
-                    EJBLookup.getTreeEngine().remove(EJBLookup.getTreeEngine().getNode(FxTreeMode.Live, nodeId), true, false);
+                    getTreeEngine().remove(getTreeEngine().getNode(FxTreeMode.Live, nodeId), true, false);
                 } catch (FxApplicationException e) {
                     // pass
                 }
