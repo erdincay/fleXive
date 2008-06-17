@@ -6,7 +6,11 @@
 <programlisting language="java" xml:id="core_structre_ex_new_user"  xmlns="http://docbook.org/ns/docbook">
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.interfaces.AccountEngine;
+import com.flexive.shared.security.AccountEdit
 
 AccountEngine ae = EJBLookup.getAccountEngine();
-ae.create(“Administrator”, “admin”, “pw123”, “admin@flexive.org”, 1, 1, true, true, SYSDATE, “”, -1, “Administrator account”, false, false);    
+AccountEdit accountEdit = new AccountEdit()
+accountEdit.setEmail("admin@flexive.org")
+accountEdit.setName("admin")
+long accountId = ae.create(accountEdit, "password")
 </programlisting>
