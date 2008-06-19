@@ -16,40 +16,48 @@
 
 <body>
 
-    <h:messages globalOnly="true"/>
-        
-    <h:form enctype="multipart/form-data">
+<h:messages globalOnly="true"/>
 
-        <ul id="mainmenu">
-            <li>
-                <h:outputLink value="index.xhtml">Return to overview</h:outputLink>
-            </li>
-        </ul>
+<h:form enctype="multipart/form-data">
+
+    <ul id="mainmenu">
+        <li>
+            <h:outputLink value="index.xhtml">Return to overview</h:outputLink>
+        </li>
+    </ul>
 
 
-        <!--
-             Create a new content of type document01 or edit an existing content instance if set in fxContentViewBean.
-        -->
-        <fx:content typeName="document01" content="#{fxContentViewBean.content}" var="document">
+    <!--
+         Create a new content of type document01 or edit an existing content instance if set in fxContentViewBean.
+    -->
+    <fx:content typeName="document01" content="#{fxContentViewBean.content}" var="document">
 
-            <fx:fieldSet legend="Document Upload">
-                <!-- Render the input form -->
-                <fx:value property="file"/>
-                <fx:value property="caption"/>
+        <fx:fieldSet legend="Document Upload">
+            <!-- Render the input form -->
+            <fx:value property="file"/>
+            <fx:value property="caption"/>
 
-                <!-- Render the submit button -->
-                <fx:formRow>
-                    <h:commandButton action="#{fxContentViewBean.save}" value="Save">
-                        <f:setPropertyActionListener target="#{fxContentViewBean.content}" value="#{document_content}"/>
-                        <f:setPropertyActionListener target="#{fxContentViewBean.successMessage}"
-                                                     value="Successfully saved the document."/>
-                    </h:commandButton>
-                </fx:formRow>
+            <!-- Render the submit button -->
+            <fx:formRow>
+                <h:commandButton action="#{fxContentViewBean.save}" value="Save">
+                    <f:setPropertyActionListener target="#{fxContentViewBean.content}" value="#{document_content}"/>
+                    <f:setPropertyActionListener target="#{fxContentViewBean.successMessage}"
+                                                 value="Successfully saved the document."/>
+                </h:commandButton>
+            </fx:formRow>
 
-            </fx:fieldSet>
+        </fx:fieldSet>
 
-        </fx:content>
+    </fx:content>
 
-    </h:form>
+</h:form>
+
+<p><h:outputLink
+        onclick="window.open('http://wiki.flexive.org/confluence/display/FX/Uploading+documents', 'In_depth_explanation', 'width=760,height=500,left=100,top=200,scrollbars=yes,resizable=yes');"
+        value="#">
+    What happens on this page?
+</h:outputLink>
+</p>
+
 </body>
 </html>

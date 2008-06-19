@@ -1,0 +1,60 @@
+body {
+    font-family: sans-serif;
+    font-size: 13px;
+}
+
+p.message, div.message {
+    border: 1px dashed #BDBDBD;
+    background-color: #F9FCF1;
+    padding: 1em;
+}
+
+#mainmenu {
+    border: 1px solid #BDBDBD;
+    background-color: #F9FCF1;
+    padding-top: 0.4em;
+    padding-bottom: 0.4em;
+}
+
+fieldset {
+    background-color: #F9FCF1;
+}
+
+code.generic {
+    font-family: monospace;
+    font-size: 0.9em;
+}
+
+em.bold {
+    font-weight:bold;
+}
+
+table.announcementEntry {
+    background-color: #BDBDBD;
+}
+
+td.key01, td.key02 {
+    width: 200px;
+}
+
+td.key01, td.value01 {
+    background-color: #D3DCB7;
+}
+
+td.key02, td.value02 {
+    background-color: #FFFFFF;
+}
+
+div.announcementEntry {
+    background-color: #FFFFFF;
+    padding: 0.5em;
+    margin-bottom: 1em;
+}
+
+.errorMessage {
+    color: red;
+}
+
+.infoMessage {
+    color: green;
+}

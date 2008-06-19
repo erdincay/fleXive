@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<head>
+    <!-- Add flexive includes -->
+    <fx:includes/>
+    <!-- Add our own stylesheet -->
+    <link rel="stylesheet" type="text/css" href="css/announcement-submission.css"/>
+    <title>[fleXive] announcement submission example application</title>
+</head>
+
+<body>
+
+<!-- Output JSF error or info messages here -->
+<h:messages showDetail="true" errorClass="errorMessage" infoClass="infoMessage"/>
+
+<div class="message">
+    <p><b>Welcome to the [fleXive] announcement submission example application</b></p>
+
+    <p class="message"><b>What this example application is doing</b><br/>
+        Announcements like software release messages are submitted on news websites etc.<br/>
+        Every time an announcement is submitted, it is logged in the announcement submission application.<br/>
+        When it got published, the publishing information (date, URL) is logged in addition.<br/>
+        This application supports user authentication and content security.
+    </p>
+
+    <p>There have been two user groups set up by the runonce script <code
+            class="generic">asubmission001.groovy</code>.<br/>
+    </p>
+
+    <p>
+        Each user group has a user assigned.
+    </p>
+
+    <p>For the first group it's</p>
+    <ul>
+        <li>Username: user_01</li>
+        <li>Password: password</li>
+    </ul>
+    <p>For the second group it's</p>
+    <ul>
+        <li>Username: user_02</li>
+        <li>Password: password</li>
+    </ul>
+
+    <p>Users of the first group may <code class="generic">read</code>, <code class="generic">create</code>,
+        <code class="generic">edit</code> and <code class="generic">delete</code> content instances.<br/>
+        Users of the second group may only <code class="generic">read</code> content instances.</p>
+
+    <p><h:outputLink
+            onclick="window.open('http://wiki.flexive.org/confluence/display/FX/Initial+setup', 'In_depth_explanation', 'width=760,height=500,left=100,top=200,scrollbars=yes,resizable=yes');"
+            value="#">
+        How does the <code
+            class="generic">asubmission001.groovy</code> script work?
+    </h:outputLink>
+    </p>
+
+    <p>
+        <h:outputText value="Feel free to modify the access control lists in the "/>
+        <h:outputLink value="http://www.flexive.org/docs/website/adm_ACL.html">administration interfaces</h:outputLink>
+        <h:outputText value=" of the "/><h:outputLink value="http://localhost:8080/flexive/adm/">backend
+        application</h:outputLink>.
+    </p>
+</div>
+
+<h:form>
+    <fx:fieldSet legend="Login">
+        <h:outputText value="Username"/><br/>
+        <h:inputText id="username" value="#{fxAuthenticationBean.username}"/><br/>
+        <h:outputText value="Password"/><br/>
+        <h:inputSecret id="password" value="#{fxAuthenticationBean.password}"/><br/>
+        <h:selectBooleanCheckbox id="takeover" value="#{fxAuthenticationBean.takeover}"/>
+        <h:outputText value="Take over"/><br/>
+        <h:commandLink action="#{fxAuthenticationBean.login}">Login</h:commandLink>
+    </fx:fieldSet>
+</h:form>
+
+<p><h:outputLink
+        onclick="window.open('http://wiki.flexive.org/confluence/display/FX/Logging+in', 'In_depth_explanation', 'width=760,height=500,left=100,top=200,scrollbars=yes,resizable=yes');"
+        value="#">
+    What happens on this page?
+</h:outputLink>
+</p>
+
+</body>
+</html>

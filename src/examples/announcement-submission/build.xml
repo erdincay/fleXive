@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+    Basic flexive project buildfile.
+
+    @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+    @version $Rev: 461 $
+-->
+<project name="announcement-submission" basedir="." default="package">
+    <property name="fxProject" value="announcement-submission"/>
+    <property name="flexive.dist.dir" value="${basedir}/../../../flexive-dist"/>
+
+    <import file="${flexive.dist.dir}/build.project.xml"/>
+</project>

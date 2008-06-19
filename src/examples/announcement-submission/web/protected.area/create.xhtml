@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<head>
+    <!-- Add flexive includes -->
+    <fx:includes/>
+    <!-- Add our own stylesheet -->
+    <link rel="stylesheet" type="text/css" href="../css/announcement-submission.css"/>
+    <title>[fleXive] announcement submission example application</title>
+</head>
+
+<body>
+
+<!-- Output JSF error or info messages here -->
+<h:messages showDetail="true" errorClass="errorMessage" infoClass="infoMessage"/>
+
+<!-- The main menu -->
+<h:form>
+    <ul id="mainmenu">
+        <li><h:commandLink action="#{fxAuthenticationBean.logout}">Logout</h:commandLink></li>
+        <li><h:outputLink value="index.xhtml">Back</h:outputLink></li>
+    </ul>
+</h:form>
+
+<p class="message">Create Announcement</p>
+
+<h:form>
+    <fx:content typeName="announcementEntry" var="entry">
+        <fx:value property="entryTitle"/><br/>
+        <fx:value property="submissionDate"/><br/>
+        <fx:value property="publishDate"/><br/>
+        <fx:value property="submissionURL"/><br/>
+        <fx:value property="publishURL"/><br/>
+        <fx:value property="entryAnnouncementText"/><br/>
+        <h:commandLink action="#{asubmissionBean.save}">
+            <f:setPropertyActionListener target="#{asubmissionBean.content}" value="#{entry_content}"/>
+            Save
+        </h:commandLink>
+    </fx:content>
+</h:form>
+
+<p><h:outputLink
+        onclick="window.open('http://wiki.flexive.org/confluence/display/FX/Creating+a+new+announcement', 'In_depth_explanation', 'width=760,height=500,left=100,top=200,scrollbars=yes,resizable=yes');"
+        value="#">
+    What happens on this page?
+</h:outputLink>
+</p>
+
+</body>
+
+</html>
