@@ -9,5 +9,11 @@
     <property name="fxProject" value="announcement-submission"/>
     <property name="flexive.dist.dir" value="${basedir}/../../../flexive-dist"/>
 
+    <!-- Copy output packages to shared flexive drop dir-->
+    <property name="build.dist.dir" value="${basedir}/../../../drop"/>
+
+    <!-- Don't build the EAR -->
+    <property name="announcement-submission.ear.disabled" value="true"/>
+
     <import file="${flexive.dist.dir}/build.project.xml"/>
 </project>
