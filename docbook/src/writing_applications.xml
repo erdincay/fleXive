@@ -452,6 +452,10 @@ BUILD SUCCESSFUL]]></screen>
                         <para>
                             Repeat the last two steps and add all JAR files of the
                             <filename>extlib/</filename>
+                            folder and the
+                            <filename>flexive-plugin-jsf-core.jar</filename>
+                            from the
+                            <filename>applications/</filename>
                             folder to the user library.
                         </para>
                     </listitem>
