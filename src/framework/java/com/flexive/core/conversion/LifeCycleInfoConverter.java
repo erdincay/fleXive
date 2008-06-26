@@ -96,11 +96,16 @@ public class LifeCycleInfoConverter implements Converter {
                 lci.setModificationTime(mfAt);
                 return lci;
             } else if( ctx.get(ConversionEngine.KEY_TYPE) instanceof FxTypeEdit) {
+                System.out.println("==> Converting type lci");
                 LifeCycleInfoImpl lci = (LifeCycleInfoImpl)((FxTypeEdit)ctx.get(ConversionEngine.KEY_TYPE)).getLifeCycleInfo();
-                lci.setCreatorId(creatorId);
-                lci.setCreationTime(crAt);
-                lci.setModifcatorId(modificator);
-                lci.setModificationTime(mfAt);
+                if( lci == null ) {
+                    System.out.println("====> NULL!!!!");
+                } else {
+                    lci.setCreatorId(creatorId);
+                    lci.setCreationTime(crAt);
+                    lci.setModifcatorId(modificator);
+                    lci.setModificationTime(mfAt);
+                }
                 return lci;
             }
             return new LifeCycleInfoImpl(creatorId, crAt, modificator, mfAt);

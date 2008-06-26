@@ -31,15 +31,17 @@
  ***************************************************************/
 package com.flexive.core.conversion;
 
+import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.core.structure.FxPreloadType;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxContext;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxConversionException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
-import com.flexive.shared.interfaces.TypeEngine;
 import com.flexive.shared.interfaces.ScriptingEngine;
+import com.flexive.shared.interfaces.TypeEngine;
 import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.scripting.FxScriptMappingEntry;
 import com.flexive.shared.security.ACL;
@@ -73,7 +75,7 @@ public class FxTypeConverter implements Converter {
         FxType type = ((FxType) o);
         FxEnvironment env = CacheAdmin.getEnvironment();
         try {
-            writer.addAttribute("name", type.getDisplayName());
+            writer.addAttribute("name", type.getName());
             writer.addAttribute("derived", String.valueOf(type.isDerived()));
             if (type.isDerived())
                 writer.addAttribute("parent", type.getParent().getName());
@@ -188,12 +190,13 @@ public class FxTypeConverter implements Converter {
         int maxRelDest = -1;
         FxString label = null;
         List<FxTypeScriptImportMapping> scriptMapping = null;
-
-        if( !existing )
+        if (!existing) {
             typeEdit = FxTypeEdit.createNew(name, label, acl, workflow, parent, false/*irrelevant*/,
-                storageMode, cat, mode, langMode, state, permissions, trackHistory, historyAge, maxVersions,
-                maxRelSource, maxRelDest);
-        if( existing ) {
+                    storageMode, cat, mode, langMode, state, permissions, trackHistory, historyAge, maxVersions,
+                    maxRelSource, maxRelDest);
+            typeEdit.setLifeCycleInfo(LifeCycleInfoImpl.createNew(FxContext.get().getTicket()));
+        }
+        if (existing) {
             typeEdit.setACL(acl);
             typeEdit.setCategory(cat);
             typeEdit.setLanguage(langMode);
@@ -210,7 +213,7 @@ public class FxTypeConverter implements Converter {
         ctx.put(ConversionEngine.KEY_TYPE, typeEdit);
         boolean processAssignments = false;
 
-        while (reader.hasMoreChildren() || processAssignments) {
+        while (reader.hasMoreChildren() || (processAssignments && reader.hasMoreChildren())) {
             reader.moveDown();
             String node = reader.getNodeName();
             if ("relations".equals(node)) {
@@ -255,26 +258,28 @@ public class FxTypeConverter implements Converter {
 
         try {
             //save and reload
-            typeEdit = CacheAdmin.getEnvironment().getType(typeEngine.save(typeEdit)).asEditable();
+            if (scriptMapping != null) {
+                typeEdit = CacheAdmin.getEnvironment().getType(typeEngine.save(typeEdit)).asEditable();
+                final ScriptingEngine scriptingEngine = EJBLookup.getScriptingEngine();
+                //remove all script assignments
+                for (FxScriptEvent ev : typeEdit.getScriptEvents())
+                    for (long scriptId : typeEdit.getScriptMapping(ev)) {
+                        scriptingEngine.removeTypeScriptMapping(scriptId, typeEdit.getId());
+                    }
+                //and re-add them
 
-            final ScriptingEngine scriptingEngine = EJBLookup.getScriptingEngine();
-            //remove all script assignments
-            for(FxScriptEvent ev: typeEdit.getScriptEvents())
-                for( long scriptId: typeEdit.getScriptMapping(ev) ) {
-                    scriptingEngine.removeTypeScriptMapping(scriptId, typeEdit.getId());
+                for (FxTypeScriptImportMapping sm : scriptMapping) {
+                    scriptingEngine.createTypeScriptMapping(sm.getEvent(),
+                            env.getScript(sm.getScriptName()).getId(), typeEdit.getId(),
+                            sm.isActive(), sm.isDerivedUsage());
                 }
-            //and re-add them
-            for(FxTypeScriptImportMapping sm: scriptMapping) {
-                scriptingEngine.createTypeScriptMapping(sm.getEvent(),
-                        env.getScript(sm.getScriptName()).getId(), typeEdit.getId(),
-                        sm.isActive(), sm.isDerivedUsage());
             }
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();
         }
 
         if (processAssignments) {
-            while (reader.hasMoreChildren() || processAssignments) {
+            while (reader.hasMoreChildren() || (processAssignments && reader.hasMoreChildren())) {
                 reader.moveDown();
                 String node = reader.getNodeName();
                 if (ConversionEngine.KEY_PROPERTY_AS.equals(node)) {
@@ -286,9 +291,7 @@ public class FxTypeConverter implements Converter {
             }
             reader.moveUp(); //move up the final assignments closing node
         }
-
-//        System.out.println("Found label: "+label);
-//        System.out.println("LCI: "+lci);
+        
         return CacheAdmin.getEnvironment().getType(typeEdit.getId());
     }
 

@@ -35,13 +35,21 @@ import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.content.FxContent;
+import com.flexive.shared.exceptions.FxAccountInUseException;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxLoginFailedException;
+import com.flexive.shared.exceptions.FxLookupException;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxValue;
+import static com.flexive.tests.embedded.FxTestUtils.login;
+import static com.flexive.tests.embedded.FxTestUtils.logout;
+import com.flexive.tests.embedded.TestUsers;
 import com.thoughtworks.xstream.XStream;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.util.Random;
@@ -54,6 +62,16 @@ import java.util.Random;
  */
 @Test(groups = {"ejb", "importexport"})
 public class ImportExportTest {
+
+    @BeforeClass
+    public void beforeClass() throws FxLookupException, FxLoginFailedException, FxAccountInUseException {
+        login(TestUsers.SUPERVISOR);
+    }
+
+    @AfterClass
+    public void afterClass() throws Exception {
+        logout();
+    }
 
     /**
      * Test values
@@ -93,8 +111,7 @@ public class ImportExportTest {
         FxContent co = ce.initialize(FxType.CONTACTDATA);
         XStream xs = ConversionEngine.getXStream();
         final String xml = xs.toXML(co);
-        System.out.print("Content:\n" + xml);
-        System.out.println("Reverted:\n" + xs.toXML(xs.fromXML(xml)));
+        Assert.assertEquals(xml, xs.toXML(xs.fromXML(xml)));
     }
 
     /**
@@ -107,9 +124,8 @@ public class ImportExportTest {
         XStream xs = ConversionEngine.getXStream();
         FxType testType = CacheAdmin.getEnvironment().getType(FxType.FOLDER);
         final String xml = xs.toXML(testType);
-        System.out.print("Type:\n" + xml);
-// TODO: work in progress ...       
-//        xs.fromXML(xml);
+        FxType importedType = (FxType) xs.fromXML(xml);
+        Assert.assertEquals(xml, xs.toXML(importedType));
     }
 
 

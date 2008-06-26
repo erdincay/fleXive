@@ -36,12 +36,14 @@ import com.flexive.shared.FxLanguage;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.workflow.Workflow;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * FxType used for structure editing
@@ -101,7 +103,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param type the FxType to edit
      */
     public FxTypeEdit(FxType type) {
-        super(type.getId(), type.getACL(), type.getWorkflow(), 
+        super(type.getId(), type.getACL(), type.getWorkflow(),
                 type.getName(), type.getDescription(), type.getParent(), type.getStorageMode(), type.getCategory(),
                 type.getMode(), type.getLanguage(), type.getState(), type.permissions,
                 type.isTrackHistory(), type.getHistoryAge(), type.getMaxVersions(), type.getMaxRelSource(),
@@ -120,7 +122,7 @@ public class FxTypeEdit extends FxType implements Serializable {
     /**
      * Create a new FxTypeEdit instance for creating a new FxType
      *
-     * @param name        name of the type
+     * @param name name of the type
      * @return FxTypeEdit instance for creating a new FxType
      */
     public static FxTypeEdit createNew(String name) {
@@ -139,7 +141,7 @@ public class FxTypeEdit extends FxType implements Serializable {
     public static FxTypeEdit createNew(String name, FxString description, ACL acl) {
         return createNew(name, description, acl, null);
     }
-    
+
     /**
      * Create a new FxTypeEdit instance for creating a new FxType
      *
@@ -193,6 +195,18 @@ public class FxTypeEdit extends FxType implements Serializable {
                 maxVersions, maxRelSource, maxRelDestination);
     }
 
+
+    /**
+     * Set the LifeCycleInfo - this can only be assigned when there is no LifeCycleInfo available
+     * (which is when it is <code>null</code>)
+     *
+     * @param lifeCycleInfo the lifeCycleInfo to assign if the current is <code>null</code>
+     */
+    public void setLifeCycleInfo(LifeCycleInfo lifeCycleInfo) {
+        if (this.lifeCycleInfo == null)
+            this.lifeCycleInfo = lifeCycleInfo;
+    }
+
     /**
      * Is this a new type or updating an existing type?
      *
@@ -205,7 +219,7 @@ public class FxTypeEdit extends FxType implements Serializable {
     /**
      * Returns the unmodifiable script mapping of this type.
      *
-     * @return  the unmodifiable script mapping of this type
+     * @return the unmodifiable script mapping of this type
      */
     /*
     public Map<FxScriptEvent, long[]> getScriptMapping() {
@@ -225,7 +239,8 @@ public class FxTypeEdit extends FxType implements Serializable {
     /**
      * Set if affected instances should be removed if FxTypeRelations are removed
      *
-     * @param removeInstancesWithRelationTypes if affected instances should be removed if FxTypeRelations are removed
+     * @param removeInstancesWithRelationTypes
+     *         if affected instances should be removed if FxTypeRelations are removed
      */
     public void setRemoveInstancesWithRelationTypes(boolean removeInstancesWithRelationTypes) {
         this.removeInstancesWithRelationTypes = removeInstancesWithRelationTypes;
@@ -529,33 +544,31 @@ public class FxTypeEdit extends FxType implements Serializable {
         long source = newRelationToAdd.getMaxSource();
         long dest = newRelationToAdd.getMaxDestination();
 
-        if (source ==0 && getMaxRelSource() >=0)
+        if (source == 0 && getMaxRelSource() >= 0)
             throw new FxInvalidParameterException("ex.structure.type.relation.maxRelSourceExceeded",
-                this.getName(), newRelationToAdd.getSource().getName(),
-                newRelationToAdd.getDestination().getName(), getMaxRelSource());
+                    this.getName(), newRelationToAdd.getSource().getName(),
+                    newRelationToAdd.getDestination().getName(), getMaxRelSource());
 
-        else if (dest ==0 && getMaxRelDestination() >=0)
+        else if (dest == 0 && getMaxRelDestination() >= 0)
             throw new FxInvalidParameterException("ex.structure.type.relation.maxRelDestExceeded",
-                this.getName(), newRelationToAdd.getSource().getName(),
-                newRelationToAdd.getDestination().getName(), getMaxRelDestination());
+                    this.getName(), newRelationToAdd.getSource().getName(),
+                    newRelationToAdd.getDestination().getName(), getMaxRelDestination());
 
         for (FxTypeRelation rel : relations) {
-            if (getMaxRelSource() >=0) {
-                if (rel.getMaxSource() == 0 || rel.getMaxSource()+source >getMaxRelSource()) {
+            if (getMaxRelSource() >= 0) {
+                if (rel.getMaxSource() == 0 || rel.getMaxSource() + source > getMaxRelSource()) {
                     throw new FxInvalidParameterException("ex.structure.type.relation.maxRelSourceExceeded",
-                    this.getName(), rel.getSource().getName(),
-                    rel.getDestination().getName(), getMaxRelSource());
-                }
-                else
+                            this.getName(), rel.getSource().getName(),
+                            rel.getDestination().getName(), getMaxRelSource());
+                } else
                     source += rel.getMaxSource();
             }
-            if(getMaxRelDestination() >=0) {
-                if (rel.getMaxDestination() == 0 || rel.getMaxDestination()+dest >getMaxRelDestination() ) {
+            if (getMaxRelDestination() >= 0) {
+                if (rel.getMaxDestination() == 0 || rel.getMaxDestination() + dest > getMaxRelDestination()) {
                     throw new FxInvalidParameterException("ex.structure.type.relation.maxRelDestExceeded",
-                    this.getName(), rel.getSource().getName(),
-                    rel.getDestination().getName(), getMaxRelDestination());
-                }
-                else
+                            this.getName(), rel.getSource().getName(),
+                            rel.getDestination().getName(), getMaxRelDestination());
+                } else
                     dest += rel.getMaxDestination();
             }
         }
@@ -623,7 +636,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @return this
      * @throws FxInvalidParameterException if the relation is invalid.
      */
-    public FxTypeEdit addRelation(FxTypeRelation relation) throws FxInvalidParameterException{
+    public FxTypeEdit addRelation(FxTypeRelation relation) throws FxInvalidParameterException {
         validateRelation(relation);
         if (relations.contains(relation)) {
             relations.remove(relation);
@@ -639,7 +652,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param relation the relation to add or update
      * @throws FxInvalidParameterException if the relation is invalid.
      */
-    public void updateRelation(FxTypeRelation relation) throws FxInvalidParameterException{
+    public void updateRelation(FxTypeRelation relation) throws FxInvalidParameterException {
         addRelation(relation);
     }
 
