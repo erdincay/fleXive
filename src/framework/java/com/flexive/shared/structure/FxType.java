@@ -118,8 +118,8 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
         this.trackHistory = trackHistory;
         this.historyAge = historyAge;
         this.maxVersions = maxVersions;
-        this.maxRelSource = maxRelSource;
-        this.maxRelDestination = maxRelDestination;
+        this.maxRelSource = maxRelSource < 0 ? 0 : maxRelSource;
+        this.maxRelDestination = maxRelDestination < 0 ? 0 : maxRelDestination;
         this.lifeCycleInfo = lifeCycleInfo;
         this.derivedTypes = derivedTypes;
         this.relations = relations;
@@ -213,14 +213,14 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * @return description (=label)
      */
     public FxString getDescription() {
-        return  getLabel();
+        return getLabel();
     }
 
     /**
      * {@inheritDoc}
      */
     public FxString getLabel() {
-        return description != null && !description.isEmpty() ? description : new FxString(false, name);
+        return description != null && !description.isEmpty() ? description : new FxString(true, name);
     }
 
     /**

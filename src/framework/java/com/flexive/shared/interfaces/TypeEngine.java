@@ -32,6 +32,7 @@
 package com.flexive.shared.interfaces;
 
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.structure.FxType;
 import com.flexive.shared.structure.FxTypeEdit;
 
 import javax.ejb.Remote;
@@ -69,4 +70,14 @@ public interface TypeEngine {
      * @throws FxApplicationException on errors
      */
     String export(long id) throws FxApplicationException;
+
+    /**
+     * Import a type fromt he given XML.
+     * If the type exists, changes will be applied.
+     *
+     * @param typeXML the type as xml
+     * @return the imported type
+     * @throws FxApplicationException on errors
+     */
+    FxType importType(String typeXML) throws FxApplicationException;
 }

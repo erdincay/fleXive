@@ -33,6 +33,7 @@ package com.flexive.shared.structure;
 
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxLanguage;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.security.ACL;
@@ -89,6 +90,7 @@ public class FxTypeEdit extends FxType implements Serializable {
         super(-1, acl, workflow, name, description, parent, storageMode,
                 category, mode, language, state, permissions, trackHistory, historyAge,
                 maxVersions, maxRelSource, maxRelDestination, null, null, new ArrayList<FxTypeRelation>(5));
+        FxSharedUtils.checkParameterMultilang(description, "description");
         this.enableParentAssignments = enableParentAssignments;
         this.isNew = true;
         this.changed = true;
@@ -108,6 +110,7 @@ public class FxTypeEdit extends FxType implements Serializable {
                 type.getMode(), type.getLanguage(), type.getState(), type.permissions,
                 type.isTrackHistory(), type.getHistoryAge(), type.getMaxVersions(), type.getMaxRelSource(),
                 type.getMaxRelDestination(), type.getLifeCycleInfo(), type.getDerivedTypes(), type.getRelations());
+        FxSharedUtils.checkParameterMultilang(description, "description");
         this.isNew = false;
         this.scriptMapping = type.scriptMapping;
         //make lists editable again
@@ -314,6 +317,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @return the type itself, useful for chained calls
      */
     public FxTypeEdit setDescription(FxString description) {
+        FxSharedUtils.checkParameterMultilang(description, "description");
         this.description = description;
         this.changed = true;
         return this;
@@ -483,23 +487,23 @@ public class FxTypeEdit extends FxType implements Serializable {
     /**
      * Set the max. number related source instances for this type, if negative unlimited
      *
-     * @param maxRelSource max. number related source instances for this type, if negative unlimited
+     * @param maxRelSource max. number related source instances for this type, if negative or zero unlimited
      * @return the type itself, useful for chained calls
      */
     public FxTypeEdit setMaxRelSource(int maxRelSource) {
-        this.maxRelSource = maxRelSource;
+        this.maxRelSource = maxRelSource < 0 ? 0 : maxRelSource;
         this.changed = true;
         return this;
     }
 
     /**
-     * Set the max. number related destination instances for this type, if negative unlimited
+     * Set the max. number related destination instances for this type, if negative or zero unlimited
      *
      * @param maxRelDestination max. number related destination instances for this type, if negative unlimited
      * @return the type itself, useful for chained calls
      */
     public FxTypeEdit setMaxRelDestination(int maxRelDestination) {
-        this.maxRelDestination = maxRelDestination;
+        this.maxRelDestination = maxRelDestination < 0 ? 0 : maxRelDestination;
         this.changed = true;
         return this;
     }

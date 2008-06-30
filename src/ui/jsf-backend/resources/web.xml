@@ -38,7 +38,7 @@
     <!-- Facelets libraries that are not loaded through the classloader -->
     <context-param>
         <param-name>facelets.LIBRARIES</param-name>
-        <param-value>/WEB-INF/cms.taglib.xml;/WEB-INF/flexive-admin.taglib.xml</param-value>
+        <param-value>/WEB-INF/flexive-admin.taglib.xml</param-value>
     </context-param>
 
 

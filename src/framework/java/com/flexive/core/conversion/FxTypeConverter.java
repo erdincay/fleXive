@@ -209,11 +209,10 @@ public class FxTypeConverter implements Converter {
             typeEdit.setTrackHistory(trackHistory);
             typeEdit.setHistoryAge(historyAge);
         }
-
         ctx.put(ConversionEngine.KEY_TYPE, typeEdit);
         boolean processAssignments = false;
 
-        while (reader.hasMoreChildren() || (processAssignments && reader.hasMoreChildren())) {
+        while (reader.hasMoreChildren()) {
             reader.moveDown();
             String node = reader.getNodeName();
             if ("relations".equals(node)) {
@@ -251,10 +250,19 @@ public class FxTypeConverter implements Converter {
 
             } else if ("assignments".equals(node)) {
                 processAssignments = true;
+                break;
             }
             if (!processAssignments)
                 reader.moveUp();
         }
+
+        try {
+            long typeId = typeEngine.save(typeEdit);
+            typeEdit = CacheAdmin.getEnvironment().getType(typeId).asEditable();
+        } catch (FxApplicationException e) {
+            throw e.asRuntimeException();
+        }
+        ctx.put(ConversionEngine.KEY_TYPE, typeEdit);
 
         try {
             //save and reload

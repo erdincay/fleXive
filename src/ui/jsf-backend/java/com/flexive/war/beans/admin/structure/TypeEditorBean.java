@@ -108,13 +108,11 @@ public class TypeEditorBean {
             } else if ("openInstance".equals(action)) {
                 editMode = false;
                 long propId = FxJsfUtils.getLongParameter("id", -1);
-                this.type = CacheAdmin.getEnvironment().getType(propId).asEditable();
-                initEditing();
+                editType(propId);
             } else if ("editInstance".equals(action)) {
                 editMode = true;
                 long propId = FxJsfUtils.getLongParameter("id", -1);
-                this.type = CacheAdmin.getEnvironment().getType(propId).asEditable();
-                initEditing();
+                editType(propId);
             } else if ("createType".equals(action)) {
                 editMode = true;
                 type = FxTypeEdit.createNew("NEWTYPE", new FxString(""), CacheAdmin.getEnvironment().getDefaultACL(ACL.Category.STRUCTURE));
@@ -133,6 +131,16 @@ public class TypeEditorBean {
         }
 
         return null;
+    }
+
+    /**
+     * Load a type for editing
+     *
+     * @param typeId id of the type
+     */
+    public void editType(long typeId) {
+        this.type = CacheAdmin.getEnvironment().getType(typeId).asEditable();
+        initEditing();
     }
 
     public boolean isReloadContentTree() {
@@ -702,8 +710,7 @@ public class TypeEditorBean {
     public String gotoTypeScriptEditor() {
         editMode = false;
         long propId = FxJsfUtils.getLongParameter("oid", -1);
-        this.type = CacheAdmin.getEnvironment().getType(propId).asEditable();
-        initEditing();
+        editType(propId);
         return showTypeScriptEditor();
     }
 

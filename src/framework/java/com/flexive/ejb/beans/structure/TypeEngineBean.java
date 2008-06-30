@@ -48,6 +48,7 @@ import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.*;
+import com.thoughtworks.xstream.converters.ConversionException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -57,6 +58,7 @@ import javax.ejb.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Iterator;
 
 
 /**
@@ -912,5 +914,29 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
      */
     public String export(long id) throws FxApplicationException {
         return ConversionEngine.getXStream().toXML(CacheAdmin.getEnvironment().getType(id));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public FxType importType(String typeXML) throws FxApplicationException {
+        try {
+            return (FxType)ConversionEngine.getXStream().fromXML(typeXML);
+        } catch (ConversionException e) {
+            String key;
+            Iterator i = e.keys();
+            String path = "unknown";
+            String line = "unknown";
+            while (i.hasNext()) {
+                key = (String) i.next();
+                if ("path".equals(key))
+                    path = e.get(key);
+                else if ("line number".equals(key))
+                    line = e.get(key);
+            }
+            throw new FxApplicationException("ex.structure.import.type.conversionError", path, line, e.getShortMessage());
+        } catch (Exception e) {
+            throw new FxApplicationException("ex.structure.import.type.error", e.getMessage());
+        }
     }
 }

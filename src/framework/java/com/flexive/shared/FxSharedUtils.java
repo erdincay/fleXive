@@ -31,14 +31,11 @@
  ***************************************************************/
 package com.flexive.shared;
 
-import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
-import com.flexive.shared.search.FxPaths;
 import com.flexive.shared.structure.FxAssignment;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
-import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
 import org.apache.commons.lang.ArrayUtils;
@@ -150,7 +147,7 @@ public final class FxSharedUtils {
             drops = new ArrayList<String>(0);
             return drops;
         }
-        if( StringUtils.isEmpty(dropsList)) {
+        if (StringUtils.isEmpty(dropsList)) {
             drops = new ArrayList<String>(0);
             return drops;
         }
@@ -226,6 +223,17 @@ public final class FxSharedUtils {
      */
     public static boolean isGroovyScript(String name) {
         return name.toLowerCase().endsWith(".gy") || name.toLowerCase().endsWith(".groovy");
+    }
+
+    /**
+     * Check if the given parameter is multilingual and throw an exception if not
+     *
+     * @param value     the value to check
+     * @param paramName name of the parameter
+     */
+    public static void checkParameterMultilang(FxValue value, String paramName) {
+        if (value != null && !value.isMultiLanguage())
+            throw new FxInvalidParameterException(paramName, "ex.general.parameter.notMultilang", paramName).asRuntimeException();
     }
 
     /**
@@ -920,8 +928,8 @@ public final class FxSharedUtils {
      * Extracts the names of the given enum elements and returns them as string.
      * Useful if the toString() method of the Enum class was overwritten.
      *
-     * @param values    the enum values
-     * @return  the names of the given enum elements
+     * @param values the enum values
+     * @return the names of the given enum elements
      */
     public static List<String> getEnumNames(Collection<? extends Enum> values) {
         final List<String> result = new ArrayList<String>(values.size());

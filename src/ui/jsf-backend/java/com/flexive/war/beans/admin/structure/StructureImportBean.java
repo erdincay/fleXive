@@ -1,19 +1,17 @@
 /***************************************************************
- *  This file is part of the [fleXive](R) backend application.
+ *  This file is part of the [fleXive](R) framework.
  *
  *  Copyright (c) 1999-2008
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
- *  The [fleXive](R) backend application is free software; you can redistribute
- *  it and/or modify it under the terms of the GNU General Public
- *  License as published by the Free Software Foundation;
- *  either version 2 of the License, or (at your option) any
- *  later version.
+ *  The [fleXive](R) project is free software; you can redistribute
+ *  it and/or modify it under the terms of the GNU Lesser General Public
+ *  License version 2.1 or higher as published by the Free Software Foundation.
  *
- *  The GNU General Public License can be found at
- *  http://www.gnu.org/licenses/gpl.html.
- *  A copy is found in the textfile GPL.txt and important notices to the
+ *  The GNU Lesser General Public License can be found at
+ *  http://www.gnu.org/licenses/lgpl.html.
+ *  A copy is found in the textfile LGPL.txt and important notices to the
  *  license from the author are found in LICENSE.txt distributed with
  *  these libraries.
  *
@@ -31,16 +29,15 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.war.beans.admin.content;
+package com.flexive.war.beans.admin.structure;
 
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.beans.ActionBean;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.EJBLookup;
-import com.flexive.shared.content.FxContent;
 import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.tree.FxTreeMode;
+import com.flexive.shared.exceptions.FxRuntimeException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -50,49 +47,35 @@ import java.io.IOException;
 import java.io.Serializable;
 
 /**
- * Content import bean
+ * Structure import
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
- * @version $Rev$
+ * @version $Rev
  */
-public class ContentImportBean implements ActionBean, Serializable {
+public class StructureImportBean implements ActionBean, Serializable {
 
-    private static final Log LOG = LogFactory.getLog(ContentImportBean.class);
+    private static final Log LOG = LogFactory.getLog(StructureImportBean.class);
 
     private UploadedFile uploadContent;
     private String pasteContent;
-    private long nodeId = -1;
-    private String nodePath = "-";
+    private String source;
 
     public String getParseRequestParameters() throws FxApplicationException {
         String action = FxJsfUtils.getParameter("action");
         if (StringUtils.isBlank(action)) {
             return null;
-        }
-        if ("importFromTree".equals(action)) {
-            nodeId = Long.valueOf(FxJsfUtils.getParameter("nodeId"));
-            if (LOG.isInfoEnabled())
-                LOG.info("Importing for nodeId " + nodeId);
+        } else if ("source".equals(action)) {
+            setSource(FxJsfUtils.getParameter("source"));
         }
         return "";
     }
 
-    public long getNodeId() {
-        return nodeId;
+    public String getSource() {
+        return source;
     }
 
-    public void setNodeId(long nodeId) {
-        this.nodeId = nodeId;
-    }
-
-    public String getNodePath() {
-        try {
-            if (nodeId > 0)
-                nodePath = EJBLookup.getTreeEngine().getPathById(FxTreeMode.Edit, nodeId);
-        } catch (FxApplicationException e) {
-            nodePath = e.getMessage();
-        }
-        return nodePath;
+    public void setSource(String source) {
+        this.source = source;
     }
 
     public UploadedFile getUploadContent() {
@@ -111,46 +94,46 @@ public class ContentImportBean implements ActionBean, Serializable {
         this.pasteContent = pasteContent;
     }
 
-    public String doImport() {
-        FxContent content = null;
+    public String importType() {
+        boolean ok = false;
+        long id = -1;
         if (uploadContent != null && uploadContent.getSize() > 0) {
-            if (LOG.isInfoEnabled())
-                LOG.info("Uploaded " + uploadContent.getSize() + " bytes for " + uploadContent.getName());
             try {
-                content = performImport(new String(uploadContent.getBytes(), "UTF-8"));
+                id = performTypeImport(new String(uploadContent.getBytes(), "UTF-8"));
+                ok = id > 0;
             } catch (IOException e) {
                 new FxFacesMsgErr("Content.err.Exception", e.getMessage()).addToContext();
             }
         } else if (!StringUtils.isEmpty(pasteContent)) {
-            content = performImport(pasteContent);
+            id = performTypeImport(pasteContent);
+            ok = id > 0;
         } else {
             new FxFacesMsgInfo("Content.nfo.import.noData").addToContext();
-            return "";
+            ok = false;
         }
-        if (content != null) {
-            ContentEditorBean ce = (ContentEditorBean) FxJsfUtils.getManagedBean("contentEditorBean");
-            ce.init(content);
-            ce.compact();
-            if (nodeId >= 0)
-                ce.addTreeNode(nodeId);
-            new FxFacesMsgInfo("Content.nfo.imported").addToContext();
-            return "contentEditor";
+        if (ok) {
+            TypeEditorBean tedit = (TypeEditorBean)FxJsfUtils.getManagedBean("typeEditorBean");
+            tedit.editType(id);
+            return "typeEditor";
         }
-        return "";
+        return "structureImport";
     }
 
     /**
      * Perform the actual import
      *
-     * @param content content as XML
-     * @return FxContent
+     * @param typeXML type as XML
+     * @return if > 0 the id, else its an error
      */
-    private FxContent performImport(String content) {
+    private long performTypeImport(String typeXML) {
         try {
-            return EJBLookup.getContentEngine().importContent(content, true);
+            return EJBLookup.getTypeEngine().importType(typeXML).getId();
+        } catch (FxRuntimeException r) {
+            new FxFacesMsgErr(r).addToContext();
+            return -1;
         } catch (FxApplicationException e) {
             new FxFacesMsgErr(e).addToContext();
-            return null;
+            return -1;
         }
     }
 }

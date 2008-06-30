@@ -51,6 +51,14 @@
     </managed-bean>
 
     <managed-bean>
+        <managed-bean-name>structureImportBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.admin.structure.StructureImportBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
         <managed-bean-name>propertyEditorBean</managed-bean-name>
         <managed-bean-class>
             com.flexive.war.beans.admin.structure.PropertyEditorBean
@@ -513,6 +521,11 @@
         <navigation-case>
             <from-outcome>languages</from-outcome>
             <to-view-id>/adm/main/system/languages.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>structureImport</from-outcome>
+            <to-view-id>/adm/structure/structureImport.xhtml</to-view-id>
         </navigation-case>
 
         <navigation-case>

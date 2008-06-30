@@ -495,6 +495,10 @@
                     invokeContentAction("adm/content/createTestData.jsf", "setTypeId", {typeId: nodeId});
             }
 
+            function importType(menuItem) {
+                invokeContentAction("adm/structure/structureImport.jsf", "source", "type");
+            }
+
             function showTreeMenu() {
                 var menu = dojo.widget.byId("structureTreeMenu");
                 if (menu.getTreeNode() == null) {
@@ -575,25 +579,26 @@
                 <adm:treeContextMenuItem icon="search" treeActions="searchContents" labelKey="StructureTree.menu.searchContents" clickHandler="searchContents"/>
                 <adm:treeContextMenuItem icon="search" treeActions="searchPropertyContents" labelKey="StructureTree.menu.searchContents.property" clickHandler="searchContentsByProperty"/>
                 <fx:menuSeparator/>
+                <adm:treeContextMenuItem icon="importContent" treeActions="importType" labelKey="StructureTree.menu.importType" clickHandler="importType"/>
                 <adm:treeContextMenuItem icon="new" treeActions="createContent" labelKey="ContentTree.menu.create" clickHandler="createContent"/>
                 <adm:treeContextMenuItem icon="createTestData" treeActions="createTestData" labelKey="StructureTree.menu.createTestData" clickHandler="createTestData" />
                 <fx:menuSeparator/>
-               <adm:treeContextMenuItem treeActions="copyAssignment" icon="copy" labelKey="StructureTree.menu.copyAssignment" clickHandler="copyAssignment"/>
-               <adm:treeContextMenuItem treeActions="pasteInto" icon="paste" labelKey="StructureTree.menu.paste.into" clickHandler="pasteInto"/>
-               <adm:treeContextMenuItem treeActions="pasteAboveAfterCut" icon="paste" labelKey="StructureTree.menu.paste.above" clickHandler="pasteAbove"/>
-               <adm:treeContextMenuItem treeActions="pasteBelowAfterCut" icon="paste" labelKey="StructureTree.menu.paste.below" clickHandler="pasteBelow"/>
-               <adm:treeContextMenuItem treeActions="pasteSubMenu" icon="paste" labelKey="StructureTree.menu.paste.submenu">
-                   <adm:treeContextMenuItem treeActions="pasteAbove" icon="paste" labelKey="StructureTree.menu.paste.above" clickHandler="pasteAbove"/>
-                   <adm:treeContextMenuItem treeActions="pasteBelow" icon="paste" labelKey="StructureTree.menu.paste.below" clickHandler="pasteBelow"/>
-                   <adm:treeContextMenuItem treeActions="pasteInto" icon="paste" labelKey="StructureTree.menu.paste.into" clickHandler="pasteInto"/>
-                   <fx:menuSeparator/>
-                   <adm:treeContextMenuItem treeActions="pasteAboveAs" icon="paste" labelKey="StructureTree.menu.paste.aboveAs" clickHandler="pasteAboveAs"/>
-                   <adm:treeContextMenuItem treeActions="pasteBelowAs" icon="paste" labelKey="StructureTree.menu.paste.belowAs" clickHandler="pasteBelowAs"/>
-                   <adm:treeContextMenuItem treeActions="pasteIntoAs" icon="paste" labelKey="StructureTree.menu.paste.intoAs" clickHandler="pasteIntoAs"/>
-               </adm:treeContextMenuItem>
-               <adm:treeContextMenuItem icon="cut" treeActions="cutAssignment" labelKey="StructureTree.menu.cut.assignment" clickHandler="cutAssignment"/>
-               <adm:treeContextMenuItem icon="delete" treeActions="deleteAssignment" labelKey="StructureTree.menu.delete.assignment" clickHandler="deleteAssignment"/>
-               <adm:treeContextMenuItem icon="delete" treeActions="deleteType" labelKey="StructureTree.menu.delete.type" clickHandler="deleteType"/>
+                <adm:treeContextMenuItem treeActions="copyAssignment" icon="copy" labelKey="StructureTree.menu.copyAssignment" clickHandler="copyAssignment"/>
+                <adm:treeContextMenuItem treeActions="pasteInto" icon="paste" labelKey="StructureTree.menu.paste.into" clickHandler="pasteInto"/>
+                <adm:treeContextMenuItem treeActions="pasteAboveAfterCut" icon="paste" labelKey="StructureTree.menu.paste.above" clickHandler="pasteAbove"/>
+                <adm:treeContextMenuItem treeActions="pasteBelowAfterCut" icon="paste" labelKey="StructureTree.menu.paste.below" clickHandler="pasteBelow"/>
+                <adm:treeContextMenuItem treeActions="pasteSubMenu" icon="paste" labelKey="StructureTree.menu.paste.submenu">
+                    <adm:treeContextMenuItem treeActions="pasteAbove" icon="paste" labelKey="StructureTree.menu.paste.above" clickHandler="pasteAbove"/>
+                    <adm:treeContextMenuItem treeActions="pasteBelow" icon="paste" labelKey="StructureTree.menu.paste.below" clickHandler="pasteBelow"/>
+                    <adm:treeContextMenuItem treeActions="pasteInto" icon="paste" labelKey="StructureTree.menu.paste.into" clickHandler="pasteInto"/>
+                    <fx:menuSeparator/>
+                    <adm:treeContextMenuItem treeActions="pasteAboveAs" icon="paste" labelKey="StructureTree.menu.paste.aboveAs" clickHandler="pasteAboveAs"/>
+                    <adm:treeContextMenuItem treeActions="pasteBelowAs" icon="paste" labelKey="StructureTree.menu.paste.belowAs" clickHandler="pasteBelowAs"/>
+                    <adm:treeContextMenuItem treeActions="pasteIntoAs" icon="paste" labelKey="StructureTree.menu.paste.intoAs" clickHandler="pasteIntoAs"/>
+                </adm:treeContextMenuItem>
+                <adm:treeContextMenuItem icon="cut" treeActions="cutAssignment" labelKey="StructureTree.menu.cut.assignment" clickHandler="cutAssignment"/>
+                <adm:treeContextMenuItem icon="delete" treeActions="deleteAssignment" labelKey="StructureTree.menu.delete.assignment" clickHandler="deleteAssignment"/>
+                <adm:treeContextMenuItem icon="delete" treeActions="deleteType" labelKey="StructureTree.menu.delete.type" clickHandler="deleteType"/>
             </adm:treeContextMenu>
 
             <adm:jsonRpcCall method="StructureTreeWriter.renderStructureTree" args="-1"/>
