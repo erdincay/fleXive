@@ -36,7 +36,10 @@ package com.flexive.war.javascript.search;
 import com.flexive.faces.beans.ResultSessionData;
 import com.flexive.faces.model.FxResultSetDataModel;
 import com.flexive.faces.converter.EnumConverter;
+import com.flexive.faces.FxJsfUtils;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.search.*;
 import static com.flexive.shared.search.ResultViewType.THUMBNAILS;
 import com.flexive.shared.search.query.SqlQueryBuilder;
@@ -82,6 +85,26 @@ public class SearchResultWriter implements Serializable {
      */
     public Map getRows() {
         return new RowDataMap();
+    }
+
+    public String getResultRows(String query, int startRow, int fetchRows) throws FxApplicationException, IOException {
+        final StringWriter out = new StringWriter();
+        final FxResultSet result = EJBLookup.getSearchEngine().search(query, startRow, fetchRows, null);
+        final JsonWriter writer = new JsonWriter(out);
+        writer.startMap();
+        writer.startAttribute("rows");
+        writer.startArray();
+        for (FxResultRow row : result.getResultRows()) {
+            writer.startMap();
+            for (String column : row.getColumnNames()) {
+                writer.writeAttribute(column, FxJsfUtils.formatResultValue(row.getValue(column), null, null, null));
+            }
+            writer.closeMap();
+        }
+        writer.closeArray();
+        writer.closeMap();
+        writer.finishResponse();
+        return out.toString();
     }
 
     /**

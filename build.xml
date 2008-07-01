@@ -26,6 +26,7 @@
     <property name="mysql.classpathref" value="classpath.build.framework"/>
 
     <property name="web.ui.dojo.baseName" value="dojo-flexive"/>
+    <property name="web.ui.yui.version" value="2.5.2"/>
 
 	<property name="invalid.path" value="${flexive.base.build.dir}/temp"/>
 
@@ -410,6 +411,9 @@
                 <include name="*"/>
                 <include name="src/**/*"/>
             </zipfileset>
+
+            <!-- include YUI -->
+            <zipfileset src="${flexive.base.ui.shared.dir}/resources/lib/yui-${web.ui.yui.version}.zip" prefix="pub/js/yui"/>
         </war>
 	</target>
 
