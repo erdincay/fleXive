@@ -329,7 +329,6 @@ public class MySQLDataSelector extends DataSelector {
      * @return the subselect for FX_CONTENT_DATA.
      */
     private String getContentDataSubselect(String column, PropertyEntry entry, boolean xpath) {
-        // TODO: lang fallback
         String select = "(SELECT " + SUBSEL_ALIAS + "." + column +
                 " FROM " + DatabaseConst.TBL_CONTENT_DATA + " " +
                 SUBSEL_ALIAS + " WHERE " +

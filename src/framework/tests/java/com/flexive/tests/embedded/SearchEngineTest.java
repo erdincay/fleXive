@@ -1217,6 +1217,8 @@ public class SearchEngineTest {
         assert reference.getTranslation(language).equals(resultValue.getBestTranslation())
                 : "bestTranslation of result value not equal to user translation, expected: "
                 + reference.getTranslation(language) + ", got: " + resultValue.getBestTranslation();
+        // The following is known to fail, because the SQL result does not know
+        // whether a specific translation or the default language was used in a column (FX-265)
         /*final String translationEn = resultValue.getTranslation(language);
         assert StringUtils.isNotBlank(translationEn) : "Ticket language translation not returned";*/
     }

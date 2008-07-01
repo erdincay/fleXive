@@ -103,9 +103,9 @@ import java.util.Map;
  * <td>Enable or disable the given type permissions.</td>
  * </tr>
  * <tr>
- * <th>disablePermissions</th>
+ * <th>usePermissions</th>
  * <td>boolean</td>
- * <td>Disable all permissions checks for the type (and contents of this type)</td>
+ * <td>If set to false, disables all permissions checks for the type (and contents of this type)</td>
  * </tr>
  * </table>
  * </p>
