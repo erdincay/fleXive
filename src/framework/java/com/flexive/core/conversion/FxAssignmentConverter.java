@@ -32,14 +32,19 @@
 package com.flexive.core.conversion;
 
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.exceptions.FxConversionException;
 import com.flexive.shared.structure.FxAssignment;
+import com.flexive.shared.structure.FxMultiplicity;
 import com.flexive.shared.structure.FxStructureOption;
+import com.flexive.shared.value.FxString;
+import com.flexive.shared.value.FxValue;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -49,6 +54,108 @@ import java.util.List;
  * @version $Rev$
  */
 public abstract class FxAssignmentConverter implements Converter {
+
+    /**
+     * Helper class storing all common assignment data returned from unmarshalling
+     */
+    static class AssignmentData {
+        private String alias;
+        private String xpath;
+        private int pos;
+        private boolean enabled;
+        private FxMultiplicity multiplicity;
+        private int defaultMultiplicity;
+        private String parentAssignment;
+        private FxString label;
+        private FxString hint;
+        private List<FxStructureOption> options;
+
+        public String getAlias() {
+            return alias;
+        }
+
+        public void setAlias(String alias) {
+            this.alias = alias;
+        }
+
+        public String getXpath() {
+            return xpath;
+        }
+
+        public void setXpath(String xpath) {
+            this.xpath = xpath;
+        }
+
+        public int getPos() {
+            return pos;
+        }
+
+        public void setPos(int pos) {
+            this.pos = pos;
+        }
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public FxMultiplicity getMultiplicity() {
+            return multiplicity;
+        }
+
+        public void setMultiplicity(FxMultiplicity multiplicity) {
+            this.multiplicity = multiplicity;
+        }
+
+        public int getDefaultMultiplicity() {
+            return defaultMultiplicity;
+        }
+
+        public void setDefaultMultiplicity(int defaultMultiplicity) {
+            this.defaultMultiplicity = defaultMultiplicity;
+        }
+
+        public String getParentAssignment() {
+            return parentAssignment;
+        }
+
+        public void setParentAssignment(String parentAssignment) {
+            this.parentAssignment = parentAssignment;
+        }
+
+        public FxString getLabel() {
+            return label;
+        }
+
+        public void setLabel(FxString label) {
+            this.label = label;
+        }
+
+        public FxString getHint() {
+            return hint;
+        }
+
+        public void setHint(FxString hint) {
+            this.hint = hint;
+        }
+
+        public List<FxStructureOption> getOptions() {
+            return options;
+        }
+
+        public void setOptions(List<FxStructureOption> options) {
+            this.options = options;
+        }
+
+        public String toString() {
+            return "AssignmentData[alias=" + alias + ",xpath=" + xpath + ",pos=" + pos + ",enabled=" + enabled +
+                    ",mult.=" + multiplicity + ",defaultMult.=" + defaultMultiplicity + ",parent=" + parentAssignment +
+                    ",label=" + label + ",hint=" + hint + ",#options=" + (options == null ? 0 : options.size()) + "]";
+        }
+    }
 
     /**
      * {@inheritDoc}
@@ -82,25 +189,86 @@ public abstract class FxAssignmentConverter implements Converter {
      * @param options List<FxStructureOption>
      */
     protected void marshallOptions(HierarchicalStreamWriter writer, List<FxStructureOption> options) {
-        if (options.size() > 0) {
-            writer.startNode("options");
-            for (FxStructureOption opt : options) {
-                writer.startNode("option");
-                writer.addAttribute("key", opt.getKey());
-                writer.addAttribute("value", opt.getValue());
-                writer.addAttribute("overrideable", String.valueOf(opt.isOverrideable()));
-                writer.addAttribute("set", String.valueOf(opt.isSet()));
-                writer.endNode();
-            }
+        writer.startNode("options");
+        for (FxStructureOption opt : options) {
+            writer.startNode("option");
+            writer.addAttribute("key", opt.getKey());
+            writer.addAttribute("value", opt.getValue());
+            writer.addAttribute("overrideable", String.valueOf(opt.isOverrideable()));
+            writer.addAttribute("set", String.valueOf(opt.isSet()));
             writer.endNode();
         }
+        writer.endNode();
+    }
+
+    /**
+     * Unmarshall FxStructureOption's
+     *
+     * @param reader HierarchicalStreamReader
+     * @param ctx    UnmarshallingContext
+     * @return List<FxStructureOption>
+     */
+    private List<FxStructureOption> unmarshallOptions(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
+        if (!reader.hasMoreChildren())
+            throw new FxConversionException("ex.conversion.missingNode", "options").asRuntimeException();
+        reader.moveDown();
+        if (!"options".equals(reader.getNodeName()))
+            throw new FxConversionException("ex.conversion.wrongNode", "options", reader.getNodeName()).asRuntimeException();
+        List<FxStructureOption> options = new ArrayList<FxStructureOption>(20);
+        while (reader.hasMoreChildren()) {
+            reader.moveDown();
+            if (!"option".equals(reader.getNodeName()))
+                throw new FxConversionException("ex.conversion.wrongNode", "option", reader.getNodeName()).asRuntimeException();
+            options.add(new FxStructureOption(reader.getAttribute("key"), Boolean.valueOf(reader.getAttribute("overrideable")),
+                    Boolean.valueOf(reader.getAttribute("set")), reader.getAttribute("value")));
+            reader.moveUp();
+        }
+        reader.moveUp();
+        return options;
     }
 
     /**
      * {@inheritDoc}
      */
-    public Object unmarshal(HierarchicalStreamReader hierarchicalStreamReader, UnmarshallingContext unmarshallingContext) {
-        //TODO
-        return null;
+    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
+        AssignmentData data = new AssignmentData();
+        //base data
+        data.setAlias(reader.getAttribute("alias"));
+        data.setXpath(reader.getAttribute("xpath"));
+        data.setPos(Integer.parseInt(reader.getAttribute("pos")));
+        data.setEnabled(Boolean.parseBoolean(reader.getAttribute("enabled")));
+        data.setMultiplicity(FxMultiplicity.fromString(reader.getAttribute("multiplicity")));
+        data.setDefaultMultiplicity(Integer.parseInt(reader.getAttribute("defaultMultiplicity")));
+        data.setParentAssignment(reader.getAttribute("parent"));
+        //label
+        String expected = "label";
+        String found = "-";
+        if (reader.hasMoreChildren()) {
+            reader.moveDown();
+            found = reader.getNodeName();
+            if (expected.equals(found)) {
+                data.setLabel(((FxString) ctx.convertAnother(this, FxValue.class)));
+                expected = null;
+            }
+            reader.moveUp();
+        }
+        if (expected != null)
+            throw new FxConversionException("ex.conversion.wrongNode", expected, found).asRuntimeException();
+        //hint
+        expected = "hint";
+        if (reader.hasMoreChildren()) {
+            reader.moveDown();
+            found = reader.getNodeName();
+            if (expected.equals(found)) {
+                data.setHint(((FxString) ctx.convertAnother(this, FxValue.class)));
+                expected = null;
+            }
+            reader.moveUp();
+        }
+        data.setOptions(unmarshallOptions(reader, ctx));
+        if (expected != null)
+            throw new FxConversionException("ex.conversion.wrongNode", expected, found).asRuntimeException();
+        //options
+        return data;
     }
 }

@@ -36,6 +36,8 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 /**
@@ -69,9 +71,9 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
             writer.addAttribute("acl", p.getACL().getName());
             writer.addAttribute("overrideACL", String.valueOf(p.mayOverrideACL()));
             writer.addAttribute("uniqueMode", p.getUniqueMode().name());
-            if( p.hasReferencedType() )
+            if (p.hasReferencedType())
                 writer.addAttribute("refType", p.getReferencedType().getName());
-            if( p.hasReferencedList())
+            if (p.hasReferencedList())
                 writer.addAttribute("refList", p.getReferencedList().getName());
 
             writer.startNode("label");
@@ -92,6 +94,15 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
         ctx.convertAnother(prop.getDefaultValue());
         writer.endNode();
         writer.endNode();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
+        AssignmentData data = (AssignmentData) super.unmarshal(reader, ctx);
+        System.out.println("PA: " + data);
+        return null;
     }
 
     /**
