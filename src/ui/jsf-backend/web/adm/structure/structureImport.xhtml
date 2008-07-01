@@ -16,6 +16,11 @@
 <ui:composition template="/adm/contentTemplate.xhtml">
 
     <ui:define name="body">
+        <c:if test="#{structureImportBean.loadType}">
+            <script type="text/javascript">
+                parent.getStructureNavFrame().doTreeAction("RELOAD_SELECT_TYPE", #{structureImportBean.typeId});
+            </script>
+        </c:if>
 
         <h:form id="frm" enctype="multipart/form-data">
 

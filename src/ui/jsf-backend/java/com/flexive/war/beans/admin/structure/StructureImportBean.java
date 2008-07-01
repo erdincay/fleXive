@@ -59,6 +59,8 @@ public class StructureImportBean implements ActionBean, Serializable {
     private UploadedFile uploadContent;
     private String pasteContent;
     private String source;
+    private boolean loadType;
+    private long typeId;
 
     public String getParseRequestParameters() throws FxApplicationException {
         String action = FxJsfUtils.getParameter("action");
@@ -94,6 +96,22 @@ public class StructureImportBean implements ActionBean, Serializable {
         this.pasteContent = pasteContent;
     }
 
+    public boolean isLoadType() {
+        return loadType;
+    }
+
+    public void setLoadType(boolean loadType) {
+        this.loadType = loadType;
+    }
+
+    public long getTypeId() {
+        return typeId;
+    }
+
+    public void setTypeId(long typeId) {
+        this.typeId = typeId;
+    }
+
     public String importType() {
         boolean ok = false;
         long id = -1;
@@ -112,9 +130,12 @@ public class StructureImportBean implements ActionBean, Serializable {
             ok = false;
         }
         if (ok) {
-            TypeEditorBean tedit = (TypeEditorBean)FxJsfUtils.getManagedBean("typeEditorBean");
-            tedit.editType(id);
-            return "typeEditor";
+//            TypeEditorBean tedit = (TypeEditorBean)FxJsfUtils.getManagedBean("typeEditorBean");
+//            tedit.editType(id);
+//            tedit.setReloadStructureTree(true);
+//            return "typeEditor";
+            setLoadType(true);
+            setTypeId(id);
         }
         return "structureImport";
     }

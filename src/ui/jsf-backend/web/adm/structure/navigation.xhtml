@@ -579,7 +579,6 @@
                 <adm:treeContextMenuItem icon="search" treeActions="searchContents" labelKey="StructureTree.menu.searchContents" clickHandler="searchContents"/>
                 <adm:treeContextMenuItem icon="search" treeActions="searchPropertyContents" labelKey="StructureTree.menu.searchContents.property" clickHandler="searchContentsByProperty"/>
                 <fx:menuSeparator/>
-                <adm:treeContextMenuItem icon="importContent" treeActions="importType" labelKey="StructureTree.menu.importType" clickHandler="importType"/>
                 <adm:treeContextMenuItem icon="new" treeActions="createContent" labelKey="ContentTree.menu.create" clickHandler="createContent"/>
                 <adm:treeContextMenuItem icon="createTestData" treeActions="createTestData" labelKey="StructureTree.menu.createTestData" clickHandler="createTestData" />
                 <fx:menuSeparator/>
@@ -613,8 +612,8 @@
             <fx:menu name="mainMenu">
 
                 <fx:menuItem rendered="#{fxSystemBean.isInRole['StructureManagement']}" labelKey="StructureTree.menu.createType" icon="windowNew" clickHandler="function(menuItem) { createType(menuItem); }"/>
-
-                <fx:menuItem labelKey="StructureTree.menu.createTypeRelation" icon="fxTypeRelation" clickHandler="function(menuItem) { createTypeRelation(menuItem); }"/>
+                <fx:menuItem rendered="#{fxSystemBean.isInRole['StructureManagement']}" labelKey="StructureTree.menu.createTypeRelation" icon="fxTypeRelation" clickHandler="function(menuItem) { createTypeRelation(menuItem); }"/>
+                <fx:menuItem rendered="#{fxSystemBean.isInRole['StructureManagement']}" labelKey="StructureTree.menu.importType" icon="importContent" clickHandler="importType"/>
 
                 <fx:menuSeparator/>
 
