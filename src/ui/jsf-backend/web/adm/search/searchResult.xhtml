@@ -25,8 +25,6 @@
         <c:if test="#{empty fxSearchResultBean.parseRequestParameters}"> </c:if>
         <a4j:form id="frm">
             <h:inputHidden value="#{fxSearchResultBean.viewType}"/>
-            <h:inputHidden id="clientSizeX" value="#{fxSearchResultBean.clientSizeX}"/>
-            <h:inputHidden id="clientSizeY" value="#{fxSearchResultBean.clientSizeY}"/>
 
             <adm:resultTabs activeTab="results"/>
 
@@ -38,63 +36,37 @@
                 <h:inputHidden id="rowCount" value="#{fxSearchResultBean.rowCount}"/>
                 <h:inputHidden id="versionFilter" value="#{fxSearchResultBean.versionFilter}"/>
 
-                <adm:resultView id="searchResults" resultModel="#{fxSearchResultBean.resultModel}"
-                    location="#{fxSearchResultBean.location}" viewType="#{fxSearchResultBean.viewType}"/>
+                <h:selectOneListbox id="typeId" value="#{fxSearchResultBean.typeId}" size="1">
+                    <f:selectItems value="#{fxSearchResultBean.contentTypeItems}"/>
+                    <a4j:support event="onchange" reRender="refreshResults"/>
+                </h:selectOneListbox>
+                <h:selectOneListbox id="version" value="#{fxSearchResultBean.versionFilter}" size="1">
+                    <f:selectItems value="#{fxSearchResultBean.versionItems}"/>
+                    <a4j:support event="onchange" reRender="refreshResults"/>
+                </h:selectOneListbox>
 
-<!--                <c:choose>
-                    <c:when test="#{'LIST' == fxSearchResultBean.viewType}">
-                        <fx:resultView id="searchResults" resultModel="#{fxSearchResultBean.resultModel}"
-                            location="#{fxSearchResultBean.location}"/>
-                    </c:when>
-                    <c:otherwise>
-                        <fx:resultThumbnailsTable id="searchResults" gridModel="#{fxSearchResultBean.gridModel}" formName="frm"
-                                dataTable="#{fxSearchResultBean.resultDataTable}" tableRows="#{fxSearchResultBean.gridRows}"
-                                resultSet="#{fxSearchResultBean.result}" previewSize="#{fxSearchResultBean.previewSize}"
-                            />
-                    </c:otherwise>
-                </c:choose>
--->
-                <!--
-                <ui:repeat var="foundContentType" value="#{fxSearchResultBean.result.contentTypes}">
-                    #{foundContentType.description}<br/>
-                </ui:repeat>
-                -->
+                <a4j:outputPanel id="refreshResults">
+                    <script type="text/javascript">
+                    <!--
+                        if (window.resultTable != null) {
+                            // refresh only if datatable is already available - also prevents refresh during initial load
+                            resultTable.deleteRows(0, 9999999);
+                            var result = #{fx:getJsonResult(fxSearchResultBean.result, null)};
+                            resultTable._reset(result);
+                        }
+                    //-->
+                    </script>
+                </a4j:outputPanel>
+
+
+                <fx:resultTable var="resultTable" value="#{fxSearchResultBean.result}"/>
                 
-            <!-- Example using JSF datatables -->
-    
-<!--
-				 <t:dataTable id="resultSetTable" value="#{fxSearchResultBean.resultModel}" rows="10" var="row">
-				 	<c:forEach items="#{fxSearchResultBean.columnNames}" var="columnName" varStatus="status">
-					 	<t:column>
-					 		<f:facet name="header">
-					 			#{columnName}
-					 		</f:facet>
-					 		#{row[status.index]}
-					 	</t:column>
-				 	</c:forEach>
-				 </t:dataTable>
-	
-                <t:dataScroller for="resultSetTable">
-                    <f:facet name="previous">
-                        &lt;
-                    </f:facet>
-                    <f:facet name="next">
-                        &gt;
-                    </f:facet>
-                    <f:facet name="first">
-                        |&lt;
-                    </f:facet>
-                    <f:facet name="last">
-                        &gt;|
-                    </f:facet>
-                </t:dataScroller>
- -->
             </c:if>
             <adm:toolbarPluginButtons/>
+
         </a4j:form>
 
         <script type="text/javascript">
-            updateClientSize(document.forms["frm"]["frm:clientSizeX"], document.forms["frm"]["frm:clientSizeY"]);
             if (parent.reloadBriefcases) {
                 parent.reloadBriefcases();
             }

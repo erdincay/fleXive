@@ -74,6 +74,7 @@ public class FxResultSetImpl implements Serializable, FxResultSet {
     private int totalRowCount;
     private boolean truncated;
     private Map<String, Integer> columnIndexMap;
+    private int userWildcardIndex = -1;
 
     // cached properties
     private transient String[] columnLabels;
@@ -422,6 +423,17 @@ public class FxResultSetImpl implements Serializable, FxResultSet {
      */
     public long getCreatedBriefcaseId() {
         return createdBriefcaseId;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int getUserWildcardIndex() {
+        return userWildcardIndex;
+    }
+
+    public void setUserWildcardIndex(int userWildcardIndex) {
+        this.userWildcardIndex = userWildcardIndex;
     }
 
     protected void setTruncated(boolean truncated) {

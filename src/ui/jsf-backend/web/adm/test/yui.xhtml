@@ -15,7 +15,6 @@
 	<ui:define name="head">
         <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/jsonrpc.js"></script>
         <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/flexiveRpc.js"></script>
-        <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/yui/yuiloader/yuiloader-beta-min.js"></script> 
     </ui:define>
 
     <ui:define name="messages">
@@ -29,56 +28,27 @@
             <input id="refreshButton" type="button" value="drueck mich"/>
             <input id="refreshButton2" type="button" value="drueck mich no yui"/>
 
-            <div id="datatable"> </div>
+            <fx:resultTable value="SELECT @pk, created_at FILTER type='image'" viewType="thumbnails"/>
+            
             <div id="menucontainer"> </div>
         </h:form>
 
         <script type="text/javascript">
-        <!--
-        function setup() {
-            var refreshButton = new YAHOO.widget.Button("refreshButton", {});
-            refreshButton.addListener("click", function() { alert("Clicked") });
+            <!--
+            flexive.yui.requireComponent("button");
+            flexive.yui.onYahooLoaded(function() {
+                var refreshButton = new YAHOO.widget.Button("refreshButton", {});
+                refreshButton.addListener("click", function() { alert("Clicked") });
 
-            var result = eval("(" + getJsonRpc().SearchResultWriter.getResultRows("SELECT id, caption, created_at", 0, 2000) + ")");
-            var dataSource = new YAHOO.util.DataSource(result.rows);
-            dataSource.responseType = YAHOO.util.DataSource.TYPE_JSARRAY;
-            dataSource.responseSchema = { fields: [
-                {key: "id",  parser: YAHOO.util.DataSource.parseNumber},
-                "caption", "created_at"
-            ] };
-            var dataTable = new YAHOO.widget.DataTable("datatable",
-                [   {key: "id", label: "ID", sortable: true},
-                    {key: "caption", label: "Caption", sortable: true},
-                    {key: "created_at", label:"Created at", sortable: true}
-                ],
-                dataSource,
-                {
-                    paginator: new YAHOO.widget.Paginator({
-	                    rowsPerPage    : 10
-	                }) 
-                }
-            );
-            // enable row selection
-            dataTable.subscribe("rowClickEvent", dataTable.onEventSelectRow);
-            // enable row highlighting
-            dataTable.subscribe("rowMouseoverEvent", dataTable.onEventHighlightRow);
-            dataTable.subscribe("rowMouseoutEvent", dataTable.onEventUnhighlightRow);
-
-            // add context menu
-            var menu = new YAHOO.widget.ContextMenu("tableMenu", {trigger: dataTable.getTbodyEl()});
-            menu.addItem("Open");
-            menu.render("menucontainer");
-        }
-
-        var loader = new YAHOO.util.YUILoader({
-                base: "#{fxSystemBean.contextPath}/pub/js/yui/",
-                require: ["button", "datatable"],
-                loadOptional: true,
-                onSuccess: setup
-        });
-        loader.insert();
-        //-->
+                // add context menu
+    //            var menu = new YAHOO.widget.ContextMenu("tableMenu", {trigger: dataTable.getTbodyEl()});
+    //            menu.addItem("Open");
+    //            menu.render("menucontainer");
+            });
+            //-->
         </script>
+
+
     </ui:define>
 
 </ui:composition>

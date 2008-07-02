@@ -34,6 +34,7 @@
 package com.flexive.war.filter;
 
 import com.flexive.faces.components.JsonRpcCallRenderer;
+import com.flexive.faces.javascript.yui.search.YahooResultProvider;
 import com.flexive.war.javascript.BriefcaseEditor;
 import com.flexive.war.javascript.ContentEditor;
 import com.flexive.war.javascript.SearchQueryEditor;
@@ -93,6 +94,8 @@ public class JsonRpcFilter implements Filter {
         bridge.registerObject("BriefcaseEditor", new BriefcaseEditor());
         bridge.registerObject("SearchQueryEditor", new SearchQueryEditor());
         bridge.registerObject("SystemInformation", new SystemInformation());
+        // TODO move Yahoo-UI stuff to JSF-components
+        bridge.registerObject("YahooResultProvider", new YahooResultProvider());
         session.setAttribute(JsonRpcCallRenderer.SESSION_JSON_BRIDGE, bridge);
         return bridge;
     }

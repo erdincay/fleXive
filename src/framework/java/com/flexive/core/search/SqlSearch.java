@@ -89,6 +89,7 @@ public class SqlSearch {
     private String cacheTbl;
     private final FxSQLSearchParams params;
     private boolean hasUserPropsWildcard = false;
+    private int indexOfUserPropsWildcard = -1;
     private FxEnvironment environment;
     private final ResultPreferencesEngine conf;
     private FxLanguage language;
@@ -266,6 +267,7 @@ public class SqlSearch {
                     fetchRows, location, viewType, df.getContentTypes(),
                     getTypeFilter() != null ? getTypeFilter().getId() : -1,
                     createdBriefcaseId);
+            fx_result.setUserWildcardIndex(indexOfUserPropsWildcard != -1 ? indexOfUserPropsWildcard + 1 : -1);
             fx_result.setTotalRowCount(df.getFoundEntries());
             fx_result.setTruncated(df.isTruncated());
 
@@ -337,7 +339,8 @@ public class SqlSearch {
         try {
             final long start = java.lang.System.currentTimeMillis();
             statement = FxStatement.parseSql(query);
-            this.hasUserPropsWildcard = this.hasUserPropsWildcard();
+            this.indexOfUserPropsWildcard = this.indexOfUserWildcard();
+            this.hasUserPropsWildcard = this.indexOfUserPropsWildcard != -1;
             this.parserExecutionTime = (int) (java.lang.System.currentTimeMillis() - start);
         } catch (SqlParserException pe) {
             // Catch the parse exception and convert it to an localized one
@@ -461,22 +464,22 @@ public class SqlSearch {
         return searchId;
     }
 
-    private boolean hasUserPropsWildcard() throws FxSqlSearchException {
-        // Find out if we have to deal with a wildcard
-        boolean hasWildcard = false;
-        for (SelectedValue value : statement.getSelectedValues()) {
+    private int indexOfUserWildcard() throws FxSqlSearchException {
+        int index = -1;
+        for (int i = 0; i < statement.getSelectedValues().size(); i++) {
+            final SelectedValue value = statement.getSelectedValues().get(i);
             if (value.getValue() instanceof Property) {
                 Property prop = ((Property) value.getValue());
                 if (prop.isUserPropsWildcard()) {
-                    if (hasWildcard) {
+                    if (index != -1) {
                         // Only one wildcard may be used per statement
                         throw new FxSqlSearchException(LOG, "ex.sqlSearch.onlyOneWildcardPermitted");
                     }
-                    hasWildcard = true;
+                    index = i;
                 }
             }
         }
-        return hasWildcard;
+        return index;
     }
 
     /**

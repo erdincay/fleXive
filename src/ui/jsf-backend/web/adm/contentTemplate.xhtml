@@ -28,6 +28,7 @@
         }
     </script>
     <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/dojo/dojo.js"> </script>
+    <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/yui/yuiloader/yuiloader-beta-min.js"> </script>
 
     <script type="text/javascript">
         dojoInit();
@@ -39,11 +40,14 @@
 
 <t:documentBody>
 <div id="fxMessages" style="display:none;"></div>
-<ui:insert name="body">Default Body</ui:insert>
+<div class="yui-skin-sam">
+    <ui:insert name="body">Default Body</ui:insert>
+</div>
 <div id="fxMessagesTmp" style="display:none"><ui:insert name="messages"><a4j:outputPanel ajaxRendered="true"><adm:messages/></a4j:outputPanel></ui:insert></div>
 
 
 <script type="text/javascript">
+<!--
     // Copy the messages from the bottom of the page to the top
     if ("#{fxSystemBean.hasGroupedFxMessages}") {
         var messagesTmp = document.getElementById("fxMessagesTmp");
@@ -51,13 +55,16 @@
         var content = messagesTmp.innerHTML;
         if (content.length>0) {
             messages.style.display="inline";
-            messages.innerHTML=content+"&lt;br>";
+            messages.innerHTML=content+"<br>";
         }
     }
-    if (parent &amp;&amp; parent.pageLoaded) {
+    if (parent && parent.pageLoaded) {
         parent.pageLoaded(#{fxSystemBean.pageId}, #{fxSystemBean.pageRenderTime}, #{fxSystemBean.treeModified});
     }
+-->
 </script>
+
+<fx:yuiSetup/>
 
 <ui:debug hotkey="d" rendered="#{initParam.debugMode}"/>
 </t:documentBody>

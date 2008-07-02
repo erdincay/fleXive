@@ -256,8 +256,17 @@ public interface FxResultSet {
     /**
      * Projects a single column to a list.
      *
-     * @param columnIndex   the 1-basedcolumn index
+     * @param columnIndex   the 1-based column index
      * @return  all column values collected in a list
      */
     <T> List<T> collectColumn(int columnIndex);
+
+    /**
+     * Return the start column index of the properties selected by the user wildcard @*, or -1
+     * if no such wildcard was present in the original statement.
+     *
+     * @return the start column index 1-based of the properties selected by the user wildcard @*, or -1
+     * if no such wildcard was present in the original statement.
+     */
+    int getUserWildcardIndex();
 }

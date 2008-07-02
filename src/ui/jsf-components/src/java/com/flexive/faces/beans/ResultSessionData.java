@@ -55,8 +55,6 @@ public class ResultSessionData implements Serializable {
     private static final long serialVersionUID = -3471062917140804393L;
 
     private ResultLocation location;
-    private int clientSizeX;
-    private int clientSizeY;
     private SqlQueryBuilder queryBuilder;
     private BinaryDescriptor.PreviewSizes previewSize;
     private long briefcaseId;
@@ -85,7 +83,7 @@ public class ResultSessionData implements Serializable {
      * @param location the search result location
      */
     private ResultSessionData(ResultLocation location) {
-        this(location, -1, -1, new SqlQueryBuilder(), BinaryDescriptor.PreviewSizes.PREVIEW2, -1);
+        this(location, new SqlQueryBuilder(), BinaryDescriptor.PreviewSizes.PREVIEW2, -1);
     }
 
     /**
@@ -94,13 +92,11 @@ public class ResultSessionData implements Serializable {
      * @param other the session data object to be copied
      */
     public ResultSessionData(ResultSessionData other) {
-        this(other.location, other.clientSizeX, other.clientSizeY, new SqlQueryBuilder(other.queryBuilder), other.previewSize, other.briefcaseId);
+        this(other.location, new SqlQueryBuilder(other.queryBuilder), other.previewSize, other.briefcaseId);
     }
 
-    private ResultSessionData(ResultLocation location, int clientSizeX, int clientSizeY, SqlQueryBuilder queryBuilder, BinaryDescriptor.PreviewSizes previewSize, long briefcaseId) {
+    private ResultSessionData(ResultLocation location, SqlQueryBuilder queryBuilder, BinaryDescriptor.PreviewSizes previewSize, long briefcaseId) {
         this.location = location;
-        this.clientSizeX = clientSizeX;
-        this.clientSizeY = clientSizeY;
         this.queryBuilder = queryBuilder;
         this.previewSize = previewSize;
         this.briefcaseId = briefcaseId;
@@ -127,24 +123,6 @@ public class ResultSessionData implements Serializable {
 
     public ResultLocation getLocation() {
         return location;
-    }
-
-    public int getClientSizeX() {
-        return clientSizeX;
-    }
-
-    public void setClientSizeX(int clientSizeX) {
-        this.clientSizeX = clientSizeX;
-        saveInSession();
-    }
-
-    public int getClientSizeY() {
-        return clientSizeY;
-    }
-
-    public void setClientSizeY(int clientSizeY) {
-        this.clientSizeY = clientSizeY;
-        saveInSession();
     }
 
     public SqlQueryBuilder getQueryBuilder() {

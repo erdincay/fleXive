@@ -77,6 +77,9 @@ public class JsonWriter {
     }
 
     public JsonWriter startArray() throws IOException {
+        if (!attributeValueNeeded && !openSet.isEmpty()) {
+            checkInArray();
+        }
         writeSeparator();
         out.write("[");
         pushElement('[');
@@ -92,6 +95,9 @@ public class JsonWriter {
     }
 
     public JsonWriter startMap() throws IOException {
+        if (!attributeValueNeeded && !openSet.isEmpty()) {
+            checkInArray();
+        }
         writeSeparator();
         out.write("{");
         pushElement('{');
@@ -155,6 +161,8 @@ public class JsonWriter {
     private void writeValue(Object value, boolean escapeValue) throws IOException {
         if (value instanceof String && escapeValue) {
             writeStringValue((String) value);
+        } else if (value instanceof String) {
+            out.write((String) value);
         } else if (value instanceof Collection) {
             startArray();
             for (Object item : (Collection<?>) value) {
@@ -165,6 +173,8 @@ public class JsonWriter {
             out.write(value.toString());
         } else if (value instanceof Date) {
             writeStringValue(dateFormat.format((Date) value));
+        } else if (escapeValue && value != null) {
+            writeStringValue(value.toString());
         } else {
             out.write(String.valueOf(value));
         }
@@ -245,4 +255,8 @@ public class JsonWriter {
 		}
 	}
 
+    @Override
+    public String toString() {
+        return out.toString();
+    }
 }

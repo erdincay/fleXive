@@ -275,4 +275,11 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     public <T> List<T> collectColumn(int columnIndex) {
         return new ArrayList<T>(0);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int getUserWildcardIndex() {
+        return -1;
+    }
 }

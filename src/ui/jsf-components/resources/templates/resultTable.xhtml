@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:c="http://java.sun.com/jstl/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+    xmlns:fx="http://www.flexive.com/jsf/core">
+
+A client-side result table implemented using the Yahoo datatable widget.
+
+Parameters:
+    var      - name of the javascript variable that exposes the Yahoo DataTable widget (default: resultTable)
+    value    - the result set to be rendered, or a plain text FxSQL query
+    viewType - the view type (THUMBNAILS or LIST). If not set and a result set is passed in as value,
+               the result set's viewtype is used, otherwise it defaults to LIST.
+
+<ui:composition>
+
+    <c:if test="#{empty var}">
+        <c:set var="var" value="resultTable"/>
+    </c:if>
+
+    <div id="ResultTable_datatable"> </div>
+
+    <script type="text/javascript">
+    <!--
+        var #{var};
+        flexive.yui.requireComponent("datatable");
+        flexive.yui.onYahooLoaded(function() {
+            var createFun = function(result) {
+                //var result = eval("(" + getJsonRpc().SearchResultWriter.getResultRows("SELECT id, caption, created_at", 0, 2000) + ")");
+                // get JSON representation of the search result
+                var view = flexive.yui.datatable.getViewWrapper(result);
+                var isThumbnails = result.viewType == "THUMBNAILS";
+
+                var dataSource = new YAHOO.util.DataSource(view.getRows());
+                dataSource.responseType = YAHOO.util.DataSource.TYPE_JSARRAY;
+                dataSource.responseSchema = view.getResponseSchema();
+                var dataTable = new YAHOO.widget.DataTable("ResultTable_datatable",
+                    view.getColumns(), dataSource,
+                    { paginator: new YAHOO.widget.Paginator({
+                        template : "#{fxMessageBean['ResultTable.label.rowSelect']}",
+                        rowsPerPage : view.rowsPerPage,
+                        rowsPerPageOptions : isThumbnails ? [5, 10, 25, 50] : [10,25,50,100]
+                    }) }
+                );
+                if (isThumbnails) {
+                    // enable cell selection
+                    dataTable.set("selectionMode", "cellrange");
+                    dataTable.subscribe("cellClickEvent", dataTable.onEventSelectCell);
+                    // enable cell highlighting
+                    dataTable.subscribe("cellMouseoverEvent", dataTable.onEventHighlightCell);
+                    dataTable.subscribe("cellMouseoutEvent", dataTable.onEventUnhighlightCell);
+                } else {
+                    // enable row selection
+                    dataTable.subscribe("rowClickEvent", dataTable.onEventSelectRow);
+                    // enable row highlighting
+                    dataTable.subscribe("rowMouseoverEvent", dataTable.onEventHighlightRow);
+                    dataTable.subscribe("rowMouseoutEvent", dataTable.onEventUnhighlightRow);
+                }
+                return dataTable;
+            }
+            #{var} = createFun(#{fx:getJsonResult(value, viewType)});
+            #{var}._reset = function(result) {
+                var reset = #{var}._reset;  // keep old method
+                // wipe out the entire datatable and create a new one
+                #{var}.destroy();
+                #{var} = createFun(result);
+                #{var}._reset = reset;
+            }
+        });
+    //-->
+    </script>
+
+</ui:composition>
+
+
+</html>

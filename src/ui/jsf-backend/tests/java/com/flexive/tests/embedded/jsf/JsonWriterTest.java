@@ -34,6 +34,8 @@
 package com.flexive.tests.embedded.jsf;
 
 import com.flexive.war.JsonWriter;
+import com.flexive.shared.exceptions.FxRuntimeException;
+import com.flexive.shared.search.ResultViewType;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -364,5 +366,51 @@ public class JsonWriterTest {
         writer.closeArray();
         writer.finishResponse();
         assert ("['" + DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.ENGLISH).format(new Date(0)) + "']").equals(out.toString()) : "Unexepcted output: " + out.toString();
+    }
+
+    @Test
+    public void testWriteInvalidMap() throws IOException {
+        final StringWriter out = new StringWriter();
+        final JsonWriter writer = new JsonWriter(out);
+        writer.startMap();
+        writer.startAttribute("attr");
+        writer.startMap();
+        writer.writeAttribute("prop", "value");
+        writer.closeMap();
+        try {
+            writer.startMap();
+            assert false : "Map outside array";
+        } catch (FxRuntimeException e) {
+            // succeed
+        }
+    }
+
+    @Test
+    public void testWriteInvalidArray() throws IOException {
+        final StringWriter out = new StringWriter();
+        final JsonWriter writer = new JsonWriter(out);
+        writer.startMap();
+        writer.startAttribute("attr");
+        writer.startMap();
+        writer.writeAttribute("prop", "value");
+        writer.closeMap();
+        try {
+            writer.startArray();
+            assert false : "Array outside array";
+        } catch (FxRuntimeException e) {
+            // succeed
+        }
+    }
+
+    @Test
+    public void testWriteEnum() throws IOException {
+        final StringWriter out = new StringWriter();
+        final JsonWriter writer = new JsonWriter(out);
+        writer.startMap()
+              .writeAttribute("enum", ResultViewType.THUMBNAILS)
+              .closeMap()
+              .finishResponse();
+        assert writer.toString().contains("'" + ResultViewType.THUMBNAILS + "'")
+                : "Enum value not escaped: " + writer.toString();
     }
 }

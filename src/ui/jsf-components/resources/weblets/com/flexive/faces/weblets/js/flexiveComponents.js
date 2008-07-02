@@ -2,6 +2,192 @@
  * Miscellaneous classes and functions used by flexive JSF components.
  */
 
+
+var flexive = new function() {
+    /**
+     * Enumeration of valid thumbnail preview sizes - see BinaryDescriptor#PreviewSizes
+     */
+    this.PreviewSizes = {
+        PREVIEW1: { id: 1, size: 42 },
+        PREVIEW2: { id: 2, size: 85 },
+        PREVIEW3: { id: 3, size: 232 },
+        ORIGINAL: { id: 0, size: -1}
+    };
+
+}
+
+// miscellaneous utility functions
+flexive.util = new function() {
+
+    /**
+     * Return the URL for the thumbnail of the given PK (relative to the flexive root path).
+     *
+     * @param pk    the object PK
+     * @param size  the thumbnail size (one of FxComponents.PreviewSizes)
+     * @param includeTimestamp  if true, the current timestamp will be included (disables caching)
+     */
+    this.getThumbnailURL = function(pk, /* flexive.PreviewSizes */ size, /* boolean */ includeTimestamp) {
+        return "thumbnail/pk" + pk
+                + (size != null ? "/s" + size.id : "")
+                + (includeTimestamp ? "/ts" + new Date().getTime() : "");
+    };
+
+    /**
+     * Returns the preview size with the given ID.
+     *
+     * @param id    the preview size ID (0-3)
+     */
+    this.getPreviewSize = function(/* int */ id) {
+        for (var ps in flexive.PreviewSizes) {
+            if (flexive.PreviewSizes[ps].id == id) {
+                return flexive.PreviewSizes[ps];
+            }
+        }
+        return null;
+    };
+}
+
+// Yahoo UI (YUI) helper methods and classes
+flexive.yui = new function() {
+    /** A list of all required components in the current page. Evaluated at the end of the page to initialize Yahoo.*/
+    this.requiredComponents = [];
+    /** A list of callback functions to be called when YUI has been fully loaded */
+    this.onYahooLoadedFunctions = [];
+
+    /**
+     * Adds the given function to flexive.yui.onYahooLoaded.
+     *
+     * @param fn    the function to be called when Yahoo has been loaded
+     */
+    this.onYahooLoaded = function(fn) {
+        this.onYahooLoadedFunctions.push(fn);
+    }
+
+    /**
+     * Adds the given Yahoo component to the required components of this page.
+     *
+     * @param component the Yahoo component (e.g. "button")
+     */
+    this.requireComponent = function(component) {
+        var found = false;
+        for (var i = 0; i < this.requiredComponents.length; i++) {
+            if (this.requiredComponents[i] == component) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            this.requiredComponents.push(component);
+        }
+    }
+
+    /**
+     * Call setup methods of flexive components after yahoo has been initialized.
+     */
+    this.processOnYahoo = function() {
+        for (var i = 0; i < this.onYahooLoadedFunctions.length; i++) {
+            this.onYahooLoadedFunctions[i]();
+        }
+        this.onYahooLoadedFunctions = [];
+    }
+}
+
+flexive.yui.datatable = new function() {
+    /**
+     * Return the datatable wrapper for the correct view (list or thumbnails).
+     *
+     * @param result    the search result object as returned by fxSearchResultBean.jsonResult
+     */
+    this.getViewWrapper = function(result) {
+        return result.viewType == "THUMBNAILS"
+                ? new flexive.yui.datatable.ThumbnailView(result)
+                : new flexive.yui.datatable.ListView(result);
+    }
+}
+
+/**
+ * List result view - returns the linear result list of the search result
+ * @param result    the search result object as returned by fxSearchResultBean.jsonResult
+ */
+flexive.yui.datatable.ListView = function(result) {
+    this.result = result;
+    this.rowsPerPage = 25;
+}
+flexive.yui.datatable.ListView.prototype = {
+    getColumns: function() {
+        return this.result.columns;
+    },
+
+    getResponseSchema: function() {
+        return this.result.responseSchema;
+    },
+
+    getRows: function() {
+        return this.result.rows;
+    }
+}
+
+/**
+ * Thumbnail view - projects the linear result list to a thumbnail grid
+ * @param result    the search result object as returned by fxSearchResultBean.jsonResult
+ */
+flexive.yui.datatable.ThumbnailView = function(result) {
+    this.result = result;
+    this.previewSize = flexive.PreviewSizes.PREVIEW2;
+    this.gridColumns = Math.max(1, Math.round(YAHOO.util.Dom.getViewportWidth() / (this.previewSize.size * 1.3)));
+    this.rowsPerPage = 5;
+}
+
+flexive.yui.datatable.ThumbnailView.prototype = {
+    // return the columns of the thumbnail grid
+    getColumns: function() {
+        var columns = [];
+        for (var i = 0; i < this.gridColumns; i++) {
+            columns.push({ key: "c" + i, label: "" })
+        }
+        return columns;
+    },
+
+    getRows: function() {
+        // transpose the linear result rows according to the grid size
+        var grid = [];
+        var currentRow = {};    // the columns of the current row
+        var currentColumn = 0;
+        for (var i = 0; i < this.result.rowCount; i++) {
+            var resultRow = this.result.rows[i];
+            var data = "";
+            if (resultRow._pk != null) {
+                data = "<img src=\"" + flexive.util.getThumbnailURL(resultRow._pk, this.previewSize, true) + "\"/>";
+            }
+            /*if (resultRow["c1"] != null) {
+                data += "<br/>" + resultRow["c1"];
+            }*/
+            if (currentColumn >= this.gridColumns) {
+                // grid row completed
+                grid.push(currentRow);
+                currentRow = {};
+                currentColumn = 0;
+            }
+            // store column
+            currentRow["c" + currentColumn] = data;
+            currentColumn++;
+        }
+        if (currentColumn > 0) {
+            grid.push(currentRow);
+        }
+        return grid;
+    },
+
+    getResponseSchema: function() {
+        var fields = [];
+        for (var i = 0; i < this.gridColumns; i++) {
+            fields.push("c" + i);
+        }
+        return { "fields": fields };
+    }
+}
+
+
 var fxValueInputList = [];   // a global list of all registered FxValueInput elements on the current page
 
 var FxMultiLanguageValueInput = function(id, baseRowId, rowIds, languageSelectId) {

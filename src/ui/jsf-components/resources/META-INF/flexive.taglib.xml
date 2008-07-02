@@ -43,6 +43,14 @@
         <source>../templates/children.xhtml</source>
     </tag>
     <tag>
+        <tag-name>resultTable</tag-name>
+        <source>../templates/resultTable.xhtml</source>
+    </tag>
+    <tag>
+        <tag-name>yuiSetup</tag-name>
+        <source>../templates/yuiSetup.xhtml</source>
+    </tag>
+    <tag>
         <tag-name>includes</tag-name>
         <component>
             <component-type>flexive.WriteWebletIncludes</component-type>
@@ -109,5 +117,10 @@
         </validator>
     </tag>
 
+    <function>
+        <function-name>getJsonResult</function-name>
+        <function-class>com.flexive.faces.beans.SearchResultBean</function-class>
+        <function-signature>java.lang.String getJsonResult(java.lang.Object,java.lang.String)</function-signature>
+    </function>
 </facelet-taglib>
 
