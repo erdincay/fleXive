@@ -172,6 +172,15 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
     }
 
     /**
+     * Assign options
+     *
+     * @param options options to assign
+     */
+    public void setOptions(List<FxStructureOption> options) {
+        this.options = options;
+    }
+
+    /**
      * Should this assignment support multilingual data?
      *
      * @param multiLang multi lingual data supported?
@@ -419,17 +428,17 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
      * Convenience method to create a new FxPropertyAssignmentEdit from an existing FxPropertyAssignment as a new one for a given type with a
      * new alias and a given parentXPath
      *
-     * @param originalProperty the original properties XPath (like ROOT/CAPTION)
-     * @param type             name of the type to assign it
-     * @param parentXPath      parent XPath within the type to assign
-     * @param alias            new alias
+     * @param originalAssignment the original assignments XPath (like ROOT/CAPTION)
+     * @param type               name of the type to assign it
+     * @param parentXPath        parent XPath within the type to assign
+     * @param alias              new alias
      * @return new FxPropertyAssignmentEdit
      * @throws FxNotFoundException         if parentXPath is invalid
      * @throws FxInvalidParameterException if parentXPath is invalid
      */
-    public static FxPropertyAssignmentEdit reuse(String originalProperty, String type, String parentXPath, String alias) throws FxNotFoundException, FxInvalidParameterException {
+    public static FxPropertyAssignmentEdit reuse(String originalAssignment, String type, String parentXPath, String alias) throws FxNotFoundException, FxInvalidParameterException {
         return createNew(
-                (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(originalProperty),
+                (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(originalAssignment),
                 CacheAdmin.getEnvironment().getType(type),
                 alias,
                 parentXPath).setEnabled(true);
@@ -439,15 +448,15 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
      * Convenience method to create a new FxPropertyAssignmentEdit from an existing FxPropertyAssignment as a new one for a given type with a
      * new alias and a given parentXPath
      *
-     * @param originalProperty the original properties XPath (like ROOT/CAPTION)
-     * @param type             name of the type to assign it
-     * @param parentXPath      parent XPath within the type to assign
+     * @param originalAssignment the original assignments XPath (like ROOT/CAPTION)
+     * @param type               name of the type to assign it
+     * @param parentXPath        parent XPath within the type to assign
      * @return new FxPropertyAssignmentEdit
      * @throws FxNotFoundException         if parentXPath is invalid
      * @throws FxInvalidParameterException if parentXPath is invalid
      */
-    public static FxPropertyAssignmentEdit reuse(String originalProperty, String type, String parentXPath) throws FxNotFoundException, FxInvalidParameterException {
-        FxPropertyAssignment propertyAssignment = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(originalProperty);
+    public static FxPropertyAssignmentEdit reuse(String originalAssignment, String type, String parentXPath) throws FxNotFoundException, FxInvalidParameterException {
+        FxPropertyAssignment propertyAssignment = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(originalAssignment);
         return createNew(
                 propertyAssignment,
                 CacheAdmin.getEnvironment().getType(type),

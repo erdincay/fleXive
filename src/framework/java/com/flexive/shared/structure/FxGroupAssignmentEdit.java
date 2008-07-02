@@ -320,6 +320,15 @@ public class FxGroupAssignmentEdit extends FxGroupAssignment {
     }
 
     /**
+     * Assign options
+     *
+     * @param options options to assign
+     */
+    public void setOptions(List<FxStructureOption> options) {
+        this.options = options;
+    }
+
+    /**
      * Returns the group of this assignment as editable.
      *
      * @return the editable group object.

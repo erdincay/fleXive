@@ -238,6 +238,14 @@ public interface FxEnvironment extends Serializable {
     FxProperty getProperty(String name);
 
     /**
+     * Check if a property with the requested name exists
+     *
+     * @param name name of the property
+     * @return exists
+     */
+    boolean properyExists(String name);
+
+    /**
      * Get all property assignments that are enabled
      *
      * @return enabled property assignments

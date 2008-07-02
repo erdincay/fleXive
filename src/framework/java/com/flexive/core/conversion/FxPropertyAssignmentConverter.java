@@ -31,14 +31,23 @@
  ***************************************************************/
 package com.flexive.core.conversion;
 
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.XPathElement;
 import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.structure.FxProperty;
-import com.flexive.shared.structure.FxPropertyAssignment;
+import com.flexive.shared.exceptions.FxConversionException;
+import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.flexive.shared.interfaces.LanguageEngine;
+import com.flexive.shared.security.ACL;
+import com.flexive.shared.structure.*;
+import com.flexive.shared.value.FxString;
+import com.flexive.shared.value.FxValue;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+
+import java.util.List;
 
 /**
  * XStream converter for FxPropertyAssignment
@@ -100,8 +109,100 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
      * {@inheritDoc}
      */
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
+        FxType type = (FxType) ctx.get(ConversionEngine.KEY_TYPE);
+        String property = reader.getAttribute("property");
+        FxEnvironment env = CacheAdmin.getEnvironment();
+        ACL acl = env.getACL(reader.getAttribute("acl"));
+        LanguageEngine lang = EJBLookup.getLanguageEngine();
+        long defaultLanguage;
+        try {
+            defaultLanguage = ConversionEngine.getLang(lang, reader.getAttribute("defaultLanguage"));
+        } catch (FxApplicationException e) {
+            throw e.asRuntimeException();
+        }
         AssignmentData data = (AssignmentData) super.unmarshal(reader, ctx);
-        System.out.println("PA: " + data);
+        String parentXPath = "/";
+        if (reader.hasMoreChildren()) {
+            reader.moveDown();
+            //only allowed child is the property if it is not derived
+            if (!"property".equals(reader.getNodeName()))
+                throw new FxConversionException("ex.conversion.wrongNode", "property", reader.getNodeName()).asRuntimeException();
+            //read property data and create if needed
+            String propName = reader.getAttribute("name");
+            FxMultiplicity propMult = FxMultiplicity.fromString(reader.getAttribute("multiplicity"));
+            FxDataType propDataType = FxDataType.valueOf(reader.getAttribute("dataType"));
+            ACL propACL = env.getACL(reader.getAttribute("acl"));
+            boolean propOverrideACL = Boolean.valueOf(reader.getAttribute("overrideACL"));
+            UniqueMode propUniqueMode = UniqueMode.valueOf(reader.getAttribute("uniqueMode"));
+            FxString propLabel = (FxString) ConversionEngine.getFxValue("label", this, reader, ctx);
+            FxString propHint = (FxString) ConversionEngine.getFxValue("hint", this, reader, ctx);
+            FxValue propDefaultValue = ConversionEngine.getFxValue("defaultValue", this, reader, ctx);
+            List<FxStructureOption> options = super.unmarshallOptions(reader, ctx);
+            if (env.properyExists(propName)) {
+                FxPropertyEdit prop = env.getProperty(propName).asEditable();
+                prop.setACL(propACL);
+                prop.setAssignmentDefaultMultiplicity(data.getDefaultMultiplicity());
+                prop.setHint(propHint);
+                prop.setLabel(propLabel);
+                prop.setOverrideACL(propOverrideACL);
+                prop.setUniqueMode(propUniqueMode);
+                prop.setDefaultValue(propDefaultValue);
+                prop.setOptions(options);
+                try {
+                    EJBLookup.getAssignmentEngine().save(prop);
+                } catch (FxApplicationException e) {
+                    throw e.asRuntimeException();
+                }
+            } else {
+                //create new assignment and property
+                FxPropertyEdit prop = FxPropertyEdit.createNew(propName, propLabel, propHint, propMult, propACL, propDataType);
+                prop.setAssignmentDefaultMultiplicity(data.getDefaultMultiplicity());
+                prop.setOverrideACL(propOverrideACL);
+                prop.setUniqueMode(propUniqueMode);
+                prop.setDefaultValue(propDefaultValue);
+                prop.setOptions(options);
+                try {
+                    List<XPathElement> xpe = XPathElement.split(data.getXpath());
+                    if (xpe.size() > 0)
+                        xpe.remove(xpe.size() - 1);
+                    parentXPath = XPathElement.toXPath(xpe);
+                } catch (FxInvalidParameterException e) {
+                    throw e.asRuntimeException();
+                }
+                try {
+                    EJBLookup.getAssignmentEngine().createProperty(type.getId(), prop, parentXPath, data.getAlias());
+                } catch (FxApplicationException e) {
+                    throw e.asRuntimeException();
+                }
+            }
+            reader.moveUp();
+        }
+        //check if the assignment exists and create if needed
+        if (!type.isXPathValid(data.getXpath(), true)) {
+            //property exists but not the xpath
+            try {
+                //TODO: FX-268: we need a way to create assignments from properties without knowing other assignments as well
+                EJBLookup.getAssignmentEngine().save(FxPropertyAssignmentEdit.reuse(property, type.getName(), parentXPath, data.getAlias()), false);
+            } catch (FxApplicationException e) {
+                throw e.asRuntimeException();
+            }
+        }
+        //assignment either exists now or has been created, apply all assignment specific data
+        try {
+            FxPropertyAssignmentEdit pa = ((FxPropertyAssignment) env.getAssignment(XPathElement.stripType(data.getXpath()))).asEditable();
+            pa.setACL(acl);
+            pa.setDefaultLanguage(defaultLanguage);
+            pa.setPosition(data.getPos());
+            pa.setMultiplicity(data.getMultiplicity());
+            pa.setDefaultMultiplicity(data.getDefaultMultiplicity());
+            pa.setLabel(data.getLabel());
+            pa.setHint(data.getHint());
+            pa.setOptions(data.getOptions());
+            pa.setDefaultValue(ConversionEngine.getFxValue("defaultValue", this, reader, ctx));
+            EJBLookup.getAssignmentEngine().save(pa, false);
+        } catch (FxApplicationException e) {
+            throw e.asRuntimeException();
+        }
         return null;
     }
 

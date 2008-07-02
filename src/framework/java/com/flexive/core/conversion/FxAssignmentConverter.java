@@ -208,7 +208,7 @@ public abstract class FxAssignmentConverter implements Converter {
      * @param ctx    UnmarshallingContext
      * @return List<FxStructureOption>
      */
-    private List<FxStructureOption> unmarshallOptions(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
+    protected List<FxStructureOption> unmarshallOptions(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
         if (!reader.hasMoreChildren())
             throw new FxConversionException("ex.conversion.missingNode", "options").asRuntimeException();
         reader.moveDown();
@@ -241,34 +241,11 @@ public abstract class FxAssignmentConverter implements Converter {
         data.setDefaultMultiplicity(Integer.parseInt(reader.getAttribute("defaultMultiplicity")));
         data.setParentAssignment(reader.getAttribute("parent"));
         //label
-        String expected = "label";
-        String found = "-";
-        if (reader.hasMoreChildren()) {
-            reader.moveDown();
-            found = reader.getNodeName();
-            if (expected.equals(found)) {
-                data.setLabel(((FxString) ctx.convertAnother(this, FxValue.class)));
-                expected = null;
-            }
-            reader.moveUp();
-        }
-        if (expected != null)
-            throw new FxConversionException("ex.conversion.wrongNode", expected, found).asRuntimeException();
+        data.setLabel(((FxString) ConversionEngine.getFxValue("label", this, reader, ctx)));
         //hint
-        expected = "hint";
-        if (reader.hasMoreChildren()) {
-            reader.moveDown();
-            found = reader.getNodeName();
-            if (expected.equals(found)) {
-                data.setHint(((FxString) ctx.convertAnother(this, FxValue.class)));
-                expected = null;
-            }
-            reader.moveUp();
-        }
-        data.setOptions(unmarshallOptions(reader, ctx));
-        if (expected != null)
-            throw new FxConversionException("ex.conversion.wrongNode", expected, found).asRuntimeException();
+        data.setHint(((FxString) ConversionEngine.getFxValue("hint", this, reader, ctx)));
         //options
+        data.setOptions(unmarshallOptions(reader, ctx));
         return data;
     }
 }

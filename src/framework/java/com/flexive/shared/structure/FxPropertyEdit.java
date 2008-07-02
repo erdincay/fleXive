@@ -585,4 +585,13 @@ public class FxPropertyEdit extends FxProperty {
     public int getAssignmentDefaultMultiplicity() {
         return defaultMultiplicity;
     }
+
+    /**
+     * Assign options
+     *
+     * @param options options to assign
+     */
+    public void setOptions(List<FxStructureOption> options) {
+        this.options = options;
+    }
 }

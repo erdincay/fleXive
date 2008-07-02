@@ -294,6 +294,13 @@ public final class FxFilteredEnvironment implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
+    public boolean properyExists(String name) {
+        return environment.properyExists(name);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public List<FxPropertyAssignment> getPropertyAssignments() {
         final List<FxType> types = getTypes(true, true, true, false);
         final List<FxPropertyAssignment> assignments = new ArrayList<FxPropertyAssignment>(environment.getPropertyAssignments());

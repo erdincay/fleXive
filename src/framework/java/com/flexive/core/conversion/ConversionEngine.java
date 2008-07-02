@@ -35,12 +35,15 @@ import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxGroupData;
 import com.flexive.shared.content.FxPropertyData;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxConversionException;
 import com.flexive.shared.interfaces.LanguageEngine;
 import com.flexive.shared.structure.FxGroupAssignment;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxValue;
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 
 /**
  * Conversion Engine - responsible for XML Import/Export
@@ -107,5 +110,25 @@ public class ConversionEngine {
      */
     static long getLang(LanguageEngine le, String code) throws FxApplicationException {
         return SYS_LANG.equals(code) ? 0 : le.load(code).getId();
+    }
+
+    /**
+     * Get an FxValue from the reader
+     *
+     * @param nodeName expected node name
+     * @param caller   caller object
+     * @param reader   the reader
+     * @param ctx      context
+     * @return FxValue
+     */
+    static FxValue getFxValue(String nodeName, Object caller, HierarchicalStreamReader reader, UnmarshallingContext ctx) {
+        if (!reader.hasMoreChildren())
+            throw new FxConversionException("ex.conversion.missingNode", nodeName).asRuntimeException();
+        reader.moveDown();
+        if (!reader.getNodeName().equals(nodeName))
+            throw new FxConversionException("ex.conversion.wrongNode", nodeName, reader.getNodeName()).asRuntimeException();
+        FxValue value = (FxValue) ctx.convertAnother(caller, FxValue.class);
+        reader.moveUp();
+        return value;
     }
 }
