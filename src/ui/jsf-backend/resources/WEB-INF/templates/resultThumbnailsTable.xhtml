@@ -23,13 +23,13 @@ Parameters:
     tableRows - table size in rows (not thumbnails) (required)
 
 <ui:composition>
-    <fx:menu name="#{id}_resultMenu" contextMenuTarget="frm:#{id}_resultSetTable" showHandler="function() { #{id}_MenuHandler.onShowContextMenu(); }">
-        <fx:menuItem id="show" labelKey="SearchResult.menu.show" icon="open" clickHandler="function() { #{id}_MenuHandler.showRow(); }"/>
-        <fx:menuItem id="edit" labelKey="SearchResult.menu.edit" icon="edit" clickHandler="function() { #{id}_MenuHandler.editRow(); }"/>
-        <fx:menuSeparator/>
-        <fx:menuItem id="delete" labelKey="SearchResult.menu.delete" icon="remove" clickHandler="function() { #{id}_MenuHandler.deleteRow(); }"/>
-        <fx:menuItem id="deleteSelected" labelKey="SearchResult.menu.deleteSelected" icon="remove" clickHandler="function() { #{id}_MenuHandler.deleteSelectedRows(); }"/>
-    </fx:menu>
+    <fx:dojoMenu name="#{id}_resultMenu" contextMenuTarget="frm:#{id}_resultSetTable" showHandler="function() { #{id}_MenuHandler.onShowContextMenu(); }">
+        <fx:dojoMenuItem id="show" labelKey="SearchResult.menu.show" icon="open" clickHandler="function() { #{id}_MenuHandler.showRow(); }"/>
+        <fx:dojoMenuItem id="edit" labelKey="SearchResult.menu.edit" icon="edit" clickHandler="function() { #{id}_MenuHandler.editRow(); }"/>
+        <fx:dojoMenuSeparator/>
+        <fx:dojoMenuItem id="delete" labelKey="SearchResult.menu.delete" icon="remove" clickHandler="function() { #{id}_MenuHandler.deleteRow(); }"/>
+        <fx:dojoMenuItem id="deleteSelected" labelKey="SearchResult.menu.deleteSelected" icon="remove" clickHandler="function() { #{id}_MenuHandler.deleteSelectedRows(); }"/>
+    </fx:dojoMenu>
 
     <div style="display:none">
         <h:inputHidden id="contentEditorId" value="#{contentEditorBean.id}"/>

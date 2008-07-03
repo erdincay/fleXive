@@ -21,18 +21,29 @@
 
     <component>
         <component-type>flexive.DojoMenu</component-type>
-        <component-class>com.flexive.faces.components.menu.DojoMenu</component-class>
+        <component-class>com.flexive.faces.components.menu.dojo.DojoMenu</component-class>
     </component>
 
     <component>
         <component-type>flexive.DojoMenuItem</component-type>
-        <component-class>com.flexive.faces.components.menu.DojoMenuItem</component-class>
+        <component-class>com.flexive.faces.components.menu.dojo.DojoMenuItem</component-class>
     </component>
 
     <component>
         <component-type>flexive.DojoMenuSeparator</component-type>
-        <component-class>com.flexive.faces.components.menu.DojoMenuItemSeparator</component-class>
+        <component-class>com.flexive.faces.components.menu.dojo.DojoMenuItemSeparator</component-class>
     </component>
+
+    <component>
+        <component-type>flexive.YahooMenu</component-type>
+        <component-class>com.flexive.faces.components.menu.yui.YahooMenu</component-class>
+    </component>
+
+    <component>
+        <component-type>flexive.YahooMenuItem</component-type>
+        <component-class>com.flexive.faces.components.menu.yui.YahooMenuItem</component-class>
+    </component>
+
 
     <component>
         <component-type>flexive.FxContentView</component-type>
@@ -66,12 +77,12 @@
 
     <component>
         <component-type>flexive.TreeContextMenu</component-type>
-        <component-class>com.flexive.faces.components.menu.TreeContextMenu</component-class>
+        <component-class>com.flexive.faces.components.menu.dojo.TreeContextMenu</component-class>
     </component>
 
     <component>
         <component-type>flexive.TreeContextMenuItem</component-type>
-        <component-class>com.flexive.faces.components.menu.TreeContextMenuItem</component-class>
+        <component-class>com.flexive.faces.components.menu.dojo.TreeContextMenuItem</component-class>
     </component>
 
     <component>

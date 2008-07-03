@@ -326,9 +326,9 @@
                 <adm:treeContextMenuItem treeActions="rename" icon="rename" labelKey="ContentTree.menu.rename" clickHandler="editStart"/>
                 <adm:treeContextMenuItem treeActions="searchSubtree" icon="search" labelKey="ContentTree.menu.querySubTree" clickHandler="querySubTree"/>
                 <adm:treeContextMenuItem treeActions="searchSubtree" icon="search" labelKey="ContentTree.menu.querySubTreeImmediate" clickHandler="querySubTreeImmediate"/>
-                <fx:menuSeparator/>
+                <fx:dojoMenuSeparator/>
                 <adm:treeContextMenuItem icon="createFolder" treeActions="createFolder" labelKey="ContentTree.menu.createNode" clickHandler="createFolder"/>
-                <fx:menuSeparator/>
+                <fx:dojoMenuSeparator/>
                 <adm:treeContextMenuItem icon="new" treeActions="createContent" labelKey="ContentTree.menu.create">
                     <c:forEach var="selectItem" items="#{fxSelectBean.types}">
                         <c:if test="#{selectItem.value > 0}">
@@ -337,12 +337,12 @@
                     </c:forEach>
                 </adm:treeContextMenuItem>
                 <adm:treeContextMenuItem icon="importContent" treeActions="importContent" labelKey="ContentTree.menu.importContent" clickHandler="importContent"/>
-                <fx:menuSeparator/>
+                <fx:dojoMenuSeparator/>
                 <adm:treeContextMenuItem treeActions="activateNode" icon="activate" labelKey="ContentTree.menu.activateNode" clickHandler="activateNode"/>
                 <adm:treeContextMenuItem treeActions="activateNodeAndChildren" icon="activateWithChildren" labelKey="ContentTree.menu.activateWithChildren" clickHandler="activateNodeAndChildren"/>
                 <adm:treeContextMenuItem treeActions="deactivateNode" icon="deactivate" labelKey="ContentTree.menu.deactivateNode" clickHandler="deactivateNode"/>
                 <adm:treeContextMenuItem treeActions="deactivateNodeAndChildren" icon="deactivateWithChildren" labelKey="ContentTree.menu.deactivateWithChildren" clickHandler="deactivateNodeAndChildren"/>
-                <fx:menuSeparator/>
+                <fx:dojoMenuSeparator/>
                 <adm:treeContextMenuItem treeActions="attachContentSelection" icon="paste" labelKey="ContentTree.menu.attachContentSelection" clickHandler="attachContentSelection"/>
                 <adm:treeContextMenuItem treeActions="pasteNode" icon="paste" labelKey="ContentTree.menu.pasteNode" clickHandler="pasteNode"/>
                 <adm:treeContextMenuItem treeActions="pasteNode" icon="paste" labelKey="ContentTree.menu.pasteNodeAbove" clickHandler="pasteNodeAbove"/>
@@ -362,18 +362,18 @@
 
     <ui:define name="mainMenu">
         <div class="menu">
-        <fx:menu name="mainMenu">
+        <fx:dojoMenu name="mainMenu">
 
-            <fx:menuItem labelKey="Content.menu.new.content">
+            <fx:dojoMenuItem labelKey="Content.menu.new.content">
                 <c:forEach var="selectItem" items="#{fxSelectBean.types}">
                     <c:if test="#{selectItem.value > 0}">
-                        <fx:menuItem label="#{selectItem.label}" clickHandler="function(menuItem) { createContent(menuItem, #{selectItem.value}); }"/>
+                        <fx:dojoMenuItem label="#{selectItem.label}" clickHandler="function(menuItem) { createContent(menuItem, #{selectItem.value}); }"/>
                     </c:if>
                 </c:forEach>
-            </fx:menuItem>
+            </fx:dojoMenuItem>
 
             <ui:include src="/adm/templates/navigation.menu.tabs.xhtml"/>
-        </fx:menu>
+        </fx:dojoMenu>
 
             
         </div>

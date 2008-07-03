@@ -27,10 +27,10 @@ Parameters:
     </c:if>
 
     <!-- Editor context menu -->
-    <fx:menu name="contextMenu" contextMenuTarget="queryEditorContainer">
-        <fx:menuItem label="#{fxMessageBean['QueryEditor.label.contextMenu.and']}" clickHandler="function() { document.getElementById('frm:createAndSubquery').onclick(); }"/>
-        <fx:menuItem label="#{fxMessageBean['QueryEditor.label.contextMenu.or']}" clickHandler="function() { document.getElementById('frm:createOrSubquery').onclick(); }"/>
-    </fx:menu>
+    <fx:dojoMenu name="contextMenu" contextMenuTarget="queryEditorContainer">
+        <fx:dojoMenuItem label="#{fxMessageBean['QueryEditor.label.contextMenu.and']}" clickHandler="function() { document.getElementById('frm:createAndSubquery').onclick(); }"/>
+        <fx:dojoMenuItem label="#{fxMessageBean['QueryEditor.label.contextMenu.or']}" clickHandler="function() { document.getElementById('frm:createOrSubquery').onclick(); }"/>
+    </fx:dojoMenu>
 
     <!-- Popup dialog that shows the current SQL query -->
     <div id="sqlPopupContainer">

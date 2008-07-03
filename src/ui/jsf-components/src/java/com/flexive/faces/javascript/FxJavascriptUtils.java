@@ -94,4 +94,29 @@ public class FxJavascriptUtils {
     public static String getWidgetName(String fqn) {
         return StringUtils.replace(StringUtils.replace(fqn, "flexive.widget.", "flexive:"), "dojo.widget.", "");
     }
+
+
+    /**
+     * Write Yahoo require calls for all requested components.
+     *
+     * @param out      the output writer
+     * @param packages array of componentsto be written (e.g. "button")
+     * @throws IOException if the code could not be written
+     */
+    public static void writeYahooRequires(Writer out, String... packages) throws IOException {
+        for (String pkg : packages) {
+            out.write("flexive.yui.requireComponent(\"" + pkg + "\");\n");
+        }
+    }
+
+    /**
+     * Renders a function to be called when Yahoo UI has been loaded.
+     *
+     * @param out   the output writer
+     * @param fn    the javascript function, either a reference or an anonymous function
+     * @throws IOException  if the code could not be written
+     */
+    public static void onYahooLoaded(Writer out, String fn) throws IOException {
+        out.write("flexive.yui.onYahooLoaded(" + fn + ");\n");
+    }
 }

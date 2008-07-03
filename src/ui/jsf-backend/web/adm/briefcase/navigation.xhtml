@@ -227,28 +227,28 @@
 
         </div>
 
-        <fx:menu name="contextMenu" contextMenuTarget="briefcaseContainer" showHandler="showContextMenu">
-            <fx:menuItem id="open" icon="open" labelKey="Briefcase.contextMenu.open" clickHandler="openBriefcase"/>
-            <fx:menuItem id="openDetails" icon="openDetails" labelKey="Briefcase.contextMenu.openDetails" clickHandler="openBriefcaseDetails"/>
-            <fx:menuItem id="rename" icon="rename" labelKey="Briefcase.contextMenu.rename" clickHandler="renameBriefcase"/>
-            <fx:menuItem id="delete" icon="remove" labelKey="Briefcase.contextMenu.delete" clickHandler="deleteBriefcase"/>
-            <fx:menuSeparator/>
-            <fx:menuItem id="addSelection" icon="paste" labelKey="Briefcase.contextMenu.addSelection" clickHandler="addSelection"/>
-            <fx:menuItem id="share" icon="share" labelKey="Briefcase.contextMenu.share" clickHandler="shareBriefcase">
-                <fx:menuItem id="unshare" labelKey="Briefcase.contextMenu.private" clickHandler="function(menuItem) { shareBriefcase(menuItem, -1); }"/>
+        <fx:dojoMenu name="contextMenu" contextMenuTarget="briefcaseContainer" showHandler="showContextMenu">
+            <fx:dojoMenuItem id="open" icon="open" labelKey="Briefcase.contextMenu.open" clickHandler="openBriefcase"/>
+            <fx:dojoMenuItem id="openDetails" icon="openDetails" labelKey="Briefcase.contextMenu.openDetails" clickHandler="openBriefcaseDetails"/>
+            <fx:dojoMenuItem id="rename" icon="rename" labelKey="Briefcase.contextMenu.rename" clickHandler="renameBriefcase"/>
+            <fx:dojoMenuItem id="delete" icon="remove" labelKey="Briefcase.contextMenu.delete" clickHandler="deleteBriefcase"/>
+            <fx:dojoMenuSeparator/>
+            <fx:dojoMenuItem id="addSelection" icon="paste" labelKey="Briefcase.contextMenu.addSelection" clickHandler="addSelection"/>
+            <fx:dojoMenuItem id="share" icon="share" labelKey="Briefcase.contextMenu.share" clickHandler="shareBriefcase">
+                <fx:dojoMenuItem id="unshare" labelKey="Briefcase.contextMenu.private" clickHandler="function(menuItem) { shareBriefcase(menuItem, -1); }"/>
                 <c:forEach var="item" items="#{fxSelectBean.briefcaseACLs}">
-                    <fx:menuItem id="share#{item.value}" label="#{item.label}"
+                    <fx:dojoMenuItem id="share#{item.value}" label="#{item.label}"
                              clickHandler="function(menuItem) { shareBriefcase(menuItem, #{item.value}); }"/>
                 </c:forEach>
-            </fx:menuItem>
-            <fx:menuSeparator/>
-            <fx:menuItem id="createBriefcase" icon="createBriefcase" labelKey="Briefcase.menu.create" clickHandler="createBriefcase"/>
-        </fx:menu>
+            </fx:dojoMenuItem>
+            <fx:dojoMenuSeparator/>
+            <fx:dojoMenuItem id="createBriefcase" icon="createBriefcase" labelKey="Briefcase.menu.create" clickHandler="createBriefcase"/>
+        </fx:dojoMenu>
 
-        <fx:menu name="queryContextMenu" contextMenuTarget="queryContainer" showHandler="showQueryContextMenu">
-            <fx:menuItem id="open" icon="open" labelKey="SearchQueries.contextMenu.open" clickHandler="openContextQuery"/>
-            <fx:menuItem id="delete" icon="remove" labelKey="SearchQueries.contextMenu.delete" clickHandler="deleteQuery"/>
-        </fx:menu>
+        <fx:dojoMenu name="queryContextMenu" contextMenuTarget="queryContainer" showHandler="showQueryContextMenu">
+            <fx:dojoMenuItem id="open" icon="open" labelKey="SearchQueries.contextMenu.open" clickHandler="openContextQuery"/>
+            <fx:dojoMenuItem id="delete" icon="remove" labelKey="SearchQueries.contextMenu.delete" clickHandler="deleteQuery"/>
+        </fx:dojoMenu>
 
         <div style="display:none">
             <t:graphicImage url="/adm/images/briefcaseIcons/normal_shared.gif" id="normalShared"/>
@@ -260,15 +260,15 @@
 
     <ui:define name="mainMenu">
         <div class="menu">
-        <fx:menu name="mainMenu">
-            <fx:menuItem id="createQuery" icon="query" labelKey="Briefcase.menu.createQuery" clickHandler="createQuery"/>
-            <fx:menuItem id="createBriefcase" icon="createBriefcase" labelKey="Briefcase.menu.create" clickHandler="createBriefcase"/>
-            <fx:menuItem id="sqlQuery" icon="database" labelKey="Briefcase.menu.createSqlQuery" clickHandler="createSqlQuery"/>
+        <fx:dojoMenu name="mainMenu">
+            <fx:dojoMenuItem id="createQuery" icon="query" labelKey="Briefcase.menu.createQuery" clickHandler="createQuery"/>
+            <fx:dojoMenuItem id="createBriefcase" icon="createBriefcase" labelKey="Briefcase.menu.create" clickHandler="createBriefcase"/>
+            <fx:dojoMenuItem id="sqlQuery" icon="database" labelKey="Briefcase.menu.createSqlQuery" clickHandler="createSqlQuery"/>
 
-            <fx:menuSeparator/>
+            <fx:dojoMenuSeparator/>
 
             <ui:include src="/adm/templates/navigation.menu.tabs.xhtml"/>
-        </fx:menu>
+        </fx:dojoMenu>
 
 
         </div>

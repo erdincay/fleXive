@@ -36,7 +36,7 @@ import com.flexive.faces.JsfRelativeUriMapper;
 import com.flexive.faces.beans.PluginRegistryBean;
 import com.flexive.faces.javascript.FxJavascriptUtils;
 import com.flexive.faces.javascript.RelativeUriMapper;
-import com.flexive.faces.javascript.menu.MenuWriter;
+import com.flexive.faces.javascript.menu.DojoMenuWriter;
 import com.flexive.faces.javascript.tree.TreeNodeWriter;
 import com.flexive.faces.plugin.ExtensionPoint;
 import com.flexive.faces.plugin.TreePluginExecutor;
@@ -230,7 +230,7 @@ public class TreeRenderer extends Renderer {
         String widgetId = tree.getName();
 
         if (tree.getContextMenu() != null) {
-            MenuWriter.writeMenu(writer, widgetId + "Menu", "contextMenu", "TreeContextMenuV3", "TreeMenuItemV3",
+            DojoMenuWriter.writeMenu(writer, widgetId + "Menu", "contextMenu", "TreeContextMenuV3", "TreeMenuItemV3",
                     tree.getContextMenu(), new JsfRelativeUriMapper(), null, tree.getContextMenu().getShowHandler());
             // add to tree listeners
             writer.write("_listeners.push(contextMenu.widgetId);\n");

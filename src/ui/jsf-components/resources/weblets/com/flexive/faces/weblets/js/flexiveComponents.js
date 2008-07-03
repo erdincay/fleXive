@@ -26,7 +26,7 @@ flexive.util = new function() {
      * @param size  the thumbnail size (one of FxComponents.PreviewSizes)
      * @param includeTimestamp  if true, the current timestamp will be included (disables caching)
      */
-    this.getThumbnailURL = function(pk, /* flexive.PreviewSizes */ size, /* boolean */ includeTimestamp) {
+    this.getThumbnailURL = function(/* String */ pk, /* flexive.PreviewSizes */ size, /* boolean */ includeTimestamp) {
         return "thumbnail/pk" + pk
                 + (size != null ? "/s" + size.id : "")
                 + (includeTimestamp ? "/ts" + new Date().getTime() : "");
@@ -103,6 +103,25 @@ flexive.yui.datatable = new function() {
                 ? new flexive.yui.datatable.ThumbnailView(result)
                 : new flexive.yui.datatable.ListView(result);
     }
+
+    this.getPk = function(/* YAHOO.widget.DataTable */ dataTable, /* Element */ element) {
+        var elRow = dataTable.getTrEl(element);
+        var record = dataTable.getRecord(elRow);
+        if (record == null) {
+            YAHOO.log("No primary key found for element " + element, "warn");
+            return null;
+        }
+        var data = record.getData();
+        if (data.pk) {
+            // only one pk for this column, return it
+            return data.pk;
+        } else {
+            // one PK per column, get column index and return PK
+            var elCol = dataTable.getTdEl(element);
+            var col = dataTable.getColumn(elCol);
+            return data.pks[col.getKeyIndex()];
+        }
+    }
 }
 
 /**
@@ -151,13 +170,13 @@ flexive.yui.datatable.ThumbnailView.prototype = {
     getRows: function() {
         // transpose the linear result rows according to the grid size
         var grid = [];
-        var currentRow = {};    // the columns of the current row
+        var currentRow = { "pks" : [] };    // the columns of the current row
         var currentColumn = 0;
         for (var i = 0; i < this.result.rowCount; i++) {
             var resultRow = this.result.rows[i];
             var data = "";
-            if (resultRow._pk != null) {
-                data = "<img src=\"" + flexive.util.getThumbnailURL(resultRow._pk, this.previewSize, true) + "\"/>";
+            if (resultRow.pk != null) {
+                data = "<img src=\"" + flexive.util.getThumbnailURL(resultRow.pk, this.previewSize, true) + "\"/>";
             }
             /*if (resultRow["c1"] != null) {
                 data += "<br/>" + resultRow["c1"];
@@ -165,11 +184,12 @@ flexive.yui.datatable.ThumbnailView.prototype = {
             if (currentColumn >= this.gridColumns) {
                 // grid row completed
                 grid.push(currentRow);
-                currentRow = {};
+                currentRow = { "pks" : [] };
                 currentColumn = 0;
             }
             // store column
             currentRow["c" + currentColumn] = data;
+            currentRow.pks.push(resultRow.pk);
             currentColumn++;
         }
         if (currentColumn > 0) {
@@ -179,7 +199,7 @@ flexive.yui.datatable.ThumbnailView.prototype = {
     },
 
     getResponseSchema: function() {
-        var fields = [];
+        var fields = ["pks"];
         for (var i = 0; i < this.gridColumns; i++) {
             fields.push("c" + i);
         }
@@ -429,7 +449,7 @@ ResultSetTableHandler.prototype = {
             this.itemId = rowData[ResultSetTableHandler.COL_ID]
             this.itemVersion = rowData[ResultSetTableHandler.COL_VERSION];
         }
-        // call dojo's show method (alias created by the MenuWriter)
+        // call dojo's show method (alias created by the DojoMenuWriter)
         menu.show_();
     },
 

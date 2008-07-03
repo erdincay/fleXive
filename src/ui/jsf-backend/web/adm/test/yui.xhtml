@@ -22,15 +22,31 @@
     </ui:define>
 
     <ui:define name="body">
+        <script type="text/javascript">
+        <!--
+        function clickHandler() {
+            alert(flexive.yui.datatable.getPk(resultTable, this.contextEventTarget));
+        }
+        //-->
+        </script>
+
         <h:form styleClass="yui-skin-sam">
             <adm:tab id="tab1" label="Yahoo UI test page" active="true"/>
 
             <input id="refreshButton" type="button" value="drueck mich"/>
             <input id="refreshButton2" type="button" value="drueck mich no yui"/>
 
-            <fx:resultTable value="SELECT @pk, created_at FILTER type='image'" viewType="thumbnails"/>
-            
-            <div id="menucontainer"> </div>
+            <div id="table">
+                <fx:resultTable var="resultTable" value="SELECT @pk, created_at FILTER type='image'" viewType="list"/>
+            </div>
+
+            <fx:menu name="menu" trigger="document.getElementById('table')" clickHandler="clickHandler">
+                <fx:menuItem label="Test 1"/>
+                <fx:menuItem label="Test 2..">
+                    <fx:menuItem label="Sub label 1" url="http://www.google.com"/>
+                    <fx:menuItem label="Sub label 2"/>
+                </fx:menuItem>
+            </fx:menu>
         </h:form>
 
         <script type="text/javascript">

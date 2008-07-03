@@ -29,29 +29,35 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.faces.javascript.menu;
+package com.flexive.faces.components.menu.dojo;
 
-import java.util.List;
+import com.flexive.faces.FxJsfUtils;
+import com.flexive.faces.javascript.menu.*;
+
+import javax.faces.component.UIOutput;
+import javax.faces.context.FacesContext;
+import java.io.IOException;
 
 /**
- * A menu item container. May be a context menu tag, or a menu item (to create sub-menus).
- *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public interface MenuItemContainer<T> {
+public class DojoMenuItemSeparator extends UIOutput {
     /**
-     * Add the given menu item to the container.
-     *
-     * @param menuItem the item to be added
+     * {@inheritDoc}
      */
-    void addMenuItem(T menuItem);
+    @Override
+    public boolean getRendersChildren() {
+        return true;
+    }
 
     /**
-     * Return a list of all menu items stored in this container.
-     * If no items are contained, an empty list is returned.
-     *
-     * @return a list of all menu items stored in this container.
+     * {@inheritDoc}
      */
-    List<T> getMenuItems();
+    @SuppressWarnings({"unchecked"})
+    @Override
+    public void encodeBegin(FacesContext facesContext) throws IOException {
+        MenuItemContainer<DojoMenuItemData> container = FxJsfUtils.findAncestor(this, MenuItemContainer.class);
+        container.addMenuItem(new DojoMenuItemSeparatorData());
+    }
 }

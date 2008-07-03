@@ -65,18 +65,18 @@ Parameters:
    </a4j:commandButton>
 </div>
 
-<fx:menu name="#{name}_resultMenu" contextMenuTarget="#{name}" showHandler="function() { #{name}.fxTableHandler.onShowContextMenu(dojo.widget.byId('#{name}_resultMenu')); }">
-    <fx:menuItem id="show" labelKey="SearchResult.menu.show" icon="open" clickHandler="function() { #{name}.fxTableHandler.showRow(); }"/>
-    <fx:menuItem id="showScreenview" labelKey="SearchResult.menu.showScreenview" icon="open" clickHandler="function() { #{name}.fxTableHandler.showScreenview(); }"/>
-    <fx:menuItem id="edit" labelKey="SearchResult.menu.edit" icon="edit" clickHandler="function() { #{name}.fxTableHandler.editRow(); }"/>
-    <fx:menuSeparator/>
-    <fx:menuItem id="copy" labelKey="SearchResult.menu.copy" icon="copy" clickHandler="function() { #{name}.fxTableHandler.copySelection(); }"/>
-    <fx:menuSeparator/>
-    <fx:menuItem id="deleteBriefcase" labelKey="SearchResult.menu.deleteBriefcase" icon="removeBriefcaseItems" clickHandler="function() { #{name}.fxTableHandler.deleteRowBriefcase(); }"/>
-    <fx:menuItem id="deleteBriefcaseSelected" labelKey="SearchResult.menu.deleteBriefcaseSelected" icon="removeBriefcaseItems" clickHandler="function() { #{name}.fxTableHandler.deleteSelectedRowsBriefcase(); }"/>
-    <fx:menuItem id="delete" labelKey="SearchResult.menu.delete" icon="remove" clickHandler="function() { #{name}.fxTableHandler.deleteRow(); }"/>
-    <fx:menuItem id="deleteSelected" labelKey="SearchResult.menu.deleteSelected" icon="remove" clickHandler="function() { #{name}.fxTableHandler.deleteSelectedRows(); }"/>
-</fx:menu>
+<fx:dojoMenu name="#{name}_resultMenu" contextMenuTarget="#{name}" showHandler="function() { #{name}.fxTableHandler.onShowContextMenu(dojo.widget.byId('#{name}_resultMenu')); }">
+    <fx:dojoMenuItem id="show" labelKey="SearchResult.menu.show" icon="open" clickHandler="function() { #{name}.fxTableHandler.showRow(); }"/>
+    <fx:dojoMenuItem id="showScreenview" labelKey="SearchResult.menu.showScreenview" icon="open" clickHandler="function() { #{name}.fxTableHandler.showScreenview(); }"/>
+    <fx:dojoMenuItem id="edit" labelKey="SearchResult.menu.edit" icon="edit" clickHandler="function() { #{name}.fxTableHandler.editRow(); }"/>
+    <fx:dojoMenuSeparator/>
+    <fx:dojoMenuItem id="copy" labelKey="SearchResult.menu.copy" icon="copy" clickHandler="function() { #{name}.fxTableHandler.copySelection(); }"/>
+    <fx:dojoMenuSeparator/>
+    <fx:dojoMenuItem id="deleteBriefcase" labelKey="SearchResult.menu.deleteBriefcase" icon="removeBriefcaseItems" clickHandler="function() { #{name}.fxTableHandler.deleteRowBriefcase(); }"/>
+    <fx:dojoMenuItem id="deleteBriefcaseSelected" labelKey="SearchResult.menu.deleteBriefcaseSelected" icon="removeBriefcaseItems" clickHandler="function() { #{name}.fxTableHandler.deleteSelectedRowsBriefcase(); }"/>
+    <fx:dojoMenuItem id="delete" labelKey="SearchResult.menu.delete" icon="remove" clickHandler="function() { #{name}.fxTableHandler.deleteRow(); }"/>
+    <fx:dojoMenuItem id="deleteSelected" labelKey="SearchResult.menu.deleteSelected" icon="remove" clickHandler="function() { #{name}.fxTableHandler.deleteSelectedRows(); }"/>
+</fx:dojoMenu>
 
 
 <script type="text/javascript">

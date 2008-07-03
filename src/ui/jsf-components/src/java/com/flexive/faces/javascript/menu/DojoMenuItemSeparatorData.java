@@ -31,27 +31,27 @@
  ***************************************************************/
 package com.flexive.faces.javascript.menu;
 
-import java.util.List;
+import com.flexive.faces.javascript.RelativeUriMapper;
+import com.flexive.war.JsonWriter;
+
+import java.io.IOException;
+import java.util.Map;
 
 /**
- * A menu item container. May be a context menu tag, or a menu item (to create sub-menus).
- *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public interface MenuItemContainer<T> {
-    /**
-     * Add the given menu item to the container.
-     *
-     * @param menuItem the item to be added
-     */
-    void addMenuItem(T menuItem);
+public class DojoMenuItemSeparatorData extends DojoMenuItemData {
+    public DojoMenuItemSeparatorData() {
+        super("Menu item separator");
+    }
 
     /**
-     * Return a list of all menu items stored in this container.
-     * If no items are contained, an empty list is returned.
-     *
-     * @return a list of all menu items stored in this container.
+     * {@inheritDoc}
      */
-    List<T> getMenuItems();
+    @Override
+    public void renderItemAttributes(JsonWriter out, RelativeUriMapper uriMapper, Map<String, String> engageSubscriptions, String widgetId) throws IOException {
+        out.writeAttribute("widgetId", widgetId);
+        out.writeAttribute("createAsType", "MenuSeparator2");
+    }
 }

@@ -578,10 +578,10 @@
                 <adm:treeContextMenuItem icon="group" treeActions="createGroup" labelKey="StructureTree.menu.createGroup" clickHandler="createGroup" />
                 <adm:treeContextMenuItem icon="search" treeActions="searchContents" labelKey="StructureTree.menu.searchContents" clickHandler="searchContents"/>
                 <adm:treeContextMenuItem icon="search" treeActions="searchPropertyContents" labelKey="StructureTree.menu.searchContents.property" clickHandler="searchContentsByProperty"/>
-                <fx:menuSeparator/>
+                <fx:dojoMenuSeparator/>
                 <adm:treeContextMenuItem icon="new" treeActions="createContent" labelKey="ContentTree.menu.create" clickHandler="createContent"/>
                 <adm:treeContextMenuItem icon="createTestData" treeActions="createTestData" labelKey="StructureTree.menu.createTestData" clickHandler="createTestData" />
-                <fx:menuSeparator/>
+                <fx:dojoMenuSeparator/>
                 <adm:treeContextMenuItem treeActions="copyAssignment" icon="copy" labelKey="StructureTree.menu.copyAssignment" clickHandler="copyAssignment"/>
                 <adm:treeContextMenuItem treeActions="pasteInto" icon="paste" labelKey="StructureTree.menu.paste.into" clickHandler="pasteInto"/>
                 <adm:treeContextMenuItem treeActions="pasteAboveAfterCut" icon="paste" labelKey="StructureTree.menu.paste.above" clickHandler="pasteAbove"/>
@@ -590,7 +590,7 @@
                     <adm:treeContextMenuItem treeActions="pasteAbove" icon="paste" labelKey="StructureTree.menu.paste.above" clickHandler="pasteAbove"/>
                     <adm:treeContextMenuItem treeActions="pasteBelow" icon="paste" labelKey="StructureTree.menu.paste.below" clickHandler="pasteBelow"/>
                     <adm:treeContextMenuItem treeActions="pasteInto" icon="paste" labelKey="StructureTree.menu.paste.into" clickHandler="pasteInto"/>
-                    <fx:menuSeparator/>
+                    <fx:dojoMenuSeparator/>
                     <adm:treeContextMenuItem treeActions="pasteAboveAs" icon="paste" labelKey="StructureTree.menu.paste.aboveAs" clickHandler="pasteAboveAs"/>
                     <adm:treeContextMenuItem treeActions="pasteBelowAs" icon="paste" labelKey="StructureTree.menu.paste.belowAs" clickHandler="pasteBelowAs"/>
                     <adm:treeContextMenuItem treeActions="pasteIntoAs" icon="paste" labelKey="StructureTree.menu.paste.intoAs" clickHandler="pasteIntoAs"/>
@@ -609,16 +609,16 @@
 
     <ui:define name="mainMenu">
         <div class="menu">
-            <fx:menu name="mainMenu">
+            <fx:dojoMenu name="mainMenu">
 
-                <fx:menuItem rendered="#{fxSystemBean.isInRole['StructureManagement']}" labelKey="StructureTree.menu.createType" icon="windowNew" clickHandler="function(menuItem) { createType(menuItem); }"/>
-                <fx:menuItem rendered="#{fxSystemBean.isInRole['StructureManagement']}" labelKey="StructureTree.menu.createTypeRelation" icon="fxTypeRelation" clickHandler="function(menuItem) { createTypeRelation(menuItem); }"/>
-                <fx:menuItem rendered="#{fxSystemBean.isInRole['StructureManagement']}" labelKey="StructureTree.menu.importType" icon="importContent" clickHandler="importType"/>
+                <fx:dojoMenuItem rendered="#{fxSystemBean.isInRole['StructureManagement']}" labelKey="StructureTree.menu.createType" icon="windowNew" clickHandler="function(menuItem) { createType(menuItem); }"/>
+                <fx:dojoMenuItem rendered="#{fxSystemBean.isInRole['StructureManagement']}" labelKey="StructureTree.menu.createTypeRelation" icon="fxTypeRelation" clickHandler="function(menuItem) { createTypeRelation(menuItem); }"/>
+                <fx:dojoMenuItem rendered="#{fxSystemBean.isInRole['StructureManagement']}" labelKey="StructureTree.menu.importType" icon="importContent" clickHandler="importType"/>
 
-                <fx:menuSeparator/>
+                <fx:dojoMenuSeparator/>
 
                 <ui:include src="/adm/templates/navigation.menu.tabs.xhtml"/>
-            </fx:menu>
+            </fx:dojoMenu>
         </div>
     </ui:define>
 

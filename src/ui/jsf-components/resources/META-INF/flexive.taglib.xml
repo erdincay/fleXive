@@ -81,23 +81,36 @@
         </component>
     </tag>
     <tag>
-        <tag-name>menu</tag-name>
+        <tag-name>dojoMenu</tag-name>
         <component>
             <component-type>flexive.DojoMenu</component-type>
         </component>
     </tag>
     <tag>
-        <tag-name>menuItem</tag-name>
+        <tag-name>dojoMenuItem</tag-name>
         <component>
             <component-type>flexive.DojoMenuItem</component-type>
         </component>
     </tag>
     <tag>
-        <tag-name>menuSeparator</tag-name>
+        <tag-name>dojoMenuSeparator</tag-name>
         <component>
             <component-type>flexive.DojoMenuSeparator</component-type>
         </component>
     </tag>
+    <tag>
+        <tag-name>menu</tag-name>
+        <component>
+            <component-type>flexive.YahooMenu</component-type>
+        </component>
+    </tag>
+    <tag>
+        <tag-name>menuItem</tag-name>
+        <component>
+            <component-type>flexive.YahooMenuItem</component-type>
+        </component>
+    </tag>
+
     <tag>
         <tag-name>resultValue</tag-name>
         <component>

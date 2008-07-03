@@ -32,7 +32,6 @@
 package com.flexive.faces.components.input;
 
 import com.flexive.faces.FxJsfUtils;
-import com.flexive.faces.components.WriteWebletIncludes;
 import com.flexive.faces.beans.UserConfigurationBean;
 import com.flexive.faces.beans.MessageBean;
 import com.flexive.shared.*;
@@ -322,7 +321,7 @@ class EditModeHelper extends RenderHelper {
         if (!value.isEmpty() && ((language != null && !value.isTranslationEmpty(language)) || language == null)) {
             // render preview image
             final FxPK translation = referenceValue.getTranslation(language);
-            image.setUrl(ThumbnailServlet.getLink(translation, BinaryDescriptor.PreviewSizes.PREVIEW2));
+            image.setUrl(ThumbnailServlet.getUrl(translation, BinaryDescriptor.PreviewSizes.PREVIEW2));
             hidden.setValue(translation);
         } else {
             image.setUrl("/pub/images/empty.gif");

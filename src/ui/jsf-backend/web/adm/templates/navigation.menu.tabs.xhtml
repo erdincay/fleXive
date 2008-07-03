@@ -13,17 +13,17 @@
 Common tabs for the admin navigation menu.
 
 <ui:composition>
-    <fx:menuItem labelKey="Content.menu.query.show" icon="query" link="adm/search/query.jsf"/>
-    <fx:menuItem labelKey="Content.menu.results.show" icon="search" link="adm/search/searchResult.jsf"/>
-    <fx:menuItem labelKey="Content.menu.contentEditor.show" icon="edit" link="adm/content/contentEditor.jsf"/>
+    <fx:dojoMenuItem labelKey="Content.menu.query.show" icon="query" link="adm/search/query.jsf"/>
+    <fx:dojoMenuItem labelKey="Content.menu.results.show" icon="search" link="adm/search/searchResult.jsf"/>
+    <fx:dojoMenuItem labelKey="Content.menu.contentEditor.show" icon="edit" link="adm/content/contentEditor.jsf"/>
 
-    <fx:menuSeparator/>
+    <fx:dojoMenuSeparator/>
 
-    <fx:menuItem labelKey="General.menu.goto.show" icon="goto">
+    <fx:dojoMenuItem labelKey="General.menu.goto.show" icon="goto">
         <c:forEach items="#{navigationMenuBean.items}" var="item">
-            <fx:menuItem label="#{item.display}" clickHandler="function() { goto(#{item.id}); }"/>
+            <fx:dojoMenuItem label="#{item.display}" clickHandler="function() { goto(#{item.id}); }"/>
         </c:forEach>
-    </fx:menuItem>
+    </fx:dojoMenuItem>
 </ui:composition>
 
 

@@ -29,66 +29,72 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.faces.components.menu;
+package com.flexive.faces.components.menu.dojo;
 
-import static com.flexive.faces.FxJsfComponentUtils.getStringValue;
-import org.apache.commons.lang.StringUtils;
+import com.flexive.faces.FxJsfComponentUtils;
+import com.flexive.faces.FxJsfUtils;
+import com.flexive.faces.components.Tree;
+import com.flexive.faces.javascript.menu.DojoMenuItemData;
+import com.flexive.faces.javascript.menu.*;
 
+import javax.faces.component.UIOutput;
 import javax.faces.context.FacesContext;
-import java.util.Arrays;
-import java.util.Map;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Renders a tree context menu item. Must be embedded in a fx:tree component.
+ * Tree context menu container.
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
- * @see com.flexive.faces.components.Tree
  */
-public class TreeContextMenuItem extends DojoMenuItem {
-    private String treeActions;
+public class TreeContextMenu extends UIOutput implements MenuItemContainer<DojoMenuItemData> {
+    private final List<DojoMenuItemData> menuItems = new ArrayList<DojoMenuItemData>();
+    private String showHandler;
+
+    public TreeContextMenu() {
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected Map<String, Object> getItemProperties() {
-        Map<String, Object> properties = super.getItemProperties();
-        if (StringUtils.isNotBlank(getTreeActions())) {
-            properties.put("treeActions", Arrays.asList(getTreeActions()));
+    public boolean getRendersChildren() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void encodeBegin(FacesContext facesContext) throws IOException {
+        // attach menu to enclosing tree
+        FxJsfUtils.findAncestor(this, Tree.class).setContextMenu(this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void addMenuItem(DojoMenuItemData menuItem) {
+        menuItems.add(menuItem);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public List<DojoMenuItemData> getMenuItems() {
+        return menuItems;
+    }
+
+    public String getShowHandler() {
+        if (showHandler == null) {
+            showHandler = FxJsfComponentUtils.getStringValue(this, "showHandler");
         }
-        return properties;
+        return showHandler;
     }
 
-    public String getTreeActions() {
-        if (treeActions == null) {
-            treeActions = getStringValue(this, "treeActions");
-        }
-        return treeActions;
-    }
-
-    public void setTreeActions(String treeActions) {
-        this.treeActions = treeActions;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Object saveState(FacesContext facesContext) {
-        Object[] state = new Object[2];
-        state[0] = super.saveState(facesContext);
-        state[1] = treeActions;
-        return state;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void restoreState(FacesContext facesContext, Object o) {
-        Object[] state = (Object[]) o;
-        super.restoreState(facesContext, state[0]);
-        treeActions = (String) state[1];
+    public void setShowHandler(String showHandler) {
+        this.showHandler = showHandler;
     }
 }

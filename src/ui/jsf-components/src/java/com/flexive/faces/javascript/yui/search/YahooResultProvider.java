@@ -45,6 +45,7 @@ import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.war.JsonWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.ArrayUtils;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -52,6 +53,7 @@ import java.io.StringWriter;
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.Arrays;
 
 /**
  * Provides map interfaces for generating JSON row and column information
@@ -129,7 +131,7 @@ public class YahooResultProvider implements Serializable {
             }
             if (result.getColumnIndex("@pk") != -1) {
                 // add special PK column
-                writer.writeAttribute("_pk", row.getPk("@pk"));
+                writer.writeAttribute("pk", row.getPk("@pk"));
             }
             writer.closeMap();
         }
@@ -164,6 +166,10 @@ public class YahooResultProvider implements Serializable {
             }
             writer.writeAttribute("parser", parser, false);
             writer.closeMap();
+        }
+        // include primary key in attribute pk, if available
+        if (result.getColumnIndex("@pk") != -1) {
+            writer.startMap().writeAttribute("key", "pk").closeMap();
         }
         writer.closeArray();
         writer.closeMap();

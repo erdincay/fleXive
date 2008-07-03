@@ -33,7 +33,7 @@ package com.flexive.faces.components;
 
 import com.flexive.faces.FxJsfComponentUtils;
 import static com.flexive.faces.FxJsfComponentUtils.getStringValue;
-import com.flexive.faces.components.menu.TreeContextMenu;
+import com.flexive.faces.components.menu.dojo.TreeContextMenu;
 import com.flexive.faces.javascript.tree.TreeNodeWriter;
 import com.flexive.shared.exceptions.FxInvalidStateException;
 import org.apache.commons.logging.Log;

@@ -75,7 +75,6 @@ class ListDataWriter extends TableDataWriter {
         assert values[0] instanceof FxPK;
 
         out.startMap();
-        out.writeAttribute("_pk", values[0].toString());    // write PK
 
         for (int i = SqlQueryBuilder.COL_USERPROPS; i < values.length; i++) {
             out.writeAttribute(getColumnName(i), FxJsfUtils.formatResultValue(values[i], null, null, null));
@@ -84,6 +83,7 @@ class ListDataWriter extends TableDataWriter {
                 FxPK pk = (FxPK) values[i];
                 out.writeAttribute(TableDataWriter.COL_ID, pk.getId());
                 out.writeAttribute(TableDataWriter.COL_VERSION, pk.getVersion());
+                out.writeAttribute("pk", pk.toString());
             }
         }
         out.closeMap();
