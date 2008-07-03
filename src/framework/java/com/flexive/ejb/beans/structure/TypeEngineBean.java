@@ -743,48 +743,9 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             }
             ps.executeBatch();
             ps.close();
-            //gather eventually orphaned properties and groups
-            sql.setLength(0);
-            for (FxPropertyAssignment pa : allPropertyAssignments) {
-                if (pa.getBaseAssignmentId() == FxAssignment.NO_PARENT &&
-                        //exclude the "ID" property whose Id is "0" which is "NO_PARENT"
-                        !(pa.getProperty().getId() == FxAssignment.NO_PARENT)) {
-                    if (sql.length() == 0) {
-                        sql.append(" WHERE ID IN(").append(pa.getProperty().getId());
-                    } else
-                        sql.append(',').append(pa.getProperty().getId());
-                }
-            }
-            if (sql.length() > 0) {
-                sql.append(')');
-                ps = con.prepareStatement("DELETE FROM " + TBL_PROPERTY_OPTIONS + sql.toString());
-                ps.executeUpdate();
-                ps.close();
-                ps = con.prepareStatement("DELETE FROM " + TBL_STRUCT_PROPERTIES + ML + sql.toString());
-                ps.executeUpdate();
-                ps.close();
-                ps = con.prepareStatement("DELETE FROM " + TBL_STRUCT_PROPERTIES + sql.toString());
-                ps.executeUpdate();
-                ps.close();
-            }
-            sql.setLength(0);
-            for (FxGroupAssignment pa : type.getAssignedGroups()) {
-                if (pa.getBaseAssignmentId() == FxAssignment.NO_PARENT) {
-                    if (sql.length() == 0) {
-                        sql.append(" WHERE ID IN(").append(pa.getGroup().getId());
-                    } else
-                        sql.append(',').append(pa.getGroup().getId());
-                }
-            }
-            if (sql.length() > 0) {
-                sql.append(')');
-                ps = con.prepareStatement("DELETE FROM " + TBL_STRUCT_GROUPS + ML + sql.toString());
-                ps.executeUpdate();
-                ps.close();
-                ps = con.prepareStatement("DELETE FROM " + TBL_STRUCT_GROUPS + sql.toString());
-                ps.executeUpdate();
-                ps.close();
-            }
+            //remove eventually orphaned properties and groups
+            AssignmentEngineBean.removeOrphanedProperties(con);
+            AssignmentEngineBean.removeOrphanedGroups(con);
 
             sql.setLength(0);
             sql.append("DELETE FROM ").append(TBL_STRUCT_TYPERELATIONS).append(" WHERE TYPEDEF=? OR TYPESRC=? OR TYPEDST=?");

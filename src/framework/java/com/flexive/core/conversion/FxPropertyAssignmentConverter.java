@@ -151,6 +151,7 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
                 prop.setOptions(options);
                 try {
                     EJBLookup.getAssignmentEngine().save(prop);
+                    env = CacheAdmin.getEnvironment(); //refresh environment
                 } catch (FxApplicationException e) {
                     throw e.asRuntimeException();
                 }
@@ -172,6 +173,7 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
                 }
                 try {
                     EJBLookup.getAssignmentEngine().createProperty(type.getId(), prop, parentXPath, data.getAlias());
+                    env = CacheAdmin.getEnvironment(); //refresh environment
                 } catch (FxApplicationException e) {
                     throw e.asRuntimeException();
                 }
@@ -182,8 +184,9 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
         if (!type.isXPathValid(data.getXpath(), true)) {
             //property exists but not the xpath
             try {
-                //TODO: FX-268: we need a way to create assignments from properties without knowing other assignments as well
-                EJBLookup.getAssignmentEngine().save(FxPropertyAssignmentEdit.reuse(property, type.getName(), parentXPath, data.getAlias()), false);
+                //create assignment from property
+                EJBLookup.getAssignmentEngine().save(FxPropertyAssignmentEdit.createNew(property, type, data.getAlias(), parentXPath), false);
+                env = CacheAdmin.getEnvironment(); //refresh environment
             } catch (FxApplicationException e) {
                 throw e.asRuntimeException();
             }

@@ -1763,7 +1763,10 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 XPath = prop.getXPath();
             ps.setString(9, XPath);
             ps.setString(10, prop.getAlias());
-            ps.setLong(11, prop.getBaseAssignmentId());
+            if( prop.getBaseAssignmentId() == FxAssignment.NO_BASE )
+                ps.setNull(11, Types.NUMERIC);
+            else
+                ps.setLong(11, prop.getBaseAssignmentId());
             ps.setLong(12, prop.getParentGroupAssignment() == null ? FxAssignment.NO_PARENT : prop.getParentGroupAssignment().getId());
             ps.setLong(13, prop.getProperty().getId());
             ps.setLong(14, prop.getACL().getId());

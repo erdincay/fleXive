@@ -104,6 +104,22 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
         isNew = true;
     }
 
+    /**
+     * Create a new FxPropertyAssignmentEdit from an existing property for a given type with a
+     * new alias and a given parentXPath
+     *
+     * @param property    the property name
+     * @param type        type to assign it
+     * @param alias       new alias
+     * @param parentXPath parent XPath within the type to assign
+     */
+    public FxPropertyAssignmentEdit(FxProperty property, FxType type, String alias, String parentXPath) {
+        super(-1, true, type, alias, XPathElement.buildXPath(false, parentXPath, alias), 0, property.getMultiplicity(), 1,
+                null, FxAssignment.NO_BASE, property.getLabel(), property.getHint(), property.getDefaultValue(), property, property.getACL(),
+                property.getLabel().getDefaultLanguage(), FxStructureOption.cloneOptions(property.options));
+        isNew = true;
+    }
+
     public boolean isNew() {
         return isNew;
     }
@@ -422,6 +438,22 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
      */
     public static FxPropertyAssignmentEdit createNew(FxPropertyAssignment pa, FxType type, String alias, String parentXPath) throws FxNotFoundException, FxInvalidParameterException {
         return new FxPropertyAssignmentEdit(pa, type, alias, parentXPath, null);
+    }
+
+    /**
+     * Create a new FxPropertyAssignmentEdit from an existing property for a given type with a
+     * new alias and a given parentXPath
+     *
+     * @param property    the property name
+     * @param type        type to assign it
+     * @param alias       new alias
+     * @param parentXPath parent XPath within the type to assign
+     * @return new FxPropertyAssignmentEdit
+     * @throws FxNotFoundException         if parentXPath is invalid
+     * @throws FxInvalidParameterException if parentXPath is invalid
+     */
+    public static FxPropertyAssignmentEdit createNew(String property, FxType type, String alias, String parentXPath) throws FxNotFoundException, FxInvalidParameterException {
+        return new FxPropertyAssignmentEdit(CacheAdmin.getEnvironment().getProperty(property), type, alias, parentXPath);
     }
 
     /**

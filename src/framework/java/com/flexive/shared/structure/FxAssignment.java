@@ -62,6 +62,11 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
     public static final long NO_PARENT = 0;
 
     /**
+     * constant if an assignment has no base assignment
+     */
+    public static final long NO_BASE = -1;
+
+    /**
      * base id value if an assignment belongs to the virtual root type
      */
     public static final long ROOT_BASE = 0;
