@@ -72,6 +72,9 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
             throw e.asRuntimeException();
         }
         super.marshal(o, writer, ctx);
+        writer.startNode("defaultValue");
+        ctx.convertAnother(prop.getDefaultValue());
+        writer.endNode();
         if (!prop.isDerivedAssignment()) {
             writer.startNode(ConversionEngine.KEY_PROPERTY);
             writer.addAttribute("name", p.getName());
@@ -99,9 +102,6 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
             marshallOptions(writer, p.getOptions());
             writer.endNode();
         }
-        writer.startNode("defaultValue");
-        ctx.convertAnother(prop.getDefaultValue());
-        writer.endNode();
         writer.endNode();
     }
 
@@ -122,7 +122,8 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
         }
         AssignmentData data = (AssignmentData) super.unmarshal(reader, ctx);
         String parentXPath = "/";
-        if (reader.hasMoreChildren()) {
+        FxValue defaultValue = ConversionEngine.getFxValue("defaultValue", this, reader, ctx);
+        if (reader.hasMoreChildren()) { //optional property as last subnode
             reader.moveDown();
             //only allowed child is the property if it is not derived
             if (!"property".equals(reader.getNodeName()))
@@ -189,7 +190,7 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
         }
         //assignment either exists now or has been created, apply all assignment specific data
         try {
-            FxPropertyAssignmentEdit pa = ((FxPropertyAssignment) env.getAssignment(XPathElement.stripType(data.getXpath()))).asEditable();
+            FxPropertyAssignmentEdit pa = ((FxPropertyAssignment) env.getAssignment(data.getXpath())).asEditable();
             pa.setACL(acl);
             pa.setDefaultLanguage(defaultLanguage);
             pa.setPosition(data.getPos());
@@ -198,7 +199,7 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
             pa.setLabel(data.getLabel());
             pa.setHint(data.getHint());
             pa.setOptions(data.getOptions());
-            pa.setDefaultValue(ConversionEngine.getFxValue("defaultValue", this, reader, ctx));
+            pa.setDefaultValue(defaultValue);
             EJBLookup.getAssignmentEngine().save(pa, false);
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();
