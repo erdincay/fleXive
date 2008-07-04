@@ -17,16 +17,20 @@ import java.util.ArrayList;
 import java.io.IOException;
 
 import org.apache.commons.lang.StringUtils;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 /**
  * @author Daniel Lichtenberger, UCS
  * @version $Rev$
  */
 public class YahooMenu extends UIOutput implements MenuItemContainer<YahooMenuItemData>, NamingContainer {
+    public static final String ICON_PATH = "adm/images/menu";
+
     private final List<YahooMenuItemData> menuItems = new ArrayList<YahooMenuItemData>();
     private String name;
     private String trigger;
     private String clickHandler;
+    private String beforeShow;
 
     /**
      * {@inheritDoc }
@@ -48,13 +52,25 @@ public class YahooMenu extends UIOutput implements MenuItemContainer<YahooMenuIt
         writer.write("<div id=\"" + containerId + "\"> </div>");
 
         FxJavascriptUtils.beginJavascript(writer);
-        YahooMenuWriter.writeMenu(writer, getName(), this, new JsfRelativeUriMapper(), getTrigger());
+        final JsfRelativeUriMapper uriMapper = new JsfRelativeUriMapper();
+        YahooMenuWriter.writeMenu(writer, getName(), this, uriMapper, getTrigger());
         // write to container
         FxJavascriptUtils.onYahooLoaded(writer, "function() { \n"
                 + getName() + ".render('" + containerId + "');\n"
-                + (StringUtils.isNotBlank(getClickHandler()) ? getName() + ".clickEvent.subscribe(" + getClickHandler() + ");\n" : "")
+                + (isNotBlank(getClickHandler()) ? getName() + ".clickEvent.subscribe(" + getClickHandler() + ");\n" : "")
+                + (isNotBlank(getBeforeShow()) ? getName() + ".subscribe('beforeShow', " + getBeforeShow() + ");\n" : "")
                 + "}\n");
         FxJavascriptUtils.endJavascript(writer);
+
+        // add icons
+        FxJavascriptUtils.beginStyleSheet(writer);
+        for (YahooMenuItemData item : getMenuItems()) {
+            if (isNotBlank(item.getIcon())) {
+                final String imageUrl = uriMapper.getAbsoluteUri(ICON_PATH + "/" + item.getIcon() + ".png");
+                writer.write("li#" + item.getId() + " .yuimenuitemlabel { background: url(" + imageUrl + ") no-repeat }\n");
+            }
+        }
+        FxJavascriptUtils.endStyleSheet(writer);
     }
 
     public void addMenuItem(YahooMenuItemData menuItem) {
@@ -96,6 +112,17 @@ public class YahooMenu extends UIOutput implements MenuItemContainer<YahooMenuIt
 
     public void setClickHandler(String clickHandler) {
         this.clickHandler = clickHandler;
+    }
+
+    public String getBeforeShow() {
+        if (beforeShow == null) {
+            beforeShow = getStringValue(this, "beforeShow");
+        }
+        return beforeShow;
+    }
+
+    public void setBeforeShow(String beforeShow) {
+        this.beforeShow = beforeShow;
     }
 
     /**

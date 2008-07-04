@@ -24,8 +24,15 @@
     <ui:define name="body">
         <script type="text/javascript">
         <!--
-        function clickHandler() {
-            alert(flexive.yui.datatable.getPk(resultTable, this.contextEventTarget));
+        var pk;
+        function clickHandler(type, args) {
+            pk = flexive.yui.datatable.getPk(resultTable, this.contextEventTarget);
+            var menuId = args[1].id;
+            alert(menuId + " - " + pk);
+        }
+
+        function onMenu(a1, a2, a3) {
+            alert("Menu clicked: " + flexive.yui.datatable.getPk(resultTable, this.contextEventTarget));
         }
         //-->
         </script>
@@ -41,7 +48,7 @@
             </div>
 
             <fx:menu name="menu" trigger="document.getElementById('table')" clickHandler="clickHandler">
-                <fx:menuItem label="Test 1"/>
+                <fx:menuItem id="test1" label="Test 1"/>
                 <fx:menuItem label="Test 2..">
                     <fx:menuItem label="Sub label 1" url="http://www.google.com"/>
                     <fx:menuItem label="Sub label 2"/>

@@ -33,11 +33,11 @@ public class YahooMenuItem extends UIOutput implements MenuItemContainer<YahooMe
     @SuppressWarnings({"unchecked"})
     @Override
     public void encodeBegin(FacesContext facesContext) throws IOException {
-        MenuItemContainer container = FxJsfUtils.findAncestor(this, MenuItemContainer.class);
-        String itemLabel = getLabel() != null ? getLabel() : FxJsfUtils.getLocalizedMessage(getLabelKey());
-        YahooMenuItemData menuItem = new YahooMenuItemData(
-                getClientId(facesContext), itemLabel, getIcon(), getClickHandler(), getObj(), getUrl(),
-                getItemProperties(), getMenuItems());
+        final MenuItemContainer container = FxJsfUtils.findAncestor(this, MenuItemContainer.class);
+        final String itemLabel = getLabel() != null ? getLabel() : FxJsfUtils.getLocalizedMessage(getLabelKey());
+        final YahooMenuItemData menuItem = new YahooMenuItemData(
+                getId() != null ? getId() : getClientId(facesContext), itemLabel
+                , getIcon(), getClickHandler(), getObj(), getUrl(), getItemProperties(), getMenuItems());
         container.addMenuItem(menuItem);
     }
 

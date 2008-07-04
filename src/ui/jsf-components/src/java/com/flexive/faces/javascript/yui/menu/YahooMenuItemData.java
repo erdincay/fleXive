@@ -33,6 +33,7 @@ public class YahooMenuItemData extends AbstractMenuItemData<YahooMenuItemData> {
 
     @Override
     public void renderItemAttributes(JsonWriter out, RelativeUriMapper uriMapper, Map<String, String> subscriptions, String widgetId) throws IOException {
+        out.writeAttribute("id", id);
         out.writeAttribute("text", title);
         if (StringUtils.isNotBlank(url)) {
             out.writeAttribute("url", url);

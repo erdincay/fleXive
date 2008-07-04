@@ -29,7 +29,7 @@ Parameters:
             if (window.#{var} != null) {
                 // refresh only if datatable is already available - also prevents refresh during initial load
                 #{var}.deleteRows(0, 9999999);
-                var result = #{fx:getJsonResult(value, null)};
+                var result = #{fxSystemBean.ajaxRequest ? fx:getJsonResult(value, null) : '{}'};
                 #{var}._reset(result);
             }
         //-->

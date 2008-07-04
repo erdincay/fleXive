@@ -313,3 +313,10 @@ table.welcometbl tbody tr td table.links tbody tr td {
     background-position: 4px 50%;
     padding-left: 26px;
 }
+
+
+/** YUI styles */
+
+li.yuimenuitem {
+    padding: 5px 0 5px 7px !important;
+}

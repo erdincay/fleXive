@@ -633,4 +633,13 @@ public class SystemBean implements Serializable {
     public FxEnvironment getEnvironment() {
         return CacheAdmin.getFilteredEnvironment();
     }
+
+    /**
+     * Return true if the current request has been submitted via Ajax4JSF.
+     *
+     * @return true if the current request has been submitted via Ajax4JSF.
+     */
+    public boolean isAjaxRequest() {
+        return FxJsfUtils.isAjaxRequest();
+    }
 }

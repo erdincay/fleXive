@@ -71,6 +71,26 @@ public class FxJavascriptUtils {
     }
 
     /**
+     * Starts an inline stylesheet tag.
+     *
+     * @param out   the output writer
+     * @throws IOException if the code could not be written
+     */
+    public static void beginStyleSheet(Writer out) throws IOException {
+        out.write("<style type=\"text/css\">\n");
+    }
+
+    /**
+     * Ends an inline stylesheet tag.
+     *
+     * @param out   the output writer
+     * @throws IOException if the code could not be written
+     */
+    public static void endStyleSheet(Writer out) throws IOException {
+        out.write("\n</style>\n");
+    }
+
+    /**
      * Write dojo "require" calls for all requested components.
      *
      * @param out      the output writer

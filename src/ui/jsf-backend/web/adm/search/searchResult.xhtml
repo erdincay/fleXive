@@ -30,9 +30,100 @@
             <adm:commandButton id="thumbsButton" labelKey="SearchResult.button.view.thumbs" bean="#{fxSearchResultBean}" action="thumbView" icon="view_thumbs" location="toolbar"/>
             <adm:commandButton id="preferencesButton" location="toolbar" labelKey="ResultPreferences.button.open" bean="#{resultPreferencesBean}" action="show" icon="configure"/>
 
+            <script type="text/javascript">
+            <!--
+                function onShowContextMenu() {
+                    try {
+                        var selectedIds = getSelectedIds();
+                        var briefcaseId = getBriefcaseId();
+                        flexive.yui.setMenuItem("deleteSelected", "disabled", selectedIds.length == 0);
+                        flexive.yui.setMenuItem("copy", "disabled", selectedIds.length == 0);
+                        flexive.yui.setMenuItem("deleteBriefcaseSelected", "disabled", briefcaseId == -1 || selectedIds.length == 0);
+                        flexive.yui.setMenuItem("deleteBriefcase", "disabled", briefcaseId == -1);
+                    } catch (e) {
+                        alert(e);
+                    }
+                }
+
+                function getSelectedIds() {
+                    // get currently selected PKs
+                    var selectedIds = [];
+                    var selection = resultTable.getSelectedTrEls().length > 0
+                            ? resultTable.getSelectedTrEls() : resultTable.getSelectedTdEls();
+                    for (var i = 0; i < selection.length; i++) {
+                        var selectedPk = flexive.yui.datatable.getPk(resultTable, selection[i]);
+                        selectedIds.push(selectedPk.id);
+                    }
+                    return selectedIds;
+                }
+
+                function getBriefcaseId() {
+                    return #{empty fxSearchResultBean.briefcase ? -1 : fxSearchResultBean.briefcase.id};
+                }
+
+                function onContextMenu(type, args) {
+                    // extract PK
+                    var pk = flexive.yui.datatable.getPk(resultTable, this.contextEventTarget);
+                    document.getElementById("frm:contentEditorId").value = pk.id;
+                    document.getElementById("frm:contentEditorVersion").value = pk.version;
+
+                    var selectedIds = getSelectedIds();
+                    var briefcaseId = getBriefcaseId();
+                    var menuId = args[1].id;
+                    switch (menuId) {
+                        case "show":
+                            document.getElementById("frm:showButton").onclick();
+                            break;
+                        case "edit":
+                            document.getElementById("frm:editButton").onclick();
+                            break;
+                        case "showScreenview":
+                            var a = document.createElement("a");
+                            a.href = getBase()+"thumbnail/pk" + pk.id + "." + pk.version + "/so";
+                            a.rel = "lytebox";
+                            a.title = "Screenview " + pk.id + "." + pk.version;
+                            myLytebox.start(a, false, false);
+                            break;
+                        case "copy":
+                            parent.getContentClipboard().set(selectedIds);
+                            break;
+                        case "delete":
+                            if (!confirm("#{fxMessageBean['SearchResult.dialog.confirm.deleteRow']}")) {
+                                break;
+                            }
+                            getJsonRpc().ContentEditor.remove(pk.id);
+                            reload();
+                            break;
+                        case "deleteSelected":
+                            if (!confirm("#{fxMessageBean['SearchResult.dialog.confirm.deleteSelection']}")) {
+                                break;
+                            }
+                            getJsonRpc().ContentEditor.removeMultiple(selectedIds);
+                            reload();
+                            break;
+                        case "deleteBriefcase":
+                            getJsonRpc().BriefcaseEditor.removeItems(briefcaseId, [pk.id]);
+                            reload();
+                            break;
+                        case "deleteBriefcaseSelected":
+                            getJsonRpc().BriefcaseEditor.removeItems(briefcaseId, selectedIds);
+                            reload();
+                            break;
+                        default:
+                    }
+                }
+
+                function reload() {
+                    document.forms["frm"].submit();
+                }
+            //-->
+            </script>
+
             <c:if test="#{fxSearchResultBean.queryBuilder != null}">
                 <h:inputHidden id="rowCount" value="#{fxSearchResultBean.rowCount}"/>
                 <h:inputHidden id="versionFilter" value="#{fxSearchResultBean.versionFilter}"/>
+                <h:inputHidden id="contentEditorId" value="#{contentEditorBean.id}"/>
+                <h:inputHidden id="contentEditorVersion" value="#{contentEditorBean.version}"/>
 
                 <h:selectOneListbox id="typeId" value="#{fxSearchResultBean.typeId}" size="1">
                     <f:selectItems value="#{fxSearchResultBean.contentTypeItems}"/>
@@ -48,8 +139,31 @@
                 </a4j:outputPanel>
 
 
-                <fx:resultTable var="resultTable" value="#{fxSearchResultBean.result}"/>
+                <div id="resultTableContainer">
+                    <fx:resultTable var="resultTable" value="#{fxSearchResultBean.result}"/>
+                </div>
                 
+                <fx:menu name="resultsMenu" beforeShow="onShowContextMenu" clickHandler="onContextMenu" trigger="resultTable.getTbodyEl()">
+                    <fx:menuItem id="show" labelKey="SearchResult.menu.show" icon="open"/>
+                    <fx:menuItem id="showScreenview" labelKey="SearchResult.menu.showScreenview" icon="open"/>
+                    <fx:menuItem id="edit" labelKey="SearchResult.menu.edit" icon="edit"/>
+                    <!--<fx:menuSeparator/>-->
+                    <fx:menuItem id="copy" labelKey="SearchResult.menu.copy" icon="copy"/>
+                    <!--<fx:menuSeparator/>-->
+                    <fx:menuItem id="deleteBriefcase" labelKey="SearchResult.menu.deleteBriefcase" icon="removeBriefcaseItems"/>
+                    <fx:menuItem id="deleteBriefcaseSelected" labelKey="SearchResult.menu.deleteBriefcaseSelected" icon="removeBriefcaseItems"/>
+                    <fx:menuItem id="delete" labelKey="SearchResult.menu.delete" icon="remove"/>
+                    <fx:menuItem id="deleteSelected" labelKey="SearchResult.menu.deleteSelected" icon="remove"/>
+                </fx:menu>
+
+                <div style="display:none">
+                    <h:commandLink id="showButton" action="#{contentEditorBean.load}">
+                        <f:setPropertyActionListener value="#{true}" target="#{contentEditorBean.readOnly}"/>
+                    </h:commandLink>
+                    <h:commandLink id="editButton" action="#{contentEditorBean.load}">
+                        <f:setPropertyActionListener value="#{false}" target="#{contentEditorBean.readOnly}"/>
+                    </h:commandLink>
+                </div>
             </c:if>
             <adm:toolbarPluginButtons/>
 

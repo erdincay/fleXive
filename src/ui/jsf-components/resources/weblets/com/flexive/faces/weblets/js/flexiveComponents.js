@@ -45,6 +45,20 @@ flexive.util = new function() {
         }
         return null;
     };
+
+    /**
+     * Parses the given PK and returns a PK object.
+     *
+     * @param pk     a primary key (e.g. "125.1")
+     * @returns      the parsed PK, e.g. { id: 125, version: 1 }
+     */
+    this.parsePk = function(/* String */ pk) {
+        if (pk.indexOf(".") == -1) {
+            throw "Not a valid PK: " + pk;
+        }
+        return { id: parseInt(pk.substr(0, pk.indexOf("."))),
+                 version: parseInt(pk.substr(pk.indexOf(".") + 1)) };
+    }
 }
 
 // Yahoo UI (YUI) helper methods and classes
@@ -90,6 +104,22 @@ flexive.yui = new function() {
         }
         this.onYahooLoadedFunctions = [];
     }
+
+    /**
+     * Updates a property of a menu item.
+     *
+     * @param id    the menu item ID
+     * @param property  the property (e.g. "disabled")
+     * @param value the new value
+     */
+    this.setMenuItem = function(/* String */ id, /* String */ property, value) {
+        var item = YAHOO.widget.MenuManager.getMenuItem(id);
+        if (item == null) {
+            alert("Menu item not found: " + id);
+            return;
+        }
+        item.cfg.setProperty(property, value);
+    }
 }
 
 flexive.yui.datatable = new function() {
@@ -104,6 +134,16 @@ flexive.yui.datatable = new function() {
                 : new flexive.yui.datatable.ListView(result);
     }
 
+    /**
+     * <p>Return the primary key of the result table row/column of the given element (e.g. an event target).
+     * Supports both list and thumbnail view.</p>
+     *
+     * <p>Note that the primary key is only available if it was selected in the FxSQL query (@pk).</p>
+     *
+     * @param dataTable the datatable variable (set with the 'var' attribute of fx:resultTable)
+     * @param element   the table element (i.e. an element nested in a table cell/row)
+     * @return  a PK object, e.g. {id: 21, version: 10}
+     */
     this.getPk = function(/* YAHOO.widget.DataTable */ dataTable, /* Element */ element) {
         var elRow = dataTable.getTrEl(element);
         var record = dataTable.getRecord(elRow);
@@ -114,12 +154,12 @@ flexive.yui.datatable = new function() {
         var data = record.getData();
         if (data.pk) {
             // only one pk for this column, return it
-            return data.pk;
+            return flexive.util.parsePk(data.pk);
         } else {
             // one PK per column, get column index and return PK
             var elCol = dataTable.getTdEl(element);
             var col = dataTable.getColumn(elCol);
-            return data.pks[col.getKeyIndex()];
+            return flexive.util.parsePk(data.pks[col.getKeyIndex()]);
         }
     }
 }
