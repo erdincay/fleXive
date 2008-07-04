@@ -294,12 +294,13 @@ public class FxTypeConverter implements Converter {
                     ctx.convertAnother(this, FxPropertyAssignment.class);
                 } else if (ConversionEngine.KEY_GROUP_AS.equals(node)) {
                     ctx.convertAnother(this, FxGroupAssignment.class);
-                }
+                } else
+                    throw new FxConversionException("ex.conversion.unexcpectedNode", reader.getNodeName()).asRuntimeException();
                 reader.moveUp();
             }
             reader.moveUp(); //move up the final assignments closing node
         }
-        
+
         return CacheAdmin.getEnvironment().getType(typeEdit.getId());
     }
 

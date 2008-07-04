@@ -732,6 +732,40 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             ps.executeBatch();
             ps.close();
 
+            //remove property and group assignment option entries
+            sql.setLength(0);
+            for (FxPropertyAssignment pa : allPropertyAssignments) {
+                if (pa.getBaseAssignmentId() == FxAssignment.NO_PARENT &&
+                        //exclude the "ID" property whose Id is "0" which is "NO_PARENT"
+                        !(pa.getProperty().getId() == FxAssignment.NO_PARENT)) {
+                    if (sql.length() == 0) {
+                        sql.append(" WHERE ASSID IN(").append(pa.getId());
+                    } else
+                        sql.append(',').append(pa.getProperty().getId());
+                }
+            }
+            if (sql.length() > 0) {
+                sql.append(')');
+                ps = con.prepareStatement("DELETE FROM " + TBL_PROPERTY_OPTIONS + sql.toString());
+                ps.executeUpdate();
+                ps.close();
+            }
+            sql.setLength(0);
+            for (FxGroupAssignment ga : type.getAssignedGroups()) {
+                if (ga.getBaseAssignmentId() == FxAssignment.NO_PARENT) {
+                    if (sql.length() == 0) {
+                        sql.append(" WHERE ASSID IN(").append(ga.getId());
+                    } else
+                        sql.append(',').append(ga.getGroup().getId());
+                }
+            }
+            if (sql.length() > 0) {
+                sql.append(')');
+                ps = con.prepareStatement("DELETE FROM " + TBL_GROUP_OPTIONS + sql.toString());
+                ps.executeUpdate();
+                ps.close();
+            }
+
             //remove the assignments
             sql.setLength(0);
             sql.append("DELETE FROM ").append(TBL_STRUCT_ASSIGNMENTS).append(" WHERE TYPEDEF=? AND ID=?");
@@ -743,6 +777,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             }
             ps.executeBatch();
             ps.close();
+
             //remove eventually orphaned properties and groups
             AssignmentEngineBean.removeOrphanedProperties(con);
             AssignmentEngineBean.removeOrphanedGroups(con);
@@ -897,7 +932,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             }
             throw new FxApplicationException("ex.structure.import.type.conversionError", path, line, e.getShortMessage());
         } catch (Exception e) {
-            throw new FxApplicationException("ex.structure.import.type.error", e.getMessage());
+            throw new FxApplicationException(e, "ex.structure.import.type.error", e.getMessage());
         }
     }
 }

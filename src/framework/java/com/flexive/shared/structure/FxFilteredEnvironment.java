@@ -294,8 +294,22 @@ public final class FxFilteredEnvironment implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
-    public boolean properyExists(String name) {
-        return environment.properyExists(name);
+    public boolean propertyExists(String name) {
+        return environment.propertyExists(name);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean assignmentExists(String name) {
+        return environment.assignmentExists(name);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean groupExists(String name) {
+        return environment.groupExists(name);
     }
 
     /**

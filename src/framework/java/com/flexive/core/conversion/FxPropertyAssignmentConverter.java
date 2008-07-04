@@ -121,7 +121,15 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
             throw e.asRuntimeException();
         }
         AssignmentData data = (AssignmentData) super.unmarshal(reader, ctx);
-        String parentXPath = "/";
+        String parentXPath;
+        try {
+            List<XPathElement> xpe = XPathElement.split(data.getXpath());
+            if (xpe.size() > 0)
+                xpe.remove(xpe.size() - 1);
+            parentXPath = XPathElement.toXPathNoMult(xpe);
+        } catch (FxInvalidParameterException e) {
+            throw e.asRuntimeException();
+        }
         FxValue defaultValue = ConversionEngine.getFxValue("defaultValue", this, reader, ctx);
         if (reader.hasMoreChildren()) { //optional property as last subnode
             reader.moveDown();
@@ -139,7 +147,7 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
             FxString propHint = (FxString) ConversionEngine.getFxValue("hint", this, reader, ctx);
             FxValue propDefaultValue = ConversionEngine.getFxValue("defaultValue", this, reader, ctx);
             List<FxStructureOption> options = super.unmarshallOptions(reader, ctx);
-            if (env.properyExists(propName)) {
+            if (env.propertyExists(propName)) {
                 FxPropertyEdit prop = env.getProperty(propName).asEditable();
                 prop.setACL(propACL);
                 prop.setAssignmentDefaultMultiplicity(data.getDefaultMultiplicity());
@@ -155,6 +163,18 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
                 } catch (FxApplicationException e) {
                     throw e.asRuntimeException();
                 }
+                if (env.assignmentExists(data.getParentAssignment()) && !type.isXPathValid(data.getXpath(), true)) {
+                    //reuse it
+                    try {
+                        EJBLookup.getAssignmentEngine().save(
+                                FxPropertyAssignmentEdit.reuse(data.getParentAssignment(), type.getName(), type.getName() + "/" + parentXPath,
+                                        data.getAlias()),
+                                false);
+                        env = CacheAdmin.getEnvironment(); //refresh environment
+                    } catch (FxApplicationException e) {
+                        throw e.asRuntimeException();
+                    }
+                }
             } else {
                 //create new assignment and property
                 FxPropertyEdit prop = FxPropertyEdit.createNew(propName, propLabel, propHint, propMult, propACL, propDataType);
@@ -163,14 +183,6 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
                 prop.setUniqueMode(propUniqueMode);
                 prop.setDefaultValue(propDefaultValue);
                 prop.setOptions(options);
-                try {
-                    List<XPathElement> xpe = XPathElement.split(data.getXpath());
-                    if (xpe.size() > 0)
-                        xpe.remove(xpe.size() - 1);
-                    parentXPath = XPathElement.toXPath(xpe);
-                } catch (FxInvalidParameterException e) {
-                    throw e.asRuntimeException();
-                }
                 try {
                     EJBLookup.getAssignmentEngine().createProperty(type.getId(), prop, parentXPath, data.getAlias());
                     env = CacheAdmin.getEnvironment(); //refresh environment
@@ -185,13 +197,18 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
             //property exists but not the xpath
             try {
                 //create assignment from property
-                EJBLookup.getAssignmentEngine().save(FxPropertyAssignmentEdit.createNew(property, type, data.getAlias(), parentXPath), false);
+                final FxPropertyAssignmentEdit paEdit = FxPropertyAssignmentEdit.createNew(property, type, data.getAlias(),
+                        type.getName() + "/" + parentXPath);
+                if (!"/".equals(parentXPath))
+                    paEdit.setParentGroupAssignment((FxGroupAssignment) type.getAssignment(parentXPath));
+                EJBLookup.getAssignmentEngine().save(paEdit, false);
                 env = CacheAdmin.getEnvironment(); //refresh environment
             } catch (FxApplicationException e) {
                 throw e.asRuntimeException();
             }
         }
         //assignment either exists now or has been created, apply all assignment specific data
+        long paId;
         try {
             FxPropertyAssignmentEdit pa = ((FxPropertyAssignment) env.getAssignment(data.getXpath())).asEditable();
             pa.setACL(acl);
@@ -203,11 +220,13 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
             pa.setHint(data.getHint());
             pa.setOptions(data.getOptions());
             pa.setDefaultValue(defaultValue);
-            EJBLookup.getAssignmentEngine().save(pa, false);
+            paId = EJBLookup.getAssignmentEngine().save(pa, false);
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();
         }
-        return null;
+        env = CacheAdmin.getEnvironment(); //refresh environment
+        ctx.put(ConversionEngine.KEY_TYPE, env.getType(type.getId()).asEditable());
+        return env.getAssignment(paId);
     }
 
     /**

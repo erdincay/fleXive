@@ -614,9 +614,29 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
-    public boolean properyExists(String name) {
+    public boolean propertyExists(String name) {
         for (FxProperty property : properties)
             if (property.getName().equalsIgnoreCase(name))
+                return true;
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean assignmentExists(String name) {
+        for(FxAssignment check: assignments)
+            if( check.getXPath().equalsIgnoreCase(name))
+                return true;
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean groupExists(String name) {
+        for(FxGroup check: groups)
+            if( check.getName().equalsIgnoreCase(name))
                 return true;
         return false;
     }

@@ -31,10 +31,19 @@
  ***************************************************************/
 package com.flexive.core.conversion;
 
-import com.flexive.shared.structure.FxAssignment;
-import com.flexive.shared.structure.FxGroupAssignment;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.EJBLookup;
+import com.flexive.shared.XPathElement;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxConversionException;
+import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.flexive.shared.structure.*;
 import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+
+import java.util.List;
 
 /**
  * XStream converter for FxGroupAssignment
@@ -70,6 +79,89 @@ public class FxGroupAssignmentConverter extends FxAssignmentConverter {
         for (FxAssignment as : grp.getAssignments())
             ctx.convertAnother(as);
         writer.endNode();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
+        FxType type = (FxType) ctx.get(ConversionEngine.KEY_TYPE);
+        GroupMode mode = GroupMode.valueOf(reader.getAttribute("mode"));
+        AssignmentData data = (AssignmentData) super.unmarshal(reader, ctx);
+        FxEnvironment env = CacheAdmin.getEnvironment();
+        boolean isDerived = data.getParentAssignment() != null;
+        List<FxStructureOption> options = unmarshallOptions(reader, ctx);
+        String parentXPath;
+        try {
+            List<XPathElement> xpe = XPathElement.split(data.getXpath());
+            if (xpe.size() > 0)
+                xpe.remove(xpe.size() - 1);
+            parentXPath = XPathElement.toXPathNoMult(xpe);
+        } catch (FxInvalidParameterException e) {
+            throw e.asRuntimeException();
+        }
+
+        FxGroupAssignmentEdit grp = null;
+
+        if (env.assignmentExists(data.getXpath()))
+            grp = ((FxGroupAssignment) env.getAssignment(data.getXpath())).asEditable();
+        else {
+            if (isDerived) {
+                //if the group that this group is derived from exists, derive from it again
+                if (env.assignmentExists(data.getParentAssignment())) {
+                    FxGroupAssignment ga = ((FxGroupAssignment) env.getAssignment(data.getParentAssignment()));
+                    try {
+                        grp = FxGroupAssignmentEdit.createNew(ga, type, data.getAlias(), parentXPath);
+                        long groupId = EJBLookup.getAssignmentEngine().save(grp, false);
+                        env = CacheAdmin.getEnvironment();
+                        grp = ((FxGroupAssignment) env.getAssignment(groupId)).asEditable();
+                    } catch (FxApplicationException e) {
+                        throw e.asRuntimeException();
+                    }
+                }
+            }
+        }
+
+        if (grp == null) {
+            //create a new one
+            try {
+                long groupId = EJBLookup.getAssignmentEngine().createGroup(
+                        FxGroupEdit.createNew(data.getAlias(), data.getLabel(), data.getHint(), true, data.getMultiplicity()),
+                        parentXPath);
+                env = CacheAdmin.getEnvironment();
+                grp = ((FxGroupAssignment) env.getAssignment(groupId)).asEditable();
+            } catch (FxApplicationException e) {
+                throw e.asRuntimeException();
+            }
+        }
+
+        //now that we have the assignment, apply all options
+        try {
+            grp.setOptions(data.getOptions());
+            grp.setEnabled(data.isEnabled());
+            grp.setLabel(data.getLabel());
+            grp.setHint(data.getHint());
+            grp.setMode(mode);
+            grp.setMultiplicity(data.getMultiplicity());
+            grp.setPosition(data.getPos());
+            EJBLookup.getAssignmentEngine().save(grp, false);
+        } catch (FxApplicationException e) {
+            throw e.asRuntimeException();
+        }
+        env = CacheAdmin.getEnvironment(); //refresh environment
+        ctx.put(ConversionEngine.KEY_TYPE, env.getType(type.getId()).asEditable());
+
+        while (reader.hasMoreChildren()) {
+            reader.moveDown();
+            if (ConversionEngine.KEY_GROUP_AS.equals(reader.getNodeName()))
+                ctx.convertAnother(this, FxGroupAssignment.class);
+            else if (ConversionEngine.KEY_PROPERTY_AS.equals(reader.getNodeName()))
+                ctx.convertAnother(this, FxPropertyAssignment.class);
+            else
+                throw new FxConversionException("ex.conversion.unexcpectedNode", reader.getNodeName()).asRuntimeException();
+            reader.moveUp();
+        }
+        return CacheAdmin.getEnvironment().getAssignment(grp.getId());
     }
 
     /**

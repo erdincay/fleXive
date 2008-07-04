@@ -125,7 +125,7 @@ public class FxGroupAssignmentEdit extends FxGroupAssignment {
      * @throws FxInvalidParameterException on errors
      */
     public FxGroupAssignmentEdit setMultiplicity(FxMultiplicity multiplicity) throws FxInvalidParameterException {
-        if (!getGroup().mayOverrideBaseMultiplicity())
+        if (!getGroup().mayOverrideBaseMultiplicity() && !multiplicity.equals(getGroup().getMultiplicity()))
             throw new FxInvalidParameterException("MULTIPLICITY", "ex.structure.override.group.forbidden", "Multiplicity", getGroup().getName());
         this.multiplicity = multiplicity;
         return this;

@@ -243,7 +243,23 @@ public interface FxEnvironment extends Serializable {
      * @param name name of the property
      * @return exists
      */
-    boolean properyExists(String name);
+    boolean propertyExists(String name);
+
+    /**
+     * Check if an assignment with the requested name exists
+     *
+     * @param name name of the assignment
+     * @return exists
+     */
+    boolean assignmentExists(String name);
+
+    /**
+     * Check if a group with the requested name exists
+     *
+     * @param name name of the group
+     * @return exists
+     */
+    boolean groupExists(String name);
 
     /**
      * Get all property assignments that are enabled
