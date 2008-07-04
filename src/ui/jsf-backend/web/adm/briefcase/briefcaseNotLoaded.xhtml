@@ -13,7 +13,7 @@
 <ui:composition template="/adm/contentTemplate.xhtml">
     <ui:define name="head">
         <script type="text/javascript">
-            dojo.addOnLoad(function() {
+            flexive.yui.onYahooLoaded(function() {
                 if (parent.getNavFrameWnd().briefcasePanel) {
                     parent.getNavFrameWnd().briefcasePanel.reload();
                 }

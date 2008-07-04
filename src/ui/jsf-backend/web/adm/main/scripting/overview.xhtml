@@ -11,16 +11,6 @@
 <body>
 
 <ui:composition template="/adm/contentTemplate.xhtml">
-    <ui:define name="head">
-
-        <script type="text/javascript">
-            dojo.require("dojo.widget.FilteringTable");
-        </script>
-
-    </ui:define>
-
-    <ui:define name="searchIds">"listForm"</ui:define>
-
     <ui:define name="body">
 
         <h:form id="listForm">
@@ -39,8 +29,8 @@
             </h:panelGrid>
 
             <br/>
-                <table dojoType="FilteringTable" widgetId="testTable" enableMultipleSelect="true"
-                       alternateRows="true" maxSortable="1" class="dojoTable">
+            <adm:sortableTable id="table">
+                <table id="table">
                     <thead>
                         <tr>
                             <th class="tblHeader" field="name" dataType="String" align="left">
@@ -92,6 +82,7 @@
                         </ui:repeat>
                     </tbody>
                 </table>
+            </adm:sortableTable>
             <br/>
             <ui:fragment rendered="#{fxSystemBean.isInRole['ScriptManagement']}">
                 <adm:commandButton labelKey="Script.button.create" location="both"

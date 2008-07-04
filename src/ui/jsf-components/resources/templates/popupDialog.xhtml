@@ -11,33 +11,37 @@
     xmlns:adm="http://www.flexive.com/jsf/admin"
     xmlns:fx="http://www.flexive.com/jsf/core">
 
-[fleXive3] modular Dojo popup. The dialog content is specified in the
-component body. Add 
-
-dojo.require("dojo.widget.Dialog");
-
-to your page if use use this component.
+A simple javascript popup panel.
 
 Parameters: 
 	jsVar = javascript variable name that should be initialized with this
-		dialog. Execute jsVar.show() to show the dialog.
+		dialog. Execute jsVar.show() to show the dialog, jsVar.hide() to hide it.
 	closeControl = element ID that should be used for closing the dialog
 	
 <ui:composition>
 
+    <div id="#{jsVar}_dialogContainer">
+        <ui:insert/>
+    </div>
 	<script type="text/javascript">
 	<!--
 		var #{jsVar};
-		dojo.addOnLoad(function() {
-			#{jsVar} = dojo.widget.byId("#{jsVar}_dialog");
-			#{jsVar}.setCloseControl(document.getElementById("#{closeControl}"));
-		});
+        document.getElementById("#{jsVar}_dialogContainer").style.display = "none"; // hide until Yahoo is available
+        flexive.yui.requireComponent("container");
+        flexive.yui.onYahooLoaded(function() {
+            var dialog = new YAHOO.widget.Panel('#{jsVar}_dialogContainer',
+            {
+                fixedcenter: true,
+                visible: false,
+                constraintoviewport: true
+            });
+            dialog.render();
+            #{jsVar} = dialog;
+            document.getElementById("#{jsVar}_dialogContainer").style.display = "block";
+        });
 	//-->
 	</script>
-	<div dojoType="dialog" id="#{jsVar}_dialog" bgColor="white" bgOpacity="0" style="display:none">
-		<ui:insert/>
-	</div>
-	
+
 </ui:composition>
 
 

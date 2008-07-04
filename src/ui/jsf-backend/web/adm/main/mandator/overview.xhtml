@@ -10,15 +10,6 @@
 <body>
 
 <ui:composition template="/adm/contentTemplate.xhtml">
-    <ui:define name="head">
-
-        <script type="text/javascript">
-            dojo.require("dojo.widget.FilteringTable");
-        </script>
-
-    </ui:define>
-
-    <ui:define name="searchIds">"listForm"</ui:define>
 
     <ui:define name="body">
 
@@ -28,42 +19,43 @@
 
             <!-- Mandator select is only shown for global supervisors -->
             <!--      <c:if test="${fxSystemBean.userTicket.globalSupervisor}"> -->
-            <table dojoType="FilteringTable" widgetId="testTable" enableMultipleSelect="true"
-                   alternateRows="true" maxSortable="1" class="dojoTable">
-                <thead>
-                    <tr>
-                        <th class="tblHeader" field="name" dataType="String" align="left">
-                            #{fxMessageBean['Mandator.field.name']}
-                        </th>
-                        <th class="tblHeader" field="active" dataType="boolean" align="left">
-                            #{fxMessageBean['Mandator.field.active']}
-                        </th>
-                        <th class="tblHeader" dataType="html" align="left">
-                            #{fxMessageBean['Mandator.field.actions']}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <ui:repeat value="#{mandatorBean.mandators}" var="item">
-                        <tr value="#{item.id}">
-                            <td align="left"><h:outputText value="#{item.name}" /></td>
-                            <td align="left"><h:selectBooleanCheckbox value="#{item.active}" disabled="true"/></td>
-                            <td align="left">
-                                <adm:commandIcon labelKey="Mandator.button.edit" location="content"
-                                                 icon="edit"  action="editMandator"  bean="#{mandatorBean}"
-                                                 id="editButton_#{item.id}">
-                                    <f:setPropertyActionListener target="#{mandatorBean.id}" value="#{item.id}"/>
-                                </adm:commandIcon>
-                                <adm:commandIcon labelKey="Mandator.button.delete" location="content"
-                                                 icon="delete"  action="deleteMandator"  bean="#{mandatorBean}"
-                                                 id="deleteButton_#{item.id}" confirmKey="Mandator.confirm.delete">
-                                    <f:setPropertyActionListener target="#{mandatorBean.id}" value="#{item.id}"/>
-                                </adm:commandIcon>
-                            </td>
+            <adm:sortableTable id="table">
+                <table id="table">
+                    <thead>
+                        <tr>
+                            <th class="tblHeader" field="name" dataType="String" align="left">
+                                #{fxMessageBean['Mandator.field.name']}
+                            </th>
+                            <th class="tblHeader" field="active" dataType="boolean" align="left">
+                                #{fxMessageBean['Mandator.field.active']}
+                            </th>
+                            <th class="tblHeader" dataType="html" align="left">
+                                #{fxMessageBean['Mandator.field.actions']}
+                            </th>
                         </tr>
-                    </ui:repeat>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <ui:repeat value="#{mandatorBean.mandators}" var="item">
+                            <tr value="#{item.id}">
+                                <td align="left"><h:outputText value="#{item.name}" /></td>
+                                <td align="left"><h:selectBooleanCheckbox value="#{item.active}" disabled="true"/></td>
+                                <td align="left">
+                                    <adm:commandIcon labelKey="Mandator.button.edit" location="content"
+                                                     icon="edit"  action="editMandator"  bean="#{mandatorBean}"
+                                                     id="editButton_#{item.id}">
+                                        <f:setPropertyActionListener target="#{mandatorBean.id}" value="#{item.id}"/>
+                                    </adm:commandIcon>
+                                    <adm:commandIcon labelKey="Mandator.button.delete" location="content"
+                                                     icon="delete"  action="deleteMandator"  bean="#{mandatorBean}"
+                                                     id="deleteButton_#{item.id}" confirmKey="Mandator.confirm.delete">
+                                        <f:setPropertyActionListener target="#{mandatorBean.id}" value="#{item.id}"/>
+                                    </adm:commandIcon>
+                                </td>
+                            </tr>
+                        </ui:repeat>
+                    </tbody>
+                </table>
+            </adm:sortableTable>
 
             <!--     </c:if>   -->
             <br/>

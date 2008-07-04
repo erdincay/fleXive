@@ -14,9 +14,6 @@
       <ui:define name="head">
         <t:stylesheet path="/adm/css/content.css"/>
         <t:stylesheet path="/adm/css/structureEditor.css"/>
-        <script type="text/javascript">
-           dojo.require("dojo.widget.FilteringTable");
-        </script>
       </ui:define>
 
     <ui:define name="body">
@@ -146,8 +143,7 @@
             </fx:formRow>
 
            <fx:fieldSet legend="#{fxMessageBean['PropertyEditor.label.referencingPropertyAssignments']}">
-             <table dojoType="SortableTable" widgetId="referencingPropertyAssignments" enableMultipleSelect="true"
-                               alternateRows="true" maxSortable="1" class="dojoTable">
+             <table class="dojoTable">
                 <tbody>
                     <ui:repeat value="#{propertyEditorBean.referencingPropertyAssignments}" var="pa">
                         <h:commandLink id="gotoPropertyAssignmentButton_#{pa.id}"

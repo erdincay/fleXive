@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:c="http://java.sun.com/jstl/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+    xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+    xmlns:fx="http://www.flexive.com/jsf/core">
+
+Updates the given result table on the current page. Useful for updates during partial page rendering.
+
+Ajax4JSF: place this component in the page region that will be re-rendered (e.g. an a4j:outputPanel component).
+
+Parameters:
+    var      - name of the javascript variable that exposes the Yahoo DataTable widget (default: resultTable)
+    value    - the result set to be rendered, or a plain text FxSQL query
+
+<ui:composition>
+
+    <c:if test="#{empty var}">
+        <c:set var="var" value="resultTable"/>
+    </c:if>
+
+    <script type="text/javascript">
+        <!--
+            if (window.#{var} != null) {
+                // refresh only if datatable is already available - also prevents refresh during initial load
+                #{var}.deleteRows(0, 9999999);
+                var result = #{fx:getJsonResult(value, null)};
+                #{var}._reset(result);
+            }
+        //-->
+    </script>
+
+</ui:composition>
+
+
+</html>

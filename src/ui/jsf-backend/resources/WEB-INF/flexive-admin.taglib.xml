@@ -123,7 +123,10 @@
         <tag-name>resultTabs</tag-name>
         <source>templates/resultTabs.xhtml</source>
     </tag>
-
+    <tag>
+        <tag-name>sortableTable</tag-name>
+        <source>templates/sortableTable.xhtml</source>
+    </tag>
     <tag>
         <tag-name>tree</tag-name>
         <component>

@@ -11,59 +11,51 @@
 
 <ui:composition template="/adm/contentTemplate.xhtml">
 
-    <ui:define name="head">
-        <script type="text/javascript">
-            dojo.require("dojo.widget.FilteringTable");
-        </script>
-    </ui:define>
-    
-	<ui:define name="searchIds">"frm"</ui:define>
-
     <ui:define name="body">
         <h:form id="frm">
             <adm:tab label="#{fxMessageBean['Workflow.tabtitle.overview']}" active="true" id="tab1"/>
-            
-            <table dojoType="FilteringTable" widgetId="testTable" enableMultipleSelect="true"
-                   alternateRows="true" maxSortable="1"
-                    class="dojoTable">
 
-                <thead>
-                    <tr>
-                        <th class="tblHeader" dataType="Number">
-                            #{fxMessageBean["Workflow.field.id"]}
-                        </th>
-                        <th class="tblHeader" dataType="String">
-                            #{fxMessageBean["Workflow.field.name"]}
-                        </th>
-                        <th class="tblHeader" dataType="String">
-                            #{fxMessageBean["Workflow.field.description"]}
-                        </th>
-                        <th class="tblHeader" dataType="html">
-                            &nbsp;
-                        </th>
-                        <!-- th dataType="html"></th -->
-                    </tr>
-                </thead>
-                <tbody>
-                    <c:forEach var="workflow" items="#{workflowBean.list}">
-                        <tr value="#{workflow.id}">
-                            <td class="tblColumn">#{workflow.id}</td>
-                            <td class="tblColumn">#{workflow.name}</td>
-                            <td class="tblColumn">#{workflow.description}</td>
-                            <td class="tblColumn">
-                                <adm:commandIcon labelKey="Workflow.button.edit" location="content"
-                                                icon="edit"  bean="#{workflowBean}" action="edit" id="editButton_#{workflow.id}">
-                                    <f:setPropertyActionListener target="#{workflowBean.workflowId}" value="#{workflow.id}"/>
-                                </adm:commandIcon>
-                                <adm:commandIcon labelKey="Workflow.button.delete" location="content"
-                                                icon="delete"  bean="#{workflowBean}" action="delete" id="deleteButton_#{workflow.id}">
-                                    <f:setPropertyActionListener target="#{workflowBean.workflowId}" value="#{workflow.id}"/>
-                                </adm:commandIcon>
-                            </td>
+            <adm:sortableTable id="table">
+                <table id="table">
+
+                    <thead>
+                        <tr>
+                            <th class="tblHeader" dataType="Number">
+                                #{fxMessageBean["Workflow.field.id"]}
+                            </th>
+                            <th class="tblHeader" dataType="String">
+                                #{fxMessageBean["Workflow.field.name"]}
+                            </th>
+                            <th class="tblHeader" dataType="String">
+                                #{fxMessageBean["Workflow.field.description"]}
+                            </th>
+                            <th class="tblHeader" dataType="html">
+                                &nbsp;
+                            </th>
+                            <!-- th dataType="html"></th -->
                         </tr>
-                    </c:forEach>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <c:forEach var="workflow" items="#{workflowBean.list}">
+                            <tr value="#{workflow.id}">
+                                <td class="tblColumn">#{workflow.id}</td>
+                                <td class="tblColumn">#{workflow.name}</td>
+                                <td class="tblColumn">#{workflow.description}</td>
+                                <td class="tblColumn">
+                                    <adm:commandIcon labelKey="Workflow.button.edit" location="content"
+                                                    icon="edit"  bean="#{workflowBean}" action="edit" id="editButton_#{workflow.id}">
+                                        <f:setPropertyActionListener target="#{workflowBean.workflowId}" value="#{workflow.id}"/>
+                                    </adm:commandIcon>
+                                    <adm:commandIcon labelKey="Workflow.button.delete" location="content"
+                                                    icon="delete"  bean="#{workflowBean}" action="delete" id="deleteButton_#{workflow.id}">
+                                        <f:setPropertyActionListener target="#{workflowBean.workflowId}" value="#{workflow.id}"/>
+                                    </adm:commandIcon>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
+            </adm:sortableTable>
 
 
             <adm:commandButton labelKey="Workflow.button.create" location="toolbar"

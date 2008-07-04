@@ -403,10 +403,6 @@
             </zipfileset>
 
             <!-- include dojo from ZIP file, install in /pub/js/dojo -->
-		    <zipfileset src="${flexive.base.ui.shared.dir}/resources/lib/dojo/${web.ui.dojo.baseName}.zip" prefix="pub/js/dojo">
-		        <include name="*"/>
-		        <include name="src/**/*"/>
-	        </zipfileset>
             <zipfileset src="${flexive.base.ui.shared.dir}/resources/lib/dojo/${web.ui.dojo.baseName}Navigation.zip" prefix="pub/js/dojoNavigation">
                 <include name="*"/>
                 <include name="src/**/*"/>

@@ -49,7 +49,7 @@ function toggleSaveQuery(element) {
     bd.style.display = element.checked ? 'inline' : 'none';
 }
 
-dojo.addOnLoad(function() {
+flexive.yui.onYahooLoaded(function() {
     // toggle search mode in content/structure frames
     if (parent.getContentNavFrame().enableSearchMode) {
         parent.getContentNavFrame().enableSearchMode();
@@ -57,14 +57,14 @@ dojo.addOnLoad(function() {
     if (parent.getStructureNavFrame().enableSearchMode) {
         parent.getStructureNavFrame().enableSearchMode();
     }
+    YAHOO.util.Event.addListener(window, "unload", function() {
+        // toggle search mode in content/structure frames
+        if (parent.getContentNavFrame().disableSearchMode) {
+            parent.getContentNavFrame().disableSearchMode();
+        }
+        if (parent.getStructureNavFrame().disableSearchMode) {
+            parent.getStructureNavFrame().disableSearchMode();
+        }
+    });
 });
 
-dojo.addOnUnload(function() {
-    // toggle search mode in content/structure frames
-    if (parent.getContentNavFrame().disableSearchMode) {
-        parent.getContentNavFrame().disableSearchMode();
-    }
-    if (parent.getStructureNavFrame().disableSearchMode) {
-        parent.getStructureNavFrame().disableSearchMode();
-    }
-});

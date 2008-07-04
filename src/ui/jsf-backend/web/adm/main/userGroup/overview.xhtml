@@ -10,17 +10,7 @@
 <body>
 
 <ui:composition template="/adm/contentTemplate.xhtml">
-    <ui:define name="head">
-
-        <script type="text/javascript">
-            dojo.require("dojo.widget.FilteringTable");
-        </script>
-
-    </ui:define>
-
-	<ui:define name="searchIds">"frm"</ui:define>
-
-    <ui:define name="body">        
+    <ui:define name="body">
 
         <h:form id="frm">
 
@@ -43,58 +33,58 @@
 
             <br/>
 
-            <table dojoType="FilteringTable" widgetId="testTable" enableMultipleSelect="true"
-                   alternateRows="true" maxSortable="1"
-                    class="dojoTable">
-                <thead>
-                    <tr>
-                        <!--<th class="tblHeader" field="id" dataType="String" sort="asc">
-                            #{fxMessageBean['UserGroup.field.id']}
-                        </th>-->
-                        <th class="tblHeader" field="name" dataType="html">
-                            #{fxMessageBean['UserGroup.field.name']}
-                        </th>
-                        <th class="tblHeader" field="userCount" dataType="Number">
-                            #{fxMessageBean['UserGroup.field.numUsers']}
-                        </th>
-                        <th class="tblHeader" field="mandator" dataType="String">
-                            #{fxMessageBean['UserGroup.field.mandator']}
-                        </th>
-                        <th class="tblHeader" dataType="html" noSort="true">
-                            #{fxMessageBean['UserGroup.field.action']}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <ui:repeat value="#{userGroupBean.list}" var="group">
-                        <tr value="#{group.id}">
-                            <!--<td><h:outputText value="#{group.id}" /></td>-->
-                            <td><!--#{group.name}--><font color="#{group.color}"><h:outputText value="#{group.name}" /></font></td>
-                            <td><h:outputText value="#{userGroupBean.userCount[group.id]}" rendered="#{group.id!=2}"/></td>
-                            <td>
-                                <ui:fragment rendered="#{!group.system || (group.system &amp;&amp; group.autoMandator>=0)}">
-                                    <h:outputText value="#{mandatorBean.mandatorsById[group.mandatorId].name}"/>
-                                </ui:fragment>
-                            </td>
-                            <td>
-                                <adm:commandIcon labelKey="User.button.edit" location="content"
-                                                icon="edit"  action="edit"  bean="#{userGroupBean}"
-                                                id="editButton_#{group.id}">
-                                    <f:setPropertyActionListener target="#{userGroupBean.id}" value="#{group.id}"/>
-                                </adm:commandIcon>
-                                <ui:fragment rendered="#{!group.system}">
-                                    <adm:commandIcon labelKey="User.button.delete" location="content"
-                                                     icon="delete" action="delete" bean="#{userGroupBean}"
-                                                     id="deleteButton_#{group.id}"
-                                                     confirmKey="UserGroup.confirm.delete,#{group.name}">
+            <adm:sortableTable id="table">
+                <table id="table">
+                    <thead>
+                        <tr>
+                            <!--<th class="tblHeader" field="id" dataType="String" sort="asc">
+                                #{fxMessageBean['UserGroup.field.id']}
+                            </th>-->
+                            <th class="tblHeader" field="name" dataType="html">
+                                #{fxMessageBean['UserGroup.field.name']}
+                            </th>
+                            <th class="tblHeader" field="userCount" dataType="Number">
+                                #{fxMessageBean['UserGroup.field.numUsers']}
+                            </th>
+                            <th class="tblHeader" field="mandator" dataType="String">
+                                #{fxMessageBean['UserGroup.field.mandator']}
+                            </th>
+                            <th class="tblHeader" dataType="html" noSort="true">
+                                #{fxMessageBean['UserGroup.field.action']}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <ui:repeat value="#{userGroupBean.list}" var="group">
+                            <tr value="#{group.id}">
+                                <!--<td><h:outputText value="#{group.id}" /></td>-->
+                                <td><!--#{group.name}--><font color="#{group.color}"><h:outputText value="#{group.name}" /></font></td>
+                                <td><h:outputText value="#{userGroupBean.userCount[group.id]}" rendered="#{group.id!=2}"/></td>
+                                <td>
+                                    <ui:fragment rendered="#{!group.system || (group.system &amp;&amp; group.autoMandator>=0)}">
+                                        <h:outputText value="#{mandatorBean.mandatorsById[group.mandatorId].name}"/>
+                                    </ui:fragment>
+                                </td>
+                                <td>
+                                    <adm:commandIcon labelKey="User.button.edit" location="content"
+                                                    icon="edit"  action="edit"  bean="#{userGroupBean}"
+                                                    id="editButton_#{group.id}">
                                         <f:setPropertyActionListener target="#{userGroupBean.id}" value="#{group.id}"/>
                                     </adm:commandIcon>
-                                </ui:fragment>
-                            </td>
-                        </tr>
-                    </ui:repeat>
-                </tbody>
-            </table>
+                                    <ui:fragment rendered="#{!group.system}">
+                                        <adm:commandIcon labelKey="User.button.delete" location="content"
+                                                         icon="delete" action="delete" bean="#{userGroupBean}"
+                                                         id="deleteButton_#{group.id}"
+                                                         confirmKey="UserGroup.confirm.delete,#{group.name}">
+                                            <f:setPropertyActionListener target="#{userGroupBean.id}" value="#{group.id}"/>
+                                        </adm:commandIcon>
+                                    </ui:fragment>
+                                </td>
+                            </tr>
+                        </ui:repeat>
+                    </tbody>
+                </table>
+            </adm:sortableTable>
 
             <br/>
 

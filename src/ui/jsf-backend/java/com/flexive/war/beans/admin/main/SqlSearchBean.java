@@ -36,11 +36,14 @@ package com.flexive.war.beans.admin.main;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
+import com.flexive.faces.messages.FxFacesMsgWarn;
 import com.flexive.faces.model.FxResultSetDataModel;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.interfaces.SearchEngine;
 import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.search.FxSQLSearchParams;
+import com.flexive.shared.search.ResultViewType;
+import com.flexive.shared.search.AdminResultLocations;
 import com.flexive.war.beans.admin.content.ContentEditorBean;
 
 import javax.faces.event.ActionEvent;
@@ -67,6 +70,7 @@ public class SqlSearchBean {
     private String cacheMode;
     final static String LAST_QUERY_CACHE = SqlSearchBean.class + "_LAST_QUERY";
     private String actionPk;
+    private ResultViewType viewType = ResultViewType.LIST;
 
 
     public String getActionPk() {
@@ -183,7 +187,15 @@ public class SqlSearchBean {
         return dataModel;
     }
 
-    public String executeSearch() {
+    public ResultViewType getViewType() {
+        return viewType;
+    }
+
+    public void setViewType(ResultViewType viewType) {
+        this.viewType = viewType;
+    }
+
+    public void executeSearch() {
         FxSQLSearchParams sp = new FxSQLSearchParams();
         sp.setCacheMode(_getCacheMode());
         try {
@@ -192,7 +204,10 @@ public class SqlSearchBean {
                 queryResult = sqlSearchInterface.search(query, 0, Integer.MAX_VALUE, sp);
                 new FxFacesMsgInfo("Briefcase.nfo.created", briefcaseName).addToContext();
             } else {
-                queryResult = sqlSearchInterface.search(this.query, 0, null, sp);
+                queryResult = sqlSearchInterface.search(this.query, 0, null, sp, AdminResultLocations.DEFAULT, viewType);
+            }
+            if (queryResult.getColumnIndex("@pk") == -1) {
+                new FxFacesMsgWarn("SqlSearch.warn.noPk").addToContext();
             }
         } catch (Exception exc) {
             queryResult = null;
@@ -200,6 +215,5 @@ public class SqlSearchBean {
         } finally {
             createBriefcase = false;
         }
-        return "sqlSearch";
     }
 }

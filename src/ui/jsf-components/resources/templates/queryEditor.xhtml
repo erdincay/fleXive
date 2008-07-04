@@ -27,10 +27,10 @@ Parameters:
     </c:if>
 
     <!-- Editor context menu -->
-    <fx:dojoMenu name="contextMenu" contextMenuTarget="queryEditorContainer">
-        <fx:dojoMenuItem label="#{fxMessageBean['QueryEditor.label.contextMenu.and']}" clickHandler="function() { document.getElementById('frm:createAndSubquery').onclick(); }"/>
-        <fx:dojoMenuItem label="#{fxMessageBean['QueryEditor.label.contextMenu.or']}" clickHandler="function() { document.getElementById('frm:createOrSubquery').onclick(); }"/>
-    </fx:dojoMenu>
+    <fx:menu name="contextMenu" trigger="'queryEditorContainer'">
+        <fx:menuItem labelKey="QueryEditor.label.contextMenu.and" clickHandler="function() { document.getElementById('frm:createAndSubquery').onclick(); }"/>
+        <fx:menuItem labelKey="QueryEditor.label.contextMenu.or" clickHandler="function() { document.getElementById('frm:createOrSubquery').onclick(); }"/>
+    </fx:menu>
 
     <!-- Popup dialog that shows the current SQL query -->
     <div id="sqlPopupContainer">
@@ -46,8 +46,6 @@ Parameters:
                     </c:otherwise>
                 </c:choose>
             </a4j:outputPanel>
-            <br/>
-            <a href="javascript:void(0)" id="closeSqlPopup">Close</a>
         </fx:popupDialog>
     </div>
     <!-- Button used to update the SQL query via Ajax  -->
@@ -126,9 +124,7 @@ Parameters:
         <t:inputDate popupCalendar="true"/>
     </div>
 
-    <c:if test="#{fxSystemBean.userTicket.globalSupervisor}">
-        <a href="javascript:document.getElementById('frm:refreshSqlButton').onclick();sqlPopupDialog.show();">#{fxMessageBean['QueryEditor.button.sql']}</a>
-    </c:if>
+    <a href="javascript:document.getElementById('frm:refreshSqlButton').onclick();sqlPopupDialog.show();">#{fxMessageBean['QueryEditor.button.sql']}</a>
 
 </ui:composition>
 

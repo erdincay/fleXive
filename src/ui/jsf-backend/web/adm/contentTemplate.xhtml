@@ -20,20 +20,11 @@
         if (parent.beginPage) {
             parent.beginPage();
         }
-        djConfig.searchIds = [<ui:insert name="searchIds"/>];
-        djConfig.searchIds.push("fxMessagesTmp");
-
         function getBase() {
             return "#{fxSystemBean.documentBase}";
         }
     </script>
-    <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/dojo/dojo.js"> </script>
     <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/yui/yuiloader/yuiloader-beta-min.js"> </script>
-
-    <script type="text/javascript">
-        dojoInit();
-        dojo.require("dojo.widget.Tooltip");
-    </script>
 
     <ui:insert name="head"/>
 </t:documentHead>

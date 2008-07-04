@@ -15,8 +15,6 @@
         <t:stylesheet path="/adm/css/content.css"/>
         <t:stylesheet path="/adm/css/structureEditor.css"/>
         <script type="text/javascript">
-            dojo.require("dojo.widget.FilteringTable");
-
             function exportType(type) {
                 try {
                     document.getElementById('exportFrame').src = getBase() + "export/type/" + type;
@@ -87,109 +85,110 @@
 
             <ui:fragment rendered="#{typeEditorBean.type.relation}">
                 <fx:fieldSet legend="#{fxMessageBean['TypeEditor.label.editRelations']}">
-                    <table dojoType="FilteringTable" widgetId="relationsTable" enableMultipleSelect="true"
-                                       alternateRows="true" maxSortable="1" class="dojoTable">
-                        <thead>
-                            <tr>
-                                <th class="tblHeader" field="source" dataType="html" align="left">
-                                    #{fxMessageBean['TypeEditor.table.relation.source']}
-                                </th>
-                                <th class="tblHeader" field="dest" dataType="html" align="left">
-                                    #{fxMessageBean['TypeEditor.table.relation.destination']}
-                                </th>
-                                <th class="tblHeader" field="maxSourceUnlimited" dataType="html" align="left">
-                                    #{fxMessageBean['TypeEditor.table.relation.maxSourceUnlimited']}
-                                </th>
-                                <th class="tblHeader" field="maxDest" dataType="html" align="left">
-                                    #{fxMessageBean['TypeEditor.table.relation.maxDestUnlimited']}
-                                </th>
-                                <th class="tblHeader" dataType="html" align="left">
-                                    #{fxMessageBean['TypeEditor.table.mandator.actions']}
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <ui:repeat value="#{typeEditorBean.wrappedRelations}" var="wr">
+                    <adm:sortableTable id="relationsTable">
+                        <table id="relationsTable">
+                            <thead>
                                 <tr>
-                                    <td align="left">
-                                         <t:selectOneListbox size="1" id="sourceType" value="#{wr.sourceId}"
-                                                 disabled="#{not typeEditorBean.editMode}">
-                                            <f:selectItems value="#{fxSelectBean.types}" />
-                                        </t:selectOneListbox>
-                                    </td>
-                                    <td align="left">
-                                         <t:selectOneListbox size="1" id="destType" value="#{wr.destId}"
-                                                 disabled="#{not typeEditorBean.editMode}">
-                                            <f:selectItems value="#{fxSelectBean.types}" />
-                                        </t:selectOneListbox>
-                                    </td>
-                                    <td rowspan="2"><h:selectBooleanCheckbox id="maxSourceUnlimited" value="#{wr.maxSourceUnlimited}"
-                                            onchange="submit();" disabled="#{not typeEditorBean.editMode}"/></td>
-                                    <td rowspan="2">
-                                        <h:selectBooleanCheckbox id="maxDestUnlimited" value="#{wr.maxDestUnlimited}"
-                                            onchange="submit();" disabled="#{not typeEditorBean.editMode}"/>
-                                    </td>
-                                    <td align="left" rowspan="2">
-                                        <ui:fragment rendered="#{typeEditorBean.editMode}">
-                                            <adm:commandButton labelKey="TypeEditor.table.relation.button.remove" location="content"
-                                                            icon="delete"  action="removeScript"  bean="#{typeEditorBean}"
-                                                            id="removeRelationButton_#{wr.sourceId}_#{wr.destId}">
-                                                <f:setPropertyActionListener target="#{typeEditorBean.wrappedRelationFiler}" value="#{wr}"/>
+                                    <th class="tblHeader" field="source" dataType="html" align="left">
+                                        #{fxMessageBean['TypeEditor.table.relation.source']}
+                                    </th>
+                                    <th class="tblHeader" field="dest" dataType="html" align="left">
+                                        #{fxMessageBean['TypeEditor.table.relation.destination']}
+                                    </th>
+                                    <th class="tblHeader" field="maxSourceUnlimited" dataType="html" align="left">
+                                        #{fxMessageBean['TypeEditor.table.relation.maxSourceUnlimited']}
+                                    </th>
+                                    <th class="tblHeader" field="maxDest" dataType="html" align="left">
+                                        #{fxMessageBean['TypeEditor.table.relation.maxDestUnlimited']}
+                                    </th>
+                                    <th class="tblHeader" dataType="html" align="left">
+                                        #{fxMessageBean['TypeEditor.table.mandator.actions']}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <ui:repeat value="#{typeEditorBean.wrappedRelations}" var="wr">
+                                    <tr>
+                                        <td align="left">
+                                             <t:selectOneListbox size="1" id="sourceType" value="#{wr.sourceId}"
+                                                     disabled="#{not typeEditorBean.editMode}">
+                                                <f:selectItems value="#{fxSelectBean.types}" />
+                                            </t:selectOneListbox>
+                                        </td>
+                                        <td align="left">
+                                             <t:selectOneListbox size="1" id="destType" value="#{wr.destId}"
+                                                     disabled="#{not typeEditorBean.editMode}">
+                                                <f:selectItems value="#{fxSelectBean.types}" />
+                                            </t:selectOneListbox>
+                                        </td>
+                                        <td rowspan="2"><h:selectBooleanCheckbox id="maxSourceUnlimited" value="#{wr.maxSourceUnlimited}"
+                                                onchange="submit();" disabled="#{not typeEditorBean.editMode}"/></td>
+                                        <td rowspan="2">
+                                            <h:selectBooleanCheckbox id="maxDestUnlimited" value="#{wr.maxDestUnlimited}"
+                                                onchange="submit();" disabled="#{not typeEditorBean.editMode}"/>
+                                        </td>
+                                        <td align="left" rowspan="2">
+                                            <ui:fragment rendered="#{typeEditorBean.editMode}">
+                                                <adm:commandButton labelKey="TypeEditor.table.relation.button.remove" location="content"
+                                                                icon="delete"  action="removeScript"  bean="#{typeEditorBean}"
+                                                                id="removeRelationButton_#{wr.sourceId}_#{wr.destId}">
+                                                    <f:setPropertyActionListener target="#{typeEditorBean.wrappedRelationFiler}" value="#{wr}"/>
+                                                </adm:commandButton>
+                                            </ui:fragment>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                         <td align="left">
+                                            <h:inputText id="maxSource" value="#{wr.maxSource}" rendered="#{not wr.maxSourceUnlimited}" style="width:40px"
+                                                    disabled="#{not typeEditorBean.editMode}"/>
+                                        </td>
+                                        <td align="left">
+                                            <h:inputText id="maxDest" value="#{wr.maxDest}" rendered="#{not wr.maxDestUnlimited}" style="width:40px"
+                                                    disabled="#{not typeEditorBean.editMode}"/>
+                                        </td>
+                                    </tr>
+                                </ui:repeat>
+                                <ui:fragment rendered="#{typeEditorBean.editMode}">
+                                    <tr>
+                                        <td align="left">
+                                             <t:selectOneListbox size="1" id="addRelationSourceType" value="#{typeEditorBean.relSourceIdFiler}">
+                                                <f:selectItems value="#{fxSelectBean.types}" />
+                                            </t:selectOneListbox>
+                                        </td>
+                                        <td align="left">
+                                             <t:selectOneListbox size="1" id="addRelationDestType" value="#{typeEditorBean.relDestIdFiler}">
+                                                <f:selectItems value="#{fxSelectBean.types}" />
+                                            </t:selectOneListbox>
+                                        </td>
+                                        <td rowspan="2">
+                                            <h:selectBooleanCheckbox id="addRelationMaxSourceUnlimited" value="#{typeEditorBean.relSourceUnlimitedFiler}"
+                                                    onchange="submit();"/>
+                                        </td>
+                                        <td rowspan="2">
+                                             <h:selectBooleanCheckbox id="addRelationMaxDestUnlimited" value="#{typeEditorBean.relDestUnlimitedFiler}"
+                                                    onchange="submit();"/>
+                                        </td>
+                                        <td align="left" rowspan="2">
+                                            <adm:commandButton labelKey="TypeEditor.table.relation.button.add" location="content"
+                                                            icon="new"  action="addRelation"  bean="#{typeEditorBean}"
+                                                            id="addRelationButton">
                                             </adm:commandButton>
-                                        </ui:fragment>
-                                    </td>
-                                </tr>
-                                <tr>
-                                     <td align="left">
-                                        <h:inputText id="maxSource" value="#{wr.maxSource}" rendered="#{not wr.maxSourceUnlimited}" style="width:40px"
-                                                disabled="#{not typeEditorBean.editMode}"/>
-                                    </td>
-                                    <td align="left">
-                                        <h:inputText id="maxDest" value="#{wr.maxDest}" rendered="#{not wr.maxDestUnlimited}" style="width:40px"
-                                                disabled="#{not typeEditorBean.editMode}"/>
-                                    </td>
-                                </tr>
-                            </ui:repeat>
-                            <ui:fragment rendered="#{typeEditorBean.editMode}">
-                                <tr>
-                                    <td align="left">
-                                         <t:selectOneListbox size="1" id="addRelationSourceType" value="#{typeEditorBean.relSourceIdFiler}">
-                                            <f:selectItems value="#{fxSelectBean.types}" />
-                                        </t:selectOneListbox>
-                                    </td>
-                                    <td align="left">
-                                         <t:selectOneListbox size="1" id="addRelationDestType" value="#{typeEditorBean.relDestIdFiler}">
-                                            <f:selectItems value="#{fxSelectBean.types}" />
-                                        </t:selectOneListbox>
-                                    </td>
-                                    <td rowspan="2">
-                                        <h:selectBooleanCheckbox id="addRelationMaxSourceUnlimited" value="#{typeEditorBean.relSourceUnlimitedFiler}"
-                                                onchange="submit();"/>
-                                    </td>
-                                    <td rowspan="2">
-                                         <h:selectBooleanCheckbox id="addRelationMaxDestUnlimited" value="#{typeEditorBean.relDestUnlimitedFiler}"
-                                                onchange="submit();"/>
-                                    </td>
-                                    <td align="left" rowspan="2">
-                                        <adm:commandButton labelKey="TypeEditor.table.relation.button.add" location="content"
-                                                        icon="new"  action="addRelation"  bean="#{typeEditorBean}"
-                                                        id="addRelationButton">
-                                        </adm:commandButton>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td align="left">
-                                        <h:inputText id="addRelationMaxSource" value="#{typeEditorBean.relMaxSourceFiler}"
-                                                     rendered="#{not typeEditorBean.relSourceUnlimitedFiler}" style="width:40px"/>
-                                    </td>
-                                     <td align="left">
-                                        <h:inputText id="addRelationMaxDest" value="#{typeEditorBean.relMaxDestFiler}"
-                                                     rendered="#{not typeEditorBean.relDestUnlimitedFiler}" style="width:40px"/>
-                                    </td>
-                                </tr>
-                           </ui:fragment>
-                        </tbody>
-                    </table>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td align="left">
+                                            <h:inputText id="addRelationMaxSource" value="#{typeEditorBean.relMaxSourceFiler}"
+                                                         rendered="#{not typeEditorBean.relSourceUnlimitedFiler}" style="width:40px"/>
+                                        </td>
+                                         <td align="left">
+                                            <h:inputText id="addRelationMaxDest" value="#{typeEditorBean.relMaxDestFiler}"
+                                                         rendered="#{not typeEditorBean.relDestUnlimitedFiler}" style="width:40px"/>
+                                        </td>
+                                    </tr>
+                               </ui:fragment>
+                            </tbody>
+                        </table>
+                    </adm:sortableTable>
                 </fx:fieldSet>
 
                 <fx:formRow labelKey="TypeEditor.label.maxRelSource" id="maxRelSource">
@@ -256,8 +255,7 @@
             
             <ui:fragment rendered="#{not typeEditorBean.type.new and not typeEditorBean.type.relation}">
                 <fx:fieldSet legend="#{fxMessageBean['TypeEditor.label.referencingRelationTypes']}">
-                 <table dojoType="SortableTable" widgetId="referencingPropertyAssignments" enableMultipleSelect="true"
-                                   alternateRows="true" maxSortable="1" class="dojoTable">
+                 <table class="dojoTable">
                     <tbody>
                         <ui:repeat value="#{typeEditorBean.referencingRelations}" var="r">
                             <h:commandLink id="gotoPropertyRelationButton_#{r.id}"

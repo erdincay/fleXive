@@ -14,9 +14,6 @@
       <ui:define name="head">
         <t:stylesheet path="/adm/css/content.css"/>
         <t:stylesheet path="/adm/css/structureEditor.css"/>
-        <script type="text/javascript">
-           dojo.require("dojo.widget.FilteringTable");
-        </script>
       </ui:define>
 
     <ui:define name="body">
@@ -52,84 +49,19 @@
             <fx:fieldSet legend="#{fxMessageBean['GroupEditor.label.options']}">
                 <fx:fieldSet legend="#{fxMessageBean['GroupEditor.label.groupOptions']}">
 
-                    <table dojoType="FilteringTable" widgetId="structureOptionsTable" enableMultipleSelect="true"
-                                       alternateRows="true" maxSortable="1" class="dojoTable">
-                        <thead>
-                            <tr>
-                                <!--th class="tblHeader" field="id" dataType="String" sort="asc">Id</th-->
-                                <th class="tblHeader" field="key" dataType="String" align="left">
-                                    #{fxMessageBean['GroupEditor.table.key']}
-                                </th>
-                                <th class="tblHeader" field="value" dataType="String" align="left">
-                                    #{fxMessageBean['GroupEditor.table.value']}
-                                </th>
-                                <th class="tblHeader" field="overridable" dataType="html" align="left">
-                                    #{fxMessageBean['GroupEditor.table.overridable']}
-                                </th>
-                                <ui:fragment rendered="#{groupEditorBean.editMode}">
-                                    <th class="tblHeader" dataType="html" align="left">
-                                        #{fxMessageBean['GroupEditor.table.actions']}
-                                    </th>
-                                </ui:fragment>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <ui:repeat value="#{groupEditorBean.optionWrapper.structureOptions}" var="option">
-                                <tr>
-                                    <h:panelGroup rendered="#{groupEditorBean.optionWrapper.isStructureOptionValidMap[option.key]}">
-                                        <td align="left"><h:inputText value="#{option.key}" style="color:green" disabled="#{not groupEditorBean.editMode}"/></td>
-                                        <td align="left"><h:inputText value="#{option.value}" style="color:green" disabled="#{not groupEditorBean.editMode}"/></td>
-                                        <td align="left"><h:selectBooleanCheckbox value="#{option.overridable}"
-                                                onchange="submit();" style="color:green" disabled="#{not groupEditorBean.editMode}"/>
-                                        </td>
-                                    </h:panelGroup>
-                                    <h:panelGroup rendered="#{not groupEditorBean.optionWrapper.isStructureOptionValidMap[option.key]}">
-                                        <td align="left"><h:inputText value="#{option.key}" style="color:red" disabled="#{not groupEditorBean.editMode}"/></td>
-                                        <td align="left"><h:inputText value="#{option.value}" style="color:red" disabled="#{not groupEditorBean.editMode}"/></td>
-                                        <td align="left"><h:selectBooleanCheckbox value="#{option.overridable}"
-                                                onchange="submit();" style="color:red" disabled="#{not groupEditorBean.editMode}"/>
-                                        </td>
-                                    </h:panelGroup>
-                                    <ui:fragment rendered="#{groupEditorBean.editMode}">
-                                        <td align="left">
-                                            <adm:commandButton labelKey="GroupEditor.table.button.delete" location="content"
-                                                            icon="delete"  action="deleteGroupOption"  bean="#{groupEditorBean}"
-                                                            id="deleteGroupOptionButton_#{option.id}" confirmKey="GroupEditor.message.deleteOption">
-                                                <f:setPropertyActionListener target="#{groupEditorBean.optionFiler}" value="#{option}"/>
-                                            </adm:commandButton>
-                                        </td>
-                                    </ui:fragment>
-                                </tr>
-                            </ui:repeat>
-                            <ui:fragment rendered="#{groupEditorBean.editMode}">
-                                 <tr>
-                                  <td align="left"><h:inputText value="#{groupEditorBean.groupOptionKey}" /></td>
-                                  <td align="left"><h:inputText value="#{groupEditorBean.groupOptionValue}" /></td>
-                                  <td align="left"><h:selectBooleanCheckbox value="#{groupEditorBean.groupOptionOverridable}"/></td>
-                                  <td align="left">
-                                    <adm:commandButton labelKey="GroupEditor.table.button.add" location="content"
-                                        icon="new"  action="addGroupOption"  bean="#{groupEditorBean}"
-                                        id="addGroupOptionButton">
-                                    </adm:commandButton>
-                                 </td>
-                                </tr>
-                            </ui:fragment>
-                        </tbody>
-                    </table>
-                </fx:fieldSet>
-
-                <ui:fragment rendered="#{not groupEditorBean.group.new}">
-                    <fx:fieldSet legend="#{fxMessageBean['GroupEditor.label.groupAssignmentOptions']}">
-
-                        <table dojoType="FilteringTable" widgetId="groupAssignmentOptionsTable" enableMultipleSelect="true"
-                                           alternateRows="true" maxSortable="1" class="dojoTable">
+                    <adm:sortableTable id="optionsTable">
+                        <table id="optionsTable">
                             <thead>
                                 <tr>
+                                    <!--th class="tblHeader" field="id" dataType="String" sort="asc">Id</th-->
                                     <th class="tblHeader" field="key" dataType="String" align="left">
                                         #{fxMessageBean['GroupEditor.table.key']}
                                     </th>
                                     <th class="tblHeader" field="value" dataType="String" align="left">
                                         #{fxMessageBean['GroupEditor.table.value']}
+                                    </th>
+                                    <th class="tblHeader" field="overridable" dataType="html" align="left">
+                                        #{fxMessageBean['GroupEditor.table.overridable']}
                                     </th>
                                     <ui:fragment rendered="#{groupEditorBean.editMode}">
                                         <th class="tblHeader" dataType="html" align="left">
@@ -139,54 +71,121 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <ui:repeat value="#{groupEditorBean.optionWrapper.assignmentOptions}" var="option">
+                                <ui:repeat value="#{groupEditorBean.optionWrapper.structureOptions}" var="option">
                                     <tr>
-                                        <h:panelGroup rendered="#{groupEditorBean.optionWrapper.isAssignmentOptionValidMap[option.key]
-                                                and groupEditorBean.optionWrapper.isAssignmentOptionOverridableMap[option.key]}">
+                                        <h:panelGroup rendered="#{groupEditorBean.optionWrapper.isStructureOptionValidMap[option.key]}">
                                             <td align="left"><h:inputText value="#{option.key}" style="color:green" disabled="#{not groupEditorBean.editMode}"/></td>
                                             <td align="left"><h:inputText value="#{option.value}" style="color:green" disabled="#{not groupEditorBean.editMode}"/></td>
+                                            <td align="left"><h:selectBooleanCheckbox value="#{option.overridable}"
+                                                    onchange="submit();" style="color:green" disabled="#{not groupEditorBean.editMode}"/>
+                                            </td>
                                         </h:panelGroup>
-                                        <h:panelGroup rendered="#{not groupEditorBean.optionWrapper.isAssignmentOptionValidMap[option.key]
-                                                and groupEditorBean.optionWrapper.isAssignmentOptionOverridableMap[option.key]}">
+                                        <h:panelGroup rendered="#{not groupEditorBean.optionWrapper.isStructureOptionValidMap[option.key]}">
                                             <td align="left"><h:inputText value="#{option.key}" style="color:red" disabled="#{not groupEditorBean.editMode}"/></td>
                                             <td align="left"><h:inputText value="#{option.value}" style="color:red" disabled="#{not groupEditorBean.editMode}"/></td>
+                                            <td align="left"><h:selectBooleanCheckbox value="#{option.overridable}"
+                                                    onchange="submit();" style="color:red" disabled="#{not groupEditorBean.editMode}"/>
+                                            </td>
                                         </h:panelGroup>
-                                        <h:panelGroup rendered="#{groupEditorBean.optionWrapper.isAssignmentOptionValidMap[option.key]
-                                                and not groupEditorBean.optionWrapper.isAssignmentOptionOverridableMap[option.key]}">
-                                            <td align="left"><h:inputText value="#{option.key}" style="color:green; background-color:lightgray" disabled="#{not groupEditorBean.editMode}"/></td>
-                                            <td align="left"><h:inputText value="#{option.value}" style="color:green; background-color:lightgray" disabled="#{not groupEditorBean.editMode}"/></td>
-                                        </h:panelGroup>
-                                        <h:panelGroup rendered="#{not groupEditorBean.optionWrapper.isAssignmentOptionValidMap[option.key]
-                                                and not groupEditorBean.optionWrapper.isAssignmentOptionOverridableMap[option.key]}">
-                                            <td align="left"><h:inputText value="#{option.key}" style="color:red; background-color:lightgray" disabled="#{not groupEditorBean.editMode}"/></td>
-                                            <td align="left"><h:inputText value="#{option.value}" style="color:red; background-color:lightgray" disabled="#{not groupEditorBean.editMode}"/></td>
-                                        </h:panelGroup>
-                                         <ui:fragment rendered="#{groupEditorBean.editMode}"> 
-                                             <td align="left">
+                                        <ui:fragment rendered="#{groupEditorBean.editMode}">
+                                            <td align="left">
                                                 <adm:commandButton labelKey="GroupEditor.table.button.delete" location="content"
-                                                                icon="delete"  action="deleteAssignmentOption"  bean="#{groupEditorBean}"
-                                                                id="deleteAssignmentOptionButton_#{option.id}" confirmKey="GroupEditor.message.deleteOption">
+                                                                icon="delete"  action="deleteGroupOption"  bean="#{groupEditorBean}"
+                                                                id="deleteGroupOptionButton_#{option.id}" confirmKey="GroupEditor.message.deleteOption">
                                                     <f:setPropertyActionListener target="#{groupEditorBean.optionFiler}" value="#{option}"/>
                                                 </adm:commandButton>
                                             </td>
                                         </ui:fragment>
-
                                     </tr>
                                 </ui:repeat>
                                 <ui:fragment rendered="#{groupEditorBean.editMode}">
-                                    <tr>
-                                      <td align="left"><h:inputText value="#{groupEditorBean.assignmentOptionKey}"/></td>
-                                      <td align="left"><h:inputText value="#{groupEditorBean.assignmentOptionValue}"/></td>
+                                     <tr>
+                                      <td align="left"><h:inputText value="#{groupEditorBean.groupOptionKey}" /></td>
+                                      <td align="left"><h:inputText value="#{groupEditorBean.groupOptionValue}" /></td>
+                                      <td align="left"><h:selectBooleanCheckbox value="#{groupEditorBean.groupOptionOverridable}"/></td>
                                       <td align="left">
                                         <adm:commandButton labelKey="GroupEditor.table.button.add" location="content"
-                                            icon="new"  action="addAssignmentOption"  bean="#{groupEditorBean}"
-                                            id="addAssignmentOptionButton">
+                                            icon="new"  action="addGroupOption"  bean="#{groupEditorBean}"
+                                            id="addGroupOptionButton">
                                         </adm:commandButton>
                                      </td>
                                     </tr>
                                 </ui:fragment>
                             </tbody>
                         </table>
+                    </adm:sortableTable>
+                </fx:fieldSet>
+
+                <ui:fragment rendered="#{not groupEditorBean.group.new}">
+                    <fx:fieldSet legend="#{fxMessageBean['GroupEditor.label.groupAssignmentOptions']}">
+
+                        <adm:sortableTable id="optionsTable2">
+                            <table id="optionsTable2">
+                                <thead>
+                                    <tr>
+                                        <th class="tblHeader" field="key" dataType="String" align="left">
+                                            #{fxMessageBean['GroupEditor.table.key']}
+                                        </th>
+                                        <th class="tblHeader" field="value" dataType="String" align="left">
+                                            #{fxMessageBean['GroupEditor.table.value']}
+                                        </th>
+                                        <ui:fragment rendered="#{groupEditorBean.editMode}">
+                                            <th class="tblHeader" dataType="html" align="left">
+                                                #{fxMessageBean['GroupEditor.table.actions']}
+                                            </th>
+                                        </ui:fragment>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <ui:repeat value="#{groupEditorBean.optionWrapper.assignmentOptions}" var="option">
+                                        <tr>
+                                            <h:panelGroup rendered="#{groupEditorBean.optionWrapper.isAssignmentOptionValidMap[option.key]
+                                                    and groupEditorBean.optionWrapper.isAssignmentOptionOverridableMap[option.key]}">
+                                                <td align="left"><h:inputText value="#{option.key}" style="color:green" disabled="#{not groupEditorBean.editMode}"/></td>
+                                                <td align="left"><h:inputText value="#{option.value}" style="color:green" disabled="#{not groupEditorBean.editMode}"/></td>
+                                            </h:panelGroup>
+                                            <h:panelGroup rendered="#{not groupEditorBean.optionWrapper.isAssignmentOptionValidMap[option.key]
+                                                    and groupEditorBean.optionWrapper.isAssignmentOptionOverridableMap[option.key]}">
+                                                <td align="left"><h:inputText value="#{option.key}" style="color:red" disabled="#{not groupEditorBean.editMode}"/></td>
+                                                <td align="left"><h:inputText value="#{option.value}" style="color:red" disabled="#{not groupEditorBean.editMode}"/></td>
+                                            </h:panelGroup>
+                                            <h:panelGroup rendered="#{groupEditorBean.optionWrapper.isAssignmentOptionValidMap[option.key]
+                                                    and not groupEditorBean.optionWrapper.isAssignmentOptionOverridableMap[option.key]}">
+                                                <td align="left"><h:inputText value="#{option.key}" style="color:green; background-color:lightgray" disabled="#{not groupEditorBean.editMode}"/></td>
+                                                <td align="left"><h:inputText value="#{option.value}" style="color:green; background-color:lightgray" disabled="#{not groupEditorBean.editMode}"/></td>
+                                            </h:panelGroup>
+                                            <h:panelGroup rendered="#{not groupEditorBean.optionWrapper.isAssignmentOptionValidMap[option.key]
+                                                    and not groupEditorBean.optionWrapper.isAssignmentOptionOverridableMap[option.key]}">
+                                                <td align="left"><h:inputText value="#{option.key}" style="color:red; background-color:lightgray" disabled="#{not groupEditorBean.editMode}"/></td>
+                                                <td align="left"><h:inputText value="#{option.value}" style="color:red; background-color:lightgray" disabled="#{not groupEditorBean.editMode}"/></td>
+                                            </h:panelGroup>
+                                             <ui:fragment rendered="#{groupEditorBean.editMode}">
+                                                 <td align="left">
+                                                    <adm:commandButton labelKey="GroupEditor.table.button.delete" location="content"
+                                                                    icon="delete"  action="deleteAssignmentOption"  bean="#{groupEditorBean}"
+                                                                    id="deleteAssignmentOptionButton_#{option.id}" confirmKey="GroupEditor.message.deleteOption">
+                                                        <f:setPropertyActionListener target="#{groupEditorBean.optionFiler}" value="#{option}"/>
+                                                    </adm:commandButton>
+                                                </td>
+                                            </ui:fragment>
+
+                                        </tr>
+                                    </ui:repeat>
+                                    <ui:fragment rendered="#{groupEditorBean.editMode}">
+                                        <tr>
+                                          <td align="left"><h:inputText value="#{groupEditorBean.assignmentOptionKey}"/></td>
+                                          <td align="left"><h:inputText value="#{groupEditorBean.assignmentOptionValue}"/></td>
+                                          <td align="left">
+                                            <adm:commandButton labelKey="GroupEditor.table.button.add" location="content"
+                                                icon="new"  action="addAssignmentOption"  bean="#{groupEditorBean}"
+                                                id="addAssignmentOptionButton">
+                                            </adm:commandButton>
+                                         </td>
+                                        </tr>
+                                    </ui:fragment>
+                                </tbody>
+                            </table>
+                        </adm:sortableTable>
                     </fx:fieldSet>
                 </ui:fragment>
 

@@ -392,6 +392,9 @@ public class SearchResultBean implements ActionBean, Serializable {
      * @throws java.io.IOException  if the JSON output could not be written
      */
     public static String getJsonResult(Object key, String viewType) throws IOException {
+        if (key == null) {
+            return "{}";
+        }
         final ResultViewType resultViewType = StringUtils.isNotBlank(viewType)
                 ? ResultViewType.valueOf(viewType.toUpperCase())
                 : ResultViewType.LIST;

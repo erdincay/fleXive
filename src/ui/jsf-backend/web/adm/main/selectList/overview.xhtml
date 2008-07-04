@@ -12,62 +12,54 @@
 
 <ui:composition template="/adm/contentTemplate.xhtml">
 
-    <ui:define name="head">
-        <script type="text/javascript">
-            dojo.require("dojo.widget.FilteringTable");
-        </script>
-    </ui:define>
-
-    <ui:define name="searchIds">"frm"</ui:define>
-
     <ui:define name="body">
         <h:form id="frm" enctype="multipart/form-data">
            <adm:tab label="#{fxMessageBean['SelectList.tab.overview']}" active="true" id="tab1"/>
 
-            <table dojoType="FilteringTable" widgetId="testTable" enableMultipleSelect="true"
-                   alternateRows="true" maxSortable="1"
-                    class="dojoTable">
+            <adm:sortableTable id="table">
+                <table id="table">
 
-                <thead>
-                    <tr>
-                        <th class="tblHeader" dataType="String" field="name" align="left">
-                            #{fxMessageBean["SelectList.table.name"]}
-                        </th>
-                        <th class="tblHeader" dataType="String" field="label" align="left">
-                            #{fxMessageBean["SelectList.table.label"]}
-                        </th>
-                        <th class="tblHeader" dataType="String" field="description" align="left">
-                            #{fxMessageBean["SelectList.table.description"]}
-                        </th>
-                        <th class="tblHeader" dataType="html" field="actions" align="left">
-                            #{fxMessageBean["SelectList.table.actions"]}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <c:forEach var="list" items="#{selectListBean.selectLists}">
-                        <tr value="#{list.id}">
-                            <td  align="left">#{list.name}</td>
-                            <td  align="left"><fx:fxValueInput readOnly="true" value="#{list.label}"/></td>
-                            <td  align="left"><fx:fxValueInput readOnly="true" value="#{list.description}"/></td>
-                            <td  align="left">
-                                <ui:fragment rendered="#{fxSystemBean.isInRole['SelectListEditor'] or selectListBean.mayCreateItems[list.id]}">
-                                    <adm:commandIcon labelKey="SelectList.button.edit" location="content"
-                                                        icon="edit"  bean="#{selectListBean}" action="initEditing" id="editButton_#{list.id}">
-                                            <f:setPropertyActionListener target="#{selectListBean.selectListId}" value="#{list.id}"/>
-                                    </adm:commandIcon>
-                                </ui:fragment>
-                                <ui:fragment rendered="#{fxSystemBean.isInRole['SelectListEditor']}">
-                                    <adm:commandIcon labelKey="SelectList.button.delete" location="content"
-                                                        icon="delete"  bean="#{selectListBean}" action="deleteSelectList" id="deleteButton_#{list.id}">
-                                            <f:setPropertyActionListener target="#{selectListBean.selectListId}" value="#{list.id}"/>
-                                    </adm:commandIcon>
-                                </ui:fragment>
-                            </td>
+                    <thead>
+                        <tr>
+                            <th class="tblHeader" dataType="String" field="name" align="left">
+                                #{fxMessageBean["SelectList.table.name"]}
+                            </th>
+                            <th class="tblHeader" dataType="String" field="label" align="left">
+                                #{fxMessageBean["SelectList.table.label"]}
+                            </th>
+                            <th class="tblHeader" dataType="String" field="description" align="left">
+                                #{fxMessageBean["SelectList.table.description"]}
+                            </th>
+                            <th class="tblHeader" dataType="html" field="actions" align="left">
+                                #{fxMessageBean["SelectList.table.actions"]}
+                            </th>
                         </tr>
-                    </c:forEach>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <c:forEach var="list" items="#{selectListBean.selectLists}">
+                            <tr value="#{list.id}">
+                                <td  align="left">#{list.name}</td>
+                                <td  align="left"><fx:fxValueInput readOnly="true" value="#{list.label}"/></td>
+                                <td  align="left"><fx:fxValueInput readOnly="true" value="#{list.description}"/></td>
+                                <td  align="left">
+                                    <ui:fragment rendered="#{fxSystemBean.isInRole['SelectListEditor'] or selectListBean.mayCreateItems[list.id]}">
+                                        <adm:commandIcon labelKey="SelectList.button.edit" location="content"
+                                                            icon="edit"  bean="#{selectListBean}" action="initEditing" id="editButton_#{list.id}">
+                                                <f:setPropertyActionListener target="#{selectListBean.selectListId}" value="#{list.id}"/>
+                                        </adm:commandIcon>
+                                    </ui:fragment>
+                                    <ui:fragment rendered="#{fxSystemBean.isInRole['SelectListEditor']}">
+                                        <adm:commandIcon labelKey="SelectList.button.delete" location="content"
+                                                            icon="delete"  bean="#{selectListBean}" action="deleteSelectList" id="deleteButton_#{list.id}">
+                                                <f:setPropertyActionListener target="#{selectListBean.selectListId}" value="#{list.id}"/>
+                                        </adm:commandIcon>
+                                    </ui:fragment>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
+            </adm:sortableTable>
             <br/>
             <ui:fragment rendered="#{fxSystemBean.isInRole['SelectListEditor']}">
                 <adm:commandButton labelKey="SelectList.button.selectList.createNew" location="both"

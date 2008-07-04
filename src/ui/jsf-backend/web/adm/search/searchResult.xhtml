@@ -19,8 +19,6 @@
         <script type="text/javascript" src="#{weblet:url('com.flexive.faces.weblets','/js/lytebox.js')}"/>
     </ui:define>
 
-    <ui:define name="searchIds">"searchResults_screenviewContainer"</ui:define>
-
     <ui:define name="body">
         <c:if test="#{empty fxSearchResultBean.parseRequestParameters}"> </c:if>
         <a4j:form id="frm">
@@ -46,16 +44,7 @@
                 </h:selectOneListbox>
 
                 <a4j:outputPanel id="refreshResults">
-                    <script type="text/javascript">
-                    <!--
-                        if (window.resultTable != null) {
-                            // refresh only if datatable is already available - also prevents refresh during initial load
-                            resultTable.deleteRows(0, 9999999);
-                            var result = #{fx:getJsonResult(fxSearchResultBean.result, null)};
-                            resultTable._reset(result);
-                        }
-                    //-->
-                    </script>
+                    <fx:resultTableUpdater var="resultTable" value="#{fxSearchResultBean.result}"/>
                 </a4j:outputPanel>
 
 

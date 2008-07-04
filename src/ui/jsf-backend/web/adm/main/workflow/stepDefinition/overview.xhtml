@@ -11,64 +11,56 @@
 
 <ui:composition template="/adm/contentTemplate.xhtml">
 
-    <ui:define name="head">
-        <script type="text/javascript">
-            dojo.require("dojo.widget.FilteringTable");
-        </script>
-    </ui:define>
-
-	<ui:define name="searchIds">"frm"</ui:define>
-
     <ui:define name="body">
         <h:form id="frm">
             <adm:tab label="#{fxMessageBean['StepDefinition.tabtitle.overview']}" active="true" id="tab1"/>
 
-            <table dojoType="FilteringTable" widgetId="testTable" enableMultipleSelect="true"
-                   alternateRows="true" maxSortable="1"
-                    class="dojoTable">
+            <adm:sortableTable id="table">
+                <table id="table">
 
-                <thead>
-                    <tr>
-                        <th class="tblHeader" dataType="String">   
-                            #{fxMessageBean["StepDefinition.field.name"]}
-                        </th>
-                        <th class="tblHeader" dataType="String">
-                            #{fxMessageBean["StepDefinition.field.label"]}
-                        </th>
-                        <th class="tblHeader" dataType="String">
-                            #{fxMessageBean["StepDefinition.field.unique"]}
-                        </th>
-                        <th class="tblHeader" dataType="html">
-                            &nbsp;
-                        </th>
-                        <!-- th dataType="html"></th -->
-                    </tr>
-                </thead>
-                <tbody>
-                    <ui:repeat var="stepDefinition" value="#{stepDefinitionBean.list}">
-                        <tr value="#{stepDefinition.id}">
-                            <td class="tblColumn">#{stepDefinition.name}</td>
-                            <td class="tblColumn">#{stepDefinition.label}</td>
-                            <td class="tblColumn">
-                                <ui:fragment rendered="#{stepDefinition.uniqueTargetId != -1}">
-                                    #{fxMapBean.stepDefinitions[stepDefinition.uniqueTargetId].label}
-                                </ui:fragment>
-                                <ui:fragment rendered="#{stepDefinition.uniqueTargetId == -1}">-</ui:fragment> 
-                            </td>
-                            <td class="tblColumn">
-                                <adm:commandIcon labelKey="StepDefinition.button.edit" location="content"
-                                                icon="edit"  bean="#{stepDefinitionBean}" action="edit" id="editButton_#{stepDefinition.id}">
-                                    <f:setPropertyActionListener target="#{stepDefinitionBean.stepDefinitionId}" value="#{stepDefinition.id}"/>
-                                </adm:commandIcon>
-                                <adm:commandIcon labelKey="StepDefinition.button.delete" location="content"
-                                                icon="delete"  bean="#{stepDefinitionBean}" action="delete" id="deleteButton_#{stepDefinition.id}">
-                                    <f:setPropertyActionListener target="#{stepDefinitionBean.stepDefinitionId}" value="#{stepDefinition.id}"/>
-                                </adm:commandIcon>
-                            </td>
+                    <thead>
+                        <tr>
+                            <th class="tblHeader" dataType="String">
+                                #{fxMessageBean["StepDefinition.field.name"]}
+                            </th>
+                            <th class="tblHeader" dataType="String">
+                                #{fxMessageBean["StepDefinition.field.label"]}
+                            </th>
+                            <th class="tblHeader" dataType="String">
+                                #{fxMessageBean["StepDefinition.field.unique"]}
+                            </th>
+                            <th class="tblHeader" dataType="html">
+                                &nbsp;
+                            </th>
+                            <!-- th dataType="html"></th -->
                         </tr>
-                    </ui:repeat>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <ui:repeat var="stepDefinition" value="#{stepDefinitionBean.list}">
+                            <tr value="#{stepDefinition.id}">
+                                <td class="tblColumn">#{stepDefinition.name}</td>
+                                <td class="tblColumn">#{stepDefinition.label}</td>
+                                <td class="tblColumn">
+                                    <ui:fragment rendered="#{stepDefinition.uniqueTargetId != -1}">
+                                        #{fxMapBean.stepDefinitions[stepDefinition.uniqueTargetId].label}
+                                    </ui:fragment>
+                                    <ui:fragment rendered="#{stepDefinition.uniqueTargetId == -1}">-</ui:fragment>
+                                </td>
+                                <td class="tblColumn">
+                                    <adm:commandIcon labelKey="StepDefinition.button.edit" location="content"
+                                                    icon="edit"  bean="#{stepDefinitionBean}" action="edit" id="editButton_#{stepDefinition.id}">
+                                        <f:setPropertyActionListener target="#{stepDefinitionBean.stepDefinitionId}" value="#{stepDefinition.id}"/>
+                                    </adm:commandIcon>
+                                    <adm:commandIcon labelKey="StepDefinition.button.delete" location="content"
+                                                    icon="delete"  bean="#{stepDefinitionBean}" action="delete" id="deleteButton_#{stepDefinition.id}">
+                                        <f:setPropertyActionListener target="#{stepDefinitionBean.stepDefinitionId}" value="#{stepDefinition.id}"/>
+                                    </adm:commandIcon>
+                                </td>
+                            </tr>
+                        </ui:repeat>
+                    </tbody>
+                </table>
+            </adm:sortableTable>
 
             <adm:commandButton labelKey="StepDefinition.button.create" location="toolbar"
                 icon="new"  action="stepDefinitionCreate" id="createToolbarButton"/>

@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:t="http://myfaces.apache.org/tomahawk">
+
+Enhances a HTML table with client-side sorting using the YUI DataTable widget.
+
+This is a replacement for the old Dojo sortable tables, thus old dojo-style markup
+is supported (e.g. "noSort" and "dataType" header attributes). Simply wrap the old
+Dojo table with this widget.
+
+Parameters:
+    id - table ID (ID of the contained table element)
+
+<ui:composition>
+
+    <div id="#{id}_container">
+        <ui:insert/>
+    </div>
+
+    <script type="text/javascript">
+    <!--
+        document.getElementById("#{id}_container").style.display = "none";
+        flexive.yui.requireComponent("datatable");
+        flexive.yui.onYahooLoaded(function() {
+            var htmlTable = YAHOO.util.Dom.get("#{id}");
+            var columns = [];
+            var dsColumns = []
+            for (var i = 0; i < htmlTable.tHead.rows[0].cells.length; i++) {
+                var th = htmlTable.tHead.rows[0].cells[i];
+                columns.push({
+                    key: "c" + i,
+                    label: th.innerHTML,
+                    sortable: th.getAttribute("noSort") == null
+                });
+                dsColumns.push({ key: "c" + i });
+            }
+            var source = new YAHOO.util.DataSource(htmlTable);
+            source.responseType = YAHOO.util.DataSource.TYPE_HTMLTABLE;
+            source.responseSchema = {
+                fields: dsColumns
+            };
+
+            var dataTable = new YAHOO.widget.DataTable("#{id}_container", columns, source);
+            dataTable.subscribe("rowMouseoverEvent", dataTable.onEventHighlightRow);
+            dataTable.subscribe("rowMouseoutEvent", dataTable.onEventUnhighlightRow);
+            document.getElementById("#{id}_container").style.display = "block";
+        })
+    //-->
+    </script>
+
+</ui:composition>
+
+
+</html>

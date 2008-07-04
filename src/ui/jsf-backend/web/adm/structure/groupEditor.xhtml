@@ -14,9 +14,6 @@
       <ui:define name="head">
         <t:stylesheet path="/adm/css/content.css"/>
         <t:stylesheet path="/adm/css/structureEditor.css"/>
-        <script type="text/javascript">
-           dojo.require("dojo.widget.FilteringTable");
-        </script>
       </ui:define>
 
     <ui:define name="body">
@@ -80,8 +77,7 @@
             </fx:formRow>
 
             <fx:fieldSet legend="#{fxMessageBean['GroupEditor.label.referencingGroupAssignments']}">
-                 <table dojoType="SortableTable" widgetId="referencingGroupAssignments" enableMultipleSelect="true"
-                                   alternateRows="true" maxSortable="1" class="dojoTable">
+                 <table class="dojoTable">
                     <tbody>
                         <ui:repeat value="#{groupEditorBean.referencingGroupAssignments}" var="ga">
                             <h:commandLink id="gotoGroupAssignmentButton_#{pa.id}" action="#{groupEditorBean.showGroupAssignmentEditor}"

@@ -12,12 +12,6 @@
 
 <ui:composition template="/adm/contentTemplate.xhtml">
 
-    <ui:define name="head">
-        <script type="text/javascript">
-            dojo.require("dojo.widget.SortableTable");
-        </script>
-    </ui:define>
-
     <ui:define name="body">
         <c:set var="wfBtnStyle" value="border:0;margin-left:3px;" />
         <a4j:keepAlive beanName="workflowBean"/>

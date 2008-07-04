@@ -12,79 +12,72 @@
 <body>
 
 <ui:composition template="/adm/contentTemplate.xhtml">
-    <ui:define name="head">
-        <script type="text/javascript">
-            dojo.require("dojo.widget.FilteringTable");
-        </script>
-    </ui:define>
-
-    <ui:define name="searchIds">"listForm"</ui:define>
-
     <ui:define name="body">
         <h:form id="form">
             <adm:tab label="#{fxMessageBean['Script.tabtitle.runOnceInfo']}" active="true" id="tab1"/>
 
-            <table dojoType="FilteringTable" widgetId="testTable" enableMultipleSelect="true"
-                   alternateRows="true" maxSortable="1" class="dojoTable">
-                <thead>
-                    <tr>
-                        <th class="tblHeader" field="success" dataType="String" align="left">
-                            #{fxMessageBean['Script.field.execution']}
-                        </th>
-                        <th class="tblHeader" field="name" dataType="String" align="left">
-                            #{fxMessageBean['Script.field.name']}
-                        </th>
-                        <th class="tblHeader" field="drop" dataType="String" align="left">
-                            #{fxMessageBean['Script.field.drop']}
-                        </th>
-                        <th class="tblHeader" field="duration" dataType="String" align="left">
-                            #{fxMessageBean['Script.field.duration']}
-                        </th>
-                        <th class="tblHeader" field="errorMessage" dataType="html" align="left">
-                            #{fxMessageBean['Script.field.errorMessage']}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <ui:repeat value="#{scriptBean.runOnceInformation}" var="info">
-                        <tr value="#{info.runInfo.name}">
-                            <td align="left"><h:outputText style="#{info.runInfo.successful ? 'color:green;' : 'color:red;'}" 
-                                   value="#{info.runInfo.successful ? fxMessageBean['Script.field.execution.ok'] : fxMessageBean['Script.field.execution.failed']}" /></td>
-                            <td align="left"><h:outputText value="#{info.runInfo.name}" /></td>
-                            <td align="left"><h:outputText value="#{info.runInfo.drop}" /></td>
-                            <td align="left"><h:outputText value="#{info.runInfo.endTime - info.runInfo.startTime}" /></td>
-                            <td align="left">
-                                <rich:modalPanel id="panel" height="450" width="650" resizeable="false">
-                                    <f:facet name="header">
-                                        <h:panelGroup>
-                                            <h:outputText value="#{fxMessageBean['Script.field.errorMessage']}"/>
-                                        </h:panelGroup>
-                                    </f:facet>
-                                    <f:facet name="controls">
-                                       <h:panelGroup>
-                                            <h:graphicImage value="/adm/images/toolbar/close.png" style="cursor:pointer" id="closeIcon"/>
-                                            <rich:componentControl for="panel" attachTo="closeIcon" operation="hide" event="onclick"/>
-                                        </h:panelGroup>
-                                    </f:facet>
-                                    <div class="modalPanel" style="overflow:scroll !important;height:410px;width:630px;" >
-                                        <h:outputLink value="javascript:void(0)" id="closeLink">
-                                            #{fxMessageBean['Script.dialog.close']}
-                                            <rich:componentControl for="panel" attachTo="closeLink" operation="hide" event="onclick"/>
-                                        </h:outputLink>
-                                        <br/>
-                                        <br/>
-                                        <h:outputText value="#{info.runInfo.errorMessage}"/>
-                                    </div>
-                                </rich:modalPanel>
-                                <h:outputLink style="color:red;" value="javascript:void(0)" id="link">
-                                    #{info.shortErrorMessage}
-                                    <rich:componentControl for="panel" attachTo="link" operation="show" event="onclick"/>
-                                </h:outputLink>
-                            </td>
+            <adm:sortableTable id="table">
+                <table id="table">
+                    <thead>
+                        <tr>
+                            <th class="tblHeader" field="success" dataType="String" align="left">
+                                #{fxMessageBean['Script.field.execution']}
+                            </th>
+                            <th class="tblHeader" field="name" dataType="String" align="left">
+                                #{fxMessageBean['Script.field.name']}
+                            </th>
+                            <th class="tblHeader" field="drop" dataType="String" align="left">
+                                #{fxMessageBean['Script.field.drop']}
+                            </th>
+                            <th class="tblHeader" field="duration" dataType="String" align="left">
+                                #{fxMessageBean['Script.field.duration']}
+                            </th>
+                            <th class="tblHeader" field="errorMessage" dataType="html" align="left">
+                                #{fxMessageBean['Script.field.errorMessage']}
+                            </th>
                         </tr>
-                    </ui:repeat>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <ui:repeat value="#{scriptBean.runOnceInformation}" var="info">
+                            <tr value="#{info.runInfo.name}">
+                                <td align="left"><h:outputText style="#{info.runInfo.successful ? 'color:green;' : 'color:red;'}"
+                                       value="#{info.runInfo.successful ? fxMessageBean['Script.field.execution.ok'] : fxMessageBean['Script.field.execution.failed']}" /></td>
+                                <td align="left"><h:outputText value="#{info.runInfo.name}" /></td>
+                                <td align="left"><h:outputText value="#{info.runInfo.drop}" /></td>
+                                <td align="left"><h:outputText value="#{info.runInfo.endTime - info.runInfo.startTime}" /></td>
+                                <td align="left">
+                                    <rich:modalPanel id="panel" height="450" width="650" resizeable="false">
+                                        <f:facet name="header">
+                                            <h:panelGroup>
+                                                <h:outputText value="#{fxMessageBean['Script.field.errorMessage']}"/>
+                                            </h:panelGroup>
+                                        </f:facet>
+                                        <f:facet name="controls">
+                                           <h:panelGroup>
+                                                <h:graphicImage value="/adm/images/toolbar/close.png" style="cursor:pointer" id="closeIcon"/>
+                                                <rich:componentControl for="panel" attachTo="closeIcon" operation="hide" event="onclick"/>
+                                            </h:panelGroup>
+                                        </f:facet>
+                                        <div class="modalPanel" style="overflow:scroll !important;height:410px;width:630px;" >
+                                            <h:outputLink value="javascript:void(0)" id="closeLink">
+                                                #{fxMessageBean['Script.dialog.close']}
+                                                <rich:componentControl for="panel" attachTo="closeLink" operation="hide" event="onclick"/>
+                                            </h:outputLink>
+                                            <br/>
+                                            <br/>
+                                            <h:outputText value="#{info.runInfo.errorMessage}"/>
+                                        </div>
+                                    </rich:modalPanel>
+                                    <h:outputLink style="color:red;" value="javascript:void(0)" id="link">
+                                        #{info.shortErrorMessage}
+                                        <rich:componentControl for="panel" attachTo="link" operation="show" event="onclick"/>
+                                    </h:outputLink>
+                                </td>
+                            </tr>
+                        </ui:repeat>
+                    </tbody>
+                </table>
+            </adm:sortableTable>
             <adm:toolbarPluginButtons/>
         </h:form>
     </ui:define>

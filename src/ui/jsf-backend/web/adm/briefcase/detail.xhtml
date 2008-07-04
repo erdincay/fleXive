@@ -14,8 +14,7 @@
     <ui:define name="head">
 
         <script type="text/javascript">
-            dojo.require("dojo.widget.SortableTable");
-            dojo.addOnLoad(function() {
+            flexive.yui.onYahooLoaded(function() {
                 if (parent.getNavFrameWnd().briefcasePanel) {
                     parent.getNavFrameWnd().briefcasePanel.reload();
                 }

@@ -47,6 +47,10 @@
         <source>../templates/resultTable.xhtml</source>
     </tag>
     <tag>
+        <tag-name>resultTableUpdater</tag-name>
+        <source>../templates/resultTableUpdater.xhtml</source>
+    </tag>
+    <tag>
         <tag-name>yuiSetup</tag-name>
         <source>../templates/yuiSetup.xhtml</source>
     </tag>
