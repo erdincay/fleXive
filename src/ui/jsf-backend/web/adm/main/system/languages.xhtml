@@ -45,123 +45,119 @@
                             <tr>
                                 <!--Enabled-->
                                 <td valign="top">
-                                    <adm:sortableTable id="enabledTable">
-                                        <table id="enabledTable">
-                                            <thead>
+                                    <table id="enabledTable" class="dojoTable">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    #{fxMessageBean['Languages.label.isocode']}
+                                                </th>
+                                                <th>
+                                                    #{fxMessageBean['Languages.label.language']}
+                                                </th>
+                                                <th>
+                                                    #{fxMessageBean['Languages.label.action']}
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <c:forEach items="#{languagesBean.available}" var="item">
                                                 <tr>
-                                                    <th>
-                                                        #{fxMessageBean['Languages.label.isocode']}
-                                                    </th>
-                                                    <th>
-                                                        #{fxMessageBean['Languages.label.language']}
-                                                    </th>
-                                                    <th>
-                                                        #{fxMessageBean['Languages.label.action']}
-                                                    </th>
+                                                    <td>
+                                                        #{jstl:toUpperCase(item.iso2digit)}
+                                                    </td>
+                                                    <td>
+                                                        #{item.label}
+                                                    </td>
+                                                    <td>
+                                                        <ui:fragment rendered="#{languagesBean.first == item.id}">
+                                                            <t:graphicImage alt="moveUp" url="#{upArrow}"
+                                                                            style="#{upDownDisabled}"/>
+                                                        </ui:fragment>
+                                                        <a4j:commandLink reRender="all"
+                                                                         rendered="#{languagesBean.first != item.id}"
+                                                                         actionListener="#{languagesBean.moveLanguageUp}"
+                                                                         onmouseover='ignoreEvent(event)'
+                                                                         eventsQueue="langQ"
+                                                                         >
+                                                            <f:setPropertyActionListener target="#{languagesBean.language}"
+                                                                                         value="#{item}"/>
+                                                            <t:graphicImage alt="moveUp" url="#{upArrow}" style="#{upDownStyle}"/>
+                                                        </a4j:commandLink>
+                                                        <ui:fragment rendered="#{languagesBean.last == item.id}">
+                                                            <t:graphicImage alt="moveDown" url="#{downArrow}"
+                                                                            style="#{upDownDisabled}"/>
+                                                        </ui:fragment>
+                                                        <a4j:commandLink reRender="all"
+                                                                         rendered="#{languagesBean.last != item.id}"
+                                                                         actionListener="#{languagesBean.moveLanguageDown}"
+                                                                         onmouseover='ignoreEvent(event)'
+                                                                         eventsQueue="langQ"
+                                                                         >
+                                                            <f:setPropertyActionListener target="#{languagesBean.language}"
+                                                                                         value="#{item}"/>
+                                                            <t:graphicImage alt="moveDown"
+                                                                            url="#{downArrow}"
+                                                                            style="#{upDownStyle};margin-left:3px"/>
+                                                        </a4j:commandLink>
+                                                        <a4j:commandLink reRender="all"
+                                                                         actionListener="#{languagesBean.removeLanguage}"
+                                                                         onmouseover='ignoreEvent(event)'
+                                                                         eventsQueue="langQ"
+                                                                         >
+                                                            <f:setPropertyActionListener target="#{languagesBean.language}"
+                                                                                         value="#{item}"/>
+                                                            <t:graphicImage alt="remove"
+                                                                            url="#{removeArrow}"
+                                                                            style="#{upDownStyle};margin-left:3px"/>
+                                                        </a4j:commandLink>
+                                                    </td>
                                                 </tr>
-                                            </thead>
-                                            <tbody>
-                                                <c:forEach items="#{languagesBean.available}" var="item">
-                                                    <tr>
-                                                        <td>
-                                                            #{jstl:toUpperCase(item.iso2digit)}
-                                                        </td>
-                                                        <td>
-                                                            #{item.label}
-                                                        </td>
-                                                        <td>
-                                                            <ui:fragment rendered="#{languagesBean.first == item.id}">
-                                                                <t:graphicImage alt="moveUp" url="#{upArrow}"
-                                                                                style="#{upDownDisabled}"/>
-                                                            </ui:fragment>
-                                                            <a4j:commandLink reRender="all"
-                                                                             rendered="#{languagesBean.first != item.id}"
-                                                                             actionListener="#{languagesBean.moveLanguageUp}"
-                                                                             onmouseover='ignoreEvent(event)'
-                                                                             eventsQueue="langQ"
-                                                                             >
-                                                                <f:setPropertyActionListener target="#{languagesBean.language}"
-                                                                                             value="#{item}"/>
-                                                                <t:graphicImage alt="moveUp" url="#{upArrow}" style="#{upDownStyle}"/>
-                                                            </a4j:commandLink>
-                                                            <ui:fragment rendered="#{languagesBean.last == item.id}">
-                                                                <t:graphicImage alt="moveDown" url="#{downArrow}"
-                                                                                style="#{upDownDisabled}"/>
-                                                            </ui:fragment>
-                                                            <a4j:commandLink reRender="all"
-                                                                             rendered="#{languagesBean.last != item.id}"
-                                                                             actionListener="#{languagesBean.moveLanguageDown}"
-                                                                             onmouseover='ignoreEvent(event)'
-                                                                             eventsQueue="langQ"
-                                                                             >
-                                                                <f:setPropertyActionListener target="#{languagesBean.language}"
-                                                                                             value="#{item}"/>
-                                                                <t:graphicImage alt="moveDown"
-                                                                                url="#{downArrow}"
-                                                                                style="#{upDownStyle};margin-left:3px"/>
-                                                            </a4j:commandLink>
-                                                            <a4j:commandLink reRender="all"
-                                                                             actionListener="#{languagesBean.removeLanguage}"
-                                                                             onmouseover='ignoreEvent(event)'
-                                                                             eventsQueue="langQ"
-                                                                             >
-                                                                <f:setPropertyActionListener target="#{languagesBean.language}"
-                                                                                             value="#{item}"/>
-                                                                <t:graphicImage alt="remove"
-                                                                                url="#{removeArrow}"
-                                                                                style="#{upDownStyle};margin-left:3px"/>
-                                                            </a4j:commandLink>
-                                                        </td>
-                                                    </tr>
-                                                </c:forEach>
-                                            </tbody>
-                                        </table>
-                                    </adm:sortableTable>
+                                            </c:forEach>
+                                        </tbody>
+                                    </table>
                                 </td>
                                 <!--Disabled-->
                                 <td valign="top">
-                                    <adm:sortableTable id="disabledTable">
-                                        <table id="disabledTable">
-                                            <thead>
+                                    <table id="disabledTable" class="dojoTable">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    #{fxMessageBean['Languages.label.isocode']}
+                                                </th>
+                                                <th>
+                                                    #{fxMessageBean['Languages.label.language']}
+                                                </th>
+                                                <th>
+                                                    #{fxMessageBean['Languages.label.action']}
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <c:forEach items="#{languagesBean.disabled}" var="item">
                                                 <tr>
-                                                    <th>
-                                                        #{fxMessageBean['Languages.label.isocode']}
-                                                    </th>
-                                                    <th>
-                                                        #{fxMessageBean['Languages.label.language']}
-                                                    </th>
-                                                    <th>
-                                                        #{fxMessageBean['Languages.label.action']}
-                                                    </th>
+                                                    <td>
+                                                        #{jstl:toUpperCase(item.iso2digit)}
+                                                    </td>
+                                                    <td>
+                                                        #{item.label}
+                                                    </td>
+                                                    <td>
+                                                        <a4j:commandLink reRender="all"
+                                                                         actionListener="#{languagesBean.addLanguage}"
+                                                                         onmouseover='ignoreEvent(event)'
+                                                                         eventsQueue="langQ"
+                                                                         >
+                                                            <f:setPropertyActionListener target="#{languagesBean.language}"
+                                                                                         value="#{item}"/>
+                                                            <t:graphicImage alt="add"
+                                                                            url="#{addArrow}"
+                                                                            style="#{upDownStyle};margin-left:3px"/>
+                                                        </a4j:commandLink>
+                                                    </td>
                                                 </tr>
-                                            </thead>
-                                            <tbody>
-                                                <c:forEach items="#{languagesBean.disabled}" var="item">
-                                                    <tr>
-                                                        <td>
-                                                            #{jstl:toUpperCase(item.iso2digit)}
-                                                        </td>
-                                                        <td>
-                                                            #{item.label}
-                                                        </td>
-                                                        <td>
-                                                            <a4j:commandLink reRender="all"
-                                                                             actionListener="#{languagesBean.addLanguage}"
-                                                                             onmouseover='ignoreEvent(event)'
-                                                                             eventsQueue="langQ"
-                                                                             >
-                                                                <f:setPropertyActionListener target="#{languagesBean.language}"
-                                                                                             value="#{item}"/>
-                                                                <t:graphicImage alt="add"
-                                                                                url="#{addArrow}"
-                                                                                style="#{upDownStyle};margin-left:3px"/>
-                                                            </a4j:commandLink>
-                                                        </td>
-                                                    </tr>
-                                                </c:forEach>
-                                            </tbody>
-                                        </table>
-                                    </adm:sortableTable>
+                                            </c:forEach>
+                                        </tbody>
+                                    </table>
                                 </td>
                             </tr>
                         </tbody>
