@@ -93,7 +93,7 @@ public class DojoMenuWriter extends AbstractMenuWriter<DojoMenuItemData> {
      */
     public static void writeMenu(Writer writer, String widgetId, String menuName, String menuClass, String itemClass,
                                  MenuItemContainer<DojoMenuItemData> container, RelativeUriMapper uriMapper, String contextMenuTarget, String showHandler) throws IOException {
-        writer.write("var " + menuName + " = makeMenu("
+        writer.write("var " + menuName + " = flexive.dojo.makeMenu("
                 + (widgetId != null ? "'" + FxFormatUtils.escapeForJavaScript(widgetId) + "'" : "null")
                 + ", '" + menuClass + "', '" + itemClass + "', ");
         // render menu-items in method call

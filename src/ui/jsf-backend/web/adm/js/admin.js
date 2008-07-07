@@ -158,3 +158,102 @@ function extractPkIds(pks) {
 function setImage(elementId, src) {
     document.getElementById(elementId).src = src;
 }
+
+
+function initializeTreeReporter(widgetIds, _clickHandler) {
+    for (var i = 0; i < widgetIds.length; i++) {
+        var widget = dojo.widget.manager.getWidgetById(widgetIds[i]);
+        var selectHandler = new TreeHandler({clickHandler: _clickHandler});
+        selectHandler.subscribe(widget);
+    }
+}
+
+/** Flexive (DOJO) Tree Handler base class */
+
+var TreeHandler = function(params) {
+    this.clickHandler = null;
+    for (var param in params) {
+        this[param] = params[param];
+    }
+}
+
+TreeHandler.prototype = {
+    /**
+     * Attach this tree handler to the given (tree) widget.
+     */
+    subscribe: function(widget) {
+        if (!widget.eventNames) {
+            return;
+        }
+        dojo.event.topic.subscribe(widget.eventNames["select"], this, "onSelect");
+        dojo.event.topic.subscribe(widget.eventNames["dblselect"], this, "onDblSelect");
+    },
+
+    /**
+     * Standard select handler - called when a node is selected/clicked.
+     */
+    onSelect: function(messages) {
+        for (var i in messages) {
+            var node = messages[i];
+            var link = node["link"];
+            if (this.clickHandler) {
+                this.clickHandler(node, false);
+            } else if (link) {
+                if (link.indexOf("javascript:") == 0) {
+                    eval(link.substr("javascript:".length));
+                } else {
+                    // open link in other frame
+                    parent.contentFrameObj.src = link;
+                }
+            } else if (node.children.length > 0) {
+                // default action: toggle node
+                if (node.isExpanded) {
+                    node.tree.fxController.collapse(node);
+                } else {
+                    node.tree.fxController.expand(node);
+                }
+            }
+        }
+    },
+
+    onDblSelect: function(messages) {
+        for (var i in messages) {
+            var node = messages[i];
+            if (this.clickHandler) {
+                this.clickHandler(node, true);
+            }
+        }
+    }
+}
+
+
+// A simple clipboard for content objects
+var ContentClipboard = function() {
+    this.ids = [];
+}
+
+ContentClipboard.prototype = {
+    // set the clipboard content to the given object ID array
+    set: function(contentIds) {
+        this.ids = [];
+        // copy IDs to our own array to prevent aliasing and inter-frame issues
+        for (var i = 0; i < contentIds.length; i++) {
+            this.ids.push(contentIds[i]);
+        }
+    },
+
+    // get the current clipboard contents as object ID array
+    get: function() {
+        return this.ids != null ? this.ids : [];
+    },
+
+    // clear the clipboard
+    clear: function() {
+        this.ids = [];
+    },
+
+    // returns true for empty clipboards
+    isEmpty: function() {
+        return this.get().length == 0;
+    }
+}

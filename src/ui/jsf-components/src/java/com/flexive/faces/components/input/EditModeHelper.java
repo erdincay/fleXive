@@ -287,7 +287,7 @@ class EditModeHelper extends RenderHelper {
     }
 
     private void renderReferenceSelect(UIComponent parent, String inputId, FxLanguage language) throws IOException {
-        final String popupLink = "javascript:openReferenceQueryPopup('" + value.getXPath() + "', '"
+        final String popupLink = "javascript:flexive.input.openReferenceQueryPopup('" + value.getXPath() + "', '"
                 + inputId + "', '" + getForm(inputId) + "')";
         // render hidden input that contains the actual reference
         final HtmlInputHidden inputPk = (HtmlInputHidden) FxJsfUtils.addChildComponent(parent, HtmlInputHidden.COMPONENT_TYPE);
@@ -503,7 +503,7 @@ class EditModeHelper extends RenderHelper {
                     "<script language=\"javascript\">\n"
                             + "<!--\n"
                             + "  document.getElementById(''{0}'')." + JS_OBJECT
-                            + " = new FxMultiLanguageValueInput(''{0}'', ''{1}'', [{2}], ''{3}'');\n"
+                            + " = new flexive.input.FxMultiLanguageValueInput(''{0}'', ''{1}'', [{2}], ''{3}'');\n"
                             + "  document.getElementById(''{3}'').onchange();\n"
                             + "//-->\n"
                             + "</script>",

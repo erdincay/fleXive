@@ -100,22 +100,6 @@
         <source>templates/dateInput.xhtml</source>
     </tag>
     <tag>
-        <tag-name>resultSetTable</tag-name>
-        <source>templates/resultSetTable.xhtml</source>
-    </tag>
-    <tag>
-        <tag-name>jsDataScroller</tag-name>
-        <source>templates/jsDataScroller.xhtml</source>
-    </tag>
-    <tag>
-        <tag-name>resultView</tag-name>
-        <source>templates/resultView.xhtml</source>
-    </tag>
-    <tag>
-        <tag-name>resultThumbnailsTable</tag-name>
-        <source>templates/resultThumbnailsTable.xhtml</source>
-    </tag>
-    <tag>
         <tag-name>resultThumbnail</tag-name>
         <source>templates/resultThumbnail.xhtml</source>
     </tag>

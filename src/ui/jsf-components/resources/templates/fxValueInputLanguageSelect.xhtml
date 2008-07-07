@@ -15,7 +15,7 @@ id - the input ID (required)
 
 <ui:composition>
 
-    <h:selectOneListbox id="#{id}" size="1" onchange="setLanguageOnAllInputs(this.value)"
+    <h:selectOneListbox id="#{id}" size="1" onchange="flexive.input.setLanguageOnAllInputs(this.value)"
             value="#{fxUserConfigurationBean.inputLanguageId}"
             title="#{fxMessageBean['FxValueInput.languageSelect.title']}">
         <f:selectItem itemValue="-2" itemLabel="#{fxMessageBean['FxValueInput.language.all']}"/>

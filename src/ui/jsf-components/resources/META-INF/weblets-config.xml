@@ -5,7 +5,7 @@
         <weblet-class>
             net.java.dev.weblets.packaged.PackagedWeblet
         </weblet-class>
-        <weblet-version>3.0-SNAPSHOT</weblet-version>
+        <weblet-version>3.0-RC2</weblet-version>
         <init-param>
             <param-name>package</param-name>
             <param-value>

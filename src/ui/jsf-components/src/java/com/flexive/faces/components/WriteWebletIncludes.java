@@ -134,7 +134,7 @@ public class WriteWebletIncludes extends UIOutput {
             out.write(getWebletInclude(WEBLET_TINYMCE));
             out.write(padding);
             FxJavascriptUtils.beginJavascript(out);
-            out.write("initHtmlEditor(false);");
+            out.write("flexive.input.initHtmlEditor(false);");
             FxJavascriptUtils.endJavascript(out);
         }
     }
