@@ -154,7 +154,7 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
 
         FxStructureOption pOpt = getProperty().getOption(key);
         if (pOpt.isSet() && !pOpt.isOverrideable())
-            throw new FxInvalidParameterException(key, "ex.structure.override.forbidden", key, getProperty().getName());
+            throw new FxInvalidParameterException(key, "ex.structure.override.property.forbidden", key, getProperty().getName());
 
         FxStructureOption.setOption(options, key, true, value);
         return this;
@@ -172,7 +172,7 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
 
         FxStructureOption pOpt = getProperty().getOption(key);
         if (pOpt.isSet() && !pOpt.isOverrideable())
-            throw new FxInvalidParameterException(key, "ex.structure.override.forbidden", key, getProperty().getName());
+            throw new FxInvalidParameterException(key, "ex.structure.override.property.forbidden", key, getProperty().getName());
 
         FxStructureOption.setOption(options, key, true, value);
         return this;

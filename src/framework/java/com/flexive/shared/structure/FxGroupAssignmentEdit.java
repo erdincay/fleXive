@@ -286,7 +286,7 @@ public class FxGroupAssignmentEdit extends FxGroupAssignment {
 
         FxStructureOption gOpt = getGroup().getOption(key);
         if (gOpt.isSet() && !gOpt.isOverrideable())
-            throw new FxInvalidParameterException(key, "ex.structure.override.forbidden", key, getGroup().getName());
+            throw new FxInvalidParameterException(key, "ex.structure.override.group.forbidden", key, getGroup().getName());
 
         FxStructureOption.setOption(options, key, true, value);
         return this;
@@ -304,7 +304,7 @@ public class FxGroupAssignmentEdit extends FxGroupAssignment {
 
         FxStructureOption gOpt = getGroup().getOption(key);
         if (gOpt.isSet() && !gOpt.isOverrideable())
-            throw new FxInvalidParameterException(key, "ex.structure.override.forbidden", key, getGroup().getName());
+            throw new FxInvalidParameterException(key, "ex.structure.override.group.forbidden", key, getGroup().getName());
 
         FxStructureOption.setOption(options, key, true, value);
         return this;

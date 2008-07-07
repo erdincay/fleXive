@@ -119,6 +119,19 @@ public class FxPropertyEdit extends FxProperty {
                 fulltextIndexed, referencedType, referencedList, UniqueMode.None, options);
         setName(name);
         setSearchable(true); //default is searchable
+        setOptionOverrideable(FxStructureOption.OPTION_SEARCHABLE, true);
+        //if the use html editor option is not set and the datatype is html, set it
+        boolean hasHTMLOption = false;
+        if (options == null)
+            options = FxStructureOption.getEmptyOptionList(5);
+        for (FxStructureOption option : options) {
+            if (FxStructureOption.OPTION_HTML_EDITOR.equals(option.getKey()))
+                hasHTMLOption = true;
+        }
+        if (dataType == FxDataType.HTML && !hasHTMLOption) {
+            setUseHTMLEditor(true);
+            setOptionOverrideable(FxStructureOption.OPTION_HTML_EDITOR, true);
+        }
         this.isNew = true;
     }
 
@@ -298,6 +311,9 @@ public class FxPropertyEdit extends FxProperty {
      */
     public FxPropertyEdit setDataType(FxDataType dataType) {
         this.dataType = dataType;
+        //if the datatype is html, set the option to use the html editor 
+        if (dataType == FxDataType.HTML)
+            setUseHTMLEditor(true);
         return this;
     }
 

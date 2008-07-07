@@ -404,6 +404,8 @@ public class PropertyEditorBean implements ActionBean {
         property.setDefaultValue(property.getDefaultValue());
         assignment.setDefaultValue(assignment.getDefaultValue());
         */
+        if( d == FxDataType.HTML)
+            optionWrapper.setOption(true, FxStructureOption.OPTION_HTML_EDITOR, true);
         if (!isPropertySelectList() && getPropertyReferencedList() != -1) {
             setPropertyReferencedList(-1);
         }

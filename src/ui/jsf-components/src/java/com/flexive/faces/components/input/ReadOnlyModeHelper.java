@@ -32,16 +32,13 @@
 package com.flexive.faces.components.input;
 
 import com.flexive.faces.FxJsfUtils;
-import com.flexive.shared.FxContext;
-import com.flexive.shared.FxFormatUtils;
-import com.flexive.shared.FxLanguage;
-import com.flexive.shared.XPathElement;
-import com.flexive.shared.value.BinaryDescriptor;
-import com.flexive.shared.value.FxBinary;
-import com.flexive.shared.value.FxHTML;
-import com.flexive.shared.value.FxValue;
+import com.flexive.shared.*;
+import com.flexive.shared.structure.FxPropertyAssignment;
+import com.flexive.shared.structure.FxStructureOption;
+import com.flexive.shared.value.*;
 import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import com.flexive.war.servlet.ThumbnailServlet;
+import org.apache.commons.lang.StringUtils;
 
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlGraphicImage;
@@ -84,10 +81,19 @@ class ReadOnlyModeHelper extends RenderHelper {
     @Override
     @SuppressWarnings({"unchecked"})
     protected void encodeField(UIComponent parent, String inputId, FxLanguage language) throws IOException {
-        if (value.isEmpty()) {
+        if (value == null || value.isEmpty()) {
             return;
         }
         // TODO: optional "empty" message
+
+        boolean useHTMLEditor;
+        if (value instanceof FxString && StringUtils.isNotBlank(value.getXPath())) {
+            FxPropertyAssignment pa = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(value.getXPath());
+            useHTMLEditor = pa.getOption(FxStructureOption.OPTION_HTML_EDITOR).isValueTrue();
+        } else {
+            useHTMLEditor = value instanceof FxHTML; //fallback if no xpath is known, we assume FxHTML to be rendered with an HTML editor
+        }
+
         final FxLanguage outputLanguage = FxContext.get().getTicket().getLanguage();
         if (component.getValueFormatter() != null) {
             // use custom formatter
@@ -95,7 +101,7 @@ class ReadOnlyModeHelper extends RenderHelper {
         } else if (value instanceof FxBinary && !value.isEmpty()) {
             // render preview image
             renderPreviewImage(language);
-        } else if (component.isFilter() && !(value instanceof FxHTML)) {
+        } else if (component.isFilter() && !(useHTMLEditor || value instanceof FxHTML)) {
             // escape HTML code and generate <br/> tags for newlines
             addOutputComponent(FxFormatUtils.escapeForJavaScript(FxValueRendererFactory.getInstance(outputLanguage).format(value, language), true, true), language);
         } else {

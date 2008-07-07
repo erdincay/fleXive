@@ -37,6 +37,7 @@ import com.flexive.faces.beans.MessageBean;
 import com.flexive.shared.*;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxSelectList;
+import com.flexive.shared.structure.FxStructureOption;
 import com.flexive.shared.value.*;
 import com.flexive.war.servlet.ThumbnailServlet;
 import com.flexive.war.FxRequest;
@@ -132,6 +133,7 @@ class EditModeHelper extends RenderHelper {
     @Override
     protected void encodeField(UIComponent parent, String inputId, FxLanguage language) throws IOException {
         boolean multiLine = false;
+        boolean useHTMLEditor = false;
         int rows = -1;
         if (language == null) {
             final ContainerWriter container = new ContainerWriter();
@@ -148,9 +150,10 @@ class EditModeHelper extends RenderHelper {
                 if( rows <= 1 )
                     rows = -1;
             }
+            useHTMLEditor = pa.getOption(FxStructureOption.OPTION_HTML_EDITOR).isValueTrue();
         }
-        if (value instanceof FxHTML || multiLine) {
-            renderTextArea(parent, inputId, language, rows);
+        if (useHTMLEditor || multiLine) {
+            renderTextArea(parent, inputId, language, rows, useHTMLEditor);
         } else if (value instanceof FxSelectOne) {
             renderSelectOne(parent, inputId, language);
         } else if (value instanceof FxSelectMany) {
@@ -181,11 +184,12 @@ class EditModeHelper extends RenderHelper {
         input.setStyleClass(FxValueInputRenderer.CSS_TEXT_INPUT + singleLanguageStyle(languageId));
     }
 
-    private void renderTextArea(UIComponent parent, final String inputId, final FxLanguage language, final int rows) throws IOException {
+    private void renderTextArea(UIComponent parent, final String inputId, final FxLanguage language, final int rows, final boolean useHTMLEditor) throws IOException {
         final TextAreaWriter textArea = new TextAreaWriter();
         textArea.setInputClientId(inputId);
         textArea.setLanguageId(language != null ? language.getId() : -1);
         textArea.setRows(rows);
+        textArea.setUseHTMLEditor(useHTMLEditor);
         parent.getChildren().add(textArea);
     }
 
@@ -622,6 +626,7 @@ class EditModeHelper extends RenderHelper {
     public static class TextAreaWriter extends DeferredInputWriter {
         private long languageId;
         private int rows=-1;
+        private boolean useHTMLEditor = false;
 
         public long getLanguageId() {
             return languageId;
@@ -635,6 +640,10 @@ class EditModeHelper extends RenderHelper {
             this.rows = rows;
         }
 
+        public void setUseHTMLEditor(boolean useHTMLEditor) {
+            this.useHTMLEditor = useHTMLEditor;
+        }
+
         @Override
         public void encodeBegin(FacesContext facesContext) throws IOException {
             final ResponseWriter writer = facesContext.getResponseWriter();
@@ -646,7 +655,7 @@ class EditModeHelper extends RenderHelper {
             writer.startElement("textarea", null);
             writer.writeAttribute("id", inputClientId, null);
             writeHtmlAttributes(getInputComponent(), writer);
-            if (value instanceof FxHTML) {
+            if (useHTMLEditor) {
                 // render tinyMCE editor
                 writer.writeAttribute("name", inputClientId, null);
                 writer.writeAttribute("class", FxValueInputRenderer.CSS_TEXTAREA_HTML + singleLanguageStyle(languageId), null);
