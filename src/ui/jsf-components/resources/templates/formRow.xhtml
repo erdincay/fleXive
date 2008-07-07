@@ -21,10 +21,10 @@ height = overrides the default height (value in pixel, eg height="80")
 <ui:composition>
 
 <c:if test="${!empty height}">
-    <c:set var="overideStyle" value="#{overideStyle};height:#{height}px" />
+    <c:set var="overrideStyle" value="#{overrideStyle};height:#{height}px" />
 </c:if>
 <c:if test="${!empty width}">
-    <c:set var="overideStyle" value="#{overideStyle};width:#{width}px" />
+    <c:set var="overrideStyle" value="#{overrideStyle};width:#{width}px" />
     <c:set var="overrideInputStyle" value="#{overrideInputStyle};width:#{width-140}px"/>
 </c:if>
 <c:if test="#{!empty labelKey}">
@@ -37,16 +37,18 @@ height = overrides the default height (value in pixel, eg height="80")
     <c:set var="tooltip" value="#{fxMessageBean[tooltipKey]}"/>
 </c:if>
 
-<div class="formRow" style="#{overideStyle}">
+<div class="formRow" style="#{overrideStyle}">
 
-    <div class="formLabel">
+    <div class="formLabelContainer">
         <div class="#{empty tooltip ? '' : 'tooltip'}">
-            <c:if test="#{!empty id}">
-                <h:outputLabel id="#{id}Label" for="#{id}">#{label}</h:outputLabel>
-            </c:if>
-            <c:if test="#{empty id}">
-                #{label}
-            </c:if>
+            <div class="formLabel">
+                <c:if test="#{!empty id}">
+                    <h:outputLabel id="#{id}Label" for="#{id}">#{label}</h:outputLabel>
+                </c:if>
+                <c:if test="#{empty id}">
+                    #{label}
+                </c:if>
+            </div>
             <div class="tooltipContent">
                 <h:outputText value="#{tooltip}" escape="false"/>
             </div>

@@ -282,18 +282,18 @@ div.formRow {
     padding: 2px;
 }
 
-div.formLabel {
+div.formLabelContainer {
     float: left;
     margin-top: 2px;
     margin-right: 3px;
     width: 120px;
     padding: 2px;
-
     white-space: nowrap;
-    overflow: hidden;
 }
 
-div.formLabel label {
+div.formLabel {
+    width: 100%;
+    overflow: hidden;
     white-space: normal;
 }
 
