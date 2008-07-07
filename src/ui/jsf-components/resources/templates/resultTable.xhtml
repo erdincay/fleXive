@@ -13,7 +13,7 @@
 A client-side result table implemented using the Yahoo datatable widget.
 
 Parameters:
-    var      - name of the javascript variable that exposes the Yahoo DataTable widget (default: resultTable)
+    var      - name of the javascript variable that exposes the Yahoo DataTable widget
     value    - the result set to be rendered, or a plain text FxSQL query
     viewType - the view type (THUMBNAILS or LIST). If not set and a result set is passed in as value,
                the result set's viewtype is used, otherwise it defaults to LIST.
@@ -21,60 +21,62 @@ Parameters:
 <ui:composition>
 
     <c:if test="#{empty var}">
-        <c:set var="var" value="resultTable"/>
+        Required attribute "var" missing for fx:resultTable.
     </c:if>
 
-    <div id="ResultTable_datatable"> </div>
+    <c:if test="#{!empty var}">
+        <div id="#{var}_datatable"> </div>
 
-    <script type="text/javascript">
-    <!--
-        var #{var};
-        flexive.yui.requireComponent("datatable");
-        flexive.yui.onYahooLoaded(function() {
-            var createFun = function(result) {
-                //var result = eval("(" + getJsonRpc().SearchResultWriter.getResultRows("SELECT id, caption, created_at", 0, 2000) + ")");
-                // get JSON representation of the search result
-                var view = flexive.yui.datatable.getViewWrapper(result);
-                var isThumbnails = result.viewType == "THUMBNAILS";
+        <script type="text/javascript">
+        <!--
+            var #{var};
+            flexive.yui.require("datatable");
+            flexive.yui.onYahooLoaded(function() {
+                var createFun = function(result) {
+                    //var result = eval("(" + getJsonRpc().SearchResultWriter.getResultRows("SELECT id, caption, created_at", 0, 2000) + ")");
+                    // get JSON representation of the search result
+                    var view = flexive.yui.datatable.getViewWrapper(result);
+                    var isThumbnails = result.viewType == "THUMBNAILS";
 
-                var dataSource = new YAHOO.util.DataSource(view.getRows());
-                dataSource.responseType = YAHOO.util.DataSource.TYPE_JSARRAY;
-                dataSource.responseSchema = view.getResponseSchema();
-                var dataTable = new YAHOO.widget.DataTable("ResultTable_datatable",
-                    view.getColumns(), dataSource,
-                    { paginator: new YAHOO.widget.Paginator({
-                        template : "#{fxMessageBean['ResultTable.label.rowSelect']}",
-                        rowsPerPage : view.rowsPerPage,
-                        rowsPerPageOptions : isThumbnails ? [5, 10, 25, 50] : [10,25,50,100]
-                    }) }
-                );
-                if (isThumbnails) {
-                    // enable cell selection
-                    dataTable.set("selectionMode", "cellrange");
-                    dataTable.subscribe("cellClickEvent", dataTable.onEventSelectCell);
-                    // enable cell highlighting
-                    dataTable.subscribe("cellMouseoverEvent", dataTable.onEventHighlightCell);
-                    dataTable.subscribe("cellMouseoutEvent", dataTable.onEventUnhighlightCell);
-                } else {
-                    // enable row selection
-                    dataTable.subscribe("rowClickEvent", dataTable.onEventSelectRow);
-                    // enable row highlighting
-                    dataTable.subscribe("rowMouseoverEvent", dataTable.onEventHighlightRow);
-                    dataTable.subscribe("rowMouseoutEvent", dataTable.onEventUnhighlightRow);
+                    var dataSource = new YAHOO.util.DataSource(view.getRows());
+                    dataSource.responseType = YAHOO.util.DataSource.TYPE_JSARRAY;
+                    dataSource.responseSchema = view.getResponseSchema();
+                    var dataTable = new YAHOO.widget.DataTable("#{var}_datatable",
+                        view.getColumns(), dataSource,
+                        { paginator: new YAHOO.widget.Paginator({
+                            template : "#{fxMessageBean['ResultTable.label.rowSelect']}",
+                            rowsPerPage : view.rowsPerPage,
+                            rowsPerPageOptions : isThumbnails ? [5, 10, 25, 50] : [10,25,50,100]
+                        }) }
+                    );
+                    if (isThumbnails) {
+                        // enable cell selection
+                        dataTable.set("selectionMode", "cellrange");
+                        dataTable.subscribe("cellClickEvent", dataTable.onEventSelectCell);
+                        // enable cell highlighting
+                        dataTable.subscribe("cellMouseoverEvent", dataTable.onEventHighlightCell);
+                        dataTable.subscribe("cellMouseoutEvent", dataTable.onEventUnhighlightCell);
+                    } else {
+                        // enable row selection
+                        dataTable.subscribe("rowClickEvent", dataTable.onEventSelectRow);
+                        // enable row highlighting
+                        dataTable.subscribe("rowMouseoverEvent", dataTable.onEventHighlightRow);
+                        dataTable.subscribe("rowMouseoutEvent", dataTable.onEventUnhighlightRow);
+                    }
+                    return dataTable;
                 }
-                return dataTable;
-            }
-            #{var} = createFun(#{fx:getJsonResult(value, viewType)});
-            #{var}._reset = function(result) {
-                var reset = #{var}._reset;  // keep old method
-                // wipe out the entire datatable and create a new one
-                #{var}.destroy();
-                #{var} = createFun(result);
-                #{var}._reset = reset;
-            }
-        });
-    //-->
-    </script>
+                #{var} = createFun(#{fx:getJsonResult(value, viewType)});
+                #{var}._reset = function(result) {
+                    var reset = #{var}._reset;  // keep old method
+                    // wipe out the entire datatable and create a new one
+                    #{var}.destroy();
+                    #{var} = createFun(result);
+                    #{var}._reset = reset;
+                }
+            });
+        //-->
+        </script>
+    </c:if>
 
 </ui:composition>
 

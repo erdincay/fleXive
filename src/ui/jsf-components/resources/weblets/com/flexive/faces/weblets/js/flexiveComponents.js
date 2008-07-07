@@ -14,19 +14,21 @@ var flexive = new function() {
         ORIGINAL: { id: 0, size: -1}
     };
 
+    /** Absolute application base URL (set by fx:includes) */
+    this.baseUrl = null;
 }
 
 // miscellaneous utility functions
 flexive.util = new function() {
     /**
-     * Return the URL for the thumbnail of the given PK (relative to the flexive root path).
+     * Return the absolute URL for the thumbnail of the given PK.
      *
      * @param pk    the object PK
      * @param size  the thumbnail size (one of FxComponents.PreviewSizes)
      * @param includeTimestamp  if true, the current timestamp will be included (disables caching)
      */
     this.getThumbnailURL = function(/* String */ pk, /* flexive.PreviewSizes */ size, /* boolean */ includeTimestamp) {
-        return "thumbnail/pk" + pk
+        return flexive.baseUrl + "thumbnail/pk" + pk
                 + (size != null ? "/s" + size.id : "")
                 + (includeTimestamp ? "/ts" + new Date().getTime() : "");
     };
@@ -81,7 +83,7 @@ flexive.yui = new function() {
      *
      * @param component the Yahoo component (e.g. "button")
      */
-    this.requireComponent = function(component) {
+    this.require = function(component) {
         var found = false;
         for (var i = 0; i < this.requiredComponents.length; i++) {
             if (this.requiredComponents[i] == component) {

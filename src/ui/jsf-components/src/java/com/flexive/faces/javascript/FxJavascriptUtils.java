@@ -125,7 +125,7 @@ public class FxJavascriptUtils {
      */
     public static void writeYahooRequires(Writer out, String... packages) throws IOException {
         for (String pkg : packages) {
-            out.write("flexive.yui.requireComponent(\"" + pkg + "\");\n");
+            out.write("flexive.yui.require(\"" + pkg + "\");\n");
         }
     }
 

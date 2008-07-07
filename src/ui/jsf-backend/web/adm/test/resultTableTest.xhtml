@@ -1,0 +1,30 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+  <head>
+      <title>fx:resultTable test cases</title>
+      <fx:includes yui="true"/>
+  </head>
+  <body class="yui-skin-sam">
+
+    <h:messages/>
+
+    <h3>fx:resultTable</h3>
+
+    <h:form>
+
+        <h4>Thumbnail view</h4>
+        <fx:resultTable var="thumbnailsTable" value="SELECT @pk, #image/caption" viewType="thumbnails"/>
+
+        <h4>List view</h4>
+        <fx:resultTable var="listTable" value="SELECT *"/>
+  
+    </h:form>
+
+    <fx:yuiSetup/>
+  </body>
+</html>

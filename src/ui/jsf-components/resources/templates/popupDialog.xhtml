@@ -27,7 +27,7 @@ Parameters:
 	<!--
 		var #{jsVar};
         document.getElementById("#{jsVar}_dialogContainer").style.display = "none"; // hide until Yahoo is available
-        flexive.yui.requireComponent("container");
+        flexive.yui.require("container");
         flexive.yui.onYahooLoaded(function() {
             var dialog = new YAHOO.widget.Panel('#{jsVar}_dialogContainer',
             {

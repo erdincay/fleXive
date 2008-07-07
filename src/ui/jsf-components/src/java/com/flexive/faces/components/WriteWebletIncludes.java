@@ -33,7 +33,10 @@ package com.flexive.faces.components;
 
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.FxJsfComponentUtils;
+import com.flexive.faces.beans.SystemBean;
 import com.flexive.faces.javascript.FxJavascriptUtils;
+import static com.flexive.faces.javascript.FxJavascriptUtils.beginJavascript;
+import static com.flexive.faces.javascript.FxJavascriptUtils.endJavascript;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 
@@ -131,13 +134,17 @@ public class WriteWebletIncludes extends UIOutput {
             }
             FxJsfUtils.getRequest().setAttribute(REQ_RENDERED, true);
         }
+        // init flexiveComponents.js
+        beginJavascript(out);
+        out.write("flexive.baseUrl='" + FxJsfUtils.getManagedBean(SystemBean.class).getDocumentBase() + "';\n");
+        endJavascript(out);
         if (isHtmlEditor()) {
             out.write(padding);
             out.write(getWebletInclude(WEBLET_TINYMCE));
             out.write(padding);
-            FxJavascriptUtils.beginJavascript(out);
+            beginJavascript(out);
             out.write("flexive.input.initHtmlEditor(false);");
-            FxJavascriptUtils.endJavascript(out);
+            endJavascript(out);
         }
         if (isYui()) {
             out.write(getWebletInclude(WEBLET_YUI));
