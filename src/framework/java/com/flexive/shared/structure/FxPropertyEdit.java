@@ -113,7 +113,7 @@ public class FxPropertyEdit extends FxProperty {
      * @param options                  this properties options
      */
     private FxPropertyEdit(String name, FxString description, FxString hint, boolean overrideBaseMultiplicity,
-                           FxMultiplicity multiplicity, boolean overrideACL, ACL ACL, FxDataType dataType, FxString defaultValue,
+                           FxMultiplicity multiplicity, boolean overrideACL, ACL ACL, FxDataType dataType, FxValue defaultValue,
                            boolean fulltextIndexed, FxType referencedType, FxSelectList referencedList, List<FxStructureOption> options) {
         super(-1, name, description, hint, false, overrideBaseMultiplicity, multiplicity, overrideACL, ACL, dataType, defaultValue,
                 fulltextIndexed, referencedType, referencedList, UniqueMode.None, options);
@@ -175,7 +175,7 @@ public class FxPropertyEdit extends FxProperty {
     public static FxPropertyEdit createNew(String name, FxString description, FxString hint,
                                            FxMultiplicity multiplicity, ACL acl, FxDataType dataType) {
         return new FxPropertyEdit(name, description, hint, true, multiplicity, true, acl,
-                dataType, new FxString(""), true, null, null, FxStructureOption.getEmptyOptionList(5));
+                dataType, null, true, null, null, FxStructureOption.getEmptyOptionList(5));
     }
 
 
@@ -310,7 +310,11 @@ public class FxPropertyEdit extends FxProperty {
      * @return the property itself, useful for chained calls
      */
     public FxPropertyEdit setDataType(FxDataType dataType) {
+        if( this.dataType == dataType)
+            return this; //no changes
+
         this.dataType = dataType;
+        this.defaultValue = getEmptyValue();
         //if the datatype is html, set the option to use the html editor 
         if (dataType == FxDataType.HTML)
             setUseHTMLEditor(true);

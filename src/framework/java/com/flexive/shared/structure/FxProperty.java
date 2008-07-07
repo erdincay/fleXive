@@ -69,7 +69,7 @@ public class FxProperty extends FxStructureElement implements Serializable {
         this.overrideACL = overrideACL;
         this.ACL = ACL;
         this.dataType = dataType;
-        this.defaultValue = defaultValue;
+        this.defaultValue = defaultValue == null ? getEmptyValue() : defaultValue;
         this.multiplicity = multiplicity;
         this.fulltextIndexed = fulltextIndexed;
         this.referencedType = referencedType;
