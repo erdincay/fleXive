@@ -538,14 +538,16 @@ public class SqlSearch {
             // return all properties attached to the root
             typeId = FxType.ROOT_ID;
         }
-        final List<FxProperty> result = new ArrayList<FxProperty>();
-        // return all properties of the type
+        final List<FxProperty> typeProps = new ArrayList<FxProperty>();
+        final List<FxProperty> systemProps = new ArrayList<FxProperty>();
+        // return all properties of the type - first user-defined type props, then the system-internal props
         for (FxPropertyAssignment assignment : environment.getType(typeId).getAssignedProperties()) {
             if (assignment.getProperty().isSearchable()) {
-                result.add(assignment.getProperty());
+                (assignment.isSystemInternal() ? systemProps : typeProps).add(assignment.getProperty());
             }
         }
-        return result;
+        typeProps.addAll(systemProps);
+        return typeProps;
     }
 
     public String getQuery() {

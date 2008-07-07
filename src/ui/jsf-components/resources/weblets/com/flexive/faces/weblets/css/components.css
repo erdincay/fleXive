@@ -282,6 +282,11 @@ div.formRow {
     padding: 2px;
 }
 
+div.formRow input[type=text] {
+    /* Limit plain text input width */
+    max-width: 100%;
+}
+
 div.formLabelContainer {
     float: left;
     margin-top: 2px;
