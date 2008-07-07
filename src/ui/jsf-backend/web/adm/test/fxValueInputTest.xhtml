@@ -9,7 +9,7 @@
       xmlns:fx="http://www.flexive.com/jsf/core">
   <head>
       <title>fx:fxValueInput test cases</title>
-      <fx:includes htmlEditor="true"/>
+      <fx:includes htmlEditor="true" yui="all"/>
   </head>
   <body>
 
@@ -64,5 +64,7 @@
         <ui:debug hotkey="d" rendered="#{initParam.debugMode}"/>
         
     </h:form>
+
+    <fx:yuiSetup/>
   </body>
 </html>

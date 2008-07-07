@@ -407,9 +407,6 @@
                 <include name="*"/>
                 <include name="src/**/*"/>
             </zipfileset>
-
-            <!-- include YUI -->
-            <zipfileset src="${flexive.base.ui.shared.dir}/resources/lib/yui-${web.ui.yui.version}.zip" prefix="pub/js/yui"/>
         </war>
 	</target>
 
@@ -698,11 +695,10 @@ database.password=a
     <target name="jar.jsf.components" depends="compile.ui.shared">
         <buildPlugin name="jsf-core" srcdir="${flexive.base.ui.components.dir}"/>
 
-        <!-- explode TinyMCE editor files in into jsf core plugins JAR under com/flexive/faces/weblets/js -->
+        <!-- explode YUI and TinyMCE editor files in into jsf core plugins JAR under com/flexive/faces/weblets/js -->
         <jar jarfile="${build.ui.jar.dir}/flexive-plugin-jsf-core.jar" update="true">
-            <zipfileset src="${flexive.base.ui.shared.dir}/resources/lib/tiny_mce.zip" prefix="com/flexive/faces/weblets/js">
-                <include name="**/*"/>
-            </zipfileset>
+            <zipfileset src="${flexive.base.ui.shared.dir}/resources/lib/tiny_mce.zip" prefix="com/flexive/faces/weblets/js"/>
+            <zipfileset src="${flexive.base.ui.shared.dir}/resources/lib/yui-${web.ui.yui.version}.zip" prefix="com/flexive/faces/weblets/js/yui"/>
         </jar>
 
         <buildPlugin name="jsf-testrunner" srcdir="${flexive.base.ui.dir}/jsf-testrunner"/>

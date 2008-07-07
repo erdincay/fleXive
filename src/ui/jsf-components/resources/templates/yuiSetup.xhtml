@@ -8,10 +8,13 @@
 	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
 	xmlns:t="http://myfaces.apache.org/tomahawk"
     xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
-    xmlns:fx="http://www.flexive.com/jsf/core">
+    xmlns:fx="http://www.flexive.com/jsf/core"
+    xmlns:weblet="http://weblets.dev.java.net/tags_jsp2">
 
 Initializes the Yahoo UI component library shipped with flexive.
-Include this near the end of all pages where you want to use Yahoo UI.
+Include this near the end of all pages where you may want to use Yahoo UI. 
+The Yahoo Loader is only executed when at least one flexive component on the page uses
+a Yahoo widget, so the performance impact is minimal if no widget is used.
 
 Parameters:
     None
@@ -22,8 +25,9 @@ Parameters:
     <!--
         if (flexive.yui.requiredComponents.length > 0) {
             // load Yahoo UI only if at least one component is required
+            var loaderPath = "#{weblet:url('com.flexive.faces.weblets', '/js/yui/yuiloader-beta-min.js')}";
             var loader = new YAHOO.util.YUILoader({
-                    base: "#{fxSystemBean.contextPath}/pub/js/yui/",
+                    base: loaderPath.substr(0, loaderPath.lastIndexOf("/") + 1),
                     require: flexive.yui.requiredComponents,
                     loadOptional: true,
                     onSuccess: function() {

@@ -71,7 +71,6 @@ public class SystemBean implements Serializable {
     private Map<Object, Integer> counters;
     private Map<Object, Integer> counterMap;
     private Map<Object, Integer> counterValueMap;
-    private Map<String, String> webletMap;
     private Map<String, Boolean> messageExistsMap;
     private Map<Object, FxContent> contentMap;
     private Map<Object, FxContent> explodedContentMap;

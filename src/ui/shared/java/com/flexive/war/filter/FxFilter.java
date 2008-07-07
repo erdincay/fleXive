@@ -51,7 +51,7 @@ import java.io.IOException;
 public class FxFilter implements Filter {
     private static final Log LOG = LogFactory.getLog(FxFilter.class);
 
-    private final static String CATALINA_CLIENT_ABORT = "org.apache.catalina.connector.ClientAbortException";
+    private static final String CATALINA_CLIENT_ABORT = "org.apache.catalina.connector.ClientAbortException";
 
     private String FILESYSTEM_WAR_ROOT = null;
     private FilterConfig config = null;

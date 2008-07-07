@@ -57,9 +57,11 @@ public class WriteWebletIncludes extends UIOutput {
     private static final String REQ_WEBLETS = WriteWebletIncludes.class.getName() + ".WEBLETS";
     private static final String REQ_RENDERED = WriteWebletIncludes.class.getName() + ".WEBLETS_RENDERED";
     private static final String WEBLET_TINYMCE = "com.flexive.faces.weblets/js/tiny_mce/tiny_mce_src.js";
+    private static final String WEBLET_YUI = "com.flexive.faces.weblets/js/yui/yuiloader/yuiloader-beta-min.js";
 
     private Map<String, Boolean> weblets = new HashMap<String, Boolean>();
     private boolean htmlEditor = false;
+    private boolean yui = false;
 
     public WriteWebletIncludes() {
         weblets.put("com.flexive.faces.weblets/js/flexiveComponents.js", false);
@@ -137,6 +139,9 @@ public class WriteWebletIncludes extends UIOutput {
             out.write("flexive.input.initHtmlEditor(false);");
             FxJavascriptUtils.endJavascript(out);
         }
+        if (isYui()) {
+            out.write(getWebletInclude(WEBLET_YUI));
+        }
     }
 
     public boolean isHtmlEditor() {
@@ -150,11 +155,23 @@ public class WriteWebletIncludes extends UIOutput {
         this.htmlEditor = htmlEditor;
     }
 
+    public boolean isYui() {
+        if (FxJsfComponentUtils.getBooleanValue(this, "yui") != null) {
+            return FxJsfComponentUtils.getBooleanValue(this, "yui");
+        }
+        return yui;
+    }
+
+    public void setYui(boolean yui) {
+        this.yui = yui;
+    }
+
     @Override
     public Object saveState(FacesContext context) {
-        final Object[] state = new Object[2];
+        final Object[] state = new Object[3];
         state[0] = super.saveState(context);
         state[1] = this.htmlEditor;
+        state[2] = this.yui;
         return state;
     }
 
@@ -163,5 +180,6 @@ public class WriteWebletIncludes extends UIOutput {
         final Object[] state = (Object[]) oState;
         super.restoreState(context, state[0]);
         this.htmlEditor = (Boolean) state[1];
+        this.yui = (Boolean) state[2];
     }
 }

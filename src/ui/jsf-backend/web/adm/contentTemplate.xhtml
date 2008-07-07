@@ -12,7 +12,7 @@
     <base href="#{fxSystemBean.documentBase}"/>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
     <t:stylesheet path="/adm/css/content.css"/>
-    <fx:includes/>
+    <fx:includes yui="true"/>
 
     <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/shared.js"/>
     <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/admin.js"/>
@@ -24,7 +24,6 @@
             return "#{fxSystemBean.documentBase}";
         }
     </script>
-    <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/yui/yuiloader/yuiloader-beta-min.js"> </script>
 
     <ui:insert name="head"/>
 </t:documentHead>
