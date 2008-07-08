@@ -543,7 +543,12 @@ public class FxPropertyEdit extends FxProperty {
      * @return the property itself, useful for chained calls
      */
     public FxPropertyEdit setReferencedList(FxSelectList referencedList) {
-        this.referencedList = referencedList;
+        if( this.referencedList == null && this.defaultValue == null ) {
+            this.referencedList = referencedList;
+            //default value can only be determined once the referenced list is known
+            this.defaultValue = getEmptyValue();
+        } else
+            this.referencedList = referencedList;
         return this;
     }
 

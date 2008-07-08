@@ -69,11 +69,19 @@ public class FxProperty extends FxStructureElement implements Serializable {
         this.overrideACL = overrideACL;
         this.ACL = ACL;
         this.dataType = dataType;
-        this.defaultValue = defaultValue == null ? getEmptyValue() : defaultValue;
-        this.multiplicity = multiplicity;
-        this.fulltextIndexed = fulltextIndexed;
         this.referencedType = referencedType;
         this.referencedList = referencedList;
+        if (dataType != null) {
+            //default value can only be determined once the referenced list is known
+            if ((dataType == FxDataType.SelectOne || dataType == FxDataType.SelectMany) &&
+                    referencedList == null)
+                this.defaultValue = null;
+            else
+                this.defaultValue = defaultValue == null ? getEmptyValue() : defaultValue;
+        } else
+            this.defaultValue = defaultValue;
+        this.multiplicity = multiplicity;
+        this.fulltextIndexed = fulltextIndexed;
         this.uniqueMode = uniqueMode;
     }
 
