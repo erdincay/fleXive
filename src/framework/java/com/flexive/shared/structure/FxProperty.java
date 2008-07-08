@@ -32,6 +32,7 @@
 package com.flexive.shared.structure;
 
 import com.flexive.shared.FxLanguage;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.value.*;
@@ -372,6 +373,8 @@ public class FxProperty extends FxStructureElement implements Serializable {
      * @return empty FxValue instance for the data type
      */
     protected FxValue getEmptyValue(boolean multiLang, long lang) {
+        if (this.dataType == null)
+            throw new FxApplicationException("ex.structure.dataType.property", getName()).asRuntimeException();
         switch (this.getDataType()) {
             case HTML:
                 return new FxHTML(multiLang, lang, FxHTML.EMPTY).setEmpty();
