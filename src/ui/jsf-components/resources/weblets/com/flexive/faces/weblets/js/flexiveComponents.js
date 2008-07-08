@@ -146,6 +146,40 @@ flexive.yui.datatable = new function() {
      * @return  a PK object, e.g. {id: 21, version: 10}
      */
     this.getPk = function(/* YAHOO.widget.DataTable */ dataTable, /* Element */ element) {
+        return flexive.util.parsePk(this._getValue(dataTable, element, "pk"));
+    }
+
+    /**
+     * <p>Return the permissions object of the result table row/column of the given element (e.g. an event target).
+     * Supports both list and thumbnail view.</p>
+     *
+     * <p>Note that the permissions are only available if they were selected in the FxSQL query (@permissions).</p>
+     *
+     * @param dataTable the datatable variable (set with the 'var' attribute of fx:resultTable)
+     * @param element   the table element (i.e. an element nested in a table cell/row)
+     * @return  <p>a permissions object with the following boolean properties: <ul>
+     * <li>read</li>
+     * <li>edit</li>
+     * <li>relate</li>
+     * <li>delete</li>
+     * <li>export</li>
+     * <li>create</li>
+     * </ul>
+     * A property is set if the current user has the appropriate rights to perform the action.</p>
+     */
+    this.getPermissions = function(/* YAHOO.widget.DataTable */ dataTable, /* Element */ element) {
+        var p = this._getValue(dataTable, element, "permissions");
+        return {
+            "read": (p & 1)  > 0,
+            "create": (p & 2) > 0,
+            "delete": (p & 4) > 0,
+            "edit": (p & 8) > 0,
+            "export": (p & 16) > 0,
+            "relate": (p & 32) > 0
+        };
+    }
+
+    this._getValue = function(/* YAHOO.widget.DataTable */ dataTable, /* Element */ element, /* String */ property) {
         var elRow = dataTable.getTrEl(element);
         var record = dataTable.getRecord(elRow);
         if (record == null) {
@@ -153,14 +187,14 @@ flexive.yui.datatable = new function() {
             return null;
         }
         var data = record.getData();
-        if (data.pk) {
-            // only one pk for this column, return it
-            return flexive.util.parsePk(data.pk);
+        if (data[property] && !YAHOO.lang.isArray(data[property])) {
+            // only one property for this column, return it
+            return data[property];
         } else {
-            // one PK per column, get column index and return PK
+            // one property per column, get column index and return PK
             var elCol = dataTable.getTdEl(element);
             var col = dataTable.getColumn(elCol);
-            return flexive.util.parsePk(data.pks[col.getKeyIndex()]);
+            return data[property][col.getKeyIndex()];
         }
     }
 }
@@ -212,7 +246,7 @@ flexive.yui.datatable.ThumbnailView.prototype = {
     getRows: function() {
         // transpose the linear result rows according to the grid size
         var grid = [];
-        var currentRow = { "pks" : [] };    // the columns of the current row
+        var currentRow = { "pk" : [], "permissions": [] };    // the columns of the current row
         var currentColumn = 0;
         for (var i = 0; i < this.result.rowCount; i++) {
             var resultRow = this.result.rows[i];
@@ -226,12 +260,13 @@ flexive.yui.datatable.ThumbnailView.prototype = {
             if (currentColumn >= this.gridColumns) {
                 // grid row completed
                 grid.push(currentRow);
-                currentRow = { "pks" : [] };
+                currentRow = { "pk" : [], "permissions": [] };
                 currentColumn = 0;
             }
             // store column
             currentRow["c" + currentColumn] = data;
-            currentRow.pks.push(resultRow.pk);
+            currentRow.pk.push(resultRow.pk);
+            currentRow.permissions.push(resultRow.permissions);
             currentColumn++;
         }
         if (currentColumn > 0) {
@@ -241,7 +276,7 @@ flexive.yui.datatable.ThumbnailView.prototype = {
     },
 
     getResponseSchema: function() {
-        var fields = ["pks"];
+        var fields = ["pk", "permissions"];
         for (var i = 0; i < this.gridColumns; i++) {
             fields.push("c" + i);
         }

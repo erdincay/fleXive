@@ -411,6 +411,7 @@ public class SqlQueryBuilder implements Serializable {
      * @return  this
      */
     public SqlQueryBuilder select(String... columns) {
+        selectColumns.clear();
         selectColumns.addAll(Arrays.asList(columns));
         if (columns.length > 0) {
             includeBasicSelects = false;

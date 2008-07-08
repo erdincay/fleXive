@@ -34,7 +34,7 @@
 package com.flexive.war.filter;
 
 import com.flexive.faces.components.JsonRpcCallRenderer;
-import com.flexive.faces.javascript.yui.search.YahooResultProvider;
+import com.flexive.faces.javascript.yui.YahooResultProvider;
 import com.flexive.war.javascript.BriefcaseEditor;
 import com.flexive.war.javascript.ContentEditor;
 import com.flexive.war.javascript.SearchQueryEditor;

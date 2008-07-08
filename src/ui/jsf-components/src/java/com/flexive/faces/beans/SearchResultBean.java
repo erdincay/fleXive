@@ -32,7 +32,7 @@
 package com.flexive.faces.beans;
 
 import com.flexive.faces.FxJsfUtils;
-import com.flexive.faces.javascript.yui.search.YahooResultProvider;
+import com.flexive.faces.javascript.yui.YahooResultProvider;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -92,7 +92,7 @@ public class SearchResultBean implements ActionBean, Serializable {
                     return null;
                 }
                 resetFilters();
-                setQueryBuilder(getSqlQueryBuilder().condition("*", PropertyValueComparator.EQ, query));
+                setQueryBuilder(createSqlQueryBuilder().condition("*", PropertyValueComparator.EQ, query));
                 show();
             } else if ("nodeSearch".equals(action)) {
                 // search in subtree
@@ -104,7 +104,7 @@ public class SearchResultBean implements ActionBean, Serializable {
                 final long id = FxJsfUtils.getLongParameter("nodeId");
                 final boolean liveTree = FxJsfUtils.getBooleanParameter("liveMode", false);
                 setVersionFilter(liveTree ? VersionFilter.LIVE : VersionFilter.MAX);
-                setQueryBuilder(getSqlQueryBuilder().isChild(id));
+                setQueryBuilder(createSqlQueryBuilder().isChild(id));
                 show();
             } else if ("openBriefcase".equals(action) || "openBriefcaseDetails".equals(action)) {
                 if (StringUtils.isBlank(FxJsfUtils.getParameter("briefcaseId"))) {
@@ -115,7 +115,7 @@ public class SearchResultBean implements ActionBean, Serializable {
                 final long briefcaseId = FxJsfUtils.getLongParameter("briefcaseId");
                 resetFilters();
                 getSessionData().setBriefcaseId(briefcaseId);
-                setQueryBuilder(getSqlQueryBuilder().filterBriefcase(briefcaseId));
+                setQueryBuilder(createSqlQueryBuilder().filterBriefcase(briefcaseId));
                 show();
             }
         } catch (Exception e) {
@@ -125,7 +125,7 @@ public class SearchResultBean implements ActionBean, Serializable {
         return null;
     }
 
-    private SqlQueryBuilder getSqlQueryBuilder() {
+    private SqlQueryBuilder createSqlQueryBuilder() {
         final SqlQueryBuilder builder = new SqlQueryBuilder(location, getViewType());
         builder.maxRows(getFetchRows());
         builder.filterVersion(getVersionFilter());
@@ -178,8 +178,11 @@ public class SearchResultBean implements ActionBean, Serializable {
 
     public FxResultSet getResult() throws FxApplicationException {
         if (result == null) {
-            result = getQueryBuilder().startRow(0).maxRows(Integer.MAX_VALUE).getResult();
-
+            result = getQueryBuilder()
+                    .select("@pk", "@permissions", "@*")
+                    .startRow(0)
+                    .maxRows(Integer.MAX_VALUE)
+                    .getResult();
         }
         return result;
     }

@@ -31,29 +31,24 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.faces.javascript.yui.search;
+package com.flexive.faces.javascript.yui;
 
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.security.PermissionSet;
 import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.search.*;
-import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.war.JsonWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.lang.ArrayUtils;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
-import java.util.AbstractMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.Arrays;
 
 /**
  * Provides map interfaces for generating JSON row and column information
@@ -133,6 +128,18 @@ public class YahooResultProvider implements Serializable {
                 // add special PK column
                 writer.writeAttribute("pk", row.getPk("@pk"));
             }
+            if (result.getColumnIndex("@permissions") != -1) {
+                // add permissions object
+                final PermissionSet permissions = row.getPermissions(result.getColumnIndex("@permissions"));
+                int perms = 0;
+                perms |= (permissions.isMayRead() ? 1 : 0);         // read
+                perms |= (permissions.isMayCreate() ? 1 : 0) << 1;  // create
+                perms |= (permissions.isMayDelete() ? 1 : 0) << 2;  // delete
+                perms |= (permissions.isMayEdit() ? 1 : 0)   << 3;  // edit
+                perms |= (permissions.isMayExport() ? 1 : 0) << 4;  // export
+                perms |= (permissions.isMayRelate() ? 1 : 0) << 5;  // relate
+                writer.writeAttribute("permissions", perms);
+            }
             writer.closeMap();
         }
         writer.closeArray();
@@ -170,6 +177,9 @@ public class YahooResultProvider implements Serializable {
         // include primary key in attribute pk, if available
         if (result.getColumnIndex("@pk") != -1) {
             writer.startMap().writeAttribute("key", "pk").closeMap();
+        }
+        if (result.getColumnIndex("@permissions") != -1) {
+            writer.startMap().writeAttribute("key", "permissions").closeMap();
         }
         writer.closeArray();
         writer.closeMap();
