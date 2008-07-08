@@ -383,6 +383,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 sql = new StringBuilder(2000);
             createDetailEntries(con, env, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
             checkUniqueConstraints(con, env, sql, pk, content.getTypeId());
+            updateContentBinaryEntry(con, pk, content.getBinaryPreviewId(), content.getBinaryPreviewACL());
         } catch (FxApplicationException e) {
             if (e instanceof FxCreateException)
                 throw (FxCreateException) e;

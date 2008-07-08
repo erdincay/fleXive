@@ -46,6 +46,7 @@ import static com.flexive.tests.embedded.FxTestUtils.logout;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -94,6 +95,75 @@ public class ImageTypeTest {
             img.setValue("/Filename", new FxString(false, "Exif.JPG"));
             img = co.prepareSave(img);
             imgPK = co.save(img);
+        } finally {
+            if( imgPK != null )
+                co.remove(imgPK);
+        }
+    }
+
+    /**
+     * A test related to issue FX-270:
+     * check if main pictures of a content are correctly set in new versions and when the image binary is replaced
+     *
+     * @throws Exception on errors
+     */
+    @Test
+    public void mainPicTest() throws Exception {
+        FxPK imgPK = null;
+        try {
+            File testFile1 = new File("src/framework/testresources/image/Exif.JPG");
+            if (!testFile1.exists())
+                return;
+            File testFile2 = new File("src/framework/testresources/image/GIF_Image.GIF");
+            if (!testFile2.exists())
+                return;
+
+            FxType type = CacheAdmin.getEnvironment().getType(IMAGE_TYPE);
+
+            FileInputStream fis = new FileInputStream(testFile1);
+            BinaryDescriptor binary = new BinaryDescriptor(testFile1.getName(), testFile1.length(), fis);
+            FxBinary fxBin = new FxBinary(false, binary);
+
+            //version 1
+            FxContent img = co.initialize(type.getId());
+            img.setValue("/ImageBinary", fxBin);
+            img.setValue("/Filename", new FxString(false, "Exif.JPG"));
+            img = co.prepareSave(img);
+            imgPK = co.save(img);
+            img = co.load(imgPK);
+            fxBin = (FxBinary)img.getValue("/ImageBinary");
+            long bin1Id = fxBin.getBestTranslation().getId();
+            Assert.assertEquals(img.getBinaryPreviewId(), bin1Id, "Image binary is not the preview binary!");
+            //change the image
+            fis = new FileInputStream(testFile2);
+            binary = new BinaryDescriptor(testFile2.getName(), testFile2.length(), fis);
+            fxBin = new FxBinary(false, binary);
+            img.setValue("/ImageBinary", fxBin);
+            img.setValue("/Filename", new FxString(false, "GIF_Image.GIF"));
+            img = co.prepareSave(img);
+            imgPK = co.save(img);
+            img = co.load(imgPK);
+            fxBin = (FxBinary)img.getValue("/ImageBinary");
+            long bin2Id = fxBin.getBestTranslation().getId();
+            Assert.assertNotSame(bin1Id, bin2Id);
+            Assert.assertEquals(img.getBinaryPreviewId(), bin2Id);
+            
+            //version 2
+            FxPK pk2 = co.createNewVersion(img);
+            img = co.load(pk2);
+            Assert.assertEquals(img.getBinaryPreviewId(), bin2Id);
+            //change the image
+            fis = new FileInputStream(testFile1);
+            binary = new BinaryDescriptor(testFile1.getName(), testFile1.length(), fis);
+            fxBin = new FxBinary(false, binary);
+            img.setValue("/ImageBinary", fxBin);
+            img.setValue("/Filename", new FxString(false, "Exif.JPG"));
+            img = co.prepareSave(img);
+            imgPK = co.save(img);
+            img = co.load(imgPK);
+            fxBin = (FxBinary)img.getValue("/ImageBinary");
+            long bin3Id = fxBin.getBestTranslation().getId();
+            Assert.assertEquals(img.getBinaryPreviewId(), bin3Id);
         } finally {
             if( imgPK != null )
                 co.remove(imgPK);
