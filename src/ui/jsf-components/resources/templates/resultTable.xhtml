@@ -32,6 +32,7 @@ Parameters:
             var #{var};
             flexive.yui.require("datatable");
             flexive.yui.onYahooLoaded(function() {
+                var containerElName = "#{var}_datatable";
                 var createFun = function(result) {
                     //var result = eval("(" + getJsonRpc().SearchResultWriter.getResultRows("SELECT id, caption, created_at", 0, 2000) + ")");
                     // get JSON representation of the search result
@@ -41,7 +42,7 @@ Parameters:
                     var dataSource = new YAHOO.util.DataSource(view.getRows());
                     dataSource.responseType = YAHOO.util.DataSource.TYPE_JSARRAY;
                     dataSource.responseSchema = view.getResponseSchema();
-                    var dataTable = new YAHOO.widget.DataTable("#{var}_datatable",
+                    var dataTable = new YAHOO.widget.DataTable(containerElName,
                         view.getColumns(), dataSource,
                         { paginator: new YAHOO.widget.Paginator({
                             template : "#{fxMessageBean['ResultTable.label.rowSelect']}",
@@ -65,6 +66,10 @@ Parameters:
                     }
                     return dataTable;
                 }
+                // disable text selection
+                document.getElementById(containerElName).onselectstart = function() { return false; };
+                document.getElementById(containerElName).style.MozUserSelect = "none";
+
                 #{var} = createFun(#{fx:getJsonResult(value, viewType)});
                 #{var}._reset = function(result) {
                     var reset = #{var}._reset;  // keep old method

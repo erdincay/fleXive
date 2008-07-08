@@ -164,6 +164,7 @@ public class YahooResultProvider implements Serializable {
             writer.writeAttribute("key", getColumnKey(i));
             String parser = "YAHOO.util.DataSource.parseString";    // the YUI data parser used for sorting
             try {
+                // set parser according to property type
                 final FxProperty property = environment.getProperty(result.getColumnName(i));
                 if (property.getEmptyValue().getDefaultTranslation() instanceof Number) {
                     parser = "YAHOO.util.DataSource.parseNumber";

@@ -15,7 +15,7 @@
         <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/briefcasePanel.js"/>
         <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/searchQueryPanel.js"/>
         <script type="text/javascript">
-
+        <!--
             // search query methods
 
             // briefcase methods
@@ -62,7 +62,7 @@
                 }
             }
 
-            // ----------- context menu functions -----------------
+            // =========== context menu functions =================
 
             function showContextMenu() {
                 var selectionAvailable = !parent.getContentClipboard().isEmpty();
@@ -103,7 +103,11 @@
                 try {
                     // clone clipboard array, otherwise JSON/RPC won't recognize it as an array
                     // since it was created in another frame
-                    var ids = parent.getContentClipboard().get().slice();
+                    var ids = [];
+                    var clipboardIds = parent.getContentClipboard().get();
+                    for (var i = 0; i < clipboardIds.length; i++) {
+                        ids.push(clipboardIds[i]);
+                    }
                     getJsonRpc().BriefcaseEditor.add(getContextBriefcaseId(), ids);
                     parent.getContentClipboard().clear();
                     briefcasePanel.reload();
@@ -192,7 +196,7 @@
                 return contextQueryName;
             }
 
-            // ------------ initialize the panels ---------------------
+            // ============ initialize the panels =====================
 
             var briefcasePanel;
             var queryPanel;
@@ -207,7 +211,7 @@
                 briefcasePanel.reload();
                 queryPanel.reload();
             }
-
+        //-->
         </script>
     </ui:define>
     <ui:define name="content">

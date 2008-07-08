@@ -318,5 +318,45 @@ table.welcometbl tbody tr td table.links tbody tr td {
 /** YUI styles */
 
 li.yuimenuitem {
-    padding: 5px 0 5px 7px !important;
+    padding: 2px 0 2px 7px !important;
 }
+
+li.yuimenuitem a {
+    font-size: 11px !important;
+    font-weight: normal !important;
+}
+
+/* YUI Datatable */
+
+/* Striping */
+tr.yui-dt-odd,
+tr.yui-dt-even td.yui-dt-asc,
+tr.yui-dt-even td.yui-dt-desc {
+    background-color: #eaf1d6 !important;
+}
+
+tr.yui-dt-odd td.yui-dt-asc,
+tr.yui-dt-odd td.yui-dt-desc {
+    background-color: #d3dcb7 !important;
+}
+
+/* Highlighting */
+tr.yui-dt-highlighted,
+tr.yui-dt-odd td.yui-dt-highlighted,
+tr.yui-dt-even td.yui-dt-highlighted,
+tr.yui-dt-highlighted td.yui-dt-asc,
+tr.yui-dt-highlighted td.yui-dt-desc {
+    background: #d3dcb7 !important;
+}
+
+/* Selection */
+tr.yui-dt-selected td,
+tr.yui-dt-selected td.yui-dt-asc,
+tr.yui-dt-selected td.yui-dt-desc,
+tr.yui-dt-selected a,
+tr.yui-dt-even td.yui-dt-selected,
+tr.yui-dt-odd td.yui-dt-selected {
+    background: #506a00 !important; 
+    color: #FFF !important;
+}
+
