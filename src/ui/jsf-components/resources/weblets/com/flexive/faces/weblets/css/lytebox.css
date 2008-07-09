@@ -4,7 +4,7 @@
 	#lbOverlay.green { background-color: #003300; }
 	#lbOverlay.blue { background-color: #011D50; }
 	#lbOverlay.gold { background-color: #666600; }
-    #lbOverlay.flexive { background-color: #EBF5CC; }
+    #lbOverlay.flexive { /*background-color: #EBF5CC;*/ }
 
 #lbMain { position: absolute; left: 0; width: 100%; z-index: 99999; text-align: center; line-height: 0; }
 #lbMain a img { border: none; }
