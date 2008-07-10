@@ -137,6 +137,16 @@
             if( !new File(file).exists() ) {
                 ant.fail(message:"Please create a customized ${file} file from build.properties.sample.")
             }
+            antVersion = org.apache.tools.ant.Main.class.getPackage().getImplementationVersion().split("\\.")
+            int major = Integer.valueOf(antVersion[0])
+            int minor = Integer.valueOf(antVersion[1])
+            if( major == 1 &amp;&amp; minor >= 7 ) {
+               //version 1.7+ is ok
+            } else if( major > 1 ) {
+               //v2+ should be ok as well
+            } else {
+               ant.fail(message:"Ant version 1.7 or higher is required! You are using version ${org.apache.tools.ant.Main.class.getPackage().getImplementationVersion()}!")
+            }
         </groovy>
 		<mkdir dir="${build.framework.classes.dir}"/>
 		<mkdir dir="${build.ui.classes.dir}"/>
