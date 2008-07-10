@@ -33,6 +33,7 @@ package com.flexive.faces.components;
 
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.FxJsfComponentUtils;
+import static com.flexive.faces.FxJsfComponentUtils.getBooleanValue;
 import com.flexive.faces.beans.SystemBean;
 import com.flexive.faces.javascript.FxJavascriptUtils;
 import static com.flexive.faces.javascript.FxJavascriptUtils.beginJavascript;
@@ -61,10 +62,13 @@ public class WriteWebletIncludes extends UIOutput {
     private static final String REQ_RENDERED = WriteWebletIncludes.class.getName() + ".WEBLETS_RENDERED";
     private static final String WEBLET_TINYMCE = "com.flexive.faces.weblets/js/tiny_mce/tiny_mce_src.js";
     private static final String WEBLET_YUI = "com.flexive.faces.weblets/js/yui/yuiloader/yuiloader-beta-min.js";
+    private static final String WEBLET_JSONRPC = "com.flexive.faces.weblets/js/jsonrpc.js";
 
     private Map<String, Boolean> weblets = new HashMap<String, Boolean>();
     private boolean htmlEditor = false;
     private boolean yui = false;
+    private boolean jsonRpc = false;
+    private boolean all = false;
 
     public WriteWebletIncludes() {
         weblets.put("com.flexive.faces.weblets/js/flexiveComponents.js", false);
@@ -149,11 +153,17 @@ public class WriteWebletIncludes extends UIOutput {
         if (isYui()) {
             out.write(getWebletInclude(WEBLET_YUI));
         }
+        if (isJsonRpc()) {
+            out.write(getWebletInclude(WEBLET_JSONRPC));
+        }
     }
 
     public boolean isHtmlEditor() {
-        if (FxJsfComponentUtils.getBooleanValue(this, "htmlEditor") != null) {
-            return FxJsfComponentUtils.getBooleanValue(this, "htmlEditor");
+        if (isAll()) {
+            return true;
+        }
+        if (getBooleanValue(this, "htmlEditor") != null) {
+            return getBooleanValue(this, "htmlEditor");
         }
         return htmlEditor;
     }
@@ -163,8 +173,11 @@ public class WriteWebletIncludes extends UIOutput {
     }
 
     public boolean isYui() {
-        if (FxJsfComponentUtils.getBooleanValue(this, "yui") != null) {
-            return FxJsfComponentUtils.getBooleanValue(this, "yui");
+        if (isAll()) {
+            return true;
+        }
+        if (getBooleanValue(this, "yui") != null) {
+            return getBooleanValue(this, "yui");
         }
         return yui;
     }
@@ -173,12 +186,39 @@ public class WriteWebletIncludes extends UIOutput {
         this.yui = yui;
     }
 
+    public boolean isJsonRpc() {
+        if (isAll()) {
+            return true;
+        }
+        if (getBooleanValue(this, "jsonRpc") != null) {
+            return getBooleanValue(this, "jsonRpc");
+        }
+        return jsonRpc;
+    }
+
+    public void setJsonRpc(boolean jsonRpc) {
+        this.jsonRpc = jsonRpc;
+    }
+
+    public boolean isAll() {
+        if (getBooleanValue(this, "all") != null) {
+            return getBooleanValue(this, "all");
+        }
+        return all;
+    }
+
+    public void setAll(boolean all) {
+        this.all = all;
+    }
+
     @Override
     public Object saveState(FacesContext context) {
-        final Object[] state = new Object[3];
+        final Object[] state = new Object[5];
         state[0] = super.saveState(context);
         state[1] = this.htmlEditor;
         state[2] = this.yui;
+        state[3] = this.all;
+        state[4] = this.jsonRpc;
         return state;
     }
 
@@ -188,5 +228,7 @@ public class WriteWebletIncludes extends UIOutput {
         super.restoreState(context, state[0]);
         this.htmlEditor = (Boolean) state[1];
         this.yui = (Boolean) state[2];
+        this.all = (Boolean) state[3];
+        this.jsonRpc = (Boolean) state[4];
     }
 }

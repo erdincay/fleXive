@@ -46,7 +46,13 @@ Parameters:
                 fields: dsColumns
             };
 
-            var dataTable = new YAHOO.widget.DataTable("#{id}_container", columns, source);
+            var dataTable = new YAHOO.widget.DataTable("#{id}_container", columns, source,
+                { paginator: new YAHOO.widget.Paginator({
+                    template : "#{fxMessageBean['ResultTable.label.rowSelect']}",
+                    rowsPerPage : 10,
+                    rowsPerPageOptions : [10, 25, 50, 100]
+                  })
+            });
             dataTable.subscribe("rowMouseoverEvent", dataTable.onEventHighlightRow);
             dataTable.subscribe("rowMouseoutEvent", dataTable.onEventUnhighlightRow);
             document.getElementById("#{id}_container").style.display = "block";

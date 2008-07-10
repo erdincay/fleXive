@@ -32,6 +32,7 @@
 package com.flexive.faces.components.input;
 
 import com.flexive.faces.FxJsfUtils;
+import com.flexive.faces.javascript.FxJavascriptUtils;
 import com.flexive.faces.beans.UserConfigurationBean;
 import com.flexive.faces.beans.MessageBean;
 import com.flexive.shared.*;
@@ -182,6 +183,14 @@ class EditModeHelper extends RenderHelper {
         }
         input.setValue(getTextValue(value, languageId));
         input.setStyleClass(FxValueInputRenderer.CSS_TEXT_INPUT + singleLanguageStyle(languageId));
+
+        // add autocomplete YUI component
+        if (StringUtils.isNotBlank(inputComponent.getAutocompleteHandler())) {
+            final YuiAutocompleteWriter yuiWriter = new YuiAutocompleteWriter();
+            yuiWriter.setInputClientId(inputId);
+            yuiWriter.setAutocompleteHandler(inputComponent.getAutocompleteHandler());
+            parent.getChildren().add(yuiWriter);
+        }
     }
 
     private void renderTextArea(UIComponent parent, final String inputId, final FxLanguage language, final int rows, final boolean useHTMLEditor) throws IOException {
@@ -703,6 +712,55 @@ class EditModeHelper extends RenderHelper {
             final Object[] state = (Object[]) stateValue;
             super.restoreState(context, state[0]);
             languageId = (Long) state[1];
+        }
+    }
+
+    public static class YuiAutocompleteWriter extends DeferredInputWriter {
+        private String autocompleteHandler;
+
+        @Override
+        public void encodeBegin(FacesContext facesContext) throws IOException {
+            final ResponseWriter out = facesContext.getResponseWriter();
+            // write autocomplete container
+            final String containerId = inputClientId + "_ac";
+            out.write("<div id=\"" + containerId + "\"> </div>");
+
+            // initialize autocomplete
+            FxJavascriptUtils.beginJavascript(out);
+            FxJavascriptUtils.writeYahooRequires(out, "autocomplete");
+            FxJavascriptUtils.onYahooLoaded(out,
+                    "function() {\n"
+                    + "    var handler = eval('(' + \"" + StringUtils.replace(autocompleteHandler, "\"", "\\\"") + "\" + ')');\n"
+                    + "    var ds = handler.getDataSource();\n"
+                    + "    var ac = new YAHOO.widget.AutoComplete('" + inputClientId + "', '" + containerId + "', ds);\n"
+                    + "    ac.formatResult = handler.formatResult;\n"
+                    + "    ac.forceSelection = true;\n"
+                    + "}"
+            );
+            FxJavascriptUtils.endJavascript(out);
+        }
+
+        public String getAutocompleteHandler() {
+            return autocompleteHandler;
+        }
+
+        public void setAutocompleteHandler(String autocompleteHandler) {
+            this.autocompleteHandler = autocompleteHandler;
+        }
+
+        @Override
+        public Object saveState(FacesContext context) {
+            final Object[] state = new Object[2];
+            state[0] = super.saveState(context);
+            state[1] = autocompleteHandler;
+            return state;
+        }
+
+        @Override
+        public void restoreState(FacesContext context, Object stateValue) {
+            final Object[] state = (Object[]) stateValue;
+            super.restoreState(context, state[0]);
+            autocompleteHandler = (String) state[1];
         }
     }
 }

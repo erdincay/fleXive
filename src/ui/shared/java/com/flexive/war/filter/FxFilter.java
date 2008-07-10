@@ -33,12 +33,12 @@ package com.flexive.war.filter;
 
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.war.webdav.FxWebDavUtils;
+import com.metaparadigm.jsonrpc.JSONRPCBridge;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,6 +46,7 @@ import org.apache.commons.logging.LogFactory;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 public class FxFilter implements Filter {
@@ -57,6 +58,8 @@ public class FxFilter implements Filter {
     private FilterConfig config = null;
     private static final String X_POWERED_BY_VALUE = "[fleXive]";
     private static volatile boolean installedTimerService = false;
+    public static final String SESSION_JSON_BRIDGE = "JSONRPCBridge";
+    private static final String SESSION_JSON_JSF = "FxFilter_JSON_JSF";
 
     /**
      * Returns the root of the war directory on the filesystem.
@@ -121,6 +124,7 @@ public class FxFilter implements Filter {
                     }
                 }
             }
+            initializeJsonRpc(request.getSession());
 
             if (!isWebdav && FxWebDavUtils.isWebDavPropertyMethod((HttpServletRequest) servletRequest)) {
                 // This is an invalid webdav request - send a not allowed flag and kill the session immediatly
@@ -230,6 +234,56 @@ public class FxFilter implements Filter {
             FxContext.cleanup();
         }
 
+    }
+
+    private void initializeJsonRpc(HttpSession session) {
+        synchronized(session) {
+            if (session.getAttribute(SESSION_JSON_JSF) == null) {
+                // try to initialize the JSF JSON/RPC beans
+                session.setAttribute(SESSION_JSON_JSF, true);
+                final JSONRPCBridge bridge = getJsonRpcBridge(session, true);
+                registerJsonRpcObjects(bridge);
+                session.setAttribute(SESSION_JSON_BRIDGE, bridge);
+            }
+        }
+    }
+
+    /**
+     * Registers all JSON/RPC objects for a user session. JSON/RPC providers that are not part of the
+     * shared WAR module must be included dynamically (<code>Class.forName(...)</code>), since we don't
+     * want to introduce compile-time dependencies.
+     *
+     * @param bridge    the JSON/RPC bridge instance
+     */
+    protected void registerJsonRpcObjects(JSONRPCBridge bridge) {
+        registerJsonRpcObject(bridge, "YahooResultProvider", "com.flexive.faces.javascript.yui.YahooResultProvider");
+        registerJsonRpcObject(bridge, "AutoCompleteProvider", "com.flexive.faces.javascript.AutoCompleteProvider");
+    }
+
+    /**
+     * Dynamic registration of a Java class in the JSON/RPC bridge. If the class could not be loaded,
+     * a log message will be written but no exception will be thrown.
+     *
+     * @param bridge    the JSON/RPC bridge
+     * @param name      the name under which the bean will be addressed by JSON/RPC
+     * @param className the fully qualified class name
+     */
+    protected void registerJsonRpcObject(JSONRPCBridge bridge, String name, String className) {
+        try {
+            bridge.registerObject(name, Class.forName(className).newInstance());
+        } catch (ClassNotFoundException e) {
+            LOG.warn("Failed to create JSF JSON/RPC objects: " + e.getMessage(), e);
+        } catch (IllegalAccessException e) {
+            LOG.warn("Failed to create JSF JSON/RPC objects: " + e.getMessage(), e);
+        } catch (InstantiationException e) {
+            LOG.warn("Failed to create JSF JSON/RPC objects: " + e.getMessage(), e);
+        }
+    }
+
+    public static JSONRPCBridge getJsonRpcBridge(HttpSession session, boolean force) {
+        return session.getAttribute(SESSION_JSON_BRIDGE) != null || !force
+                ? (JSONRPCBridge) session.getAttribute(SESSION_JSON_BRIDGE)
+                : new JSONRPCBridge();
     }
 
     private int getDivisionId(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException {

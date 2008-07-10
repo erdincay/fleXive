@@ -89,6 +89,12 @@ public class SelectOneInputMapper extends InputMapper<FxLargeNumber, FxSelectOne
 
     /** {@inheritDoc} */
     @Override
+    public FxLargeNumber decode(FxSelectOne value) {
+        return new FxLargeNumber(value.isMultiLanguage(), value.getDefaultTranslation().getId());
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public List<? extends ValueComparator> getAvailableValueComparators() {
         return PropertyValueComparator.getAvailable(FxDataType.SelectOne);
     }

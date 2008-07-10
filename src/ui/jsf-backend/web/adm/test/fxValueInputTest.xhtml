@@ -9,7 +9,7 @@
       xmlns:fx="http://www.flexive.com/jsf/core">
   <head>
       <title>fx:fxValueInput test cases</title>
-      <fx:includes htmlEditor="true" yui="true"/>
+      <fx:includes all="true"/>
   </head>
   <body>
 
@@ -17,9 +17,24 @@
 
     <h3>fx:fxValueInput testcases</h3>
 
-    <h:form id="someFormId" enctype="multipart/form-data">
+    <h:form id="someFormId" enctype="multipart/form-data" styleClass="yui-skin-sam">
 
         <fx:fxValueInputLanguageSelect id="switchLanguages"/>
+
+        <h5>autocomplete</h5>
+        <script type="text/javascript">
+        <!--
+            var userAcHandler = new flexive.yui.AutoCompleteHandler(function(query) {
+                return eval("(" + flexive.util.getJsonRpc().AutoCompleteProvider.userQuery(query) + ")");
+            });
+        //-->
+        </script>
+        <fx:formRow label="Default autocomplete provider">
+            <fx:fxValueInput value="#{fxValueInputTestBean.stringValue}" autocompleteHandler="new flexive.yui.AutoCompleteHandler()"/>
+        </fx:formRow>
+        <fx:formRow label="User autocomplete provider">
+            <fx:fxValueInput value="#{fxValueInputTestBean.userStringValue}" autocompleteHandler="userAcHandler"/>
+        </fx:formRow>
 
         <h5>ui:repeat</h5>
         <table id="ui_repeat_basic">

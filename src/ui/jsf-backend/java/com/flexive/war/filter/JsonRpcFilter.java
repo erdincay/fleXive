@@ -33,8 +33,6 @@
  ***************************************************************/
 package com.flexive.war.filter;
 
-import com.flexive.faces.components.JsonRpcCallRenderer;
-import com.flexive.faces.javascript.yui.YahooResultProvider;
 import com.flexive.war.javascript.BriefcaseEditor;
 import com.flexive.war.javascript.ContentEditor;
 import com.flexive.war.javascript.SearchQueryEditor;
@@ -44,6 +42,8 @@ import com.flexive.war.javascript.tree.ContentTreeEditor;
 import com.flexive.war.javascript.tree.ContentTreeWriter;
 import com.flexive.war.javascript.tree.StructureTreeEditor;
 import com.flexive.war.javascript.tree.StructureTreeWriter;
+import static com.flexive.war.filter.FxFilter.SESSION_JSON_BRIDGE;
+import static com.flexive.war.filter.FxFilter.getJsonRpcBridge;
 import com.metaparadigm.jsonrpc.JSONRPCBridge;
 
 import javax.servlet.*;
@@ -52,6 +52,7 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 public class JsonRpcFilter implements Filter {
+    private static final String SESSION_INITIALIZED = "JsonRpcFilter_init";
 
     /**
      * {@inheritDoc}
@@ -81,22 +82,23 @@ public class JsonRpcFilter implements Filter {
      * @return the JSON/RPC bridge with all registered objects
      */
     public static JSONRPCBridge getJsonBridge(HttpSession session) {
-        if (session.getAttribute(JsonRpcCallRenderer.SESSION_JSON_BRIDGE) != null) {
-            return (JSONRPCBridge) session.getAttribute(JsonRpcCallRenderer.SESSION_JSON_BRIDGE);
+        synchronized(session) {
+            if (getJsonRpcBridge(session, false) != null && session.getAttribute(SESSION_INITIALIZED) != null) {
+                return getJsonRpcBridge(session, false);
+            }
+            session.setAttribute(SESSION_INITIALIZED, true);
+            final JSONRPCBridge bridge = getJsonRpcBridge(session, true);
+            bridge.registerObject("SearchResultWriter", new SearchResultWriter());
+            bridge.registerObject("StructureTreeWriter", new StructureTreeWriter());
+            bridge.registerObject("StructureTreeEditor", new StructureTreeEditor());
+            bridge.registerObject("ContentTreeWriter", new ContentTreeWriter());
+            bridge.registerObject("ContentTreeEditor", new ContentTreeEditor());
+            bridge.registerObject("ContentEditor", new ContentEditor());
+            bridge.registerObject("BriefcaseEditor", new BriefcaseEditor());
+            bridge.registerObject("SearchQueryEditor", new SearchQueryEditor());
+            bridge.registerObject("SystemInformation", new SystemInformation());
+            session.setAttribute(SESSION_JSON_BRIDGE, bridge);
+            return bridge;
         }
-        JSONRPCBridge bridge = new JSONRPCBridge();
-        bridge.registerObject("SearchResultWriter", new SearchResultWriter());
-        bridge.registerObject("StructureTreeWriter", new StructureTreeWriter());
-        bridge.registerObject("StructureTreeEditor", new StructureTreeEditor());
-        bridge.registerObject("ContentTreeWriter", new ContentTreeWriter());
-        bridge.registerObject("ContentTreeEditor", new ContentTreeEditor());
-        bridge.registerObject("ContentEditor", new ContentEditor());
-        bridge.registerObject("BriefcaseEditor", new BriefcaseEditor());
-        bridge.registerObject("SearchQueryEditor", new SearchQueryEditor());
-        bridge.registerObject("SystemInformation", new SystemInformation());
-        // TODO move Yahoo-UI stuff to JSF-components
-        bridge.registerObject("YahooResultProvider", new YahooResultProvider());
-        session.setAttribute(JsonRpcCallRenderer.SESSION_JSON_BRIDGE, bridge);
-        return bridge;
     }
 }

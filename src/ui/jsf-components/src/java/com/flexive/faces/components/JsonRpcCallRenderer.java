@@ -33,6 +33,7 @@ package com.flexive.faces.components;
 
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.war.JsonWriter;
+import com.flexive.war.filter.FxFilter;
 import com.metaparadigm.jsonrpc.JSONRPCBridge;
 import com.metaparadigm.jsonrpc.JSONRPCResult;
 import org.apache.commons.lang.StringUtils;
@@ -54,7 +55,6 @@ import java.io.StringWriter;
  */
 public class JsonRpcCallRenderer extends Renderer {
     private static final Log LOG = LogFactory.getLog(JsonRpcCallRenderer.class);
-    public static final String SESSION_JSON_BRIDGE = "JSONRPCBridge";
 
     /**
      * {@inheritDoc}
@@ -68,7 +68,7 @@ public class JsonRpcCallRenderer extends Renderer {
         }
         String jsonRequest = getJsonRequest(rpcCall);
         try {
-            JSONRPCBridge bridge = (JSONRPCBridge) FxJsfUtils.getSession().getAttribute(SESSION_JSON_BRIDGE);
+            JSONRPCBridge bridge = (JSONRPCBridge) FxJsfUtils.getSession().getAttribute(FxFilter.SESSION_JSON_BRIDGE);
             JSONRPCResult result = bridge.call(new Object[]{FxJsfUtils.getRequest()}, new JSONObject(jsonRequest));
             facesContext.getResponseWriter().write(result.getResult().toString());
         } catch (Throwable e) {

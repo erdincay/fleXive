@@ -37,7 +37,7 @@
     document.getElementById('initStatus').style.width = (getWindowWidth() / 2) + 'px';
     var polling = window.setInterval("updateStatus()", 1000);
     JSONRpcClient.max_req_active = 2;
-    getJsonRpc().SystemInformation.initEnvironment(function (result, exception) {
+    flexive.util.getJsonRpc().SystemInformation.initEnvironment(function (result, exception) {
         window.clearInterval(polling);
         updateStatus(); //"final" update
         document.getElementById('continue').style.display='block';
@@ -45,7 +45,7 @@
 
     updateStatus();
     function updateStatus() {
-        getJsonRpc().SystemInformation.getInitializationStatus(function (result, exception) {
+        flexive.util.getJsonRpc().SystemInformation.getInitializationStatus(function (result, exception) {
             document.getElementById('msg').innerHTML = result;
         });
     }

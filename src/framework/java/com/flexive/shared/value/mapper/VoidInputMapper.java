@@ -50,6 +50,12 @@ public final class VoidInputMapper extends InputMapper<FxValue, FxVoid> {
         return new FxVoid();
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public FxValue decode(FxVoid value) {
+        return value;
+    }
+
     /**
      * Return the singleton instance of the void input mapper.
      *

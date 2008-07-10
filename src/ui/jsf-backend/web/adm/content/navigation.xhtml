@@ -89,7 +89,7 @@
                 //getFxController().removeContent = false;
                 //getFxController().destroyChild(menuItem.getTreeNode());
                 try {
-                    getJsonRpc().ContentTreeEditor.remove(getObjectId(menuItem), false, treeLiveMode, false);
+                    flexive.util.flexive.util.getJsonRpc().ContentTreeEditor.remove(getObjectId(menuItem), false, treeLiveMode, false);
                     reloadContentTree();
                 } catch (e) {
                     alert(e.message);
@@ -104,7 +104,7 @@
                 //getFxController().removeContent = true;
                 //getFxController().destroyChild(menuItem.getTreeNode());
                 try {
-                    getJsonRpc().ContentTreeEditor.remove(getObjectId(menuItem), true, treeLiveMode, false);
+                    flexive.util.flexive.util.getJsonRpc().ContentTreeEditor.remove(getObjectId(menuItem), true, treeLiveMode, false);
                     reloadContentTree();
                 } catch (e) {
                     alert(e.message);
@@ -116,7 +116,7 @@
                 var name = prompt("#{fxMessageBean['ContentTree.dialog.prompt.createFolder']}", "#{fxMessageBean['ContentTree.dialog.prompt.createFolder.default']}");
                 if (name != null && name.length > 0) {
                     try {
-                        getJsonRpc().ContentTreeEditor.createFolder(getObjectId(menuItem), name);
+                        flexive.util.flexive.util.getJsonRpc().ContentTreeEditor.createFolder(getObjectId(menuItem), name);
                         reloadContentTree();
                     } catch (e) {
                         alert(e.message);
@@ -148,7 +148,7 @@
             // attach the selected rows from the content frame
             function attachContentSelection(menuItem) {
                 try {
-                    getJsonRpc().ContentTreeEditor.addReferences(getObjectId(menuItem), parent.getContentClipboard().get().slice());
+                    flexive.util.flexive.util.getJsonRpc().ContentTreeEditor.addReferences(getObjectId(menuItem), parent.getContentClipboard().get().slice());
                     parent.getContentClipboard().clear();
                     reloadContentTree();
                 } catch (e) {
@@ -164,7 +164,7 @@
             // activate the tree node
             function activateNode(menuItem) {
                 try {
-                    getJsonRpc().ContentTreeEditor.activate(getObjectId(menuItem), false);
+                    flexive.util.flexive.util.getJsonRpc().ContentTreeEditor.activate(getObjectId(menuItem), false);
                     reloadContentTree();
                 } catch (e) {
                     alert(e.message);
@@ -174,7 +174,7 @@
             // activate the tree node and its children
             function activateNodeAndChildren(menuItem) {
                 try {
-                    getJsonRpc().ContentTreeEditor.activate(getObjectId(menuItem), true);
+                    flexive.util.getJsonRpc().ContentTreeEditor.activate(getObjectId(menuItem), true);
                     reloadContentTree();
                 } catch (e) {
                     alert(e.message);
@@ -197,7 +197,7 @@
                     return;
                 }
                 try {
-                    getJsonRpc().ContentTreeEditor.remove(getObjectId(menuItem), /* remove content */ false,
+                    flexive.util.getJsonRpc().ContentTreeEditor.remove(getObjectId(menuItem), /* remove content */ false,
                             /* live tree */ true, /* delete children */ false);
                     reloadContentTree();
                 } catch (e) {
@@ -222,15 +222,15 @@
 
             // Paste a previously copied or cut tree node into the current node
             function pasteNode(menuItem) {
-                doPaste(menuItem, getJsonRpc().ContentTreeEditor.move, getJsonRpc().ContentTreeEditor.copy);
+                doPaste(menuItem, flexive.util.getJsonRpc().ContentTreeEditor.move, flexive.util.getJsonRpc().ContentTreeEditor.copy);
             }
 
             function pasteNodeAbove(menuItem) {
-                doPaste(menuItem, getJsonRpc().ContentTreeEditor.moveAbove, getJsonRpc().ContentTreeEditor.copyAbove);
+                doPaste(menuItem, flexive.util.getJsonRpc().ContentTreeEditor.moveAbove, flexive.util.getJsonRpc().ContentTreeEditor.copyAbove);
             }
 
             function pasteNodeBelow(menuItem) {
-                doPaste(menuItem, getJsonRpc().ContentTreeEditor.moveBelow, getJsonRpc().ContentTreeEditor.copyBelow);
+                doPaste(menuItem, flexive.util.getJsonRpc().ContentTreeEditor.moveBelow, flexive.util.getJsonRpc().ContentTreeEditor.copyBelow);
             }
 
             // pastes or moves a tree node. moveFun and copyFun are methods with the following signature:

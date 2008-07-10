@@ -48,6 +48,12 @@ public final class IdentityInputMapper extends InputMapper<FxValue, FxValue> {
         return value;
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public FxValue decode(FxValue value) {
+        return value;
+    }
+
     /**
      * Return a shared instance of this value mapper. Use this method instead
      * of creating a new identity mapper when no mapper really is needed.

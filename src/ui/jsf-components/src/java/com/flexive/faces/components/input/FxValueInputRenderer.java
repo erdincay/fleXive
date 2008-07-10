@@ -157,12 +157,13 @@ public class FxValueInputRenderer extends Renderer {
      * @param component the component to be rendered
      * @return FxValue items posted for this component.
      */
+    @SuppressWarnings({"unchecked"})
     private FxValue decodeFxValue(FacesContext context, UIComponent component) {
         final FxValueInput input = (FxValueInput) component;
         final Map parameters = context.getExternalContext().getRequestParameterMap();
         final Map parameterValues = context.getExternalContext().getRequestParameterValuesMap();
         final String clientId = component.getClientId(context);
-        final FxValue value = getFxValue(context, input).copy();
+        final FxValue value = input.getInputMapper().encode(getFxValue(context, input).copy());
 
         if (LOG.isDebugEnabled()) {
             LOG.debug(DBG + "Decoding value for " + clientId + ", component value=" + value);
@@ -187,7 +188,7 @@ public class FxValueInputRenderer extends Renderer {
         if (LOG.isDebugEnabled()) {
             LOG.debug(DBG + "Decoded value for " + clientId + ": " + value);
         }
-        return value;
+        return input.getInputMapper().decode(value);
     }
 
     @SuppressWarnings({"unchecked"})

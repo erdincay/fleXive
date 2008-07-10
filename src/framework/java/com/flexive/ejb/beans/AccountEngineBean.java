@@ -369,7 +369,9 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
     }
 
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long create(Account account, String password) throws FxApplicationException {
         final UserTicket ticket = FxContext.get().getTicket();
@@ -384,8 +386,8 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
     }
 
     private long create(String userName, String loginName, String password, String email, long lang,
-                       long mandatorId, boolean isActive, boolean isConfirmed, Date validFrom, Date validTo, long defaultNode,
-                       String description, boolean allowMultiLogin, boolean checkUserRoles)
+                        long mandatorId, boolean isActive, boolean isConfirmed, Date validFrom, Date validTo, long defaultNode,
+                        String description, boolean allowMultiLogin, boolean checkUserRoles)
             throws FxApplicationException {
 
         final UserTicket ticket = FxContext.get().getTicket();
@@ -755,8 +757,8 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                 continue;
             //make sure the calling user is assigned all roles of the group as well
             RoleList rl = group.getRoles(grp);
-            for(Role check: rl.getRoles())
-                if(!ticket.isInRole(check))
+            for (Role check : rl.getRoles())
+                if (!ticket.isInRole(check))
                     throw new FxNoAccessException("ex.account.roles.assign.noMember.group", check.name(), g.getName());
             if (!ticket.isGlobalSupervisor()) {
                 if (g.getMandatorId() != account.getMandatorId())
@@ -890,7 +892,9 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void addRole(long accountId, long roleId) throws FxApplicationException {
         final List<Role> roles = new ArrayList<Role>();
@@ -899,7 +903,9 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         setRoleList(accountId, roles);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void addGroup(long accountId, long groupId) throws FxApplicationException {
         final List<UserGroup> groups = new ArrayList<UserGroup>();
@@ -1006,6 +1012,16 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      */
     public Account[] loadAll(long mandatorId) throws FxApplicationException {
         return loadAll(null, null, null, null, null, mandatorId, null, null, 0, Integer.MAX_VALUE);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Account[] loadAll() throws FxApplicationException {
+        final UserTicket ticket = FxContext.get().getTicket();
+        return loadAll(null, null, null, null, null,
+                ticket.isGlobalSupervisor() ? null : ticket.getMandatorId(),
+                null, null, 0, Integer.MAX_VALUE);
     }
 
     /**

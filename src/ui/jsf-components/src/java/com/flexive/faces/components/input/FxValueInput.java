@@ -66,6 +66,7 @@ public class FxValueInput extends UIInput {
     private Boolean filter;
     private String containerDivClass; //if present a div is created to surround the FxValueInput using this CSS class
     private InputMapper inputMapper;
+    private String autocompleteHandler;
     private String onchange;
     private FxValueFormatter valueFormatter;
     private Boolean disableLytebox;
@@ -284,6 +285,19 @@ public class FxValueInput extends UIInput {
         this.onchange = onchange;
     }
 
+    public String getAutocompleteHandler() {
+        if (autocompleteHandler == null) {
+            autocompleteHandler = FxJsfComponentUtils.getStringValue(this, "autocompleteHandler");
+        }
+        if (autocompleteHandler == null && getInputMapper() != null) {
+            autocompleteHandler = getInputMapper().getAutocompleteHandler();
+        }
+        return autocompleteHandler;
+    }
+
+    public void setAutocompleteHandler(String autocompleteHandler) {
+        this.autocompleteHandler = autocompleteHandler;
+    }
 
     /**
      * Return the (optional) {@link FxValueFormatter} to be used for formatting the output
@@ -400,8 +414,9 @@ public class FxValueInput extends UIInput {
         this.forceLineInput = (Boolean) values[index++];
         this.onchange = (String) values[index++];
         this.filter = (Boolean) values[index++];
-        //noinspection UnusedAssignment
         this.configurationMask = (Integer) values[index++];
+        //noinspection UnusedAssignment
+        this.autocompleteHandler = (String) values[index++];
     }
 
     /**
@@ -409,7 +424,7 @@ public class FxValueInput extends UIInput {
      */
     @Override
     public Object saveState(FacesContext context) {
-        Object[] values = new Object[10];
+        Object[] values = new Object[11];
         int index = 0;
         values[index++] = super.saveState(context);
         values[index++] = disableMultiLanguage;
@@ -420,8 +435,9 @@ public class FxValueInput extends UIInput {
         values[index++] = forceLineInput;
         values[index++] = onchange;
         values[index++] = filter;
-        //noinspection UnusedAssignment
         values[index++] = configurationMask >= 0 ? configurationMask : calcConfigurationMask();
+        //noinspection UnusedAssignment
+        values[index++] = autocompleteHandler;
         return values;
 	}
 	

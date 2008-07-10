@@ -41,6 +41,7 @@ import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.FxSelectOne;
 import com.flexive.shared.value.FxString;
+import com.flexive.shared.value.ReferencedContent;
 
 import java.util.List;
 
@@ -86,6 +87,12 @@ public class FxPkSelectOneInputMapper extends InputMapper<FxReference, FxSelectO
             item = selectList.getItems().get(0);    // select first item as default
         }
         return new FxSelectOne(value.isMultiLanguage(), item);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public FxReference decode(FxSelectOne value) {
+        return new FxReference(new ReferencedContent(value.getDefaultTranslation().getId()));
     }
 
     /** {@inheritDoc} */

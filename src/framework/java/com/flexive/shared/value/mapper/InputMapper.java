@@ -51,7 +51,7 @@ import java.util.List;
  * </p>
  * <p>
  * Note that the "output type" of the rendered UI control must be applicable to the
- * base FxValue type, since there is not "inverted" mapping (from input to base type).
+ * base FxValue type, since there is no "inverted" mapping (from input to base type).
  * For example, the select list IDs of an {@link SelectOneInputMapper}
  * must correspond to valid values of the base FxLargeNumber property.
  * </p>
@@ -69,17 +69,35 @@ import java.util.List;
  * @version $Rev$
  */
 public abstract class InputMapper<BaseType extends FxValue, MappedType extends FxValue> {
+    private String autocompleteHandler;
 
     /**
      * Map the given value to the destination FxValue type. The resulting object will be
-     * used for rendering the input element for the given value. Note that the "output type" of
-     * the rendered UI control must be applicable to the base FxValue type, i.e. a
-     * call to {@link FxValue#setTranslation(long, Object)} must be successful.
+     * used for rendering the input element for the given value.
      *
      * @param value the value to be mapped
      * @return  the mapped type
      */
     public abstract MappedType encode(BaseType value);
+
+    /**
+     * Decode the mapped type. Called after the mapped type has been updated in
+     * the user form.
+     *
+     * @param value the mapped value type, possibly modified by the user
+     * @return  the corresponding base type
+     */
+    public abstract BaseType decode(MappedType value);
+
+    /**
+     * Return an (optional) autocomplete handler for the input component, for example:<br/>
+     * <code>new flexive.yui.AutoCompleteHandler()</code>. 
+     *
+     * @return  an (optional) autocomplete handler for the input component.
+     */
+    public String getAutocompleteHandler() {
+        return autocompleteHandler;
+    }
 
     /**
      * Returns all available value comparators available in search queries. If the returned
@@ -110,10 +128,24 @@ public abstract class InputMapper<BaseType extends FxValue, MappedType extends F
             mapper = new SelectOneInputMapper(FxSelectList.createListWithName("MANDATOR", environment.getMandators(true, false)));
         } else if ("STEP".equals(name)) {
             mapper = new SelectOneInputMapper(FxSelectList.createList("STEP", environment.getStepDefinitions()));
+        } else if ("CREATED_BY".equals(name) || "MODIFIED_BY".equals(name)) {
+            mapper = new NumberQueryInputMapper.AccountQueryInputMapper();
         } else {
             mapper = IdentityInputMapper.getInstance();
         }
         return mapper;
     }
 
+
+    /**
+     * Build an autocomplete handler for the given JSON/RPC query call.
+     *
+     * @param jsonRpcQuery  the query method, for example:<br/>
+     * <code>AutoCompleteProvider.userQuery</code>
+     */
+    protected final void buildAutocompleteHandler(String jsonRpcQuery) {
+        this.autocompleteHandler = "new flexive.yui.AutoCompleteHandler(function(query) {"
+                + "return eval(\"(\" + flexive.util.getJsonRpc()." + jsonRpcQuery + "(query) + \")\");"
+                + "})";
+    }
 }

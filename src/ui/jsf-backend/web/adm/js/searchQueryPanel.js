@@ -17,7 +17,7 @@ var SearchQueryPanel = function(targetDiv, openQueryHandler) {
 SearchQueryPanel.prototype = {
     reload: function() {
         try {
-            this.items = eval("(" + getJsonRpc().SearchQueryEditor.renderSearchQueries() + ")");
+            this.items = eval("(" + flexive.util.getJsonRpc().SearchQueryEditor.renderSearchQueries() + ")");
             this.render();
         } catch (e) {
             alert(e);

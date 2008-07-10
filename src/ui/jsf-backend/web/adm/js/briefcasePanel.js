@@ -20,7 +20,7 @@ var BriefcasePanel = function(targetDiv, showBriefcaseHandler) {
 BriefcasePanel.prototype = {
     reload: function() {
         try {
-            this.items = eval("(" + getJsonRpc().BriefcaseEditor.renderBriefcases() + ")");
+            this.items = eval("(" + flexive.util.getJsonRpc().BriefcaseEditor.renderBriefcases() + ")");
             this.render();
         } catch (e) {
             alert(e);

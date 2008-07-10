@@ -34,7 +34,7 @@ Parameters:
             flexive.yui.onYahooLoaded(function() {
                 var containerElName = "#{var}_datatable";
                 var createFun = function(result) {
-                    //var result = eval("(" + getJsonRpc().SearchResultWriter.getResultRows("SELECT id, caption, created_at", 0, 2000) + ")");
+                    //var result = eval("(" + flexive.util.getJsonRpc().SearchResultWriter.getResultRows("SELECT id, caption, created_at", 0, 2000) + ")");
                     // get JSON representation of the search result
                     var view = flexive.yui.datatable.getViewWrapper(result);
                     var isThumbnails = result.viewType == "THUMBNAILS";

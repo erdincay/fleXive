@@ -60,6 +60,16 @@ flexive.util = new function() {
         return { id: parseInt(pk.substr(0, pk.indexOf("."))),
                  version: parseInt(pk.substr(pk.indexOf(".") + 1)) };
     }
+
+    this.JSON_RPC_CLIENT = null;
+    this.getJsonRpc = function() {
+        if (this.JSON_RPC_CLIENT == null) {
+            // TODO retrieve context path
+            this.JSON_RPC_CLIENT = new JSONRpcClient("/flexive/adm/JSON-RPC");
+        }
+        return this.JSON_RPC_CLIENT;
+    }
+
 }
 
 // Yahoo UI (YUI) helper methods and classes
@@ -284,6 +294,47 @@ flexive.yui.datatable.ThumbnailView.prototype = {
     }
 }
 
+flexive.yui.AutoCompleteHandler = function(queryFn) {
+    if (queryFn != null) {
+        this.query = queryFn;
+    }
+}
+
+flexive.yui.AutoCompleteHandler.prototype = {
+    /**
+     * <p>Return a datasource for the autocomplete handler.</p>
+     * <p>Usually <code>YAHOO.widget.DS_JSArray</code> for data that can be sent to the client
+     * or <code>YAHOO.widget.DS_JSFunction</code> for a JSON/RPC/Java wrapper.</p>
+     *
+     * @return The YAHOO.widget.DataSource to be used for the autocomplete. The default implementation
+     * returns a JSFunction datasource that uses <code>this.query()</code> to determine the
+     * valid choices.
+     */
+    getDataSource: function() {
+        return new YAHOO.widget.DS_JSFunction(this.query);
+    },
+
+    /**
+     * Implement the query logic here.
+     *
+     * @param query the query from the autocomplete field
+     * @return the autocomplete choices (format determined by the data source)
+     */
+    query: function(query) {
+        return [["Java 1.5", "Java"], ["Groovy 1.5", "Groovy"], ["Scala 2.7", "Scala"], ["JRuby 1.0", "JRuby"], ["JavaScript 2", "Javascript"]];
+    },
+
+    /**
+     * Formats an item returned by query().
+     *
+     * @param item  the item to be formatted
+     * @param query the current user query
+     * @return  the formatted markup for the item
+     */
+    formatResult: function(/* Object */ item, /* String */ query) {
+        return item[1];
+    }
+}
 
 flexive.input = new function() {
     this.fxValueInputList = [];   // a global list of all registered FxValueInput elements on the current page

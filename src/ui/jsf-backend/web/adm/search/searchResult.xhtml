@@ -97,22 +97,22 @@
                             if (!confirm("#{fxMessageBean['SearchResult.dialog.confirm.deleteRow']}")) {
                                 break;
                             }
-                            getJsonRpc().ContentEditor.remove(pk.id);
+                            flexive.util.getJsonRpc().ContentEditor.remove(pk.id);
                             reload();
                             break;
                         case "deleteSelected":
                             if (!confirm("#{fxMessageBean['SearchResult.dialog.confirm.deleteSelection']}")) {
                                 break;
                             }
-                            getJsonRpc().ContentEditor.removeMultiple(selectedIds);
+                            flexive.util.getJsonRpc().ContentEditor.removeMultiple(selectedIds);
                             reload();
                             break;
                         case "deleteBriefcase":
-                            getJsonRpc().BriefcaseEditor.removeItems(briefcaseId, [pk.id]);
+                            flexive.util.getJsonRpc().BriefcaseEditor.removeItems(briefcaseId, [pk.id]);
                             reload();
                             break;
                         case "deleteBriefcaseSelected":
-                            getJsonRpc().BriefcaseEditor.removeItems(briefcaseId, selectedIds);
+                            flexive.util.getJsonRpc().BriefcaseEditor.removeItems(briefcaseId, selectedIds);
                             reload();
                             break;
                         default:

@@ -71,6 +71,8 @@ public class FxValueInputTestBean {
         }
     }
 
+    private FxValue stringValue = new FxString(false, "");
+    private FxString userStringValue = new FxString(false, "");
     private List<ValueHolder> basicValues;
     private List<FxValue> basicValues2;
 
@@ -122,5 +124,21 @@ public class FxValueInputTestBean {
                 new FxSelectMany(false, new SelectMany(countriesList)),
                 new FxSelectMany(ENGLISH, new SelectMany(countriesList)).setTranslation(GERMAN, new SelectMany(countriesList)),
         });
+    }
+
+    public FxValue getStringValue() {
+        return stringValue;
+    }
+
+    public void setStringValue(FxValue stringValue) {
+        this.stringValue = stringValue;
+    }
+
+    public FxString getUserStringValue() {
+        return userStringValue;
+    }
+
+    public void setUserStringValue(FxString userStringValue) {
+        this.userStringValue = userStringValue;
     }
 }

@@ -83,6 +83,12 @@ Parameters:
 
                 rowSelection.updateActiveRow(#{addAssignmentNodeValue});
 
+                if (window._queryEditorPageLoaded) {
+                    // init yahoo components after Ajax refresh
+                    flexive.yui.processOnYahoo();
+                }
+                var _queryEditorPageLoaded = true;
+
             </script>
         </a4j:outputPanel>
     </div>

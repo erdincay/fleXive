@@ -539,6 +539,11 @@ public class QueryNodeTreeTests {
             }
 
             @Override
+            public FxString decode(FxBoolean value) {
+                return new FxString(value.getDefaultTranslation().toString());
+            }
+
+            @Override
             public List<? extends ValueComparator> getAvailableValueComparators() {
                 return allowedComparators;
             }

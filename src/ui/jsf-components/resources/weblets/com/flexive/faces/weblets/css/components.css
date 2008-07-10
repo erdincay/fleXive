@@ -47,7 +47,7 @@ select.fxValueSelectInput, .fxValueInputElementWidth, input.fxValueTextInput, te
 /* Stretch single-language inputs over space normally occupied by the language select */
 .fxValueInput input[type="text"].singleLanguage,
 .fxValueInput textarea.singleLanguage {
-    width: 100% !important;;
+    width: 100%; /* don't force with !important because it breaks standalone inputs outside a fx:formRow */
 }
 
 input.fxValueTextInput, textarea.fxValueTextArea, textarea.fxValueTextAreaHtml, select.fxValueSelectInput {
@@ -96,7 +96,6 @@ table.queryRoot {
     border: 1px solid #A0A0A0;
     background-color: #EAF1D6;
     width: 600px;
-    -moz-user-select: none;
 }
 
 table.queryRoot td.nestedTable {
@@ -194,11 +193,13 @@ select.queryValueComparator {
 
 .queryRoot .fxValueInputElementWidth {
     width: 122px;
-    overflow: hidden;
+    /*overflow: hidden;*/
 }
 
-.queryRoot input.fxValueTextInput {
-    width: 120px;
+.queryRoot input.fxValueTextInput,
+.fxValueInput input[type="text"].singleLanguage,
+.fxValueInput textarea.singleLanguage {
+    width: 125px;
 }
 
 .queryRoot textarea.fxValueTextArea, .queryRoot textarea.fxValueTextAreaHtml {

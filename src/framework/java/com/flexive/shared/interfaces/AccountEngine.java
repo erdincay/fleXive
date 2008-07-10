@@ -197,7 +197,7 @@ public interface AccountEngine {
      * Only callers in ROLE_USER_MANAGEMENTS may create users, and only for their mandatorId.<br>
      * GLOBAL_SUPERVISOR may create users for all mandators.
      *
-     * @param account the account to be created. Use an {@link AccountEdit} object for easier account creation.
+     * @param account  the account to be created. Use an {@link AccountEdit} object for easier account creation.
      * @param password the user's password
      * @return the ID of the created user
      * @throws FxCreateException           if the create failed
@@ -347,6 +347,15 @@ public interface AccountEngine {
      * @throws FxApplicationException on errors
      */
     Account[] loadAll(long mandatorId) throws FxApplicationException;
+
+    /**
+     * Loads all accounts. Unless the calling user is a global supervisor, this call returns the same result
+     * as calling {@link #loadAll(long)} with the user mandator ID.
+     *
+     * @return all accounts.
+     * @throws FxApplicationException on errors
+     */
+    Account[] loadAll() throws FxApplicationException;
 
     /**
      * Returns number of users matching the parameters.
