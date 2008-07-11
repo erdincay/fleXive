@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<head>
+    <fx:includes/>
+</head>
+<body>
+
+    <a4j:form id="frm">
+        <c:if test="#{empty fxBrowseReferencesBean.parseRequestParameters}"> </c:if>
+        <script type="text/javascript">
+        <!--
+            var formId = "#{fxBrowseReferencesBean.formName}";
+            var inputId = "#{fxBrowseReferencesBean.inputName}";
+            function selectReference(pk, caption) {
+                try {
+                    var parentForm = window.opener.document.forms[formId];
+                    if (parentForm[inputId + "_caption"] != null) {
+                        // "old" reference select without autocomplete input
+                        parentForm[inputId].value = pk;
+                        parentForm[inputId + "_caption"].value = caption;
+                        window.opener.document.getElementById(inputId + "_preview").innerHTML = caption;
+                            //"<img border=\"0\" src=\"" + getThumbnailURI(pk) + "\">";
+                    } else {
+                        // autocomplete text input field - store everything in text input field
+                        parentForm[inputId].value = pk + " - " + caption;
+                    }
+                    window.close();
+                } catch (e) {
+                    alert(e);
+                }
+                return false;
+            }
+            // set body style in JS (subtle firefox problem with <style> elements, CDATA and text/html encoding)
+            document.body.style.overflow = "scroll";
+        //-->
+        </script>
+
+        <adm:infoBox>
+            <h:outputText value="#{fxMessageBean['BrowseReferences.label.info,#{fxBrowseReferencesBean.referencedType.label}']}" escape="false"/>
+        </adm:infoBox>
+
+        <a4j:region>
+            <h:inputHidden value="#{fxBrowseReferencesBean.inputName}"/>
+            <h:inputHidden value="#{fxBrowseReferencesBean.formName}"/>
+            <h:inputHidden value="#{fxBrowseReferencesBean.XPath}"/>
+
+            <table>
+                <tr>
+                    <td>
+                        <h:inputText value="#{fxBrowseReferencesBean.query}">
+                            <a4j:support event="onchange" reRender="results" eventsQueue="updateResults"/>
+                        </h:inputText>
+                    </td>
+                    <td>
+                        <a4j:commandLink id="submitSearchButton" reRender="results" eventsQueue="updateResults">
+                            <t:graphicImage url="/adm/images/toolbar/search.png" border="0"/>
+                        </a4j:commandLink>
+                    </td>
+                </tr>
+            </table>
+
+            <a4j:outputPanel id="results">
+                <h:dataTable var="row" value="#{fxBrowseReferencesBean.dataModel}">
+                    <h:column>
+                        <img id="loadrow#{index}" src="#{fxSystemBean.contextPath}/thumbnail/pk#{row[0]}/s1" alt="#{row[1]}" title="#{row[1]}"
+                             border="0" onclick="return selectReference('#{row[0]}', '#{fxSystemBean.escapeForJavaScript[row[1]]}')" style="cursor: pointer"/>
+                    </h:column>
+                    <c:forEach var="name" varStatus="status" begin="2"
+                               items="#{fxBrowseReferencesBean.dataModel.result.columnNames}">
+                        <h:column>
+                            <f:facet name="header">
+                                #{fxBrowseReferencesBean.dataModel.result.columnLabels[status.index]}
+                            </f:facet>
+                            <span style="cursor: pointer" onclick="return selectReference('#{row[0]}', '#{fxSystemBean.escapeForJavaScript[row[1]]}')">
+                                #{row[status.index]}
+                            </span>
+                        </h:column>
+                    </c:forEach>
+                </h:dataTable>
+                <ui:fragment rendered="#{fxBrowseReferencesBean.dataModel.rowCount == 0}">
+                    <br/>
+                    #{fxMessageBean['BrowseReferences.label.empty']}
+                </ui:fragment>
+            </a4j:outputPanel>
+        </a4j:region>
+
+    </a4j:form>
+
+
+</body>
+</html>

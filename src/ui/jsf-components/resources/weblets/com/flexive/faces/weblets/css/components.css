@@ -50,6 +50,10 @@ select.fxValueSelectInput, .fxValueInputElementWidth, input.fxValueTextInput, te
     width: 100%; /* don't force with !important because it breaks standalone inputs outside a fx:formRow */
 }
 
+.FxReferenceInput input.singleLanguage {
+    width: 80% !important;     /* leave room for the browse references button, overrides yui-skin-sam autocomplete width */
+}
+
 input.fxValueTextInput, textarea.fxValueTextArea, textarea.fxValueTextAreaHtml, select.fxValueSelectInput {
     border: 1px solid gray;
 }
@@ -87,6 +91,10 @@ div.fxValueInputLanguageIcon {
     margin-left: 3px;
     width: 15px;
     display: inline;
+}
+
+div.fxValueInput img.findReferencesIcon {
+    float: left;
 }
 
 /* Query editor */
@@ -197,9 +205,14 @@ select.queryValueComparator {
 }
 
 .queryRoot input.fxValueTextInput,
-.fxValueInput input[type="text"].singleLanguage,
-.fxValueInput textarea.singleLanguage {
+.queryRoot .fxValueInput input[type="text"].singleLanguage,
+.queryRoot .fxValueInput textarea.singleLanguage {
     width: 125px;
+}
+
+/* Reduce text input for reference popup button */
+.queryRoot .FxReferenceInput input.fxValueTextInput {
+    width: 100px !important;
 }
 
 .queryRoot textarea.fxValueTextArea, .queryRoot textarea.fxValueTextAreaHtml {
@@ -349,4 +362,36 @@ div.tooltip:hover div.tooltipContent {
     color: #000000;
     border: 1px solid #000000;
     background-color: #FFFFCC;
+}
+
+
+/** Autocomplete styles */
+
+/* Content autocomplete - a block div with a thumbnail preview */
+div.pkAutoComplete {
+    height: 50px;
+    display: block;
+    clear: both;
+}
+
+div.pkAutoComplete img {
+    float: left;
+}
+
+div.pkAutoComplete div {
+    margin-left: 55px;
+    display: block;
+}
+div.pkAutoComplete .caption {
+    padding-bottom: 3px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+div.pkAutoComplete .property {
+}
+
+/** Yahoo UI default skin overrides */
+.yui-skin-sam .yui-ac-input {
+    position: relative !important;  /* override position:absolute since it makes buttons near the input field difficult to place*/
 }

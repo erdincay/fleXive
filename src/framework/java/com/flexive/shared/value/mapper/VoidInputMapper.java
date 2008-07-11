@@ -46,13 +46,13 @@ public final class VoidInputMapper extends InputMapper<FxValue, FxVoid> {
 
     /** {@inheritDoc} */
     @Override
-    public FxVoid encode(FxValue value) {
+    protected FxVoid doEncode(FxValue value) {
         return new FxVoid();
     }
 
     /** {@inheritDoc} */
     @Override
-    public FxValue decode(FxVoid value) {
+    protected FxValue doDecode(FxVoid value) {
         return value;
     }
 

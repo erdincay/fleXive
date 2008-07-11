@@ -75,6 +75,8 @@ import java.io.IOException;
 import java.text.Collator;
 import java.util.*;
 
+import net.java.dev.weblets.FacesWebletUtils;
+
 /**
  * Utility class for JSF functionality within beans.
  *
@@ -156,6 +158,19 @@ public class FxJsfUtils {
         } else {
             return value.toString(); // unsupported type
         }
+    }
+
+    /**
+     * Returns the weblet path for the given weblet identifier. The return URL is
+     * absolute, but does not include the context path.
+     *
+     * @param packageName   the weblet package
+     * @param path          the path inside that package
+     * @return  the weblet path for the given weblet identifier.
+     */
+    public static String getWebletURL(String packageName, String path) {
+        return FacesWebletUtils.getURL(getCurrentInstance(), packageName, path)
+            .substring(getRequest().getContextPath().length());
     }
 
     private static class EmptySelectableObjectWithName extends AbstractSelectableObjectWithName implements Serializable {

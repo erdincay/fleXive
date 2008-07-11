@@ -100,6 +100,13 @@ abstract class RenderHelper {
      */
     protected abstract void encodeField(UIComponent parent, String inputId, FxLanguage language) throws IOException;
 
+    protected static FxValue getInputValue(FxValueInput input) {
+        if (input != null) {
+            return input.getSubmittedValue() != null ? (FxValue) input.getSubmittedValue() : (FxValue) input.getValue();
+        }
+        throw new IllegalStateException("No enclosing fx:fxValueInput component found");
+    }
+
     /**
      * The base class of all primitive input renderer components.
      * These inputs are not composed of more complex input elements (like date pickers),
@@ -120,11 +127,7 @@ abstract class RenderHelper {
         }
 
         protected FxValue getInputValue() {
-            final FxValueInput input = getInputComponent();
-            if (input != null) {
-                return input.getSubmittedValue() != null ? (FxValue) input.getSubmittedValue() : (FxValue) input.getValue();
-            }
-            throw new IllegalStateException("No enclosing fx:fxValueInput component found");
+            return RenderHelper.getInputValue(getInputComponent());
         }
 
         protected FxValueInput getInputComponent() {
@@ -205,8 +208,8 @@ abstract class RenderHelper {
         public void encodeBegin(FacesContext facesContext) throws IOException {
             final ResponseWriter writer = facesContext.getResponseWriter();
             StringBuilder styleClass = new StringBuilder(300);
-            styleClass.append(FxValueInputRenderer.CSS_CONTAINER).append(" ").append(getInputValue().getClass().getSimpleName()).
-                    append("Input");
+            styleClass.append(getInputValue().getClass().getSimpleName()).append("Input ")
+                    .append(FxValueInputRenderer.CSS_CONTAINER);
             if( displayLanguage && language != null )  {
                 writer.writeText(language.getLabel().getBestTranslation()+":", null);
                 styleClass.insert(0, FxValueInputRenderer.CSS_READONLYCONTAINER+" ");

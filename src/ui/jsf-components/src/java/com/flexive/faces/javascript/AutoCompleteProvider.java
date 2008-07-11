@@ -32,7 +32,17 @@
 package com.flexive.faces.javascript;
 
 import com.flexive.war.JsonWriter;
+import com.flexive.war.servlet.ThumbnailServlet;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.content.FxPK;
+import com.flexive.shared.value.mapper.NumberQueryInputMapper;
+import static com.flexive.shared.value.mapper.NumberQueryInputMapper.ReferenceQueryInputMapper;
+import com.flexive.shared.value.BinaryDescriptor;
+import com.flexive.shared.search.query.SqlQueryBuilder;
+import com.flexive.shared.search.query.PropertyValueComparator;
+import com.flexive.shared.search.SortDirection;
+import com.flexive.shared.search.FxResultSet;
+import com.flexive.shared.search.FxResultRow;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.security.Account;
 
@@ -40,6 +50,11 @@ import java.util.List;
 import java.util.ArrayList;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.URLDecoder;
+
+import org.apache.commons.lang.StringUtils;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Provides autocomplete query methods for the fx:fxValueInput tag.
@@ -89,11 +104,54 @@ public class AutoCompleteProvider {
                 }
             }
         }
-        final StringWriter out = new StringWriter();
-        final JsonWriter writer = new JsonWriter(out);
-        writer.startArray();
-        writeResponseLines(writer, result);
-        return writer.closeArray().finishResponse().toString();
+        return writeAutocompleteResponse(result);
+    }
+
+
+    /**
+     * <p>Submits a query for contents, either by primary key (if a numeric value is given)
+     * or by a prefix match on the caption. The output value has the format</p>
+     * <code>"id.version - caption"</code>
+     *
+     * @param request   the current request (injected)
+     * @param rawQuery the query, either a number (matching an instance ID) or a fulltext query
+     * @param typeId    the type filter (set to -1 to disable)
+     * @return  the autocomplete response
+     * @throws com.flexive.shared.exceptions.FxApplicationException on application errors
+     * @throws java.io.IOException  if the response could not be created
+     */
+    public String pkQuery(HttpServletRequest request, String rawQuery, long typeId) throws FxApplicationException, IOException {
+        // get the actual text query also for "encoded" queries (that include the PK, which we don't need here)
+        final String query = ReferenceQueryInputMapper.getReferencedContent(URLDecoder.decode(rawQuery, "UTF-8")).getCaption();
+        final SqlQueryBuilder builder = new SqlQueryBuilder()
+                .select("@pk", "caption")
+                .orderBy("caption", SortDirection.ASCENDING);
+        // filter by content type
+        if (typeId != -1) {
+            builder.type(typeId);
+        }
+        // prefix search in the caption property
+        builder.orSub().condition("caption", PropertyValueComparator.LIKE, query + "%");
+        if (StringUtils.isNumeric(query)) {
+            // query by ID
+            builder.condition("id", PropertyValueComparator.EQ, Long.parseLong(query));
+        } 
+        builder.closeSub();
+        final List<ResponseLine> result = new ArrayList<ResponseLine>(MAX_ITEMS);
+        for (FxResultRow row : builder.maxRows(MAX_ITEMS).getResult().getResultRows()) {
+            final FxPK pk = row.getPk(1);
+            final String caption = row.getString(2);
+            final String value = pk + " - " + caption;
+            final String label = "<div class=\"pkAutoComplete\"><img src=\""
+                    + request.getContextPath()
+                    + ThumbnailServlet.getLink(pk, BinaryDescriptor.PreviewSizes.PREVIEW1)
+                    + "\"/>"
+                    + "<div class=\"caption\">" + caption + "</div>"
+                    + "<div class=\"property\">" + pk + "</div>"
+                    + "</div>";
+            result.add(new ResponseLine(value, label));
+        }
+        return writeAutocompleteResponse(result);
     }
 
     private boolean match(String value, String upperCaseQuery) {
@@ -102,6 +160,15 @@ public class AutoCompleteProvider {
         }
         final String ucValue = value.toUpperCase();
         return ucValue.startsWith(upperCaseQuery) || (upperCaseQuery.length() > 1 && ucValue.contains(upperCaseQuery));
+    }
+
+
+    private String writeAutocompleteResponse(List<ResponseLine> result) throws IOException {
+        final StringWriter out = new StringWriter();
+        final JsonWriter writer = new JsonWriter(out);
+        writer.startArray();
+        writeResponseLines(writer, result);
+        return writer.closeArray().finishResponse().toString();
     }
 
     private void writeResponseLines(JsonWriter out, List<ResponseLine> responseLines) throws IOException {

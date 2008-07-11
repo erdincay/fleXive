@@ -36,10 +36,13 @@ import com.flexive.shared.search.query.ValueComparator;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.structure.FxSelectList;
+import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.value.FxValue;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
 
 /**
  * InputMapper introduces another level of abstraction for the FxValue input
@@ -48,12 +51,6 @@ import java.util.List;
  * called and may wrap the given value in another object. For example, an ordinal
  * {@link com.flexive.shared.value.FxLargeNumber} like the ACL id may be mapped
  * to a {@link com.flexive.shared.value.FxSelectOne} value for input rendering.
- * </p>
- * <p>
- * Note that the "output type" of the rendered UI control must be applicable to the
- * base FxValue type, since there is no "inverted" mapping (from input to base type).
- * For example, the select list IDs of an {@link SelectOneInputMapper}
- * must correspond to valid values of the base FxLargeNumber property.
  * </p>
  * <p>
  * Use {@link #getInstance(FxProperty)} to retrieve a new InputMapper for the given
@@ -78,7 +75,11 @@ public abstract class InputMapper<BaseType extends FxValue, MappedType extends F
      * @param value the value to be mapped
      * @return  the mapped type
      */
-    public abstract MappedType encode(BaseType value);
+    public final MappedType encode(BaseType value) {
+        final MappedType encodedValue = doEncode(value);
+        encodedValue.setXPath(value.getXPath());
+        return encodedValue;
+    }
 
     /**
      * Decode the mapped type. Called after the mapped type has been updated in
@@ -87,7 +88,29 @@ public abstract class InputMapper<BaseType extends FxValue, MappedType extends F
      * @param value the mapped value type, possibly modified by the user
      * @return  the corresponding base type
      */
-    public abstract BaseType decode(MappedType value);
+    public final BaseType decode(MappedType value) {
+        final BaseType decodedValue = doDecode(value);
+        decodedValue.setXPath(value.getXPath());
+        return decodedValue;
+    }
+
+    /**
+     * Map the given value to the destination FxValue type. The resulting object will be
+     * used for rendering the input element for the given value.
+     *
+     * @param value the value to be mapped
+     * @return  the mapped type
+     */
+    protected abstract MappedType doEncode(BaseType value);
+
+    /**
+     * Decode the mapped type. Called after the mapped type has been updated in
+     * the user form.
+     *
+     * @param value the mapped value type, possibly modified by the user
+     * @return  the corresponding base type
+     */
+    protected abstract BaseType doDecode(MappedType value);
 
     /**
      * Return an (optional) autocomplete handler for the input component, for example:<br/>
@@ -130,6 +153,8 @@ public abstract class InputMapper<BaseType extends FxValue, MappedType extends F
             mapper = new SelectOneInputMapper(FxSelectList.createList("STEP", environment.getStepDefinitions()));
         } else if ("CREATED_BY".equals(name) || "MODIFIED_BY".equals(name)) {
             mapper = new NumberQueryInputMapper.AccountQueryInputMapper();
+        } else if (FxDataType.Reference.equals(property.getDataType())) {
+            mapper = new NumberQueryInputMapper.ReferenceQueryInputMapper(property);
         } else {
             mapper = IdentityInputMapper.getInstance();
         }
@@ -142,10 +167,13 @@ public abstract class InputMapper<BaseType extends FxValue, MappedType extends F
      *
      * @param jsonRpcQuery  the query method, for example:<br/>
      * <code>AutoCompleteProvider.userQuery</code>
+     * @param args additional parameters for the javascript function. The first parameter is always
+     * the query string.
      */
-    protected final void buildAutocompleteHandler(String jsonRpcQuery) {
+    protected final void buildAutocompleteHandler(String jsonRpcQuery, String... args) {
         this.autocompleteHandler = "new flexive.yui.AutoCompleteHandler(function(query) {"
-                + "return eval(\"(\" + flexive.util.getJsonRpc()." + jsonRpcQuery + "(query) + \")\");"
+                + "return eval(\"(\" + flexive.util.getJsonRpc()." + jsonRpcQuery + "(query"
+                + (args.length > 0 ? ',' + StringUtils.join(args, ',') : "") + ") + \")\");"
                 + "})";
     }
 }

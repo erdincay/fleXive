@@ -58,7 +58,7 @@ public class FxPkSelectOneInputMapper extends InputMapper<FxReference, FxSelectO
     /**
      * Create a new select-one input mapper. The input mapper will select a select item
      * of the given list based on the PK value of the value passed
-     * to {@link #encode(com.flexive.shared.value.FxReference FxReference)} and return
+     * to {@link #doEncode(com.flexive.shared.value.FxReference FxReference)} and return
      * the appropriate {@link FxSelectOne} object. If no valid value is selected,
      * the first select list value will be used.
      *
@@ -76,7 +76,7 @@ public class FxPkSelectOneInputMapper extends InputMapper<FxReference, FxSelectO
 
     /** {@inheritDoc} */
     @Override
-    public FxSelectOne encode(FxReference value) {
+    protected FxSelectOne doEncode(FxReference value) {
         if (value.isMultiLanguage()) {
             throw new FxInvalidParameterException("VALUE", "ex.content.value.mapper.select.singleLanguage").asRuntimeException();
         }
@@ -91,7 +91,7 @@ public class FxPkSelectOneInputMapper extends InputMapper<FxReference, FxSelectO
 
     /** {@inheritDoc} */
     @Override
-    public FxReference decode(FxSelectOne value) {
+    protected FxReference doDecode(FxSelectOne value) {
         return new FxReference(new ReferencedContent(value.getDefaultTranslation().getId()));
     }
 

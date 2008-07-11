@@ -33,10 +33,14 @@ package com.flexive.faces.components.input;
 
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxLanguage;
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxUpdateException;
 import com.flexive.shared.value.*;
+import com.flexive.shared.value.mapper.InputMapper;
+import com.flexive.shared.value.mapper.IdentityInputMapper;
+import com.flexive.shared.value.mapper.NumberQueryInputMapper;
 import com.flexive.faces.FxJsfUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -79,6 +83,7 @@ public class FxValueInputRenderer extends Renderer {
     protected static final String CSS_INPUTELEMENTWIDTH = "fxValueInputElementWidth";
     protected static final String CSS_LANG_ICON = "fxValueInputLanguageIcon";
     protected static final String CSS_SINGLE_LANG = "singleLanguage";
+    protected static final String CSS_FIND_REFERENCES = "findReferencesIcon";
     private static final String DBG = "fxValueInput: ";
 
     /**
@@ -94,10 +99,12 @@ public class FxValueInputRenderer extends Renderer {
     }
 
     public static void buildComponent(FacesContext context, FxValueInput component) {
-        ResponseWriter writer = context.getResponseWriter();
-        String clientId = component.getClientId(context);
+
+        final String clientId = component.getClientId(context);
         //noinspection unchecked
-        FxValue value = component.getInputMapper().encode(getFxValue(context, component));
+        final FxValue value = component.isReadOnly()
+                ? getFxValue(context, component) 
+                : component.getInputMapper().encode(getFxValue(context, component));
         RenderHelper helper = component.isReadOnly()
                 ? new ReadOnlyModeHelper(component, clientId, value)
                 : new EditModeHelper(component, clientId, value);
@@ -139,7 +146,7 @@ public class FxValueInputRenderer extends Renderer {
      * @param input   the FxValueInput component @return the FxValue used as input for the component.
      * @return the FxValue stored in the input component
      */
-    private static FxValue getFxValue(FacesContext context, UIInput input) {
+    public static FxValue getFxValue(FacesContext context, UIInput input) {
         Object o = input.getSubmittedValue() != null ? input.getSubmittedValue() : input.getValue();
         if (o == null) {
             throw new FxInvalidParameterException("VALUE", "ex.jsf.valueInput.null", input.getClientId(context)).asRuntimeException();

@@ -36,9 +36,7 @@ import com.flexive.faces.javascript.FxJavascriptUtils;
 import com.flexive.faces.beans.UserConfigurationBean;
 import com.flexive.faces.beans.MessageBean;
 import com.flexive.shared.*;
-import com.flexive.shared.structure.FxPropertyAssignment;
-import com.flexive.shared.structure.FxSelectList;
-import com.flexive.shared.structure.FxStructureOption;
+import com.flexive.shared.structure.*;
 import com.flexive.shared.value.*;
 import com.flexive.war.servlet.ThumbnailServlet;
 import com.flexive.war.FxRequest;
@@ -70,8 +68,25 @@ class EditModeHelper extends RenderHelper {
     private static final String REQUEST_EDITORINIT = "REQUEST_EDITORINIT";
     private static final String JS_OBJECT = "fxValue";
 
-    public EditModeHelper( FxValueInput component, String clientId, FxValue value) {
+    private boolean multiLine = false;
+    private boolean useHTMLEditor = false;
+    private int rows = -1;
+
+    protected FxEnvironment environment;
+
+    public EditModeHelper(FxValueInput component, String clientId, FxValue value) {
         super(component, clientId, value);
+        environment = CacheAdmin.getEnvironment();
+        if (value != null && StringUtils.isNotBlank(value.getXPath()) && value instanceof FxString) {
+            FxPropertyAssignment pa = (FxPropertyAssignment) environment.getAssignment(value.getXPath());
+            multiLine = pa.isMultiLine();
+            if (multiLine) {
+                rows = pa.getMultiLines();
+                if (rows <= 1)
+                    rows = -1;
+            }
+            useHTMLEditor = pa.getOption(FxStructureOption.OPTION_HTML_EDITOR).isValueTrue();
+        }
     }
 
     /**
@@ -133,25 +148,12 @@ class EditModeHelper extends RenderHelper {
      */
     @Override
     protected void encodeField(UIComponent parent, String inputId, FxLanguage language) throws IOException {
-        boolean multiLine = false;
-        boolean useHTMLEditor = false;
-        int rows = -1;
         if (language == null) {
             final ContainerWriter container = new ContainerWriter();
             container.setInputClientId(clientId);
             parent.getChildren().add(container);
             // use container as parent for all subsequent operations
             parent = container;
-        }
-        if (value != null && StringUtils.isNotBlank(value.getXPath()) && value instanceof FxString) {
-            FxPropertyAssignment pa = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(value.getXPath());
-            multiLine = pa.isMultiLine();
-            if( multiLine ) {
-                rows = pa.getMultiLines();
-                if( rows <= 1 )
-                    rows = -1;
-            }
-            useHTMLEditor = pa.getOption(FxStructureOption.OPTION_HTML_EDITOR).isValueTrue();
         }
         if (useHTMLEditor || multiLine) {
             renderTextArea(parent, inputId, language, rows, useHTMLEditor);
@@ -170,7 +172,15 @@ class EditModeHelper extends RenderHelper {
         } else if (value instanceof FxBoolean) {
             renderCheckbox(parent, inputId, language);
         } else {
-            renderTextInput(component, parent, value, inputId, language != null ? language.getId() : -1);
+            renderTextInput(parent, inputId, language);
+        }
+    }
+
+    private void renderTextInput(UIComponent parent, String inputId, FxLanguage language) throws IOException {
+        renderTextInput(component, parent, value, inputId, language != null ? language.getId() : -1);
+        if (getInputValue(component) instanceof FxReference) {
+            // add a browse reference popup button
+            renderReferencePopupButton(parent, inputId);
         }
     }
 
@@ -205,9 +215,9 @@ class EditModeHelper extends RenderHelper {
     /**
      * Render additional HTML attributes passed to the FxValueInput component.
      *
-     * @throws IOException if the output could not be written
      * @param component the input component
      * @param writer    the output writer
+     * @throws IOException if the output could not be written
      */
     private static void writeHtmlAttributes(FxValueInput component, ResponseWriter writer) throws IOException {
         if (StringUtils.isNotBlank(component.getOnchange())) {
@@ -300,8 +310,6 @@ class EditModeHelper extends RenderHelper {
     }
 
     private void renderReferenceSelect(UIComponent parent, String inputId, FxLanguage language) throws IOException {
-        final String popupLink = "javascript:flexive.input.openReferenceQueryPopup('" + value.getXPath() + "', '"
-                + inputId + "', '" + getForm(inputId) + "')";
         // render hidden input that contains the actual reference
         final HtmlInputHidden inputPk = (HtmlInputHidden) FxJsfUtils.addChildComponent(parent, HtmlInputHidden.COMPONENT_TYPE);
         inputPk.setId(stripForm(inputId));
@@ -310,11 +318,7 @@ class EditModeHelper extends RenderHelper {
         inputCaption.setId(stripForm(inputId) + "_caption");
 
         // render popup button
-        final HtmlOutputLink link = (HtmlOutputLink) FxJsfUtils.addChildComponent(parent, HtmlOutputLink.COMPONENT_TYPE);
-        link.setValue(popupLink);
-        final HtmlGraphicImage button = (HtmlGraphicImage) FxJsfUtils.addChildComponent(link, HtmlGraphicImage.COMPONENT_TYPE);
-        button.setUrl("/adm/images/contentEditor/findReferences.png");
-        button.setStyle("border:0");
+        renderReferencePopupButton(parent, inputId);
 
         // render image container (we need this since the image id attribute does not get rendered)
         final HtmlOutputText captionContainer = (HtmlOutputText) FxJsfUtils.addChildComponent(parent, HtmlOutputText.COMPONENT_TYPE);
@@ -341,8 +345,18 @@ class EditModeHelper extends RenderHelper {
         }*/
     }
 
+    private void renderReferencePopupButton(UIComponent parent, String inputId) {
+        final HtmlOutputLink link = (HtmlOutputLink) FxJsfUtils.addChildComponent(parent, HtmlOutputLink.COMPONENT_TYPE);
+        link.setValue("javascript:flexive.input.openReferenceQueryPopup('" + value.getXPath() + "', '"
+                + inputId + "', '" + getForm(inputId) + "')");
+        final HtmlGraphicImage button = (HtmlGraphicImage) FxJsfUtils.addChildComponent(link, HtmlGraphicImage.COMPONENT_TYPE);
+        button.setUrl(FxJsfUtils.getWebletURL("com.flexive.faces.weblets", "/images/findReferences.png"));
+        button.setStyle("border:0");
+        button.setStyleClass(FxValueInputRenderer.CSS_FIND_REFERENCES);
+    }
+
     private void renderBinary(UIComponent parent, String inputId, FxLanguage language) throws IOException {
-        if (!value.isEmpty() && (language == null || value.translationExists((int)language.getId()))) {
+        if (!value.isEmpty() && (language == null || value.translationExists((int) language.getId()))) {
             final BinaryDescriptor descriptor = ((FxBinary) value).getTranslation(language);
             if (!descriptor.isNewBinary()) {
                 final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(parent, HtmlGraphicImage.COMPONENT_TYPE);
@@ -499,7 +513,7 @@ class EditModeHelper extends RenderHelper {
                 writer.startElement("option", null);
                 writer.writeAttribute("value", language.getId(), null);
                 if ((inputLanguageId == -1 && language.getId() == getInputValue().getDefaultLanguage())
-                    || (inputLanguageId == language.getId())) {
+                        || (inputLanguageId == language.getId())) {
                     writer.writeAttribute("selected", "selected", null);
                 }
                 writer.writeText(language.getIso2digit(), null);
@@ -634,7 +648,7 @@ class EditModeHelper extends RenderHelper {
      */
     public static class TextAreaWriter extends DeferredInputWriter {
         private long languageId;
-        private int rows=-1;
+        private int rows = -1;
         private boolean useHTMLEditor = false;
 
         public long getLanguageId() {
@@ -692,7 +706,7 @@ class EditModeHelper extends RenderHelper {
                 // render standard text area
                 writer.writeAttribute("name", inputClientId, null);
                 writer.writeAttribute("class", FxValueInputRenderer.CSS_TEXTAREA + singleLanguageStyle(languageId), null);
-                if( rows > 0 )
+                if (rows > 0)
                     writer.writeAttribute("rows", String.valueOf(rows), null);
                 writer.writeText(getTextValue(value, languageId), null);
                 writer.endElement("textarea");
@@ -730,12 +744,12 @@ class EditModeHelper extends RenderHelper {
             FxJavascriptUtils.writeYahooRequires(out, "autocomplete");
             FxJavascriptUtils.onYahooLoaded(out,
                     "function() {\n"
-                    + "    var handler = eval('(' + \"" + StringUtils.replace(autocompleteHandler, "\"", "\\\"") + "\" + ')');\n"
-                    + "    var ds = handler.getDataSource();\n"
-                    + "    var ac = new YAHOO.widget.AutoComplete('" + inputClientId + "', '" + containerId + "', ds);\n"
-                    + "    ac.formatResult = handler.formatResult;\n"
-                    + "    ac.forceSelection = true;\n"
-                    + "}"
+                            + "    var handler = eval('(' + \"" + StringUtils.replace(autocompleteHandler, "\"", "\\\"") + "\" + ')');\n"
+                            + "    var ds = handler.getDataSource();\n"
+                            + "    var ac = new YAHOO.widget.AutoComplete('" + inputClientId + "', '" + containerId + "', ds);\n"
+                            + "    ac.formatResult = handler.formatResult;\n"
+                            + "    ac.forceSelection = true;\n"
+                            + "}"
             );
             FxJavascriptUtils.endJavascript(out);
         }

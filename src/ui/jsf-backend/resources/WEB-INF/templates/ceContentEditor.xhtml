@@ -11,7 +11,8 @@
       xmlns:fx="http://www.flexive.com/jsf/core"
       xmlns:adm="http://www.flexive.com/jsf/admin"
       xmlns:t="http://myfaces.apache.org/tomahawk"
-      xmlns:jstl="http://java.sun.com/jsp/jstl/functions">
+      xmlns:jstl="http://java.sun.com/jsp/jstl/functions"
+      xmlns:weblet="http://weblets.dev.java.net/tags_jsp2">
 
 <ui:composition>
        <c:if test="#{empty srcEditor.parseRequestParameters}"> </c:if>
@@ -361,7 +362,15 @@
                         </ui:repeat>
                         <script type="text/javascript">
                             parent.renderErrors();
+
+                            if (window._contentEditorPageLoaded) {
+                                // init yahoo components after Ajax refresh
+                                flexive.yui.load("#{weblet:url('com.flexive.faces.weblets', '/js/yui/yuiloader-beta-min.js')}");
+                            }
+                            var _contentEditorPageLoaded = true;
                         </script>
+
+
                     </a4j:outputPanel>
 
                 <div style="clear:both;height:20px"><!-- __ --></div>

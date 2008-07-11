@@ -44,13 +44,13 @@ public final class IdentityInputMapper extends InputMapper<FxValue, FxValue> {
 
     /** {@inheritDoc} */
     @Override
-    public FxValue encode(FxValue value) {
+    protected FxValue doEncode(FxValue value) {
         return value;
     }
 
     /** {@inheritDoc} */
     @Override
-    public FxValue decode(FxValue value) {
+    protected FxValue doDecode(FxValue value) {
         return value;
     }
 

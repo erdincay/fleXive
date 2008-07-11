@@ -220,12 +220,6 @@
     </managed-bean>
 
     <managed-bean>
-        <managed-bean-name>browseReferencesBean</managed-bean-name>
-        <managed-bean-class>com.flexive.war.beans.admin.search.BrowseReferencesBean</managed-bean-class>
-        <managed-bean-scope>request</managed-bean-scope>
-    </managed-bean>
-
-    <managed-bean>
         <managed-bean-name>selectListBean</managed-bean-name>
         <managed-bean-class>com.flexive.war.beans.admin.main.SelectListBean</managed-bean-class>
         <managed-bean-scope>session</managed-bean-scope>

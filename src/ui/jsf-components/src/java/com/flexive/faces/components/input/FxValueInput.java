@@ -33,9 +33,13 @@ package com.flexive.faces.components.input;
 
 import com.flexive.faces.FxJsfComponentUtils;
 import com.flexive.shared.value.FxValue;
+import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.mapper.IdentityInputMapper;
 import com.flexive.shared.value.mapper.InputMapper;
+import com.flexive.shared.value.mapper.NumberQueryInputMapper;
 import com.flexive.shared.value.renderer.FxValueFormatter;
+import com.flexive.shared.structure.FxPropertyAssignment;
+import com.flexive.shared.CacheAdmin;
 
 import javax.faces.component.UIInput;
 import javax.faces.component.UIViewRoot;
@@ -43,6 +47,8 @@ import javax.faces.context.FacesContext;
 import javax.faces.context.ResponseWriter;
 import javax.faces.validator.Validator;
 import java.io.IOException;
+
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Input fields for FxValue variables, including multi-language support.
@@ -258,7 +264,14 @@ public class FxValueInput extends UIInput {
         if (inputMapper == null) {
             inputMapper = (InputMapper) FxJsfComponentUtils.getValue(this, "inputMapper");
             if (inputMapper == null) {
-                inputMapper = new IdentityInputMapper();    // use dummy mapper
+                final FxValue fxValue = FxValueInputRenderer.getFxValue(FacesContext.getCurrentInstance(), this);
+                if (fxValue instanceof FxReference && StringUtils.isNotBlank(fxValue.getXPath())) {
+                    // force reference mapper with autocompletion
+                    final FxPropertyAssignment assignment = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(fxValue.getXPath());
+                    inputMapper = new NumberQueryInputMapper.ReferenceQueryInputMapper(assignment.getProperty());
+                } else {
+                    inputMapper = new IdentityInputMapper();    // use dummy mapper
+                }
             }
         }
         return inputMapper;

@@ -56,7 +56,7 @@ public class SelectOneInputMapper extends InputMapper<FxLargeNumber, FxSelectOne
     /**
      * Create a new select-one input mapper. The input mapper will select a select item
      * of the given list based on the ordinal value of the value passed
-     * to {@link #encode(com.flexive.shared.value.FxLargeNumber FxLargeNumber)} and return
+     * to {@link #doEncode(com.flexive.shared.value.FxLargeNumber FxLargeNumber)} and return
      * the appropriate {@link com.flexive.shared.value.FxSelectOne} object. If no valid value is selected,
      * the first select list value will be used.
      * 
@@ -74,7 +74,7 @@ public class SelectOneInputMapper extends InputMapper<FxLargeNumber, FxSelectOne
 
     /** {@inheritDoc} */
     @Override
-    public FxSelectOne encode(FxLargeNumber value) {
+    protected FxSelectOne doEncode(FxLargeNumber value) {
         if (value.isMultiLanguage()) {
             throw new FxInvalidParameterException("VALUE", "ex.content.value.mapper.select.singleLanguage").asRuntimeException();
         }
@@ -89,7 +89,7 @@ public class SelectOneInputMapper extends InputMapper<FxLargeNumber, FxSelectOne
 
     /** {@inheritDoc} */
     @Override
-    public FxLargeNumber decode(FxSelectOne value) {
+    protected FxLargeNumber doDecode(FxSelectOne value) {
         return new FxLargeNumber(value.isMultiLanguage(), value.getDefaultTranslation().getId());
     }
 

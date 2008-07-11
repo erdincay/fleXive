@@ -427,7 +427,7 @@ flexive.input = new function() {
 
     // TODO: implement for usage outside the backend
     this.openReferenceQueryPopup = function(xpath, updateInputId, formName) {
-        var win = window.open(getBase() + "adm/search/browseReferencesPopup.jsf?xPath=" + xpath + "&inputName="
+        var win = window.open(flexive.baseUrl + "jsf-components/browseReferencesPopup.jsf?xPath=" + xpath + "&inputName="
                 + updateInputId + "&formName=" + formName,
                 "searchReferences", "scrollbars=yes,width=800,height=600,toolbar=no,menubar=no,location=no");
         win.focus();
