@@ -89,7 +89,7 @@
                 //getFxController().removeContent = false;
                 //getFxController().destroyChild(menuItem.getTreeNode());
                 try {
-                    flexive.util.flexive.util.getJsonRpc().ContentTreeEditor.remove(getObjectId(menuItem), false, treeLiveMode, false);
+                    flexive.util.getJsonRpc().ContentTreeEditor.remove(getObjectId(menuItem), false, treeLiveMode, false);
                     reloadContentTree();
                 } catch (e) {
                     alert(e.message);
@@ -104,7 +104,7 @@
                 //getFxController().removeContent = true;
                 //getFxController().destroyChild(menuItem.getTreeNode());
                 try {
-                    flexive.util.flexive.util.getJsonRpc().ContentTreeEditor.remove(getObjectId(menuItem), true, treeLiveMode, false);
+                    flexive.util.getJsonRpc().ContentTreeEditor.remove(getObjectId(menuItem), true, treeLiveMode, false);
                     reloadContentTree();
                 } catch (e) {
                     alert(e.message);
@@ -116,7 +116,7 @@
                 var name = prompt("#{fxMessageBean['ContentTree.dialog.prompt.createFolder']}", "#{fxMessageBean['ContentTree.dialog.prompt.createFolder.default']}");
                 if (name != null && name.length > 0) {
                     try {
-                        flexive.util.flexive.util.getJsonRpc().ContentTreeEditor.createFolder(getObjectId(menuItem), name);
+                        flexive.util.getJsonRpc().ContentTreeEditor.createFolder(getObjectId(menuItem), name);
                         reloadContentTree();
                     } catch (e) {
                         alert(e.message);
@@ -148,7 +148,7 @@
             // attach the selected rows from the content frame
             function attachContentSelection(menuItem) {
                 try {
-                    flexive.util.flexive.util.getJsonRpc().ContentTreeEditor.addReferences(getObjectId(menuItem), parent.getContentClipboard().get().slice());
+                    flexive.util.getJsonRpc().ContentTreeEditor.addReferences(getObjectId(menuItem), parent.getContentClipboard().get().slice());
                     parent.getContentClipboard().clear();
                     reloadContentTree();
                 } catch (e) {
@@ -164,7 +164,7 @@
             // activate the tree node
             function activateNode(menuItem) {
                 try {
-                    flexive.util.flexive.util.getJsonRpc().ContentTreeEditor.activate(getObjectId(menuItem), false);
+                    flexive.util.getJsonRpc().ContentTreeEditor.activate(getObjectId(menuItem), false);
                     reloadContentTree();
                 } catch (e) {
                     alert(e.message);
