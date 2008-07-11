@@ -23,19 +23,7 @@ Parameters:
 
     <script type="text/javascript">
     <!--
-        if (flexive.yui.requiredComponents.length > 0) {
-            // load Yahoo UI only if at least one component is required
-            var loaderPath = "#{weblet:url('com.flexive.faces.weblets', '/js/yui/yuiloader-beta-min.js')}";
-            var loader = new YAHOO.util.YUILoader({
-                    base: loaderPath.substr(0, loaderPath.lastIndexOf("/") + 1),
-                    require: flexive.yui.requiredComponents,
-                    loadOptional: true,
-                    onSuccess: function() {
-                        flexive.yui.processOnYahoo();
-                    }
-            });
-            loader.insert();
-        }
+        flexive.yui.load("#{weblet:url('com.flexive.faces.weblets', '/js/yui/yuiloader-beta-min.js')}");
     //-->
     </script>
 

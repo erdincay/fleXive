@@ -80,6 +80,26 @@ flexive.yui = new function() {
     this.onYahooLoadedFunctions = [];
 
     /**
+     * Loads the required Yahoo components of the current page.
+     *
+     * @param loaderPath    the path to yuiloader-min.js
+     */
+    this.load = function(loaderPath) {
+        if (this.requiredComponents.length > 0) {
+            // load Yahoo UI only if at least one component is required
+            var loader = new YAHOO.util.YUILoader({
+                        base: loaderPath.substr(0, loaderPath.lastIndexOf("/") + 1),
+                        require: this.requiredComponents,
+                        loadOptional: true,
+                        onSuccess: function() {
+                            flexive.yui.processOnYahoo();
+                        }
+                });
+            loader.insert();
+        }
+    }
+
+    /**
      * Adds the given function to flexive.yui.onYahooLoaded.
      *
      * @param fn    the function to be called when Yahoo has been loaded
@@ -110,6 +130,7 @@ flexive.yui = new function() {
      * Call setup methods of flexive components after yahoo has been initialized.
      */
     this.processOnYahoo = function() {
+        this.requiredComponents = [];
         for (var i = 0; i < this.onYahooLoadedFunctions.length; i++) {
             this.onYahooLoadedFunctions[i]();
         }

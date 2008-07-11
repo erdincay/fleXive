@@ -24,7 +24,10 @@ public abstract class NumberQueryInputMapper extends InputMapper<FxLargeNumber, 
         }
 
         @Override
-        public String encodeId(long id) {
+        public String encodeId(Long id) {
+            if (id == null) {
+                return "";
+            }
             try {
                 return EJBLookup.getAccountEngine().load(id).getLoginName();
             } catch (FxApplicationException e) {
@@ -45,7 +48,7 @@ public abstract class NumberQueryInputMapper extends InputMapper<FxLargeNumber, 
         }
     }
 
-    public abstract String encodeId(long id);
+    public abstract String encodeId(Long id);
 
     public abstract Long decodeQuery(String query);
 
@@ -54,7 +57,7 @@ public abstract class NumberQueryInputMapper extends InputMapper<FxLargeNumber, 
         if (value.isMultiLanguage()) {
             throw new FxInvalidParameterException("VALUE", "ex.content.value.mapper.select.singleLanguage").asRuntimeException();
         }
-        return new FxString(value.isMultiLanguage(), encodeId(value.getDefaultTranslation()));
+        return new FxString(value.isMultiLanguage(), encodeId(value.isEmpty() ? null : value.getDefaultTranslation()));
     }
 
     @Override

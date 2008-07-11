@@ -8,7 +8,8 @@
 	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
 	xmlns:t="http://myfaces.apache.org/tomahawk"
     xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
-    xmlns:fx="http://www.flexive.com/jsf/core">
+    xmlns:fx="http://www.flexive.com/jsf/core"
+    xmlns:weblet="http://weblets.dev.java.net/tags_jsp2">
 
 [fleXive3] search query editor. 
 
@@ -85,7 +86,7 @@ Parameters:
 
                 if (window._queryEditorPageLoaded) {
                     // init yahoo components after Ajax refresh
-                    flexive.yui.processOnYahoo();
+                    flexive.yui.load("#{weblet:url('com.flexive.faces.weblets', '/js/yui/yuiloader-beta-min.js')}");
                 }
                 var _queryEditorPageLoaded = true;
 
