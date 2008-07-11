@@ -46,6 +46,7 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.List;
 
@@ -110,7 +111,7 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
      */
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
         FxType type = (FxType) ctx.get(ConversionEngine.KEY_TYPE);
-        String property = reader.getAttribute("property");
+        String property = reader.getAttribute(ConversionEngine.KEY_PROPERTY);
         FxEnvironment env = CacheAdmin.getEnvironment();
         ACL acl = env.getACL(reader.getAttribute("acl"));
         LanguageEngine lang = EJBLookup.getLanguageEngine();
@@ -134,8 +135,8 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
         if (reader.hasMoreChildren()) { //optional property as last subnode
             reader.moveDown();
             //only allowed child is the property if it is not derived
-            if (!"property".equals(reader.getNodeName()))
-                throw new FxConversionException("ex.conversion.wrongNode", "property", reader.getNodeName()).asRuntimeException();
+            if (!ConversionEngine.KEY_PROPERTY.equals(reader.getNodeName()))
+                throw new FxConversionException("ex.conversion.wrongNode", ConversionEngine.KEY_PROPERTY, reader.getNodeName()).asRuntimeException();
             //read property data and create if needed
             String propName = reader.getAttribute("name");
             FxMultiplicity propMult = FxMultiplicity.fromString(reader.getAttribute("multiplicity"));
@@ -197,11 +198,17 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
             //property exists but not the xpath
             try {
                 //create assignment from property
-                final FxPropertyAssignmentEdit paEdit = FxPropertyAssignmentEdit.createNew(property, type, data.getAlias(),
-                        type.getName() + "/" + parentXPath);
+                FxPropertyAssignmentEdit paEdit;
+                if (StringUtils.isEmpty(data.getParentAssignment()))
+                    paEdit = FxPropertyAssignmentEdit.createNew(property, type, data.getAlias(),
+                            type.getName() + "/" + parentXPath);
+                else //reuse it
+                    paEdit = FxPropertyAssignmentEdit.reuse(data.getParentAssignment(), type.getName(),
+                            parentXPath, data.getAlias());
                 if (!"/".equals(parentXPath))
                     paEdit.setParentGroupAssignment((FxGroupAssignment) type.getAssignment(parentXPath));
                 EJBLookup.getAssignmentEngine().save(paEdit, false);
+
                 env = CacheAdmin.getEnvironment(); //refresh environment
             } catch (FxApplicationException e) {
                 throw e.asRuntimeException();

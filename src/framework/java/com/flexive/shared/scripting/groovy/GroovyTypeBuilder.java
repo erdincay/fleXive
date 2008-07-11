@@ -255,7 +255,7 @@ public class GroovyTypeBuilder extends BuilderSupport {
             try {
                 element.setXPath((parent == null ? "" : getParent().getXPath()) + element.getXPath());
                 element.setParentGroupAssignment(parent != null ? parent.getAssignment() : null);
-                element.setPosition(9000); //set to the bottom-most position
+                element.setPosition(FxAssignment.POSITION_BOTTOM); //set to the bottom-most position
                 EJBLookup.getAssignmentEngine().save(element, true);
             } catch (FxApplicationException e) {
                 throw e.asRuntimeException();
@@ -274,7 +274,7 @@ public class GroovyTypeBuilder extends BuilderSupport {
             try {
                 element.setXPath((parent == null ? "" : getParent().getXPath()) + element.getXPath());
                 element.setParentGroupAssignment(parent != null ? parent.getAssignment() : null);
-                element.setPosition(9000); //set to the bottom-most position
+                element.setPosition(FxAssignment.POSITION_BOTTOM); //set to the bottom-most position
                 EJBLookup.getAssignmentEngine().save(element, true);
             } catch (FxApplicationException e) {
                 throw e.asRuntimeException();

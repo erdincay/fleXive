@@ -31,11 +31,15 @@
  ***************************************************************/
 package com.flexive.core.conversion;
 
+import com.flexive.core.Database;
+import static com.flexive.core.DatabaseConst.TBL_STRUCT_TYPES;
 import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.core.structure.FxPreloadType;
+import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxConversionException;
@@ -57,6 +61,8 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import org.apache.commons.lang.ArrayUtils;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -237,17 +243,19 @@ public class FxTypeConverter implements Converter {
                 ctx.convertAnother(this, LifeCycleInfo.class);
             } else if ("scriptEvents".equals(node)) {
                 scriptMapping = new ArrayList<FxTypeScriptImportMapping>(5);
-            } else if ("scriptMapping".equals(node)) {
-                if (scriptMapping == null)
-                    throw new FxConversionException("ex.conversion.unexcpectedNode", node).asRuntimeException();
-                final Boolean derived = Boolean.valueOf(reader.getAttribute("derived"));
-                scriptMapping.add(new FxTypeScriptImportMapping(FxScriptEvent.valueOf(reader.getAttribute("event")),
-                        reader.getAttribute("script"),
-                        Boolean.valueOf(reader.getAttribute("active")),
-                        Boolean.valueOf(reader.getAttribute("derivedUsage")),
-                        derived,
-                        derived ? reader.getAttribute("baseType") : ""));
-
+                while (reader.hasMoreChildren()) {
+                    reader.moveDown();
+                    if( !"scriptMapping".equals(reader.getNodeName()))
+                        throw new FxConversionException("ex.conversion.wrongNode", "scriptMapping", reader.getNodeName()).asRuntimeException();
+                    final Boolean derived = Boolean.valueOf(reader.getAttribute("derived"));
+                    scriptMapping.add(new FxTypeScriptImportMapping(FxScriptEvent.valueOf(reader.getAttribute("event")),
+                            reader.getAttribute("script"),
+                            Boolean.valueOf(reader.getAttribute("active")),
+                            Boolean.valueOf(reader.getAttribute("derivedUsage")),
+                            derived,
+                            derived ? reader.getAttribute("baseType") : ""));
+                    reader.moveUp();
+                }
             } else if ("assignments".equals(node)) {
                 processAssignments = true;
                 break;
@@ -258,6 +266,27 @@ public class FxTypeConverter implements Converter {
 
         try {
             long typeId = typeEngine.save(typeEdit);
+            //appy LifeCycleInfos
+            Connection con = null;
+            PreparedStatement ps = null;
+            StringBuilder sql = new StringBuilder(500);
+            try {
+                con = Database.getDbConnection();
+                sql.append("UPDATE ").append(TBL_STRUCT_TYPES).append(
+                        " SET CREATED_BY=?, CREATED_AT=?, MODIFIED_BY=?, MODIFIED_AT=? WHERE ID=?");
+                ps = con.prepareStatement(sql.toString());
+                ps.setLong(1, typeEdit.getLifeCycleInfo().getCreatorId());
+                ps.setLong(2, typeEdit.getLifeCycleInfo().getCreationTime());
+                ps.setLong(3, typeEdit.getLifeCycleInfo().getModificatorId());
+                ps.setLong(4, typeEdit.getLifeCycleInfo().getModificationTime());
+                ps.setLong(5, typeId);
+                ps.executeUpdate();
+                StructureLoader.reload(con);
+            } catch (Exception e) {
+                throw new FxApplicationException(e, "ex.conversion.type.error", typeEdit.getName(), e.getMessage()).asRuntimeException();
+            } finally {
+                Database.closeObjects(FxTypeConverter.class, con, ps);
+            }
             typeEdit = CacheAdmin.getEnvironment().getType(typeId).asEditable();
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();
@@ -281,6 +310,11 @@ public class FxTypeConverter implements Converter {
                             env.getScript(sm.getScriptName()).getId(), typeEdit.getId(),
                             sm.isActive(), sm.isDerivedUsage());
                 }
+                try {
+                    StructureLoader.reload(null);
+                } catch (FxCacheException e) {
+                    throw new FxApplicationException(e, "ex.conversion.type.error", typeEdit.getName(), e.getMessage()).asRuntimeException();
+                }
             }
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();
@@ -300,8 +334,7 @@ public class FxTypeConverter implements Converter {
             }
             reader.moveUp(); //move up the final assignments closing node
         }
-
-        return CacheAdmin.getEnvironment().getType(typeEdit.getId());
+        return typeEdit;
     }
 
     /**

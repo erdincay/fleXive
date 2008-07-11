@@ -83,6 +83,11 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
     public final static int TYPE_PROPERTY = 1;
 
     /**
+     * Position constant to assign if an assignment should be positioned at the bottom
+     */
+    public final static int POSITION_BOTTOM = 9000;
+
+    /**
      * Internal id of this assignment
      */
     private long assignmentId;
@@ -132,7 +137,7 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
     /**
      * base assignment (if derived the parent, if not the root assignment, if its a root assignment FxAssignment.ROOT_BASE)
      */
-    private long baseAssignment;
+    protected long baseAssignment;
 
     /**
      * (optional) description

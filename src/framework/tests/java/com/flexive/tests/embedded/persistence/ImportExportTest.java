@@ -120,12 +120,23 @@ public class ImportExportTest {
      * @throws FxApplicationException on errors
      */
     @Test
-    public void typeMarshalling() throws FxApplicationException {
-        XStream xs = ConversionEngine.getXStream();
-        FxType testType = CacheAdmin.getEnvironment().getType(FxType.FOLDER);
-        final String xml = xs.toXML(testType);
-        FxType importedType = (FxType) xs.fromXML(xml);
-        Assert.assertEquals(xml, xs.toXML(importedType));
+    public void typeExportImport() throws FxApplicationException {
+        String xml = EJBLookup.getTypeEngine().export(CacheAdmin.getEnvironment().getType(FxType.CONTACTDATA).getId());
+        String tmpName = "TMP" + FxType.CONTACTDATA;
+        xml = xml.replaceAll(FxType.CONTACTDATA, tmpName);
+//        System.out.println("Original: " + xml);
+        FxType importedType = EJBLookup.getTypeEngine().importType(xml);
+        try {
+            Assert.assertTrue(importedType.getName().equals(tmpName));
+            String importedXml = EJBLookup.getTypeEngine().export(importedType.getId());
+//            System.out.println("Imported: " + importedXml);
+            Assert.assertEquals(xml, importedXml);
+            //try re-importing over existing, should not throw any errors
+            String importedXml2 = EJBLookup.getTypeEngine().export(importedType.getId());
+            Assert.assertEquals(importedXml, importedXml2);
+        } finally {
+            EJBLookup.getTypeEngine().remove(importedType.getId());
+        }
     }
 
 

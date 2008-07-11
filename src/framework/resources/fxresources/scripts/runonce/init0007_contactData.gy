@@ -36,7 +36,6 @@ import com.flexive.shared.CacheAdmin
 import com.flexive.shared.EJBLookup
 import com.flexive.shared.FxLanguage
 import com.flexive.shared.configuration.SystemParameters
-import com.flexive.shared.interfaces.AssignmentEngine
 import com.flexive.shared.scripting.FxScriptInfo
 import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
 import com.flexive.shared.security.ACL
@@ -44,16 +43,9 @@ import com.flexive.shared.structure.*
 import com.flexive.shared.value.FxString
 import com.flexive.shared.scripting.FxScriptEvent
 
-//Create contact data type
-def countries = """
-
-"""
-
 def label(labelEn, labelDe) {
     return new FxString(true, FxLanguage.ENGLISH, (String)labelEn).setTranslation(FxLanguage.GERMAN, labelDe);
 }
-
-def AssignmentEngine ae = EJBLookup.getAssignmentEngine()
 
 def long typeId = EJBLookup.getTypeEngine().save(FxTypeEdit.createNew(FxType.CONTACTDATA, new FxString(FxLanguage.ENGLISH, "Contact Data").setTranslation(FxLanguage.GERMAN, "Kontaktdaten"),
         CacheAdmin.getEnvironment().getACL(ACL.Category.STRUCTURE.defaultId), null))

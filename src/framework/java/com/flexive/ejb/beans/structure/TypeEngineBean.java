@@ -57,8 +57,8 @@ import javax.annotation.Resource;
 import javax.ejb.*;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
 
 
 /**
@@ -171,7 +171,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             //store relations
             ps.close();
             if (type.getAddedRelations().size() > 0) {
-                ps = con.prepareStatement("INSERT INTO "+TBL_STRUCT_TYPERELATIONS+" (TYPEDEF,TYPESRC,TYPEDST,MAXSRC,MAXDST)VALUES(?,?,?,?,?)");
+                ps = con.prepareStatement("INSERT INTO " + TBL_STRUCT_TYPERELATIONS + " (TYPEDEF,TYPESRC,TYPEDST,MAXSRC,MAXDST)VALUES(?,?,?,?,?)");
                 ps.setLong(1, thisType.getId());
                 for (FxTypeRelation rel : type.getAddedRelations()) {
                     if (rel.getSource().isRelation())
@@ -806,7 +806,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             StructureLoader.reload(con);
             htracker.track(type, "history.type.remove", type.getName(), type.getId());
         } catch (SQLException e) {
-            if( Database.isForeignKeyViolation(e)) {
+            if (Database.isForeignKeyViolation(e)) {
                 ctx.setRollbackOnly();
                 throw new FxRemoveException(LOG, e, "ex.structure.type.inUse", type.getName());
             }
@@ -917,7 +917,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
      */
     public FxType importType(String typeXML) throws FxApplicationException {
         try {
-            return (FxType)ConversionEngine.getXStream().fromXML(typeXML);
+            return (FxType) ConversionEngine.getXStream().fromXML(typeXML);
         } catch (ConversionException e) {
             String key;
             Iterator i = e.keys();
@@ -930,7 +930,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                 else if ("line number".equals(key))
                     line = e.get(key);
             }
-            throw new FxApplicationException("ex.structure.import.type.conversionError", path, line, e.getShortMessage());
+            throw new FxApplicationException(e.getCause(), "ex.structure.import.type.conversionError", path, line, e.getShortMessage());
         } catch (Exception e) {
             throw new FxApplicationException(e, "ex.structure.import.type.error", e.getMessage());
         }

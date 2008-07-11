@@ -275,6 +275,14 @@ public class FxGroupAssignmentEdit extends FxGroupAssignment {
     }
 
     /**
+     * Remove any references of derived usage
+     */
+    public void clearDerivedUse() {
+        this.parentGroupAssignment = null;
+        this.baseAssignment = NO_BASE;
+    }
+
+    /**
      * Set an option
      *
      * @param key   option key

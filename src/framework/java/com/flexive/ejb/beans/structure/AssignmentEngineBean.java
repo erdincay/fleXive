@@ -973,8 +973,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     private int setAssignmentPosition(Connection con, long assignmentId, int position) throws FxUpdateException, FxInvalidParameterException {
         if (position < 0)
             position = 0;
-        if( position > 9000 )
-            throw new FxInvalidParameterException("position", "ex.structure.assignment.pos.tooHigh", position, 9000);
+        if( position > FxAssignment.POSITION_BOTTOM )
+            throw new FxInvalidParameterException("position", "ex.structure.assignment.pos.tooHigh", position, FxAssignment.POSITION_BOTTOM);
         PreparedStatement ps = null, ps2 = null;
         int retPosition = position;
         try {
@@ -1101,7 +1101,10 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 ps.setInt(8, position);
                 ps.setString(9, XPath);
                 ps.setString(10, group.getAlias());
-                ps.setLong(11, group.getBaseAssignmentId());
+                if( group.getBaseAssignmentId() == FxAssignment.NO_BASE )
+                    ps.setNull(11, java.sql.Types.NUMERIC);
+                else
+                    ps.setLong(11, group.getBaseAssignmentId());
                 ps.setLong(12, group.getParentGroupAssignment() == null ? FxAssignment.NO_PARENT : group.getParentGroupAssignment().getId());
                 ps.setLong(13, group.getGroup().getId());
                 ps.setBoolean(14, group.isSystemInternal());
@@ -1120,7 +1123,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             }
             htracker.track(group.getAssignedType(), "history.assignment.createGroupAssignment", XPath, group.getAssignedType().getId(), group.getAssignedType().getName(),
                     group.getGroup().getId(), group.getGroup().getName());
-            if (group.getBaseAssignmentId() != FxAssignment.ROOT_BASE && createSubAssignments) {
+            if (group.getBaseAssignmentId() > 0 && createSubAssignments) {
                 FxGroupAssignment baseGroup = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(group.getBaseAssignmentId());
                 for (FxGroupAssignment ga : baseGroup.getAssignedGroups()) {
                     FxGroupAssignmentEdit gae = new FxGroupAssignmentEdit(ga);
@@ -1818,12 +1821,18 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      * @throws FxCreateException if no result could be retrieved
      */
     private int getValidPosition(Connection con, StringBuilder sql, int desiredPos, long typeId, FxGroupAssignment parentGroupAssignment) throws SQLException, FxCreateException {
-//      original MySQL statement:
-//        select if( (select count(id) from FXS_ASSIGNMENTS where typedef=1 and parentgroup=0 and pos=1) > 0,
-//             (select (max(pos)+1) from FXS_ASSIGNMENTS WHERE typedef=1 and parentgroup=0),
-//             1) as pos
         PreparedStatement ps = null;
         sql.setLength(0);
+        if( desiredPos >= FxAssignment.POSITION_BOTTOM ) {
+            sql.append("SELECT MAX(POS+1) FROM "+TBL_STRUCT_ASSIGNMENTS+" WHERE TYPEDEF=? AND PARENTGROUP=?");
+            ps = con.prepareStatement(sql.toString());
+            ps.setLong(1, typeId);
+            ps.setLong(2, parentGroupAssignment == null ? FxAssignment.NO_PARENT : parentGroupAssignment.getId());
+            ResultSet rs = ps.executeQuery();
+            if (rs != null && rs.next())
+                return rs.getInt(1);
+            throw new FxCreateException("ex.structure.position.failed", typeId, parentGroupAssignment == null ? FxAssignment.NO_PARENT : parentGroupAssignment.getId(), desiredPos);
+        }
         sql.append("SELECT IF((SELECT COUNT(ID) FROM ").append(TBL_STRUCT_ASSIGNMENTS).
                 //                             1                 2         3
                         append(" WHERE TYPEDEF=? AND PARENTGROUP=? AND POS=?)>0,(SELECT IFNULL(MAX(POS)+1,0) FROM ").

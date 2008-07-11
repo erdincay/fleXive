@@ -37,7 +37,9 @@ import com.flexive.shared.XPathElement;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxConversionException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.flexive.shared.interfaces.AssignmentEngine;
 import com.flexive.shared.structure.*;
+import com.flexive.shared.value.FxString;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
@@ -90,7 +92,6 @@ public class FxGroupAssignmentConverter extends FxAssignmentConverter {
         AssignmentData data = (AssignmentData) super.unmarshal(reader, ctx);
         FxEnvironment env = CacheAdmin.getEnvironment();
         boolean isDerived = data.getParentAssignment() != null;
-        List<FxStructureOption> options = unmarshallOptions(reader, ctx);
         String parentXPath;
         try {
             List<XPathElement> xpe = XPathElement.split(data.getXpath());
@@ -101,7 +102,31 @@ public class FxGroupAssignmentConverter extends FxAssignmentConverter {
             throw e.asRuntimeException();
         }
 
+        final AssignmentEngine assignmentEngine = EJBLookup.getAssignmentEngine();
         FxGroupAssignmentEdit grp = null;
+
+        String grpName = null;
+        FxMultiplicity grpMult = null;
+        FxString grpLabel = null;
+        FxString grpHint = null;
+        List<FxStructureOption> grpOptions = null;
+
+        if (!isDerived) {
+            //read the group information
+            reader.moveDown();
+            //only allowed child is the property if it is not derived
+            if (!ConversionEngine.KEY_GROUP.equals(reader.getNodeName())) {
+                throw new FxConversionException("ex.conversion.wrongNode", ConversionEngine.KEY_GROUP, reader.getNodeName()).asRuntimeException();
+            }
+            //read property data and create if needed
+            grpName = reader.getAttribute("name");
+            grpMult = FxMultiplicity.fromString(reader.getAttribute("multiplicity"));
+            grpLabel = (FxString) ConversionEngine.getFxValue("label", this, reader, ctx);
+            grpHint = (FxString) ConversionEngine.getFxValue("hint", this, reader, ctx);
+            grpOptions = super.unmarshallOptions(reader, ctx);
+            reader.moveUp();
+        }
+
 
         if (env.assignmentExists(data.getXpath()))
             grp = ((FxGroupAssignment) env.getAssignment(data.getXpath())).asEditable();
@@ -112,7 +137,7 @@ public class FxGroupAssignmentConverter extends FxAssignmentConverter {
                     FxGroupAssignment ga = ((FxGroupAssignment) env.getAssignment(data.getParentAssignment()));
                     try {
                         grp = FxGroupAssignmentEdit.createNew(ga, type, data.getAlias(), parentXPath);
-                        long groupId = EJBLookup.getAssignmentEngine().save(grp, false);
+                        long groupId = assignmentEngine.save(grp, false);
                         env = CacheAdmin.getEnvironment();
                         grp = ((FxGroupAssignment) env.getAssignment(groupId)).asEditable();
                     } catch (FxApplicationException e) {
@@ -125,11 +150,35 @@ public class FxGroupAssignmentConverter extends FxAssignmentConverter {
         if (grp == null) {
             //create a new one
             try {
-                long groupId = EJBLookup.getAssignmentEngine().createGroup(
-                        FxGroupEdit.createNew(data.getAlias(), data.getLabel(), data.getHint(), true, data.getMultiplicity()),
-                        parentXPath);
-                env = CacheAdmin.getEnvironment();
-                grp = ((FxGroupAssignment) env.getAssignment(groupId)).asEditable();
+                long groupId;
+                if (env.groupExists(data.getAlias())) {
+                    groupId = env.getGroup(data.getAlias()).getId();
+                    //reuse a group from another assignment!
+                    List<FxGroupAssignment> assignments = CacheAdmin.getFilteredEnvironment().getGroupAssignments(true);
+                    FxGroupAssignment reuse = null;
+                    for (FxGroupAssignment assignment : assignments) {
+                        if (assignment.getGroup().getId() == groupId && !assignment.isSystemInternal()) {
+                            reuse = assignment;
+                            break;
+                        }
+                    }
+                    if (reuse != null) {
+                        //reuse the group but not the group assignment
+                        FxGroupAssignmentEdit gedit = FxGroupAssignmentEdit.createNew(reuse, type, data.getAlias(), parentXPath);
+                        gedit.clearDerivedUse();
+                        long aid = assignmentEngine.save(gedit, false);
+                        env = CacheAdmin.getEnvironment();
+                        grp = ((FxGroupAssignment) env.getAssignment(aid)).asEditable();
+                    }
+                } else {
+                    groupId = assignmentEngine.createGroup(
+                            isDerived
+                                    ? FxGroupEdit.createNew(data.getAlias(), data.getLabel(), data.getHint(), true, data.getMultiplicity())
+                                    : FxGroupEdit.createNew(grpName, grpLabel, grpHint, true, grpMult),
+                            parentXPath);
+                    env = CacheAdmin.getEnvironment();
+                    grp = ((FxGroupAssignment) env.getAssignment(groupId)).asEditable();
+                }
             } catch (FxApplicationException e) {
                 throw e.asRuntimeException();
             }
@@ -144,7 +193,7 @@ public class FxGroupAssignmentConverter extends FxAssignmentConverter {
             grp.setMode(mode);
             grp.setMultiplicity(data.getMultiplicity());
             grp.setPosition(data.getPos());
-            EJBLookup.getAssignmentEngine().save(grp, false);
+            assignmentEngine.save(grp, false);
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();
         }

@@ -39,7 +39,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -132,7 +135,7 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
     public String toString() {
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
         return "LCI:{C:" + this.getCreatorId() + "/" + sdf.format(new Date(this.getCreationTime())) + "|"
-                + "M:" + this.getModificatorId() + "/" + sdf.format(new Date(this.getModificationTime()));
+                + "M:" + this.getModificatorId() + "/" + sdf.format(new Date(this.getModificationTime())) + "}";
     }
 
     /**
@@ -304,9 +307,9 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
      */
     @Override
     public boolean equals(Object obj) {
-        if( obj == null || !(obj instanceof LifeCycleInfo))
+        if (obj == null || !(obj instanceof LifeCycleInfo))
             return false;
-        LifeCycleInfo other = (LifeCycleInfo)obj;
+        LifeCycleInfo other = (LifeCycleInfo) obj;
         return modifcatorId == other.getModificatorId() && modificationTime == other.getModificationTime() &&
                 creatorId == other.getCreatorId() && creationTime == other.getCreationTime();
     }
