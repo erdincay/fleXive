@@ -32,8 +32,10 @@
 package com.flexive.shared.content;
 
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.XPathElement;
+import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.security.LifeCycleInfo;
@@ -93,6 +95,10 @@ public class FxContent implements Serializable, Cloneable {
     private FxGroupData data;
     private long binaryPreviewId;
     private long binaryPreviewACL;
+
+    private volatile boolean captionResolved = false;
+    private volatile boolean hasCaption = false;
+    private volatile FxString caption = null;
 
     /**
      * Constructor
@@ -629,7 +635,7 @@ public class FxContent implements Serializable, Cloneable {
     }
 
     /**
-     * Drop all data and create random entries for testing purposes
+     * Drop all data and create random entries with a maximum multiplicity for testing purposes
      *
      * @param maxMultiplicity the maximum multiplicity for groups
      * @return this
@@ -645,6 +651,14 @@ public class FxContent implements Serializable, Cloneable {
         return this;
     }
 
+    /**
+     * Drop all data and create random entries for testing purposes
+     *
+     * @return this
+     * @throws FxCreateException           on errors
+     * @throws FxNotFoundException         on errors
+     * @throws FxInvalidParameterException on errors
+     */
     public FxContent randomize() throws FxCreateException, FxNotFoundException, FxInvalidParameterException {
         return randomize(FxMultiplicity.RANDOM_MAX);
     }
@@ -1150,6 +1164,59 @@ public class FxContent implements Serializable, Cloneable {
             data.getChildren().remove(d);
             removeData();
             return;
+        }
+    }
+
+    /**
+     * Check if this content instance has a caption property assigned
+     *
+     * @return <code>true</code> if a caption property is assigned to this content instance
+     * @throws FxApplicationException on erros
+     */
+    public synchronized boolean hasCaption() throws FxApplicationException {
+        resolveCaption();
+        return hasCaption;
+    }
+
+    /**
+     * Get the caption value of this instance.
+     * If no caption property is assigned, this method will return <code>null</code>
+     *
+     * @return caption or <code>null</code> if not assigned
+     */
+    public FxString getCaption() {
+        return caption;
+    }
+
+    /**
+     * Internally resolve if a caption property is present
+     *
+     * @throws FxApplicationException on errors
+     */
+    private synchronized void resolveCaption() throws FxApplicationException {
+        if (captionResolved)
+            return;
+        long captionPropertyId = EJBLookup.getConfigurationEngine().get(SystemParameters.TREE_CAPTION_PROPERTY);
+        _resolveCaption(data, captionPropertyId);
+        captionResolved = true;
+    }
+
+    /**
+     * Recurse through all property data to find a caption value
+     *
+     * @param gdata             group to examine
+     * @param captionPropertyId id of the caption property
+     */
+    private void _resolveCaption(FxGroupData gdata, long captionPropertyId) {
+        for (FxData check : gdata.getChildren()) {
+            if (check instanceof FxPropertyData) {
+                if (((FxPropertyData) check).getPropertyId() == captionPropertyId) {
+                    caption = (FxString) ((FxPropertyData) check).getValue();
+                    hasCaption = true;
+                    return;
+                }
+            } else if (check instanceof FxGroupData)
+                _resolveCaption((FxGroupData) check, captionPropertyId);
         }
     }
 }
