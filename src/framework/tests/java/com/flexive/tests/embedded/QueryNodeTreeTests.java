@@ -534,12 +534,12 @@ public class QueryNodeTreeTests {
         assert node.getAvailableComparators().equals(Arrays.asList(PropertyValueComparator.values()));
         node.setInputMapper(new InputMapper<FxString, FxBoolean>() {
             @Override
-            public FxBoolean encode(FxString value) {
+            protected FxBoolean doEncode(FxString value) {
                 return new FxBoolean(Boolean.valueOf(value.getDefaultTranslation()));
             }
 
             @Override
-            public FxString decode(FxBoolean value) {
+            protected FxString doDecode(FxBoolean value) {
                 return new FxString(value.getDefaultTranslation().toString());
             }
 
