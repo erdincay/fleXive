@@ -644,7 +644,8 @@ public class PropertyEditorBean implements ActionBean {
                 property.setOption(FxStructureOption.OPTION_MULTILANG, propOption.isOverrideable(), b);
             } else {
                 property.setOption(FxStructureOption.OPTION_MULTILANG, true, b);
-                assignment.setOption(FxStructureOption.OPTION_MULTILANG, !b);
+                if (assignment !=null)
+                    assignment.setOption(FxStructureOption.OPTION_MULTILANG, !b);
             }
         } else {
             if (b && multilang)
