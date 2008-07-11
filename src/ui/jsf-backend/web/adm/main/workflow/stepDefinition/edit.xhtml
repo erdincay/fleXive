@@ -6,7 +6,8 @@
       xmlns:t="http://myfaces.apache.org/tomahawk"
       xmlns:c="http://java.sun.com/jstl/core"
       xmlns:adm="http://www.flexive.com/jsf/admin"
-      xmlns:fx="http://www.flexive.com/jsf/core">
+      xmlns:fx="http://www.flexive.com/jsf/core"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax">
 <body>
 
 <ui:composition template="/adm/contentTemplate.xhtml">
@@ -15,32 +16,43 @@
     </ui:define>
 
     <ui:define name="body">
-        <h:form id="frm">
-            <h:inputHidden value="#{stepDefinitionBean.stepDefinition.id}"/>
+        <a4j:form id="frm">
+            <a4j:region>
+                <h:inputHidden value="#{stepDefinitionBean.stepDefinition.id}"/>
 
-            <ui:fragment rendered="#{stepDefinitionBean.stepDefinition.id == -1}">
-                <adm:tab label="#{fxMessageBean['StepDefinition.tabtitle.create']}" active="true" id="tab1"/>
-            </ui:fragment>
-            <ui:fragment rendered="#{stepDefinitionBean.stepDefinition.id != -1}">
-                <adm:tab label="#{fxMessageBean['StepDefinition.tabtitle.edit,#{stepDefinitionBean.stepDefinition.label}']}" active="true" id="tab2">
-                    <f:param value="#{stepDefinition.label}"/>
-                </adm:tab>
-            </ui:fragment>
+                <ui:fragment rendered="#{stepDefinitionBean.stepDefinition.id == -1}">
+                    <adm:tab label="#{fxMessageBean['StepDefinition.tabtitle.create']}" active="true" id="tab1"/>
+                </ui:fragment>
+                <ui:fragment rendered="#{stepDefinitionBean.stepDefinition.id != -1}">
+                    <adm:tab label="#{fxMessageBean['StepDefinition.tabtitle.edit,#{stepDefinitionBean.stepDefinition.label}']}" active="true" id="tab2">
+                        <f:param value="#{stepDefinition.label}"/>
+                    </adm:tab>
+                </ui:fragment>
 
-            <fx:formRow label="#{fxMessageBean['StepDefinition.field.name']}" id="name">
-                <h:inputText id="stepDescription" value="#{stepDefinitionBean.stepDefinition.name}"/>
-            </fx:formRow>
+                <fx:formRow label="#{fxMessageBean['StepDefinition.field.name']}" id="name">
+                    <h:inputText id="stepDescription" value="#{stepDefinitionBean.stepDefinition.name}"/>
+                </fx:formRow>
 
-            <fx:formRow label="#{fxMessageBean['StepDefinition.field.label']}" id="label">
-                <fx:fxValueInput id="stepName" value="#{stepDefinitionBean.stepDefinition.label}"/>
-            </fx:formRow>
+                <fx:formRow label="#{fxMessageBean['StepDefinition.field.label']}" id="label">
+                    <fx:fxValueInput id="stepName" value="#{stepDefinitionBean.stepDefinition.label}"/>
+                </fx:formRow>
 
-            <fx:formRow label="#{fxMessageBean['StepDefinition.field.unique']}" id="uniqueTarget">
-                <h:selectOneListbox id="uniqueTarget" value="#{stepDefinitionBean.stepDefinition.uniqueTargetId}" size="1">
-                    <f:selectItem itemLabel="" itemValue="#{-1}"/>
-                    <f:selectItems value="#{stepDefinitionBean.stepDefinitions}"/>
-                </h:selectOneListbox>
-            </fx:formRow>
+                <fx:formRow label="#{fxMessageBean['StepDefinition.field.unique.select']}" id="uniqueTargetSelect">
+                    <h:selectBooleanCheckbox id="uniqueTargetSelect" value="#{stepDefinitionBean.uniqueTargetSelected}">
+                        <a4j:support event="onchange" reRender="uniqueTargetList"/>
+                    </h:selectBooleanCheckbox>
+                </fx:formRow>
+
+                <a4j:outputPanel id="uniqueTargetList" ajaxRendered="#{stepDefinitionBean.uniqueTargetSelected}">
+                    <c:if test="#{stepDefinitionBean.uniqueTargetSelected}">
+                        <fx:formRow label="#{fxMessageBean['StepDefinition.field.unique.target']}" id="uniqueTarget">
+                            <h:selectOneListbox id="uniqueTarget" value="#{stepDefinitionBean.stepDefinition.uniqueTargetId}" size="1">
+                                <f:selectItems value="#{stepDefinitionBean.stepDefinitions}"/>
+                            </h:selectOneListbox>
+                        </fx:formRow>
+                    </c:if>
+                </a4j:outputPanel>
+            </a4j:region>
 
             <c:if test="#{stepDefinitionBean.stepDefinition.id == -1}">
                 <adm:commandButton id="createButton" labelKey="StepDefinition.button.create" icon="new"  bean="#{stepDefinitionBean}" action="create"/>
@@ -53,7 +65,7 @@
                 icon="cancel"  action="stepDefinitionOverview" id="cancelButton" immediate="true"/>
 
             <adm:toolbarPluginButtons/>
-        </h:form>
+        </a4j:form>
 
         <br/>
 

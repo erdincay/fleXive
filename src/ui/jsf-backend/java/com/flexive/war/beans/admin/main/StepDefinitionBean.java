@@ -53,6 +53,7 @@ import java.util.ArrayList;
 public class StepDefinitionBean {
     private long stepDefinitionId = -1;
     private StepDefinitionEdit stepDefinition;
+    private boolean uniqueTargetSelected;
 
     /**
      * Step definition overview.
@@ -70,6 +71,7 @@ public class StepDefinitionBean {
      */
     public String edit() {
         stepDefinition =CacheAdmin.getEnvironment().getStepDefinition(stepDefinitionId).asEditable();
+        initUniqueTargetSelected();
         return "stepDefinitionEdit";
     }
 
@@ -112,6 +114,8 @@ public class StepDefinitionBean {
      */
     public String save() {
         try {
+            if (!isUniqueTargetSelected())
+                stepDefinition.setUniqueTargetId(-1);
             getWorkflowStepDefinitionEngine().update(stepDefinition);
             new FxFacesMsgInfo("StepDefinition.nfo.updated", stepDefinition.getName()).addToContext();
             return overview();
@@ -124,7 +128,6 @@ public class StepDefinitionBean {
     public List<StepDefinition> getList() {
         return CacheAdmin.getFilteredEnvironment().getStepDefinitions();
     }
-
 
     public long getStepDefinitionId() {
         return stepDefinitionId;
@@ -139,11 +142,13 @@ public class StepDefinitionBean {
             return stepDefinition;
         }
         stepDefinition = new StepDefinitionEdit(new StepDefinition(-1, new FxString(""), null, -1));
+        uniqueTargetSelected = stepDefinition.getUniqueTargetId() !=-1;
         return stepDefinition;
     }
 
     public void setStepDefinition(StepDefinitionEdit stepDefinition) {
         this.stepDefinition = stepDefinition;
+        initUniqueTargetSelected();
     }
 
     public List<SelectItem> getStepDefinitions() {
@@ -153,6 +158,19 @@ public class StepDefinitionBean {
             if (sd.getId() != stepDefinition.getId()) {
                 filteredList.add(sd);
             }
-        return FxJsfUtils.asIdSelectListWithLabel(filteredList);
+        //if list is empty, add empty element
+        return filteredList.isEmpty() ? FxJsfUtils.asSelectListWithLabel(filteredList, true) : FxJsfUtils.asSelectListWithLabel(filteredList, false);
+    }
+
+    public boolean isUniqueTargetSelected() {
+        return uniqueTargetSelected;
+    }
+
+    public void setUniqueTargetSelected(boolean b) {
+        uniqueTargetSelected=b;
+    }
+
+    private void initUniqueTargetSelected() {
+        uniqueTargetSelected = getStepDefinition().getUniqueTargetId() !=-1;
     }
 }
