@@ -413,7 +413,13 @@ public class PropertyEditorBean implements ActionBean {
      * @param d the data type
      */
     public void setPropertyDataType(FxDataType d) {
+        boolean typeChanged=false;
+        if (property.getDataType() != null && property.getDataType().getId() != d.getId())
+            typeChanged=true;
         property.setDataType(d);
+        if (typeChanged && assignment != null)
+            assignment.setDefaultValue(property.getEmptyValue());
+
         /*
         property.setDefaultValue(property.getDefaultValue());
         assignment.setDefaultValue(assignment.getDefaultValue());
