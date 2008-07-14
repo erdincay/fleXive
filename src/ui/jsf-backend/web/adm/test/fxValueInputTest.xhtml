@@ -17,6 +17,8 @@
 
     <h3>fx:fxValueInput testcases</h3>
 
+    <!-- Trigger test type init #{fxContentViewTestBean.typeName} -->
+
     <h:form id="someFormId" enctype="multipart/form-data" styleClass="yui-skin-sam">
 
         <fx:fxValueInputLanguageSelect id="switchLanguages"/>
@@ -27,6 +29,13 @@
             var userAcHandler = new flexive.yui.AutoCompleteHandler(function(query) {
                 return eval("(" + flexive.util.getJsonRpc().AutoCompleteProvider.userQuery(query) + ")");
             });
+
+            var customHandler = new flexive.yui.AutoCompleteHandler(function(query) {
+                var q = decodeURIComponent(query);
+                return [[q + "/a", q + ": <i>a label</i>"],
+                        [q + "/b", q + ": <i>b label</i>"],
+                        [q + "/c", q + ": <i>c label</i>"]];
+            });
         //-->
         </script>
         <fx:formRow label="Default autocomplete provider">
@@ -34,6 +43,9 @@
         </fx:formRow>
         <fx:formRow label="User autocomplete provider">
             <fx:fxValueInput value="#{fxValueInputTestBean.userStringValue}" autocompleteHandler="userAcHandler"/>
+        </fx:formRow>
+        <fx:formRow label="Custom autocomplete provider">
+            <fx:fxValueInput value="#{fxValueInputTestBean.userStringValue}" autocompleteHandler="customHandler"/>
         </fx:formRow>
 
         <h5>ui:repeat</h5>

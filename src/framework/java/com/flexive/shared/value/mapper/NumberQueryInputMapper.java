@@ -15,15 +15,20 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 
 /**
- * An input mapper between discrete values (e.g. IDs) and unique String representations. For example, this can be used
- * to map account IDs to login names. This is also used for most auto-complete inputs for flexive contents.
+ * An abstract input mapper between discrete values (e.g. IDs) and unique String representations.
+ * For example, this can be used to map account IDs to login names.
+ * This is also used for most auto-complete inputs for flexive structure propreties.
+ *
+ * @param <T>   the actual value type of the FxValue implementation (e.g. Long)
+ * @param <BaseType>    the FxValue class to be used as input (e.g. FxLargeNumber or FxReference)
  *
  * @author Daniel Lichtenberger, UCS
  * @version $Rev$
  */
 public abstract class NumberQueryInputMapper<T, BaseType extends FxValue<T, ?>> extends InputMapper<BaseType, FxString> {
     /**
-     * Maps account IDs to login names.
+     * Maps account IDs to login names. The autocomplete options are provided by
+     * com.flexive.faces.javascript.AutoCompleteProvider#userQuery().
      */
     public static class AccountQueryInputMapper extends NumberQueryInputMapper<Long, FxLargeNumber> {
         public AccountQueryInputMapper() {
@@ -38,7 +43,7 @@ public abstract class NumberQueryInputMapper<T, BaseType extends FxValue<T, ?>> 
             try {
                 return EJBLookup.getAccountEngine().load(id).getLoginName();
             } catch (FxApplicationException e) {
-                return "";
+                return "";  // account does not exist or cannot be loaded - ignore and return an empty value
             }
         }
 

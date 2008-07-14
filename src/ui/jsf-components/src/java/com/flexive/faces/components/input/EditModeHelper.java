@@ -756,7 +756,7 @@ class EditModeHelper extends RenderHelper {
                             + "    var ds = handler.getDataSource();\n"
                             + "    var ac = new YAHOO.widget.AutoComplete('" + inputClientId + "', '" + containerId + "', ds);\n"
                             + "    ac.formatResult = handler.formatResult;\n"
-                            + "    ac.forceSelection = true;\n"
+                            + "    ac.forceSelection = false;\n"
                             + "}"
             );
             FxJavascriptUtils.endJavascript(out);

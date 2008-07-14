@@ -49,8 +49,15 @@ import org.apache.commons.lang.StringUtils;
  * components.
  * <p>When rendering the input component, {@link InputMapper#encode(FxValue)} is
  * called and may wrap the given value in another object. For example, an ordinal
- * {@link com.flexive.shared.value.FxLargeNumber} like the ACL id may be mapped
- * to a {@link com.flexive.shared.value.FxSelectOne} value for input rendering.
+ * {@link com.flexive.shared.value.FxLargeNumber FxLargeNumber} like the ACL ID may be mapped
+ * to a {@link com.flexive.shared.value.FxSelectOne FxSelectOne} value for input rendering.
+ * </p>
+ * <p>
+ * When decoding the value submitted from the input form, {@link #decode(com.flexive.shared.value.FxValue)}
+ * is called with an instance of the mapped type. In the example given above,
+ * the decode method would store the element ID of the
+ * {@link com.flexive.shared.value.FxSelectOne FxSelectOne} value in a
+ * {@link com.flexive.shared.value.FxLargeNumber FxLargeNumber} instance.
  * </p>
  * <p>
  * Use {@link #getInstance(FxProperty)} to retrieve a new InputMapper for the given
@@ -61,6 +68,9 @@ import org.apache.commons.lang.StringUtils;
  * You may also implement your own input mapper and supply it to the FxValueInput component
  * or attach it to a search query node.
  * </p>
+ *
+ * @param <BaseType> the source value to be mapped (must extend FxValue).
+ * @param <MappedType> the target type of the mapping (must extend FxValue).
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$

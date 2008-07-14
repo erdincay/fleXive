@@ -68,11 +68,19 @@
                     </listitem>
                     <listitem>
                         <para>
-                            On every page using &flexive; components, you have to add
-                            <code>&lt;fx:includes/></code>
+                            On every page using &flexive; components, you have to add a call to
+                            <link linkend="jcl_fx_includes">&lt;fx:includes/></link>
                             somewhere in the HTML
                             head section. This tag includes javascript files and CSS stylesheets
                             needed by the components via &weblets;.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            If you want to use components based on &yui;, you have to include a call to
+                            <link linkend="jcl_fx_yuisetup">&lt;fx:yuiSetup/></link>
+                            near the end of the HTML body section. This initializes all YUI components
+                            on the current page and loads the required Javascript libraries.
                         </para>
                     </listitem>
                 </orderedlist>
@@ -375,7 +383,7 @@
                         <title>Use InputMappers for application-specific properties</title>
                         <para>
                             Some content properties cannot be populated in a generic way. InputMappers wrap the FxValue
-                            provided by the content instance in another FxValue, usually a FxSelectOne select item
+                            provided by the content instance in another FxValue, for example a FxSelectOne select item
                             value.
                         </para>
                         <xi:include href="listings/jsfsupport_content_inputmappers1.xml"/>
@@ -384,7 +392,7 @@
                             returned by our business method "someOtherBean.getAccountPks()". There already exists an
                             input mapper for FxPK objects in the flexive framework that takes a select list and
                             interprets the item IDs as PK IDs. A "real" input mapper would probably use less generic
-                            labels and use e.g. the account caption instead.
+                            labels and use the account caption instead.
                         </para>
                         <xi:include href="listings/jsfsupport_content_inputmappers2.xml"/>
                     </example>
@@ -585,8 +593,8 @@
 
                 <section xml:id="jcl_fx_value_synopsis">
                     <title>Synopsis</title>
-                    <programlisting language="xhtml">
-                        <![CDATA[<fx:value property="xpath" [var="varname"] [labelKey="messagekey"] [any attribute for fx:formRow]/>]]></programlisting>
+                    <programlisting language="xhtml"><![CDATA[<fx:value property="xpath" [var="varname"] [labelKey="messagekey"] [any attribute for fx:formRow]/>
+]]></programlisting>
                 </section>
 
                 <section xml:id="jcl_fx_value_parameters">
@@ -668,7 +676,8 @@
                     <title>Synopsis</title>
                     <programlisting language="xhtml"><![CDATA[<fx:fxValueInput value="fxvalue" [id="clientid"] [externalId="externalId"] [readOnly="true|false"] [readOnlyShowTranslations="true|false"]
                  [forceLineInput="true|false"] [inputMapper="inputMapper"] [valueFormatter="valueFormatter"] [filter="true|false"]
-                 [containerDivClass="CSS class"] [disableMultiLanguage="true|false"] [disableLytebox="true|false] [onchange="onchange"] />
+                 [containerDivClass="CSS class"] [disableMultiLanguage="true|false"] [disableLytebox="true|false] [onchange="onchange"]
+                 [autocompleteHandler="handler instance"]/>
 ]]></programlisting>
                 </section>
 
@@ -741,8 +750,12 @@
                                 <para>
                                     An optional input mapper for rendering the input control. For example, properties
                                     referencing other content may need a custom input mapper that provides a select list
-                                    of content instances. For more information take a look at the InputMapper
-                                    documentation.
+                                    of content instances. For more information take a look at the
+                                    <ulink url="&flexiveJavadocBase;shared/com/flexive/shared/value/mapper/InputMapper.html">
+                                        InputMapper
+                                    </ulink>
+                                    documentation and at
+                                    <xref linkend="jcl_fx_content_ex_inputmappers"/>.
                                 </para>
                             </listitem>
                         </varlistentry>
@@ -812,6 +825,19 @@
                                 </para>
                             </listitem>
                         </varlistentry>
+
+                        <varlistentry>
+                            <term>autocompleteHandler</term>
+                            <listitem>
+                                <para>
+                                    An instance of the
+                                    <classname>flexive.yui.AutoCompleteHandler</classname>
+                                    javascript class. This class provides a query method for a
+                                    client-side autocomplete widget provided by Yahoo UI, as well as a method
+                                    for formatting the response.
+                                </para>
+                            </listitem>
+                        </varlistentry>
                     </variablelist>
                 </section>
 
@@ -820,6 +846,81 @@
                         <title>An input row for editing a FxString value</title>
                         <xi:include href="listings/jsfsupport_valueinput_groupname.xml"/>
                     </example>
+
+                    <example xml:id="jcl_fx_value_input_ex_autocomplete">
+                        <title>An autocomplete handler for user names</title>
+                        <para>
+                            In this example, we use the predefined JSON/RPC autocomplete provider
+                            <ulink url="&fisheyeBase;src/ui/jsf-components/src/java/com/flexive/faces/javascript/AutoCompleteProvider.java">
+                                AutoCompleteProvider#userQuery(String query)</ulink>.
+                            It searches for user account names based on the user input and returns possible matches.
+                        </para>
+                        <programlisting language="xhtml"><![CDATA[<script type="text/javascript">
+<!--
+    // Initialize the Javascript handler that submits the queries via JSON/RPC and evaluates the response
+    var userAcHandler = new flexive.yui.AutoCompleteHandler(function(query) {
+        // execute JSON/RPC call and evaluate the response
+        return eval("(" + flexive.util.getJsonRpc().AutoCompleteProvider.userQuery(query) + ")");
+    });
+//-->
+</script>
+
+<fx:fxValueInput value="#{backingBean.userName}" autocompleteHandler="userAcHandler"/>
+]]></programlisting>
+
+                        <para>
+                            The backing bean property
+                            <code>#{backingBean.userName}</code>
+                            is a property of type
+                            <type>FxString</type>
+                            and will hold the submitted user name.
+                        </para>
+                    </example>
+
+                    <example xml:id="jcl_fx_value_input_ex_autocomplete_custom">
+                        <title>Writing custom autocomplete handlers</title>
+                        <para>
+                            An autocomplete provider returns its response to a query in a twodimensional
+                            Javascript array. An entry consists of:
+                            <orderedlist>
+                                <listitem>
+                                    <para>
+                                        The value that will be set in the text input (index: 0).
+                                    </para>
+                                </listitem>
+                                <listitem>
+                                    <para>
+                                        The displayed label in the autocomplete box, possibly including
+                                        markup (index: 1).
+                                    </para>
+                                </listitem>
+                            </orderedlist>
+                            The Javascript class
+                            <classname>flexive.yui.AutoCompleteHandler</classname>
+                            provides a small wrapper that is used by the fxValueInput component. To implement
+                            a custom wrapper you need to overwrite the
+                            <methodname>query</methodname>
+                            method and perform the autocomplete query inside. This can (but does not have to)
+                            include a server call, e.g. using JSON/RPC. In this example, we define a new query
+                            function that automatically generates "suggestions" based on the input value
+                            by appending a suffix:
+
+                            <programlisting language="xhtml"><![CDATA[<script type="text/javascript">
+<!--
+    var customHandler = new flexive.yui.AutoCompleteHandler(function(query) {
+        var q = decodeURIComponent(query);
+        return [[q + "/a", q + ": <i>a label</i>"],
+                [q + "/b", q + ": <i>b label</i>"],
+                [q + "/c", q + ": <i>c label</i>"]];
+    });
+//-->
+</script>
+
+<fx:fxValueInput value="#{backingBean.fxStringValue}" autocompleteHandler="customHandler"/>
+]]></programlisting>
+                        </para>
+                    </example>
+
                 </section>
             </section>
 
@@ -838,8 +939,8 @@
 
                 <section xml:id="jcl_fx_value_input_languageselect_synopsis">
                     <title>Synopsis</title>
-                    <programlisting language="xhtml">
-                        <![CDATA[<fx:fxValueInputLanguageSelect id="clientid"/>]]></programlisting>
+                    <programlisting language="xhtml"><![CDATA[<fx:fxValueInputLanguageSelect id="clientid"/>
+]]></programlisting>
                 </section>
 
                 <section xml:id="jcl_fx_value_input_languageselect_parameters">
@@ -879,8 +980,8 @@
 
                 <section xml:id="jcl_fx_resultvalue_synopsis">
                     <title>Synopsis</title>
-                    <programlisting language="xhtml">
-                        <![CDATA[<fx:resultValue value="value" [linkFormatter="formatter"] [itemLinkFormat="format"] [contentLinkFormat="format"]/>]]></programlisting>
+                    <programlisting language="xhtml"><![CDATA[<fx:resultValue value="value" [linkFormatter="formatter"] [itemLinkFormat="format"] [contentLinkFormat="format"]/>
+]]></programlisting>
                 </section>
 
                 <section xml:id="jcl_fx_resultvalue_parameters">
@@ -1086,12 +1187,13 @@
                 <section xml:id="jcl_fx_thumbnail_synopsis">
                     <title>Synopsis</title>
                     <para>
-                        <programlisting language="xhtml">
-                            <![CDATA[<fx:thumbnail (pk="fxpk" | binary="fxbinary")/>]]></programlisting>
+                        <programlisting language="xhtml"><![CDATA[<fx:thumbnail (pk="fxpk" | binary="fxbinary")/>
+]]></programlisting>
                     </para>
                 </section>
 
                 <section xml:id="jcl_fx_thumbnail_parameters">
+                    <title>Parameters</title>
                     <variablelist>
                         <varlistentry>
                             <term>pk</term>
@@ -1117,6 +1219,176 @@
                     </variablelist>
                 </section>
             </section>
+
+            <section xml:id="jcl_fx_resulttable">
+                <title>
+                    <code language="xhtml">&lt;fx:resultTable></code>
+                </title>
+
+                <para>
+                    Renders a &yui; datatable widget for a &flexive; result set. This provides
+                    an easy way of rendering a result to the user, and it includes a paginator
+                    widget.
+                </para>
+
+                <section xml:id="jcl_fx_resulttable_synopsis">
+                    <title>Synopsis</title>
+
+                    <para>
+                        <programlisting language="xhtml"><![CDATA[<fx:resultTable var="name" value="query" [viewType="list|thumbnails"]/>
+]]></programlisting>
+                    </para>
+                </section>
+
+                <section xml:id="jcl_fx_resulttable_parameters">
+                    <title>Parameters</title>
+
+                    <variablelist>
+                        <varlistentry>
+                            <term>var</term>
+                            <listitem>
+                                <para>
+                                    The name of the Javascript variable that exposes the &yui; DataTable widget.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>value</term>
+                            <listitem>
+                                <para>
+                                    The result set to be rendered, or a plain text FxSQL query.
+                                    The following types are supported:
+                                </para>
+                                <variablelist>
+                                    <varlistentry>
+                                        <term><classname>String</classname></term>
+                                        <listitem>
+                                            <para>
+                                                A &fxsql; query, for example:
+                                                <code language="sql">SELECT @pk, #image/caption</code>
+                                            </para>
+                                        </listitem>
+                                    </varlistentry>
+                                    <varlistentry>
+                                        <term><classname>com.flexive.shared.search.FxResultSet</classname></term>
+                                        <listitem>
+                                            <para>
+                                                The result of a &fxsql; query.
+                                            </para>
+                                        </listitem>
+                                    </varlistentry>
+                                    <varlistentry>
+                                        <term><classname>com.flexive.shared.search.query.SqlQueryBuilder</classname></term>
+                                        <listitem>
+                                            <para>
+                                                A &fxsql; query builder instance the will be used for fetching
+                                                the result set.
+                                            </para>
+                                        </listitem>
+                                    </varlistentry>
+                                </variablelist>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>viewType</term>
+                            <listitem>
+                                <para>The view type of the datatable.
+                                    "list" renders a common table view for each of the columns,
+                                    while "thumbnails" renders only the thumbnails as in the
+                                    backend administration's thumbnail view. Note that the thumbnail view
+                                    only works if the object's primary key ("@pk") was selected in the query,
+                                    otherwise no valid thumbnail image can be rendered.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </section>
+
+                <section xml:id="jcl_fx_resulttable_examples">
+                    <title>Examples</title>
+
+                    <example xml:id="jcl_fx_resulttable_examples_basic">
+                        <title>Using fx:resultTable to submit and render &fxsql; queries</title>
+
+                        <para>
+                            The following code snippet renders two result tables: the first in thumbnail mode,
+                            the second in list mode. The query is formulated in &fxsql; and is passed using the
+                            <parameter>value</parameter>
+                            attribute.
+                        </para>
+
+                        <programlisting language="xhtml"><![CDATA[<fx:resultTable var="thumbnailsTable" value="SELECT @pk, #image/caption" viewType="thumbnails"/>
+
+<fx:resultTable var="listTable" value="SELECT *"/>
+]]></programlisting>
+                    </example>
+                </section>
+            </section>
+
+            <section xml:id="jcl_fx_resulttableupdater">
+                <title>
+                    <code language="xhtml">&lt;fx:resultTableUpdater></code>
+                </title>
+
+                <para>
+                    Provides support for updating a result table after an Ajax request. This allows to combine
+                    &ajax4jsf; with the client-side fx:resultTable widget. After an Ajax response was rendered,
+                    this tag updates a result table with the current result values. Take a look at
+                    the backend administration's search results page for a more sophisticated example.
+                </para>
+
+                <section xml:id="jcl_fx_resulttableupdater_synopsis">
+                    <title>Synopsis</title>
+                    <programlisting language="xhtml"><![CDATA[<fx:resultTableUpdater var="name" value="query"/>
+]]></programlisting>
+                </section>
+
+                <section xml:id="jcl_fx_resulttableupdater_parameters">
+                    <title>Parameters</title>
+                    <variablelist>
+                        <varlistentry>
+                            <term>var</term>
+                            <listitem>
+                                <para>
+                                    The name of the javascript variable that exposes the &yui; DataTable widget.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>value</term>
+                            <listitem>
+                                <para>The result set to be rendered, or a plain text FxSQL query - see
+                                    <link linkend="jcl_fx_resulttable">&lt;fx:resultTable></link>
+                                    documentation.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </section>
+
+                <section xml:id="jcl_fx_resulttableupdater_examples">
+                    <title>Examples</title>
+                    <example xml:id="jcl_fx_resulttableupdater_examples_basic">
+                        <title>Updating a resultTable through an &ajax4jsf; update</title>
+
+                        <para>
+                            When re-rendering this &ajax4jsf; output panel (e.g. through a command button
+                            or an onchange listener)
+                            the result table of the given name will be refreshed based on the current result:
+                        </para>
+
+                        <programlisting language="xhtml"><![CDATA[<a4j:outputPanel id="refreshResults">
+    <fx:resultTableUpdater var="resultTable" value="#{fxSearchResultBean.result}"/>
+</a4j:outputPanel>
+
+<!-- Render the result table (this part of the page should not be included in the Ajax response)  -->
+<fx:resultTable var="resultTable" value="#{fxSearchResultBean.result}"/>
+]]></programlisting>
+                    </example>
+                </section>
+            </section>
+
+
         </section>
 
         <section xml:id="jcl_search">
@@ -1144,14 +1416,24 @@
                 <section xml:id="jcl_fx_includes_synopsis">
                     <title>Synopsis</title>
                     <para>
-                        <programlisting language="xhtml">
-                            <![CDATA[<fx:includes [htmlEditor="true|false"]/>]]></programlisting>
+                        <programlisting language="xhtml"><![CDATA[<fx:includes [all="true|false"] [htmlEditor="true|false"] [jsonRpc="true|false"] [yui="true|false"]/>
+]]></programlisting>
                     </para>
                 </section>
 
                 <section xml:id="jcl_fx_includes_parameters">
                     <title>Parameters</title>
                     <variablelist>
+                        <varlistentry>
+                            <term>all</term>
+                            <listitem>
+                                <para>
+                                    If true, includes all resources supported by the tag. This leads to a
+                                    performance penalty for loading and initializing the Javascript
+                                    libraries, but is more convenient if performance is not critical.
+                                </para>
+                            </listitem>
+                        </varlistentry>
                         <varlistentry>
                             <term>htmlEditor</term>
                             <listitem>
@@ -1164,17 +1446,59 @@
                                     <code language="xhtml">&lt;fx:fxValueInput></code>
                                     component is used for a HTML property.
                                 </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>jsonRpc</term>
+                            <listitem>
                                 <para>
-                                    Note that you can call the
-                                    <code language="xhtml">&lt;fx:includes></code>
-                                    tag more than once. This is useful if the HTML editor
-                                    is only needed on some pages and
-                                    <code language="xhtml">&lt;fx:includes></code>
-                                    is already included in the main page template.
+                                    Includes the &jsonRpcJava; library for Ajax calls via
+                                    JSON/RPC (the Javascript proxy can then be obtained with
+                                    <code language="javascript">flexive.yui.getJsonRpc()</code>).
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>yui</term>
+                            <listitem>
+                                <para>
+                                    Includes the &yui; bootstrap library. If you want to use Yahoo UI components,
+                                    you also have to include a call to
+                                    <link linkend="jcl_fx_yuisetup">&lt;fx:yuiSetup</link>
+                                    near the end of your page.
                                 </para>
                             </listitem>
                         </varlistentry>
                     </variablelist>
+
+                    <para>
+                        Note that you can include the
+                        <code language="xhtml">&lt;fx:includes></code>
+                        tag more than once. This is useful if a component (e.g. the HTML editor)
+                        is only needed on some pages and
+                        <code language="xhtml">&lt;fx:includes></code>
+                        is already included in the main page template.
+                    </para>
+
+                </section>
+
+            </section>
+
+            <section xml:id="jcl_fx_yuisetup">
+                <title>
+                    <code language="xhtml">&lt;fx:yuiSetup></code>
+                </title>
+
+                <para>
+                    Initializes the &yui; widgets on the current page and loads all required libraries.
+                </para>
+
+                <section xml:id="jcl_fx_yuisetup_synopsis">
+                    <title>Synopsis</title>
+                    <para>
+                        <programlisting language="xhtml"><![CDATA[<fx:yuiSetup/>
+]]></programlisting>
+                    </para>
                 </section>
 
             </section>
