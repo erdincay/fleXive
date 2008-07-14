@@ -252,6 +252,7 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
      * @return FxValue
      */
     public FxValue getDefaultValue() {
+        defaultValue.setXPath(this.getXPath());
         return defaultValue;
     }
 
