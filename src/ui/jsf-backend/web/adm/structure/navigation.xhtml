@@ -499,6 +499,16 @@
                 invokeContentAction("adm/structure/structureImport.jsf", "source", "type");
             }
 
+            function exportType(menuItem) {
+                try {
+                    var menu = dojo.widget.byId("structureTreeMenu");
+                    var nodeId = getNodeId(menu.getTreeNode());
+                    loadContentPage( "export/type/" + nodeId);
+                } catch(ex) {
+                    alert(ex)
+                }
+            }
+
             function showTreeMenu() {
                 var menu = dojo.widget.byId("structureTreeMenu");
                 if (menu.getTreeNode() == null) {
@@ -539,6 +549,7 @@
                 setActionDisabled(menu.getTreeNode(), "pasteIntoAs", lackRole || copyNode==null || cutMode || (!isType(node.nodeDocType) && node.nodeDocType!="Group"));
                 setActionDisabled(menu.getTreeNode(), "pasteSubMenu", lackRole || copyNode==null || cutMode);
                 setActionDisabled(menu.getTreeNode(), "createTestData", lackRole || node.nodeDocType!="Type");
+                setActionDisabled(menu.getTreeNode(), "exportType", lackRole || node.nodeDocType!="Type");
                 menu.show_();
             }
 
@@ -567,13 +578,14 @@
             });
         //-->
 		</script>
-        
+        <div style="display:none;"><iframe id="exportFrame" ><!--empty--></iframe></div>
         <adm:tree name="structureTree" targetId="structureTreeContainer"  extensionPoint="/tree/adm/structure"
                   clickHandler="structureTreeClickHandler" docIcons="true" expandFirstNode="false">
 
             <adm:treeContextMenu showHandler="showTreeMenu">
                 <adm:treeContextMenuItem icon="open" treeActions="showNode" labelKey="StructureTree.menu.open" clickHandler="showNode"/>
                 <adm:treeContextMenuItem icon="edit" treeActions="editNode" labelKey="StructureTree.menu.edit" clickHandler="editNode"/>
+                <adm:treeContextMenuItem icon="export" treeActions="exportType" labelKey="StructureTree.menu.exportType" clickHandler="exportType"/>
                 <adm:treeContextMenuItem icon="property" treeActions="createProperty" labelKey="StructureTree.menu.createProperty" clickHandler="createProperty"/>
                 <adm:treeContextMenuItem icon="group" treeActions="createGroup" labelKey="StructureTree.menu.createGroup" clickHandler="createGroup" />
                 <adm:treeContextMenuItem icon="search" treeActions="searchContents" labelKey="StructureTree.menu.searchContents" clickHandler="searchContents"/>

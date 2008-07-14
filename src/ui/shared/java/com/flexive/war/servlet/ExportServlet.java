@@ -43,6 +43,7 @@ import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.StringUtils;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -124,6 +125,13 @@ public class ExportServlet implements Servlet {
      * @throws IOException on errors
      */
     private void exportType(HttpServletRequest request, HttpServletResponse response, String type) throws IOException {
+        if( StringUtils.isNumeric(type)) {
+            try {
+                type = CacheAdmin.getEnvironment().getType(Long.parseLong(type)).getName();
+            } catch (Exception e) {
+                //ignore and try with type as name
+            }
+        }
         final UserTicket ticket = FxContext.get().getTicket();
         if (!ticket.isInRole(Role.StructureManagement)) {
             LOG.warn("Tried to export type [" + type + "] without being in role StructureManagment!");
