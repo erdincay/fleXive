@@ -126,6 +126,15 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
     }
 
     /**
+     * Check if an ACL is defined for this assignment which overrides the properties ACL
+     *
+     * @return <code>true</code> if an ACL is defined for this assignment which overrides the properties ACL
+     */
+    public boolean isOverridingPropertyACL() {
+        return this.ACL != null;
+    }
+
+    /**
      * Get the multiplicity of this assignment.
      * Depending on if the assigned element allows overriding of its base multiplicity the base
      * elements multiplicity is returned or the multiplicity of the assignment
@@ -135,6 +144,15 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
     @Override
     public FxMultiplicity getMultiplicity() {
         return (getProperty().mayOverrideBaseMultiplicity() && this.multiplicity != null ? this.multiplicity : getProperty().getMultiplicity());
+    }
+
+    /**
+     * Check if a multiplicity is defined for this assignment which overrides the properties multiplicity
+     *
+     * @return <code>true</code> if a multiplicity is defined for this assignment which overrides the properties multiplicity
+     */
+    public boolean isOverridingPropertyMultiplicity() {
+        return this.multiplicity != null;
     }
 
     /**
