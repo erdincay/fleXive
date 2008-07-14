@@ -45,6 +45,7 @@ import com.flexive.shared.search.*;
 import com.flexive.war.JsonWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -107,7 +108,7 @@ public class YahooResultProvider implements Serializable {
         writer.startArray();
         for (int i = firstColumn; i <= result.getColumnCount(); i++) {
             writer.startMap();
-            writer.writeAttribute("key", getColumnKey(i));
+            writer.writeAttribute("key", getColumnKey(result, i));
             writer.writeAttribute("label", result.getColumnLabel(i));
             writer.writeAttribute("sortable", true);
             writer.closeMap();
@@ -121,7 +122,7 @@ public class YahooResultProvider implements Serializable {
         for (FxResultRow row : result.getResultRows()) {
             writer.startMap();
             for (int i = firstColumn; i <= result.getColumnCount(); i++) {
-                writer.writeAttribute(getColumnKey(i),
+                writer.writeAttribute(getColumnKey(result, i),
                         FxJsfUtils.formatResultValue(row.getValue(i), null, null, null));
             }
             if (result.getColumnIndex("@pk") != -1) {
@@ -161,7 +162,7 @@ public class YahooResultProvider implements Serializable {
         final FxEnvironment environment = CacheAdmin.getEnvironment();
         for (int i = firstColumn; i <= result.getColumnCount(); i++) {
             writer.startMap();
-            writer.writeAttribute("key", getColumnKey(i));
+            writer.writeAttribute("key", getColumnKey(result, i));
             String parser = "YAHOO.util.DataSource.parseString";    // the YUI data parser used for sorting
             try {
                 // set parser according to property type
@@ -186,8 +187,8 @@ public class YahooResultProvider implements Serializable {
         writer.closeMap();
     }
 
-    private static String getColumnKey(int index) {
-        return "c" + index;
+    private static String getColumnKey(FxResultSet result, int index) {
+        return result.getColumnName(index);
     }
 
     /**

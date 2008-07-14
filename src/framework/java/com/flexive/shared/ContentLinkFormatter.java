@@ -43,8 +43,10 @@ import org.apache.commons.lang.StringUtils;
  * @version $Rev$
  */
 public class ContentLinkFormatter {
-    public static final String DEFAULT_ADMIN_CONTENT = "<a href=\"adm/content/contentEditor.jsf?action=editInstance&pk=%{id}.%{version}\">%{id}.%{version}</a>";
-    public static final String DEFAULT_ADMIN_ITEM = "<a href=\"adm/content/contentEditor.jsf?action=editInstance&id=%{id}\">%{caption}</a>";
+    private static final String DEFAULT = "%{id}.%{version}";
+    private static final String DEFAULT_ITEM = "%{caption}";
+    private static final String DEFAULT_ADMIN_CONTENT = "<a href=\"adm/content/contentEditor.jsf?action=editInstance&pk=%{id}.%{version}\">%{id}.%{version}</a>";
+    private static final String DEFAULT_ADMIN_ITEM = "<a href=\"adm/content/contentEditor.jsf?action=editInstance&id=%{id}\">%{caption}</a>";
 
     private static final ContentLinkFormatter INSTANCE = new ContentLinkFormatter();
     private static final int MAX_CAPTION_LEN = 20;
@@ -84,7 +86,7 @@ public class ContentLinkFormatter {
      * @return  the resulting hyperlink
      */
     public String format(String formatString, FxPK pk) {
-        return StringUtils.defaultString(formatString, DEFAULT_ADMIN_CONTENT).replace("%{id}", String.valueOf(pk.getId()))
+        return StringUtils.defaultString(formatString, DEFAULT).replace("%{id}", String.valueOf(pk.getId()))
                 .replace("%{version}", String.valueOf(pk.getVersion()))
                 .replace("%{pk}", pk.toString());
     }
@@ -141,7 +143,7 @@ public class ContentLinkFormatter {
     }
 
     protected String format(String formatString, FxPaths.Item item) {
-        final String result = format(StringUtils.defaultString(formatString, DEFAULT_ADMIN_ITEM),
+        final String result = format(StringUtils.defaultString(formatString, DEFAULT_ITEM),
                 new FxPK(item.getReferenceId()))
                 .replace("%{nodeId}", String.valueOf(item.getNodeId()));
         return result.replace("%{caption20}", StringUtils.abbreviate(item.getCaption(), MAX_CAPTION_LEN))

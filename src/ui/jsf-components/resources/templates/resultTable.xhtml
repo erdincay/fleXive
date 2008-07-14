@@ -17,6 +17,8 @@ Parameters:
     value    - the result set to be rendered, or a plain text FxSQL query
     viewType - the view type (THUMBNAILS or LIST). If not set and a result set is passed in as value,
                the result set's viewtype is used, otherwise it defaults to LIST.
+    clickHandler - an optional Javascript method for handling clicks on the table. The first two parameters
+                are the element that received the click and the primary key, if available.
 
 <ui:composition>
 
@@ -34,7 +36,6 @@ Parameters:
             flexive.yui.onYahooLoaded(function() {
                 var containerElName = "#{var}_datatable";
                 var createFun = function(result) {
-                    //var result = eval("(" + flexive.util.getJsonRpc().SearchResultWriter.getResultRows("SELECT id, caption, created_at", 0, 2000) + ")");
                     // get JSON representation of the search result
                     var view = flexive.yui.datatable.getViewWrapper(result);
                     var isThumbnails = result.viewType == "THUMBNAILS";
@@ -50,16 +51,33 @@ Parameters:
                             rowsPerPageOptions : isThumbnails ? [5, 10, 25, 50] : [10,25,50,100]
                         }) }
                     );
+                    var __clickHandlerFn = #{empty clickHandler ? 'null' : clickHandler};
+                    var __clickHandler = __clickHandlerFn == null ? null :
+                        function(args) {
+                            var pk = flexive.yui.datatable.getPk(#{var}, args.target);
+                            __clickHandlerFn(args.target, pk);
+                        };
+                    var selectionEnabled = __clickHandler == null;
                     if (isThumbnails) {
                         // enable cell selection
-                        dataTable.set("selectionMode", "cellrange");
-                        dataTable.subscribe("cellClickEvent", dataTable.onEventSelectCell);
+                        if (selectionEnabled) {
+                            dataTable.set("selectionMode", "cellrange");
+                            dataTable.subscribe("cellClickEvent", dataTable.onEventSelectCell);
+                        }
+                        if (__clickHandler != null) {
+                            dataTable.subscribe("cellClickEvent", __clickHandler);
+                        }
                         // enable cell highlighting
                         dataTable.subscribe("cellMouseoverEvent", dataTable.onEventHighlightCell);
                         dataTable.subscribe("cellMouseoutEvent", dataTable.onEventUnhighlightCell);
                     } else {
                         // enable row selection
-                        dataTable.subscribe("rowClickEvent", dataTable.onEventSelectRow);
+                        if (selectionEnabled) {
+                            dataTable.subscribe("rowClickEvent", dataTable.onEventSelectRow);
+                        }
+                        if (__clickHandler != null) {
+                            dataTable.subscribe("rowClickEvent", __clickHandler);
+                        }
                         // enable row highlighting
                         dataTable.subscribe("rowMouseoverEvent", dataTable.onEventHighlightRow);
                         dataTable.subscribe("rowMouseoutEvent", dataTable.onEventUnhighlightRow);

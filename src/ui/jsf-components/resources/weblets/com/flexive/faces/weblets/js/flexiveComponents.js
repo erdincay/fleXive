@@ -58,7 +58,9 @@ flexive.util = new function() {
             throw "Not a valid PK: " + pk;
         }
         return { id: parseInt(pk.substr(0, pk.indexOf("."))),
-                 version: parseInt(pk.substr(pk.indexOf(".") + 1)) };
+                 version: parseInt(pk.substr(pk.indexOf(".") + 1)), 
+                 toString: function() { return this.id + "." + this.version }
+        };
     }
 
     this.JSON_RPC_CLIENT = null;
@@ -177,7 +179,7 @@ flexive.yui.datatable = new function() {
      * @return  a PK object, e.g. {id: 21, version: 10}
      */
     this.getPk = function(/* YAHOO.widget.DataTable */ dataTable, /* Element */ element) {
-        return flexive.util.parsePk(this._getValue(dataTable, element, "pk"));
+        return flexive.util.parsePk(this.getRecordValue(dataTable, element, "pk"));
     }
 
     /**
@@ -199,7 +201,7 @@ flexive.yui.datatable = new function() {
      * A property is set if the current user has the appropriate rights to perform the action.</p>
      */
     this.getPermissions = function(/* YAHOO.widget.DataTable */ dataTable, /* Element */ element) {
-        var p = this._getValue(dataTable, element, "permissions");
+        var p = this.getRecordValue(dataTable, element, "permissions");
         return {
             "read": (p & 1)  > 0,
             "create": (p & 2) > 0,
@@ -210,7 +212,16 @@ flexive.yui.datatable = new function() {
         };
     }
 
-    this._getValue = function(/* YAHOO.widget.DataTable */ dataTable, /* Element */ element, /* String */ property) {
+    /**
+     * Extracts a property from the data record of the row/column indicated by the given element
+     * (e.g. the target element of a "click" or "contextmenu" event).
+     *
+     * @param dataTable the Yahoo datatable widget
+     * @param element   the source element (must be inside the table)
+     * @param property  the property value to be looked up
+     * @return  the property value, or null if no data record was found
+     */
+    this.getRecordValue = function(/* YAHOO.widget.DataTable */ dataTable, /* Element */ element, /* String */ property) {
         var elRow = dataTable.getTrEl(element);
         var record = dataTable.getRecord(elRow);
         if (record == null) {

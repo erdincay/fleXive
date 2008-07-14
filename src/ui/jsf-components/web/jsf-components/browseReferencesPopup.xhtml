@@ -9,9 +9,9 @@
       xmlns:adm="http://www.flexive.com/jsf/admin"
       xmlns:fx="http://www.flexive.com/jsf/core">
 <head>
-    <fx:includes/>
+    <fx:includes yui="true"/>
 </head>
-<body>
+<body class="yui-skin-sam">
 
     <a4j:form id="frm">
         <c:if test="#{empty fxBrowseReferencesBean.parseRequestParameters}"> </c:if>
@@ -38,6 +38,11 @@
                 }
                 return false;
             }
+
+            function clickHandler(target, pk) {
+                selectReference(pk, flexive.yui.datatable.getRecordValue(resultTable, target, "caption"));
+            }
+        
             // set body style in JS (subtle firefox problem with <style> elements, CDATA and text/html encoding)
             document.body.style.overflow = "scroll";
         //-->
@@ -67,33 +72,15 @@
                 </tr>
             </table>
 
+            <fx:resultTable var="resultTable" value="#{fxBrowseReferencesBean.result}" clickHandler="clickHandler"/>
+            
             <a4j:outputPanel id="results">
-                <h:dataTable var="row" value="#{fxBrowseReferencesBean.dataModel}">
-                    <h:column>
-                        <img id="loadrow#{index}" src="#{fxSystemBean.contextPath}/thumbnail/pk#{row[0]}/s1" alt="#{row[1]}" title="#{row[1]}"
-                             border="0" onclick="return selectReference('#{row[0]}', '#{fxSystemBean.escapeForJavaScript[row[1]]}')" style="cursor: pointer"/>
-                    </h:column>
-                    <c:forEach var="name" varStatus="status" begin="2"
-                               items="#{fxBrowseReferencesBean.dataModel.result.columnNames}">
-                        <h:column>
-                            <f:facet name="header">
-                                #{fxBrowseReferencesBean.dataModel.result.columnLabels[status.index]}
-                            </f:facet>
-                            <span style="cursor: pointer" onclick="return selectReference('#{row[0]}', '#{fxSystemBean.escapeForJavaScript[row[1]]}')">
-                                #{row[status.index]}
-                            </span>
-                        </h:column>
-                    </c:forEach>
-                </h:dataTable>
-                <ui:fragment rendered="#{fxBrowseReferencesBean.dataModel.rowCount == 0}">
-                    <br/>
-                    #{fxMessageBean['BrowseReferences.label.empty']}
-                </ui:fragment>
+                <fx:resultTableUpdater var="resultTable" value="#{fxBrowseReferencesBean.result}"/>
             </a4j:outputPanel>
         </a4j:region>
 
     </a4j:form>
 
-
+    <fx:yuiSetup/>
 </body>
 </html>

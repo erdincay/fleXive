@@ -64,7 +64,7 @@ public class BrowseReferencesBean implements ActionBean {
     private String inputName;
     private String formName;
     private String query;
-    private FxResultSetDataModel dataModel;
+    private FxResultSet result;
 
     /**
      * {@inheritDoc}
@@ -76,8 +76,8 @@ public class BrowseReferencesBean implements ActionBean {
         return null;
     }
 
-    public FxResultSetDataModel getDataModel() throws FxApplicationException {
-        if (dataModel == null) {
+    public FxResultSet getResult() throws FxApplicationException {
+        if (result == null) {
             if (StringUtils.isBlank(xPath)) {
                 return null;
             }
@@ -86,9 +86,9 @@ public class BrowseReferencesBean implements ActionBean {
                 throw new FxInvalidParameterException("xPath", "ex.browseReferences.assignment.reference", LOG,
                         xPath).asRuntimeException();
             }
-            dataModel = new FxResultSetDataModel(getQueryBuilder(referencedType).getResult());
+            result = getQueryBuilder(referencedType).getResult();
         }
-        return dataModel;
+        return result;
     }
 
     public FxType getReferencedType() {
@@ -108,10 +108,6 @@ public class BrowseReferencesBean implements ActionBean {
             builder.condition("*", PropertyValueComparator.EQ, query.trim());
         }
         return builder;
-    }
-
-    public FxResultSet getResultSet() throws FxApplicationException {
-        return getDataModel() != null ? getDataModel().getResult() : null;
     }
 
     public String getXPath() {

@@ -1235,7 +1235,8 @@
                     <title>Synopsis</title>
 
                     <para>
-                        <programlisting language="xhtml"><![CDATA[<fx:resultTable var="name" value="query" [viewType="list|thumbnails"]/>
+                        <programlisting language="xhtml"><![CDATA[<fx:resultTable var="name" value="query" [viewType="list|thumbnails"]
+    [clickHandler="clickHandler"]/>
 ]]></programlisting>
                     </para>
                 </section>
@@ -1261,7 +1262,9 @@
                                 </para>
                                 <variablelist>
                                     <varlistentry>
-                                        <term><classname>String</classname></term>
+                                        <term>
+                                            <classname>String</classname>
+                                        </term>
                                         <listitem>
                                             <para>
                                                 A &fxsql; query, for example:
@@ -1270,7 +1273,9 @@
                                         </listitem>
                                     </varlistentry>
                                     <varlistentry>
-                                        <term><classname>com.flexive.shared.search.FxResultSet</classname></term>
+                                        <term>
+                                            <classname>com.flexive.shared.search.FxResultSet</classname>
+                                        </term>
                                         <listitem>
                                             <para>
                                                 The result of a &fxsql; query.
@@ -1278,7 +1283,9 @@
                                         </listitem>
                                     </varlistentry>
                                     <varlistentry>
-                                        <term><classname>com.flexive.shared.search.query.SqlQueryBuilder</classname></term>
+                                        <term>
+                                            <classname>com.flexive.shared.search.query.SqlQueryBuilder</classname>
+                                        </term>
                                         <listitem>
                                             <para>
                                                 A &fxsql; query builder instance the will be used for fetching
@@ -1298,6 +1305,18 @@
                                     backend administration's thumbnail view. Note that the thumbnail view
                                     only works if the object's primary key ("@pk") was selected in the query,
                                     otherwise no valid thumbnail image can be rendered.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>clickHandler</term>
+                            <listitem>
+                                <para>
+                                    An optional Javascript method for handling clicks on the table with
+                                    signature
+                                    <code language="javascript">function handler(targetEl, pk)</code>.
+                                    The primary key parameter is only available if the @pk column
+                                    was selected in the &fxsql; query.
                                 </para>
                             </listitem>
                         </varlistentry>

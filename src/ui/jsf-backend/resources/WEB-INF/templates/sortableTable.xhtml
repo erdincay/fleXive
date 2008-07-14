@@ -19,13 +19,15 @@ Parameters:
 
 <ui:composition>
 
-    <div id="#{id}_container">
+    <div id="#{id}_loading">
+        <h:graphicImage url="/pub/images/loading.gif"/>
+    </div>
+    <div id="#{id}_container" style="display:none">
         <ui:insert/>
     </div>
 
     <script type="text/javascript">
     <!--
-        document.getElementById("#{id}_container").style.display = "none";
         flexive.yui.require("datatable");
         flexive.yui.onYahooLoaded(function() {
             var htmlTable = YAHOO.util.Dom.get("#{id}");
@@ -55,6 +57,7 @@ Parameters:
             });
             dataTable.subscribe("rowMouseoverEvent", dataTable.onEventHighlightRow);
             dataTable.subscribe("rowMouseoutEvent", dataTable.onEventUnhighlightRow);
+            document.getElementById("#{id}_loading").style.display = "none";
             document.getElementById("#{id}_container").style.display = "block";
         })
     //-->
