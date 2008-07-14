@@ -355,7 +355,7 @@ class EditModeHelper extends RenderHelper {
 
     private void renderReferencePopupButton(UIComponent parent, String inputId) {
         final HtmlOutputLink link = (HtmlOutputLink) FxJsfUtils.addChildComponent(parent, HtmlOutputLink.COMPONENT_TYPE);
-        link.setValue("javascript:flexive.input.openReferenceQueryPopup('" + value.getXPath() + "', '"
+        link.setValue("javascript:flexive.input.openReferenceQueryPopup('" + StringUtils.defaultString(value.getXPath()) + "', '"
                 + inputId + "', '" + getForm(inputId) + "')");
         final HtmlGraphicImage button = (HtmlGraphicImage) FxJsfUtils.addChildComponent(link, HtmlGraphicImage.COMPONENT_TYPE);
         button.setUrl(FxJsfUtils.getWebletURL("com.flexive.faces.weblets", "/images/findReferences.png"));

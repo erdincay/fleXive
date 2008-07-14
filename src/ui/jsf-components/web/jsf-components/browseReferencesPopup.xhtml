@@ -40,7 +40,7 @@
             }
 
             function clickHandler(target, pk) {
-                selectReference(pk, flexive.yui.datatable.getRecordValue(resultTable, target, "caption"));
+                selectReference(pk.toString(), flexive.yui.datatable.getRecordValue(resultTable, target, "caption"));
             }
         
             // set body style in JS (subtle firefox problem with <style> elements, CDATA and text/html encoding)
@@ -49,7 +49,12 @@
         </script>
 
         <adm:infoBox>
-            <h:outputText value="#{fxMessageBean['BrowseReferences.label.info,#{fxBrowseReferencesBean.referencedType.label}']}" escape="false"/>
+            <c:if test="#{!empty fxBrowseReferencesBean.referencedType}">
+                <h:outputText value="#{fxMessageBean['BrowseReferences.label.info.type,#{fxBrowseReferencesBean.referencedType.label}']}" escape="false"/>
+            </c:if>
+            <c:if test="{!empty fxBrowseReferencesBean.referencedType}">
+                <h:outputText value="#{fxMessageBean['BrowseReferences.label.info']}" escape="false"/>
+            </c:if>
         </adm:infoBox>
 
         <a4j:region>

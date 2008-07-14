@@ -78,20 +78,15 @@ public class BrowseReferencesBean implements ActionBean {
 
     public FxResultSet getResult() throws FxApplicationException {
         if (result == null) {
-            if (StringUtils.isBlank(xPath)) {
-                return null;
-            }
-            final FxType referencedType = getReferencedType();
-            if (referencedType == null) {
-                throw new FxInvalidParameterException("xPath", "ex.browseReferences.assignment.reference", LOG,
-                        xPath).asRuntimeException();
-            }
-            result = getQueryBuilder(referencedType).getResult();
+            result = getQueryBuilder(getReferencedType()).getResult();
         }
         return result;
     }
 
     public FxType getReferencedType() {
+        if (StringUtils.isBlank(xPath)) {
+            return null;
+        }
         final FxAssignment fxAssignment = CacheAdmin.getEnvironment().getAssignment(xPath);
         if (!(fxAssignment instanceof FxPropertyAssignment)) {
             throw new FxInvalidParameterException("xPath", "ex.browseReferences.assignment.type", LOG,
@@ -102,8 +97,10 @@ public class BrowseReferencesBean implements ActionBean {
 
     private SqlQueryBuilder getQueryBuilder(FxType referencedType) {
         final SqlQueryBuilder builder = new SqlQueryBuilder(AdminResultLocations.BROWSE_REFERENCES, ResultViewType.LIST)
-                .select("@pk", "caption", "@*")
-                .type(referencedType.getId());
+                .select("@pk", "caption", "@*");
+        if (referencedType != null) {
+            builder.type(referencedType.getId());
+        }
         if (StringUtils.isNotBlank(query)) {
             builder.condition("*", PropertyValueComparator.EQ, query.trim());
         }
