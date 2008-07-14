@@ -87,6 +87,14 @@ class EditModeHelper extends RenderHelper {
             }
             useHTMLEditor = pa.getOption(FxStructureOption.OPTION_HTML_EDITOR).isValueTrue();
         }
+        if( useHTMLEditor && !(value instanceof FxString))
+            useHTMLEditor = false; //prevent showing HTML editor for non-string types
+
+        if( value instanceof FxHTML && !useHTMLEditor) {
+            //if no xpath is available, always show the HTML editor for FxHTML values
+            if(StringUtils.isEmpty(value.getXPath()))
+                useHTMLEditor = true;
+        }
     }
 
     /**

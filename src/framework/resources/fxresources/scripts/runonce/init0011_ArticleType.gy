@@ -127,6 +127,7 @@ ass.createProperty(typeId, pe, "/");
 ass.save(((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(ARTICLE_TYPE + "/LongtextHtml")).asEditable().setDefaultMultiplicity(0), false)
 
 pe.setDataType(FxDataType.Text);
+pe.setUseHTMLEditor(false);
 pe.setName("Longtext");
 pe.setLabel(new FxString("Text"));
 pe.setMultiLang(false);

@@ -316,8 +316,17 @@ public class FxPropertyEdit extends FxProperty {
         this.dataType = dataType;
         this.defaultValue = getEmptyValue();
         //if the datatype is html, set the option to use the html editor 
-        if (dataType == FxDataType.HTML)
-            setUseHTMLEditor(true);
+        switch (dataType) {
+            case HTML:
+                setUseHTMLEditor(true);
+                break;
+            case String1024:
+            case Text:
+                //dont change html editor setting
+                break;
+            default:
+                setUseHTMLEditor(false);
+        }
         return this;
     }
 
