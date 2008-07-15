@@ -141,6 +141,7 @@ public class WriteWebletIncludes extends UIOutput {
         // init flexiveComponents.js
         beginJavascript(out);
         out.write("flexive.baseUrl='" + FxJsfUtils.getManagedBean(SystemBean.class).getDocumentBase() + "';\n");
+        out.write("flexive.componentsWebletUrl='" + FacesWebletUtils.getURL(facesContext, "com.flexive.faces.weblets", "") + "';\n");
         endJavascript(out);
         if (isHtmlEditor()) {
             out.write(padding);

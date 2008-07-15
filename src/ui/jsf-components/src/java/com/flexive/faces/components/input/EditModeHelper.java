@@ -113,6 +113,7 @@ class EditModeHelper extends RenderHelper {
         component.getChildren().add(container);
 
         final List<String> rowIds = new ArrayList<String>(languages.size());
+        final List<UIComponent> rows = new ArrayList<UIComponent>();
         for (final FxLanguage language : languages) {
             final String containerId = clientId + FxValueInputRenderer.LANG_CONTAINER + language.getId();
             final String inputId = clientId + FxValueInputRenderer.INPUT + language.getId();
@@ -121,7 +122,7 @@ class EditModeHelper extends RenderHelper {
             final LanguageContainerWriter languageContainer = new LanguageContainerWriter();
             languageContainer.setContainerId(containerId);
             languageContainer.setLanguageId(language.getId());
-            container.getChildren().add(languageContainer);
+            rows.add(languageContainer);
 
             encodeField(languageContainer, inputId, language);
             encodeDefaultLanguageRadio(languageContainer, clientId, radioName, language);
@@ -131,6 +132,8 @@ class EditModeHelper extends RenderHelper {
         languageSelect.setInputClientId(clientId);
         languageSelect.setRowIds(rowIds);
         container.getChildren().add(languageSelect);
+        // add children to language select because the language select needs to write code before and after the input rows
+        languageSelect.getChildren().addAll(rows);
     }
 
     /**
@@ -207,7 +210,7 @@ class EditModeHelper extends RenderHelper {
             final YuiAutocompleteWriter yuiWriter = new YuiAutocompleteWriter();
             yuiWriter.setInputClientId(inputId);
             yuiWriter.setAutocompleteHandler(inputComponent.getAutocompleteHandler());
-            parent.getChildren().add(yuiWriter);
+            parent.getChildren().add(parent.getChildren().size() - 1, yuiWriter);
         }
     }
 
@@ -492,6 +495,7 @@ class EditModeHelper extends RenderHelper {
      */
     public static class LanguageSelectWriter extends DeferredInputWriter {
         private List<String> rowIds;
+        private String languageSelectId;
 
         public List<String> getRowIds() {
             return rowIds;
@@ -504,7 +508,7 @@ class EditModeHelper extends RenderHelper {
         @Override
         public void encodeBegin(FacesContext facesContext) throws IOException {
             final ResponseWriter writer = facesContext.getResponseWriter();
-            final String languageSelectId = inputClientId + FxValueInputRenderer.LANG_SELECT;
+            languageSelectId = inputClientId + FxValueInputRenderer.LANG_SELECT;
             writer.startElement("select", null);
             writer.writeAttribute("name", languageSelectId, null);
             writer.writeAttribute("id", languageSelectId, null);
@@ -529,10 +533,14 @@ class EditModeHelper extends RenderHelper {
             }
             writer.endElement("select");
 
-            writer.startElement("br", null);
-            writer.writeAttribute("clear", "all", null);
-            writer.endElement("br");
+//            writer.startElement("br", null);
+//            writer.writeAttribute("clear", "all", null);
+//            writer.endElement("br");
+        }
 
+        @Override
+        public void encodeEnd(FacesContext facesContext) throws IOException {
+            final ResponseWriter writer = facesContext.getResponseWriter();
             // attach JS handler object to container div
             writer.write(MessageFormat.format(
                     "<script language=\"javascript\">\n"
@@ -745,7 +753,7 @@ class EditModeHelper extends RenderHelper {
             final ResponseWriter out = facesContext.getResponseWriter();
             // write autocomplete container
             final String containerId = inputClientId + "_ac";
-            out.write("<div id=\"" + containerId + "\"> </div>");
+            out.write("<div id=\"" + containerId + "\" class=\"fxValueInputAutocomplete\"> </div>");
 
             // initialize autocomplete
             FxJavascriptUtils.beginJavascript(out);

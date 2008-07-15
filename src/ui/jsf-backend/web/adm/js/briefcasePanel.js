@@ -31,11 +31,15 @@ BriefcasePanel.prototype = {
         var out = [];
         for (var i in this.items) {
             var item = this.items[i];
-            out.push("<a href=\"javascript:" + this.showBriefcaseHandler + "(" + item.id + ")\">");
-            out.push("<div class=\"briefcaseItem\" briefcaseId=\"" + item.id + "\">");
+            var linkId = "bc_i" + item.id;
+            out.push("<a id=\"" + linkId + "\" href=\"javascript:" + this.showBriefcaseHandler + "(" + item.id + ")\" class=\"briefcaseItem\">");
+            out.push("<div briefcaseId=\"" + item.id + "\">");
             out.push("<div class=\"briefcaseIcon\">");
-            out.push("<img border=\"0\" src=\"adm/images/briefcaseIcons/normal"
-                    + (item.aclId != -1 ? "_shared" : "") + ".gif\"/>");
+            if (item.aclId != -1) {
+                // render shared icon overlay - add onclick handler for IE7
+                out.push("<img border=\"0\" src=\"adm/images/briefcaseIcons/normal_shared.gif\""
+                        + " onclick=\"document.getElementById('" + linkId + "').click()\"/>");
+            }
             out.push("</div>");
             out.push("<div class=\"briefcaseSize\">" + item.size + "</div>");
             out.push(item.name);

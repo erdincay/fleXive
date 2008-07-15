@@ -106,7 +106,7 @@
                     <ui:fragment rendered="#{srcEditor.infoPanelState=='export'}">
                         <span class="infoPanel">
                             <span class="infoPanelButton" style="margin: 12px; display: block; float: left;" onclick="copy2clipboard(getPreElementContent('exportArea'),'#{fxMessageBean['Global.clipboard.error']}','#{fxMessageBean['Global.clipboard.success']}')">#{fxMessageBean['Content.button.copyToClipboard']}</span>
-                            <br clear="both"/>
+                            <br clear="all"/>
                             <pre id="exportArea">#{srcEditor.exportData}</pre>
                         </span>
                     </ui:fragment>
@@ -273,32 +273,35 @@
 
 
                         <!-- General fields -->
-                        <table>
+                        <table class="contentOverview">
                             <!-- FxType -->
                             <tr>
-                                <td colspan="2">
+                                <th>
+                                    #{fxMessageBean['Content.field.type']}
+                                </th>
+                                <td class="contentData">
                                     #{srcEditor.typeDisplay}
                                 </td>
                             </tr>
                             <!-- PREVIEW -->
-                            <tr>
-                                <td colspan="2">
-                                    <ui:fragment rendered="#{srcEditor.content.previewAvailable}">
+                            <ui:fragment rendered="#{srcEditor.content.previewAvailable}">
+                                <tr>
+                                    <td colspan="2">
                                         <img src="thumbnail/pk#{srcEditor.id}.#{srcEditor.version}/s2/ts#{fxSystemBean.currentTimeMillis}"
                                              alt="Preview" title="Preview" border="0" style="border:1px solid gray"/>
-                                    </ui:fragment>
-                                </td>
-                            </tr>
+                                    </td>
+                                </tr>
+                            </ui:fragment>
                             <!-- ACL -->
                             <tr>
                                 <ui:fragment rendered="#{not srcEditor.supportSecurity}">
                                     <td colspan="2"><i>#{fxMessageBean['Content.msg.noSecurity']}</i></td>
                                 </ui:fragment>
                                 <ui:fragment rendered="#{srcEditor.supportSecurity}">
-                                    <td>
+                                    <th>
                                         #{fxMessageBean['Content.field.ACL']}
-                                    </td>
-                                    <td>
+                                    </th>
+                                    <td class="contentData #{srcEditor.readOnly ? 'readonlyValue' : ''}">
                                         <ui:fragment rendered="#{srcEditor.readOnly==false}">
                                             <t:selectOneListbox size="1" id="acl" value="#{srcEditor.acl}"
                                                                 converter="SelectableConverter">
@@ -306,33 +309,33 @@
                                             </t:selectOneListbox>
                                         </ui:fragment>
                                         <ui:fragment rendered="#{srcEditor.readOnly==true}">
-                                            <span class="readonlyValue">#{srcEditor.acl.name}</span>
+                                            #{srcEditor.acl.name}
                                         </ui:fragment>
                                     </td>
                                 </ui:fragment>
                             </tr>
                             <!-- Workflow step -->
                             <tr>
-                                <td>
+                                <th>
                                     #{fxMessageBean['Content.field.step']}
-                                </td>
-                                <td>
+                                </th>
+                                <td class="contentData #{srcEditor.readOnly ? 'readonlyValue' : ''}">
                                     <ui:fragment rendered="#{srcEditor.readOnly==false}">
                                         <t:selectOneListbox size="1" id="step" value="#{srcEditor.step}">
                                             <f:selectItems value="#{srcEditor.possibleWorkflowSteps}"/>
                                         </t:selectOneListbox>
                                     </ui:fragment>
                                     <ui:fragment rendered="#{srcEditor.readOnly==true}">
-                                        <span class="readonlyValue">#{srcEditor.stepDescription}</span>
+                                        #{srcEditor.stepDescription}
                                     </ui:fragment>
                                 </td>
                             </tr>
                             <!-- Tree nodes -->
                             <tr>
-                                <td valign="top">
+                                <th valign="top">
                                     #{fxMessageBean['Content.field.nodes']}
-                                </td>
-                                <td>
+                                </th>
+                                <td class="contentData #{srcEditor.readOnly ? 'readonlyValue' : ''}">
                                     <!-- Tree -->
                                     <adm:ceRenderTreeNodes srcEditor="#{srcEditor}"/>
                                 </td>
@@ -350,7 +353,7 @@
                                 <adm:ceRenderFieldMenu group="#{srcEditor.content.rootGroup}" icon="group"
                                                        srcEditor="#{srcEditor}"/>
                             </div>
-                            <br clear="both"/>
+                            <br clear="all"/>
                             <adm:ceRenderFields data="#{srcEditor.content.rootGroup.children}" srcEditor="#{srcEditor}"/>
                         </div>
                         <ui:repeat value="#{fxSystemBean.groupedFxMessages}" var="msg">

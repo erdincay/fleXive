@@ -1,3 +1,35 @@
+/***************************************************************
+ *  This file is part of the [fleXive](R) framework.
+ *
+ *  Copyright (c) 1999-2008
+ *  UCS - unique computing solutions gmbh (http://www.ucs.at)
+ *  All rights reserved
+ *
+ *  The [fleXive](R) project is free software; you can redistribute
+ *  it and/or modify it under the terms of the GNU Lesser General Public
+ *  License version 2.1 or higher as published by the Free Software Foundation.
+ *
+ *  The GNU Lesser General Public License can be found at
+ *  http://www.gnu.org/licenses/lgpl.html.
+ *  A copy is found in the textfile LGPL.txt and important notices to the
+ *  license from the author are found in LICENSE.txt distributed with
+ *  these libraries.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  For further information about UCS - unique computing solutions gmbh,
+ *  please see the company website: http://www.ucs.at
+ *
+ *  For further information about [fleXive](R), please see the
+ *  project website: http://www.flexive.org
+ *
+ *
+ *  This copyright notice MUST APPEAR in all copies of the file!
+ ***************************************************************/
+
 /**
  * Miscellaneous classes and functions used by flexive JSF components.
  */
@@ -16,6 +48,8 @@ var flexive = new function() {
 
     /** Absolute application base URL (set by fx:includes) */
     this.baseUrl = null;
+    /** Weblets resource provider root URL. */
+    this.componentsWebletUrl = null;
 }
 
 // miscellaneous utility functions
@@ -86,11 +120,11 @@ flexive.yui = new function() {
      *
      * @param loaderPath    the path to yuiloader-min.js
      */
-    this.load = function(loaderPath) {
+    this.load = function() {
         if (this.requiredComponents.length > 0) {
             // load Yahoo UI only if at least one component is required
             var loader = new YAHOO.util.YUILoader({
-                        base: loaderPath.substr(0, loaderPath.lastIndexOf("/") + 1),
+                        base: flexive.componentsWebletUrl + "js/yui/",
                         require: this.requiredComponents,
                         loadOptional: true,
                         onSuccess: function() {
@@ -403,7 +437,7 @@ flexive.input = new function() {
     // initialize the TinyMCE HTML editor
     this.initHtmlEditor = function(autoPopulate) {
         try {
-            //tinyMCE.baseURL = getBase() + "pub/js/tiny_mce";
+            tinyMCE.baseURL = flexive.componentsWebletUrl + "js/tiny_mce";
             tinyMCE.srcMode = ""; // "_src" to enable original sourcefiles
             tinyMCE.init({
                     mode: autoPopulate ? "specific_textareas" : "exact",
@@ -465,7 +499,7 @@ flexive.input.FxMultiLanguageValueInput.prototype = {
             var enabled = rowId == null || this.rowIds[i] == rowId;
             document.getElementById(this.rowIds[i]).style.display = enabled ? "block" : "none";
             // all languages / show language icon for each row
-            document.getElementById(this.rowIds[i] + "_language").style.display = (enabled && rowId == null) ? "inline" : "none"; 
+            document.getElementById(this.rowIds[i] + "_language").style.display = (enabled && rowId == null) ? "inline" : "none";
         }
     },
 

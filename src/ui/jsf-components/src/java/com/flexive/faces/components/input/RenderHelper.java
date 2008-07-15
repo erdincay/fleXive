@@ -253,7 +253,6 @@ abstract class RenderHelper {
                 final ResponseWriter writer = facesContext.getResponseWriter();
                 final BinaryDescriptor descriptor = ((FxBinary) value).getTranslation(language);
                 writer.startElement("br", null);
-                writer.writeAttribute("clear", "all", null);
                 writer.endElement("br");
 
                 writer.startElement("span", null);
@@ -282,7 +281,6 @@ abstract class RenderHelper {
                 }
 
                 writer.startElement("br", null);
-                writer.writeAttribute("clear", "all", null);
                 writer.endElement("br");
             }
         }

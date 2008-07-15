@@ -14,7 +14,7 @@
 <ui:composition>
 
     <c:if test="#{srcEditor.readOnly}">
-        <c:set var="nodeStyle" value="readonlyValue"/>
+        <c:set var="nodeStyle" value=""/>
     </c:if>
     <c:if test="#{not srcEditor.readOnly}">
         <c:set var="nodeStyle" value="editableNodes"/>
@@ -62,7 +62,7 @@
         <div style="display:none">
             <a4j:commandButton id="addTreeNodeButton" reRender="treeNodes" actionListener="#{srcEditor.addTreeNode}"/>
         </div>
-        <!--<br clear="both"/><br/>-->
+        <!--<br clear="all"/><br/>-->
     </a4j:outputPanel>
 
 

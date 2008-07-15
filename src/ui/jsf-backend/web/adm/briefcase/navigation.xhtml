@@ -117,7 +117,7 @@
             }
 
             function renameBriefcase(menuItem) {
-                var newName = prompt("#{fxMessageBean['Briefcase.dialog.prompt.briefcaseName']}");
+                var newName = prompt("#{fxMessageBean['Briefcase.dialog.prompt.briefcaseName']}", "");
                 if (newName == null || newName.length == 0) {
                     return;
                 }

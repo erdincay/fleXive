@@ -1184,7 +1184,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
             // Handle the tree
             final List<FxTreeNode> treeNodes = tree.getNodesWithReference(FxTreeMode.Edit, pk.getId());
             for (FxTreeNode node : this.treeNodes) {
-                if (node.isMarkForDelete()) {
+                if (node.isMarkForDelete() && !node.isTemporary()) {
                     tree.remove(node, false, true);
                 } else if (node.isTemporary()) {
                     boolean assignmentExists = false;

@@ -18,9 +18,9 @@ div.fxValueInput {
 
 /* An input row containing the input element and the default language checkbox */
 div.fxValueInputRow {
-    position: relative;
+    /*position: relative;*/
     width: 225px;
-    clear: both;
+    /*clear: both;*/
     padding: 1px 1px 1px 0;
 }
 
@@ -46,7 +46,8 @@ select.fxValueSelectInput, .fxValueInputElementWidth, input.fxValueTextInput, te
 
 /* Stretch single-language inputs over space normally occupied by the language select */
 .fxValueInput input[type="text"].singleLanguage,
-.fxValueInput textarea.singleLanguage {
+.fxValueInput textarea.singleLanguage,
+.fxValueInput select.singleLanguage {
     width: 100%; /* don't force with !important because it breaks standalone inputs outside a fx:formRow */
 }
 
@@ -58,7 +59,7 @@ input.fxValueTextInput, textarea.fxValueTextArea, textarea.fxValueTextAreaHtml, 
     border: 1px solid gray;
 }
 
-/*textarea.fxValueTextArea, */
+textarea.fxValueTextArea,
 textarea.fxValueTextAreaHtml {
     height: 150px;
 }
@@ -76,14 +77,15 @@ input.fxValueFileInput {
 }
 
 div.fxValueInput {
-    position: relative;
+    /*position: relative;*/
     display: block;
 }
 
 div.fxValueInput select.languages {
-    position: absolute;
-    right: 0;
-    top: 0;
+    /*position: absolute;*/
+    /*right: 0;*/
+    /*top: 0;*/
+    float: right;
     width: 70px;
 }
 
@@ -95,6 +97,11 @@ div.fxValueInputLanguageIcon {
 
 div.fxValueInput img.findReferencesIcon {
     float: left;
+}
+
+div.fxValueInputAutocomplete {
+    position: absolute;
+    left: 0;
 }
 
 /* Query editor */
@@ -206,7 +213,8 @@ select.queryValueComparator {
 
 .queryRoot input.fxValueTextInput,
 .queryRoot .fxValueInput input[type="text"].singleLanguage,
-.queryRoot .fxValueInput textarea.singleLanguage {
+.queryRoot .fxValueInput textarea.singleLanguage,
+.queryRoot .fxValueInput select.singleLanguage {
     width: 125px;
 }
 

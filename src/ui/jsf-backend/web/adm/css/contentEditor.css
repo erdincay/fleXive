@@ -55,12 +55,15 @@
 }
 
 .readonlyValue {
+    border:1px solid #bdbdbd;
+    background-color:#f9fcf1
+}
+
+div.readonlyValue {
     position:relative;
     top:2px;
     padding-left:2px;
     padding-right:2px;
-    border:1px solid #bdbdbd;
-    background-color:#f9fcf1
 }
 
 .property .value[readonly='true'] {
@@ -128,12 +131,12 @@
 }
 
 /* Content editor input styles */
-.property .fxValueTextInput, .property .fxValueInputElementWidth, .property textarea.fxValueTextArea, .property textarea.fxValueTextAreaHtml {
+.property .fxValueTextInput, .property .fxValueInputElementWidth, .property .fxValueTextArea, .property .fxValueTextAreaHtml {
     width: 275px;
 }
 
 .property div.fxValueInputRow {
-    width: 330px;
+    width: 325px;
 }
 
 .property div.fxValueInput {
@@ -279,4 +282,16 @@ table.historyTable TR TD.action {
     height:16px;
     width:16px;
     vertical-align:middle;
+}
+
+table.contentOverview {
+    margin-top: 15px;
+}
+
+table.contentOverview input, table.contentOverview select {
+    width: 100%;
+}
+
+table.contentOverview td.contentData {
+    width: 200px;
 }
