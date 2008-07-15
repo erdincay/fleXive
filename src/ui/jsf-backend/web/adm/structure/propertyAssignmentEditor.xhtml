@@ -73,13 +73,32 @@
             <fx:formRow labelKey="PropertyEditor.label.propertyDataType" id="propertyDataType">
                 <fx:resultValue id="propertyDataType" value="#{propertyEditorBean.property.dataType.name}"/>
             </fx:formRow>
+            <div style="padding-left:17px">
+                <ui:fragment rendered="#{propertyEditorBean.propertyReference}">
+                    <fx:formRow labelKey="PropertyEditor.label.referencedType" id="referencedType">
+                        <a href="javascript:var treeframe=parent.getStructureNavFrame(); treeframe.openNode(#{propertyEditorBean.propertyReferencedType}, true);">
+                                <h:outputText value="#{propertyEditorBean.propertyReferencedTypeName}"/>
+                        </a>
+                    </fx:formRow>
+                </ui:fragment>
+            </div>
 
-             <a4j:outputPanel id="defaultValueInput">
-                 <fx:formRow labelKey="PropertyEditor.label.defaultValue" id="defaultValue">
-                    <fx:fxValueInput id="defaultValue" value="#{propertyEditorBean.defaultValue}"
-                             readOnly="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
-                </fx:formRow>
+            <fx:formRow labelKey="PropertyEditor.label.setDefaultValue" id="defaultValue">
+                <h:selectBooleanCheckbox id="defaultValue" value="#{propertyEditorBean.defaultValueSet}"
+                         disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
+                    <a4j:support event="onchange" reRender="multiLangBox,defaultLangSelect,defaultValueInput,defaultLanguageInput"/>
+                </h:selectBooleanCheckbox>
+            </fx:formRow>
+
+            <a4j:outputPanel id="defaultValueInput">
+                <ui:fragment rendered="#{propertyEditorBean.defaultValueSet}">
+                    <fx:formRow labelKey="PropertyEditor.label.defaultValue" id="defaultValueSelect">
+                       <fx:fxValueInput id="defaultValueSelect" value="#{propertyEditorBean.defaultValue}"
+                                 readOnly="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
+                    </fx:formRow>
+                </ui:fragment>
             </a4j:outputPanel>
+
 
             <a4j:outputPanel id="defaultLangSelect">
                 <fx:formRow labelKey="PropertyEditor.label.defaultLanguage" id="defaultLanguage">

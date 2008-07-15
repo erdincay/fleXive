@@ -45,7 +45,7 @@
                 }
                 if (action=="RELOAD_SELECT_TYPE") {
                     reloadAndKeepExpanded();
-                    selectNode(id, true);
+                    structureTreeClickHandler(selectNode(id, true));
                 }
                 if (action=="RELOAD_SELECT_ASSIGNMENT") {
                     reloadAndKeepExpanded();
@@ -53,7 +53,6 @@
                 }
                 if (action=="RELOAD_EXPAND_TYPE") {
                     reloadStructureTree();
-                    expandToNodeWithId(id, true);
                 }
                 if (action=="RELOAD_EXPAND_ASSIGNMENT") {
                     reloadStructureTree();

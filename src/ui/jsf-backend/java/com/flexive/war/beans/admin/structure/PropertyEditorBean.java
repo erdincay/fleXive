@@ -218,6 +218,19 @@ public class PropertyEditorBean implements ActionBean {
         this.defaultMultiplicity = defaultMultiplicity;
     }
 
+    public boolean isDefaultValueSet() {
+        return assignment.getDefaultValue() !=null;
+    }
+
+    public void setDefaultValueSet(boolean setDefaultValue) {
+        //only react to changes
+        if (setDefaultValue !=isDefaultValueSet())
+            if (setDefaultValue)
+                assignment.setDefaultValue(assignment.getProperty().getEmptyValue());
+            else
+                assignment.setDefaultValue(null);
+    }
+
     public FxValue getDefaultValue() {
         //check if multi language settings have changed and adjust the default value
         if (assignment.isMultiLang() != assignment.getDefaultValue().isMultiLanguage()) {
@@ -520,6 +533,13 @@ public class PropertyEditorBean implements ActionBean {
         if (getProperty().getReferencedType() != null) {
             return getProperty().getReferencedType().getId();
         } else return -1;
+    }
+
+    public String getPropertyReferencedTypeName() {
+        if (getPropertyReferencedType() != -1)
+            return CacheAdmin.getEnvironment().getType(getPropertyReferencedType()).getName();
+        else
+            return "";
     }
 
     /**
