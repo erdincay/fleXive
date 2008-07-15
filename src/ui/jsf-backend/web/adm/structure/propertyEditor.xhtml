@@ -121,6 +121,10 @@
                 </t:selectOneListbox>
             </fx:formRow>
             <fx:fieldSet legend="#{fxMessageBean['PropertyEditor.label.propertyOverrideOptions']}">
+                <fx:formRow labelKey="PropertyEditor.label.mayOverrideMultiLang" id="propertyMayOverrideMultiLang">
+                    <h:selectBooleanCheckbox id="propertyMayOverrideMultiLang" value="#{propertyEditorBean.propertyMayOverrideMultiLang}"
+                         disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
+                </fx:formRow>
                 <fx:formRow labelKey="PropertyEditor.label.mayOverrideBaseMultiplicity" id="propertyMayOverrideBaseMultiplicity">
                     <h:selectBooleanCheckbox id="propertyMayOverrideBaseMultiplicity" value="#{propertyEditorBean.propertyMayOverrideBaseMultiplicity}"
                          disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>

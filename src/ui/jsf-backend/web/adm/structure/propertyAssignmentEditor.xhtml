@@ -81,6 +81,21 @@
                 </fx:formRow>
             </a4j:outputPanel>
 
+            <a4j:outputPanel id="defaultLangSelect">
+                <fx:formRow labelKey="PropertyEditor.label.defaultLanguage" id="defaultLanguage">
+                    <ui:fragment rendered="#{propertyEditorBean.multiLang}">
+                        <t:selectOneListbox size="1" id="defaultLanguage" value="#{propertyEditorBean.defaultLanguage}"
+                            converter="FxLanguageConverter"
+                            disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
+                            <f:selectItems value="#{fxSelectBean.languages}" />
+                        </t:selectOneListbox>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{not propertyEditorBean.multiLang}">
+                        <h:outputText value="#{fxMessageBean['PropertyEditor.label.multilang.disabled']}"/>
+                    </ui:fragment>
+                </fx:formRow>
+            </a4j:outputPanel>
+
             <fx:formRow labelKey="PropertyEditor.label.defaultMultiplicity" id="defaultMultiplicity">
                 <h:inputText id="defaultMultiplicity" value="#{propertyEditorBean.defaultMultiplicity}"
                      disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
@@ -93,63 +108,75 @@
             </fx:formRow>
 
             <fx:fieldSet legend="#{fxMessageBean['PropertyEditor.label.overridePropertyOptions']}">
-                <fx:formRow labelKey="PropertyEditor.label.multiLang" id="multiLang">
-                        <h:selectBooleanCheckbox id="multiLang" value="#{propertyEditorBean.multiLang}"
-                             disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
-                             onclick="confirmMultiLang(#{propertyEditorBean.multiLang});">
-                            <a4j:support event="onchange" reRender="defaultValueInput,defaultLanguageInput"/>
+                <fx:formRow labelKey="PropertyEditor.label.overrideMultiLang" id="overrideMultiLang">
+                        <h:selectBooleanCheckbox id="overrideMultiLang" value="#{propertyEditorBean.overrideMultiLang}"
+                             disabled="#{not propertyEditorBean.propertyMayOverrideMultiLang or not
+                             propertyEditorBean.editMode or (propertyEditorBean.systemInternal
+                             and not fxSystemBean.isInRole['GlobalSupervisor'])}">
+                            <a4j:support event="onchange" reRender="multiLangBox,defaultLangSelect,defaultValueInput,defaultLanguageInput"/>
                         </h:selectBooleanCheckbox>
                 </fx:formRow>
 
-                <a4j:outputPanel id="defaultLanguageInput">
-                    <ui:fragment rendered="#{propertyEditorBean.multiLang}">
+                <a4j:outputPanel id="multiLangBox">
+                    <ui:fragment rendered="#{propertyEditorBean.overrideMultiLang}">
                         <div style="padding-left:17px">
-                            <fx:formRow labelKey="PropertyEditor.label.defaultLanguage" id="defaultLanguage">
-                             <t:selectOneListbox size="1" id="defaultLanguage" value="#{propertyEditorBean.defaultLanguage}"
-                                    converter="FxLanguageConverter"
-                                    disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
-                                    <f:selectItems value="#{fxSelectBean.languages}" />
-                                </t:selectOneListbox>
+                            <fx:formRow labelKey="PropertyEditor.label.multiLang" id="multiLang">
+                                    <h:selectBooleanCheckbox id="multiLang" value="#{propertyEditorBean.assignmentMultiLang}"
+                                         disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
+                                        <a4j:support event="onchange" reRender="defaultLangSelect,defaultValueInput,defaultLanguageInput"/>
+                                    </h:selectBooleanCheckbox>
                             </fx:formRow>
                         </div>
                     </ui:fragment>
                 </a4j:outputPanel>
 
-                <fx:formRow labelKey="PropertyEditor.label.overrideBaseMultiplicity" id="mayOverrideBaseMultiplicity">
-                        <h:selectBooleanCheckbox id="mayOverrideBaseMultiplicity" value="#{propertyEditorBean.propertyMayOverrideBaseMultiplicity}"
-                             disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
-                             onclick="confirmOverrideBaseMultiplicity(#{propertyEditorBean.propertyMayOverrideBaseMultiplicity});"/>
+                <fx:formRow labelKey="PropertyEditor.label.overrideBaseMultiplicity" id="overrideBaseMultiplicity">
+                        <h:selectBooleanCheckbox id="overrideBaseMultiplicity" value="#{propertyEditorBean.overrideMultiplicity}"
+                             disabled="#{not propertyEditorBean.propertyMayOverrideBaseMultiplicity
+                                or not propertyEditorBean.editMode or (propertyEditorBean.systemInternal
+                                and not fxSystemBean.isInRole['GlobalSupervisor'])}">
+                                 <a4j:support event="onchange" reRender="multiplicitySelect"/>
+                             </h:selectBooleanCheckbox>
                 </fx:formRow>
 
-                <div style="padding-left:17px">
-                    <fx:formRow labelKey="PropertyEditor.label.multiplicity" id="multiplicity">
-                        <h:inputText id="minMultiplicity" value="#{propertyEditorBean.minMultiplicity}"
-                                 disabled="#{not propertyEditorBean.editMode or not propertyEditorBean.propertyMayOverrideBaseMultiplicity or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
-                                 required="true" style="width:40px">
-                        </h:inputText>
-                        <h:inputText value="#{propertyEditorBean.maxMultiplicity}" id="maxMultiplicity"
-                                        disabled="#{not propertyEditorBean.editMode or not propertyEditorBean.propertyMayOverrideBaseMultiplicity or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
-                                        required="true" style="width:40px">
-                        </h:inputText>
-                    </fx:formRow>
-                </div>
+                <a4j:outputPanel id="multiplicitySelect">
+                    <ui:fragment rendered="#{propertyEditorBean.overrideMultiplicity}">
+                        <div style="padding-left:17px">
+                            <fx:formRow labelKey="PropertyEditor.label.multiplicity" id="multiplicity">
+                                <h:inputText id="minMultiplicity" value="#{propertyEditorBean.minMultiplicity}"
+                                         disabled="#{not propertyEditorBean.editMode or not propertyEditorBean.propertyMayOverrideBaseMultiplicity or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
+                                         required="true" style="width:40px">
+                                </h:inputText>
+                                <h:inputText value="#{propertyEditorBean.maxMultiplicity}" id="maxMultiplicity"
+                                                disabled="#{not propertyEditorBean.editMode or not propertyEditorBean.propertyMayOverrideBaseMultiplicity or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
+                                                required="true" style="width:40px">
+                                </h:inputText>
+                            </fx:formRow>
+                        </div>
+                    </ui:fragment>
+                </a4j:outputPanel>
 
-                <fx:formRow labelKey="PropertyEditor.label.overrideACL" id="mayOverrideACL">
-                        <h:selectBooleanCheckbox id="mayOverrideACL" value="#{propertyEditorBean.propertyMayOverrideACL}"
-                             disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
-                             onclick="confirmOverrideAcl(#{propertyEditorBean.propertyMayOverrideACL});"/>
+                <fx:formRow labelKey="PropertyEditor.label.overrideACL" id="overrideACL">
+                        <h:selectBooleanCheckbox id="overrideACL" value="#{propertyEditorBean.overrideACL}"
+                             disabled="#{not propertyEditorBean.propertyMayOverrideACL or not
+                             propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not
+                             fxSystemBean.isInRole['GlobalSupervisor'])}">
+                                <a4j:support event="onchange" reRender="aclSelect"/>
+                             </h:selectBooleanCheckbox>
                 </fx:formRow>
 
-                <ui:fragment rendered="#{propertyEditorBean.propertyMayOverrideACL}">
-                     <div style="padding-left:17px">
-                        <fx:formRow labelKey="PropertyEditor.label.acl" id="acl">
-                            <t:selectOneListbox size="1" id="acl" value="#{propertyEditorBean.acl}"
-                                    disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
-                                <f:selectItems value="#{fxSelectBean.structureACLs}" />
-                            </t:selectOneListbox>
-                        </fx:formRow>
-                    </div>
-                </ui:fragment>
+                <a4j:outputPanel id="aclSelect">
+                    <ui:fragment rendered="#{propertyEditorBean.overrideACL}">
+                         <div style="padding-left:17px">
+                            <fx:formRow labelKey="PropertyEditor.label.acl" id="acl">
+                                <t:selectOneListbox size="1" id="acl" value="#{propertyEditorBean.acl}"
+                                        disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
+                                    <f:selectItems value="#{fxSelectBean.structureACLs}" />
+                                </t:selectOneListbox>
+                            </fx:formRow>
+                        </div>
+                    </ui:fragment>
+                </a4j:outputPanel>
             </fx:fieldSet>
 
             <ui:fragment rendered="#{propertyEditorBean.structureManagement and not propertyEditorBean.editMode}">
@@ -183,37 +210,6 @@
 
 
         <script type="text/javascript">
-            function confirmOverrideBaseMultiplicity(value) {
-                choice = confirm("#{fxMessageBean['PropertyEditor.message.confirmOverrideBaseMultiplicity']}");
-                if (choice) {
-                    document.forms["frm"].submit();
-                }
-                else {
-                    document.getElementById("frm:mayOverrideBaseMultiplicity").checked = value;
-                }
-            }
-
-            function confirmMultiLang(value) {
-                choice = confirm("#{fxMessageBean['PropertyEditor.message.confirmMultiLang']}");
-                if (choice) {
-                    // not needed anymore, handled by ajax:support tag now
-                    // document.forms["frm"].submit();
-                }
-                else {
-                    document.getElementById("frm:multiLang").checked = value;
-                }
-            }
-
-            function confirmOverrideAcl(value) {
-                choice = confirm("#{fxMessageBean['PropertyEditor.message.confirmOverrideACL']}");
-                if (choice) {
-                    document.forms["frm"].submit();
-                }
-                else {
-                    document.getElementById("frm:mayOverrideACL").checked = value;
-                }
-            }
-
             function getNewLabel() {
                 alert(document.getElementById("frm:label"));
                 return document.getElementById("frm:label").value;

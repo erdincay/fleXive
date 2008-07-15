@@ -35,6 +35,9 @@ package com.flexive.war.beans;
 
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.beans.MessageBean;
+import com.flexive.shared.FxContext;
+import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.security.Role;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,17 +50,43 @@ import java.util.List;
  */
 public class NavigationMenuBean {
     private static List<Item> items = new ArrayList<Item>(10);
+    private static int adminTabIdx =-1;
 
     static {
         addItem("Admin.tab.content", "adm/content.jsf", "adm/content/navigation.jsf", "contentNavigation", true);
         addItem("Admin.tab.structure", "adm/content.jsf", "adm/structure/navigation.jsf", "structureNavigation", true);
         addItem("Admin.tab.briefcase", "adm/main/briefcase/bcOverview.jsf", "adm/briefcase/navigation.jsf", "briefcaseNavigation", true);
         addItem("Admin.tab.admin", "adm/main/userGroup/overview.jsf", "adm/main/navigation.jsf", "mainNavigation", false);
+        adminTabIdx = items.size()-1;
         //addItem("menu4","content4.jsf","content/navigation.jsf","contentNavigation",false);
     }
 
     private int activeIdx = 0;
 
+    /**
+     * Returns if the user has access to the administation tab.
+     * (i.e if user is global supervisor or has at least one role
+     * besides BackendAccess)
+     *
+     * @return  if the current user has access to the administration tab.
+     */
+    private static boolean hasAdminAccess() {
+        UserTicket ticket = FxContext.get().getTicket();
+        boolean adminAccess=ticket.isInRole(Role.GlobalSupervisor);
+        if (!adminAccess) {
+            int i=0;
+            for (Role r:Role.getList()) {
+                if (ticket.isInRole(r)) {
+                    i++;
+                    if (i==2) {
+                        adminAccess=true;
+                        break;
+                    }
+                }
+            }
+        }
+        return adminAccess;
+    }
 
     /**
      * Items that are displayed as navigation.
@@ -136,7 +165,13 @@ public class NavigationMenuBean {
 
 
     public List getItems() {
-        return items;
+        if (hasAdminAccess())
+            return items;
+        else  {
+            List<Item> restrictedItems = new ArrayList<Item>(items);
+            restrictedItems.remove(adminTabIdx);
+            return restrictedItems;
+        }
     }
 
     public List getTopItems() {
