@@ -53,7 +53,7 @@ dojo.widget.defineWidget(
     },
     listenNodeFilter: function(elem) { return elem instanceof dojo.widget.Widget}, 
 
-    expand: function(node) {
+    expand: function(node, sync) {
         if (node.children.length > 0 ||
           (node.state == node.loadStates.UNCHECKED  && node.isFolder && !node.children.length)) {
             this.expandedNodes.push(node.widgetId);
@@ -105,7 +105,6 @@ dojo.widget.defineWidget(
         while (this.expandedNodes.length > 0) {
             nodes.push(this.expandedNodes.pop());
         }
-       //alert("Restore: " + nodes);
         // "multi-pass" expand nodes because of lazy node initalization
         var somethingDone = false;
         var maxIterations = 1000;   // safety fallback if something breaks...
@@ -116,10 +115,9 @@ dojo.widget.defineWidget(
                 var id = nodes[i];
                 var node = dojo.widget.byId(id);
                 if (node != null && !node.isExpanded && !expandedNodes[id]) {
-                    //dojo.debug("Expanding: " + node + " with " + node.children + " children");
                     somethingDone = true;
                     expandedNodes[id] = true;
-                    this.expand(node);
+                    this.expand(node, true);
                 }
             }
         } while (somethingDone && maxIterations-- > 0);
