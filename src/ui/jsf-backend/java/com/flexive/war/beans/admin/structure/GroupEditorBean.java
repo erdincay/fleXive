@@ -231,7 +231,9 @@ public class GroupEditorBean {
 
     public void setAssignmentAlias(String a) {
         try {
-            assignment.setAlias(a);
+            //only react to changes, else xpath may change!
+            if (!assignment.getAlias().equals(a))
+                assignment.setAlias(a);
         }
         catch (Throwable t) {
             new FxFacesMsgErr(t).addToContext();
