@@ -170,10 +170,13 @@ public class FxGroupAssignmentEdit extends FxGroupAssignment {
     public FxGroupAssignmentEdit setAlias(String alias) throws FxInvalidParameterException {
         if (StringUtils.isEmpty(alias))
             throw new FxInvalidParameterException("ALIAS", "ex.structure.assignment.noAlias");
-        this.alias = alias.trim().toUpperCase();
-        List<XPathElement> xpe = XPathElement.split(this.XPath);
-        xpe.set(xpe.size() - 1, new XPathElement(this.alias, 1, true));
-        this.XPath = XPathElement.toXPathNoMult(xpe);
+        //only react to alias changes
+        if (!this.alias.trim().toUpperCase().equals(alias.trim().toUpperCase())) {
+            this.alias = alias.trim().toUpperCase();
+            List<XPathElement> xpe = XPathElement.split(this.XPath);
+            xpe.set(xpe.size() - 1, new XPathElement(this.alias, 1, true));
+            this.XPath = XPathElement.toXPathNoMult(xpe);
+        }
         return this;
     }
 
