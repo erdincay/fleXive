@@ -19,14 +19,21 @@ QueryRowSelection.prototype = {
     handleRowClick: function(event, nodeId) {
         var oldActiveNodeId = this.activeNodeId;
         this.updateActiveRow(nodeId);
-        this.deselectAllRows();
         if (event.shiftKey) {
             // select range
+            this.deselectAllRows();
             var selection = this.getRowRange(oldActiveNodeId, nodeId);
             for (var i = 0; i < selection.length; i++) {
                 this.selectRow(selection[i]);
             }
+        } else if (event.ctrlKey) {
+            if (this.isSelected(nodeId)) {
+                this.deselectRow(nodeId);
+            } else {
+                this.selectRow(nodeId);
+            }
         } else {
+            this.deselectAllRows();
             // select single row
             this.selectRow(nodeId);
         }
@@ -39,7 +46,7 @@ QueryRowSelection.prototype = {
         var element = this.getRow(nodeId);
         element.className = element.className + " " + this.selectedRowStyle;
         this.selectedIds.push(nodeId);
-        this.selectionInput.value = this.selectedIds.join(",");
+        this.updateFormValue();
     },
 
     deselectRow: function(nodeId) {
@@ -59,6 +66,11 @@ QueryRowSelection.prototype = {
             }
         }
         this.selectedIds = selected;
+        this.updateFormValue();
+    },
+
+    updateFormValue: function() {
+        this.selectionInput.value = this.selectedIds.join(",");
     },
 
     deselectAllRows: function() {
