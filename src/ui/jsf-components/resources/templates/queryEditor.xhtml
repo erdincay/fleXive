@@ -27,10 +27,23 @@ Parameters:
         <c:set var="emptyMessageKey" value="QueryEditor.label.emptyQuery"/>
     </c:if>
 
+    <script type="text/javascript">
+    <!--
+        function onShowContextMenu() {
+            try {
+                flexive.yui.setMenuItem("and", "disabled", rowSelection.selectedIds.length < 2);
+                flexive.yui.setMenuItem("or", "disabled", rowSelection.selectedIds.length < 2);
+            } catch (e) {
+                alert(e);
+            }
+        }
+    //-->
+    </script>
+
     <!-- Editor context menu -->
-    <fx:menu name="contextMenu" trigger="'queryEditorContainer'">
-        <fx:menuItem labelKey="QueryEditor.label.contextMenu.and" clickHandler="function() { document.getElementById('frm:createAndSubquery').onclick(); }"/>
-        <fx:menuItem labelKey="QueryEditor.label.contextMenu.or" clickHandler="function() { document.getElementById('frm:createOrSubquery').onclick(); }"/>
+    <fx:menu name="contextMenu" trigger="'queryEditorContainer'" beforeShow="onShowContextMenu">
+        <fx:menuItem id="and" labelKey="QueryEditor.label.contextMenu.and" clickHandler="function() { document.getElementById('frm:createAndSubquery').onclick(); }"/>
+        <fx:menuItem id="or" labelKey="QueryEditor.label.contextMenu.or" clickHandler="function() { document.getElementById('frm:createOrSubquery').onclick(); }"/>
     </fx:menu>
 
     <!-- Popup dialog that shows the current SQL query -->
