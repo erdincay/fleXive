@@ -39,7 +39,7 @@
 
                 <fx:formRow label="#{fxMessageBean['StepDefinition.field.unique.select']}" id="uniqueTargetSelect">
                     <h:selectBooleanCheckbox id="uniqueTargetSelect" value="#{stepDefinitionBean.uniqueTargetSelected}">
-                        <a4j:support event="onchange" reRender="uniqueTargetList"/>
+                        <a4j:support event="onclick" reRender="uniqueTargetList"/>
                     </h:selectBooleanCheckbox>
                 </fx:formRow>
 

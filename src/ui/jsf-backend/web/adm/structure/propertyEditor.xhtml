@@ -72,7 +72,7 @@
             <fx:formRow labelKey="PropertyEditor.label.multiLang" id="multiLang">
                 <h:selectBooleanCheckbox id="multiLang" value="#{propertyEditorBean.propertyMultiLanguage}"
                      disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
-                    <a4j:support event="onchange" reRender="defaultValueInput"/>
+                    <a4j:support event="onclick" reRender="defaultValueInput"/>
                 </h:selectBooleanCheckbox>
             </fx:formRow>
             <fx:formRow labelKey="PropertyEditor.label.dataType" id="dataType">

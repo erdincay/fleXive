@@ -86,7 +86,7 @@
             <fx:formRow labelKey="PropertyEditor.label.setDefaultValue" id="defaultValue">
                 <h:selectBooleanCheckbox id="defaultValue" value="#{propertyEditorBean.defaultValueSet}"
                          disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
-                    <a4j:support event="onchange" reRender="multiLangBox,defaultLangSelect,defaultValueInput,defaultLanguageInput"/>
+                    <a4j:support event="onclick" reRender="multiLangBox,defaultLangSelect,defaultValueInput,defaultLanguageInput"/>
                 </h:selectBooleanCheckbox>
             </fx:formRow>
 
@@ -132,7 +132,7 @@
                              disabled="#{not propertyEditorBean.propertyMayOverrideMultiLang or not
                              propertyEditorBean.editMode or (propertyEditorBean.systemInternal
                              and not fxSystemBean.isInRole['GlobalSupervisor'])}">
-                            <a4j:support event="onchange" reRender="multiLangBox,defaultLangSelect,defaultValueInput,defaultLanguageInput"/>
+                            <a4j:support event="onclick" reRender="multiLangBox,defaultLangSelect,defaultValueInput,defaultLanguageInput"/>
                         </h:selectBooleanCheckbox>
                 </fx:formRow>
 
@@ -142,7 +142,7 @@
                             <fx:formRow labelKey="PropertyEditor.label.multiLang" id="multiLang">
                                     <h:selectBooleanCheckbox id="multiLang" value="#{propertyEditorBean.assignmentMultiLang}"
                                          disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
-                                        <a4j:support event="onchange" reRender="defaultLangSelect,defaultValueInput,defaultLanguageInput"/>
+                                        <a4j:support event="onclick" reRender="defaultLangSelect,defaultValueInput,defaultLanguageInput"/>
                                     </h:selectBooleanCheckbox>
                             </fx:formRow>
                         </div>
@@ -154,7 +154,7 @@
                              disabled="#{not propertyEditorBean.propertyMayOverrideBaseMultiplicity
                                 or not propertyEditorBean.editMode or (propertyEditorBean.systemInternal
                                 and not fxSystemBean.isInRole['GlobalSupervisor'])}">
-                                 <a4j:support event="onchange" reRender="multiplicitySelect"/>
+                                 <a4j:support event="onclick" reRender="multiplicitySelect"/>
                              </h:selectBooleanCheckbox>
                 </fx:formRow>
 
@@ -180,7 +180,7 @@
                              disabled="#{not propertyEditorBean.propertyMayOverrideACL or not
                              propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not
                              fxSystemBean.isInRole['GlobalSupervisor'])}">
-                                <a4j:support event="onchange" reRender="aclSelect"/>
+                                <a4j:support event="onclick" reRender="aclSelect"/>
                              </h:selectBooleanCheckbox>
                 </fx:formRow>
 
