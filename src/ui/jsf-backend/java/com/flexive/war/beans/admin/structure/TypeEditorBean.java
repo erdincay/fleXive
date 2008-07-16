@@ -422,7 +422,7 @@ public class TypeEditorBean {
         WrappedRelation wrappedRelToRemove = getWrappedRelationFiler();
         int removeIndex = -1;
         for (int i = 0; i < wrappedRelations.size(); i++) {
-            if (wrappedRelations.get(i).equalsCompletely(wrappedRelToRemove)) {
+            if (wrappedRelations.get(i).equals(wrappedRelToRemove)) {
                 removeIndex = i;
                 break;
             }
@@ -593,6 +593,7 @@ public class TypeEditorBean {
         private long destId;
         protected long maxSource;
         protected long maxDest;
+        private int id;
 
         WrappedRelation(FxTypeRelation r) {
             this.sourceId = r.getSource().getId();
@@ -644,6 +645,14 @@ public class TypeEditorBean {
 
         public void setMaxDest(long maxDestination) {
             this.maxDest = maxDestination;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
         }
 
         @Override

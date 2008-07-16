@@ -442,7 +442,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                 if (ps != null) ps.close();
                 ps = con.prepareStatement(sql.toString());
                 ps.setLong(3, type.getId());
-                for (FxTypeRelation rel : type.getAddedRelations()) {
+                for (FxTypeRelation rel : type.getUpdatedRelations()) {
                     if (rel.getSource().isRelation())
                         throw new FxInvalidParameterException("ex.structure.type.relation.wrongTarget", type.getName(), rel.getSource().getName());
                     if (rel.getDestination().isRelation())
