@@ -67,7 +67,8 @@ public abstract class NumberQueryInputMapper<T, BaseType extends FxValue<T, ?>> 
         private static final String SEP_PK_CAPTION = " - ";
 
         public ReferenceQueryInputMapper(FxProperty property) {
-            buildAutocompleteHandler("AutoCompleteProvider.pkQuery", String.valueOf(property.getReferencedType().getId()));
+            buildAutocompleteHandler("AutoCompleteProvider.pkQuery", property.getReferencedType() != null
+                    ? String.valueOf(property.getReferencedType().getId()): "-1");
         }
 
         public static ReferencedContent getReferencedContent(String query) {
@@ -103,7 +104,7 @@ public abstract class NumberQueryInputMapper<T, BaseType extends FxValue<T, ?>> 
     @Override
     protected FxString doEncode(BaseType value) {
         if (value.isMultiLanguage()) {
-            throw new FxInvalidParameterException("VALUE", "ex.content.value.mapper.select.singleLanguage").asRuntimeException();
+            throw new FxInvalidParameterException("VALUE", "ex.content.value.mapper.numberQuery.singleLanguage").asRuntimeException();
         }
         return new FxString(value.isMultiLanguage(), encodeId(value.isEmpty() ? null : value.getDefaultTranslation()));
     }

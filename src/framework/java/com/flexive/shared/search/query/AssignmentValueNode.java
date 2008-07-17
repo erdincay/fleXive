@@ -68,7 +68,9 @@ public class AssignmentValueNode extends QueryValueNode<FxValue, PropertyValueCo
         this.comparator = PropertyValueComparator.EQ;
         final FxAssignment assignment = getEnvironment().getAssignment(assignmentId);
         if (assignment instanceof FxPropertyAssignment) {
-        	value = ((FxPropertyAssignment) assignment).getEmptyValue();
+            // use the property's empty value to avoid using the assignment's default value
+            value = ((FxPropertyAssignment) assignment).getProperty().getEmptyValue();
+            value.setXPath(assignment.getXPath());
         }
         if (this.value == null) {
         	setValue(new FxString(""));

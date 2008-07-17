@@ -669,6 +669,20 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
+    public List<FxPropertyAssignment> getPropertyAssignments(long propertyId, boolean includeDisabled) {
+        final List<FxPropertyAssignment> assignments = includeDisabled ? propertyAssignmentsAll : propertyAssignmentsEnabled;
+        final List<FxPropertyAssignment> result = new ArrayList<FxPropertyAssignment>();
+        for (FxPropertyAssignment assignment : assignments) {
+            if (assignment.getProperty().getId() == propertyId) {
+                result.add(assignment);
+            }
+        }
+        return Collections.unmodifiableList(result);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public List<FxGroupAssignment> getGroupAssignments() {
         return getGroupAssignments(false);
     }

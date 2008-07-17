@@ -34,6 +34,7 @@ package com.flexive.shared.search.query;
 import com.flexive.shared.exceptions.FxInvalidQueryNodeException;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.structure.FxProperty;
+import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.mapper.InputMapper;
@@ -64,6 +65,11 @@ public class PropertyValueNode extends QueryValueNode<FxValue, PropertyValueComp
         this.comparator = PropertyValueComparator.EQ;
         if (propertyId != -1) {
             this.value = getEnvironment().getProperty(propertyId).getEmptyValue();
+
+            // use XPath of first assignment to enable property lookups via FxValue
+            final List<FxPropertyAssignment> assignments = getEnvironment().getPropertyAssignments(propertyId, true);
+            assert assignments.size() > 0 : "At least one assignment is expected to exist for property " + propertyId;
+            this.value.setXPath(assignments.get(0).getXPath());
         } else {
             setValue(new FxString(""));
         }

@@ -285,6 +285,15 @@ public interface FxEnvironment extends Serializable {
     List<FxPropertyAssignment> getPropertyAssignments(boolean includeDisabled);
 
     /**
+     * Get the property assignments for a given property.
+     *
+     * @param propertyId    the property ID
+     * @param includeDisabled include disabled assignments?
+     * @return property all assignments of the given property
+     */
+    List<FxPropertyAssignment> getPropertyAssignments(long propertyId, boolean includeDisabled);
+
+    /**
      * Get all group assignments that are enabled
      *
      * @return enabled group assignments
