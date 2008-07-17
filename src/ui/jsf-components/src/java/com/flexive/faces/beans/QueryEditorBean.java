@@ -49,6 +49,7 @@ import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.value.FxLargeNumber;
+import com.flexive.shared.value.FxString;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
@@ -281,7 +282,9 @@ public class QueryEditorBean implements Serializable {
     public void addTreeNode(ActionEvent event) throws FxApplicationException {
         final FxTreeNode treeNode = EJBLookup.getTreeEngine().getNode(FxTreeMode.Edit, addAssignmentId);
         final TreeValueNode newNode = new TreeValueNode(getRootNode().getNewId(), treeNode.getId(),
-                addNodeLive ? FxTreeMode.Live : FxTreeMode.Edit, treeNode.getLabel());
+                addNodeLive ? FxTreeMode.Live : FxTreeMode.Edit,
+                treeNode.getLabel() != null && !treeNode.getLabel().isEmpty()
+                        ? treeNode.getLabel() : new FxString(false, treeNode.getName()));
         addQueryNode(newNode);
     }
 
