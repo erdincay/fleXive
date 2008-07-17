@@ -191,18 +191,31 @@ public final class FxFormatUtils {
      * @param path the path to escape
      * @return escaped path
      */
-    public static String escapeTreePath(String path) {
+    public static String escapeTreePath(final String path) {
         StringBuilder sb = new StringBuilder(path.length());
         char c;
+        boolean inTag = false;
         for (int i = 0; i < path.length(); i++) {
             c = path.charAt(i);
+            if (c == '<' && !inTag) {
+                inTag = true;
+                continue;
+            }
+            if (c == '>' && inTag) {
+                inTag = false;
+                continue;
+            }
+            if (inTag)
+                continue;
             if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '/')
                 sb.append(c);
             else {
-                if (i > 0 && path.charAt(i - 1) != '_')
+                if ((i > 0 && path.charAt(i - 1) != '_') || i == 0)
                     sb.append('_');
             }
         }
+        if (sb.length() == 0)
+            sb.append('_');
         return sb.toString();
     }
 
