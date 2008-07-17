@@ -230,7 +230,7 @@ public class FxSelectOne extends FxValue<FxSelectListItem, FxSelectOne> implemen
      */
     public void setSelectList(FxSelectList list) {
         if (isMultiLanguage()) {
-            this.list = null;
+            this.list = translations.isEmpty() ? list : null;
             for (FxSelectListItem item : translations.values()) {
                 item.setList(list);
             }

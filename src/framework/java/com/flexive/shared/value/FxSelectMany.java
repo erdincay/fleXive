@@ -258,7 +258,7 @@ public class FxSelectMany extends FxValue<SelectMany, FxSelectMany> implements S
      */
     public void setSelectList(FxSelectList list) {
         if (isMultiLanguage()) {
-            this.list = null;
+            this.list = translations.isEmpty() ? list : null;
             for (SelectMany item : translations.values()) {
                 item.setSelectList(list);
             }
