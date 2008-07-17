@@ -138,12 +138,14 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
 
     /** {@inheritDoc} */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void saveSystemDefault(ResultPreferences preferences, long typeId, ResultViewType viewType, ResultLocation location) throws FxApplicationException {
+    public void saveSystemDefault(ResultPreferences preferences, long typeId, ResultViewType viewType, ResultLocation... locations) throws FxApplicationException {
         if (preferences.getSelectedColumns().isEmpty()) {
             throw new FxInvalidParameterException("preferences", "ex.ResultPreferences.save.empty");
         }
-        // div conf already checks for supervisor access
-        divisionConfiguration.put(SystemParameters.USER_RESULT_PREFERENCES, getKey(typeId, viewType, location), preferences);
+        for (ResultLocation location: locations) {
+            // div conf already checks for supervisor access
+            divisionConfiguration.put(SystemParameters.USER_RESULT_PREFERENCES, getKey(typeId, viewType, location), preferences);
+        }
     }
 
     /** {@inheritDoc} */

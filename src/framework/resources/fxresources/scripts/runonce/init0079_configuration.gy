@@ -40,39 +40,27 @@
 import com.flexive.shared.*;
 import com.flexive.shared.search.*;
 
+/**
+ * Sets the default result preferences for the backend application.
+ */
 void setupResultPreferences() {
     // default list view
     EJBLookup.getResultPreferencesEngine().saveSystemDefault(
             new ResultPreferences(
-                [new ResultColumnInfo(Table.CONTENT, "@pk", null),
-                 new ResultColumnInfo(Table.CONTENT, "caption", null)],
-                [new ResultOrderByInfo(Table.CONTENT, "@pk", null, SortDirection.DESCENDING)],
+                [new ResultColumnInfo("@pk"),
+                 new ResultColumnInfo("caption")],
+                [new ResultOrderByInfo("@pk", SortDirection.DESCENDING)],
                 25, 0
             ), -1,
-            ResultViewType.LIST, AdminResultLocations.DEFAULT);
-    EJBLookup.getResultPreferencesEngine().saveSystemDefault(
-            new ResultPreferences(
-                [new ResultColumnInfo(Table.CONTENT, "@pk", null),
-                 new ResultColumnInfo(Table.CONTENT, "caption", null)],
-                [new ResultOrderByInfo(Table.CONTENT, "@pk", null, SortDirection.DESCENDING)],
-                25, 0
-            ), -1,
-            ResultViewType.LIST, AdminResultLocations.ADMIN);
+            ResultViewType.LIST, AdminResultLocations.values());
     // default thumbnail view
     EJBLookup.getResultPreferencesEngine().saveSystemDefault(
             new ResultPreferences(
-                [new ResultColumnInfo(Table.CONTENT, "@pk", null)],
-                [new ResultOrderByInfo(Table.CONTENT, "@pk", null, SortDirection.DESCENDING)],
+                [new ResultColumnInfo("@pk")],
+                [new ResultOrderByInfo("@pk", SortDirection.DESCENDING)],
                 25, 0
             ), -1,
-            ResultViewType.THUMBNAILS, AdminResultLocations.DEFAULT);
-    EJBLookup.getResultPreferencesEngine().saveSystemDefault(
-            new ResultPreferences(
-                [new ResultColumnInfo(Table.CONTENT, "@pk", null)],
-                [new ResultOrderByInfo(Table.CONTENT, "@pk", null, SortDirection.DESCENDING)],
-                25, 0
-            ), -1,
-            ResultViewType.THUMBNAILS, AdminResultLocations.ADMIN);
+            ResultViewType.THUMBNAILS, AdminResultLocations.values());
 }
 
 setupResultPreferences();

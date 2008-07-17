@@ -66,6 +66,16 @@ public class ResultColumnInfo implements Serializable {
         this.suffix = suffix;
     }
 
+    /**
+     * Create a displayed column info object for a content property.
+     *
+     * @param propertyName      the type name
+     */
+    public ResultColumnInfo(String propertyName) {
+        this(Table.CONTENT, propertyName, null);
+    }
+
+
     public Table getTable() {
         return table;
     }

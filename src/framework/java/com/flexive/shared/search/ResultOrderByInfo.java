@@ -52,6 +52,10 @@ public class ResultOrderByInfo extends ResultColumnInfo implements Serializable 
         this.direction = direction;
     }
 
+    public ResultOrderByInfo(String propertyName, SortDirection direction) {
+        this(Table.CONTENT, propertyName, null, direction);
+    }
+
     public SortDirection getDirection() {
         return direction;
     }

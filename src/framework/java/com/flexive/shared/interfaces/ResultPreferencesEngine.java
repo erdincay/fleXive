@@ -104,7 +104,7 @@ public interface ResultPreferencesEngine {
      * @param location      the "location" where the results will be displayed
      * @throws FxApplicationException   if the result preferences could not be updated
      */
-    void saveSystemDefault(ResultPreferences preferences, long typeId, ResultViewType viewType, ResultLocation location) throws FxApplicationException;
+    void saveSystemDefault(ResultPreferences preferences, long typeId, ResultViewType viewType, ResultLocation... locations) throws FxApplicationException;
 
     /**
      * Remove the current user's preferences for the given parameters. If no preferences exist
