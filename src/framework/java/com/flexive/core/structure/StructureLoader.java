@@ -134,6 +134,8 @@ public final class StructureLoader {
                 //accessed and it does not exist because its empty
                 CacheAdmin.getInstance().put(CacheAdmin.CONTENTCACHE_BASE, -1, null);
                 UserTicketImpl.reloadGuestTicketAssignments(true);
+                environment.setAssignments(loader.loadAssignments(con, environment)); //have to reload since default values require a present environment
+                FxEnvironmentUtils.cachePut(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME, environment);
             }
         } catch (FxNotFoundException e) {
             throw new FxLoadException(LOG, e);

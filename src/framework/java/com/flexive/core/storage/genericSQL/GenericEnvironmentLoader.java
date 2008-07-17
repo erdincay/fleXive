@@ -41,6 +41,7 @@ import com.flexive.core.structure.FxPreloadGroupAssignment;
 import com.flexive.core.structure.FxPreloadType;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxLoadException;
 import com.flexive.shared.exceptions.FxNotFoundException;
@@ -488,10 +489,10 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                     case FxAssignment.TYPE_PROPERTY:
                         FxValue defaultValue = null;
                         String _def = rs.getString(19);
-                        if (!StringUtils.isEmpty(_def)) {
+                        if (!StringUtils.isEmpty(_def) && CacheAdmin.isEnvironmentLoaded()) {
                             try {
                                 defaultValue = (FxValue) xStream.fromXML(_def);
-                            } catch (Exception e) {
+                            } catch (Throwable e) {
                                 defaultValue = null;
                                 LOG.warn("Failed to unmarshall default value for assignment " + rs.getString(8) + ": " + e.getMessage(), e);
                             }
