@@ -16,7 +16,7 @@
         res-type="javax.sql.XADataSource">
         <property name="user" value="root"/>
         <property name="password" value="a"/>
-        <property name="url" value="jdbc:mysql://localhost:3306/flexiveConfiguration"/>
+        <property name="url" value="jdbc:mysql://localhost:3306/flexiveConfiguration?useUnicode=true&amp;characterEncoding=utf8&amp;characterResultSets=utf8"/>
     </jdbc-connection-pool>
 
     <jdbc-resource pool-name="flexiveConfiguration" jndi-name="jdbc/flexiveConfiguration" enabled="true" object-type="user"/>
@@ -30,7 +30,7 @@
         res-type="javax.sql.XADataSource">
         <property name="user" value="root"/>
         <property name="password" value="a"/>
-        <property name="url" value="jdbc:mysql://localhost:3306/flexive"/>
+        <property name="url" value="jdbc:mysql://localhost:3306/flexive?useUnicode=true&amp;characterEncoding=utf8&amp;characterResultSets=utf8"/>
     </jdbc-connection-pool>
 
     <jdbc-resource pool-name="flexiveDivision1" jndi-name="jdbc/flexiveDivision1" enabled="true" object-type="user"/>
@@ -43,7 +43,7 @@
         res-type="javax.sql.DataSource">
         <property name="user" value="root"/>
         <property name="password" value="a"/>
-        <property name="url" value="jdbc:mysql://localhost:3306/flexive"/>
+        <property name="url" value="jdbc:mysql://localhost:3306/flexive?useUnicode=true&amp;characterEncoding=utf8&amp;characterResultSets=utf8"/>
     </jdbc-connection-pool>
 
     <jdbc-resource pool-name="flexiveDivision1NoTX" jndi-name="jdbc/flexiveDivision1NoTX" enabled="true" object-type="user"/>
