@@ -394,42 +394,60 @@ public class FxProperty extends FxStructureElement implements Serializable {
     protected FxValue getEmptyValue(boolean multiLang, long lang) {
         if (this.dataType == null)
             throw new FxApplicationException("ex.structure.dataType.property", getName()).asRuntimeException();
+        final FxValue value;
         switch (this.getDataType()) {
             case HTML:
-                return new FxHTML(multiLang, lang, FxHTML.EMPTY).setEmpty();
+                value = new FxHTML(multiLang, lang, FxHTML.EMPTY).setEmpty();
+                break;
             case String1024:
             case Text:
-                return new FxString(multiLang, lang, FxString.EMPTY).setEmpty();
+                value = new FxString(multiLang, lang, FxString.EMPTY).setEmpty();
+                break;
             case Number:
-                return new FxNumber(multiLang, lang, FxNumber.EMPTY).setEmpty();
+                value = new FxNumber(multiLang, lang, FxNumber.EMPTY).setEmpty();
+                break;
             case LargeNumber:
-                return new FxLargeNumber(multiLang, lang, FxLargeNumber.EMPTY).setEmpty();
+                value = new FxLargeNumber(multiLang, lang, FxLargeNumber.EMPTY).setEmpty();
+                break;
             case Float:
-                return new FxFloat(multiLang, lang, FxFloat.EMPTY).setEmpty();
+                value = new FxFloat(multiLang, lang, FxFloat.EMPTY).setEmpty();
+                break;
             case Double:
-                return new FxDouble(multiLang, lang, FxDouble.EMPTY).setEmpty();
+                value = new FxDouble(multiLang, lang, FxDouble.EMPTY).setEmpty();
+                break;
             case Date:
-                return new FxDate(multiLang, lang, FxDate.EMPTY).setEmpty();
+                value = new FxDate(multiLang, lang, FxDate.EMPTY).setEmpty();
+                break;
             case DateTime:
-                return new FxDateTime(multiLang, lang, FxDateTime.EMPTY).setEmpty();
+                value = new FxDateTime(multiLang, lang, FxDateTime.EMPTY).setEmpty();
+                break;
             case DateRange:
-                return new FxDateRange(multiLang, lang, FxDateRange.EMPTY).setEmpty();
+                value = new FxDateRange(multiLang, lang, FxDateRange.EMPTY).setEmpty();
+                break;
             case DateTimeRange:
-                return new FxDateTimeRange(multiLang, lang, FxDateTimeRange.EMPTY).setEmpty();
+                value = new FxDateTimeRange(multiLang, lang, FxDateTimeRange.EMPTY).setEmpty();
+                break;
             case Boolean:
-                return new FxBoolean(multiLang, lang, FxBoolean.EMPTY).setEmpty();
+                value = new FxBoolean(multiLang, lang, FxBoolean.EMPTY).setEmpty();
+                break;
             case Binary:
-                return new FxBinary(multiLang, lang, FxBinary.EMPTY).setEmpty();
+                value = new FxBinary(multiLang, lang, FxBinary.EMPTY).setEmpty();
+                break;
             case Reference:
-                return new FxReference(multiLang, lang, FxReference.EMPTY).setEmpty();
+                value = new FxReference(multiLang, lang, FxReference.EMPTY).setEmpty();
+                break;
             case SelectOne:
-                return new FxSelectOne(multiLang, lang, this.getReferencedList().getItems().get(0)).setEmpty();
+                value = new FxSelectOne(multiLang, lang, this.getReferencedList().getItems().get(0)).setEmpty();
+                break;
             case SelectMany:
-                return new FxSelectMany(multiLang, lang, new SelectMany(this.getReferencedList())).setEmpty();
+                value = new FxSelectMany(multiLang, lang, new SelectMany(this.getReferencedList())).setEmpty();
+                break;
             case InlineReference:
             default:
                 throw new FxNotFoundException("ex.structure.datatype.notImplemented", this.getDataType()).asRuntimeException();
         }
+        updateEnvironmentData(value);
+        return value;
     }
 
 
