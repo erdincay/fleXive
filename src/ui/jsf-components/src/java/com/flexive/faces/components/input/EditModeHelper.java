@@ -36,6 +36,7 @@ import com.flexive.faces.javascript.FxJavascriptUtils;
 import com.flexive.faces.beans.UserConfigurationBean;
 import com.flexive.faces.beans.MessageBean;
 import com.flexive.shared.*;
+import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.*;
 import com.flexive.war.servlet.ThumbnailServlet;
@@ -292,6 +293,10 @@ class EditModeHelper extends RenderHelper {
     }
 
     private void storeSelectItems(UIInput listbox, FxSelectList selectList) {
+        if (selectList == null) {
+            throw new FxInvalidParameterException("selectList", "ex.jsf.valueInput.select.emptyList",
+                    component.getClientId(FacesContext.getCurrentInstance())).asRuntimeException();
+        }
         // store available items in select component
         final UISelectItems selectItems = (UISelectItems) FxJsfUtils.createComponent(UISelectItems.COMPONENT_TYPE);
         final List<SelectItem> items = FxJsfUtils.asSelectList(selectList);

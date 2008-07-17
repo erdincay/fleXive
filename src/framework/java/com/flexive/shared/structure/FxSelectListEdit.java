@@ -229,7 +229,7 @@ public class FxSelectListEdit extends FxSelectList implements Serializable {
             return;
         this.id = newId;
         for (FxSelectListItem item : this.getItems())
-            item._updateList(this);
+            item.setList(this);
     }
 
     /**

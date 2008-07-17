@@ -123,9 +123,12 @@ public class FxProperty extends FxStructureElement implements Serializable {
      * @return default value
      */
     public FxValue getDefaultValue() {
-        if (defaultValue == null)
+        if (defaultValue == null) {
             defaultValue = getEmptyValue();
-        return defaultValue;
+        }
+        final FxValue copy = defaultValue.copy();
+        updateEnvironmentData(copy);
+        return copy;
     }
 
     /**
@@ -364,6 +367,22 @@ public class FxProperty extends FxStructureElement implements Serializable {
         return getEmptyValue(multiLang, FxLanguage.DEFAULT_ID);
     }
 
+
+    /**
+     * Updates miscellaneous FxValue information that has to be updated from the environment,
+     * like select lists for FxSelectOne objects.
+     *
+     * @param value  the value to be updated
+     */
+    public void updateEnvironmentData(FxValue value) {
+        // set current select list for select list default values
+        if (value instanceof FxSelectOne) {
+            ((FxSelectOne) value).setSelectList(getReferencedList());
+        } else if (value instanceof FxSelectMany) {
+            ((FxSelectMany) value).setSelectList(getReferencedList());
+        }
+    }
+
     /**
      * Get an empty FxValue instance for this property in single or multi language mode.
      * To be called from property assignments only!
@@ -429,6 +448,5 @@ public class FxProperty extends FxStructureElement implements Serializable {
     public int hashCode() {
         return (int) this.getId();
     }
-
 
 }

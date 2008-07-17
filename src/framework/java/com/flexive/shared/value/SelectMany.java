@@ -196,6 +196,15 @@ public class SelectMany implements Serializable {
     }
 
     /**
+     * Updates the select list for this instance.
+     *
+     * @param list  the select list for this instance.
+     */
+    public void setSelectList(FxSelectList list) {
+        this.list = list;
+    }
+
+    /**
      * Deselects all items
      */
     public void deselectAll() {

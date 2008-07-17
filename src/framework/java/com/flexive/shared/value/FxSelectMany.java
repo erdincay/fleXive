@@ -251,6 +251,25 @@ public class FxSelectMany extends FxValue<SelectMany, FxSelectMany> implements S
         return list;
     }
 
+
+    /**
+     * Updates the select list.
+     * @param list the new select list instance
+     */
+    public void setSelectList(FxSelectList list) {
+        if (isMultiLanguage()) {
+            this.list = null;
+            for (SelectMany item : translations.values()) {
+                item.setSelectList(list);
+            }
+        } else if (singleValue != null) {
+            this.list = null;
+            singleValue.setSelectList(list);
+        } else {
+            this.list = list;
+        }
+    }
+
     /** {@inheritDoc} */
     @Override
     protected boolean isAcceptsEmptyDefaultTranslations() {

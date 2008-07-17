@@ -185,7 +185,6 @@ public class FxSelectOne extends FxValue<FxSelectListItem, FxSelectOne> implemen
      */
     @Override
     public FxSelectListItem fromString(String value) {
-        list = null;
         return CacheAdmin.getEnvironment().getSelectListItem(Long.parseLong(value));
     }
 
@@ -223,5 +222,23 @@ public class FxSelectOne extends FxValue<FxSelectListItem, FxSelectOne> implemen
                 list = this.singleValue.getList();
         }
         return list;
+    }
+
+    /**
+     * Updates the select list.
+     * @param list the new select list instance
+     */
+    public void setSelectList(FxSelectList list) {
+        if (isMultiLanguage()) {
+            this.list = null;
+            for (FxSelectListItem item : translations.values()) {
+                item.setList(list);
+            }
+        } else if (singleValue != null) {
+            this.list = null;
+            singleValue.setList(list);
+        } else {
+            this.list = list; 
+        }
     }
 }

@@ -133,7 +133,7 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
      *
      * @param list new list with a valid id
      */
-    protected void _updateList(FxSelectList list) {
+    public void setList(FxSelectList list) {
         this.list = list;
     }
 

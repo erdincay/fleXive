@@ -41,6 +41,8 @@ import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
+import com.flexive.shared.value.FxSelectOne;
+import com.flexive.shared.value.FxSelectMany;
 
 import java.io.Serializable;
 import java.util.List;
@@ -252,9 +254,13 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
      * @return FxValue
      */
     public FxValue getDefaultValue() {
-        if (defaultValue != null)
-            defaultValue.setXPath(this.getXPath());
-        return defaultValue;
+        if (defaultValue == null) {
+            return null;
+        }
+        final FxValue copy = defaultValue.copy();
+        copy.setXPath(this.getXPath());
+        property.updateEnvironmentData(copy);
+        return copy;
     }
 
     /**
@@ -268,7 +274,7 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
             value = this.getProperty().getEmptyValue(this.isMultiLang(), this.getDefaultLanguage()).setXPath(getXPath());
         else
             value = this.getProperty().getEmptyValue(this.isMultiLang()).setXPath(getXPath());
-        if (value.isMultiLanguage() == this.getDefaultValue().isMultiLanguage() && !this.getDefaultValue().isEmpty())
+        if (this.getDefaultValue() != null && value.isMultiLanguage() == this.getDefaultValue().isMultiLanguage() && !this.getDefaultValue().isEmpty())
             value = this.getDefaultValue().copy();
         if (this.hasMaxLength()) {
             value.setMaxInputLength(this.getMaxLength());
@@ -276,6 +282,7 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
                 value.setMaxInputLength(1024);
         } else if (this.getProperty().getDataType() == FxDataType.String1024)
             value.setMaxInputLength(1024);
+        property.updateEnvironmentData(value);
         return value;
     }
 
