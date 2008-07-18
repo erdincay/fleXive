@@ -46,6 +46,7 @@ import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Utitlity class to access the StreamServer
@@ -84,9 +85,10 @@ public class FxStreamUtils {
         List<ServerLocation> servers = CacheAdmin.getStreamServers();
         try {
             StreamClient client;
-//            client = StreamClientFactory.getRemoteClient(servers.get(0).getAddress(), servers.get(0).getPort());
-            client = StreamClientFactory.getClient(servers);
-//            System.out.println("StreamClient is " + (client.isLocal() ? "LOCAL" : "REMOTE"));
+            List<ServerLocation> allServers = new ArrayList<ServerLocation>(servers.size() + localServers.size());
+            allServers.addAll(localServers);
+            allServers.addAll(servers);
+            client = StreamClientFactory.getClient(allServers);
             return client;
         } catch (StreamException e) {
             throw new FxStreamException(e);
@@ -233,5 +235,20 @@ public class FxStreamUtils {
                 //ignore
             }
         }
+    }
+
+    /**
+     * List of local servers
+     */
+    private volatile static List<ServerLocation> localServers = new ArrayList<ServerLocation>(5);
+
+    /**
+     * Add a local server
+     *
+     * @param serverLocation local server location
+     */
+    public static void addLocalServer(ServerLocation serverLocation) {
+        if( !localServers.contains(serverLocation))
+            localServers.add(serverLocation);
     }
 }

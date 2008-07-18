@@ -116,8 +116,9 @@ public class FxCache implements FxCacheMBean, DynamicMBean {
             if (servers == null)
                 servers = new ArrayList<ServerLocation>(5);
             ServerLocation thisServer = new ServerLocation(server.getAddress().getAddress(), server.getPort());
-            if( !(thisServer.getAddress().isLinkLocalAddress() || thisServer.getAddress().isAnyLocalAddress() || thisServer.getAddress().isLoopbackAddress() )
-                    && !servers.contains(thisServer)) //only add if not contained already and not bound to a local address
+            if ((thisServer.getAddress().isLinkLocalAddress() || thisServer.getAddress().isAnyLocalAddress() || thisServer.getAddress().isLoopbackAddress()))
+                FxStreamUtils.addLocalServer(thisServer);
+            else if (!servers.contains(thisServer)) //only add if not contained already and not bound to a local address
                 servers.add(thisServer);
             globalPut(CacheAdmin.STREAMSERVER_BASE, CacheAdmin.STREAMSERVER_EJB_KEY, servers);
             LOG.info("Added " + thisServer + " to available StreamServers (" + servers.size() + " total)");
@@ -441,8 +442,8 @@ public class FxCache implements FxCacheMBean, DynamicMBean {
             } else if ("destroy".equals(actionName)) {
                 destroy();
             } else if ("setEvictionStrategy".equals(actionName) && params.length == 5) {
-                setEvictionStrategy((Integer)params[0], (String)params[1],
-                        (Integer)params[2], (Integer)params[3], (Integer)params[4]);
+                setEvictionStrategy((Integer) params[0], (String) params[1],
+                        (Integer) params[2], (Integer) params[3], (Integer) params[4]);
             } else {
                 LOG.warn("Tried to call [" + actionName + "] which is not implemented!");
             }
