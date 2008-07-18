@@ -308,6 +308,8 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                     if (!StringUtils.isEmpty(_def)) {
                         try {
                             defaultValue = (FxValue) xStream.fromXML(_def);
+                            if( defaultValue != null && defaultValue.isEmpty() )
+                                defaultValue = null;
                         } catch (Exception e) {
                             defaultValue = null;
                             LOG.warn("Failed to unmarshall default value for propery " + name + ": " + e.getMessage(), e);
@@ -492,6 +494,8 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                         if (!StringUtils.isEmpty(_def) && CacheAdmin.isEnvironmentLoaded()) {
                             try {
                                 defaultValue = (FxValue) xStream.fromXML(_def);
+                                if( defaultValue != null && defaultValue.isEmpty() )
+                                    defaultValue = null;
                             } catch (Throwable e) {
                                 defaultValue = null;
                                 LOG.warn("Failed to unmarshall default value for assignment " + rs.getString(8) + ": " + e.getMessage(), e);

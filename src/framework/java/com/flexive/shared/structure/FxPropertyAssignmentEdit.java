@@ -69,6 +69,9 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
         if (pa.isSystemInternal())
             _setSystemInternal();
         this.isNew = false;
+        this.hasAssignmentDefaultValue = pa.hasAssignmentDefaultValue;
+        if (!pa.hasAssignmentDefaultValue())
+            this.defaultValue = null;
     }
 
 
@@ -87,7 +90,8 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
     private FxPropertyAssignmentEdit(FxPropertyAssignment pa, FxType type, String alias, String parentXPath, FxAssignment parent) throws FxNotFoundException, FxInvalidParameterException {
         super(-1, pa.isEnabled(), type, alias, XPathElement.buildXPath(false, parentXPath, alias), pa.getPosition(),
                 new FxMultiplicity(pa.getMultiplicity()), pa.getDefaultMultiplicity(), pa.getParentGroupAssignment(), pa.getId(), pa.getLabel().copy(),
-                pa.getHint().copy(), pa.getDefaultValue().copy(), pa.getProperty().asEditable(), new ACL(pa.getACL()), pa.getDefaultLanguage(), FxStructureOption.cloneOptions(pa.options));
+                pa.getHint().copy(), pa.getDefaultValue() == null ? null : pa.getDefaultValue().copy(),
+                pa.getProperty().asEditable(), new ACL(pa.getACL()), pa.getDefaultLanguage(), FxStructureOption.cloneOptions(pa.options));
         if (pa.isSystemInternal())
             _setSystemInternal();
         if (parent == null) {
@@ -96,6 +100,9 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
             if (parent != null && parent instanceof FxPropertyAssignment)
                 throw new FxInvalidParameterException("parentXPath", "ex.structure.assignment.noGroup", parentXPath);
         }
+        this.hasAssignmentDefaultValue = pa.hasAssignmentDefaultValue;
+        if (!pa.hasAssignmentDefaultValue())
+            this.defaultValue = null;
         //check parentXPath
         if (parent == null)
             parentGroupAssignment = null;
@@ -124,6 +131,14 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
         return isNew;
     }
 
+    /**
+     * Clear the default value
+     */
+    public void clearDefaultValue() {
+        this.hasAssignmentDefaultValue = false;
+        this.defaultValue = null;
+    }
+
     public FxPropertyAssignmentEdit setACL(ACL ACL) throws FxInvalidParameterException {
         if (!getProperty().mayOverrideACL())
             throw new FxInvalidParameterException("ACL", "ex.structure.override.property.forbidden", "ACL", getProperty().getName());
@@ -139,6 +154,7 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
      */
     public FxPropertyAssignmentEdit setDefaultValue(FxValue defaultValue) {
         this.defaultValue = defaultValue;
+        this.hasAssignmentDefaultValue = defaultValue != null;
         return this;
     }
 

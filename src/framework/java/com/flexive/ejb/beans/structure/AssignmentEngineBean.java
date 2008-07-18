@@ -32,8 +32,8 @@
 package com.flexive.ejb.beans.structure;
 
 import com.flexive.core.Database;
-import com.flexive.core.conversion.ConversionEngine;
 import static com.flexive.core.DatabaseConst.*;
+import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.structure.StructureLoader;
@@ -49,6 +49,7 @@ import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
+import com.flexive.shared.value.FxValue;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -121,7 +122,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             property.checkConsistency();
             //parentXPath is valid, create the property, then assign it to root
             newPropertyId = seq.getId(SequencerEngine.System.TYPEPROP);
-            final String _def = ConversionEngine.getXStream().toXML(property.getDefaultValue());
+            FxValue defValue = property.getDefaultValue();
+            final String _def = defValue == null || defValue.isEmpty() ? null : ConversionEngine.getXStream().toXML(defValue);
             con = Database.getDbConnection();
             //create property, no checks for existing names are performed as this is handled with unique keys
             sql.append("INSERT INTO ").append(TBL_STRUCT_PROPERTIES).
@@ -152,7 +154,10 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             else
                 ps.setNull(11, java.sql.Types.NUMERIC);
             ps.setInt(12, property.getUniqueMode().getId());
-            ps.setString(13, _def);
+            if (_def == null)
+                ps.setNull(13, java.sql.Types.VARCHAR);
+            else
+                ps.setString(13, _def);
             if (!property.isAutoUniquePropertyName())
                 ps.executeUpdate();
             else {
@@ -967,13 +972,13 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      * @param assignmentId the id of the assignment with the desired position
      * @param position     desired position
      * @return the position that "really" was assigned
-     * @throws FxUpdateException on errors
+     * @throws FxUpdateException           on errors
      * @throws FxInvalidParameterException if the position is too high
      */
     private int setAssignmentPosition(Connection con, long assignmentId, int position) throws FxUpdateException, FxInvalidParameterException {
         if (position < 0)
             position = 0;
-        if( position > FxAssignment.POSITION_BOTTOM )
+        if (position > FxAssignment.POSITION_BOTTOM)
             throw new FxInvalidParameterException("position", "ex.structure.assignment.pos.tooHigh", position, FxAssignment.POSITION_BOTTOM);
         PreparedStatement ps = null, ps2 = null;
         int retPosition = position;
@@ -1101,7 +1106,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 ps.setInt(8, position);
                 ps.setString(9, XPath);
                 ps.setString(10, group.getAlias());
-                if( group.getBaseAssignmentId() == FxAssignment.NO_BASE )
+                if (group.getBaseAssignmentId() == FxAssignment.NO_BASE)
                     ps.setNull(11, java.sql.Types.NUMERIC);
                 else
                     ps.setLong(11, group.getBaseAssignmentId());
@@ -1363,16 +1368,20 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     changes = true;
                 }
 
-                if(org.getDefaultValue() != null && !org.getDefaultValue().equals(prop.getDefaultValue()) ||
+                if (org.getDefaultValue() != null && !org.getDefaultValue().equals(prop.getDefaultValue()) ||
                         org.getDefaultValue() == null && prop.getDefaultValue() != null) {
                     if (changes)
                         changesDesc.append(',');
                     if (ps != null) ps.close();
-                        ps = con.prepareStatement("UPDATE " + TBL_STRUCT_PROPERTIES + " SET DEFAULT_VALUE=? WHERE ID=?");
-                        String _def = ConversionEngine.getXStream().toXML(prop.getDefaultValue());
+                    ps = con.prepareStatement("UPDATE " + TBL_STRUCT_PROPERTIES + " SET DEFAULT_VALUE=? WHERE ID=?");
+                    FxValue defValue = prop.getDefaultValue();
+                    final String _def = defValue == null || defValue.isEmpty() ? null : ConversionEngine.getXStream().toXML(defValue);
+                    if (_def == null)
+                        ps.setNull(1, java.sql.Types.VARCHAR);
+                    else
                         ps.setString(1, _def);
-                        ps.setLong(2, prop.getId());
-                        ps.executeUpdate();
+                    ps.setLong(2, prop.getId());
+                    ps.executeUpdate();
                     changesDesc.append("defaultValue=").append(prop.getDefaultValue());
                     changes = true;
                 }
@@ -1611,7 +1620,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 if (original.getLabel() != null && !original.getLabel().equals(modified.getLabel()) ||
                         original.getLabel() == null && modified.getLabel() != null ||
                         original.getHint() != null && !original.getHint().equals(modified.getHint()) ||
-                        original.getHint() == null && modified.getHint() != null ) {
+                        original.getHint() == null && modified.getHint() != null) {
                     Database.storeFxString(new FxString[]{modified.getLabel(), modified.getHint()}, con,
                             TBL_STRUCT_ASSIGNMENTS, new String[]{"DESCRIPTION", "HINT"}, "ID", original.getId());
                     if (changes)
@@ -1620,16 +1629,20 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     changesDesc.append("hint=").append(modified.getHint()).append(',');
                     changes = true;
                 }
-                if(original.getDefaultValue() != null && !original.getDefaultValue().equals(modified.getDefaultValue()) ||
+                if (original.getDefaultValue() != null && !original.getDefaultValue().equals(modified.getDefaultValue()) ||
                         original.getDefaultValue() == null && modified.getDefaultValue() != null) {
                     if (changes)
                         changesDesc.append(',');
                     if (ps != null) ps.close();
-                        ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET DEFAULT_VALUE=? WHERE ID=?");
-                        String _def = ConversionEngine.getXStream().toXML(modified.getDefaultValue());
+                    ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET DEFAULT_VALUE=? WHERE ID=?");
+                    FxValue defValue = modified.getDefaultValue();
+                    final String _def = defValue == null || defValue.isEmpty() ? null : ConversionEngine.getXStream().toXML(defValue);
+                    if (_def == null)
+                        ps.setNull(1, java.sql.Types.VARCHAR);
+                    else
                         ps.setString(1, _def);
-                        ps.setLong(2, original.getId());
-                        ps.executeUpdate();
+                    ps.setLong(2, original.getId());
+                    ps.executeUpdate();
                     changesDesc.append("defaultValue=").append(original.getDefaultValue());
                     changes = true;
                 }
@@ -1766,7 +1779,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 XPath = prop.getXPath();
             ps.setString(9, XPath);
             ps.setString(10, prop.getAlias());
-            if( prop.getBaseAssignmentId() == FxAssignment.NO_BASE )
+            if (prop.getBaseAssignmentId() == FxAssignment.NO_BASE)
                 ps.setNull(11, Types.NUMERIC);
             else
                 ps.setLong(11, prop.getBaseAssignmentId());
@@ -1775,7 +1788,12 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             ps.setLong(14, prop.getACL().getId());
             ps.setInt(15, prop.hasDefaultLanguage() ? (int) prop.getDefaultLanguage() : (int) FxLanguage.SYSTEM_ID);
             ps.setBoolean(16, prop.isSystemInternal());
-            ps.setString(17, ConversionEngine.getXStream().toXML(prop.getDefaultValue()));
+            FxValue defValue = prop.getDefaultValue();
+            final String _def = defValue == null || defValue.isEmpty() ? null : ConversionEngine.getXStream().toXML(defValue);
+            if (_def == null)
+                ps.setNull(17, java.sql.Types.VARCHAR);
+            else
+                ps.setString(17, _def);
             ps.executeUpdate();
             Database.storeFxString(new FxString[]{prop.getLabel(), prop.getHint()}, con,
                     TBL_STRUCT_ASSIGNMENTS, new String[]{"DESCRIPTION", "HINT"}, "ID", newAssignmentId);
@@ -1823,8 +1841,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     private int getValidPosition(Connection con, StringBuilder sql, int desiredPos, long typeId, FxGroupAssignment parentGroupAssignment) throws SQLException, FxCreateException {
         PreparedStatement ps = null;
         sql.setLength(0);
-        if( desiredPos >= FxAssignment.POSITION_BOTTOM ) {
-            sql.append("SELECT MAX(POS+1) FROM "+TBL_STRUCT_ASSIGNMENTS+" WHERE TYPEDEF=? AND PARENTGROUP=?");
+        if (desiredPos >= FxAssignment.POSITION_BOTTOM) {
+            sql.append("SELECT MAX(POS+1) FROM " + TBL_STRUCT_ASSIGNMENTS + " WHERE TYPEDEF=? AND PARENTGROUP=?");
             ps = con.prepareStatement(sql.toString());
             ps.setLong(1, typeId);
             ps.setLong(2, parentGroupAssignment == null ? FxAssignment.NO_PARENT : parentGroupAssignment.getId());

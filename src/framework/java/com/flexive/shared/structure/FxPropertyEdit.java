@@ -60,8 +60,9 @@ public class FxPropertyEdit extends FxProperty {
     public FxPropertyEdit(FxProperty prop) {
         super(prop.getId(), prop.getName(), prop.getLabel().copy(), prop.getHint().copy(), prop.isSystemInternal(),
                 prop.mayOverrideBaseMultiplicity(), new FxMultiplicity(prop.getMultiplicity()), prop.mayOverrideACL(), new ACL(prop.getACL()),
-                prop.getDataType(), prop.getDefaultValue().copy(), prop.isFulltextIndexed(), prop.getReferencedType(),
+                prop.getDataType(), null, prop.isFulltextIndexed(), prop.getReferencedType(),
                 prop.getReferencedList(), prop.getUniqueMode(), FxStructureOption.cloneOptions(prop.options));
+        this.defaultValue = prop.getDefaultValue();
         isNew = false;
     }
 

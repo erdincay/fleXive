@@ -41,8 +41,6 @@ import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
-import com.flexive.shared.value.FxSelectOne;
-import com.flexive.shared.value.FxSelectMany;
 
 import java.io.Serializable;
 import java.util.List;
@@ -69,6 +67,7 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
     protected FxValue defaultValue;
 
     protected long defaultLang;
+    protected boolean hasAssignmentDefaultValue;
 
     /**
      * Constructor
@@ -98,6 +97,7 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
         super(assignmentId, enabled, assignedType, alias, xpath, position, multiplicity, defaultMultiplicity, parentGroupAssignment,
                 baseAssignment, label, hint, options);
         this.defaultValue = defaultValue;
+        this.hasAssignmentDefaultValue = defaultValue != null;
         if (defaultValue == null)
             this.defaultValue = property.getDefaultValue().copy();
         this.property = property;
@@ -115,6 +115,15 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
      */
     public FxProperty getProperty() {
         return property;
+    }
+
+    /**
+     * Is an explicit default value set for this assignment or is it taken from the property?
+     *
+     * @return if an explicit default value set for this assignment or is it taken from the property
+     */
+    public boolean hasAssignmentDefaultValue() {
+        return hasAssignmentDefaultValue;
     }
 
     /**

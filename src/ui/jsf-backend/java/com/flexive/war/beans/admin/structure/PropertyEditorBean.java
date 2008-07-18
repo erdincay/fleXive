@@ -219,7 +219,7 @@ public class PropertyEditorBean implements ActionBean {
     }
 
     public boolean isDefaultValueSet() {
-        return assignment.getDefaultValue() !=null;
+        return assignment.hasAssignmentDefaultValue();
     }
 
     public void setDefaultValueSet(boolean setDefaultValue) {
@@ -228,7 +228,7 @@ public class PropertyEditorBean implements ActionBean {
             if (setDefaultValue)
                 assignment.setDefaultValue(assignment.getProperty().getEmptyValue());
             else
-                assignment.setDefaultValue(null);
+                assignment.clearDefaultValue();
     }
 
     public FxValue getDefaultValue() {

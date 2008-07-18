@@ -214,14 +214,28 @@ public class FxSelectOne extends FxValue<FxSelectListItem, FxSelectOne> implemen
      */
     public FxSelectList getSelectList() {
         if (list == null) {
-            if( this.isEmpty() )
+            if( this.isEmpty() ) {
+                //try to fetch a list for default values which are returned as empty values as well
+                if( this.isMultiLanguage() ) {
+                    for(FxSelectListItem item: this.translations.values()) {
+                        if( item != null && item.getList() != null ) {
+                            this.list = item.getList();
+                            return this.list;
+                        }
+                    }
+                } else {
+                    if( this.singleValue != null && this.singleValue.getList() != null ) {
+                        this.list = this.singleValue.getList();
+                        return this.list;
+                    }
+                }
                 return null;
-            if (this.isMultiLanguage()) {
-                list = this.getBestTranslation().getList();
+            } if (this.isMultiLanguage()) {
+                this.list = this.getBestTranslation().getList();
             } else
-                list = this.singleValue.getList();
+                this.list = this.singleValue.getList();
         }
-        return list;
+        return this.list;
     }
 
     /**
