@@ -76,21 +76,36 @@ public class SelectOneInputMapper extends InputMapper<FxLargeNumber, FxSelectOne
     @Override
     protected FxSelectOne doEncode(FxLargeNumber value) {
         if (value.isMultiLanguage()) {
-            throw new FxInvalidParameterException("VALUE", "ex.content.value.mapper.select.singleLanguage").asRuntimeException();
+            final FxSelectOne encoded = new FxSelectOne(value.getDefaultLanguage(), getSelectItem(value, value.getDefaultLanguage()));
+            for (long languageId : value.getTranslatedLanguages()) {
+                encoded.setTranslation(languageId, getSelectItem(value, languageId));
+            }
+            return encoded;
+        } else {
+            return new FxSelectOne(false, getSelectItem(value, -1));
         }
-        FxSelectListItem item;
+    }
+
+    private FxSelectListItem getSelectItem(FxLargeNumber value, long languageId) {
         try {
-            item = selectList.getItem(value.getDefaultTranslation());
+            return selectList.getItem(languageId != -1 ? value.getTranslation(languageId) : value.getDefaultTranslation());
         } catch (FxRuntimeException e) {
-            item = selectList.getItems().get(0);    // select first item as default
+            return selectList.getItems().get(0);    // select first item as default
         }
-        return new FxSelectOne(value.isMultiLanguage(), item);
     }
 
     /** {@inheritDoc} */
     @Override
     protected FxLargeNumber doDecode(FxSelectOne value) {
-        return new FxLargeNumber(value.isMultiLanguage(), value.getDefaultTranslation().getId());
+        if (value.isMultiLanguage()) {
+            final FxLargeNumber number = new FxLargeNumber(value.getDefaultLanguage(), value.getDefaultTranslation().getId());
+            for (long languageId : value.getTranslatedLanguages()) {
+                number.setTranslation(languageId, value.getTranslation(languageId).getId());
+            }
+            return number;
+        } else {
+            return new FxLargeNumber(value.isMultiLanguage(), value.getDefaultTranslation().getId());
+        }
     }
 
     /** {@inheritDoc} */

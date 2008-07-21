@@ -867,14 +867,14 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 if (translatedValue == null) {
                     java.lang.System.err.println("null!");
                 }
-                ps.setInt(pos_lang, value.getTranslatedLanguages()[i].intValue());
+                ps.setLong(pos_lang, value.getTranslatedLanguages()[i]);
                 if (!value.isMultiLanguage())
                     ps.setBoolean(pos_isdef_lang, true);
                 else
                     ps.setBoolean(pos_isdef_lang, value.isDefaultLanguage(value.getTranslatedLanguages()[i]));
                 if (upperColumn != null)
                     ps.setString(pos_value + 1, translatedValue.toString().toUpperCase());
-                ps_ft.setInt(insert ? FT_LANG_POS_INSERT : FT_LANG_POS_UPDATE, value.getTranslatedLanguages()[i].intValue());
+                ps_ft.setLong(insert ? FT_LANG_POS_INSERT : FT_LANG_POS_UPDATE, value.getTranslatedLanguages()[i]);
                 ps_ft.setString(insert ? FT_VALUE_POS_INSERT : FT_VALUE_POS_UPDATE, translatedValue.toString());
                 switch (prop.getDataType()) {
                     case Double:

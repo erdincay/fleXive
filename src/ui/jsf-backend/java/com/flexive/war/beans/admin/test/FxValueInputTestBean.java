@@ -34,11 +34,19 @@
 package com.flexive.war.beans.admin.test;
 
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.search.query.SqlQueryBuilder;
+import com.flexive.shared.search.FxResultSet;
+import com.flexive.shared.search.FxResultRow;
 import static com.flexive.shared.FxLanguage.ENGLISH;
 import static com.flexive.shared.FxLanguage.GERMAN;
 import com.flexive.shared.structure.FxSelectList;
 import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.value.*;
+import com.flexive.shared.value.mapper.InputMapper;
+import com.flexive.shared.value.mapper.FxPkSelectOneInputMapper;
+import com.flexive.shared.value.mapper.NumberQueryInputMapper;
+import com.flexive.shared.value.mapper.SelectOneInputMapper;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -73,8 +81,15 @@ public class FxValueInputTestBean {
 
     private FxValue stringValue = new FxString(false, "");
     private FxString userStringValue = new FxString(false, "");
+    private FxReference singleMappedValue = new FxReference(false, new ReferencedContent(-1)).setXPath("searchtest/referenceSearchProp").setEmpty();
+    private FxReference singleMappedValue2 = new FxReference(false, new ReferencedContent(-1)).setXPath("searchtest/referenceSearchProp").setEmpty();
+    private FxReference multiMappedValue = new FxReference(true, new ReferencedContent(-1)).setXPath("searchtest/referenceSearchProp").setEmpty();
+    private FxReference multiMappedValue2 = new FxReference(true, new ReferencedContent(-1)).setXPath("searchtest/referenceSearchProp").setEmpty();
+    private FxLargeNumber singleSelectValue = new FxLargeNumber(false, -1L).setEmpty();
+    private FxLargeNumber multiSelectValue = new FxLargeNumber(true, -1L).setEmpty();
     private List<ValueHolder> basicValues;
     private List<FxValue> basicValues2;
+    private InputMapper referenceInputMapper;
 
     public void submit() {
         // TODO: evaluate input values
@@ -140,5 +155,75 @@ public class FxValueInputTestBean {
 
     public void setUserStringValue(FxString userStringValue) {
         this.userStringValue = userStringValue;
+    }
+
+    public FxReference getSingleMappedValue() {
+        return singleMappedValue;
+    }
+
+    public void setSingleMappedValue(FxReference singleMappedValue) {
+        this.singleMappedValue = singleMappedValue;
+    }
+
+    public FxReference getMultiMappedValue() {
+        return multiMappedValue;
+    }
+
+    public void setMultiMappedValue(FxReference multiMappedValue) {
+        this.multiMappedValue = multiMappedValue;
+    }
+
+    public InputMapper getReferenceInputMapper() throws FxApplicationException {
+        if (referenceInputMapper == null) {
+            final FxResultSet result = new SqlQueryBuilder().select("@pk", "caption").maxRows(30).getResult();
+            final FxSelectList list = new FxSelectList("");
+            for (FxResultRow row : result.getResultRows()) {
+                new FxSelectListItem(row.getPk(1).getId(), row.getString(2), list, -1, (FxString) row.getFxValue(2));
+            }
+            referenceInputMapper = new FxPkSelectOneInputMapper(list);
+        }
+        return referenceInputMapper;
+    }
+
+    public InputMapper getNumberQueryInputMapper() {
+        return new NumberQueryInputMapper.ReferenceQueryInputMapper(
+                CacheAdmin.getEnvironment().getProperty("referenceSearchProp")
+        );
+    }
+
+    public FxReference getSingleMappedValue2() {
+        return singleMappedValue2;
+    }
+
+    public void setSingleMappedValue2(FxReference singleMappedValue2) {
+        this.singleMappedValue2 = singleMappedValue2;
+    }
+
+    public FxReference getMultiMappedValue2() {
+        return multiMappedValue2;
+    }
+
+    public void setMultiMappedValue2(FxReference multiMappedValue2) {
+        this.multiMappedValue2 = multiMappedValue2;
+    }
+
+    public FxLargeNumber getSingleSelectValue() {
+        return singleSelectValue;
+    }
+
+    public void setSingleSelectValue(FxLargeNumber singleSelectValue) {
+        this.singleSelectValue = singleSelectValue;
+    }
+
+    public FxLargeNumber getMultiSelectValue() {
+        return multiSelectValue;
+    }
+
+    public void setMultiSelectValue(FxLargeNumber multiSelectValue) {
+        this.multiSelectValue = multiSelectValue;
+    }
+
+    public InputMapper getSelectOneInputMapper() {
+        return new SelectOneInputMapper(CacheAdmin.getEnvironment().getSelectList(FxSelectList.COUNTRIES));
     }
 }

@@ -880,7 +880,15 @@ public class FxJsfUtils {
         }
 
         public int compare(SelectItem o1, SelectItem o2) {
-            return this.collator.compare(o1.getLabel(), o2.getLabel());
+            if (o1.getLabel() == null && o2.getLabel() != null) {
+                return -1;
+            } else if (o2.getLabel() == null && o1.getLabel() != null) {
+                return 1;
+            } else if (o1.getLabel() == null && o2.getLabel() == null) {
+                return 0;
+            } else {
+                return this.collator.compare(o1.getLabel(), o2.getLabel());
+            }
         }
     }
 

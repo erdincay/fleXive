@@ -36,8 +36,11 @@ package com.flexive.tests.embedded.jsf.util;
 import com.flexive.faces.FxJsfUtils;
 import org.testng.annotations.Test;
 
+import javax.faces.model.SelectItem;
+import java.util.Arrays;
+
 /**
- * Tests for the JsfUtils utility class.
+ * Tests for the FxJsfUtils utility class.
  * 
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  *
@@ -48,4 +51,19 @@ public class JsfUtilTest {
 	public void testEvalInt() {
 		assert FxJsfUtils.evalInt("3") == 3;
 	}
+
+    @Test
+    public void testSelectItemSorter() {
+        final SelectItem[] items = {
+                new SelectItem(null, null), // null value and label
+                new SelectItem(-1, null),
+                new SelectItem(-1, "b"),
+                new SelectItem(-1, "a")
+        };
+        Arrays.sort(items, new FxJsfUtils.SelectItemSorter());
+        assert items[0].getLabel() == null;
+        assert items[1].getLabel() == null;
+        assert "a".equals(items[2].getLabel());
+        assert "b".equals(items[3].getLabel());
+    }
 }

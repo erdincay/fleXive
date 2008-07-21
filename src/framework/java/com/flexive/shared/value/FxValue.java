@@ -67,7 +67,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     private int maxInputLength;
     private String XPath = "";
 
-    private final static Long[] SYSTEM_LANG_ARRAY = new Long[]{FxLanguage.SYSTEM_ID};
+    private final static long[] SYSTEM_LANG_ARRAY = new long[]{FxLanguage.SYSTEM_ID};
 
     /**
      * Data if <code>multiLanguage</code> is enabled
@@ -588,8 +588,8 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      *
      * @return languages for which translations exist
      */
-    public Long[] getTranslatedLanguages() {
-        return (multiLanguage ? translations.keySet().toArray(new Long[translations.keySet().size()]) : SYSTEM_LANG_ARRAY.clone());
+    public long[] getTranslatedLanguages() {
+        return (multiLanguage ? ArrayUtils.toPrimitive(translations.keySet().toArray(new Long[translations.keySet().size()])) : SYSTEM_LANG_ARRAY.clone());
     }
 
     /**

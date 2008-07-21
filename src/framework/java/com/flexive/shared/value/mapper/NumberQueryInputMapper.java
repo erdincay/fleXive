@@ -49,16 +49,30 @@ public abstract class NumberQueryInputMapper<T, BaseType extends FxValue<T, ?>> 
 
         @Override
         protected FxLargeNumber doDecode(FxString value) {
-            final String query = value.getDefaultTranslation();
-            Long result = null;
+            if (value.isMultiLanguage()) {
+                final FxLargeNumber decoded = new FxLargeNumber(value.getDefaultLanguage(), decodeQuery(value, value.getDefaultLanguage()));
+                for (long languageId : value.getTranslatedLanguages()) {
+                    final Long result = decodeQuery(value, languageId);
+                    if (result != null) {
+                        decoded.setTranslation(languageId, result);
+                    }
+                }
+                return decoded;
+            }
+            final Long result = decodeQuery(value, -1);
+            return result != null ? new FxLargeNumber(false, result) : new FxLargeNumber(false, FxLargeNumber.EMPTY).setEmpty();
+        }
+
+        private Long decodeQuery(FxString value, long languageId) {
+            final String query = languageId != -1 ? value.getTranslation(languageId) : value.getDefaultTranslation();
             if (StringUtils.isNotBlank(query)) {
                 try {
-                    result = EJBLookup.getAccountEngine().load(query).getId();
+                    return EJBLookup.getAccountEngine().load(query).getId();
                 } catch (FxApplicationException e) {
-                    // fail silently - reset input
+                    return null; // fail silently - reset input
                 }
             }
-            return result != null ? new FxLargeNumber(false, result) : new FxLargeNumber(false, FxLargeNumber.EMPTY).setEmpty();
+            return null;
         }
     }
 
@@ -72,6 +86,9 @@ public abstract class NumberQueryInputMapper<T, BaseType extends FxValue<T, ?>> 
         }
 
         public static ReferencedContent getReferencedContent(String query) {
+            if (StringUtils.isBlank(query)) {
+                return new ReferencedContent();
+            }
             final int sepIndex = query.indexOf(SEP_PK_CAPTION);
             if (sepIndex == -1) {
                 // not properly formatted, return a temporary reference that uses the entire query in the caption
@@ -83,7 +100,7 @@ public abstract class NumberQueryInputMapper<T, BaseType extends FxValue<T, ?>> 
 
         @Override
         public String encodeId(ReferencedContent rc) {
-            if (rc == null) {
+            if (rc == null || rc.getId() == -1) {
                 return "";
             }
             return rc.getId() + "." + rc.getVersion() + SEP_PK_CAPTION + rc.getCaption();
@@ -91,11 +108,17 @@ public abstract class NumberQueryInputMapper<T, BaseType extends FxValue<T, ?>> 
 
         @Override
         protected FxReference doDecode(FxString value) {
-            final String query = value.getDefaultTranslation();
-            if (StringUtils.isNotBlank(query)) {
+            if (value.isMultiLanguage()) {
+                final FxReference reference = new FxReference(value.getDefaultLanguage(),
+                        getReferencedContent(value.getDefaultTranslation()));
+                for (long languageId : value.getTranslatedLanguages()) {
+                    reference.setTranslation(languageId, getReferencedContent(value.getTranslation(languageId)));
+                }
+                return reference;
+            } else {
+                final String query = value.getDefaultTranslation();
                 return new FxReference(false, getReferencedContent(query));
             }
-            return new FxReference(false, new ReferencedContent()).setEmpty();
         }
     }
 
@@ -104,9 +127,14 @@ public abstract class NumberQueryInputMapper<T, BaseType extends FxValue<T, ?>> 
     @Override
     protected FxString doEncode(BaseType value) {
         if (value.isMultiLanguage()) {
-            throw new FxInvalidParameterException("VALUE", "ex.content.value.mapper.numberQuery.singleLanguage").asRuntimeException();
+            final FxString encoded = new FxString(value.getDefaultLanguage(), encodeId(value.isEmpty() ? null : value.getDefaultTranslation()));
+            for (long languageId : value.getTranslatedLanguages()) {
+                encoded.setTranslation(languageId, encodeId(value.getTranslation(languageId)));
+            }
+            return encoded;
+        } else {
+            return new FxString(false, encodeId(value.isEmpty() ? null : value.getDefaultTranslation()));
         }
-        return new FxString(value.isMultiLanguage(), encodeId(value.isEmpty() ? null : value.getDefaultTranslation()));
     }
 
     @Override

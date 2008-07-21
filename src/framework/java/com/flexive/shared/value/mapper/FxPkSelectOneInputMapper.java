@@ -32,7 +32,6 @@
 package com.flexive.shared.value.mapper;
 
 import com.flexive.shared.exceptions.FxInvalidParameterException;
-import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.search.query.ValueComparator;
 import com.flexive.shared.structure.FxDataType;
@@ -78,21 +77,40 @@ public class FxPkSelectOneInputMapper extends InputMapper<FxReference, FxSelectO
     @Override
     protected FxSelectOne doEncode(FxReference value) {
         if (value.isMultiLanguage()) {
-            throw new FxInvalidParameterException("VALUE", "ex.content.value.mapper.select.singleLanguage").asRuntimeException();
+            final FxSelectOne select = new FxSelectOne(value.getDefaultLanguage(), createSelectItem(value, value.getDefaultLanguage()));
+            for (long languageId: value.getTranslatedLanguages()) {
+                select.setTranslation(languageId, createSelectItem(value, languageId));
+            }
+            return select;
+        } else {
+            return new FxSelectOne(false, createSelectItem(value, -1));
         }
-        FxSelectListItem item;
-        try {
-            item = selectList.getItem(value.getDefaultTranslation().getId());
-        } catch (FxRuntimeException e) {
-            item = selectList.getItems().get(0);    // select first item as default
+    }
+
+    private FxSelectListItem createSelectItem(FxReference value, long languageId) {
+        final ReferencedContent translation = languageId != -1
+                ? value.getTranslation(languageId) : value.getDefaultTranslation();
+        if (translation == null) {
+            return defaultSelectItem();
+        } else {
+            return selectList.containsItem(translation.getId())
+                    ? selectList.getItem(translation.getId()) : defaultSelectItem();
         }
-        return new FxSelectOne(value.isMultiLanguage(), item);
     }
 
     /** {@inheritDoc} */
     @Override
     protected FxReference doDecode(FxSelectOne value) {
-        return new FxReference(new ReferencedContent(value.getDefaultTranslation().getId()));
+        if (value.isMultiLanguage()) {
+            final FxReference reference = new FxReference(value.getDefaultLanguage(),
+                    new ReferencedContent(value.getDefaultTranslation().getId()));
+            for (long languageId: value.getTranslatedLanguages()) {
+                reference.setTranslation(languageId, new ReferencedContent(value.getTranslation(languageId).getId()));
+            }
+            return reference;
+        } else {
+            return new FxReference(false, new ReferencedContent(value.getDefaultTranslation().getId()));
+        }
     }
 
     /** {@inheritDoc} */
@@ -100,4 +118,12 @@ public class FxPkSelectOneInputMapper extends InputMapper<FxReference, FxSelectO
     public List<? extends ValueComparator> getAvailableValueComparators() {
         return PropertyValueComparator.getAvailable(FxDataType.SelectOne);
     }
+
+    private FxSelectListItem defaultSelectItem() {
+        return selectList.getItems().isEmpty()
+                    ? new FxSelectListItem(-1, "", selectList, -1, new FxString(""))
+                : selectList.getItems().get(0);
+    }
+
+
 }

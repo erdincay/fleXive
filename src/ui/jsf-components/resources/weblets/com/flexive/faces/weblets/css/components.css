@@ -51,6 +51,10 @@ select.fxValueSelectInput, .fxValueInputElementWidth, input.fxValueTextInput, te
     width: 100%; /* don't force with !important because it breaks standalone inputs outside a fx:formRow */
 }
 
+.FxReferenceInput input {
+    width: 65% !important;     /* leave room for the browse references button, overrides yui-skin-sam autocomplete width */
+}
+
 .FxReferenceInput input.singleLanguage {
     width: 80% !important;     /* leave room for the browse references button, overrides yui-skin-sam autocomplete width */
 }

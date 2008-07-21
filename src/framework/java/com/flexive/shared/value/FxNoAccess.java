@@ -47,7 +47,7 @@ public final class FxNoAccess extends FxValue<Object, FxNoAccess> {
     private String noAccess;
     private String orgXPath;
     private long defaultLanguage;
-    private Long[] translatedLanguages;
+    private long[] translatedLanguages;
     private boolean empty;
     private boolean multilang;
     private Class valueClass;
@@ -136,7 +136,7 @@ public final class FxNoAccess extends FxValue<Object, FxNoAccess> {
      * {@inheritDoc}
      */
     @Override
-    public Long[] getTranslatedLanguages() {
+    public long[] getTranslatedLanguages() {
         return translatedLanguages;
     }
 
@@ -182,7 +182,7 @@ public final class FxNoAccess extends FxValue<Object, FxNoAccess> {
     public FxNoAccess copy() {
         FxNoAccess clone = new FxNoAccess(defaultLanguage, multilang);
         clone.defaultLanguage = this.defaultLanguage;
-        clone.translatedLanguages = new Long[translatedLanguages.length];
+        clone.translatedLanguages = new long[translatedLanguages.length];
         System.arraycopy(translatedLanguages, 0, clone.translatedLanguages, 0, translatedLanguages.length);
         clone.empty = this.empty;
         clone.multilang = this.multilang;

@@ -48,6 +48,32 @@
             <fx:fxValueInput value="#{fxValueInputTestBean.userStringValue}" autocompleteHandler="customHandler"/>
         </fx:formRow>
 
+        <h5>inputMapper</h5>
+        <fx:formRow label="Single-Language PK-select list input mapper">
+            <fx:fxValueInput value="#{fxValueInputTestBean.singleMappedValue}" inputMapper="#{fxValueInputTestBean.referenceInputMapper}"/>
+        </fx:formRow>
+
+        <fx:formRow label="Multi-Language PK-select list input mapper">
+            <fx:fxValueInput value="#{fxValueInputTestBean.multiMappedValue}" inputMapper="#{fxValueInputTestBean.referenceInputMapper}"/>
+        </fx:formRow>
+
+        <fx:formRow label="Single-Language select-one input mapper">
+            <fx:fxValueInput value="#{fxValueInputTestBean.singleSelectValue}" inputMapper="#{fxValueInputTestBean.selectOneInputMapper}"/>
+        </fx:formRow>
+
+        <fx:formRow label="Multi-Language select-one input mapper">
+            <fx:fxValueInput value="#{fxValueInputTestBean.multiSelectValue}" inputMapper="#{fxValueInputTestBean.selectOneInputMapper}"/>
+        </fx:formRow>
+
+        <h5>autocomplete + inputMapper</h5>
+        <fx:formRow label="Single-language, autocompleting ID handler">
+            <fx:fxValueInput value="#{fxValueInputTestBean.singleMappedValue2}" inputMapper="#{fxValueInputTestBean.numberQueryInputMapper}"/>
+        </fx:formRow>
+
+        <fx:formRow label="Multi-language, autocompleting ID handler">
+            <fx:fxValueInput value="#{fxValueInputTestBean.multiMappedValue2}" inputMapper="#{fxValueInputTestBean.numberQueryInputMapper}"/>
+        </fx:formRow>
+
         <h5>ui:repeat</h5>
         <table id="ui_repeat_basic">
             <ui:repeat var="holder" value="#{fxValueInputTestBean.basicValues}">
