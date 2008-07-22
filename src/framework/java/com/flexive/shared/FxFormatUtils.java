@@ -219,12 +219,8 @@ public final class FxFormatUtils {
         return sb.toString();
     }
 
-    public static String toString(Date date, Locale locale) {
-        return getGermanDateFormat().format(date);
-    }
-
-    public static Date toDate(String date, Locale locale) throws ParseException {
-        return getGermanDateFormat().parse(date);
+    public static String toString(Date date) {
+        return getDateFormat().format(date);
     }
 
     private static SimpleDateFormat getGermanDateFormat() {
@@ -583,8 +579,12 @@ public final class FxFormatUtils {
             try {
                 return getDateTimeFormat().parse(unquote(value));
             } catch (ParseException e) {
-                //fallback to universal format if "short" format is no match
-                return new SimpleDateFormat(UNIVERSAL_TIMEFORMAT).parse(unquote(value));
+                try {
+                    return getDateFormat().parse(unquote(value));
+                } catch (ParseException e2) {
+                    //fallback to universal format if "short" format is no match
+                    return new SimpleDateFormat(UNIVERSAL_TIMEFORMAT).parse(unquote(value));
+                }
             }
         } catch (Exception e) {
             throw new FxConversionException(e, "ex.conversion.value.error", FxDate.class.getCanonicalName(), value,

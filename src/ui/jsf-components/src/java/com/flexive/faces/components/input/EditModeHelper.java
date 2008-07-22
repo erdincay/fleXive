@@ -54,10 +54,8 @@ import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Renders an FxValueInput component in edit mode.
@@ -307,11 +305,50 @@ class EditModeHelper extends RenderHelper {
     }
 
     private void renderDateInput(UIComponent parent, String inputId, FxLanguage language) {
-        createInputDate(parent, inputId, language);
+        final Date date = value.isTranslationEmpty(language) ? null : (Date) value.getTranslation(language);
+
+        final HtmlInputText input = (HtmlInputText) FxJsfUtils.addChildComponent(parent, HtmlInputText.COMPONENT_TYPE);
+        input.setId(stripForm(inputId));
+        input.setSize(10);
+        input.setValue(date == null ? "" : FxFormatUtils.toString(date));
+
+        //createInputDate(parent, inputId, language);
+        final HtmlGraphicImage img = (HtmlGraphicImage) FxJsfUtils.addChildComponent(parent, HtmlGraphicImage.COMPONENT_TYPE);
+        img.setId("calendarButton_" + stripForm(inputId));
+        img.setUrl(FxJsfUtils.getWebletURL("com.flexive.faces.weblets", "/images/calendar.gif"));
+        img.setStyleClass("button");
+        
+        final YuiDateInputWriter diw = new YuiDateInputWriter();
+        diw.setInputClientId(inputId);
+        diw.setButtonId(img.getClientId(FacesContext.getCurrentInstance()));
+        diw.setDate(date);
+        parent.getChildren().add(diw);
     }
 
     private void renderDateTimeInput(UIComponent parent, String inputId, FxLanguage language) {
-        createInputDate(parent, inputId, language).setType("full");
+//        createInputDate(parent, inputId, language).setType("full");
+        renderDateInput(parent, inputId, language);
+
+        final Date date = value.isTranslationEmpty(language) ? null : (Date) value.getTranslation(language);
+        final Calendar cal = date != null ? Calendar.getInstance() : null;
+        if (cal != null) {
+            cal.setTime(date);
+        }
+        renderTimeInput(parent, inputId, "_hh", cal != null ? cal.get(Calendar.HOUR_OF_DAY) : -1);
+        renderLiteral(parent, ":");
+        renderTimeInput(parent, inputId, "_mm", cal != null ? cal.get(Calendar.MINUTE) : -1);
+        renderLiteral(parent, ":");
+        renderTimeInput(parent, inputId, "_ss", cal != null ? cal.get(Calendar.SECOND) : -1);
+    }
+
+    private void renderTimeInput(UIComponent parent, String inputId, String suffix, int value) {
+        final HtmlInputText input = (HtmlInputText) FxJsfUtils.addChildComponent(parent, HtmlInputText.COMPONENT_TYPE);
+        input.setId(stripForm(inputId) + suffix);
+        input.setSize(2);
+        input.setMaxlength(2);
+        if (value != -1) {
+            input.setValue(new Formatter().format("%02d", value));
+        }
     }
 
     @SuppressWarnings({"unchecked"})
@@ -396,6 +433,12 @@ class EditModeHelper extends RenderHelper {
         checkbox.setId(stripForm(inputId));
         checkbox.setValue(value.getTranslation(language));
         addHtmlAttributes(component, checkbox);
+    }
+
+    private HtmlOutputText renderLiteral(UIComponent parent, String value) {
+        HtmlOutputText output = (HtmlOutputText) FxJsfUtils.addChildComponent(parent, HtmlOutputText.COMPONENT_TYPE);
+        output.setValue(value);
+        return output;
     }
 
     private static String getTextValue(FxValue value, long languageId) {
@@ -796,6 +839,78 @@ class EditModeHelper extends RenderHelper {
             final Object[] state = (Object[]) stateValue;
             super.restoreState(context, state[0]);
             autocompleteHandler = (String) state[1];
+        }
+    }
+
+    public static class YuiDateInputWriter extends DeferredInputWriter {
+        private String buttonId;
+        private Date date;
+
+        public String getButtonId() {
+            return buttonId;
+        }
+
+        public void setButtonId(String buttonId) {
+            this.buttonId = buttonId;
+        }
+
+        public Date getDate() {
+            return date;
+        }
+
+        public void setDate(Date date) {
+            this.date = date;
+        }
+
+        @Override
+        public void encodeBegin(FacesContext facesContext) throws IOException {
+            final ResponseWriter out = facesContext.getResponseWriter();
+            final String containerId = "cal_" + inputClientId;
+            out.write("<div id=\"" + containerId + "\" class=\"popupCalendar\"> </div>\n");
+            FxJavascriptUtils.beginJavascript(out);
+            FxJavascriptUtils.writeYahooRequires(out, "calendar");
+            FxJavascriptUtils.onYahooLoaded(out,
+                    "function() {\n"
+                    + "    var button = document.getElementById('" + buttonId + "');\n"
+                    + "    var container = document.getElementById('" + containerId + "');\n"
+                    + "    var input = document.getElementById('" + inputClientId + "');\n"
+                    + "    var date = " + (date != null ? "'" + new SimpleDateFormat("M/d/yyyy").format(date) + "'" : "''") + ";\n"
+                    + "    var pdate = " + (date != null ? "'" + new SimpleDateFormat("M/yyyy").format(date) + "'" : "''") + ";\n"
+                    + "    var cal = new YAHOO.widget.Calendar('" + containerId + "', '" + containerId + "', \n"
+                    + "                  { navigator: true, close: true, title: '"
+                            + MessageBean.getInstance().getResource("FxValueInput.datepicker.title")
+                            + "', selected: date, pagedate: pdate });\n"
+                    + "    cal.selectEvent.subscribe(function(type, args, obj) {\n"
+                    + "             var date = args[0][0];\n"
+                            // YYYY/MM/DD
+                    + "             input.value = flexive.util.zeroPad(date[0], 4) + '-' "
+                    + " + flexive.util.zeroPad(date[1], 2) + '-' + flexive.util.zeroPad(date[2], 2);\n"
+                    + "             cal.hide();\n"
+                    + "         }, cal, true);\n"
+                    + "    cal.render();\n"
+                    + "    var Dom = YAHOO.util.Dom;\n"
+                    + "    YAHOO.util.Event.on('" + buttonId + "', 'click', \n"
+                    + "          function() { cal.show(); Dom.setXY(container, Dom.getXY(button)); }, cal, true);\n"
+                    + "}"
+            );
+            FxJavascriptUtils.endJavascript(out);
+        }
+
+        @Override
+        public Object saveState(FacesContext context) {
+            final Object[] state = new Object[3];
+            state[0] = super.saveState(context);
+            state[1] = buttonId;
+            state[2] = date;
+            return state;
+        }
+
+        @Override
+        public void restoreState(FacesContext context, Object stateValue) {
+            final Object[] state = (Object[]) stateValue;
+            super.restoreState(context, state[0]);
+            buttonId = (String) state[1];
+            date = (Date) state[2];
         }
     }
 }

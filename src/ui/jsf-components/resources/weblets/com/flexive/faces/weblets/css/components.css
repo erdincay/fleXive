@@ -32,12 +32,13 @@ div.FxHTMLInput div.fxValueInputRow {
 }
 
 /* Limit width of the month select list*/
-.FxDateInput select {
-    width: 90px;
-}
 
-.FxDateTimeInput select {
-    width: 80px;
+.FxDateInput .popupCalendar, .FxDateTimeInput .popupCalendar {
+    display: none;
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    z-index: 999;
 }
 
 select.fxValueSelectInput, .fxValueInputElementWidth, input.fxValueTextInput, textarea.fxValueTextArea  {
@@ -59,7 +60,7 @@ select.fxValueSelectInput, .fxValueInputElementWidth, input.fxValueTextInput, te
     width: 80% !important;     /* leave room for the browse references button, overrides yui-skin-sam autocomplete width */
 }
 
-input.fxValueTextInput, textarea.fxValueTextArea, textarea.fxValueTextAreaHtml, select.fxValueSelectInput {
+.fxValueInput input {
     border: 1px solid gray;
 }
 

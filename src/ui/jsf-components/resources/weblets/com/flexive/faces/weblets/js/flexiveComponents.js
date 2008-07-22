@@ -106,6 +106,20 @@ flexive.util = new function() {
         return this.JSON_RPC_CLIENT;
     }
 
+    /**
+     * Adds "zero padding" to a number, e.g.: flexive.util.zeroPad(51, 4) --> "0051"
+     *
+     * @param number    the number to be formatted
+     * @param count     the desired input width
+     */
+    this.zeroPad = function(number, count) {
+        var result = "" + number;
+        while (result.length < count) {
+            result = "0" + result;
+        }
+        return result;
+    }
+
 }
 
 // Yahoo UI (YUI) helper methods and classes

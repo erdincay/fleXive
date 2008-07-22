@@ -32,6 +32,11 @@
         function onMenu(a1, a2, a3) {
             alert("Menu clicked: " + flexive.yui.datatable.getPk(resultTable, this.contextEventTarget));
         }
+
+        flexive.yui.onYahooLoaded(function() {
+            //alert(YAHOO.util.Date.format(new Date(), { format: "YYYY/MM/DD" }));
+        })
+
         //-->
         </script>
 

@@ -246,7 +246,7 @@ public class Account extends AbstractSelectableObjectWithName implements Seriali
      * @return the valid from date of the user
      */
     public String getValidFromString() {
-        return FxFormatUtils.toString(this.validFrom, null);
+        return FxFormatUtils.toString(this.validFrom);
     }
 
     /**
@@ -258,7 +258,7 @@ public class Account extends AbstractSelectableObjectWithName implements Seriali
      * @return the valid to date of the user
      */
     public String getValidToString() {
-        return FxFormatUtils.toString(this.validTo, null);
+        return FxFormatUtils.toString(this.validTo);
     }
 
     /**

@@ -52,6 +52,7 @@ import org.apache.myfaces.custom.fileupload.UploadedFile;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIInput;
 import javax.faces.component.NamingContainer;
+import javax.faces.component.html.HtmlInputText;
 import javax.faces.context.FacesContext;
 import javax.faces.context.ResponseWriter;
 import javax.faces.render.Renderer;
@@ -60,6 +61,7 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Calendar;
 
 /**
  * Renderer for the FxValueInput component.
@@ -94,7 +96,7 @@ public class FxValueInputRenderer extends Renderer {
         FxValueInput component = (FxValueInput) input;
 
 //        if (component.calcConfigurationMask() != component.getConfigurationMask()) {
-            buildComponent(context, component);
+        buildComponent(context, component);
 //        }
     }
 
@@ -103,7 +105,7 @@ public class FxValueInputRenderer extends Renderer {
         final String clientId = component.getClientId(context);
         //noinspection unchecked
         final FxValue value = component.isReadOnly()
-                ? getFxValue(context, component) 
+                ? getFxValue(context, component)
                 : component.getInputMapper().encode(getFxValue(context, component));
         RenderHelper helper = component.isReadOnly()
                 ? new ReadOnlyModeHelper(component, clientId, value)
@@ -116,7 +118,7 @@ public class FxValueInputRenderer extends Renderer {
         if (!(value instanceof FxVoid)) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug(DBG + "Rendering " + (component.isReadOnly() ? "read only" : "editable")
-                    + " component " + clientId + " for value=" + value);
+                        + " component " + clientId + " for value=" + value);
             }
             try {
                 helper.render();
@@ -209,27 +211,6 @@ public class FxValueInputRenderer extends Renderer {
                 // remove all selected items
                 ((FxSelectMany) value).getTranslation(languageId).deselectAll();
             }
-        } else if (value instanceof FxDate || value instanceof FxDateTime) {
-            // get date value from dateinput child
-            //noinspection unchecked
-            final HtmlInputDate dateInput = (HtmlInputDate) input.findComponent(stripNamingContainers(inputId));
-            if (dateInput == null) {
-                throw new FxUpdateException(LOG, "ex.jsf.valueInput.date.input", inputId, value).asRuntimeException();
-            }
-            dateInput.processDecodes(context);
-            HtmlInputDate.UserData data = (HtmlInputDate.UserData) dateInput.getSubmittedValue();
-            if (data != null) {
-                try {
-                    final Date date = data.parse();
-                    if (date != null) {
-                        value.setTranslation(languageId, date);
-                    } else {
-                        value.setEmpty(languageId);
-                    }
-                } catch (ParseException e) {
-                    // keep old value
-                }
-            }
         } else if (value instanceof FxBinary) {
             final HtmlInputFileUpload upload = (HtmlInputFileUpload) input.findComponent(stripNamingContainers(inputId));
             if (upload != null) {
@@ -263,6 +244,24 @@ public class FxValueInputRenderer extends Renderer {
             } else {
                 value.removeLanguage(languageId);
             }
+
+            if (value instanceof FxDateTime && !value.isTranslationEmpty(languageId) && value.isValid()) {
+                // get additional time information
+                final String hours = (String) parameters.get(inputId + "_hh");
+                final String minutes = (String) parameters.get(inputId + "_mm");
+                final String seconds = (String) parameters.get(inputId + "_ss");
+                final Calendar cal = Calendar.getInstance();
+                final FxDateTime dateTime = (FxDateTime) value;
+                cal.setTime(dateTime.getTranslation(languageId));
+                try {
+                    cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(hours));
+                    cal.set(Calendar.MINUTE, Integer.parseInt(minutes));
+                    cal.set(Calendar.SECOND, Integer.parseInt(seconds));
+                } catch (NumberFormatException e) {
+                    // ignore invalid time
+                }
+                dateTime.setTranslation(languageId, cal.getTime());    
+            }
         }
     }
 
@@ -285,8 +284,8 @@ public class FxValueInputRenderer extends Renderer {
      * Strips all naming containers from our client ID (e.g. forms, iterator components).
      * This is usful for finding components by id within our FxValueInput component.
      *
-     * @param clientId  the client ID
-     * @return  the client ID without naming containers
+     * @param clientId the client ID
+     * @return the client ID without naming containers
      */
     private static String stripNamingContainers(String clientId) {
         return clientId.indexOf(NamingContainer.SEPARATOR_CHAR) != -1
