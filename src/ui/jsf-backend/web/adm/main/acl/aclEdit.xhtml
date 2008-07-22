@@ -33,7 +33,9 @@
         </fx:formRow>
 
         <fx:formRow label="#{fxMessageBean['ACL.field.color']}" id="color" >
-            <h:inputText id="color" value="#{aclBean.acl.color}"/>
+            <h:inputText id="color" value="#{aclBean.acl.color}" size="7">
+                <fx:colorPicker/>
+            </h:inputText>
         </fx:formRow>
 
         <fx:formRow label="#{fxMessageBean['ACL.field.category']}" id="category">

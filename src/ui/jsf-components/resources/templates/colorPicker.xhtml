@@ -1,0 +1,106 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:weblet="http://weblets.dev.java.net/tags_jsp2">
+
+A YUI-based color picker shown in a popup dialog. The color value will be written
+to the given form element (an input text or hidden input). The color-picker can be nested
+in a JSF input element (e.g. h:inputText).
+
+Parameters:
+    inputId - ID of the input element where the picked color value will be stored. If not set, the
+              parent component ID will be used.
+
+<ui:composition>
+    <div id="preview#{inputId}" class="colorPickerPreview">
+        <img src="#{weblet:url('com.flexive.faces.weblets', '/images/empty.gif')}" width="12" height="12"/>
+    </div>
+    <img id="show#{inputId}" src="#{weblet:url('com.flexive.faces.weblets', '/images/pickColor.png')}" class="button"
+            alt="#{fxMessageBean['ColorPicker.button.open']}" title="#{fxMessageBean['ColorPicker.button.open']}"/>
+
+    <div id="colorpickerpanel_#{inputId}" class="yui-picker-panel">
+        <div class="hd">#{fxMessageBean['ColorPicker.dialog.title']}</div>
+        <div class="bd">
+            <div id="colorpicker_#{inputId}" class="yui-picker"> </div>
+        </div>
+        <div class="ft"> </div>
+    </div>
+
+    <script type="text/javascript">
+    <!--
+        flexive.yui.require("colorpicker");
+        flexive.yui.require("container");
+        flexive.yui.onYahooLoaded(function() {
+            var buttonId = "show#{inputId}";
+            var panelId = "colorpickerpanel_#{inputId}";
+            var containerId = "colorpicker_#{inputId}";
+            var previewContainer = document.getElementById("preview#{inputId}");
+            var colorInput = document.getElementById("#{inputId}");
+            if (colorInput == null) {
+                YAHOO.log("Color input not found (id: #{inputId})", "warn");
+                return;
+            }
+            // create popup dialog
+            var dialog = new YAHOO.widget.Dialog(panelId, {
+                width: "500px",
+                fixedcenter: true,
+                visible: false,
+                buttons: [
+                    { text: "#{fxMessageBean['ColorPicker.button.submit']}",
+                      handler: function() {
+                                  if (this.hexColor) {
+                                      colorInput.value = "#" + this.hexColor;
+                                      previewContainer.style.backgroundColor = colorInput.value;
+                                  }
+                                  this.hide();
+                               },
+                      isDefault: true },
+                    { text: "#{fxMessageBean['ColorPicker.button.cancel']}",
+                      handler: function() { this.hide(); }
+                    }
+                ]
+            });
+            dialog.renderEvent.subscribe(function() {
+                if (!this.picker) {
+                    // create color picker
+                    this.picker = new YAHOO.widget.ColorPicker(containerId, {
+                        container: dialog,
+                        showhexcontrols: true,
+                        images: {
+	                        PICKER_THUMB: flexive.componentsWebletUrl + "js/yui/colorpicker/assets/picker_thumb.png",
+	                        HUE_THUMB: flexive.componentsWebletUrl + "js/yui/colorpicker/assets/hue_thumb.png"
+        	            }
+                    });
+                    // store RGB value in dialog on updates
+                    this.picker.on("rgbChange", function(o) {
+                        dialog.hexColor = YAHOO.util.Color.rgb2hex(o.newValue);
+                    });
+                    // initalize picker with form value
+                    if (colorInput.value.length > 0) {
+                        var value = colorInput.value;
+                        if (value.charAt(0) == "#") {
+                            value = value.substr(1);
+                        }
+                        this.picker.setValue(YAHOO.util.Color.hex2rgb(value), false);
+                    }
+                }
+            });
+            dialog.render();
+            YAHOO.util.Event.on(buttonId, "click", function() { dialog.show(); return false }, dialog, true);
+            if (colorInput.value.length > 0) {
+                // initialize color preview
+                previewContainer.style.backgroundColor = colorInput.value;
+            }
+        });
+    //-->
+    </script>
+</ui:composition>
+
+
+</html>

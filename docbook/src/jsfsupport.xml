@@ -1407,6 +1407,71 @@
                 </section>
             </section>
 
+            <section xml:id="jcl_fx_colorpicker">
+                <title>
+                    <code language="xhtml">&lt;fx:colorPicker></code>
+                </title>
+
+                <para>
+                    A color picker based on &yui;, shown in a popup dialog. The color value will be written
+                    to the given form element (a text or hidden input element). The color picker can be nested
+                    directly in a JSF input element (e.g. h:inputText). In this case it will be rendered directly
+                    before the actual input element.
+                </para>
+
+                <section xml:id="jcl_fx_colorpicker_synopsis">
+                    <title>Synopsis</title>
+                    <programlisting language="xhtml"><![CDATA[<fx:colorPicker [inputId="name"]/>
+]]></programlisting>
+                </section>
+
+                <section xml:id="jcl_fx_colorpicker_parameters">
+                    <title>Parameters</title>
+                    <variablelist>
+                        <varlistentry>
+                            <term>inputId</term>
+                            <listitem>
+                                <para>
+                                    ID of the input element where the picked color value will be stored. If not set, the
+                                    parent component ID will be used.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </section>
+
+                <section xml:id="jcl_fx_colorpicker_examples">
+                    <title>Examples</title>
+                    <example xml:id="jcl_fx_colorpicker_examples_nested">
+                        <title>Using the color picker with a JSF input component</title>
+
+                        <para>
+                            In this example, an existing JSF text input component will be augmented
+                            with a color picker.
+                        </para>
+
+                        <programlisting language="xhtml"><![CDATA[<h:inputText id="color" value="#{myBean.color}" size="7">
+    <fx:colorPicker/>
+</h:inputText>
+]]></programlisting>
+                    </example>
+
+                    <example xml:id="jcl_fx_colorpicker_examples_standalone">
+                        <title>Using the color picker for a form input</title>
+
+                        <para>
+                            The color picker can be used "stand-alone" for any text-based form input.
+                            To do so, just set the form input element ID with the
+                            <parameter>inputId</parameter>
+                            parameter.
+                        </para>
+
+                        <programlisting language="xhtml"><![CDATA[<input type="text" id="myinput" size="7"/>
+<fx:colorPicker inputId="myinput"/>]]></programlisting>
+                    </example>
+                </section>
+            </section>
+
 
         </section>
 

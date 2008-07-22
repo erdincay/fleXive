@@ -84,8 +84,10 @@
                                         <f:selectItems value="#{selectListBean.selectListItemACLs}"/>
                                     </t:selectOneListbox>
                                 </td>
-                                <td align="left"><h:inputText id="itemColor_#{selectListBean.idMap[item.id]}" value="#{item.color}"
-                                        disabled="#{not (fxSystemBean.isInRole['SelectListEditor'] or selectListBean.mayEditItem[item])}"/></td>
+                                <td align="left" nowrap="nowrap">
+                                    <h:inputText size="7" id="itemColor_#{selectListBean.idMap[item.id]}" value="#{item.color}"
+                                        disabled="#{not (fxSystemBean.isInRole['SelectListEditor'] or selectListBean.mayEditItem[item])}"/>
+                                </td>
                                 <td align="left">
                                     <c:if test="#{selectListBean.mayDeleteItems}">
                                         <adm:commandButton labelKey="SelectList.button.delete" location="content"
@@ -107,7 +109,11 @@
                                         <f:selectItems value="#{selectListBean.selectListItemACLs}" />
                                     </t:selectOneListbox>
                                 </td>
-                                <td align="left"><h:inputText id="newItemColor" value="#{selectListBean.itemColor}"/></td>
+                                <td align="left">
+                                    <h:inputText size="7" id="newItemColor" value="#{selectListBean.itemColor}">
+                                        <fx:colorPicker/>
+                                    </h:inputText>
+                                </td>
                                 <td align="left">
                                     <adm:commandButton labelKey="SelectList.button.add" location="content"
                                                     icon="new"  bean="#{selectListBean}" action="addListItem" id="addButton">

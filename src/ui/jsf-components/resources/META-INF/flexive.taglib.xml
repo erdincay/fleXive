@@ -55,6 +55,10 @@
         <source>../templates/yuiSetup.xhtml</source>
     </tag>
     <tag>
+        <tag-name>colorPicker</tag-name>
+       <handler-class>com.flexive.faces.components.ColorPickerHandler</handler-class>
+    </tag>
+    <tag>
         <tag-name>includes</tag-name>
         <component>
             <component-type>flexive.WriteWebletIncludes</component-type>
