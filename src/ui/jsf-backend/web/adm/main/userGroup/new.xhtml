@@ -32,7 +32,9 @@
             </fx:formRow>
 
             <fx:formRow label="#{fxMessageBean['UserGroup.field.color']}" id="color">
-                <h:inputText id="color" value="#{userGroupBean.color}" />
+                <h:inputText id="color" value="#{userGroupBean.color}" size="7">
+                    <fx:colorPicker/>
+                </h:inputText>
             </fx:formRow>
 
             <fx:formRow label="#{fxMessageBean['UserGroup.field.roles']}" id="roles" height="95">

@@ -31,7 +31,9 @@
                 </fx:formRow>
             </ui:fragment>
             <fx:formRow label="#{fxMessageBean['UserGroup.field.color']}" id="color">
-                <h:inputText id="color" value="#{userGroupBean.color}" />
+                <h:inputText size="7" id="color" value="#{userGroupBean.color}">
+                    <fx:colorPicker/>
+                </h:inputText>
             </fx:formRow>
 
             <fx:formRow label="#{fxMessageBean['UserGroup.field.roles']}" id="roles" height="95">

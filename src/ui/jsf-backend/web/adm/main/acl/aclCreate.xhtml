@@ -31,7 +31,9 @@
             </fx:formRow>
 
             <fx:formRow label="Color" id="color" >
-                <h:inputText id="color" value="#{aclBean.acl.color}"/>
+                <h:inputText id="color" value="#{aclBean.acl.color}" size="7">
+                    <fx:colorPicker/>
+                </h:inputText>
             </fx:formRow>
 
             <fx:formRow label="Category" id="category">
