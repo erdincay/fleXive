@@ -39,7 +39,7 @@ import com.flexive.shared.security.UserTicket;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
-public interface FxRequest {
+public interface FxRequest extends HttpServletRequest {
 
     // All recognized browsers
     enum Browser {
@@ -80,18 +80,6 @@ public interface FxRequest {
      */
     int getDivisionId();
 
-    public long getNodeId();
-
-    public long[] getIdChain();
-
-
-    /**
-     * Returns true if the given tree node id is part of the called url.
-     *
-     * @param nodeId the node to check for
-     * @return true if the given tree node id is active
-     */
-    public boolean treeNodeIsActive(long nodeId);
 
     /**
      * Returns the operating system that generated the request.
@@ -114,96 +102,7 @@ public interface FxRequest {
      */
     String getRequestURIWithoutContext();
 
-    /**
-     * Tries to login a user.
-     * <p/>
-     * The next getUserTicket() call will return the new ticket.
-     *
-     * @param username the unique user name
-     * @param password the password
-     * @param takeOver the take over flag
-     * @throws com.flexive.shared.exceptions.FxLoginFailedException
-     *          if the login failed
-     * @throws com.flexive.shared.exceptions.FxAccountInUseException
-     *          if take over was false and the account is in use
-     */
-    void login(String username, String password, boolean takeOver)
-            throws FxLoginFailedException, FxAccountInUseException;
-
-
-    /**
-     * Returns true if this request references the content editor.
-     *
-     * @return true if this request references the content editor
-     */
-    public boolean isContentEditor();
-
-    /**
-     * Returns true if this request references the inline content editor.
-     *
-     * @return true if this request references the inline content editor.
-     */
-    public boolean isInlineContentEditor();
-
-    public String getCharacterEncoding();
-
-    public Map getParameterMap();
-
-
-    /**
-     * Logout of the current user.
-     *
-     * @throws com.flexive.shared.exceptions.FxLogoutFailedException
-     *          -
-     */
-    void logout() throws FxLogoutFailedException;
-
-    public String getRequestURI();
-
-    public StringBuffer getRequestURL();
-
     boolean isWebDavMethod();
 
     boolean isDynamicContent();
-
-    public void setAttribute(String string, Object object);
-
-    public Object getAttribute(String string);
-
-    public void removeAttribute(String string);
-
-    String getServletPath();
-
-    javax.servlet.http.HttpSession getSession(boolean b);
-
-    javax.servlet.http.HttpSession getSession();
-
-    String getContextPath();
-
-    // --
-    String getAuthType();
-
-    String getMethod();
-
-    String getPathInfo();
-
-    String getQueryString();
-
-    String getRemoteUser();  // TODO
-
-    boolean isUserInRole(String string); // TODO
-
-    java.security.Principal getUserPrincipal(); // TODO
-
-    String getRequestedSessionId();
-
-    boolean isRequestedSessionIdValid();
-
-    boolean isRequestedSessionIdFromCookie();
-
-    boolean isRequestedSessionIdFromURL();
-
-    boolean isRequestedSessionIdFromUrl();
-
-    String getRemoteHost();
 }

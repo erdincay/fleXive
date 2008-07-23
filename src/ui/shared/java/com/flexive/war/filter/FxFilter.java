@@ -34,9 +34,8 @@ package com.flexive.war.filter;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.configuration.DivisionData;
-import com.flexive.shared.security.Role;
-import com.flexive.shared.security.UserTicket;
 import com.flexive.war.webdav.FxWebDavUtils;
 import com.metaparadigm.jsonrpc.JSONRPCBridge;
 import org.apache.commons.lang.StringUtils;
@@ -49,17 +48,28 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
+/**
+ * The main [fleXive] servlet filter. Its main responsibility is to provide the
+ * {@link FxContext} instance for the current request, which can be retrieved with
+ * {@link com.flexive.shared.FxContext#get()} any time during a request made through FxFilter.
+ *
+ * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ *
+ * @version $Rev$
+ */
 public class FxFilter implements Filter {
     private static final Log LOG = LogFactory.getLog(FxFilter.class);
 
     private static final String CATALINA_CLIENT_ABORT = "org.apache.catalina.connector.ClientAbortException";
+    private static final String X_POWERED_BY_VALUE = "[fleXive]";
+    private static final String SESSION_JSON_BRIDGE = "JSONRPCBridge";
+    private static final String SESSION_JSON_JSF = "FxFilter_JSON_JSF";
+
+    private static volatile boolean installedTimerService = false;
 
     private String FILESYSTEM_WAR_ROOT = null;
     private FilterConfig config = null;
-    private static final String X_POWERED_BY_VALUE = "[fleXive]";
-    private static volatile boolean installedTimerService = false;
-    public static final String SESSION_JSON_BRIDGE = "JSONRPCBridge";
-    private static final String SESSION_JSON_JSF = "FxFilter_JSON_JSF";
 
     /**
      * Returns the root of the war directory on the filesystem.
@@ -70,22 +80,14 @@ public class FxFilter implements Filter {
         return FILESYSTEM_WAR_ROOT;
     }
 
-
-    /**
-     * Returns the filter configuration.
-     *
-     * @return the filter configuration
-     */
-    public FilterConfig getConfiguration() {
-        return config;
+    public void init(FilterConfig filterConfig) throws ServletException {
+        this.config = filterConfig;
+        // Get the war deployment directory root on the server file system
+        // Eg. "/opt/jboss-4.0.3RC1/server/default/./tmp/deploy/tmp52986Demo.ear-contents/web.war/"
+        this.FILESYSTEM_WAR_ROOT = filterConfig.getServletContext().getRealPath("/");
     }
 
-    /**
-     * Destroy function
-     */
     public void destroy() {
-        // nothing to do
-
     }
 
 
@@ -113,29 +115,16 @@ public class FxFilter implements Filter {
                     : new FxRequestWrapper((HttpServletRequest) servletRequest, divisionId, isWebdav);
             request.setCharacterEncoding("UTF-8");
 
-            final FxContext si = FxContext.storeInfos(request, request.isDynamicContent(), divisionId, isWebdav);
+            // create thread-local FxContext variable for the current user
+            FxContext.storeInfos(request, request.isDynamicContent(), divisionId, isWebdav);
 
-            if (!installedTimerService) {
-                synchronized(FxFilter.class) {
-                    installedTimerService = EJBLookup.getTimerService().isInstalled();
-                    if (!installedTimerService) {
-                        EJBLookup.getTimerService().install(true);
-                        installedTimerService = true;
-                    }
-                }
-            }
+            initializeTimerService();
             initializeJsonRpc(request.getSession());
 
             if (!isWebdav && FxWebDavUtils.isWebDavPropertyMethod((HttpServletRequest) servletRequest)) {
                 // This is an invalid webdav request - send a not allowed flag and kill the session immediatly
                 ((HttpServletResponse) servletResponse).sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
                 ((HttpServletRequest) servletRequest).getSession().invalidate();
-                return;
-            }
-
-            // Servlets are not handled by the flex filter, so we abort processing here
-            if (request.isServlet()) {
-                filterChain.doFilter(request, new FxResponseWrapper(servletResponse, false));
                 return;
             }
 
@@ -154,34 +143,15 @@ public class FxFilter implements Filter {
                             ? (FxResponseWrapper) servletResponse
                             : new FxResponseWrapper(servletResponse, cacheData);
 
-            // resolve standard application request
-            if (needsLogin(request, si)) {
-                if (request.isSetupURL()) {
-                    request.forward(response, "/" + FxRequestWrapper.PATH_SETUP + "/globalconfig.fx?action=showLogin");
-                } else {
-                    final String loginPath = "/" + FxRequestWrapper.PATH_PUBLIC + "/login.jsf";
-                    if (!loginPath.equals(request.getRealRequestUriNoContext()))
-                        request.forward(response, loginPath);
-                    else {
-                        final String msg = "Multiple redirects attempted to " + loginPath;
-                        LOG.warn(msg);
-                        response.sendError(HttpServletResponse.SC_NOT_FOUND, msg);
-                    }
-                }
-            } else if (restrictBackendAccess(request, si)) {
-                //user is in backend but may not access it
-                request.forward(response, "/" + FxRequestWrapper.PATH_PUBLIC + "/backendRestricted.jsf");
-            } else {
-                try {
-                    filterChain.doFilter(request, response);
-                } catch (ServletException e) {
-                    LOG.error(e, e.getRootCause());
-                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getRootCause());
-                } catch (Throwable t) {
-                    // Failed to process the page
-                    LOG.error(t, t);
-                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t);
-                }
+            try {
+                filterChain.doFilter(request, response);
+            } catch (ServletException e) {
+                LOG.error(e, e.getRootCause());
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getRootCause());
+            } catch (Throwable t) {
+                // Failed to process the page
+                LOG.error(t, t);
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t);
             }
             try {
                 if ("faces".equals(request.getPageType()) || "jsf".equals(request.getPageType()) || "xhtml".equals(request.getPageType())
@@ -193,7 +163,7 @@ public class FxFilter implements Filter {
                 }
 
                 response.setXPoweredBy(X_POWERED_BY_VALUE);
-                if (request.browserMayCache()) {
+                if (!request.isDynamicContent()) {
                     response.enableBrowserCache(FxResponseWrapper.CacheControl.PRIVATE, null, false);
                 } else {
                     response.disableBrowserCache();
@@ -202,38 +172,53 @@ public class FxFilter implements Filter {
                 if (!response.isClientWriteThrough()) {
                     // Manually write the final response to the client
                     if (response.hadError()) {
-                        response.getWrappedResponse().reset();
-                        response.disableBrowserCache();
-                        String error = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\" >\n" +
-                                "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n" +
-                                "<head>\n" +
-                                "<title>[fleXive] Error Report</title>\n" +
-                                //(js==null?"":js)+
-                                "</head>\n" +
-                                "<body style=\"background-color:white;\">\n" +
-                                "<h1 style=\"color:red;\"> Error Code: " + response.getStatus() + "</h1><br/>" +
-                                response.getStatusMsg().replaceAll("\n", "<br/>") + "\n" +
-                                "</body>\n" +
-                                "</html>";
-                        response.writeToUnderlyingResponse(error);
+                        writeErrorPage(response);
                     } else {
                         response.writeToUnderlyingResponse(null);
                     }
                 } else {
                     // nothing
                 }
-//            } catch (org.apache.catalina.connector.ClientAbortException e) {
-//                LOG.debug("Client aborted transfer: " + e);
             } catch (Exception e) {
                 if (CATALINA_CLIENT_ABORT.equals(e.getClass().getCanonicalName())) {
-                    LOG.debug("Client aborted transfer: " + e);
-                } else
+                    LOG.debug("Client aborted transfer: " + e.getMessage(), e);
+                } else {
                     LOG.error("FxFilter caught exception: " + e.getMessage(), e);
+                }
             }
         } finally {
             FxContext.cleanup();
         }
 
+    }
+
+    private void writeErrorPage(FxResponseWrapper response) throws IOException, FxApplicationException {
+        response.getWrappedResponse().reset();
+        response.disableBrowserCache();
+        final String error = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\" >\n" +
+                "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n" +
+                "<head>\n" +
+                "<title>[fleXive] Error Report</title>\n" +
+                //(js==null?"":js)+
+                "</head>\n" +
+                "<body style=\"background-color:white;\">\n" +
+                "<h1 style=\"color:red;\"> Error Code: " + response.getStatus() + "</h1><br/>" +
+                response.getStatusMsg().replaceAll("\n", "<br/>") + "\n" +
+                "</body>\n" +
+                "</html>";
+        response.writeToUnderlyingResponse(error);
+    }
+
+    private void initializeTimerService() {
+        if (!installedTimerService) {
+            synchronized(FxFilter.class) {
+                installedTimerService = EJBLookup.getTimerService().isInstalled();
+                if (!installedTimerService) {
+                    EJBLookup.getTimerService().install(true);
+                    installedTimerService = true;
+                }
+            }
+        }
     }
 
     private void initializeJsonRpc(HttpSession session) {
@@ -243,7 +228,7 @@ public class FxFilter implements Filter {
                 session.setAttribute(SESSION_JSON_JSF, true);
                 final JSONRPCBridge bridge = getJsonRpcBridge(session, true);
                 registerJsonRpcObjects(bridge);
-                session.setAttribute(SESSION_JSON_BRIDGE, bridge);
+                setJsonRpcBridge(session, bridge);
             }
         }
     }
@@ -280,10 +265,36 @@ public class FxFilter implements Filter {
         }
     }
 
+    /**
+     * Retrieves the JSON-RPC-Bridge of the current session. The RPC-Bridge holds all objects accessible
+     * via JSON-RPC-Java for the current session.
+     *
+     * @param session   the user HTTP session
+     * @param force     if true and no JSON-RPC-Bridge is set in the session, a new one will be created.
+     *                  Note that you have to store the newly created bridge with a call to
+     *                  {@link #setJsonRpcBridge(javax.servlet.http.HttpSession, com.metaparadigm.jsonrpc.JSONRPCBridge)}
+     *                  if you want to make it available in the user session.
+     * @return  the JSON-RPC-Bridge of the current session
+     */
     public static JSONRPCBridge getJsonRpcBridge(HttpSession session, boolean force) {
-        return session.getAttribute(SESSION_JSON_BRIDGE) != null || !force
-                ? (JSONRPCBridge) session.getAttribute(SESSION_JSON_BRIDGE)
-                : new JSONRPCBridge();
+        synchronized(session) {
+            return session.getAttribute(SESSION_JSON_BRIDGE) != null || !force
+                    ? (JSONRPCBridge) session.getAttribute(SESSION_JSON_BRIDGE)
+                    : new JSONRPCBridge();
+        }
+    }
+
+    /**
+     * Sets the JSON-RPC-Bridge for the current session. The RPC-Bridge holds all objects accessible
+     * via JSON-RPC-Java for the current session.
+     *
+     * @param session   the HTTP session
+     * @param bridge    the bridge to be stored
+     */
+    public static void setJsonRpcBridge(HttpSession session, JSONRPCBridge bridge) {
+        synchronized(session) {
+            session.setAttribute(SESSION_JSON_BRIDGE, bridge);
+        }
     }
 
     private int getDivisionId(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException {
@@ -299,57 +310,6 @@ public class FxFilter implements Filter {
                     sendError(HttpServletResponse.SC_NOT_FOUND, "Division not defined or configuration error");
         }
         return divisionId;
-    }
-
-    /**
-     * Init function.
-     *
-     * @param filterConfig -
-     * @throws ServletException -
-     */
-    public void init(FilterConfig filterConfig) throws ServletException {
-        // Remember the configuration
-        this.config = filterConfig;
-        // Get the war deployment directory root on the server file system
-        // Eg. "/opt/jboss-4.0.3RC1/server/default/./tmp/deploy/tmp52986Demo.ear-contents/web.war/"
-        this.FILESYSTEM_WAR_ROOT = filterConfig.getServletContext().getRealPath("/");
-    }
-
-    /**
-     * Returns true if the path within the request does not need an forward processing.
-     *
-     * @param si      the request information
-     * @param request the request
-     * @return true if the path within the request does not need an forward processing
-     */
-    private static boolean needsLogin(final FxRequestWrapper request, final FxContext si) {
-        UserTicket ticket = si.getTicket();
-        if (!ticket.isGuest())
-            return false;
-        boolean inAdminArea = request.isAdminURL() && !request.isServletRedirectorURL();
-        if (inAdminArea)
-            return true;
-        boolean inSetupArea = request.isSetupURL() && request.getSession().getAttribute(FxContext.ADMIN_AUTHENTICATED) == null
-                && !"login".equals(request.getParameter("action"));
-        if (inSetupArea)
-            return true;
-        // TODO config admin: use clean routine
-        return false;
-    }
-
-    /**
-     * Should access to the backend be restricted?
-     *
-     * @param si      the request information
-     * @param request the request
-     * @return true if access should be restricted
-     */
-    private static boolean restrictBackendAccess(final FxRequestWrapper request, final FxContext si) {
-        UserTicket ticket = si.getTicket();
-        /*if( ticket.isGuest() )
-            return true;*/
-        boolean inAdminArea = request.isAdminURL() && !request.isServletRedirectorURL();
-        return inAdminArea && !ticket.isInRole(Role.BackendAccess);
     }
 
 }

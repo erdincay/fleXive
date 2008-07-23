@@ -33,6 +33,7 @@ package com.flexive.war.servlet;
 
 import com.flexive.war.filter.FxRequestWrapper;
 import com.flexive.war.webdav.FxWebDavServlet;
+import com.flexive.shared.FxContext;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -40,7 +41,7 @@ public class WebDavCfgServlet extends FxWebDavServlet {
 
     protected boolean login(HttpServletRequest request, String username, String password) {
         try {
-            ((FxRequestWrapper) request).login(username, password, true);
+            FxContext.get().login(username, password, true);
             return true;
         } catch (Exception exc) {
             return false;

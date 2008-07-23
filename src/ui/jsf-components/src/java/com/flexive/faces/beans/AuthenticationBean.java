@@ -84,7 +84,7 @@ public class AuthenticationBean implements Serializable {
     public String login() {
         try {
             FxRequest request = FxJsfUtils.getRequest();
-            request.login(username, password, takeover);
+            FxContext.get().login(username, password, takeover);
             request.getUserTicket();
             return "loginSuccess";
         } catch (Exception exc) {
@@ -95,8 +95,7 @@ public class AuthenticationBean implements Serializable {
 
     public String logout() {
         try {
-            FxRequest request = FxJsfUtils.getRequest();
-            request.logout();
+            FxContext.get().logout();
             FxJsfUtils.getSession().invalidate();
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();

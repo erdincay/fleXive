@@ -118,9 +118,19 @@
         <filter-class>com.flexive.war.filter.FxFilter</filter-class>
     </filter>
 
+    <filter>
+        <filter-name>BackendAuthorizationFilter</filter-name>
+        <filter-class>com.flexive.war.filter.BackendAuthorizationFilter</filter-class>
+    </filter>
+
     <filter-mapping>
         <filter-name>FlexFilter</filter-name>
         <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>BackendAuthorizationFilter</filter-name>
+        <url-pattern>/adm/*</url-pattern>
     </filter-mapping>
 
     <filter>

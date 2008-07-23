@@ -68,7 +68,7 @@ public class JsonRpcCallRenderer extends Renderer {
         }
         String jsonRequest = getJsonRequest(rpcCall);
         try {
-            JSONRPCBridge bridge = (JSONRPCBridge) FxJsfUtils.getSession().getAttribute(FxFilter.SESSION_JSON_BRIDGE);
+            JSONRPCBridge bridge = FxFilter.getJsonRpcBridge(FxJsfUtils.getSession(), true);
             JSONRPCResult result = bridge.call(new Object[]{FxJsfUtils.getRequest()}, new JSONObject(jsonRequest));
             facesContext.getResponseWriter().write(result.getResult().toString());
         } catch (Throwable e) {

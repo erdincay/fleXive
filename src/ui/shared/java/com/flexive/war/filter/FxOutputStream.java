@@ -37,9 +37,6 @@ import javax.servlet.ServletOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-/**
- *
- */
 class FxOutputStream extends ServletOutputStream {
 
     ServletOutputStream sos = null;

@@ -32,9 +32,6 @@
 package com.flexive.war.filter;
 
 import com.flexive.shared.FxContext;
-import com.flexive.shared.exceptions.FxAccountInUseException;
-import com.flexive.shared.exceptions.FxLoginFailedException;
-import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.war.FxRequest;
 import com.flexive.war.webdav.FxWebDavUtils;
@@ -50,12 +47,6 @@ import java.util.Map;
  * HttpRequest wrapper to privide flexive specific informations
  */
 public class FxRequestWrapper extends HttpServletRequestWrapper implements FxRequest {
-    public static final String PATH_ADMIN = "adm";
-    public static final String PATH_PUBLIC = "pub";
-    public static final String PATH_SETUP = "config";
-    private static final String PATH_TESTS = "tests";
-
-    private final static String[] SERVLETS = {"cefileupload", "cefiledownload", "thumbnail", "faces"};
     private HttpServletRequest request = null;
     private long timestamp = -1;
     private int division = -1;
@@ -64,36 +55,7 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
     private String pageType;
     private boolean isWebdavRequest = false;
     private String realRequestUriNoContext = null;
-    private long nodeId = -1;
-    private long[] idChain;
 
-
-    public long getNodeId() {
-        return nodeId;
-    }
-
-    public void setNodeId(long nodeId) {
-        this.nodeId = nodeId;
-    }
-
-    protected void setIdChain(long chain[]) {
-        this.idChain = chain;
-    }
-
-    public long[] getIdChain() {
-        return this.idChain;
-    }
-
-    /**
-     * {@inheritDoc} *
-     */
-    public boolean treeNodeIsActive(long nodeId) {
-        if (idChain == null) return false;
-        for (long id : idChain) {
-            if (id == nodeId) return true;
-        }
-        return false;
-    }
 
     public boolean isWebDavMethod() {
         return FxWebDavUtils.isWebDavMethod(this.getMethod());
@@ -119,23 +81,6 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
 
     private void setRealRequestUriNoContext(String value) {
         this.realRequestUriNoContext = value;
-    }
-
-    public boolean browserMayCache() {
-        return (!(isAdminURL() || isPublicURL() || isSetupURL() || isDynamicContent())) ||
-                // Exceptions:
-                requestUriNoContext.startsWith("/adm/layout/") ||
-                requestUriNoContext.startsWith("/adm/css/") ||
-                requestUriNoContext.startsWith("/adm/js/") ||
-                requestUriNoContext.startsWith("/adm/images/") ||
-                requestUriNoContext.equals("/adm/blank.gif") ||
-                requestUriNoContext.startsWith("/pub/layout/") ||
-                requestUriNoContext.startsWith("/pub/css/") ||
-                requestUriNoContext.startsWith("/pub/images/") ||
-                requestUriNoContext.startsWith("/pub/js/") ||
-                requestUriNoContext.startsWith("/images/") ||
-                requestUriNoContext.startsWith("/css/") ||
-                requestUriNoContext.startsWith("/js/");
     }
 
     /**
@@ -181,31 +126,6 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
     }
 
     /**
-     * Tries to login a user.
-     * <p/>
-     * The next getUserTicket() call will return the new ticket.
-     *
-     * @param username the unique user name
-     * @param password the password
-     * @param takeOver the take over flag
-     * @throws FxLoginFailedException  if the login failed
-     * @throws FxAccountInUseException if take over was false and the account is in use
-     */
-    public void login(String username, String password, boolean takeOver) throws FxLoginFailedException,
-            FxAccountInUseException {
-        FxContext.get().login(username, password, takeOver);
-    }
-
-    /**
-     * Logout of the current user.
-     *
-     * @throws FxLogoutFailedException
-     */
-    public void logout() throws FxLogoutFailedException {
-        FxContext.get().logout();
-    }
-
-    /**
      * The underlying request.
      *
      * @return the underlying request
@@ -233,56 +153,6 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
      */
     public UserTicket getUserTicket() {
         return FxContext.get().getTicket();
-    }
-
-    /**
-     * Returns true of the called URL is in the admin area.
-     *
-     * @return true of the called URL is in the admin area.
-     */
-    public boolean isAdminURL() {
-        return requestUriNoContext.startsWith("/" + PATH_ADMIN + "/");
-    }
-
-    /**
-     * Returns true if the called URL is the cactus servlets redirector.
-     *
-     * @return true if the called URL is the cactus servlets redirector.
-     */
-    public boolean isServletRedirectorURL() {
-        return requestUriNoContext.endsWith("ServletRedirector");
-    }
-
-    /**
-     * Returns true of the called URL is in the public area.
-     *
-     * @return true of the called URL is in the public area.
-     */
-    public boolean isPublicURL() {
-        // this must not use hard-coded public URLs.
-        return !isAdminURL() && !isSetupURL();
-        /*if (requestUriNoContext.startsWith("/" + PATH_PUBLIC + "/")) {
-            return true;
-        }
-        for (String application: APPS) {
-            if (request.getContextPath().equals("/" + application)) {
-                return true;
-            }
-        }
-        return false;*/
-    }
-
-    /**
-     * Returns true of the called URL is in the public area.
-     *
-     * @return true of the called URL is in the public area.
-     */
-    public boolean isSetupURL() {
-        return requestUriNoContext.startsWith("/" + PATH_SETUP + "/");
-    }
-
-    public boolean isTestURL() {
-        return requestUriNoContext.startsWith("/" + PATH_TESTS + "/");
     }
 
     /**
@@ -414,39 +284,6 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
     @Override
     public Map getParameterMap() {
         return request.getParameterMap();
-    }
-
-    /**
-     * Returns true if this request is handled by a servlet
-     *
-     * @return true if this request is handled by a servlet
-     */
-    public boolean isServlet() {
-        if (isWebdavRequest) {
-            return true;
-        }
-        for (String servlet : SERVLETS) {
-            String comp = this.getRealRequestUriNoContext();
-            if (comp.length() == servlet.length() + 1) {
-                comp += "/";
-            }
-            if (comp.startsWith("/" + servlet + "/")) return true;
-        }
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public boolean isContentEditor() {
-        return getRealRequestUriNoContext().equals("/adm/content/contentEditor.jsf");
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public boolean isInlineContentEditor() {
-        return getRealRequestUriNoContext().equals("/adm/content/inlineContentEditor.jsf");
     }
 
 }

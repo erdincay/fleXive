@@ -44,23 +44,6 @@ import org.apache.commons.logging.LogFactory;
 public class FxRequestUtils {
     private static final transient Log LOG = LogFactory.getLog(FxRequestUtils.class);
 
-    // Do not use upper case characters, URL needs to be valid
-    // or IE will lose the session after every request (ie do not use
-    // a URL like 'flexive_site.1'. Do not use '_' in the String!
-    final static String DIV_SITE = "www.flexive-develop";
-    final static String DIV_GLOBAL_ADMIN = "127.0.0.1";
-
-    static class knownSite {
-        String name;
-        int division;
-
-        public knownSite(String name, int division) {
-            this.name = name;
-            this.division = division;
-        }
-    }
-
-
     /**
      * Determines the division of the request.
      *
@@ -75,13 +58,6 @@ public class FxRequestUtils {
         }
 
         GlobalConfigurationEngine configuration = EJBLookup.getGlobalConfigurationEngine();
-
-        // Check for global config URL
-        String URI = request.getRequestURI().substring(request.getContextPath().length());
-        if ((URI.startsWith("/" + FxRequestWrapper.PATH_SETUP + "/") ||
-                URI.equals("/" + FxRequestWrapper.PATH_SETUP + "/"))) {
-            return FxContext.DIV_GLOBAL_CONFIGURATION;
-        }
 
         // Check for virtual site name that defines the division
         final String server = request.getServerName();

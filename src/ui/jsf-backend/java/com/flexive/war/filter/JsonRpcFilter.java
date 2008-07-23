@@ -33,6 +33,8 @@
  ***************************************************************/
 package com.flexive.war.filter;
 
+import static com.flexive.war.filter.FxFilter.getJsonRpcBridge;
+import static com.flexive.war.filter.FxFilter.setJsonRpcBridge;
 import com.flexive.war.javascript.BriefcaseEditor;
 import com.flexive.war.javascript.ContentEditor;
 import com.flexive.war.javascript.SearchQueryEditor;
@@ -42,8 +44,6 @@ import com.flexive.war.javascript.tree.ContentTreeEditor;
 import com.flexive.war.javascript.tree.ContentTreeWriter;
 import com.flexive.war.javascript.tree.StructureTreeEditor;
 import com.flexive.war.javascript.tree.StructureTreeWriter;
-import static com.flexive.war.filter.FxFilter.SESSION_JSON_BRIDGE;
-import static com.flexive.war.filter.FxFilter.getJsonRpcBridge;
 import com.metaparadigm.jsonrpc.JSONRPCBridge;
 
 import javax.servlet.*;
@@ -51,6 +51,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
+/**
+ * A servlet filter that provides the JSON-RPC-Java objects for the backend administration.
+ *
+ * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ *
+ * @version $Rev$
+ */
 public class JsonRpcFilter implements Filter {
     private static final String SESSION_INITIALIZED = "JsonRpcFilter_init";
 
@@ -97,7 +104,8 @@ public class JsonRpcFilter implements Filter {
             bridge.registerObject("BriefcaseEditor", new BriefcaseEditor());
             bridge.registerObject("SearchQueryEditor", new SearchQueryEditor());
             bridge.registerObject("SystemInformation", new SystemInformation());
-            session.setAttribute(SESSION_JSON_BRIDGE, bridge);
+
+            setJsonRpcBridge(session, bridge);
             return bridge;
         }
     }
