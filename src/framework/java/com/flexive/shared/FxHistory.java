@@ -40,6 +40,8 @@ import java.io.Serializable;
  * @version $Rev$
  */
 public class FxHistory implements Serializable {
+    private static final long serialVersionUID = -610739322976575887L;
+
     private long timestp;
     private long accountId;
     private String loginName;
@@ -118,7 +120,7 @@ public class FxHistory implements Serializable {
      */
     public String getMessage() {
         FxLanguage lang = FxContext.get().getTicket().getLanguage();
-        return FxSharedUtils.getLocalizedMessage("History", lang.getId(), lang.getIso2digit(), key, args);
+        return FxSharedUtils.getLocalizedMessage("History", lang.getId(), lang.getIso2digit(), key, (Object[]) args);
     }
 
 }

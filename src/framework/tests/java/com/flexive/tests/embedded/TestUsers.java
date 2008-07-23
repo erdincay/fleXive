@@ -95,7 +95,7 @@ public class TestUsers {
 
             // setup supervisor
             SUPERVISOR.createUser(mandatorId, languageId);
-            EJBLookup.getAccountEngine().setRoleList(SUPERVISOR.getUserId(), Role.getList());
+            EJBLookup.getAccountEngine().setRoles(SUPERVISOR.getUserId(), Role.getList());
 
             // setup mandator supervisor
             MANDATOR_SUPERVISOR.createUser(mandatorId, languageId);

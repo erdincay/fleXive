@@ -156,7 +156,7 @@ public class SelectBean implements Serializable {
         if (userGroups == null) {
             UserGroupEngine groupEngine = EJBLookup.getUserGroupEngine();
             long mandatorId = FxContext.get().getTicket().getMandatorId();
-            List<UserGroup> groups = groupEngine.loadAll(mandatorId).getList();
+            List<UserGroup> groups = groupEngine.loadAll(mandatorId);
             userGroups = FxJsfUtils.asSelectList(groups, false);
         }
         return userGroups;
@@ -172,7 +172,7 @@ public class SelectBean implements Serializable {
         if (userGroupsNonSystem == null) {
             UserGroupEngine groupEngine = EJBLookup.getUserGroupEngine();
             long mandatorId = FxContext.get().getTicket().getMandatorId();
-            List<UserGroup> groups = groupEngine.loadAll(mandatorId).getList();
+            List<UserGroup> groups = groupEngine.loadAll(mandatorId);
             userGroupsNonSystem = new ArrayList<SelectItem>(groups.size());
 
             for (UserGroup group : groups) {
@@ -193,7 +193,7 @@ public class SelectBean implements Serializable {
     public List<SelectItem> getGlobalUserGroups() throws FxApplicationException {
         if (globalUserGroups == null) {
             UserGroupEngine groupEngine = EJBLookup.getUserGroupEngine();
-            List<UserGroup> groups = groupEngine.loadAll(-1).getList();
+            List<UserGroup> groups = groupEngine.loadAll(-1);
             globalUserGroups = new ArrayList<SelectItem>(groups.size());
             long mandator = FxContext.get().getTicket().getMandatorId();
             for (UserGroup group : groups) {
@@ -217,7 +217,7 @@ public class SelectBean implements Serializable {
     public List<SelectItem> getGlobalUserGroupsNonSystem() throws FxApplicationException {
         if (globalUserGroupsNonSystem == null) {
             UserGroupEngine groupEngine = EJBLookup.getUserGroupEngine();
-            List<UserGroup> groups = groupEngine.loadAll(-1).getList();
+            List<UserGroup> groups = groupEngine.loadAll(-1);
             globalUserGroupsNonSystem = new ArrayList<SelectItem>(groups.size());
             long mandator = FxContext.get().getTicket().getMandatorId();
             for (UserGroup group : groups) {

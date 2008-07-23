@@ -35,12 +35,14 @@ import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.security.UserTicketStore;
 import com.flexive.shared.*;
+import static com.flexive.shared.FxSharedUtils.indexOfSelectableObject;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.security.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.ArrayUtils;
 
 import javax.annotation.Resource;
 import javax.ejb.*;
@@ -145,7 +147,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public UserGroupList loadAll(long mandatorId) throws FxApplicationException {
+    public List<UserGroup> loadAll(long mandatorId) throws FxApplicationException {
         Connection con = null;
         Statement stmt = null;
         String sql = null;
@@ -169,27 +171,24 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             ResultSet rs = stmt.executeQuery(sql);
 
             // Process resultset
-            ArrayList<UserGroup> aRes = new ArrayList<UserGroup>(100);
+            final List<UserGroup> result = new ArrayList<UserGroup>();
             while (rs != null && rs.next()) {
                 long autoMandator = rs.getLong(5);
                 if (rs.wasNull())
                     autoMandator = -1;
-                aRes.add(new UserGroup(rs.getLong(1), rs.getLong(2), autoMandator, rs.getBoolean(6),
+                result.add(new UserGroup(rs.getLong(1), rs.getLong(2), autoMandator, rs.getBoolean(6),
                         rs.getString(3), rs.getString(4)));
             }
 
-            // Build result list
-            UserGroupList res = new UserGroupList(aRes.toArray(new UserGroup[aRes.size()]));
-
             // Sanity check
-            if (!res.contains(UserGroup.GROUP_EVERYONE) || !res.contains(UserGroup.GROUP_OWNER)) {
+            if (indexOfSelectableObject(result, UserGroup.GROUP_EVERYONE) == -1
+                    || indexOfSelectableObject(result, UserGroup.GROUP_OWNER) == -1) {
                 FxLoadException le = new FxLoadException("ex.usergroup.oneOfSystemGroupsIsMissing");
                 LOG.fatal(le);
                 throw le;
             }
 
-            return res;
-
+            return result;
         } catch (SQLException exc) {
             FxLoadException de = new FxLoadException(exc, "ex.usergroup.sqlError", exc.getMessage(), sql);
             LOG.error(de);
@@ -494,13 +493,11 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
         roles = FxArrayUtils.removeDuplicates(roles);
         //only allow to assign roles which the calling user is a member of (unless it is a global supervisor)
         if (!ticket.isGlobalSupervisor()) {
-            Role[] orgRoles = getRoles(groupId).getRoles();
-            long[] orgRoleIds = new long[orgRoles.length];
-            for (int i = 0; i < orgRoles.length; i++)
-                orgRoleIds[i] = orgRoles[i].getId();
+            List<Role> orgRoles = getRoles(groupId);
+            long[] orgRoleIds = FxSharedUtils.getSelectableObjectIds(orgRoles);
             //check removed roles
             for (long check : orgRoleIds) {
-                if (!FxArrayUtils.containsElement(roles, check)) {
+                if (!ArrayUtils.contains(roles, check)) {
                     if (!ticket.isInRole(Role.getById(check))) {
                         ctx.setRollbackOnly();
                         throw new FxNoAccessException("ex.account.roles.assign.noMember.remove", Role.getById(check).getName());
@@ -509,7 +506,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             }
             //check added roles
             for (long check : roles) {
-                if (!FxArrayUtils.containsElement(orgRoleIds, check)) {
+                if (!ArrayUtils.contains(orgRoleIds, check)) {
                     if (!ticket.isInRole(Role.getById(check))) {
                         ctx.setRollbackOnly();
                         throw new FxNoAccessException("ex.account.roles.assign.noMember.add", Role.getById(check).getName());
@@ -602,7 +599,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public RoleList getRoles(long groupId) throws FxApplicationException {
+    public List<Role> getRoles(long groupId) throws FxApplicationException {
         Connection con = null;
         Statement stmt = null;
         final String sql = "SELECT DISTINCT ROLE FROM " + TBL_ASSIGN_ROLES + " WHERE USERGROUP=" + groupId;
@@ -623,12 +620,12 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             // Load the roles
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
-            RoleList result = new RoleList();
+            List<Role> result = new ArrayList<Role>();
             while (rs != null && rs.next()) {
-                result.add(rs.getByte(1));
+                result.add(Role.getById(rs.getByte(1)));
             }
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Roles for group [" + groupId + "]: " + result.toNameArray());
+                LOG.debug("Roles for group [" + groupId + "]: " + result);
             }
             return result;
         } catch (SQLException exc) {

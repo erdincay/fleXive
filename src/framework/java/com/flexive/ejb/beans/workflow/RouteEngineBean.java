@@ -36,7 +36,6 @@ import static com.flexive.core.DatabaseConst.TBL_ROUTES;
 import static com.flexive.core.DatabaseConst.TBL_STEP;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
@@ -51,6 +50,8 @@ import com.flexive.shared.workflow.Route;
 import com.flexive.shared.workflow.Step;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.ArrayUtils;
 
 import javax.annotation.Resource;
 import javax.ejb.*;
@@ -94,7 +95,7 @@ public class RouteEngineBean implements RouteEngine, RouteEngineLocal {
                         + step.getWorkflowId() + " AND ID!=" + fromStep;
             } else {
                 sql = "SELECT DISTINCT TO_STEP FROM " + TBL_ROUTES + " WHERE FROM_STEP=" + fromStep
-                        + " AND USERGROUP IN (" + FxArrayUtils.toSeparatedList(ticket.getGroups(), ',') + ")";
+                        + " AND USERGROUP IN (" + StringUtils.join(ArrayUtils.toObject(ticket.getGroups()), ',') + ")";
             }
             ResultSet rs = stmt.executeQuery(sql);
             ArrayList<Step> targets = new ArrayList<Step>(20);

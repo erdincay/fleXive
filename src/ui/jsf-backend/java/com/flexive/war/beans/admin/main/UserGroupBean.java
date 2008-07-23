@@ -148,7 +148,7 @@ public class UserGroupBean {
             // Load an cache within the result
             List<UserGroup> result = groupLists.get(mandatorId);
             if (result == null) {
-                result = groupEngine.loadAll(mandatorId).getList();
+                result = groupEngine.loadAll(mandatorId);
                 groupLists.put(mandatorId, result);
             }
             return result;
@@ -239,7 +239,7 @@ public class UserGroupBean {
             this.color = aGroup.getColor();
             this.name = aGroup.getName();
             this.mandator = CacheAdmin.getEnvironment().getMandator(aGroup.getMandatorId());
-            this.roles = groupEngine.getRoles(aGroup.getId()).getList();
+            this.roles = groupEngine.getRoles(aGroup.getId());
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();
         }

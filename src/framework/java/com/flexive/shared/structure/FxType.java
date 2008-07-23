@@ -47,6 +47,7 @@ import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.workflow.Workflow;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.ArrayUtils;
 
 import java.io.Serializable;
 import java.util.*;
@@ -576,7 +577,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
             scriptMapping.put(scriptEvent, new long[]{scriptId});
         else {
             long[] scripts = scriptMapping.get(scriptEvent);
-            if (FxArrayUtils.containsElement(scripts, scriptId))
+            if (ArrayUtils.contains(scripts, scriptId))
                 return;
             long[] new_scripts = new long[scripts.length + 1];
             System.arraycopy(scripts, 0, new_scripts, 0, scripts.length);

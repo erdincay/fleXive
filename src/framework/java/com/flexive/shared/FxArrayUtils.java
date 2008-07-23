@@ -36,6 +36,9 @@ import com.flexive.shared.exceptions.FxInvalidParameterException;
 import java.lang.reflect.Array;
 import java.util.*;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.ArrayUtils;
+
 /**
  * Utility functions for arrays.
  *
@@ -43,126 +46,6 @@ import java.util.*;
  * @version $Rev$
  */
 public class FxArrayUtils {
-
-    /**
-     * Converts a SelectableObjectWithLabel array to a string list containing the id's.
-     *
-     * @param values    the array
-     * @param separator the separator to use between the id's
-     * @return the array as string list
-     */
-    public static String toSeparatedList(SelectableObjectWithLabel[] values, char separator) {
-        if (values == null) return "";
-        StringBuilder res = new StringBuilder(values.length * 5);
-        for (int i = 0; i < values.length; i++) {
-            if (i > 0) res.append(separator);
-            res.append(values[i].getId());
-        }
-        return res.toString();
-    }
-
-    /**
-     * Converts a int array to a string list.
-     *
-     * @param values    the array
-     * @param separator the separator to use between the numbers
-     * @return the array as string list
-     */
-    public static String toSeparatedList(int[] values, char separator) {
-        if (values == null) return "";
-        StringBuilder res = new StringBuilder(values.length * 5);
-        for (int i = 0; i < values.length; i++) {
-            if (i > 0) res.append(separator);
-            res.append(values[i]);
-        }
-        return res.toString();
-    }
-
-    /**
-     * Converts a byte array to a string list.
-     *
-     * @param values    the array
-     * @param separator the separator to use between the numbers
-     * @return the array as string list
-     */
-    public static String toSeparatedList(byte[] values, char separator) {
-        if (values == null) return "";
-        StringBuilder res = new StringBuilder(values.length * 5);
-        for (int i = 0; i < values.length; i++) {
-            if (i > 0) res.append(separator);
-            res.append(values[i]);
-        }
-        return res.toString();
-    }
-
-
-    /**
-     * Converts a long array to a string list.
-     *
-     * @param values    the array
-     * @param separator the separator to use between the numbers
-     * @return the array as string list
-     */
-    public static String toSeparatedList(long[] values, char separator) {
-        if (values == null) return "";
-        StringBuilder res = new StringBuilder(values.length * 5);
-        for (int i = 0; i < values.length; i++) {
-            if (i > 0) res.append(separator);
-            res.append(values[i]);
-        }
-        return res.toString();
-    }
-
-    /**
-     * Join a list of elements using the given delimiter.
-     *
-     * @param elements Elements to be joined
-     * @param delim    Delimiter between elements
-     * @return Joined string
-     */
-    public static String toSeparatedList(List elements, String delim) {
-        StringBuilder out = new StringBuilder();
-        boolean first = true;
-        for(Object s:elements) {
-            out.append(((first ? "" : delim) + s));
-            first = false;
-        }
-        return out.toString();
-    }
-
-    /**
-     * Join an array of elements using the given delimiter.
-     *
-     * @param elements Elements to be joined
-     * @param delim    Delimiter between elements
-     * @return Joined string
-     */
-    public static String toSeparatedList(String[] elements, String delim) {
-        StringBuilder out = new StringBuilder();
-        for (int i = 0; i < elements.length; i++)
-            out.append(((i > 0 ? delim : "") + elements[i]));
-        return out.toString();
-    }
-
-    /**
-     * Converts a list with items separated by a specific delimeter to a array.
-     * <p/>
-     * A empty array will be returned if the list is null or a empty string.
-     *
-     * @param list      the list
-     * @param separator the separator character
-     * @return the array
-     */
-    public static String[] toArray(String list, char separator) {
-        if (list == null || list.length() == 0) return new String[0];
-        StringTokenizer st = new StringTokenizer(list, ("" + separator), false);
-        ArrayList<String>al = new ArrayList<String>(100);
-        while (st.hasMoreTokens()) {
-            al.add(st.nextToken());
-        }
-        return al.toArray(new String[al.size()]);
-    }
-
 
     /**
      * Converts a list with integer items separated by a specific delimeter to a array.
@@ -177,7 +60,7 @@ public class FxArrayUtils {
      */
     public static int[] toIntArray(String list, char separator) throws FxInvalidParameterException {
         if (list == null || list.length() == 0) return new int[0];
-        String sInts[] = toArray(list, separator);
+        String sInts[] = StringUtils.split(list, separator);
         int iInts[] = new int[sInts.length];
         for (int i = 0; i < sInts.length; i++) {
             try {
@@ -188,18 +71,6 @@ public class FxArrayUtils {
             }
         }
         return iInts;
-    }
-
-    public static int[] toIntArray(Integer list[]) {
-        if (list==null || list.length==0) {
-            return new int[0];
-        }
-        int result[] = new int[list.length];
-        int pos=0;
-        for (Integer ele:list) {
-            result[pos++]=ele;
-        }
-        return result;
     }
 
     /**
@@ -215,7 +86,7 @@ public class FxArrayUtils {
      */
     public static long[] toLongArray(String list, char separator) throws FxInvalidParameterException {
         if (list == null || list.length() == 0) return new long[0];
-        String sInts[] = toArray(list, separator);
+        String sInts[] = StringUtils.split(list, separator);
         long iInts[] = new long[sInts.length];
         for (int i = 0; i < sInts.length; i++) {
             try {
@@ -228,55 +99,6 @@ public class FxArrayUtils {
         return iInts;
     }
 
-
-    /**
-     * Removes the given element from the list.
-     *
-     * @param list    the list the element should be removed from
-     * @param element the element to remove
-     * @return the list without the given element
-     */
-    public static int[] removeElementFromList(int[] list, final int element) {
-
-        if (list != null) {
-            int elementFound = 0;
-            while (elementFound != -1) {
-                // Look for the elemenet
-                elementFound = -1;
-                for (int i = 0; i < list.length; i++) {
-                    if (list[i] == element) {
-                        elementFound = i;
-                        break;
-                    }
-                }
-                // Delete the element
-                if (elementFound != -1) {
-                    int tmp[] = new int[list.length - 1];
-                    int pos = 0;
-                    for (int i = 0; i < list.length; i++) {
-                        if (i != elementFound) tmp[pos++] = list[i];
-                    }
-                    list = tmp;
-                }
-            }
-        }
-        return list;
-
-    }
-
-    /**
-     * Removes the given elements from the list.
-     *
-     * @param list     the list the element should be removed from
-     * @param elements the elements to remove
-     * @return the list without the given element
-     */
-    public static int[] removeElementsFromList(int[] list, final int elements[]) {
-        for (int ele:elements) {
-            list = removeElementFromList(list, ele);
-        }
-        return list;
-    }
 
     /**
      * Removes dupicated entries from the list.
@@ -403,73 +225,6 @@ public class FxArrayUtils {
     }
 
     /**
-     * Adds a element to the end of the array.
-     *
-     * @param list original list
-     * @param element the element to add
-     * @return the new list
-     */
-    public static <T> T[] addElement(T[] list, T element) {
-        return addElement(list, element, false);
-    }
-
-    /**
-     * Adds every element in a list to the end of the array, if it is not already contained.
-     *
-     * @param elements the elements to add
-     * @param list the list to add the element to
-     * @return the new list
-     */
-    public static int[] addElements(int[] list, int[] elements) {
-        if (elements == null) return list;
-        for (int element : elements)
-            list = addElement(list, element);
-        return list;
-    }
-
-    /**
-     * Return true if the list contains the given element.
-     *
-     * @param list    the list
-     * @param element the element to look for
-     * @return true if the list contains the given element
-     */
-    public static boolean containsElement(int[] list, int element) {
-        if (list == null) return false;
-        for (int aList : list)
-            if (aList == element) return true;
-        return false;
-    }
-
-    /**
-     * Return true if the list contains the given element.
-     *
-     * @param list    the list
-     * @param element the element to look for
-     * @return true if the list contains the given element
-     */
-    public static boolean containsElement(SelectableObject[] list, SelectableObject element) {
-        if (list == null) return false;
-        for (SelectableObject aList : list)
-            if (aList.getId() == element.getId()) return true;
-        return false;
-    }
-
-    /**
-     * Return true if the list contains the given element.
-     *
-     * @param list    the list
-     * @param element the element to look for
-     * @return true if the list contains the given element
-     */
-    public static boolean containsElement(byte[] list, byte element) {
-        if (list == null) return false;
-        for (byte aList : list)
-            if (aList == element) return true;
-        return false;
-    }
-
-    /**
      * Return true if the list contains the given element.
      *
      * @param list       the list
@@ -518,32 +273,5 @@ public class FxArrayUtils {
     }
 
 
-
-    /**
-     * Return true if the list contains the given element.
-     *
-     * @param list    the list
-     * @param element the element to look for
-     * @return true if the list contains the given element
-     */
-    public static boolean containsElement(long[] list, long element) {
-        for (long aList : list)
-            if (aList == element) return true;
-        return false;
-    }
-
-    /**
-     * Generic shallow array clone function (until commons ArrayUtils is generified)
-     *
-     * @param <T>   array type
-     * @param array the array to be cloned (shallow copy)
-     * @return  the cloned array (shallow copy)
-     */
-    public static <T> T[] clone(T[] array) {
-        if (array == null) {
-            return null;
-        }
-        return array.clone();
-    }
 }
 

@@ -109,7 +109,7 @@ public class AccountManagementTest extends AbstractRoleTest {
             if (ticket.isGlobalSupervisor()) {
                 roles.add(Role.GlobalSupervisor);
             }
-            getAccountEngine().setRoleList(accountId, roles);
+            getAccountEngine().setRoles(accountId, roles);
             assertSuccess(AccountManagement, mandatorId);
         } catch (FxNoAccessException e) {
             assertNoAccess(e, AccountManagement, mandatorId);

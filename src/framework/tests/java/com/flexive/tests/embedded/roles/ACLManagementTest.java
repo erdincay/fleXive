@@ -46,6 +46,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * ACL management role tests.
@@ -99,7 +100,7 @@ public class ACLManagementTest extends AbstractRoleTest {
         long foreignUserGroupId = -1;
         try {
             FxContext.get().runAsSystem();
-            final UserGroup[] groups = EJBLookup.getUserGroupEngine().loadAll(Mandator.MANDATOR_FLEXIVE).getGroups();
+            final List<UserGroup> groups = EJBLookup.getUserGroupEngine().loadAll(Mandator.MANDATOR_FLEXIVE);
             for (final UserGroup group : groups) {
                 if (group.getId() != UserGroup.GROUP_EVERYONE && group.getId() != UserGroup.GROUP_OWNER) {
                     foreignUserGroupId = group.getId();

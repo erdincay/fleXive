@@ -63,6 +63,7 @@ import com.flexive.shared.workflow.Workflow;
 import com.flexive.stream.ServerLocation;
 import com.thoughtworks.xstream.XStream;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.tidy.Tidy;
@@ -695,7 +696,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setLong(5, data.getAssignmentId());
             ps.setString(6, XPathElement.stripType(data.getXPath()));
             ps.setString(7, XPathElement.stripType(data.getXPathFull()));
-            String xmult = FxArrayUtils.toSeparatedList(data.getIndices(), ',');
+            String xmult = StringUtils.join(ArrayUtils.toObject(data.getIndices()), ',');
             ps.setString(8, xmult);
             ps.setInt(9, data.getIndex());
             ps.setString(10, getParentGroupXMult(xmult));
@@ -812,7 +813,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps_ft.setInt(3, pk.getVersion());
             //3==lang
             ps_ft.setLong(5, data.getAssignmentId());
-            ps_ft.setString(6, FxArrayUtils.toSeparatedList(data.getIndices(), ','));
+            ps_ft.setString(6, StringUtils.join(ArrayUtils.toObject(data.getIndices()), ','));
             setPropertyData(false, pos_idx, prop, allData, con, data, ps, ps_ft, upperColumn);
         } finally {
             if (ps != null)
@@ -1244,7 +1245,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setLong(5, groupData.getAssignmentId());
             ps.setString(6, groupData.getXPath() + "/");
             ps.setString(7, groupData.getXPathFull() + "/");
-            String xmult = FxArrayUtils.toSeparatedList(groupData.getIndices(), ',');
+            String xmult = StringUtils.join(ArrayUtils.toObject(groupData.getIndices()), ',');
             ps.setString(8, xmult);
             ps.setString(9, getParentGroupXMult(xmult));
             ps.setBoolean(10, isMaxVer);
@@ -1286,7 +1287,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             else
                 ps.setString(4, data.getXPathFull());
             ps.executeUpdate();
-            String xmult = FxArrayUtils.toSeparatedList(data.getIndices(), ',');
+            String xmult = StringUtils.join(ArrayUtils.toObject(data.getIndices()), ',');
 
             ps.close();
             sql.setLength(0);

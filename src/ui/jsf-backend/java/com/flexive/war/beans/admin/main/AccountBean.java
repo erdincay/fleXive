@@ -46,6 +46,7 @@ import com.flexive.shared.interfaces.UserGroupEngine;
 import com.flexive.shared.security.*;
 import com.flexive.war.FxRequest;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -78,7 +79,7 @@ public class AccountBean {
     private List<UserGroup> groups;
     private List<Role> roles;
     private Mandator mandator;
-    private Hashtable<String, ArrayList<Account>> listCache;
+    private Hashtable<String, List<Account>> listCache;
     private static final String ID_CACHE_KEY = AccountBean.class + "_id";
     private FxContent contactData;
     private boolean languageChanged;
@@ -197,7 +198,7 @@ public class AccountBean {
             return new ArrayList<Role>(0);
         List<Role> result = new ArrayList<Role>(Role.values().length);
         for (UserGroup grp : groups) {
-            List<Role> tmp = EJBLookup.getUserGroupEngine().getRoles(grp.getId()).getList();
+            List<Role> tmp = EJBLookup.getUserGroupEngine().getRoles(grp.getId());
             result.removeAll(tmp);
             result.addAll(tmp);
         }
@@ -231,7 +232,7 @@ public class AccountBean {
      */
     public AccountBean() {
         accountInterface = EJBLookup.getAccountEngine();
-        listCache = new Hashtable<String, ArrayList<Account>>(5);
+        listCache = new Hashtable<String, List<Account>>(5);
         resetFilter();
     }
 
@@ -369,7 +370,7 @@ public class AccountBean {
         } else
             mandatorId = getAccount().getMandatorId();
         UserGroupEngine groupEngine = EJBLookup.getUserGroupEngine();
-        List<UserGroup> groups = groupEngine.loadAll(mandatorId).getList();
+        List<UserGroup> groups = groupEngine.loadAll(mandatorId);
         List<SelectItem> userGroupsNonSystem = new ArrayList<SelectItem>(groups.size());
         for (UserGroup group : groups) {
             if (group.isSystem())
@@ -457,8 +458,8 @@ public class AccountBean {
         try {
             ensureAccountIdSet();
             this.account = new AccountEditBean(accountInterface.load(this.accountIdFiler));
-            this.roles = accountInterface.getRoleList(this.accountIdFiler, AccountEngine.RoleLoadMode.FROM_USER_ONLY);
-            this.groups = accountInterface.getGroupList(this.accountIdFiler);
+            this.roles = accountInterface.getRoles(this.accountIdFiler, AccountEngine.RoleLoadMode.FROM_USER_ONLY);
+            this.groups = accountInterface.getGroups(this.accountIdFiler);
             return "accountEdit";
         } catch (Throwable t) {
             new FxFacesMsgErr(t).addToContext();
@@ -475,8 +476,8 @@ public class AccountBean {
         try {
             this.account = new AccountEditBean(accountInterface.load(FxContext.get().getTicket().getUserId()));
             setAccountIdFiler(this.account.getId());
-            this.roles = accountInterface.getRoleList(this.accountIdFiler, AccountEngine.RoleLoadMode.ALL);
-            this.groups = accountInterface.getGroupList(this.accountIdFiler);
+            this.roles = accountInterface.getRoles(this.accountIdFiler, AccountEngine.RoleLoadMode.ALL);
+            this.groups = accountInterface.getGroups(this.accountIdFiler);
             this.contactData = null;
             this.contactData = EJBLookup.getContentEngine().load(this.account.getContactData());
             // load configuration parameters
@@ -561,14 +562,14 @@ public class AccountBean {
             new FxFacesMsgInfo("User.nfo.saved").addToContext();
             // Assign the given groups to the account
             try {
-                accountInterface.setGroupList(this.accountIdFiler, groups);
+                accountInterface.setGroups(this.accountIdFiler, groups);
             } catch (Exception exc) {
                 new FxFacesMsgErr(exc).addToContext();
             }
 
             // Assign the given roles to the account
             try {
-                accountInterface.setRoleList(this.accountIdFiler, getRoles());
+                accountInterface.setRoles(this.accountIdFiler, getRoles());
             } catch (Exception exc) {
                 new FxFacesMsgErr(exc).addToContext();
             }
@@ -627,14 +628,14 @@ public class AccountBean {
 
         // Assign the given groups to the account
         try {
-            accountInterface.setGroupList(this.accountIdFiler, groups);
+            accountInterface.setGroups(this.accountIdFiler, groups);
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();
         }
 
         // Assign the given roles to the account
         try {
-            accountInterface.setRoleList(this.accountIdFiler, getRoles());
+            accountInterface.setRoles(this.accountIdFiler, getRoles());
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();
         }
@@ -650,7 +651,7 @@ public class AccountBean {
      *
      * @return all users matching the filter criterias.
      */
-    public ArrayList<Account> getList() {
+    public List<Account> getList() {
         final UserTicket ticket = FxContext.get().getTicket();
         try {
             long _mandatorFilter = mandator == null ? -1 : mandator.getId();
@@ -670,14 +671,12 @@ public class AccountBean {
             // Load list if needed, and cache within the request
             String cacheKey = account.getName() + "_" + account.getLoginName() + "_" +
                     account.getEmail() + "_" + isActiveFilter() + "_" + isValidatedFilter() + "_" + _mandatorFilter + "_" +
-                    FxArrayUtils.toSeparatedList(userGroupIds, ',');
-            ArrayList<Account> result = listCache.get(cacheKey);
+                    StringUtils.join(ArrayUtils.toObject(userGroupIds), ',');
+            List<Account> result = listCache.get(cacheKey);
             if (result == null) {
-                Account allUsers[] = accountInterface.loadAll(account.getName(), account.getLoginName(),
+                result = accountInterface.loadAll(account.getName(), account.getLoginName(),
                         account.getEmail(), isActiveFilter(), isValidatedFilter(), _mandatorFilter,
                         null, userGroupIds, 0, -1);
-                result = new ArrayList<Account>(allUsers.length);
-                result.addAll(Arrays.asList(allUsers));
                 listCache.put(cacheKey, result);
             }
             return result;

@@ -131,7 +131,7 @@ public class MapBean implements Serializable {
             return userGroupsMap;
         }
         userGroupsMap = new HashMap<Long, UserGroup>();
-        return populateMap(userGroupsMap, EJBLookup.getUserGroupEngine().loadAll(-1).getList());
+        return populateMap(userGroupsMap, EJBLookup.getUserGroupEngine().loadAll(-1));
     }
 
     /**

@@ -259,7 +259,7 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
     public DivisionData[] getDivisions() throws FxApplicationException {
         synchronized (this) {
             if (divisions != null) {
-                return FxArrayUtils.clone(divisions);
+                return divisions.clone();
             }
         }
         int[] divisionIds = getDivisionIds();

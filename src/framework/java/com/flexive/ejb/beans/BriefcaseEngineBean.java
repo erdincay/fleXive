@@ -34,7 +34,6 @@ package com.flexive.ejb.beans;
 import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.LifeCycleInfoImpl;
-import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
@@ -43,6 +42,7 @@ import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.security.UserTicket;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -352,7 +352,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
         try {
             con = Database.getDbConnection();
             stmt = con.prepareStatement("DELETE FROM " + DatabaseConst.TBL_BRIEFCASE_DATA + " WHERE briefcase_id=?" +
-                    " AND id IN (" + FxArrayUtils.toSeparatedList(objectIds, ',') + ")");
+                    " AND id IN (" + StringUtils.join(ArrayUtils.toObject(objectIds), ',') + ")");
             stmt.setLong(1, id);
             stmt.executeUpdate();
         } catch (Exception e) {

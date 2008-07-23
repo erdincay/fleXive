@@ -246,7 +246,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * @param mandators all defined mandators
      */
     public void setMandators(Mandator[] mandators) {
-        this.mandators = FxArrayUtils.clone(mandators);
+        this.mandators = mandators.clone();
     }
 
     /**

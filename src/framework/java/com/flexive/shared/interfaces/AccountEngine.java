@@ -91,7 +91,7 @@ public interface AccountEngine {
      *                                if the load failed
      * @throws FxApplicationException on errors
      */
-    Account load(final long id) throws FxApplicationException;
+    Account load(long id) throws FxApplicationException;
 
     /**
      * Loads a user.
@@ -104,7 +104,7 @@ public interface AccountEngine {
      * @throws FxLoadException        if the load failed
      * @throws FxApplicationException on errors
      */
-    Account load(final String loginName) throws FxApplicationException;
+    Account load(String loginName) throws FxApplicationException;
 
     /**
      * Load the account that belongs to the given contact data
@@ -135,23 +135,8 @@ public interface AccountEngine {
      * @throws FxNoAccessException    if the caller lacks the permissions to load the groups
      * @throws FxApplicationException on errors
      */
-    UserGroupList getGroups(long accountId) throws FxApplicationException;
+    List<UserGroup> getGroups(long accountId) throws FxApplicationException;
 
-
-    /**
-     * Gets the groups a user is assigned to.
-     * <p/>
-     * A user may only see the groups assigned to other users within his mandator.
-     * GLOBAL_SUPERVISOR may get the groups for all users.
-     *
-     * @param accountId the user to get the groupd for
-     * @return the groups a user is assigned to
-     * @throws FxLoadException        if the load failed
-     * @throws FxNotFoundException    if the user does not exist
-     * @throws FxNoAccessException    if the caller lacks the permissions to load the groups
-     * @throws FxApplicationException on errors
-     */
-    ArrayList<UserGroup> getGroupList(long accountId) throws FxApplicationException;
 
     /**
      * Loads all roles that a user is assigned to.
@@ -169,26 +154,7 @@ public interface AccountEngine {
      * @throws FxNoAccessException    if the caller lacks the permissions to load the roles
      * @throws FxApplicationException on errors
      */
-    Role[] getRoles(long accountId, RoleLoadMode mode) throws FxApplicationException;
-
-    /**
-     * Loads all roles that a user is assigned to.
-     * <p/>
-     * Users may only query roles of users within the same mandator domain.<br>
-     * GLOBAL_SUPERVISOR may get the roles of all users.
-     *
-     * @param accountId the unique user id to get the roles for
-     * @param mode      MODE_USER:   get all roles the USER himself is assigned to<br>
-     *                  MODE_GROUPS: get all roles from the groups that the user belongs to<br>
-     *                  MODE_ALL:    get all roles the user belongs to from his groups, or direct assignment
-     * @return the roles assigned to the given user
-     * @throws FxLoadException        if the load failed
-     * @throws FxNotFoundException    if the user does not exist
-     * @throws FxNoAccessException    if the caller lacks the permissions to load the roles
-     * @throws FxApplicationException on errors
-     */
-    List<Role> getRoleList(long accountId, RoleLoadMode mode) throws FxApplicationException;
-
+    List<Role> getRoles(long accountId, RoleLoadMode mode) throws FxApplicationException;
 
     /**
      * Creates a new user.
@@ -268,7 +234,7 @@ public interface AccountEngine {
      * @throws FxUpdateException      if setting the roles failed
      * @throws FxApplicationException on errors
      */
-    void setRoleList(long accountId, List<Role> roles) throws FxApplicationException;
+    void setRoles(long accountId, List<Role> roles) throws FxApplicationException;
 
     /**
      * Sets the groups a user defined by its unique id belongs to.
@@ -304,7 +270,7 @@ public interface AccountEngine {
      */
     void addGroup(long accountId, long groupId) throws FxApplicationException;
 
-    void setGroupList(long accountId, List<UserGroup> groups) throws FxApplicationException;
+    void setGroups(long accountId, List<UserGroup> groups) throws FxApplicationException;
 
 
     /**
@@ -335,7 +301,7 @@ public interface AccountEngine {
      * @throws FxLoadException        if the load failed
      * @throws FxApplicationException on errors
      */
-    Account[] loadAll(String name, String loginName, String email, Boolean isActive,
+    List<Account> loadAll(String name, String loginName, String email, Boolean isActive,
                       Boolean isConfirmed, Long mandatorId, int[] isInRole, long[] isInGroup, int startIdx, int maxEntries)
             throws FxApplicationException;
 
@@ -346,7 +312,7 @@ public interface AccountEngine {
      * @return all accounts of the mandator.
      * @throws FxApplicationException on errors
      */
-    Account[] loadAll(long mandatorId) throws FxApplicationException;
+    List<Account> loadAll(long mandatorId) throws FxApplicationException;
 
     /**
      * Loads all accounts. Unless the calling user is a global supervisor, this call returns the same result
@@ -355,7 +321,7 @@ public interface AccountEngine {
      * @return all accounts.
      * @throws FxApplicationException on errors
      */
-    Account[] loadAll() throws FxApplicationException;
+    List<Account> loadAll() throws FxApplicationException;
 
     /**
      * Returns number of users matching the parameters.
@@ -459,7 +425,7 @@ public interface AccountEngine {
      * @throws FxLoadException        if the get failed
      * @throws FxNotFoundException    if the group does not exist
      */
-    Account[] getAssignedUsers(long groupId, int startIdx, int maxEntries)
+    List<Account> getAssignedUsers(long groupId, int startIdx, int maxEntries)
             throws FxApplicationException;
 
     /**
@@ -489,7 +455,7 @@ public interface AccountEngine {
      * @throws FxNoAccessException    if the calling user may not access the ACLAssignment of the given user
      * @throws FxApplicationException on errors
      */
-    ACLAssignment[] loadAccountAssignments(long accountId) throws FxApplicationException;
+    List<ACLAssignment> loadAccountAssignments(long accountId) throws FxApplicationException;
 
     /**
      * Create contact data for all accounts that dont have them

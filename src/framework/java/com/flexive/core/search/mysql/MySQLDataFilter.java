@@ -51,6 +51,7 @@ import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.sqlParser.*;
 import static com.flexive.sqlParser.Condition.Comparator;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -112,7 +113,7 @@ public class MySQLDataFilter extends DataFilter {
             final String briefcaseIdFilter = "SELECT id from " + DatabaseConst.TBL_BRIEFCASE_DATA +
                     " WHERE briefcase_id " +
                     (getStatement().getBriefcaseFilter().length == 1 ? ("=" + briefcaseIds[0]) : "IN (" +
-                            FxArrayUtils.toSeparatedList(briefcaseIds, ',') + ")");
+                            StringUtils.join(ArrayUtils.toObject(briefcaseIds), ',') + ")");
             tableContentData = "(SELECT * FROM " + DatabaseConst.TBL_CONTENT_DATA +
                     " WHERE id IN (" + briefcaseIdFilter + ") " + getVersionFilter(null) + ")";
             tableMain = "(SELECT * FROM " + DatabaseConst.TBL_CONTENT +

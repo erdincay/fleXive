@@ -350,8 +350,7 @@ public class SqlParserTest {
      * @throws SqlParserException on parser errors
      */
     private FxStatement parse(String query) throws SqlParserException {
-        //noinspection NullArgumentToVariableArgMethod
-        return parse(query, null);
+        return parse(query, (String[]) null);
     }
 
 

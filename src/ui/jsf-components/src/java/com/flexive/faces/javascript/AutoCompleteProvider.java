@@ -92,7 +92,7 @@ public class AutoCompleteProvider {
      * @throws java.io.IOException  if the response could not be created
      */
     public String userQuery(String query) throws FxApplicationException, IOException {
-        final Account[] accounts = EJBLookup.getAccountEngine().loadAll();
+        final List<Account> accounts = EJBLookup.getAccountEngine().loadAll();
         final List<ResponseLine> result = new ArrayList<ResponseLine>();
         final String ucQuery = query != null ? query.toUpperCase() : "";
         for (Account account : accounts) {

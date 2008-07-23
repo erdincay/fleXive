@@ -34,6 +34,7 @@ package com.flexive.core.security;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLoadException;
@@ -239,10 +240,14 @@ public class UserTicketStore {
         try {
             AccountEngine ae = EJBLookup.getAccountEngine();
             Account acc = ae.load(loginName);
-            UserGroupList gl = ae.getGroups(acc.getId());
-            Role roles[] = ae.getRoles(acc.getId(), AccountEngine.RoleLoadMode.ALL);
-            ACLAssignment[] aad = ae.loadAccountAssignments(acc.getId());
-            return new UserTicketImpl(ri.getApplicationId(), ri.isWebDAV(), acc, gl.toLongArray(), roles, aad, acc.getLanguage());
+            final List<UserGroup> groups = ae.getGroups(acc.getId());
+            final List<Role> roleList = ae.getRoles(acc.getId(), AccountEngine.RoleLoadMode.ALL);
+            final Role[] roles = roleList.toArray(new Role[roleList.size()]);
+            final List<ACLAssignment> assignmentList = ae.loadAccountAssignments(acc.getId());
+            ACLAssignment[] aad = assignmentList.toArray(new ACLAssignment[assignmentList.size()]);
+            return new UserTicketImpl(ri.getApplicationId(), ri.isWebDAV(), acc,
+                    FxSharedUtils.getSelectableObjectIds(groups),
+                    roles, aad, acc.getLanguage());
         } catch (FxNoAccessException exc) {
             // This should NEVER happen since we are running as system
             throw new FxLoadException(LOG, exc);

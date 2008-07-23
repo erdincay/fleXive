@@ -31,7 +31,6 @@
  ***************************************************************/
 package com.flexive.core.search;
 
-import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.value.FxString;
@@ -172,7 +171,7 @@ public class FxResultSetImpl implements Serializable, FxResultSet {
      * {@inheritDoc} *
      */
     public String[] getColumnNames() {
-        return FxArrayUtils.clone(this.columnNames);
+        return this.columnNames.clone();
     }
 
     /**

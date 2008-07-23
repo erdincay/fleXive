@@ -54,7 +54,6 @@ import com.flexive.shared.value.*;
 import com.flexive.shared.value.renderer.FxValueFormatter;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
-import com.flexive.core.conversion.ConversionEngine;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -65,7 +64,6 @@ import javax.faces.model.SelectItem;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.Serializable;
-import java.io.IOException;
 import java.util.*;
 
 public class ContentEditorBean implements ActionBean, Serializable {
@@ -997,7 +995,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
 
 
     public String getElements() {
-        return elements == null ? "" : FxArrayUtils.toSeparatedList(elements, ",");
+        return elements == null ? "" : StringUtils.join(elements, ",");
     }
 
     public void setElements(String elements) {

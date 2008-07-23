@@ -49,6 +49,7 @@ import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxString;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -57,7 +58,6 @@ import javax.ejb.*;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -229,19 +229,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public ArrayList<UserGroup> getGroupList(long accountId) throws FxApplicationException {
-        UserGroupList gl = getGroups(accountId);
-        ArrayList<UserGroup> result = new ArrayList<UserGroup>(gl.size());
-        for (long id : gl.toLongArray())
-            result.add(group.load(id));
-        return result;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public UserGroupList getGroups(long accountId) throws FxApplicationException {
+    public List<UserGroup> getGroups(long accountId) throws FxApplicationException {
 
         Connection con = null;
         Statement stmt = null;
@@ -266,7 +254,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                     " WHERE grp.ID=ass.USERGROUP AND ass.ACCOUNT=" + accountId;
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(curSql);
-            ArrayList<UserGroup> tmp = new ArrayList<UserGroup>(10);
+            final List<UserGroup> result = new ArrayList<UserGroup>(10);
             while (rs != null && rs.next()) {
                 long id = rs.getLong(1);
                 String grpName = rs.getString(2);
@@ -274,10 +262,9 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                 String grpColor = rs.getString(4);
                 final UserGroup aGroup = new UserGroup(id, grpName, grpMandator, grpColor);
                 if (LOG.isDebugEnabled()) LOG.debug("Found group for user [" + accountId + "]: " + aGroup);
-                tmp.add(aGroup);
+                result.add(aGroup);
             }
-            // Return as array
-            return new UserGroupList(tmp.toArray(new UserGroup[tmp.size()]));
+            return result;
         } catch (SQLException exc) {
             throw new FxLoadException(LOG, exc, "ex.account.groups.loadFailed.sql", accountId, exc.getMessage());
         } finally {
@@ -313,20 +300,11 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         }
     }
 
-    /**
+     /**
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public List<Role> getRoleList(long accountId, RoleLoadMode mode) throws FxApplicationException {
-        return Arrays.asList(getRoles(accountId, mode));
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public Role[] getRoles(long accountId, RoleLoadMode mode) throws FxApplicationException {
+    public List<Role> getRoles(long accountId, RoleLoadMode mode) throws FxApplicationException {
         Connection con = null;
         Statement stmt = null;
         String curSql;
@@ -352,15 +330,13 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                             TBL_ASSIGN_GROUPS + " WHERE ACCOUNT=" + accountId + " )" : "");
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(curSql);
-            ArrayList<Byte> tmp = new ArrayList<Byte>(15);
+            List<Role> result = new ArrayList<Role>(15);
             while (rs != null && rs.next())
-                tmp.add(rs.getByte(1));
-            Role[] roles = new Role[tmp.size()];
-            for (int i = 0; i < tmp.size(); i++)
-                roles[i] = Role.getById(tmp.get(i));
+                result.add(Role.getById(rs.getByte(1)));
+
             if (LOG.isDebugEnabled())
-                LOG.debug("Role for user [" + accountId + "]: " + FxArrayUtils.toSeparatedList(roles, ','));
-            return roles;
+                LOG.debug("Role for user [" + accountId + "]: " + result);
+            return result;
         } catch (SQLException exc) {
             throw new FxLoadException(LOG, exc, "ex.account.roles.loadFailed.sql", accountId, exc.getMessage());
         } finally {
@@ -695,7 +671,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void setGroupList(long accountId, List<UserGroup> groups) throws FxApplicationException {
+    public void setGroups(long accountId, List<UserGroup> groups) throws FxApplicationException {
         if (groups != null && groups.size() > 0) {
             long groupIds[] = new long[groups.size()];
             int pos = 0;
@@ -737,7 +713,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         groups = FxArrayUtils.addElement(groups, group.loadMandatorGroup(account.getMandatorId()).getId());
 
         // Check the groups
-        UserGroupList currentlyAssigned;
+        List<UserGroup> currentlyAssigned;
         try {
             currentlyAssigned = getGroups(accountId);
         } catch (FxLoadException exc) {
@@ -749,15 +725,14 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             if (grp == UserGroup.GROUP_EVERYONE) continue;
             if (grp == UserGroup.GROUP_OWNER) continue;
             if (grp == UserGroup.GROUP_UNDEFINED) continue;
-            if (currentlyAssigned.contains(grp)) continue;
+            if (FxSharedUtils.indexOfSelectableObject(currentlyAssigned, grp) != -1) continue;
             // Perform the check for all regular groups, loading an inaccessible
             // group will throw an exception which is what we want here
             UserGroup g = group.load(grp);
             if (g.isSystem())
                 continue;
             //make sure the calling user is assigned all roles of the group as well
-            RoleList rl = group.getRoles(grp);
-            for (Role check : rl.getRoles())
+            for (Role check : group.getRoles(grp))
                 if (!ticket.isInRole(check))
                     throw new FxNoAccessException("ex.account.roles.assign.noMember.group", check.name(), g.getName());
             if (!ticket.isGlobalSupervisor()) {
@@ -806,7 +781,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void setRoleList(long accountId, List<Role> roles) throws FxApplicationException {
+    public void setRoles(long accountId, List<Role> roles) throws FxApplicationException {
         if (roles != null && roles.size() > 0) {
             setRoles(accountId, roles.toArray(new Role[roles.size()]));
         } else {
@@ -837,13 +812,11 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             UserTicket ticket = FxContext.get().getTicket();
             //only allow to assign roles which the calling user is a member of (unless it is a global supervisor)
             if (!ticket.isGlobalSupervisor() && !(ticket.isMandatorSupervisor() && account.getMandatorId() == ticket.getMandatorId())) {
-                Role[] orgRoles = getRoles(accountId, RoleLoadMode.FROM_USER_ONLY);
-                long[] orgRoleIds = new long[orgRoles.length];
-                for (int i = 0; i < orgRoles.length; i++)
-                    orgRoleIds[i] = orgRoles[i].getId();
+                List<Role> orgRoles = getRoles(accountId, RoleLoadMode.FROM_USER_ONLY);
+                final long[] orgRoleIds = FxSharedUtils.getSelectableObjectIds(orgRoles);
                 //check removed roles
                 for (long check : orgRoleIds) {
-                    if (!FxArrayUtils.containsElement(roles, check)) {
+                    if (!ArrayUtils.contains(roles, check)) {
                         if (!ticket.isInRole(Role.getById(check))) {
                             ctx.setRollbackOnly();
                             throw new FxNoAccessException("ex.account.roles.assign.noMember.remove", Role.getById(check).getName());
@@ -852,7 +825,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                 }
                 //check added roles
                 for (long check : roles) {
-                    if (!FxArrayUtils.containsElement(orgRoleIds, check)) {
+                    if (!ArrayUtils.contains(orgRoleIds, check)) {
                         if (!ticket.isInRole(Role.getById(check))) {
                             ctx.setRollbackOnly();
                             throw new FxNoAccessException("ex.account.roles.assign.noMember.add", Role.getById(check).getName());
@@ -898,9 +871,9 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void addRole(long accountId, long roleId) throws FxApplicationException {
         final List<Role> roles = new ArrayList<Role>();
-        roles.addAll(getRoleList(accountId, RoleLoadMode.ALL));
+        roles.addAll(getRoles(accountId, RoleLoadMode.ALL));
         roles.add(Role.getById(roleId));
-        setRoleList(accountId, roles);
+        setRoles(accountId, roles);
     }
 
     /**
@@ -909,9 +882,9 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void addGroup(long accountId, long groupId) throws FxApplicationException {
         final List<UserGroup> groups = new ArrayList<UserGroup>();
-        groups.addAll(getGroupList(accountId));
+        groups.addAll(getGroups(accountId));
         groups.add(group.load(groupId));
-        setGroupList(accountId, groups);
+        setGroups(accountId, groups);
     }
 
     /**
@@ -934,7 +907,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public Account[] loadAll(String name, String loginName, String email, Boolean isActive,
+    public List<Account> loadAll(String name, String loginName, String email, Boolean isActive,
                              Boolean isConfirmed, Long mandatorId, int[] isInRole, long[] isInGroup, int startIdx, int maxEntries)
             throws FxApplicationException {
 
@@ -996,7 +969,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             }
 
 
-            return alResult.toArray(new Account[alResult.size()]);
+            return alResult;
         } catch (FxInvalidLanguageException exc) {
             throw new FxLoadException(exc);
         } catch (SQLException exc) {
@@ -1010,14 +983,14 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
     /**
      * {@inheritDoc}
      */
-    public Account[] loadAll(long mandatorId) throws FxApplicationException {
+    public List<Account> loadAll(long mandatorId) throws FxApplicationException {
         return loadAll(null, null, null, null, null, mandatorId, null, null, 0, Integer.MAX_VALUE);
     }
 
     /**
      * {@inheritDoc}
      */
-    public Account[] loadAll() throws FxApplicationException {
+    public List<Account> loadAll() throws FxApplicationException {
         final UserTicket ticket = FxContext.get().getTicket();
         return loadAll(null, null, null, null, null,
                 ticket.isGlobalSupervisor() ? null : ticket.getMandatorId(),
@@ -1084,14 +1057,14 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                 // Group link
                 ((!filterByGrp) ? "" :
                         " AND EXISTS (SELECT 1 FROM " + TBL_ASSIGN_GROUPS + " grp WHERE grp.ACCOUNT=usr.ID AND grp.USERGROUP IN (" +
-                                FxArrayUtils.toSeparatedList(isInGroup, ',') + "))") +
+                                StringUtils.join(ArrayUtils.toObject(isInGroup), ',') + "))") +
 
                 // Role link
                 ((!filterByRole) ? "" :
                         " AND (EXISTS (SELECT 1 FROM " + TBL_ASSIGN_ROLES + " rol WHERE rol.ACCOUNT=usr.ID and rol.ROLE IN (" +
-                                FxArrayUtils.toSeparatedList(isInRole, ',') + ")) OR " +
+                                StringUtils.join(ArrayUtils.toObject(isInRole), ',') + ")) OR " +
                                 "EXISTS (SELECT 1 FROM " + TBL_ASSIGN_ROLES + " rol, " + TBL_ASSIGN_GROUPS + " grp WHERE " +
-                                "grp.ACCOUNT=usr.ID AND rol.USERGROUP=grp.USERGROUP AND rol.ROLE IN (" + FxArrayUtils.toSeparatedList(isInRole, ',') + ")))") +
+                                "grp.ACCOUNT=usr.ID AND rol.USERGROUP=grp.USERGROUP AND rol.ROLE IN (" + StringUtils.join(ArrayUtils.toObject(isInRole), ',') + ")))") +
 
                 // Order
                 (isCountOnly ? "" : " ORDER by usr.LOGIN_NAME");
@@ -1323,7 +1296,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public Account[] getAssignedUsers(long groupId, int startIdx, int maxEntries)
+    public List<Account> getAssignedUsers(long groupId, int startIdx, int maxEntries)
             throws FxApplicationException {
 
         final UserTicket ticket = FxContext.get().getTicket();
@@ -1393,7 +1366,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public ACLAssignment[] loadAccountAssignments(long accountId) throws
+    public List<ACLAssignment> loadAccountAssignments(long accountId) throws
             FxApplicationException {
         Connection con = null;
         Statement stmt = null;
@@ -1412,7 +1385,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                     throw nae;
                 }
             } catch (FxNotFoundException exc) {
-                return new ACLAssignment[0];
+                return new ArrayList<ACLAssignment>(0);
             }
         }
 
@@ -1446,8 +1419,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                         rs.getBoolean(6), rs.getBoolean(8), ACL.Category.getById(rs.getByte(9)),
                         LifeCycleInfoImpl.load(rs, 10, 11, 12, 13)));
             }
-            // Return the found entries
-            return result.toArray(new ACLAssignment[result.size()]);
+            return result;
         } catch (SQLException exc) {
             FxLoadException dbe = new FxLoadException("Failed to load the ACL assignments for user [" +
                     accountId + "]: " + exc.getMessage(), exc);
@@ -1463,7 +1435,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void fixContactData() throws FxApplicationException {
-        Account[] acct = loadAll(null, null, null, null, null, null, null, null, 0, Integer.MAX_VALUE);
+        List<Account> acct = loadAll(null, null, null, null, null, null, null, null, 0, Integer.MAX_VALUE);
         FxContext.get().runAsSystem();
         try {
             for (Account a : acct) {

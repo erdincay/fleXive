@@ -32,7 +32,6 @@
 package com.flexive.shared.exceptions;
 
 import com.flexive.shared.EJBLookup;
-import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.FxSharedUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -66,7 +65,7 @@ public class FxExceptionMessage implements Serializable {
      */
     public FxExceptionMessage(String key, Object... values) {
         this.key = key;
-        this.values = values != null ? FxArrayUtils.clone(values) : new Object[0];
+        this.values = values != null ? values.clone() : new Object[0];
     }
 
     /**

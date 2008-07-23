@@ -38,14 +38,12 @@ import com.flexive.shared.interfaces.AccountEngine;
 import com.flexive.shared.security.*;
 import com.flexive.shared.structure.FxEnvironment;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.List;
+import java.util.*;
 
 /**
  * Implementation of the interface UserTicket.<br>
@@ -110,9 +108,11 @@ public class UserTicketImpl implements UserTicket, Serializable {
     public static synchronized void reloadGuestTicketAssignments(boolean flagDirty) {
         try {
             AccountEngine accountInterface = EJBLookup.getAccountEngine();
-            guestACLAssignments = accountInterface.loadAccountAssignments(Account.USER_GUEST);
-            guestRoles = accountInterface.getRoles(Account.USER_GUEST, AccountEngine.RoleLoadMode.ALL);
-            guestGroups = accountInterface.getGroups(Account.USER_GUEST).toLongArray();
+            final List<ACLAssignment> assignmentList = accountInterface.loadAccountAssignments(Account.USER_GUEST);
+            guestACLAssignments = assignmentList.toArray(new ACLAssignment[assignmentList.size()]);
+            final List<Role> roles = accountInterface.getRoles(Account.USER_GUEST, AccountEngine.RoleLoadMode.ALL);
+            guestRoles = roles.toArray(new Role[roles.size()]);
+            guestGroups = FxSharedUtils.getSelectableObjectIds(accountInterface.getGroups(Account.USER_GUEST));
             guestContactData = accountInterface.load(Account.USER_GUEST).getContactData();
             if (flagDirty)
                 UserTicketStore.flagDirtyHavingUserId(Account.USER_GUEST);
@@ -126,7 +126,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
      * {@inheritDoc}
      */
     public final boolean isInRole(Role role) {
-        return isGlobalSupervisor() || roles != null && FxArrayUtils.containsElement(roles, role);
+        return isGlobalSupervisor() || roles != null && ArrayUtils.contains(roles, role);
     }
 
     /**
@@ -140,7 +140,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
      * {@inheritDoc}
      */
     public boolean isInGroup(long group) {
-        return FxArrayUtils.containsElement(groups, group);
+        return ArrayUtils.contains(groups, group);
     }
 
     /**
@@ -170,7 +170,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
             return true;
         }
         for (int group : groups) {
-            if (!FxArrayUtils.containsElement(this.groups, group)) {
+            if (!ArrayUtils.contains(this.groups, (long) group)) {
                 return false;
             }
         }
@@ -185,7 +185,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
             return false;
         }
         for (long group : groups) {
-            if (FxArrayUtils.containsElement(this.groups, group)) {
+            if (ArrayUtils.contains(this.groups, group)) {
                 return true;
             }
         }
@@ -307,7 +307,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
         this.groups = ArrayUtils.clone(groups);
         this.mandator = acc.getMandatorId();
         this.applicationId = applicationId;
-        this.assignments = FxArrayUtils.clone(aad);
+        this.assignments = aad.clone();
         this.language = language;
         this.webDav = isWebDav;
         populateData();
@@ -370,7 +370,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
             this.groups = new long[]{UserGroup.GROUP_EVERYONE};
         } else {
             // Group everyone has to be present
-            if (!(FxArrayUtils.containsElement(this.groups, UserGroup.GROUP_EVERYONE))) {
+            if (!(ArrayUtils.contains(this.groups, UserGroup.GROUP_EVERYONE))) {
                 this.groups = ArrayUtils.add(this.groups, UserGroup.GROUP_EVERYONE);
             }
         }
@@ -411,8 +411,8 @@ public class UserTicketImpl implements UserTicket, Serializable {
                 "; name:" + this.userName +
                 "; mandator:" + this.mandator +
                 "; language: " + this.getLanguage().getIso2digit() +
-                "; groups:" + FxArrayUtils.toSeparatedList(this.groups, ',') +
-                "; roles:" + FxArrayUtils.toSeparatedList(this.roles, ',') +
+                "; groups:" + StringUtils.join(ArrayUtils.toObject(this.groups), ',') +
+                "; roles:" + StringUtils.join(ArrayUtils.toObject(FxSharedUtils.getSelectableObjectIds(Arrays.asList((SelectableObjectWithLabel[]) this.roles))), ',') +
                 "; globalSupervisor:" + this.globalSupervisor +
                 "; multiLogin:" + this.multiLogin +
                 "]";
@@ -435,7 +435,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
      * {@inheritDoc}
      */
     public ACLAssignment[] getACLAssignments() {
-        return FxArrayUtils.clone(this.assignments);
+        return this.assignments.clone();
     }
 
     /**

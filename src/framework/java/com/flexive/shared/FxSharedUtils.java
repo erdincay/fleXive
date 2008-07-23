@@ -940,6 +940,38 @@ public final class FxSharedUtils {
     }
 
     /**
+     * Extract the unique IDs of the given {@link SelectableObject} collection.
+     *
+     * @param values    the input values
+     * @return          the IDs of the input values
+     */
+    public static long[] getSelectableObjectIds(Collection<? extends SelectableObject> values) {
+        final long[] result = new long[values.size()];
+        int idx = 0;
+        for (SelectableObject object : values) {
+            result[idx++] = object.getId();
+        }
+        return result;
+    }
+
+    /**
+     * Returns the index of the {@link SelectableObject} with the given ID, or -1 if none was found.
+     *
+     * @param values    the values to be examined
+     * @param id        the target ID
+     * @return          the index of the {@link SelectableObject} with the given ID, or -1 if none was found.          
+     */
+    public static int indexOfSelectableObject(List<? extends SelectableObject> values, long id) {
+        for (int i = 0; i < values.size(); i++) {
+            final SelectableObject object = values.get(i);
+            if (object.getId() == id) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
      * Comparator for sorting Assignments according to their position.
      */
     public static class AssignmentPositionSorter implements Comparator<FxAssignment>, Serializable {

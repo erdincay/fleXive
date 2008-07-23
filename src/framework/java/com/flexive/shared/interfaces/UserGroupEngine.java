@@ -33,9 +33,7 @@ package com.flexive.shared.interfaces;
 
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.security.Role;
-import com.flexive.shared.security.RoleList;
 import com.flexive.shared.security.UserGroup;
-import com.flexive.shared.security.UserGroupList;
 
 import javax.ejb.Remote;
 import java.util.List;
@@ -72,7 +70,7 @@ public interface UserGroupEngine {
      * @return UserGroup containing all users of the mandator
      * @throws FxApplicationException on errors
      */
-    public UserGroup loadMandatorGroup(long mandatorId) throws FxApplicationException;
+    UserGroup loadMandatorGroup(long mandatorId) throws FxApplicationException;
 
     /**
      * Loads all groups belonging to a specific mandator, plus GROUP_EVERYONE and GROUP_OWNER.
@@ -85,7 +83,7 @@ public interface UserGroupEngine {
      * @throws FxNoAccessException    If the calling user may not access the groups of the given mandator
      * @throws FxLoadException        if the load failed
      */
-    UserGroupList loadAll(long mandatorId) throws FxApplicationException;
+    List<UserGroup> loadAll(long mandatorId) throws FxApplicationException;
 
     /**
      * Creates a new group for a specific mandator.
@@ -191,7 +189,7 @@ public interface UserGroupEngine {
      * @throws FxNotFoundException    if the group does not exist
      * @throws FxLoadException        if the function failed to load the data
      */
-    RoleList getRoles(long groupId) throws FxApplicationException;
+    List<Role> getRoles(long groupId) throws FxApplicationException;
 
     /**
      * Rebuild the mandator groups
