@@ -81,7 +81,7 @@ public class BriefcaseBean {
         try {
             if (list == null) {
                 // Load only once per request
-                list = briefcaseEng.getList(true);
+                list = briefcaseEng.loadAll(true);
             }
             return list;
         } catch (Throwable t) {

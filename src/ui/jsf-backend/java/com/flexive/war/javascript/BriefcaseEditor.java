@@ -60,7 +60,7 @@ public class BriefcaseEditor implements Serializable {
         final StringWriter out = new StringWriter();
         final JsonWriter writer = new JsonWriter(out);
         writer.startArray();
-        for (Briefcase briefcase : EJBLookup.getBriefcaseEngine().getList(true)) {
+        for (Briefcase briefcase : EJBLookup.getBriefcaseEngine().loadAll(true)) {
             writer.startMap()
                     .writeAttribute("id", briefcase.getId())
                     .writeAttribute("name", briefcase.getName())
