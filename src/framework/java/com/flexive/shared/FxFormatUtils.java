@@ -580,10 +580,10 @@ public final class FxFormatUtils {
                 return getDateTimeFormat().parse(unquote(value));
             } catch (ParseException e) {
                 try {
-                    return getDateFormat().parse(unquote(value));
-                } catch (ParseException e2) {
                     //fallback to universal format if "short" format is no match
                     return new SimpleDateFormat(UNIVERSAL_TIMEFORMAT).parse(unquote(value));
+                } catch (ParseException e2) {
+                    return getDateFormat().parse(unquote(value));
                 }
             }
         } catch (Exception e) {
