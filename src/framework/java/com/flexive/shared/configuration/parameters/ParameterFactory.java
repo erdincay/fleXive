@@ -37,6 +37,7 @@ import com.flexive.shared.exceptions.FxCreateException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Collections;
 
 /**
  * <p>
@@ -63,34 +64,83 @@ import java.util.Map;
  * @version $Rev$
  */
 public final class ParameterFactory {
-    private static final Map<Class, Class<? extends Parameter>> INSTANCES = new HashMap<Class, Class<? extends Parameter>>();
+    private static final Map<Class, Class<? extends Parameter>> INSTANCES;
 
     static {
-        INSTANCES.put(Boolean.class, BooleanParameter.class);
-        INSTANCES.put(Integer.class, IntegerParameter.class);
-        INSTANCES.put(Long.class, LongParameter.class);
-        INSTANCES.put(String.class, StringParameter.class);
+        final Map<Class, Class<? extends Parameter>> instances = new HashMap<Class, Class<? extends Parameter>>();
+        instances.put(Boolean.class, BooleanParameter.class);
+        instances.put(Integer.class, IntegerParameter.class);
+        instances.put(Long.class, LongParameter.class);
+        instances.put(String.class, StringParameter.class);
+        INSTANCES = Collections.unmodifiableMap(instances);
     }
 
     private ParameterFactory() {
     }
 
+    /**
+     * Creates a new parameter from a {@link ParameterData} instance.
+     *
+     * @param cls   the parameter type class
+     * @param data  the bean holding all parameter properties
+     * @return      a new parameter instance
+     */
     public static <T> Parameter<T> newInstance(Class<T> cls, ParameterData<T> data) {
         return getImpl(cls).setData(data).freeze();
     }
 
+    /**
+     * Create a new parameter with key and default value, using path information from a {@link ParameterPath} object.
+     *
+     * @param cls   the parameter type class
+     * @param path  the path description
+     * @param key   the parameter key
+     * @param defaultValue  the default value (if null, no default value will be used)
+     * @return      a new parameter instance
+     */
     public static <T> Parameter<T> newInstance(Class<T> cls, ParameterPath path, String key, T defaultValue) {
         return newInstance(cls, new ParameterDataBean<T>(path, key, defaultValue));
     }
 
+    /**
+     * Create a new parameter without a specific key and a default value. The key has to be specified
+     * in configuration queries. This is useful for dynamic keys, e.g. for storing user preferences
+     * for different pages (using the page path for the key).
+     *
+     * @param cls   the parameter type class
+     * @param path  the path description
+     * @param defaultValue  the default value (if null, no default value will be used)
+     * @return      a new parameter instance
+     */
     public static <T> Parameter<T> newInstance(Class<T> cls, ParameterPath path, T defaultValue) {
         return newInstance(cls, path, "", defaultValue);
     }
 
+    /**
+     * Create a new parameter for a path with key and default value.
+     *
+     * @param cls   the parameter type class
+     * @param path  the path description
+     * @param scope the parameter scope (user, division, or global)
+     * @param key   the parameter key
+     * @param defaultValue  the default value (if null, no default value will be used)
+     * @return  a new parameter instance
+     */
     public static <T> Parameter<T> newInstance(Class<T> cls, String path, ParameterScope scope, String key, T defaultValue) {
         return newInstance(cls, new ParameterPathBean(path, scope), key, defaultValue);
     }
 
+    /**
+     * Create a new parameter for a path with a default value, but without a fixed key. The key has to be specified
+     * in configuration queries. This is useful for dynamic keys, e.g. for storing user preferences
+     * for different pages (using the page path for the key).
+     *
+     * @param cls   the parameter type class
+     * @param path  the path description
+     * @param scope the parameter scope (user, division, or global)
+     * @param defaultValue  the default value (if null, no default value will be used)
+     * @return  a new parameter instance
+     */
     public static <T> Parameter<T> newInstance(Class<T> cls, String path, ParameterScope scope, T defaultValue) {
         return newInstance(cls, new ParameterPathBean(path, scope), "", defaultValue);
     }
