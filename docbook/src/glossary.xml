@@ -114,4 +114,24 @@
         </glossdef>
     </glossentry>
 
+    <glossentry xml:id="gloss_division">
+        <glossterm>division</glossterm>
+        <glossdef>
+            <para>
+                A logical installation of &flexive;. It defines the JDBC data source to be used, as
+                well as the domains that map to this installation. A &flexive; server can handle
+                multiple divisions that are isolated from each other.
+            </para>
+        </glossdef>
+    </glossentry>
+
+    <glossentry xml:id="gloss_global_supervisor">
+        <glossterm>global supervisor</glossterm>
+        <glossdef>
+            <para>
+                The &flexive; superuser role. No permission checks are performed at all if a user
+                has this role.
+            </para>
+        </glossdef>
+    </glossentry>
 </glossary>

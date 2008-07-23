@@ -37,8 +37,9 @@ import com.flexive.shared.workflow.Workflow;
 import javax.ejb.Remote;
 
 /**
- * The workflow class represets a workflow that defines steps that are connected
- * through routes.
+ * Workflow management engine.
+ *
+ * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 @Remote
 public interface WorkflowEngine {

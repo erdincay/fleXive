@@ -36,6 +36,7 @@ import com.flexive.shared.workflow.Route;
 import com.flexive.shared.workflow.Step;
 
 import javax.ejb.Remote;
+import java.util.List;
 
 /**
  * Workflow route engine interface.
@@ -55,18 +56,8 @@ public interface RouteEngine {
 	 * @throws FxLoadException if the function failed to load the steps
 	 * @throws FxNotFoundException if the from step does not exist
 	 */
-	Step[] getTargets(long fromStep) throws FxApplicationException;
+	List<Step> getTargets(long fromStep) throws FxApplicationException;
 	
-	/**
-	 * Returns all defined routes within a workflow.
-	 *
-	 * @param workflowId the unique workflow id
-	 * @return all defined routes within a workflow
-	 * @throws FxApplicationException TODO
-	 * @throws FxLoadException if the function failed to read the routes
-	 */
-	Route[] loadRoutes(long workflowId) throws FxApplicationException;
-
     /**
 	 * Creates a new route.
 	 * <p/>

@@ -69,7 +69,7 @@ public interface BriefcaseEngine {
      * @return the briefcases
      * @throws FxApplicationException if the function fails
      */
-    List<Briefcase> getList(boolean includeShared) throws FxApplicationException;
+    List<Briefcase> loadAll(boolean includeShared) throws FxApplicationException;
 
     /**
      * Loads the briefcase with the given id.

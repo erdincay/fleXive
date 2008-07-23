@@ -101,7 +101,7 @@ public interface ResultPreferencesEngine {
      * @param preferences   the preferences to be saved
      * @param typeId        the content type ID
      * @param viewType      the view type (list, thumbs)
-     * @param location      the "location" where the results will be displayed
+     * @param locations      the result location(s) where the results will be displayed
      * @throws FxApplicationException   if the result preferences could not be updated
      */
     void saveSystemDefault(ResultPreferences preferences, long typeId, ResultViewType viewType, ResultLocation... locations) throws FxApplicationException;

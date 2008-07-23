@@ -6,4 +6,160 @@
 <section xml:id="core_configuration" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude">
     <title>Configuration Engine</title>
+
+    <xi:include href="../includes/author_dlichtenberger.xml"/>
+
+    <para>
+        The
+        <ulink url="&flexiveJavadocBase;shared/com/flexive/shared/interfaces/GenericConfigurationEngine.html">
+            configuration engine
+        </ulink>
+        provides a hierarchical storage for configuration properties.
+        It allows to override default parameters with user-specific settings, and uses the
+        distributed cache to avoid database lookups.
+    </para>
+
+    <section xml:id="core_configuration_overview">
+        <title>Conceptual Overview</title>
+
+        <para>
+            A configuration parameter is characterized by the following properties:
+            <itemizedlist>
+                <listitem>
+                    <para>
+                        The
+                        <emphasis>key</emphasis>
+                        is a unique identifier for the actual configuration entry.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        The
+                        <emphasis>path</emphasis>
+                        allows to organize configuration entries similar to a file system.
+                        Keys are unique (only) for the same path.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        The
+                        <emphasis>scope</emphasis>
+                        tells the configuration engine where the configuration entry can be stored:
+                    </para>
+                    <variablelist>
+                        <varlistentry>
+                            <term>global</term>
+                            <listitem>
+                                <para>
+                                    for entries that are shared across the entire &flexive; installation
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>division</term>
+                            <listitem>
+                                <para>
+                                    for entries that are shared across a &flexive; &division;
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>user</term>
+                            <listitem>
+                                <para>
+                                    for entries that can be customized by the user.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                    <para>
+                        The scope also includes fallback scopes, for example a
+                        <emphasis>user</emphasis>
+                        parameter may use
+                        <emphasis>division</emphasis>
+                        for its fallback scope: the value stored in the division configuration acts as a default value
+                        for
+                        all users, who can (but do not have to) override this with their own setting.
+                    </para>
+                </listitem>
+            </itemizedlist>
+        </para>
+
+    </section>
+
+    <section xml:id="core_configuration_use">
+        <title>Working with configuration parameters</title>
+
+        <para>
+            A parameter is usually defined using one of the
+            <ulink url="&flexiveJavadocBase;shared/com/flexive/shared/configuration/parameters/ParameterFactory.html">
+                ParameterFactory
+            </ulink>
+            factory methods. The parameter interface uses Java generics to provide typesafe manipulation of the
+            configuration values, for example it is not possible (using the configuration APIs) to store a String value
+            in an Integer parameter. Let's start with declaring a configuration parameter of type Integer:
+        </para>
+        <programlisting language="java"><![CDATA[public static final Parameter<Integer> INT_PARAM =
+    ParameterFactory.newInstance(
+        Integer.class,       /* value class */
+        "/config/test",      /* path */
+        ParameterScope.USER,
+        "param1"             /* key */,
+        21                   /* default value */
+    );]]></programlisting>
+        <para>
+            Our new parameter uses
+            <emphasis>user scope</emphasis>,
+            which (by definition) uses the division configuration as a fallback.
+            This means we can now store values both in the division and user configuration. Of course, unless
+            we are logged in as a
+            <glossterm>global supervisor</glossterm>,
+            we cannot update the division configuration, but any user can update his or her own configuration.
+            By default, the configuration engine uses the "least shared" scope, in our case the user scope.
+            The following call puts a value in the configuration of the calling user and displays the new value:
+        </para>
+        <programlisting language="java"><![CDATA[EJBLookup.getConfigurationEngine().put(INT_PARAM, 123456);
+
+System.out.println("User parameter value: " + EJBLookup.getConfigurationEngine().get(INT_PARAM));]]></programlisting>
+        <para>
+            Having
+            <glossterm>global supervisor</glossterm>
+            privileges (e.g. in a
+            <glossterm>run-once script</glossterm>)
+            we can also update the fallback value using the division configuration engine (which has the
+            same interface as the configuration engine, but always uses division scope):
+        </para>
+        <programlisting language="java"><![CDATA[EJBLookup.getDivisionConfigurationEngine().put(INT_PARAM, 123456);
+]]></programlisting>
+
+
+        <section xml:id="core_configuration_use_objectparams">
+            <title>Object parameters</title>
+
+            <para>
+                The configuration engine supports generic value types through serialization to XML
+                with &xstream;. The
+                <classname>ParameterFactory</classname>
+                methods return optimized parameter implementations for most primitive values
+                (e.g. Integer, Long or String), and uses the &xstream;-based implementation for everything
+                else. For example, the following code declares and uses a parameter for values of type
+                <classname>java.awt.Point</classname>:
+            </para>
+
+            <programlisting language="java"><![CDATA[
+// declare parameter
+final Parameter<Point> POINT_PARAM = ParameterFactory.newInstance(Point.class,
+                            "/config/test",         /* path */
+                            ParameterScope.USER,
+                            "pointParam",           /* key */
+                            new Point(10, 20)       /* default value */);
+
+// store Point value
+EJBLookup.getConfigurationEngine().put(POINT_PARAM, new Point(3, 4));
+
+// retrieve stored value
+System.out.println("Point parameter: " + EJBLookup.getConfigurationEngine().get(POINT_PARAM));]]></programlisting>
+        </section>
+    </section>
+
 </section>

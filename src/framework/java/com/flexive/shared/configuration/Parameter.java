@@ -36,6 +36,7 @@ package com.flexive.shared.configuration;
  * 
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @param <T>   parameter value type
+ * @see com.flexive.shared.configuration.parameters.ParameterFactory ParameterFactory
  */
 public interface Parameter<T> {
 	/**

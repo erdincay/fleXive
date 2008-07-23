@@ -272,7 +272,7 @@ public class WorkflowTest {
                         long routeId = routeEngine.create(steps.get(i).getId(), steps.get(j).getId(),
                                 j % 2 == 0 ? UserGroup.GROUP_EVERYONE : UserGroup.GROUP_OWNER);
                         Route route = getEnvironment().getRoute(routeId);
-                        Step[] targets = routeEngine.getTargets(route.getFromStepId());
+                        List<Step> targets = routeEngine.getTargets(route.getFromStepId());
                         boolean found = false;
                         for (Step step : targets) {
                             if (step.getId() == route.getToStepId()) {

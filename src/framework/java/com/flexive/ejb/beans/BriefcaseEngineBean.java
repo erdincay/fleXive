@@ -254,7 +254,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public List<Briefcase> getList(boolean includeShared) throws FxApplicationException {
+    public List<Briefcase> loadAll(boolean includeShared) throws FxApplicationException {
         return getList(null, includeShared);
     }
 

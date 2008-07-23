@@ -57,6 +57,7 @@ import javax.annotation.Resource;
 import javax.ejb.*;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -78,7 +79,7 @@ public class RouteEngineBean implements RouteEngine, RouteEngineLocal {
     @Resource private SessionContext ctx;
 
     /** {@inheritDoc} */
-    public Step[] getTargets(long fromStep) throws FxApplicationException {
+    public List<Step> getTargets(long fromStep) throws FxApplicationException {
         Connection con = null;
         String sql = null;
         Statement stmt = null;
@@ -108,7 +109,7 @@ public class RouteEngineBean implements RouteEngine, RouteEngineLocal {
                     LOG.error("Failed to load step " + stepId + " (skipping it), err=" + exc.getMessage(), exc);
                 }
             }
-            return targets.toArray(new Step[targets.size()]);
+            return targets;
         } catch (SQLException exc) {
             throw new FxLoadException(LOG, "ex.step.load.target", exc, fromStep, exc.getMessage());
         } finally {
@@ -116,52 +117,6 @@ public class RouteEngineBean implements RouteEngine, RouteEngineLocal {
         }
     }
 
-
-    /** {@inheritDoc} */
-    public Route[] loadRoutes(long workflowId) throws FxApplicationException {
-
-        // TODO | Step cache distribution may be too slow to reflect changes,
-        // TODO | this function should read all data from the database instead of using the
-        // TODO | loadStep(..) function.
-
-        //                             1     2               3             4
-        final String sql = "SELECT ro.ID,ro.FROM_STEP,ro.TO_STEP,ro.USERGROUP "
-                + "FROM " + TBL_ROUTES + " ro, " + TBL_STEP + " stp "
-                + "WHERE ro.TO_STEP=stp.ID AND stp.WORKFLOW=" + workflowId + " "
-                + "ORDER BY ro.USERGROUP ASC";
-
-        if (LOG.isDebugEnabled()) LOG.debug("getRoute(" + workflowId + ")=" + sql);
-
-        Connection con = null;
-        Statement stmt = null;
-
-        try {
-
-            // Obtain a database connection
-            con = Database.getDbConnection();
-
-            // Create the new route
-            stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
-            ArrayList<Route> routes = new ArrayList<Route>(50);
-
-            // Process result set
-            while (rs != null && rs.next()) {
-                long routeId = rs.getLong(1);
-                long fromId = rs.getLong(2);
-                long toId = rs.getLong(3);
-                long groupId = rs.getLong(4);
-                Route route = new Route(routeId, groupId, fromId, toId);
-                routes.add(route);
-            }
-
-            return routes.toArray(new Route[routes.size()]);
-        } catch (SQLException exc) {
-            throw new FxLoadException(LOG, "ex.routes.load", exc, workflowId, exc.getMessage());
-        } finally {
-            Database.closeObjects(RouteEngineBean.class, con, stmt);
-        }
-    }
 
     /** {@inheritDoc} */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)

@@ -43,6 +43,8 @@ import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.workflow.Step;
 
+import java.util.List;
+
 /**
  * Tutorial on how to work with FxContents
  *
@@ -122,9 +124,9 @@ public class ContentTutorialExample {
         //get the step the customer should be set to
         //we just retrieve the first available from the customers
         //valid target steps
-        Step[] targets = EJBLookup.getWorkflowRouteEngine().getTargets(customer.getStepId());
-        if (targets.length > 0) {
-            customer.setStepId(targets[0].getId());
+        List<Step> targets = EJBLookup.getWorkflowRouteEngine().getTargets(customer.getStepId());
+        if (targets.size() > 0) {
+            customer.setStepId(targets.get(0).getId());
             ce.save(customer);
         }
     }

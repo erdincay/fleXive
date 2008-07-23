@@ -144,7 +144,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
 
     /** {@inheritDoc} */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public FxScriptInfo[] getScriptInfos() throws FxApplicationException {
+    public List<FxScriptInfo> getScriptInfos() throws FxApplicationException {
         Connection con = null;
         PreparedStatement ps = null;
         String sql;
@@ -168,7 +168,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         } finally {
             Database.closeObjects(ScriptingEngineBean.class, con, ps);
         }
-        return slist.toArray(new FxScriptInfo[slist.size()]);
+        return slist;
     }
 
 

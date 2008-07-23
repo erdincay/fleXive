@@ -64,7 +64,7 @@ public interface ScriptingEngine {
      * @return FxScriptInfo
      * @throws FxApplicationException on errors
      */
-    FxScriptInfo[] getScriptInfos() throws FxApplicationException;
+    List<FxScriptInfo> getScriptInfos() throws FxApplicationException;
 
     /**
      * Update a scripts info
