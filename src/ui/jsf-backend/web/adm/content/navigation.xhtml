@@ -75,7 +75,7 @@
             // attach node in the content editor
             function attachNode(menuItem) {
                 if (!getContentFrame().isContentEditor) {
-                    alert("#{fxMessageBean['ContentTree.dialog.noEditor']}");
+                    alertDialog("#{fxMessageBean['ContentTree.dialog.noEditor']}");
                     return;
                 }
                 getContentFrame().addTreeNode(getObjectId(menuItem));
@@ -83,45 +83,46 @@
 
             // remove the tree node
             function removeNode(menuItem) {
-                if (!confirm("#{fxMessageBean['ContentTree.dialog.confirm.removeNode']}")) {
-                    return;
-                }
-                //getFxController().removeContent = false;
-                //getFxController().destroyChild(menuItem.getTreeNode());
-                try {
-                    flexive.util.getJsonRpc().ContentTreeEditor.remove(getObjectId(menuItem), false, treeLiveMode, false);
-                    reloadContentTree();
-                } catch (e) {
-                    alert(e.message);
-                }
+                confirmDialog("#{fxMessageBean['ContentTree.dialog.confirm.removeNode']}", function() {
+                    //getFxController().removeContent = false;
+                    //getFxController().destroyChild(menuItem.getTreeNode());
+                    try {
+                        flexive.util.getJsonRpc().ContentTreeEditor.remove(getObjectId(menuItem), false, treeLiveMode, false);
+                        reloadContentTree();
+                    } catch (e) {
+                        alertDialog(e.message);
+                    }
+                });
             }
 
             // remove the tree node and the attached content instance
             function removeContent(menuItem) {
-                if (!confirm("#{fxMessageBean['ContentTree.dialog.confirm.removeContent']}")) {
-                    return;
-                }
-                //getFxController().removeContent = true;
-                //getFxController().destroyChild(menuItem.getTreeNode());
-                try {
-                    flexive.util.getJsonRpc().ContentTreeEditor.remove(getObjectId(menuItem), true, treeLiveMode, false);
-                    reloadContentTree();
-                } catch (e) {
-                    alert(e.message);
-                }
+                confirmDialog("#{fxMessageBean['ContentTree.dialog.confirm.removeContent']}", function() {
+                    //getFxController().removeContent = true;
+                    //getFxController().destroyChild(menuItem.getTreeNode());
+                    try {
+                        flexive.util.getJsonRpc().ContentTreeEditor.remove(getObjectId(menuItem), true, treeLiveMode, false);
+                        reloadContentTree();
+                    } catch (e) {
+                        alertDialog(e.message);
+                    }
+                });
             }
 
             // create a subnode for the current node
             function createFolder(menuItem) {
-                var name = prompt("#{fxMessageBean['ContentTree.dialog.prompt.createFolder']}", "#{fxMessageBean['ContentTree.dialog.prompt.createFolder.default']}");
-                if (name != null && name.length > 0) {
-                    try {
-                        flexive.util.getJsonRpc().ContentTreeEditor.createFolder(getObjectId(menuItem), name);
-                        reloadContentTree();
-                    } catch (e) {
-                        alert(e.message);
-                    }
-                }
+                promptDialog("#{fxMessageBean['ContentTree.dialog.prompt.createFolder']}", "#{fxMessageBean['ContentTree.dialog.prompt.createFolder.default']}",
+                        function(name) {
+                            if (name != null && name.length > 0) {
+                                try {
+                                    flexive.util.getJsonRpc().ContentTreeEditor.createFolder(getObjectId(menuItem), name);
+                                    reloadContentTree();
+                                } catch (e) {
+                                    alertDialog(e.message);
+                                }
+                            }
+                        }
+                );
             }
 
            // import a content
@@ -152,7 +153,7 @@
                     parent.getContentClipboard().clear();
                     reloadContentTree();
                 } catch (e) {
-                    alert(e.message);
+                    alertDialog(e.message);
                 }
             }
 
@@ -167,7 +168,7 @@
                     flexive.util.getJsonRpc().ContentTreeEditor.activate(getObjectId(menuItem), false);
                     reloadContentTree();
                 } catch (e) {
-                    alert(e.message);
+                    alertDialog(e.message);
                 }
             }
 
@@ -177,32 +178,30 @@
                     flexive.util.getJsonRpc().ContentTreeEditor.activate(getObjectId(menuItem), true);
                     reloadContentTree();
                 } catch (e) {
-                    alert(e.message);
+                    alertDialog(e.message);
                 }
             }
 
             // deactivate a subtree
             function deactivateNodeAndChildren(menuItem) {
-                if (!confirm("#{fxMessageBean['ContentTree.dialog.confirm.deactivateNodeWithChildren']}")) {
-                    return;
-                }
-                getFxController().removeContent = false;
-                getFxController().destroyChild(menuItem.getTreeNode());
+                confirmDialog("#{fxMessageBean['ContentTree.dialog.confirm.deactivateNodeWithChildren']}", function() {
+                    getFxController().removeContent = false;
+                    getFxController().destroyChild(menuItem.getTreeNode());
+                });
             }
 
 
             // deactivate a single folder, its children should be reattached to this tree node
             function deactivateNode(menuItem) {
-                if (!confirm("#{fxMessageBean['ContentTree.dialog.confirm.deactivateNode']}")) {
-                    return;
-                }
-                try {
-                    flexive.util.getJsonRpc().ContentTreeEditor.remove(getObjectId(menuItem), /* remove content */ false,
-                            /* live tree */ true, /* delete children */ false);
-                    reloadContentTree();
-                } catch (e) {
-                    alert(e.message);
-                }
+                confirmDialog("#{fxMessageBean['ContentTree.dialog.confirm.deactivateNode']}", function() {
+                    try {
+                        flexive.util.getJsonRpc().ContentTreeEditor.remove(getObjectId(menuItem), /* remove content */ false,
+                                /* live tree */ true, /* delete children */ false);
+                        reloadContentTree();
+                    } catch (e) {
+                        alertDialog(e.message);
+                    }
+                });
             }
 
 
@@ -247,21 +246,21 @@
                     }
                     reloadContentTree();
                 } catch (e) {
-                    alert(e.message);
+                    alertDialog(e.message);
                 }
                 cutNodeId = copyNodeId = -1;
             }
 
             function checkNodeSelected() {
                 if (cutNodeId == -1 && copyNodeId == -1) {
-                    alert("#{fxMessageBean['ContentTree.dialog.noNodeSelected']}");
+                    alertDialog("#{fxMessageBean['ContentTree.dialog.noNodeSelected']}");
                     return false;
                 }
                 return true;
             }
 
             function menuHandler(menuItem) {
-                alert("Menu handler called: " + menuItem);
+                alertDialog("Menu handler called: " + menuItem);
             }
 
             function getObjectId(menuItem) {

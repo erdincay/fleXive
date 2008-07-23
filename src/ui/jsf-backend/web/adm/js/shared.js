@@ -27,12 +27,12 @@ function getFirstLinkElement(doc,elementName) {
     try {
         var parent = doc.getElementById(elementName);
         if (parent==null) {
-            alert("No parent with id=" + elementName + " found");
+            alertDialog("No parent with id=" + elementName + " found");
             return null;
         }
         var childs = parent.childNodes;
         if (childs==null) {
-            alert("No children for parent-id=" + elementName + " found");
+            alertDialog("No children for parent-id=" + elementName + " found");
             return null;
         }
         for (var i=0;i<childs.length;i++) {
@@ -42,7 +42,7 @@ function getFirstLinkElement(doc,elementName) {
         }
         return null;
     } catch (e) {
-        alert("getFirstLinkElement("+elementName+") failed: "+e);
+        alertDialog("getFirstLinkElement("+elementName+") failed: "+e);
         return null;
     }
 }
@@ -73,7 +73,7 @@ function getFirstMatchingElement(parent,tagName) {
         }
         return null;
     } catch (e) {
-        alert("getFirstMatchingElement("+tagName+") failed: "+e);
+        alertDialog("getFirstMatchingElement("+tagName+") failed: "+e);
         return null;
     }
 }
@@ -148,17 +148,17 @@ function copy2clipboard(cliptext, errorMessage, successMessage) {
 //        try {
 //            netscape.security.PrivilegeManager.enablePrivilege('UniversalXPConnect');
 //        } catch(ex) {
-//            if( errorMessage ) alert(errorMessage); else alert(ex);
+//            if( errorMessage ) alertDialog(errorMessage); else alertDialog(ex);
 //            return false;
 //        }
 //        var clip = Components.classes['@mozilla.org/widget/clipboard;1'].createInstance(Components.interfaces.nsIClipboard);
 //        if (!clip) {
-//            if( errorMessage ) alert(errorMessage);
+//            if( errorMessage ) alertDialog(errorMessage);
 //            return false;
 //        }
 //        var trans = Components.classes['@mozilla.org/widget/transferable;1'].createInstance(Components.interfaces.nsITransferable);
 //        if (!trans) {
-//            if( errorMessage ) alert(errorMessage);
+//            if( errorMessage ) alertDialog(errorMessage);
 //            return false;
 //        }
 //        trans.addDataFlavor('text/unicode');
@@ -169,7 +169,7 @@ function copy2clipboard(cliptext, errorMessage, successMessage) {
 //        trans.setTransferData("text/unicode", str, copytext.length * 2);
 //        var clipid = Components.interfaces.nsIClipboard;
 //        if (!clip) {
-//            if( errorMessage ) alert(errorMessage);
+//            if( errorMessage ) alertDialog(errorMessage);
 //            return false;
 //        }
 //        clip.setData(trans, null, clipid.kGlobalClipboard);
@@ -186,7 +186,7 @@ function copy2clipboard(cliptext, errorMessage, successMessage) {
         document.getElementById(fxClipboard).innerHTML = '<embed src="'+getBase()+'/adm/js/fxClipCopy.swf" FlashVars="cliptext=' +
                                                          encodeURIComponent(cliptext) + '" width="0" height="0" type="application/x-shockwave-flash"></embed>';
     }
-    if( successMessage ) alert(successMessage);
+    if( successMessage ) alertDialog(successMessage);
     return false;
 }
 

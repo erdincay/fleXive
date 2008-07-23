@@ -234,7 +234,7 @@ dojo.widget.defineWidget(
         var action = kw.url.substring(kw.url.lastIndexOf('=') + 1);
         var mapping = this.methodMappings[action];
         if (mapping == null) {
-            alert("Action not mapped: " + action);
+            alertDialog("Action not mapped: " + action);
         }
         //kw.params.maxExpandedLevel = this.maxExpandedLevel;
         // evaluate params

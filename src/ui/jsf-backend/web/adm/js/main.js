@@ -30,6 +30,7 @@ var tabUri = [];
 var _caller;
 var _tabResponseId;
 var _toolbarResponseId;
+var messages = {};
 
 window.onresize = windowResize;
 
@@ -279,7 +280,7 @@ function addDynTab(responseId,caller,id,title,active) {
         tabId[pos]=id;
         tabUri[pos]="toggleDynTab("+pos+",'"+id+"')";
     } catch (e) {
-        alert("failed to add the tab '"+title+"':"+e);
+        alertDialog("failed to add the tab '"+title+"':"+e);
     }
 }
 
@@ -325,13 +326,13 @@ function addTab(responseId,caller,id,title,url,active) {
             }
         }
         if (!ele || ele==null) {
-            //alert("Unable to obtain reference to tab '"+id+"'");
+            //alertDialog("Unable to obtain reference to tab '"+id+"'");
         } else {
             jsfOnClick = getJsfOnClick(ele);
             eval("_caller.tabClickScript"+id+"=\""+jsfOnClick+"\"");
             jsfOnClick = "_caller.tabClickFct"+id+"()";
-            //alert(jsfOnClick);
-            //_document.alert('a');
+            //alertDialog(jsfOnClick);
+            //_document.alertDialog('a');
         }
 
         // Either add the tab, or replace it if it exists
@@ -350,7 +351,7 @@ function addTab(responseId,caller,id,title,url,active) {
         tabId[pos]=id;
         tabUri[pos]=jsfOnClick;
     } catch (e) {
-        alert("Failed to add tab '"+title+"':"+e);
+        alertDialog("Failed to add tab '"+title+"':"+e);
     }
 }
 
@@ -421,7 +422,7 @@ function getCallerElement(caller,id) {
             return ele;
         }
     } catch (e) {
-        alert('getCallerElement(..,'+id+') failed: '+e);
+        alertDialog('getCallerElement(..,'+id+') failed: '+e);
         return null;
     }
 }
@@ -455,7 +456,7 @@ function addToolbarItem(responseId,caller,id,helpTxt,url,iconUrl) {
         toolbarClick[pos]="_caller.triggerCommandElement_"+id+"()";
         toolbarIds[pos]=id;
     } catch (e) {
-        alert("Unable to trigger the command element '"+id+"' from the toolbar: "+e);
+        alertDialog("Unable to trigger the command element '"+id+"' from the toolbar: "+e);
     }
 }
 
@@ -478,7 +479,7 @@ function setActionClickScript(caller,id) {
         }
         eval("caller.actionClickScript"+id+"=\""+getJsfOnClick(ele)+"\"");
     } catch (e) {
-        alert("Failed to set the action click script for element with id='"+id+"': "+e);
+        alertDialog("Failed to set the action click script for element with id='"+id+"': "+e);
     }
 }
 
@@ -606,7 +607,7 @@ function renderErrors() {
                 ele = null;
             }
         } catch (e) {
-            alert("main.js/renderErrors():"+e+", element="+elementId+"; caller="+_caller);
+            alertDialog("main.js/renderErrors():"+e+", element="+elementId+"; caller="+_caller);
         }
     }
 }
@@ -653,7 +654,7 @@ function findElementById(elementId) {
         }
         return null;
     } catch (e) {
-        alert("main.js/findElementById():"+e+", element="+elementId+"; caller="+_caller);
+        alertDialog("main.js/findElementById():"+e+", element="+elementId+"; caller="+_caller);
         return null;
     }
 }
@@ -665,3 +666,95 @@ function reloadBriefcases() {
     }
 }
 
+/**
+ * DHTML replacement for Javascript's confirm() dialog
+ * Don't invoke directly, use confirmDialog(...) from admin.js.
+ *
+ * @param message       the message to be displayed
+ * @param onConfirmed   the function to be executed when the user confirmed the message
+ * @param onCancel      the function to be executed when the user did not confirm (optional)
+ */
+function _confirmDialog(message, onConfirmed, onCancel) {
+    var dialog = new YAHOO.widget.SimpleDialog("dlg", {
+	    width: Math.min(message.length + 5, 40) + "em",
+	    fixedcenter:true,
+	    modal:true,
+	    visible:false,
+	    draggable:true,
+        constraintoviewport: true,
+        buttons:  [   { text: messages["Global.dialog.confirm.yes"],
+	                    handler: function() { onConfirmed(); dialog.hide(); dialog.destroy(); },
+                        isDefault:true },
+                      { text: messages["Global.dialog.confirm.no"],
+                        handler:function() { if (onCancel) onCancel(); dialog.hide(); dialog.destroy(); } }
+                  ]
+    });
+	dialog.setHeader(messages["Global.dialog.confirm.title"]);
+	dialog.setBody(message);
+	dialog.cfg.setProperty("icon",YAHOO.widget.SimpleDialog.ICON_WARN);
+    dialog.render(document.body);
+    dialog.show();
+}
+
+/**
+ * DHTML replacement for Javascript's alertDialog() dialog
+ * Don't invoke directly, use alertDialog(...) from admin.js.
+ *
+ * @param message       the message to be displayed
+ * @param onConfirmed   the function to be executed when the user confirmed the message
+ * @param onCancel      the function to be executed when the user did not confirm (optional)
+ */
+function _alertDialog(message) {
+    var dialog = new YAHOO.widget.SimpleDialog("dlg", {
+	    width: Math.min(message.length + 5, 40) + "em",
+	    fixedcenter:true,
+	    modal:true,
+	    visible:false,
+	    draggable:true,
+        constraintoviewport: true,
+        buttons:  [   { text: messages["Global.dialog.alert.ok"],
+	                    handler: function() { dialog.hide(); dialog.destroy(); },
+                        isDefault:true } ]
+    });
+	dialog.setHeader(messages["Global.dialog.alert.title"]);
+	dialog.setBody(message);
+	dialog.cfg.setProperty("icon",YAHOO.widget.SimpleDialog.ICON_INFO);
+    dialog.render(document.body);
+    dialog.show();
+}
+
+/**
+ * DHTML replacement for Javascript's prompt() dialog
+ * Don't invoke directly, use promptDialog(...) from admin.js.
+ *
+ * @param message       the message to be displayed
+ * @param defaultValue  the default value (optional)
+ * @param onSuccess     the function to be executed when the user entered a valid value. The input value is passed in the first parameter.
+ */
+function _promptDialog(message, defaultValue, onSuccess) {
+    var e = document.getElementById("promptDialog");
+    document.getElementById("promptLabel").innerHTML = message;
+    document.getElementById("promptInput").value = defaultValue != null ? defaultValue : "";
+
+    if (e.dialog == null) {
+        e.dialog = new YAHOO.widget.Dialog("promptDialog", {
+            width: "40em",
+            fixedcenter:true,
+            modal:true,
+            visible:false,
+            draggable:true,
+            postmethod: "none",
+            constraintoviewport: true,
+            buttons:  [   { text: messages["Global.dialog.prompt.submit"],
+                            handler: function() { e.onSuccess(document.getElementById("promptInput").value); e.dialog.hide(); },
+                            isDefault:true },
+                          { text: messages["Global.dialog.prompt.cancel"],
+                            handler:function() { e.dialog.hide(); } }
+                      ]
+        });
+        document.getElementById("promptDialog").style.display = "block";
+        e.dialog.render();
+    }
+    e.onSuccess = onSuccess;
+    e.dialog.show();
+}

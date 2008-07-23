@@ -58,7 +58,7 @@
                         try {
                             document.getElementById('exportFrame').src = getBase() + "export/content/" + pk;
                         } catch(ex) {
-                            alert(ex)
+                            alertDialog(ex)
                         }
                     }
                 </script>
@@ -247,7 +247,7 @@
                             function startUpload(id) {
                                 var _iframe = window.frames['fileupload'+id].document;
                                 if (_iframe.getElementById('theFile').value=='') {
-                                    alert('Please select a file first');
+                                    alertDialog('Please select a file first');
                                 } else {
                                     parent.lockScreen();
                                     _iframe.getElementById('myForm').submit();

@@ -13,7 +13,7 @@
     <c:if test="#{fxSystemBean.browserAsString=='IE'}">
         <t:stylesheet path="/adm/css/mainIE.css"/>
     </c:if>
-    <fx:includes/>
+    <fx:includes yui="true"/>
     <link rel="stylesheet" type="text/css" href="#{weblet:url('com.flexive.faces.weblets','/css/lytebox.css')}"/>
     <script type="text/javascript" src="adm/js/shared.js"> </script>
     <script type="text/javascript" src="adm/js/commandElement.js"> </script>
@@ -34,7 +34,7 @@
             var input = document.searchForm.query;
             var query = input.value;
             if (query == null || query.length == 0) {
-                alert("#{fxMessageBean['Global.dialog.emptyQuery']}");
+                alertDialog("#{fxMessageBean['Global.dialog.emptyQuery']}");
                 input.focus();
                 return;
             }
@@ -54,8 +54,17 @@
 </head>
 
 
-<body onload="init();" onmouseup="endDrag();">
+<body onload="init();" onmouseup="endDrag();" class="yui-skin-sam">
 
+<div id="promptDialog" style="display: none;">
+    <div class="hd">#{fxMessageBean['Global.dialog.prompt.title']}</div>
+    <div class="bd">
+        <form>
+            <label for="promptInput"><span id="promptLabel"> </span></label>
+            <input id="promptInput" name="promptInput" type="text" size="25"/>
+        </form>
+    </div>
+</div>
 
 <ui:fragment rendered="#{!fxSystemBean.newInstallation}">
     <div id="loading"><br/><br/>
@@ -130,6 +139,21 @@
 
 <div id="slbg" onmouseup="endDrag();" onmousemove="doDrag(event);" > </div>
 <div id="slbgLine" onmouseup="endDrag();" onmousemove="doDrag(event);" > </div>
+
+<script type="text/javascript">
+<!--            
+    flexive.yui.require("container");   // for popup dialogs
+    messages["Global.dialog.confirm.title"] = "#{fxMessageBean['Global.dialog.confirm.title']}";
+    messages["Global.dialog.confirm.yes"] = "#{fxMessageBean['Global.dialog.confirm.yes']}";
+    messages["Global.dialog.confirm.no"] = "#{fxMessageBean['Global.dialog.confirm.no']}";
+    messages["Global.dialog.prompt.title"] = "#{fxMessageBean['Global.dialog.prompt.title']}";
+    messages["Global.dialog.prompt.submit"] = "#{fxMessageBean['Global.dialog.prompt.submit']}";
+    messages["Global.dialog.prompt.cancel"] = "#{fxMessageBean['Global.dialog.prompt.cancel']}";
+    messages["Global.dialog.alert.title"] = "#{fxMessageBean['Global.dialog.alert.title']}";
+    messages["Global.dialog.alert.ok"] = "#{fxMessageBean['Global.dialog.alert.ok']}";
+//-->
+</script>
+<fx:yuiSetup/>
 
 </body>
 

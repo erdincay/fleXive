@@ -26,15 +26,15 @@
         function clickHandler(type, args) {
             pk = flexive.yui.datatable.getPk(resultTable, this.contextEventTarget);
             var menuId = args[1].id;
-            alert(menuId + " - " + pk);
+            alertDialog(menuId + " - " + pk);
         }
 
         function onMenu(a1, a2, a3) {
-            alert("Menu clicked: " + flexive.yui.datatable.getPk(resultTable, this.contextEventTarget));
+            alertDialog("Menu clicked: " + flexive.yui.datatable.getPk(resultTable, this.contextEventTarget));
         }
 
         flexive.yui.onYahooLoaded(function() {
-            //alert(YAHOO.util.Date.format(new Date(), { format: "YYYY/MM/DD" }));
+            //alertDialog(YAHOO.util.Date.format(new Date(), { format: "YYYY/MM/DD" }));
         })
 
         //-->
@@ -64,7 +64,7 @@
             flexive.yui.require("button");
             flexive.yui.onYahooLoaded(function() {
                 var refreshButton = new YAHOO.widget.Button("refreshButton", {});
-                refreshButton.addListener("click", function() { alert("Clicked") });
+                refreshButton.addListener("click", function() { alertDialog("Clicked") });
 
                 // add context menu
     //            var menu = new YAHOO.widget.ContextMenu("tableMenu", {trigger: dataTable.getTbodyEl()});

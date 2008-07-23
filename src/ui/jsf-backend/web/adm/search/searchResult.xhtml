@@ -42,7 +42,7 @@
                         flexive.yui.setMenuItem("edit", "disabled", !perms.edit);
                         flexive.yui.setMenuItem("delete", "disabled", !perms["delete"]);
                     } catch (e) {
-                        alert(e);
+                        alertDialog(e);
                     }
                 }
 
@@ -92,18 +92,16 @@
                             parent.getContentClipboard().set(selectedIds);
                             break;
                         case "delete":
-                            if (!confirm("#{fxMessageBean['SearchResult.dialog.confirm.deleteRow']}")) {
-                                break;
-                            }
-                            flexive.util.getJsonRpc().ContentEditor.remove(pk.id);
-                            reload();
+                            confirmDialog("#{fxMessageBean['SearchResult.dialog.confirm.deleteRow']}", function() {
+                                flexive.util.getJsonRpc().ContentEditor.remove(pk.id);
+                                reload();
+                            });
                             break;
                         case "deleteSelected":
-                            if (!confirm("#{fxMessageBean['SearchResult.dialog.confirm.deleteSelection']}")) {
-                                break;
-                            }
-                            flexive.util.getJsonRpc().ContentEditor.removeMultiple(selectedIds);
-                            reload();
+                            confirmDialog("#{fxMessageBean['SearchResult.dialog.confirm.deleteSelection']}", function() {
+                                flexive.util.getJsonRpc().ContentEditor.removeMultiple(selectedIds);
+                                reload();
+                            });
                             break;
                         case "deleteBriefcase":
                             flexive.util.getJsonRpc().BriefcaseEditor.removeItems(briefcaseId, [pk.id]);

@@ -211,11 +211,11 @@
                         if (flexive.util.getJsonRpc().StructureTreeEditor.isSearchable(propertyId))
                             parent.frames["contentFrame"].addQueryNode(propertyId, node.nodeDocType);
                         else
-                            alert("#{fxMessageBean['StructureTree.message.property.notSearchable']}");
+                            alertDialog("#{fxMessageBean['StructureTree.message.property.notSearchable']}");
                     }
                     else
                         parent.frames["contentFrame"].addQueryNode(propertyId, node.nodeDocType);
-                    //alert("sturctureTreeClickHandler, addProperty branch");
+                    //alertDialog("sturctureTreeClickHandler, addProperty branch");
                 }
                 else doContentActionFromContextMenu(node, defaultAction);
             }
@@ -297,8 +297,7 @@
             }
 
             function _deleteAssignment(id) {
-                var doDelete = confirm("#{fxMessageBean['StructureTree.message.delete.assignment']}");
-                if (doDelete) {
+                confirmDialog("#{fxMessageBean['StructureTree.message.delete.assignment']}", function() {
                     try {
                         flexive.util.getJsonRpc().StructureTreeEditor.deleteAssignment(id);
                         if (copyNode!=null && copyNode.assignmentId ==id && (copyNode.nodeDocType=="Group" || copyNode.nodeDocType=="Assignment"))
@@ -308,11 +307,11 @@
                         parent.gotoNavMenu(1);
                     }
                     catch (e) {
-                        alert(e.message);
+                        alertDialog(e.message);
                         reloadStructureTree();
                         loadContentPage("adm/structure/content.jsf");
                     }
-                }
+                });
             }
 
             function deleteType(menuItem) {
@@ -322,8 +321,7 @@
             }
 
             function _deleteType(id) {
-                var doDelete = confirm("#{fxMessageBean['StructureTree.message.delete.type']}");
-                if (doDelete) {
+                confirmDialog("#{fxMessageBean['StructureTree.message.delete.type']}", function() {
                     try {
                         flexive.util.getJsonRpc().StructureTreeEditor.deleteType(id);
                         reloadStructureTree();
@@ -331,11 +329,11 @@
                         loadContentPage("adm/structure/content.jsf");
                     }
                     catch (e) {
-                        alert(e.message);
+                        alertDialog(e.message);
                         reloadStructureTree();
                         loadContentPage("adm/structure/content.jsf");
                     }
-                }
+                });
             }
 
             function copyAssignment(menuItem) {
@@ -352,16 +350,15 @@
                 cutMode=true;
             }
 
-            function promptAlias() {
-                var valid = false;
-                var alias="dummy";
-                while (!valid && alias!=null && alias!="") {
-                    alias =prompt("#{fxMessageBean['StructureTree.message.enterAlias']}");
-                    valid = flexive.util.getJsonRpc().StructureTreeEditor.validateAlias(alias);
-                    if (!valid)
-                        alert("#{fxMessageBean['StructureTree.message.err.invalidAlias']}");
-                }
-                return alias;
+            function promptAlias(onSuccess) {
+                promptDialog("#{fxMessageBean['StructureTree.message.enterAlias']}", "", function(alias) {
+                    var valid = flexive.util.getJsonRpc().StructureTreeEditor.validateAlias(alias);
+                    if (!valid) {
+                        alertDialog("#{fxMessageBean['StructureTree.message.err.invalidAlias']}");
+                    } else {
+                        onSuccess(alias);
+                    }
+                });
             }
 
             function pasteBelow(menuItem, alias) {
@@ -381,15 +378,16 @@
                     }
                 }
                 catch (e) {
-                        alert(e.message);
+                        alertDialog(e.message);
                 }
             }
 
             function pasteBelowAs(menuItem) {
-                var alias = promptAlias();
-                if (alias!=null && alias!="") {
-                    pasteBelow(null, alias);
-                }
+                promptAlias(function(alias) {
+                    if (alias!=null && alias!="") {
+                        pasteBelow(null, alias);
+                    }
+                });
             }
 
             function pasteAbove(menuItem, alias) {
@@ -409,15 +407,16 @@
                     }
                 }
                 catch (e) {
-                        alert(e.message);
+                        alertDialog(e.message);
                 }
             }
 
             function pasteAboveAs(menuItem) {
-                var alias = promptAlias();
-                if (alias!=null && alias!="") {
-                    pasteAbove(null,alias);
-                }
+                promptAlias(function(alias) {
+                    if (alias!=null && alias!="") {
+                        pasteAbove(null,alias);
+                    }
+                });
             }
 
             function pasteInto(menuItem, alias) {
@@ -430,15 +429,16 @@
                     expandToNodeWithId(newAssignmentId, false);
                 }
                 catch (e) {
-                        alert(e.message);
+                        alertDialog(e.message);
                 }
             }
 
             function pasteIntoAs(menuItem) {
-                var alias = promptAlias();
-                if (alias!=null && alias!="") {
-                    pasteInto(null, alias);
-                }
+                promptAlias(function(alias) {
+                    if (alias!=null && alias!="") {
+                        pasteInto(null, alias);
+                    }
+                });
             }
 
             function createContent(menuItem) {
@@ -459,7 +459,12 @@
                 var menu = dojo.widget.byId("structureTreeMenu");
                 var nodeId = getNodeId(menu.getTreeNode());
                 var docType = menu.getTreeNode().nodeDocType;
+                var propertyId = menu.getTreeNode().propertyId;
 
+                if (propertyId != null && !flexive.util.getJsonRpc().StructureTreeEditor.isSearchable(propertyId)) {
+                    alertDialog("#{fxMessageBean['StructureTree.message.property.notSearchable']}");
+                    return;
+                }
                 if (parent.frames["contentFrame"].isQueryEditor) {
                     // add node to query
                     parent.frames["contentFrame"].addQueryNode(nodeId, docType);
@@ -480,6 +485,10 @@
             function searchContentsByProperty(menuItem) {
                 var menu = dojo.widget.byId("structureTreeMenu");
                 var nodeId = menu.getTreeNode().propertyId;
+                if (!flexive.util.getJsonRpc().StructureTreeEditor.isSearchable(nodeId)) {
+                    alertDialog("#{fxMessageBean['StructureTree.message.property.notSearchable']}");
+                    return;
+                };
                 if (parent.frames["contentFrame"].isQueryEditor) {
                     parent.frames["contentFrame"].addPropertyQueryNode(nodeId);
                 } else {
@@ -504,7 +513,7 @@
                     var nodeId = getNodeId(menu.getTreeNode());
                     loadContentPage( "export/type/" + nodeId);
                 } catch(ex) {
-                    alert(ex)
+                    alertDialog(ex)
                 }
             }
 

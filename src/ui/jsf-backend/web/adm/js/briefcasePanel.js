@@ -23,7 +23,7 @@ BriefcasePanel.prototype = {
             this.items = eval("(" + flexive.util.getJsonRpc().BriefcaseEditor.renderBriefcases() + ")");
             this.render();
         } catch (e) {
-            alert(e);
+            alertDialog(e);
         }
     },
 

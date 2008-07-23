@@ -56,7 +56,7 @@ function onReturnEval(event, expression) {
     } else if (event) {
         keycode = event.which;
     } else {
-        alert("onReturnEval: no event object found.");
+        alertDialog("onReturnEval: no event object found.");
         return true;
     }
     if (keycode != 13) {
@@ -255,5 +255,57 @@ ContentClipboard.prototype = {
     // returns true for empty clipboards
     isEmpty: function() {
         return this.get().length == 0;
+    }
+}
+
+/**
+ * DHTML replacement for Javascript's confirm() dialog
+ * @param message       the message to be displayed
+ * @param onConfirmed   the function to be executed when the user confirmed the message
+ * @param onCancel      the function to be executed when the user did not confirm (optional)
+ */
+function confirmDialog(message, onConfirmed, onCancel) {
+    var wnd = window;
+    while (wnd != null && wnd.parent != wnd && !wnd._confirmDialog) {
+        wnd = wnd.parent;
+    }
+    if (wnd != null) {
+        wnd._confirmDialog(message, onConfirmed, onCancel);
+    }
+}
+
+/**
+ * DHTML replacement for Javascript's prompt() dialog
+ *
+ * @param message       the message to be displayed
+ * @param defaultValue  the default value (optional)
+ * @param onSuccess     the function to be executed when the user entered a valid value. The input value is passed in the first parameter.
+ */
+function promptDialog(message, defaultValue, onSuccess) {
+    var wnd = window;
+    while (wnd != null && wnd.parent != wnd && !wnd._promptDialog) {
+        wnd = wnd.parent;
+    }
+    if (wnd != null) {
+        wnd._promptDialog(message, defaultValue, onSuccess);
+    }
+}
+
+
+/**
+ * DHTML replacement for Javascript's alertDialog() dialog
+ * Don't invoke directly, use alertDialog(...) from admin.js.
+ *
+ * @param message       the message to be displayed
+ * @param onConfirmed   the function to be executed when the user confirmed the message
+ * @param onCancel      the function to be executed when the user did not confirm (optional)
+ */
+function alertDialog(message) {
+    var wnd = window;
+    while (wnd != null && wnd.parent != wnd && !wnd._alertDialog) {
+        wnd = wnd.parent;
+    }
+    if (wnd != null) {
+        wnd._alertDialog(message);
     }
 }

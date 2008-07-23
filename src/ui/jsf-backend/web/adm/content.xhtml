@@ -44,7 +44,7 @@
             var input = document.searchForm.query;
             var query = input.value;
             if (query == null || query.length == 0) {
-                alert("#{fxMessageBean['Global.dialog.emptyQuery']}");
+                alertDialog("#{fxMessageBean['Global.dialog.emptyQuery']}");
                 input.focus();
                 return;
             }
@@ -77,6 +77,8 @@
             </div>
         </ui:fragment>
         <br/>
+
+        <!--<a href="javascript:promptDialog('Please enter your name:', null, function(n) { alertDialog('your name: ' + n); })">Enter it!</a>-->
 
         <h:form id="searchForm">
         <table class="welcometbl" width="100%">

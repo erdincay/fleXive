@@ -20,7 +20,7 @@ SearchQueryPanel.prototype = {
             this.items = eval("(" + flexive.util.getJsonRpc().SearchQueryEditor.renderSearchQueries() + ")");
             this.render();
         } catch (e) {
-            alert(e);
+            alertDialog(e);
         }
     },
 

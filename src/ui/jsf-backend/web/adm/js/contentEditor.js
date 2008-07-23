@@ -23,7 +23,7 @@ function showMenu(e,caller,xpath) {
         activeMenu = null;
     }
     if (activeMenu==null) {
-        alert("Menu is missing for id:"+eleId);
+        alertDialog("Menu is missing for id:"+eleId);
         return;
     }
 

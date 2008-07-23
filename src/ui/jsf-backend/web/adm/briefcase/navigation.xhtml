@@ -50,16 +50,19 @@
 
 
             function createBriefcase() {
-                var name = prompt("#{fxMessageBean['Briefcase.dialog.prompt.briefcaseName']}", "#{fxMessageBean['Briefcase.dialog.prompt.briefcaseName.default']}");
-                if (name == null || name.length == 0) {
-                    return;
-                }
-                try {
-                    flexive.util.getJsonRpc().BriefcaseEditor.create(name);
-                    briefcasePanel.reload();
-                } catch (e) {
-                    alert(e.message);
-                }
+                promptDialog("#{fxMessageBean['Briefcase.dialog.prompt.briefcaseName']}", "#{fxMessageBean['Briefcase.dialog.prompt.briefcaseName.default']}",
+                        function (name) {
+                            if (name == null || name.length == 0) {
+                                return;
+                            }
+                            try {
+                                flexive.util.getJsonRpc().BriefcaseEditor.create(name);
+                                briefcasePanel.reload();
+                            } catch (e) {
+                                alertDialog(e.message);
+                            }
+                        }
+                );
             }
 
             // =========== context menu functions =================
@@ -88,15 +91,16 @@
             }
 
             function deleteBriefcase(menuItem) {
-                if (!confirm("#{fxMessageBean['Briefcase.dialog.confirm.delete']}")) {
-                    return;
-                }
-                try {
-                    flexive.util.getJsonRpc().BriefcaseEditor.remove(getContextBriefcaseId());
-                    briefcasePanel.reload();
-                } catch (e) {
-                    alert(e.message);
-                }
+                confirmDialog("#{fxMessageBean['Briefcase.dialog.confirm.delete']}",
+                    function() {
+                        try {
+                            flexive.util.getJsonRpc().BriefcaseEditor.remove(getContextBriefcaseId());
+                            briefcasePanel.reload();
+                        } catch (e) {
+                            alertDialog(e.message);
+                        }
+                    }
+                );
             }
 
             function addSelection(menuItem) {
@@ -112,21 +116,22 @@
                     parent.getContentClipboard().clear();
                     briefcasePanel.reload();
                 } catch (e) {
-                    alert(e.message);
+                    alertDialog(e.message);
                 }
             }
 
             function renameBriefcase(menuItem) {
-                var newName = prompt("#{fxMessageBean['Briefcase.dialog.prompt.briefcaseName']}", "");
-                if (newName == null || newName.length == 0) {
-                    return;
-                }
-                try {
-                    flexive.util.getJsonRpc().BriefcaseEditor.rename(getContextBriefcaseId(), newName);
-                    briefcasePanel.reload();
-                } catch (e) {
-                    alert(e.message);
-                }
+                promptDialog("#{fxMessageBean['Briefcase.dialog.prompt.briefcaseName']}", "", function(newName) {
+                    if (newName == null || newName.length == 0) {
+                        return;
+                    }
+                    try {
+                        flexive.util.getJsonRpc().BriefcaseEditor.rename(getContextBriefcaseId(), newName);
+                        briefcasePanel.reload();
+                    } catch (e) {
+                        alertDialog(e.message);
+                    }
+                });
             }
 
             function shareBriefcase(menuItem, aclId) {
@@ -134,7 +139,7 @@
                     flexive.util.getJsonRpc().BriefcaseEditor.share(getContextBriefcaseId(), aclId);
                     briefcasePanel.reload();
                 } catch (e) {
-                    alert(e.message);
+                    alertDialog(e.message);
                 }
             }
                     
@@ -173,15 +178,14 @@
 
             // delete a query
             function deleteQuery(menuItem) {
-                try {
-                    if (!confirm("#{fxMessageBean['SearchQueries.dialog.confirm.delete']}")) {
-                        return;
+                confirmDialog("#{fxMessageBean['SearchQueries.dialog.confirm.delete']}", function() {
+                    try {
+                        flexive.util.getJsonRpc().SearchQueryEditor.remove(getContextQueryName());
+                        queryPanel.reload();
+                    } catch (e) {
+                        alertDialog(e.message);
                     }
-                    flexive.util.getJsonRpc().SearchQueryEditor.remove(getContextQueryName());
-                    queryPanel.reload();
-                } catch (e) {
-                    alert(e.message);
-                }
+                });
             }
 
             function getQueryContextMenu() {

@@ -20,12 +20,12 @@ function registerCommandElement(callerWindow,id,confirmTxt,lockscreen) {
         }
         // Add the confirm script part if needed
         if (confirmTxt && confirmTxt!=null && confirmTxt!='') {
-            onClickAction="if (confirm('"+confirmTxt+"')) {"+onClickAction+"}";
+            onClickAction="confirmDialog('"+confirmTxt+"', function() { "+onClickAction+" })";
         }
         // Store the action within the caller
         eval("callerWindow.commandElementAction_"+id+"=\""+onClickAction+"\"");
     } catch (e) {
-        alert("Unable to register the command element '"+id+"': "+e);
+        alertDialog("Unable to register the command element '"+id+"': "+e);
     }
 }
 
@@ -41,7 +41,7 @@ function getCommandElementScript(callerWindow,id) {
     try {
         return eval("callerWindow.commandElementAction_"+id);
     } catch (e) {
-        alert("Unable to trigger the command element '"+id+"': "+e);
+        alertDialog("Unable to trigger the command element '"+id+"': "+e);
         return null;
     }
 }

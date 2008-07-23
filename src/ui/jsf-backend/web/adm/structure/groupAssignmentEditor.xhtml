@@ -133,13 +133,14 @@
         </h:form>
         <script type="text/javascript">
             function confirmOverrideBaseMultiplicity(value) {
-                choice = confirm("#{fxMessageBean['GroupEditor.message.confirmOverrideBaseMultiplicity']}");
-                if (choice) {
-                    document.forms["frm"].submit();
-                }
-                else {
-                    document.getElementById("frm:overrideBaseMultiplicity").checked = value;
-                }
+                confirmDialog("#{fxMessageBean['GroupEditor.message.confirmOverrideBaseMultiplicity']}",
+                        function() {
+                            document.forms["frm"].submit();
+                        },
+                        function() {
+                            document.getElementById("frm:overrideBaseMultiplicity").checked = value;
+                        }
+                );
             }
 
         </script>
