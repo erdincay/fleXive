@@ -91,7 +91,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
             curSql = "SELECT DISTINCT acl.ID, acl.NAME, acl.CAT_TYPE, acl.DESCRIPTION, acl.COLOR, acl.MANDATOR, mand.NAME, " +
                     //    8               9               10               11
                     " acl.CREATED_BY, acl.CREATED_AT, acl.MODIFIED_BY, acl.MODIFIED_AT FROM " +
-                    TBL_ACLS + " acl, " + TBL_MANDATORS + " mand WHERE mand.ID=acl.MANDATOR";
+                    TBL_ACLS + " acl, " + TBL_MANDATORS + " mand WHERE mand.ID=acl.MANDATOR order by acl.NAME";
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(curSql);
             while (rs != null && rs.next()) {
