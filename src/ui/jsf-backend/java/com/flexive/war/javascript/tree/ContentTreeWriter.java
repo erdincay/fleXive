@@ -165,12 +165,17 @@ public class ContentTreeWriter implements Serializable {
     private void setAllowedActions(List<String> actionsDisabled, FxTreeNode node, boolean liveTreeEnabled) {
         final boolean contentAvailable = node.hasReference();
         enableAction(actionsDisabled, contentAvailable && node.isMayDelete(), "removeContent");
+        enableAction(actionsDisabled, contentAvailable && node.isMayDelete() && node.getDirectChildCount() > 0, "removeContentAndChildren");
         enableAction(actionsDisabled, contentAvailable && node.isMayEdit(), "editContent", "rename");
         enableAction(actionsDisabled, node.isMayEdit(), "editNode", "cutNode");
         enableAction(actionsDisabled, node.getDirectChildCount() > 0, "searchSubtree");
-        enableAction(actionsDisabled, !node.isLive() && node.isMayEdit() && liveTreeEnabled, "activateNode", "activateNodeAndChildren", "removeNode");
+        final boolean editNodeActions = !node.isLive() && node.isMayEdit() && liveTreeEnabled;
+        enableAction(actionsDisabled, editNodeActions, "activateNode", "activateNodeAndChildren", "removeNode");
+        enableAction(actionsDisabled, editNodeActions && node.getDirectChildCount() > 0, "removeNodeAndChildren");
         enableAction(actionsDisabled, !node.isLive(), "createContent", "createFolder");
-        enableAction(actionsDisabled, node.isLive() && liveTreeEnabled, "deactivateNode", "deactivateNodeAndChildren");
+        final boolean liveNodeActions = node.isLive() && liveTreeEnabled && node.isMayEdit();
+        enableAction(actionsDisabled, liveNodeActions, "deactivateNode");
+        enableAction(actionsDisabled, liveNodeActions && node.getDirectChildCount() > 0, "deactivateNodeAndChildren");
     }
 
     /**

@@ -52,6 +52,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Tree engine tests.
@@ -477,6 +478,34 @@ public class FxTreeTest {
             } catch (FxApplicationException e) {
                 //ignore
             }
+        }
+    }
+
+    @Test
+    public void treeIteratorTest() throws FxApplicationException {
+        tree.clear(FxTreeMode.Edit);
+        final String[] names = { "my", "virtual", "directory" };
+        final long[] nodes = tree.createNodes(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, 0, StringUtils.join(names, "/"));
+        int index = 0;
+        for (FxTreeNode node: tree.getTree(FxTreeMode.Edit, nodes[0], 5)) {
+            assert node.getName().equals(names[index]) : "Expected node name: " + names[index] + ", got: " + node.getName();
+            index++;
+        }
+
+        // test mixed folder/node access
+        tree.createNodes(FxTreeMode.Edit, nodes[1], 999, "new/directory");
+        final String[] expected = {"my", "virtual", "directory", "new", "directory"};
+        /* new folder structure:
+            my/
+                virtual/
+                    directory/
+                    new/
+                        directory/
+         */
+        index = 0;
+        for (FxTreeNode node : tree.getTree(FxTreeMode.Edit, nodes[0], 5)) {
+            assert node.getName().equals(expected[index]) : "Expected node name: " + expected[index] + ", got: " + node.getName();
+            index++;
         }
     }
 }

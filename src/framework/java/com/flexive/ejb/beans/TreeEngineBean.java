@@ -373,18 +373,27 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
      */
     private void removeNode(FxTreeMode mode, long nodeId, boolean deleteReferencedContent, boolean deleteChildren) throws FxApplicationException {
         Connection con = null;
-        FxPK ref = null;
         if (nodeId < 0) {
             throw new FxInvalidParameterException("nodeId", "ex.tree.delete.nodeId");
         }
         try {
             FxContext.get().setTreeWasModified();
             con = Database.getDbConnection();
-            if (deleteReferencedContent)
-                ref = getNode(mode, nodeId).getReference();
+            final FxTreeNode subTree;
+            if (deleteReferencedContent) {
+                subTree = deleteChildren ? getTree(mode, nodeId, Integer.MAX_VALUE) : getNode(mode, nodeId);
+            } else {
+                subTree = null;
+            }
             StorageManager.getTreeStorage().removeNode(con, mode, contentEngine, nodeId, deleteChildren);
-            if (ref != null && contentEngine.getReferencedContentCount(ref) == 0)
-                contentEngine.remove(ref);
+            if (deleteReferencedContent) {
+                for (FxTreeNode node: subTree) {
+                    if (node.getReference() != null && contentEngine.getReferencedContentCount(node.getReference()) == 0) {
+                        // remove only contents that are not referenced elsewhere
+                        contentEngine.remove(node.getReference());
+                    }
+                }
+            }
             StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
         } catch (FxNotFoundException nf) {
             // Node does not exist and we wanted to delete it anyway .. so this is no error

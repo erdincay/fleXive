@@ -683,13 +683,27 @@ function _confirmDialog(message, onConfirmed, onCancel) {
 	    draggable:true,
         constraintoviewport: true,
         buttons:  [   { text: messages["Global.dialog.confirm.yes"],
-	                    handler: function() { onConfirmed(); dialog.hide(); dialog.destroy(); },
+	                    handler: function() {
+                            dialog.disableButtons();
+                            onConfirmed();
+                            dialog.hide();
+                            dialog.destroy();
+                        },
                         isDefault:true },
                       { text: messages["Global.dialog.confirm.no"],
-                        handler:function() { if (onCancel) onCancel(); dialog.hide(); dialog.destroy(); } }
+                        handler:function() {
+                            dialog.disableButtons();
+                            if (onCancel) onCancel();
+                            dialog.hide();
+                            dialog.destroy();
+                        } }
                   ]
     });
-	dialog.setHeader(messages["Global.dialog.confirm.title"]);
+    dialog.disableButtons = function() {
+        this.getButtons()[0].disabled = true;
+        this.getButtons()[1].disabled = true;
+    }
+    dialog.setHeader(messages["Global.dialog.confirm.title"]);
 	dialog.setBody(message);
 	dialog.cfg.setProperty("icon",YAHOO.widget.SimpleDialog.ICON_WARN);
     dialog.render(document.body);

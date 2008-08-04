@@ -83,11 +83,20 @@
 
             // remove the tree node
             function removeNode(menuItem) {
-                confirmDialog("#{fxMessageBean['ContentTree.dialog.confirm.removeNode']}", function() {
+                _removeNode(menuItem, "#{fxMessageBean['ContentTree.dialog.confirm.removeNode']}", false);
+            }
+
+            // remove the tree node, including all subnodes
+            function removeNodeAndChildren(menuItem) {
+                _removeNode(menuItem, "#{fxMessageBean['ContentTree.dialog.confirm.removeNodeAndChildren']}", true); 
+            }
+
+            function _removeNode(menuItem, confirmMessage, withChildren) {
+                confirmDialog(confirmMessage, function() {
                     //getFxController().removeContent = false;
                     //getFxController().destroyChild(menuItem.getTreeNode());
                     try {
-                        flexive.util.getJsonRpc().ContentTreeEditor.remove(getObjectId(menuItem), false, treeLiveMode, false);
+                        flexive.util.getJsonRpc().ContentTreeEditor.remove(getObjectId(menuItem), false, treeLiveMode, withChildren);
                         reloadContentTree();
                     } catch (e) {
                         alertDialog(e.message);
@@ -97,11 +106,20 @@
 
             // remove the tree node and the attached content instance
             function removeContent(menuItem) {
-                confirmDialog("#{fxMessageBean['ContentTree.dialog.confirm.removeContent']}", function() {
+                _removeContent(menuItem, "#{fxMessageBean['ContentTree.dialog.confirm.removeContent']}", false);
+            }
+
+            // remove the tree node and the attached content instance, including all contents attached to child nodes
+            function removeContentAndChildren(menuItem) {
+                _removeContent(menuItem, "#{fxMessageBean['ContentTree.dialog.confirm.removeContentAndChildren']}", true);
+            }
+
+            function _removeContent(menuItem, confirmMessage, withChildren) {
+                confirmDialog(confirmMessage, function() {
                     //getFxController().removeContent = true;
                     //getFxController().destroyChild(menuItem.getTreeNode());
                     try {
-                        flexive.util.getJsonRpc().ContentTreeEditor.remove(getObjectId(menuItem), true, treeLiveMode, false);
+                        flexive.util.getJsonRpc().ContentTreeEditor.remove(getObjectId(menuItem), true, treeLiveMode, withChildren);
                         reloadContentTree();
                     } catch (e) {
                         alertDialog(e.message);
@@ -348,8 +366,11 @@
                 <adm:treeContextMenuItem treeActions="pasteNode" icon="paste" labelKey="ContentTree.menu.pasteNodeBelow" clickHandler="pasteNodeBelow"/>
                 <adm:treeContextMenuItem treeActions="cutNode" icon="cut" labelKey="ContentTree.menu.cutNode" clickHandler="cutNode"/>
                 <adm:treeContextMenuItem treeActions="copyNode" icon="copy" labelKey="ContentTree.menu.copyNode" clickHandler="copyNode"/>
+                <fx:dojoMenuSeparator/>
                 <adm:treeContextMenuItem treeActions="removeNode" icon="detach" labelKey="ContentTree.menu.removeNode" clickHandler="removeNode"/>
+                <adm:treeContextMenuItem treeActions="removeNodeAndChildren" icon="detach" labelKey="ContentTree.menu.removeNodeAndChildren" clickHandler="removeNodeAndChildren"/>
                 <adm:treeContextMenuItem treeActions="removeContent" icon="remove" labelKey="ContentTree.menu.remove" clickHandler="removeContent"/>
+                <adm:treeContextMenuItem treeActions="removeContentAndChildren" icon="remove" labelKey="ContentTree.menu.removeContentAndChildren" clickHandler="removeContentAndChildren"/>
             </adm:treeContextMenu>
             
             <adm:jsonRpcCall method="ContentTreeWriter.renderContentTree" args="1, 2, false, false"/>

@@ -42,13 +42,14 @@ import com.flexive.shared.value.FxString;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Iterator;
 
 /**
  * FxNode implementation for flexive
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class FxTreeNode implements Serializable, SelectableObjectWithLabel, SelectableObjectWithName {
+public class FxTreeNode implements Serializable, SelectableObjectWithLabel, SelectableObjectWithName, Iterable<FxTreeNode> {
     private static final long serialVersionUID = -1666004845250114348L;
 
     private String path = null;
@@ -545,5 +546,46 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
         int pos = 0;
         for (FxTreeNode node : this.getChildren())
             node._applyPosition(pos++);
+    }
+
+    /**
+     * Returns an iterator over this node and its children.
+     *
+     * @return  an iterator over this node and its children.
+     */
+    public Iterator<FxTreeNode> iterator() {
+        return new NodeIterator();
+    }
+
+    private class NodeIterator implements Iterator<FxTreeNode>, Serializable {
+        private static final long serialVersionUID = -3147200089772263291L;
+        private int index = -1;
+        private Iterator<FxTreeNode> childIterator;
+
+        public boolean hasNext() {
+            return index == -1 ||
+                    (index >= 0 && !children.isEmpty() && (
+                            (children.size() > index) ||
+                            (children.size() == index && childIterator != null && childIterator.hasNext())
+                    )
+            );
+        }
+
+        public FxTreeNode next() {
+            if (index == -1) {
+                index++;
+                return FxTreeNode.this;
+            } else {
+                if (childIterator == null || !childIterator.hasNext()) {
+                    childIterator = children.get(index).iterator();
+                    index++;
+                }
+                return childIterator.next();
+            }
+        }
+
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
     }
 }

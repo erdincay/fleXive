@@ -167,7 +167,8 @@ dojo.widget.defineWidget(
         deferred.addCallback(dojo.lang.hitch(this, function() {
             this.maxExpandedLevel = null;
             this.expandOldView();
-            this.fixDndAfterReload(rootNode);
+            // skip since dnd is disabled anyway
+            //this.fixDndAfterReload(rootNode);
         }));
     },
 
