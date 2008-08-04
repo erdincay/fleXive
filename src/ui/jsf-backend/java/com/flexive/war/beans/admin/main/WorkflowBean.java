@@ -186,12 +186,12 @@ public class WorkflowBean {
             workflow.setSteps(steps);
             workflow.setRoutes(routes);
             EJBLookup.getWorkflowEngine().update(workflow);
+            new FxFacesMsgInfo("Workflow.nfo.updated", workflow.getName()).addToContext();
+            return null;
         } catch (Exception e) {
             new FxFacesMsgErr(e).addToContext();
-            return "workflowEdit";
+            return null;
         }
-        new FxFacesMsgInfo("Workflow.nfo.updated", workflow.getName()).addToContext();
-        return "workflowOverview";
     }
 
     /**

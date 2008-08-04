@@ -242,10 +242,10 @@ public class MandatorBean {
             // make sure the variable holding the mandator data will be updated by setting it to null
             updateMandatorList();
             new FxFacesMsgInfo("Mandator.nfo.updated").addToContext();
-            return "mandatorOverview";
+            return null;
         } catch (FxApplicationException e) {
             new FxFacesMsgErr(e).addToContext();
-            return "mandatorOverview";
+            return null;
         }
     }
 

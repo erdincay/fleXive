@@ -118,10 +118,10 @@ public class StepDefinitionBean {
                 stepDefinition.setUniqueTargetId(-1);
             getWorkflowStepDefinitionEngine().update(stepDefinition);
             new FxFacesMsgInfo("StepDefinition.nfo.updated", stepDefinition.getName()).addToContext();
-            return overview();
+            return null;
         } catch (Exception e) {
             new FxFacesMsgErr(e).addToContext();
-            return "stepDefinitionEdit";
+            return null;
         }
     }
 

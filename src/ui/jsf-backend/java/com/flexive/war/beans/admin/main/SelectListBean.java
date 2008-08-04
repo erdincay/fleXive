@@ -35,6 +35,7 @@ package com.flexive.war.beans.admin.main;
 
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.messages.FxFacesMsgErr;
+import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxFormatUtils;
@@ -463,11 +464,12 @@ public class SelectListBean {
             }
             EJBLookup.getSelectListEngine().save(selectList);
             reset();
-            return showSelectListOverview();
+            new FxFacesMsgInfo("SelectList.nfo.saved").addToContext();
+            return initEditing();
         }
         catch (Throwable t) {
             new FxFacesMsgErr(t).addToContext();
-            return null;
+            return initEditing();
         }
     }
 }

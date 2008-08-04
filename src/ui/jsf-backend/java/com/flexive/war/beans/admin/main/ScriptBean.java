@@ -317,7 +317,7 @@ public class ScriptBean {
         final UserTicket ticket = FxContext.get().getTicket();
         if (!ticket.isInRole(Role.ScriptManagement)) {
             new FxFacesMsgErr("Script.err.editPerm").addToContext();
-            return "scriptOverview";
+            return null;
         }
 
         ensureScriptIdSet();
@@ -326,10 +326,10 @@ public class ScriptBean {
             scriptInterface.updateScriptInfo(id, sinfo.getEvent(), sinfo.getName(), sinfo.getDescription(), sinfo.getCode(), sinfo.isActive());
             //updateScriptList(); needed (see mandators) ???
             new FxFacesMsgInfo("Script.nfo.updated").addToContext();
-            return "scriptOverview";
+            return null;
         } catch (FxApplicationException e) {
             new FxFacesMsgErr(e).addToContext();
-            return "scriptOverview";
+            return null;
         }
     }
 
