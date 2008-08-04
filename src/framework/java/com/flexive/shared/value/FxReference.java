@@ -186,6 +186,15 @@ public class FxReference extends FxValue<ReferencedContent, FxReference> impleme
         return new FxReference(this);
     }
 
+    /** 
+     * {@inheritDoc}
+     */
+    @Override
+    public ReferencedContent getEmptyValue() {
+        return EMPTY.copy();
+    }
+
+
     @Override
     public int compareTo(FxValue o) {
         if (isEmpty() || o.isEmpty() || !(o instanceof FxReference)) {

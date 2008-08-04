@@ -187,6 +187,14 @@ public class FxFloat extends FxValue<Float, FxFloat> implements Serializable {
         return Float.class;
 	}
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Float getEmptyValue() {
+        return EMPTY;
+    }
+
     @Override
     public int compareTo(FxValue o) {
         if (!(o instanceof FxFloat) || isEmpty() || o.isEmpty()) {

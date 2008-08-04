@@ -226,4 +226,13 @@ public class FxDateRange extends FxValue<DateRange, FxDateRange> implements Seri
         }
         return super.compareTo(o);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public DateRange getEmptyValue() {
+        return EMPTY.copy();
+    }
+
 }

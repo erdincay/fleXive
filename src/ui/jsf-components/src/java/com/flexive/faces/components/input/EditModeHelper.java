@@ -175,6 +175,10 @@ class EditModeHelper extends RenderHelper {
             renderDateInput(parent, inputId, language);
         } else if (value instanceof FxDateTime) {
             renderDateTimeInput(parent, inputId, language);
+        } else if (value instanceof FxDateRange) {
+            renderDateRangeInput(parent, inputId, language);
+        } else if (value instanceof FxDateTimeRange) {
+            renderDateTimeRangeInput(parent, inputId, language);
         } else if (value instanceof FxReference) {
             renderReferenceSelect(parent, inputId, language);
         } else if (value instanceof FxBinary) {
@@ -306,7 +310,10 @@ class EditModeHelper extends RenderHelper {
 
     private void renderDateInput(UIComponent parent, String inputId, FxLanguage language) {
         final Date date = value.isTranslationEmpty(language) ? null : (Date) value.getTranslation(language);
+        createDateInput(parent, inputId, date);
+    }
 
+    private void createDateInput(UIComponent parent, String inputId, Date date) {
         final HtmlInputText input = (HtmlInputText) FxJsfUtils.addChildComponent(parent, HtmlInputText.COMPONENT_TYPE);
         input.setId(stripForm(inputId));
         input.setSize(10);
@@ -317,7 +324,7 @@ class EditModeHelper extends RenderHelper {
         img.setId("calendarButton_" + stripForm(inputId));
         img.setUrl(FxJsfUtils.getWebletURL("com.flexive.faces.weblets", "/images/calendar.gif"));
         img.setStyleClass("button");
-        
+
         final YuiDateInputWriter diw = new YuiDateInputWriter();
         diw.setInputClientId(inputId);
         diw.setButtonId(img.getClientId(FacesContext.getCurrentInstance()));
@@ -325,11 +332,23 @@ class EditModeHelper extends RenderHelper {
         parent.getChildren().add(diw);
     }
 
+    private void renderDateRangeInput(UIComponent parent, String inputId, FxLanguage language) {
+        final DateRange range = value.isTranslationEmpty(language) ? null : (DateRange) value.getTranslation(language);
+        createDateInput(parent, inputId + "_1", range != null ? range.getLower() : null);
+        renderLiteral(parent, " - ");
+        createDateInput(parent, inputId + "_2", range != null ? range.getUpper() : null);
+    }
+
+
     private void renderDateTimeInput(UIComponent parent, String inputId, FxLanguage language) {
 //        createInputDate(parent, inputId, language).setType("full");
-        renderDateInput(parent, inputId, language);
 
         final Date date = value.isTranslationEmpty(language) ? null : (Date) value.getTranslation(language);
+        createDateTimeInput(parent, inputId, date);
+    }
+
+    private void createDateTimeInput(UIComponent parent, String inputId, Date date) {
+        createDateInput(parent, inputId, date);
         final Calendar cal = date != null ? Calendar.getInstance() : null;
         if (cal != null) {
             cal.setTime(date);
@@ -349,6 +368,13 @@ class EditModeHelper extends RenderHelper {
         if (value != -1) {
             input.setValue(new Formatter().format("%02d", value));
         }
+    }
+
+    private void renderDateTimeRangeInput(UIComponent parent, String inputId, FxLanguage language) {
+        final DateRange range = value.isTranslationEmpty(language) ? null : (DateRange) value.getTranslation(language);
+        createDateTimeInput(parent, inputId + "_1", range != null ? range.getLower() : null);
+        renderLiteral(parent, " -<br/>").setEscape(false);
+        createDateTimeInput(parent, inputId + "_2", range != null ? range.getUpper() : null);
     }
 
     @SuppressWarnings({"unchecked"})
@@ -455,7 +481,7 @@ class EditModeHelper extends RenderHelper {
         final Object writeValue;
         if (languageId != -1) {
             //noinspection unchecked
-            writeValue = value.isTranslationEmpty(languageId) ? "" : value.getTranslation(languageId);
+            writeValue = value.isTranslationEmpty(languageId) ? value.getEmptyValue() : value.getTranslation(languageId);
         } else {
             //noinspection unchecked
             writeValue = value.getDefaultTranslation();

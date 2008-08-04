@@ -220,5 +220,11 @@ public class FxBinary extends FxValue<BinaryDescriptor, FxBinary> implements Ser
         return BinaryDescriptor.class;
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public BinaryDescriptor getEmptyValue() {
+        return EMPTY;
+    }
 }

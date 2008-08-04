@@ -276,6 +276,17 @@ public class FxSelectMany extends FxValue<SelectMany, FxSelectMany> implements S
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SelectMany getEmptyValue() {
+        if (getSelectList() == null) {
+            throw new FxInvalidParameterException("list", "ex.content.value.select.list").asRuntimeException();
+        }
+        return new SelectMany(getSelectList());
+    }
+
     private void checkForEmptyTranslations(Map<Long, SelectMany> translations) {
         FxSharedUtils.checkParameterEmpty(translations, "translations");
         for (SelectMany translation: translations.values()) {

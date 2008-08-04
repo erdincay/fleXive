@@ -33,7 +33,8 @@ div.FxHTMLInput div.fxValueInputRow {
 
 /* Limit width of the month select list*/
 
-.FxDateInput .popupCalendar, .FxDateTimeInput .popupCalendar {
+.FxDateInput .popupCalendar, .FxDateTimeInput .popupCalendar,
+.FxDateRangeInput .popupCalendar, .FxDateTimeRangeInput .popupCalendar {
     display: none;
     position: absolute;
     left: 10px;

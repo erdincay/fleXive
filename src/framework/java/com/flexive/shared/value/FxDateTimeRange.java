@@ -224,6 +224,14 @@ public class FxDateTimeRange extends FxValue<DateRange, FxDateTimeRange> impleme
         throw new FxInvalidStateException("ex.content.value.sql.notSupported", getClass().getSimpleName()).asRuntimeException();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public DateRange getEmptyValue() {
+        return EMPTY.copy();
+    }
+
 
     @Override
     public int compareTo(FxValue o) {

@@ -196,6 +196,14 @@ public class FxDouble extends FxValue<Double, FxDouble> implements Serializable 
         return Double.class;
 	}
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Double getEmptyValue() {
+        return EMPTY;
+    }
+
     @Override
     public int compareTo(FxValue o) {
         if (!(o instanceof FxDouble) || isEmpty() || o.isEmpty()) {

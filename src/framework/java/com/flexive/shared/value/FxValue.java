@@ -903,6 +903,13 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     }
 
     /**
+     * Returns an empty value object for this FxValue type.
+     *
+     * @return  an empty value object for this FxValue type.
+     */
+    public abstract T getEmptyValue();
+
+    /**
      * {@inheritDoc}
      */
     @Override

@@ -46,6 +46,7 @@ import org.apache.commons.lang.StringUtils;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.io.Serializable;
 
 /**
  * A {@link com.flexive.shared.structure.FxType FxType} groovy builder. By convention,
@@ -113,7 +114,8 @@ import java.util.Map;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class GroovyTypeBuilder extends BuilderSupport {
+public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
+    private static final long serialVersionUID = -6856824640709225006L;
     private static final Map<Object, Object> EMPTYATTRIBUTES = Collections.unmodifiableMap(new HashMap<Object, Object>());
 
     /**
@@ -148,7 +150,7 @@ public class GroovyTypeBuilder extends BuilderSupport {
 
     private FxType type;
 
-    private class Node<TElement> {
+    private static class Node<TElement> {
         protected GroupNode parent;
         protected final TElement element;
 
@@ -181,7 +183,7 @@ public class GroovyTypeBuilder extends BuilderSupport {
         }
     }
 
-    private class StructureNode<T extends FxStructureElement> extends Node<T> {
+    private static class StructureNode<T extends FxStructureElement> extends Node<T> {
 
         public StructureNode(T element) {
             super(element);
@@ -199,12 +201,14 @@ public class GroovyTypeBuilder extends BuilderSupport {
         }
     }
 
-    private class PropertyNode extends StructureNode<FxPropertyEdit> {
+    private static class PropertyNode extends StructureNode<FxPropertyEdit> {
+        private final long typeId;
         private final String alias;
 
-        public PropertyNode(FxPropertyEdit element, String alias) {
+        public PropertyNode(FxPropertyEdit element, String alias, long typeId) {
             super(element);
             this.alias = alias;
+            this.typeId = typeId;
         }
 
         @Override
@@ -212,7 +216,7 @@ public class GroovyTypeBuilder extends BuilderSupport {
             super.setParent(parent);
             try {
                 // attach property
-                EJBLookup.getAssignmentEngine().createProperty(type.getId(), getElement(),
+                EJBLookup.getAssignmentEngine().createProperty(typeId, getElement(),
                         getParent() == null ? "/" : getParent().getXPath(), alias);
             } catch (FxApplicationException e) {
                 throw e.asRuntimeException();
@@ -220,11 +224,13 @@ public class GroovyTypeBuilder extends BuilderSupport {
         }
     }
 
-    private class GroupNode extends StructureNode<FxGroupEdit> {
+    private static class GroupNode extends StructureNode<FxGroupEdit> {
         private FxGroupAssignment assignment;
+        private final long typeId;
 
-        public GroupNode(FxGroupEdit element) {
+        public GroupNode(FxGroupEdit element, long typeId) {
             super(element);
+            this.typeId = typeId;
         }
 
         public FxGroupAssignment getAssignment() {
@@ -235,7 +241,7 @@ public class GroovyTypeBuilder extends BuilderSupport {
         public void setParent(GroupNode parent) {
             super.setParent(parent);
             try {
-                final long id = EJBLookup.getAssignmentEngine().createGroup(type.getId(), getElement(),
+                final long id = EJBLookup.getAssignmentEngine().createGroup(typeId, getElement(),
                         getParent() == null ? "/" : getParent().getXPath());
                 assignment = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(id);
             } catch (FxApplicationException e) {
@@ -244,7 +250,7 @@ public class GroovyTypeBuilder extends BuilderSupport {
         }
     }
 
-    private class PropertyAssignmentNode extends Node<FxPropertyAssignmentEdit> {
+    private static class PropertyAssignmentNode extends Node<FxPropertyAssignmentEdit> {
         public PropertyAssignmentNode(FxPropertyAssignmentEdit element) {
             super(element);
         }
@@ -263,7 +269,7 @@ public class GroovyTypeBuilder extends BuilderSupport {
         }
     }
 
-    private class GroupAssignmentNode extends Node<FxGroupAssignmentEdit> {
+    private static class GroupAssignmentNode extends Node<FxGroupAssignmentEdit> {
         private GroupAssignmentNode(FxGroupAssignmentEdit element) {
             super(element);
         }
@@ -428,7 +434,7 @@ public class GroovyTypeBuilder extends BuilderSupport {
                     if( defaultValue != null )
                         property.setDefaultValue(defaultValue);
                 }
-                return new PropertyNode(property, alias);
+                return new PropertyNode(property, alias, type.getId());
             }
         } else {
             //TODO: set options for group
@@ -453,7 +459,8 @@ public class GroovyTypeBuilder extends BuilderSupport {
             } else {
                 // create a new group
                 return new GroupNode(FxGroupEdit.createNew(elementName, description, hint,
-                        false, multiplicity).setAssignmentDefaultMultiplicity(defaultMultiplicity));
+                        false, multiplicity).setAssignmentDefaultMultiplicity(defaultMultiplicity),
+                        type.getId());
             }
         }
     }

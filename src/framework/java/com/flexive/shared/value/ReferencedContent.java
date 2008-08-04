@@ -48,9 +48,10 @@ import org.apache.commons.lang.StringUtils;
  */
 public class ReferencedContent extends FxPK implements Serializable {
     private static final long serialVersionUID = 4530337199230606480L;
-    private String caption;
-    private Step step;
-    private ACL acl;
+    private final String caption;
+    private final Step step;
+    private final ACL acl;
+
     private FxContent content;
     private boolean accessGranted;
     private boolean resolved;
@@ -126,6 +127,29 @@ public class ReferencedContent extends FxPK implements Serializable {
         this.acl = null;
         this.content = null;
         this.accessGranted = false;
+    }
+
+    /**
+     * Copy constructor.
+     *
+     * @param other the instance to be copied
+     */
+    public ReferencedContent(ReferencedContent other) {
+        this.caption = other.caption;
+        this.step = other.step;
+        this.acl = other.acl;
+        this.content = other.content.copy();
+        this.accessGranted = other.accessGranted;
+        this.resolved = other.resolved;
+    }
+
+    /**
+     * Returns a copy of this ReferencedContent instance.
+     *
+     * @return  a copy of this ReferencedContent instance.
+     */
+    public ReferencedContent copy() {
+        return new ReferencedContent(this);
     }
 
     /**

@@ -75,6 +75,21 @@ public class FxValueRendererFactory {
     }
 
     /**
+     * FxDateRange formatter
+     */
+    private static class FxDateRangeFormatter implements FxValueFormatter<DateRange, FxDateRange> {
+        public String format(FxDateRange container, DateRange value, FxLanguage outputLanguage) {
+            return value != null
+                    ? formatDate(outputLanguage, value.getLower()) + " - " + formatDate(outputLanguage, value.getUpper())
+                    : getEmptyMessage(outputLanguage);
+        }
+
+        private String formatDate(FxLanguage outputLanguage, Date date) {
+            return DateFormat.getDateInstance(DateFormat.MEDIUM, outputLanguage.getLocale()).format(date);
+        }
+    }
+
+    /**
      * FxDateTime formatter.
      */
     private static class FxDateTimeFormatter implements FxValueFormatter<Date, FxDateTime> {
@@ -84,6 +99,22 @@ public class FxValueRendererFactory {
                     : getEmptyMessage(outputLanguage);
         }
     }
+
+    /**
+     * FxDateTimeRange formatter.
+     */
+    private static class FxDateTimeRangeFormatter implements FxValueFormatter<DateRange, FxDateTimeRange> {
+        public String format(FxDateTimeRange container, DateRange value, FxLanguage outputLanguage) {
+            return value != null
+                    ? formatDateTime(outputLanguage, value.getLower()) + " - " + formatDateTime(outputLanguage, value.getUpper())
+                    : getEmptyMessage(outputLanguage);
+        }
+
+        private String formatDateTime(FxLanguage outputLanguage, Date dateTime) {
+            return DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, outputLanguage.getLocale()).format(dateTime);
+        }
+    }
+
 
     /**
      * FxDouble formatter.
@@ -174,6 +205,8 @@ public class FxValueRendererFactory {
         addRenderer(DEFAULT, FxSelectMany.class, new FxSelectManyFormatter());
         addRenderer(DEFAULT, FxReference.class, new FxReferenceFormatter());
         addRenderer(DEFAULT, FxNoAccess.class, new FxNoAccessFormatter());
+        addRenderer(DEFAULT, FxDateRange.class, new FxDateRangeFormatter());
+        addRenderer(DEFAULT, FxDateTimeRange.class, new FxDateTimeRangeFormatter());
         //noinspection unchecked
         addRenderer(DEFAULT, FxValue.class, new ObjectFormatter());
     }

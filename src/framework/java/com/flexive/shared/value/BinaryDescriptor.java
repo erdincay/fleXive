@@ -42,7 +42,7 @@ import java.io.*;
 import java.util.List;
 
 /**
- * Descriptor for binaries
+ * Descriptor for binaries (immutable).
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
@@ -77,6 +77,7 @@ public class BinaryDescriptor implements Serializable {
      * For images: box scaled size for preview 3
      */
     public final static int PREVIEW3_BOX = 232;
+    private static final String MIMETYPE_UNKNOWN = "unknown/unknown";
 
     /**
      * Enumeration of all available preview sizes.
@@ -109,22 +110,29 @@ public class BinaryDescriptor implements Serializable {
         }
     }
 
-    private String handle = null;
-    private boolean newBinary;
-    private List<ServerLocation> server;
+    private final String handle;
+    private final boolean newBinary;
+    private final List<ServerLocation> server;
 
-    private long id = -1;
-    private int version;
-    private int quality;
-    private long creationTime;
-    private String name;
-    private long size;
-    private String metadata;
-    private String mimeType;
-    private boolean image;
-    private double resolution;
-    private int width;
-    private int height;
+    private final long id;
+    private final int version;
+    private final int quality;
+    private final long creationTime;
+    private final String name;
+    private final long size;
+    private final String metadata;
+    private final String mimeType;
+    private final boolean image;
+    private final double resolution;
+    private final int width;
+    private final int height;
+
+    /**
+     * Constructor for a new empty binary
+     */
+    public BinaryDescriptor() {
+        this(EMPTY);
+    }
 
     /**
      * Constructor (for new Binaries)
@@ -132,8 +140,7 @@ public class BinaryDescriptor implements Serializable {
      * @param handle binary_transit handle
      */
     public BinaryDescriptor(String handle) {
-        this.handle = handle;
-        this.newBinary = true;
+        this(handle, EMPTY, -1, null, null);
     }
 
     /**
@@ -152,17 +159,15 @@ public class BinaryDescriptor implements Serializable {
         this.size = size;
         this.metadata = metadata;
         this.mimeType = mimeType;
-    }
-
-    /**
-     * Constructor for a new empty binary
-     */
-    public BinaryDescriptor() {
-        this.handle = EMPTY;
-        this.mimeType = "unknown/unknown";
-        this.metadata = EMPTY;
-        this.name = EMPTY;
-        this.newBinary = true;
+        this.server = null;
+        this.id = -1;
+        this.version = -1;
+        this.quality = -1;
+        this.creationTime = -1;
+        this.image = false;
+        this.resolution = 0;
+        this.width = -1;
+        this.height = -1;
     }
 
     /**
@@ -174,11 +179,8 @@ public class BinaryDescriptor implements Serializable {
      * @throws FxStreamException on upload errors
      */
     public BinaryDescriptor(String name, long streamLength, InputStream stream) throws FxStreamException {
-        this.name = name;
-        this.size = streamLength;
-        BinaryUploadPayload payload = FxStreamUtils.uploadBinary(streamLength, stream);
-        this.handle = payload.getHandle();
-        this.newBinary = true;
+        this(FxStreamUtils.uploadBinary(streamLength, stream).getHandle(), name, streamLength,
+                null, null);
     }
 
     /**
@@ -231,6 +233,17 @@ public class BinaryDescriptor implements Serializable {
             }
         }
         this.newBinary = true;
+        this.mimeType = null;
+        this.metadata = null;
+        this.server = null;
+        this.id = -1;
+        this.version = -1;
+        this.quality = -1;
+        this.creationTime = -1;
+        this.image = false;
+        this.resolution = 0;
+        this.width = -1;
+        this.height = -1;
     }
 
 
@@ -252,6 +265,7 @@ public class BinaryDescriptor implements Serializable {
      * @param height       height (if image and detected)
      */
     public BinaryDescriptor(List<ServerLocation> server, long id, int version, int quality, long creationTime, String name, long size, String metadata, String mimeType, boolean image, double resolution, int width, int height) {
+        this.newBinary = false;
         this.server = server;
         this.id = id;
         this.version = version;
@@ -265,6 +279,7 @@ public class BinaryDescriptor implements Serializable {
         this.resolution = resolution;
         this.width = width;
         this.height = height;
+        this.handle = null;
     }
 
     /**

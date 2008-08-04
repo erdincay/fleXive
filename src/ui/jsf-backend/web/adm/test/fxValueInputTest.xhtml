@@ -79,7 +79,7 @@
             <ui:repeat var="holder" value="#{fxValueInputTestBean.basicValues}">
                 <tr>
                     <td valign="top">
-                        #{value.valueClass.simpleName}
+                        #{holder.value.class.simpleName}
                     </td>
                     <td>
                         <fx:fxValueInput id="basic" value="#{holder.value}"/>
@@ -98,7 +98,7 @@
             <c:forEach var="value" items="#{fxValueInputTestBean.basicValues2}" varStatus="status">
                 <tr>
                     <td valign="top">
-                        #{value.valueClass.simpleName}
+                        #{value.class.simpleName}
                     </td>
                     <td>
                         <fx:fxValueInput id="basic2#{status.index}" value="#{value}"/>

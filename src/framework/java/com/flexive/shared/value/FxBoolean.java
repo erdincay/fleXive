@@ -201,4 +201,13 @@ public class FxBoolean extends FxValue<Boolean, FxBoolean> implements Serializab
     public Class<Boolean> getValueClass() {
         return Boolean.class;
 	}
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Boolean getEmptyValue() {
+        return EMPTY;
+    }
+
 }

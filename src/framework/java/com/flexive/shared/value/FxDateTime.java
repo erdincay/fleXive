@@ -197,4 +197,13 @@ public class FxDateTime extends FxValue<Date, FxDateTime> implements Serializabl
         }
         return "'" + FxFormatUtils.getDateTimeFormat().format(getDefaultTranslation()) + "'";
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Date getEmptyValue() {
+        return (Date) EMPTY.clone();
+    }
+
 }

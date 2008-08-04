@@ -76,6 +76,15 @@ public class DateRange implements Serializable {
         }
     }
 
+    /**
+     * Returns a copy of this DateRange instance.
+     *
+     * @return  a copy of this DateRange instance.
+     */
+    public DateRange copy() {
+        return new DateRange(lower, upper);
+    }
+
     public Date getLower() {
         return (Date) lower.clone();
     }

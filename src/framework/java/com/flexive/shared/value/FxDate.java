@@ -207,4 +207,13 @@ public class FxDate extends FxValue<Date, FxDate> implements Serializable {
     public Class<Date> getValueClass() {
         return Date.class;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Date getEmptyValue() {
+        return (Date) EMPTY.clone();
+    }
+
 }

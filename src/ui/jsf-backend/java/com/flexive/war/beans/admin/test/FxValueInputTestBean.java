@@ -117,6 +117,8 @@ public class FxValueInputTestBean {
     private List<FxValue> createFxValues() {
         final FxSelectList countriesList = CacheAdmin.getEnvironment().getSelectList(FxSelectList.COUNTRIES);
         final List<FxSelectListItem> countries = countriesList.getItems();
+        final DateRange range = new DateRange(new Date(), new Date());
+        final DateRange range2 = new DateRange(new Date(0), new Date(1000000));
         return Arrays.asList(new FxValue[]{
                 new FxString(false, "string singlelanguage"),
                 new FxString(ENGLISH, "english").setTranslation(GERMAN, "deutsch"),
@@ -132,6 +134,10 @@ public class FxValueInputTestBean {
                 new FxDate(ENGLISH, new Date()).setTranslation(GERMAN, new Date(new Date().getTime() - 24*3600*1000)),
                 new FxDateTime(false, new Date()),
                 new FxDateTime(ENGLISH, new Date()).setTranslation(GERMAN, new Date(new Date().getTime() - 24*3600*1000)),
+                new FxDateRange(false, range.copy()),
+                new FxDateRange(ENGLISH, range.copy()).setTranslation(GERMAN, range2.copy()),
+                new FxDateTimeRange(false, range.copy()),
+                new FxDateTimeRange(ENGLISH, range.copy()).setTranslation(GERMAN, range2.copy()),
                 new FxHTML(false, "HTML value"),
                 new FxHTML(ENGLISH, "english HTML").setTranslation(GERMAN, "deutsches HTML"),
                 new FxSelectOne(false, countries.get(0)),

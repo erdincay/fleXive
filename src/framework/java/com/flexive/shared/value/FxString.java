@@ -127,4 +127,12 @@ public class FxString extends FxValue<String, FxString> implements Serializable 
     public Class<String> getValueClass() {
         return String.class;
 	}
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getEmptyValue() {
+        return EMPTY;
+    }
 }

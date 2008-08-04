@@ -32,6 +32,7 @@
 package com.flexive.shared.value;
 
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.structure.FxSelectList;
 import com.flexive.shared.structure.FxSelectListItem;
 
@@ -205,6 +206,17 @@ public class FxSelectOne extends FxValue<FxSelectListItem, FxSelectOne> implemen
     @Override
     public boolean isImmutableValueType() {
         return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public FxSelectListItem getEmptyValue() {
+        if (getSelectList() == null) {
+            throw new FxInvalidParameterException("list", "ex.content.value.select.list").asRuntimeException();
+        }
+        return new FxSelectListItem(-1, null, getSelectList(), -1, null);
     }
 
     /**

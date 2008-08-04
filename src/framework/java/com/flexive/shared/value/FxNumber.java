@@ -197,6 +197,14 @@ public class FxNumber extends FxValue<Integer, FxNumber> implements Serializable
         return Integer.class;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Integer getEmptyValue() {
+        return EMPTY;
+    }
+
     @Override
     public int compareTo(FxValue o) {
         if (!(o instanceof FxNumber) || isEmpty() || o.isEmpty()) {

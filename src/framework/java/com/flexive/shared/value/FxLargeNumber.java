@@ -196,6 +196,15 @@ public class FxLargeNumber extends FxValue<Long, FxLargeNumber> implements Seria
         return Long.class;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Long getEmptyValue() {
+        return EMPTY;
+    }
+
+
     @Override
     public int compareTo(FxValue o) {
         if (!(o instanceof FxLargeNumber) || isEmpty() || o.isEmpty()) {

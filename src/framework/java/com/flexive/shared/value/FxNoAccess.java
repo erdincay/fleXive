@@ -202,6 +202,14 @@ public final class FxNoAccess extends FxValue<Object, FxNoAccess> {
     /**
      * {@inheritDoc}
      */
+    @Override
+    public Object getEmptyValue() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @SuppressWarnings({"EqualsWhichDoesntCheckParameterClass"})
     @Override
     public boolean equals(Object other) {

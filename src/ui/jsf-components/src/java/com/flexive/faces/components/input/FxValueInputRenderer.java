@@ -33,31 +33,26 @@ package com.flexive.faces.components.input;
 
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxLanguage;
-import com.flexive.shared.CacheAdmin;
+import static com.flexive.shared.FxFormatUtils.toDateTime;
+import static com.flexive.shared.FxFormatUtils.toDate;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxUpdateException;
 import com.flexive.shared.value.*;
-import com.flexive.shared.value.mapper.InputMapper;
-import com.flexive.shared.value.mapper.IdentityInputMapper;
-import com.flexive.shared.value.mapper.NumberQueryInputMapper;
-import com.flexive.faces.FxJsfUtils;
 import org.apache.commons.lang.StringUtils;
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.myfaces.custom.date.HtmlInputDate;
 import org.apache.myfaces.custom.fileupload.HtmlInputFileUpload;
 import org.apache.myfaces.custom.fileupload.UploadedFile;
 
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIInput;
 import javax.faces.component.NamingContainer;
-import javax.faces.component.html.HtmlInputText;
 import javax.faces.context.FacesContext;
-import javax.faces.context.ResponseWriter;
 import javax.faces.render.Renderer;
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -180,7 +175,7 @@ public class FxValueInputRenderer extends Renderer {
         if (value.isMultiLanguage() && !input.isDisableMultiLanguage()) {
             // set the FxValue default language
             final String defaultLanguage = (String) parameters.get(clientId + DEFAULT_LANGUAGE);
-            if (StringUtils.isNotBlank(defaultLanguage)) {
+            if (isNotBlank(defaultLanguage)) {
                 final int defaultLanguageId = Integer.parseInt(defaultLanguage);
                 value.setDefaultLanguage(defaultLanguageId, true);
             } else {
@@ -204,7 +199,7 @@ public class FxValueInputRenderer extends Renderer {
     private void updateTranslation(FacesContext context, FxValueInput input, FxValue value, String inputId, long languageId, Map parameters, Map parameterValues) {
         if (value instanceof FxSelectMany) {
             final String selectedOptions = StringUtils.join((String[]) parameterValues.get(inputId), ',');
-            if (StringUtils.isNotBlank(selectedOptions)) {
+            if (isNotBlank(selectedOptions)) {
                 // update selection
                 value.setTranslation(languageId, selectedOptions);
             } else if (value.getTranslation(languageId) != null) {
@@ -230,11 +225,23 @@ public class FxValueInputRenderer extends Renderer {
                 }
             }
         } else if (value instanceof FxBoolean) {
-            value.setTranslation(languageId, StringUtils.isNotBlank((String) parameters.get(inputId)));
+            value.setTranslation(languageId, isNotBlank((String) parameters.get(inputId)));
+        } else if (value instanceof FxDateRange || value instanceof FxDateTimeRange) {
+            final boolean withTime = value instanceof FxDateTimeRange;
+            final String postedLower = (String) parameters.get(inputId + "_1");
+            final String postedUpper = (String) parameters.get(inputId + "_2");
+            if (isBlank(postedLower) || isBlank(postedUpper)) {
+                value.removeLanguage(languageId);
+            } else {
+                value.setTranslation(languageId, new DateRange(
+                        withTime ? addTimeFields(parameters, inputId + "_1", toDateTime(postedLower)) : toDate(postedLower),
+                        withTime ? addTimeFields(parameters, inputId + "_2", toDateTime(postedUpper)) : toDate(postedUpper))
+                );
+            }
         } else {
             // use FxValue string representation
             final String postedValue = (String) parameters.get(inputId);
-            if (StringUtils.isNotBlank(postedValue)) {
+            if (isNotBlank(postedValue)) {
                 value.setTranslation(languageId, postedValue);
                 if (value instanceof FxReference && value.isValid()) {
                     // store translation
@@ -246,23 +253,26 @@ public class FxValueInputRenderer extends Renderer {
             }
 
             if (value instanceof FxDateTime && !value.isTranslationEmpty(languageId) && value.isValid()) {
-                // get additional time information
-                final String hours = (String) parameters.get(inputId + "_hh");
-                final String minutes = (String) parameters.get(inputId + "_mm");
-                final String seconds = (String) parameters.get(inputId + "_ss");
-                final Calendar cal = Calendar.getInstance();
-                final FxDateTime dateTime = (FxDateTime) value;
-                cal.setTime(dateTime.getTranslation(languageId));
-                try {
-                    cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(hours));
-                    cal.set(Calendar.MINUTE, Integer.parseInt(minutes));
-                    cal.set(Calendar.SECOND, Integer.parseInt(seconds));
-                } catch (NumberFormatException e) {
-                    // ignore invalid time
-                }
-                dateTime.setTranslation(languageId, cal.getTime());    
+                value.setTranslation(languageId, addTimeFields(parameters, inputId, ((FxDateTime) value).getTranslation(languageId)));
             }
         }
+    }
+
+    private Date addTimeFields(Map parameters, String inputId, Date date) {
+        // get additional time information
+        final String hours = (String) parameters.get(inputId + "_hh");
+        final String minutes = (String) parameters.get(inputId + "_mm");
+        final String seconds = (String) parameters.get(inputId + "_ss");
+        final Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        try {
+            cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(hours));
+            cal.set(Calendar.MINUTE, Integer.parseInt(minutes));
+            cal.set(Calendar.SECOND, Integer.parseInt(seconds));
+        } catch (NumberFormatException e) {
+            // ignore invalid time
+        }
+        return cal.getTime();
     }
 
     /**

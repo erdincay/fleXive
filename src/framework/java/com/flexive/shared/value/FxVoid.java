@@ -63,4 +63,10 @@ public final class FxVoid extends FxValue<Object, FxVoid> {
     public Class<Object> getValueClass() {
         return Object.class;
     }
+
+    /** {@inheritDoc} */
+    @Override
+    public Object getEmptyValue() {
+        return "";
+    }
 }
