@@ -82,8 +82,8 @@
                                 <td align="left"><h:outputText value="#{item.loginName}" /></td>
                                 <td align="left"><h:outputText value="#{item.name}" /></td>
                                 <td align="left"><h:outputText value="#{item.email}" /></td>
-                                <td align="left"><h:outputText value="#{item.active}" /></td>
-                                <td align="left"><h:outputText value="#{item.validated}" /></td>
+                                <td align="left"><h:outputText value="#{fxMessageBean[item.active ? 'Account.label.overview.true' : 'Account.label.overview.false']}" /></td>
+                                <td align="left"><h:outputText value="#{fxMessageBean[item.validated ? 'Account.label.overview.true' : 'Account.label.overview.false']}" /></td>
                                 <c:if test="${fxSystemBean.userTicket.globalSupervisor}">
                                     <td align="left">
                                         <ui:fragment rendered="#{!item.systemInternalAccount}">
@@ -95,13 +95,13 @@
                                     <adm:commandIcon labelKey="User.button.edit" location="content"
                                                     icon="edit"  action="editUser"  bean="#{accountBean}"
                                                     id="editButton_#{item.id}">
-                                        <f:setPropertyActionListener target="#{accountBean.accountIdFiler}" value="#{item.id}"/>
+                                        <f:setPropertyActionListener target="#{accountBean.accountIdFilter}" value="#{item.id}"/>
                                     </adm:commandIcon>
                                     <ui:fragment rendered="#{!item.systemInternalAccount}">
                                         <adm:commandIcon labelKey="User.button.delete" location="content"
                                                          icon="delete" action="deleteUser" bean="#{accountBean}"
                                                          id="deleteButton_#{item.id}" confirmKey="User.confirm.delete">
-                                            <f:setPropertyActionListener target="#{accountBean.accountIdFiler}"
+                                            <f:setPropertyActionListener target="#{accountBean.accountIdFilter}"
                                                                          value="#{item.id}"/>
                                         </adm:commandIcon>
                                     </ui:fragment>

@@ -68,7 +68,7 @@ public class AccountBean {
     private UISelectBoolean validatedFilterCheckbox;
 
     private long groupFilter = -1;
-    private long accountIdFiler = -1;
+    private long accountIdFilter = -1;
     private AccountEngine accountInterface;
     private boolean activeFilter = true;
     private boolean validatedFilter = true;
@@ -218,13 +218,13 @@ public class AccountBean {
     }
 
 
-    public long getAccountIdFiler() {
-        return accountIdFiler;
+    public long getAccountIdFilter() {
+        return accountIdFilter;
     }
 
-    public void setAccountIdFiler(long accountIdFiler) {
-        this.accountIdFiler = accountIdFiler;
-        FxJsfUtils.setSessionAttribute(ID_CACHE_KEY, this.accountIdFiler);
+    public void setAccountIdFilter(long accountIdFilter) {
+        this.accountIdFilter = accountIdFilter;
+        FxJsfUtils.setSessionAttribute(ID_CACHE_KEY, this.accountIdFilter);
     }
 
     /**
@@ -432,7 +432,7 @@ public class AccountBean {
     public String deleteUser() {
         try {
             ensureAccountIdSet();
-            accountInterface.remove(accountIdFiler);
+            accountInterface.remove(accountIdFilter);
             new FxFacesMsgInfo("User.nfo.deleted").addToContext();
             listCache.clear();
             resetFilter();
@@ -444,8 +444,8 @@ public class AccountBean {
     }
 
     private void ensureAccountIdSet() {
-        if (this.accountIdFiler <= 0) {
-            this.accountIdFiler = (Long) FxJsfUtils.getSessionAttribute(ID_CACHE_KEY);
+        if (this.accountIdFilter <= 0) {
+            this.accountIdFilter = (Long) FxJsfUtils.getSessionAttribute(ID_CACHE_KEY);
         }
     }
 
@@ -457,9 +457,9 @@ public class AccountBean {
     public String editUser() {
         try {
             ensureAccountIdSet();
-            this.account = new AccountEditBean(accountInterface.load(this.accountIdFiler));
-            this.roles = accountInterface.getRoles(this.accountIdFiler, AccountEngine.RoleLoadMode.FROM_USER_ONLY);
-            this.groups = accountInterface.getGroups(this.accountIdFiler);
+            this.account = new AccountEditBean(accountInterface.load(this.accountIdFilter));
+            this.roles = accountInterface.getRoles(this.accountIdFilter, AccountEngine.RoleLoadMode.FROM_USER_ONLY);
+            this.groups = accountInterface.getGroups(this.accountIdFilter);
             return "accountEdit";
         } catch (Throwable t) {
             new FxFacesMsgErr(t).addToContext();
@@ -475,9 +475,9 @@ public class AccountBean {
     public String editUserPref() {
         try {
             this.account = new AccountEditBean(accountInterface.load(FxContext.get().getTicket().getUserId()));
-            setAccountIdFiler(this.account.getId());
-            this.roles = accountInterface.getRoles(this.accountIdFiler, AccountEngine.RoleLoadMode.ALL);
-            this.groups = accountInterface.getGroups(this.accountIdFiler);
+            setAccountIdFilter(this.account.getId());
+            this.roles = accountInterface.getRoles(this.accountIdFilter, AccountEngine.RoleLoadMode.ALL);
+            this.groups = accountInterface.getGroups(this.accountIdFilter);
             this.contactData = null;
             this.contactData = EJBLookup.getContentEngine().load(this.account.getContactData());
             // load configuration parameters
@@ -525,7 +525,7 @@ public class AccountBean {
                 }
                 newPasswd = password;
             }
-            accountInterface.updateUser(this.accountIdFiler, newPasswd, null, null, this.account.getEmail(), this.account.getLanguage().getId());
+            accountInterface.updateUser(this.accountIdFilter, newPasswd, null, null, this.account.getEmail(), this.account.getLanguage().getId());
             languageChanged = true; //currently a "fake" ...
             // update user configuration
             if (getDefaultInputLanguage() != null) {
@@ -555,21 +555,21 @@ public class AccountBean {
             }
 
             // Update the user
-            accountInterface.update(this.accountIdFiler, newPasswd, null, null, null, this.account.getEmail(),
+            accountInterface.update(this.accountIdFilter, newPasswd, null, null, null, this.account.getEmail(),
                     this.account.isValidated(), this.account.isActive(), this.account.getValidFrom(),
                     this.account.getValidTo(), this.account.getLanguage().getId(), this.account.getDescription(),
                     this.account.isAllowMultiLogin(), this.account.getContactData().getId());
             new FxFacesMsgInfo("User.nfo.saved").addToContext();
             // Assign the given groups to the account
             try {
-                accountInterface.setGroups(this.accountIdFiler, groups);
+                accountInterface.setGroups(this.accountIdFilter, groups);
             } catch (Exception exc) {
                 new FxFacesMsgErr(exc).addToContext();
             }
 
             // Assign the given roles to the account
             try {
-                accountInterface.setRoles(this.accountIdFiler, getRoles());
+                accountInterface.setRoles(this.accountIdFilter, getRoles());
             } catch (Exception exc) {
                 new FxFacesMsgErr(exc).addToContext();
             }
@@ -618,8 +618,8 @@ public class AccountBean {
 
         // Create the new account itself
         try {
-            setAccountIdFiler(accountInterface.create(account, password));
-            account = new AccountEditBean(accountInterface.load(this.accountIdFiler));
+            setAccountIdFilter(accountInterface.create(account, password));
+            account = new AccountEditBean(accountInterface.load(this.accountIdFilter));
             new FxFacesMsgInfo("User.nfo.saved", account.getName()).addToContext();
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();
@@ -628,14 +628,14 @@ public class AccountBean {
 
         // Assign the given groups to the account
         try {
-            accountInterface.setGroups(this.accountIdFiler, groups);
+            accountInterface.setGroups(this.accountIdFilter, groups);
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();
         }
 
         // Assign the given roles to the account
         try {
-            accountInterface.setRoles(this.accountIdFiler, getRoles());
+            accountInterface.setRoles(this.accountIdFilter, getRoles());
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();
         }
@@ -675,7 +675,7 @@ public class AccountBean {
             List<Account> result = listCache.get(cacheKey);
             if (result == null) {
                 result = accountInterface.loadAll(account.getName(), account.getLoginName(),
-                        account.getEmail(), isActiveFilter(), isValidatedFilter(), _mandatorFilter,
+                        account.getEmail(), isActiveFilter() ? true : null, isValidatedFilter() ? true : null, _mandatorFilter,
                         null, userGroupIds, 0, -1);
                 listCache.put(cacheKey, result);
             }

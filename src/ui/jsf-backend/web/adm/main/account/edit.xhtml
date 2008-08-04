@@ -23,7 +23,7 @@
             <ui:fragment rendered="#{!accountBean.account.systemInternalAccount}">
                 <h:outputText id="mandator" value="#{mandatorBean.mandatorsById[accountBean.account.mandatorId].name}" />
             </ui:fragment>
-            <h:inputHidden value="#{accountBean.accountIdFiler}"/>
+            <h:inputHidden value="#{accountBean.accountIdFilter}"/>
             <h:inputHidden value="#{accountBean.account.contactDataId}"/>
             <h:inputHidden value="#{accountBean.validatedFilter}"/>
             <h:inputHidden value="#{accountBean.activeFilter}"/>
