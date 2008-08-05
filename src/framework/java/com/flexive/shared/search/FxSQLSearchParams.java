@@ -119,13 +119,9 @@ public class FxSQLSearchParams implements Serializable {
          * @param aclId       the acl the briefcase is using, or null if the briefcase is not shared
          */
         public BriefcaseCreationData(String name, String description, Long aclId) {
+            FxSharedUtils.checkParameterEmpty(name, "name");
             this.description = description == null ? "" : description;
-            if (StringUtils.isBlank(name)) {
-                final UserTicket ticket = FxContext.get().getTicket();
-                this.name = ticket.getUserName() + "_" + FxFormatUtils.getDateTimeFormat().format(new Date());
-            } else {
-                this.name = name;
-            }
+            this.name = name;
             this.aclId = aclId;
         }
 

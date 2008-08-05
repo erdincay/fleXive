@@ -201,7 +201,7 @@ public class SearchEngineTest {
     @Test
     public void briefcaseQueryTest() throws FxApplicationException {
         // create briefcase
-        final String selectFolders = new SqlQueryBuilder().filterType("FOLDER").getQuery();
+        final String selectFolders = new SqlQueryBuilder().type("FOLDER").getQuery();
         final FxSQLSearchParams params = new FxSQLSearchParams().saveResultInBriefcase("test briefcase", "description", (Long) null);
         final FxResultSet result = getSearchEngine().search(selectFolders, 0, Integer.MAX_VALUE, params);
         long bcId = result.getCreatedBriefcaseId();
@@ -211,9 +211,28 @@ public class SearchEngineTest {
 
             // select briefcase
             final FxResultSet briefcase = new SqlQueryBuilder().filterBriefcase(result.getCreatedBriefcaseId()).getResult();
-            assert briefcase.getRowCount() > 0 : "Empty briefcase returned, but getResult returned " + result.getRowCount() + " rows.";
+            assert briefcase.getTotalRowCount() == result.getTotalRowCount()
+                    : "Briefcase returned " + briefcase.getTotalRowCount() + " rows, but getResult returned " + result.getTotalRowCount() + " rows.";
         } finally {
             EJBLookup.getBriefcaseEngine().remove(bcId);
+        }
+    }
+
+
+    @Test
+    public void queryBuilderBriefcaseTest() throws FxApplicationException {
+        long briefcaseId = -1;
+        try {
+            final FxResultSet result = new SqlQueryBuilder().saveInBriefcase("SqlQueryBuilderTest").getResult();
+            assert result.getRowCount() > 0;
+            briefcaseId = result.getCreatedBriefcaseId();
+            final Briefcase briefcase = EJBLookup.getBriefcaseEngine().load(briefcaseId);
+            assert briefcase.getSize() == result.getTotalRowCount()
+                    : "Invalid briefcase size: " + briefcase.getSize() + ", expected: " + result.getTotalRowCount(); 
+        } finally {
+            if (briefcaseId != -1) {
+                EJBLookup.getBriefcaseEngine().remove(briefcaseId);
+            }
         }
     }
 

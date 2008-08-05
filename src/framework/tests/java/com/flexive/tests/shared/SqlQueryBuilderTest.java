@@ -33,7 +33,6 @@ package com.flexive.tests.shared;
 
 import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.search.SortDirection;
-import com.flexive.shared.search.Table;
 import com.flexive.shared.search.query.AssignmentValueNode;
 import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.search.query.QueryOperatorNode.Operator;
@@ -43,7 +42,6 @@ import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.value.FxDate;
 import com.flexive.shared.value.FxString;
 import com.flexive.tests.embedded.QueryNodeTreeTests.AssignmentNodeGenerator;
-import org.testng.Assert;
 import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Test;
 

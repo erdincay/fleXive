@@ -29,7 +29,7 @@
 
 <h:form id="frm">
 
-    <adm:tab label="SQL Search" active="true" id="tab1"/>
+    <adm:tab label="#{fxMessageBean['SqlSearch.fxsql.tabtitle.query']}" active="true" id="tab1"/>
 
     <a4j:region>
         <h:inputTextarea id="query" value="#{sqlSearchBean.query}" style="width:98%" rows="10"/>
@@ -42,20 +42,20 @@
                 </h:selectOneListbox>
             </fx:formRow>
     -->
-            <fx:formRow label="Create Briefcase" id="createBriefcase">
+            <fx:formRow label="#{fxMessageBean['SqlSearch.fxsql.field.createBriefcase']}" id="createBriefcase">
                 <t:selectBooleanCheckbox id="createBriefcase" value="#{sqlSearchBean.createBriefcase}"
                                          onchange="toggleBriefcase(this)"/>
             </fx:formRow>
 
             <h:panelGroup id="briefcaseData" style="display:none">
-                <fx:formRow label="Briefcase Name" id="briefcaseName" >
+                <fx:formRow labelKey="SqlSearch.fxsql.field.briefcaseName" id="briefcaseName" >
                     <t:inputText id="briefcaseName" value="#{sqlSearchBean.briefcaseName}"/>
                 </fx:formRow>
-                <fx:formRow label="Description" id="briefcaseDescription" width="500">
+                <fx:formRow labelKey="SqlSearch.fxsql.field.briefcaseDescription" id="briefcaseDescription" width="500">
                     <t:inputText id="briefcaseDescription" value="#{sqlSearchBean.briefcaseDescription}"
                                  style="width:350px"/>
                 </fx:formRow>
-                <fx:formRow label="Shared" id="briefcaseACL" width="500" heigth="100">
+                <fx:formRow labelKey="SqlSearch.fxsql.field.briefcaseShared" id="briefcaseACL" width="500" heigth="100">
                     <h:selectOneListbox id="briefcaseACL" value="#{sqlSearchBean.briefcaseAclId}" size="1">
                         <f:selectItem itemValue="-1" itemLabel=""/>
                         <f:selectItems value="#{fxSelectBean.briefcaseACLs}" />
@@ -73,13 +73,13 @@
         <br/><br/><br/><br/>
         <c:if test="#{sqlSearchBean.queryResult!=null}">
                     <span style="color:#bdbdbd">
-                    Entries: #{sqlSearchBean.queryResult.rowCount} /
-                    Total Found: #{sqlSearchBean.queryResult.totalRowCount},
-                    Truncated: #{sqlSearchBean.queryResult.truncated},
-                    Parser Execution Time: #{sqlSearchBean.queryResult.parserExecutionTime},
-                    Db Search Time: #{sqlSearchBean.queryResult.dbSearchTime},
-                    Fetch Time: #{sqlSearchBean.queryResult.fetchTime},
-                    Total Time: #{sqlSearchBean.queryResult.totalTime}<br/>
+                    #{fxMessageBean['SqlSearch.fxsql.result.field.entries']} #{sqlSearchBean.queryResult.rowCount} /
+                    #{fxMessageBean['SqlSearch.fxsql.result.field.total']} #{sqlSearchBean.queryResult.totalRowCount},
+                    #{fxMessageBean['SqlSearch.fxsql.result.field.truncated']} #{sqlSearchBean.queryResult.truncated},
+                    #{fxMessageBean['SqlSearch.fxsql.result.field.parserTime']} #{sqlSearchBean.queryResult.parserExecutionTime},
+                    #{fxMessageBean['SqlSearch.fxsql.result.field.searchTime']} #{sqlSearchBean.queryResult.dbSearchTime},
+                    #{fxMessageBean['SqlSearch.fxsql.result.field.fetchTime']} #{sqlSearchBean.queryResult.fetchTime},
+                    #{fxMessageBean['SqlSearch.fxsql.result.field.totalTime']} #{sqlSearchBean.queryResult.totalTime}<br/>
                     </span>
             <h:selectOneListbox value="#{sqlSearchBean.viewType}" size="1">
                 <f:selectItems value="#{fxSelectBean.resultViewTypes}"/>

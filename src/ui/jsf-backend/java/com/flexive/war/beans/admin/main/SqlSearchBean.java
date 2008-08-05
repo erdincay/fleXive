@@ -51,6 +51,8 @@ import javax.faces.model.SelectItem;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * This Bean provides access the the sql search.
  *
@@ -200,6 +202,10 @@ public class SqlSearchBean {
         sp.setCacheMode(_getCacheMode());
         try {
             if (createBriefcase) {
+                if (StringUtils.isBlank(briefcaseName)) {
+                    new FxFacesMsgErr("Briefcase.err.name").addToContext();
+                    return;
+                }
                 sp.saveResultInBriefcase(briefcaseName, briefcaseDescription, briefcaseAclId);
                 queryResult = sqlSearchInterface.search(query, 0, Integer.MAX_VALUE, sp);
                 new FxFacesMsgInfo("Briefcase.nfo.created", briefcaseName).addToContext();

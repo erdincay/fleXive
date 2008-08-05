@@ -80,6 +80,7 @@ public class SqlQueryBuilder implements Serializable {
 
     private int startRow;
     private int maxRows = -1;
+    private FxSQLSearchParams params;
 
     private boolean includeBasicSelects;
     private boolean frozen;     // when the query is frozen, no more conditions may be added. Getting the query or the search conditions freezes the query builder.
@@ -132,6 +133,10 @@ public class SqlQueryBuilder implements Serializable {
         this.frozen = frozen;
         this.location = location;
         this.viewType = viewType;
+        if (getFilterIndex("VERSION") == -1) {
+            // return only maximum object version by default
+            uniqueFilter("VERSION", VersionFilter.MAX.name());
+        }
     }
 
     /**
@@ -475,13 +480,21 @@ public class SqlQueryBuilder implements Serializable {
         return this;
     }
 
-    private void assertNoFilterStartsWith(String substring) {
-        for (String filter: filters) {
-            if (filter.startsWith(substring)) {
-                throw new FxInvalidParameterException("FILTER", "ex.sqlQueryBuilder.filter.unique",
-                        filter, substring).asRuntimeException();
+    private void assertNoFilterStartsWith(final String substring) {
+        if (getFilterIndex(substring) != -1) {
+            throw new FxInvalidParameterException("FILTER", "ex.sqlQueryBuilder.filter.unique",
+                    substring, filters.get(getFilterIndex(substring))).asRuntimeException();
+        }
+    }
+
+    private int getFilterIndex(String name) {
+        final String nameUpper = name.toUpperCase() + "=";
+        for (int i = 0; i < filters.size(); i++) {
+            if (filters.get(i).toUpperCase().startsWith(nameUpper)) {
+                return i;
             }
         }
+        return -1;
     }
 
     private SqlQueryBuilder removeFilter(String name) {
@@ -673,13 +686,42 @@ public class SqlQueryBuilder implements Serializable {
     }
 
     /**
+     * Saves the result of this query in a briefcase (if the result is obtained via
+     * #{@link #getResult()}).
+     *
+     * @param name          the briefcase name (required)
+     * @param description   the briefcase description (optional)
+     * @param aclId         the briefcase ACL (if -1, the briefcase will be private for the calling user)
+     * @return  this
+     */
+    public SqlQueryBuilder saveInBriefcase(String name, String description, long aclId) {
+        if (params == null) {
+            params = new FxSQLSearchParams();
+        }
+        params.saveResultInBriefcase(name, description, aclId != -1 ? aclId : null);
+        return this;
+    }
+
+    /**
+     * Saves the result of this query in a briefcase (if the result is obtained via
+     * #{@link #getResult()}).
+     *
+     * @param name          the briefcase name (required)
+     * @return  this
+     */
+    public SqlQueryBuilder saveInBriefcase(String name) {
+        return saveInBriefcase(name, null, -1);
+    }
+
+    /**
      * Convenience method for executing a search query using this query builder.
      *
      * @return  the search result for the current query
      * @throws FxApplicationException   if the search failed
      */
     public FxResultSet getResult() throws FxApplicationException {
-        return EJBLookup.getSearchEngine().search(getQuery(), startRow, maxRows != -1 ? maxRows : null, null, location, viewType);
+        return EJBLookup.getSearchEngine().search(getQuery(), startRow, maxRows != -1 ? maxRows : null, 
+                params, location, viewType);
     }
 
     /**

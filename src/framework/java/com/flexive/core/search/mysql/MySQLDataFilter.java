@@ -118,7 +118,7 @@ public class MySQLDataFilter extends DataFilter {
                     " WHERE id IN (" + briefcaseIdFilter + ") " + getVersionFilter(null) + ")";
             tableMain = "(SELECT * FROM " + DatabaseConst.TBL_CONTENT +
                     " WHERE id IN (" + briefcaseIdFilter + ") " + getVersionFilter(null) +
-                    getTypeFilter(null) + getMandatorFilter(null) + ")";
+                    getDeactivatedTypesFilter(null) + getInactiveMandatorsFilter(null) + ")";
             tableFulltext = "(SELECT * FROM " + DatabaseConst.TBL_CONTENT_DATA_FT +
                     " WHERE id IN (" + briefcaseIdFilter + "))"; //versions are matched against content_data table
         }
@@ -163,8 +163,10 @@ public class MySQLDataFilter extends DataFilter {
                             ticket.getMandatorId() + "," + ticket.isMandatorSupervisor() + "," + ticket.isGlobalSupervisor() + ")\n";
             if (getStatement().getType() == FxStatement.Type.ALL) {
                 // The statement will not filter the data
-                dataSelect = "SELECT " + search.getSearchId() + " search_id,id,ver,tdef,created_by FROM " + tableMain + " data2 " +
-                        securityFilter + " LIMIT " + maxRows;
+                dataSelect = "SELECT " + search.getSearchId() + " search_id,id,ver,tdef,created_by FROM " + tableMain + " data2 "
+                        + securityFilter
+                        + (getStatement().getBriefcaseFilter().length == 0 ? getVersionFilter("data2") : "")
+                        + " LIMIT " + maxRows;
             } else {
                 // The statement filters the data
                 StringBuilder result = new StringBuilder(5000);
@@ -449,8 +451,8 @@ public class MySQLDataFilter extends DataFilter {
                     "MATCH (value) AGAINST (" + constant.getValue() + ")\n" +
                     getLanguageFilter() +
                     getVersionFilter("cd") +
-                    getTypeFilter("cd") +
-                    getMandatorFilter("cd") +
+                    getDeactivatedTypesFilter("cd") +
+                    getInactiveMandatorsFilter("cd") +
                     getSubQueryLimit() +
                     ")";
             /*} else if (prop.getPropertyName().charAt(0)=='#') {
@@ -511,8 +513,8 @@ public class MySQLDataFilter extends DataFilter {
                     "LEFT JOIN " + tableContentData + " da ON (ct.id=da.id AND ct.ver=da.ver AND da." + filter + ")\n" +
                     "WHERE da.tprop IS NULL " +
                     getVersionFilter("ct") +
-                    getTypeFilter("ct") +
-                    getMandatorFilter("ct") +
+                    getDeactivatedTypesFilter("ct") +
+                    getInactiveMandatorsFilter("ct") +
                     // Assignment search: we are only interrested in the type that the assignment belongs to
                     (prop.isAssignment()
                             ? "AND ct.TDEF=" + entry.getAssignment().getAssignedType().getId() + " "
@@ -644,8 +646,8 @@ public class MySQLDataFilter extends DataFilter {
                     cond.getSqlComperator() +
                     value +
                     getVersionFilter("cd") +
-                    getTypeFilter("cd") +
-                    getMandatorFilter("cd") +
+                    getDeactivatedTypesFilter("cd") +
+                    getInactiveMandatorsFilter("cd") +
                     getSubQueryLimit() +
                     ") ");
         } else {
@@ -692,7 +694,7 @@ public class MySQLDataFilter extends DataFilter {
      * @param tblAlias table alias
      * @return filter statement
      */
-    private String getMandatorFilter(String tblAlias) {
+    private String getInactiveMandatorsFilter(String tblAlias) {
         String tbl = (tblAlias == null || tblAlias.length() == 0) ? "" : tblAlias + ".";
         String mandators = CacheAdmin.getEnvironment().getInactiveMandatorList();
         if (mandators.length() > 0)
@@ -707,7 +709,7 @@ public class MySQLDataFilter extends DataFilter {
      * @param tblAlias table alias
      * @return filter statement
      */
-    private String getTypeFilter(String tblAlias) {
+    private String getDeactivatedTypesFilter(String tblAlias) {
         String tbl = (tblAlias == null || tblAlias.length() == 0) ? "" : tblAlias + ".";
         String types = CacheAdmin.getEnvironment().getDeactivatedTypesList();
         if (types.length() > 0)

@@ -34,7 +34,9 @@ package com.flexive.faces.beans;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.javascript.yui.YahooResultProvider;
 import com.flexive.faces.messages.FxFacesMsgErr;
+import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.search.*;
@@ -145,6 +147,11 @@ public class SearchResultBean implements ActionBean, Serializable {
      * @return the next page
      */
     public String show() {
+        // backend briefcase creation - name check
+        if (Boolean.TRUE.equals(createBriefcase) && StringUtils.isBlank(briefcaseName)) {
+            new FxFacesMsgErr("Briefcase.err.name").addToContext();
+            return FxJsfUtils.getManagedBean(QueryEditorBean.class).show();
+        }
         try {
             getResult();
         } catch (FxApplicationException e) {
@@ -178,6 +185,11 @@ public class SearchResultBean implements ActionBean, Serializable {
 
     public FxResultSet getResult() throws FxApplicationException {
         if (result == null) {
+            if (Boolean.TRUE.equals(createBriefcase)) {
+                getQueryBuilder().saveInBriefcase(briefcaseName, briefcaseDescription, briefcaseAclId);
+                new FxFacesMsgInfo("Briefcase.nfo.created", briefcaseName).addToContext();
+            }
+
             result = getQueryBuilder()
                     .select("@pk", "@permissions", "@*")
                     .startRow(0)
