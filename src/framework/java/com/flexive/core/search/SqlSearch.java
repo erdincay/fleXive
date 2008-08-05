@@ -500,13 +500,13 @@ public class SqlSearch {
                     // Wildcard, select all properties of the result type
                     for (FxProperty property : getAllProperties(df)) {
                         final Property prop = new Property(propValue.getTableAlias(), property.getName(), null);
-                        selValues.add(new SelectedValue(prop, property.getName()));
+                        selValues.add(new SelectedValue(prop, null));
                     }
                 } else if (propValue != null && propValue.isUserPropsWildcard()) {
                     // User preferences wildcard
                     for (ResultColumnInfo nfo : prefs.getSelectedColumns()) {
                         Property newProp = new Property(propValue.getTableAlias(), nfo.getPropertyName(), nfo.getSuffix());
-                        SelectedValue newSel = new SelectedValue(newProp, nfo.getColumnName());
+                        SelectedValue newSel = new SelectedValue(newProp, null);
                         selValues.add(newSel);
                     }
                 } else {

@@ -53,14 +53,15 @@ public class Property extends Value {
      * Constructor.
      *
      * @param tableAlias the table the property belongs to
-     * @param property   the property
+     * @param property   the property or assignment (e.g. #folder/caption)
      * @param field      null, or the field to use from the property (eg. "m.mandator.name" where name is the field to
      *                   use from the mandator)
      */
     public Property(String tableAlias, String property, String field) {
-        super(tableAlias + "." + property);
+        super(property.startsWith("#") ? property.substring(1) : property);
+        this.assignment = property.startsWith("#");
         this.tableAlias = tableAlias.toUpperCase();
-        this.property = property.toUpperCase();
+        this.property = (this.assignment ? property.substring(1) : property).toUpperCase();
         this.field = field == null ? null : field.trim().toUpperCase();
     }
 

@@ -52,6 +52,7 @@ import com.flexive.shared.FxLanguage
 import com.flexive.shared.configuration.SystemParameters
 import com.flexive.shared.value.FxString
 import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
+import com.flexive.shared.search.*
 
 void createSelectLists() {
     ACL aclList = CacheAdmin.getEnvironment().getDefaultACL(ACL.Category.SELECTLIST);
@@ -153,3 +154,21 @@ builder {
 
 FxScriptInfo si = se.createScriptFromLibrary(FxScriptEvent.BeforeContentCreate, "ImageMetaParser.gy", "ImageMetaParser.gy", "Script filling image properties");
 se.createTypeScriptMapping(si.getId(), typeId, true, true);
+
+EJBLookup.resultPreferencesEngine.saveSystemDefault(
+        new ResultPreferences(
+                [new ResultColumnInfo("@pk"),
+                 new ResultColumnInfo("#image/caption"),
+                 new ResultColumnInfo("#image/filename"),
+                 new ResultColumnInfo("#image/keywords"),
+                 new ResultColumnInfo("#image/author"),
+                 new ResultColumnInfo("#image/pixelXDimension"),
+                 new ResultColumnInfo("#image/pixelYDimension")
+                ],
+                [new ResultOrderByInfo("#image/caption", SortDirection.ASCENDING)],
+                25, 0
+        ),
+        CacheAdmin.environment.getType(IMAGE_TYPE).id,
+        ResultViewType.LIST,
+        AdminResultLocations.values()
+)

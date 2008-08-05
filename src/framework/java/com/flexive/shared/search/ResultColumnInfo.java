@@ -55,7 +55,7 @@ public class ResultColumnInfo implements Serializable {
      * Create a displayed column info object.
      *
      * @param table         the table containing the type/assignment
-     * @param propertyName      the type name
+     * @param propertyName  the property name or an assignment reference (#type/assignment)
      * @param suffix        an (optional) suffix
      */
     public ResultColumnInfo(Table table, String propertyName, String suffix) {
@@ -69,7 +69,7 @@ public class ResultColumnInfo implements Serializable {
     /**
      * Create a displayed column info object for a content property.
      *
-     * @param propertyName      the type name
+     * @param value  the property name or an assignment reference (#type/assignment)
      */
     public ResultColumnInfo(String propertyName) {
         this(Table.CONTENT, propertyName, null);

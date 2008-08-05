@@ -41,6 +41,7 @@ import com.flexive.shared.structure.*
 import com.flexive.shared.scripting.*
 import com.flexive.shared.security.ACL
 import com.flexive.shared.value.FxString
+import com.flexive.shared.search.*
 
 class DocumentType {
     def typeEngine = EJBLookup.getTypeEngine();
@@ -100,3 +101,20 @@ DocumentType dt = new DocumentType()
 dt.createType()
 dt.createProperties()
 dt.createScriptMappings()
+
+// create default result columns for the backend application
+EJBLookup.resultPreferencesEngine.saveSystemDefault(
+        new ResultPreferences(
+                [new ResultColumnInfo("@pk"),
+                 new ResultColumnInfo("#document/title"),
+                 new ResultColumnInfo("#document/createDate"),
+                 new ResultColumnInfo("#document/description"),
+                 new ResultColumnInfo("#document/author"),
+                ],
+                [new ResultOrderByInfo("#document/title", SortDirection.ASCENDING)],
+                25, 0
+        ),
+        CacheAdmin.environment.getType("document").id,
+        ResultViewType.LIST,
+        AdminResultLocations.values()
+)

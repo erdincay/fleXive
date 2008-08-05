@@ -42,6 +42,7 @@ import com.flexive.shared.structure.*
 import com.flexive.shared.tree.FxTreeMode
 import com.flexive.shared.value.FxString
 import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
+import com.flexive.shared.search.*
 
 //file: init0013_folder.gy
 //description: Create the "Folder" FxType needed for all flexive installations
@@ -80,3 +81,17 @@ builder {
 
 EJBLookup.treeEngine.clear FxTreeMode.Live
 EJBLookup.treeEngine.clear FxTreeMode.Edit
+
+// create default result columns for the backend application
+EJBLookup.resultPreferencesEngine.saveSystemDefault(
+        new ResultPreferences(
+                [new ResultColumnInfo("@pk"),
+                 new ResultColumnInfo("#folder/caption"),
+                 new ResultColumnInfo("#folder/comment")],
+                [new ResultOrderByInfo("#folder/caption", SortDirection.ASCENDING)],
+                25, 0
+        ),
+        CacheAdmin.environment.getType(FOLDER_TYPE).id,
+        ResultViewType.LIST,
+        AdminResultLocations.values()
+)

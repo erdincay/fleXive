@@ -33,9 +33,12 @@ package com.flexive.tests.embedded;
 
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.CacheAdmin;
+import static com.flexive.shared.EJBLookup.getResultPreferencesEngine;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.ResultPreferencesEngine;
 import com.flexive.shared.search.*;
+import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.security.UserTicket;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -44,6 +47,7 @@ import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Basic unit tests for the result preferences EJB.
@@ -89,7 +93,7 @@ public class ResultPreferencesEngineTest {
     @Test
     public void resultPreferencesSaveLoad() throws FxApplicationException {
         ResultPreferences rp = createResultPreferences();
-        final ResultPreferencesEngine rpi = EJBLookup.getResultPreferencesEngine();
+        final ResultPreferencesEngine rpi = getResultPreferencesEngine();
 
         final long typeId = -2;
         final ResultViewType viewType = ResultViewType.LIST;
@@ -115,7 +119,7 @@ public class ResultPreferencesEngineTest {
     @Test
     public void resultPreferencesTimestamp() throws FxApplicationException {
         ResultPreferences rp = createResultPreferences();
-        final ResultPreferencesEngine rpi = EJBLookup.getResultPreferencesEngine();
+        final ResultPreferencesEngine rpi = getResultPreferencesEngine();
         assert rp.getLastChecked() == -1;
         final ResultViewType viewType = ResultViewType.LIST;
         final AdminResultLocations location = AdminResultLocations.ADMIN;
@@ -136,11 +140,30 @@ public class ResultPreferencesEngineTest {
         final ResultPreferences rp = createResultPreferences();
         final UserTicket ticket = FxContext.get().getTicket();
         try {
-            EJBLookup.getResultPreferencesEngine().saveSystemDefault(rp, -10,
+            getResultPreferencesEngine().saveSystemDefault(rp, -10,
                     ResultViewType.LIST, AdminResultLocations.ADMIN);
             assert ticket.isGlobalSupervisor() : "Only global supervisors might update the default result preferences.";
         } catch (FxNoAccessException e) {
             assert !ticket.isGlobalSupervisor() : "Global supervisors should be able to update the default result preferences.";
+        }
+    }
+
+    @Test
+    public void resultPreferencesWithAssignment() throws FxApplicationException {
+        final long folderTypeId = CacheAdmin.getEnvironment().getType("folder").getId();
+        try {
+            getResultPreferencesEngine().save(new ResultPreferences(
+                    Arrays.asList(new ResultColumnInfo("#folder/caption")),
+                    Arrays.asList(new ResultOrderByInfo("#folder/caption", SortDirection.ASCENDING)),
+                    25,
+                    75),
+                    folderTypeId,
+                    ResultViewType.LIST, AdminResultLocations.DEFAULT);
+            final FxResultSet result = new SqlQueryBuilder().select("@*").type("folder").getResult();
+            assert result.getColumnCount() == 1 : "Expected one column, got: " + Arrays.toString(result.getColumnNames());
+            assert result.getColumnName(1).equals("folder/caption") : "Invalid column name: " + result.getColumnName(1);
+        } finally {
+            getResultPreferencesEngine().remove(folderTypeId, ResultViewType.LIST, AdminResultLocations.DEFAULT);
         }
     }
 

@@ -18,6 +18,7 @@ import com.flexive.shared.security.ACL
 import com.flexive.shared.structure.FxSelectListItemEdit
 import com.flexive.shared.value.FxBinary
 import com.flexive.shared.value.BinaryDescriptor
+import com.flexive.shared.search.*
 
 // create colors select list
 final ACL itemAcl = environment.getACL(ACL.Category.SELECTLISTITEM.getDefaultId())
@@ -57,6 +58,21 @@ new GroovyTypeBuilder().manufacturer(description: new FxString("Manufacturer")) 
                  description: new FxString(FxLanguage.ENGLISH, "Based in"))
 
 }
+
+EJBLookup.resultPreferencesEngine.saveSystemDefault(
+        new ResultPreferences(
+                [new ResultColumnInfo("@pk"),
+                 new ResultColumnInfo("#manufacturer/basedIn"),
+                 new ResultColumnInfo("#manufacturer/name"),
+                 new ResultColumnInfo("#manufacturer/description")
+                ],
+                [new ResultOrderByInfo("#manufacturer/name", SortDirection.ASCENDING)],
+                25, 0
+        ),
+        CacheAdmin.environment.getType("manufacturer").id,
+        ResultViewType.LIST,
+        AdminResultLocations.values()
+)
 
 // create the product type
 final FxType manufacturerType = CacheAdmin.environment.getType("manufacturer")
@@ -99,6 +115,23 @@ new GroovyTypeBuilder().product(description: new FxString("Product")) {
                   multiplicity: FxMultiplicity.MULT_0_N,
                   description: new FxString(FxLanguage.ENGLISH, "Images"))
 }
+
+EJBLookup.resultPreferencesEngine.saveSystemDefault(
+        new ResultPreferences(
+                [new ResultColumnInfo("@pk"),
+                 new ResultColumnInfo("#product/name"),
+                 new ResultColumnInfo("#product/price"),
+                 new ResultColumnInfo("#product/manufacturer"),
+                 new ResultColumnInfo("#product/description")
+                ],
+                [new ResultOrderByInfo("#product/name", SortDirection.ASCENDING)],
+                25, 0
+        ),
+        CacheAdmin.environment.getType("product").id,
+        ResultViewType.LIST,
+        AdminResultLocations.values()
+)
+
 
 // create test data
 

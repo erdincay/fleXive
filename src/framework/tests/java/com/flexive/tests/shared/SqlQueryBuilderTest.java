@@ -224,15 +224,15 @@ public class SqlQueryBuilderTest {
     @Test
     public void filterTypeTest() {
         final SqlQueryBuilder builder = new SqlQueryBuilder().select("@pk").filterType("MYTYPE");
-        assertEquals(builder.getFilters(), "TYPE=MYTYPE");
+        assert builder.getFilters().indexOf("TYPE=MYTYPE") != -1 : "Filter missing: " + builder.getFilters();
         assert builder.getQuery().contains("FILTER TYPE=MYTYPE") : "Filter not contained in getResult: " + builder.getQuery();
 
         final SqlQueryBuilder builder2 = new SqlQueryBuilder().select("@pk").filterType(21);
-        assertEquals(builder2.getFilters(), "TYPE=21");
+        assert builder2.getFilters().indexOf("TYPE=21") != -1 : "Filter missing: " + builder2.getFilters();
         assert builder2.getQuery().contains("FILTER TYPE=21") : "Filter not contained in getResult: " + builder2.getQuery();
         // remove filter
         builder2.filterType(-1);
-        assertEquals(builder2.getFilters(), "");
+        assert builder2.getFilters().indexOf("TYPE=") == -1 : "Type filter not removed: " + builder2.getFilters();
         assert !builder2.getQuery().contains("FILTER TYPE=21") : "Filter still present in getResult: " + builder2.getQuery();
     }
 

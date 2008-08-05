@@ -159,13 +159,14 @@ public class MySQLDataFilter extends DataFilter {
         try {
             final String dataSelect;
             final String securityFilter = ticket.isGlobalSupervisor() ? "" :
-                    "WHERE mayReadInstance2(data2.id,data2.ver," + ticket.getUserId() + "," +
+                    "mayReadInstance2(data2.id,data2.ver," + ticket.getUserId() + "," +
                             ticket.getMandatorId() + "," + ticket.isMandatorSupervisor() + "," + ticket.isGlobalSupervisor() + ")\n";
             if (getStatement().getType() == FxStatement.Type.ALL) {
                 // The statement will not filter the data
-                dataSelect = "SELECT " + search.getSearchId() + " search_id,id,ver,tdef,created_by FROM " + tableMain + " data2 "
-                        + securityFilter
-                        + (getStatement().getBriefcaseFilter().length == 0 ? getVersionFilter("data2") : "")
+                final String filters = StringUtils.defaultIfEmpty(securityFilter, "1=1")
+                        + (getStatement().getBriefcaseFilter().length == 0 ? getVersionFilter("data2") : "");
+                dataSelect = "SELECT " + search.getSearchId() + " search_id,id,ver,tdef,created_by FROM " + tableMain + " data2\n"
+                        + (StringUtils.isNotBlank(filters) ? "WHERE " + filters + "\n" : "")
                         + " LIMIT " + maxRows;
             } else {
                 // The statement filters the data
@@ -178,7 +179,8 @@ public class MySQLDataFilter extends DataFilter {
                 dataSelect = "SELECT * FROM (SELECT DISTINCT " + search.getSearchId() +
                         " search_id,data.id,data.ver,main.tdef,main.created_by \n" +
                         "FROM (" + result.toString() + ") data, " + DatabaseConst.TBL_CONTENT + " main\n" +
-                        "WHERE data.ver=main.ver AND data.id=main.id) data2\n" + securityFilter +
+                        "WHERE data.ver=main.ver AND data.id=main.id) data2\n"
+                        + (StringUtils.isNotBlank(securityFilter) ? "WHERE " + securityFilter : "") +
                         // Limit by the specified max items
                         "LIMIT " + maxRows;
             }
