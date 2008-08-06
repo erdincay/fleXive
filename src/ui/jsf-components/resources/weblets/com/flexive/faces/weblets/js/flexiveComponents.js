@@ -466,7 +466,7 @@ flexive.input = new function() {
                     theme_advanced_layout_manager: "SimpleLayout",
                     theme_advanced_toolbar_location : "top",
                     theme_advanced_buttons1: "pastetext,pasteword,separator,undo,redo"
-                        + ",separator,link,unlink,separator,bullist,justifyleft,justifycenter,justifyright,justifyfull,separator,code,fullscreen",
+                        + ",separator,link,unlink,separator,bullist,justifyleft,justifycenter,justifyright,justifyfull,separator,code",
                     theme_advanced_buttons2: "bold,italic,underline,strikethrough,sub,sup,separator,forecolor,fontsizeselect,removeformat",
                     theme_advanced_buttons3: "",
                     theme_advanced_toolbar_align: "left",
