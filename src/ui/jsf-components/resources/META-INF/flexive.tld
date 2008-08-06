@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE taglib PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.2//EN"
+        "http://java.sun.com/dtd/web-jsptaglibrary_1_2.dtd">
+<taglib>
+    <tlib-version>1.0</tlib-version>
+    <jsp-version>1.2</jsp-version>
+    <short-name>ui</short-name>
+    <uri>http://www.flexive.com/jsf/core</uri>
+    <description>
+    </description>
+
+    <!-- JSF Components start -->
+    <!-- JSF Components end -->
+
+    <!-- Template components start -->
+    <tag>
+        <name>formRow</name>
+        <body-content>JSP</body-content>
+        <description>Basic [fleXive3] form row.</description>
+        <attribute>
+            <name>id</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>main input element ID (for assigning the label)</description>
+        </attribute>
+        <attribute>
+            <name>label</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>Label</description>
+        </attribute>
+        <attribute>
+            <name>labelKey</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>Message key (overrides label)</description>
+        </attribute>
+        <attribute>
+            <name>tooltipKey</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>Message key of the tooltip (if not specified and labelKey is set, it defaults to
+                #{labelKey}.tooltip)
+            </description>
+        </attribute>
+        <attribute>
+            <name>newLine</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>if a newline should be rendered after the input row (default: true)</description>
+        </attribute>
+        <attribute>
+            <name>width</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>overrides the default width (value in pixel, eg width="100")</description>
+        </attribute>
+        <attribute>
+            <name>height</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>overrides the default height (value in pixel, eg height="80")</description>
+        </attribute>
+    </tag>
+    <tag>
+        <name>fxValueInputRow</name>
+        <body-content>JSP</body-content>
+        <description>A flexive form input row with a single fxValueInput field.</description>
+        <attribute>
+            <name>id</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>element input ID</description>
+        </attribute>
+        <attribute>
+            <name>labelKey</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>Label key (possibly including parameters, e.g. my.property.message,#{myBean.value}
+            </description>
+        </attribute>
+        <attribute>
+            <name>label</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>Label text to be displayed</description>
+        </attribute>
+        <attribute>
+            <name>value</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>the FxValue object to be displayed (mandatory, must not be null)</description>
+        </attribute>
+        <attribute>
+            <name>inputMapper</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>an (optional) InputMapper</description>
+        </attribute>
+        <attribute>
+            <name>onchange</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>a javascript onchange handler</description>
+        </attribute>
+        <attribute>
+            <name>readOnly</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>true to enable read-only mode</description>
+        </attribute>
+        <attribute>
+            <name>decorate</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>if false, no label/input div will be rendered, only the output of the fxValueInput component
+            </description>
+        </attribute>
+        <attribute>
+            <name>filter</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>filter HTML output?</description>
+        </attribute>
+    </tag>
+    <tag>
+        <name>queryEditor</name>
+        <body-content>JSP</body-content>
+        <description>[fleXive3] search query editor.</description>
+        <attribute>
+            <name>nodes</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>list of nodes of the (sub-)tree to be rendered</description>
+        </attribute>
+        <attribute>
+            <name>addAssignmentNode</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>form element where the selected node for adding an assignment should be stored</description>
+        </attribute>
+        <attribute>
+            <name>addAssignmentNodeValue</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>id of the preselected node (no node will be selected for -1 or empty values)</description>
+        </attribute>
+        <attribute>
+            <name>selectionNode</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>form element for storing the current selection (a comma-separated list of node IDs)
+            </description>
+        </attribute>
+        <attribute>
+            <name>emptyMessageKey</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>message key of the message to be displayed when the current query is empty</description>
+        </attribute>
+    </tag>
+    <tag>
+        <name>queryEditorChild</name>
+        <body-content>JSP</body-content>
+        <description>Search query editor table. Used by queryEditor.xhtml for rendering the actual query editor.
+        </description>
+        <attribute>
+            <name>nodes</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>list of nodes of the (sub-)tree to be rendered</description>
+        </attribute>
+        <attribute>
+            <name>addAssignmentNode</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>form element where the selected node for adding an assignment should be stored</description>
+        </attribute>
+        <attribute>
+            <name>addAssignmentNodeValue</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>id of the preselected node (no node will be selected for -1 or empty values)</description>
+        </attribute>
+        <attribute>
+            <name>selectionNode</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>form element for storing the current selection (a comma-separated list of node IDs)
+            </description>
+        </attribute>
+    </tag>
+    <tag>
+        <name>popupDialog</name>
+        <body-content>JSP</body-content>
+        <description>A simple javascript popup panel.</description>
+        <attribute>
+            <name>jsVar</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>javascript variable name that should be initialized with this</description>
+        </attribute>
+        <attribute>
+            <name>closeControl</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>element ID that should be used for closing the dialog</description>
+        </attribute>
+    </tag>
+    <tag>
+        <name>fieldSet</name>
+        <body-content>JSP</body-content>
+        <description>Basic [fleXive3] form group (fieldset).</description>
+        <attribute>
+            <name>legend</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>label of the fieldset (usually displayed in the top border)</description>
+        </attribute>
+        <attribute>
+            <name>legendKey</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>message key for the label (if specified, the legend attribute is ignored)</description>
+        </attribute>
+        <attribute>
+            <name>width</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>overrides the default width of the fieldset, which also affects any nested form rows
+            </description>
+        </attribute>
+    </tag>
+    <tag>
+        <name>downloadLink</name>
+        <body-content>JSP</body-content>
+        <description>Renders a download link for the given object/xpath. The passed body content is rendered inside the
+            link.
+        </description>
+        <attribute>
+            <name>pk</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>the primary key of the object</description>
+        </attribute>
+        <attribute>
+            <name>xpath</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>the xpath of the binary value to be download, e.g. /document</description>
+        </attribute>
+        <attribute>
+            <name>filename</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>the filename to be rendered. If not specified, the primary key is used (without extension).
+            </description>
+        </attribute>
+    </tag>
+    <tag>
+        <name>fxValueInputLanguageSelect</name>
+        <body-content>JSP</body-content>
+        <description>A select list that toggles all fx:fxValueInput elements on the current page (client-side).
+        </description>
+        <attribute>
+            <name>id</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>the input ID (required)</description>
+        </attribute>
+    </tag>
+    <tag>
+        <name>children</name>
+        <body-content>JSP</body-content>
+        <description>Iterator tag for properties and groups of a content instance.</description>
+        <attribute>
+            <name>value</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>the content instance (provided by fx:content) or group (provided by fx:values)</description>
+        </attribute>
+        <attribute>
+            <name>property</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>name/xpath of the property or group to be iterated</description>
+        </attribute>
+        <attribute>
+            <name>var</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>name of the variable where the current value will be exposed in the tag body.</description>
+        </attribute>
+    </tag>
+    <tag>
+        <name>resultTable</name>
+        <body-content>JSP</body-content>
+        <description>A client-side result table implemented using the Yahoo datatable widget.</description>
+        <attribute>
+            <name>var</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>name of the Javascript variable that exposes the Yahoo DataTable widget</description>
+        </attribute>
+        <attribute>
+            <name>value</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>the result set to be rendered, or a plain text FxSQL query</description>
+        </attribute>
+        <attribute>
+            <name>viewType</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>the view type (THUMBNAILS or LIST). If not set and a result set is passed in as value,
+            </description>
+        </attribute>
+        <attribute>
+            <name>clickHandler</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>an optional Javascript method for handling clicks on the table. The first two parameters
+            </description>
+        </attribute>
+    </tag>
+    <tag>
+        <name>resultTableUpdater</name>
+        <body-content>JSP</body-content>
+        <description>Updates the given result table on the current page. Useful for updates during partial page
+            rendering. Ajax4JSF: place this component in the page region that will be re-rendered (e.g. an
+            a4j:outputPanel component).
+        </description>
+        <attribute>
+            <name>var</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>name of the javascript variable that exposes the Yahoo DataTable widget (default: resultTable)
+            </description>
+        </attribute>
+        <attribute>
+            <name>value</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>the result set to be rendered, or a plain text FxSQL query</description>
+        </attribute>
+    </tag>
+    <tag>
+        <name>yuiSetup</name>
+        <body-content>JSP</body-content>
+        <description>Initializes the Yahoo UI component library shipped with flexive. Include this near the end of all
+            pages where you may want to use Yahoo UI. The Yahoo Loader is only executed when at least one flexive
+            component on the page uses a Yahoo widget, so the performance impact is minimal if no widget is used.
+        </description>
+    </tag>
+    <!-- Template components end -->
+</taglib>
