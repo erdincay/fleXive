@@ -42,6 +42,7 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
+import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.structure.FxAssignment;
 import com.flexive.shared.structure.FxPropertyAssignment;
@@ -95,7 +96,7 @@ public class FxContentView extends UIOutput {
     private String typeName;
     private String var;
     private FxContent content;
-    private Map<FxPK, FxContent> contentMap = new HashMap<FxPK, FxContent>();
+    private Map<ContentKey, FxContent> contentMap = new HashMap<ContentKey, FxContent>();
     private boolean preserveContent = false;
     private boolean explode = true;
 
@@ -122,15 +123,20 @@ public class FxContentView extends UIOutput {
             getContent();
             if (content == null || (pk != null && !content.matchesPk(pk))) {
                 final ContentEngine contentInterface = EJBLookup.getContentEngine();
+                final ContentKey contentKey = new ContentKey(pk, getClientId(context));
                 if (pk == null || pk.isNew()) {
                     setContent(contentInterface.initialize(getSelectedType().getId()));
                 } else {
-                    setContent(contentInterface.load(pk));
-                    if (explode) {
-                        content.getRootGroup().explode(true);
+                    if (contentMap.containsKey(contentKey)) {
+                        setContent(contentMap.get(contentKey));
+                    } else {
+                        setContent(contentInterface.load(pk));
+                        if (explode) {
+                            content.getRootGroup().explode(true);
+                        }
                     }
                 }
-                contentMap.put(content.getPk(), content);
+                contentMap.put(contentKey, content);
             }
             //noinspection unchecked
             requestMap.put(getVar(), new ContentMap(content));
@@ -338,6 +344,7 @@ public class FxContentView extends UIOutput {
         private static final long serialVersionUID = -6423903577633591618L;
         private final String prefix;
         private final FxContent content;
+        private Map<String, Integer> newIndices;    // caches new group/property indices for an XPath
 
         public ContentMap(FxContent content) {
             this(content, "");
@@ -375,6 +382,8 @@ public class FxContentView extends UIOutput {
                     return getResolvedReference(path);
                 } else if (isXPathRequest(path)) {
                     return getXPath(path);
+                } else if (isMayCreateMoreRequest(path)) {
+                    return getMayCreateMore(path);
                 } else {
                     return content.getValue(path);
                 }
@@ -414,6 +423,10 @@ public class FxContentView extends UIOutput {
 
         private boolean isXPathRequest(String path) {
             return path.endsWith("$xpath");
+        }
+
+        private boolean isMayCreateMoreRequest(String path) {
+            return path.endsWith("$mayCreateMore");
         }
 
         private FxString getLabel(String path) throws FxNotFoundException, FxInvalidParameterException {
@@ -464,14 +477,35 @@ public class FxContentView extends UIOutput {
                     final String group = groups[i];
                     xPathSoFar.append("/").append(group);
                     final FxGroupData data = content.getGroupData(xPathSoFar.toString());
-                    newPath.append("/").append(group).append('[').append(data.getOccurances() + 1).append("]");
+                    final List<FxData> elements = data.getElements();
+                    final int index;
+                    if (getNewIndices().containsKey(xPathSoFar.toString())) {
+                        index = getNewIndices().get(xPathSoFar.toString());
+                    } else if (!elements.isEmpty()) {
+                        final FxData lastGroup = elements.get(elements.size() - 1);
+                        // re-use last empty group
+                        index = lastGroup.isEmpty() ? elements.size() - 1 : elements.size();
+                    } else {
+                        index = elements.size();
+                    }
+                    if (index == elements.size() && !data.mayCreateMore()) {
+                        throw new FxInvalidParameterException("PATH", "ex.jsf.contentView.create.multiplicity",
+                                xPathSoFar.toString()).asRuntimeException();
+                    }
+                    getNewIndices().put(xPathSoFar.toString(), index);
+                    newPath.append("/").append(group).append('[').append(index + 1).append("]");
                 }
                 final FxType type = CacheAdmin.getEnvironment().getType(content.getTypeId());
-                final FxValue value = ((FxPropertyAssignment) type.getAssignment(path)).getEmptyValue();
                 // add property
                 newPath.append("/").append(groups[groups.length - 1]);
-                content.setValue(newPath.toString(), value);
-                return content.getValue(newPath.toString());
+                try {
+                    return content.getValue(newPath.toString());
+                } catch (FxNotFoundException e) {
+                    // xpath not set yet
+                    final FxValue value = ((FxPropertyAssignment) type.getAssignment(path)).getEmptyValue();
+                    content.setValue(newPath.toString(), value);
+                    return content.getValue(newPath.toString());
+                }
             } catch (FxNotFoundException e) {
                 return new FxString("");
             } catch (FxApplicationException e) {
@@ -484,13 +518,14 @@ public class FxContentView extends UIOutput {
             // resolve referenced object
             try {
                 final FxPK pk = ((FxReference) content.getValue(path)).getDefaultTranslation();
-                if (contentMap.containsKey(pk)) {
-                    return new ContentMap(contentMap.get(pk));
+                final ContentKey contentKey = new ContentKey(pk, getClientId(FacesContext.getCurrentInstance()));
+                if (contentMap.containsKey(contentKey)) {
+                    return new ContentMap(contentMap.get(contentKey));
                 } else if (pk.isNew()) {
                     return null;    // don't resolve empty references
                 }
                 final FxContent referencedContent = EJBLookup.getContentEngine().load(pk);
-                contentMap.put(pk, referencedContent);
+                contentMap.put(contentKey, referencedContent);
                 return new ContentMap(referencedContent);
             } catch (FxApplicationException e) {
                 throw e.asRuntimeException();
@@ -500,6 +535,23 @@ public class FxContentView extends UIOutput {
         private String getXPath(String path) {
             final String xpath = StringUtils.replace(path, "$xpath", "").toUpperCase();
             return xpath.endsWith("/") ? xpath.substring(0, xpath.length() - 1) : xpath;
+        }
+
+        private boolean getMayCreateMore(String path) {
+            path = StringUtils.replace(path, "$mayCreateMore", "");
+            try {
+                getNewValue(path);
+                return true;
+            } catch (FxRuntimeException e) {
+                return false;
+            }
+        }
+
+        public Map<String, Integer> getNewIndices() {
+            if (newIndices == null) {
+                newIndices = new HashMap<String, Integer>();
+            }
+            return newIndices;
         }
     }
 
@@ -538,4 +590,44 @@ public class FxContentView extends UIOutput {
             event.queue();
         }
     }
+
+    private static class ContentKey {
+        private final FxPK pk;
+        private final String clientId;
+
+        private ContentKey(FxPK pk, String clientId) {
+            this.pk = pk;
+            this.clientId = clientId;
+        }
+
+        public FxPK getPk() {
+            return pk;
+        }
+
+        public String getClientId() {
+            return clientId;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            ContentKey that = (ContentKey) o;
+
+            if (clientId != null ? !clientId.equals(that.clientId) : that.clientId != null) return false;
+            if (pk != null ? !pk.equals(that.pk) : that.pk != null) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = pk != null ? pk.hashCode() : 0;
+            result = 31 * result + (clientId != null ? clientId.hashCode() : 0);
+            return result;
+        }
+    }
+
+
 }

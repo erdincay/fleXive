@@ -291,6 +291,19 @@
                                 </para>
                             </listitem>
                         </varlistentry>
+
+                        <varlistentry>
+                            <term>
+                                <code language="jsfel">#{content['group/text$mayCreateMore']}</code>
+                            </term>
+                            <listitem>
+                                <para>
+                                    Returns true if evaluating the $new suffix for the given XPath will succeed.
+                                    Useful when using the $new suffix for assignments with a limited
+                                    multiplicity, since it could cause an exception otherwise.
+                                </para>
+                            </listitem>
+                        </varlistentry>
                     </variablelist>
                 </section>
 
