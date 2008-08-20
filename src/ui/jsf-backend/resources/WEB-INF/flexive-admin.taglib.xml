@@ -34,11 +34,6 @@
     </tag>
 
     <tag>
-        <tag-name>ceInlineEditor</tag-name>
-        <source>templates/ceInlineEditor.xhtml</source>
-    </tag>
-
-    <tag>
         <tag-name>ceVersionInfo</tag-name>
         <source>templates/ceVersionInfo.xhtml</source>
     </tag>
@@ -76,6 +71,22 @@
         <source>templates/resultPreferencesEditor.xhtml</source>
     </tag>
     <tag>
+        <tag-name>dateInput</tag-name>
+        <source>templates/dateInput.xhtml</source>
+    </tag>
+    <tag>
+        <tag-name>resultThumbnail</tag-name>
+        <source>templates/resultThumbnail.xhtml</source>
+    </tag>
+    <tag>
+        <tag-name>resultTabs</tag-name>
+        <source>templates/resultTabs.xhtml</source>
+    </tag>
+    <tag>
+        <tag-name>sortableTable</tag-name>
+        <source>templates/sortableTable.xhtml</source>
+    </tag>
+    <tag>
         <tag-name>fxValueInput</tag-name>
         <component>
             <component-type>flexive.FxValueInput</component-type>
@@ -94,22 +105,6 @@
         <component>
             <component-type>flexive.TreeNode</component-type>
         </component>
-    </tag>
-    <tag>
-        <tag-name>dateInput</tag-name>
-        <source>templates/dateInput.xhtml</source>
-    </tag>
-    <tag>
-        <tag-name>resultThumbnail</tag-name>
-        <source>templates/resultThumbnail.xhtml</source>
-    </tag>
-    <tag>
-        <tag-name>resultTabs</tag-name>
-        <source>templates/resultTabs.xhtml</source>
-    </tag>
-    <tag>
-        <tag-name>sortableTable</tag-name>
-        <source>templates/sortableTable.xhtml</source>
     </tag>
     <tag>
         <tag-name>tree</tag-name>

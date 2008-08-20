@@ -9,10 +9,6 @@
     <description>
     </description>
 
-    <!-- JSF Components start -->
-    <!-- JSF Components end -->
-
-    <!-- Template components start -->
     <tag>
         <name>formRow</name>
         <body-content>JSP</body-content>
@@ -352,5 +348,60 @@
             component on the page uses a Yahoo widget, so the performance impact is minimal if no widget is used.
         </description>
     </tag>
-    <!-- Template components end -->
+    <tag>
+        <name>colorPicker</name>
+        <body-content>JSP</body-content>
+    </tag>
+    <tag>
+        <name>includes</name>
+        <body-content>JSP</body-content>
+    </tag>
+    <tag>
+        <name>fxValueInput</name>
+        <body-content>JSP</body-content>
+    </tag>
+    <tag>
+        <name>content</name>
+        <body-content>JSP</body-content>
+    </tag>
+    <tag>
+        <name>value</name>
+        <body-content>JSP</body-content>
+    </tag>
+    <tag>
+        <name>contentList</name>
+        <body-content>JSP</body-content>
+    </tag>
+    <tag>
+        <name>dojoMenu</name>
+        <body-content>JSP</body-content>
+    </tag>
+    <tag>
+        <name>dojoMenuItem</name>
+        <body-content>JSP</body-content>
+    </tag>
+    <tag>
+        <name>dojoMenuSeparator</name>
+        <body-content>JSP</body-content>
+    </tag>
+    <tag>
+        <name>menu</name>
+        <body-content>JSP</body-content>
+    </tag>
+    <tag>
+        <name>menuItem</name>
+        <body-content>JSP</body-content>
+    </tag>
+    <tag>
+        <name>resultValue</name>
+        <body-content>JSP</body-content>
+    </tag>
+    <tag>
+        <name>thumbnail</name>
+        <body-content>JSP</body-content>
+    </tag>
+    <tag>
+        <name>regularExpressionValidator</name>
+        <body-content>JSP</body-content>
+    </tag>
 </taglib>

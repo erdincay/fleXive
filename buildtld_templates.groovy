@@ -20,15 +20,15 @@ final def xml = new groovy.xml.MarkupBuilder(xmlOut)
 new XmlSlurper(false, false).parseText(taglibXml).tag.list().each { it ->
     final String tag = it."tag-name".toString()
     final String source = it."source".toString()
-    if (!source.isEmpty()) {
-        // template component, source = source file name relative to the taglib file
-        boolean inParams = false        // in Parameters: block
-        boolean inDescription = false   // in Description: block
-        final def tagDescription = new StringBuffer()
-        xml.tag {
-            name(tag)
-            "body-content"("JSP")
+    boolean inParams = false        // in Parameters: block
+    boolean inDescription = false   // in Description: block
+    final def tagDescription = new StringBuffer()
+    xml.tag {
+        name(tag)
+        "body-content"("JSP")
 
+        if (!source.isEmpty()) {
+            // template component, source = source file name relative to the taglib file
             new File(taglibFile.getParent() + File.separator + source).eachLine { String line ->
                 if (line.startsWith("Description:")) {
                     inDescription = true
