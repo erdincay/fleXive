@@ -103,19 +103,25 @@
         <attribute name="policyClass">org.jboss.cache.eviction.LRUPolicy</attribute>
         <attribute name="wakeUpIntervalSeconds">5</attribute>
         <!--  Cache wide default -->
-        <region name="/_default_">
-         <attribute name="maxNodes">500000</attribute>
-         <attribute name="timeToLiveSeconds">100000000</attribute>
-         <!-- Maximum time an object is kept in cache regardless of idle time -->
-         <!--<attribute name="maxAgeSeconds">120</attribute>-->
-       </region>
+          <region name="/_default_">
+             <attribute name="maxNodes">0</attribute>
+             <attribute name="timeToIdleSeconds">0</attribute>
+             <attribute name="timeToLiveSeconds">0</attribute>
+          </region>
 
-       <!-- cache region for contents -->
-       <region name="/FxContent">
-         <attribute name="maxNodes">20000</attribute>
-         <attribute name="timeToLiveSeconds">30</attribute>
-       </region>
+           <!-- cache region for contents -->
+           <region name="/Division1/FxContent">
+             <attribute name="maxNodes">20000</attribute>
+             <attribute name="timeToIdleSeconds">300</attribute>
+             <attribute name="timeToLiveSeconds">1000</attribute>
+           </region>
 
+          <!-- cache region for user configuration -->
+          <region name="/Division1/userConfig">
+              <attribute name="maxNodes">100000</attribute>
+              <attribute name="timeToIdleSeconds">300</attribute>
+              <attribute name="timeToLiveSeconds">1000</attribute>
+          </region>
       </config>
     </attribute>
 

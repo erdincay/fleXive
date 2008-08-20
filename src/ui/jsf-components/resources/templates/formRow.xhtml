@@ -45,7 +45,7 @@ height = overrides the default height (value in pixel, eg height="80")
         <div class="#{empty tooltip ? '' : 'tooltip'}">
             <div class="formLabel" title="#{empty tooltip ? label : ''}">
                 <c:if test="#{!empty id}">
-                    <h:outputLabel id="#{id}Label" for="#{id}">#{label}</h:outputLabel>
+                    <h:outputLabel id="#{id}Label" for="#{id}" value="#{label}"/>
                 </c:if>
                 <c:if test="#{empty id}">
                     #{label}

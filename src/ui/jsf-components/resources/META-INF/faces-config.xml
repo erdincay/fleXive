@@ -7,6 +7,9 @@
         <phase-listener>
             com.flexive.faces.listener.JsfPhaseListener
         </phase-listener>
+        <phase-listener>
+            com.flexive.faces.listener.FormRowMessageListener
+        </phase-listener>
     </lifecycle>
 
     <component>

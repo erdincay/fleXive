@@ -305,6 +305,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void changeName(long mandatorId, String name) throws FxApplicationException {
+        FxSharedUtils.checkParameterEmpty(name, "name");
         final UserTicket ticket = FxContext.get().getTicket();
         final FxEnvironment environment = CacheAdmin.getEnvironment();
         // Security
@@ -323,7 +324,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
             sql = "UPDATE " + TBL_MANDATORS + " SET NAME=?, MODIFIED_BY=?, MODIFIED_AT=? WHERE ID=?";
             final long NOW = System.currentTimeMillis();
             ps = con.prepareStatement(sql);
-            ps.setString(1, name);
+            ps.setString(1, name.trim());
             ps.setLong(2, ticket.getUserId());
             ps.setLong(3, NOW);
             ps.setLong(4, mandatorId);
@@ -338,8 +339,14 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
                     mand.getMetadataId(), mand.isActive(), new LifeCycleInfoImpl(mand.getLifeCycleInfo().getCreatorId(),
                     mand.getLifeCycleInfo().getCreationTime(), ticket.getUserId(), NOW)));
         } catch (SQLException exc) {
+            // check before rollback, because it might need an active transaciton
+            final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(exc);
             ctx.setRollbackOnly();
-            throw new FxUpdateException(LOG, exc, "ex.mandator.updateFailed", mand.getName(), exc.getMessage());
+            if (uniqueConstraintViolation) {
+                throw new FxUpdateException(LOG, "ex.mandator.update.name.unique", name);
+            } else {
+                throw new FxUpdateException(LOG, exc, "ex.mandator.updateFailed", mand.getName(), exc.getMessage());
+            }
         } finally {
             Database.closeObjects(MandatorEngineBean.class, con, ps);
         }
