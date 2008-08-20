@@ -274,7 +274,7 @@ database.password=a]]></programlisting>
             <title>Required libraries</title>
             <para>Flexive needs several libraries to be deployed to the application server's internal
                 <filename>lib</filename>
-                directories.
+                directories. Execute these steps once glassfish has been setup.
             </para>
             <section xml:id="glassfish_installation_required_libs_ant_task">
                 <title>Running the ant task</title>

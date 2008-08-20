@@ -41,7 +41,6 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.exceptions.FxLoadException;
 import com.flexive.shared.interfaces.ScriptingEngine;
 import com.flexive.shared.scripting.*;
 import com.flexive.shared.security.Role;
@@ -334,6 +333,8 @@ public class ScriptBean {
     }
 
     public List<Map.Entry<Long, String>> getTypeMappingNames() {
+        if( this.typeMappingNames == null )
+            this.typeMappingNames = new HashMap<Long, String>();
         ArrayList<Map.Entry<Long, String>> list = new ArrayList<Map.Entry<Long, String>>(this.typeMappingNames.entrySet().size());
         for (Map.Entry<Long, String> entry : this.typeMappingNames.entrySet()) {
             list.add(entry);
@@ -342,6 +343,8 @@ public class ScriptBean {
     }
 
     public List<Map.Entry<Long, String>> getAssignmentMappingNames() {
+        if( this.assignmentMappingNames == null )
+            this.assignmentMappingNames = new HashMap<Long, String>();
         ArrayList<Map.Entry<Long, String>> list = new ArrayList<Map.Entry<Long, String>>(this.assignmentMappingNames.entrySet().size());
         for (Map.Entry<Long, String> entry : this.assignmentMappingNames.entrySet()) {
             list.add(entry);
@@ -368,8 +371,9 @@ public class ScriptBean {
     /**
      * called from the structure editor -> get the oid of the script to show from the request parameters
      *
-     * @param e
+     * @param e event
      */
+    @SuppressWarnings({"UnusedDeclaration"})
     public void structureListen(ActionEvent e) {
         FacesContext context = FacesContext.getCurrentInstance();
         Map requestParams = context.getExternalContext().getRequestParameterMap();
