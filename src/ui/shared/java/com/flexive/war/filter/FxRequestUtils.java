@@ -52,7 +52,7 @@ public class FxRequestUtils {
      */
     public static int getDivision(HttpServletRequest request) {
 
-        // Check ifalready resolved
+        // Check if already resolved
         if (request instanceof FxRequestWrapper) {
             return ((FxRequestWrapper) request).getDivisionId();
         }

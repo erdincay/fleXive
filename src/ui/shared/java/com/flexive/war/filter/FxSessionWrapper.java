@@ -264,7 +264,7 @@ public class FxSessionWrapper implements HttpSession {
      * @param name the original name
      * @return the encoded name
      */
-    private String encodeAttributeName(String name) {
+    public static String encodeAttributeName(String name) {
         FxContext ri = FxContext.get();
         return ri.getApplicationId() + ":" + name;
     }

@@ -69,18 +69,22 @@ public class FxContext implements Serializable {
      * Session key set if the user successfully logged into the admin area
      */
     public static final String ADMIN_AUTHENTICATED = "$flexive_admin_auth$";
+    /**
+     * Session key for the session division ID.
+     */
+    public static final String SESSION_DIVISIONID = "$flexive_division_id$";
 
     private static final transient Log LOG = LogFactory.getLog(FxContext.class);
     private static ThreadLocal<FxContext> info = new ThreadLocal<FxContext>() {
     };
 
-    private final String sessionID;
     private final String requestURI;
     private final String remoteHost;
     private final boolean webDAV;
     private final String serverName;
     private final int serverPort;
 
+    private String sessionID;
     private boolean treeWasModified;
     private String contextPath;
     private String requestUriNoContext;
@@ -240,7 +244,7 @@ public class FxContext implements Serializable {
      * @param session the session
      * @return the user ticket
      */
-    private static UserTicket getTicketFromEJB(final HttpSession session) {
+    public static UserTicket getTicketFromEJB(final HttpSession session) {
         try {
             UserTicket ticket = EJBLookup.getAccountEngine().getUserTicket();
             setLastUserTicket(session, ticket);
@@ -349,6 +353,15 @@ public class FxContext implements Serializable {
      */
     public String getSessionId() {
         return sessionID;
+    }
+
+    /**
+     * Sets the session ID.
+     *
+     * @param sessionID the new session ID
+     */
+    public void setSessionID(String sessionID) {
+        this.sessionID = sessionID;
     }
 
     /**
@@ -563,6 +576,9 @@ public class FxContext implements Serializable {
         info.set(si);
         // Do user ticket retrieval and store it in the threadlocal
         final HttpSession session = request.getSession();
+        if (session.getAttribute(SESSION_DIVISIONID) == null) {
+            session.setAttribute(SESSION_DIVISIONID, divisionId);
+        }
         if (dynamicContent || isWebdav) {
             UserTicket last = getLastUserTicket(session);
             // Always determine the current user ticket for dynamic pages and webdav requests.

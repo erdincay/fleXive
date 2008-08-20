@@ -2,7 +2,7 @@
 .dojoPopupMenu2 {
 	position: absolute;
 	border: 1px solid #7F7F7F;
-	/*background:#ebf5cc url(../../js/dojo/src/widget/templates/images/soriaMenuBg.gif) repeat-x bottom left !important;*/
+	/*background:#ebf5cc url(../../js/dojoNavigation/src/widget/templates/images/soriaMenuBg.gif) repeat-x bottom left !important;*/
     background:#fff !important;
     padding: 1px;
 	margin-top: 1px;
@@ -59,17 +59,17 @@
 	position: relative;
 	background-position: center center;
 	background-repeat: no-repeat;
-	background-image: url(../../js/dojo/src/widget/templates/images/submenu_off.gif);
+	background-image: url(../../js/dojoNavigation/src/widget/templates/images/submenu_off.gif);
 	width: 5px;
 	height: 9px;
 	padding-left: 3px;
 }
 .dojoMenuItem2Hover .dojoMenuItem2Submenu {
-	background-image: url(../../js/dojo/src/widget/templates/images/submenu_on.gif);
+	background-image: url(../../js/dojoNavigation/src/widget/templates/images/submenu_on.gif);
 }
 
 .dojoMenuItem2Disabled .dojoMenuItem2Submenu {
-	background-image: url(../../js/dojo/src/widget/templates/images/submenu_disabled.gif);
+	background-image: url(../../js/dojoNavigation/src/widget/templates/images/submenu_disabled.gif);
 }
 
 .dojoMenuSeparator2 { 
@@ -91,7 +91,7 @@
 
 .dojoMenuBar2 {
 	/*position: relative;*/
-	background:#85aeec url(../../js/dojo/src/widget/templates/images/soriaBarBg.gif) repeat-x top left;
+	background:#85aeec url(../../js/dojoNavigation/src/widget/templates/images/soriaBarBg.gif) repeat-x top left;
 	border-bottom:1px solid #6b9fec;
 
 }

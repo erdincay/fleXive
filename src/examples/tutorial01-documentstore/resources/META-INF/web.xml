@@ -91,5 +91,8 @@
     <listener>
         <listener-class>net.java.dev.weblets.WebletsContextListener</listener-class>
     </listener>
+    <listener>
+        <listener-class>com.flexive.war.listener.SessionTimeoutListener</listener-class>
+    </listener>
 
 </web-app>
