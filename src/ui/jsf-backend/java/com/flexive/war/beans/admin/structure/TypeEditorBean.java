@@ -276,6 +276,8 @@ public class TypeEditorBean {
                 } else
                     s.addAction(StructureTreeControllerBean.ACTION_RENAME_SELECT_TYPE, id, type.getDisplayName());
 
+                new FxFacesMsgInfo("TypeEditor.message.info." + (type.isNew() ? "createdType" : "savedChanges"),
+                        type.getLabel()).addToContext();
                 reloadContentTree = true;
             }
             catch (Throwable t) {
