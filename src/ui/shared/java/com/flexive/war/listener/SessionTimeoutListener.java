@@ -59,7 +59,6 @@ public class SessionTimeoutListener implements HttpSessionListener {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Session created: " + event.getSession().getId());
         }
-        event.getSession().setMaxInactiveInterval(60);
     }
 
     public void sessionDestroyed(HttpSessionEvent event) {
