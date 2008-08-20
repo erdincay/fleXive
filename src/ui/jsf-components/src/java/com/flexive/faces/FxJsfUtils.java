@@ -871,8 +871,7 @@ public class FxJsfUtils {
     /**
      * Comparator for sorting select items by their display label.
      */
-    public static class SelectItemSorter implements Comparator<SelectItem>, Serializable {
-        private static final long serialVersionUID = -1382307878763605130L;
+    public static class SelectItemSorter implements Comparator<SelectItem> {
         private final Collator collator;
 
         public SelectItemSorter() {
@@ -895,8 +894,7 @@ public class FxJsfUtils {
     /**
      * Comparator for sorting FxScriptInfo objects by their name.
      */
-    public static class ScriptInfoSorter implements Comparator<FxScriptInfo>, Serializable {
-        private static final long serialVersionUID = -5034370124391320180L;
+    public static class ScriptInfoSorter implements Comparator<FxScriptInfo> {
         private final Collator collator;
 
         public ScriptInfoSorter() {

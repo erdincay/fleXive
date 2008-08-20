@@ -80,6 +80,7 @@ public class FxContentVersionInfo implements Serializable {
      * Selector for versions (helps with EL)
      */
     public static final class VersionSelector extends Hashtable<Integer, VersionData> {
+        private static final long serialVersionUID = -1240028837766282868L;
         FxContentVersionInfo versionInfo;
 
         /**

@@ -57,6 +57,7 @@ import java.io.Serializable;
  */
 public class ContentImportBean implements ActionBean, Serializable {
 
+    private static final long serialVersionUID = -7064538905513906162L;
     private static final Log LOG = LogFactory.getLog(ContentImportBean.class);
 
     private UploadedFile uploadContent;

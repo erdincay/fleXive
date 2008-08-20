@@ -73,17 +73,17 @@ public class ParameterDataBean<T> implements ParameterData<T> {
 
 
     /** {@inheritDoc} */
-	public ParameterPath getPath() {
+	public synchronized ParameterPath getPath() {
 		return path;
 	}
 
     /** {@inheritDoc} */
-	public String getKey() {
+	public synchronized String getKey() {
 		return key;
 	}
 	
     /** {@inheritDoc} */
-	public T getDefaultValue() {
+	public synchronized T getDefaultValue() {
 		return defaultValue;
 	}
 

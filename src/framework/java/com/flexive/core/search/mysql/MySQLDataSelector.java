@@ -1,3 +1,4 @@
+
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
@@ -152,7 +153,7 @@ public class MySQLDataSelector extends DataSelector {
         // Build the final select statement
 
         select.append("SELECT \n")
-              .append(filterProperties(INTERNAL_RESULTCOLS))
+              .append(filterProperties((String[]) INTERNAL_RESULTCOLS.toArray(new String[INTERNAL_RESULTCOLS.size()])))
               .append(' ');
         for (SubSelectValues ssv : values) {
             for (SubSelectValues.Item item : ssv.getItems()) {

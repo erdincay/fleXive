@@ -60,7 +60,7 @@ public class FxHistory implements Serializable {
         this.accountId = accountId;
         this.loginName = loginName;
         this.key = key;
-        this.args = args;
+        this.args = args != null ? args.clone() : null;
         this.typeId = typeId;
         this.contentId = contentId;
         this.contentVersion = contentVersion;

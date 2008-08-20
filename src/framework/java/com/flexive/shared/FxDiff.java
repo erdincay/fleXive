@@ -259,8 +259,8 @@ public class FxDiff {
      * @param comp comparator
      */
     public FxDiff(Object[] a, Object[] b, Comparator<Object> comp) {
-        this.a = a;
-        this.b = b;
+        this.a = a.clone();
+        this.b = b.clone();
         this.comparator = comp;
         this.thresh = null;     // created in getLongestCommonSubsequences
     }
@@ -274,7 +274,7 @@ public class FxDiff {
      * @param b array B
      */
     public FxDiff(Object[] a, Object[] b) {
-        this(a, b, null);
+        this(a.clone(), b.clone(), null);
     }
 
     /**
@@ -674,7 +674,7 @@ public class FxDiff {
 
                 while (lo <= hi) {
                     int index = (hi + lo) / 2;
-                    Integer val = thresh.get(new Integer(index));
+                    Integer val = thresh.get(Integer.valueOf(index));
                     int cmp = j.compareTo(val);
 
                     if (cmp == 0) {

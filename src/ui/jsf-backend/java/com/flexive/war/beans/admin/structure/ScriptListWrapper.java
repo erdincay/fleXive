@@ -223,22 +223,6 @@ public class ScriptListWrapper implements Serializable {
         return scriptList;
     }
 
-    public Map<ScriptListEntry, Boolean> hasDoubleEntry() {
-        return new HashMap<ScriptListEntry, Boolean>() {
-            public Boolean getObject(Object key) {
-                int ctr=0;
-                for (ScriptListEntry le: scriptList) {
-                    if (le.getScriptEvent().getId() == ((ScriptListEntry)key).getScriptEvent().getId()
-                            && le.getScriptInfo().getId() == ((ScriptListEntry)key).getScriptInfo().getId())
-                        ctr++;
-                    if (ctr >1)
-                        return true;
-                }
-                return false;
-            }
-        };
-    }
-
     /**
      * checks the script list for a script list entry with matching script id and event.
      *
@@ -356,8 +340,7 @@ public class ScriptListWrapper implements Serializable {
     /**
      * compares script list entries, priorizes the script event name and if equal the script name
      */
-    private class ScriptEventSorter implements Comparator<ScriptListEntry>, Serializable {
-        private static final long serialVersionUID = -1285682507584328636L;
+    private class ScriptEventSorter implements Comparator<ScriptListEntry> {
         private final Collator collator = FxSharedUtils.getCollator();
 
         public int compare(ScriptListEntry o1, ScriptListEntry o2) {

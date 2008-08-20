@@ -79,6 +79,7 @@ import java.util.*;
  */
 
 public class DefaultServlet extends HttpServlet {
+    private static final long serialVersionUID = -6261835317658772316L;
 
     // ----------------------------------------------------- Instance Variables
 

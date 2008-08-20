@@ -2450,7 +2450,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         ps.setString(1, binary.getHandle());
         ResultSet rs = ps.executeQuery();
         String mimeType = "unknown";
-        if (rs != null && rs.next()) {
+        if (rs.next()) {
             byte[] header = null;
             try {
                 header = rs.getBlob(1).getBytes(1, 48);

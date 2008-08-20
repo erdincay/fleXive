@@ -46,7 +46,7 @@ import java.util.List;
  */
 public class FxCachedContentContainer implements Serializable {
     private static final long serialVersionUID = -6810666943342672605L;
-    private long id;
+    private final long id;
     private int maxVersion;
     private int liveVersion;
     private List<FxCachedContent> content;
@@ -78,7 +78,7 @@ public class FxCachedContentContainer implements Serializable {
      *
      * @return max. version number
      */
-    public int getMaxVersion() {
+    public synchronized int getMaxVersion() {
         return maxVersion;
     }
 
@@ -87,7 +87,7 @@ public class FxCachedContentContainer implements Serializable {
      *
      * @return live version number
      */
-    public int getLiveVersion() {
+    public synchronized int getLiveVersion() {
         return liveVersion;
     }
 

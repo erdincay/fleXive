@@ -54,6 +54,7 @@ import java.util.Vector;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class ResourceAttributes implements Attributes {
+    private static final long serialVersionUID = 8977002508350224301L;
 
     // -------------------------------------------------------------- Constants
 

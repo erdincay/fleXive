@@ -53,6 +53,7 @@ import java.io.Serializable;
  * @version $Rev
  */
 public class StructureImportBean implements ActionBean, Serializable {
+    private static final long serialVersionUID = 1763704615519844541L;
 
     private static final Log LOG = LogFactory.getLog(StructureImportBean.class);
 

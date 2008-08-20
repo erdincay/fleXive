@@ -46,6 +46,7 @@ import org.apache.commons.lang.StringUtils;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.io.Serializable;
 
 /**
@@ -407,10 +408,12 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                         description, hint, multiplicity, acl, dataType);
                 property.setAutoUniquePropertyName(true);
                 property.setAssignmentDefaultMultiplicity(defaultMultiplicity);
-                for (Object key : attributes.keySet()) {
+                for (Object oEntry : attributes.entrySet()) {
+                    final Map.Entry entry = (Map.Entry) oEntry;
+                    final Object key = entry.getKey();
                     if (isNonOptionKey((String) key))
                         continue;
-                    final Object optionValue = attributes.get(key);
+                    final Object optionValue = entry.getValue();
                     final String optionKey = ((String) key).toUpperCase();
                     // set non-generic property options
                     if ("FULLTEXTINDEXED".equals(optionKey)) {

@@ -158,7 +158,7 @@ abstract class RenderHelper {
         private String[] weblets;
 
         public void setWeblets(String... weblets) {
-            this.weblets = weblets;
+            this.weblets = weblets.clone();
         }
 
         @Override

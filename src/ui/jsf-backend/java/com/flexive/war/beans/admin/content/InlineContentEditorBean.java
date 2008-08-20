@@ -53,6 +53,7 @@ import java.net.URLEncoder;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class InlineContentEditorBean extends ContentEditorBean implements ActionBean, Serializable {
+    private static final long serialVersionUID = 548994914619554937L;
 
     private static final String REQ_ATR_INITIALIZED = InlineContentEditorBean.class.getName() + ".pageIsInitialized";
     private static final String PAGE_CLOSE_EDITOR = "iceClose";

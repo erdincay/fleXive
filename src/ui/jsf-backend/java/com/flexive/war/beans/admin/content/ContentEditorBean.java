@@ -67,6 +67,7 @@ import java.io.Serializable;
 import java.util.*;
 
 public class ContentEditorBean implements ActionBean, Serializable {
+    private static final long serialVersionUID = 1255372771864031452L;
     private static final Log LOG = LogFactory.getLog(ContentEditorBean.class);
 
     private ContentEngine co;

@@ -36,10 +36,7 @@ import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.value.BinaryDescriptor;
 
 import java.sql.Connection;
-import java.util.Map;
-import java.util.List;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -57,33 +54,42 @@ public abstract class DataSelector {
      * The delimiter for the encoded binary column returned by the selector.
      */
     public static final String BINARY_DELIM = "||";
-    
+
     /**
      * The columns to be selected by the binary selector. The result will be returned in a single
      * string column, the entries delimited by {@link #BINARY_DELIM}.
      */
-    protected static final String[] BINARY_COLUMNS = {"ID", "NAME", "BLOBSIZE", "XMLMETA", "CREATED_AT", "MIMETYPE",
-            "ISIMAGE", "RESOLUTION", "WIDTH", "HEIGHT"};
+    protected static final List<String> BINARY_COLUMNS = Collections.unmodifiableList(
+            Arrays.asList(
+                    "ID", "NAME", "BLOBSIZE", "XMLMETA", "CREATED_AT", "MIMETYPE",
+                    "ISIMAGE", "RESOLUTION", "WIDTH", "HEIGHT"
+            )
+    );
 
     /**
      * All result columns that are selected for search-internal queries and are not
      * returned to the user. Note that this is mostly an informal listing and used to determine
      * the number of internal columns, but that changing the order will probably not work as intended
-     * since the generated SQL requires that these internal properties are actually selected. 
+     * since the generated SQL requires that these internal properties are actually selected.
      */
-    protected static final String[] INTERNAL_RESULTCOLS = new String[] { "rownr", "id", "ver", "created_by" };
+    protected static final List<String> INTERNAL_RESULTCOLS = Collections.unmodifiableList(
+            Arrays.asList("rownr", "id", "ver", "created_by")
+    );
 
     protected static final int COL_ROWNR = 1;
     protected static final int COL_ID = 2;
     protected static final int COL_VER = 3;
     protected static final int COL_CREATED_BY = 4;
 
-    private static final Map<String, Integer> BINARY_COLUMN_INDICES = new HashMap<String, Integer>();
+    private static final Map<String, Integer> BINARY_COLUMN_INDICES;
+
     static {
+        final Map<String, Integer> indices = new HashMap<String, Integer>(BINARY_COLUMNS.size());
         // create a lookup cache for binary columns
-        for (int i = 0; i < BINARY_COLUMNS.length; i++) {
-            BINARY_COLUMN_INDICES.put(BINARY_COLUMNS[i], i);
+        for (int i = 0; i < BINARY_COLUMNS.size(); i++) {
+            indices.put(BINARY_COLUMNS.get(i), i);
         }
+        BINARY_COLUMN_INDICES = Collections.unmodifiableMap(indices);
     }
 
     public abstract String build(final Connection con) throws FxSqlSearchException;
@@ -95,8 +101,8 @@ public abstract class DataSelector {
     /**
      * Returns the index of the given column in a encoded binary result value.
      *
-     * @param columnName    the column name (uppercase)
-     * @return  the index of the given column name
+     * @param columnName the column name (uppercase)
+     * @return the index of the given column name
      */
     static int getBinaryIndex(String columnName) {
         final Integer value = BINARY_COLUMN_INDICES.get(columnName);

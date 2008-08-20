@@ -55,11 +55,11 @@ public class SimpleCacheStats {
 		misses++;
 	}
 	
-	public int getHits() {
+	public synchronized int getHits() {
 		return hits;
 	}
 
-	public int getMisses() {
+	public synchronized int getMisses() {
 		return misses;
 	}
 

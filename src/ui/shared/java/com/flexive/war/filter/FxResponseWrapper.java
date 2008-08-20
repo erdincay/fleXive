@@ -472,6 +472,9 @@ public class FxResponseWrapper extends HttpServletResponseWrapper {
      * @return the stacktrace as string
      */
     private String getStackTrace(Throwable th) {
+        if (th == null) {
+            return "";
+        }
         StringWriter sw = null;
         PrintWriter pw = null;
         try {

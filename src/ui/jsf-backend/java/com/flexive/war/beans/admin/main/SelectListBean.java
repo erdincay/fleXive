@@ -53,6 +53,7 @@ import com.flexive.shared.value.FxString;
 
 import javax.faces.model.SelectItem;
 import java.util.*;
+import java.io.Serializable;
 
 /**
  * Bean to display and edit FxSelectList objects and FxSelectListItem objects
@@ -270,18 +271,11 @@ public class SelectListBean {
         return FxJsfUtils.asSelectList(CacheAdmin.getEnvironment().getACLs(ACL.Category.SELECTLISTITEM), false);
     }
 
-    private static class ItemIdSorter implements Comparator<FxSelectListItemEdit> {
+    private static class ItemIdSorter implements Comparator<FxSelectListItemEdit>, Serializable {
+        private static final long serialVersionUID = 3366660003069358959L;
+
         public int compare(FxSelectListItemEdit i1, FxSelectListItemEdit i2) {
-            if (i1.getId() >= 0 && i2.getId() >= 0)
-                return (int) (i1.getId() - i2.getId());
-            else if (i1.getId() < 0 && i2.getId() < 0)
-                return (int) -(i1.getId() - i2.getId());
-            else if (i1.getId() < 0 && i2.getId() >= 0)
-                return 1;
-            else if (i1.getId() >= 0 && i2.getId() < 0)
-                return -1;
-            else //should never happen
-                return 0;
+            return Long.valueOf(i1.getId()).compareTo(i2.getId());
         }
     }
 

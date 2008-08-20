@@ -138,9 +138,9 @@ public class ReferencedContent extends FxPK implements Serializable {
         this.caption = other.caption;
         this.step = other.step;
         this.acl = other.acl;
-        this.content = other.content.copy();
+        this.content = other.getContent().copy();
         this.accessGranted = other.accessGranted;
-        this.resolved = other.resolved;
+        this.resolved = other.isResolved();
     }
 
     /**
@@ -206,7 +206,7 @@ public class ReferencedContent extends FxPK implements Serializable {
      *
      * @return if a loaded FxContent is assigned for this reference
      */
-    public boolean hasContent() {
+    public synchronized boolean hasContent() {
         return content != null;
     }
 
@@ -219,6 +219,15 @@ public class ReferencedContent extends FxPK implements Serializable {
         if (!hasContent())
             throw new FxApplicationException("ex.content.reference.content.missing").asRuntimeException();
         return content;
+    }
+
+    /**
+     * Returns true if the content instance has already been resolved.
+     *
+     * @return  true if the content instance has already been resolved.
+     */
+    public synchronized boolean isResolved() {
+        return resolved;
     }
 
     /**

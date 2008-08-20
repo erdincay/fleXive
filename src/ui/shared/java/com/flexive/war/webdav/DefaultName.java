@@ -51,6 +51,8 @@ import java.util.Properties;
  * @version $Rev$
  */
 public class DefaultName extends CompoundName {
+    private static final long serialVersionUID = -9136287431384322669L;
+
     /**
      * The Properties used for the project directory heirarchical names
      */
