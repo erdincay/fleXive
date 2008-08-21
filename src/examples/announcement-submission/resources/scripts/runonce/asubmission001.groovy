@@ -32,17 +32,17 @@ AccountEngine ae = EJBLookup.getAccountEngine();
 ACLEngine acle = EJBLookup.getAclEngine()
 
 // Create user groups
-long uGroupId1 = ue.create("UGroup_01", "#AAAAAA", FxContext.get().getTicket().getMandatorId())
-long uGroupId2 = ue.create("UGroup_02", "#FF0055", FxContext.get().getTicket().getMandatorId())
+long uGroupId1 = ue.create("Editors", "#AAAAAA", FxContext.get().getTicket().getMandatorId())
+long uGroupId2 = ue.create("Guests", "#FF0055", FxContext.get().getTicket().getMandatorId())
 
 // Create accounts ...
 AccountEdit accountEdit1 = new AccountEdit()
 AccountEdit accountEdit2 = new AccountEdit()
 
-accountEdit1.setEmail("user_01@ucs.at")
-accountEdit1.setName("user_01")
-accountEdit2.setEmail("user_02@ucs.at")
-accountEdit2.setName("user_02")
+accountEdit1.setEmail("announcement.editor@ucs.at")
+accountEdit1.setName("announcement.editor")
+accountEdit2.setEmail("announcement.guest@ucs.at")
+accountEdit2.setName("announcement.guest")
 
 long accountId1 = ae.create(accountEdit1, "password")
 long accountId2 = ae.create(accountEdit2, "password")
@@ -57,11 +57,11 @@ acle.assign(ACL.Category.STRUCTURE.getDefaultId(), uGroupId1, ACL.Permission.REA
 
 // Create instance ACL and assign it to user groups
 long instanceAclId = acle.create(
-        "Instance_ACL_01",
-        new FxString("Instance ACL 01"),
+        "Announcement_Entry_ACL",
+        new FxString("Announcement Entry ACL"),
         FxContext.get().getTicket().getMandatorId(),
         "#0033CC",
-        "Announcement Submission Instance ACL",
+        "Announcement Entry Instance ACL",
         ACL.Category.INSTANCE
 )
 acle.assign(instanceAclId, uGroupId1, ACL.Permission.READ, ACL.Permission.EDIT, ACL.Permission.CREATE, ACL.Permission.DELETE)
