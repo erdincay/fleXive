@@ -63,7 +63,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class PluginRegistryBean implements Serializable {
     private static final long serialVersionUID = -1931267445285693491L;
-    private static final transient Log LOG = LogFactory.getLog(PluginRegistryBean.class);
+    private static final Log LOG = LogFactory.getLog(PluginRegistryBean.class);
     private static final String CONFIG_FILENAME = "META-INF/flexive-plugins-config.xml";
 
     private final ConcurrentMap<ExtensionPoint, List<Plugin>> plugins

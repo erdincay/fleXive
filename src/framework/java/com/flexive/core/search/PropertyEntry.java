@@ -84,7 +84,7 @@ import static java.lang.Integer.parseInt;
  * @version $Rev$
  */
 public class PropertyEntry {
-    private static final transient Log LOG = LogFactory.getLog(PropertyEntry.class);
+    private static final Log LOG = LogFactory.getLog(PropertyEntry.class);
 
     /**
      * Property entry types. A type is either a generic property selector (e.g. {@link #PROPERTY_REF}),

@@ -67,7 +67,7 @@ import java.util.List;
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
 
-    private static transient Log LOG = LogFactory.getLog(ACLEngineBean.class);
+    private static final Log LOG = LogFactory.getLog(ACLEngineBean.class);
     @Resource
     javax.ejb.SessionContext ctx;
     @EJB

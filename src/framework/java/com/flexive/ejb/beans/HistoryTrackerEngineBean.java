@@ -62,7 +62,7 @@ import java.util.List;
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTrackerEngineLocal {
 
-    private static transient Log LOG = LogFactory.getLog(HistoryTrackerEngineBean.class);
+    private static final Log LOG = LogFactory.getLog(HistoryTrackerEngineBean.class);
 
     private static final String HISTORY_INSERT = "INSERT INTO " + TBL_HISTORY +
             //1       2         3       4          5           6          7       8           9

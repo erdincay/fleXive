@@ -94,7 +94,7 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
      */
     private static final String CACHE_DIVISIONS = "divisionData";
 
-    private static final transient Log LOG = LogFactory.getLog(GlobalConfigurationEngineBean.class);
+    private static final Log LOG = LogFactory.getLog(GlobalConfigurationEngineBean.class);
 
     /**
      * Cached local copy of divisions, must be cleared if the cache is cleared

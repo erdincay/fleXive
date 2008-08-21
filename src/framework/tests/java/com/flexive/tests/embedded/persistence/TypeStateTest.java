@@ -62,7 +62,7 @@ import org.testng.annotations.Test;
  */
 @Test(groups = {"ejb", "structure"})
 public class TypeStateTest extends StructureTestBase {
-    private static transient Log LOG = LogFactory.getLog(TypeStateTest.class);
+    private static final Log LOG = LogFactory.getLog(TypeStateTest.class);
 
     private long testType = -1;
 

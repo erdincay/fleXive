@@ -101,7 +101,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     }
 
 
-    private static final transient Log LOG = LogFactory.getLog(GenericHierarchicalStorage.class);
+    private static final Log LOG = LogFactory.getLog(GenericHierarchicalStorage.class);
 
     protected static final String CONTENT_MAIN_INSERT = "INSERT INTO " + TBL_CONTENT +
             // 1  2   3    4   5    6       7        8

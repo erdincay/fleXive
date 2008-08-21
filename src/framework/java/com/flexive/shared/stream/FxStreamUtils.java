@@ -55,7 +55,7 @@ import java.util.ArrayList;
  */
 public class FxStreamUtils {
 
-    private static final transient Log LOG = LogFactory.getLog(FxStreamUtils.class);
+    private static final Log LOG = LogFactory.getLog(FxStreamUtils.class);
 
     /**
      * 5 minutes default time to live

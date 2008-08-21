@@ -31,6 +31,9 @@
  ***************************************************************/
 package com.flexive.war.webdav;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -45,6 +48,7 @@ import java.util.Date;
  * @version $Rev$
  */
 public class FxDavFileSystemContext extends FxDavContext {
+    private static final Log LOG = LogFactory.getLog(FxDavFileSystemContext.class);
 
     private static FxDavFileSystemContext ddc = new FxDavFileSystemContext();
     private static String BASE = "/home/pandur";
@@ -268,11 +272,15 @@ public class FxDavFileSystemContext extends FxDavContext {
             if (f.list().length != 0) {
                 File fa[] = f.listFiles();
                 for (File aFa : fa) {
-                    if (!aFa.isDirectory())
-                        aFa.delete();
-                    else {
+                    if (!aFa.isDirectory()) {
+                        if (!aFa.delete()) {
+                            LOG.warn("Failed to delete file: " + aFa.getPath());
+                        }
+                    } else {
                         delete(aFa);
-                        aFa.delete();
+                        if (!aFa.delete()) {
+                            LOG.warn("Failed to delete file: " + aFa.getPath());
+                        }
                     }
                 }
                 return delete(f);

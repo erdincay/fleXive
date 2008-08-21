@@ -42,7 +42,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class FxRequestUtils {
-    private static final transient Log LOG = LogFactory.getLog(FxRequestUtils.class);
+    private static final Log LOG = LogFactory.getLog(FxRequestUtils.class);
 
     /**
      * Determines the division of the request.

@@ -50,7 +50,7 @@ import java.io.IOException;
  */
 public class PassiveCallbackHandler implements CallbackHandler {
 
-    private static final transient Log LOG = LogFactory.getLog(PassiveCallbackHandler.class);
+    private static final Log LOG = LogFactory.getLog(PassiveCallbackHandler.class);
     private String username = null;
     private char[] password = null;
     private boolean takeOverSession = false;

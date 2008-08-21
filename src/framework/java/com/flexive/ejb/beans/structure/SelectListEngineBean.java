@@ -73,7 +73,7 @@ import java.util.List;
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class SelectListEngineBean implements SelectListEngine, SelectListEngineLocal {
 
-    private static transient Log LOG = LogFactory.getLog(SelectListEngineBean.class);
+    private static final Log LOG = LogFactory.getLog(SelectListEngineBean.class);
     @Resource
     javax.ejb.SessionContext ctx;
 

@@ -58,7 +58,7 @@ import java.util.regex.Pattern;
  * @version $Rev$
  */
 public abstract class URIRoute {
-    private static final transient Log LOG = LogFactory.getLog(URIRoute.class);
+    private static final Log LOG = LogFactory.getLog(URIRoute.class);
 
     protected static final Map<String, String> PARAMETERS = new HashMap<String, String>();
     protected final Pattern pattern;

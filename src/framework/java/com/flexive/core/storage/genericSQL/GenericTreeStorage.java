@@ -93,7 +93,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
     }
 
 
-    private static final transient Log LOG = LogFactory.getLog(GenericTreeStorage.class);
+    private static final Log LOG = LogFactory.getLog(GenericTreeStorage.class);
 
     //                                                         1   2   3      4
     protected static final String TREE_LIVE_NODEINFO = "SELECT LFT,RGT,PARENT,TOTAL_CHILDCOUNT," +

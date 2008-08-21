@@ -76,7 +76,7 @@ import java.util.Map;
  */
 public class GenericEnvironmentLoader implements EnvironmentLoader {
 
-    protected static final transient Log LOG = LogFactory.getLog(GenericEnvironmentLoader.class);
+    protected static final Log LOG = LogFactory.getLog(GenericEnvironmentLoader.class);
 
     /**
      * {@inheritDoc}

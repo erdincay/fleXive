@@ -48,7 +48,7 @@ import java.util.Arrays;
  */
 public class FxExceptionMessage implements Serializable {
     private static final long serialVersionUID = -545689173017222846L;
-    private static transient Log LOG = LogFactory.getLog(FxExceptionMessage.class);
+    private static final Log LOG = LogFactory.getLog(FxExceptionMessage.class);
 
     /**
      * Default language of a resource if no _locale file is present

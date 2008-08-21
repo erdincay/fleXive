@@ -43,7 +43,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class FxBackingCacheProviderFactory {
 
-    private static transient Log LOG = LogFactory.getLog(FxBackingCacheProviderFactory.class);
+    private static final Log LOG = LogFactory.getLog(FxBackingCacheProviderFactory.class);
 
     /**
      * Name of the environment property to set to force a provider

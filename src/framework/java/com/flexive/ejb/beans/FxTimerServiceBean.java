@@ -59,7 +59,7 @@ import java.sql.Connection;
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
 
-    private static transient Log LOG = LogFactory.getLog(FxTimerServiceBean.class);
+    private static final Log LOG = LogFactory.getLog(FxTimerServiceBean.class);
 
     /**
      * timer interval in minutes

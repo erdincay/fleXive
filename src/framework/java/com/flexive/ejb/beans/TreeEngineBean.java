@@ -76,7 +76,7 @@ import java.util.List;
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
-    private static transient Log LOG = LogFactory.getLog(TreeEngineBean.class);
+    private static final Log LOG = LogFactory.getLog(TreeEngineBean.class);
 
     @Resource
     javax.ejb.SessionContext ctx;

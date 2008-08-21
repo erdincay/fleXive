@@ -62,7 +62,7 @@ import java.util.Stack;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class GenericTreeStorageSpreaded extends GenericTreeStorage {
-    private static final transient Log LOG = LogFactory.getLog(GenericTreeStorageSpreaded.class);
+    private static final Log LOG = LogFactory.getLog(GenericTreeStorageSpreaded.class);
 
     protected static final BigDecimal TWO = new BigDecimal(2);
     protected static final BigDecimal THREE = new BigDecimal(3);

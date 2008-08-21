@@ -57,7 +57,7 @@ import java.util.*;
  * @version $Rev$
  */
 public class MySQLDataSelector extends DataSelector {
-    private static final transient Log LOG = LogFactory.getLog(MySQLDataSelector.class);
+    private static final Log LOG = LogFactory.getLog(MySQLDataSelector.class);
 
     /**
      * All field selectors supported by this implementation

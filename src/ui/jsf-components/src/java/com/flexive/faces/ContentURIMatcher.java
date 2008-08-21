@@ -48,7 +48,7 @@ import java.util.regex.Matcher;
  * @version $Rev$
  */
 public class ContentURIMatcher extends URIMatcher {
-    private static final transient Log LOG = LogFactory.getLog(ContentURIMatcher.class);
+    private static final Log LOG = LogFactory.getLog(ContentURIMatcher.class);
     public static final String REQUEST_PK = ContentURIMatcher.class.getName() + ".PK";
     public static final String REQUEST_ORIG_URI = ContentURIMatcher.class.getName() + ".ORIGINAL_URI";
     public static final String REQUEST_MAPPED_URI = ContentURIMatcher.class.getName() + ".MAPPED_URI";

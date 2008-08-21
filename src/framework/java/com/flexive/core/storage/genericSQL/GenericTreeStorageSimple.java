@@ -56,7 +56,7 @@ import java.sql.*;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class GenericTreeStorageSimple extends GenericTreeStorage {
-    private static final transient Log LOG = LogFactory.getLog(GenericTreeStorageSimple.class);
+    private static final Log LOG = LogFactory.getLog(GenericTreeStorageSimple.class);
 
     /**
      * {@inheritDoc}

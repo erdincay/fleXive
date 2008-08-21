@@ -55,7 +55,7 @@ import java.util.Vector;
  * @version $Rev$
  */
 public class FxDefaultLogin implements LoginModule {
-    private static final transient Log LOG = LogFactory.getLog(FxDefaultLogin.class);
+    private static final Log LOG = LogFactory.getLog(FxDefaultLogin.class);
     private CallbackHandler callbackHandler = null;
     private Subject subject = null;
 

@@ -70,7 +70,7 @@ public final class Database {
      */
     static final String NO_TX_SUFFIX = "NoTX";
 
-    private static final transient Log LOG = LogFactory.getLog(Database.class);
+    private static final Log LOG = LogFactory.getLog(Database.class);
     private static DataSource globalDataSource = null;
     private static DataSource testDataSource = null;
     // cached data source references - index = division ID

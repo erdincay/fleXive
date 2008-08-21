@@ -54,7 +54,7 @@ import java.util.HashSet;
 public final class LoginLogoutHandler {
 
     private static final String LOGIN_CTX = "FxLogin";
-    private static final transient Log LOG = LogFactory.getLog(LoginLogoutHandler.class);
+    private static final Log LOG = LogFactory.getLog(LoginLogoutHandler.class);
 
     /**
      * Private construcutor

@@ -72,7 +72,7 @@ import java.util.List;
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class RouteEngineBean implements RouteEngine, RouteEngineLocal {
 
-    private static final transient Log LOG = LogFactory.getLog(StepEngineBean.class);
+    private static final Log LOG = LogFactory.getLog(StepEngineBean.class);
 
     @EJB private UserGroupEngineLocal groupEngine;
     @EJB private SequencerEngineLocal seq;

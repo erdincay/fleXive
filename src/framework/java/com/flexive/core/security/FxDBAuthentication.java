@@ -64,7 +64,7 @@ import java.util.Date;
  */
 class FxDBAuthentication {
 
-    private static transient Log LOG = LogFactory.getLog(FxDBAuthentication.class);
+    private static final Log LOG = LogFactory.getLog(FxDBAuthentication.class);
 
     public static UserTicket login(String username, String password, FxCallback callback) throws FxAccountInUseException, FxLoginFailedException, FxAccountExpiredException {
         final long SYS_UP = CacheAdmin.getInstance().getSystemStartTime();

@@ -73,7 +73,7 @@ import java.util.List;
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
 @Stateless(name = "DivisionConfigurationEngine")
 public class DivisionConfigurationEngineBean extends GenericConfigurationImpl implements DivisionConfigurationEngine, DivisionConfigurationEngineLocal {
-    private static final transient Log LOG = LogFactory.getLog(DivisionConfigurationEngineBean.class);
+    private static final Log LOG = LogFactory.getLog(DivisionConfigurationEngineBean.class);
     /**
      * Division config cache root.
      */

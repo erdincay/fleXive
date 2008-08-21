@@ -37,7 +37,7 @@ import org.apache.commons.logging.LogFactory;
 
 public class FxFacesMsgErr extends FxFacesMessage {
 
-    private static transient Log LOG = LogFactory.getLog(FxFacesMsgErr.class);
+    private static final Log LOG = LogFactory.getLog(FxFacesMsgErr.class);
     private static final long serialVersionUID = -3804224752720667187L;
     private static final Severity SEVERITY = SEVERITY_ERROR;
 

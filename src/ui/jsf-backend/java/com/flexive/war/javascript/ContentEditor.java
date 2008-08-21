@@ -48,7 +48,7 @@ import java.io.Serializable;
  */
 public class ContentEditor implements Serializable {
     private static final long serialVersionUID = 8418186403482323113L;
-    private static final transient Log LOG = LogFactory.getLog(ContentEditor.class);
+    private static final Log LOG = LogFactory.getLog(ContentEditor.class);
 
     /**
      * Delete the given content.

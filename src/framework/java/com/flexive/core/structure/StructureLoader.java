@@ -59,7 +59,7 @@ import java.sql.SQLException;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public final class StructureLoader {
-    private static final transient Log LOG = LogFactory.getLog(StructureLoader.class);
+    private static final Log LOG = LogFactory.getLog(StructureLoader.class);
 
     /**
      * Private c'tor to avoid instantiation

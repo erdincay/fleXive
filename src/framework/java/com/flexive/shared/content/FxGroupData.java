@@ -49,7 +49,7 @@ import java.util.List;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class FxGroupData extends FxData implements Cloneable {
+public class FxGroupData extends FxData {
     private static final long serialVersionUID = 133412774300450631L;
     private List<FxData> data;
 

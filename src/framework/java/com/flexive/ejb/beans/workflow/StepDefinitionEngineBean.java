@@ -73,7 +73,7 @@ import java.util.Set;
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefinitionEngineLocal {
 
-    private static final transient Log LOG = LogFactory.getLog(StepDefinitionEngineBean.class);
+    private static final Log LOG = LogFactory.getLog(StepDefinitionEngineBean.class);
 
     @EJB
     private StepEngineLocal stepEngine;

@@ -48,7 +48,7 @@ import org.apache.commons.logging.LogFactory;
  * @version $Rev$
  */
 public abstract class DataSelector {
-    private static final transient Log LOG = LogFactory.getLog(DataSelector.class);
+    private static final Log LOG = LogFactory.getLog(DataSelector.class);
 
     /**
      * The delimiter for the encoded binary column returned by the selector.

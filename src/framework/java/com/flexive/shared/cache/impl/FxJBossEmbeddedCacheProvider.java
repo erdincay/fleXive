@@ -46,7 +46,7 @@ import org.jboss.cache.eviction.LRUPolicy;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class FxJBossEmbeddedCacheProvider extends AbstractBackingCacheProvider<FxJBossTreeCacheWrapper> {
-    private static transient Log LOG = LogFactory.getLog(FxJBossEmbeddedCacheProvider.class);
+    private static final Log LOG = LogFactory.getLog(FxJBossEmbeddedCacheProvider.class);
     private static final String CONFIG_FILE = "embeddedJBossCacheConfig.xml";
 
     /**

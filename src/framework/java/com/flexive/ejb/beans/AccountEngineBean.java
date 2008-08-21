@@ -72,7 +72,7 @@ import java.util.List;
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
 
-    private static transient Log LOG = LogFactory.getLog(AccountEngineBean.class);
+    private static final Log LOG = LogFactory.getLog(AccountEngineBean.class);
     @Resource
     javax.ejb.SessionContext ctx;
 

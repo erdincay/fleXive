@@ -67,7 +67,7 @@ import java.util.Set;
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLocal {
 
-    private static transient Log LOG = LogFactory.getLog(BriefcaseEngineBean.class);
+    private static final Log LOG = LogFactory.getLog(BriefcaseEngineBean.class);
     @Resource
     javax.ejb.SessionContext ctx;
     @EJB

@@ -65,7 +65,7 @@ import java.util.List;
         "search", "tutorial", "benchmark", "environment", "mandator", "importexport",
         "roles"})
 public class ContainerBootstrap {
-    private static final transient Log LOG = LogFactory.getLog(ContainerBootstrap.class);
+    private static final Log LOG = LogFactory.getLog(ContainerBootstrap.class);
 
     private EJB3StandaloneDeployer deployer;
     private List<Object> deployedBeans = new ArrayList<Object>();

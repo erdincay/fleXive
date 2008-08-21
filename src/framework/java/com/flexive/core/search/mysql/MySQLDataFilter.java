@@ -82,7 +82,7 @@ import java.util.Date;
  * @version $Rev$
  */
 public class MySQLDataFilter extends DataFilter {
-    private static final transient Log LOG = LogFactory.getLog(MySQLDataFilter.class);
+    private static final Log LOG = LogFactory.getLog(MySQLDataFilter.class);
 
 //    private static final String NO_MATCH = "(SELECT DISTINCT null id,null ver,null lang FROM dual where 1=2)";
 

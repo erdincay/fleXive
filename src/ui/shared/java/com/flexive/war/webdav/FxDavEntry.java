@@ -53,9 +53,6 @@ public class FxDavEntry {
             "getcontenttype", "getetag", "resourcetype", "supportedlock"};
 
 
-    // Simple date format for the creation date ISO representation (partial).
-    protected static final SimpleDateFormat creationDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-
     protected static URLEncoder urlEncoder;
 
 
@@ -68,6 +65,9 @@ public class FxDavEntry {
 
     }
 
+    private static SimpleDateFormat getDateFormat() {
+        return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    }
 
     public void writeProperties(XMLWriter generatedXML, String path, String[] properties) {
 
@@ -217,7 +217,7 @@ public class FxDavEntry {
      * Get creation date in ISO format.
      */
     private String getISOCreationDate(long creationDate) {
-        StringBuffer creationDateValue = new StringBuffer(creationDateFormat.format(new Date(creationDate)));
+        StringBuffer creationDateValue = new StringBuffer(getDateFormat().format(new Date(creationDate)));
         return creationDateValue.toString();
     }
 

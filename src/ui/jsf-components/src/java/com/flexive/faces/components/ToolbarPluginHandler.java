@@ -63,7 +63,7 @@ import java.util.regex.Pattern;
  * @version $Rev$
  */
 public class ToolbarPluginHandler extends TagHandler implements TemplateClient {
-    private static final transient Log LOG = LogFactory.getLog(ToolbarPluginHandler.class);
+    private static final Log LOG = LogFactory.getLog(ToolbarPluginHandler.class);
 
     private static final String COMMAND_TEMPLATE = "/adm/templates/commandElement.xhtml";
     private static final String SEPARATOR_TEMPLATE = "/adm/templates/toolbarSeparator.xhtml";

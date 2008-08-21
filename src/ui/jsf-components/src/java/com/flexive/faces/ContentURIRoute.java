@@ -59,7 +59,7 @@ import java.util.regex.Matcher;
  * @version $Rev$
  */
 public class ContentURIRoute extends URIRoute {
-    //    private static final transient Log LOG = LogFactory.getLog(ContentURIMapper.class);
+    //    private static final Log LOG = LogFactory.getLog(ContentURIMapper.class);
     static {
         PARAMETERS.put("id", "([0-9]+)");
         PARAMETERS.put("pk", "([0-9]+\\.(?:[0-9]+|LIVE|MAX))");

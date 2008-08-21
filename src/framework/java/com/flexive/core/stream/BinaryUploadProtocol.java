@@ -58,7 +58,7 @@ import java.util.Date;
  */
 public class BinaryUploadProtocol extends StreamProtocol<BinaryUploadPayload> implements Runnable {
 
-    protected static final transient Log LOG = LogFactory.getLog(BinaryUploadProtocol.class);
+    protected static final Log LOG = LogFactory.getLog(BinaryUploadProtocol.class);
 
     private long timeToLive = 0;
     private String handle = null;

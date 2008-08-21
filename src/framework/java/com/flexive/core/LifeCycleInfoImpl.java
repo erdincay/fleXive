@@ -58,7 +58,7 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
     /**
      * our logger
      */
-    private static final transient Log LOG = LogFactory.getLog(LifeCycleInfoImpl.class);
+    private static final Log LOG = LogFactory.getLog(LifeCycleInfoImpl.class);
 
     /**
      * Value to set if a column is not set (=null)

@@ -66,7 +66,7 @@ import java.net.URLDecoder;
  * @version $Rev$
  */
 public class ExportServlet implements Servlet {
-    private static transient Log LOG = LogFactory.getLog(ExportServlet.class);
+    private static final Log LOG = LogFactory.getLog(ExportServlet.class);
 
     public final static String EXPORT_TYPE = "type";
     public final static String EXPORT_CONTENT = "content";

@@ -58,7 +58,7 @@ import java.util.Random;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class FxContent implements Serializable, Cloneable {
+public class FxContent implements Serializable {
 
     private static final long serialVersionUID = -7014370829966212118L;
 

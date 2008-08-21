@@ -59,7 +59,7 @@ import java.util.List;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class CacheAdmin {
-    private static transient Log LOG = LogFactory.getLog(CacheAdmin.class);
+    private static final Log LOG = LogFactory.getLog(CacheAdmin.class);
 
     public final static String ROOT_USERTICKETSTORE = "/UserTicketStore";
     public final static String ROOT_WEBDAV_USERTICKETSTORE = "/WebdavUserTicketStore";

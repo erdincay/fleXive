@@ -54,7 +54,7 @@ public class ACLAssignment implements Serializable, Cloneable {
     private boolean mayExport;
     private boolean mayCreate;
     private LifeCycleInfo lifeCycleInfo = null;
-    private static transient Log LOG = LogFactory.getLog(ACLAssignment.class);
+    private static final Log LOG = LogFactory.getLog(ACLAssignment.class);
 
     /**
      * Creates a clone.

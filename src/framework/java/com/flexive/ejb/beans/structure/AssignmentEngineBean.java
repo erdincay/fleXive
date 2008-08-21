@@ -74,7 +74,7 @@ import java.util.List;
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineLocal {
 
-    private static transient Log LOG = LogFactory.getLog(AssignmentEngineBean.class);
+    private static final Log LOG = LogFactory.getLog(AssignmentEngineBean.class);
 
     @Resource
     javax.ejb.SessionContext ctx;

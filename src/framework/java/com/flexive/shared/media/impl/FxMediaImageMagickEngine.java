@@ -51,7 +51,7 @@ import java.util.StringTokenizer;
  */
 public class FxMediaImageMagickEngine {
 
-    private static final transient Log LOG = LogFactory.getLog(FxMediaImageMagickEngine.class);
+    private static final Log LOG = LogFactory.getLog(FxMediaImageMagickEngine.class);
 
     public static final boolean IM_AVAILABLE;
     public static final boolean IM_IDENTIFY_POSSIBLE;

@@ -44,7 +44,7 @@ import org.apache.commons.logging.LogFactory;
  * @version $Rev$
  */
 public class TestRunnerPluginFactory implements PluginFactory {
-    private static final transient Log LOG = LogFactory.getLog(TestRunnerPluginFactory.class);
+    private static final Log LOG = LogFactory.getLog(TestRunnerPluginFactory.class);
 
     public void initialize(PluginRegistryBean registry) {
         try {

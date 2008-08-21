@@ -83,7 +83,7 @@ public class FxDirContext extends DirContextStringImpl implements DirContext, Se
         bindingAttrs.put("", (Attributes) attributes.clone());
         if (parent != null)
             parent.bind(contextName, this);
-        this.env = (Hashtable) env.clone();
+        this.env = env != null ? (Hashtable) env.clone() : new Hashtable();
     }
 
 

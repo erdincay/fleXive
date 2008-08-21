@@ -50,7 +50,7 @@ import java.io.Writer;
  */
 
 final class FxWriter extends Writer {
-    private static final transient Log LOG = LogFactory.getLog(FxWriter.class);
+    private static final Log LOG = LogFactory.getLog(FxWriter.class);
     private final PrintWriter pw;
     private final boolean catchContent;
     private final ByteArrayOutputStream output;

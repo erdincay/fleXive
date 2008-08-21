@@ -69,7 +69,7 @@ import java.util.Date;
 @Test(groups = {"ejb", "mandator"})
 public class MandatorTest {
 
-    private static transient Log LOG = LogFactory.getLog(MandatorTest.class);
+    private static final Log LOG = LogFactory.getLog(MandatorTest.class);
 
     private MandatorEngine me = null;
     private TypeEngine te = null;

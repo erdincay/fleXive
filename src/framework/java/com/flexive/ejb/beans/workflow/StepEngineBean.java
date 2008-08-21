@@ -77,7 +77,7 @@ import java.util.List;
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class StepEngineBean implements StepEngine, StepEngineLocal {
 
-    private static final transient Log LOG = LogFactory.getLog(StepEngineBean.class);
+    private static final Log LOG = LogFactory.getLog(StepEngineBean.class);
 
     @EJB
     private SequencerEngineLocal seq;

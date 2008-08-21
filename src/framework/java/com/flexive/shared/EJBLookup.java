@@ -52,7 +52,7 @@ import java.util.concurrent.ConcurrentMap;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class EJBLookup {
-    private static transient Log LOG = LogFactory.getLog(EJBLookup.class);
+    private static final Log LOG = LogFactory.getLog(EJBLookup.class);
     private static String APPNAME = "flexive";
 
     private enum STRATEGY {

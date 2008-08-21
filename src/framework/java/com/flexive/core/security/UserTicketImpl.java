@@ -53,9 +53,9 @@ import java.util.*;
  */
 public class UserTicketImpl implements UserTicket, Serializable {
     private static final long serialVersionUID = -8780256553138578843L;
-    private static transient Log LOG = LogFactory.getLog(UserTicketImpl.class);
+    private static final Log LOG = LogFactory.getLog(UserTicketImpl.class);
 
-    //private static transient Log LOG = LogFactory.getLog(UserTicketImpl.class);
+    //private static final Log LOG = LogFactory.getLog(UserTicketImpl.class);
     private final String userName;
     private final String loginName;
     private final long userId;

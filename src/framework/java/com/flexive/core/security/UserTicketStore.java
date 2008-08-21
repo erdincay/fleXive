@@ -60,7 +60,7 @@ import java.util.Set;
 public class UserTicketStore {
 
     private static final String KEY_TICKET = "Ticket";
-    private static transient Log LOG = LogFactory.getLog(UserTicketStore.class);
+    private static final Log LOG = LogFactory.getLog(UserTicketStore.class);
 
     /**
      * Helper class

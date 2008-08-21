@@ -62,7 +62,7 @@ import java.util.Set;
  */
 //@Service(objectName = CacheAdmin.CACHE_SERVICE_NAME)
 public class FxCache implements FxCacheMBean, DynamicMBean {
-    private static final transient Log LOG = LogFactory.getLog(FxCache.class);
+    private static final Log LOG = LogFactory.getLog(FxCache.class);
 
 
     private StreamServer server = null;

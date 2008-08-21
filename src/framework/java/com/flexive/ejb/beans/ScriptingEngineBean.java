@@ -86,7 +86,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLocal {
 
     // Our logger
-    private static transient Log LOG = LogFactory.getLog(ScriptingEngineBean.class);
+    private static final Log LOG = LogFactory.getLog(ScriptingEngineBean.class);
 
     @Resource
     javax.ejb.SessionContext ctx;

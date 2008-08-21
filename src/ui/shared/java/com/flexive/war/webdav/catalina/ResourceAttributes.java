@@ -905,11 +905,17 @@ public class ResourceAttributes implements Attributes {
 
 
     /**
-     * Clone the attributes object (WARNING: fake cloning).
+     * Clone the attributes object.
      */
-    @SuppressWarnings({"CloneDoesntCallSuperClone"})
+    @Override
     public Object clone() {
-        return this;
+        try {
+            final ResourceAttributes clone = (ResourceAttributes) super.clone();
+            clone.attributes = (Attributes) attributes.clone();
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new UnsupportedOperationException(e);
+        }
     }
 
 

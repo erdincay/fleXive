@@ -55,7 +55,7 @@ import javax.management.MBeanInfo;
  * 
  */
 public class FxJBossExternalCacheProvider extends AbstractBackingCacheProvider<FxJBossTreeCacheMBeanWrapper> {
-    private static transient Log LOG = LogFactory.getLog(FxJBossExternalCacheProvider.class);
+    private static final Log LOG = LogFactory.getLog(FxJBossExternalCacheProvider.class);
 
     /**
      * {@inheritDoc}

@@ -31,12 +31,14 @@
  ***************************************************************/
 package com.flexive.shared.security;
 
+import java.io.Serializable;
+
 /**
  * LifeCycle Information
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public interface LifeCycleInfo {
+public interface LifeCycleInfo extends Serializable {
 
     /**
      * Get the Id of the User that created this entry

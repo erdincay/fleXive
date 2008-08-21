@@ -69,7 +69,7 @@ import java.util.Map;
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
 
-    private static transient Log LOG = LogFactory.getLog(LanguageBean.class);
+    private static final Log LOG = LogFactory.getLog(LanguageBean.class);
 
     /**
      * All tables that have references to languages and the referencing column

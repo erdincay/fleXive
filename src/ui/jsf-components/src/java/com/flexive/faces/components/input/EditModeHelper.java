@@ -881,11 +881,11 @@ class EditModeHelper extends RenderHelper {
         }
 
         public Date getDate() {
-            return (Date) date.clone();
+            return date != null ? (Date) date.clone() : null;
         }
 
         public void setDate(Date date) {
-            this.date = (Date) date.clone();
+            this.date = date != null ? (Date) date.clone() : null;
         }
 
         @Override

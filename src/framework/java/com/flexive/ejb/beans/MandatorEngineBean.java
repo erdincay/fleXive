@@ -64,7 +64,7 @@ import java.sql.SQLException;
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
     // Our logger
-    private static transient Log LOG = LogFactory.getLog(MandatorEngineBean.class);
+    private static final Log LOG = LogFactory.getLog(MandatorEngineBean.class);
 
     @Resource
     javax.ejb.SessionContext ctx;

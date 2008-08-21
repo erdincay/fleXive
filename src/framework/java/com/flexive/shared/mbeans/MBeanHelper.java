@@ -47,7 +47,7 @@ import com.flexive.shared.Pair;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public final class MBeanHelper {
-    private static final transient Log LOG = LogFactory.getLog(MBeanHelper.class);
+    private static final Log LOG = LogFactory.getLog(MBeanHelper.class);
 
     //TODO: create a real deployment id at compile time!
     public final static String DEPLOYMENT_ID = "" + System.currentTimeMillis();

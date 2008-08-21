@@ -59,7 +59,7 @@ import java.util.List;
  * @version $Rev$
  */
 public class FxMediaNativeEngine {
-    private static final transient Log LOG = LogFactory.getLog(FxMediaNativeEngine.class);
+    private static final Log LOG = LogFactory.getLog(FxMediaNativeEngine.class);
 
     /**
      * Do we run in headless mode?

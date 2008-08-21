@@ -75,7 +75,7 @@ import java.util.List;
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
 
-    private static transient Log LOG = LogFactory.getLog(ContentEngineBean.class);
+    private static final Log LOG = LogFactory.getLog(ContentEngineBean.class);
     @Resource
     javax.ejb.SessionContext ctx;
 

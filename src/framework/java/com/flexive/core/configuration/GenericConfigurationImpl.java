@@ -70,7 +70,7 @@ import java.util.Map;
  */
 
 public abstract class GenericConfigurationImpl implements GenericConfigurationEngine {
-    private static final transient Log LOG = LogFactory.getLog(GenericConfigurationImpl.class);
+    private static final Log LOG = LogFactory.getLog(GenericConfigurationImpl.class);
 
     /**
      * Helper class to place unset parameters in the configuration cache.

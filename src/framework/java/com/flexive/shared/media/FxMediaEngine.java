@@ -52,7 +52,7 @@ import java.io.IOException;
  * @version $Rev$
  */
 public class FxMediaEngine {
-    private static final transient Log LOG = LogFactory.getLog(FxMediaEngine.class);
+    private static final Log LOG = LogFactory.getLog(FxMediaEngine.class);
 
 
     /**

@@ -63,7 +63,7 @@ import java.util.List;
 @Stateless(name = "SequencerEngine")
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class SequencerEngineBean implements SequencerEngine, SequencerEngineLocal {
-    private static transient Log LOG = LogFactory.getLog(SequencerEngineBean.class);
+    private static final Log LOG = LogFactory.getLog(SequencerEngineBean.class);
     @Resource
     javax.ejb.SessionContext ctx;
 

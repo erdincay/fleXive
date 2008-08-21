@@ -115,7 +115,7 @@ public class OptionWrapper {
     *                                  if not alaready present
     */
     public OptionWrapper(List<FxStructureOption> structureOptions, List<FxStructureOption> assignmentOptions, List<String> standardOptionKeyList) {
-        new OptionWrapper(structureOptions, assignmentOptions, false);
+        this(structureOptions, assignmentOptions, false);
         List<WrappedOption> standardOptions = new ArrayList<WrappedOption>();
         for (String key : standardOptionKeyList) {
             standardOptions.add(new WrappedOption(key, FxStructureOption.VALUE_FALSE, false, true));

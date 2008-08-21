@@ -52,7 +52,7 @@ import java.sql.Connection;
  */
 public class MaintenanceJob implements Job {
 
-    private static transient Log LOG = LogFactory.getLog(MaintenanceJob.class);
+    private static final Log LOG = LogFactory.getLog(MaintenanceJob.class);
 
     /**
      * {@inheritDoc}

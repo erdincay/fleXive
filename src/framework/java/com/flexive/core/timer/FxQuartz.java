@@ -55,7 +55,7 @@ import java.util.Properties;
  */
 public class FxQuartz {
 
-    private static transient Log LOG = LogFactory.getLog(FxQuartz.class);
+    private static final Log LOG = LogFactory.getLog(FxQuartz.class);
 
     public final static String GROUP_INTERNAL = "FxInternal";
     public final static String JOB_MAINTENANCE = "FxMaintenanceJob";

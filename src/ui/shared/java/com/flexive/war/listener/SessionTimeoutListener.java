@@ -53,7 +53,7 @@ import com.flexive.war.filter.FxSessionWrapper;
  * @version $Rev$
  */
 public class SessionTimeoutListener implements HttpSessionListener {
-    private static final transient Log LOG = LogFactory.getLog(SessionTimeoutListener.class);
+    private static final Log LOG = LogFactory.getLog(SessionTimeoutListener.class);
 
     public void sessionCreated(HttpSessionEvent event) {
         if (LOG.isDebugEnabled()) {

@@ -2054,7 +2054,9 @@ public class DefaultServlet extends HttpServlet {
             log("Serving bytes:" + start + "-" + end);
 
         try {
-            istream.skip(start);
+            if (istream.skip(start) != start) {
+                return new IOException("Failed to skip start range (not enough data)."); 
+            }
         } catch (IOException e) {
             return e;
         }
@@ -2102,7 +2104,9 @@ public class DefaultServlet extends HttpServlet {
                                   long start, long end) {
 
         try {
-            reader.skip(start);
+            if (reader.skip(start) != start) {
+                return new IOException("Failed to skip start range (not enough data).");
+            }
         } catch (IOException e) {
             return e;
         }
@@ -2137,7 +2141,7 @@ public class DefaultServlet extends HttpServlet {
     // ------------------------------------------------------ Range Inner Class
 
 
-    private class Range {
+    private static class Range {
 
         public long start;
         public long end;

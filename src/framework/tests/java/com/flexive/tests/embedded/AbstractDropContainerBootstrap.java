@@ -52,7 +52,7 @@ import java.util.Properties;
  * @version $Rev$
  */
 public abstract class AbstractDropContainerBootstrap extends ContainerBootstrap {
-    private static final transient Log LOG = LogFactory.getLog(AbstractDropContainerBootstrap.class);
+    private static final Log LOG = LogFactory.getLog(AbstractDropContainerBootstrap.class);
 
     @Override
     public void startup() throws FxApplicationException {

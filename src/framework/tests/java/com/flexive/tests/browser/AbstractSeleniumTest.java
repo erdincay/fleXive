@@ -56,7 +56,7 @@ import java.util.Properties;
  */
 @Test(groups = "browser")
 public abstract class AbstractSeleniumTest {
-    private static final transient Log LOG = LogFactory.getLog(AbstractSeleniumTest.class);
+    private static final Log LOG = LogFactory.getLog(AbstractSeleniumTest.class);
 
     /**
      * Property for setting the selenium server port

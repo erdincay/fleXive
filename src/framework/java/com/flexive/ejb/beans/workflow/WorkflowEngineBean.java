@@ -73,7 +73,7 @@ import java.util.Map;
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
 
-    private static final transient Log LOG = LogFactory.getLog(WorkflowEngineBean.class);
+    private static final Log LOG = LogFactory.getLog(WorkflowEngineBean.class);
 
     @Resource
     private SessionContext ctx;

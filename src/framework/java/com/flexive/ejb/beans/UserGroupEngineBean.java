@@ -59,7 +59,7 @@ import java.util.List;
 @Stateless(name = "UserGroupEngine")
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLocal {
-    private static transient Log LOG = LogFactory.getLog(UserGroupEngineBean.class);
+    private static final Log LOG = LogFactory.getLog(UserGroupEngineBean.class);
     @Resource
     javax.ejb.SessionContext ctx;
     //@EJB AccountEngine account;

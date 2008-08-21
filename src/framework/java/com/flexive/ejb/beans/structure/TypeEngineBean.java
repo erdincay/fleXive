@@ -71,7 +71,7 @@ import java.util.List;
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
 
-    private static transient Log LOG = LogFactory.getLog(TypeEngineBean.class);
+    private static final Log LOG = LogFactory.getLog(TypeEngineBean.class);
     @Resource
     javax.ejb.SessionContext ctx;
 

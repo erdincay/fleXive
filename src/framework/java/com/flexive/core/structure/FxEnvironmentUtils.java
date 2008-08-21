@@ -54,7 +54,7 @@ import java.sql.SQLException;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 final class FxEnvironmentUtils {
-    private static transient Log LOG = LogFactory.getLog(FxEnvironmentUtils.class);
+    private static final Log LOG = LogFactory.getLog(FxEnvironmentUtils.class);
 
     /**
      * Includes the division id into the path.
