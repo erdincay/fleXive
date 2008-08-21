@@ -1185,6 +1185,12 @@ public class FxContent implements Serializable {
      * @return caption or <code>null</code> if not assigned
      */
     public FxString getCaption() {
+        if (!captionResolved)
+            try {
+                resolveCaption();
+            } catch (FxApplicationException e) {
+                throw e.asRuntimeException();
+            }
         return caption;
     }
 
