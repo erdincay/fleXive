@@ -251,7 +251,7 @@
             </fx:formRow>
 
             <fx:formRow labelKey="TypeEditor.label.icon" id="icon">
-                <fx:fxValueInput value="#{typeEditorBean.icon}" id="icon"/>
+                <fx:fxValueInput value="#{typeEditorBean.icon}" id="icon" readOnly="#{not typeEditorBean.editMode}"/>
             </fx:formRow>
             
             <ui:fragment rendered="#{not typeEditorBean.type.new and not typeEditorBean.type.relation}">
