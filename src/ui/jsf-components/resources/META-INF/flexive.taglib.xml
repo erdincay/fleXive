@@ -80,7 +80,7 @@
     </tag>
     <tag>
         <tag-name>value</tag-name>
-        <handler-class>com.flexive.faces.components.toolkit.FxValueHandler</handler-class>
+        <handler-class>com.flexive.faces.components.content.FxValueHandler</handler-class>
     </tag>
     <tag>
         <tag-name>contentList</tag-name>

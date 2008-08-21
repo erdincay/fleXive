@@ -47,7 +47,7 @@ import java.util.Map;
 
 /**
  * Provides actions that may be useful for (not only) pages using
- * the {@link com.flexive.faces.components.toolkit.FxContentView FxContentView} component.
+ * the {@link com.flexive.faces.components.content.FxContentView FxContentView} component.
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$

@@ -27,6 +27,7 @@
 	            <h:inputHidden id="addAssignmentNodeId" value="#{fxQueryEditorBean.addAssignmentNodeId}"/>
                 <h:inputHidden id="nodeSelection" value="#{fxQueryEditorBean.nodeSelection}"/>
                 <h:inputHidden id="addNodeLive" value="#{fxQueryEditorBean.addNodeLive}"/>
+                <h:inputHidden id="queryName" value="#{fxQueryEditorBean.rootNode.name}"/>
 
 
                 <!-- The actual query editor -->
@@ -47,19 +48,6 @@
                     </h:selectOneListbox>
                 </fx:formRow>
     -->
-                <!-- Save query options -->
-                <fx:formRow labelKey="QueryEditor.label.query.save" id="saveQuery">
-                    <t:selectBooleanCheckbox id="saveQuery" value="#{fxQueryEditorBean.saveQuery}"
-                                             onclick="toggleSaveQuery(this)"/>
-                </fx:formRow>
-
-                <h:panelGroup id="saveQueryData" style="display:#{fxQueryEditorBean.saveQuery ? 'block' : 'none'}">
-                    <fx:formRow labelKey="QueryEditor.label.query.name">
-                        <h:inputText id="queryName" value="${fxQueryEditorBean.rootNode.name}"/>
-                    </fx:formRow>
-                </h:panelGroup>
-
-                <!-- Briefcase options -->
 
                 <fx:formRow labelKey="QueryEditor.label.briefcase.create" id="createBriefcase">
                     <t:selectBooleanCheckbox id="createBriefcase" value="#{fxSearchResultBean.createBriefcase}"
@@ -87,6 +75,13 @@
 			<adm:commandButton id="searchButton" location="both" bean="#{fxQueryEditorBean}" action="executeSearch" labelKey="QueryEditor.button.submit" icon="search">
                 <f:setPropertyActionListener target="#{fxQueryEditorBean.location}" value="#{fxSystemBean.adminResultLocation}"/>
             </adm:commandButton>
+			<adm:commandButton id="saveButtonJs" location="both" labelKey="QueryEditor.button.save" icon="save" lockscreen="false"
+                    onclick="onSaveQuery();return false"/>
+            <div style="display:none">
+                <adm:commandButton id="saveButton" location="content" bean="#{fxQueryEditorBean}" action="saveQuery">
+                    <f:setPropertyActionListener target="#{fxQueryEditorBean.location}" value="#{fxSystemBean.adminResultLocation}"/>
+                </adm:commandButton>
+            </div>
             <adm:commandButton id="saveDefaultButton" location="both" bean="#{fxQueryEditorBean}" action="saveDefault" labelKey="QueryEditor.button.saveDefault" confirmKey="QueryEditor.confirm.saveDefault" icon="home">
                 <f:setPropertyActionListener target="#{fxQueryEditorBean.location}" value="#{fxSystemBean.adminResultLocation}"/>
             </adm:commandButton>
@@ -94,6 +89,24 @@
 
             <adm:toolbarPluginButtons/>
 
+            <script type="text/javascript">
+            <!--
+                function onSaveQuery() {
+                    promptDialog("#{fxMessageBean['QueryEditor.dialog.save']}", "#{fxMessageBean['QueryEditor.dialog.save.default']}",
+                            function(name) {
+                                document.getElementById("frm:queryName").value = name;
+                                document.getElementById("frm:saveButton").onclick();
+                            }
+                    );
+                }
+
+                if (#{fxQueryEditorBean.reloadSearchPanel}) {
+                    if (parent.getSearchNavFrame() != null && parent.getSearchNavFrame().reload) {
+                        parent.getSearchNavFrame().reload();
+                    }
+                }
+            //-->
+            </script>
         </a4j:form>
     </ui:define>
 

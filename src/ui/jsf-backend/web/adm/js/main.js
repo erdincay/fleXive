@@ -144,6 +144,10 @@ function getStructureNavFrame() {
     return frames["treeNavFrame_1"];
 }
 
+function getSearchNavFrame() {
+    return frames["treeNavFrame_2"];
+}
+
 function getNavFrameTop() {
     return frames['navFrameTop'];
 }

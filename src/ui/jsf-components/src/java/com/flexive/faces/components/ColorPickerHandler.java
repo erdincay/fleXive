@@ -30,7 +30,7 @@ public class ColorPickerHandler extends TagHandler {
         this.inputId = getAttribute("inputId");
     }
 
-    public void apply(FaceletContext ctx, UIComponent parent) throws IOException, FacesException, FaceletException, ELException {
+    public void apply(FaceletContext ctx, UIComponent parent) throws IOException, FacesException, ELException {
         VariableMapper orig = ctx.getVariableMapper();
         try {
             final VariableMapperWrapper mapper = new VariableMapperWrapper(orig);

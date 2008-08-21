@@ -29,7 +29,7 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.faces.components.toolkit;
+package com.flexive.faces.components.content;
 
 import com.flexive.faces.FxJsfComponentUtils;
 import com.flexive.shared.exceptions.FxApplicationException;

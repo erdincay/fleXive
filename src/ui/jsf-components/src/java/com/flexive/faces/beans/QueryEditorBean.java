@@ -83,8 +83,7 @@ public class QueryEditorBean implements Serializable {
     private boolean addNodeLive = false;
     private int removeNodeId = -1;
     private String nodeSelection = null;
-
-    private boolean saveQuery;
+    private boolean reloadSearchPanel = false;
 
     private SqlQueryBuilder queryBuilder;
     private ResultLocation location = AdminResultLocations.ADMIN;
@@ -165,19 +164,6 @@ public class QueryEditorBean implements Serializable {
         if (!buildQuery(builder)) {
             return null;
         }
-        if (saveQuery) {
-            if (StringUtils.isBlank(rootNode.getName())) {
-                new FxFacesMsgErr("QueryEditor.err.saveQuery.empty").addToContext("queryName");
-                return null;
-            }
-            try {
-                getRootNode().setName(rootNode.getName());
-                EJBLookup.getSearchEngine().save(getRootNode());
-                new FxFacesMsgInfo("QueryEditor.nfo.saveQuery", rootNode.getName()).addToContext();
-            } catch (FxApplicationException e) {
-                new FxFacesMsgErr(e).addToContext();
-            }
-        }
         resultBean.setQueryBuilder(builder);
         resultBean.resetFilters();
         updateQueryStore();
@@ -216,14 +202,35 @@ public class QueryEditorBean implements Serializable {
      * Sets the current user's default query for the current location.
      */
     public void saveDefault() {
-        if (!buildQuery(new SqlQueryBuilder())) {
+        /*if (!buildQuery(new SqlQueryBuilder())) {
             return;
-        }
+        }*/
         try {
             EJBLookup.getSearchEngine().saveDefault(rootNode);
             new FxFacesMsgInfo("QueryEditor.nfo.saveDefault").addToContext();
         } catch (FxApplicationException e) {
             new FxFacesMsgErr("QueryEditor.err.saveSystemDefault", e).addToContext();
+        }
+    }
+
+    /**
+     * Saves the current query.
+     */
+    public void saveQuery() {
+        if (StringUtils.isBlank(rootNode.getName())) {
+            new FxFacesMsgErr("QueryEditor.err.saveQuery.empty").addToContext("queryName");
+            return;
+        }
+        /*if (!buildQuery(new SqlQueryBuilder())) {
+            return;
+        }*/
+        try {
+            getRootNode().setName(rootNode.getName());
+            EJBLookup.getSearchEngine().save(getRootNode());
+            reloadSearchPanel = true;
+            new FxFacesMsgInfo("QueryEditor.nfo.saveQuery", rootNode.getName()).addToContext();
+        } catch (FxApplicationException e) {
+            new FxFacesMsgErr(e).addToContext();
         }
     }
 
@@ -473,14 +480,6 @@ public class QueryEditorBean implements Serializable {
         this.addNodeLive = addNodeLive;
     }
 
-    public boolean isSaveQuery() {
-        return saveQuery;
-    }
-
-    public void setSaveQuery(boolean saveQuery) {
-        this.saveQuery = saveQuery;
-    }
-
     /**
      * Return the current tab title of the query tab.
      *
@@ -500,5 +499,9 @@ public class QueryEditorBean implements Serializable {
     private String getQueryTreeStore() {
         return "FlexiveSearchQueryTree/" + location + "/" + QueryRootNode.Type.CONTENTSEARCH
                 + FacesContext.getCurrentInstance().getViewRoot().getViewId();
+    }
+
+    public boolean isReloadSearchPanel() {
+        return reloadSearchPanel;
     }
 }
