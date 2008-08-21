@@ -251,6 +251,7 @@ public class FxFilter implements Filter {
     protected void registerJsonRpcObjects(JSONRPCBridge bridge) {
         registerJsonRpcObject(bridge, "YahooResultProvider", "com.flexive.faces.javascript.yui.YahooResultProvider");
         registerJsonRpcObject(bridge, "AutoCompleteProvider", "com.flexive.faces.javascript.AutoCompleteProvider");
+        registerJsonRpcObject(bridge, "ContentProvider", "com.flexive.faces.javascript.ContentProvider");
     }
 
     /**

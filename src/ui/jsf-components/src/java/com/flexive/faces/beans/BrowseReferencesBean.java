@@ -97,7 +97,7 @@ public class BrowseReferencesBean implements ActionBean {
 
     private SqlQueryBuilder getQueryBuilder(FxType referencedType) {
         final SqlQueryBuilder builder = new SqlQueryBuilder(AdminResultLocations.BROWSE_REFERENCES, ResultViewType.LIST)
-                .select("@pk", "caption", "@*");
+                .select("@pk", "@*");
         if (referencedType != null) {
             builder.type(referencedType.getId());
         }

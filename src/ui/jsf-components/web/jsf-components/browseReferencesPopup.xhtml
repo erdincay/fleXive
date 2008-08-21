@@ -9,7 +9,7 @@
       xmlns:adm="http://www.flexive.com/jsf/admin"
       xmlns:fx="http://www.flexive.com/jsf/core">
 <head>
-    <fx:includes yui="true"/>
+    <fx:includes yui="true" jsonRpc="true"/>
 </head>
 <body class="yui-skin-sam">
 
@@ -40,7 +40,11 @@
             }
 
             function clickHandler(target, pk) {
-                selectReference(pk.toString(), flexive.yui.datatable.getRecordValue(resultTable, target, "caption"));
+                try {
+                    selectReference(pk.toString(), flexive.util.getJsonRpc().ContentProvider.getCaption(pk.id, pk.version));
+                } catch (e) {
+                    alert(e);
+                }
             }
         
             // set body style in JS (subtle firefox problem with <style> elements, CDATA and text/html encoding)
