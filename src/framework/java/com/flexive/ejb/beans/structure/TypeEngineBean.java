@@ -98,9 +98,9 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             "INSERT INTO " + TBL_STRUCT_TYPES + " (ID, NAME, PARENT, STORAGE_MODE, CATEGORY, TYPE_MODE, " +
                     //7          8           9              10            11           12
                     "LANG_MODE,  TYPE_STATE, SECURITY_MODE, TRACKHISTORY, HISTORY_AGE, MAX_VERSIONS, " +
-                    //13               14                15          16          17           18           19   20
-                    "REL_TOTAL_MAXSRC, REL_TOTAL_MAXDST, CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT, ACL, WORKFLOW) VALUES " +
-                    "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    //13               14                15          16          17           18           19   20        21
+                    "REL_TOTAL_MAXSRC, REL_TOTAL_MAXDST, CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT, ACL, WORKFLOW, ICON_REF) VALUES " +
+                    "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     /**
      * {@inheritDoc}
@@ -161,6 +161,10 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             ps.setLong(18, NOW);
             ps.setLong(19, type.getACL().getId());
             ps.setLong(20, type.getWorkflow().getId());
+            if( type.getIcon().isEmpty() )
+                ps.setNull(21, java.sql.Types.INTEGER);
+            else
+                ps.setLong(21, type.getIcon().getDefaultTranslation().getId());
             ps.executeUpdate();
             Database.storeFxString(type.getDescription(), con, TBL_STRUCT_TYPES, "DESCRIPTION", "ID", newId);
 
@@ -639,6 +643,23 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                 htracker.track(type, "history.type.update.maxRelDest", orgType.getMaxRelDestination(), type.getMaxRelDestination());
             }
             //end max destination relations changes
+
+            //start icon
+            if (!type.getIcon().equals(orgType.getIcon())) {
+                sql.setLength(0);
+                sql.append("UPDATE ").append(TBL_STRUCT_TYPES).append(" SET ICON_REF=? WHERE ID=?");
+                if (ps != null) ps.close();
+                ps = con.prepareStatement(sql.toString());
+                if (type.getIcon().isEmpty())
+                    ps.setNull(1, java.sql.Types.INTEGER);
+                else
+                    ps.setLong(1, type.getIcon().getDefaultTranslation().getId());
+                ps.setLong(2, type.getId());
+                ps.executeUpdate();
+                htracker.track(type, "history.type.update.icon", orgType.getIcon().getDefaultTranslation().getId(),
+                        type.getIcon().getDefaultTranslation().getId());
+            }
+            //end icon
 
             //sync back to cache
             try {

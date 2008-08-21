@@ -39,6 +39,7 @@ import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.value.FxString;
+import com.flexive.shared.value.FxReference;
 import com.flexive.shared.workflow.Workflow;
 import org.apache.commons.lang.StringUtils;
 
@@ -120,6 +121,7 @@ public class FxTypeEdit extends FxType implements Serializable {
         this.changed = false;
         this.removeInstancesWithRelationTypes = false;
         this.originalRelations = new ArrayList<FxTypeRelation>(super.getRelations());
+        this.icon = type.getIcon();
     }
 
     /**
@@ -376,6 +378,18 @@ public class FxTypeEdit extends FxType implements Serializable {
      */
     public FxTypeEdit setState(TypeState state) {
         this.state = state;
+        this.changed = true;
+        return this;
+    }
+
+    /**
+     * Set the preview icon of this type
+     *
+     * @param icon the (optional) preview icon of this type
+     * @return the type itself, useful for chained calls
+     */
+    public FxTypeEdit setIcon(FxReference icon) {
+        this.icon = icon;
         this.changed = true;
         return this;
     }

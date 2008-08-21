@@ -39,12 +39,15 @@ import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
+import com.flexive.shared.value.FxReference;
+import com.flexive.shared.value.ReferencedContent;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -80,6 +83,7 @@ public class TypeEditorBean {
     private List<SelectItem> timeRanges = null;
     private int timeRange = -1;
     private long historyAge = -1;
+    private FxReference icon = new FxReference(false, FxReference.EMPTY);
     private boolean maxRelSourceUnlimited = false;
     private boolean maxRelDestUnlimited = false;
     private static final int DEFAULT_REL_MAX = 100;
@@ -175,6 +179,7 @@ public class TypeEditorBean {
         unlimitedVersions = type.getMaxVersions() == -1;
         maxRelSourceUnlimited = type.getMaxRelSource() == 0;
         maxRelDestUnlimited = type.getMaxRelDestination() == 0;
+        icon = type.getIcon();
         timeRange = initTimeRange();
     }
 
@@ -200,6 +205,23 @@ public class TypeEditorBean {
         if (!this.maxRelDestUnlimited && maxRelDestUnlimited)
             setMaxRelDestination(0);
         this.maxRelDestUnlimited = maxRelDestUnlimited;
+    }
+
+    public FxReference getIcon() {
+        if( !icon.isEmpty() && !icon.getDefaultTranslation().hasContent() ) {
+            //load the content to be able to display the caption
+            try {
+                icon.getDefaultTranslation().setContent(EJBLookup.getContentEngine().load(new FxPK(icon.getDefaultTranslation().getId())));
+            } catch (FxApplicationException e) {
+                LOG.warn(e);
+            }
+        }
+        return icon;
+    }
+
+    public void setIcon(FxReference icon) {
+        this.icon = icon;
+        this.type.setIcon(icon);
     }
 
     /**
@@ -440,6 +462,7 @@ public class TypeEditorBean {
 
     public void setType(FxTypeEdit type) {
         this.type = type;
+        this.icon = type.getIcon();
     }
 
     public void setCategory(TypeCategory tg) {

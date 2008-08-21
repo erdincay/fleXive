@@ -52,8 +52,7 @@ import com.flexive.shared.scripting.FxScriptMappingEntry;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.structure.*;
-import com.flexive.shared.value.FxString;
-import com.flexive.shared.value.FxValue;
+import com.flexive.shared.value.*;
 import com.flexive.shared.workflow.Route;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
@@ -403,8 +402,8 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
             curSql = "SELECT ID, NAME, PARENT, STORAGE_MODE, CATEGORY, TYPE_MODE, " +
                     //7         8           9              10            11           12
                     "LANG_MODE, TYPE_STATE, SECURITY_MODE, TRACKHISTORY, HISTORY_AGE, MAX_VERSIONS," +
-                    //13               14                15          16          17           18           19   20
-                    "REL_TOTAL_MAXSRC, REL_TOTAL_MAXDST, CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT, ACL, WORKFLOW" +
+                    //13               14                15          16          17           18           19   20        21
+                    "REL_TOTAL_MAXSRC, REL_TOTAL_MAXDST, CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT, ACL, WORKFLOW, ICON_REF" +
                     " FROM " + TBL_STRUCT_TYPES + " ORDER BY NAME";
 
             stmt = con.createStatement();
@@ -422,20 +421,24 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                                 rsRelations.getInt(3), rsRelations.getInt(4)));
                     long parentId = rs.getLong(3);
                     FxType parentType = rs.wasNull() ? null : new FxPreloadType(parentId);
-                    result.add(new FxType(id, environment.getACL(rs.getInt(19)),
+                    FxType _type = new FxType(id, environment.getACL(rs.getInt(19)),
                             environment.getWorkflow(rs.getInt(20)), rs.getString(2),
                             getTranslation(labels, id, 0),
                             parentType, TypeStorageMode.getById(rs.getInt(4)),
                             TypeCategory.getById(rs.getInt(5)), TypeMode.getById(rs.getInt(6)),
                             LanguageMode.getById(rs.getInt(7)), TypeState.getById(rs.getInt(8)), rs.getByte(9),
                             rs.getBoolean(10), rs.getLong(11), rs.getLong(12), rs.getInt(13), rs.getInt(14),
-                            LifeCycleInfoImpl.load(rs, 15, 16, 17, 18), new ArrayList<FxType>(5), alRelations));
+                            LifeCycleInfoImpl.load(rs, 15, 16, 17, 18), new ArrayList<FxType>(5), alRelations);
+                    long iconId = rs.getLong(21);
+                    if( !rs.wasNull())
+                        _type.getIcon().setValue(new ReferencedContent(iconId));
+                    result.add(_type);
                 } catch (FxNotFoundException e) {
                     throw new FxLoadException(LOG, e);
                 }
             }
         } catch (SQLException exc) {
-            throw new FxLoadException(LOG, "Failed to load all FxAssignments: " + exc.getMessage(), exc);
+            throw new FxLoadException(LOG, "Failed to load all FxTypes: " + exc.getMessage(), exc);
         } finally {
             try {
                 if (ps != null)

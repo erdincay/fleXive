@@ -40,6 +40,8 @@ import com.flexive.shared.workflow.Step;
 import java.io.Serializable;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * A referenced content - value class for FxReference
@@ -47,8 +49,9 @@ import org.apache.commons.lang.StringUtils;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class ReferencedContent extends FxPK implements Serializable {
+    private static final Log LOG = LogFactory.getLog(ReferencedContent.class);
     private static final long serialVersionUID = 4530337199230606480L;
-    private final String caption;
+    private String caption;
     private final Step step;
     private final ACL acl;
 
@@ -238,6 +241,12 @@ public class ReferencedContent extends FxPK implements Serializable {
     public synchronized void setContent(FxContent content) {
         if(!resolved) {
             this.content = content;
+            try {
+                if( this.content.hasCaption() )
+                    this.caption = this.content.getCaption().getBestTranslation();
+            } catch (FxApplicationException e) {
+                LOG.warn(e);
+            }
             accessGranted = content != null;
         } else {
             resolved = true;

@@ -45,6 +45,7 @@ import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.value.FxString;
+import com.flexive.shared.value.FxReference;
 import com.flexive.shared.workflow.Workflow;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -99,6 +100,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     protected List<FxGroupAssignment> assignedGroups;
     protected List<FxAssignment> scriptedAssignments;
     protected Map<FxScriptEvent, long[]> scriptMapping;
+    protected FxReference icon;
 
     public FxType(long id, ACL acl, Workflow workflow, String name, FxString description, FxType parent, TypeStorageMode storageMode,
                   TypeCategory category, TypeMode mode, LanguageMode language, TypeState state, byte permissions,
@@ -125,6 +127,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
         this.derivedTypes = derivedTypes;
         this.relations = relations;
         this.scriptMapping = new HashMap<FxScriptEvent, long[]>(10);
+        this.icon = new FxReference(false, FxReference.EMPTY).setEmpty();
     }
 
     /**
@@ -488,6 +491,17 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      */
     public byte getBitCodedPermissions() {
         return permissions;
+    }
+
+    /**
+     * Get the preview icon of this type.
+     * The icon can be empty if not defined.
+     * Version is ignored and always the max version.
+     *
+     * @return preview icon (can be empty)
+     */
+    public FxReference getIcon() {
+        return icon;
     }
 
     /**
