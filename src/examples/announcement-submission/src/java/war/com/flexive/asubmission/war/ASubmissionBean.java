@@ -54,7 +54,7 @@ public class ASubmissionBean {
     public String save() {
         try {
             if (content.getPk().isNew()) // Instance ACL Id only set for new instances
-                content.setAclId(CacheAdmin.getEnvironment().getACL("Instance_ACL_01").getId());
+                content.setAclId(CacheAdmin.getEnvironment().getACL("Announcement_Entry_ACL").getId());
             EJBLookup.getContentEngine().save(content.copy());
         } catch (FxApplicationException e) {
             new FxFacesMsgErr(e).addToContext();

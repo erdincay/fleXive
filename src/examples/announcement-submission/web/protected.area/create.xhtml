@@ -8,13 +8,13 @@
       xmlns:fx="http://www.flexive.com/jsf/core">
 <head>
     <!-- Add flexive includes -->
-    <fx:includes/>
+    <fx:includes all="true" yui="true"/>
     <!-- Add our own stylesheet -->
     <link rel="stylesheet" type="text/css" href="../css/announcement-submission.css"/>
     <title>[fleXive] announcement submission example application</title>
 </head>
 
-<body>
+<body class="yui-skin-sam">
 
 <!-- Output JSF error or info messages here -->
 <h:messages showDetail="true" errorClass="errorMessage" infoClass="infoMessage"/>
@@ -50,6 +50,8 @@
     What happens on this page?
 </h:outputLink>
 </p>
+
+<fx:yuiSetup/>
 
 </body>
 
