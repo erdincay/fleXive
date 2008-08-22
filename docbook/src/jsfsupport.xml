@@ -81,6 +81,9 @@
                             <link linkend="jcl_fx_yuisetup">&lt;fx:yuiSetup/&gt;</link>
                             near the end of the HTML body section. This initializes all YUI components
                             on the current page and loads the required Javascript libraries.
+                            You also have to specify the YUI skin class on your page, the most convenient way
+                            is through the body tag, e.g.:
+                            <code>&lt;body class="yui-skin-sam"&gt;</code>.
                         </para>
                     </listitem>
                 </orderedlist>
@@ -1561,8 +1564,10 @@
                                 <para>
                                     Includes the &yui; bootstrap library. If you want to use Yahoo UI components,
                                     you also have to include a call to
-                                    <link linkend="jcl_fx_yuisetup">&lt;fx:yuiSetup</link>
-                                    near the end of your page.
+                                    <link linkend="jcl_fx_yuisetup">&lt;fx:yuiSetup/></link>
+                                    near the end of your page. You also have to specify the skin class on your page, the
+                                    most convenient way is through the body tag, e.g.:
+                                    <code>&lt;body class="yui-skin-sam"&gt;</code>.
                                 </para>
                             </listitem>
                         </varlistentry>
@@ -1588,6 +1593,12 @@
 
                 <para>
                     Initializes the &yui; widgets on the current page and loads all required libraries.
+                </para>
+
+                <para>
+                    When using &yui; you have to specify the skin class on your page, the most convenient way
+                    is through the body tag, e.g.:
+                    <code>&lt;body class="yui-skin-sam"&gt;</code>.
                 </para>
 
                 <section xml:id="jcl_fx_yuisetup_synopsis">
