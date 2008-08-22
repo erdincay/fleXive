@@ -84,7 +84,15 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public FxResultSet search(String query, final int startIndex, final Integer fetchRows, FxSQLSearchParams params)
+    public FxResultSet search(String query) throws FxApplicationException {
+        return search(query, 0, Integer.MAX_VALUE, null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public FxResultSet search(String query, int startIndex, int fetchRows, FxSQLSearchParams params)
             throws FxApplicationException {
         return search(query, startIndex, fetchRows, params, AdminResultLocations.DEFAULT, ResultViewType.LIST);
     }
@@ -93,13 +101,13 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public FxResultSet search(String query, int startIndex, Integer fetchRows, FxSQLSearchParams params, ResultLocation location, ResultViewType viewType) throws FxApplicationException {
+    public FxResultSet search(String query, int startIndex, int fetchRows, FxSQLSearchParams params, ResultLocation location, ResultViewType viewType) throws FxApplicationException {
         try {
             if (params == null) {
                 params = new FxSQLSearchParams();
             }
             return new SqlSearch(seq, briefcase, treeEngine, query, startIndex, fetchRows, 
-                    params, resultPreferences, location, viewType).executeQuery();
+                    params, resultPreferences, location, viewType, null).executeQuery();
         } catch (FxSqlSearchException exc) {
             ctx.setRollbackOnly();
             throw exc;
@@ -201,7 +209,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void saveSystemDefault(QueryRootNode query) throws FxApplicationException {
-        if (!FxContext.get().getTicket().isGlobalSupervisor()) {
+        if (!FxContext.getUserTicket().isGlobalSupervisor()) {
             throw new FxNoAccessException(LOG, "ex.searchQuery.systemDefault.noAccess");
         }
         save(EJBLookup.getDivisionConfigurationEngine(), query, DEFAULT_QUERY_NAME);

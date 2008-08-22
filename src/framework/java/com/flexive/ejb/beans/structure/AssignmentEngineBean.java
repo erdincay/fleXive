@@ -106,7 +106,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long createProperty(long typeId, FxPropertyEdit property, String parentXPath, String assignmentAlias) throws FxApplicationException {
-        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.StructureManagement);
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.StructureManagement);
         Connection con = null;
         PreparedStatement ps = null;
         StringBuilder sql = new StringBuilder(2000);
@@ -574,7 +574,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long createGroup(long typeId, FxGroupEdit group, String parentXPath) throws FxApplicationException {
-        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.StructureManagement);
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.StructureManagement);
         Connection con = null;
         PreparedStatement ps = null;
         StringBuilder sql = new StringBuilder(2000);
@@ -690,7 +690,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long save(FxAssignment assignment, boolean createSubAssignments) throws FxApplicationException {
-        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.StructureManagement);
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.StructureManagement);
         long returnId;
         boolean reload = false;
         if (assignment instanceof FxPropertyAssignmentEdit) {
@@ -912,7 +912,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             }
 
             //update SystemInternal flag, this is a one way function, so it can only be set, but not reset!!
-            if (!org.isSystemInternal() && group.isSystemInternal() && FxContext.get().getTicket().isGlobalSupervisor()) {
+            if (!org.isSystemInternal() && group.isSystemInternal() && FxContext.getUserTicket().isGlobalSupervisor()) {
                 if (ps != null) ps.close();
                 ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET SYSINTERNAL=? WHERE ID=?");
                 ps.setBoolean(1, group.isSystemInternal());
@@ -1181,7 +1181,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 con = Database.getDbConnection();
             sql.setLength(0);
 
-            if (!org.isSystemInternal() || FxContext.get().getTicket().isGlobalSupervisor()) {
+            if (!org.isSystemInternal() || FxContext.getUserTicket().isGlobalSupervisor()) {
 
                 if (org.mayOverrideBaseMultiplicity() != prop.mayOverrideBaseMultiplicity()) {
                     if (!prop.mayOverrideBaseMultiplicity()) {
@@ -1388,7 +1388,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
 
                 //update SystemInternal flag, this is a one way function, so it can only be set, but not reset!!
                 if (!org.isSystemInternal() && prop.isSystemInternal()) {
-                    if (FxContext.get().getTicket().isGlobalSupervisor()) {
+                    if (FxContext.getUserTicket().isGlobalSupervisor()) {
                         if (ps != null) ps.close();
                         ps = con.prepareStatement("UPDATE " + TBL_STRUCT_PROPERTIES + " SET SYSINTERNAL=? WHERE ID=?");
                         ps.setBoolean(1, prop.isSystemInternal());
@@ -1457,7 +1457,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 con = Database.getDbConnection();
             sql.setLength(0);
 
-            if (!original.isSystemInternal() || FxContext.get().getTicket().isGlobalSupervisor()) {
+            if (!original.isSystemInternal() || FxContext.getUserTicket().isGlobalSupervisor()) {
                 if (original.isEnabled() != modified.isEnabled()) {
                     if (!modified.isEnabled())
                         removeAssignment(original.getId(), true, false, true, false);
@@ -1675,7 +1675,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 }
                 //update SystemInternal flag, this is a one way function, so it can only be set, but not reset!!
                 if (!original.isSystemInternal() && modified.isSystemInternal()) {
-                    if (FxContext.get().getTicket().isGlobalSupervisor()) {
+                    if (FxContext.getUserTicket().isGlobalSupervisor()) {
                         if (ps != null) ps.close();
                         ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET SYSINTERNAL=? WHERE ID=?");
                         ps.setBoolean(1, modified.isSystemInternal());
@@ -1902,7 +1902,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      */
     private void removeAssignment(long assignmentId, boolean removeSubAssignments, boolean removeDerivedAssignments,
                                   boolean disableAssignment, boolean allowDerivedRemoval) throws FxApplicationException {
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         FxPermissionUtils.checkRole(ticket, Role.StructureManagement);
         FxAssignment assignment;
         assignment = CacheAdmin.getEnvironment().getAssignment(assignmentId);
@@ -2219,7 +2219,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long save(FxPropertyEdit property) throws FxApplicationException {
-        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.StructureManagement);
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.StructureManagement);
         long returnId = property.getId();
         boolean reload;
         Connection con = null;
@@ -2248,7 +2248,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long save(FxGroupEdit group) throws FxApplicationException {
-        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.StructureManagement);
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.StructureManagement);
         long returnId = group.getId();
         boolean reload;
         Connection con = null;

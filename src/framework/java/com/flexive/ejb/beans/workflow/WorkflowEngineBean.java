@@ -89,7 +89,7 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void remove(long workflowId) throws FxApplicationException {
-        UserTicket ticket = FxContext.get().getTicket();
+        UserTicket ticket = FxContext.getUserTicket();
         // Permission checks
         FxPermissionUtils.checkRole(ticket, Role.WorkflowManagement);
 
@@ -161,7 +161,7 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
     public void update(Workflow workflow)
             throws FxApplicationException {
 
-        UserTicket ticket = FxContext.get().getTicket();
+        UserTicket ticket = FxContext.getUserTicket();
 
         // Permission checks
         FxPermissionUtils.checkRole(ticket, Role.WorkflowManagement);
@@ -363,7 +363,7 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long create(Workflow workflow) throws FxApplicationException {
-        UserTicket ticket = FxContext.get().getTicket();
+        UserTicket ticket = FxContext.getUserTicket();
         // Permission checks
         FxPermissionUtils.checkRole(ticket, Role.WorkflowManagement);
 

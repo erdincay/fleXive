@@ -95,7 +95,7 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long createStep(Step step)
             throws FxApplicationException {
-        UserTicket ticket = FxContext.get().getTicket();
+        UserTicket ticket = FxContext.getUserTicket();
         // Security checks
         FxPermissionUtils.checkRole(ticket, Role.WorkflowManagement);
 
@@ -172,7 +172,7 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
      * {@inheritDoc}
      */
     public List<StepPermission> loadAllStepsForUser(long userId) throws FxApplicationException {
-        UserTicket ticket = FxContext.get().getTicket();
+        UserTicket ticket = FxContext.getUserTicket();
         // Select all step ids
         final String sql =
                 //                 1    ,   2         ,      3
@@ -275,7 +275,7 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
      */
     private void deleteStep(long objectId, boolean isWorkflow)
             throws FxApplicationException {
-        UserTicket ticket = FxContext.get().getTicket();
+        UserTicket ticket = FxContext.getUserTicket();
         // Security checks
         FxPermissionUtils.checkRole(ticket, Role.WorkflowManagement);
         final FxEnvironment env = CacheAdmin.getEnvironment();
@@ -360,7 +360,7 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void updateStep(long stepId, long aclId)
             throws FxApplicationException {
-        UserTicket ticket = FxContext.get().getTicket();
+        UserTicket ticket = FxContext.getUserTicket();
         // Security checks
         FxPermissionUtils.checkRole(ticket, Role.WorkflowManagement);
 

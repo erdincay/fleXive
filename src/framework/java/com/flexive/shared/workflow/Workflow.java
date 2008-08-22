@@ -190,7 +190,7 @@ public class Workflow extends AbstractSelectableObjectWithName implements Serial
      */
     public List<Step> getTargets(long stepId) {
         List<Step> res = new ArrayList<Step>(5);
-        UserTicket ticket = FxContext.get().getTicket();
+        UserTicket ticket = FxContext.getUserTicket();
         for (Route r : getRoutes()) {
             if (r.getFromStepId() == stepId) {
                 Step step = getStep(r.getToStepId());
@@ -224,7 +224,7 @@ public class Workflow extends AbstractSelectableObjectWithName implements Serial
      * @return does a valid route exist?
      */
     public boolean isRouteValid(long source, long dest) {
-        UserTicket ticket = FxContext.get().getTicket();
+        UserTicket ticket = FxContext.getUserTicket();
         for (Route r : getRoutes()) {
             if (r.getFromStepId() == source && r.getToStepId() == dest) {
                 if (ticket.isGlobalSupervisor() || ticket.isInGroup(r.getGroupId()))

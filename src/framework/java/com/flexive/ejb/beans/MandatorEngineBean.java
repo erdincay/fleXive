@@ -79,7 +79,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public int create(String name, boolean active) throws FxApplicationException {
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         final FxEnvironment environment;
         // Security
         FxPermissionUtils.checkRole(ticket, Role.GlobalSupervisor);
@@ -169,7 +169,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void activate(long mandatorId) throws FxApplicationException {
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         final FxEnvironment environment;
         // Security
         FxPermissionUtils.checkRole(ticket, Role.GlobalSupervisor);
@@ -213,7 +213,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void deactivate(long mandatorId) throws FxApplicationException {
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         final FxEnvironment environment;
         // Security
         FxPermissionUtils.checkRole(ticket, Role.GlobalSupervisor);
@@ -259,7 +259,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void remove(long mandatorId) throws FxApplicationException {
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         final FxEnvironment environment = CacheAdmin.getEnvironment();
         // Security
         FxPermissionUtils.checkRole(ticket, Role.GlobalSupervisor);
@@ -306,7 +306,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void changeName(long mandatorId, String name) throws FxApplicationException {
         FxSharedUtils.checkParameterEmpty(name, "name");
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         final FxEnvironment environment = CacheAdmin.getEnvironment();
         // Security
         FxPermissionUtils.checkRole(ticket, Role.GlobalSupervisor);

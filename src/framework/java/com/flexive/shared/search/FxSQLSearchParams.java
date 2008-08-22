@@ -212,7 +212,7 @@ public class FxSQLSearchParams implements Serializable {
     public List<FxLanguage> getResultLanguages() {
         if (this.resultLanguages == null) {
             this.resultLanguages = new ArrayList<FxLanguage>(1);
-            final UserTicket ticket = FxContext.get().getTicket();
+            final UserTicket ticket = FxContext.getUserTicket();
             this.resultLanguages.add(ticket.getLanguage());
         }
         return this.resultLanguages;

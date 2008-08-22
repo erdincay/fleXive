@@ -145,7 +145,7 @@ public final class LoginLogoutHandler {
         }
 
         try {
-            FxDBAuthentication.logout(FxContext.get().getTicket());
+            FxDBAuthentication.logout(FxContext.getUserTicket());
             UserTicketStore.removeSubject();
         } catch (Exception exc) {
             FxLogoutFailedException lfe = new FxLogoutFailedException("Logout failed", exc);

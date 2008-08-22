@@ -212,7 +212,7 @@ public final class FxSharedUtils {
      * @return a collator for the calling user's locale.
      */
     public static Collator getCollator() {
-        return Collator.getInstance(FxContext.get().getTicket().getLanguage().getLocale());
+        return Collator.getInstance(FxContext.getUserTicket().getLanguage().getLocale());
     }
 
     /**
@@ -591,7 +591,7 @@ public final class FxSharedUtils {
      * @return the localized "empty" message for empty result fields
      */
     public static String getEmptyResultMessage() {
-        final FxLanguage language = FxContext.get().getTicket().getLanguage();
+        final FxLanguage language = FxContext.getUserTicket().getLanguage();
         return getLocalizedMessage(SHARED_BUNDLE, language.getId(), language.getIso2digit(), "shared.result.emptyValue");
     }
 

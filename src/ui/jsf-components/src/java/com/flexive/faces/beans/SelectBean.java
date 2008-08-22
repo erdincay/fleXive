@@ -155,7 +155,7 @@ public class SelectBean implements Serializable {
     public List<SelectItem> getUserGroups() throws FxApplicationException {
         if (userGroups == null) {
             UserGroupEngine groupEngine = EJBLookup.getUserGroupEngine();
-            long mandatorId = FxContext.get().getTicket().getMandatorId();
+            long mandatorId = FxContext.getUserTicket().getMandatorId();
             List<UserGroup> groups = groupEngine.loadAll(mandatorId);
             userGroups = FxJsfUtils.asSelectList(groups, false);
         }
@@ -171,7 +171,7 @@ public class SelectBean implements Serializable {
     public List<SelectItem> getUserGroupsNonSystem() throws FxApplicationException {
         if (userGroupsNonSystem == null) {
             UserGroupEngine groupEngine = EJBLookup.getUserGroupEngine();
-            long mandatorId = FxContext.get().getTicket().getMandatorId();
+            long mandatorId = FxContext.getUserTicket().getMandatorId();
             List<UserGroup> groups = groupEngine.loadAll(mandatorId);
             userGroupsNonSystem = new ArrayList<SelectItem>(groups.size());
 
@@ -195,7 +195,7 @@ public class SelectBean implements Serializable {
             UserGroupEngine groupEngine = EJBLookup.getUserGroupEngine();
             List<UserGroup> groups = groupEngine.loadAll(-1);
             globalUserGroups = new ArrayList<SelectItem>(groups.size());
-            long mandator = FxContext.get().getTicket().getMandatorId();
+            long mandator = FxContext.getUserTicket().getMandatorId();
             for (UserGroup group : groups) {
                 globalUserGroups.add(new SelectItem(
                         group,
@@ -219,7 +219,7 @@ public class SelectBean implements Serializable {
             UserGroupEngine groupEngine = EJBLookup.getUserGroupEngine();
             List<UserGroup> groups = groupEngine.loadAll(-1);
             globalUserGroupsNonSystem = new ArrayList<SelectItem>(groups.size());
-            long mandator = FxContext.get().getTicket().getMandatorId();
+            long mandator = FxContext.getUserTicket().getMandatorId();
             for (UserGroup group : groups) {
                 if (group.isSystem())
                     continue;
@@ -545,7 +545,7 @@ public class SelectBean implements Serializable {
      * @return GUI relevant type categories.
      */
     public List<SelectItem> getRestrictedTypeCategories() {
-        if (FxContext.get().getTicket().isGlobalSupervisor())
+        if (FxContext.getUserTicket().isGlobalSupervisor())
             return getTypeCategories();
         else {
             if (restrictedTypeCategories == null) {

@@ -151,7 +151,7 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
     public long create(StepDefinition stepDefinition)
             throws FxApplicationException {
 
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         // Security checks
         FxPermissionUtils.checkRole(ticket, Role.WorkflowManagement);
         // Create the new step
@@ -228,7 +228,7 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
     public void update(StepDefinition stepDefinition)
             throws FxApplicationException {
 
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         final FxContext ri = FxContext.get();
 
         // Security checks
@@ -342,7 +342,7 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
     public void remove(long id)
             throws FxApplicationException {
 
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
 
         // Cannot delete basis step
         if (id == StepDefinition.LIVE_STEP_ID || id == StepDefinition.EDIT_STEP_ID) {

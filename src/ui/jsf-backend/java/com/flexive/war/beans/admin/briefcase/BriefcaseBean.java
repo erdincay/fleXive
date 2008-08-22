@@ -129,8 +129,7 @@ public class BriefcaseBean {
             if (sqlSearchInterface == null) {
                 sqlSearchInterface = EJBLookup.getSearchEngine();
             }
-            String sSql = "select m.id,m.version from content m filter briefcase=" + getId();
-            queryResult = sqlSearchInterface.search(sSql, 1, null, null);
+            queryResult = sqlSearchInterface.search("select m.id,m.version from content m filter briefcase=" + getId());
             return "briefcaseDetail";
         } catch (Exception exc) {
             queryResult = null;

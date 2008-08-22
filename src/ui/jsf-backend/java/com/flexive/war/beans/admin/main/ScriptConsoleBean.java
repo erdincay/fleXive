@@ -96,7 +96,7 @@ public class ScriptConsoleBean {
         long start = System.currentTimeMillis();
         try {
             if (web && FxSharedUtils.isGroovyScript("console."+language)) {
-                if( !FxContext.get().getTicket().isInRole(Role.ScriptExecution))
+                if( !FxContext.getUserTicket().isInRole(Role.ScriptExecution))
                     return "No permission to execute scripts!";
                 GroovyShell shell = new GroovyShell();
                 Script script = shell.parse(code);

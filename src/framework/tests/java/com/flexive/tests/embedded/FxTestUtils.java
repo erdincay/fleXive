@@ -79,7 +79,7 @@ public class FxTestUtils {
      * @return The ticket of the user
      */
     public static UserTicket getUserTicket() {
-        return FxContext.get().getTicket();
+        return FxContext.getUserTicket();
     }
 
     /**

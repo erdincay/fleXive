@@ -188,7 +188,7 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
             } catch (FxRuntimeException e) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Removing property " + info.getPropertyName()
-                            + " for user " + FxContext.get().getTicket());
+                            + " for user " + FxContext.getUserTicket());
                 }
                 rpe.removeSelectedColumn(info);
             }
@@ -204,7 +204,7 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
             } catch (FxRuntimeException e) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Removing property " + info.getPropertyName()
-                            + " for user " + FxContext.get().getTicket());
+                            + " for user " + FxContext.getUserTicket());
                 }
                 rpe.removeOrderByColumn(info);
             }

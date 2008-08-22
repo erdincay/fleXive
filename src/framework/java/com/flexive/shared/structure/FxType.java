@@ -615,7 +615,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
         } catch (FxInvalidParameterException e) {
             throw new FxCreateException(e);
         }
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         for (FxPropertyAssignment fxpa : assignedProperties) {
             if (!fxpa.isEnabled() || (usePropertyPermissions() && !ticket.mayCreateACL(fxpa.getACL().getId(), ticket.getUserId())))
                 continue;

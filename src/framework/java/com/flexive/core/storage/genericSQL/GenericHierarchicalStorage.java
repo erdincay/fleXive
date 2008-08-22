@@ -558,7 +558,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 ps.setNull(16, java.sql.Types.NUMERIC);
                 ps.setNull(17, java.sql.Types.NUMERIC);
             }
-            final long userId = FxContext.get().getTicket().getUserId();
+            final long userId = FxContext.getUserTicket().getUserId();
             final long now = System.currentTimeMillis();
             ps.setLong(18, userId);
             ps.setLong(19, now);
@@ -1643,7 +1643,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             try {
                 ref.setAccessGranted(
                         FxPermissionUtils.checkPermission(
-                                FxContext.get().getTicket(),
+                                FxContext.getUserTicket(),
                                 ownerId, ACL.Permission.READ,
                                 env.getType(typeId),
                                 ref.getStep().getAclId(),
@@ -1728,7 +1728,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         FxDelta delta;
         FxContent original;
         final FxType type = env.getType(content.getTypeId());
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         try {
             original = contentLoad(con, content.getPk(), env, sql);
             original.getRootGroup().removeEmptyEntries();
@@ -2036,7 +2036,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 ps.setNull(14, java.sql.Types.NUMERIC);
                 ps.setNull(15, java.sql.Types.NUMERIC);
             }
-            long userId = FxContext.get().getTicket().getUserId();
+            long userId = FxContext.getUserTicket().getUserId();
             ps.setLong(16, userId);
             ps.setLong(17, System.currentTimeMillis());
             ps.executeUpdate();

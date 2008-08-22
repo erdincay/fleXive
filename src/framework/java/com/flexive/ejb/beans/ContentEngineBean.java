@@ -94,7 +94,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public FxContent initialize(long typeId, long mandatorId, long prefACL, long prefStep, long prefLang)
             throws FxApplicationException {
-        UserTicket ticket = FxContext.get().getTicket();
+        UserTicket ticket = FxContext.getUserTicket();
         FxEnvironment environment;
         environment = CacheAdmin.getEnvironment();
         FxPermissionUtils.checkMandatorExistance(mandatorId);
@@ -165,7 +165,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public FxContent initialize(long typeId) throws FxApplicationException {
         FxType type = CacheAdmin.getEnvironment().getType(typeId);
-        UserTicket ticket = FxContext.get().getTicket();
+        UserTicket ticket = FxContext.getUserTicket();
         long step;
         try {
             step = type.getWorkflow().getSteps().get(0).getId();
@@ -212,7 +212,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             FxContent content = cachedContent.getContent().copy();
 
             //security check start
-            UserTicket ticket = FxContext.get().getTicket();
+            UserTicket ticket = FxContext.getUserTicket();
             FxType type = env.getType(cachedContent.getContent().getTypeId());
             FxPermissionUtils.checkPermission(ticket, content.getLifeCycleInfo().getCreatorId(), ACL.Permission.READ, type,
                     cachedContent.getSecurityInfo().getStepACL(),
@@ -278,7 +278,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             //security check start
             FxType type = env.getType(content.getTypeId());
             Step step = env.getStep(content.getStepId());
-            UserTicket ticket = FxContext.get().getTicket();
+            UserTicket ticket = FxContext.getUserTicket();
             if (content.getPk().isNew()) {
                 FxPermissionUtils.checkPermission(ticket, ticket.getUserId(), ACL.Permission.CREATE, type, step.getAclId(), content.getAclId(), true);
                 beforeAssignmentScript = FxScriptEvent.BeforeAssignmentDataCreate;
@@ -398,7 +398,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             FxEnvironment env = CacheAdmin.getEnvironment();
             FxType type = env.getType(content.getTypeId());
             Step step = env.getStep(content.getStepId());
-            UserTicket ticket = FxContext.get().getTicket();
+            UserTicket ticket = FxContext.getUserTicket();
             FxPermissionUtils.checkMandatorExistance(content.getMandatorId());
             FxPermissionUtils.checkTypeAvailable(type.getId(), false);
             FxPermissionUtils.checkPermission(ticket, ticket.getUserId(), ACL.Permission.CREATE, type, step.getAclId(), content.getAclId(), true);
@@ -480,13 +480,13 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             con = Database.getDbConnection();
             final FxEnvironment env = CacheAdmin.getEnvironment();
             //security check start
-            if (!(FxContext.get().getRunAsSystem() || FxContext.get().getTicket().isGlobalSupervisor())) {
+            if (!(FxContext.get().getRunAsSystem() || FxContext.getUserTicket().isGlobalSupervisor())) {
                 FxContentVersionInfo cvi = storage.getContentVersionInfo(con, pk.getId());
                 FxPK currPK;
                 for (int currVer : cvi.getVersions()) {
                     currPK = new FxPK(pk.getId(), currVer);
                     FxContentSecurityInfo si = storage.getContentSecurityInfo(con, currPK);
-                    FxPermissionUtils.checkPermission(FxContext.get().getTicket(), ACL.Permission.DELETE, si, true);
+                    FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACL.Permission.DELETE, si, true);
                 }
             }
             //security check end
@@ -581,7 +581,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             FxType type = CacheAdmin.getEnvironment().getType(si.getTypeId());
             FxPermissionUtils.checkMandatorExistance(si.getMandatorId());
             FxPermissionUtils.checkTypeAvailable(type.getId(), false);
-            FxPermissionUtils.checkPermission(FxContext.get().getTicket(), ACL.Permission.DELETE, si, true);
+            FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACL.Permission.DELETE, si, true);
             //security check end
 
             storage.contentRemoveVersion(con, type, pk);
@@ -613,7 +613,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             long[] scriptsAfter = null;
 
             FxScriptBinding binding = null;
-            UserTicket ticket = FxContext.get().getTicket();
+            UserTicket ticket = FxContext.getUserTicket();
             if (CacheAdmin.getEnvironment().getType(typeId).getScriptMapping(FxScriptEvent.BeforeContentRemove) != null)
                 scriptsBefore = CacheAdmin.getEnvironment().getType(typeId).getScriptMapping(FxScriptEvent.BeforeContentRemove);
             if (CacheAdmin.getEnvironment().getType(typeId).getScriptMapping(FxScriptEvent.AfterContentRemove) != null)
@@ -627,7 +627,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                         //security check start
                         FxContentSecurityInfo si = storage.getContentSecurityInfo(con, pk);
                         if (!ticket.isGlobalSupervisor())
-                            FxPermissionUtils.checkPermission(FxContext.get().getTicket(), ACL.Permission.DELETE, si, true);
+                            FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACL.Permission.DELETE, si, true);
                         //note: instances of deactivated mandators are silently ignored and erased on purposed!
                         //security check end
                         //scripting before start
@@ -764,7 +764,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public List<FxPK> getPKsForType(long typeId, boolean onePkPerInstance) throws FxApplicationException {
-        if (!FxContext.get().getTicket().isGlobalSupervisor()) {
+        if (!FxContext.getUserTicket().isGlobalSupervisor()) {
             throw new FxNoAccessException("ex.content.type.getAll.noPermission");
         }
         Connection con = null;
@@ -791,7 +791,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             ContentStorage storage = StorageManager.getContentStorage(pk.getStorageMode());
             con = Database.getDbConnection();
             FxContent co = load(pk);
-            UserTicket ticket = FxContext.get().getTicket();
+            UserTicket ticket = FxContext.getUserTicket();
             if (xpath.equals("/")) {
                 if (!ticket.isGlobalSupervisor()) {
                     FxType type = CacheAdmin.getEnvironment().getType(co.getTypeId());

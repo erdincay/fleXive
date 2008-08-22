@@ -738,7 +738,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
-    public void overrideLanguage(FxLanguage language) {
+    public void setLanguage(FxLanguage language) {
         if (language != null)
             this.language = language;
     }

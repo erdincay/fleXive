@@ -350,7 +350,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long create(Account account, String password) throws FxApplicationException {
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         return create(account.getName(), account.getLoginName(), password, account.getEmail(),
                 account.getLanguage() != null ? account.getLanguage().getId() : FxLanguage.DEFAULT.getId(),
                 account.getMandatorId() != -1 ? account.getMandatorId() : ticket.getMandatorId(),
@@ -366,7 +366,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                         String description, boolean allowMultiLogin, boolean checkUserRoles)
             throws FxApplicationException {
 
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         // Security
         if (checkUserRoles && !ticket.isGlobalSupervisor()) {
             if (!ticket.isInRole(Role.MandatorSupervisor))
@@ -554,7 +554,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         Account account = load(accountId);
 
         // Permission checks
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         if (!ticket.isGlobalSupervisor()) {
             if (!ticket.isInRole(Role.MandatorSupervisor))
                 FxPermissionUtils.checkRole(ticket, Role.AccountManagement);
@@ -637,7 +637,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      *         position MAY_SET_GROUPS: set groups for the user
      */
     private static boolean[] _checkPermissions(Account account) {
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         if (ticket.isGlobalSupervisor() ||
                 (ticket.getMandatorId() == account.getMandatorId() &&
                         ticket.isMandatorSupervisor())) {
@@ -693,7 +693,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         if (groups == null)
             groups = new long[0];
 
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
 
         // Permission checks
         try {
@@ -809,7 +809,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             roles = FxArrayUtils.removeDuplicates(roles);
             con = Database.getDbConnection();
 
-            UserTicket ticket = FxContext.get().getTicket();
+            UserTicket ticket = FxContext.getUserTicket();
             //only allow to assign roles which the calling user is a member of (unless it is a global supervisor)
             if (!ticket.isGlobalSupervisor() && !(ticket.isMandatorSupervisor() && account.getMandatorId() == ticket.getMandatorId())) {
                 List<Role> orgRoles = getRoles(accountId, RoleLoadMode.FROM_USER_ONLY);
@@ -913,7 +913,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
 
         Connection con = null;
         Statement stmt = null;
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
 
         String curSql = _buildSearchStmt(ticket, name, loginName, email, isActive, isConfirmed,
                 mandatorId, isInRole, isInGroup, false);
@@ -991,7 +991,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * {@inheritDoc}
      */
     public List<Account> loadAll() throws FxApplicationException {
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         return loadAll(null, null, null, null, null,
                 ticket.isGlobalSupervisor() ? null : ticket.getMandatorId(),
                 null, null, 0, Integer.MAX_VALUE);
@@ -1082,7 +1082,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
 
         Connection con = null;
         Statement stmt = null;
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         String curSql = _buildSearchStmt(ticket, name, loginName, email, isActive, isConfirmed,
                 mandatorId, isInRole, isInGroup, true);
         try {
@@ -1117,7 +1117,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         // Load the account to update
         Account account = load(accountId);
 
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         // Determine if only fields are accessed that the use may alter for himself
         final boolean protectedFields = (name != null || loginName != null || isConfirmed != null || isActive != null ||
                 validTo != null || validFrom != null || description != null);
@@ -1231,7 +1231,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         // Load the account to update
         Account account = load(accountId);
 
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         if (ticket.getUserId() != accountId) {
             if (!ticket.isGlobalSupervisor() ||
                     !(ticket.isMandatorSupervisor() && account.getMandatorId() == ticket.getMandatorId()))
@@ -1299,7 +1299,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
     public List<Account> getAssignedUsers(long groupId, int startIdx, int maxEntries)
             throws FxApplicationException {
 
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
 
         // Load the requested group
         final UserGroup theGroup = group.load(groupId);
@@ -1323,7 +1323,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
     public long getAssignedUsersCount(long groupId, boolean includeInvisible) throws FxApplicationException {
 
         if (groupId < 0 || groupId == UserGroup.GROUP_UNDEFINED) return 0;
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         Connection con = null;
         Statement stmt = null;
         String sCurSql = null;

@@ -252,7 +252,7 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void setAvailable(List<FxLanguage> available, boolean ignoreUsage) throws FxApplicationException {
-        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.GlobalSupervisor);
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.GlobalSupervisor);
         Connection con = null;
         PreparedStatement ps = null;
         if (available == null || available.size() == 0)

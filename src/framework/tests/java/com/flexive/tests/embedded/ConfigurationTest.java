@@ -312,7 +312,7 @@ public class ConfigurationTest {
          * @throws FxLookupException if a lookup error occured
          */
         private boolean mayUpdateConfig() throws FxLookupException {
-            final UserTicket ticket = FxContext.get().getTicket();
+            final UserTicket ticket = FxContext.getUserTicket();
             final ParameterScope scope = parameter.getScope();
             GenericConfigurationEngine checkConfiguration = configuration;
             if (configuration instanceof ConfigurationEngine) {
@@ -627,7 +627,7 @@ public class ConfigurationTest {
      * @param parameter the parameter to be checked
      */
     private void assertNoAccess(Parameter<?> parameter, ParameterScope scope) {
-        UserTicket ticket = FxContext.get().getTicket();
+        UserTicket ticket = FxContext.getUserTicket();
         if (scope == ParameterScope.USER || scope == ParameterScope.USER_ONLY) {
             assert false : "User parameters should always be writable for the user: " + parameter;
         }
@@ -650,7 +650,7 @@ public class ConfigurationTest {
      * @param parameter the parameter to be checked
      */
     private void assertAccess(Parameter<?> parameter, ParameterScope scope) {
-        UserTicket ticket = FxContext.get().getTicket();
+        UserTicket ticket = FxContext.getUserTicket();
         if ((scope == ParameterScope.DIVISION || scope == ParameterScope.DIVISION_ONLY)
                 && !ticket.isGlobalSupervisor()) {
             assert false : "User is NOT global supervisor, but can update division parameter: " + parameter;

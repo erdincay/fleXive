@@ -335,7 +335,7 @@ public interface UserTicket extends Serializable {
      *
      * @param language language to override
      */
-    public void overrideLanguage(FxLanguage language);
+    public void setLanguage(FxLanguage language);
 }
 
 

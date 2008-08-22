@@ -440,7 +440,7 @@ public class WorkflowTest {
             workflowId = createTestWorkflow();
             stepDefinitionId = createStepDefinition(null);
             stepId = stepEngine.createStep(new Step(-1, stepDefinitionId, workflowId, myWorkflowACL.getId()));
-            List<StepPermission> stepPermissions = stepEngine.loadAllStepsForUser(FxContext.get().getTicket().getUserId());
+            List<StepPermission> stepPermissions = stepEngine.loadAllStepsForUser(FxContext.getUserTicket().getUserId());
             assert stepPermissions.size() > 0 : "No steps/step permissions returned.";
             // TODO add more checks
         } finally {

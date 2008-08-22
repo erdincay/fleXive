@@ -84,7 +84,7 @@ public class ContentTreeEditor implements Serializable {
             if (pathMode) {
                 node.setName(label);
             } else {
-                node.getLabel().setTranslation(FxContext.get().getTicket().getLanguage(), label);
+                node.getLabel().setTranslation(FxContext.getUserTicket().getLanguage(), label);
             }
             getTreeEngine().save(node);
 //            EJBLookup.getTreeInterface().renameNode(nodeId,false,label,null);

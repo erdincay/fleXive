@@ -210,7 +210,7 @@ public class SqlSearchBean {
                 queryResult = sqlSearchInterface.search(query, 0, Integer.MAX_VALUE, sp);
                 new FxFacesMsgInfo("Briefcase.nfo.created", briefcaseName).addToContext();
             } else {
-                queryResult = sqlSearchInterface.search(this.query, 0, null, sp, AdminResultLocations.DEFAULT, viewType);
+                queryResult = sqlSearchInterface.search(this.query, 0, -1, sp, AdminResultLocations.DEFAULT, viewType);
             }
             if (queryResult.getColumnIndex("@pk") == -1) {
                 new FxFacesMsgWarn("SqlSearch.warn.noPk").addToContext();

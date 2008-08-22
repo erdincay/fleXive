@@ -71,7 +71,7 @@ public class NavigationMenuBean {
      * @return  if the current user has access to the administration tab.
      */
     private static boolean hasAdminAccess() {
-        UserTicket ticket = FxContext.get().getTicket();
+        UserTicket ticket = FxContext.getUserTicket();
         boolean adminAccess=ticket.isInRole(Role.GlobalSupervisor);
         if (!adminAccess) {
             int i=0;

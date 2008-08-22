@@ -187,7 +187,7 @@ public final class FxFilteredEnvironment implements FxEnvironment {
      * {@inheritDoc}
      */
     public List<ACL> getACLs(long mandatorId, ACL.Category category, boolean includeForeignAccessible) {
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         if (!ticket.isGlobalSupervisor() && mandatorId != ticket.getMandatorId()) {
             throw new FxNoAccessException("ex.acl.loadAllFailed.foreignMandator").asRuntimeException();
         }

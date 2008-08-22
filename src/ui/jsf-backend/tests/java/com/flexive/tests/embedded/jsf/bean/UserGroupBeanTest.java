@@ -83,7 +83,7 @@ public class UserGroupBeanTest {
             userGroupBean.setId(-1);
             userGroupBean.setColor(null);
             userGroupBean.setName("TESTNG_TEST_GROUP");
-            userGroupBean.setMandator(CacheAdmin.getEnvironment().getMandator(FxContext.get().getTicket().getMandatorId()));
+            userGroupBean.setMandator(CacheAdmin.getEnvironment().getMandator(FxContext.getUserTicket().getMandatorId()));
             String result = userGroupBean.create();
             assert "userGroupOverview".equals(result) : "Invalid outcome: " + result;
         } finally {

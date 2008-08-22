@@ -220,7 +220,7 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
         ArrayList<FxData> children = new ArrayList<FxData>(5);
         FxGroupData thisGroup;
         try {
-            final UserTicket ticket = FxContext.get().getTicket();
+            final UserTicket ticket = FxContext.getUserTicket();
             if (!this.getMultiplicity().isValid(index))
                 throw new FxCreateException("ex.content.xpath.index.invalid", index, this.getMultiplicity(), this.getXPath()).setAffectedXPath(parent.getXPathFull());
             thisGroup = new FxGroupData(parent == null ? "" : parent.getXPathPrefix(), this.getAlias(), index, this.getXPath(),
@@ -286,7 +286,7 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
         ArrayList<FxData> children = new ArrayList<FxData>(5);
         FxGroupData thisGroup;
         try {
-            final UserTicket ticket = FxContext.get().getTicket();
+            final UserTicket ticket = FxContext.getUserTicket();
             thisGroup = new FxGroupData(parent == null ? "" : parent.getXPathPrefix(), this.getAlias(), index, this.getXPath(),
                     XPathElement.stripType(XPathElement.toXPathMult(this.getXPath())), XPathElement.getIndices(getXPath()),
                     this.getId(), this.getMultiplicity(), this.getPosition(), parent, children, this.isSystemInternal());

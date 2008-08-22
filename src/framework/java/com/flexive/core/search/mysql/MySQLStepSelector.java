@@ -62,7 +62,7 @@ public class MySQLStepSelector extends MySQLGenericSelector {
     public void apply(Property prop, PropertyEntry entry, StringBuffer statement) throws FxSqlSearchException {
         if ("LABEL".equalsIgnoreCase(prop.getField())) {
             statement.delete(0, statement.length());
-            final long lang = FxContext.get().getTicket().getLanguage().getId();
+            final long lang = FxContext.getUserTicket().getLanguage().getId();
             statement.append(("ifnull(\n" +
                     ML_SEL + "lang=" + lang + " limit 1) ,\n" +
                     ML_SEL + "deflang=true limit 1) \n" +

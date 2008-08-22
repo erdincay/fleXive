@@ -1196,11 +1196,11 @@ public class SearchEngineTest {
     @Test
     public void searchLanguageFallbackTest_FX260() throws FxApplicationException {
         final int maxRows = 20;
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         final FxLanguage oldLanguage = ticket.getLanguage();
 
         try {
-            ticket.overrideLanguage(getLanguageEngine().load(ENGLISH));
+            ticket.setLanguage(getLanguageEngine().load(ENGLISH));
             final FxResultSet result = new SqlQueryBuilder()
                     .select("@pk", TEST_TYPE + "/stringSearchPropML")
                     .type(TEST_TYPE)
@@ -1218,7 +1218,7 @@ public class SearchEngineTest {
             // compare translated values in the search result
             checkResultTranslation((FxString) result.getResultRow(0).getFxValue(2), reference, ENGLISH);
 
-            ticket.overrideLanguage(getLanguageEngine().load(GERMAN));
+            ticket.setLanguage(getLanguageEngine().load(GERMAN));
             checkResultTranslation(new SqlQueryBuilder()
                     .select(TEST_TYPE + "/stringSearchPropML")
                     .condition("id", PropertyValueComparator.EQ, pk.getId())
@@ -1228,8 +1228,31 @@ public class SearchEngineTest {
                     reference,
                     GERMAN);
         } finally {
-            ticket.overrideLanguage(oldLanguage);
+            ticket.setLanguage(oldLanguage);
         }
+    }
+
+    @Test
+    public void searchInOtherLanguagesTest_FX297() throws FxApplicationException {
+        final String name = "FX297";
+        final FxTreeNodeEdit node = FxTreeNodeEdit.createNew(name);
+        node.setLabel(new FxString(FxLanguage.ENGLISH, name));
+        final long nodeId = EJBLookup.getTreeEngine().save(node);
+        try {
+            FxContext.getUserTicket().setLanguage(EJBLookup.getLanguageEngine().load(FxLanguage.ENGLISH));
+            queryForCaption(name);
+
+            FxContext.getUserTicket().setLanguage(EJBLookup.getLanguageEngine().load(FxLanguage.GERMAN));
+            queryForCaption(name);
+        } finally {
+            EJBLookup.getTreeEngine().remove(FxTreeMode.Edit, nodeId, false, false);
+        }
+    }
+
+    private void queryForCaption(String name) throws FxApplicationException {
+        final FxResultSet result = new SqlQueryBuilder().select("caption").condition("caption", PropertyValueComparator.EQ, name).getResult();
+        assert result.getRowCount() == 1 : "Expected one result row, got: " + result.getRowCount();
+        assert name.equals(result.getResultRow(0).getString(1)) : "Expected " + name + ", got: " + result.getResultRow(0).getString(1);
     }
 
     private void checkResultTranslation(FxString resultValue, FxString reference, long language) {

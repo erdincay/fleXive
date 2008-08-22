@@ -57,7 +57,7 @@ public class BackendAuthorizationFilter implements Filter {
 
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         // get URI without application context path
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         if (ticket.isGuest()) {
             // not logged in at all - forward to login page
             servletRequest.getRequestDispatcher("/pub/login.jsf").forward(servletRequest, servletResponse);

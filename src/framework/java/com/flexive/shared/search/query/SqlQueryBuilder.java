@@ -720,7 +720,7 @@ public class SqlQueryBuilder implements Serializable {
      * @throws FxApplicationException   if the search failed
      */
     public FxResultSet getResult() throws FxApplicationException {
-        return EJBLookup.getSearchEngine().search(getQuery(), startRow, maxRows != -1 ? maxRows : null, 
+        return EJBLookup.getSearchEngine().search(getQuery(), startRow, maxRows,
                 params, location, viewType);
     }
 

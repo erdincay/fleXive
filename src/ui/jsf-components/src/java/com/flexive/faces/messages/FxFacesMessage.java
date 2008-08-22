@@ -156,7 +156,7 @@ public class FxFacesMessage extends FacesMessage implements Serializable {
 
         String msg;
         if (exc instanceof FxLocalizedException) {
-            UserTicket ticket = FxContext.get().getTicket();
+            UserTicket ticket = FxContext.getUserTicket();
             FxLocalizedException le = ((FxLocalizedException) exc);
             msg = le.getMessage(ticket);
         } else {

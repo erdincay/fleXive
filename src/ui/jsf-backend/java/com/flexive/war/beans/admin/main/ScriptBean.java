@@ -233,7 +233,7 @@ public class ScriptBean {
      */
     public String deleteScript() {
 
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         if (!ticket.isInRole(Role.ScriptManagement)) {
             new FxFacesMsgErr("Script.err.deletePerm").addToContext();
             return "scriptOverview";
@@ -258,7 +258,7 @@ public class ScriptBean {
      */
     public String runScript() {
 
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         if (!ticket.isInRole(Role.ScriptExecution)) {
             new FxFacesMsgErr("Script.err.runPerm").addToContext();
             return "scriptOverview";
@@ -282,7 +282,7 @@ public class ScriptBean {
      * @return the next jsf page to render
      */
     public String createScript() {
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         if (!ticket.isInRole(Role.ScriptManagement)) {
             new FxFacesMsgErr("Script.err.createPerm").addToContext();
             return "scriptOverview";
@@ -313,7 +313,7 @@ public class ScriptBean {
      */
     public String saveScript() {
 
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         if (!ticket.isInRole(Role.ScriptManagement)) {
             new FxFacesMsgErr("Script.err.editPerm").addToContext();
             return null;

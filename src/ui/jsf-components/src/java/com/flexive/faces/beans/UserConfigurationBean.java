@@ -62,7 +62,7 @@ public class UserConfigurationBean {
     public long getInputLanguageId() {
         if (inputLanguageId == -1) {
             final long defaultLanguageId = getDefaultInputLanguageId();
-            return defaultLanguageId != -1 ? defaultLanguageId : FxContext.get().getTicket().getLanguage().getId();
+            return defaultLanguageId != -1 ? defaultLanguageId : FxContext.getUserTicket().getLanguage().getId();
         }
         return inputLanguageId;
     }

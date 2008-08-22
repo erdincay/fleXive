@@ -88,7 +88,7 @@ public class RouteEngineBean implements RouteEngine, RouteEngineLocal {
         Step step = CacheAdmin.getEnvironment().getStep(fromStep);
 
         try {
-            final UserTicket ticket = FxContext.get().getTicket();
+            final UserTicket ticket = FxContext.getUserTicket();
             con = Database.getDbConnection();
             stmt = con.createStatement();
             if (ticket.isMandatorSupervisor() || ticket.isGlobalSupervisor()) {
@@ -121,7 +121,7 @@ public class RouteEngineBean implements RouteEngine, RouteEngineLocal {
     /** {@inheritDoc} */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long create(long fromStepId, long toStepId, long groupId) throws FxApplicationException {
-        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.WorkflowManagement);
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.WorkflowManagement);
         // Sanity checks.
         // StepImp.loadStep(..) throws a FxNotFoundException if the steps do not exist.
         Step fromStep;
@@ -218,7 +218,7 @@ public class RouteEngineBean implements RouteEngine, RouteEngineLocal {
     /** {@inheritDoc} */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void remove(long routeId) throws FxApplicationException {
-        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.WorkflowManagement);
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.WorkflowManagement);
         deleteRoute(routeId);
     }
 

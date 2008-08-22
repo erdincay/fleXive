@@ -152,7 +152,7 @@ public class MySQLDataFilter extends DataFilter {
      */
     @Override
     public void build() throws FxSqlSearchException {
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         final long maxRows = search.getFxStatement().getMaxResultRows() + 1;
         Statement stmt = null;
         String sql = null;
@@ -725,7 +725,7 @@ public class MySQLDataFilter extends DataFilter {
     }
 
     private String getLanguageFilter() {
-        return search.getLanguage() == null ? "" : " AND lang IN (0," + search.getLanguage().getId() + ") ";
+        return search.getSearchLanguage() == null ? "" : " AND lang IN (0," + search.getSearchLanguage().getId() + ") ";
     }
 
 

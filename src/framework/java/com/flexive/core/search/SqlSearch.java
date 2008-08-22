@@ -93,6 +93,7 @@ public class SqlSearch {
     private FxEnvironment environment;
     private final ResultPreferencesEngine conf;
     private FxLanguage language;
+    private FxLanguage searchLanguage;
 
     /**
      * Ctor
@@ -102,18 +103,27 @@ public class SqlSearch {
      * @param treeEngine   reference to the tree engine
      * @param query        the query to execute
      * @param startIndex   the start index (0 based)
-     * @param maxFetchRows the number of rows to return with the resultset, or null to fetch all rows
+     * @param maxFetchRows the number of rows to return with the resultset, or -1 to fetch all rows
      * @param params       all aditional search parameters
      * @param conf         the result set configuration
      * @param location     the location that started the search
      * @param viewType     the view type @throws com.flexive.shared.exceptions.FxSqlSearchException
      *                     if the search failed
+     * @param searchLanguage     the search language. If set, contents will be queried only in the given language.
      * @throws com.flexive.shared.exceptions.FxSqlSearchException
      *          if the search engine could not be initialized
      */
-    public SqlSearch(SequencerEngine seq, BriefcaseEngine briefcase, TreeEngine treeEngine, String query, int startIndex, Integer maxFetchRows, FxSQLSearchParams params,
-                     ResultPreferencesEngine conf, ResultLocation location, ResultViewType viewType) throws FxSqlSearchException {
+    public SqlSearch(SequencerEngine seq, BriefcaseEngine briefcase, TreeEngine treeEngine, String query, int startIndex, int maxFetchRows, FxSQLSearchParams params,
+                     ResultPreferencesEngine conf, ResultLocation location, ResultViewType viewType, FxLanguage searchLanguage) throws FxSqlSearchException {
         FxSharedUtils.checkParameterEmpty(query, "query");
+        // Parameter checks
+        if (startIndex < 0) {
+            throw new FxSqlSearchException(LOG, "ex.sqlSearch.parameter.invalidStartIndex", startIndex);
+        }
+        if (maxFetchRows == 0) {
+            throw new FxSqlSearchException(LOG, "ex.sqlSearch.parameter.fetchRows", maxFetchRows);
+        }
+        
         // Init
         this.seq = seq;
         this.briefcase = briefcase;
@@ -122,22 +132,13 @@ public class SqlSearch {
         this.environment = CacheAdmin.getEnvironment();
         this.params = params;
         this.startIndex = startIndex;
-        this.fetchRows = maxFetchRows == null ? Integer.MAX_VALUE : maxFetchRows;
+        this.fetchRows = maxFetchRows == -1 ? Integer.MAX_VALUE : maxFetchRows;
         this.query = query;
         this.language = FxContext.get().getTicket().getLanguage();
+        this.searchLanguage = searchLanguage;
         this.location = location;
         this.viewType = viewType;
 
-        // Parameter checks
-        if (this.startIndex < 0) {
-            throw new FxSqlSearchException(LOG, "ex.sqlSearch.parameter.invalidStartIndex", startIndex);
-        }
-
-        if (maxFetchRows != null) {
-            if (maxFetchRows < 1 && maxFetchRows != -1) {
-                throw new FxSqlSearchException(LOG, "ex.sqlSearch.parameter.fetchRows", maxFetchRows);
-            }
-        }
     }
 
     /**
@@ -231,7 +232,7 @@ public class SqlSearch {
                 createdBriefcaseId = copyToBriefcase(con);
             }
 
-            final UserTicket ticket = FxContext.get().getTicket();
+            final UserTicket ticket = FxContext.getUserTicket();
 
             //list containing all used types with property permission checks enabled
             final List<FxType> propertyPermTypes = new ArrayList<FxType>(df.getContentTypes().size());
@@ -556,5 +557,9 @@ public class SqlSearch {
 
     public TreeEngine getTreeEngine() {
         return treeEngine;
+    }
+
+    public FxLanguage getSearchLanguage() {
+        return searchLanguage;
     }
 }

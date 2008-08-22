@@ -93,7 +93,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
     @Override
     protected PreparedStatement getInsertStatement(Connection conn, String path, String key, String value)
             throws SQLException, FxNoAccessException {
-        if (!FxContext.get().getTicket().isGlobalSupervisor()) {
+        if (!FxContext.getUserTicket().isGlobalSupervisor()) {
             throw new FxNoAccessException("ex.configuration.update.perm.division");
         }
         String sql = "INSERT INTO " + TBL_DIVISION_CONFIG + " (cpath, ckey, cvalue) VALUES (?, ?, ?)";
@@ -133,7 +133,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
     @Override
     protected PreparedStatement getUpdateStatement(Connection conn, String path, String key, String value)
             throws SQLException, FxNoAccessException {
-        if (!FxContext.get().getTicket().isGlobalSupervisor()) {
+        if (!FxContext.getUserTicket().isGlobalSupervisor()) {
             throw new FxNoAccessException("ex.configuration.update.perm.division");
         }
         String sql = "UPDATE " + TBL_DIVISION_CONFIG + " SET cvalue=? WHERE cpath=? AND ckey=?";
@@ -150,7 +150,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
     @Override
     protected PreparedStatement getDeleteStatement(Connection conn, String path, String key)
             throws SQLException, FxNoAccessException {
-        if (!FxContext.get().getTicket().isGlobalSupervisor()) {
+        if (!FxContext.getUserTicket().isGlobalSupervisor()) {
             throw new FxNoAccessException("ex.configuration.delete.perm.division");
         }
         String sql = "DELETE FROM " + TBL_DIVISION_CONFIG + " WHERE cpath=? "

@@ -74,7 +74,7 @@ public class UserConfigurationEngineBean extends GenericConfigurationImpl implem
             throws SQLException, FxNoAccessException {
         String sql = "INSERT INTO " + TBL_USER_CONFIG + "(user_id, cpath, ckey, cvalue) VALUES (?, ?, ?, ?)";
         PreparedStatement stmt = conn.prepareStatement(sql);
-        stmt.setLong(1, FxContext.get().getTicket().getUserId());
+        stmt.setLong(1, FxContext.getUserTicket().getUserId());
         stmt.setString(2, path);
         stmt.setString(3, key);
         stmt.setString(4, value);
@@ -86,7 +86,7 @@ public class UserConfigurationEngineBean extends GenericConfigurationImpl implem
     protected PreparedStatement getSelectStatement(Connection conn, String path, String key) throws SQLException {
         String sql = "SELECT cvalue FROM " + TBL_USER_CONFIG + " WHERE user_id=? AND cpath=? AND ckey=?";
         PreparedStatement stmt = conn.prepareStatement(sql);
-        stmt.setLong(1, FxContext.get().getTicket().getUserId());
+        stmt.setLong(1, FxContext.getUserTicket().getUserId());
         stmt.setString(2, path);
         stmt.setString(3, key);
         return stmt;
@@ -97,7 +97,7 @@ public class UserConfigurationEngineBean extends GenericConfigurationImpl implem
     protected PreparedStatement getSelectStatement(Connection conn, String path) throws SQLException {
         String sql = "SELECT ckey, cvalue FROM " + TBL_USER_CONFIG + " WHERE user_id=? AND cpath=?";
         PreparedStatement stmt = conn.prepareStatement(sql);
-        stmt.setLong(1, FxContext.get().getTicket().getUserId());
+        stmt.setLong(1, FxContext.getUserTicket().getUserId());
         stmt.setString(2, path);
         return stmt;
     }
@@ -109,7 +109,7 @@ public class UserConfigurationEngineBean extends GenericConfigurationImpl implem
         String sql = "UPDATE " + TBL_USER_CONFIG + " SET cvalue=? WHERE user_id=? AND cpath=? AND ckey=?";
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, value);
-        stmt.setLong(2, FxContext.get().getTicket().getUserId());
+        stmt.setLong(2, FxContext.getUserTicket().getUserId());
         stmt.setString(3, path);
         stmt.setString(4, key);
         return stmt;
@@ -122,7 +122,7 @@ public class UserConfigurationEngineBean extends GenericConfigurationImpl implem
         String sql = "DELETE FROM " + TBL_USER_CONFIG + " WHERE user_id=? AND cpath=? "
             + (key != null ? " AND ckey=?" : "");
         PreparedStatement stmt = conn.prepareStatement(sql);
-        stmt.setLong(1, FxContext.get().getTicket().getUserId());
+        stmt.setLong(1, FxContext.getUserTicket().getUserId());
         stmt.setString(2, path);
         if (key != null) {
             stmt.setString(3, key);
@@ -133,6 +133,6 @@ public class UserConfigurationEngineBean extends GenericConfigurationImpl implem
     /** {@inheritDoc} */
     @Override
     protected String getCachePath(String path) {
-        return CACHE_ROOT + FxContext.get().getTicket().getUserId() + path;
+        return CACHE_ROOT + FxContext.getUserTicket().getUserId() + path;
     }
 }

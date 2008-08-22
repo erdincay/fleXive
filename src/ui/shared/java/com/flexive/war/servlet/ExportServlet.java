@@ -132,7 +132,7 @@ public class ExportServlet implements Servlet {
                 //ignore and try with type as name
             }
         }
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         if (!ticket.isInRole(Role.StructureManagement)) {
             LOG.warn("Tried to export type [" + type + "] without being in role StructureManagment!");
             response.sendError(HttpServletResponse.SC_FORBIDDEN);

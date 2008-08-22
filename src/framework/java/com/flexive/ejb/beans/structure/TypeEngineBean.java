@@ -121,7 +121,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
      * @throws FxApplicationException on errors
      */
     private long create(FxTypeEdit type) throws FxApplicationException {
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         FxPermissionUtils.checkRole(ticket, Role.StructureManagement);
         final FxEnvironment environment = CacheAdmin.getEnvironment();
         if (StringUtils.isEmpty(type.getName()))
@@ -332,7 +332,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
         if (!type.isChanged())
             return type.getId();
 
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         FxPermissionUtils.checkRole(ticket, Role.StructureManagement);
         final FxEnvironment environment = CacheAdmin.getEnvironment();
 
@@ -686,7 +686,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void remove(long id) throws FxApplicationException {
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         FxPermissionUtils.checkRole(ticket, Role.StructureManagement);
 
         FxType type = CacheAdmin.getEnvironment().getType(id);

@@ -165,7 +165,7 @@ public class SystemBean implements Serializable {
      */
     public void updateLanguage() {
         try {
-            getUserTicket().overrideLanguage(EJBLookup.getLanguageEngine().load(updateLanguageId));
+            getUserTicket().setLanguage(EJBLookup.getLanguageEngine().load(updateLanguageId));
         } catch (FxApplicationException e) {
             new FxFacesMsgErr(e).addToContext();
         }
@@ -595,7 +595,7 @@ public class SystemBean implements Serializable {
             queries = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<String, DataModel>() {
                 public DataModel get(Object key) {
                     try {
-                        final FxResultSet result = EJBLookup.getSearchEngine().search((String) key, 0, null, null);
+                        final FxResultSet result = EJBLookup.getSearchEngine().search((String) key, 0, -1, null);
                         return new FxResultSetDataModel(result);
                     } catch (FxApplicationException e) {
                         throw e.asRuntimeException();
@@ -621,7 +621,7 @@ public class SystemBean implements Serializable {
      * @return number of failed login attempts
      */
     public long getFailedLoginAttempts() {
-        return FxContext.get().getTicket().getFailedLoginAttempts();
+        return FxContext.getUserTicket().getFailedLoginAttempts();
     }
 
     /**

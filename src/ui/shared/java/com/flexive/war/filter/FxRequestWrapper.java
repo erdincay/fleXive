@@ -152,7 +152,7 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
      * @return The ticke of the user
      */
     public UserTicket getUserTicket() {
-        return FxContext.get().getTicket();
+        return FxContext.getUserTicket();
     }
 
     /**

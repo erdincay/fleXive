@@ -116,7 +116,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
         try {
             con = Database.getDbConnection();
             return StorageManager.getTreeStorage().getTree(con, contentEngine, mode, nodeId, depth, PARTIAL_LOADING,
-                    FxContext.get().getTicket().getLanguage());
+                    FxContext.getUserTicket().getLanguage());
         } catch (FxApplicationException fx) {
             throw fx;
         } catch (Throwable t) {
@@ -285,7 +285,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
         try {
             FxContext.get().setTreeWasModified();
             con = Database.getDbConnection();
-            UserTicket ticket = FxContext.get().getTicket();
+            UserTicket ticket = FxContext.getUserTicket();
             if (FxContext.get().getRunAsSystem() || ticket.isGlobalSupervisor())
                 StorageManager.getTreeStorage().clearTree(con, contentEngine, mode);
             else
@@ -371,7 +371,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
      *                                node)
      * @throws FxApplicationException on errors
      */
-    private void removeNode(FxTreeMode mode, long nodeId, boolean deleteReferencedContent, boolean deleteChildren) throws FxApplicationException {
+    public void remove(FxTreeMode mode, long nodeId, boolean deleteReferencedContent, boolean deleteChildren) throws FxApplicationException {
         Connection con = null;
         if (nodeId < 0) {
             throw new FxInvalidParameterException("nodeId", "ex.tree.delete.nodeId");
@@ -634,7 +634,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public List<String> getLabels(FxTreeMode mode, long... ids) throws FxApplicationException {
-        return getLabels(mode, FxContext.get().getTicket().getLanguage(), ids);
+        return getLabels(mode, FxContext.getUserTicket().getLanguage(), ids);
     }
 
 
@@ -797,7 +797,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void remove(FxTreeNode node, boolean removeReferencedContent, boolean removeChildren) throws FxApplicationException {
-        removeNode(node.getMode(), node.getId(), removeReferencedContent, removeChildren);
+        remove(node.getMode(), node.getId(), removeReferencedContent, removeChildren);
     }
 
     /**

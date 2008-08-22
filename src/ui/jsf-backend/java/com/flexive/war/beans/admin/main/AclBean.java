@@ -115,7 +115,7 @@ public class AclBean {
 
     public Mandator getMandator() {
         if (mandator == null) {
-            return CacheAdmin.getEnvironment().getMandator(FxContext.get().getTicket().getMandatorId());
+            return CacheAdmin.getEnvironment().getMandator(FxContext.getUserTicket().getMandatorId());
         }
         return mandator;
     }
@@ -165,7 +165,7 @@ public class AclBean {
      */
     public List<ACL> getList() {
         try {
-            final UserTicket ticket = FxContext.get().getTicket();
+            final UserTicket ticket = FxContext.getUserTicket();
             long mandatorId = (ticket.isGlobalSupervisor()) ? getMandator().getId() : ticket.getMandatorId();
             return CacheAdmin.getFilteredEnvironment().getACLs(mandatorId, false);
         } catch (Exception exc) {
@@ -225,7 +225,7 @@ public class AclBean {
     public String create() {
         try {
             // create the acl
-            final UserTicket ticket = FxContext.get().getTicket();
+            final UserTicket ticket = FxContext.getUserTicket();
             long mandatorId = (ticket.isGlobalSupervisor()) ?
                     (mandator == null ? -1 : mandator.getId()) : ticket.getMandatorId();
             setId(aclEngine.create(acl.getName(), acl.getLabel(), mandatorId,

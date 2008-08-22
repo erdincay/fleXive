@@ -344,7 +344,7 @@ public class FxContentVersionInfo implements Serializable {
      */
     public static FxContentVersionInfo createEmpty() {
         Map<Integer, VersionData> versions = new HashMap<Integer, VersionData>(1);
-        versions.put(1, new VersionData(new NewLifeCycleInfoImpl(FxContext.get().getTicket().getUserId()), 1));
+        versions.put(1, new VersionData(new NewLifeCycleInfoImpl(FxContext.getUserTicket().getUserId()), 1));
         return new FxContentVersionInfo(FxPK.NEW_ID, 1, 1, -1, 1, versions);
     }
 }

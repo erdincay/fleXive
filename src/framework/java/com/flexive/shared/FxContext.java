@@ -482,6 +482,19 @@ public class FxContext implements Serializable {
     }
 
     /**
+     * Returns the user ticket associated to the current thread.
+     *
+     * @return  the user ticket associated to the current thread.
+     */
+    public static UserTicket getUserTicket() {
+        final FxContext context = get();
+        if (context == null) {
+            throw new NullPointerException("FxContext not set in current thread.");
+        }
+        return context.getTicket();
+    }
+
+    /**
      * Replace the threadlocal context with another one.
      * This method provides a mean to escalate the current context to other threads.
      * As a safeguard, the context can only be replaced if the current UserTicket is <code>null</code>
@@ -489,7 +502,7 @@ public class FxContext implements Serializable {
      * @param context the FxContext to use as replacement
      */
     public static void replace(FxContext context) {
-        if (FxContext.get().getTicket() == null)
+        if (FxContext.getUserTicket() == null)
             info.set(context);
     }
 
@@ -587,9 +600,9 @@ public class FxContext implements Serializable {
             if (si.ticket.isGuest()) {
                 try {
                     if (last == null)
-                        si.ticket.overrideLanguage(EJBLookup.getLanguageEngine().load(request.getLocale().getLanguage()));
+                        si.ticket.setLanguage(EJBLookup.getLanguageEngine().load(request.getLocale().getLanguage()));
                     else
-                        si.ticket.overrideLanguage(last.getLanguage());
+                        si.ticket.setLanguage(last.getLanguage());
                 } catch (FxApplicationException e) {
                     if (LOG.isInfoEnabled()) {
                         LOG.info("Failed to use request locale from browser: " + e.getMessage(), e);

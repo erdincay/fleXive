@@ -57,7 +57,7 @@ public class MySQLACLSelector extends MySQLGenericSelector {
         if ("LABEL".equals(prop.getField())) {
             statement.delete(0, statement.length());
             String _tbl = DatabaseConst.TBL_ACLS + DatabaseConst.ML;
-            final long lang = FxContext.get().getTicket().getLanguage().getId();
+            final long lang = FxContext.getUserTicket().getLanguage().getId();
             statement.append(("ifnull(\n" +
                     "(select acl.label from " + _tbl + " acl, " + DatabaseConst.TBL_CONTENT + " ct where ct.id=filter.id and " +
                     "ct.ver=filter.ver and ct.acl=acl.id and lang=" + lang + " limit 1) ,\n" +

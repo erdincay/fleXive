@@ -180,7 +180,7 @@ public class FxValueRendererFactory {
 
     private static class FxNoAccessFormatter implements FxValueFormatter<Object,FxNoAccess> {
         public String format(FxNoAccess container, Object value, FxLanguage outputLanguage) {
-            final UserTicket ticket = FxContext.get().getTicket();
+            final UserTicket ticket = FxContext.getUserTicket();
             return FxSharedUtils.getLocalizedMessage(FxSharedUtils.SHARED_BUNDLE, ticket.getLanguage().getId(),
                     ticket.getLanguage().getIso2digit(), "shared.noAccess");
         }
@@ -217,7 +217,7 @@ public class FxValueRendererFactory {
      * @return a <code>FxValueRenderer</code> instance for the user's current language.
      */
     public static FxValueRenderer getInstance() {
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         return getInstance(ticket != null ? ticket.getLanguage() : null);
     }
 

@@ -427,7 +427,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * {@inheritDoc}
      */
     public List<ACL> getACLs(long mandatorId, ACL.Category category, boolean includeForeignAccessible) {
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         final List<ACL> result = new ArrayList<ACL>();
         for (ACL acl : acls) {
             if ((acl.getMandatorId() == mandatorId                                          // mandator filter matches

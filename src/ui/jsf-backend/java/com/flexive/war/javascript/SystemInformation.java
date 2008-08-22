@@ -85,7 +85,7 @@ public class SystemInformation implements Serializable {
             }
             sb.append("</table>\n");
         } catch (FxApplicationException e) {
-            sb.append("Failed to retrieve information: ").append(e.getMessage(FxContext.get().getTicket()));
+            sb.append("Failed to retrieve information: ").append(e.getMessage(FxContext.getUserTicket()));
         }
         return sb.toString();
     }

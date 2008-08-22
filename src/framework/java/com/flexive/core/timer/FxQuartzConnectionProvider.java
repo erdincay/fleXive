@@ -56,7 +56,7 @@ public class FxQuartzConnectionProvider implements ConnectionProvider {
 //        System.out.println("Quartz requested a TX connection ... Thread: " + Thread.currentThread() + "; I am: " + this);
         if( savedCtx == null )
             savedCtx = FxContext.get();
-        if(FxContext.get().getTicket() == null ) {
+        if(FxContext.getUserTicket() == null ) {
             FxContext.replace(savedCtx);
         }
 

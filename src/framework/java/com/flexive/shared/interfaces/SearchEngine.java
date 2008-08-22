@@ -59,13 +59,22 @@ public interface SearchEngine {
      * Executes a query.
      *
      * @param query the query to execute
+     * @return the result set
+     * @throws FxApplicationException if the search failed
+     */
+    FxResultSet search(String query) throws FxApplicationException;
+
+    /**
+     * Executes a query.
+     *
+     * @param query the query to execute
      * @param startIndex return data starting at the given row, 0 based
-     * @param fetchRows the maximum rows to fetch, or null to fetch all found entries
+     * @param fetchRows the maximum rows to fetch, -1 to fetch all rows
      * @param params all additional search options
      * @return the result set
      * @throws FxApplicationException if the search failed
      */
-    FxResultSet search(String query, final int startIndex, final Integer fetchRows, FxSQLSearchParams params)
+    FxResultSet search(String query, int startIndex, int fetchRows, FxSQLSearchParams params)
             throws FxApplicationException;
 
     /**
@@ -73,14 +82,14 @@ public interface SearchEngine {
      *
      * @param query the query to execute
      * @param startIndex return data starting at the given row, 0 based
-     * @param fetchRows the maximum rows to fetch, or null to fetch all found entries
+     * @param fetchRows the maximum rows to fetch, -1 to fetch all rows.
      * @param params all additional search options
      * @param location  the result location
      * @param viewType  the result view type
      * @return the result set
      * @throws FxApplicationException if the search failed
      */
-    FxResultSet search(String query, final int startIndex, final Integer fetchRows, FxSQLSearchParams params,
+    FxResultSet search(String query, int startIndex, int fetchRows, FxSQLSearchParams params,
                               ResultLocation location, ResultViewType viewType)
             throws FxApplicationException;
 

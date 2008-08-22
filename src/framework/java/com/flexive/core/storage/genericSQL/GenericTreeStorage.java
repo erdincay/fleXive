@@ -233,7 +233,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 if (versionInfo.hasLiveVersion()) {
                     //check edit permission
                     FxContentSecurityInfo si = ce.getContentSecurityInfo(new FxPK(reference.getId(), versionInfo.getLiveVersion()));
-                    FxPermissionUtils.checkPermission(FxContext.get().getTicket(), ACL.Permission.EDIT, si, true);
+                    FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACL.Permission.EDIT, si, true);
                 } else {
                     //create a Live version
                     co.setStepId(CacheAdmin.getEnvironment().getType(co.getTypeId()).getWorkflow().getLiveStep().getId());
@@ -664,7 +664,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 long _stepACL = env.getStep(rs.getLong(15)).getAclId();
                 long _createdBy = rs.getLong(16);
                 long _mandator = rs.getLong(17);
-                UserTicket ticket = FxContext.get().getTicket();
+                UserTicket ticket = FxContext.getUserTicket();
                 boolean _edit;
                 boolean _create;
                 boolean _delete;
@@ -731,7 +731,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 long _stepACL = CacheAdmin.getEnvironment().getStep(rs.getLong(15)).getAclId();
                 long _createdBy = rs.getLong(16);
                 long _mandator = rs.getLong(17);
-                UserTicket ticket = FxContext.get().getTicket();
+                UserTicket ticket = FxContext.getUserTicket();
                 boolean _read;
                 boolean _edit;
                 boolean _create;
@@ -799,7 +799,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
             ResultSet rs = ps.executeQuery(sql);
             Map<Long, FxTreeNode> data = new HashMap<Long, FxTreeNode>(100, 2.0f);
             //prepare infos needed to compute permissions
-            UserTicket ticket = FxContext.get().getTicket();
+            UserTicket ticket = FxContext.getUserTicket();
             final boolean _system = FxContext.get().getRunAsSystem() || ticket.isGlobalSupervisor();
             //StepId->step ACL Id lookup
             Map<Long, Long> step2stepACLId = new HashMap<Long, Long>(10);
@@ -1001,7 +1001,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
             long childNodeDelta;
             stmt.addBatch("SET FOREIGN_KEY_CHECKS=0");
             List<FxPK> references = new ArrayList<FxPK>(50);
-            UserTicket ticket = FxContext.get().getTicket();
+            UserTicket ticket = FxContext.getUserTicket();
 
             if (removeChildren) {
                 childNodeDelta = nodeInfo.getTotalChildCount() + 1;
@@ -1036,7 +1036,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 //FX-102: edit permission checks on references
                 try {
                     if (ce != null)
-                        FxPermissionUtils.checkPermission(FxContext.get().getTicket(), ACL.Permission.EDIT, ce.getContentSecurityInfo(nodeInfo.getReference()), true);
+                        FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACL.Permission.EDIT, ce.getContentSecurityInfo(nodeInfo.getReference()), true);
                     references.add(nodeInfo.getReference());
                 } catch (FxLoadException e) {
                     //ignore, might have been removed meanwhile

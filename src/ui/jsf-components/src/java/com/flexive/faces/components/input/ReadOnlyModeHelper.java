@@ -71,7 +71,7 @@ class ReadOnlyModeHelper extends RenderHelper {
                 }
             }
         } else {
-            encodeField(component, clientId, FxContext.get().getTicket().getLanguage());
+            encodeField(component, clientId, FxContext.getUserTicket().getLanguage());
         }
     }
 
@@ -94,7 +94,7 @@ class ReadOnlyModeHelper extends RenderHelper {
             useHTMLEditor = value instanceof FxHTML; //fallback if no xpath is known, we assume FxHTML to be rendered with an HTML editor
         }
 
-        final FxLanguage outputLanguage = FxContext.get().getTicket().getLanguage();
+        final FxLanguage outputLanguage = FxContext.getUserTicket().getLanguage();
         if (component.getValueFormatter() != null) {
             // use custom formatter
             addOutputComponent(component.getValueFormatter().format(value, value.getBestTranslation(language), outputLanguage), language);

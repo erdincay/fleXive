@@ -177,7 +177,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void updateScriptInfo(long scriptId, FxScriptEvent event, String name, String description, String code, boolean active) throws FxApplicationException {
-        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
         Connection con = null;
         PreparedStatement ps = null;
         String sql;
@@ -290,7 +290,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxScriptInfo createScript(FxScriptEvent event, String name, String description, String code) throws FxApplicationException {
-        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
         FxScriptInfo si;
         Connection con = null;
         PreparedStatement ps = null;
@@ -332,7 +332,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxScriptInfo createScriptFromLibrary(FxScriptEvent event, String libraryname, String name, String description) throws FxApplicationException {
-        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         String code = FxSharedUtils.loadFromInputStream(cl.getResourceAsStream("fxresources/scripts/library/" + libraryname), -1);
         if (code == null || code.length() == 0)
@@ -345,7 +345,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxScriptInfo createScriptFromDropLibrary(String dropName, FxScriptEvent event, String libraryname, String name, String description) throws FxApplicationException {
-        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         String code = FxSharedUtils.loadFromInputStream(cl.getResourceAsStream(dropName + "Resources/scripts/library/" + libraryname), -1);
         if (code == null || code.length() == 0)
@@ -358,7 +358,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void remove(long scriptId) throws FxApplicationException {
-        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
         Connection con = null;
         PreparedStatement ps = null;
         String sql;
@@ -417,7 +417,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             return internal_runScript(si.getName(), binding, si.getCode());
 
         if (si.getEvent() == FxScriptEvent.Manual)
-            FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.ScriptExecution);
+            FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptExecution);
 
         long timeStamp = CacheAdmin.getEnvironment().getTimeStamp();
         if (timeStamp != scriptCacheTimestamp)
@@ -438,7 +438,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         if (binding == null)
             binding = new FxScriptBinding();
         if (!binding.getProperties().containsKey("ticket"))
-            binding.setVariable("ticket", FxContext.get().getTicket());
+            binding.setVariable("ticket", FxContext.getUserTicket());
         if (!binding.getProperties().containsKey("environment"))
             binding.setVariable("environment", CacheAdmin.getEnvironment());
         binding.setVariable("scriptname", si.getName());
@@ -471,7 +471,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxScriptMappingEntry createAssignmentScriptMapping(FxScriptEvent scriptEvent, long scriptId, long assignmentId, boolean active, boolean derivedUsage) throws FxApplicationException {
-        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
         FxScriptMappingEntry sm;
         Connection con = null;
         PreparedStatement ps = null;
@@ -531,7 +531,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxScriptMappingEntry createTypeScriptMapping(FxScriptEvent scriptEvent, long scriptId, long typeId, boolean active, boolean derivedUsage) throws FxApplicationException {
-        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
         FxScriptMappingEntry sm;
         Connection con = null;
         PreparedStatement ps = null;
@@ -591,7 +591,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void removeAssignmentScriptMapping(long scriptId, long assignmentId) throws FxApplicationException {
-        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
         Connection con = null;
         PreparedStatement ps = null;
         String sql;
@@ -622,7 +622,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void removeAssignmentScriptMappingForEvent(long scriptId, long assignmentId, FxScriptEvent event) throws FxApplicationException {
-        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
         Connection con = null;
         PreparedStatement ps = null;
         String sql;
@@ -654,7 +654,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void removeTypeScriptMapping(long scriptId, long typeId) throws FxApplicationException {
-        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
         Connection con = null;
         PreparedStatement ps = null;
         String sql;
@@ -685,7 +685,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void removeTypeScriptMappingForEvent(long scriptId, long typeId, FxScriptEvent event) throws FxApplicationException {
-        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
         Connection con = null;
         PreparedStatement ps = null;
         String sql;
@@ -717,7 +717,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxScriptMappingEntry updateAssignmentScriptMappingForEvent(long scriptId, long assignmentId, FxScriptEvent event, boolean active, boolean derivedUsage) throws FxApplicationException {
-        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
         FxScriptMappingEntry sm;
         Connection con = null;
         PreparedStatement ps = null;
@@ -767,7 +767,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxScriptMappingEntry updateTypeScriptMappingForEvent(long scriptId, long typeId, FxScriptEvent event, boolean active, boolean derivedUsage) throws FxApplicationException {
-        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.ScriptManagement);
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
         FxScriptMappingEntry sm;
         Connection con = null;
         PreparedStatement ps = null;
@@ -865,7 +865,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             }
             String[] files = FxSharedUtils.loadFromInputStream(scriptIndex, -1).
                     replaceAll("\r", "").split("\n");
-            final UserTicket originalTicket = FxContext.get().getTicket();
+            final UserTicket originalTicket = FxContext.getUserTicket();
             FxContext.get().runAsSystem();
             try {
                 FxScriptBinding binding = new FxScriptBinding();
@@ -958,7 +958,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         }
         String[] files = FxSharedUtils.loadFromInputStream(scriptIndex, -1).
                 replaceAll("\r", "").split("\n");
-        final UserTicket originalTicket = FxContext.get().getTicket();
+        final UserTicket originalTicket = FxContext.getUserTicket();
         FxContext.get().runAsSystem();
         try {
             FxScriptBinding binding = new FxScriptBinding();
@@ -988,7 +988,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public FxScriptResult runScript(String name, FxScriptBinding binding, String code) throws FxApplicationException {
-        FxPermissionUtils.checkRole(FxContext.get().getTicket(), Role.ScriptExecution);
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptExecution);
         return internal_runScript(name, binding, code);
     }
 
@@ -1050,7 +1050,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         }
         if (binding != null) {
             if (!binding.getProperties().containsKey("ticket"))
-                binding.setVariable("ticket", FxContext.get().getTicket());
+                binding.setVariable("ticket", FxContext.getUserTicket());
             if (!binding.getProperties().containsKey("environment"))
                 binding.setVariable("environment", CacheAdmin.getEnvironment());
             binding.setVariable("scriptname", name);

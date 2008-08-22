@@ -321,7 +321,7 @@ public class UserTicketStore {
         if (FxContext.get() != null) {
             // update current user's ticket directly from the DB
             try {
-                FxContext.get().setTicket(getUserTicket(FxContext.get().getTicket().getLoginName()));
+                FxContext.get().setTicket(getUserTicket(FxContext.getUserTicket().getLoginName()));
             } catch (FxApplicationException e) {
                 throw e.asRuntimeException();
             }

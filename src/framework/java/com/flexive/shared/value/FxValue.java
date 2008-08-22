@@ -580,7 +580,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     public T getBestTranslation() {
         if (!multiLanguage) //redundant but faster
             return singleValue;
-        return getBestTranslation(FxContext.get().getTicket().getLanguage());
+        return getBestTranslation(FxContext.getUserTicket().getLanguage());
     }
 
     /**

@@ -69,7 +69,7 @@ public class JDK6Scripting {
             name = "unknown";
         if (binding != null) {
             if (!binding.getProperties().containsKey("ticket"))
-                binding.setVariable("ticket", FxContext.get().getTicket());
+                binding.setVariable("ticket", FxContext.getUserTicket());
             if (!binding.getProperties().containsKey("environment"))
                 binding.setVariable("environment", CacheAdmin.getEnvironment());
             binding.setVariable("scriptname", name);

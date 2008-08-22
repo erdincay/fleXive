@@ -138,7 +138,7 @@ public class ResultPreferencesEngineTest {
     @Test
     public void saveDefaultPreferences() throws FxApplicationException {
         final ResultPreferences rp = createResultPreferences();
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         try {
             getResultPreferencesEngine().saveSystemDefault(rp, -10,
                     ResultViewType.LIST, AdminResultLocations.ADMIN);

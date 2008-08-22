@@ -247,7 +247,7 @@ public class AccountBean {
         roles = null;
         activeFilter = true;
         validatedFilter = true;
-        UserTicket ticket = FxContext.get().getTicket();
+        UserTicket ticket = FxContext.getUserTicket();
         if( !ticket.isGlobalSupervisor() ) {
             mandator = CacheAdmin.getFilteredEnvironment().getMandator(ticket.getMandatorId());
         }
@@ -474,7 +474,7 @@ public class AccountBean {
      */
     public String editUserPref() {
         try {
-            this.account = new AccountEditBean(accountInterface.load(FxContext.get().getTicket().getUserId()));
+            this.account = new AccountEditBean(accountInterface.load(FxContext.getUserTicket().getUserId()));
             setAccountIdFilter(this.account.getId());
             this.roles = accountInterface.getRoles(this.accountIdFilter, AccountEngine.RoleLoadMode.ALL);
             this.groups = accountInterface.getGroups(this.accountIdFilter);
@@ -602,7 +602,7 @@ public class AccountBean {
         }
 
         // Mandator select and check
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         long mandatorId = ticket.isGlobalSupervisor() ? account.getMandatorId() : ticket.getMandatorId();
         if (mandatorId < 0) {
             FxFacesMsgErr msg = new FxFacesMsgErr("User.err.mandatorMissing");
@@ -652,7 +652,7 @@ public class AccountBean {
      * @return all users matching the filter criterias.
      */
     public List<Account> getList() {
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         try {
             long _mandatorFilter = mandator == null ? -1 : mandator.getId();
 

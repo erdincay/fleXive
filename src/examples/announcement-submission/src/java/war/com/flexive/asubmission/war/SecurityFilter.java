@@ -43,7 +43,7 @@ public class SecurityFilter implements Filter {
         CacheAdmin.getEnvironment(); // This will execute the run once script of a fresh installation. It creates the users.
 
         // Check if the current user is a guest user
-        if (FxContext.get().getTicket().isGuest() && request.getRequestURI().startsWith(contextPath + "/protected.area/")) {
+        if (FxContext.getUserTicket().isGuest() && request.getRequestURI().startsWith(contextPath + "/protected.area/")) {
             response.sendRedirect(contextPath + "/login.xhtml");
         } else {
             chain.doFilter(servletRequest, servletResponse);

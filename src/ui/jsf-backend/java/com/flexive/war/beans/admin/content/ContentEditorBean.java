@@ -246,7 +246,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
      */
     public boolean isMayExport() {
         try {
-            return FxPermissionUtils.checkPermission(FxContext.get().getTicket(), content.getLifeCycleInfo().getCreatorId(),
+            return FxPermissionUtils.checkPermission(FxContext.getUserTicket(), content.getLifeCycleInfo().getCreatorId(),
                     ACL.Permission.EXPORT, environment.getType(content.getTypeId()),
                     environment.getStep(content.getStepId()).getAclId(), content.getAclId(), false);
         } catch (FxNoAccessException e) {
@@ -262,7 +262,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
      */
     public boolean isMayImport() {
         try {
-            return FxPermissionUtils.checkPermission(FxContext.get().getTicket(), content.getLifeCycleInfo().getCreatorId(),
+            return FxPermissionUtils.checkPermission(FxContext.getUserTicket(), content.getLifeCycleInfo().getCreatorId(),
                     ACL.Permission.EDIT, environment.getType(content.getTypeId()),
                     environment.getStep(content.getStepId()).getAclId(), content.getAclId(), false);
         } catch (FxNoAccessException e) {
@@ -760,11 +760,11 @@ public class ContentEditorBean implements ActionBean, Serializable {
                 : null;
         if (editAble && id != -1) {
             if (fxType.usePermissions())
-                editAble = FxPermissionUtils.checkPermission(FxContext.get().getTicket(), ACL.Permission.EDIT,
+                editAble = FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACL.Permission.EDIT,
                         si, false);
         }
         if (fxType.usePermissions() && id != -1)
-            deleteAble = FxPermissionUtils.checkPermission(FxContext.get().getTicket(), ACL.Permission.DELETE,
+            deleteAble = FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACL.Permission.DELETE,
                     si, false);
         versionDeleteAble = deleteAble;
         if (versionInfo.getVersionCount() <= 1)
@@ -848,7 +848,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
      * Determines all possible steps for the current content.
      */
     public void _initSteps() {
-        UserTicket ticket = FxContext.get().getTicket();
+        UserTicket ticket = FxContext.getUserTicket();
         FxType fxType = environment.getType(type);
 
         List<Step> steps;

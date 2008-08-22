@@ -257,7 +257,7 @@ public class FxPermissionUtils {
      * @throws FxNoAccessException         on errors
      */
     public static void checkPropertyPermissions(FxContent content, ACL.Permission perm) throws FxNotFoundException, FxInvalidParameterException, FxNoAccessException {
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         List<String> xpaths = content.getAllPropertyXPaths();
         FxPropertyData pdata;
         for (String xpath : xpaths) {
@@ -277,7 +277,7 @@ public class FxPermissionUtils {
     public static void checkPropertyPermissions(long creatorId, FxDelta delta, ACL.Permission perm) throws FxNoAccessException {
         if (!delta.changes())
             return;
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         for (FxDelta.FxDeltaChange add : delta.getAdds())
             checkPropertyPermission(((FxPropertyData) add.getNewData()).getValue(), add.getXPath(), ticket, creatorId,
                     ((FxPropertyAssignment) add.getNewData().getAssignment()).getACL().getId(), perm);
@@ -369,7 +369,7 @@ public class FxPermissionUtils {
      *          if no read access if permitted
      */
     public static PermissionSet getPermissions(long acl, FxType type, long stepACL, long createdBy, long mandator) throws FxNoAccessException {
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         final boolean _system = FxContext.get().getRunAsSystem() || ticket.isGlobalSupervisor();
         //throw exception if read is forbidden
         checkPermission(ticket, createdBy, ACL.Permission.READ, type, stepACL, acl, true);

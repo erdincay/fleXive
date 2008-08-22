@@ -208,7 +208,7 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
      */
     public static void store(PreparedStatement ps, int creatorColumn, int creationTimeColumn, int modificatorColumn,
                              int modificationTimeColumn) throws SQLException {
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         final long ts = System.currentTimeMillis();
         ps.setLong(creatorColumn, ticket.getUserId());
         ps.setLong(creationTimeColumn, ts);
@@ -226,7 +226,7 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
      */
     public static void updateLifeCycleInfo(PreparedStatement ps, int modificatorColumn, int modificationTimeColumn)
             throws SQLException {
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         final long ts = System.currentTimeMillis();
         ps.setLong(modificatorColumn, ticket.getUserId());
         ps.setLong(modificationTimeColumn, ts);
@@ -260,7 +260,7 @@ public class LifeCycleInfoImpl implements LifeCycleInfo, Serializable {
      */
     public static void updateLifeCycleInfo(String table, String idField, String verField,
                                            long id, int ver, boolean updateCreated, boolean throwOnNone) throws FxUpdateException {
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
 
         Connection con = null;
         PreparedStatement stmt = null;

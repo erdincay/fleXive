@@ -135,7 +135,7 @@ public class UserGroupBean {
      */
     public List<UserGroup> getList() {
         try {
-            final UserTicket ticket = FxContext.get().getTicket();
+            final UserTicket ticket = FxContext.getUserTicket();
             long mandatorId;
             if (ticket.isGlobalSupervisor()) {
                 // Drop down list enabled -> handle it
@@ -184,7 +184,7 @@ public class UserGroupBean {
      */
     public String create() {
         try {
-            final UserTicket ticket = FxContext.get().getTicket();
+            final UserTicket ticket = FxContext.getUserTicket();
             long mandatorId = mandator == null ? -1 : mandator.getId();
             if (!ticket.isGlobalSupervisor()) {
                 mandatorId = ticket.getMandatorId();

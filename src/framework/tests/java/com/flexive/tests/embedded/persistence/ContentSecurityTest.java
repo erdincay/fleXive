@@ -272,16 +272,16 @@ public class ContentSecurityTest {
      * @throws FxApplicationException on errors
      */
     private void assignGroup(long grp) throws FxApplicationException {
-//        System.out.println("Before: "+ FxContext.get().getTicket());
+//        System.out.println("Before: "+ FxContext.getUserTicket());
         FxContext.get().runAsSystem();
         try {
-            EJBLookup.getAccountEngine().setGroups(FxContext.get().getTicket().getUserId(), groups[((int) grp - 1)].getId());
+            EJBLookup.getAccountEngine().setGroups(FxContext.getUserTicket().getUserId(), groups[((int) grp - 1)].getId());
         } finally {
             FxContext.get().stopRunAsSystem();
         }
         FxContext.get()._reloadUserTicket();
-//        System.out.println("After: "+ FxContext.get().getTicket());
-//        for(long g: FxContext.get().getTicket().getGroups())
+//        System.out.println("After: "+ FxContext.getUserTicket());
+//        for(long g: FxContext.getUserTicket().getGroups())
 //            System.out.println("Group #"+g+": "+ EJBLookup.getUserGroupEngine().load(g).getName());
     }
 

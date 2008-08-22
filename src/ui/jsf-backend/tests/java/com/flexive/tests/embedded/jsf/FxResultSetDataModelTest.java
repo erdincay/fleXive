@@ -72,7 +72,7 @@ public class FxResultSetDataModelTest extends AbstractSqlQueryTest {
 	 */
 	@Test
 	public void findTestData() throws FxApplicationException {
-		FxResultSet rs = EJBLookup.getSearchEngine().search(SELECT_ALL, 1, null, null);
+		FxResultSet rs = EJBLookup.getSearchEngine().search(SELECT_ALL);
 		assert rs.getRowCount() == TOTALROWS : "Unexpected number of results: " + rs.getRowCount();
 		assertTotalRowCount(rs);
 	}

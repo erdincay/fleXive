@@ -133,7 +133,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
     public long create(String name, FxString label, long mandatorId, String color, String description, ACL.Category category)
             throws FxApplicationException {
 
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         final FxEnvironment environment = CacheAdmin.getEnvironment();
         // Security
         if (!ticket.isInRole(Role.MandatorSupervisor))
@@ -210,7 +210,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void remove(long id)
             throws FxApplicationException {
-        UserTicket ticket = FxContext.get().getTicket();
+        UserTicket ticket = FxContext.getUserTicket();
         ACL theACL = load(id);
 
         // Protected interal ACLs
@@ -276,7 +276,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
     public void update(long id, String name, FxString label, String color, String description,
                        List<ACLAssignment> assignments)
             throws FxApplicationException {
-        UserTicket ticket = FxContext.get().getTicket();
+        UserTicket ticket = FxContext.getUserTicket();
         // Load the current version of the ACL
         ACL theACL = load(id);
 
@@ -447,7 +447,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             String sMandator = environment.getMandator(mandatorId).getName();
             ACL theACL = new ACL(id, name, label, mandatorId, sMandator, desc, color, ACL.Category.getById(cat),
                     LifeCycleInfoImpl.load(rs, 6, 7, 8, 9));
-            if (ignoreSecurity && mandatorId != FxContext.get().getTicket().getMandatorId())
+            if (ignoreSecurity && mandatorId != FxContext.getUserTicket().getMandatorId())
                 throw new FxNoAccessException(LOG, "ex.acl.loadFailed.foreignMandator", theACL.getName());
             // Return the ACL
             return theACL;
@@ -466,7 +466,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
     public void assign(long aclId, long groupId, boolean mayRead, boolean mayEdit,
                        boolean mayRelate, boolean mayDelete, boolean mayExport, boolean mayCreate)
             throws FxApplicationException {
-        UserTicket ticket = FxContext.get().getTicket();
+        UserTicket ticket = FxContext.getUserTicket();
         // Delete rather than create?
         if (!mayRead && !mayRelate && !mayExport && !mayEdit && !mayDelete) {
             try {
@@ -591,7 +591,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
         Connection con = null;
         Statement stmt = null;
         String curSql;
-        UserTicket ticket = FxContext.get().getTicket();
+        UserTicket ticket = FxContext.getUserTicket();
         checkPermissions(ticket, groupId, aclId, true);
 
         try {
@@ -656,7 +656,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
         Connection con = null;
         Statement stmt = null;
         String curSql;
-        UserTicket ticket = FxContext.get().getTicket();
+        UserTicket ticket = FxContext.getUserTicket();
 
         // Permission & Exists check
         checkPermissions(ticket, groupId, aclId, false);

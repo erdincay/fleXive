@@ -203,7 +203,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long create(String name, String color, long mandatorId) throws FxApplicationException {
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         // Permission checks
         try {
             if (!ticket.isGlobalSupervisor()) {
@@ -279,7 +279,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void update(long groupId, String name, String color) throws FxApplicationException {
 
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
 
         // Load the group
         UserGroup aGroup;
@@ -462,7 +462,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
     public void setRoles(long groupId, long[] roles)
             throws FxApplicationException {
 
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
 
         // EJBLookup the group
         UserGroup aGroup;
@@ -564,7 +564,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
      * @return true if the caller may see the group its roles and assignments
      */
     public boolean mayAccessGroup(UserGroup grp) {
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         return ticket.isGlobalSupervisor() || grp.getId() == UserGroup.GROUP_EVERYONE ||
                 grp.getId() == UserGroup.GROUP_OWNER || grp.getMandatorId() == ticket.getMandatorId();
     }
@@ -578,7 +578,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
      * @throws FxNoAccessException if the caller lacks the permissions
      */
     private static void checkPermission(UserGroup group, String mode) throws FxNoAccessException {
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         // Permission checks
         try {
             if (!ticket.isGlobalSupervisor()) {

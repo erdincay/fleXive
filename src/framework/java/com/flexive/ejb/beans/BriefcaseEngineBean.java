@@ -80,7 +80,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long create(String name, String description, Long aclId) throws FxApplicationException {
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
 
         if (description == null) {
             description = "";
@@ -208,7 +208,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
     }
 
     private void checkEditBriefcase(Briefcase br) throws FxNotFoundException {
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         if (!ticket.isGlobalSupervisor() && br.getMandator() != ticket.getMandatorId()) {
             if (!ticket.mayEditACL((br.getAcl()), br.getLifeCycleInfo().getCreatorId())) {
                 throw new FxNotFoundException("ex.briefcase.noEditPermission", br.getName());
@@ -227,7 +227,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
             throw new FxNotFoundException("ex.briefcase.notFound", ("#" + id));
         }
         // Permission checks
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         if (!ticket.isGlobalSupervisor() && br.getMandator() != ticket.getMandatorId()) {
             if (!ticket.mayDeleteACL(br.getAcl(), br.getLifeCycleInfo().getCreatorId())) {
                 throw new FxNotFoundException("ex.briefcase.noDeletePermission", br.getName());
@@ -416,7 +416,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
      * @return a sql filter, eg '([briefcaseTblAlias.]CREATED_BY=12 OR ACL IS NOT NULL)'
      */
     public static String getSqlAccessFilter(String briefcaseTblAlias, boolean includeShared, ACL.Permission... perms) {
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         StringBuffer filter = new StringBuffer(1024);
         if (briefcaseTblAlias == null) {
             briefcaseTblAlias = "";

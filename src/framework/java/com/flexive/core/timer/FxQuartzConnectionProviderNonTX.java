@@ -57,12 +57,12 @@ public class FxQuartzConnectionProviderNonTX implements ConnectionProvider {
     public Connection getConnection() throws SQLException {
         if( savedCtx == null )
             savedCtx = FxContext.get();
-        if(FxContext.get().getTicket() == null ) {
+        if(FxContext.getUserTicket() == null ) {
 //            System.out.println("Replacing context");
             FxContext.replace(savedCtx);
         }
 //        System.out.println("Quartz requested a non-TX connection ... Thread: " + Thread.currentThread() + "; I am: " + this);
-//        System.out.println("Ctx-Info -> Division: " + FxContext.get().getDivisionId() + " Ticket: " + FxContext.get().getTicket());
+//        System.out.println("Ctx-Info -> Division: " + FxContext.get().getDivisionId() + " Ticket: " + FxContext.getUserTicket());
 
         return Database.getNonTXDataSource().getConnection();
     }

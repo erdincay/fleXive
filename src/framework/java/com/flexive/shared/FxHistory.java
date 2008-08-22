@@ -119,7 +119,7 @@ public class FxHistory implements Serializable {
      * @return message formatted in the calling users locale (if available) 
      */
     public String getMessage() {
-        FxLanguage lang = FxContext.get().getTicket().getLanguage();
+        FxLanguage lang = FxContext.getUserTicket().getLanguage();
         return FxSharedUtils.getLocalizedMessage("History", lang.getId(), lang.getIso2digit(), key, (Object[]) args);
     }
 

@@ -78,6 +78,21 @@ public interface TreeEngine {
     void remove(FxTreeNode node, boolean removeReferencedContent, boolean removeChildren) throws FxApplicationException;
 
     /**
+     * Remove a node and optionally its children.
+     * Referenced content content will only be removed if removedReferencedContent is set to true and the referenced
+     * content is not referenced elsewhere.
+     * The only exception is if the referenced content is of type FOLDER, then the folder is removed if it is not referenced
+     * from anywhere else.
+     *
+     * @param mode                    the tree mode (edit or live)
+     * @param nodeId                  the node to removed
+     * @param removeReferencedContent remove referenced content
+     * @param removeChildren          remove children as well?
+     * @throws FxApplicationException on errors
+     */
+    void remove(FxTreeMode mode, long nodeId, boolean removeReferencedContent, boolean removeChildren) throws FxApplicationException;
+
+    /**
      * Create a tree folders of the given path relative to the parent node, creating all folders
      * stored in <code>path</code> if they dont exist (similar to {@link java.io.File#mkdirs()}).
      *

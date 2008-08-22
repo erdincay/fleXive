@@ -101,7 +101,7 @@ public class ASubmissionBean {
      * @return true if the user may create announcements
      */
     public boolean isMayCreateAnnouncement() {
-        if (FxContext.get().getTicket().mayCreateACL(ACL.Category.STRUCTURE.getDefaultId(), -1L))
+        if (FxContext.getUserTicket().mayCreateACL(ACL.Category.STRUCTURE.getDefaultId(), -1L))
             return true;
         return false;
     }

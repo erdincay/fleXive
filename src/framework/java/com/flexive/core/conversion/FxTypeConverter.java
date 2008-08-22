@@ -200,7 +200,7 @@ public class FxTypeConverter implements Converter {
             typeEdit = FxTypeEdit.createNew(name, label, acl, workflow, parent, false/*irrelevant*/,
                     storageMode, cat, mode, langMode, state, permissions, trackHistory, historyAge, maxVersions,
                     maxRelSource, maxRelDest);
-            typeEdit.setLifeCycleInfo(LifeCycleInfoImpl.createNew(FxContext.get().getTicket()));
+            typeEdit.setLifeCycleInfo(LifeCycleInfoImpl.createNew(FxContext.getUserTicket()));
         }
         if (existing) {
             typeEdit.setACL(acl);

@@ -550,7 +550,7 @@ public class PropertyEditorBean implements ActionBean {
     public List<SelectItem> getTypes() {
         List<FxType> typesList = CacheAdmin.getFilteredEnvironment().getTypes(true, true, true, false);
         final List<SelectItem> result = new ArrayList<SelectItem>(typesList.size() + 1);
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         result.add(new SelectItem((long) -1, ""));
         for (SelectableObjectWithLabel item : typesList) {
             result.add(new SelectItem(item.getId(), item.getLabel().getBestTranslation(ticket)));

@@ -144,7 +144,7 @@ public class FxJsfUtils {
                             BinaryDescriptor.PreviewSizes.PREVIEW2,
                             binary.getXPath(),
                             binary.getBestTranslation().getCreationTime(),
-                            FxContext.get().getTicket().getLanguage())
+                            FxContext.getUserTicket().getLanguage())
                     + "\" alt=\""
                     + FxFormatUtils.escapeForJavaScript(binary.getBestTranslation().getName())
                     + "\"/>";
@@ -825,7 +825,7 @@ public class FxJsfUtils {
      */
     public static List<SelectItem> asSelectListWithLabel(List<? extends SelectableObjectWithLabel> items, boolean addEmptyElement) {
         final List<SelectItem> result = new ArrayList<SelectItem>(items.size());
-        final UserTicket ticket = FxContext.get().getTicket();
+        final UserTicket ticket = FxContext.getUserTicket();
         if (addEmptyElement) {
             result.add(new SelectItem(-1, ""));
         }

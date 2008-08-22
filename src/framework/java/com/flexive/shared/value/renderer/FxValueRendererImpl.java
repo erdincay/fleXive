@@ -74,7 +74,7 @@ class FxValueRendererImpl implements FxValueRenderer {
      * Create a new renderer in the calling user's language.
      */
     FxValueRendererImpl() {
-        this(FxContext.get().getTicket().getLanguage());
+        this(FxContext.getUserTicket().getLanguage());
     }
 
     /** {@inheritDoc} */

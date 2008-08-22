@@ -256,7 +256,7 @@ public class CacheAdmin {
      * @throws Exception on errors
      */
     public static void reloadEnvironment() throws Exception {
-        if (!FxContext.get().getTicket().isGlobalSupervisor()) {
+        if (!FxContext.getUserTicket().isGlobalSupervisor()) {
             throw new FxNoAccessException("ex.cache.reload.privileges").asRuntimeException();
         }
         getInstance().reloadEnvironment(FxContext.get().getDivisionId());

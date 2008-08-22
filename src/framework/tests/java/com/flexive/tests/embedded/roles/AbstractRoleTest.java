@@ -61,7 +61,7 @@ public abstract class AbstractRoleTest {
     public void beforeTestMethod() throws FxLoginFailedException, FxAccountInUseException {
         if (user != null) {
             login(user);
-            this.ticket = FxContext.get().getTicket();
+            this.ticket = FxContext.getUserTicket();
         }
     }
 

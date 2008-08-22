@@ -90,8 +90,8 @@ public class ACLEngineTest {
             assertEquals(acl.getColor(), "#000000");
             assertEquals(acl.getLabel(), new FxString("first label"));
 
-            assert FxContext.get().getTicket().getGroups().length > 0;
-            final long groupId = FxContext.get().getTicket().getGroups()[0];
+            assert FxContext.getUserTicket().getGroups().length > 0;
+            final long groupId = FxContext.getUserTicket().getGroups()[0];
 
             EJBLookup.getAclEngine().update(aclId, "new-acl-test", new FxString("test"), null, "new description",
                     Arrays.asList(new ACLAssignment(aclId, groupId, true, true, true, false, false, false,
@@ -112,7 +112,7 @@ public class ACLEngineTest {
         final long aclId = aclEngine.create("create-acl-test", new FxString("first label"), TestUsers.getTestMandator(),
                 "#000000", "", ACL.Category.INSTANCE);
         try {
-            final UserTicket ticket = FxContext.get().getTicket();
+            final UserTicket ticket = FxContext.getUserTicket();
             assert ticket.getGroups().length > 0;
             for (long group: ticket.getGroups()) {
                 aclEngine.assign(aclId, group, Permission.EDIT, Permission.CREATE);

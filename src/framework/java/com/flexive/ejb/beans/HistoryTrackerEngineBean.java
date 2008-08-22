@@ -100,7 +100,7 @@ public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTr
         Connection con = null;
         PreparedStatement ps = null;
         try {
-            final UserTicket ticket = FxContext.get().getTicket();
+            final UserTicket ticket = FxContext.getUserTicket();
             con = Database.getDbConnection();
             ps = con.prepareStatement(HISTORY_INSERT);
             ps.setLong(1, ticket.getUserId());
@@ -156,7 +156,7 @@ public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTr
             ps = con.prepareStatement(HISTORY_SELECT + " WHERE PKID=? ORDER BY TIMESTP");
             ps.setLong(1, contentId);
             ResultSet rs = ps.executeQuery();
-            boolean loadData = FxContext.get().getTicket().isGlobalSupervisor();
+            boolean loadData = FxContext.getUserTicket().isGlobalSupervisor();
             while (rs != null && rs.next())
                 ret.add(new FxHistory(rs.getLong(3), rs.getLong(1), rs.getString(2), rs.getString(4), rs.getString(5).split("\\|"),
                         rs.getLong(8), rs.getLong(9), rs.getInt(10), rs.getString(6), rs.getString(7),
