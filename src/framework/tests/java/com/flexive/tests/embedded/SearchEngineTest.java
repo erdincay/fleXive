@@ -1238,6 +1238,7 @@ public class SearchEngineTest {
         final FxTreeNodeEdit node = FxTreeNodeEdit.createNew(name);
         node.setLabel(new FxString(FxLanguage.ENGLISH, name));
         final long nodeId = EJBLookup.getTreeEngine().save(node);
+        final FxLanguage oldUserLanguage = FxContext.getUserTicket().getLanguage();
         try {
             FxContext.getUserTicket().setLanguage(EJBLookup.getLanguageEngine().load(FxLanguage.ENGLISH));
             queryForCaption(name);
@@ -1245,6 +1246,7 @@ public class SearchEngineTest {
             FxContext.getUserTicket().setLanguage(EJBLookup.getLanguageEngine().load(FxLanguage.GERMAN));
             queryForCaption(name);
         } finally {
+            FxContext.getUserTicket().setLanguage(oldUserLanguage);
             EJBLookup.getTreeEngine().remove(FxTreeMode.Edit, nodeId, false, false);
         }
     }
