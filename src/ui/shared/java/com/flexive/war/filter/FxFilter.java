@@ -162,11 +162,7 @@ public class FxFilter implements Filter {
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t);
             }
             try {
-                if ("faces".equals(request.getPageType()) || "jsf".equals(request.getPageType()) || "xhtml".equals(request.getPageType())
-                        || StringUtils.defaultString(response.getContentType()).contains("application/xhtml+xml")) {
-                    // TODO: flag response as XHTML only if our response actually is valid XHTML (which it currently is not)
-                    response.setContentType("text/html");
-                } else if ("css".equalsIgnoreCase(request.getPageType())) {
+                if ("css".equalsIgnoreCase(request.getPageType())) {
                     response.setContentType("text/css");
                 }
 

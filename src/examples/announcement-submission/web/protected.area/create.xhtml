@@ -7,11 +7,11 @@
       xmlns:c="http://java.sun.com/jstl/core"
       xmlns:fx="http://www.flexive.com/jsf/core">
 <head>
+    <title>[fleXive] announcement submission example application</title>
     <!-- Add flexive includes -->
-    <fx:includes all="true" yui="true"/>
+    <fx:includes all="true"/>
     <!-- Add our own stylesheet -->
     <link rel="stylesheet" type="text/css" href="../css/announcement-submission.css"/>
-    <title>[fleXive] announcement submission example application</title>
 </head>
 
 <body class="yui-skin-sam">
@@ -20,7 +20,7 @@
 <h:messages showDetail="true" errorClass="errorMessage" infoClass="infoMessage"/>
 
 <!-- The main menu -->
-<h:form>
+<h:form id="menuForm">
     <ul id="mainmenu">
         <li><h:commandLink action="#{fxAuthenticationBean.logout}">Logout</h:commandLink></li>
         <li><h:outputLink value="index.xhtml">Back</h:outputLink></li>
@@ -29,7 +29,7 @@
 
 <p class="message">Create Announcement</p>
 
-<h:form>
+<h:form id="entryForm">
     <fx:content typeName="announcementEntry" var="entry">
         <fx:value property="entryTitle"/><br/>
         <fx:value property="submissionDate"/><br/>
