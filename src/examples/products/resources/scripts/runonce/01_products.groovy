@@ -209,17 +209,17 @@ int currentArticleNr = new Random().nextInt(50000)
         image(getImageBinary(product, "products/${product}/2.png"))
         image(getImageBinary(product, "products/${product}/3.png"))
         variant {
-            articleNumber("A" + (currentArticleNr += new Random().nextInt(1000)))
+            articleNumber("A" + (currentArticleNr += new Random().nextInt(1000) + 1))
             color(colors.getItemByData("white").id)
             image(getImageBinary(product, "products/${product}/1_white.png"))
         }
         variant {
-            articleNumber("A" + (currentArticleNr += new Random().nextInt(1000)))
+            articleNumber("A" + (currentArticleNr += new Random().nextInt(1000) + 1))
             color(colors.getItemByData("red").id)
             image(getImageBinary(product, "products/${product}/1_red.png"))
         }
         variant {
-            articleNumber("A" + (currentArticleNr += new Random().nextInt(1000)))
+            articleNumber("A" + (currentArticleNr += new Random().nextInt(1000) + 1))
             color(colors.getItemByData("blue").id)
             image(getImageBinary(product, "products/${product}/1_blue.png"))
         }

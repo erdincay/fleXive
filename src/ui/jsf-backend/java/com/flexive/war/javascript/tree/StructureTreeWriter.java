@@ -64,6 +64,7 @@ public class StructureTreeWriter implements Serializable {
     public static final String DOC_TYPE_TYPE_RELATION = "TypeRelation";
     public static final String DOC_TYPE_ASSIGNMENT = "Assignment";
     public static final String DOC_TYPE_ASSIGNMENT_SYSTEMINTERNAL = "AssignmentSystemInternal";
+    public static final String DOC_TYPE_TYPEID = "Type_";
 
     /**
      * Render the structure tree to the node writer set in the current request.
@@ -143,7 +144,12 @@ public class StructureTreeWriter implements Serializable {
         nodeProperties.clear();
         nodeProperties.put("typeId", String.valueOf(type.getId()));
 
-        writer.startNode(new Node(String.valueOf(type.getId()), type.getDisplayName(), type.isRelation() ? DOC_TYPE_TYPE_RELATION : DOC_TYPE_TYPE, nodeProperties));
+        final String docType = type.isRelation()
+                ? DOC_TYPE_TYPE_RELATION
+                : type.getIcon() != null && !type.getIcon().isEmpty()
+                ? DOC_TYPE_TYPEID + type.getId()
+                : DOC_TYPE_TYPE;
+        writer.startNode(new Node(String.valueOf(type.getId()), type.getDisplayName(), docType, nodeProperties));
         writer.startChildren();
         // write derived types
         for (FxType child : type.getDerivedTypes()) {

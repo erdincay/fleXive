@@ -53,7 +53,6 @@ import com.flexive.shared.configuration.SystemParameters
 import com.flexive.shared.value.FxString
 import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
 import com.flexive.shared.search.*
-
 void createSelectLists() {
     ACL aclList = CacheAdmin.getEnvironment().getDefaultACL(ACL.Category.SELECTLIST);
     ACL aclItem = CacheAdmin.getEnvironment().getDefaultACL(ACL.Category.SELECTLISTITEM);

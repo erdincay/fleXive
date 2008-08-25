@@ -1015,6 +1015,11 @@ public class ContentEditorBean implements ActionBean, Serializable {
         return display;
     }
 
+    public FxPK getTypeIcon() {
+        final FxReference icon = environment.getType(type).getIcon();
+        return icon.isEmpty() ? null : icon.getDefaultTranslation();
+    }
+
     public boolean isSupportSecurity() {
         return environment.getType(type).usePermissions();
     }

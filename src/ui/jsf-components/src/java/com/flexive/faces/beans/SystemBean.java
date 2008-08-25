@@ -641,4 +641,15 @@ public class SystemBean implements Serializable {
     public boolean isAjaxRequest() {
         return FxJsfUtils.isAjaxRequest();
     }
+
+    /**
+     * String concat function (fx:concat).
+     *
+     * @param s1    the first string
+     * @param s2    the second string
+     * @return s1 + s2
+     */
+    public static String concat(Object s1, Object s2) {
+        return String.valueOf(s1) + String.valueOf(s2);
+    }
 }

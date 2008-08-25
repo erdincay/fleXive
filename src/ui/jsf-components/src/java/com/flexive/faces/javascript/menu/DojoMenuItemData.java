@@ -29,7 +29,11 @@ public class DojoMenuItemData extends AbstractMenuItemData<DojoMenuItemData> {
         out.writeAttribute("widgetId", widgetId);
         out.writeAttribute("caption", caption);
         if (StringUtils.isNotBlank(icon)) {
-            out.writeAttribute("iconSrc", uriMapper.getAbsoluteUri(DojoMenuWriter.ICON_PATH + "/" + icon + ".png"));
+            out.writeAttribute("iconSrc", uriMapper.getAbsoluteUri(
+                    icon.indexOf('.') == -1 && icon.indexOf('/') == -1
+                        ? DojoMenuWriter.ICON_PATH + "/" + icon + ".png"
+                        : icon 
+            ));
         }
         for (Map.Entry<String, Object> entry : properties.entrySet()) {
             out.writeAttribute(entry.getKey(), entry.getValue());

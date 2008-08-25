@@ -280,6 +280,9 @@
                                     #{fxMessageBean['Content.field.type']}
                                 </th>
                                 <td class="contentData">
+                                    <ui:fragment rendered="#{not empty srcEditor.typeIcon}">
+                                        <fx:thumbnail pk="#{srcEditor.typeIcon}" previewSize="original"/>
+                                    </ui:fragment>
                                     #{srcEditor.typeDisplay}
                                 </td>
                             </tr>

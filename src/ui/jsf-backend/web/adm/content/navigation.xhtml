@@ -347,9 +347,12 @@
                 <adm:treeContextMenuItem icon="createFolder" treeActions="createFolder" labelKey="ContentTree.menu.createNode" clickHandler="createFolder"/>
                 <fx:dojoMenuSeparator/>
                 <adm:treeContextMenuItem icon="new" treeActions="createContent" labelKey="ContentTree.menu.create">
-                    <c:forEach var="selectItem" items="#{fxSelectBean.types}">
-                        <c:if test="#{selectItem.value > 0}">
-                            <adm:treeContextMenuItem label="#{selectItem.label}" clickHandler="function(menuItem) { createContent(menuItem, #{selectItem.value}); }"/>
+                    <c:forEach var="type" items="#{fxSystemBean.environment.types}">
+                        <c:if test="#{type.id > 0}">
+                            <adm:treeContextMenuItem label="#{type.label.defaultTranslation}"
+                                                     icon="#{type.icon.isEmpty ? null : fx:concat('thumbnail/pk', type.icon.defaultTranslation)}"
+                                                     clickHandler="function(menuItem) { createContent(menuItem, #{type.id}); }"
+                            />
                         </c:if>
                     </c:forEach>
                 </adm:treeContextMenuItem>
@@ -385,9 +388,12 @@
         <fx:dojoMenu name="mainMenu">
 
             <fx:dojoMenuItem labelKey="Content.menu.new.content">
-                <c:forEach var="selectItem" items="#{fxSelectBean.types}">
-                    <c:if test="#{selectItem.value > 0}">
-                        <fx:dojoMenuItem label="#{selectItem.label}" clickHandler="function(menuItem) { createContent(menuItem, #{selectItem.value}); }"/>
+                <c:forEach var="type" items="#{fxSystemBean.environment.types}">
+                    <c:if test="#{type.id > 0}">
+                        <adm:treeContextMenuItem label="#{type.label.defaultTranslation}"
+                                                 icon="#{type.icon.isEmpty ? null : fx:concat('thumbnail/pk', type.icon.defaultTranslation)}"
+                                                 clickHandler="function(menuItem) { createContent(menuItem, #{type.id}); }"
+                        />
                     </c:if>
                 </c:forEach>
             </fx:dojoMenuItem>

@@ -143,5 +143,11 @@
         <function-class>com.flexive.faces.beans.SearchResultBean</function-class>
         <function-signature>java.lang.String getJsonResult(java.lang.Object,java.lang.String)</function-signature>
     </function>
+
+    <function>
+        <function-name>concat</function-name>
+        <function-class>com.flexive.faces.beans.SystemBean</function-class>
+        <function-signature>java.lang.String concat(java.lang.Object,java.lang.Object)</function-signature>
+    </function>
 </facelet-taglib>
 

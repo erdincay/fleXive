@@ -14,6 +14,16 @@
 
     <ui:define name="content">
 
+        <!-- Render tree node styles for types with icons -->
+        <style type="text/css">
+            <ui:repeat var="type" value="#{fxSystemBean.environment.types}">
+                <ui:fragment rendered="#{not type.icon.isEmpty}">
+                    .TreeIconType_#{type.id} {
+                        background-image: url('<fx:thumbnail pk="#{type.icon.defaultTranslation}" urlOnly="true" previewSize="original"/>');
+                    }
+                </ui:fragment>
+            </ui:repeat>
+        </style>
 		<script type="text/javascript">
 		<!--
             //var contentPage=null;     tracks which page is shown in the content frame..no longer used
@@ -225,7 +235,7 @@
                 if ("Assignment" == node.nodeDocType || "AssignmentSystemInternal" == node.nodeDocType) {
                     invokeContentAction("adm/structure/propertyAssignmentEditor.jsf", defaultAction, {id: node["assignmentId"]});
                 }
-                else if ("Type" == node.nodeDocType || "TypeRelation" == node.nodeDocType) {
+                else if (isType(node.nodeDocType)) {
                     invokeContentAction("adm/structure/typeEditor.jsf", defaultAction, {id: node["typeId"]});
                 }
                 else if ("Group" == node.nodeDocType) {
@@ -499,7 +509,7 @@
             function createTestData(menuItem) {
                 var menu = dojo.widget.byId("structureTreeMenu");
                 var nodeId = getNodeId(menu.getTreeNode());
-                if (menu.getTreeNode().nodeDocType == "Type")
+                if (isType(menu.getTreeNode().nodeDocType))
                     invokeContentAction("adm/content/createTestData.jsf", "setTypeId", {typeId: nodeId});
             }
 
@@ -529,7 +539,7 @@
                 var notGlobalSupervisor = #{not fxSystemBean.isInRole['GlobalSupervisor']};
                 var mayOpen = !lackRole || #{fxSystemBean.isInRole['ScriptManagement']};
                 setActionDisabled(menu.getTreeNode(), "editNode", !mayOpen || (node.nodeDocType =="AssignmentSystemInternal" && notGlobalSupervisor));
-                setActionDisabled(menu.getTreeNode(), "createContent", node.nodeDocType!="Type");
+                setActionDisabled(menu.getTreeNode(), "createContent", !isType(node.nodeDocType));
                 setActionDisabled(menu.getTreeNode(), "createProperty", !(node.nodeDocType=="Group" || isType(node.nodeDocType)) || lackRole);
                 setActionDisabled(menu.getTreeNode(), "createGroup", !(node.nodeDocType=="Group" || isType(node.nodeDocType)) || lackRole);
                 setActionDisabled(menu.getTreeNode(), "deleteAssignment", (node.nodeDocType!="Group" && node.nodeDocType!="Assignment") || lackRole || (node.nodeDocType =="AssignmentSystemInternal" && notGlobalSupervisor));
@@ -556,15 +566,13 @@
                 setActionDisabled(menu.getTreeNode(), "pasteAboveAs", lackRole || copyNode==null || cutMode ||(node.nodeDocType!="Assignment" && node.nodeDocType!="Group"));
                 setActionDisabled(menu.getTreeNode(), "pasteIntoAs", lackRole || copyNode==null || cutMode || (!isType(node.nodeDocType) && node.nodeDocType!="Group"));
                 setActionDisabled(menu.getTreeNode(), "pasteSubMenu", lackRole || copyNode==null || cutMode);
-                setActionDisabled(menu.getTreeNode(), "createTestData", lackRole || node.nodeDocType!="Type");
-                setActionDisabled(menu.getTreeNode(), "exportType", lackRole || node.nodeDocType!="Type");
+                setActionDisabled(menu.getTreeNode(), "createTestData", lackRole || !isType(node.nodeDocType));
+                setActionDisabled(menu.getTreeNode(), "exportType", lackRole || !isType(node.nodeDocType));
                 menu.show_();
             }
 
             function isType(docType) {
-                if (docType=="Type" || docType=="TypeRelation")
-                    return true;
-                return false;
+                return docType.indexOf("Type") == 0;
             }
 
             function isAssignment(docType) {

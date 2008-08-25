@@ -694,6 +694,12 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         return Collections.unmodifiableList(includeDisabled ? groupAssignmentsAll : groupAssignmentsEnabled);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public List<FxType> getTypes() {
+        return getTypes(true, true, true, true);
+    }
 
     /**
      * {@inheritDoc}

@@ -64,6 +64,18 @@ public class FxJsfComponentUtils {
     }
 
     /**
+     * Evaluate the string attribute of a component.
+     *
+     * @param component     a JSF component
+     * @param attributeName the attribute name to be evaluated, e.g. "title"
+     * @param defaultValue  the default value to be used if no value is bound
+     * @return the bound value, or null if no value is bound
+     */
+    public static String getStringValue(UIComponent component, String attributeName, String defaultValue) {
+        return StringUtils.defaultIfEmpty((String) getValue(component, attributeName), defaultValue);
+    }
+
+    /**
      * Evaluate the integer attribute of a component.
      *
      * @param component     a JSF component

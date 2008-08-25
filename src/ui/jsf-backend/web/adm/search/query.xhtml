@@ -78,7 +78,7 @@
 			<adm:commandButton id="saveButtonJs" location="both" labelKey="QueryEditor.button.save" icon="save" lockscreen="false"
                     onclick="onSaveQuery();return false"/>
             <div style="display:none">
-                <adm:commandButton id="saveButton" location="content" bean="#{fxQueryEditorBean}" action="saveQuery">
+                <adm:commandButton id="saveButton" location="content" bean="#{fxQueryEditorBean}" icon="save" action="saveQuery">
                     <f:setPropertyActionListener target="#{fxQueryEditorBean.location}" value="#{fxSystemBean.adminResultLocation}"/>
                 </adm:commandButton>
             </div>

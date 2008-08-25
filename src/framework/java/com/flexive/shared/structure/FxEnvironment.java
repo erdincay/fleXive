@@ -349,6 +349,13 @@ public interface FxEnvironment extends Serializable {
     boolean typeExists(String name);
 
     /**
+     * Returns all defined types.
+     *
+     * @return  all defined types.
+     */
+    List<FxType> getTypes();
+
+    /**
      * Get types depending on selection criteria
      *
      * @param returnBaseTypes    return types that are not derived from another type

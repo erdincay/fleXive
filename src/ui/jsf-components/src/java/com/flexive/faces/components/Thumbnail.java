@@ -41,9 +41,12 @@ import com.flexive.shared.value.FxBinary;
 import com.flexive.war.servlet.ThumbnailServlet;
 
 import javax.faces.component.UIOutput;
+import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlGraphicImage;
+import javax.faces.component.html.HtmlOutputText;
 import javax.faces.context.FacesContext;
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * A basic component for displaying thumbnails of content instances. Renders URLs
@@ -55,7 +58,9 @@ import java.io.IOException;
 public class Thumbnail extends UIOutput {
     private FxPK pk;
     private FxBinary binary;
-    private HtmlGraphicImage image;
+    private UIComponent body;
+    private boolean urlOnly;
+    private String previewSize = BinaryDescriptor.PreviewSizes.PREVIEW2.name();
 
     public Thumbnail() {
         setRendererType(null);
@@ -63,23 +68,36 @@ public class Thumbnail extends UIOutput {
 
     @Override
     public void encodeBegin(FacesContext facesContext) throws IOException {
-        image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(this, HtmlGraphicImage.COMPONENT_TYPE);
         final String link;
+        final BinaryDescriptor.PreviewSizes previewSize;
+        try {
+            previewSize = BinaryDescriptor.PreviewSizes.valueOf(getPreviewSize().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid preview size: " + getPreviewSize()
+                    + ", possible values are: " + Arrays.toString(BinaryDescriptor.PreviewSizes.values()));
+        }
         if (getPk() != null) {
-            link = ThumbnailServlet.getLink(getPk(), BinaryDescriptor.PreviewSizes.PREVIEW2);
+            link = ThumbnailServlet.getLink(getPk(), previewSize);
         } else if (getBinary() != null) {
             link = ThumbnailServlet.getLink(XPathElement.getPK(getBinary().getXPath()),
-                    BinaryDescriptor.PreviewSizes.PREVIEW2,
+                    previewSize,
                     getBinary().getXPath());
         } else {
             throw new FxInvalidParameterException("pk", "ex.jsf.thumbnail.empty").asRuntimeException();
         }
-        image.setUrl(link);
+        if (isUrlOnly()) {
+            body = FxJsfUtils.addChildComponent(this, HtmlOutputText.COMPONENT_TYPE);
+            ((HtmlOutputText) body).setEscape(false);
+            ((HtmlOutputText) body).setValue(link.substring(1));    // don't return absolute URLs to the client
+        } else {
+            body = FxJsfUtils.addChildComponent(this, HtmlGraphicImage.COMPONENT_TYPE);
+            ((HtmlGraphicImage) body).setUrl(link);
+        }
     }
 
     @Override
     public void encodeEnd(FacesContext facesContext) throws IOException {
-        getChildren().remove(image);
+        getChildren().remove(body);
     }
 
     public FxPK getPk() {
@@ -102,5 +120,21 @@ public class Thumbnail extends UIOutput {
 
     public void setBinary(FxBinary binary) {
         this.binary = binary;
+    }
+
+    public boolean isUrlOnly() {
+        return FxJsfComponentUtils.getBooleanValue(this, "urlOnly", urlOnly);
+    }
+
+    public void setUrlOnly(boolean urlOnly) {
+        this.urlOnly = urlOnly;
+    }
+
+    public String getPreviewSize() {
+        return FxJsfComponentUtils.getStringValue(this, "previewSize", previewSize);
+    }
+
+    public void setPreviewSize(String previewSize) {
+        this.previewSize = previewSize;
     }
 }

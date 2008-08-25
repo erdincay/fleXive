@@ -366,6 +366,13 @@ public final class FxFilteredEnvironment implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
+    public List<FxType> getTypes() {
+        return getTypes(true, true, true, true);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public List<FxType> getTypes(boolean returnBaseTypes, boolean returnDerivedTypes, boolean returnTypes, boolean returnRelations) {
         return environment.getTypes(returnBaseTypes, returnDerivedTypes, returnTypes, returnRelations);
     }
