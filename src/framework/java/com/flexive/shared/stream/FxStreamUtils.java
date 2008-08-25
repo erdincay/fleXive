@@ -32,6 +32,7 @@
 package com.flexive.shared.stream;
 
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxStreamException;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.stream.*;
@@ -180,8 +181,13 @@ public class FxStreamUtils {
     }
 
     public static void downloadBinary(BinaryDownloadCallback callback, List<ServerLocation> server, OutputStream stream, long binaryId, int binarySize) throws FxStreamException {
-        if (server == null || server.size() == 0 || stream == null || (binarySize < 0 || binarySize > 3))
-            throw new FxStreamException("ex.stream.download.param.missing");
+        FxSharedUtils.checkParameterEmpty(stream, "stream");
+        if (server == null || server.size() == 0) { 
+            throw new FxStreamException("ex.stream.download.param.server");
+        }
+        if (binarySize < 0 || binarySize > 3) {
+            throw new FxStreamException("ex.stream.download.param.binarySize");
+        }
         StreamClient client = null;
         try {
             client = getClient();
