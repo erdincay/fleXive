@@ -1232,6 +1232,47 @@
                                 </para>
                             </listitem>
                         </varlistentry>
+                        <varlistentry>
+                            <term>urlOnly</term>
+                            <listitem>
+                                <para>
+                                    If true, only the thumbnail URL will be rendered (relative to the context root,
+                                    e.g.
+                                    <code>thumbnail/pk5.1/s0</code>).
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>previewSize</term>
+                            <listitem>
+                                <para>
+                                    The desired size of the thumbnail. Valid values are taken from
+                                    <ulink url="&flexiveJavadocBase;/shared/com/flexive/shared/value/BinaryDescriptor.PreviewSizes.html">
+                                        BinaryDescriptor.PreviewSizes</ulink>:
+                                    <itemizedlist>
+                                        <listitem>
+                                            <para><code>PREVIEW1</code>,
+                                            </para>
+                                        </listitem>
+                                        <listitem>
+                                            <para>
+                                                <code>PREVIEW2</code>
+                                                (default),
+                                            </para>
+                                        </listitem>
+                                        <listitem>
+                                            <para><code>PREVIEW3</code>,
+                                            </para>
+                                        </listitem>
+                                        <listitem>
+                                            <para>
+                                                <code>ORIGINAL.</code>
+                                            </para>
+                                        </listitem>
+                                    </itemizedlist>
+                                </para>
+                            </listitem>
+                        </varlistentry>
                     </variablelist>
                 </section>
             </section>
