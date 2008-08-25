@@ -7,7 +7,8 @@
       xmlns:c="http://java.sun.com/jstl/core"
       xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
       xmlns:adm="http://www.flexive.com/jsf/admin"
-      xmlns:fx="http://www.flexive.com/jsf/core">
+      xmlns:fx="http://www.flexive.com/jsf/core"
+      xmlns:weblet="http://weblets.dev.java.net/tags_jsp2">
 <head>
     <fx:includes yui="true" jsonRpc="true"/>
 </head>
@@ -37,6 +38,10 @@
                     alert(e);
                 }
                 return false;
+            }
+
+            function clearReference() {
+                selectReference("", "");
             }
 
             function clickHandler(target, pk) {
@@ -75,8 +80,17 @@
                     </td>
                     <td>
                         <a4j:commandLink id="submitSearchButton" reRender="results" eventsQueue="updateResults">
-                            <t:graphicImage url="/adm/images/toolbar/search.png" border="0"/>
+                            <img src="#{weblet:url('com.flexive.faces.weblets', '/images/findReferences.png')}" style="border:0"
+                                 alt="#{fxMessageBean['BrowseReferences.button.find']}"
+                                 title="#{fxMessageBean['BrowseReferences.button.find']}"/>
                         </a4j:commandLink>
+                    </td>
+                    <td>
+                        <a href="javascript:clearReference()">
+                            <img src="#{weblet:url('com.flexive.faces.weblets', '/images/clearReference.png')}" style="border:0"
+                                alt="#{fxMessageBean['BrowseReferences.button.clear']}"
+                                title="#{fxMessageBean['BrowseReferences.button.clear']}"/>
+                        </a>
                     </td>
                 </tr>
             </table>

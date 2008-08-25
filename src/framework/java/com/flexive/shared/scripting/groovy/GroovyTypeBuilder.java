@@ -151,7 +151,8 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
 
     private FxType type;
 
-    private static class Node<TElement> {
+    private static class Node<TElement> implements Serializable {
+        private static final long serialVersionUID = 4721651554653493085L;
         protected GroupNode parent;
         protected final TElement element;
 
@@ -185,6 +186,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
     }
 
     private static class StructureNode<T extends FxStructureElement> extends Node<T> {
+        private static final long serialVersionUID = -2703786157094279644L;
 
         public StructureNode(T element) {
             super(element);
@@ -203,6 +205,8 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
     }
 
     private static class PropertyNode extends StructureNode<FxPropertyEdit> {
+        private static final long serialVersionUID = 7033936953834313748L;
+
         private final long typeId;
         private final String alias;
 
@@ -226,6 +230,8 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
     }
 
     private static class GroupNode extends StructureNode<FxGroupEdit> {
+        private static final long serialVersionUID = 4759700316011472966L;
+
         private FxGroupAssignment assignment;
         private final long typeId;
 
@@ -252,6 +258,8 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
     }
 
     private static class PropertyAssignmentNode extends Node<FxPropertyAssignmentEdit> {
+        private static final long serialVersionUID = -5173534896365045004L;
+
         public PropertyAssignmentNode(FxPropertyAssignmentEdit element) {
             super(element);
         }
@@ -271,6 +279,8 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
     }
 
     private static class GroupAssignmentNode extends Node<FxGroupAssignmentEdit> {
+        private static final long serialVersionUID = -6625714158681292375L;
+
         private GroupAssignmentNode(FxGroupAssignmentEdit element) {
             super(element);
         }

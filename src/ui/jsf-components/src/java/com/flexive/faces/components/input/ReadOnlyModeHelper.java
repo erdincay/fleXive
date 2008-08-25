@@ -32,6 +32,7 @@
 package com.flexive.faces.components.input;
 
 import com.flexive.faces.FxJsfUtils;
+import com.flexive.faces.components.Thumbnail;
 import com.flexive.shared.*;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxStructureOption;
@@ -101,6 +102,16 @@ class ReadOnlyModeHelper extends RenderHelper {
         } else if (value instanceof FxBinary && !value.isEmpty()) {
             // render preview image
             renderPreviewImage(language);
+        } else if (value instanceof FxReference && !value.isTranslationEmpty(language)) {
+            // render reference preview
+            final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(parent, HtmlGraphicImage.COMPONENT_TYPE);
+            image.setUrl(ThumbnailServlet.getLink(
+                    ((FxReference) value).getDefaultTranslation(),
+                    BinaryDescriptor.PreviewSizes.PREVIEW1
+            ));
+            image.setHeight("16px");
+            // render reference label
+            addOutputComponent(FxValueRendererFactory.getInstance(outputLanguage).format(value, language), language);
         } else if (component.isFilter() && !(useHTMLEditor || value instanceof FxHTML)) {
             // escape HTML code and generate <br/> tags for newlines
             addOutputComponent(FxFormatUtils.escapeForJavaScript(FxValueRendererFactory.getInstance(outputLanguage).format(value, language), true, true), language);
