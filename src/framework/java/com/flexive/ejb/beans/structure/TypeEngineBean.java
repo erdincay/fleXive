@@ -656,6 +656,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                     ps.setLong(1, type.getIcon().getDefaultTranslation().getId());
                 ps.setLong(2, type.getId());
                 ps.executeUpdate();
+                needReload = true;
                 htracker.track(type, "history.type.update.icon", orgType.getIcon().getDefaultTranslation().getId(),
                         type.getIcon().getDefaultTranslation().getId());
             }

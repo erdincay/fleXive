@@ -31,16 +31,15 @@
  ***************************************************************/
 package com.flexive.war;
 
-import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.FxLanguage;
 import com.flexive.shared.EJBLookup;
-import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.FxLanguage;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.content.FxPK;
+import com.flexive.shared.exceptions.FxApplicationException;
+import org.apache.commons.lang.StringUtils;
 
 import java.awt.*;
 import java.util.regex.Pattern;
-
-import org.apache.commons.lang.StringUtils;
 
 /**
  * Configuration helper that parses a URI for thumbnail configuration parameters
@@ -52,6 +51,8 @@ public class FxThumbnailURIConfigurator {
     private final static Pattern pPK = Pattern.compile("^pk\\d+(\\.(\\d+|MAX|LIVE))?");
     private final static Pattern pXPath = Pattern.compile("^xp.+");
     private final static Pattern pSize = Pattern.compile("s[0123]");
+    private final static Pattern pWidth = Pattern.compile("w\\d+");
+    private final static Pattern pHeight = Pattern.compile("h\\d+");
     private final static Pattern pLang = Pattern.compile("^lang[a-zA-Z]{2}");
     private final static Pattern pLangFallback = Pattern.compile("^lfb[01]");
 
@@ -71,6 +72,11 @@ public class FxThumbnailURIConfigurator {
     private Rectangle crop = null;
     private String filename = null; //filename is last parameter (optional) if it contains a dot and does not match another parameter
 
+    /**
+     * Ctor from URI
+     *
+     * @param URI the servlet URI containing the configuration options
+     */
     public FxThumbnailURIConfigurator(String URI) {
         this.URI = URI;
         parse();
@@ -103,40 +109,116 @@ public class FxThumbnailURIConfigurator {
             }
             if (size == 0 && pSize.matcher(element).matches())
                 size = Integer.parseInt(element.substring(1));
+            if (scaleHeight == -1 && pHeight.matcher(element).matches())
+                scaleHeight = Integer.parseInt(element.substring(1));
+            if (scaleWidth == -1 && pWidth.matcher(element).matches())
+                scaleWidth = Integer.parseInt(element.substring(1));
             if (lang == null && pLang.matcher(element).matches())
                 lang = element.substring(4);
             if (langFallback == null && pLangFallback.matcher(element).matches())
                 langFallback = "1".equals(element.substring(3));
         }
-        if( xp == null )
+        if (xp == null)
             xp = "/";
     }
 
+    /**
+     * Is a primary key set?
+     *
+     * @return primary key set
+     */
     public boolean hasPK() {
         return pk != null;
     }
 
+    /**
+     * Get the XPath of the property containing the image
+     *
+     * @return XPath of the property containing the image
+     */
     public String getXPath() {
         return xp;
     }
 
+    /**
+     * Get the primary key
+     *
+     * @return primary key
+     */
     public FxPK getPK() {
         return pk;
     }
 
+    /**
+     * Get the requested (pre-scaled) thumbnail size (0..3)
+     *
+     * @return requested (pre-scaled) thumbnail size (0..3)
+     */
     public int getSize() {
         return size;
     }
 
+    /**
+     * Get the iso code of the desired translation for multilingual images
+     *
+     * @return iso code of the desired translation
+     */
     public String getLanguageIso() {
         return lang;
     }
 
+    /**
+     * Fallback to the default language if no image present for the requested?
+     *
+     * @return fallback to the default language?
+     */
     public boolean useLangFallback() {
         return langFallback != null && langFallback;
     }
 
+    /**
+     * Get the requested language for the image
+     *
+     * @return requested language
+     * @throws FxApplicationException on errors
+     */
     public FxLanguage getLanguage() throws FxApplicationException {
         return StringUtils.isNotBlank(lang) ? EJBLookup.getLanguageEngine().load(lang) : null;
+    }
+
+    /**
+     * Scale to a given height?
+     *
+     * @return scale to a given height?
+     */
+    public boolean isScaleHeight() {
+        return scaleHeight >= 0;
+    }
+
+    /**
+     * Get the height to scale to
+     *
+     * @return height to scale to
+     */
+    public int getScaleHeight() {
+        return scaleHeight;
+    }
+
+    /**
+     * Scale to a given width?
+     *
+     * @return scale to a given width?
+     */
+    public boolean isScaleWidth() {
+        return scaleWidth >= 0;
+    }
+
+    /**
+     * Get the width to scale to
+     *
+     * @return width to scale to
+     */
+    public int getScaleWidth() {
+        return scaleWidth;
     }
 }
