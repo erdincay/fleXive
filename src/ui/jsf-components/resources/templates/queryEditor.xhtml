@@ -49,7 +49,7 @@ Parameters:
 
     <!-- Popup dialog that shows the current SQL query -->
     <div id="sqlPopupContainer">
-        <fx:popupDialog jsVar="sqlPopupDialog" closeControl="closeSqlPopup">
+        <fx:popupDialog jsVar="sqlPopupDialog">
             <a4j:outputPanel id="sqlPopupPanel">
                 <c:choose>
                     #{fxMessageBean['QueryEditor.label.sqlQuery']}:<br/>

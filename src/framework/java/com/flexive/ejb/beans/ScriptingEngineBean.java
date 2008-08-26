@@ -114,6 +114,17 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
     private static final Object RUNONCE_LOCK = new Object();
 
     /**
+     * Marker exception that wraps a script exception (used for more accurate error reporting).
+     */
+    public static class GenericScriptException extends FxInvalidParameterException {
+        private static final long serialVersionUID = 6437523270242591223L;
+
+        private GenericScriptException(String parameter, Log log, Throwable cause, String key, Object... values) {
+            super(parameter, log, cause, key, values);
+        }
+    }
+
+    /**
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
@@ -886,10 +897,12 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                         internal_runScript(file[0], binding, FxSharedUtils.loadFromInputStream(cl.getResourceAsStream(prefix + "/scripts/runonce/" + file[0]), -1));
                     } catch (Throwable e) {
                         runInfo.endExecution(false);
+                        final Throwable reported = e instanceof GenericScriptException ? e.getCause() : e;
                         StringWriter sw = new StringWriter();
-                        e.printStackTrace(new PrintWriter(sw));
+                        reported.printStackTrace(new PrintWriter(sw));
                         runInfo.setErrorMessage(sw.toString());
-                        LOG.error("Failed to run script " + file[0] + ": " + e.getMessage(), e);
+                        // already logged in internal_runScript
+                        //LOG.error("Failed to run script " + file[0] + ": " + reported.getMessage(), e);
                     }
                     try {
                         Thread.sleep(100); //play nice ...
@@ -1067,8 +1080,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             } catch (Throwable e) {
                 if (e instanceof FxApplicationException)
                     throw (FxApplicationException) e;
-                LOG.error("Scripting error: " + e.getMessage(), e);
-                throw new FxInvalidParameterException(name, "ex.general.scripting.exception", name, e.getMessage());
+                throw new GenericScriptException(name, LOG, e, "ex.general.scripting.exception", name, e.getMessage());
             }
         }
         throw new FxInvalidParameterException(name, "ex.general.scripting.needJDK6", name).asRuntimeException();

@@ -16,6 +16,29 @@
         <h:form id="form">
             <adm:tab label="#{fxMessageBean['Script.tabtitle.runOnceInfo']}" active="true" id="tab1"/>
 
+            <rich:modalPanel id="panel" height="450" width="650" resizeable="false">
+                <f:facet name="header">
+                    <h:outputText value="#{fxMessageBean['Script.field.errorMessage']}"/>
+                </f:facet>
+                <f:facet name="controls">
+                   <h:panelGroup>
+                        <h:graphicImage value="/adm/images/toolbar/close.png" style="cursor:pointer" id="closeIcon"/>
+                        <rich:componentControl for="panel" attachTo="closeIcon" operation="hide" event="onclick"/>
+                    </h:panelGroup>
+                </f:facet>
+                <div class="modalPanel" style="overflow:scroll !important;height:410px;width:630px;" >
+                    <h:outputLink value="javascript:void(0)" id="closeLink">
+                        #{fxMessageBean['Script.dialog.close']}
+                        <rich:componentControl for="panel" attachTo="closeLink" operation="hide" event="onclick"/>
+                    </h:outputLink>
+                    <br/>
+                    <br/>
+                    <a4j:outputPanel id="messageContainer">
+                        <h:outputText value="#{scriptBean.currentRunInfo.errorMessage}"/>
+                    </a4j:outputPanel>
+                </div>
+            </rich:modalPanel>
+
             <adm:sortableTable id="table">
                 <table id="table">
                     <thead>
@@ -46,32 +69,10 @@
                                 <td align="left"><h:outputText value="#{info.runInfo.drop}" /></td>
                                 <td align="left"><h:outputText value="#{info.runInfo.endTime - info.runInfo.startTime}" /></td>
                                 <td align="left">
-                                    <rich:modalPanel id="panel" height="450" width="650" resizeable="false">
-                                        <f:facet name="header">
-                                            <h:panelGroup>
-                                                <h:outputText value="#{fxMessageBean['Script.field.errorMessage']}"/>
-                                            </h:panelGroup>
-                                        </f:facet>
-                                        <f:facet name="controls">
-                                           <h:panelGroup>
-                                                <h:graphicImage value="/adm/images/toolbar/close.png" style="cursor:pointer" id="closeIcon"/>
-                                                <rich:componentControl for="panel" attachTo="closeIcon" operation="hide" event="onclick"/>
-                                            </h:panelGroup>
-                                        </f:facet>
-                                        <div class="modalPanel" style="overflow:scroll !important;height:410px;width:630px;" >
-                                            <h:outputLink value="javascript:void(0)" id="closeLink">
-                                                #{fxMessageBean['Script.dialog.close']}
-                                                <rich:componentControl for="panel" attachTo="closeLink" operation="hide" event="onclick"/>
-                                            </h:outputLink>
-                                            <br/>
-                                            <br/>
-                                            <h:outputText value="#{info.runInfo.errorMessage}"/>
-                                        </div>
-                                    </rich:modalPanel>
-                                    <h:outputLink style="color:red;" value="javascript:void(0)" id="link">
+                                    <a4j:commandLink reRender="messageContainer" onclick="Richfaces.showModalPanel('form:panel')" style="color:red">
+                                        <f:setPropertyActionListener value="#{info.runInfo}" target="#{scriptBean.currentRunInfo}"/>
                                         #{info.shortErrorMessage}
-                                        <rich:componentControl for="panel" attachTo="link" operation="show" event="onclick"/>
-                                    </h:outputLink>
+                                    </a4j:commandLink>
                                 </td>
                             </tr>
                         </ui:repeat>

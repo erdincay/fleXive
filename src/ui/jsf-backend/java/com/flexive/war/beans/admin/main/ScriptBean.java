@@ -75,6 +75,7 @@ public class ScriptBean {
     private Map<Long, String> assignmentMappingNames;
     private FxScriptScope selectedScope = null;
     private long selectedScriptEventId = -1;
+    private FxScriptRunInfo currentRunInfo;
 
     private static final String ID_CACHE_KEY = ScriptBean.class + "_id";
 
@@ -366,6 +367,14 @@ public class ScriptBean {
             new FxFacesMsgErr(t.getMessage()).addToContext();
         }
         return runInfo;
+    }
+
+    public FxScriptRunInfo getCurrentRunInfo() {
+        return currentRunInfo;
+    }
+
+    public void setCurrentRunInfo(FxScriptRunInfo currentRunInfo) {
+        this.currentRunInfo = currentRunInfo;
     }
 
     /**
