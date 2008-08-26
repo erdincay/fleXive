@@ -88,13 +88,27 @@ flexive.util = new function() {
      * @returns      the parsed PK, e.g. { id: 125, version: 1 }
      */
     this.parsePk = function(/* String */ pk) {
-        if (pk.indexOf(".") == -1) {
+        if (pk == null || pk.indexOf(".") == -1) {
             throw "Not a valid PK: " + pk;
         }
         return { id: parseInt(pk.substr(0, pk.indexOf("."))),
                  version: parseInt(pk.substr(pk.indexOf(".") + 1)), 
                  toString: function() { return this.id + "." + this.version }
         };
+    }
+
+    /**
+     * Extracts the object IDs of the given PK array.
+     *
+     * @param pks   the PKs
+     * @return  the IDs of the given PKs
+     */
+    this.getPkIds = function(/* Array[PK] */ pks) {
+        var result = []
+        for (var i = 0; i < pks.length; i++) {
+            result[i] = pks[i].id;
+        }
+        return result;
     }
 
     this.JSON_RPC_CLIENT = null;
@@ -286,6 +300,35 @@ flexive.yui.datatable = new function() {
             var col = dataTable.getColumn(elCol);
             return data[property][col.getKeyIndex()];
         }
+    }
+
+    /**
+     * <p>Returns the currently selected PKs of the given datatable.</p>
+     *
+     * <p><i>
+     * Implementation note: selections over page boundaries are only supported in list view.
+     * This appears to be a limitation of the YUI datatable widget, and may work in future versions.
+     * </i></p>
+     *
+     * @param dataTable the datatable instance.
+     * @return  a PK object, e.g. {id: 21, version: 10}
+     */
+    this.getSelectedPks = function(/* YAHOO.widget.DataTable */ dataTable) {
+        var selectedPks = [];
+        var tdEls = dataTable.getSelectedTdEls();
+        if (tdEls.length > 0) {
+            // column selection mode - works only on current page anyway
+            for (var i = 0; i < tdEls.length; i++) {
+                selectedPks.push(flexive.yui.datatable.getPk(dataTable, tdEls[i]));
+            }
+        } else {
+            // get all selected rows (may include rows outside the current page)
+            var rows = resultTable.getSelectedRows();
+            for (var i = 0; i < rows.length; i++) {
+                selectedPks.push(flexive.util.parsePk(dataTable.getRecord(rows[i]).getData()["pk"]));
+            }
+        }
+        return selectedPks;
     }
 }
 

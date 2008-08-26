@@ -47,15 +47,7 @@
                 }
 
                 function getSelectedIds() {
-                    // get currently selected PKs
-                    var selectedIds = [];
-                    var selection = resultTable.getSelectedTrEls().length > 0
-                            ? resultTable.getSelectedTrEls() : resultTable.getSelectedTdEls();
-                    for (var i = 0; i < selection.length; i++) {
-                        var selectedPk = flexive.yui.datatable.getPk(resultTable, selection[i]);
-                        selectedIds.push(selectedPk.id);
-                    }
-                    return selectedIds;
+                    return flexive.util.getPkIds(flexive.yui.datatable.getSelectedPks(resultTable));
                 }
 
                 function getBriefcaseId() {
@@ -144,7 +136,7 @@
                 <div id="resultTableContainer">
                     <fx:resultTable var="resultTable" value="#{fxSearchResultBean.result}"/>
                 </div>
-                
+
                 <fx:menu name="resultsMenu" beforeShow="onShowContextMenu" clickHandler="onContextMenu" trigger="'resultTableContainer'">
                     <fx:menuItem id="show" labelKey="SearchResult.menu.show" icon="open"/>
                     <fx:menuItem id="showScreenview" labelKey="SearchResult.menu.showScreenview" icon="open"/>

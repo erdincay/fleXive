@@ -87,12 +87,81 @@
                              reRender="refreshResults"/>
             </h:selectOneListbox>
 
-            <fx:resultTable var="resultTable" value="#{sqlSearchBean.queryResult}"/>
+            <a4j:commandButton id="refreshButton" action="#{sqlSearchBean.executeSearch}"
+                               style="display:none" reRender="refreshResults"/>
+
+            <div id="resultContainer">
+                <fx:resultTable var="resultTable" value="#{sqlSearchBean.queryResult}"/>
+            </div>
 
         </c:if>
         <a4j:outputPanel id="refreshResults">
             <fx:resultTableUpdater var="resultTable" value="#{sqlSearchBean.queryResult}"/>
         </a4j:outputPanel>
+
+        <fx:menu name="resultsMenu" beforeShow="onShowContextMenu" clickHandler="onContextMenu" trigger="'resultContainer'">
+            <fx:menuItem id="show" labelKey="SearchResult.menu.show" icon="open"/>
+            <fx:menuItem id="edit" labelKey="SearchResult.menu.edit" icon="edit"/>
+            <fx:menuItem id="delete" labelKey="SearchResult.menu.delete" icon="remove"/>
+            <fx:menuItem id="deleteSelected" labelKey="SearchResult.menu.deleteSelected" icon="remove"/>
+        </fx:menu>
+
+        <script type="text/javascript">
+        <!--
+            function onShowContextMenu() {
+                try {
+                    var selectedPks = flexive.yui.datatable.getSelectedPks(resultTable);
+                    flexive.yui.setMenuItem("deleteSelected", "disabled", selectedPks.length == 0);
+                } catch (e) {
+                    alertDialog(e);
+                }
+            }
+
+            function onContextMenu(type, args) {
+                // extract PK
+                try {
+                    var pk = flexive.yui.datatable.getPk(resultTable, this.contextEventTarget);
+                } catch (e) {
+                    alertDialog("#{fxMessageBean['SqlSearch.dialog.menu.noPk']}");
+                    return;
+                }
+
+                var selectedPks = flexive.yui.datatable.getSelectedPks(resultTable)
+                var menuItem = args[1];
+                if (menuItem.cfg.getProperty("disabled")) {
+                    return;
+                }
+                switch (menuItem.id) {
+                    case "edit":
+                        invokeContentAction("adm/content/contentEditor.jsf", "editInstance", {pk: pk.toString(), readOnly: false});
+                        break;
+                    case "show":
+                        invokeContentAction("adm/content/contentEditor.jsf", "editInstance", {pk: pk.toString(), readOnly: true});
+                        break;
+                    case "delete":
+                        confirmDialog("#{fxMessageBean['SearchResult.dialog.confirm.deleteRow']}", function() {
+                            flexive.util.getJsonRpc().ContentEditor.remove(pk.id);
+                            reload();
+                        });
+                        break;
+                    case "deleteSelected":
+                        confirmDialog("#{fxMessageBean['SearchResult.dialog.confirm.deleteSelection']}", function() {
+                            flexive.util.getJsonRpc().ContentEditor.removeMultiple(
+                                    flexive.util.getPkIds(selectedPks)
+                            );
+                            reload();
+                        });
+                        break;
+                    default:
+                }
+            }
+
+            function reload() {
+                document.getElementById("frm:refreshButton").onclick();
+            }
+        //-->
+        </script>
+
     </a4j:region>
 
     <adm:toolbarPluginButtons/>
