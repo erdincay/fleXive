@@ -45,9 +45,9 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.ArrayList;
 
 /**
  * Utitlity class to access the StreamServer
@@ -64,6 +64,21 @@ public class FxStreamUtils {
     public final static long DEFAULT_TTL = 5 * 60 * 1000;
 
     /**
+     * List of local servers
+     */
+    private volatile static List<ServerLocation> localServers = new ArrayList<ServerLocation>(5);
+
+    /**
+     * Add a local server
+     *
+     * @param serverLocation local server location
+     */
+    public static void addLocalServer(ServerLocation serverLocation) {
+        if (!localServers.contains(serverLocation))
+            localServers.add(serverLocation);
+    }
+
+    /**
      * Upload a binary (using an OutputStream) to the StreamServer with a default time to live
      *
      * @param length expected length of the stream/binary
@@ -77,18 +92,33 @@ public class FxStreamUtils {
     }
 
     /**
-     * Retrieve a StreamClient, local servers are preferred, remote only as fallback
+     * Retrieve a StreamClient, local servers are preferred, remote only as fallback.
+     * Remote servers will be fetched from the cache
      *
      * @return StreamClient
      * @throws FxStreamException on errors
      */
     public static StreamClient getClient() throws FxStreamException {
-        List<ServerLocation> servers = CacheAdmin.getStreamServers();
+        return getClient(null);
+    }
+
+    /**
+     * Retrieve a StreamClient, local servers are preferred, remote only as fallback
+     *
+     * @param servers (optional) known remote servers
+     * @return StreamClient
+     * @throws FxStreamException on errors
+     */
+    public static StreamClient getClient(List<ServerLocation> servers) throws FxStreamException {
+        if (servers == null)
+            servers = CacheAdmin.getStreamServers();
         try {
             StreamClient client;
             List<ServerLocation> allServers = new ArrayList<ServerLocation>(servers.size() + localServers.size());
             allServers.addAll(localServers);
             allServers.addAll(servers);
+            if (allServers.size() == 0)
+                throw new FxStreamException("ex.stream.download.param.server");
             client = StreamClientFactory.getClient(allServers);
             return client;
         } catch (StreamException e) {
@@ -167,7 +197,6 @@ public class FxStreamUtils {
                         fallback = na;
                 }
             }
-
             if (LOG.isDebugEnabled())
                 LOG.debug("preferred: " + preferred + " fallback: " + fallback);
             if (preferred != null)
@@ -180,17 +209,23 @@ public class FxStreamUtils {
         }
     }
 
+    /**
+     * Download a binary
+     *
+     * @param callback   callback handler to set mimetype and size for downloads
+     * @param server     (optional) list of remote stream servers
+     * @param stream     the output stream to send the binary to
+     * @param binaryId   id of the binary
+     * @param binarySize preview size of the binary if an image (1..3) or 0 for the original binary
+     * @throws FxStreamException on errors
+     */
     public static void downloadBinary(BinaryDownloadCallback callback, List<ServerLocation> server, OutputStream stream, long binaryId, int binarySize) throws FxStreamException {
         FxSharedUtils.checkParameterEmpty(stream, "stream");
-        if (server == null || server.size() == 0) { 
-            throw new FxStreamException("ex.stream.download.param.server");
-        }
-        if (binarySize < 0 || binarySize > 3) {
+        if (binarySize < 0 || binarySize > 3)
             throw new FxStreamException("ex.stream.download.param.binarySize");
-        }
         StreamClient client = null;
         try {
-            client = getClient();
+            client = getClient(server);
 //            client = StreamClientFactory.getRemoteClient(servers.get(0).getAddress(), servers.get(0).getPort());
             DataPacket<BinaryDownloadPayload> req = new DataPacket<BinaryDownloadPayload>(
                     new BinaryDownloadPayload(binaryId, 1, 1, binarySize), true, true);
@@ -216,12 +251,20 @@ public class FxStreamUtils {
         }
     }
 
+    /**
+     * Download a binary
+     *
+     * @param server     (optional) list of remote stream servers
+     * @param stream     the output stream to send the binary to
+     * @param descriptor binary descriptor
+     * @throws FxStreamException on errors
+     */
     public static void downloadBinary(List<ServerLocation> server, OutputStream stream, BinaryDescriptor descriptor) throws FxStreamException {
-        if (server == null || server.size() == 0 || descriptor.getSize() <= 0 || stream == null)
+        if (descriptor.getSize() <= 0 || stream == null)
             throw new FxStreamException("ex.stream.download.param.missing");
         StreamClient client = null;
         try {
-            client = getClient();
+            client = getClient(server);
 //            client = StreamClientFactory.getRemoteClient(servers.get(0).getAddress(), servers.get(0).getPort());
             DataPacket<BinaryDownloadPayload> req = new DataPacket<BinaryDownloadPayload>(
                     new BinaryDownloadPayload(descriptor.getId(), descriptor.getVersion(), descriptor.getQuality()), true, true);
@@ -241,20 +284,5 @@ public class FxStreamUtils {
                 //ignore
             }
         }
-    }
-
-    /**
-     * List of local servers
-     */
-    private volatile static List<ServerLocation> localServers = new ArrayList<ServerLocation>(5);
-
-    /**
-     * Add a local server
-     *
-     * @param serverLocation local server location
-     */
-    public static void addLocalServer(ServerLocation serverLocation) {
-        if( !localServers.contains(serverLocation))
-            localServers.add(serverLocation);
     }
 }
