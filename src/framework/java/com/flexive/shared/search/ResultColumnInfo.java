@@ -69,7 +69,7 @@ public class ResultColumnInfo implements Serializable {
     /**
      * Create a displayed column info object for a content property.
      *
-     * @param value  the property name or an assignment reference (#type/assignment)
+     * @param propertyName  the property name or an assignment reference (#type/assignment)
      */
     public ResultColumnInfo(String propertyName) {
         this(Table.CONTENT, propertyName, null);
