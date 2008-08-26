@@ -33,7 +33,7 @@ ACLEngine acle = EJBLookup.getAclEngine()
 
 // Create user groups
 long uGroupId1 = ue.create("Editors", "#AAAAAA", FxContext.get().getTicket().getMandatorId())
-long uGroupId2 = ue.create("Guests", "#FF0055", FxContext.get().getTicket().getMandatorId())
+long uGroupId2 = ue.create("Visitors", "#FF0055", FxContext.get().getTicket().getMandatorId())
 
 // Create accounts ...
 AccountEdit accountEdit1 = new AccountEdit()
@@ -41,8 +41,8 @@ AccountEdit accountEdit2 = new AccountEdit()
 
 accountEdit1.setEmail("announcement.editor@ucs.at")
 accountEdit1.setName("announcement.editor")
-accountEdit2.setEmail("announcement.guest@ucs.at")
-accountEdit2.setName("announcement.guest")
+accountEdit2.setEmail("announcement.visitor@ucs.at")
+accountEdit2.setName("announcement.visitor")
 
 long accountId1 = ae.create(accountEdit1, "password")
 long accountId2 = ae.create(accountEdit2, "password")
