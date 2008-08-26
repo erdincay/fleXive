@@ -176,7 +176,7 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
 
         // clean up selected columns
         for (ResultColumnInfo info: preferences.getSelectedColumns()) {
-            if (!info.isProperty()) {
+            if (!info.isStructureNode()) {
                 continue;
             }
             try {
@@ -196,7 +196,7 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
 
         // clean up order by columns
         for (ResultOrderByInfo info: preferences.getOrderByColumns()) {
-            if (!info.isProperty()) {
+            if (!info.isStructureNode()) {
                 continue;
             }
             try {

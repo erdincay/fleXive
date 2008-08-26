@@ -450,6 +450,8 @@ public class ResultPreferencesBean {
                     final String name = key.toString();
                     if (name.charAt(0) == '@') {
                         return MessageBean.getInstance().getMessage("ResultPreferences.label.property." + name.substring(1));
+                    } else if (name.charAt(0) == '#') {
+                        return environment.getAssignment(name.substring(1)).getLabel().getBestTranslation();
                     } else {
                         return environment.getProperty(name).getLabel().getBestTranslation();
                     }

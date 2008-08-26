@@ -95,9 +95,11 @@ public class ResultColumnInfo implements Serializable {
      * @return  the label to be used e.g. as result column header.
      */
     public String getLabel(FxEnvironment environment) {
-        if (isProperty()) {
+        if (isStructureNode()) {
             try {
-                return environment.getProperty(propertyName).getLabel().getBestTranslation();
+                return propertyName.startsWith("#")
+                        ? environment.getAssignment(propertyName.substring(1)).getLabel().getBestTranslation()
+                        : environment.getProperty(propertyName).getLabel().getBestTranslation();
             } catch (FxRuntimeException e) {
                 return propertyName;
             }
@@ -117,10 +119,10 @@ public class ResultColumnInfo implements Serializable {
 
     /**
      * Return true if the object info's property is a "real" structure
-     * property.
-     * @return  true if this info object is for a "real" structure property
+     * property or assignment.
+     * @return  true if this info object is for a "real" structure property or assignment
      */
-    public boolean isProperty() {
+    public boolean isStructureNode() {
         return !propertyName.startsWith("@");
     }
 
