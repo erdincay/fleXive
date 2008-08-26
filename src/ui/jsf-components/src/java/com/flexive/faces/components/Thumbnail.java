@@ -137,4 +137,25 @@ public class Thumbnail extends UIOutput {
     public void setPreviewSize(String previewSize) {
         this.previewSize = previewSize;
     }
+
+    @Override
+    public Object saveState(FacesContext context) {
+        final Object[] state = new Object[5];
+        state[0] = super.saveState(context);
+        state[1] = pk;
+        state[2] = binary;
+        state[3] = urlOnly;
+        state[4] = previewSize;
+        return state;
+    }
+
+    @Override
+    public void restoreState(FacesContext context, Object oState) {
+        final Object[] state = (Object[]) oState;
+        super.restoreState(context, state[0]);
+        pk = (FxPK) state[1];
+        binary = (FxBinary) state[2];
+        urlOnly = state[3] != null && (Boolean) state[3];
+        previewSize = (String) state[4];
+    }
 }
