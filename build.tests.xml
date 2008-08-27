@@ -278,7 +278,7 @@
             // build dist target only when executing the dist group
             if (properties.'tests.groups'.indexOf('dist') != -1) {
                 project.executeTarget('dist')
-                properties.'run.dist.settings' = '-Dflexive.test.dist.file=' + properties.'flexive.base.build.dir' + '/flexive-dist.zip'
+                properties.'run.dist.settings' = '-Dflexive.test.dist.file="' + properties.'flexive.base.build.dir' + '/flexive-dist.zip"'
             }
         </groovy>
         <copy file="${tests.resources.dir}/testlog4j.xml" todir="${tests.classes.dir}"/>

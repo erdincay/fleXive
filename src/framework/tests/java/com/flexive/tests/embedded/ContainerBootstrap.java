@@ -32,14 +32,14 @@
 package com.flexive.tests.embedded;
 
 import com.flexive.core.security.UserTicketImpl;
-import com.flexive.core.structure.StructureLoader;
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
-import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.AccountEngine;
 import com.flexive.shared.security.UserTicket;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.ejb3.embedded.EJB3StandaloneBootstrap;
@@ -85,7 +85,7 @@ public class ContainerBootstrap {
                 LOG.info("Running on: " + System.getProperty("os.name") + " " + System.getProperty("os.version"));
             }
 
-            deployDirectories.add(0, new URL(getFileUrl(getFlexiveBaseDir()) + getFlexiveDistDir()));
+            deployDirectories.add(0, new URL(escapeUrl(getFileUrl(getFlexiveBaseDir()) + getFlexiveDistDir())));
             for (URL url : deployDirectories) {
                 deployDirectory(url);
             }
@@ -128,6 +128,10 @@ public class ContainerBootstrap {
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    protected String escapeUrl(String url) {
+        return StringUtils.replace(url, " ", "%20");
     }
 
     protected String getFlexiveDistDir() {

@@ -58,7 +58,7 @@ public abstract class AbstractDropContainerBootstrap extends ContainerBootstrap 
     public void startup() throws FxApplicationException {
         try {
             // deploy dropped ejbs
-            deployDirectories.add(new URL(getFileUrl(getFlexiveBaseDir() + "/drop")));
+            deployDirectories.add(new URL(escapeUrl(getFileUrl(getFlexiveBaseDir() + "/drop"))));
             // container bootstrap
             super.startup();
         } catch (MalformedURLException e) {
