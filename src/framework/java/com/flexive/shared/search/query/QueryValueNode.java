@@ -138,7 +138,7 @@ public abstract class QueryValueNode<T extends FxValue, VC extends ValueComparat
     /** {@inheritDoc} */
     @Override
     public boolean isWideInput() {
-        return value instanceof FxDate || value instanceof FxDateTime;
+        return value instanceof FxDateTime;
     }
 
     /**

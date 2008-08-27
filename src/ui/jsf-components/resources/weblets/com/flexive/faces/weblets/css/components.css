@@ -245,6 +245,11 @@ select.queryValueComparator {
     width: 210px;
 }
 
+/** Temporary fix for date input alignment */
+.queryRoot .FxDateInput img.button {
+    margin-top: -5px;
+}
+
 /** FxPopup - a static dojo popup, e.g. for displaying some text */
 div.dojoDialog {
     background-color: #F9FCF1;
