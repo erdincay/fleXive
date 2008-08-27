@@ -18,7 +18,7 @@ public class HelloWorldBean {
     public DataModel getBlogEntries() throws FxApplicationException {
         if (blogEntries == null) {
             final FxResultSet result = new SqlQueryBuilder()
-                    .select("@pk", "entryTitle", "entryText", "created_at")
+                    .select("@pk", "blogentry/entryTitle", "blogentry/entryText", "created_at")
                     .type("blogEntry")
                     .orderBy("created_at", SortDirection.DESCENDING)
                     .getResult();

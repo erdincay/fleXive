@@ -37,9 +37,14 @@ public class ASubmissionBean {
     public DataModel getAnnouncementEntries() throws FxApplicationException {
         if (announcementEntries == null) {
             final FxResultSet result = new SqlQueryBuilder()
-                    .select("@permissions", "@pk", "entryTitle", "submissionDate", "publishDate", "submissionURL", "publishURL")
+                    .select("@permissions", "@pk",
+                            "announcementEntry/entryTitle",
+                            "announcementEntry/submissionDate",
+                            "announcementEntry/publishDate",
+                            "announcementEntry/submissionURL",
+                            "announcementEntry/publishURL")
                     .type("announcementEntry")
-                    .orderBy("publishDate", SortDirection.DESCENDING)
+                    .orderBy("announcementEntry/publishDate", SortDirection.DESCENDING)
                     .getResult();
             announcementEntries = new FxResultSetDataModel(result);
         }
