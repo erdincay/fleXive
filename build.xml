@@ -544,6 +544,7 @@
         <ant antfile="${basedir}/src/examples/helloworld/build.xml" inheritAll="false"/>
         <ant antfile="${basedir}/src/examples/products/build.xml" inheritAll="false"/>
         <ant antfile="${basedir}/src/examples/tutorial01-documentstore/build.xml" inheritAll="false"/>
+        <ant antfile="${basedir}/src/examples/announcement-submission/build.xml" inheritAll="false"/>
     </target>
 
     <target name="dist.prepare">
@@ -648,6 +649,7 @@ database.password=a
             <zipfileset prefix="flexive-dist/applications/helloworld" dir="${flexive.drop.dir}" includes="helloworld*"/>
             <zipfileset prefix="flexive-dist/applications/tutorial01-documentstore" dir="${flexive.drop.dir}" includes="tutorial01-documentstore*"/>
             <zipfileset prefix="flexive-dist/applications/products" dir="${flexive.drop.dir}" includes="products*"/>
+            <zipfileset prefix="flexive-dist/applications/announcement-submission" dir="${flexive.drop.dir}" includes="announcement-submission*"/>
         </zip>
         <copy file="${flexive.base.build.dir}/${dist.bin-all.file}" toFile="${flexive.base.build.dir}/flexive-dist.zip"/>
         <!-- Create flexive distribution w/o backend and GPL'd files -->
