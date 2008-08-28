@@ -7,7 +7,7 @@ var isQueryEditor = true;
 function addQueryNode(id, nodeDocType) {
     if (nodeDocType.indexOf("Assignment") == 0) {
         addAssignment(id);
-    } else if (nodeDocType == "Type") {
+    } else if (nodeDocType.indexOf("Type") == 0) {
         addTypeQuery(id);
     } else {
         // do nothing
