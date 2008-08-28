@@ -46,7 +46,7 @@ import com.flexive.shared.value.FxHTML
 
 // add a article to the tree
 final FxContent article = EJBLookup.contentEngine.initialize("article")
-article.setValue("/caption", new FxString("Welcome to [flexive] 3.0"))
+article.setValue("/caption", new FxString(FxLanguage.ENGLISH, "Welcome to [fleXive] 3.0").setTranslation(FxLanguage.GERMAN, "Willkommen bei [fleXive] 3.0"))
 article.setValue("/title", new FxString(false, "Welcome to [flexive] 3.0"))
 article.setValue("/longtexthtml", new FxHTML(false,
 """<p>Welcome to your installation of [fleXive] 3.0.</p><h3>What is [fleXive]?</h3><p>[fleXive] is a <strong>Java EE 5 open-source (LGPL) framework</strong> for the development of complex and evolving (web-)applications. It <strong>speeds up development</strong> as it handles numerous important application issues and keeps your application flexible over the development-cycle.</p>"""))

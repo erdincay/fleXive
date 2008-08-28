@@ -65,6 +65,10 @@ select.fxValueSelectInput, .fxValueInputElementWidth, input.fxValueTextInput, te
     border: 1px solid gray;
 }
 
+.fxValueInput input[type="checkbox"] {
+    border: none;   /* looks ugly in IE */
+}
+
 textarea.fxValueTextArea,
 textarea.fxValueTextAreaHtml {
     height: 150px;

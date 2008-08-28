@@ -140,16 +140,24 @@
                         break;
                     case "delete":
                         confirmDialog("#{fxMessageBean['SearchResult.dialog.confirm.deleteRow']}", function() {
-                            flexive.util.getJsonRpc().ContentEditor.remove(pk.id);
-                            reload();
+                            try {
+                                flexive.util.getJsonRpc().ContentEditor.remove(pk.id);
+                                reload();
+                            } catch (e) {
+                                alertDialog(e);
+                            }
                         });
                         break;
                     case "deleteSelected":
                         confirmDialog("#{fxMessageBean['SearchResult.dialog.confirm.deleteSelection']}", function() {
-                            flexive.util.getJsonRpc().ContentEditor.removeMultiple(
-                                    flexive.util.getPkIds(selectedPks)
-                            );
-                            reload();
+                            try {
+                                flexive.util.getJsonRpc().ContentEditor.removeMultiple(
+                                        flexive.util.getPkIds(selectedPks)
+                                );
+                                reload();
+                            } catch (e) {
+                                alertDialog(e);
+                            }
                         });
                         break;
                     default:

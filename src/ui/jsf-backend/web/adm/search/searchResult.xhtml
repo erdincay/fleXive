@@ -85,23 +85,39 @@
                             break;
                         case "delete":
                             confirmDialog("#{fxMessageBean['SearchResult.dialog.confirm.deleteRow']}", function() {
-                                flexive.util.getJsonRpc().ContentEditor.remove(pk.id);
-                                reload();
+                                try {
+                                    flexive.util.getJsonRpc().ContentEditor.remove(pk.id);
+                                    reload();
+                                } catch (e) {
+                                    alertDialog(e);
+                                }
                             });
                             break;
                         case "deleteSelected":
                             confirmDialog("#{fxMessageBean['SearchResult.dialog.confirm.deleteSelection']}", function() {
-                                flexive.util.getJsonRpc().ContentEditor.removeMultiple(selectedIds);
-                                reload();
+                                try {
+                                    flexive.util.getJsonRpc().ContentEditor.removeMultiple(selectedIds);
+                                    reload();
+                                } catch (e) {
+                                    alertDialog(e);
+                                }
                             });
                             break;
                         case "deleteBriefcase":
-                            flexive.util.getJsonRpc().BriefcaseEditor.removeItems(briefcaseId, [pk.id]);
-                            reload();
+                            try {
+                                flexive.util.getJsonRpc().BriefcaseEditor.removeItems(briefcaseId, [pk.id]);
+                                reload();
+                            } catch (e) {
+                                alertDialog(e);
+                            }
                             break;
                         case "deleteBriefcaseSelected":
-                            flexive.util.getJsonRpc().BriefcaseEditor.removeItems(briefcaseId, selectedIds);
-                            reload();
+                            try {
+                                flexive.util.getJsonRpc().BriefcaseEditor.removeItems(briefcaseId, selectedIds);
+                                reload();
+                            } catch (e) {
+                                alertDialog(e);
+                            }
                             break;
                         default:
                     }
