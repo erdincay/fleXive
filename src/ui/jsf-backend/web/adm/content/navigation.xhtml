@@ -350,7 +350,7 @@
                     <c:forEach var="type" items="#{fxSystemBean.environment.types}">
                         <c:if test="#{type.id > 0}">
                             <adm:treeContextMenuItem label="#{type.label.defaultTranslation}"
-                                                     icon="#{type.icon.isEmpty ? null : fx:concat('thumbnail/pk', type.icon.defaultTranslation)}"
+                                                     icon="#{type.icon.isEmpty ? null : fx:concat('thumbnail/16/h16/pk', type.icon.defaultTranslation)}"
                                                      clickHandler="function(menuItem) { createContent(menuItem, #{type.id}); }"
                             />
                         </c:if>

@@ -33,7 +33,10 @@ package com.flexive.shared.stream;
 
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.media.FxMediaEngine;
+import com.flexive.shared.media.FxMediaSelector;
 import com.flexive.shared.exceptions.FxStreamException;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.stream.*;
 import org.apache.commons.logging.Log;
@@ -41,6 +44,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.ByteArrayOutputStream;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -216,28 +220,41 @@ public class FxStreamUtils {
      * @param server     (optional) list of remote stream servers
      * @param stream     the output stream to send the binary to
      * @param binaryId   id of the binary
-     * @param binarySize preview size of the binary if an image (1..3) or 0 for the original binary
+     * @param selector   selector of binary to use and for optional manipulations to perform
      * @throws FxStreamException on errors
      */
-    public static void downloadBinary(BinaryDownloadCallback callback, List<ServerLocation> server, OutputStream stream, long binaryId, int binarySize) throws FxStreamException {
+    @SuppressWarnings({"UnusedAssignment"})
+    public static void downloadBinary(BinaryDownloadCallback callback, List<ServerLocation> server, OutputStream stream, long binaryId, FxMediaSelector selector) throws FxStreamException {
         FxSharedUtils.checkParameterEmpty(stream, "stream");
-        if (binarySize < 0 || binarySize > 3)
-            throw new FxStreamException("ex.stream.download.param.binarySize");
         StreamClient client = null;
         try {
             client = getClient(server);
 //            client = StreamClientFactory.getRemoteClient(servers.get(0).getAddress(), servers.get(0).getPort());
             DataPacket<BinaryDownloadPayload> req = new DataPacket<BinaryDownloadPayload>(
-                    new BinaryDownloadPayload(binaryId, 1, 1, binarySize), true, true);
+                    new BinaryDownloadPayload(binaryId, 1, 1, selector.getSize().getSize()), true, true);
             DataPacket<BinaryDownloadPayload> resp = client.connect(req);
             if (resp.getPayload().isServerError())
                 throw new FxStreamException("ex.stream.serverError", resp.getPayload().getErrorMessage());
-            if (callback != null) {
-                callback.setMimeType(resp.getPayload().getMimeType());
-                callback.setBinarySize(resp.getPayload().getDatasize());
+            if (!selector.isApplyManipulations()) {
+                if (callback != null) {
+                    callback.setMimeType(resp.getPayload().getMimeType());
+                    callback.setBinarySize(resp.getPayload().getDatasize());
+                }
+                client.receiveStream(stream);
+                client.close();
+            } else {
+                //perform on-the-fly modifications
+                ByteArrayOutputStream _out = new ByteArrayOutputStream(resp.getPayload().getDatasize());
+                client.receiveStream(_out);
+                client.close();
+                byte[] _data = _out.toByteArray();
+                _out = null;
+                try {
+                    FxMediaEngine.streamingManipulate(_data, stream, callback, resp.getPayload().getMimeType(), selector);
+                } catch (FxApplicationException e) {
+                    throw new FxStreamException(e);
+                }
             }
-            client.receiveStream(stream);
-            client.close();
             client = null;
         } catch (StreamException e) {
             throw new FxStreamException(e);

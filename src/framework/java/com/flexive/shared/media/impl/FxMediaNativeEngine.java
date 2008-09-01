@@ -33,12 +33,15 @@ package com.flexive.shared.media.impl;
 
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.media.FxMetadata;
+import com.flexive.shared.media.FxMediaSelector;
+import com.flexive.shared.stream.BinaryDownloadCallback;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.sanselan.ImageFormat;
 import org.apache.sanselan.ImageInfo;
 import org.apache.sanselan.Sanselan;
+import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.common.IImageMetadata;
 import org.apache.sanselan.common.ImageMetadata;
 
@@ -47,6 +50,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.*;
 import java.io.File;
+import java.io.OutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -109,6 +115,30 @@ public class FxMediaNativeEngine {
                 throw new FxApplicationException(LOG, "ex.media.readFallback.error", original.getName(), extension, e.getMessage(), e1.getMessage());
             }
         }
+        BufferedImage bi2 = scale(bi, width, height);
+
+        String eMsg;
+        boolean fallback;
+        try {
+            fallback = !ImageIO.write(bi2, extension.substring(1), scaled);
+            eMsg = "No ImageIO writer found.";
+        } catch (Exception e) {
+            eMsg = e.getMessage();
+            fallback = true;
+        }
+        if (fallback) {
+            try {
+                Sanselan.writeImage(bi2, scaled, getImageFormatByExtension(extension), new HashMap());
+            } catch (Exception e1) {
+                throw new FxApplicationException(LOG, "ex.media.write.error", scaled.getName(), extension,
+                        eMsg + ", " + e1.getMessage());
+            }
+        }
+        return new int[]{bi2.getWidth(), bi2.getHeight()};
+    }
+
+    public static BufferedImage scale(BufferedImage bi, int width, int height) {
+        BufferedImage bi2;
         int scaleWidth = bi.getWidth(null);
         int scaleHeight = bi.getHeight(null);
         double scaleX = (double) width / scaleWidth;
@@ -117,7 +147,6 @@ public class FxMediaNativeEngine {
         scaleWidth = (int) ((double) scaleWidth * scale);
         scaleHeight = (int) ((double) scaleHeight * scale);
         Image scaledImage;
-        BufferedImage bi2;
         if (headless) {
             // create a new buffered image, don't rely on a local graphics system (headless mode)
             bi2 = new BufferedImage(scaleWidth, scaleHeight, BufferedImage.TYPE_INT_ARGB);
@@ -135,33 +164,53 @@ public class FxMediaNativeEngine {
             g.drawImage(bi, 0, 0, scaleWidth, scaleHeight, null);
         }
         g.dispose();
-        String eMsg;
-        boolean fallback;
-        try {
-            fallback = !ImageIO.write(bi2, extension.substring(1), scaled);
-            eMsg = "No ImageIO writer found.";
-        } catch (Exception e) {
-            eMsg = e.getMessage();
-            fallback = true;
-        }
-        if (fallback) {
-            try {
-                ImageFormat iFormat;
-                if (".BMP".equals(extension))
-                    iFormat = ImageFormat.IMAGE_FORMAT_BMP;
-                else if (".TIF".equals(extension))
-                    iFormat = ImageFormat.IMAGE_FORMAT_TIFF;
-                else if (".PNG".equals(extension))
-                    iFormat = ImageFormat.IMAGE_FORMAT_PNG;
-                else
-                    iFormat = ImageFormat.IMAGE_FORMAT_GIF;
-                Sanselan.writeImage(bi2, scaled, iFormat, new HashMap());
-            } catch (Exception e1) {
-                throw new FxApplicationException(LOG, "ex.media.write.error", scaled.getName(), extension,
-                        eMsg + ", " + e1.getMessage());
-            }
-        }
-        return new int[]{scaleWidth, scaleHeight};
+        return bi2;
+    }
+
+    /**
+     * Get the image format based on the extension
+     *
+     * @param extension image file extension
+     * @return ImageFormat (fallback to GIF if unknown)
+     */
+    public static ImageFormat getImageFormatByExtension(String extension) {
+        ImageFormat iFormat;
+        if (".BMP".equals(extension))
+            iFormat = ImageFormat.IMAGE_FORMAT_BMP;
+        else if (".TIF".equals(extension))
+            iFormat = ImageFormat.IMAGE_FORMAT_TIFF;
+        else if (".PNG".equals(extension))
+            iFormat = ImageFormat.IMAGE_FORMAT_PNG;
+        else
+            iFormat = ImageFormat.IMAGE_FORMAT_GIF;
+        return iFormat;
+    }
+
+    /**
+     * Get the image format based on the mime type
+     *
+     * @param mimeType image mime type
+     * @return ImageFormat (fallback to GIF if unknown)
+     */
+    public static ImageFormat getImageFormatByMimeType(String mimeType) {
+        String mime = mimeType == null ? "image/gif" : mimeType.toLowerCase();
+        ImageFormat iFormat;
+        if( "image/jpeg".equals(mimeType))
+            return ImageFormat.IMAGE_FORMAT_JPEG;
+        else if( "image/jpg".equals(mimeType))
+            return ImageFormat.IMAGE_FORMAT_JPEG;
+        else if( "image/gif".equals(mimeType))
+            return ImageFormat.IMAGE_FORMAT_GIF;
+        else if( "image/png".equals(mimeType))
+            return ImageFormat.IMAGE_FORMAT_PNG;
+        else if( "image/bmp".equals(mimeType))
+            return ImageFormat.IMAGE_FORMAT_PNG;
+        else if( "image/tif".equals(mimeType))
+            return ImageFormat.IMAGE_FORMAT_TIFF;
+        else if( "image/tiff".equals(mimeType))
+            return ImageFormat.IMAGE_FORMAT_TIFF;
+        else
+            return ImageFormat.IMAGE_FORMAT_GIF;
     }
 
     /**
@@ -197,6 +246,122 @@ public class FxMediaNativeEngine {
             throw new FxApplicationException("ex.media.identify.error", (file == null ? "unknown" : file.getName()),
                     mimeType, e.getMessage());
         }
+    }
+
+    /**
+     * Manipulate image raw data and stream them back
+     *
+     * @param data     raw image data
+     * @param out      stream
+     * @param callback optional callback to set mimetype and size
+     * @param mimeType mimetype
+     * @param selector operations to apply
+     * @throws FxApplicationException on errors
+     */
+    @SuppressWarnings({"UnusedAssignment"})
+    public static void streamingManipulate(byte[] data, OutputStream out, BinaryDownloadCallback callback, String mimeType, FxMediaSelector selector) throws FxApplicationException {
+        try {
+            ImageFormat format = FxMediaNativeEngine.getImageFormatByMimeType(mimeType);
+
+            BufferedImage bufferedImage;
+
+            if (format == ImageFormat.IMAGE_FORMAT_JPEG) {
+                //need ImageIO for jpegs
+                ByteArrayInputStream bis = new ByteArrayInputStream(data);
+                bufferedImage = ImageIO.read(bis);
+                bis = null;
+            } else {
+                try {
+                    bufferedImage = Sanselan.getBufferedImage(data);
+                } catch (ImageReadException e) {
+                    //might not be supported, try ImageIO
+                    ByteArrayInputStream bis = new ByteArrayInputStream(data);
+                    bufferedImage = ImageIO.read(bis);
+                    bis = null;
+                }
+            }
+
+            //perform requested operations
+            if (selector.isScaleHeight() || selector.isScaleWidth())
+                bufferedImage = FxMediaNativeEngine.scale(bufferedImage, selector.isScaleWidth() ? selector.getScaleWidth() : bufferedImage.getWidth(),
+                        selector.isScaleHeight() ? selector.getScaleHeight() : bufferedImage.getHeight());
+
+            if (callback != null) {
+                ByteArrayOutputStream _out = new ByteArrayOutputStream(data.length);
+                boolean fallback = false;
+                try {
+                    fallback = !ImageIO.write(bufferedImage, format.extension, _out);
+                } catch (Exception e) {
+                    fallback = true;
+                }
+                if (fallback)
+                    Sanselan.writeImage(bufferedImage, _out, format, new HashMap(0));
+                byte[] _newData = _out.toByteArray();
+                ImageInfo imageInfo = Sanselan.getImageInfo(_newData);
+                callback.setMimeType(imageInfo.getMimeType());
+                callback.setBinarySize(_newData.length);
+                out.write(_newData);
+            } else {
+                Sanselan.writeImage(bufferedImage, out, format, new HashMap(0));
+            }
+        } catch (Exception e) {
+            throw new FxApplicationException(e, "ex.media.manipulate.error", e.getMessage());
+        }
+    }
+
+    /**
+     * Detect the mimetype of a file based on the first n bytes and the filename
+     *
+     * @param header   first n bytes of the file to examine
+     * @param fileName filename
+     * @return detected mimetype
+     */
+    public static String detectMimeType(byte[] header, String fileName) {
+        if (header != null && header.length > 5) {
+            try {
+                ImageFormat iformat = Sanselan.guessFormat(header);
+                if (iformat.actual) {
+                    return "image/" + iformat.extension.toLowerCase();
+                }
+            } catch (Exception e) {
+                LOG.error(e);
+            }
+        }
+        if (!StringUtils.isEmpty(fileName) && fileName.indexOf('.') > 0) {
+            //extension based detection
+            fileName = fileName.trim().toUpperCase();
+            if (fileName.endsWith(".JPG"))
+                return "image/jpeg";
+            if (fileName.endsWith(".GIF"))
+                return "image/gif";
+            if (fileName.endsWith(".PNG"))
+                return "image/png";
+            if (fileName.endsWith(".BMP"))
+                return "image/bmp";
+            if (fileName.endsWith(".TIF"))
+                return "image/tiff";
+            if (fileName.endsWith(".DOC") || fileName.endsWith(".DOCX"))
+                return "application/msword";
+            if (fileName.endsWith(".XLS") || fileName.endsWith(".XLSX"))
+                return "application/msexcel";
+            if (fileName.endsWith(".PPT") || fileName.endsWith(".PPTX"))
+                return "application/mspowerpoint";
+            if (fileName.endsWith(".PDF"))
+                return "application/pdf";
+            if (fileName.endsWith(".HTM"))
+                return "text/html";
+            if (fileName.endsWith(".HTML"))
+                return "text/html";
+            if (fileName.endsWith(".TXT"))
+                return "text/plain";
+            if (fileName.endsWith(".ICO"))
+                return "image/vnd.microsoft.icon";
+        }
+        //byte signature based detection
+        if (header != null && header.length > 5 && header[1] == 0x50 && header[2] == 0x4E && header[3] == 0x47) { //PNG
+            return "image/png";
+        }
+        return "application/unknown";
     }
 
     /**

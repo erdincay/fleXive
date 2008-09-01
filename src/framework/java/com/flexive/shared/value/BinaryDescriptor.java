@@ -104,9 +104,25 @@ public class BinaryDescriptor implements Serializable {
             return blobIndex;
         }
 
-        /** {@inheritDoc} */
+        /**
+         * {@inheritDoc}
+         */
         public FxString getLabel() {
             return FxSharedUtils.getEnumLabel(this, size, size);
+        }
+
+        /**
+         * Get a previewSize from a numeric String
+         *
+         * @param s String with numeric size
+         * @return PreviewSizes
+         */
+        public static PreviewSizes fromString(String s) {
+            int size = Integer.parseInt(s);
+            for (PreviewSizes p : PreviewSizes.values())
+                if (p.getSize() == size)
+                    return p;
+            return PreviewSizes.ORIGINAL;
         }
     }
 
@@ -186,8 +202,8 @@ public class BinaryDescriptor implements Serializable {
     /**
      * Constructor (for new Binaries with unknown length - use with care since it will have to create a temp file to determine length!)
      *
-     * @param name         name of the binary
-     * @param stream       an open input stream for the binary to upload
+     * @param name   name of the binary
+     * @param stream an open input stream for the binary to upload
      * @throws FxStreamException on upload errors
      */
     public BinaryDescriptor(String name, InputStream stream) throws FxStreamException {
@@ -202,7 +218,7 @@ public class BinaryDescriptor implements Serializable {
             fos = new FileOutputStream(tmp);
             byte[] buffer = new byte[BUF_SIZE];
             int read;
-            while( (read = stream.read(buffer)) != -1 ) {
+            while ((read = stream.read(buffer)) != -1) {
                 fos.write(buffer, 0, read);
             }
             fos.flush();
@@ -216,19 +232,19 @@ public class BinaryDescriptor implements Serializable {
             throw new FxStreamException(e, "ex.stream", e.getMessage());
         } finally {
             try {
-                if( fos != null)
+                if (fos != null)
                     fos.close();
             } catch (IOException e) {
                 //ignore
             }
             try {
-                if( fin != null)
+                if (fin != null)
                     fin.close();
             } catch (IOException e) {
                 //ignore
             }
-            if( tmp != null ) {
-                if( !tmp.delete() )
+            if (tmp != null) {
+                if (!tmp.delete())
                     tmp.deleteOnExit();
             }
         }

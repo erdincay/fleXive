@@ -36,6 +36,7 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.exceptions.FxStreamException;
+import com.flexive.shared.media.FxMediaSelector;
 import com.flexive.shared.stream.BinaryDownloadCallback;
 import com.flexive.shared.stream.FxStreamUtils;
 import com.flexive.shared.value.BinaryDescriptor;
@@ -87,7 +88,7 @@ import java.net.URLEncoder;
  * Examples:
  * <code>/thumbnail/pk27.1/s2/test.jpg</code>
  * <code>/thumbnail/s0/w100/h300/pk4711.MAX/vermax/rot90/test.jpg</code>
- *
+ * <p/>
  * TODO:
  * rotate, flip, scale and crop are not implemented yet and have no effect!
  *
@@ -178,7 +179,7 @@ public class ThumbnailServlet implements Servlet {
         try {
             response.setDateHeader("Expires", System.currentTimeMillis() + 24L * 3600 * 1000);
             FxStreamUtils.downloadBinary(new ThumbnailBinaryCallback(response),
-                    CacheAdmin.getStreamServers(), response.getOutputStream(), binaryId, conf.getSize());
+                    CacheAdmin.getStreamServers(), response.getOutputStream(), binaryId, conf);
         } catch (FxStreamException e) {
             LOG.error(e);
             throw new ServletException(e);
@@ -211,9 +212,9 @@ public class ThumbnailServlet implements Servlet {
     /**
      * Return a thumbnail link for the given object.
      *
-     * @param pk    the object id
-     * @param size  the preview size (if null, the default size is used by the servlet)
-     * @param xpath the binary xpath (if null, the default preview for the object will be used)
+     * @param pk        the object id
+     * @param size      the preview size (if null, the default size is used by the servlet)
+     * @param xpath     the binary xpath (if null, the default preview for the object will be used)
      * @param timestamp the binary timestamp, to be added to the URL for fine-grained cache control
      * @return a thumbnail link for the given object.
      */
@@ -224,9 +225,9 @@ public class ThumbnailServlet implements Servlet {
     /**
      * Return a thumbnail link for the given object.
      *
-     * @param pk    the object id
-     * @param size  the preview size (if null, the default size is used by the servlet)
-     * @param xpath the binary xpath (if null, the default preview for the object will be used)
+     * @param pk        the object id
+     * @param size      the preview size (if null, the default size is used by the servlet)
+     * @param xpath     the binary xpath (if null, the default preview for the object will be used)
      * @param timestamp the binary timestamp, to be added to the URL for fine-grained cache control
      * @param language  the language (for multi-lingual objects, otherwise the default language will be used)
      * @return a thumbnail link for the given object.
@@ -238,6 +239,37 @@ public class ThumbnailServlet implements Servlet {
                     + URLEncoder.encode(FxSharedUtils.escapeXPath(xpath), "UTF-8") : "")
                     + "/ts" + timestamp
                     + (language != null ? "/lang" + language.getIso2digit() : "");
+        } catch (UnsupportedEncodingException e) {
+            // shouldn't happen with UTF-8
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    /**
+     * Request a thumbnail link for the FxMediaSelector's settings
+     *
+     * @param selector FxMediaSelector containing requested settings
+     * @return a thumbnail link for the given selector
+     */
+    public static String getLink(FxMediaSelector selector) {
+        try {
+            StringBuilder sb = new StringBuilder(100);
+            sb.append(URI_BASE).
+                    append("pk").append(selector.getPK()).
+                    append("/s").append(selector.getSize().getBlobIndex());
+            if (StringUtils.isNotBlank(selector.getXPath()))
+                sb.append("/xp").append(URLEncoder.encode(FxSharedUtils.escapeXPath(selector.getXPath()), "UTF-8"));
+            if (selector.getLanguageIso() != null)
+                sb.append("/lang").append(selector.getLanguageIso());
+            if (selector.isScaleHeight())
+                sb.append("/h").append(selector.getScaleHeight());
+            if (selector.isScaleWidth())
+                sb.append("/w").append(selector.getScaleWidth());
+            if (selector.hasTimestamp())
+                sb.append("/ts").append(selector.getTimestamp());
+            if (selector.hasFilename())
+                sb.append("/").append(selector.getFilename());
+            return sb.toString();
         } catch (UnsupportedEncodingException e) {
             // shouldn't happen with UTF-8
             throw new IllegalArgumentException(e);

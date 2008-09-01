@@ -19,7 +19,7 @@
             <ui:repeat var="type" value="#{fxSystemBean.environment.types}">
                 <ui:fragment rendered="#{not type.icon.isEmpty}">
                     .TreeIconType_#{type.id} {
-                        background-image: url('<fx:thumbnail pk="#{type.icon.defaultTranslation}" urlOnly="true" previewSize="original"/>');
+                        background-image: url('<fx:thumbnail pk="#{type.icon.defaultTranslation}" urlOnly="true" previewSize="original" width="16" height="16"/>');
                     }
                 </ui:fragment>
             </ui:repeat>

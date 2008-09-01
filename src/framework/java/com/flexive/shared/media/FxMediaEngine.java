@@ -35,15 +35,14 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.media.impl.FxMediaImageMagickEngine;
 import com.flexive.shared.media.impl.FxMediaNativeEngine;
 import com.flexive.shared.media.impl.FxUnknownMetadataImpl;
-import org.apache.commons.lang.StringUtils;
+import com.flexive.shared.stream.BinaryDownloadCallback;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.sanselan.ImageFormat;
-import org.apache.sanselan.Sanselan;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Media engine
@@ -145,6 +144,21 @@ public class FxMediaEngine {
     }
 
     /**
+     * Manipulate image raw data and stream them back
+     *
+     * @param data     raw image data
+     * @param out      stream
+     * @param callback optional callback to set mimetype and size
+     * @param mimeType mimetype
+     * @param selector operations to apply
+     * @throws FxApplicationException on errors
+     */
+    public static void streamingManipulate(byte[] data, OutputStream out, BinaryDownloadCallback callback, String mimeType, FxMediaSelector selector) throws FxApplicationException {
+        //for now we have only a native implementation
+        FxMediaNativeEngine.streamingManipulate(data, out, callback, mimeType, selector);
+    }
+
+    /**
      * Detect the mimetype of a file based on the first n bytes and the filename
      *
      * @param header first n bytes of the file to examine
@@ -162,48 +176,6 @@ public class FxMediaEngine {
      * @return detected mimetype
      */
     public static String detectMimeType(byte[] header, String fileName) {
-        if (header != null && header.length > 5) {
-            try {
-                ImageFormat iformat = Sanselan.guessFormat(header);
-                if (iformat.actual) {
-                    return "image/" + iformat.extension.toLowerCase();
-                }
-            } catch (Exception e) {
-                LOG.error(e);
-            }
-        }
-        if (!StringUtils.isEmpty(fileName) && fileName.indexOf('.') > 0) {
-            //extension based detection
-            fileName = fileName.trim().toUpperCase();
-            if (fileName.endsWith(".JPG"))
-                return "image/jpeg";
-            if (fileName.endsWith(".GIF"))
-                return "image/gif";
-            if (fileName.endsWith(".PNG"))
-                return "image/png";
-            if (fileName.endsWith(".BMP"))
-                return "image/bmp";
-            if (fileName.endsWith(".DOC") || fileName.endsWith(".DOCX"))
-                return "application/msword";
-            if (fileName.endsWith(".XLS") || fileName.endsWith(".XLSX"))
-                return "application/msexcel";
-            if (fileName.endsWith(".PPT") || fileName.endsWith(".PPTX"))
-                return "application/mspowerpoint";
-            if (fileName.endsWith(".PDF"))
-                return "application/pdf";
-            if (fileName.endsWith(".HTM"))
-                return "text/html";
-            if (fileName.endsWith(".HTML"))
-                return "text/html";
-            if (fileName.endsWith(".TXT"))
-                return "text/plain";
-            if (fileName.endsWith(".ICO"))
-                return "image/vnd.microsoft.icon";
-        }
-        //byte signature based detection
-        if (header != null && header.length > 5 && header[1] == 0x50 && header[2] == 0x4E && header[3] == 0x47) { //PNG
-            return "image/png";
-        }
-        return "application/unknown";
+        return FxMediaNativeEngine.detectMimeType(header, fileName);
     }
 }

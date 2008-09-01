@@ -34,14 +34,15 @@ package com.flexive.faces.components;
 import com.flexive.faces.FxJsfComponentUtils;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.shared.XPathElement;
+import com.flexive.shared.media.FxMediaSelector;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxBinary;
 import com.flexive.war.servlet.ThumbnailServlet;
 
-import javax.faces.component.UIOutput;
 import javax.faces.component.UIComponent;
+import javax.faces.component.UIOutput;
 import javax.faces.component.html.HtmlGraphicImage;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.context.FacesContext;
@@ -60,6 +61,8 @@ public class Thumbnail extends UIOutput {
     private FxBinary binary;
     private UIComponent body;
     private boolean urlOnly;
+    private int width = -1;
+    private int height = -1;
     private String previewSize = BinaryDescriptor.PreviewSizes.PREVIEW2.name();
 
     public Thumbnail() {
@@ -76,15 +79,21 @@ public class Thumbnail extends UIOutput {
             throw new IllegalArgumentException("Invalid preview size: " + getPreviewSize()
                     + ", possible values are: " + Arrays.toString(BinaryDescriptor.PreviewSizes.values()));
         }
+        FxMediaSelector selector = new FxMediaSelector();
         if (getPk() != null) {
-            link = ThumbnailServlet.getLink(getPk(), previewSize);
+            selector.setPK(getPk());
         } else if (getBinary() != null) {
-            link = ThumbnailServlet.getLink(XPathElement.getPK(getBinary().getXPath()),
-                    previewSize,
-                    getBinary().getXPath());
+            selector.setPK(XPathElement.getPK(getBinary().getXPath()));
+            selector.setXPath(getBinary().getXPath());
         } else {
             throw new FxInvalidParameterException("pk", "ex.jsf.thumbnail.empty").asRuntimeException();
         }
+        selector.setSize(previewSize);
+        if( width != -1 )
+            selector.setScaleWidth(width);
+        if( height != -1 )
+            selector.setScaleHeight(height);
+        link = ThumbnailServlet.getLink(selector);
         if (isUrlOnly()) {
             body = FxJsfUtils.addChildComponent(this, HtmlOutputText.COMPONENT_TYPE);
             ((HtmlOutputText) body).setEscape(false);
@@ -138,14 +147,32 @@ public class Thumbnail extends UIOutput {
         this.previewSize = previewSize;
     }
 
+    public int getWidth() {
+        return width;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
+    }
+
     @Override
     public Object saveState(FacesContext context) {
-        final Object[] state = new Object[5];
+        final Object[] state = new Object[7];
         state[0] = super.saveState(context);
         state[1] = pk;
         state[2] = binary;
         state[3] = urlOnly;
         state[4] = previewSize;
+        state[5] = width;
+        state[6] = height;
         return state;
     }
 

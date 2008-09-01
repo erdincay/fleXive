@@ -34,6 +34,7 @@ package com.flexive.faces.components.input;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.components.Thumbnail;
 import com.flexive.shared.*;
+import com.flexive.shared.media.FxMediaSelector;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxStructureOption;
 import com.flexive.shared.value.*;
@@ -106,10 +107,11 @@ class ReadOnlyModeHelper extends RenderHelper {
             // render reference preview
             final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(parent, HtmlGraphicImage.COMPONENT_TYPE);
             image.setUrl(ThumbnailServlet.getLink(
-                    ((FxReference) value).getDefaultTranslation(),
-                    BinaryDescriptor.PreviewSizes.PREVIEW1
+                    new FxMediaSelector(((FxReference) value).getDefaultTranslation()).
+                            setSize(BinaryDescriptor.PreviewSizes.PREVIEW1).
+                            setScaleHeight(16).
+                            setScaleWidth(16)
             ));
-            image.setHeight("16px");
             // render reference label
             addOutputComponent(FxValueRendererFactory.getInstance(outputLanguage).format(value, language), language);
         } else if (component.isFilter() && !(useHTMLEditor || value instanceof FxHTML)) {

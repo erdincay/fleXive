@@ -31,14 +31,11 @@
  ***************************************************************/
 package com.flexive.war;
 
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.FxLanguage;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.content.FxPK;
-import com.flexive.shared.exceptions.FxApplicationException;
-import org.apache.commons.lang.StringUtils;
+import com.flexive.shared.media.FxMediaSelector;
+import com.flexive.shared.value.BinaryDescriptor;
 
-import java.awt.*;
 import java.util.regex.Pattern;
 
 /**
@@ -46,7 +43,7 @@ import java.util.regex.Pattern;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class FxThumbnailURIConfigurator {
+public class FxThumbnailURIConfigurator extends FxMediaSelector {
 
     private final static Pattern pPK = Pattern.compile("^pk\\d+(\\.(\\d+|MAX|LIVE))?");
     private final static Pattern pXPath = Pattern.compile("^xp.+");
@@ -58,19 +55,9 @@ public class FxThumbnailURIConfigurator {
 
 
     private String URI;
-    private FxPK pk = null;
-    private String xp = null;
-    private String lang = null;
-    private Boolean langFallback = null;
     private String err500 = null;
     private String err404 = null;
     private String err403 = null;
-    private int size = 0;
-    private int scaleWidth = -1, scaleHeight = -1;
-    private byte rot = 0;
-    private Boolean flipH = null, flipV = null;
-    private Rectangle crop = null;
-    private String filename = null; //filename is last parameter (optional) if it contains a dot and does not match another parameter
 
     /**
      * Ctor from URI
@@ -101,124 +88,35 @@ public class FxThumbnailURIConfigurator {
     private void parse() {
         String[] elements = URI.split("\\/");
         for (String element : elements) {
-            if (pk == null && pPK.matcher(element).matches()) {
-                pk = FxPK.fromString(element.substring(2));
+            if (getPK() == null && pPK.matcher(element).matches()) {
+                setPK(FxPK.fromString(element.substring(2)));
             }
-            if (xp == null && pXPath.matcher(element).matches()) {
-                xp = FxSharedUtils.decodeXPath(element.substring(2));
+            if (getXPath() == null && pXPath.matcher(element).matches()) {
+                setXPath(FxSharedUtils.decodeXPath(element.substring(2)));
             }
-            if (size == 0 && pSize.matcher(element).matches())
-                size = Integer.parseInt(element.substring(1));
-            if (scaleHeight == -1 && pHeight.matcher(element).matches())
-                scaleHeight = Integer.parseInt(element.substring(1));
-            if (scaleWidth == -1 && pWidth.matcher(element).matches())
-                scaleWidth = Integer.parseInt(element.substring(1));
-            if (lang == null && pLang.matcher(element).matches())
-                lang = element.substring(4);
-            if (langFallback == null && pLangFallback.matcher(element).matches())
-                langFallback = "1".equals(element.substring(3));
+            if (getSize() == BinaryDescriptor.PreviewSizes.ORIGINAL && pSize.matcher(element).matches())
+                setSize(BinaryDescriptor.PreviewSizes.fromString(element.substring(1)));
+            if (getScaleHeight() == -1 && pHeight.matcher(element).matches()) {
+                setScaleHeight(Integer.parseInt(element.substring(1)));
+            }
+            if (getScaleWidth() == -1 && pWidth.matcher(element).matches()) {
+                setScaleWidth(Integer.parseInt(element.substring(1)));
+            }
+            if (getLanguageIso() == null && pLang.matcher(element).matches())
+                setLang(element.substring(4));
+            if (!useLangFallback() && pLangFallback.matcher(element).matches())
+                setLangFallback("1".equals(element.substring(3)));
         }
-        if (xp == null)
-            xp = "/";
+        if (getXPath() == null)
+            setXPath("/");
     }
 
     /**
-     * Is a primary key set?
+     * Get the original configuration URI
      *
-     * @return primary key set
+     * @return the original configuration URI
      */
-    public boolean hasPK() {
-        return pk != null;
-    }
-
-    /**
-     * Get the XPath of the property containing the image
-     *
-     * @return XPath of the property containing the image
-     */
-    public String getXPath() {
-        return xp;
-    }
-
-    /**
-     * Get the primary key
-     *
-     * @return primary key
-     */
-    public FxPK getPK() {
-        return pk;
-    }
-
-    /**
-     * Get the requested (pre-scaled) thumbnail size (0..3)
-     *
-     * @return requested (pre-scaled) thumbnail size (0..3)
-     */
-    public int getSize() {
-        return size;
-    }
-
-    /**
-     * Get the iso code of the desired translation for multilingual images
-     *
-     * @return iso code of the desired translation
-     */
-    public String getLanguageIso() {
-        return lang;
-    }
-
-    /**
-     * Fallback to the default language if no image present for the requested?
-     *
-     * @return fallback to the default language?
-     */
-    public boolean useLangFallback() {
-        return langFallback != null && langFallback;
-    }
-
-    /**
-     * Get the requested language for the image
-     *
-     * @return requested language
-     * @throws FxApplicationException on errors
-     */
-    public FxLanguage getLanguage() throws FxApplicationException {
-        return StringUtils.isNotBlank(lang) ? EJBLookup.getLanguageEngine().load(lang) : null;
-    }
-
-    /**
-     * Scale to a given height?
-     *
-     * @return scale to a given height?
-     */
-    public boolean isScaleHeight() {
-        return scaleHeight >= 0;
-    }
-
-    /**
-     * Get the height to scale to
-     *
-     * @return height to scale to
-     */
-    public int getScaleHeight() {
-        return scaleHeight;
-    }
-
-    /**
-     * Scale to a given width?
-     *
-     * @return scale to a given width?
-     */
-    public boolean isScaleWidth() {
-        return scaleWidth >= 0;
-    }
-
-    /**
-     * Get the width to scale to
-     *
-     * @return width to scale to
-     */
-    public int getScaleWidth() {
-        return scaleWidth;
+    public String getURI() {
+        return URI;
     }
 }
