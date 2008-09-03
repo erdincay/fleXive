@@ -407,7 +407,19 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                 }
                 try {
                     final FxPropertyAssignmentEdit pa = FxPropertyAssignmentEdit.createNew((FxPropertyAssignment) fxAssignment,
-                            type, alias, "/").setDefaultMultiplicity(defaultMultiplicity);
+                            type, alias, "/");
+                    if( attributes.containsKey("defaultMultiplicity"))
+                        pa.setDefaultMultiplicity(defaultMultiplicity);
+                    if( attributes.containsKey("description"))
+                        pa.setLabel(description);
+                    if( attributes.containsKey("hint"))
+                        pa.setHint(hint);
+                    if( attributes.containsKey("acl"))
+                        pa.setACL(acl);
+                    if( attributes.containsKey("defaultValue"))
+                        pa.setDefaultValue(defaultValue);
+                    if( attributes.containsKey("multiplicity"))
+                        pa.setMultiplicity(multiplicity);
                     return new PropertyAssignmentNode(pa);
                 } catch (FxApplicationException e) {
                     throw e.asRuntimeException();
