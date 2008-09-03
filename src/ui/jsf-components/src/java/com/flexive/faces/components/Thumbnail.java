@@ -63,6 +63,9 @@ public class Thumbnail extends UIOutput {
     private boolean urlOnly;
     private int width = -1;
     private int height = -1;
+    private int rot = 0;
+    private boolean flipH = false;
+    private boolean flipV = false;
     private String previewSize = BinaryDescriptor.PreviewSizes.PREVIEW2.name();
 
     public Thumbnail() {
@@ -93,6 +96,12 @@ public class Thumbnail extends UIOutput {
             selector.setScaleWidth(width);
         if( height != -1 )
             selector.setScaleHeight(height);
+        if( rot % 360 != 0)
+            selector.setRotationAngle(rot);
+        if( flipH )
+            selector.setFlipHorizontal(true);
+        if( flipV )
+            selector.setFlipVertical(true);
         link = ThumbnailServlet.getLink(selector);
         if (isUrlOnly()) {
             body = FxJsfUtils.addChildComponent(this, HtmlOutputText.COMPONENT_TYPE);
@@ -163,9 +172,33 @@ public class Thumbnail extends UIOutput {
         this.height = height;
     }
 
+    public int getRot() {
+        return rot;
+    }
+
+    public void setRot(int rot) {
+        this.rot = rot;
+    }
+
+    public boolean isFlipH() {
+        return flipH;
+    }
+
+    public void setFlipH(boolean flipH) {
+        this.flipH = flipH;
+    }
+
+    public boolean isFlipV() {
+        return flipV;
+    }
+
+    public void setFlipV(boolean flipV) {
+        this.flipV = flipV;
+    }
+
     @Override
     public Object saveState(FacesContext context) {
-        final Object[] state = new Object[7];
+        final Object[] state = new Object[10];
         state[0] = super.saveState(context);
         state[1] = pk;
         state[2] = binary;
@@ -173,6 +206,9 @@ public class Thumbnail extends UIOutput {
         state[4] = previewSize;
         state[5] = width;
         state[6] = height;
+        state[7] = rot;
+        state[8] = flipH;
+        state[9] = flipV;
         return state;
     }
 
@@ -184,5 +220,10 @@ public class Thumbnail extends UIOutput {
         binary = (FxBinary) state[2];
         urlOnly = state[3] != null && (Boolean) state[3];
         previewSize = (String) state[4];
+        width = (Integer)state[5];
+        height = (Integer)state[6];
+        rot = (Integer)state[7];
+        flipH = (Boolean)state[8];
+        flipV = (Boolean)state[9];
     }
 }

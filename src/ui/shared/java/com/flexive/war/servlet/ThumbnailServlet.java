@@ -90,7 +90,7 @@ import java.net.URLEncoder;
  * <code>/thumbnail/s0/w100/h300/pk4711.MAX/vermax/rot90/test.jpg</code>
  * <p/>
  * TODO:
- * rotate, flip, scale and crop are not implemented yet and have no effect!
+ * rotate, flip and crop are not implemented yet and have no effect!
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)

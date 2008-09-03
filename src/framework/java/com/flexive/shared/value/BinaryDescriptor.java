@@ -120,7 +120,7 @@ public class BinaryDescriptor implements Serializable {
         public static PreviewSizes fromString(String s) {
             int size = Integer.parseInt(s);
             for (PreviewSizes p : PreviewSizes.values())
-                if (p.getSize() == size)
+                if (p.getBlobIndex() == size)
                     return p;
             return PreviewSizes.ORIGINAL;
         }

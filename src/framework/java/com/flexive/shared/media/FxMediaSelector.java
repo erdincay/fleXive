@@ -54,8 +54,8 @@ public class FxMediaSelector implements Serializable {
     private Boolean langFallback = null;
     private BinaryDescriptor.PreviewSizes size = BinaryDescriptor.PreviewSizes.ORIGINAL;
     private int scaleWidth = -1, scaleHeight = -1;
-    private byte rot = 0;
-    private Boolean flipH = null, flipV = null;
+    private int rotationAngle = 0;
+    private Boolean flipHorizontal = null, flipVertical = null;
     private Rectangle crop = null;
     private String filename = null; //filename is last parameter (optional) if it contains a dot and does not match another parameter
     private long timestamp = 0; //optional timestamp to apply
@@ -160,12 +160,12 @@ public class FxMediaSelector implements Serializable {
     /**
      * Rotate the image by the given degrees
      *
-     * @param rot degrees to rotate
+     * @param angle degrees to rotate
      * @return this object, useful for chaining
      */
-    public FxMediaSelector setRot(byte rot) {
-        this.rot = rot;
-        if (rot != 0)
+    public FxMediaSelector setRotationAngle(int angle) {
+        this.rotationAngle = angle % 360;
+        if (angle % 360 != 0)
             applyManipulations = true;
         return this;
     }
@@ -176,8 +176,8 @@ public class FxMediaSelector implements Serializable {
      * @param flipH flip horizontal?
      * @return this object, useful for chaining
      */
-    public FxMediaSelector setFlipH(Boolean flipH) {
-        this.flipH = flipH;
+    public FxMediaSelector setFlipHorizontal(Boolean flipH) {
+        this.flipHorizontal = flipH;
         applyManipulations = true;
         return this;
     }
@@ -188,8 +188,8 @@ public class FxMediaSelector implements Serializable {
      * @param flipV flip vertical?
      * @return this object, useful for chaining
      */
-    public FxMediaSelector setFlipV(Boolean flipV) {
-        this.flipV = flipV;
+    public FxMediaSelector setFlipVertical(Boolean flipV) {
+        this.flipVertical = flipV;
         applyManipulations = true;
         return this;
     }
@@ -202,8 +202,18 @@ public class FxMediaSelector implements Serializable {
      */
     public FxMediaSelector setCrop(Rectangle crop) {
         this.crop = crop;
-        applyManipulations = true;
+        if (crop != null)
+            applyManipulations = true;
         return this;
+    }
+
+    /**
+     * Is a crop operation requested?
+     *
+     * @return crop operation requested?
+     */
+    public boolean isCrop() {
+        return this.crop != null;
     }
 
     /**
@@ -269,8 +279,8 @@ public class FxMediaSelector implements Serializable {
      *
      * @return rotation angle
      */
-    public byte getRot() {
-        return rot;
+    public int getRotationAngle() {
+        return rotationAngle;
     }
 
     /**
@@ -278,8 +288,8 @@ public class FxMediaSelector implements Serializable {
      *
      * @return flip horizontal?
      */
-    public Boolean getFlipH() {
-        return flipH;
+    public Boolean isFlipHorizontal() {
+        return flipHorizontal != null && flipHorizontal;
     }
 
     /**
@@ -287,8 +297,8 @@ public class FxMediaSelector implements Serializable {
      *
      * @return flip vertical?
      */
-    public Boolean getFlipV() {
-        return flipV;
+    public Boolean isFlipVertical() {
+        return flipVertical != null && flipVertical;
     }
 
     /**

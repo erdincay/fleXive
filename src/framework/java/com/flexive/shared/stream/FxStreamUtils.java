@@ -231,7 +231,7 @@ public class FxStreamUtils {
             client = getClient(server);
 //            client = StreamClientFactory.getRemoteClient(servers.get(0).getAddress(), servers.get(0).getPort());
             DataPacket<BinaryDownloadPayload> req = new DataPacket<BinaryDownloadPayload>(
-                    new BinaryDownloadPayload(binaryId, 1, 1, selector.getSize().getSize()), true, true);
+                    new BinaryDownloadPayload(binaryId, 1, 1, selector.getSize().getBlobIndex()), true, true);
             DataPacket<BinaryDownloadPayload> resp = client.connect(req);
             if (resp.getPayload().isServerError())
                 throw new FxStreamException("ex.stream.serverError", resp.getPayload().getErrorMessage());

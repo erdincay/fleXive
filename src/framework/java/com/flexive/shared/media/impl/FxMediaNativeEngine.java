@@ -32,27 +32,30 @@
 package com.flexive.shared.media.impl;
 
 import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.media.FxMetadata;
 import com.flexive.shared.media.FxMediaSelector;
+import com.flexive.shared.media.FxMetadata;
 import com.flexive.shared.stream.BinaryDownloadCallback;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.sanselan.ImageFormat;
 import org.apache.sanselan.ImageInfo;
-import org.apache.sanselan.Sanselan;
 import org.apache.sanselan.ImageReadException;
+import org.apache.sanselan.Sanselan;
 import org.apache.sanselan.common.IImageMetadata;
 import org.apache.sanselan.common.ImageMetadata;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.*;
-import java.io.File;
-import java.io.OutputStream;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
+import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -99,7 +102,7 @@ public class FxMediaNativeEngine {
      * @throws FxApplicationException on errors
      */
     public static int[] scale(File original, File scaled, String extension, int width, int height) throws FxApplicationException {
-        if( headless && FxMediaImageMagickEngine.IM_AVAILABLE && ".GIF".equals(extension)) {
+        if (headless && FxMediaImageMagickEngine.IM_AVAILABLE && ".GIF".equals(extension)) {
             //native headless engine can't handle gif transparency ... so if we have IM we use it, else
             //transparent pixels will be black
             return FxMediaImageMagickEngine.scale(original, scaled, extension, width, height);
@@ -195,19 +198,19 @@ public class FxMediaNativeEngine {
     public static ImageFormat getImageFormatByMimeType(String mimeType) {
         String mime = mimeType == null ? "image/gif" : mimeType.toLowerCase();
         ImageFormat iFormat;
-        if( "image/jpeg".equals(mimeType))
+        if ("image/jpeg".equals(mimeType))
             return ImageFormat.IMAGE_FORMAT_JPEG;
-        else if( "image/jpg".equals(mimeType))
+        else if ("image/jpg".equals(mimeType))
             return ImageFormat.IMAGE_FORMAT_JPEG;
-        else if( "image/gif".equals(mimeType))
+        else if ("image/gif".equals(mimeType))
             return ImageFormat.IMAGE_FORMAT_GIF;
-        else if( "image/png".equals(mimeType))
+        else if ("image/png".equals(mimeType))
             return ImageFormat.IMAGE_FORMAT_PNG;
-        else if( "image/bmp".equals(mimeType))
+        else if ("image/bmp".equals(mimeType))
             return ImageFormat.IMAGE_FORMAT_PNG;
-        else if( "image/tif".equals(mimeType))
+        else if ("image/tif".equals(mimeType))
             return ImageFormat.IMAGE_FORMAT_TIFF;
-        else if( "image/tiff".equals(mimeType))
+        else if ("image/tiff".equals(mimeType))
             return ImageFormat.IMAGE_FORMAT_TIFF;
         else
             return ImageFormat.IMAGE_FORMAT_GIF;
@@ -282,9 +285,21 @@ public class FxMediaNativeEngine {
             }
 
             //perform requested operations
+            if (selector.isCrop())
+                bufferedImage = bufferedImage.getSubimage(
+                        (int) selector.getCrop().getX(),
+                        (int) selector.getCrop().getY(),
+                        (int) selector.getCrop().getWidth(),
+                        (int) selector.getCrop().getHeight());
+            if (selector.isFlipHorizontal())
+                bufferedImage = flipHorizontal(bufferedImage);
+            if (selector.isFlipVertical())
+                bufferedImage = flipVertical(bufferedImage);
             if (selector.isScaleHeight() || selector.isScaleWidth())
-                bufferedImage = FxMediaNativeEngine.scale(bufferedImage, selector.isScaleWidth() ? selector.getScaleWidth() : bufferedImage.getWidth(),
+                bufferedImage = scale(bufferedImage, selector.isScaleWidth() ? selector.getScaleWidth() : bufferedImage.getWidth(),
                         selector.isScaleHeight() ? selector.getScaleHeight() : bufferedImage.getHeight());
+            if (selector.getRotationAngle() != 0)
+                bufferedImage = rotate(bufferedImage, selector.getRotationAngle());
 
             if (callback != null) {
                 ByteArrayOutputStream _out = new ByteArrayOutputStream(data.length);
@@ -307,6 +322,93 @@ public class FxMediaNativeEngine {
         } catch (Exception e) {
             throw new FxApplicationException(e, "ex.media.manipulate.error", e.getMessage());
         }
+    }
+
+    /**
+     * Rotate an image using the requested angle
+     *
+     * @param bufferedImage imeg to rotate
+     * @param angle         angle to rotate
+     * @return BufferedImage containing the rotation
+     */
+    @SuppressWarnings({"UnusedAssignment"})
+    private static BufferedImage rotate(BufferedImage bufferedImage, int angle) {
+        angle = angle % 360;
+        if (angle == 0)
+            return bufferedImage;
+        if (angle < 0)
+            angle += 360;
+        switch (angle) {
+            case 90:
+                BufferedImageOp rot90 = new
+                        AffineTransformOp(AffineTransform.getRotateInstance(Math.PI / 2.0, bufferedImage.getHeight() / 2.0,
+                        bufferedImage.getHeight() / 2.0), AffineTransformOp.TYPE_BILINEAR);
+                BufferedImage img90 = new BufferedImage(bufferedImage.getHeight(), bufferedImage.getWidth(), bufferedImage.getType());
+                return rot90.filter(bufferedImage, img90);
+            case 180:
+                BufferedImageOp rot180 = new
+                        AffineTransformOp(AffineTransform.getRotateInstance(Math.PI, bufferedImage.getWidth() / 2.0,
+                        bufferedImage.getHeight() / 2.0), AffineTransformOp.TYPE_BILINEAR);
+                BufferedImage img180 = new BufferedImage(bufferedImage.getWidth(), bufferedImage.getHeight(), bufferedImage.getType());
+                return rot180.filter(bufferedImage, img180);
+            case 270:
+                BufferedImageOp rot270 = new
+                        AffineTransformOp(AffineTransform.getRotateInstance(-Math.PI / 2.0, bufferedImage.getWidth() / 2.0,
+                        bufferedImage.getWidth() / 2.0), AffineTransformOp.TYPE_BILINEAR);
+                BufferedImage img270 = new BufferedImage(bufferedImage.getHeight(), bufferedImage.getWidth(), bufferedImage.getType());
+                return rot270.filter(bufferedImage, img270);
+            default:
+                //rotate using a non-standard angle (have to draw a box around the image that can fit it)
+                int box = (int) Math.sqrt(bufferedImage.getHeight() * bufferedImage.getHeight() + bufferedImage.getWidth() * bufferedImage.getWidth());
+                BufferedImage imgFree = new BufferedImage(box, box, bufferedImage.getType());
+                BufferedImage imgRet = new BufferedImage(box, box, bufferedImage.getType());
+                Graphics2D g = imgFree.createGraphics();
+                if (bufferedImage.getTransparency() == Transparency.OPAQUE) {
+                    //draw a white background on opaque images since they dont support transparency
+                    g.setBackground(Color.WHITE);
+                    g.clearRect(0, 0, box, box);
+                    Graphics2D gr = imgRet.createGraphics();
+                    gr.setBackground(Color.WHITE);
+                    gr.clearRect(0, 0, box, box);
+                    gr = null;
+                }
+                g.drawImage(bufferedImage, box / 2 - bufferedImage.getWidth() / 2, box / 2 - bufferedImage.getHeight() / 2,
+                        bufferedImage.getWidth(), bufferedImage.getHeight(), null);
+                g = null;
+                AffineTransform at = new AffineTransform();
+                at.rotate(angle * Math.PI / 180.0, box / 2.0, box / 2.0);
+                BufferedImageOp bio;
+                bio = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
+                return bio.filter(imgFree, imgRet);
+        }
+    }
+
+    /**
+     * Flip the image horizontal
+     *
+     * @param bufferedImage original image
+     * @return horizontally flipped image
+     */
+    private static BufferedImage flipHorizontal(BufferedImage bufferedImage) {
+        AffineTransform at = AffineTransform.getTranslateInstance(bufferedImage.getWidth(), 0);
+        at.scale(-1.0, 1.0);
+        BufferedImageOp biOp = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+        BufferedImage imgRes = new BufferedImage(bufferedImage.getWidth(), bufferedImage.getHeight(), bufferedImage.getType());
+        return biOp.filter(bufferedImage, imgRes);
+    }
+
+    /**
+     * Flip the image horizontal
+     *
+     * @param bufferedImage original image
+     * @return horizontally flipped image
+     */
+    private static BufferedImage flipVertical(BufferedImage bufferedImage) {
+        AffineTransform at = AffineTransform.getTranslateInstance(0, bufferedImage.getHeight());
+        at.scale(1.0, -1.0);
+        BufferedImageOp biOp = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+        BufferedImage imgRes = new BufferedImage(bufferedImage.getWidth(), bufferedImage.getHeight(), bufferedImage.getType());
+        return biOp.filter(bufferedImage, imgRes);
     }
 
     /**
