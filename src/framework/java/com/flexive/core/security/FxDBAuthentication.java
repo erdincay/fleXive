@@ -62,10 +62,21 @@ import java.util.Date;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-class FxDBAuthentication {
+public final class FxDBAuthentication {
 
     private static final Log LOG = LogFactory.getLog(FxDBAuthentication.class);
 
+    /**
+     * Login a user using flexive's database
+     *
+     * @param username name of the user
+     * @param password plaintext password
+     * @param callback callback providing datasource, ejb context and "take over"
+     * @return Authenticated UserTicket
+     * @throws FxAccountInUseException   on errors
+     * @throws FxLoginFailedException    on errors
+     * @throws FxAccountExpiredException on errors
+     */
     public static UserTicket login(String username, String password, FxCallback callback) throws FxAccountInUseException, FxLoginFailedException, FxAccountExpiredException {
         final long SYS_UP = CacheAdmin.getInstance().getSystemStartTime();
         FxContext inf = FxContext.get();
@@ -118,7 +129,7 @@ class FxDBAuthentication {
 
             // Account active?
             if (!active || !validated ||
-                    (CacheAdmin.isEnvironmentLoaded() && !CacheAdmin.getEnvironment().getMandator(mandator).isActive()) ) {
+                    (CacheAdmin.isEnvironmentLoaded() && !CacheAdmin.getEnvironment().getMandator(mandator).isActive())) {
                 if (LOG.isDebugEnabled()) LOG.debug("Login for user [" + username +
                         "] failed, account is inactive. Active=" + active + ", Validated=" + validated +
                         ", Mandator active: " + CacheAdmin.getEnvironment().getMandator(mandator).isActive());
@@ -197,7 +208,7 @@ class FxDBAuthentication {
     /**
      * Mark a user as no longer active in the database.
      *
-     * @param ticket the ticke of the user
+     * @param ticket the ticket of the user
      * @throws javax.security.auth.login.LoginException
      *          if the function failed
      */

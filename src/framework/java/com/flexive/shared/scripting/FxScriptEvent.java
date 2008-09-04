@@ -47,121 +47,172 @@ public enum FxScriptEvent {
     Manual(1, FxScriptScope.All),
 
     /**
-     * Fired before an existing content is saved
+     * Fired before an existing content is saved<br/><br/>
+     * Passed variables:<br/>
+     * <i>FxContent content</i>: content instance which is about to be saved<br/>
      */
     BeforeContentSave(2, FxScriptScope.Type,
             "FxContent content"),
 
     /**
-     * Fired after an existing content is saved
+     * Fired after an existing content is saved<br/><br/>
+     * Passed variables:<br/>
+     * <i>FxPK pk</i>: Primary key of the saved content<br/>
      */
     AfterContentSave(3, FxScriptScope.Type,
             "FxPK pk"),
 
     /**
-     * Fired before a new content is created
+     * Fired before a new content is created<br/><br/>
+     * Passed variables:<br/>
+     * <i>FxContent content</i>: content instance which is about to be saved<br/>
      */
     BeforeContentCreate(4, FxScriptScope.Type,
             "FxContent content"),
 
     /**
-     * Fired after a new content is created
+     * Fired after a new content is created<br/><br/>
+     * Passed variables:<br/>
+     * <i>FxPK pk</i>: Primary key of the created content<br/>
      */
     AfterContentCreate(5, FxScriptScope.Type,
             "FxPK pk"),
 
     /**
-     * Fired before a content is removed
+     * Fired before a content is removed<br/><br/>
+     * Passed variables:<br/>
+     * <i>FxPK pk</i>: Primary key of the removed content<br/>
      */
     BeforeContentRemove(6, FxScriptScope.Type,
             "FxPK pk", "FxContentSecurityInfo securityInfo"),
 
     /**
-     * Fired after a content is removed
+     * Fired after a content is removed<br/><br/>
+     * Passed variables:<br/>
+     * <i>FxPK pk</i>: Primary key of the removed content<br/>
      */
     AfterContentRemove(7, FxScriptScope.Type,
             "FxPK pk"),
 
     /**
      * Fired after a content is loaded
+     * <br/><br/>
+     * Passed variables:<br/>
+     * <i>FxContent content</i>: the loaded content instance<br/>
      */
     AfterContentLoad(8, FxScriptScope.Type,
             "FxContent content"),
 
     /**
-     * Fired after a new content instance is initialized with default values
+     * Fired after a new content instance is initialized with default values<br/><br/>
+     * Passed variables:<br/>
+     * <i>FxContent content</i>: the initialized content instance<br/>
      */
     AfterContentInitialize(9, FxScriptScope.Type,
             "FxContent content"),
 
     /**
-     * Fired for ContentEngine.prepareSave() for new contents
+     * Fired for ContentEngine.prepareSave() for new contents<br/><br/>
+     * Passed variables:<br/>
+     * <i>FxContent content</i>: the content to be prepared for creation<br/>
      */
     PrepareContentCreate(10, FxScriptScope.Type,
             "FxContent content"),
 
     /**
-     * Fired for ContentEngine.prepareSave() for existing contents
+     * Fired for ContentEngine.prepareSave() for existing contents<br/><br/>
+     * Passed variables:<br/>
+     * <i>FxContent content</i>: the content to be prepared for saving<br/>
      */
     PrepareContentSave(11, FxScriptScope.Type,
             "FxContent content"),
 
     /**
-     * Fired before a FxData update of an existing existance
+     * Fired before a FxData update of an existing existance<br/><br/>
+     * Passed variables:<br/>
+     * <i>FxContent content</i>: the content to be updated<br/>
+     * <i>FxDeltaChange change</i>: information about the change<br/>
      */
     BeforeDataChangeUpdate(12, FxScriptScope.Assignment,
             "FxContent content", "FxDeltaChange change"),
 
     /**
-     * Fired after a FxData update of an existing existance
+     * Fired after a FxData update of an existing existance<br/><br/>
+     * Passed variables:<br/>
+     * <i>FxContent content</i>: the content to be updated<br/>
+     * <i>FxDeltaChange change</i>: information about the change<br/>
      */
     AfterDataChangeUpdate(13, FxScriptScope.Assignment,
             "FxContent content", "FxDeltaChange change"),
 
     /**
-     * Fired before a FxData is removed from an existing existance, instance will <b>not</b> be removed!
+     * Fired before a FxData is removed from an existing existance, instance will <b>not</b> be removed!<br/><br/>
+     * Passed variables:<br/>
+     * <i>FxContent content</i>: the content to be updated<br/>
+     * <i>FxDeltaChange change</i>: information about the change<br/>
      */
     BeforeDataChangeDelete(14, FxScriptScope.Assignment,
             "FxContent content", "FxDeltaChange change"),
 
     /**
-     * Fired after a FxData is removed from an existing existance, instance will <b>not</b> be removed!
+     * Fired after a FxData is removed from an existing existance, instance will <b>not</b> be removed!<br/><br/>
+     * Passed variables:<br/>
+     * <i>FxContent content</i>: the content to be updated<br/>
+     * <i>FxDeltaChange change</i>: information about the change<br/>
      */
     AfterDataChangeDelete(15, FxScriptScope.Assignment,
             "FxContent content", "FxDeltaChange change"),
 
     /**
-     * Fired before a FxData is updated in an existing existance
+     * Fired before a FxData is updated in an existing existance<br/><br/>
+     * Passed variables:<br/>
+     * <i>FxContent content</i>: the content to be updated<br/>
+     * <i>FxDeltaChange change</i>: information about the change<br/>
      */
     BeforeDataChangeAdd(16, FxScriptScope.Assignment,
             "FxContent content", "FxDeltaChange change"),
 
     /**
-     * Fired after a FxData is updated in an existing existance
+     * Fired after a FxData is updated in an existing existance<br/><br/>
+     * Passed variables:<br/>
+     * <i>FxContent content</i>: the content to be updated<br/>
+     * <i>FxDeltaChange change</i>: information about the change<br/>
      */
     AfterDataChangeAdd(17, FxScriptScope.Assignment,
             "FxContent content", "FxDeltaChange change"),
 
     /**
-     * Fired before a new instance is created that will contain the assignment
+     * Fired before a new instance is created that will contain the assignment<br/><br/>
+     * Passed variables:<br/>
+     * <i>FxContent content</i>: the content to be created<br/>
+     * <i>FxAssignment assignment</i>: the new assignment<br/>
      */
     BeforeAssignmentDataCreate(18, FxScriptScope.Assignment,
             "FxContent content", "FxAssignment assignment"),
 
     /**
-     * Fired after a new instance is created that will contain the assignment
+     * Fired after a new instance is created that will contain the assignment<br/><br/>
+     * Passed variables:<br/>
+     * <i>FxPK pk</i>: primary key of the created content<br/>
+     * <i>FxAssignment assignment</i>: the new assignment<br/>
      */
     AfterAssignmentDataCreate(19, FxScriptScope.Assignment,
             "FxPK pk", "FxAssignment assignment"),
 
     /**
-     * Fired before an existing instance is saved that contains the assignment
+     * Fired before an existing instance is saved that contains the assignment<br/><br/>
+     * Passed variables:<br/>
+     * <i>FxContent content</i>: the content to be saved<br/>
+     * <i>FxAssignment assignment</i>: the updated assignment<br/>
      */
     BeforeAssignmentDataSave(20, FxScriptScope.Assignment,
             "FxContent content", "FxAssignment assignment"),
 
     /**
-     * Fired after an existing instance is saved that contains the assignment
+     * Fired after an existing instance is saved that contains the assignment<br/><br/>
+     * Passed variables:<br/>
+     * <i>FxPK pk</i>: primary key of the saved content<br/>
+     * <i>FxAssignment assignment</i>: the updated assignment<br/>
      */
     AfterAssignmentDataSave(21, FxScriptScope.Assignment,
             "FxPK pk", "FxAssignment assignment"),
@@ -169,18 +220,41 @@ public enum FxScriptEvent {
 
     /**
      * Fired before an instance is deleted <b>could</b> contain the assignment,
-     * no guarantee can be made that the instance actually contains FxData for the assignment!
+     * no guarantee can be made that the instance actually contains FxData for the assignment!<br/><br/>
+     * Passed variables:<br/>
+     * <i>FxPK pk</i>: primary key of the removed content<br/>
+     * <i>FxAssignment assignment</i>: the assignment<br/>
      */
     BeforeAssignmentDataDelete(22, FxScriptScope.Assignment,
             "FxPK pk", "FxAssignment assignment"),
 
     /**
      * Fired after an instance is deleted <b>could</b> contain the assignment,
-     * no guarantee can be made that the instance actually contains FxData for the assignment!
+     * no guarantee can be made that the instance actually contains FxData for the assignment!<br/><br/>
+     * Passed variables:<br/>
+     * <i>FxPK pk</i>: primary key of the created content<br/>
+     * <i>FxAssignment assignment</i>: the assignment<br/>
      */
     AfterAssignmentDataDelete(23, FxScriptScope.Assignment,
             "FxPK pk", "FxAssignment assignment"),
 
+    /**
+     * Fired for processing of binaries.
+     * <br/><br/>
+     * Passed variables:<br/>
+     * <i>boolean processedk</i>: has the binary already been processed? Usually return from the script if true<br/>
+     * <i>boolean useDefaultPreview</i>: set from the script if a default preview should be used or the script creates one<br/>
+     * <i>int defaultId</i>: set from the script: the default id to use for previews if using thed default preview id<br/>
+     * <i>String mimeType</i>: set from the script: mime type<br/>
+     * <i>String metaData</i>: set from the script: xml based meta data<br/>
+     * <i>File binaryFile</i>: the original binary file<br/>
+     * <i>File previewFile1</i>: set from script: file containing preview 1<br/>
+     * <i>File previewFile2</i>: set from script: file containing preview 2<br/>
+     * <i>File previewFile3</i>: set from script: file containing preview 3<br/>
+     * <i>int[] dimensionPreview1</i>: set from script: dimension of preview 1<br/>
+     * <i>int[] dimensionPreview2</i>: set from script: dimension of preview 2<br/>
+     * <i>int[] dimensionPreview3</i>: set from script: dimension of preview 3<br/>
+     */
     BinaryPreviewProcess(24, FxScriptScope.BinaryProcessing,
             "boolean processed",
             "boolean useDefaultPreview",
@@ -198,47 +272,86 @@ public enum FxScriptEvent {
 
     /**
      * Fired after a new user account has been created. The account ID and the
-     * contact data PK are bound as "accountId" and "pk" .
+     * contact data PK are bound as "accountId" and "pk" .<br/><br/>
+     * Passed variables:<br/>
+     * <i>long accountId</i>: id of the account<br/>
+     * <i>FxPK pk</i>: primary key of the contact data<br/>
      */
     AfterAccountCreate(25, FxScriptScope.Accounts, "long accountId", "FxPK pk"),
 
     /**
      * Fired after a new node was added to the tree.
-     * Note that this event will not be fired from the <code>populate(mode)</code> method!
+     * Note that this event will not be fired from the <code>populate(mode)</code> method!<br/><br/>
+     * Passed variables:<br/>
+     * <i>FxTreeNode node</i>: the affected tree node<br/>
      */
     AfterTreeNodeAdded(26, FxScriptScope.Tree, "FxTreeNode node"),
 
     /**
      * Fired after a new node was removed from the tree.
-     * Note that this event will not be fired from the <code>clear(mode)</code> method!
+     * Note that this event will not be fired from the <code>clear(mode)</code> method!<br/><br/>
+     * Passed variables:<br/>
+     * <i>FxTreeNode node</i>: the affected tree node<br/>
      */
     AfterTreeNodeRemoved(27, FxScriptScope.Tree, "FxTreeNode node"),
 
     /**
      * Fired after a new node was removed from the tree.
-     * Note that this event will not be fired from the <code>clear(mode)</code> method!
+     * Note that this event will not be fired from the <code>clear(mode)</code> method!<br/><br/>
+     * Passed variables:<br/>
+     * <i>FxTreeNode node</i>: the affected tree node<br/>
      */
     BeforeTreeNodeRemoved(28, FxScriptScope.Tree, "FxTreeNode node"),
 
     /**
      * Fired after a node was activated (copied from Edit to Live tree).
      * The node passed as binding is the activated node from the Live tree!
-     * Please note that there is no deactivate event since this is equal to removal.
+     * Please note that there is no deactivate event since this is equal to removal.<br/><br/>
+     * Passed variables:<br/>
+     * <i>FxTreeNode node</i>: the affected tree node<br/>
      */
     AfterTreeNodeActivated(29, FxScriptScope.Tree, "FxTreeNode node"),
 
     /**
      * Fired before a node is activated (copied from Edit to Live tree).
      * The node passed as binding is the node to be activated from the Edit tree!
-     * Please note that there is no deactivate event since this is equal to removal.
+     * Please note that there is no deactivate event since this is equal to removal.<br/><br/>
+     * Passed variables:<br/>
+     * <i>FxTreeNode node</i>: the affected tree node<br/>
      */
     BeforeTreeNodeActivated(30, FxScriptScope.Tree, "FxTreeNode node"),
 
     /**
      * Fired after a content reference has been replaced by a folder reference.
-     * This event happens when a content that is referenced by the tree is removed and is no leaf node.
+     * This event happens when a content that is referenced by the tree is removed and is no leaf node.<br/><br/>
+     * Passed variables:<br/>
+     * <i>FxTreeNode node</i>: the affected tree node<br/>
+     * <i>FxPK content</i>: primary key of the removed content<br/>
      */
-    AfterTreeNodeFolderReplacement(31, FxScriptScope.Tree, "FxTreeNode node", "FxPK content");
+    AfterTreeNodeFolderReplacement(31, FxScriptScope.Tree, "FxTreeNode node", "FxPK content"),
+
+    /**
+     * Fired when an account logs in. The script has to return a UserTicket for the logged in user.
+     * If no scripts of this event type exist, the default database based login is performed which is skipped on
+     * presence of such scripts!
+     * Use this event if you want to authenticate against LDAP or the like.
+     * The callback provides access to the datasource, ejb context and if a session should be "taken over" to
+     * prevent multiple logins.<br/><br/>
+     * Passed variables:<br/>
+     * <i>String loginname</i>: Name used to log on<br/>
+     * <i>String password</i>: Plaintext password<br/>
+     * <i>FxCallback callback</i>: An FxCallback instance providing a DataSource to access the database, the EJB context and a flag if user already logged in with this account should be logged off<br/>
+     */
+    AccountLogin(32, FxScriptScope.Accounts, "String loginname", "String password", "FxCallback callback"),
+
+    /**
+     * Fired when an account is logged off to clear state information if needed.
+     * If no scripts of this event type exist, the default database based logout is performed which is skipped on
+     * presence of such scripts!
+     * Passed variables:<br/>
+     * <i>UserTicket ticket</i>: The UserTicket of the user that is being logged off<br/>
+     */
+    AccountLogout(33, FxScriptScope.Accounts, "UserTicket ticket");
 
 
     private long id;

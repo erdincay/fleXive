@@ -439,7 +439,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                 GroovyShell shell = new GroovyShell();
                 script = shell.parse(CacheAdmin.getEnvironment().getScript(scriptId).getCode());
             } catch (CompilationFailedException e) {
-                throw new FxInvalidParameterException(si.getName(), "ex.general.scripting.compileFailed", si.getName());
+                throw new FxInvalidParameterException(si.getName(), "ex.general.scripting.compileFailed", si.getName(), e.getMessage());
             } catch (Throwable t) {
                 throw new FxInvalidParameterException(si.getName(), "ex.general.scripting.exception", si.getName(), t.getMessage());
             }

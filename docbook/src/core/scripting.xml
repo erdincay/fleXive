@@ -41,7 +41,8 @@
             called
             <constant>bindings</constant>. A script that is called before a content instance is saved will for example
             require a reference to the content instance in its bindings.
-            Please see the API documentation of
+            Please see the
+            <link href="http://www.flexive.org/docs/javadoc/shared/index.html?com/flexive/shared/scripting/FxScriptEvent.html">API documentation</link> of
             <classname>FxScriptEvent</classname>
             for further information.
         </para>

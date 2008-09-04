@@ -3,6 +3,7 @@ package com.flexive.shared.security;
 import com.flexive.shared.FxLanguage;
 
 import java.util.Date;
+import java.util.Calendar;
 
 /**
  * An editable account wrapper implementation. Use this class for creating new accounts
@@ -15,6 +16,13 @@ public class AccountEdit extends Account {
     private static final long serialVersionUID = 7602517754874344449L;
 
     public AccountEdit() {
+        //Init with a start date of today
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        setValidFrom(cal.getTime());
     }
 
     public AccountEdit(Account account) {

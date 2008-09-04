@@ -163,7 +163,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(curSql);
             if (rs == null || !rs.next())
-                throw new FxNotFoundException(LOG, "ex.account.notFound", (loginName != null ? loginName : accountId));
+                throw new FxNotFoundException("ex.account.notFound", (loginName != null ? loginName : accountId));
             long id = rs.getLong(1);
             String email = rs.getString(2);
             long contactDataId = rs.getLong(3);

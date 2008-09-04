@@ -196,7 +196,7 @@ public class FxDefaultLogin implements LoginModule {
             final PasswordCallback pc = (PasswordCallback) callbacks[1];
             final String password = new String((pc.getPassword()));
             pc.clearPassword();
-            UserTicket ticket = FxDBAuthentication.login(username, password, ac);
+            UserTicket ticket = FxAuthenticationHandler.login(username, password, ac);
             // Set the credentials and principals
             this.tempPrincipals.add(new FxPrincipal(ticket));
             // The login was successfull
@@ -235,7 +235,7 @@ public class FxDefaultLogin implements LoginModule {
 
         // remove the principals the login module added
         for (FxPrincipal p : subject.getPrincipals(FxPrincipal.class))
-            FxDBAuthentication.logout(p.getUserTicket());
+            FxAuthenticationHandler.logout(p.getUserTicket());
         return true;
     }
 

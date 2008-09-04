@@ -97,7 +97,7 @@ public final class LoginLogoutHandler {
             callback.setTakeOverSession(takeOver);
             callback.setSessionContext(ctx);
             callback.setDataSource(ds);
-            ticket = FxDBAuthentication.login(username, password, callback);
+            ticket = FxAuthenticationHandler.login(username, password, callback);
             // Log out any other sessions of the user
             if (!ticket.isMultiLogin() && !ticket.isWebDav()) {
                 // TODO: real logout?
@@ -145,7 +145,7 @@ public final class LoginLogoutHandler {
         }
 
         try {
-            FxDBAuthentication.logout(FxContext.getUserTicket());
+            FxAuthenticationHandler.logout(FxContext.getUserTicket());
             UserTicketStore.removeSubject();
         } catch (Exception exc) {
             FxLogoutFailedException lfe = new FxLogoutFailedException("Logout failed", exc);

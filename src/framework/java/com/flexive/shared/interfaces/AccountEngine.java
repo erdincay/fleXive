@@ -36,11 +36,12 @@ import com.flexive.shared.exceptions.*;
 import com.flexive.shared.security.*;
 
 import javax.ejb.Remote;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 /**
+ * Account management
+ *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 @Remote
