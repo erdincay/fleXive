@@ -73,6 +73,11 @@ public class FxAuthenticationHandler {
      * @throws FxAccountExpiredException on errors
      */
     public static UserTicket login(String loginname, String password, FxCallback callback) throws FxAccountInUseException, FxLoginFailedException, FxAccountExpiredException {
+        if( CacheAdmin.isNewInstallation() ) {
+            //if we have a new installation, do not use scripted logins yet to allow run-once scripts to be
+            //displayed (which will be prevented if the environment is accessed)
+            return FxDBAuthentication.login(loginname, password, callback);
+        }
         ScriptingEngine scripting = EJBLookup.getScriptingEngine();
         List<Long> events = scripting.getByScriptEvent(FxScriptEvent.AccountLogin);
 
