@@ -302,6 +302,7 @@ public class ScriptBean {
             new FxFacesMsgInfo("Script.nfo.created", sinfo.getName()).addToContext();
         } catch (FxApplicationException e) {
             new FxFacesMsgErr(e).addToContext();
+            return "scriptCreate";
         }
         return "scriptOverview";
     }
