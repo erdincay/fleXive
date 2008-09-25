@@ -240,6 +240,20 @@ public class MessageBean extends HashMap {
                 // continue with next bundle
             }
         }
+        if (!locale.equals(Locale.ENGLISH)) {
+            //try to find the locale in english as last resort
+            //this is a fix for using PropertyResourceBundles which can only handle one locale (have to use them thanks to JBoss 5...)
+            for (BundleReference bundleReference : resourceBundles) {
+                try {
+                    final ResourceBundle bundle = getResources(bundleReference, Locale.ENGLISH);
+                    final String message = bundle.getString(key);
+                    cachedMessages.putIfAbsent(messageKey, message);
+                    return message;
+                } catch (MissingResourceException e) {
+                    // continue with next bundle
+                }
+            }
+        }
         throw new MissingResourceException("Resource not found", "MessageBean", key);
     }
 
@@ -293,7 +307,11 @@ public class MessageBean extends HashMap {
         while (resources.hasMoreElements()) {
             final URL resourceURL = resources.nextElement();
             try {
-                // expected format: file:/some/path/to/file.jar!{baseName}.properties
+                if ("vfszip".equals(resourceURL.getProtocol())) {
+                    addResourceBundle(baseName, resourceURL);
+                    continue;
+                }
+                // expected format: file:/some/path/to/file.jar!{baseName}.properties if this is no JBoss 5 vfs zipfile
                 final int jarDelim = resourceURL.getPath().lastIndexOf(".jar!");
                 if (jarDelim == -1) {
                     LOG.warn("Cannot use message resources because they are not stored in a jar file: " + resourceURL.getPath());
@@ -306,7 +324,7 @@ public class MessageBean extends HashMap {
 
                 // "file:" and everything after ".jar" gets stripped for the class loader URL
                 final URL jarURL = new URL("file", null, resourceURL.getPath().substring("file:".length(), jarDelim + 4));
-                addResourceBundle(baseName, new URLClassLoader(new URL[]{jarURL}));
+                addResourceBundle(baseName, jarURL);
 
                 LOG.info("Added plugin message resources for " + jarURL.getPath());
             } catch (Exception e) {
@@ -318,11 +336,11 @@ public class MessageBean extends HashMap {
     /**
      * Add a resource bundle with the given name and classloader.
      *
-     * @param baseName the resource base name
-     * @param loader   the class loader to be used
+     * @param baseName    the resource base name
+     * @param resourceURL the resource URL
      */
-    private static void addResourceBundle(String baseName, ClassLoader loader) {
-        resourceBundles.add(new BundleReference(baseName, loader));
+    private static void addResourceBundle(String baseName, URL resourceURL) {
+        resourceBundles.add(new BundleReference(baseName, resourceURL));
     }
 
     /**
@@ -330,18 +348,18 @@ public class MessageBean extends HashMap {
      */
     private static class BundleReference {
         private final String baseName;
-        private final ClassLoader classLoader;
+        private final URL resourceURL;
 
         /**
          * Create a new bundle reference.
          *
          * @param baseName    the fully qualified base name (e.g. "ApplicationResources")
-         * @param classLoader the class loader to be used for loading the resource bundle. If null,
+         * @param resourceURL the resource URL to be used for loading the resource bundle. If null,
          *                    the context class loader will be used.
          */
-        private BundleReference(String baseName, ClassLoader classLoader) {
+        private BundleReference(String baseName, URL resourceURL) {
             this.baseName = baseName;
-            this.classLoader = classLoader;
+            this.resourceURL = resourceURL;
         }
 
         /**
@@ -358,8 +376,8 @@ public class MessageBean extends HashMap {
          *
          * @return the class loader to be used for loading the bundle.
          */
-        public ClassLoader getClassLoader() {
-            return classLoader;
+        public URL getResourceURL() {
+            return resourceURL;
         }
 
         /**
@@ -369,10 +387,31 @@ public class MessageBean extends HashMap {
          * @return the resource bundle in the given locale.
          */
         public ResourceBundle getBundle(Locale locale) {
-            if (this.classLoader == null) {
+            if (this.resourceURL == null) {
                 return ResourceBundle.getBundle(baseName, locale);
             } else {
-                return ResourceBundle.getBundle(baseName, locale, classLoader);
+                try {
+                    return ResourceBundle.getBundle(baseName, locale, new URLClassLoader(new URL[]{resourceURL}));
+                } catch (MissingResourceException mre) {
+                    //fix for JBoss 5 vfs which doesn't work with classloader
+                    try {
+                        //try to find in the desired locale
+                        Enumeration<URL> e = Thread.currentThread().getContextClassLoader().getResources(baseName + "_" + locale.getLanguage() + ".properties");
+                        String orgPath = resourceURL.toExternalForm().substring(0, resourceURL.toExternalForm().lastIndexOf("/"));
+                        while (e.hasMoreElements()) {
+                            URL resource = e.nextElement();
+                            if (orgPath.equals(resource.toExternalForm().substring(0, resource.toExternalForm().lastIndexOf("/")))) {
+                                return new PropertyResourceBundle(resource.openStream());
+                            }
+                        }
+                        //Fallback to the default locale
+                        return new PropertyResourceBundle(resourceURL.openStream());
+                    } catch (IOException e) {
+                        LOG.warn("Failed to retrieve bundle " + baseName + " directly from stream");
+                    }
+                    //last resort
+                    return ResourceBundle.getBundle(baseName, locale);
+                }
             }
         }
 
@@ -384,7 +423,7 @@ public class MessageBean extends HashMap {
          */
         public String getCacheKey(Locale locale) {
             final String localeSuffix = locale == null ? "" : "_" + locale.toString();
-            if (this.classLoader == null) {
+            if (this.resourceURL == null) {
                 return baseName + localeSuffix;
             } else {
                 return baseName + this.toString() + localeSuffix;
