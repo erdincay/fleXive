@@ -12,7 +12,7 @@ INSERT INTO FXS_LANG_T VALUES (1, 2, 'Englisch');
 INSERT INTO FXS_LANG_T VALUES (2, 1, 'German');
 INSERT INTO FXS_LANG_T VALUES (2, 2, 'Deutsch');
 INSERT INTO FXS_LANG_T VALUES (3, 1, 'French');
-INSERT INTO FXS_LANG_T VALUES (3, 2, 'FranzÃ¶sisch');
+INSERT INTO FXS_LANG_T VALUES (3, 2, 'Französisch');
 INSERT INTO FXS_LANG_T VALUES (4, 1, 'Italian');
 INSERT INTO FXS_LANG_T VALUES (4, 2, 'Italienisch');
 -- load all other known languages
