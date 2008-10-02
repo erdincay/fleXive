@@ -135,7 +135,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             //9     10     11    12    13   14      15        16      17     18    19      20
             "FDATE1,FDATE2,FBLOB,FCLOB,FINT,FBIGINT,FTEXT1024,FDOUBLE,FFLOAT,FBOOL,FSELECT,FREF FROM " + TBL_CONTENT_DATA +
             //         1         2
-            " WHERE ID=? AND VER=? ORDER BY XDEPTH ASC, " +/*ISGROUP DESC, PARENTXPATH ASC,*/ "POS ASC";
+            " WHERE ID=? AND VER=? ORDER BY XDEPTH ASC, " +/*ISGROUP DESC, PARENTXPATH ASC,*/ "POS ASC, ASSIGN ASC";
 
     //                                                                                                       1         2
     protected static final String CONTENT_DATA_REMOVE_VERSION = "DELETE FROM " + TBL_CONTENT_DATA + " WHERE ID=? AND VER=?";
