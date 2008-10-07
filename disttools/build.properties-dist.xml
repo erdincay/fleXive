@@ -35,9 +35,10 @@
 	<property name="compiler.target" value="1.5"/>
 
     <path id="dist.path">
-        <fileset dir="${dist.lib.dir}" includes="*"/>
-        <fileset dir="${dist.extlib.dir}" includes="*"/>
+        <fileset dir="${dist.lib.dir}" includes="**/*"/>
+        <fileset dir="${dist.extlib.dir}" includes="**/*"/>
         <fileset dir="${applications.dir}" includes="**/*"/>
+        <fileset dir="${basedir}/lib" includes="**/*"/>
     </path>
 
     <!-- Task definitions -->
