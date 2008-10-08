@@ -69,6 +69,7 @@ public class FxApplicationException extends Exception implements FxLocalizedExce
     public FxApplicationException(FxApplicationException converted) {
         super(converted.message.getKey());
         this.message = converted.message;
+        this.affectedXPath = converted.affectedXPath;
     }
 
     /**
@@ -78,8 +79,7 @@ public class FxApplicationException extends Exception implements FxLocalizedExce
      * @param converted exception to convert
      */
     public FxApplicationException(Log log, FxApplicationException converted) {
-        super(converted.message.getKey());
-        this.message = converted.message;
+        this(converted);
         if (log != null && !converted.messageLogged())
             this.logMessage(log, this.getMessage(), null);
     }
