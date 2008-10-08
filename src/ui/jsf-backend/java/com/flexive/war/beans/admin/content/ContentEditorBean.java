@@ -1021,7 +1021,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
     }
 
     public boolean isSupportSecurity() {
-        return environment.getType(type).usePermissions();
+        return environment.getType(type).useInstancePermissions();
     }
 
     public CeDataWrapper getData() {
