@@ -304,7 +304,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                     uniqueMode = UniqueMode.getById(rs.getInt(17));
                     String _def = rs.getString(13);
                     defaultValue = null;
-                    if (!StringUtils.isEmpty(_def)) {
+                    if (!StringUtils.isEmpty(_def) && CacheAdmin.isEnvironmentLoaded()) {
                         try {
                             defaultValue = (FxValue) xStream.fromXML(_def);
                             if( defaultValue != null && defaultValue.isEmpty() )
