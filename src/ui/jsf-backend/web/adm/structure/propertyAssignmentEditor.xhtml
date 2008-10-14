@@ -25,6 +25,9 @@
                     treeframe.doTreeAction('#{structureTreeControllerBean.action}',#{structureTreeControllerBean.id}, '#{structureTreeControllerBean.value}');
                 </script>
             </h:panelGroup>
+            <!-- provide the assignment id so that it can be retrieved from the structure editor nav frame -->
+            <h:inputHidden id="struct_internal_assignmentId" value="#{propertyEditorBean.assignmentId}"/>
+
             <ui:fragment rendered="#{propertyEditorBean.editMode}">
                 <adm:tab label="#{fxMessageBean['PropertyEditor.tab.propertyAssignment']}" active="true" id="tab1"/>
                 <adm:tab label="#{fxMessageBean['PropertyEditor.tab.property']}" active="false" id="tab2"

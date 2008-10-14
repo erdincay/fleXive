@@ -302,4 +302,40 @@ public class StructureTreeEditor implements Serializable {
     public boolean isSearchable(long assId) {
         return ((FxPropertyAssignment) CacheAdmin.getFilteredEnvironment().getAssignment(assId)).isSearchable();
     }
+
+    /**
+     * Returns if a type still. (Used to check after deletion of a type if
+     * the content page is still valid or if it displays a structure element
+     * that does not exist anymore).
+     *
+     * @param id    the id of the type
+     * @return  if the type with the specified id exists.
+     */
+    public boolean isTypeExists(long id) {
+        try {
+            CacheAdmin.getFilteredEnvironment().getType(id);
+        }
+        catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Returns if an assignment exits. (Used to check after deletion if
+     * the content page is still valid or or if it displays a structure element
+     * that does not exist anymore).
+     *
+     * @param id    the id of the assignment
+     * @return  if the type with the specified id exists.
+     */
+    public boolean isAssignmentExists(long id) {
+        try {
+            CacheAdmin.getFilteredEnvironment().getAssignment(id);
+        }
+        catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
 }

@@ -324,6 +324,10 @@
             <to-view-id>/adm/structure/navigation.xhtml</to-view-id>
         </navigation-case>
 
+         <navigation-case>
+            <from-outcome>structureContent</from-outcome>
+            <to-view-id>/adm/structure/content.xhtml</to-view-id>
+        </navigation-case>
 
         <navigation-case>
             <from-outcome>briefcaseOverview</from-outcome>

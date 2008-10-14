@@ -300,6 +300,23 @@
             }
           */
 
+            //checks if the structure element opened in the contet frame
+            //is still valid (== does still exist).
+            function isContentFrameValidAfterDeletion() {
+                if (getContentFrame().location.href.indexOf("/flexive/adm/structure/") >0) {
+                    var assId=-1; var typeId=-1;
+                    if (getContentFrame().document.getElementById("frm:struct_internal_assignmentId") != null)
+                        assId = getContentFrame().document.getElementById("frm:struct_internal_assignmentId").value;
+                    if (getContentFrame().document.getElementById("frm:struct_internal_typeId") != null)
+                        typeId = getContentFrame().document.getElementById("frm:struct_internal_typeId").value;
+                    if (assId != -1 && !flexive.util.getJsonRpc().StructureTreeEditor.isAssignmentExists(assId))
+                        return false;
+                    if (typeId != -1 && !flexive.util.getJsonRpc().StructureTreeEditor.isTypeExists(typeId))
+                        return false;
+                }
+                return true;
+            }
+
             function deleteAssignment(menuItem) {
                 var menu = dojo.widget.byId("structureTreeMenu");
                 var id = menu.getTreeNode().assignmentId;
@@ -313,13 +330,17 @@
                         if (copyNode!=null && copyNode.assignmentId ==id && (copyNode.nodeDocType=="Group" || copyNode.nodeDocType=="Assignment"))
                             copyNode=null;
                         reloadStructureTree();
-                        loadContentPage("adm/structure/content.jsf");
-                        parent.gotoNavMenu(1);
+                        if (!isContentFrameValidAfterDeletion()) {
+                            loadContentPage("adm/structure/content.jsf");
+                            parent.gotoNavMenu(1);
+                        }
                     }
                     catch (e) {
                         alertDialog(e.message);
                         reloadStructureTree();
-                        loadContentPage("adm/structure/content.jsf");
+                        if (!isContentFrameValidAfterDeletion()) {
+                            loadContentPage("adm/structure/content.jsf");
+                        }
                     }
                 });
             }
@@ -336,12 +357,16 @@
                         flexive.util.getJsonRpc().StructureTreeEditor.deleteType(id);
                         reloadStructureTree();
                         reloadContentTreeNavFrame=true;
-                        loadContentPage("adm/structure/content.jsf");
+                        if (!isContentFrameValidAfterDeletion()) {
+                            loadContentPage("adm/structure/content.jsf");
+                        }
                     }
                     catch (e) {
                         alertDialog(e.message);
                         reloadStructureTree();
-                        loadContentPage("adm/structure/content.jsf");
+                        if (!isContentFrameValidAfterDeletion()) {
+                            loadContentPage("adm/structure/content.jsf");
+                        }
                     }
                 });
             }
@@ -524,6 +549,14 @@
                     loadContentPage( "export/type/" + nodeId);
                 } catch(ex) {
                     alertDialog(ex)
+                }
+            }
+
+            //checks if the assignment that is currently being deleted is opened for editing
+            //in the content frame
+            function checkIfDeletingActiveContent() {
+                if (getContentFrame().location.href.contains("/flexive/adm/structure/")) {
+
                 }
             }
 

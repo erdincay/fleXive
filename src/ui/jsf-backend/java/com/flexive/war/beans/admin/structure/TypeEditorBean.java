@@ -132,9 +132,14 @@ public class TypeEditorBean {
         } catch (Throwable t) {
             LOG.error("Failed to parse request parameters: " + t.getMessage(), t);
             new FxFacesMsgErr(t).addToContext();
+            return "structureContent";
         }
 
         return null;
+    }
+
+    public long getTypeId() {
+        return type != null ? type.getId() : -1;
     }
 
     /**

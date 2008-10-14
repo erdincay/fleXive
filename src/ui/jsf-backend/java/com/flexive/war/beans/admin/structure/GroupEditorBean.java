@@ -149,9 +149,14 @@ public class GroupEditorBean {
         } catch (Throwable t) {
             LOG.error("Failed to parse request parameters: " + t.getMessage(), t);
             new FxFacesMsgErr(t).addToContext();
+            return "structureContent";
         }
 
         return null;
+    }
+
+    public long getAssignmentId() {
+        return group != null ? group.getId() : -1;
     }
 
     public void toggleEditMode() {

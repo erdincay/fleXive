@@ -103,6 +103,10 @@ public class PropertyEditorBean implements ActionBean {
     private boolean selectedActive = true;
     private int defaultMultiplicity = -1;
 
+    public long getAssignmentId() {
+        return assignment != null ? assignment.getId() : -1;
+    }
+
     public boolean isSystemInternal() {
         return property.isSystemInternal();
     }
@@ -863,6 +867,7 @@ public class PropertyEditorBean implements ActionBean {
         } catch (Throwable t) {
             LOG.error("Failed to parse request parameters: " + t.getMessage(), t);
             new FxFacesMsgErr(t).addToContext();
+            return "structureContent";
         }
 
         return null;

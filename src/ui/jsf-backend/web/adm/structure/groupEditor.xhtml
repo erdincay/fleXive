@@ -25,6 +25,9 @@
                 treeframe.doTreeAction('#{structureTreeControllerBean.action}',#{structureTreeControllerBean.id}, '#{structureTreeControllerBean.value}');
             </script>
         </c:if>
+        <!-- provide the assignment id so that it can be retrieved from the structure editor nav frame -->
+        <h:inputHidden id="struct_internal_assignmentId" value="#{groupEditorBean.assignmentId}"/>
+
         <c:if test="#{not groupEditorBean.group.new}">
             <ui:fragment rendered="#{groupEditorBean.editMode}">
                 <adm:tab label="#{fxMessageBean['GroupEditor.tab.groupAssignment']}" active="false" id="tab1"

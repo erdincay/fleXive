@@ -18,6 +18,9 @@
 
 <ui:define name="body">
     <h:form id="frm" enctype="multipart/form-data">
+        <!-- provide the type id so that it can be retrieved from the structure editor nav frame -->
+        <h:inputHidden id="struct_internal_typeId" value="#{typeEditor.typeId}"/>
+
         <ui:fragment rendered="#{typeEditorBean.editMode}">
             <adm:tab label="#{fxMessageBean['TypeEditor.tab.typeEditor']}" active="false" id="tab1"
                      bean="#{typeEditorBean}" action="showTypeEditor"/>
