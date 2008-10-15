@@ -305,7 +305,7 @@ public class TypeEditorBean {
                 if (type.isNew()) {
                     s.addAction(StructureTreeControllerBean.ACTION_RELOAD_SELECT_TYPE, id, "");
                 } else
-                    s.addAction(StructureTreeControllerBean.ACTION_RENAME_SELECT_TYPE, id, type.getDisplayName());
+                    s.addAction(StructureTreeControllerBean.ACTION_RENAME_TYPE, id, type.getDisplayName());
 
                 new FxFacesMsgInfo("TypeEditor.message.info." + (type.isNew() ? "createdType" : "savedChanges"),
                         type.getLabel()).addToContext();

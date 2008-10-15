@@ -122,7 +122,9 @@ public class GroupEditorBean {
 
                 group = FxGroupEdit.createNew("NEWGROUP", new FxString(""), new FxString(""), false, FxMultiplicity.MULT_0_1);
                 initNewGroupEditing();
-            } else if ("assignGroup".equals(action)) {
+            }
+            /* not used anymore
+            else if ("assignGroup".equals(action)) {
                 editMode = false;
                 structureManagement = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
                 if (structureManagement) {
@@ -145,7 +147,7 @@ public class GroupEditorBean {
                     s.addAction(StructureTreeControllerBean.ACTION_RELOAD_SELECT_ASSIGNMENT, assignmentId, "");
                 }
             }
-
+            */
         } catch (Throwable t) {
             LOG.error("Failed to parse request parameters: " + t.getMessage(), t);
             new FxFacesMsgErr(t).addToContext();
@@ -396,7 +398,7 @@ public class GroupEditorBean {
                 saveAssignmentChanges();
                 EJBLookup.getAssignmentEngine().save(group);
                 StructureTreeControllerBean s = (StructureTreeControllerBean) FxJsfUtils.getManagedBean("structureTreeControllerBean");
-                s.addAction(StructureTreeControllerBean.ACTION_RENAME_SELECT_ASSIGNMENT, assignment.getId(), assignment.getDisplayName());
+                s.addAction(StructureTreeControllerBean.ACTION_RENAME_ASSIGNMENT, assignment.getId(), assignment.getDisplayName());
             }
             catch (Throwable t) {
                 new FxFacesMsgErr(t).addToContext();

@@ -843,7 +843,9 @@ public class PropertyEditorBean implements ActionBean {
                         FxMultiplicity.MULT_0_1, CacheAdmin.getEnvironment().getDefaultACL(ACL.Category.STRUCTURE),
                         FxDataType.Text);
                 initNewPropertyEditing();
-            } else if ("assignProperty".equals(action)) {
+            }
+            /* not used anymore
+            else if ("assignProperty".equals(action)) {
                 editMode = false;
                 structureManagement = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
                 if (structureManagement) {
@@ -868,6 +870,7 @@ public class PropertyEditorBean implements ActionBean {
                     s.addAction(StructureTreeControllerBean.ACTION_RELOAD_SELECT_ASSIGNMENT, assignmentId, "");
                 }
             }
+           */  
         } catch (Throwable t) {
             LOG.error("Failed to parse request parameters: " + t.getMessage(), t);
             new FxFacesMsgErr(t).addToContext();
@@ -1008,7 +1011,7 @@ public class PropertyEditorBean implements ActionBean {
                 EJBLookup.getAssignmentEngine().save(property);
                 savePropertyAssignmentChanges();
                 StructureTreeControllerBean s = (StructureTreeControllerBean) FxJsfUtils.getManagedBean("structureTreeControllerBean");
-                s.addAction(StructureTreeControllerBean.ACTION_RENAME_SELECT_ASSIGNMENT, assignment.getId(), assignment.getDisplayName());
+                s.addAction(StructureTreeControllerBean.ACTION_RENAME_ASSIGNMENT, assignment.getId(), assignment.getDisplayName());
             }
             catch (Throwable t) {
                 new FxFacesMsgErr(t).addToContext();

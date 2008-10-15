@@ -41,7 +41,7 @@
             </c:if>
             <c:if test="#{empty typeEditorBean.parseRequestParameters}"> </c:if>
             <!-- provide the type id so that it can be retrieved from the structure editor nav frame -->
-            <h:inputHidden id="struct_internal_typeId" value="#{typeEditor.typeId}"/>
+            <h:inputHidden id="struct_internal_typeId" value="#{typeEditorBean.typeId}"/>
 
             <ui:fragment rendered="#{typeEditorBean.editMode}">
                 <adm:tab label="#{fxMessageBean['TypeEditor.tab.typeEditor']}" active="true" id="tab1"/>
