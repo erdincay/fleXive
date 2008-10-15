@@ -107,6 +107,10 @@ public class PropertyEditorBean implements ActionBean {
         return assignment != null ? assignment.getId() : -1;
     }
 
+    //necessarry only to prevent JSF errors because of value binding
+    public void setAssignmentId(long assignmentId) {
+    }
+
     public boolean isSystemInternal() {
         return property.isSystemInternal();
     }

@@ -159,6 +159,10 @@ public class GroupEditorBean {
         return group != null ? group.getId() : -1;
     }
 
+    //necessarry only to prevent JSF errors because of value binding
+    public void setAssignmentId(long assignmentId) {
+    }
+
     public void toggleEditMode() {
         editMode = !editMode;
     }

@@ -142,6 +142,10 @@ public class TypeEditorBean {
         return type != null ? type.getId() : -1;
     }
 
+    //necessarry only to prevent JSF errors because of value binding
+    public void setTypeId(long typeId) {
+    }
+
     /**
      * Load a type for editing
      *
