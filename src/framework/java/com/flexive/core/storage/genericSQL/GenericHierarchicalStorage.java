@@ -2416,6 +2416,11 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 FxBinary bin = (FxBinary) pdata.getValue();
                 for (long lang : bin.getTranslatedLanguages()) {
                     BinaryDescriptor bd = bin.getTranslation(lang);
+                    if (bd.isEmpty()) {
+                        //remove empty languages to prevent further processing (FX-327)
+                        bin.removeLanguage(lang);
+                        continue;
+                    }
                     if (!bd.isNewBinary())
                         continue;
                     if (mimeMetaMap.containsKey(bd.getHandle())) {

@@ -43,6 +43,7 @@ import java.util.List;
 
 /**
  * Descriptor for binaries (immutable).
+ * Qualities and Versions are currently only planned features but not yet functional.
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
@@ -77,7 +78,6 @@ public class BinaryDescriptor implements Serializable {
      * For images: box scaled size for preview 3
      */
     public final static int PREVIEW3_BOX = 232;
-    private static final String MIMETYPE_UNKNOWN = "unknown/unknown";
 
     /**
      * Enumeration of all available preview sizes.
@@ -91,15 +91,31 @@ public class BinaryDescriptor implements Serializable {
         private final int blobIndex;
         private final int size;
 
+        /**
+         * Ctor
+         *
+         * @param blobIndex blob index in the database
+         * @param size      size constant
+         */
         PreviewSizes(int blobIndex, int size) {
             this.blobIndex = blobIndex;
             this.size = size;
         }
 
+        /**
+         * Get the binary size constant
+         *
+         * @return binary size constant
+         */
         public int getSize() {
             return size;
         }
 
+        /**
+         * Get the blob index in the database containing the binary
+         *
+         * @return blob index in the database containing the binary
+         */
         public int getBlobIndex() {
             return blobIndex;
         }
@@ -309,58 +325,137 @@ public class BinaryDescriptor implements Serializable {
         FxStreamUtils.downloadBinary(server, stream, this);
     }
 
+    /**
+     * Is this BinaryDescriptor empty?
+     *
+     * @return BinaryDescriptor is empty
+     */
+    public boolean isEmpty() {
+        return EMPTY.equals(handle);
+    }
+
+    /**
+     * Getter for the handle
+     *
+     * @return handle
+     */
     public String getHandle() {
         return handle;
     }
 
+    /**
+     * Is this a new binary?
+     *
+     * @return new binary?
+     */
     public boolean isNewBinary() {
         return newBinary;
     }
 
+    /**
+     * Getter for the binary id (not content instance id!)
+     *
+     * @return binary id
+     */
     public long getId() {
         return id;
     }
 
+    /**
+     * Getter for the binary version
+     *
+     * @return binary version
+     */
     public int getVersion() {
         return version;
     }
 
+    /**
+     * Getter for the quality
+     *
+     * @return quality
+     */
     public int getQuality() {
         return quality;
     }
 
+    /**
+     * Getter for the creation timestamp
+     *
+     * @return creation timestamp
+     */
     public long getCreationTime() {
         return creationTime;
     }
 
+    /**
+     * Name of the binary
+     *
+     * @return name of the binary
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Getter for the binary size in bytes
+     *
+     * @return binary size in bytes
+     */
     public long getSize() {
         return size;
     }
 
+    /**
+     * Getter for optional metadata (usually XML)
+     *
+     * @return optional metadata (usually XML)
+     */
     public String getMetadata() {
         return metadata;
     }
 
+    /**
+     * Getter for the mime type (if available)
+     *
+     * @return mime type (if available)
+     */
     public String getMimeType() {
         return mimeType;
     }
 
+    /**
+     * Is this binary an image?
+     *
+     * @return binary is an image
+     */
     public boolean isImage() {
         return image;
     }
 
+    /**
+     * If binary is an image, getter for the resolution in dpi
+     *
+     * @return resolution in dpi
+     */
     public double getResolution() {
         return resolution;
     }
 
+    /**
+     * If binary is an image, getter for the width in pixel
+     *
+     * @return width in pixel
+     */
     public int getWidth() {
         return width;
     }
 
+    /**
+     * If binary is an image, getter for the height in pixel
+     *
+     * @return height in pixel
+     */
     public int getHeight() {
         return height;
     }
