@@ -31,10 +31,7 @@
  ***************************************************************/
 package com.flexive.core.security;
 
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.FxContext;
-import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.*;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLoadException;
@@ -321,7 +318,11 @@ public class UserTicketStore {
         if (FxContext.get() != null) {
             // update current user's ticket directly from the DB
             try {
-                FxContext.get().setTicket(getUserTicket(FxContext.getUserTicket().getLoginName()));
+                final UserTicket ticket = getUserTicket(FxContext.getUserTicket().getLoginName());
+                // remember current language (FX-329)
+                ticket.setLanguage(FxContext.getUserTicket().getLanguage());
+                // update request ticket
+                FxContext.get().setTicket(ticket);
             } catch (FxApplicationException e) {
                 throw e.asRuntimeException();
             }
