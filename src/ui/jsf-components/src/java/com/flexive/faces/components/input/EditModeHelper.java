@@ -446,7 +446,8 @@ class EditModeHelper extends RenderHelper {
                     image.setStyle("padding: 5px;");
                     addImageDescriptionComponent(parent, language);
                 }
-            }
+            } else
+                addImageDescriptionComponent(parent, language);
         }
         final HtmlInputFileUpload upload = (HtmlInputFileUpload) FxJsfUtils.addChildComponent(parent, HtmlInputFileUpload.COMPONENT_TYPE);
         addHtmlAttributes(component, upload);
