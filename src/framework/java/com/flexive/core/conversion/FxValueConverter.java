@@ -58,6 +58,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.util.Iterator;
 
 /**
  * XStream converter for FxValues
@@ -72,6 +73,8 @@ import java.net.URLEncoder;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class FxValueConverter implements Converter {
+    public final static int MAX_BINARY_SIZE = 500 * 1024;
+
     private String downloadURL = null;
 
     /**
@@ -105,30 +108,33 @@ public class FxValueConverter implements Converter {
         BinaryDescriptor desc = value.getTranslation(lang);
         writer.addAttribute("fileName", desc.getName());
         writer.addAttribute("size", String.valueOf(desc.getSize()));
+        writer.addAttribute("binaryId", String.valueOf(desc.getId()));
         writer.startNode("content");
         if (desc.isNewBinary()) {
             writer.addAttribute("content", "EMPTY");
-        } else if (desc.getSize() > 500 * 1024 && ctx.get("pk") != null) {
-            // > 500 KBytes add a download URL
-            writer.addAttribute("content", "URL");
-            try {
-                writer.setValue(getDownloadURL() + "pk" + ctx.get("pk") + "/" +
-                        URLEncoder.encode(FxSharedUtils.escapeXPath(value.getXPath()), "UTF-8") + "/" +
-                        desc.getName());
-            } catch (UnsupportedEncodingException e) {
-                //unlikely to happen since UTF-8 should be available
-                throw new RuntimeException(e);
-            }
         } else {
-            //add BASE64 encoded binary data
-            writer.addAttribute("content", "Base64");
-            ByteArrayOutputStream bos = new ByteArrayOutputStream((int) desc.getSize());
-            desc.download(bos);
-            try {
-                writer.setValue(new String(Base64.encodeBase64(bos.toByteArray()), "UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                //unlikely to happen since UTF-8 should be available
-                throw new RuntimeException(e);
+            if (desc.getSize() > MAX_BINARY_SIZE && ctx.get("pk") != null) {
+                // > MAX_BINARY_SIZE (500 KBytes) add a download URL
+                writer.addAttribute("content", "URL");
+                try {
+                    writer.setValue(getDownloadURL() + "pk" + ctx.get("pk") + "/" +
+                            URLEncoder.encode(FxSharedUtils.escapeXPath(value.getXPath()), "UTF-8") + "/" +
+                            desc.getName());
+                } catch (UnsupportedEncodingException e) {
+                    //unlikely to happen since UTF-8 should be available
+                    throw new RuntimeException(e);
+                }
+            } else {
+                //add BASE64 encoded binary data
+                writer.addAttribute("content", "Base64");
+                ByteArrayOutputStream bos = new ByteArrayOutputStream((int) desc.getSize());
+                desc.download(bos);
+                try {
+                    writer.setValue(new String(Base64.encodeBase64(bos.toByteArray()), "UTF-8"));
+                } catch (UnsupportedEncodingException e) {
+                    //unlikely to happen since UTF-8 should be available
+                    throw new RuntimeException(e);
+                }
             }
         }
         writer.endNode();
@@ -146,6 +152,15 @@ public class FxValueConverter implements Converter {
     private BinaryDescriptor unmarshalBinary(HierarchicalStreamReader reader, UnmarshallingContext ctx, FxValue v) throws FxStreamException {
         String fileName = reader.getAttribute("fileName");
         long size = Long.valueOf(reader.getAttribute("size"));
+        long binaryId = -100;
+        Iterator names = reader.getAttributeNames();
+        while(names.hasNext()) {
+            String name = (String)names.next();
+            if( "binaryId".equals(name)){
+                binaryId = Long.parseLong(reader.getAttribute(name));
+                break;
+            }
+        }
         BinaryDescriptor binary = null;
         while (reader.hasMoreChildren()) {
             reader.moveDown();
@@ -156,6 +171,7 @@ public class FxValueConverter implements Converter {
                 } else if ("Base64".equals(content)) {
                     try {
                         binary = new BinaryDescriptor(fileName, size, new ByteArrayInputStream(Base64.decodeBase64(reader.getValue().getBytes("UTF-8"))));
+                        if( binaryId != -100 ) binary.setId(binaryId);
                     } catch (UnsupportedEncodingException e) {
                         //can not happen really ...
                     }
@@ -167,6 +183,7 @@ public class FxValueConverter implements Converter {
                             URLConnection con = url.openConnection();
                             in = con.getInputStream();
                             binary = new BinaryDescriptor(fileName, size, in);
+                            if( binaryId != -100 ) binary.setId(binaryId);
                         } finally {
                             if (in != null)
                                 in.close();

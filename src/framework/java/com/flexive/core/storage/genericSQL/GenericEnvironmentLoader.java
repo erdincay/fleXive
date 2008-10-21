@@ -309,6 +309,9 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                             defaultValue = (FxValue) xStream.fromXML(_def);
                             if( defaultValue != null && defaultValue.isEmpty() )
                                 defaultValue = null;
+                            if( defaultValue != null ) {
+                                defaultValue.setXPath(name);
+                            }
                         } catch (Exception e) {
                             defaultValue = null;
                             LOG.warn("Failed to unmarshall default value for propery " + name + ": " + e.getMessage(), e);

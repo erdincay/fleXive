@@ -47,7 +47,7 @@ import java.util.regex.Pattern;
  */
 public class FxThumbnailURIConfigurator extends FxMediaSelector {
 
-    private final static Pattern pPK = Pattern.compile("^pk\\d+(\\.(\\d+|MAX|LIVE))?");
+    private final static Pattern pPK = Pattern.compile("^pk(\\d+(\\.(\\d+|MAX|LIVE))?|TYPE)");
     private final static Pattern pXPath = Pattern.compile("^xp.+");
     private final static Pattern pSize = Pattern.compile("s[0123]");
     private final static Pattern pWidth = Pattern.compile("w\\d+");
@@ -78,7 +78,8 @@ public class FxThumbnailURIConfigurator extends FxMediaSelector {
     /**
      * Valid options are:
      * <ul>
-     * <li><code>pk{n.m}</code>  - id and version of the content, if no version is given the live version is used</li>
+     * <li><code>pk{n.m|TYPE}</code>  - id and version of the content, if no version is given the live version is used, for
+     * TYPE the default binary of the xpath's assignment is served if present </li>
      * <li><code>xp{path}</code>  - URL encoded XPath of the property containing the image (optional, else default will be used)</li>
      * <li><code>lang{lang}</code> - 2-digit ISO language code
      * <li><code>lfb{0,1}</code> - language fallback: 0=generate error if language not found, 1=fall back to default language
@@ -94,8 +95,12 @@ public class FxThumbnailURIConfigurator extends FxMediaSelector {
     private void parse() {
         String[] elements = URI.split("\\/");
         for (String element : elements) {
-            if (getPK() == null && pPK.matcher(element).matches())
-                setPK(FxPK.fromString(element.substring(2)));
+            if (getPK() == null && pPK.matcher(element).matches()) {
+                if( "TYPE".equals(element.substring(2)))
+                    setUseType(true);
+                else
+                    setPK(FxPK.fromString(element.substring(2)));
+            }
             if (getXPath() == null && pXPath.matcher(element).matches())
                 setXPath(FxSharedUtils.decodeXPath(element.substring(2)));
             if (getSize() == BinaryDescriptor.PreviewSizes.ORIGINAL && pSize.matcher(element).matches())

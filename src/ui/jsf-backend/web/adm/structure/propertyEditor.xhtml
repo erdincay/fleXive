@@ -106,6 +106,7 @@
             <a4j:outputPanel id="defaultValueInput">
                 <fx:formRow labelKey="PropertyEditor.label.defaultValue" id="defaultValue">
                     <fx:fxValueInput id="defaultValue" value="#{propertyEditorBean.propertyDefaultValue}"
+                             readOnlyShowTranslations="true"
                              readOnly="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
                 </fx:formRow>
             </a4j:outputPanel>

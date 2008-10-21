@@ -49,6 +49,7 @@ import java.io.Serializable;
  */
 public class FxMediaSelector implements Serializable {
     private FxPK pk = null;
+    private Boolean useType = null;
     private String xp = null;
     private String lang = null;
     private Boolean langFallback = null;
@@ -84,6 +85,17 @@ public class FxMediaSelector implements Serializable {
      */
     public FxMediaSelector setPK(FxPK pk) {
         this.pk = pk;
+        return this;
+    }
+
+    /**
+     * Set the flag to use the assignments default binary image from the type if present
+     *
+     * @param useType use the assignments default binary image from the type if present
+     * @return this object, useful for chaining
+     */
+    public FxMediaSelector setUseType(Boolean useType) {
+        this.useType = useType;
         return this;
     }
 
@@ -272,6 +284,16 @@ public class FxMediaSelector implements Serializable {
      */
     public boolean hasFilename() {
         return filename != null && StringUtils.isNotBlank(filename);
+    }
+
+    /**
+     * Use the assignments default binary image from the type if present?
+     * @return use the assignments default binary image from the type if present
+     */
+    public Boolean isUseType() {
+        if( useType == null )
+            return false;
+        return useType;
     }
 
     /**

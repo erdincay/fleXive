@@ -32,6 +32,9 @@
 package com.flexive.war.servlet;
 
 import com.flexive.shared.*;
+import com.flexive.shared.structure.FxAssignment;
+import com.flexive.shared.structure.FxPropertyAssignment;
+import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNoAccessException;
@@ -40,6 +43,8 @@ import com.flexive.shared.media.FxMediaSelector;
 import com.flexive.shared.stream.BinaryDownloadCallback;
 import com.flexive.shared.stream.FxStreamUtils;
 import com.flexive.shared.value.BinaryDescriptor;
+import com.flexive.shared.value.FxValue;
+import com.flexive.shared.value.FxBinary;
 import com.flexive.war.FxThumbnailURIConfigurator;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -63,7 +68,8 @@ import java.net.URLEncoder;
  * <p/>
  * Valid options are:
  * <ul>
- * <li><code>pk{n.m}</code>  - id and version of the content, if no version is given the live version is used</li>
+ * <li><code>pk{n.m|TYPE}</code>  - id and version of the content, if no version is given the live version is used, for
+ * TYPE the default binary of the xpath's assignment is served if present</li>
  * <li><code>xp{path}</code>  - URL encoded XPath of the property containing the image (optional, else default will be used)</li>
  * <li><code>lang{lang}</code> - 2-digit ISO language code
  * <li><code>lfb{0,1}</code> - language fallback: 0=generate error if language not found, 1=fall back to default language
@@ -89,8 +95,6 @@ import java.net.URLEncoder;
  * <code>/thumbnail/pk27.1/s2/test.jpg</code>
  * <code>/thumbnail/s0/w100/h300/pk4711.MAX/vermax/rot90/test.jpg</code>
  * <p/>
- * TODO:
- * rotate, flip and crop are not implemented yet and have no effect!
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
@@ -159,7 +163,7 @@ public class ThumbnailServlet implements Servlet {
         final HttpServletResponse response = (HttpServletResponse) servletResponse;
         final String uri = request.getRequestURI();
         FxThumbnailURIConfigurator conf = new FxThumbnailURIConfigurator(URLDecoder.decode(uri, "UTF-8"));
-        if (conf.getPK() == null) {
+        if (conf.getPK() == null && !conf.isUseType()) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Empty request for thumbnail servlet: " + uri);
             }
@@ -168,9 +172,24 @@ public class ThumbnailServlet implements Servlet {
         }
         long binaryId;
         try {
-            //authorization check and binary lookup
-            binaryId = EJBLookup.getContentEngine().getBinaryId(conf.getPK(), XPathElement.stripType(conf.getXPath()),
-                    conf.getLanguage(), conf.useLangFallback());
+            if (conf.isUseType()) {
+                if (conf.getXPath().indexOf('/') == -1) {
+                    //probably a property
+                    FxProperty prop = CacheAdmin.getFilteredEnvironment().getProperty(conf.getXPath());
+                    binaryId = getStuctureBinaryId(conf, prop.getDefaultValue());
+                } else {
+                    FxAssignment as = CacheAdmin.getFilteredEnvironment().getAssignment(conf.getXPath());
+                    if (as instanceof FxPropertyAssignment) {
+                        FxPropertyAssignment pa = (FxPropertyAssignment) as;
+                        binaryId = getStuctureBinaryId(conf, pa.getDefaultValue());
+                    } else
+                        binaryId = BinaryDescriptor.SYS_UNKNOWN;
+                }
+            } else {
+                //authorization check and binary lookup
+                binaryId = EJBLookup.getContentEngine().getBinaryId(conf.getPK(), XPathElement.stripType(conf.getXPath()),
+                        conf.getLanguage(), conf.useLangFallback());
+            }
         } catch (FxNoAccessException na) {
             binaryId = BinaryDescriptor.SYS_NOACCESS;
         } catch (FxApplicationException e) {
@@ -184,6 +203,26 @@ public class ThumbnailServlet implements Servlet {
             LOG.error(e);
             throw new ServletException(e);
         }
+    }
+
+    /**
+     * Get the binary id of a structure element (property or property assignment)
+     *
+     * @param conf FxThumbnailURIConfigurator
+     * @param val  FxValue containing the value
+     * @return binary id
+     * @throws FxApplicationException on errors
+     */
+    private long getStuctureBinaryId(FxThumbnailURIConfigurator conf, FxValue val) throws FxApplicationException {
+        long binaryId;
+        if (val instanceof FxBinary) {
+            if (conf.getLanguage() != null)
+                binaryId = ((FxBinary) val).getTranslation(conf.getLanguage().getId()).getId();
+            else
+                binaryId = ((FxBinary) val).getBestTranslation().getId();
+        } else
+            binaryId = BinaryDescriptor.SYS_UNKNOWN;
+        return binaryId;
     }
 
     /**
@@ -225,7 +264,7 @@ public class ThumbnailServlet implements Servlet {
     /**
      * Return a thumbnail link for the given object.
      *
-     * @param pk        the object id
+     * @param pk        the object id or <code>null</code> if a type's assignment default binary is requested
      * @param size      the preview size (if null, the default size is used by the servlet)
      * @param xpath     the binary xpath (if null, the default preview for the object will be used)
      * @param timestamp the binary timestamp, to be added to the URL for fine-grained cache control
@@ -234,7 +273,7 @@ public class ThumbnailServlet implements Servlet {
      */
     public static String getLink(FxPK pk, BinaryDescriptor.PreviewSizes size, String xpath, long timestamp, FxLanguage language) {
         try {
-            return URI_BASE + "pk" + pk + (size != null ? "/s" + size.getBlobIndex() : "")
+            return URI_BASE + "pk" + (pk == null ? "TYPE" : pk) + (size != null ? "/s" + size.getBlobIndex() : "")
                     + (StringUtils.isNotBlank(xpath) ? "/xp"
                     + URLEncoder.encode(FxSharedUtils.escapeXPath(xpath), "UTF-8") : "")
                     + "/ts" + timestamp

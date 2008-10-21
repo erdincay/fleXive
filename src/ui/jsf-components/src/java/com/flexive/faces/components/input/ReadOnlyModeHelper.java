@@ -34,6 +34,9 @@ package com.flexive.faces.components.input;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.components.Thumbnail;
 import com.flexive.shared.*;
+import com.flexive.shared.content.FxPK;
+import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.media.FxMediaSelector;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxStructureOption;
@@ -149,8 +152,15 @@ class ReadOnlyModeHelper extends RenderHelper {
             return;
         }
         final HtmlOutputLink link = (HtmlOutputLink) FxJsfUtils.addChildComponent(component, HtmlOutputLink.COMPONENT_TYPE);
+        FxPK pk;
+        try {
+            pk = XPathElement.getPK(value.getXPath());
+        } catch (FxRuntimeException e) {
+            pk = null;
+        }
+
         final String urlOriginal = FxJsfUtils.getServletContext().getContextPath() +
-                ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()),
+                ThumbnailServlet.getLink(pk,
                         descriptor.isImage() ? BinaryDescriptor.PreviewSizes.ORIGINAL : BinaryDescriptor.PreviewSizes.PREVIEW3,
                         value.getXPath(), descriptor.getCreationTime(), language);
         link.setValue(urlOriginal);
@@ -170,7 +180,13 @@ class ReadOnlyModeHelper extends RenderHelper {
 
     private void addImageComponent(UIComponent parent, BinaryDescriptor descriptor, FxLanguage language) {
         final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(parent, HtmlGraphicImage.COMPONENT_TYPE);
-        image.setUrl(ThumbnailServlet.getLink(XPathElement.getPK(value.getXPath()),
+        FxPK pk;
+        try {
+            pk = XPathElement.getPK(value.getXPath());
+        } catch (FxRuntimeException e) {
+            pk = null;
+        }
+        image.setUrl(ThumbnailServlet.getLink(pk,
                 BinaryDescriptor.PreviewSizes.PREVIEW2, value.getXPath(), descriptor.getCreationTime(), language));
         if (component.isReadOnlyShowTranslations()) //TODO: might use another attribute to determine if this should be rendered
             image.setStyle("border: none; padding: 5px;");

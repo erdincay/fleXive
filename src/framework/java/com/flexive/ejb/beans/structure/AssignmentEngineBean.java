@@ -50,6 +50,7 @@ import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
+import com.flexive.shared.value.FxBinary;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -123,6 +124,10 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             //parentXPath is valid, create the property, then assign it to root
             newPropertyId = seq.getId(SequencerEngine.System.TYPEPROP);
             FxValue defValue = property.getDefaultValue();
+            if( defValue instanceof FxBinary) {
+                ContentStorage storage = StorageManager.getContentStorage(type.getStorageMode());
+                storage.prepareBinary(con, (FxBinary)defValue);
+            }
             final String _def = defValue == null || defValue.isEmpty() ? null : ConversionEngine.getXStream().toXML(defValue);
             con = Database.getDbConnection();
             //create property, no checks for existing names are performed as this is handled with unique keys
@@ -1375,6 +1380,10 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     if (ps != null) ps.close();
                     ps = con.prepareStatement("UPDATE " + TBL_STRUCT_PROPERTIES + " SET DEFAULT_VALUE=? WHERE ID=?");
                     FxValue defValue = prop.getDefaultValue();
+                    if (defValue instanceof FxBinary) {
+                        ContentStorage storage = StorageManager.getContentStorage(TypeStorageMode.Hierarchical);
+                        storage.prepareBinary(con, (FxBinary) defValue);
+                    }
                     final String _def = defValue == null || defValue.isEmpty() ? null : ConversionEngine.getXStream().toXML(defValue);
                     if (_def == null)
                         ps.setNull(1, java.sql.Types.VARCHAR);
@@ -1636,6 +1645,10 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     if (ps != null) ps.close();
                     ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET DEFAULT_VALUE=? WHERE ID=?");
                     FxValue defValue = modified.getDefaultValue();
+                    if( defValue instanceof FxBinary) {
+                        ContentStorage storage = StorageManager.getContentStorage(modified.getAssignedType().getStorageMode());
+                        storage.prepareBinary(con, (FxBinary)defValue);
+                    }
                     final String _def = defValue == null || defValue.isEmpty() ? null : ConversionEngine.getXStream().toXML(defValue);
                     if (_def == null)
                         ps.setNull(1, java.sql.Types.VARCHAR);
@@ -1789,6 +1802,10 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             ps.setInt(15, prop.hasDefaultLanguage() ? (int) prop.getDefaultLanguage() : (int) FxLanguage.SYSTEM_ID);
             ps.setBoolean(16, prop.isSystemInternal());
             FxValue defValue = prop.getDefaultValue();
+            if( defValue instanceof FxBinary) {
+                ContentStorage storage = StorageManager.getContentStorage(prop.getAssignedType().getStorageMode());
+                storage.prepareBinary(con, (FxBinary)defValue);
+            }
             final String _def = defValue == null || defValue.isEmpty() ? null : ConversionEngine.getXStream().toXML(defValue);
             if (_def == null)
                 ps.setNull(17, java.sql.Types.VARCHAR);

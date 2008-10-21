@@ -2398,13 +2398,59 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         Map<String, String[]> mimeMetaMap = new HashMap<String, String[]>(5);
         try {
             for (FxData data : content.getRootGroup().getChildren())
-                _prepareSave(mimeMetaMap, con, data);
+                try {
+                    _prepareSave(mimeMetaMap, con, data);
+                } catch (FxApplicationException e) {
+                    LOG.error(e); //not supposed to be thrown if called with a mimeMetaMap
+                }
         } catch (SQLException e) {
             throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage());
         }
     }
 
-    private void _prepareSave(Map<String, String[]> mimeMetaMap, Connection con, FxData data) throws SQLException {
+
+    /**
+     * {@inheritDoc}
+     */
+    public void prepareBinary(Connection con, FxBinary binary) throws SQLException, FxApplicationException {
+        prepareBinary(con, null, binary);
+    }
+
+    /**
+     * Prepare and identify a binary
+     *
+     * @param con         an open and valid Connection
+     * @param mimeMetaMap optional mimeMetaMap to avoid saving duplicates, if <code>null</code>, binary will be transfered to the real binary space
+     * @param binary      the binary to process (BinaryDescriptor's may be altered or replaced after calling this method!)
+     * @throws java.sql.SQLException on errors
+     * @throws FxApplicationException on errors
+     */
+    public void prepareBinary(Connection con, Map<String, String[]> mimeMetaMap, FxBinary binary) throws SQLException, FxApplicationException {
+        for (long lang : binary.getTranslatedLanguages()) {
+            BinaryDescriptor bd = binary.getTranslation(lang);
+            if (bd.isEmpty()) {
+                //remove empty languages to prevent further processing (FX-327)
+                binary.removeLanguage(lang);
+                continue;
+            }
+            if (!bd.isNewBinary())
+                continue;
+            if (mimeMetaMap != null && mimeMetaMap.containsKey(bd.getHandle())) {
+                String[] mm = mimeMetaMap.get(bd.getHandle());
+                BinaryDescriptor bdNew = new BinaryDescriptor(bd.getHandle(), bd.getName(), bd.getSize(), mm[0], mm[1]);
+                binary.setTranslation(lang, bdNew);
+            } else {
+                BinaryDescriptor bdNew = identifyAndTransferTransitBinary(con, bd);
+                if( mimeMetaMap == null )
+                    bdNew = binaryTransit(con, bdNew);
+                binary.setTranslation(lang, bdNew);
+                if (mimeMetaMap != null)
+                    mimeMetaMap.put(bdNew.getHandle(), new String[]{bdNew.getMimeType(), bdNew.getMetadata()});
+            }
+        }
+    }
+
+    private void _prepareSave(Map<String, String[]> mimeMetaMap, Connection con, FxData data) throws SQLException, FxApplicationException {
         if (data instanceof FxGroupData)
             for (FxData sub : ((FxGroupData) data).getChildren())
                 _prepareSave(mimeMetaMap, con, sub);
@@ -2414,26 +2460,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 ((FxPropertyData) data).setContainsDefaultValue(false);
             if (!pdata.isEmpty() && pdata.getValue() instanceof FxBinary) {
                 FxBinary bin = (FxBinary) pdata.getValue();
-                for (long lang : bin.getTranslatedLanguages()) {
-                    BinaryDescriptor bd = bin.getTranslation(lang);
-                    if (bd.isEmpty()) {
-                        //remove empty languages to prevent further processing (FX-327)
-                        bin.removeLanguage(lang);
-                        continue;
-                    }
-                    if (!bd.isNewBinary())
-                        continue;
-                    if (mimeMetaMap.containsKey(bd.getHandle())) {
-                        String[] mm = mimeMetaMap.get(bd.getHandle());
-                        BinaryDescriptor bdNew = new BinaryDescriptor(bd.getHandle(), bd.getName(), bd.getSize(), mm[0], mm[1]);
-                        bin.setTranslation(lang, bdNew);
-                    } else {
-                        BinaryDescriptor bdNew = identifyAndTransferTransitBinary(con, bd);
-                        bin.setTranslation(lang, bdNew);
-                        mimeMetaMap.put(bdNew.getHandle(), new String[]{bdNew.getMimeType(), bdNew.getMetadata()});
-                    }
-                }
-
+                prepareBinary(con, mimeMetaMap, bin);
             }
         }
     }
@@ -2445,8 +2472,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @param binary the binary to identify
      * @return BinaryDescriptor
      * @throws SQLException on errors
+     * @throws FxApplicationException on errors
      */
-    private BinaryDescriptor identifyAndTransferTransitBinary(Connection con, BinaryDescriptor binary) throws SQLException {
+    private BinaryDescriptor identifyAndTransferTransitBinary(Connection con, BinaryDescriptor binary) throws SQLException, FxApplicationException {
         PreparedStatement ps;
         //check if already identified
         if (!StringUtils.isEmpty(binary.getMetadata()))

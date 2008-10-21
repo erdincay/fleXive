@@ -40,6 +40,7 @@ import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.structure.UniqueMode;
+import com.flexive.shared.value.FxBinary;
 
 import java.io.InputStream;
 import java.sql.Connection;
@@ -303,4 +304,14 @@ public interface ContentStorage {
      * @throws SQLException      on errors
      */
     void updateMultilanguageSettings(Connection con, long assignmentId, boolean orgMultiLang, boolean newMultiLang, long defaultLanguage) throws FxUpdateException, SQLException;
+
+    /**
+     * Prepare, identify and transfer a binary to the binary space
+     *
+     * @param con         an open and valid Connection
+     * @param binary      the binary to process (BinaryDescriptor's may be altered or replaced after calling this method!)
+     * @throws java.sql.SQLException on errors
+     * @throws FxApplicationException on errors
+     */
+    void prepareBinary(Connection con, FxBinary binary) throws SQLException, FxApplicationException;
 }

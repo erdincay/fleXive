@@ -97,7 +97,8 @@
                 <ui:fragment rendered="#{propertyEditorBean.defaultValueSet}">
                     <fx:formRow labelKey="PropertyEditor.label.defaultValue" id="defaultValueSelect">
                        <fx:fxValueInput id="defaultValueSelect" value="#{propertyEditorBean.defaultValue}"
-                                 readOnly="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
+                                        readOnlyShowTranslations="true"
+                                        readOnly="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
                     </fx:formRow>
                 </ui:fragment>
             </a4j:outputPanel>

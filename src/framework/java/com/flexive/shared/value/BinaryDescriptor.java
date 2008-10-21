@@ -146,7 +146,7 @@ public class BinaryDescriptor implements Serializable {
     private final boolean newBinary;
     private final List<ServerLocation> server;
 
-    private final long id;
+    private long id=-1;
     private final int version;
     private final int quality;
     private final long creationTime;
@@ -315,6 +315,17 @@ public class BinaryDescriptor implements Serializable {
     }
 
     /**
+     * Set the binary id, only allowed if not assigned previously
+     *
+     * @param binaryId binary id
+     */
+    public void setId(long binaryId) {
+        if( this.id == -1)
+            this.id = binaryId;
+    }
+
+
+    /**
      * Downloads the binary to the given stream.
      * The stream won't be flushed or closed!
      *
@@ -385,6 +396,8 @@ public class BinaryDescriptor implements Serializable {
      * @return creation timestamp
      */
     public long getCreationTime() {
+        if( creationTime == -1 )
+            return System.currentTimeMillis();
         return creationTime;
     }
 
@@ -494,6 +507,6 @@ public class BinaryDescriptor implements Serializable {
      */
     @Override
     public String toString() {
-        return this.getName() + " " + this.mimeType;
+        return this.getName() + " " + (this.mimeType == null ? "unknown/unknown" : this.mimeType);
     }
 }

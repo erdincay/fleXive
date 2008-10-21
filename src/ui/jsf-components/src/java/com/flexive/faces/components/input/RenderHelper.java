@@ -230,7 +230,11 @@ abstract class RenderHelper {
      */
     public static class ImageDescription extends UIOutput {
         private FxLanguage language = FxLanguage.DEFAULT;
+        private boolean downloadLink = true;
 
+        public void setDownloadLink(boolean downloadLink) {
+            this.downloadLink = downloadLink;
+        }
 
         public void setLanguage(FxLanguage language) {
             this.language = language;
@@ -257,16 +261,10 @@ abstract class RenderHelper {
 
                 writer.startElement("span", null);
                 writer.writeAttribute("class", "binaryDescription", null);
-                StringBuilder sb = new StringBuilder(500);
-                if (input.isReadOnly() && input.isReadOnlyShowTranslations() && value.isMultiLanguage())
-                    sb.append(language.getLabel().getBestTranslation()).append(": ");
-                sb.append(descriptor.getName()).append(", ").append(descriptor.getSize()).append(" byte");
-                if (descriptor.isImage())
-                    sb.append(",").append(descriptor.getWidth()).append("x").append(descriptor.getHeight()).append(" pixel");
-                writer.writeText(sb.toString(), null);
+                writer.writeText(getBinaryDescription(input, value, descriptor), null);
                 writer.endElement("span");
 
-                if (!descriptor.isNewBinary()) {
+                if (!descriptor.isNewBinary() && downloadLink) {
                     final HtmlOutputLink link = (HtmlOutputLink) FxJsfUtils.createComponent(HtmlOutputLink.COMPONENT_TYPE);
                     final String downloadURL = FxJsfUtils.getServletContext().getContextPath() +
                             "/cefiledownload/" +
@@ -283,6 +281,24 @@ abstract class RenderHelper {
                 writer.startElement("br", null);
                 writer.endElement("br");
             }
+        }
+
+        /**
+         * Build a binary description
+         *
+         * @param input input component
+         * @param value FxValue
+         * @param descriptor BinaryDescriptor
+         * @return description
+         */
+        public String getBinaryDescription(FxValueInput input, FxValue value, BinaryDescriptor descriptor) {
+            StringBuilder sb = new StringBuilder(500);
+            if (input.isReadOnly() && input.isReadOnlyShowTranslations() && value.isMultiLanguage())
+                sb.append(language.getLabel().getBestTranslation()).append(": ");
+            sb.append(descriptor.getName()).append(", ").append(descriptor.getSize()).append(" byte");
+            if (descriptor.isImage())
+                sb.append(",").append(descriptor.getWidth()).append("x").append(descriptor.getHeight()).append(" pixel");
+            return sb.toString();
         }
     }
 
