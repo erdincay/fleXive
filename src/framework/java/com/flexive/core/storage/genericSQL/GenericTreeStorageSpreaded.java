@@ -355,7 +355,8 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                     if (lastDepth < depth) {
                         currentParent.push(newId);
                     } else if (lastDepth > depth) {
-                        currentParent.pop();
+                        for (int p = 0; p < (lastDepth - depth); p++)
+                            currentParent.pop();
                     }
                 }
 
