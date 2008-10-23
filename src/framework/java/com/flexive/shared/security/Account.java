@@ -104,8 +104,8 @@ public class Account extends AbstractSelectableObjectWithName implements Seriali
         this.language = language;
         this.active = active;
         this.validated = validated;
-        this.validFrom = (Date) validFrom.clone();
-        this.validTo = (Date) validTo.clone();
+        this.validFrom = validFrom == null ? null : (Date) validFrom.clone();
+        this.validTo = validTo == null ? null : (Date) validTo.clone();
         this.defaultNodeId = defaultNode;
         this.description = description;
         this.contactDataId = contactDataId;
