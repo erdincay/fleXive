@@ -84,6 +84,7 @@ public class FxQuartz {
         }
 
         // Grab the Scheduler instance from the Factory
+        // see http://wiki.opensymphony.com/display/QRTZ1/ConfigJobStoreCMT for more options
         Properties props = new Properties();
         props.put(StdSchedulerFactory.PROP_DATASOURCE_PREFIX, "fxQuartzDS");
         props.put("org.quartz.dataSource.fxQuartzDS." + StdSchedulerFactory.PROP_CONNECTION_PROVIDER_CLASS, FxQuartzConnectionProviderNonTX.class.getCanonicalName());
@@ -97,6 +98,7 @@ public class FxQuartz {
         props.put("org.quartz.dataSource.fxQuartzNoTXDS." + StdSchedulerFactory.PROP_CONNECTION_PROVIDER_CLASS, FxQuartzConnectionProviderNonTX.class.getCanonicalName());
         props.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, "FxQuartzScheduler_Division_" + FxContext.get().getDivisionId());
         props.put("org.quartz.jobStore.isClustered", "true");
+        props.put("org.quartz.jobStore.txIsolationLevelSerializable", "true");
 
         Scheduler scheduler = new StdSchedulerFactory(props).getScheduler();
         FxContext ctx = FxContext._getEJBContext(currCtx);
