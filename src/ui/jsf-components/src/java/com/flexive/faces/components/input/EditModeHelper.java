@@ -41,6 +41,7 @@ import com.flexive.shared.structure.*;
 import com.flexive.shared.value.*;
 import com.flexive.war.servlet.ThumbnailServlet;
 import com.flexive.war.FxRequest;
+import com.flexive.war.JsonWriter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.myfaces.custom.date.HtmlInputDate;
 import org.apache.myfaces.custom.fileupload.HtmlInputFileUpload;
@@ -53,6 +54,7 @@ import javax.faces.context.ResponseWriter;
 import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -86,12 +88,12 @@ class EditModeHelper extends RenderHelper {
             }
             useHTMLEditor = pa.getOption(FxStructureOption.OPTION_HTML_EDITOR).isValueTrue();
         }
-        if( useHTMLEditor && !(value instanceof FxString))
+        if (useHTMLEditor && !(value instanceof FxString))
             useHTMLEditor = false; //prevent showing HTML editor for non-string types
 
-        if( value instanceof FxHTML && !useHTMLEditor) {
+        if (value instanceof FxHTML && !useHTMLEditor) {
             //if no xpath is available, always show the HTML editor for FxHTML values
-            if(StringUtils.isEmpty(value.getXPath()))
+            if (StringUtils.isEmpty(value.getXPath()))
                 useHTMLEditor = true;
         }
     }
@@ -111,12 +113,13 @@ class EditModeHelper extends RenderHelper {
         container.setInputClientId(clientId);
         component.getChildren().add(container);
 
-        final List<String> rowIds = new ArrayList<String>(languages.size());
         final List<UIComponent> rows = new ArrayList<UIComponent>();
+        final HashMap<Long, LanguageSelectWriter.InputRowInfo> rowInfos =
+                new HashMap<Long, LanguageSelectWriter.InputRowInfo>(languages.size());
         for (final FxLanguage language : languages) {
             final String containerId = clientId + FxValueInputRenderer.LANG_CONTAINER + language.getId();
             final String inputId = clientId + FxValueInputRenderer.INPUT + language.getId();
-            rowIds.add("'" + containerId + "'");
+            rowInfos.put(language.getId(), new LanguageSelectWriter.InputRowInfo(containerId, inputId));
 
             final LanguageContainerWriter languageContainer = new LanguageContainerWriter();
             languageContainer.setContainerId(containerId);
@@ -129,7 +132,8 @@ class EditModeHelper extends RenderHelper {
 
         final LanguageSelectWriter languageSelect = new LanguageSelectWriter();
         languageSelect.setInputClientId(clientId);
-        languageSelect.setRowIds(rowIds);
+        languageSelect.setRowInfos(rowInfos);
+        languageSelect.setDefaultLanguageId(value.getDefaultLanguage());
         container.getChildren().add(languageSelect);
         // add children to language select because the language select needs to write code before and after the input rows
         languageSelect.getChildren().addAll(rows);
@@ -569,15 +573,38 @@ class EditModeHelper extends RenderHelper {
      * row switcher.
      */
     public static class LanguageSelectWriter extends DeferredInputWriter {
-        private List<String> rowIds;
-        private String languageSelectId;
+        public static class InputRowInfo {
+            private final String rowId;
+            private final String inputId;
 
-        public List<String> getRowIds() {
-            return rowIds;
+            public InputRowInfo(String rowId, String inputId) {
+                this.rowId = rowId;
+                this.inputId = inputId;
+            }
+
+            public String getRowId() {
+                return rowId;
+            }
+
+            public String getInputId() {
+                return inputId;
+            }
         }
 
-        public void setRowIds(List<String> rowIds) {
-            this.rowIds = rowIds;
+        private Map<Long, InputRowInfo> rowInfos;
+        private String languageSelectId;
+        private long defaultLanguageId;
+
+        public Map<Long, InputRowInfo> getRowInfos() {
+            return rowInfos;
+        }
+
+        public void setRowInfos(Map<Long, InputRowInfo> rowInfos) {
+            this.rowInfos = rowInfos;
+        }
+
+        public void setDefaultLanguageId(long defaultLanguageId) {
+            this.defaultLanguageId = defaultLanguageId;
         }
 
         @Override
@@ -617,25 +644,36 @@ class EditModeHelper extends RenderHelper {
         public void encodeEnd(FacesContext facesContext) throws IOException {
             final ResponseWriter writer = facesContext.getResponseWriter();
             // attach JS handler object to container div
+            final JsonWriter jsonWriter = new JsonWriter().startMap();
+            for (Map.Entry<Long, InputRowInfo> entry : rowInfos.entrySet()) {
+                jsonWriter.startAttribute(String.valueOf(entry.getKey()))
+                        .startMap()
+                        .writeAttribute("rowId", entry.getValue().getRowId())
+                        .writeAttribute("inputId", entry.getValue().getInputId())
+                        .closeMap();
+            }
+            jsonWriter.closeMap().finishResponse();
             writer.write(MessageFormat.format(
                     "<script language=\"javascript\">\n"
                             + "<!--\n"
                             + "  document.getElementById(''{0}'')." + JS_OBJECT
-                            + " = new flexive.input.FxMultiLanguageValueInput(''{0}'', ''{1}'', [{2}], ''{3}'');\n"
+                            + " = new flexive.input.FxMultiLanguageValueInput(''{0}'', ''{1}'', {2}, ''{3}'', ''{4}'');\n"
                             + "  document.getElementById(''{3}'').onchange();\n"
                             + "//-->\n"
                             + "</script>",
                     inputClientId, inputClientId + FxValueInputRenderer.LANG_CONTAINER,
-                    StringUtils.join(rowIds.iterator(), ','),
-                    languageSelectId
+                    jsonWriter.toString(),
+                    languageSelectId,
+                    defaultLanguageId
             ));
         }
 
         @Override
         public Object saveState(FacesContext context) {
-            final Object[] state = new Object[2];
+            final Object[] state = new Object[3];
             state[0] = super.saveState(context);
-            state[1] = rowIds;
+            state[1] = rowInfos;
+            state[2] = defaultLanguageId;
             return state;
         }
 
@@ -644,7 +682,8 @@ class EditModeHelper extends RenderHelper {
         public void restoreState(FacesContext context, Object stateValue) {
             final Object[] state = (Object[]) stateValue;
             super.restoreState(context, state[0]);
-            rowIds = (List<String>) state[1];
+            rowInfos = (Map<Long, InputRowInfo>) state[1];
+            defaultLanguageId = (Long) state[2];
         }
     }
 
@@ -702,7 +741,7 @@ class EditModeHelper extends RenderHelper {
                 writer.writeAttribute("checked", "true", null);
             }
             writer.writeAttribute("onclick", "document.getElementById('" + inputClientId
-                    + "')." + JS_OBJECT + ".onDefaultLanguageChanged(this)", null);
+                    + "')." + JS_OBJECT + ".onDefaultLanguageChanged(this, " + languageId + ")", null);
             writer.endElement("input");
 
             writer.startElement("div", null);
@@ -898,27 +937,27 @@ class EditModeHelper extends RenderHelper {
             FxJavascriptUtils.writeYahooRequires(out, "calendar");
             FxJavascriptUtils.onYahooLoaded(out,
                     "function() {\n"
-                    + "    var button = document.getElementById('" + buttonId + "');\n"
-                    + "    var container = document.getElementById('" + containerId + "');\n"
-                    + "    var input = document.getElementById('" + inputClientId + "');\n"
-                    + "    var date = " + (date != null ? "'" + new SimpleDateFormat("M/d/yyyy").format(date) + "'" : "''") + ";\n"
-                    + "    var pdate = " + (date != null ? "'" + new SimpleDateFormat("M/yyyy").format(date) + "'" : "''") + ";\n"
-                    + "    var cal = new YAHOO.widget.Calendar('" + containerId + "', '" + containerId + "', \n"
-                    + "                  { navigator: true, close: true, title: '"
+                            + "    var button = document.getElementById('" + buttonId + "');\n"
+                            + "    var container = document.getElementById('" + containerId + "');\n"
+                            + "    var input = document.getElementById('" + inputClientId + "');\n"
+                            + "    var date = " + (date != null ? "'" + new SimpleDateFormat("M/d/yyyy").format(date) + "'" : "''") + ";\n"
+                            + "    var pdate = " + (date != null ? "'" + new SimpleDateFormat("M/yyyy").format(date) + "'" : "''") + ";\n"
+                            + "    var cal = new YAHOO.widget.Calendar('" + containerId + "', '" + containerId + "', \n"
+                            + "                  { navigator: true, close: true, title: '"
                             + MessageBean.getInstance().getResource("FxValueInput.datepicker.title")
                             + "', selected: date, pagedate: pdate });\n"
-                    + "    cal.selectEvent.subscribe(function(type, args, obj) {\n"
-                    + "             var date = args[0][0];\n"
+                            + "    cal.selectEvent.subscribe(function(type, args, obj) {\n"
+                            + "             var date = args[0][0];\n"
                             // YYYY/MM/DD
-                    + "             input.value = flexive.util.zeroPad(date[0], 4) + '-' "
-                    + " + flexive.util.zeroPad(date[1], 2) + '-' + flexive.util.zeroPad(date[2], 2);\n"
-                    + "             cal.hide();\n"
-                    + "         }, cal, true);\n"
-                    + "    cal.render();\n"
-                    + "    var Dom = YAHOO.util.Dom;\n"
-                    + "    YAHOO.util.Event.on('" + buttonId + "', 'click', \n"
-                    + "          function() { cal.show(); Dom.setXY(container, Dom.getXY(button)); }, cal, true);\n"
-                    + "}"
+                            + "             input.value = flexive.util.zeroPad(date[0], 4) + '-' "
+                            + " + flexive.util.zeroPad(date[1], 2) + '-' + flexive.util.zeroPad(date[2], 2);\n"
+                            + "             cal.hide();\n"
+                            + "         }, cal, true);\n"
+                            + "    cal.render();\n"
+                            + "    var Dom = YAHOO.util.Dom;\n"
+                            + "    YAHOO.util.Event.on('" + buttonId + "', 'click', \n"
+                            + "          function() { cal.show(); Dom.setXY(container, Dom.getXY(button)); }, cal, true);\n"
+                            + "}"
             );
             FxJavascriptUtils.endJavascript(out);
         }

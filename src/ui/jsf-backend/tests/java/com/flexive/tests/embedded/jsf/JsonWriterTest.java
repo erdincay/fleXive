@@ -41,9 +41,7 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.text.DateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Locale;
+import java.util.*;
 
 /**
  * Test cases for the JsonWriter component.
@@ -118,6 +116,20 @@ public class JsonWriterTest {
 		writer.finishResponse();
 		assert expected.equals(out.toString()) : "Unexpected output: " + out.toString();
 	}
+
+    @Test
+    public void testWriteMapValue() throws IOException {
+        final StringWriter out = new StringWriter();
+        final JsonWriter writer = new JsonWriter(out);
+        final Map<Long, String> map = new HashMap<Long, String>();
+        map.put(1L, "first value");
+        map.put(2L, "second value");
+        writer.writeAttribute("map", map);
+        writer.finishResponse();
+        assert out.toString().contains("first value") : "Unexpected output: " + out.toString();
+        assert out.toString().contains("second value") : "Unexpected output: " + out.toString();
+        assert out.toString().charAt(0) == '{' : "Unexpected output: " + out.toString();
+    }
 	
 	@Test
 	public void testMatchingParensArray() throws IOException {

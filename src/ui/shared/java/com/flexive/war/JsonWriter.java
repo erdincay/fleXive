@@ -37,11 +37,9 @@ import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.io.StringWriter;
 import java.text.DateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * A simple abstraction for JSON writers, including trivial
@@ -66,6 +64,10 @@ public class JsonWriter {
      * not completely JSON-compliant, but makes encoding XHTML much easier
      */
     private boolean singleQuotesForStrings = true;
+
+    public JsonWriter() {
+        this(new StringWriter());
+    }
 
     public JsonWriter(Writer out) {
         this(out, Locale.getDefault());
@@ -169,6 +171,12 @@ public class JsonWriter {
                 writeLiteral(item, escapeValue);
             }
             closeArray();
+        } else if (value instanceof Map) {
+            startMap();
+            for (Map.Entry<?, ?> entry: ((Map<?, ?>) value).entrySet()) {
+                writeAttribute(String.valueOf(entry.getKey()), entry.getValue());
+            }
+            closeMap();
         } else if (value instanceof Number) {
             out.write(value.toString());
         } else if (value instanceof Date) {

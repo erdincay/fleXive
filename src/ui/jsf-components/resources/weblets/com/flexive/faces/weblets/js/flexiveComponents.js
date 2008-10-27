@@ -537,12 +537,23 @@ flexive.input = new function() {
 
 }
 
-flexive.input.FxMultiLanguageValueInput = function(id, baseRowId, rowIds, languageSelectId) {
+/**
+ * JS object for fx:fxValueInput components.
+ *
+ * @param id            the fx:fxValueInput input ID
+ * @param baseRowId     the row prefix, a valid row ID is constructed by appending the language ID
+ * @param rowInfos      a map of type <code>{ languageId: { rowId: String, inputId: String } }</code>
+ * @param languageSelectId  the input ID of the language select listbox
+ * @param defaultLanguageId the default language (may be -1 if no default language is selected)
+ */
+flexive.input.FxMultiLanguageValueInput = function(id, baseRowId, rowInfos, languageSelectId, defaultLanguageId) {
     this.id = id;
     this.baseRowId = baseRowId;
-    this.rowIds = rowIds;
+    this.rowInfos = rowInfos;
     this.languageSelectId = languageSelectId;
+    this.defaultLanguageId = defaultLanguageId;
     flexive.input.fxValueInputList.push(this);
+    this._attachInputListeners();
 };
 
 flexive.input.FxMultiLanguageValueInput.prototype = {
@@ -551,12 +562,13 @@ flexive.input.FxMultiLanguageValueInput.prototype = {
         flexive.input._fixHtmlEditorsIE();
     },
 
-    showRow: function(rowId) {
-        for (var i = 0; i < this.rowIds.length; i++) {
-            var enabled = rowId == null || this.rowIds[i] == rowId;
-            document.getElementById(this.rowIds[i]).style.display = enabled ? "block" : "none";
+    showRow: function(showRowId) {
+        for (var i in this.rowInfos) {
+            var rowId = this.rowInfos[i].rowId;
+            var enabled = showRowId == null || rowId == showRowId;
+            document.getElementById(rowId).style.display = enabled ? "block" : "none";
             // all languages / show language icon for each row
-            document.getElementById(this.rowIds[i] + "_language").style.display = (enabled && rowId == null) ? "inline" : "none";
+            document.getElementById(rowId + "_language").style.display = (enabled && showRowId == null) ? "inline" : "none";
         }
     },
 
@@ -570,7 +582,7 @@ flexive.input.FxMultiLanguageValueInput.prototype = {
         }
     },
 
-    onDefaultLanguageChanged: function(inputCheckbox) {
+    onDefaultLanguageChanged: function(inputCheckbox, languageId) {
         if (inputCheckbox.checked) {
             // uncheck other languages since only one language may be the default
             var languageCheckboxes = document.getElementsByName(inputCheckbox.name);
@@ -579,6 +591,7 @@ flexive.input.FxMultiLanguageValueInput.prototype = {
                     languageCheckboxes[i].checked = false;
                 }
             }
+            this.defaultLanguageId = languageId;
         }
     },
 
@@ -587,6 +600,23 @@ flexive.input.FxMultiLanguageValueInput.prototype = {
      */
     isValid: function() {
         return document.getElementById(this.languageSelectId) != null;
+    },
+
+    /**
+     * Attaches an input listener to the given row IDs
+     */
+    _attachInputListeners: function() {
+        // set value from current default language in all empty inputs
+        for (var i in this.rowInfos) {
+            var rowInfo = this.rowInfos[i];
+            var input = document.getElementById(rowInfo.inputId);
+            if (input != null && input.type == "text" && this.defaultLanguageId > 0) {
+                input.value = document.getElementById(this.rowInfos[this.defaultLanguageId].inputId).value;
+                input.setAttribute("defaultLanguageSet", true);
+            } else if (input != null) {
+                input.removeAttribute("defaultLanguageSet");
+            }
+        }
     }
 }
 
