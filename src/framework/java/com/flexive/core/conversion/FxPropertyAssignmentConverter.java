@@ -132,6 +132,7 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
             throw e.asRuntimeException();
         }
         FxValue defaultValue = ConversionEngine.getFxValue("defaultValue", this, reader, ctx);
+
         if (reader.hasMoreChildren()) { //optional property as last subnode
             reader.moveDown();
             //only allowed child is the property if it is not derived
@@ -161,6 +162,8 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
                 try {
                     EJBLookup.getAssignmentEngine().save(prop);
                     env = CacheAdmin.getEnvironment(); //refresh environment
+                    ctx.put(ConversionEngine.KEY_TYPE, env.getType(type.getId()).asEditable());
+                    type = (FxType) ctx.get(ConversionEngine.KEY_TYPE);
                 } catch (FxApplicationException e) {
                     throw e.asRuntimeException();
                 }
@@ -172,6 +175,8 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
                                         data.getAlias()),
                                 false);
                         env = CacheAdmin.getEnvironment(); //refresh environment
+                        ctx.put(ConversionEngine.KEY_TYPE, env.getType(type.getId()).asEditable());
+                        type = (FxType) ctx.get(ConversionEngine.KEY_TYPE);
                     } catch (FxApplicationException e) {
                         throw e.asRuntimeException();
                     }
@@ -187,6 +192,8 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
                 try {
                     EJBLookup.getAssignmentEngine().createProperty(type.getId(), prop, parentXPath, data.getAlias());
                     env = CacheAdmin.getEnvironment(); //refresh environment
+                    ctx.put(ConversionEngine.KEY_TYPE, env.getType(type.getId()).asEditable());
+                    type = (FxType) ctx.get(ConversionEngine.KEY_TYPE);
                 } catch (FxApplicationException e) {
                     throw e.asRuntimeException();
                 }
@@ -210,6 +217,8 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
                 EJBLookup.getAssignmentEngine().save(paEdit, false);
 
                 env = CacheAdmin.getEnvironment(); //refresh environment
+                ctx.put(ConversionEngine.KEY_TYPE, env.getType(type.getId()).asEditable());
+                type = (FxType) ctx.get(ConversionEngine.KEY_TYPE);
             } catch (FxApplicationException e) {
                 throw e.asRuntimeException();
             }
