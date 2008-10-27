@@ -37,15 +37,13 @@ import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPropertyData;
 import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.exceptions.FxNotFoundException;
-import com.flexive.shared.exceptions.FxInvalidParameterException;
-import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.value.FxValue;
 import groovy.util.BuilderSupport;
 
 import java.util.Map;
+import java.util.HashMap;
 
 /**
  * <p>
@@ -82,13 +80,11 @@ public class GroovyContentBuilder extends BuilderSupport {
         public NodeInfo(String xpath, Object value) {
             if (value == null && !xpath.endsWith("]")) {
                 // group node
-                String path;
-                try {
-                    path = xpath + "[" + (content.getGroupData(xpath).getOccurances() + 1) + "]";
-                } catch (FxApplicationException e) {
-                    path = xpath + "[1]"; // first group
+                if (!newGroupIndex.containsKey(xpath)) {
+                    newGroupIndex.put(xpath, 1);
                 }
-                this.xpath = path;
+                this.xpath = xpath + "[" + newGroupIndex.get(xpath) + "]";
+                newGroupIndex.put(xpath, newGroupIndex.get(xpath) + 1);
             } else if (!xpath.endsWith("]")) {
                 String path;
                 try {
@@ -127,6 +123,7 @@ public class GroovyContentBuilder extends BuilderSupport {
 
     private final FxContent content;
     private final FxEnvironment environment = CacheAdmin.getEnvironment();
+    private final Map<String, Integer> newGroupIndex = new HashMap<String, Integer>();
 
     /**
      * Create a new content builder that operates on the given content instance.

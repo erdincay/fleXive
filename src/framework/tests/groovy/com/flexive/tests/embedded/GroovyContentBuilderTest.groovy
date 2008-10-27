@@ -37,6 +37,13 @@ import com.flexive.shared.scripting.groovy.GroovyContentBuilder
 import com.flexive.shared.value.FxString
 import org.testng.Assert
 import org.testng.annotations.Test
+import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
+import com.flexive.shared.structure.FxMultiplicity
+import com.flexive.shared.CacheAdmin
+import com.flexive.shared.EJBLookup
+import com.flexive.shared.exceptions.FxRuntimeException
+import com.flexive.shared.content.FxPK
+import com.flexive.tests.embedded.TestUsers
 
 /**
 * GroovyContentBuilder test cases.
@@ -71,5 +78,33 @@ class GroovyContentBuilderTest {
         Assert.assertEquals(content.getValue("/box[1]/box_title").defaultTranslation, "Box title 1")
         Assert.assertEquals(content.getValue("/box[2]/box_title").defaultTranslation, "Box title 2")
         Assert.assertEquals(content.getValue("/box[2]/box_text").defaultTranslation, "Some box text")
+    }
+
+    @Test(groups = ["content", "ejb", "scripting"])
+    void groupCardinalityTest_FX314() {
+        try {
+            FxTestUtils.login TestUsers.SUPERVISOR
+            // create test group with default multiplicity of 1
+            new GroovyTypeBuilder().testFX314 {
+                Group(defaultMultiplicity: 1, multiplicity: FxMultiplicity.MULT_0_1) {
+                    prop(defaultValue: new FxString(false, "value"))
+                }
+            }
+            def builder = new GroovyContentBuilder("TESTFX314")
+            builder {
+                Group {
+                    prop("value")
+                }
+            }
+            FxPK pk = EJBLookup.contentEngine.save(builder.content)
+            EJBLookup.contentEngine.remove(pk)
+        } finally {
+            try {
+                EJBLookup.typeEngine.remove(CacheAdmin.environment.getType("TESTFX314").id)
+            } catch (FxRuntimeException e) {
+                // pass
+            }
+            FxTestUtils.logout()
+        }
     }
 }
