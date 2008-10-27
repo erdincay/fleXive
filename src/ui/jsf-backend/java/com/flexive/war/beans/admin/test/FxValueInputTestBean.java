@@ -87,6 +87,7 @@ public class FxValueInputTestBean {
     private FxReference multiMappedValue2 = new FxReference(true, new ReferencedContent(-1)).setXPath("searchtest/referenceSearchProp").setEmpty();
     private FxLargeNumber singleSelectValue = new FxLargeNumber(false, -1L).setEmpty();
     private FxLargeNumber multiSelectValue = new FxLargeNumber(true, -1L).setEmpty();
+    private FxString valueNoPrepend = new FxString(false, "");
     private List<ValueHolder> basicValues;
     private List<FxValue> basicValues2;
     private InputMapper referenceInputMapper;
@@ -231,5 +232,13 @@ public class FxValueInputTestBean {
 
     public InputMapper getSelectOneInputMapper() {
         return new SelectOneInputMapper(CacheAdmin.getEnvironment().getSelectList(FxSelectList.COUNTRIES));
+    }
+
+    public FxString getValueNoPrepend() {
+        return valueNoPrepend;
+    }
+
+    public void setValueNoPrepend(FxString valueNoPrepend) {
+        this.valueNoPrepend = valueNoPrepend;
     }
 }

@@ -38,8 +38,8 @@
             });
         //-->
         </script>
-        <fx:formRow label="Default autocomplete provider">
-            <fx:fxValueInput value="#{fxValueInputTestBean.stringValue}" autocompleteHandler="new flexive.yui.AutoCompleteHandler()"/>
+        <fx:formRow id="acDefaultInput" label="Default autocomplete provider">
+            <fx:fxValueInput id="acDefaultInput" value="#{fxValueInputTestBean.stringValue}" autocompleteHandler="new flexive.yui.AutoCompleteHandler()"/>
         </fx:formRow>
         <fx:formRow label="User autocomplete provider">
             <fx:fxValueInput value="#{fxValueInputTestBean.userStringValue}" autocompleteHandler="userAcHandler"/>
@@ -114,9 +114,20 @@
 
         <h:commandButton action="#{fxValueInputTestBean.submit}" value="Submit"/>
 
-        <ui:debug hotkey="d" rendered="#{initParam.debugMode}"/>
-        
     </h:form>
+
+    <!-- Check input components in a form with prependId=false -->
+    <h5>Form with prependId=false</h5>
+    <h:form id="someFormId2" enctype="multipart/form-data" styleClass="yui-skin-sam" prependId="false">
+        <fx:formRow id="inputNoPrepend" label="Input without prependId">
+            <fx:fxValueInput id="inputNoPrepend" value="#{fxValueInputTestBean.valueNoPrepend}"/>
+        </fx:formRow>
+
+        <h:commandButton action="#{fxValueInputTestBean.submit}" value="Submit"/>
+    </h:form>
+
+    <ui:debug hotkey="d" rendered="#{initParam.debugMode}"/>
+
 
     <fx:yuiSetup/>
   </body>

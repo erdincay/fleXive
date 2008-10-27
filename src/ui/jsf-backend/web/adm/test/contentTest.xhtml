@@ -26,10 +26,10 @@
 
     <h:form id="createContent" enctype="multipart/form-data">
         <fx:fxValueInputLanguageSelect id="switchLanguage"/>
-        
+
         <fx:content var="test" typeName="#{fxContentViewTestBean.typeName}">
             <c:forEach var="propertyName" items="#{fxContentViewTestBean.testPropertyNames}">
-                <fx:value property="#{propertyName}"/> 
+                <fx:value property="#{propertyName}"/>
             </c:forEach>
 
             <fx:fieldSet legend="groupTop">
@@ -66,6 +66,12 @@
         </fx:content>
     </h:form>
 
+    <h4>fx:value in form with prependId=false (FX-319)</h4>
+    <h:form id="formNoPrepend" prependId="false">
+        <fx:content var="test" pk="#{fxContentViewTestBean.searchTestPK}">
+            <fx:value property="stringSearchProp"/>
+        </fx:content>
+    </h:form>
     <fx:yuiSetup/>
 </body>
 </html>
