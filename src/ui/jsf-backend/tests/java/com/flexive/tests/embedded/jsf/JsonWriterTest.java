@@ -124,8 +124,10 @@ public class JsonWriterTest {
         final Map<Long, String> map = new HashMap<Long, String>();
         map.put(1L, "first value");
         map.put(2L, "second value");
-        writer.writeAttribute("map", map);
-        writer.finishResponse();
+        writer.startMap()
+                .writeAttribute("map", map)
+                .closeMap()
+                .finishResponse();
         assert out.toString().contains("first value") : "Unexpected output: " + out.toString();
         assert out.toString().contains("second value") : "Unexpected output: " + out.toString();
         assert out.toString().charAt(0) == '{' : "Unexpected output: " + out.toString();
