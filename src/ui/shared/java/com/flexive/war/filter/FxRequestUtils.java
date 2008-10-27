@@ -60,7 +60,7 @@ public class FxRequestUtils {
         GlobalConfigurationEngine configuration = EJBLookup.getGlobalConfigurationEngine();
 
         // Check for virtual site name that defines the division
-        final String server = request.getServerName();
+        final String server = getExternalServerName(request);
         int divisionId = -1;
         try {
             divisionId = configuration.getDivisionId(server);
@@ -92,6 +92,27 @@ public class FxRequestUtils {
             }
         }
         return null;
+    }
+
+    /**
+     * Returns the server name as seen by the client. Takes into account proxies
+     * like Apache2 which may alter the server name in their requests.
+     *
+     * @param request   the request
+     * @return  the server name as seen by the client
+     */
+    public static String getExternalServerName(HttpServletRequest request) {
+        if (request.getHeader("x-forwarded-host") != null) {
+            // use external (forwarded) host - FX-330
+            return request.getHeader("x-forwarded-host");
+        } else {
+            // use our own server name
+            return
+                    request.getServerName()
+                    + (request.getServerPort() == 80 || (request.isSecure() && request.getServerPort() == 443)
+                    ? ""
+                    : ":" + request.getServerPort());
+        }
     }
 
 }

@@ -48,6 +48,7 @@ import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.war.FxRequest;
 import com.flexive.war.filter.FxResponseWrapper;
+import com.flexive.war.filter.FxRequestUtils;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
@@ -244,10 +245,7 @@ public class SystemBean implements Serializable {
      */
     public String getServerBase() {
         HttpServletRequest request = FxJsfUtils.getRequest().getRequest();
-        return "http" + (request.isSecure() ? "s://" : "://") + request.getServerName()
-                + (request.getServerPort() == 80 || (request.isSecure() && request.getServerPort() == 443)
-                ? ""
-                : ":" + request.getServerPort());
+        return "http" + (request.isSecure() ? "s://" : "://") + FxRequestUtils.getExternalServerName(request);
     }
 
     public String getDocumentBase() {
