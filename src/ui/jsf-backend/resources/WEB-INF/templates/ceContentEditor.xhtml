@@ -64,23 +64,23 @@
                 </script>
 
                 <a4j:outputPanel id="infoPanel">
-                    <a4j:commandLink reRender="infoPanel">
+                    <a4j:commandLink reRender="infoPanel" eventsQueue="ceQueue">
                         <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='version'?'':'version'}" target="#{srcEditor.infoPanelState}"/>
                         <span class="infoPanelButton">#{fxMessageBean['Content.field.info']}</span>
                     </a4j:commandLink>&nbsp;
-                    <a4j:commandLink reRender="infoPanel" rendered="#{srcEditor.versionInfo.versionCount > 1}">
+                    <a4j:commandLink reRender="infoPanel" eventsQueue="ceQueue" rendered="#{srcEditor.versionInfo.versionCount > 1}">
                         <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='compare'?'':'compare'}" target="#{srcEditor.infoPanelState}"/>
                         <span class="infoPanelButton">#{fxMessageBean['Content.field.versionCompare']}</span>
                     </a4j:commandLink>
-                    <a4j:commandLink reRender="infoPanel" rendered="#{fxMapBean.types[srcEditor.type].trackHistory}">
+                    <a4j:commandLink reRender="infoPanel" eventsQueue="ceQueue" rendered="#{fxMapBean.types[srcEditor.type].trackHistory}">
                         <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='history'?'':'history'}" target="#{srcEditor.infoPanelState}"/>
                         <span class="infoPanelButton">#{fxMessageBean['Content.field.history']}</span>
                     </a4j:commandLink>
-                    <a4j:commandLink reRender="infoPanel" rendered="#{srcEditor.mayImport}">
+                    <a4j:commandLink reRender="infoPanel" eventsQueue="ceQueue" rendered="#{srcEditor.mayImport}">
                         <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='import'?'':'import'}" target="#{srcEditor.infoPanelState}"/>
                         <span class="infoPanelButton">#{fxMessageBean['Content.field.import']}</span>
                     </a4j:commandLink>
-                    <a4j:commandLink reRender="infoPanel" rendered="#{srcEditor.mayExport}">
+                    <a4j:commandLink reRender="infoPanel" eventsQueue="ceQueue" rendered="#{srcEditor.mayExport}">
                         <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='export'?'':'export'}" target="#{srcEditor.infoPanelState}"/>
                         <span class="infoPanelButton">#{fxMessageBean['Content.field.export']}</span>
                     </a4j:commandLink>
@@ -183,7 +183,7 @@
                                 </tr>
                             </table>
 
-                            <a4j:commandLink reRender="comparePanel, infoPanel" rendered="#{srcEditor.versionInfo.versionCount > 1}">
+                            <a4j:commandLink reRender="comparePanel, infoPanel" eventsQueue="ceQueue" rendered="#{srcEditor.versionInfo.versionCount > 1}">
                                 <span class="infoPanelButton">#{fxMessageBean['Content.button.compare']}</span>
                             </a4j:commandLink><br/><br/>
                             <a4j:outputPanel id="comparePanel" rendered="#{srcEditor.compareSourceVersion > 0 and srcEditor.compareDestinationVersion > 0}">
