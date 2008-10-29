@@ -34,7 +34,7 @@
 package com.flexive.war.javascript.tree;
 
 import com.flexive.faces.RequestRelativeUriMapper;
-import com.flexive.faces.components.TreeRenderer;
+import com.flexive.faces.components.tree.dojo.DojoTreeRenderer;
 import com.flexive.faces.javascript.tree.TreeNodeWriter;
 import static com.flexive.faces.javascript.tree.TreeNodeWriter.Node;
 import com.flexive.shared.EJBLookup;
@@ -80,7 +80,7 @@ public class ContentTreeWriter implements Serializable {
         StringWriter localWriter = null;
         try {
             // if embedded in a tree component, use the component's tree writer
-            TreeNodeWriter writer = (TreeNodeWriter) request.getAttribute(TreeRenderer.PROP_NODEWRITER);
+            TreeNodeWriter writer = (TreeNodeWriter) request.getAttribute(DojoTreeRenderer.PROP_NODEWRITER);
             if (writer == null) {
                 // otherwise return the tree nodes in the response
                 localWriter = new StringWriter();

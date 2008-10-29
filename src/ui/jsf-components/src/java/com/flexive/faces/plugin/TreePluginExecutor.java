@@ -34,7 +34,7 @@ package com.flexive.faces.plugin;
 import com.flexive.faces.javascript.tree.TreeNodeWriter;
 
 /**
- * A PluginExecutor for extending UI trees rendered by the JSF {@link com.flexive.faces.components.Tree Tree}
+ * A PluginExecutor for extending UI trees rendered by the JSF {@link com.flexive.faces.components.tree.dojo.DojoTree Tree}
  * component.
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)

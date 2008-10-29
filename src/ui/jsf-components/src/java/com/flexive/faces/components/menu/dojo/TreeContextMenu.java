@@ -33,7 +33,7 @@ package com.flexive.faces.components.menu.dojo;
 
 import com.flexive.faces.FxJsfComponentUtils;
 import com.flexive.faces.FxJsfUtils;
-import com.flexive.faces.components.Tree;
+import com.flexive.faces.components.tree.dojo.DojoTree;
 import com.flexive.faces.javascript.menu.DojoMenuItemData;
 import com.flexive.faces.javascript.menu.*;
 
@@ -70,7 +70,7 @@ public class TreeContextMenu extends UIOutput implements MenuItemContainer<DojoM
     @Override
     public void encodeBegin(FacesContext facesContext) throws IOException {
         // attach menu to enclosing tree
-        FxJsfUtils.findAncestor(this, Tree.class).setContextMenu(this);
+        FxJsfUtils.findAncestor(this, DojoTree.class).setContextMenu(this);
     }
 
     /**

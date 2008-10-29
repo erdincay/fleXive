@@ -43,7 +43,7 @@ import java.util.Map;
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
- * @see com.flexive.faces.components.Tree
+ * @see com.flexive.faces.components.tree.dojo.DojoTree
  */
 public class TreeContextMenuItem extends DojoMenuItem {
     private String treeActions;

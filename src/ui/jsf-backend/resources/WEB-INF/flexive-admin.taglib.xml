@@ -96,27 +96,27 @@
     <tag>
         <tag-name>tree</tag-name>
         <component>
-            <component-type>flexive.Tree</component-type>
-            <renderer-type>flexive.Tree</renderer-type>
+            <component-type>flexive.DojoTree</component-type>
+            <renderer-type>flexive.DojoTree</renderer-type>
         </component>
     </tag>
     <tag>
         <tag-name>treeNode</tag-name>
         <component>
-            <component-type>flexive.TreeNode</component-type>
+            <component-type>flexive.DojoTreeNode</component-type>
         </component>
     </tag>
     <tag>
         <tag-name>tree</tag-name>
         <component>
-            <component-type>flexive.Tree</component-type>
-            <renderer-type>flexive.Tree</renderer-type>
+            <component-type>flexive.DojoTree</component-type>
+            <renderer-type>flexive.DojoTree</renderer-type>
         </component>
     </tag>
     <tag>
         <tag-name>treeNode</tag-name>
         <component>
-            <component-type>flexive.TreeNode</component-type>
+            <component-type>flexive.DojoTreeNode</component-type>
         </component>
     </tag>
     <tag>
@@ -129,13 +129,13 @@
     <tag>
         <tag-name>treeContextMenu</tag-name>
         <component>
-            <component-type>flexive.TreeContextMenu</component-type>
+            <component-type>flexive.DojoTreeContextMenu</component-type>
         </component>
     </tag>
     <tag>
         <tag-name>treeContextMenuItem</tag-name>
         <component>
-            <component-type>flexive.TreeContextMenuItem</component-type>
+            <component-type>flexive.DojoTreeContextMenuItem</component-type>
         </component>
     </tag>
     <tag>
