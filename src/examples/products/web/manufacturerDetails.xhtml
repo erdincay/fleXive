@@ -22,7 +22,9 @@
 
     <h:form>
 
-        <h:commandLink action="home">#{fxMessageBean['products.button.backToProducts']}</h:commandLink>
+        <h:outputLink value="#{fx:url('')}">
+            #{fxMessageBean['products.button.backToProducts']}
+        </h:outputLink>
 
         <fx:content var="manufacturer" pk="#{manufacturerBean.pk}">
             <div class="manufacturer">

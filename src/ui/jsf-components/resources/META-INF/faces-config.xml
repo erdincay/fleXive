@@ -228,7 +228,6 @@
         <managed-bean-scope>request</managed-bean-scope>
     </managed-bean>
 
-
     <render-kit>
         <renderer>
             <component-family>javax.faces.Output</component-family>

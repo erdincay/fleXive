@@ -17,13 +17,14 @@ Renders the page footer.
     <h:form>
         <h:panelGrid columns="2">
             <h:column>
-                <h:selectOneRadio value="${fxSystemBean.updateLanguageId}">
-                    <f:selectItem itemValue="1" itemLabel="#{fxMapBean.language[1].label}"/>
-                    <f:selectItem itemValue="2" itemLabel="#{fxMapBean.language[2].label}"/>
-                </h:selectOneRadio>
+                <h:outputLink value="#{fx:urlWithLocale(fxMapBean.language[1].iso2digit, fxPageBean.url)}" disabled="#{fxPageBean.languageCode eq fxMapBean.language[1].iso2digit}">
+                    #{fxMapBean.language[1].label}
+                </h:outputLink>
             </h:column>
             <h:column>
-                <h:commandButton action="#{fxSystemBean.updateLanguage}" value="#{fxMessageBean['products.footer.button.changeLanguage']}"/>
+                <h:outputLink value="#{fx:urlWithLocale(fxMapBean.language[2].iso2digit, fxPageBean.url)}" disabled="#{fxPageBean.languageCode eq fxMapBean.language[2].iso2digit}">
+                    #{fxMapBean.language[2].label}
+                </h:outputLink>
             </h:column>
         </h:panelGrid>
     </h:form>

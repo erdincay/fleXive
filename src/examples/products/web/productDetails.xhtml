@@ -19,7 +19,9 @@
         <t:saveState value="#{productBean.pk}"/>
         <t:saveState value="#{productBean.articleNumber}"/>
 
-        <h:commandLink action="home">#{fxMessageBean['products.button.backToProducts']}</h:commandLink>
+        <h:outputLink value="#{fx:url('')}">
+            #{fxMessageBean['products.button.backToProducts']}
+        </h:outputLink>
 
         <fx:content var="product" pk="#{productBean.pk}">
             <div class="product">
@@ -29,10 +31,10 @@
 
                 <ui:fragment rendered="#{!empty product.manufacturer}">
                     <div class="manufacturer">
-                        <h:commandLink action="manufacturerDetails">#{product.manufacturer$.name}
-                            <f:setPropertyActionListener value="#{product.manufacturer.defaultTranslation}"
-                                                         target="#{manufacturerBean.pk}"/>
-                        </h:commandLink>
+                        <h:outputLink value="#{fx:url('manufacturerDetails.xhtml')}">
+                            <f:param name="id" value="#{product.manufacturer.defaultTranslation.id}"/>
+                            #{product.manufacturer$.name}
+                        </h:outputLink>
                     </div>
                 </ui:fragment>
 
@@ -65,10 +67,9 @@
                     <ul>
                         <fx:children value="#{product}" property="variant">
                             <li>
-                                <h:commandLink>#{variant.color}
-                                    <f:setPropertyActionListener value="#{variant.articleNumber}" target="#{productBean.articleNumber}"/>
-                                </h:commandLink>
-
+                                <h:outputLink value="#{variant.articleNumber.defaultTranslation}">
+                                    #{variant.color}
+                                </h:outputLink>
                                 (#{variant.articleNumber})
                             </li>
                         </fx:children>

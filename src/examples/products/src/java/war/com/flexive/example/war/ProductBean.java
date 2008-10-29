@@ -1,6 +1,7 @@
 package com.flexive.example.war;
 
 import com.flexive.faces.model.FxResultSetDataModel;
+import com.flexive.faces.beans.PageBean;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.search.SortDirection;
@@ -38,6 +39,9 @@ public class ProductBean {
     }
 
     public FxPK getPk() {
+        if (PageBean.getInstance().getPageId() != -1) {
+            return new FxPK(PageBean.getInstance().getPageId(), FxPK.LIVE);
+        }
         return pk;
     }
 
@@ -51,5 +55,9 @@ public class ProductBean {
 
     public void setArticleNumber(FxString articleNumber) {
         this.articleNumber = articleNumber;
+    }
+
+    public void setArticleNumberString(String articleNumber) {
+        this.articleNumber = new FxString(false, articleNumber);
     }
 }

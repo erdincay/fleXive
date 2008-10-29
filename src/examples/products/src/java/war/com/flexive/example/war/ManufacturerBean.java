@@ -7,6 +7,7 @@ import com.flexive.shared.search.query.VersionFilter;
 import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.faces.model.FxResultSetDataModel;
+import com.flexive.faces.beans.PageBean;
 
 import javax.faces.model.DataModel;
 
@@ -23,6 +24,9 @@ public class ManufacturerBean {
     private DataModel products;
 
     public FxPK getPk() {
+        if (PageBean.getInstance().getPageId() != -1) {
+            return new FxPK(PageBean.getInstance().getPageId(), FxPK.LIVE);
+        }
         return pk;
     }
 
@@ -31,11 +35,11 @@ public class ManufacturerBean {
     }
 
     public DataModel getProducts() throws FxApplicationException {
-        if (products == null && pk != null) {
+        if (products == null && getPk() != null) {
             final FxResultSet result = new SqlQueryBuilder()
                     .select("@pk", "product/name", "product/price", "product/variant/articlenumber")
                     .filterVersion(VersionFilter.LIVE)
-                    .condition("product/manufacturer", PropertyValueComparator.EQ, pk.getId())
+                    .condition("product/manufacturer", PropertyValueComparator.EQ, getPk().getId())
                     .getResult();
             products = new FxResultSetDataModel(result);
         }

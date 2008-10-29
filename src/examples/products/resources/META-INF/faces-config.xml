@@ -18,6 +18,10 @@
         <managed-bean-name>productBean</managed-bean-name>
         <managed-bean-class>com.flexive.example.war.ProductBean</managed-bean-class>
         <managed-bean-scope>request</managed-bean-scope>
+        <managed-property>
+            <property-name>articleNumberString</property-name>
+            <value>#{param.articleNumber}</value>
+        </managed-property>
     </managed-bean>
 
     <managed-bean>
@@ -26,22 +30,28 @@
         <managed-bean-scope>request</managed-bean-scope>
     </managed-bean>
 
-    <navigation-rule>
-        <from-view-id>*</from-view-id>
+    <!-- Our page controller implementation -->
+    <managed-bean>
+        <managed-bean-name>fxPageBean</managed-bean-name>
+        <managed-bean-class>com.flexive.example.war.ProductsPageBean</managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+        <managed-property>
+            <property-name>languageCode</property-name>
+            <value>#{param.fxLanguageCode}</value>
+        </managed-property>
+        <managed-property>
+            <property-name>pageId</property-name>
+            <value>#{param.fxPageId}</value>
+        </managed-property>
+        <managed-property>
+            <property-name>treePath</property-name>
+            <value>#{param.fxTreePath}</value>
+        </managed-property>
+        <managed-property>
+            <property-name>url</property-name>
+            <value>#{param.fxUrl}</value>
+        </managed-property>
+    </managed-bean>
 
-        <navigation-case>
-            <from-outcome>productDetails</from-outcome>
-            <to-view-id>/productDetails.xhtml</to-view-id>
-        </navigation-case>
 
-        <navigation-case>
-            <from-outcome>manufacturerDetails</from-outcome>
-            <to-view-id>/manufacturerDetails.xhtml</to-view-id>
-        </navigation-case>
-
-        <navigation-case>
-            <from-outcome>home</from-outcome>
-            <to-view-id>/index.xhtml</to-view-id>
-        </navigation-case>
-    </navigation-rule>
 </faces-config>

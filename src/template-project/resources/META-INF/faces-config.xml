@@ -19,4 +19,33 @@
         <managed-bean-class>com.flexive.example.war.ManagedExampleBean</managed-bean-class>
         <managed-bean-scope>request</managed-bean-scope>
     </managed-bean>
+
+    <!--
+        Flexive page controller for generating and working with "pretty URLs".
+        An example of using the page bean can be found in the products demo application.     
+    -->
+<!--
+    <managed-bean>
+        <managed-bean-name>fxPageBean</managed-bean-name>
+        <managed-bean-class>com.flexive.faces.beans.PageBean</managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+        <managed-property>
+            <property-name>languageCode</property-name>
+            <value>#{param.fxLanguageCode}</value>
+        </managed-property>
+        <managed-property>
+            <property-name>pageId</property-name>
+            <value>#{param.fxPageId}</value>
+        </managed-property>
+        <managed-property>
+            <property-name>treePath</property-name>
+            <value>#{param.fxTreePath}</value>
+        </managed-property>
+        <managed-property>
+            <property-name>url</property-name>
+            <value>#{param.fxUrl}</value>
+        </managed-property>
+    </managed-bean>
+-->
+
 </faces-config>

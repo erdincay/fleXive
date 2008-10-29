@@ -149,5 +149,17 @@
         <function-class>com.flexive.faces.beans.SystemBean</function-class>
         <function-signature>java.lang.String concat(java.lang.Object,java.lang.Object)</function-signature>
     </function>
+
+    <function>
+        <function-name>url</function-name>
+        <function-class>com.flexive.faces.beans.PageBean</function-class>
+        <function-signature>java.lang.String absoluteUrl(java.lang.String)</function-signature>
+    </function>
+
+    <function>
+        <function-name>urlWithLocale</function-name>
+        <function-class>com.flexive.faces.beans.PageBean</function-class>
+        <function-signature>java.lang.String absoluteUrl(java.lang.String, java.lang.String)</function-signature>
+    </function>
 </facelet-taglib>
 

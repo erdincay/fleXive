@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE urlrewrite PUBLIC "-//tuckey.org//DTD UrlRewrite 3.1//EN"
+        "http://tuckey.org/res/dtds/urlrewrite3.1.dtd">
+
+<!--
+
+    Configuration file for UrlRewriteFilter
+    http://tuckey.org/urlrewrite/
+
+-->
+<urlrewrite>
+
+
+    <!-- Add locale to request, unless specified -->
+     <rule>
+         <from>^/(^[de|en].*|)$</from>
+         <to type="redirect">en/$1</to>
+     </rule>
+
+    <!-- index page mapping -->
+    <rule>
+        <from>^/([^/]+)/$</from>
+        <to>/index.xhtml?fxLanguageCode=$1&amp;fxUrl=/</to>
+    </rule>
+    
+    <!-- Inbound product URL mapping -->
+    <rule>
+        <from>([^/]+)/product/(.*)/(.*)</from>
+        <to>/productDetails.xhtml?fxPageId=$2&amp;fxLanguageCode=$1&amp;articleNumber=$3&amp;fxUrl=/product/$2/$3</to>
+    </rule>
+
+    <!-- Inbound manufacturer URL mapping -->
+    <rule>
+        <from>([^/]+)/manufacturer/(.*)</from>
+        <to>/manufacturerDetails.xhtml?fxPageId=$2&amp;fxLanguageCode=$1&amp;fxUrl=/manufacturer/$2</to>
+    </rule>
+
+    <!-- Generic front-end page mapping -->
+    <rule>
+        <from>([^/]+)/([^.]+.xhtml)</from>
+        <to>/$2?fxLanguageCode=$1&amp;fxUrl=/$2</to>
+    </rule>
+
+    <!-- Outbound product URL mapping -->
+    <outbound-rule encodefirst="true">
+        <from>(.*)productDetails.xhtml\?id=(.*)&amp;articleNumber=(.*)</from>
+        <to>$1product/$2/$3</to>
+    </outbound-rule>
+
+    <!-- Outbound manufacturer URL mapping -->
+    <outbound-rule encodefirst="true">
+        <from>(.*)manufacturerDetails.xhtml\?id=(.*)</from>
+        <to>$1manufacturer/$2</to>
+    </outbound-rule>
+
+</urlrewrite>
+

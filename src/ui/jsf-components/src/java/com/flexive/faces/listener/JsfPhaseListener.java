@@ -33,6 +33,7 @@ package com.flexive.faces.listener;
 
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.beans.SystemBean;
+import com.flexive.faces.beans.PageBean;
 
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
@@ -60,7 +61,10 @@ public class JsfPhaseListener implements PhaseListener {
 
     public void beforePhase(PhaseEvent e) {
         currentPhase.set(e.getPhaseId());
+        // reset system bean
         FxJsfUtils.getManagedBean(SystemBean.class).reset();
+        // instantiate PageBean
+        PageBean.getInstance();
     }
 
     public void afterPhase(PhaseEvent e) {
