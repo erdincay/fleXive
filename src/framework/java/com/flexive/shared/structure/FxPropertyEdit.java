@@ -249,16 +249,6 @@ public class FxPropertyEdit extends FxProperty {
         return this;
     }
 
-    /**
-     * Set the default value
-     *
-     * @param defaultValue the new default value
-     * @return the property itself, useful for chained calls
-     */
-    public FxPropertyEdit setHint(FxValue defaultValue) {
-        this.defaultValue = defaultValue;
-        return this;
-    }
 
     /**
      * Set the multiplicity
@@ -315,7 +305,7 @@ public class FxPropertyEdit extends FxProperty {
             return this; //no changes
 
         this.dataType = dataType;
-        this.defaultValue = getEmptyValue();
+        this.defaultValue = this.defaultValue == null ? null : getEmptyValue();
         //if the datatype is html, set the option to use the html editor 
         switch (dataType) {
             case HTML:
@@ -553,12 +543,7 @@ public class FxPropertyEdit extends FxProperty {
      * @return the property itself, useful for chained calls
      */
     public FxPropertyEdit setReferencedList(FxSelectList referencedList) {
-        if( this.referencedList == null && this.defaultValue == null ) {
-            this.referencedList = referencedList;
-            //default value can only be determined once the referenced list is known
-            this.defaultValue = getEmptyValue();
-        } else
-            this.referencedList = referencedList;
+        this.referencedList = referencedList;
         return this;
     }
 
@@ -628,5 +613,12 @@ public class FxPropertyEdit extends FxProperty {
      */
     public void setOptions(List<FxStructureOption> options) {
         this.options = options;
+    }
+
+    /**
+     * Clear the default value
+     */
+    public void clearDefaultValue() {
+        this.defaultValue = null;
     }
 }

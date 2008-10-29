@@ -241,7 +241,7 @@ public class PropertyEditorBean implements ActionBean {
 
     public FxValue getDefaultValue() {
         //check if multi language settings have changed and adjust the default value
-        if (assignment.isMultiLang() != assignment.getDefaultValue().isMultiLanguage()) {
+        if ( assignment.hasAssignmentDefaultValue() && assignment.isMultiLang() != assignment.getDefaultValue().isMultiLanguage()) {
             assignment.setDefaultValue(assignment.getEmptyValue());
             /*
             FxValue v = assignment.getEmptyValue();
@@ -256,8 +256,10 @@ public class PropertyEditorBean implements ActionBean {
     public void setDefaultValue(FxValue val) {
         if (val != null && assignment.getDefaultValue() != null) {
             if (!assignment.getDefaultValue().getClass().equals(assignment.getProperty().getEmptyValue().getClass())) {
+                /*
                 if (!property.getEmptyValue().getClass().equals(property.getEmptyValue().getClass()))
                     property.setDefaultValue(property.getEmptyValue());
+                */
                 assignment.setDefaultValue(assignment.getProperty().getEmptyValue());
                 return;
             }
@@ -270,9 +272,23 @@ public class PropertyEditorBean implements ActionBean {
         }
     }
 
+    public boolean isPropertyDefaultValueSet() {
+        return property.isDefaultValueSet();
+    }
+
+    public void setPropertyDefaultValueSet(boolean setDefaultValue) {
+        //only react to changes
+        if (setDefaultValue !=isPropertyDefaultValueSet())
+            if (setDefaultValue)
+                property.setDefaultValue(property.getEmptyValue());
+            else {
+                property.clearDefaultValue();
+            }
+    }
+
     public FxValue getPropertyDefaultValue() {
         //check if multi language settings have changed and adjust the default value
-        if (property.isMultiLang() != property.getDefaultValue().isMultiLanguage()) {
+        if (property.isDefaultValueSet() && property.isMultiLang() != property.getDefaultValue().isMultiLanguage()) {
             property.setDefaultValue(property.getEmptyValue());
             /*
             FxValue v = property.getEmptyValue();
@@ -292,7 +308,7 @@ public class PropertyEditorBean implements ActionBean {
             return;
         }
         try {
-            if (val.getClass().equals(property.getDefaultValue().getClass()))
+            if (val.getClass().equals(property.getEmptyValue().getClass()))
                 property.setDefaultValue(val);
         }
         catch (Throwable t) {

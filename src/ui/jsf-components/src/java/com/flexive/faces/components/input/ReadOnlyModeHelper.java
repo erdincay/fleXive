@@ -40,6 +40,7 @@ import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.media.FxMediaSelector;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxStructureOption;
+import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.value.*;
 import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import com.flexive.war.servlet.ThumbnailServlet;
@@ -93,8 +94,14 @@ class ReadOnlyModeHelper extends RenderHelper {
 
         boolean useHTMLEditor;
         if (value instanceof FxString && StringUtils.isNotBlank(value.getXPath())) {
-            FxPropertyAssignment pa = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(value.getXPath());
-            useHTMLEditor = pa.getOption(FxStructureOption.OPTION_HTML_EDITOR).isValueTrue();
+            if (CacheAdmin.getEnvironment().assignmentExists(value.getXPath())) {
+                FxPropertyAssignment pa = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(value.getXPath());
+                useHTMLEditor = pa.getOption(FxStructureOption.OPTION_HTML_EDITOR).isValueTrue();
+            } else if (CacheAdmin.getEnvironment().propertyExists(value.getXPath())) {
+                FxProperty p = CacheAdmin.getEnvironment().getProperty(value.getXPath());
+                useHTMLEditor = p.getOption(FxStructureOption.OPTION_HTML_EDITOR).isValueTrue();
+            } else
+                useHTMLEditor = value instanceof FxHTML; //fallback if no xpath is known, we assume FxHTML to be rendered with an HTML editor
         } else {
             useHTMLEditor = value instanceof FxHTML; //fallback if no xpath is known, we assume FxHTML to be rendered with an HTML editor
         }

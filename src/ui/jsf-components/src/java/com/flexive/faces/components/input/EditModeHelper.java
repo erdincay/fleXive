@@ -79,14 +79,26 @@ class EditModeHelper extends RenderHelper {
         super(component, clientId, value);
         environment = CacheAdmin.getEnvironment();
         if (value != null && StringUtils.isNotBlank(value.getXPath()) && value instanceof FxString) {
-            FxPropertyAssignment pa = (FxPropertyAssignment) environment.getAssignment(value.getXPath());
-            multiLine = pa.isMultiLine();
-            if (multiLine) {
-                rows = pa.getMultiLines();
-                if (rows <= 1)
-                    rows = -1;
+            if (CacheAdmin.getEnvironment().assignmentExists(value.getXPath())) {
+                FxPropertyAssignment pa = (FxPropertyAssignment) environment.getAssignment(value.getXPath());
+                multiLine = pa.isMultiLine();
+                if (multiLine) {
+                    rows = pa.getMultiLines();
+                    if (rows <= 1)
+                        rows = -1;
+                }
+                useHTMLEditor = pa.getOption(FxStructureOption.OPTION_HTML_EDITOR).isValueTrue();
             }
-            useHTMLEditor = pa.getOption(FxStructureOption.OPTION_HTML_EDITOR).isValueTrue();
+            else if (CacheAdmin.getEnvironment().propertyExists(value.getXPath())) {
+                FxProperty p = CacheAdmin.getEnvironment().getProperty(value.getXPath());
+                multiLine = p.getOption(FxStructureOption.OPTION_MULTILINE).isValueTrue();
+                if (multiLine) {
+                    rows = p.getMultiLines();
+                    if (rows <= 1)
+                        rows = -1;
+                }
+                useHTMLEditor = p.getOption(FxStructureOption.OPTION_HTML_EDITOR).isValueTrue();
+            }
         }
         if (useHTMLEditor && !(value instanceof FxString))
             useHTMLEditor = false; //prevent showing HTML editor for non-string types

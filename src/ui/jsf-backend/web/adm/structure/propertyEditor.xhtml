@@ -103,12 +103,24 @@
                     </fx:formRow>
                 </ui:fragment>
             </div>
-            <a4j:outputPanel id="defaultValueInput">
-                <fx:formRow labelKey="PropertyEditor.label.defaultValue" id="defaultValue">
-                    <fx:fxValueInput id="defaultValue" value="#{propertyEditorBean.propertyDefaultValue}"
-                             readOnlyShowTranslations="true"
-                             readOnly="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
+
+            <a4j:region>
+                <fx:formRow labelKey="PropertyEditor.label.setDefaultValue" id="defaultValue">
+                    <h:selectBooleanCheckbox id="defaultValue" value="#{propertyEditorBean.propertyDefaultValueSet}"
+                             disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
+                        <a4j:support event="onclick" reRender="defaultValueInput"/>
+                    </h:selectBooleanCheckbox>
                 </fx:formRow>
+            </a4j:region>
+
+            <a4j:outputPanel id="defaultValueInput">
+                <ui:fragment rendered="#{propertyEditorBean.propertyDefaultValueSet}">
+                    <fx:formRow labelKey="PropertyEditor.label.defaultValue" id="defaultValueSelect">
+                        <fx:fxValueInput id="defaultValueSelect" value="#{propertyEditorBean.propertyDefaultValue}"
+                                 readOnlyShowTranslations="true"
+                                 readOnly="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
+                    </fx:formRow>
+                </ui:fragment>
             </a4j:outputPanel>
             <fx:formRow labelKey="PropertyEditor.label.multiplicity" id="multiplicity">
                 <h:inputText id="multiplicity" value="#{propertyEditorBean.propertyMinMultiplicity}"

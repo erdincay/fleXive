@@ -67,7 +67,6 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
     protected FxValue defaultValue;
 
     protected long defaultLang;
-    protected boolean hasAssignmentDefaultValue;
 
     /**
      * Constructor
@@ -97,9 +96,6 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
         super(assignmentId, enabled, assignedType, alias, xpath, position, multiplicity, defaultMultiplicity, parentGroupAssignment,
                 baseAssignment, label, hint, options);
         this.defaultValue = defaultValue;
-        this.hasAssignmentDefaultValue = defaultValue != null;
-        if (defaultValue == null)
-            this.defaultValue = property.getDefaultValue().copy();
         this.property = property;
         if (alias == null || alias.trim().length() == 0)
             this.alias = property.getName();
@@ -123,7 +119,7 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
      * @return if an explicit default value set for this assignment or is it taken from the property
      */
     public boolean hasAssignmentDefaultValue() {
-        return hasAssignmentDefaultValue;
+        return this.defaultValue != null;
     }
 
     /**
@@ -258,13 +254,23 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
     }
 
     /**
-     * Get the default value for this assignment
+     * Get the default value for this assignment. If not set
+     * a copy of the property default value is returned.
      *
      * @return FxValue
      */
     public FxValue getDefaultValue() {
         if (defaultValue == null) {
-            return null;
+            //if default value is not set, return
+            //a synchronized copy of the property default value
+            if (property.isDefaultValueSet()) {
+                final FxValue copy = property.getDefaultValue();
+                copy.setXPath(this.getXPath());
+                property.updateEnvironmentData(copy);
+                return copy;
+            }
+            else
+                return null;
         }
         final FxValue copy = defaultValue.copy();
         copy.setXPath(this.getXPath());

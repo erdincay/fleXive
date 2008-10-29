@@ -73,9 +73,11 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
             throw e.asRuntimeException();
         }
         super.marshal(o, writer, ctx);
-        writer.startNode("defaultValue");
-        ctx.convertAnother(prop.getDefaultValue());
-        writer.endNode();
+        if (prop.hasAssignmentDefaultValue()) {
+            writer.startNode("defaultValue");
+            ctx.convertAnother(prop.getDefaultValue());
+            writer.endNode();
+        }
         if (!prop.isDerivedAssignment()) {
             writer.startNode(ConversionEngine.KEY_PROPERTY);
             writer.addAttribute("name", p.getName());
@@ -96,9 +98,11 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
             ctx.convertAnother(p.getHint());
             writer.endNode();
 
-            writer.startNode("defaultValue");
-            ctx.convertAnother(p.getDefaultValue());
-            writer.endNode();
+            if (p.isDefaultValueSet()) {
+                writer.startNode("defaultValue");
+                ctx.convertAnother(p.getDefaultValue());
+                writer.endNode();
+            }
 
             marshallOptions(writer, p.getOptions());
             writer.endNode();

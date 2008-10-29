@@ -122,6 +122,26 @@ public class ConversionEngine {
      * @return FxValue
      */
     static FxValue getFxValue(String nodeName, Object caller, HierarchicalStreamReader reader, UnmarshallingContext ctx) {
+        //default values may not be set, and node may not exist ->return null
+        if ("defaultValue".equals(nodeName)) {
+            //if no child node exists anymore return null
+            if (!reader.hasMoreChildren())
+                return null;
+            else {
+                //check if the next child node is the "defaultValue" node
+                reader.moveDown();
+                if (!reader.getNodeName().equals(nodeName)) {
+                    reader.moveUp();
+                    return null;
+                }
+                //node found-> read value
+                else {
+                    FxValue value = (FxValue) ctx.convertAnother(caller, FxValue.class);
+                    reader.moveUp();
+                    return value;
+                }
+            }
+        }
         if (!reader.hasMoreChildren())
             throw new FxConversionException("ex.conversion.missingNode", nodeName).asRuntimeException();
         reader.moveDown();

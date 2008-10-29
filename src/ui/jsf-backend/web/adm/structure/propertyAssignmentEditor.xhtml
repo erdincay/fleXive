@@ -86,12 +86,14 @@
                 </ui:fragment>
             </div>
 
-            <fx:formRow labelKey="PropertyEditor.label.setDefaultValue" id="defaultValue">
-                <h:selectBooleanCheckbox id="defaultValue" value="#{propertyEditorBean.defaultValueSet}"
-                         disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
-                    <a4j:support event="onclick" reRender="multiLangBox,defaultLangSelect,defaultValueInput,defaultLanguageInput"/>
-                </h:selectBooleanCheckbox>
-            </fx:formRow>
+            <a4j:region>
+                <fx:formRow labelKey="PropertyEditor.label.setDefaultValue" id="defaultValue">
+                    <h:selectBooleanCheckbox id="defaultValue" value="#{propertyEditorBean.defaultValueSet}"
+                             disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
+                        <a4j:support event="onclick" reRender="multiLangBox,defaultLangSelect,defaultValueInput,defaultLanguageInput"/>
+                    </h:selectBooleanCheckbox>
+                </fx:formRow>
+            </a4j:region>
 
             <a4j:outputPanel id="defaultValueInput">
                 <ui:fragment rendered="#{propertyEditorBean.defaultValueSet}">

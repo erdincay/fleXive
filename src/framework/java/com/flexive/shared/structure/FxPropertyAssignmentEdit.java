@@ -64,14 +64,11 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
         super(pa.getId(), pa.isEnabled(), pa.getAssignedType(), pa.getAlias(), pa.getXPath(),
                 pa.getPosition(), new FxMultiplicity(pa.getMultiplicity()), pa.getDefaultMultiplicity(),
                 pa.getParentGroupAssignment(), pa.getBaseAssignmentId(), pa.getLabel() == null ? null : pa.getLabel().copy(),
-                pa.getHint() == null ? null : pa.getHint().copy(), pa.getDefaultValue() == null ? null : pa.getDefaultValue().copy(),
+                pa.getHint() == null ? null : pa.getHint().copy(), pa.hasAssignmentDefaultValue() ? pa.getDefaultValue().copy() : null,
                 pa.getProperty().asEditable(), new ACL(pa.getACL()), pa.getDefaultLanguage(), FxStructureOption.cloneOptions(pa.options));
         if (pa.isSystemInternal())
             _setSystemInternal();
         this.isNew = false;
-        this.hasAssignmentDefaultValue = pa.hasAssignmentDefaultValue;
-        if (!pa.hasAssignmentDefaultValue())
-            this.defaultValue = null;
     }
 
 
@@ -90,7 +87,7 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
     private FxPropertyAssignmentEdit(FxPropertyAssignment pa, FxType type, String alias, String parentXPath, FxAssignment parent) throws FxNotFoundException, FxInvalidParameterException {
         super(-1, pa.isEnabled(), type, alias, XPathElement.buildXPath(false, parentXPath, alias), pa.getPosition(),
                 new FxMultiplicity(pa.getMultiplicity()), pa.getDefaultMultiplicity(), pa.getParentGroupAssignment(), pa.getId(), pa.getLabel().copy(),
-                pa.getHint().copy(), pa.getDefaultValue() == null ? null : pa.getDefaultValue().copy(),
+                pa.getHint().copy(), pa.hasAssignmentDefaultValue() ? pa.getDefaultValue().copy() : null,
                 pa.getProperty().asEditable(), new ACL(pa.getACL()), pa.getDefaultLanguage(), FxStructureOption.cloneOptions(pa.options));
         if (pa.isSystemInternal())
             _setSystemInternal();
@@ -100,9 +97,6 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
             if (parent != null && parent instanceof FxPropertyAssignment)
                 throw new FxInvalidParameterException("parentXPath", "ex.structure.assignment.noGroup", parentXPath);
         }
-        this.hasAssignmentDefaultValue = pa.hasAssignmentDefaultValue;
-        if (!pa.hasAssignmentDefaultValue())
-            this.defaultValue = null;
         //check parentXPath
         if (parent == null)
             parentGroupAssignment = null;
@@ -122,7 +116,7 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
      */
     public FxPropertyAssignmentEdit(FxProperty property, FxType type, String alias, String parentXPath) {
         super(-1, true, type, alias, XPathElement.buildXPath(false, parentXPath, alias), 0, property.getMultiplicity(), 1,
-                null, FxAssignment.NO_BASE, property.getLabel(), property.getHint(), property.getDefaultValue(), property, property.getACL(),
+                null, FxAssignment.NO_BASE, property.getLabel(), property.getHint(), null, property, property.getACL(),
                 property.getLabel().getDefaultLanguage(), FxStructureOption.cloneOptions(property.options));
         isNew = true;
     }
@@ -135,7 +129,6 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
      * Clear the default value
      */
     public void clearDefaultValue() {
-        this.hasAssignmentDefaultValue = false;
         this.defaultValue = null;
     }
 
@@ -154,7 +147,6 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
      */
     public FxPropertyAssignmentEdit setDefaultValue(FxValue defaultValue) {
         this.defaultValue = defaultValue;
-        this.hasAssignmentDefaultValue = defaultValue != null;
         return this;
     }
 

@@ -72,13 +72,13 @@ public class FxProperty extends FxStructureElement implements Serializable {
         this.dataType = dataType;
         this.referencedType = referencedType;
         this.referencedList = referencedList;
-        if (dataType != null) {
+        if (dataType != null && defaultValue != null) {
             //default value can only be determined once the referenced list is known
             if ((dataType == FxDataType.SelectOne || dataType == FxDataType.SelectMany) &&
                     referencedList == null)
                 this.defaultValue = null;
             else
-                this.defaultValue = defaultValue == null ? getEmptyValue() : defaultValue;
+                this.defaultValue = defaultValue;
         } else
             this.defaultValue = defaultValue;
         this.multiplicity = multiplicity;
@@ -123,9 +123,8 @@ public class FxProperty extends FxStructureElement implements Serializable {
      * @return default value
      */
     public FxValue getDefaultValue() {
-        if (defaultValue == null) {
-            defaultValue = getEmptyValue();
-        }
+        if (defaultValue == null)
+            return null;
         final FxValue copy = defaultValue.copy();
         updateEnvironmentData(copy);
         return copy;
@@ -467,4 +466,12 @@ public class FxProperty extends FxStructureElement implements Serializable {
         return (int) this.getId();
     }
 
+    /**
+     * Returns if the default value of this property is set.
+     *
+     * @return  if the default value of this property is set.
+     */
+    public boolean isDefaultValueSet() {
+        return this.defaultValue !=null;
+    }
 }
