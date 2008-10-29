@@ -132,6 +132,12 @@
         </component>
     </tag>
     <tag>
+        <tag-name>navigation</tag-name>
+        <component>
+            <component-type>flexive.TreeNavigation</component-type>
+        </component>
+    </tag>
+    <tag>
         <tag-name>regularExpressionValidator</tag-name>
         <validator>
             <validator-id>flexive.regularExpressionValidator</validator-id>

@@ -431,3 +431,69 @@ img.button {
     position: relative !important;  /* override position:absolute since it makes buttons near the input field difficult to place*/
 }
 
+/** "CSSPopup" styles for fx:navigation */
+.flexiveMenuBar ul {
+    display: block;
+    padding: 0;
+    margin: 0;
+
+    background-color: white;
+
+    list-style: none;
+    z-index: 999;
+}
+
+.flexiveMenuBar li {
+    padding: 2px 5px 2px 5px;
+    background-color: white;
+}
+
+.flexiveMenuBar li:hover {
+    background-color: #f0f0f0;
+}
+
+.flexiveMenuBar > ul {
+    height: 25px;
+}
+
+.flexiveMenuBar > ul > li {
+    position: relative;
+    float: left;
+    height: 25px;
+    line-height: 25px;
+    margin-right: -1px;
+
+    border: 1px solid #ccc;
+}
+
+/* First submenu level */
+.flexiveMenuBar ul ul {
+    position: absolute;
+    display: none;
+    top: 29px;
+    left: -1px;
+
+    background-color: white;
+    border: 1px solid #ccc;
+}
+
+.flexiveMenuBar ul ul {
+    position: relative;
+    min-width: 100px;
+}
+
+.flexiveMenuBar ul ul li {
+    position: relative;
+}
+
+/* Other submenu levels */
+.flexiveMenuBar ul ul ul {
+    position: absolute;
+    left: 100px;
+    top: 2px;
+}
+
+.flexiveMenuBar li:hover > ul {
+    position: absolute;
+    display: block;
+}

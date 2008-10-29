@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<head>
+    <title>fx:navigation test cases</title>
+    <fx:includes yui="true"/>
+
+    <style type="text/css">
+    </style>
+</head>
+<body class="yui-skin-sam">
+
+    <h:messages/>
+
+    <h2>fx:navigation testcases</h2>
+ 
+    <h4>output=csspopup</h4>
+
+    <fx:navigation var="node" output="csspopup" path="/" depth="5">
+        <f:facet name="item">
+            <a href="javascript:alert('You clicked on node with ID=#{node.id}')">#{node.label}</a>
+        </f:facet>
+    </fx:navigation>
+
+    <h4>output=yui</h4>
+
+    <fx:navigation var="node" output="yui" path="/" depth="5">
+        <f:facet name="item">
+            <a href="javascript:alert('You clicked on node with ID=#{node.id} and path=#{node.path}')">#{node.label}</a>
+        </f:facet>
+    </fx:navigation>
+
+    <h4>output=default</h4>
+
+    <fx:navigation var="node" path="/" depth="5">
+        <f:facet name="item">
+            <a href="javascript:alert('You clicked on node with ID=#{node.id}')">#{node.label}</a>
+        </f:facet>
+    </fx:navigation>
+
+
+    <fx:yuiSetup/>
+</body>
+</html>
