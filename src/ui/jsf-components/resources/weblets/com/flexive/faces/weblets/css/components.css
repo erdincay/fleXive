@@ -452,6 +452,10 @@ img.button {
     background-color: #f0f0f0;
 }
 
+.flexiveMenuBar li.selected {
+    background-color: #ccc;
+}
+
 .flexiveMenuBar > ul {
     height: 25px;
 }

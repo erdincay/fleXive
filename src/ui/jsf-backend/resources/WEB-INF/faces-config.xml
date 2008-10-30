@@ -238,6 +238,12 @@
     </managed-bean>
 
     <managed-bean>
+        <managed-bean-name>fxNavigationTestBean</managed-bean-name>
+        <managed-bean-class>com.flexive.war.beans.admin.test.FxNavigationTestBean</managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+    
+    <managed-bean>
         <managed-bean-name>adminConfigurationBean</managed-bean-name>
         <managed-bean-class>com.flexive.war.beans.admin.AdminConfigurationBean</managed-bean-class>
         <managed-bean-scope>request</managed-bean-scope>

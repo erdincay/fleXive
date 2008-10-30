@@ -13,6 +13,15 @@
     <fx:includes yui="true"/>
 
     <style type="text/css">
+
+        .defaultNavigation li {
+            font-weight: normal;
+        }
+        
+        .defaultNavigation li.selected {
+            font-weight: bold;
+        }
+        
     </style>
 </head>
 <body class="yui-skin-sam">
@@ -20,30 +29,42 @@
     <h:messages/>
 
     <h2>fx:navigation testcases</h2>
- 
-    <h4>output=csspopup</h4>
 
-    <fx:navigation var="node" output="csspopup" path="/" depth="5">
-        <f:facet name="item">
-            <a href="javascript:alert('You clicked on node with ID=#{node.id}')">#{node.label}</a>
-        </f:facet>
-    </fx:navigation>
+    <h:form>
+        <h4>output=csspopup</h4>
 
-    <h4>output=yui</h4>
+        <fx:navigation var="node" output="csspopup" path="/" depth="5" selectedNodeId="#{fxNavigationTestBean.selectedNodeId1}">
+            <f:facet name="item">
+                <h:commandLink>
+                    <f:setPropertyActionListener value="#{node.id}" target="#{fxNavigationTestBean.selectedNodeId1}"/>
+                    #{node.label}
+                </h:commandLink>
+            </f:facet>
+        </fx:navigation>
 
-    <fx:navigation var="node" output="yui" path="/" depth="5">
-        <f:facet name="item">
-            <a href="javascript:alert('You clicked on node with ID=#{node.id} and path=#{node.path}')">#{node.label}</a>
-        </f:facet>
-    </fx:navigation>
+        <h4>output=yui</h4>
 
-    <h4>output=default</h4>
+        <fx:navigation var="node" output="yui" path="/" depth="5" selectedNodeId="#{fxNavigationTestBean.selectedNodeId2}">
+            <f:facet name="item">
+                <ui:fragment>
+                    <a href="javascript:alert('You clicked on node with ID=#{node.id} and path=#{node.path}')">#{node.label}</a>
+                </ui:fragment>
+            </f:facet>
+        </fx:navigation>
 
-    <fx:navigation var="node" path="/" depth="5">
-        <f:facet name="item">
-            <a href="javascript:alert('You clicked on node with ID=#{node.id}')">#{node.label}</a>
-        </f:facet>
-    </fx:navigation>
+        <h4>output=default</h4>
+
+        <div class="defaultNavigation">
+            <fx:navigation var="node" path="/" depth="5" selectedNodeId="#{fxNavigationTestBean.selectedNodeId3}">
+                <f:facet name="item">
+                    <h:commandLink>
+                        <f:setPropertyActionListener value="#{node.id}" target="#{fxNavigationTestBean.selectedNodeId3}"/>
+                        #{node.label}
+                    </h:commandLink>
+                </f:facet>
+            </fx:navigation>
+        </div>
+    </h:form>
 
 
     <fx:yuiSetup/>

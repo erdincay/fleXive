@@ -61,7 +61,7 @@ public class WriteWebletIncludes extends UIOutput {
     private static final String REQ_WEBLETS = WriteWebletIncludes.class.getName() + ".WEBLETS";
     private static final String REQ_RENDERED = WriteWebletIncludes.class.getName() + ".WEBLETS_RENDERED";
     private static final String WEBLET_TINYMCE = "com.flexive.faces.weblets/js/tiny_mce/tiny_mce_src.js";
-    private static final String WEBLET_YUI = "com.flexive.faces.weblets/js/yui/yuiloader/yuiloader-beta-min.js";
+    private static final String WEBLET_YUI = "com.flexive.faces.weblets/js/yui/yuiloader/yuiloader-min.js";
     private static final String WEBLET_JSONRPC = "com.flexive.faces.weblets/js/jsonrpc.js";
 
     private Map<String, Boolean> weblets = new HashMap<String, Boolean>();

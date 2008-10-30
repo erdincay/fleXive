@@ -6,27 +6,36 @@ import com.flexive.shared.EJBLookup;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
-
-import javax.faces.component.UIOutput;
-import javax.faces.context.FacesContext;
-import javax.faces.context.ResponseWriter;
-import java.io.IOException;
-import java.util.Map;
-
-import static org.apache.commons.lang.StringUtils.isNotBlank;
 import org.apache.commons.lang.StringUtils;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import javax.faces.component.UIComponent;
+import javax.faces.component.UIOutput;
+import javax.faces.component.NamingContainer;
+import javax.faces.context.FacesContext;
+import static javax.faces.context.FacesContext.getCurrentInstance;
+import javax.faces.context.ResponseWriter;
+import javax.faces.event.AbortProcessingException;
+import javax.faces.event.FacesEvent;
+import javax.faces.event.FacesListener;
+import javax.faces.event.PhaseId;
+import java.io.IOException;
 
 /**
  * <p>The flexive tree navigation component. Renders part of the topic tree as
  * nested {@code <ul>} elements. These can be styled via CSS to resemble
  * menus or even pop-up menus, or enhanced with JavaScript using YahooUI components.</p>
- * <p/>
  * <p>
  * The part of the topic tree to be rendered can be controlled through the
  * {@code nodeId}, {@code path} and {@code depth} attributes. The tree mode is set through
  * the {@code mode} attribute ("edit" or "live" (default)).
  * </p>
- * <p/>
+ * <p>
+ * When either {@code selectedNodeId} or {@code selectedPath} is specified, the nodes leading from the
+ * root node to the given node are marked with the CSS style class "{@code selected}".
+ * </p>
  * <p>
  * The {@code output} attribute modifies the visual style of the navigation:
  * <dl>
@@ -35,7 +44,7 @@ import org.apache.commons.lang.StringUtils;
  * <dt><strong>csspopup</strong></dt>
  * <dd>Renders a menu that uses popups for nested elements (only works in current browsers, like Firefox 2+ or IE7+)</dd>
  * <dt><strong>yui</strong></dt>
- * <dd>Adds style classes for the YahooUI menu component. If JavaScript is enabled, YUI creates a
+ * <dd>Adds style classes and javascript for the YahooUI menu component. If JavaScript is enabled, YUI creates a
  * Menu component from the markup. If JavaScript is disabled, the basic markup version is shown.</dd>
  * </dl>
  * </p>
@@ -46,9 +55,14 @@ import org.apache.commons.lang.StringUtils;
  * <dd>
  * The markup of an individual item body. The tree node is exposed under the variable set
  * in the {@code var} attribute and is of type {@link com.flexive.shared.tree.FxTreeNode}.
+ * Note that even if it contains only HTML markup, it must be embedded in a JSF component
+ * (e.g. {@code ui:fragment}) for proper processing.
+ *
  * For example:
  * <pre> {@code <f:facet name="item">
+ *   <ui:fragment>
  *     <a href="/content/#{node.id}">#{node.label}</a>
+ *   </ui:fragment
  * </f:facet>}</pre>
  * </dd>
  * </dl>
@@ -57,14 +71,18 @@ import org.apache.commons.lang.StringUtils;
  * <h4>Rendering the topic tree as a menu bar</h4>
  * <pre> {@code <fx:navigation var="node" output="yui" path="/" depth="5">
  *    <f:facet name="item">
+ *      <ui:fragment>
  *        <a href="javascript:alert('You clicked on node with ID=#{node.id} and path=#{node.path}')">#{node.label}</a>
+ *      </ui:fragment>
  *    </f:facet>
  * </fx:navigation>}</pre>
  *
  * @author Daniel Lichtenberger, UCS
  * @version $Rev$
  */
-public class TreeNavigation extends UIOutput {
+public class TreeNavigation extends UIOutput implements NamingContainer {
+    private static final Log LOG = LogFactory.getLog(TreeNavigation.class);
+
     private static enum OutputType {
         DEFAULT, CSSPOPUP, YUI
     }
@@ -72,7 +90,7 @@ public class TreeNavigation extends UIOutput {
     /**
      * CSS class to be set for selected items (i.e. in current node path)
      */
-    private static final String CSS_SELECTED = "selectedItem";
+    private static final String CSS_SELECTED = "selected";
     /**
      * Container style class for the enclosing UL element of a tree
      */
@@ -87,30 +105,91 @@ public class TreeNavigation extends UIOutput {
     private String output;
     private Long nodeId;
     private String path;
+    private Long selectedNodeId;
+    private String selectedPath;
     private Integer depth;
     private String menuOptions;
+    private String treeOptions;
+
+    private transient String selectedPathCache;
+    private transient FxTreeNode treeCache;
 
     public TreeNavigation() {
         setRendererType(null);
     }
 
     @Override
+    public boolean getRendersChildren() {
+        return true;
+    }
+
+    @Override
+    public String getClientId(FacesContext context) {
+        return super.getClientId(context) + NamingContainer.SEPARATOR_CHAR +
+                (getVarValue(context) != null ? getVarValue(context).getId() : 0);
+    }
+
+    @Override
     public void encodeBegin(FacesContext context) throws IOException {
-        super.encodeBegin(context);
-        if (getFacet("item") == null) {
-            throw new IllegalArgumentException("Required facet \"item\" not specified.");
-        }
-        if (getVar() == null) {
-            throw new IllegalArgumentException("Required attribute \"var\" not specified.");
-        }
-        final FxTreeMode mode;
+        createRenderer(context).renderTree(getTree());
+    }
+
+    @Override
+    public void processDecodes(FacesContext context) {
         try {
-            mode = FxTreeMode.valueOf(StringUtils.capitalize(getMode().toLowerCase()));
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid value for \"mode\" attribute: " + getMode(), e);
+            new ItemPhaseRenderer(context, PhaseId.APPLY_REQUEST_VALUES).renderTree(getTree());
+        } catch (IOException e) {
+            LOG.warn(e.getMessage(), e);    // shouldn't happen
         }
+    }
+
+    @Override
+    public void processUpdates(FacesContext context) {
         try {
-            final long nodeId;
+            new ItemPhaseRenderer(context, PhaseId.UPDATE_MODEL_VALUES).renderTree(getTree());
+        } catch (IOException e) {
+            LOG.warn(e.getMessage(), e);    // shouldn't happen
+        }
+    }
+
+    @Override
+    public void processValidators(FacesContext context) {
+        try {
+            new ItemPhaseRenderer(context, PhaseId.PROCESS_VALIDATIONS).renderTree(getTree());
+        } catch (IOException e) {
+            LOG.warn(e.getMessage(), e);    // shouldn't happen
+        }
+    }
+
+    @Override
+    public void queueEvent(FacesEvent event) {
+        super.queueEvent(new NodeEvent(this, event, getVarValue(getCurrentInstance())));
+    }
+
+    @Override
+    public void broadcast(FacesEvent event) throws AbortProcessingException {
+        if (event instanceof NodeEvent) {
+            final NodeEvent nodeEvent = (NodeEvent) event;
+            final Object oldValue = provideVar(getCurrentInstance(), nodeEvent.getNode());
+            try {
+                nodeEvent.getTarget().getComponent().broadcast(nodeEvent.getTarget());
+            } finally {
+                removeVar(getCurrentInstance(), oldValue);
+            }
+        } else {
+            super.broadcast(event);
+        }
+    }
+
+    /**
+     * Return the entire tree that should be rendered.
+     *
+     * @return  the entire tree that should be rendered.
+     */
+    private FxTreeNode getTree() {
+        final FxTreeMode mode = getTreeMode();
+        final long nodeId;
+        try {
             if (isNotBlank(getPath())) {
                 nodeId = EJBLookup.getTreeEngine().getIdByPath(mode, getPath());
             } else if (getNodeId() != -1) {
@@ -118,14 +197,36 @@ public class TreeNavigation extends UIOutput {
             } else {
                 nodeId = FxTreeNode.ROOT_NODE;
             }
-            createRenderer(context).renderTree(
-                    EJBLookup.getTreeEngine().getTree(mode, nodeId, getDepth())
-            );
+            if (treeCache != null && treeCache.getId() == nodeId) {
+                return treeCache;
+            }
+            return treeCache = EJBLookup.getTreeEngine().getTree(mode, nodeId, getDepth());
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();
         }
     }
 
+    /**
+     * Return the selected tree mode (edit or live).
+     *
+     * @return  the selected tree mode (edit or live).
+     */
+    private FxTreeMode getTreeMode() {
+        final FxTreeMode mode;
+        try {
+            mode = FxTreeMode.valueOf(StringUtils.capitalize(getMode().toLowerCase()));
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid value for \"mode\" attribute: " + getMode(), e);
+        }
+        return mode;
+    }
+
+    /**
+     * Create a renderer for the selected output type (plain, YUI, CSS).
+     *
+     * @param context   the faces context
+     * @return  a navigation renderer for the selected output type (plain, YUI, CSS).
+     */
     private Renderer createRenderer(FacesContext context) {
         switch (getOutputType()) {
             case YUI:
@@ -140,6 +241,42 @@ public class TreeNavigation extends UIOutput {
     }
 
     /**
+     * Store the given tree node in the request variable specified by the "var" attribute.
+     *
+     * @param context   the faces context
+     * @param node      the tree node to be stored
+     * @return          the old value of the request variable (may be null)
+     */
+    protected Object provideVar(FacesContext context, FxTreeNode node) {
+        return context.getExternalContext().getRequestMap().put(getVar(), node);
+    }
+
+    /**
+     * Restore the previous value of the request variable specified by "var".
+     *
+     * @param context   the faces context
+     * @param oldValue  the value to be restored
+     */
+    protected void removeVar(FacesContext context, Object oldValue) {
+        if (oldValue != null) {
+            context.getExternalContext().getRequestMap().put(getVar(), oldValue);
+        } else {
+            context.getExternalContext().getRequestMap().remove(getVar());
+        }
+    }
+
+    /**
+     * Return the current value of the request variable specified by the "var" attribute.
+     *
+     * @param context   the faces context
+     * @return  the current value of the request variable specified by the "var" attribute.
+     */
+    protected FxTreeNode getVarValue(FacesContext context) {
+        return (FxTreeNode) context.getExternalContext().getRequestMap().get(getVar());
+    }
+
+
+    /**
      * Submenu list renderer
      */
     private class Renderer {
@@ -149,6 +286,12 @@ public class TreeNavigation extends UIOutput {
         public Renderer(FacesContext context) {
             this.context = context;
             this.out = context.getResponseWriter();
+            if (getFacet("item") == null) {
+                throw new IllegalArgumentException("Required facet \"item\" not specified.");
+            }
+            if (getVar() == null) {
+                throw new IllegalArgumentException("Required attribute \"var\" not specified.");
+            }
         }
 
         public void renderTree(FxTreeNode node) throws IOException {
@@ -165,7 +308,7 @@ public class TreeNavigation extends UIOutput {
                 renderMenuItem(child);
 
                 // render nested items
-                if (!child.getChildren().isEmpty()) {
+                if (child.getChildren() != null && !child.getChildren().isEmpty()) {
                     renderSubtree(child);
                 }
                 out.endElement("li");
@@ -174,19 +317,14 @@ public class TreeNavigation extends UIOutput {
         }
 
         protected void renderMenuItem(FxTreeNode node) throws IOException {
-            // provide "var" variable in request
-            final Map<String, Object> requestMap = context.getExternalContext().getRequestMap();
-            final Object oldValue = requestMap.put(getVar(), node);
-
+            final Object oldValue = provideVar(context, node);
+            
             // encode item facet
-            getFacet("item").encodeAll(context);
+            final UIComponent item = getFacet("item");
+            item.setId(item.getId());   // force re-calculation of client ID
+            item.encodeAll(context);
 
-            // remove "var" variable
-            if (oldValue != null) {
-                requestMap.put(getVar(), oldValue);
-            } else {
-                requestMap.remove(getVar());
-            }
+            removeVar(context, oldValue);
         }
 
         /**
@@ -197,6 +335,40 @@ public class TreeNavigation extends UIOutput {
          */
         protected String getElementClass(FxTreeNode node) {
             return isSelected(node) ? CSS_SELECTED : "";
+        }
+    }
+
+    /**
+     * Helper class to encode al the items in JSF phases other than render response
+     */
+    private class ItemPhaseRenderer extends Renderer {
+        private final PhaseId phase;
+
+        private ItemPhaseRenderer(FacesContext context, PhaseId phase) {
+            super(context);
+            this.phase = phase;
+        }
+
+        @Override
+        protected void renderSubtree(FxTreeNode node) throws IOException {
+            for (FxTreeNode child: node.getChildren()) {
+                final Object oldValue = provideVar(context, child);
+                final UIComponent item = getFacet("item");
+                item.setId(item.getId());   // force re-calculation of client ID
+                if (PhaseId.APPLY_REQUEST_VALUES.equals(phase)) {
+                    item.decode(context);
+                } else if (PhaseId.UPDATE_MODEL_VALUES.equals(phase)) {
+                    item.processUpdates(context);
+                } else if (PhaseId.PROCESS_VALIDATIONS.equals(phase)) {
+                    item.processValidators(context);
+                } else {
+                    throw new IllegalArgumentException("Invalid phase: " + phase);
+                }
+                if (child.getChildren() != null && !child.getChildren().isEmpty()) {
+                    renderSubtree(child);
+                }
+                removeVar(context, oldValue);
+            }
         }
     }
 
@@ -230,7 +402,7 @@ public class TreeNavigation extends UIOutput {
         public void renderTree(FxTreeNode node) throws IOException {
             // write container
             out.startElement("div", null);
-            final String id = getClientId(FacesContext.getCurrentInstance());
+            final String id = getClientId(getCurrentInstance());
             out.writeAttribute("id", id, null);
             out.writeAttribute("class", "yuimenubar yuimenubarnav", null);
 
@@ -278,7 +450,8 @@ public class TreeNavigation extends UIOutput {
     }
 
     private boolean isSelected(FxTreeNode node) {
-        return false;
+        return !StringUtils.isBlank(getSelectedPath())
+                && getSelectedPath().startsWith(node.getPath());
     }
 
     public String getMode() {
@@ -356,6 +529,17 @@ public class TreeNavigation extends UIOutput {
         this.menuOptions = menuOptions;
     }
 
+    public String getTreeOptions() {
+        if (treeOptions == null) {
+            return FxJsfComponentUtils.getStringValue(this, "treeOptions", "");
+        }
+        return treeOptions;
+    }
+
+    public void setTreeOptions(String treeOptions) {
+        this.treeOptions = treeOptions;
+    }
+
     public String getVar() {
         if (var == null) {
             return FxJsfComponentUtils.getStringValue(this, "var");
@@ -367,9 +551,87 @@ public class TreeNavigation extends UIOutput {
         this.var = var;
     }
 
+    public Long getSelectedNodeId() {
+        if (selectedNodeId == null) {
+            return FxJsfComponentUtils.getLongValue(this, "selectedNodeId", -1);
+        }
+        return selectedNodeId;
+    }
+
+    public void setSelectedNodeId(Long selectedNodeId) {
+        this.selectedNodeId = selectedNodeId;
+    }
+
+    public String getSelectedPath() {
+        if (selectedPath == null) {
+            if (FxJsfComponentUtils.getStringValue(this, "selectedPath") != null) {
+                return FxJsfComponentUtils.getStringValue(this, "selectedPath");
+            }
+            if (selectedPathCache != null) {
+                return selectedPathCache;
+            }
+            if (getSelectedNodeId() != -1) {
+                // resolve path
+                try {
+                    selectedPathCache = EJBLookup.getTreeEngine().getPathById(getTreeMode(), getSelectedNodeId());
+                    return selectedPathCache;
+                } catch (FxApplicationException e) {
+                    throw e.asRuntimeException();
+                }
+            }
+        }
+        return selectedPath;
+    }
+
+    public void setSelectedPath(String selectedPath) {
+        this.selectedPath = selectedPath;
+    }
+
+    private static class NodeEvent extends FacesEvent {
+        private static final long serialVersionUID = 5274895541939738723L;
+        private final FacesEvent target;
+        private final FxTreeNode node;
+
+        public NodeEvent(TreeNavigation owner, FacesEvent target, FxTreeNode node) {
+            super(owner);
+            this.target = target;
+            this.node = node;
+        }
+
+        @Override
+        public PhaseId getPhaseId() {
+            return (this.target.getPhaseId());
+        }
+
+        @Override
+        public void setPhaseId(PhaseId phaseId) {
+            this.target.setPhaseId(phaseId);
+        }
+
+        @Override
+        public boolean isAppropriateListener(FacesListener listener) {
+            return this.target.isAppropriateListener(listener);
+        }
+
+        @Override
+        public void processListener(FacesListener listener) {
+            ((TreeNavigation) getComponent()).provideVar(getCurrentInstance(), node);
+            this.target.processListener(listener);
+            ((TreeNavigation) getComponent()).removeVar(getCurrentInstance(), node);
+        }
+
+        public FacesEvent getTarget() {
+            return target;
+        }
+
+        public FxTreeNode getNode() {
+            return node;
+        }
+    }
+
     @Override
     public Object saveState(FacesContext context) {
-        final Object[] state = new Object[8];
+        final Object[] state = new Object[11];
         state[0] = super.saveState(context);
         state[1] = mode;
         state[2] = nodeId;
@@ -378,6 +640,9 @@ public class TreeNavigation extends UIOutput {
         state[5] = output;
         state[6] = menuOptions;
         state[7] = var;
+        state[8] = treeOptions;
+        state[9] = selectedNodeId;
+        state[10] = selectedPath;
         return state;
     }
 
@@ -392,5 +657,8 @@ public class TreeNavigation extends UIOutput {
         this.output = (String) state[5];
         this.menuOptions = (String) state[6];
         this.var = (String) state[7];
+        this.treeOptions = (String) state[8];
+        this.selectedNodeId = (Long) state[9];
+        this.selectedPath = (String) state[10];
     }
 }
