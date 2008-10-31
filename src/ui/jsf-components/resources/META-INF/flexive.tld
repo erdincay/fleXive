@@ -351,26 +351,275 @@
     <tag>
         <name>colorPicker</name>
         <body-content>JSP</body-content>
+        <description>
+            A color picker based on Yahoo UI, shown in a popup dialog. The color value will be written to the given form
+            element (a text or hidden input element). The color picker can be nested directly in a JSF input element
+            (e.g. h:inputText). In this case it will be rendered directly before the actual input element.
+        </description>
+        <attribute>
+            <name>inputId</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>ID of the input element where the picked color value will be stored. If not set, the parent
+                component ID will be used.
+            </description>
+        </attribute>
     </tag>
     <tag>
         <name>includes</name>
         <body-content>JSP</body-content>
+        <description>Includes external resources (CSS and JavaScripts) used by [fleXive] components. Place this in the
+            &lt;head> section of your HTML page.
+        </description>
+        <attribute>
+            <name>all</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>If true, includes all resources supported by the tag. This leads to a performance penalty for
+                loading and initializing the Javascript libraries, but is more convenient if performance is not
+                critical.
+            </description>
+        </attribute>
+        <attribute>
+            <name>htmlEditor</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>If true, the HTML editor (currently TinyMCE) will be loaded and initialized. Since TinyMCE must
+                be initialized in the &lt;head&gt; section, unfortunately you have to set this attribute manually when a
+                &lt;fx:fxValueInput&gt; component is used for a HTML property.
+            </description>
+        </attribute>
+        <attribute>
+            <name>jsonRpc</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>Includes the JSON-RPC-Java library for Ajax calls via JSON/RPC (the Javascript proxy can then
+                be obtained with flexive.yui.getJsonRpc() ).
+            </description>
+        </attribute>
+        <attribute>
+            <name>yui</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>Includes the Yahoo UI bootstrap library. If you want to use Yahoo UI components, you also have
+                to include a call to &lt;fx:yuiSetup/&gt; near the end of your page. You also have to specify the skin
+                class on your page, the most convenient way is through the body tag, e.g.: &lt;body class="yui-skin-sam"&gt;
+                .
+            </description>
+        </attribute>
     </tag>
     <tag>
         <name>fxValueInput</name>
         <body-content>JSP</body-content>
+        <attribute>
+            <name>value</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>An expression of type FxValue of the value to be edited. Note that the value must not be null,
+                otherwise the input component cannot determine the actual FxValue type.
+            </description>
+        </attribute>
+        <attribute>
+            <name>id</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>An optional client ID of the input component.</description>
+        </attribute>
+        <attribute>
+            <name>externalId</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>An optional external ID that overrides the clientId in JSF validation error messages - may be
+                necessary in complex, generic forms, but usually you won't need this.
+            </description>
+        </attribute>
+        <attribute>
+            <name>readOnly</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>If true, only the value itself will be rendered.</description>
+        </attribute>
+        <attribute>
+            <name>readOnlyShowTranslations</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>If true, all translations of a property will be shown, else only the best matching translation
+                (in the calling users language or the language marked as default).
+            </description>
+        </attribute>
+        <attribute>
+            <name>forceLineInput</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>For multiline and HTML properties, force to render a single-line input field (e.g. for search
+                query forms).
+            </description>
+        </attribute>
+        <attribute>
+            <name>inputMapper</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>An optional input mapper for rendering the input control. For example, properties referencing
+                other content may need a custom input mapper that provides a select list of content instances. For more
+                information take a look at the InputMapper documentation and at .
+            </description>
+        </attribute>
+        <attribute>
+            <name>valueFormatter</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>A FxValueFormatter to be used for rendering the value (in read-only mode only). If not
+                specified, the JSF renderer will choose the appropriate default formatter for the actual value class.
+            </description>
+        </attribute>
+        <attribute>
+            <name>filter</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>If set to false, HTML output will not be filtered. If set to true (the default), HTML entities
+                will be used for sensitive characters (e.g. "&amp;lt;" instead of "&lt;").
+            </description>
+        </attribute>
+        <attribute>
+            <name>containerDivClass</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>If this CSS class property is set, the component will be embedded in a div-container using this
+                CSS class as style.
+            </description>
+        </attribute>
+        <attribute>
+            <name>disableMultiLanguage</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>Disables multi language support even if the FxValue object is multilingual. Only the default
+                translation will be displayed and updated.
+            </description>
+        </attribute>
+        <attribute>
+            <name>disableLytebox</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>Set this property to true if the Lytebox javascript library used for rendering inline previews
+                of images should not be used.
+            </description>
+        </attribute>
+        <attribute>
+            <name>onchange</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>An optional javascript expression to be called when an input element changed its value.
+            </description>
+        </attribute>
+        <attribute>
+            <name>autocompleteHandler</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>An instance of the flexive.yui.AutoCompleteHandler javascript class. This class provides a
+                query method for a client-side autocomplete widget provided by Yahoo UI, as well as a method for
+                formatting the response.
+            </description>
+        </attribute>
     </tag>
     <tag>
         <name>content</name>
         <body-content>JSP</body-content>
+        <attribute>
+            <name>var</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>The name of the variable that provides the content. The actual FxContent instance itself is
+                provided in "#{var}_content", i.e. if var="project", then the FxContent is supplied in
+                "project_content".
+            </description>
+        </attribute>
+        <attribute>
+            <name>pk</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>A primary key. May be supplied as an FxPK object, a long ID, a String containing a primary key
+                (e.g. "5", "5.1", "5.MAX"), a FxReference, or a FxSelectListItem whose ID will be interpreted as a
+                content ID.
+            </description>
+        </attribute>
+        <attribute>
+            <name>type</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>The new content type ID (if no PK was specified)</description>
+        </attribute>
+        <attribute>
+            <name>typeName</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>The new content type name (if no PK was specified)</description>
+        </attribute>
+        <attribute>
+            <name>preserveContent</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>If set to true, the content instance will be stored in the JSF viewstate. This is
+                memory-expensive, but is necessary for editor pages that modify the content structure, e.g. pages that
+                allow to add or remove groups or properties. By default, this option is set to false.
+            </description>
+        </attribute>
     </tag>
     <tag>
         <name>value</name>
         <body-content>JSP</body-content>
+        <attribute>
+            <name>property</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>The XPath of the property.</description>
+        </attribute>
+        <attribute>
+            <name>var</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>The value of the "var" attribute of the &lt;fx:content&gt; component whose content should be
+                edited. If nested directly in a fx:content tag, this attribute can be omitted.
+            </description>
+        </attribute>
+        <attribute>
+            <name>labelKey</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>An optional message key that overrides the assignment label.</description>
+        </attribute>
     </tag>
     <tag>
         <name>contentList</name>
         <body-content>JSP</body-content>
+        <attribute>
+            <name>var</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>Name of the variable that provides the content. The actual FxContent instance itself is
+                provided in "#{var}_content", i.e. if var="project", then the FxContent is supplied in
+                "project_content".
+            </description>
+        </attribute>
+        <attribute>
+            <name>indexVar</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>Optional name for a variable that exposes the current iteration index.</description>
+        </attribute>
+        <attribute>
+            <name>queryBuilder</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>An expression of type SqlQueryBuilder that is used for selecting the contents.</description>
+        </attribute>
+        <attribute>
+            <name>explode</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>Indicates whether the content instances should be "exploded", i.e. whether empty properties
+                should be initialized. Useful for content editors. Defaults to false.
+            </description>
+        </attribute>
     </tag>
     <tag>
         <name>dojoMenu</name>
@@ -395,10 +644,76 @@
     <tag>
         <name>resultValue</name>
         <body-content>JSP</body-content>
+        <attribute>
+            <name>value</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>The value to be rendered. Can be of any type.</description>
+        </attribute>
+        <attribute>
+            <name>linkFormatter</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>A ContentLinkFormatter instance that will be used for rendering links to contents. This applies
+                to the rendering of the virtual properties @pk and @path , as described in . If not specified, the
+                default ContentLinkFormatter will be used. For a description of the supported link format, please refer
+                to the [fleXive] JavaDoc of this class.
+            </description>
+        </attribute>
+        <attribute>
+            <name>contentLinkFormat</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>The format string passed to the linkFormatter for content links, i.e. FxPK values. For a
+                description of the supported link format of the default formatter, please refer to the [fleXive] JavaDoc
+                of this class.
+            </description>
+        </attribute>
+        <attribute>
+            <name>itemLinkFormat</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>The format string used for FxPaths values as returned by the virtual @path property. For a
+                description of the supported link format of the default formatter, please refer to the [fleXive] JavaDoc
+                of this class.
+            </description>
+        </attribute>
     </tag>
     <tag>
         <name>thumbnail</name>
         <body-content>JSP</body-content>
+        <attribute>
+            <name>pk</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>The primary key of the content instance. If the PK is specified, the default thumbnail of the
+                content is rendered.
+            </description>
+        </attribute>
+        <attribute>
+            <name>binary</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>A specific binary entry of type FxBinary to be rendered. This is useful for for content types
+                with more than one binary property. For an example, see .
+            </description>
+        </attribute>
+        <attribute>
+            <name>urlOnly</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>If true, only the thumbnail URL will be rendered (relative to the context root, e.g.
+                thumbnail/pk5.1/s0 ).
+            </description>
+        </attribute>
+        <attribute>
+            <name>previewSize</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>The desired size of the thumbnail. Valid values are taken from BinaryDescriptor.PreviewSizes :
+                PREVIEW1 , PREVIEW2 (default), PREVIEW3 , ORIGINAL.
+            </description>
+        </attribute>
     </tag>
     <tag>
         <name>regularExpressionValidator</name>
