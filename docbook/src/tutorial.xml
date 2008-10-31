@@ -429,7 +429,7 @@
                     </link>
                     tag, which essentially renders read-only
                     <link linkend="jcl_fx_value_input">
-                        <code>&lt;fx:valueInput&gt;</code>
+                        <code>&lt;fx:fxValueInput&gt;</code>
                     </link>
                     components for more sophisticated output formatting.
                     For the document browser, we select four columns in our content query:

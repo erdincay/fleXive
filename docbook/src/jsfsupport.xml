@@ -575,7 +575,7 @@
                             <para>
                                 a
                                 <link linkend="jcl_fx_value_input">
-                                    <code language="xhtml">&lt;fx:valueInput></code>
+                                    <code language="xhtml">&lt;fx:fxValueInput></code>
                                 </link>
                                 instance that renders suitable input tags for all supported data
                                 types, including multilanguage and binary support.
@@ -675,7 +675,7 @@
                 </title>
                 <para>
                     The
-                    <code language="xhtml">&lt;fx:valueInput></code>
+                    <code language="xhtml">&lt;fx:fxValueInput></code>
                     component is a universal
                     component for editing FxValue objects. It supports every datatype of FxValue,
                     for example plain text, numbers, dates, or even binaries. It is used in the
@@ -980,12 +980,12 @@
                 </title>
                 <para>
                     The resultValue tag is a specialized wrapper for the
-                    <code>&lt;fx:valueInput&gt;</code>
+                    <code>&lt;fx:fxValueInput&gt;</code>
                     to be used for rendering a column value of a search result row.
                     If the value passed is an instance of
                     <classname>FxValue</classname>, a read-only instance
                     of
-                    <code>&lt;fx:valueInput&gt;</code>
+                    <code>&lt;fx:fxValueInput&gt;</code>
                     is created which then renders the given value.
                     Otherwise (e.g. for
                     <classname>FxPK</classname>
