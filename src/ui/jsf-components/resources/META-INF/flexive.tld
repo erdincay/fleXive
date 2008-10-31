@@ -563,6 +563,12 @@
                 allow to add or remove groups or properties. By default, this option is set to false.
             </description>
         </attribute>
+        <attribute>
+            <name>content</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>The content instance to be displayed (if no PK was specified).</description>
+        </attribute>
     </tag>
     <tag>
         <name>value</name>

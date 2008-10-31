@@ -162,6 +162,14 @@
                                 </listitem>
                             </varlistentry>
                             <varlistentry>
+                                <term>content</term>
+                                <listitem>
+                                    <para>
+                                        The content instance to be displayed (if no PK was specified).
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                            <varlistentry>
                                 <term>preserveContent</term>
                                 <listitem>
                                     <para>
