@@ -517,6 +517,12 @@
                 //contentPage=null;
             }
 
+            function searchContentsImmediate(menuItem) {
+                // show type query results
+                var menu = dojo.widget.byId("structureTreeMenu");
+                invokeContentAction("adm/search/searchResult.jsf", "typeSearch", {typeId: getNodeId(menu.getTreeNode())});
+            }
+
             function searchContentsByProperty(menuItem) {
                 var menu = dojo.widget.byId("structureTreeMenu");
                 var nodeId = menu.getTreeNode().propertyId;
@@ -579,6 +585,7 @@
                 setActionDisabled(menu.getTreeNode(), "deleteType", !isType(node.nodeDocType) || lackRole);
                 setActionDisabled(menu.getTreeNode(), "copyAssignment", lackRole || node.nodeDocType!="Group" && node.nodeDocType!="Assignment");
                 setActionDisabled(menu.getTreeNode(), "searchContents", !isType(node.nodeDocType) && !isAssignment(node.nodeDocType));
+                setActionDisabled(menu.getTreeNode(), "searchContentsImmediate", !isType(node.nodeDocType));
                 setActionDisabled(menu.getTreeNode(), "searchPropertyContents", !isAssignment(node.nodeDocType));
                 setActionDisabled(menu.getTreeNode(), "cutAssignment", lackRole || node.nodeDocType!="Assignment" && node.nodeDocType!="Group");
                 //paste a copied assignment node into a different Type below another assignment
@@ -638,6 +645,7 @@
                 <adm:treeContextMenuItem icon="property" treeActions="createProperty" labelKey="StructureTree.menu.createProperty" clickHandler="createProperty"/>
                 <adm:treeContextMenuItem icon="group" treeActions="createGroup" labelKey="StructureTree.menu.createGroup" clickHandler="createGroup" />
                 <adm:treeContextMenuItem icon="search" treeActions="searchContents" labelKey="StructureTree.menu.searchContents" clickHandler="searchContents"/>
+                <adm:treeContextMenuItem icon="search" treeActions="searchContentsImmediate" labelKey="StructureTree.menu.searchContentsImmediate" clickHandler="searchContentsImmediate"/>
                 <adm:treeContextMenuItem icon="search" treeActions="searchPropertyContents" labelKey="StructureTree.menu.searchContents.property" clickHandler="searchContentsByProperty"/>
                 <fx:dojoMenuSeparator/>
                 <adm:treeContextMenuItem icon="new" treeActions="createContent" labelKey="ContentTree.menu.create" clickHandler="createContent"/>

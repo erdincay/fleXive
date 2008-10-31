@@ -108,6 +108,16 @@ public class SearchResultBean implements ActionBean, Serializable {
                 setVersionFilter(liveTree ? VersionFilter.LIVE : VersionFilter.MAX);
                 setQueryBuilder(createSqlQueryBuilder().isChild(id));
                 show();
+            } else if ("typeSearch".equals(action)) {
+                // search for contents of a type
+                if (StringUtils.isBlank(FxJsfUtils.getParameter("typeId"))) {
+                    new FxFacesMsgErr("SearchResult.err.query.type.empty").addToContext();
+                    return null;
+                }
+                resetFilters();
+                final long id = FxJsfUtils.getLongParameter("typeId");
+                setQueryBuilder(createSqlQueryBuilder().type(id));
+                show();
             } else if ("openBriefcase".equals(action) || "openBriefcaseDetails".equals(action)) {
                 if (StringUtils.isBlank(FxJsfUtils.getParameter("briefcaseId"))) {
                     new FxFacesMsgErr("SearchResult.err.query.briefcase.empty").addToContext();
