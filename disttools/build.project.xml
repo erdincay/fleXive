@@ -57,6 +57,11 @@ db.config.create
     <!-- Empty no-op target -->
     <target name="quit"/>
 
+    <!-- User target definitions. To overwrite one of them, define them in your build.xml before including this file -->
+    <target name="project.precompile" description="Target called before the project gets compiled."/>
+    <target name="project.postcompile" description="Target called after the project was compiled, but before it is packaged."/>
+    <target name="project.postpackage" description="Target called after the project was packaged."/>
+
     <target name="clean">
         <delete dir="${build.dir}" failonerror="false"/>
         <delete failonerror="false">
@@ -156,5 +161,5 @@ db.config.create
         <delete file="${build.dist.dir}/drops.archives"/>
     </target>
 
-    <target name="package" depends="compile,package.shared,package.ejb,package.war,package.ear"/>
+    <target name="package" depends="project.precompile,compile,project.postcompile,package.shared,package.ejb,package.war,package.ear,project.postpackage"/>
 </project>

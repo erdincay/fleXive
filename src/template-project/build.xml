@@ -9,5 +9,47 @@
     <property name="fxProject" value="template-project"/>
     <property name="flexive.dist.dir" value="${basedir}/../flexive-dist"/>
 
+    <!--
+        To add your own targets to the build process, implement one of the following targets
+        before including build.project.xml:
+
+        project.precompile   - Target called before the project gets compiled.
+        project.postcompile  - Target called after the project was compiled, but before it is packaged.
+        project.postpackage  - Target called after the project was packaged.
+
+
+********
+Examples
+********
+
+** Compile Groovy source files in src/groovy for all layers:
+
+   Invoke the Groovy compiler for your sources and write them to the package's shared build directory
+   (#{build.dir}). Since it is called after the project sources have been compiled, it has access
+   to all Java classes defined in your project (without using the joint compiler).
+   If you want to allow access to your Groovy classes from Java, you have to use the
+   project.precompile target.
+
+    <target name="project.postcompile">
+        <taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc" classpathref="dist.path"/>
+
+        <groovyc srcdir="src/groovy/shared" destdir="${build.dir}/shared" classpathref="dist.path"/>
+
+        <groovyc srcdir="src/groovy/war" destdir="${build.dir}/war" classpathref="dist.path">
+            <classpath>
+                <path path="${build.dir}/shared"/>
+            </classpath>
+        </groovyc>
+
+        <groovyc srcdir="src/groovy/ejb" destdir="${build.dir}/ejb" classpathref="dist.path">
+            <classpath>
+                <path path="${build.dir}/shared"/>
+            </classpath>
+        </groovyc>
+    </target>
+
+            
+    -->
+
     <import file="${flexive.dist.dir}/build.project.xml"/>
 </project>
