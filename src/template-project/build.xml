@@ -25,7 +25,7 @@ Examples
 ** Compile Groovy source files in src/groovy for all layers:
 
    Invoke the Groovy compiler for your sources and write them to the package's shared build directory
-   (#{build.dir}). Since it is called after the project sources have been compiled, it has access
+   (${build.dir}). Since it is called after the project sources have been compiled, it has access
    to all Java classes defined in your project (without using the joint compiler).
    If you want to allow access to your Groovy classes from Java, you have to use the
    project.precompile target.
