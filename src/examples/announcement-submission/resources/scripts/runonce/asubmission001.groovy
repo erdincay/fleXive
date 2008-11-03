@@ -52,8 +52,8 @@ ae.addGroup(accountId1, uGroupId1)
 ae.addGroup(accountId2, uGroupId2)
 
 // Type ACL settings
-acle.assign(ACL.Category.STRUCTURE.getDefaultId(), UserGroup.GROUP_EVERYONE, ACL.Permission.READ)
-acle.assign(ACL.Category.STRUCTURE.getDefaultId(), uGroupId1, ACL.Permission.READ, ACL.Permission.EDIT, ACL.Permission.CREATE, ACL.Permission.DELETE)
+//acle.assign(ACL.Category.STRUCTURE.getDefaultId(), UserGroup.GROUP_EVERYONE, ACL.Permission.READ)
+//acle.assign(ACL.Category.STRUCTURE.getDefaultId(), uGroupId1, ACL.Permission.READ, ACL.Permission.EDIT, ACL.Permission.CREATE, ACL.Permission.DELETE)
 
 // Create instance ACL and assign it to user groups
 long instanceAclId = acle.create(
