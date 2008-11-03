@@ -151,21 +151,8 @@ public class FxFilter implements Filter {
                             ? (FxResponseWrapper) servletResponse
                             : new FxResponseWrapper(servletResponse, cacheData);
 
-            try {
-                filterChain.doFilter(request, response);
-            } catch (ServletException e) {
-                LOG.error(e.getMessage(), e.getRootCause());
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getRootCause());
-            } catch (IOException e) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(e.getMessage(), e);
-                }
-                return;
-            } catch (Throwable t) {
-                // Failed to process the page
-                LOG.error(t, t);
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t);
-            }
+            filterChain.doFilter(request, response);
+
             try {
                 if ("css".equalsIgnoreCase(request.getPageType())) {
                     response.setContentType("text/css");
