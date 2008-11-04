@@ -40,6 +40,7 @@ import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.interfaces.AccountEngine;
 import com.flexive.shared.mbeans.FxCacheMBean;
 import com.flexive.shared.security.*;
+import com.flexive.core.structure.StructureLoader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -327,6 +328,8 @@ public class UserTicketStore {
                 throw e.asRuntimeException();
             }
         }
+        // need to flag environment as dirty to force guest ticket updates (FX-349)
+        StructureLoader.updateEnvironmentTimestamp();
     }
 
     /**

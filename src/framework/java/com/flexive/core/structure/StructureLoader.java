@@ -150,6 +150,19 @@ public final class StructureLoader {
     }
 
     /**
+     * Updates the current division's environment timestamp, but does not reload the environment from the DB
+     */
+    public static synchronized void updateEnvironmentTimestamp() {
+        final FxEnvironmentImpl env = (FxEnvironmentImpl) CacheAdmin.getEnvironment();
+        env.updateTimeStamp();
+        try {
+            FxEnvironmentUtils.cachePut(FxContext.get().getDivisionId(), CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME, env);
+        } catch (FxCacheException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /**
      * Load all FxStructure runtimes from the registered databases and place them into the cache
      *
      * @throws FxCacheException       on errors

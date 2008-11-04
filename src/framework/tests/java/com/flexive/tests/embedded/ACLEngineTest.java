@@ -32,21 +32,25 @@
 package com.flexive.tests.embedded;
 
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.EJBLookup;
+import com.flexive.shared.content.FxPK;
+import com.flexive.shared.structure.FxTypeEdit;
+import static com.flexive.shared.EJBLookup.getAclEngine;
+import static com.flexive.shared.EJBLookup.getContentEngine;
+import static com.flexive.shared.EJBLookup.getTypeEngine;
+import static com.flexive.shared.FxContext.getUserTicket;
 import com.flexive.shared.interfaces.ACLEngine;
-import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.exceptions.FxLogoutFailedException;
+import com.flexive.shared.exceptions.*;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.security.ACLAssignment;
+import com.flexive.shared.security.UserGroup;
 import static com.flexive.shared.security.ACL.Permission;
 import com.flexive.shared.value.FxString;
 import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
 import static org.testng.Assert.assertEquals;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.util.List;
@@ -60,22 +64,14 @@ import java.util.Arrays;
  */
 @Test(groups = {"ejb", "security"})
 public class ACLEngineTest {
-    @BeforeClass
-    public void beforeClass() throws Exception {
-        login(TestUsers.SUPERVISOR);
-    }
-
-    @AfterClass
-    public void afterClass() throws FxLogoutFailedException {
-        logout();
-    }
 
     @Test(groups = {"ejb", "security"})
-    public void createAclTest() throws FxApplicationException {
-        final long aclId = EJBLookup.getAclEngine().create("create-acl-test", new FxString("first label"), TestUsers.getTestMandator(),
+    public void createAclTest() throws FxApplicationException, FxLoginFailedException, FxAccountInUseException, FxLogoutFailedException {
+        login(TestUsers.SUPERVISOR);
+        final long aclId = getAclEngine().create("create-acl-test", new FxString("first label"), TestUsers.getTestMandator(),
                 "#000000", "", ACL.Category.INSTANCE);
         try {
-                EJBLookup.getAclEngine().create("create-acl-test", new FxString("first label"), TestUsers.getTestMandator(),
+                getAclEngine().create("create-acl-test", new FxString("first label"), TestUsers.getTestMandator(),
                 "#000000", "", ACL.Category.INSTANCE);
                 assert false:"ACL's must have unique names";
             }
@@ -90,10 +86,10 @@ public class ACLEngineTest {
             assertEquals(acl.getColor(), "#000000");
             assertEquals(acl.getLabel(), new FxString("first label"));
 
-            assert FxContext.getUserTicket().getGroups().length > 0;
-            final long groupId = FxContext.getUserTicket().getGroups()[0];
+            assert getUserTicket().getGroups().length > 0;
+            final long groupId = getUserTicket().getGroups()[0];
 
-            EJBLookup.getAclEngine().update(aclId, "new-acl-test", new FxString("test"), null, "new description",
+            getAclEngine().update(aclId, "new-acl-test", new FxString("test"), null, "new description",
                     Arrays.asList(new ACLAssignment(aclId, groupId, true, true, true, false, false, false,
                             ACL.Category.INSTANCE, null)));
             final ACL updatedAcl = CacheAdmin.getFilteredEnvironment().getACL(aclId);
@@ -102,17 +98,19 @@ public class ACLEngineTest {
             assertEquals(updatedAcl.getColor(), "#000000");
             assertEquals(updatedAcl.getLabel(), new FxString("test"));
         } finally {
-            EJBLookup.getAclEngine().remove(aclId);
+            getAclEngine().remove(aclId);
+            logout();
         }
     }
 
     @Test(groups = {"ejb", "security"})
-    public void aclAssignmentsTest() throws FxApplicationException {
-        final ACLEngine aclEngine = EJBLookup.getAclEngine();
+    public void aclAssignmentsTest() throws FxApplicationException, FxLoginFailedException, FxAccountInUseException, FxLogoutFailedException {
+        login(TestUsers.SUPERVISOR);
+        final ACLEngine aclEngine = getAclEngine();
         final long aclId = aclEngine.create("create-acl-test", new FxString("first label"), TestUsers.getTestMandator(),
                 "#000000", "", ACL.Category.INSTANCE);
         try {
-            final UserTicket ticket = FxContext.getUserTicket();
+            final UserTicket ticket = getUserTicket();
             assert ticket.getGroups().length > 0;
             for (long group: ticket.getGroups()) {
                 aclEngine.assign(aclId, group, Permission.EDIT, Permission.CREATE);
@@ -144,7 +142,79 @@ public class ACLEngineTest {
             }
         } finally {
             aclEngine.remove(aclId);
+            logout();
+        }
+    }
+
+    /**
+     * Checks if guest user tickets reflect ACL changes
+     */
+    @Test(groups = {"ejb", "security"})
+    public void guestAssignmentUpdateTest_FX349() throws FxApplicationException {
+        assert getUserTicket().isGuest() : "Not logged in, expected guest ticket";
+        final long aclId;
+        final long typeId;
+        try {
+            FxContext.get().runAsSystem();
+            aclId = getAclEngine().create("acl-fx349", new FxString("label"), TestUsers.getTestMandator(),
+                    "#000000", "", ACL.Category.STRUCTURE);
+            getAclEngine().assign(aclId, UserGroup.GROUP_EVERYONE, Permission.READ);
+            typeId = getTypeEngine().save(FxTypeEdit.createNew("fx349")
+                    .setUseTypePermissions(true)
+                    .setUseInstancePermissions(false)
+                    .setUsePropertyPermissions(false)
+                    .setUseStepPermissions(false)
+                    .setACL(getAclEngine().load(aclId))
+            );
+        } finally {
+            FxContext.get().stopRunAsSystem();
         }
 
+        try {
+            assert getUserTicket().isAssignedToACL(aclId) : "Guest user ticket should be assigned to " + aclId;
+            assert !getUserTicket().mayCreateACL(aclId, -1) : "Guest user should not have create permissions on acl " + aclId;
+            tryCreateInstanceAsGuest(typeId, false);
+
+            // remove create perm
+            try {
+                FxContext.get().runAsSystem();
+                getAclEngine().assign(aclId, UserGroup.GROUP_EVERYONE, Permission.READ, Permission.CREATE);
+            } finally {
+                FxContext.get().stopRunAsSystem();
+            }
+            assert getUserTicket().isAssignedToACL(aclId) : "Guest user ticket should be assigned to " + aclId;
+            assert getUserTicket().mayCreateACL(aclId, -1) : "Guest user should now have create permissions on acl " + aclId;
+            tryCreateInstanceAsGuest(typeId, true);
+        } finally {
+            try {
+                FxContext.get().runAsSystem();
+                getTypeEngine().remove(typeId);
+                getAclEngine().remove(aclId);
+            } finally {
+                FxContext.get().stopRunAsSystem();
+            }
+        }
+    }
+
+    private void tryCreateInstanceAsGuest(long typeId, boolean hasPerms) throws FxApplicationException {
+        try {
+            // force user ticket update (as in a new request)
+            FxContext.get().overrideTicket(EJBLookup.getAccountEngine().getUserTicket());
+            
+            final FxPK pk = getContentEngine().save(getContentEngine().initialize(typeId));
+            try {
+                FxContext.get().runAsSystem();
+                getContentEngine().remove(pk);
+            } finally {
+                FxContext.get().stopRunAsSystem();
+            }
+            assert hasPerms : "User should not be able to create folder instance";
+        } catch (FxApplicationException e) {
+            if (!hasPerms && (e instanceof FxNoAccessException)) {
+                // pass
+            } else {
+                throw e;
+            }
+        }
     }
 }
