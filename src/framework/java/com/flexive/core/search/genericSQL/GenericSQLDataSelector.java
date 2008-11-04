@@ -1,4 +1,3 @@
-
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
@@ -50,7 +49,7 @@ import java.sql.Connection;
 import java.util.*;
 
 /**
- * MySQL specific data selector
+ * Generic SQL data selector
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
@@ -177,7 +176,7 @@ public class GenericSQLDataSelector extends DataSelector {
     private String buildSourceTable(final SubSelectValues[] values) {
         // Prepare type filter
         final String typeFilter = search.getTypeFilter() == null ? ""
-                : " and " + FILTER_ALIAS + ".tdef=" + search.getTypeFilter().getId() + " ";
+                : " AND " + FILTER_ALIAS + ".TDEF=" + search.getTypeFilter().getId() + " ";
 
         final List<String> orderByNumbers = new ArrayList<String>();
         final List<String> columns = new ArrayList<String>();
@@ -185,7 +184,7 @@ public class GenericSQLDataSelector extends DataSelector {
         // create select columns
         for (String column: INTERNAL_RESULTCOLS) {
             if ("rownr".equals(column)) {
-                columns.add("@rownr=@rownr+1 rownr");
+                columns.add(getRowNumberCounterStatement());
             } else {
                 columns.add(filterProperties(column));
             }
@@ -232,6 +231,15 @@ public class GenericSQLDataSelector extends DataSelector {
         }
         return sql.toString();
 
+    }
+
+    /**
+     * Get the database vendor specific statement to increase the rownr counter
+     *
+     * @return database vendor specific statement to increase the rownr counter
+     */
+    public String getRowNumberCounterStatement() {
+        return "@rownr:=@rownr+1 rownr";
     }
 
     /**

@@ -50,7 +50,7 @@ import java.util.Map;
 import java.util.HashMap;
 
 /**
- * A generic MySQL selector
+ * A generic SQL selector
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$

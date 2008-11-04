@@ -39,7 +39,7 @@ import com.flexive.shared.FxContext;
 import com.flexive.sqlParser.Property;
 
 /**
- * MySQL specific workflow step selector
+ * Generic SQL workflow step selector
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
