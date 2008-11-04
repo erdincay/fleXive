@@ -45,7 +45,7 @@ public class MySQLTreeStorage extends GenericTreeStorageSpreaded {
     /**
      * Singleton getter
      *
-     * @return MySQLHierarchicalTypes
+     * @return TreeStorage
      */
     public static TreeStorage getInstance() {
         return instance;

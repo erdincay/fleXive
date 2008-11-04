@@ -7,7 +7,7 @@
  *
  * parameters:
  *   live     use the live or edit table?
- *   nodeId   id of the node to get the position fort
+ *   nodeId   id of the node to get the position for
  *   parentId id of the parent node (no checks are performed if nodeId is actually a child of parentId!)
  * returns:
  *   position relative to all children of the parent node, starting at 1 or NULL if the node is no child of parent

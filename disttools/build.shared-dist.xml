@@ -1,8 +1,27 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <project name="flexive-shared-dist" basedir=".">
 
+    <target name="db.prepare" description="Prepare database specific properties">
+        <groovy>
+            if( !properties['database.vendor'] )
+                ant.fail(taskname: "flexive", message: "Missing database.vendor property in database.properties!")
+            //setup database properties based on the selected database vendor
+            properties['database.host'] = properties['database.'+properties['database.vendor']+'.host']
+            properties['database.port'] = properties['database.'+properties['database.vendor']+'.port']
+            properties['database.username'] = properties['database.'+properties['database.vendor']+'.username']
+            properties['database.password'] = properties['database.'+properties['database.vendor']+'.password']
+            properties['database.schema.root'] = properties['database.'+properties['database.vendor']+'.schema.root']
+            properties['database.schema.config'] = properties['database.'+properties['database.vendor']+'.schema.config']
+            properties['database.driver'] = properties['database.'+properties['database.vendor']+'.driver']
+            properties['database.url.base'] = properties['database.'+properties['database.vendor']+'.url.base']
+            properties['database.url.parameters'] = properties['database.'+properties['database.vendor']+'.url.parameters']
+        </groovy>
+    </target>
+
     <!-- Database setup tasks -->
-    <target name="db.create" description="(Re-)Initialize a new flexive database with the given name. The database connection properties are retrieved from database.properties.">
+    <target name="db.create"
+            description="(Re-)Initialize a new flexive database with the given name. The database connection properties are retrieved from database.properties."
+            depends="db.prepare">
         <echo taskname="flexive">Warning: this tool does not check if a schema of the given name
 already exists. When you enter an existing database schema name,
 you will lose all data stored in the schema.
@@ -10,13 +29,16 @@ you will lose all data stored in the schema.
 If you reset the database of a running flexive application,
 you must shutdown flexive before the update and then restart flexive.
 
+[fleXive] is using ${database.vendor} database settings... (this can be changed in database.properties)            
         </echo>
         <input taskname="flexive" addproperty="schema.name" defaultvalue="flexive"
                message="Please enter the database schema you want to create or reset:"/>
         <division-setup database="${schema.name}"/>
     </target>
 
-    <target name="db.config.create" description="(Re-)Initialize the global division configuration database. The database connection properties are retrieved from database.properties.">
+    <target name="db.config.create"
+            description="(Re-)Initialize the global division configuration database. The database connection properties are retrieved from database.properties."
+            depends="db.prepare">
         <globalconfig-setup/>
     </target>
 

@@ -545,7 +545,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
      */
     public List<Workflow> loadWorkflows(Connection con, FxEnvironment environment) throws FxLoadException {
         Statement stmt = null;
-        final String sql = "SELECT ID, NAME, DESCRIPTION FROM " + TBL_WORKFLOW;
+        final String sql = "SELECT ID, NAME, DESCRIPTION FROM " + TBL_WORKFLOW + " ORDER BY ID";
         try {
             // Create the new workflow instance
             stmt = con.createStatement();
@@ -584,7 +584,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
             // Read all stepDefinitions from the database
             stmt = con.createStatement();
             //                                             1  2    3
-            final ResultSet rs = stmt.executeQuery("SELECT ID,NAME,UNIQUE_TARGET FROM " + TBL_STEPDEFINITION);
+            final ResultSet rs = stmt.executeQuery("SELECT ID,NAME,UNIQUE_TARGET FROM " + TBL_STEPDEFINITION + " ORDER BY ID");
             ArrayList<StepDefinition> tmp = new ArrayList<StepDefinition>(10);
             final Map<Long, FxString[]> labels = Database.loadFxStrings(con, TBL_STEPDEFINITION, "name");
 
@@ -614,7 +614,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
         Statement stmt = null;
         //                                      1      2               3                4
         final String sql = "SELECT DISTINCT stp.ID, stp.WORKFLOW, stp.STEPDEF,stp.ACL " +
-                "FROM " + TBL_STEP + " stp";
+                "FROM " + TBL_STEP + " stp ORDER BY stp.ID";
         try {
             // Load all steps in the database
             stmt = con.createStatement();

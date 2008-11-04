@@ -96,7 +96,7 @@ public final class FxDBAuthentication {
                     "FROM " + TBL_ACCOUNTS + " a " +
                     "LEFT JOIN " +
                     " (SELECT ID,ISLOGGEDIN,LAST_LOGIN,LAST_LOGIN_FROM,FAILED_ATTEMPTS,AUTHSRC FROM " + TBL_ACCOUNT_DETAILS +
-                    " WHERE APPLICATION=?) d ON a.ID=d.ID WHERE a.LOGIN_NAME=?";
+                    " WHERE APPLICATION=?) d ON a.ID=d.ID WHERE UPPER(a.LOGIN_NAME)=UPPER(?)";
             ps = con.prepareStatement(curSql);
             ps.setString(1, inf.getApplicationId());
             ps.setString(2, username);

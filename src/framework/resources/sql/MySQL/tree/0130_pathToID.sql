@@ -1,3 +1,4 @@
+-- Get the id of a tree path's leaf
 drop function if exists tree_pathToID|
 Create function tree_pathToID(_startNode INTEGER UNSIGNED,_path text,_live boolean)
 returns INTEGER UNSIGNED DETERMINISTIC READS SQL DATA

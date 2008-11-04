@@ -1,0 +1,85 @@
+
+<!--
+ JBoss Datasource Configuration
+
+ See http://www.redhat.com/docs/manuals/jboss/jboss-eap-4.3/doc/Server_Configuration_Guide/html/Connectors_on_JBoss-Configuring_JDBC_DataSources.html
+ for detailed configuration infos
+-->
+<datasources>
+
+    <!--
+        transactional datasource, as configured in the global configuration
+    -->
+    <xa-datasource>
+        <jndi-name>jdbc/flexiveDivision1</jndi-name>
+        <xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
+        <!-- Note: "&amp;" has to be used instead of "&" for parameters -->
+        <xa-datasource-property name="URL">jdbc:h2:tcp://localhost:9092/~/flexive;SCHEMA=flexive;LOCK_TIMEOUT=10000</xa-datasource-property>
+        <user-name>sa</user-name>
+        <password></password>
+
+        <transaction-isolation>TRANSACTION_READ_COMMITTED</transaction-isolation>
+        <no-tx-separate-pools/>
+        <!-- This disables transaction interleaving (which BTW, most DB vendors don't support) -->
+        <track-connection-by-tx/>
+        <isSameRM-override-value>false</isSameRM-override-value>
+
+        <!--pooling parameters-->
+        <min-pool-size>5</min-pool-size>
+        <max-pool-size>20</max-pool-size>
+        <blocking-timeout-millis>5000</blocking-timeout-millis>
+        <idle-timeout-minutes>15</idle-timeout-minutes>
+
+        <!-- If you supply the usr/pw from a JAAS login module -->
+        <security-domain/>
+    </xa-datasource>
+
+    <!--
+        non-transactional datasource for database structure patches, Quartz, etc.
+        As per convention, non-transactional datasources have the same name like
+        transactional but use the suffix "NoTX"
+    -->
+    <no-tx-datasource>
+        <jndi-name>jdbc/flexiveDivision1NoTX</jndi-name>
+        <driver-class>org.h2.Driver</driver-class>
+        <!-- Note: "&amp;" has to be used instead of "&" for parameters -->
+        <connection-url>jdbc:h2:tcp://localhost:9092/~/flexive;SCHEMA=flexive;LOCK_TIMEOUT=10000;LOCK_MODE=0</connection-url>
+        <user-name>sa</user-name>
+        <password></password>
+
+        <!--pooling parameters-->
+        <min-pool-size>5</min-pool-size>
+        <max-pool-size>20</max-pool-size>
+        <blocking-timeout-millis>5000</blocking-timeout-millis>
+        <idle-timeout-minutes>15</idle-timeout-minutes>
+
+        <!-- If you supply the usr/pw from a JAAS login module -->
+        <security-domain/>
+    </no-tx-datasource>
+
+    <xa-datasource>
+        <jndi-name>jdbc/flexiveConfiguration</jndi-name>
+        <xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
+        <!-- Note: "&amp;" has to be used instead of "&" for parameters -->
+        <xa-datasource-property name="URL">jdbc:h2:tcp://localhost:9092/~/flexiveConfiguration</xa-datasource-property>
+        <user-name>sa</user-name>
+        <password></password>
+
+        <transaction-isolation>TRANSACTION_READ_COMMITTED</transaction-isolation>
+        <no-tx-separate-pools/>
+        <!-- This disables transaction interleaving (which BTW, most DB vendors don't support) -->
+        <track-connection-by-tx/>
+        <isSameRM-override-value>false</isSameRM-override-value>
+
+        <!--pooling parameters-->
+        <min-pool-size>5</min-pool-size>
+        <max-pool-size>20</max-pool-size>
+        <blocking-timeout-millis>5000</blocking-timeout-millis>
+        <idle-timeout-minutes>15</idle-timeout-minutes>
+
+        <!-- If you supply the usr/pw from a JAAS login module -->
+        <security-domain/>
+    </xa-datasource>
+
+</datasources>
+

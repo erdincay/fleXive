@@ -1,0 +1,1 @@
+-- dummy stored procedure script, needed for build files

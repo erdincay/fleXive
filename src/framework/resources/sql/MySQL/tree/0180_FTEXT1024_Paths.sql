@@ -18,7 +18,7 @@ BEGIN
   DECLARE _path text;
   DECLARE done BOOLEAN DEFAULT FALSE;
   DECLARE curLive CURSOR FOR 
-     select tree_FTEXT1024_Chain(id,_lang,_tprop,true) chain from FXS_TREE where ref=_contentId order by chain;
+     select tree_FTEXT1024_Chain(id,_lang,_tprop,true) chain from FXS_TREE_LIVE where ref=_contentId order by chain;
   DECLARE curMax CURSOR FOR 
      select tree_FTEXT1024_Chain(id,_lang,_tprop,false) chain from FXS_TREE where ref=_contentId order by chain;
   DECLARE CONTINUE HANDLER FOR SQLSTATE '02000' SET done = TRUE;

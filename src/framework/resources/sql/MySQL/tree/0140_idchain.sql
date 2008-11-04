@@ -1,3 +1,4 @@
+-- Get a chain of id's for the given node (from the root node) like /1/4/42 for node 42
 drop function if exists tree_idchain|
 Create function tree_idchain(_nodeId INTEGER UNSIGNED,live boolean)
 returns text deterministic reads sql data

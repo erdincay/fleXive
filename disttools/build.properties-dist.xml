@@ -12,8 +12,8 @@
     <property name="applications.dir" value="${dist.basedir}/applications" description="Directory to add compiled flexive applications"/>
 
     <property name="flexive.ant.jar" value="${dist.lib.dir}/flexive-ant.jar"/>
-    <property name="mysql.src.dir" value="${dist.basedir}/lib/resources/sql/mysql"/>
-    <property name="mysql.classpathref" value="dist.path"/>
+    <property name="database.src.dir" value="${dist.basedir}/lib/resources/sql/"/>
+    <property name="database.classpathref" value="dist.path"/>
 
     <!-- Component/project source and build paths -->
     <property name="build.dir" value="${basedir}/build"/>

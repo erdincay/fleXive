@@ -1868,7 +1868,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 return rs.getInt(1);
             throw new FxCreateException("ex.structure.position.failed", typeId, parentGroupAssignment == null ? FxAssignment.NO_PARENT : parentGroupAssignment.getId(), desiredPos);
         }
-        sql.append("SELECT IF((SELECT COUNT(ID) FROM ").append(TBL_STRUCT_ASSIGNMENTS).
+        sql.append("SELECT ").append(Database.getIfFunction()).append("((SELECT COUNT(ID) FROM ").append(TBL_STRUCT_ASSIGNMENTS).
                 //                             1                 2         3
                         append(" WHERE TYPEDEF=? AND PARENTGROUP=? AND POS=?)>0,(SELECT IFNULL(MAX(POS)+1,0) FROM ").
                 //                                                            4                 5  6

@@ -152,7 +152,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                     "MODIFIED_BY,MODIFIED_AT FROM " + TBL_ACCOUNTS +
                     " WHERE " +
                     (loginName != null
-                            ? "LOGIN_NAME='" + loginName + "'"
+                            ? "UPPER(LOGIN_NAME)='" + loginName.toUpperCase() + "'"
                             : "") +
                     (accountId != null
                             ? ((loginName != null) ? " AND " : "") + "ID=" + accountId

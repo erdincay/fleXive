@@ -1,3 +1,4 @@
+-- Get the path (excluding the root node) for a node
 drop function if exists tree_idToPath|
 Create function tree_idToPath(nodeId INTEGER UNSIGNED,live boolean)
 returns text deterministic reads sql data

@@ -33,8 +33,8 @@ package com.flexive.core.search;
 
 import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
-import com.flexive.core.search.mysql.MySQLDataFilter;
-import com.flexive.core.search.mysql.MySQLDataSelector;
+import com.flexive.core.search.genericSQL.GenericSQLDataFilter;
+import com.flexive.core.search.genericSQL.GenericSQLDataSelector;
 import com.flexive.shared.*;
 import com.flexive.shared.configuration.DBVendor;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -255,7 +255,7 @@ public class SqlSearch {
             selectSql = ds.build(con);
 
             stmt = con.createStatement();
-            stmt.executeUpdate("SET @rownr=1;");
+            stmt.executeUpdate("SET @rownr=1");
             stmt.close();
 
             stmt = con.createStatement();
@@ -384,7 +384,7 @@ public class SqlSearch {
         } catch (Throwable t) {
             throw new FxSqlSearchException(LOG, t, "ex.sqlSearch.err.failedToBuildBriefcase", bcd.getName());
         } finally {
-            Database.closeObjects(MySQLDataSelector.class, null, stmt);
+            Database.closeObjects(SqlSearch.class, null, stmt);
         }
     }
 
@@ -399,8 +399,9 @@ public class SqlSearch {
         try {
             vendor = Database.getDivisionData().getDbVendor();
             switch (vendor) {
+                case H2:
                 case MySQL:
-                    return new MySQLDataSelector(this);
+                    return new GenericSQLDataSelector(this);
                 default:
                     throw new FxSqlSearchException(LOG, "ex.db.selector.undefined", vendor);
             }
@@ -421,8 +422,9 @@ public class SqlSearch {
         try {
             vendor = Database.getDivisionData().getDbVendor();
             switch (vendor) {
+                case H2:
                 case MySQL:
-                    return new MySQLDataFilter(con, this);
+                    return new GenericSQLDataFilter(con, this);
                 default:
                     throw new FxSqlSearchException(LOG, "ex.db.filter.undefined", vendor);
             }

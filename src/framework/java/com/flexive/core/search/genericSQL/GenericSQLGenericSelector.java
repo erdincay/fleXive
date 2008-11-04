@@ -29,7 +29,7 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.core.search.mysql;
+package com.flexive.core.search.genericSQL;
 
 import com.flexive.core.Database;
 import com.flexive.core.search.FieldSelector;
@@ -55,14 +55,14 @@ import java.util.HashMap;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-class MySQLGenericSelector implements FieldSelector {
-    private static final Log LOG = LogFactory.getLog(MySQLGenericSelector.class);
+class GenericSQLGenericSelector implements FieldSelector {
+    private static final Log LOG = LogFactory.getLog(GenericSQLGenericSelector.class);
 
     private final Map<String, FxDataType> columns = new HashMap<String, FxDataType>();
     private final String tableName;
     private final String linksOn;
 
-    protected MySQLGenericSelector(String tableName, String linksOn) {
+    protected GenericSQLGenericSelector(String tableName, String linksOn) {
         FxSharedUtils.checkParameterNull(tableName, "tableName");
         FxSharedUtils.checkParameterNull(linksOn, "linksOn");
         Connection con = null;
@@ -123,7 +123,7 @@ class MySQLGenericSelector implements FieldSelector {
             LOG.error(ex.getMessage(), ex);
             throw ex.asRuntimeException();
         } finally {
-            Database.closeObjects(MySQLGenericSelector.class, con, stmt);
+            Database.closeObjects(GenericSQLGenericSelector.class, con, stmt);
         }
     }
 

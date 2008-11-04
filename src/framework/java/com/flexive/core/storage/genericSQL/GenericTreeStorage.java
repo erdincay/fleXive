@@ -35,6 +35,7 @@ import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.TreeStorage;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.*;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.content.*;
@@ -391,8 +392,8 @@ public abstract class GenericTreeStorage implements TreeStorage {
     protected void clearDirtyFlag(Connection con, FxTreeMode mode, long nodeId) throws FxUpdateException {
         PreparedStatement ps = null;
         try {
-            //                                                                 1                                            2
-            ps = con.prepareStatement("UPDATE " + getTable(mode) + " SET DIRTY=?,MODIFIED_AT=UNIX_TIMESTAMP()*1000 WHERE ID=?");
+            //                                                                 1                                                              2
+            ps = con.prepareStatement("UPDATE " + getTable(mode) + " SET DIRTY=?,MODIFIED_AT=" + Database.getTimestampFunction() + " WHERE ID=?");
             ps.setBoolean(1, false); //live tree is never dirty
             ps.setLong(2, nodeId);
             ps.executeUpdate();
@@ -419,8 +420,8 @@ public abstract class GenericTreeStorage implements TreeStorage {
     protected void flagDirty(Connection con, FxTreeMode mode, long nodeId) throws FxUpdateException {
         PreparedStatement ps = null;
         try {
-            //                                                                 1                                            2
-            ps = con.prepareStatement("UPDATE " + getTable(mode) + " SET DIRTY=?,MODIFIED_AT=UNIX_TIMESTAMP()*1000 WHERE ID=?");
+            //                                                                 1                                                              2
+            ps = con.prepareStatement("UPDATE " + getTable(mode) + " SET DIRTY=?,MODIFIED_AT=" + Database.getTimestampFunction() + " WHERE ID=?");
             ps.setBoolean(1, mode != FxTreeMode.Live); //live tree is never dirty
             ps.setLong(2, nodeId);
             ps.executeUpdate();
@@ -938,7 +939,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
             wipeTree(mode, stmt, rootPK);
 
             //reset sequencer
-            stmt.executeUpdate("UPDATE " + DatabaseConst.TBL_SEQUENCE + " SET ID=1 WHERE NAME='" + mode.getSequencer().getSequencerName() + "'");
+            StorageManager.getSequencerStorage().setSequencerId(mode.getSequencer().getSequencerName(), 1);
             if (mode == FxTreeMode.Live) {
                 //flag all edit nodes back to dirty
                 stmt.executeUpdate("UPDATE " + getTable(FxTreeMode.Edit) + " SET DIRTY=TRUE WHERE ID<>" + ROOT_NODE);
@@ -999,7 +1000,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
 
             final String INSIDE_NODE = " LFT>=" + nodeInfo.getLeft() + " AND RGT<=" + nodeInfo.getRight() + " ";
             long childNodeDelta;
-            stmt.addBatch("SET FOREIGN_KEY_CHECKS=0");
+            stmt.addBatch(Database.getReferentialIntegrityChecksStatement(false));
             List<FxPK> references = new ArrayList<FxPK>(50);
             UserTicket ticket = FxContext.getUserTicket();
 
@@ -1061,7 +1062,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 stmt.addBatch("UPDATE " + getTable(mode) + " SET DIRTY=TRUE WHERE ID=" + nodeInfo.getParentId());
             }
 
-            stmt.addBatch("SET FOREIGN_KEY_CHECKS=1");
+            stmt.addBatch(Database.getReferentialIntegrityChecksStatement(true));
             if (mode == FxTreeMode.Live && exists(con, FxTreeMode.Edit, nodeId)) {
                 //check if a node with the same id that has been removed in the live tree exists in the edit tree,
                 //the node and all its children will be flagged as dirty in the edit tree
@@ -1128,7 +1129,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
         // Set the data
         PreparedStatement ps = null;
         try {
-            ps = con.prepareStatement("UPDATE " + getTable(mode) + " SET TEMPLATE=?,DIRTY=TRUE,MODIFIED_AT=UNIX_TIMESTAMP()*1000 WHERE ID=" + nodeId);
+            ps = con.prepareStatement("UPDATE " + getTable(mode) + " SET TEMPLATE=?,DIRTY=TRUE,MODIFIED_AT=" + Database.getTimestampFunction() + " WHERE ID=" + nodeId);
             if (data == null)
                 ps.setNull(1, java.sql.Types.VARCHAR);
             else
@@ -1152,12 +1153,12 @@ public abstract class GenericTreeStorage implements TreeStorage {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            stmt.addBatch("SET FOREIGN_KEY_CHECKS=0");
+            stmt.addBatch(Database.getReferentialIntegrityChecksStatement(false));
             stmt.addBatch("DELETE FROM " + getTable(FxTreeMode.Live));
-            stmt.addBatch("INSERT INTO " + getTable(FxTreeMode.Live) + " (SELECT * FROM " + getTable(mode) + ")");
+            stmt.addBatch("INSERT INTO " + getTable(FxTreeMode.Live) + " SELECT * FROM " + getTable(mode));
             stmt.addBatch("UPDATE " + getTable(mode) + " SET DIRTY=FALSE");
             stmt.addBatch("UPDATE " + getTable(FxTreeMode.Live) + " SET DIRTY=FALSE");
-            stmt.addBatch("SET FOREIGN_KEY_CHECKS=1");
+            stmt.addBatch(Database.getReferentialIntegrityChecksStatement(true));
             stmt.executeBatch();
         } catch (Throwable t) {
             throw new FxTreeException(LOG, "ex.tree.activate.all.failed", mode.name(), t.getMessage());

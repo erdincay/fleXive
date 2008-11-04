@@ -23,6 +23,8 @@
         <fileset dir="extlib" includes="**/*.jar"/>
     </path>
 
+    <taskdef name="groovy" classname="org.codehaus.groovy.ant.Groovy" classpathref="lib.path"/>
+
     <target name="check" description="Checks if the distribution contains all required files">
         <checkAvailable file="${template-component.dir}"/>
     </target>
@@ -37,12 +39,12 @@ project.create
 component.create
     Creates a new flexive UI component directory.
 
-db.create
+db.create   (using ${database.vendor} database)
     Create or reset the database schema of a flexive division.
     Warning: if the schema already exists, it will be dropped (i.e. you will lose all data
     stored in the schema).
 
-db.config.create
+db.config.create   (using ${database.vendor} database)
     Create or reset the global flexive configuration schema.
 
 ear
@@ -51,6 +53,8 @@ ear
 
 glassfish.libs
     Copies libraries needed for Glassfish compatibility to a directory]]>
+
+[fleXive] is using ${database.vendor} database settings... (this can be changed in database.properties)            
         </echo>
 
         <input message="Please enter a target name, or quit to exit:" addproperty="info.targetname"/>

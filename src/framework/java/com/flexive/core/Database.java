@@ -151,10 +151,21 @@ public final class Database {
     }
 
     /**
+     * Returns the non-transactional data source for the requested division.
+     *
+     * @param division the division
+     * @return the non-transactional data source for the requested division
+     * @throws SQLException if a DB error occured
+     */
+    public static DataSource getNonTXDataSource(int division) throws SQLException {
+        return getDataSource(division, false);
+    }
+
+    /**
      * Retrieves a database connection.
      *
      * @param divisionId the division id
-     * @param useTX request transaction support?
+     * @param useTX      request transaction support?
      * @return a database connection
      * @throws SQLException If no connection could be retrieved
      */
@@ -182,7 +193,7 @@ public final class Database {
                     // else: get data source from global configuration
                     GlobalConfigurationEngine globalConfiguration = EJBLookup.getGlobalConfigurationEngine();
                     finalDsName = globalConfiguration.getDivisionData(divisionId).getDataSource();
-                    if( !useTX )
+                    if (!useTX)
                         finalDsName += NO_TX_SUFFIX;
                 }
                 LOG.info("Looking up datasource for division " + divisionId + ": " + finalDsName);
@@ -191,9 +202,9 @@ public final class Database {
                     dataSource = (DataSource) c.lookup(finalDsName);
                 } catch (NamingException e) {
                     String name = finalDsName;
-                    if( name.startsWith("jdbc/"))
+                    if (name.startsWith("jdbc/"))
                         name = name.substring(5);
-                    Object o = c.lookup("jca:/console.dbpool/"+name+"/JCAManagedConnectionFactory/"+name);
+                    Object o = c.lookup("jca:/console.dbpool/" + name + "/JCAManagedConnectionFactory/" + name);
                     try {
                         dataSource = (DataSource) o.getClass().getMethod("$getResource").invoke(o);
                     } catch (Exception ex) {
@@ -257,6 +268,67 @@ public final class Database {
             LOG.error(sErr);
             throw new SQLException(sErr);
         }
+    }
+
+    /**
+     * Get a database vendor specific timestamp of the current time in milliseconds as Long
+     *
+     * @return database vendor specific timestamp of the current time in milliseconds as Long
+     */
+    public static String getTimestampFunction() {
+        try {
+            switch (getDivisionData().getDbVendor()) {
+                case MySQL:
+                    return "UNIX_TIMESTAMP()*1000";
+                case H2:
+                    return "TIMEMILLIS(NOW())";
+            }
+        } catch (SQLException e) {
+            LOG.error(e);
+        }
+        //default fallback
+        return "UNIX_TIMESTAMP()*1000";
+    }
+
+    /**
+     * Get a database vendor specific "IF" function
+     *
+     * @return database vendor specific "IF" function
+     */
+    public static String getIfFunction() {
+        try {
+            switch (getDivisionData().getDbVendor()) {
+                case MySQL:
+                    return "IF";
+                case H2:
+                    return "CASEWHEN";
+            }
+        } catch (SQLException e) {
+            LOG.error(e);
+        }
+        //default fallback
+        return "IF";
+    }
+
+    /**
+     * Get the database vendor specific statement to enable or disable referential integrity checks
+     *
+     * @param enable enable or disable checks?
+     * @return database vendor specific statement to enable or disable referential integrity checks
+     */
+    public static String getReferentialIntegrityChecksStatement(boolean enable) {
+        try {
+            switch (getDivisionData().getDbVendor()) {
+                case MySQL:
+                    return "SET FOREIGN_KEY_CHECKS=" + (enable ? 1 : 0);
+                case H2:
+                    return "SET REFERENTIAL_INTEGRITY " + (enable ? "TRUE" : "FALSE");
+            }
+        } catch (SQLException e) {
+            LOG.error(e);
+        }
+        //default fallback: nothing
+        return "";
     }
 
     /**
@@ -358,11 +430,15 @@ public final class Database {
             return false;
         }
         try {
-            if (getDivisionData().getDbVendor() == DBVendor.MySQL) {
-                //see http://dev.mysql.com/doc/refman/5.1/en/error-messages-server.html
-                // 1582 Example error: Duplicate entry 'ABSTRACT' for key 'UK_TYPEPROPS_NAME'
-                int sqlErr = ((SQLException) exc).getErrorCode();
-                return (sqlErr == 1062 || sqlErr == 1582);
+            int sqlErr = ((SQLException) exc).getErrorCode();
+            switch (getDivisionData().getDbVendor()) {
+                case MySQL:
+                    //see http://dev.mysql.com/doc/refman/5.1/en/error-messages-server.html
+                    // 1582 Example error: Duplicate entry 'ABSTRACT' for key 'UK_TYPEPROPS_NAME'
+                    return (sqlErr == 1062 || sqlErr == 1582);
+                case H2:
+                    return sqlErr == 23001;
+
             }
         } catch (SQLException e) {
             return false;
@@ -495,7 +571,7 @@ public final class Database {
             while (rs.next()) {
                 final long id = rs.getLong(1);
                 final int lang = rs.getInt(2);
-                final boolean  defLang = hasDefLang && rs.getBoolean(3);
+                final boolean defLang = hasDefLang && rs.getBoolean(3);
                 if (lang == FxLanguage.SYSTEM_ID) {
                     continue;   // TODO how to deal with system language? 
                 }

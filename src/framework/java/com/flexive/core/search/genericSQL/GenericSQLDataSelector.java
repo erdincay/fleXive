@@ -30,7 +30,7 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.core.search.mysql;
+package com.flexive.core.search.genericSQL;
 
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.search.*;
@@ -45,7 +45,6 @@ import com.flexive.sqlParser.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.ArrayUtils;
 
 import java.sql.Connection;
 import java.util.*;
@@ -56,8 +55,8 @@ import java.util.*;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class MySQLDataSelector extends DataSelector {
-    private static final Log LOG = LogFactory.getLog(MySQLDataSelector.class);
+public class GenericSQLDataSelector extends DataSelector {
+    private static final Log LOG = LogFactory.getLog(GenericSQLDataSelector.class);
 
     /**
      * All field selectors supported by this implementation
@@ -65,11 +64,11 @@ public class MySQLDataSelector extends DataSelector {
     private static final Map<String, FieldSelector> SELECTORS = new HashMap<String, FieldSelector>();
 
     static {
-        SELECTORS.put("MANDATOR", new MySQLGenericSelector(DatabaseConst.TBL_MANDATORS, "id"));
-        SELECTORS.put("CREATED_BY", new MySQLGenericSelector(DatabaseConst.TBL_ACCOUNTS, "id"));
-        SELECTORS.put("MODIFIED_BY", new MySQLGenericSelector(DatabaseConst.TBL_ACCOUNTS, "id"));
-        SELECTORS.put("ACL", new MySQLACLSelector());
-        SELECTORS.put("STEP", new MySQLStepSelector());
+        SELECTORS.put("MANDATOR", new GenericSQLGenericSelector(DatabaseConst.TBL_MANDATORS, "id"));
+        SELECTORS.put("CREATED_BY", new GenericSQLGenericSelector(DatabaseConst.TBL_ACCOUNTS, "id"));
+        SELECTORS.put("MODIFIED_BY", new GenericSQLGenericSelector(DatabaseConst.TBL_ACCOUNTS, "id"));
+        SELECTORS.put("ACL", new GenericSQLACLSelector());
+        SELECTORS.put("STEP", new GenericSQLStepSelector());
     }
 
     private static final String[] CONTENT_DIRECT_SELECT = {"ID", "VERSION"};
@@ -85,7 +84,7 @@ public class MySQLDataSelector extends DataSelector {
      *
      * @param search the search object
      */
-    public MySQLDataSelector(SqlSearch search) {
+    public GenericSQLDataSelector(SqlSearch search) {
         this.search = search;
     }
 
@@ -186,7 +185,7 @@ public class MySQLDataSelector extends DataSelector {
         // create select columns
         for (String column: INTERNAL_RESULTCOLS) {
             if ("rownr".equals(column)) {
-                columns.add("@rownr:=@rownr+1 rownr");
+                columns.add("@rownr=@rownr+1 rownr");
             } else {
                 columns.add(filterProperties(column));
             }

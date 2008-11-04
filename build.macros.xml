@@ -49,19 +49,21 @@
     </macrodef>
 
     <!-- ==================== Database maintenance macros ==================== -->
-    <macrodef name="sql-call" description="Executes nested SQL statements. The database host, user and password are configured with the properties database.host, database.port, database.username, database.password">
+    <macrodef name="sql-call"
+              description="Executes nested SQL statements. The database host, user and password are configured with the properties database.host, database.port, database.username, database.password">
         <attribute name="database"/>
+        <attribute name="url"/>
         <attribute name="includes" default="N/A"/>
         <attribute name="excludes" default=""/>
         <attribute name="delimiter" default=";"/>
         <element name="args" optional="true" implicit="true"/>
         <sequential >
-            <sql driver="com.mysql.jdbc.Driver" url="jdbc:mysql://${database.host}:${database.port}/@{database}?useUnicode=true&amp;characterEncoding=UTF-8"
+            <sql driver="${database.driver}" url="@{url}"
                 userid="${database.username}" password="${database.password}" delimiter="@{delimiter}">
-                <classpath refid="${mysql.classpathref}"/>
+                <classpath refid="${database.classpathref}"/>
                 <args/>
                 <sort>
-                    <fileset dir="${mysql.src.dir}" includes="@{includes}" excludes="@{excludes}"/>
+                    <fileset dir="${database.src.dir}${database.vendor}" includes="@{includes}" excludes="@{excludes}"/>
                 </sort>
             </sql>
         </sequential>
@@ -70,33 +72,37 @@
     <macrodef name="division-setup" description="Creates all database structures for the given database name">
         <attribute name="database" description="The database name"/>
         <sequential >
-            <sql-call database="mysql">
+            <!-- call with no url parameters to allow schema creation -->
+            <sql-call database="${database.schema.root}" url="${database.url.base}@{database}">
                 <transaction >
                     DROP SCHEMA IF EXISTS @{database};
                     CREATE SCHEMA @{database};
                 </transaction>
             </sql-call>
 
-            <sql-call database="@{database}" includes="*.sql" excludes="SP*.sql"/>
+            <sql-call database="${database.schema.root}" includes="*.sql" excludes="SP*.sql"
+                    url="${database.url.base}@{database}${database.url.parameters}"/>
             <!-- Stored procedures setup -->
-            <sql-call database="@{database}" delimiter="|" includes="SP*.sql"/>
-            <sql-call database="@{database}" delimiter="|" includes="tree/*.sql"/>
+            <sql-call database="@{database}" delimiter="|" includes="SP*.sql"
+                    url="${database.url.base}@{database}${database.url.parameters}"/>
+            <sql-call database="@{database}" delimiter="|" includes="tree/*.sql"
+                    url="${database.url.base}@{database}${database.url.parameters}"/>
 
-            <echo taskname="flexive">Successfully initialized a flexive division at jdbc:mysql://${database.host}:${database.port}/@{database}</echo>
+            <echo taskname="flexive">Successfully initialized a flexive division at ${database.url.base}@{database}</echo>
         </sequential>
     </macrodef>
 
     <macrodef name="globalconfig-setup" description="The global configuration setup.">
         <sequential >
             <!-- Create global configuration -->
-            <sql-call database="mysql">
+            <sql-call database="${database.schema.config}"  url="${database.url.base}flexiveConfiguration">
                 <transaction >
                     DROP SCHEMA IF EXISTS flexiveConfiguration;
                     CREATE SCHEMA flexiveConfiguration;
                 </transaction>
             </sql-call>
-            <sql-call database="flexiveConfiguration" includes="config/*.sql"/>
-            <echo taskname="flexive">Successfully initialized a the flexive configuration database at jdbc:mysql://${database.host}:${database.port}/flexiveConfiguration</echo>
+            <sql-call database="flexiveConfiguration" includes="config/*.sql"  url="${database.url.base}flexiveConfiguration"/>
+            <echo taskname="flexive">Successfully initialized a the flexive configuration database at ${database.url.base}${database.schema.config}</echo>
         </sequential>
     </macrodef>
 

@@ -29,7 +29,7 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.core.search.mysql;
+package com.flexive.core.search.genericSQL;
 
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.search.PropertyEntry;
@@ -39,20 +39,14 @@ import com.flexive.shared.FxContext;
 import com.flexive.sqlParser.Property;
 
 /**
- * MySQL specific workflow step selector
+ * Selector for ACL's
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class MySQLStepSelector extends MySQLGenericSelector {
-    private static final String ML_SEL = "(SELECT def.name FROM " + DatabaseConst.TBL_CONTENT + " ct," + DatabaseConst.TBL_STEP + " step, " +
-            DatabaseConst.TBL_STEPDEFINITION + " def," + DatabaseConst.TBL_STEPDEFINITION + DatabaseConst.ML + " deft" +
-            " WHERE \n" +
-            "ct.id=filter.id AND ct.ver=filter.ver AND step.id=ct.step AND step.stepdef=def.id AND" +
-            " deft.id=def.id AND ";
-
-    public MySQLStepSelector() {
-        super(DatabaseConst.TBL_STEP, "id");
+public class GenericSQLACLSelector extends GenericSQLGenericSelector {
+    public GenericSQLACLSelector() {
+        super(DatabaseConst.TBL_ACLS, "id");
     }
 
     /**
@@ -60,12 +54,15 @@ public class MySQLStepSelector extends MySQLGenericSelector {
      */
     @Override
     public void apply(Property prop, PropertyEntry entry, StringBuffer statement) throws FxSqlSearchException {
-        if ("LABEL".equalsIgnoreCase(prop.getField())) {
+        if ("LABEL".equals(prop.getField())) {
             statement.delete(0, statement.length());
+            String _tbl = DatabaseConst.TBL_ACLS + DatabaseConst.ML;
             final long lang = FxContext.getUserTicket().getLanguage().getId();
             statement.append(("ifnull(\n" +
-                    ML_SEL + "lang=" + lang + " limit 1) ,\n" +
-                    ML_SEL + "deflang=true limit 1) \n" +
+                    "(select acl.label from " + _tbl + " acl, " + DatabaseConst.TBL_CONTENT + " ct where ct.id=filter.id and " +
+                    "ct.ver=filter.ver and ct.acl=acl.id and lang=" + lang + " limit 1) ,\n" +
+                    "(select acl.label from " + _tbl + " acl, " + DatabaseConst.TBL_CONTENT + " ct where ct.id=filter.id and " +
+                    "ct.ver=filter.ver and ct.acl=acl.id and deflang=true limit 1) \n" +
                     ")"));
             entry.overrideDataType(FxDataType.String1024);
             return;

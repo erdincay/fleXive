@@ -195,3 +195,19 @@ if (!project.getTaskDefinitions().containsKey("safeDelete")) {
     if (major > 1 || (major == 1 && minor >= 6))
         properties['isJDK6'] = true;
 }
+
+if (!properties['database.vendor']) {
+    println "Missing database.vendor property in build.properties!"
+    println "You might have an outdated build.properties file. Please copy build.properties.sample to build.properties!"
+    ant.fail
+}
+//setup database properties based on the selected database vendor
+properties['database.host'] = properties['database.'+properties['database.vendor']+'.host']
+properties['database.port'] = properties['database.'+properties['database.vendor']+'.port']
+properties['database.username'] = properties['database.'+properties['database.vendor']+'.username']
+properties['database.password'] = properties['database.'+properties['database.vendor']+'.password']
+properties['database.schema.root'] = properties['database.'+properties['database.vendor']+'.schema.root']
+properties['database.schema.config'] = properties['database.'+properties['database.vendor']+'.schema.config']
+properties['database.driver'] = properties['database.'+properties['database.vendor']+'.driver']
+properties['database.url.base'] = properties['database.'+properties['database.vendor']+'.url.base']
+properties['database.url.parameters'] = properties['database.'+properties['database.vendor']+'.url.parameters']

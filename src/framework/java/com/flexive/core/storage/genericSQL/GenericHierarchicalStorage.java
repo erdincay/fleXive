@@ -34,6 +34,7 @@ package com.flexive.core.storage.genericSQL;
 import com.flexive.core.DatabaseConst;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.LifeCycleInfoImpl;
+import com.flexive.core.Database;
 import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
@@ -202,8 +203,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     protected static final String BINARY_TRANSIT_HEADER = "SELECT FBLOB FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
     //                                                                                     1  2   3             4(handle)5    6                  7                    8                    9       10         11    12
     protected static final String BINARY_TRANSIT = "INSERT INTO " + TBL_CONTENT_BINARY + "(ID,VER,QUALITY,FBLOB,NAME,BLOBSIZE,XMLMETA,CREATED_AT,MIMETYPE,PREVIEW_REF,ISIMAGE,RESOLUTION,WIDTH,HEIGHT,PREV1,PREV1_WIDTH,PREV1_HEIGHT,PREV2,PREV2_WIDTH,PREV2_HEIGHT,PREV3,PREV3_WIDTH,PREV3_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE) " +
-            //      1 2 3       4 5 6       7             8 9 10 11
-            "SELECT ?,?,?,FBLOB,?,?,?,UNIX_TIMESTAMP()*1000,?,PREVIEW_REF,?,?,?,?,PREV1,PREV1_WIDTH,PREV1_HEIGHT,PREV2,PREV2_WIDTH,PREV2_HEIGHT,PREV3,PREV3_WIDTH,PREV3_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
+            //      1 2 3       4 5 6       7                                 8 9 10 11
+            "SELECT ?,?,?,FBLOB,?,?,?," + Database.getTimestampFunction() + ",?,PREVIEW_REF,?,?,?,?,PREV1,PREV1_WIDTH,PREV1_HEIGHT,PREV2,PREV2_WIDTH,PREV2_HEIGHT,PREV3,PREV3_WIDTH,PREV3_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
     //                                                                                                   1              2               3        4              5               6        7              8               9            10           11           12           13
     protected static final String BINARY_TRANSIT_PREVIEWS = "UPDATE " + TBL_BINARY_TRANSIT + " SET PREV1=?, PREV1_WIDTH=?, PREV1_HEIGHT=?, PREV2=?, PREV2_WIDTH=?, PREV2_HEIGHT=?, PREV3=?, PREV3_WIDTH=?, PREV3_HEIGHT=?, PREV1SIZE=?, PREV2SIZE=?, PREV3SIZE=? WHERE BKEY=?";
     protected static final String BINARY_TRANSIT_PREVIEWS_REF = "UPDATE " + TBL_BINARY_TRANSIT + " SET PREVIEW_REF=? WHERE BKEY=?";
@@ -1958,7 +1959,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            stmt.executeUpdate("SET UNIQUE_CHECKS=1");
+            stmt.executeUpdate(Database.getReferentialIntegrityChecksStatement(true));
         } finally {
             if (stmt != null)
                 stmt.close();
@@ -1969,7 +1970,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            stmt.executeUpdate("SET UNIQUE_CHECKS=0");
+            stmt.executeUpdate(Database.getReferentialIntegrityChecksStatement(false));
         } finally {
             if (stmt != null)
                 stmt.close();

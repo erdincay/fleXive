@@ -1,3 +1,5 @@
+-- Get a chain of nodes with their caption from the root node plus additional information
+-- Result format: /<node name>:<nodeId>:<refId>:<typeDefId>/...
 drop function if exists tree_FTEXT1024_Chain|
 Create function tree_FTEXT1024_Chain(_nodeId INTEGER UNSIGNED,_lang INTEGER,_tprop INTEGER UNSIGNED,_live boolean)
 returns text CHARSET UTF8 deterministic reads sql data

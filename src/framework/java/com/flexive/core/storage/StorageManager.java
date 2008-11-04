@@ -35,6 +35,11 @@ import com.flexive.core.Database;
 import com.flexive.core.storage.mySQL.MySQLEnvironmentLoader;
 import com.flexive.core.storage.mySQL.MySQLHierarchicalStorage;
 import com.flexive.core.storage.mySQL.MySQLTreeStorage;
+import com.flexive.core.storage.mySQL.MySQLSequencerStorage;
+import com.flexive.core.storage.h2.H2HierarchicalStorage;
+import com.flexive.core.storage.h2.H2TreeStorage;
+import com.flexive.core.storage.h2.H2EnvironmentLoader;
+import com.flexive.core.storage.h2.H2SequencerStorage;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.configuration.DBVendor;
 import com.flexive.shared.configuration.DivisionData;
@@ -67,6 +72,8 @@ public class StorageManager {
                     switch (vendor) {
                         case MySQL:
                             return MySQLHierarchicalStorage.getInstance();
+                        case H2:
+                            return H2HierarchicalStorage.getInstance();
                         default:
                             throw new FxNotFoundException("ex.db.contentStorage.undefined", vendor, mode);
                     }
@@ -93,6 +100,8 @@ public class StorageManager {
                 switch (data.getDbVendor()) {
                     case MySQL:
                         return MySQLHierarchicalStorage.getInstance();
+                    case H2:
+                        return H2HierarchicalStorage.getInstance();
                     default:
                         throw new FxNotFoundException("ex.db.contentStorage.undefined", data.getDbVendor(), mode);
                 }
@@ -114,6 +123,8 @@ public class StorageManager {
             switch (vendor) {
                 case MySQL:
                     return MySQLTreeStorage.getInstance();
+                case H2:
+                    return H2TreeStorage.getInstance();
                 default:
                     throw new FxNotFoundException("ex.db.treeStorage.undefined", vendor);
             }
@@ -134,8 +145,33 @@ public class StorageManager {
         switch (vendor) {
             case MySQL:
                 return MySQLEnvironmentLoader.getInstance();
+            case H2:
+                return H2EnvironmentLoader.getInstance();
             default:
                 throw new FxNotFoundException("ex.db.environmentLoader.undefined", vendor);
+        }
+    }
+
+    /**
+     * Get concrete tree storage implementation for the used database
+     *
+     * @return TreeStorage
+     * @throws FxNotFoundException if no implementation was found
+     */
+    public static SequencerStorage getSequencerStorage() throws FxNotFoundException {
+        DBVendor vendor;
+        try {
+            vendor = Database.getDivisionData().getDbVendor();
+            switch (vendor) {
+                case MySQL:
+                    return MySQLSequencerStorage.getInstance();
+                case H2:
+                    return H2SequencerStorage.getInstance();
+                default:
+                    throw new FxNotFoundException("ex.db.treeStorage.undefined", vendor);
+            }
+        } catch (SQLException e) {
+            throw new FxNotFoundException(e, "ex.db.vendor.notFound", FxContext.get().getDivisionId(), e);
         }
     }
 }

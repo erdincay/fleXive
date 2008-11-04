@@ -40,7 +40,9 @@ public enum DBVendor {
     /** Unknown SQL database vendor. */
     Unknown(0),
     /** MySQL 5+ */
-    MySQL(1);
+    MySQL(1),
+    /** H2: www.h2database.com */
+    H2(2);
 
     private int id;
 
@@ -67,6 +69,9 @@ public enum DBVendor {
     public static DBVendor getVendor(String dbVendor) {
         if ("MySQL".equals(dbVendor))
             return MySQL;
-        return Unknown;
+        else if("H2".equals(dbVendor))
+            return H2;
+        else
+            return Unknown;
     }
 }

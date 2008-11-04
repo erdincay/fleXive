@@ -43,10 +43,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.commons.lang.SerializationUtils;
 
 import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -360,7 +357,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
             ResultSet rs = stmt.executeQuery();
             while (rs != null && rs.next()) {
                 // retrieve parameters and put them in hashmap
-                parameters.put(rs.getString(1), parameter.getValue(rs.getObject(2)));
+                parameters.put(rs.getString(1), parameter.getValue(rs.getString(2)));
             }
             return parameters;
         } catch (SQLException se) {
@@ -454,7 +451,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
             stmt = getSelectStatement(conn, path, key);
             ResultSet rs = stmt.executeQuery();
             if (rs != null && rs.next()) {
-                return (Serializable) rs.getObject(1);
+                return rs.getString(1);
             } else {
                 String cachePath = getCachePath(path);
                 if (cachePath != null) {

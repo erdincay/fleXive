@@ -231,12 +231,7 @@ public final class DatabaseConst {
      * Tree Base table
      */
     public static final String TBL_TREE = "FXS_TREE";
-    /**
-     * Global sequencer table
-     *
-     * @see com.flexive.shared.interfaces.SequencerEngine
-     */
-    public static final String TBL_SEQUENCE = "FXS_SEQUENCE";
+    
     public static final String TBL_PROPERTY_OPTIONS = "FXS_PROP_OPT";
     public static final String TBL_GROUP_OPTIONS = "FXS_GROUP_OPT";
 

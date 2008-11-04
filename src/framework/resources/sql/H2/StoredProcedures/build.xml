@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+    H2 Stored Procedures Buildfile.
+
+    Builds a jar file containing required stored procedures for the H2 database (www.h2database.com).
+    Include this jar file on database startup.
+
+    @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+    @version $Rev$
+-->
+<project name="H2StoredProcedures" basedir="." default="h2.jar">
+
+    <property name="build.h2sp.base.dir" value="${flexive.base.build.dir}/h2StoredProcedures"/>
+    <property name="build.h2sp.classes.dir" value="${build.h2sp.base.dir}/classes"/>
+
+    <target name="h2.compile">
+        <mkdir dir="${build.h2sp.classes.dir}"/>
+        <javac-call
+                srcdir="${flexive.base.framework.dir}/resources/sql/H2/StoredProcedures"
+                includes="**/*java"
+                destdir="${build.h2sp.classes.dir}">
+			<!--<classpath refid="classpath.build.framework"/>-->
+        </javac-call>
+    </target>
+
+    <target name="h2.jar" depends="h2.compile">
+        <jar jarfile="${flexive.lib.dir}/flexive-h2.jar">
+            <fileset dir="${build.h2sp.classes.dir}">
+                <include name="com/flexive/h2/**/*"/>
+            </fileset>
+        </jar>
+        <delete dir="${build.h2sp.base.dir}"/>
+    </target>
+</project>

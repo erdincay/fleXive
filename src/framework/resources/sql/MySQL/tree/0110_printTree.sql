@@ -1,3 +1,4 @@
+-- deprecated and used for testing purposes only!
 drop function if exists printTree|
 Create function printTree(_lang char(2))
 returns text deterministic reads sql data

@@ -29,7 +29,7 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.core.search.mysql;
+package com.flexive.core.search.genericSQL;
 
 import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
@@ -81,8 +81,8 @@ import java.util.Date;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class MySQLDataFilter extends DataFilter {
-    private static final Log LOG = LogFactory.getLog(MySQLDataFilter.class);
+public class GenericSQLDataFilter extends DataFilter {
+    private static final Log LOG = LogFactory.getLog(GenericSQLDataFilter.class);
 
 //    private static final String NO_MATCH = "(SELECT DISTINCT null id,null ver,null lang FROM dual where 1=2)";
 
@@ -99,7 +99,7 @@ public class MySQLDataFilter extends DataFilter {
     private boolean truncated;
     private Connection con;
 
-    public MySQLDataFilter(Connection con, SqlSearch search) throws FxSqlSearchException {
+    public GenericSQLDataFilter(Connection con, SqlSearch search) throws FxSqlSearchException {
         super(con, search);
         this.con = con;
         final long[] briefcaseIds = getStatement().getBriefcaseFilter();
@@ -140,7 +140,7 @@ public class MySQLDataFilter extends DataFilter {
             } catch (Throwable t) {
                 throw new FxSqlSearchException(LOG, t, "ex.sqlSearch.err.failedToClearTempSearchResult", search.getSearchId());
             } finally {
-                Database.closeObjects(MySQLDataSelector.class, null, stmt);
+                Database.closeObjects(GenericSQLDataSelector.class, null, stmt);
             }
         }
     }
@@ -188,7 +188,7 @@ public class MySQLDataFilter extends DataFilter {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("SQL getResult: \n" + dataSelect + "\n");
             }
-            sql = "INSERT INTO " + search.getCacheTable() + " (" + dataSelect + ")";
+            sql = "INSERT INTO " + search.getCacheTable() + " " + dataSelect;
             stmt = getConnection().createStatement();
             stmt.setQueryTimeout(search.getParams().getQueryTimeout());
             stmt.executeUpdate(sql);
@@ -200,7 +200,7 @@ public class MySQLDataFilter extends DataFilter {
         } catch (Throwable t) {
             throw new FxSqlSearchException(LOG, t, "ex.sqlSearch.failedToBuildDataFilter", t.getMessage(), search.getQuery());
         } finally {
-            Database.closeObjects(MySQLDataFilter.class, null, stmt);
+            Database.closeObjects(GenericSQLDataFilter.class, null, stmt);
         }
     }
 
@@ -252,7 +252,7 @@ public class MySQLDataFilter extends DataFilter {
         } catch (Throwable t) {
             throw new FxSqlSearchException(LOG, t, "ex.sqlSearch.failedToCountFoundEntries", search.getSearchId());
         } finally {
-            Database.closeObjects(MySQLDataFilter.class, null, stmt);
+            Database.closeObjects(GenericSQLDataFilter.class, null, stmt);
         }
     }
 

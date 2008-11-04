@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.core.storage.genericSQL;
 
+import com.flexive.core.Database;
 import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.FxTreeNodeInfoSpreaded;
 import com.flexive.shared.CacheAdmin;
@@ -504,7 +505,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             ps = con.prepareStatement("INSERT INTO " + getTable(mode) + " (ID,PARENT,DEPTH,DIRTY,REF,LFT,RGT," +
                     "TOTAL_CHILDCOUNT,CHILDCOUNT,NAME,MODIFIED_AT,TEMPLATE) VALUES " +
                     "(" + nci.id + "," + parentNodeId + "," + (parentNode.getDepth() + 1) +
-                    ",?," + nci.reference.getId() + ",?,?,0,0,?,UNIX_TIMESTAMP()*1000,?)");
+                    ",?," + nci.reference.getId() + ",?,?,0,0,?," + Database.getTimestampFunction() + ",?)");
             ps.setBoolean(1, mode != FxTreeMode.Live);
             ps.setBigDecimal(2, left);
             ps.setBigDecimal(3, right);
@@ -740,9 +741,12 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                         "JOIN (SELECT ID FROM " + getTable(FxTreeMode.Live) + " WHERE PARENT=" + nodeId + ") b USING (ID) WHERE b.ID IS NULL");
                 while (rs != null && rs.next()) {
                     long deleteId = rs.getLong(1);
-                    stmt2.addBatch("SET FOREIGN_KEY_CHECKS=0");
-                    stmt2.addBatch("DELETE FROM " + getTable(FxTreeMode.Live) + " WHERE ID=" + deleteId);
-                    stmt2.addBatch("SET FOREIGN_KEY_CHECKS=1");
+                    stmt2.addBatch(Database.getReferentialIntegrityChecksStatement(false));
+                    try {
+                        stmt2.addBatch("DELETE FROM " + getTable(FxTreeMode.Live) + " WHERE ID=" + deleteId);
+                    } finally {
+                        stmt2.addBatch(Database.getReferentialIntegrityChecksStatement(true));
+                    }
                 }
                 stmt2.addBatch("UPDATE " + getTable(FxTreeMode.Live) + " SET MODIFIED_AT=" + System.currentTimeMillis());
                 stmt2.executeBatch();
@@ -861,12 +865,15 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
      */
     @Override
     protected void wipeTree(FxTreeMode mode, Statement stmt, FxPK rootPK) throws SQLException {
-        stmt.execute("SET FOREIGN_KEY_CHECKS=0");
-        stmt.executeUpdate("DELETE FROM " + getTable(mode));
-        stmt.executeUpdate("INSERT INTO " + getTable(mode) + " (ID,NAME,MODIFIED_AT,DIRTY,PARENT,DEPTH,CHILDCOUNT,TOTAL_CHILDCOUNT,REF,TEMPLATE,LFT,RGT) " +
-                "VALUES (" + ROOT_NODE + ",'Root',UNIX_TIMESTAMP()*1000,FALSE,NULL,1,0,0," + rootPK.getId() +
-                ",NULL,1," + MAX_RIGHT + ")");
-        stmt.executeUpdate("SET FOREIGN_KEY_CHECKS=1");
+        stmt.execute(Database.getReferentialIntegrityChecksStatement(false));
+        try {
+            stmt.executeUpdate("DELETE FROM " + getTable(mode));
+            stmt.executeUpdate("INSERT INTO " + getTable(mode) + " (ID,NAME,MODIFIED_AT,DIRTY,PARENT,DEPTH,CHILDCOUNT,TOTAL_CHILDCOUNT,REF,TEMPLATE,LFT,RGT) " +
+                    "VALUES (" + ROOT_NODE + ",'Root'," + Database.getTimestampFunction() + ",FALSE,NULL,1,0,0," + rootPK.getId() +
+                    ",NULL,1," + MAX_RIGHT + ")");
+        } finally {
+            stmt.executeUpdate(Database.getReferentialIntegrityChecksStatement(true));
+        }
     }
 
     /**
