@@ -114,8 +114,7 @@ flexive.util = new function() {
     this.JSON_RPC_CLIENT = null;
     this.getJsonRpc = function() {
         if (this.JSON_RPC_CLIENT == null) {
-            // TODO retrieve context path
-            this.JSON_RPC_CLIENT = new JSONRpcClient("/flexive/adm/JSON-RPC");
+            this.JSON_RPC_CLIENT = new JSONRpcClient(flexive.baseUrl + "/adm/JSON-RPC");
         }
         return this.JSON_RPC_CLIENT;
     }
