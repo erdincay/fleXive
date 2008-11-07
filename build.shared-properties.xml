@@ -10,6 +10,7 @@
 
     <property name="flexive.base.build.dir" value="${flexive.basedir}/build"/>
     <property name="flexive.build.framework.jar.dir" value="${flexive.base.build.dir}/framework/jar"/>
+    <property name="flexive.build.repo.dir" value="${flexive.base.build.dir}/repository"/>
 
     <property name="flexive.dist.dir" value="${flexive.basedir}/flexive-dist"/>
     <property name="flexive.dist.lib.dir" value="${flexive.dist.dir}/lib"/>

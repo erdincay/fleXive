@@ -165,7 +165,7 @@ public class FxSummaryInformation implements Serializable {
         charCount = si.getCharCount();
         comments = si.getComments();
         createdAt = si.getCreateDateTime();
-        editTime = si.getEditTime();
+        editTime = new Date(si.getEditTime());
         keywords = si.getKeywords();
         lastModifiedBy = si.getLastAuthor();
         lastPrintedAt = si.getLastPrinted();

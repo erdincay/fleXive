@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<project name="flexive" default="all" basedir=".">
+<project name="flexive" default="all" basedir="." xmlns:artifact="urn:maven-artifact-ant">
 
 	<!-- ========================== properties ========================== -->
 
@@ -82,6 +82,9 @@
 	<!-- ========================== tasks / macros ====================== -->
     <taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc" classpathref="classpath.build.framework"/>
     <taskdef name="groovy" classname="org.codehaus.groovy.ant.Groovy" classpathref="classpath.build.framework"/>
+    <typedef resource="org/apache/maven/artifact/ant/antlib.xml"
+               uri="urn:maven-artifact-ant"
+               classpathref="classpath.build.framework" />
 
     <!-- ========================== imports ============================= -->
 	<import file="build.tests.xml"/>
@@ -691,6 +694,45 @@ database.vendor=MySQL
             <fileset file="${flexive.base.build.dir}/flexive-srcOnly.zip"/>
         </copy>
     </target>
+
+
+    <target name="maven.deploy" description="Publish to Maven repository set in maven.dist.repo" depends="jar.all">
+        <maven-deploy file="${flexive.build.framework.jar.dir}/flexive-ejb.jar" pom="flexive-ejb.pom"/>
+        <maven-deploy file="${flexive.build.framework.jar.dir}/flexive-shared.jar" pom="flexive-shared.pom"/>
+
+        <maven-deploy file="${build.ui.jar.dir}/flexive-web-shared.jar" pom="flexive-web-shared.pom"/>
+        <maven-deploy file="${build.ui.jar.dir}/flexive-plugin-jsf-core.jar" pom="flexive-plugin-jsf-core.pom"/>
+        <maven-deploy file="${build.ui.jar.dir}/flexive-plugin-jsf-globalconfig.jar" pom="flexive-plugin-jsf-globalconfig.pom"/>
+        <maven-deploy file="${build.ui.jar.dir}/flexive-plugin-jsf-feedbackPlugin.jar" pom="flexive-plugin-jsf-feedback.pom"/>
+        <maven-deploy file="${build.ui.jar.dir}/flexive-backend.jar" pom="flexive-backend.pom"/>
+
+        <maven-deploy file="${flexive.lib.dir}/flexive-extractor.jar" pom="flexive-extractor.pom"/>
+        <maven-deploy file="${flexive.lib.dir}/flexive-sqlParser.jar" pom="flexive-sqlParser.pom"/>
+        <maven-deploy file="${flexive.lib.dir}/fxStream.jar" pom="fxStream.pom"/>
+
+        <maven-deploy file="${flexive.base.build.dir}/ui/flexive.war" pom="flexive-backend-war.pom"/>
+
+        <!-- Also package libraries that are not available on common public servers -->
+        <maven-deploy file="${flexive.lib.dir}/sanselan.jar" pom="sanselan.pom"/>
+    </target>
+
+    <macrodef name="maven-deploy">
+        <attribute name="file"/>
+        <attribute name="pom"/>
+        <sequential>
+            <copy file="${flexive.resources.framework.dir}/maven/@{pom}" todir="${flexive.base.build.dir}">
+                <filterset>
+                    <filter token="FLEXIVE_VERSION" value="${flexive.version}"/>
+                </filterset>
+            </copy>
+            <artifact:deploy file="@{file}">
+                <remoterepository url="${maven.dist.repo}">
+                    <snapshots updatePolicy="always"/>
+                </remoterepository>
+                <pom file="${flexive.base.build.dir}/@{pom}"/>
+            </artifact:deploy>
+        </sequential>
+    </macrodef>
 
     <target name="dist.package">
         <!-- Create flexive distribution w/ backend and examples ZIP file -->

@@ -15,6 +15,9 @@ jboss.embedded.path=${user.home}/as/jboss-embeddable/
 profile.netbeans.root=/opt/netbeans-5.0/profiler1
 profile.netbeans.agent=lib/deployed/jdk15/linux/libprofilerinterface.so
 
+# Maven repository path
+maven.dist.repo.snapshot=/var/repo/flexive
+
 # This is the database configuration file used by the flexive setup tasks.
 #
 # Enter the settings for your database server connection to be used for development.

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.flexive</groupId>
+    <artifactId>flexive-backend</artifactId>
+    <version>@FLEXIVE_VERSION@</version>
+    <description>Flexive backend administration.</description>
+    <packaging>jar</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-backend-war</artifactId>
+            <version>@FLEXIVE_VERSION@</version>
+            <type>war</type>
+            <optional>false</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-plugin-jsf-core</artifactId>
+            <version>@FLEXIVE_VERSION@</version>
+            <optional>false</optional>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.richfaces.ui</groupId>
+            <artifactId>richfaces-ui</artifactId>
+            <version>3.2.2.GA</version>
+            <optional>false</optional>
+        </dependency>
+    </dependencies>
+</project>
