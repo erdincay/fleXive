@@ -74,9 +74,11 @@ public final class Database {
     private static DataSource globalDataSource = null;
     private static DataSource testDataSource = null;
     // cached data source references - index = division ID
-    private static DataSource[] dataSources = new DataSource[MAX_DIVISIONS];
+    private static final DataSource[] dataSources = new DataSource[MAX_DIVISIONS];
     // cached data sources without transaction support
-    private static DataSource[] dataSourcesNoTX = new DataSource[MAX_DIVISIONS];
+    private static final DataSource[] dataSourcesNoTX = new DataSource[MAX_DIVISIONS];
+    // cached data source by (resource) name
+    private static final Map<String, DataSource> dataSourcesByName = new HashMap<String, DataSource>();
 
     /**
      * Empty default constructor.
@@ -185,7 +187,6 @@ public final class Database {
             // Try to obtain a connection
             String finalDsName = null;
             try {
-                Context c = EJBLookup.getInitialContext();
                 if (divisionId == DivisionData.DIVISION_GLOBAL) {
                     // Special case: global config database
                     finalDsName = DS_GLOBAL_CONFIG;
@@ -197,23 +198,7 @@ public final class Database {
                         finalDsName += NO_TX_SUFFIX;
                 }
                 LOG.info("Looking up datasource for division " + divisionId + ": " + finalDsName);
-                DataSource dataSource;
-                try {
-                    dataSource = (DataSource) c.lookup(finalDsName);
-                } catch (NamingException e) {
-                    String name = finalDsName;
-                    if (name.startsWith("jdbc/"))
-                        name = name.substring(5);
-                    Object o = c.lookup("jca:/console.dbpool/" + name + "/JCAManagedConnectionFactory/" + name);
-                    try {
-                        dataSource = (DataSource) o.getClass().getMethod("$getResource").invoke(o);
-                    } catch (Exception ex) {
-                        String sErr = "Unable to retrieve Connection to [" + finalDsName
-                                + "]: " + ex.getMessage();
-                        LOG.error(sErr);
-                        throw new SQLException(sErr);
-                    }
-                }
+                final DataSource dataSource = getDataSource(finalDsName);
                 if (divisionId == DivisionData.DIVISION_TEST) {
                     testDataSource = dataSource;
                     return testDataSource;
@@ -242,6 +227,39 @@ public final class Database {
                 throw new SQLException(sErr);
             }
         }
+    }
+
+    public static synchronized DataSource getDataSource(String dataSourceName) throws NamingException, SQLException {
+        if (dataSourcesByName.containsKey(dataSourceName)) {
+            return dataSourcesByName.get(dataSourceName);
+        }
+        final Context c = EJBLookup.getInitialContext();
+        DataSource dataSource = null;
+        for (String path : getPossibleJndiNames(dataSourceName)) {
+            try {
+                dataSource = (DataSource) c.lookup(path);
+                break;
+            } catch (NamingException e) {
+                // pass
+            }
+        }
+        if (dataSource == null) {
+            // Geronimo
+            String name = dataSourceName;
+            if (name.startsWith("jdbc/"))
+                name = name.substring(5);
+            Object o = c.lookup("jca:/console.dbpool/" + name + "/JCAManagedConnectionFactory/" + name);
+            try {
+                dataSource = (DataSource) o.getClass().getMethod("$getResource").invoke(o);
+            } catch (Exception ex) {
+                String sErr = "Unable to retrieve Connection to [" + dataSourceName
+                        + "]: " + ex.getMessage();
+                LOG.error(sErr);
+                throw new SQLException(sErr);
+            }
+        }
+        dataSourcesByName.put(dataSourceName, dataSource);
+        return dataSource;
     }
 
     /**
@@ -344,33 +362,48 @@ public final class Database {
             return globalDataSource;
         }
         try {
-            Context c = EJBLookup.getInitialContext();
-            try {
-                globalDataSource = (DataSource) c.lookup(DS_GLOBAL_CONFIG);
-            } catch (NamingException e) {
-                //try once more in local java namespace
+            final Context c = EJBLookup.getInitialContext();
+            for (String path : getPossibleJndiNames(DS_GLOBAL_CONFIG)) {
                 try {
-                    globalDataSource = (DataSource) c.lookup("java:" + DS_GLOBAL_CONFIG);
-                } catch (NamingException e1) {
-                    //try the wierd geronimo logic as last resort
-                    Object o = c.lookup("jca:/console.dbpool/flexiveConfiguration/JCAManagedConnectionFactory/flexiveConfiguration");
-                    try {
-                        globalDataSource = (DataSource) o.getClass().getMethod("$getResource").invoke(o);
-                    } catch (Exception ex) {
-                        String sErr = "Unable to retrieve Connection to [" + DS_GLOBAL_CONFIG
-                                + "]: " + ex.getMessage();
-                        LOG.error(sErr);
-                        throw new SQLException(sErr);
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Trying JNDI path " + path + "...");
                     }
+                    globalDataSource = (DataSource) c.lookup(path);
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("Found global datasource under JNDI path " + path);
+                    }
+                    break;
+                } catch (NamingException e) {
+                    // try next path
+                }
+            }
+            if (globalDataSource == null) {
+                //try the wierd geronimo logic as last resort
+                try {
+                    Object o = EJBLookup.getInitialContext().lookup("jca:/console.dbpool/flexiveConfiguration/JCAManagedConnectionFactory/flexiveConfiguration");
+                    globalDataSource = (DataSource) o.getClass().getMethod("$getResource").invoke(o);
+                } catch (Exception ex) {
+                    String msg = "Unable to retrieve Connection to [" + DS_GLOBAL_CONFIG + "]: " + ex.getMessage();
+                    LOG.error(msg);
+                    throw new SQLException(msg);
                 }
             }
             return globalDataSource;
         } catch (NamingException exc) {
-            String sErr = "Naming Exception, unable to retrieve Connection to [" + DS_GLOBAL_CONFIG
+            String msg = "Naming Exception, unable to retrieve Connection to [" + DS_GLOBAL_CONFIG
                     + "]: " + exc.getMessage();
-            LOG.error(sErr);
-            throw new SQLException(sErr);
+            LOG.error(msg);
+            throw new SQLException(msg);
         }
+    }
+
+    private static String[] getPossibleJndiNames(String dataSourceName) {
+        return new String[] {
+                dataSourceName,
+                "java:" + dataSourceName,
+                "java:comp/env/" + dataSourceName,
+                "java:openejb/Resource/" + dataSourceName,
+        };
     }
 
     /**

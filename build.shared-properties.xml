@@ -34,6 +34,7 @@
     <property name="flexive.web.ui.jsf.dir" value="${flexive.base.ui.jsf.dir}/web"/>
 
     <property name="flexive.ant.jar" value="${flexive.build.framework.jar.dir}/flexive-ant.jar"/>
+    <property name="flexive.openejb.dir" value="${flexive.lib.dir}/openejb-3.1"/>
 
     <fileset id="flexive.lib.ui.jsf" dir="${flexive.lib.dir}/jsf" includes="*.jar"/>
 	<fileset id="flexive.lib.ui.ajax4jsf" dir="${flexive.lib.dir}/richfaces" includes="*.jar"/>
@@ -42,6 +43,7 @@
     <fileset id="flexive.dist.jar.libs" dir="${flexive.lib.dir}"
         includes="cglib*.jar, commons-*.jar, fxTree.jar, fxStream.jar, jbosscache-core.jar, jboss-common-core-42-compat.jar, javaee.jar, testNG/*.jar, mail/*.jar, xstream/*.jar, groovy/*.jar, selenium-java-client-driver.jar, text_extraction/*.jar, mysql-*.jar, jtidy.jar, commons-io-1.1.jar, sanselan.jar, PDFRenderer.jar, jgroups.jar, concurrent.jar, jboss-common-core.jar, jboss-jmx.jar, jboss-system.jar, quartz-*.jar, urlrewrite-*.jar, *h2.jar"/>
     <fileset id="flexive.dist.appserver.libs" dir="${flexive.lib.dir}" includes="${flexive.global.include.appserverlibs}"/>
+
 
     <path id="flexive.shared-libs.path">
         <fileset refid="flexive.lib.ui.jsf"/>
@@ -55,15 +57,9 @@
         <path refid="flexive.shared-libs.path"/>
     </path>
 
-    <!-- classpath containing the jboss EJB3 embedded server, if available -->
+    <!-- classpath containing the OpenEJB embedded server -->
     <path id="flexive.ejb3-embedded.classpath">
-        <path path="${jboss.embedded.path}/bootstrap"/>
-        <fileset dir="${jboss.embedded.path}/lib" includes="*.jar"/>
-        <fileset dir="${jboss.embedded.path}/optional-lib" includes="*.jar"/>
-        <fileset dir="${flexive.lib.dir}" includes="*.jar">
-            <present targetdir="${jboss.embedded.path}/lib" present="srconly"/>
-        </fileset>
-        <path path="${jboss.embedded.path}/conf"/>
+        <fileset dir="${flexive.openejb.dir}/lib" includes="*.jar"/>
     </path>
 
 

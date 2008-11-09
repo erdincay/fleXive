@@ -87,7 +87,12 @@ public final class MBeanHelper {
     }
 
     private static List<MBeanServer> findMBeanServers() {
-        return MBeanServerFactory.findMBeanServer(null);
+        final ArrayList<MBeanServer> servers = MBeanServerFactory.findMBeanServer(null);
+        if (servers.isEmpty()) {
+            LOG.error("No active JMX MBean servers found - creating a new one");
+            servers.add(MBeanServerFactory.createMBeanServer());
+        }
+        return servers;
     }
 
 }

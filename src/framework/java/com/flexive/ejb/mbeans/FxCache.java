@@ -216,7 +216,7 @@ public class FxCache implements FxCacheMBean, DynamicMBean {
             }
             return "/Division" + divId + (path.startsWith("/") ? "" : "/") + path;
         } catch (Throwable t) {
-            System.err.println(t.getMessage());
+            LOG.error("Unable to envode division ID in cache path: " + t.getMessage(), t);
             throw new FxCacheException("Unable to encode path: " + t.getMessage());
         }
     }

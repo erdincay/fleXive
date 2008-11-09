@@ -32,6 +32,7 @@
 package com.flexive.core.structure;
 
 import com.flexive.core.DatabaseConst;
+import com.flexive.core.Database;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.cache.FxCacheException;
@@ -136,47 +137,6 @@ final class FxEnvironmentUtils {
         if (!DivisionData.isValidDivisionId(divisionId)) {
             throw new SQLException("Unable to obtain connection: Division not defined");
         }
-        // Try to obtain a connection
-        String finalDsName = null;
-        try {
-            Context c = EJBLookup.getInitialContext();
-            if (divisionId == DivisionData.DIVISION_GLOBAL) {
-                // Special case: global config database
-                finalDsName = DatabaseConst.DS_GLOBAL_CONFIG;
-            } else {
-                // else: get data source from global configuration
-                GlobalConfigurationEngine globalConfiguration = EJBLookup.getGlobalConfigurationEngine();
-                finalDsName = globalConfiguration.getDivisionData(divisionId).getDataSource();
-            }
-            try {
-                return ((DataSource) c.lookup(finalDsName)).getConnection();
-            } catch (NamingException e) {
-                //last exit: geronimo global scope
-                String name = finalDsName;
-                if (name.startsWith("jdbc/"))
-                    name = name.substring(5);
-                Object o = c.lookup("jca:/console.dbpool/" + name + "/JCAManagedConnectionFactory/" + name);
-                try {
-                    return ((DataSource) o.getClass().getMethod("$getResource").invoke(o)).getConnection();
-                } catch (Exception e1) {
-                    String sErr = "Failed to load datasource: " + e1.getMessage();
-                    LOG.error(sErr);
-                    throw new SQLException(sErr);
-                }
-            }
-        } catch (NamingException exc) {
-            String sErr = "Naming Exception, unable to retrieve Connection to [" + finalDsName +
-                    "]: " + exc.getMessage();
-            LOG.error(sErr);
-            throw new SQLException(sErr);
-        } catch (FxNotFoundException exc) {
-            String sErr = "Failed to retrieve datasource for division " + divisionId + " (not configured).";
-            LOG.error(sErr);
-            throw new SQLException(sErr);
-        } catch (FxApplicationException exc) {
-            String sErr = "Failed to load datasource: " + exc.getMessage();
-            LOG.error(sErr);
-            throw new SQLException(sErr);
-        }
+        return Database.getDbConnection(divisionId);
     }
 }

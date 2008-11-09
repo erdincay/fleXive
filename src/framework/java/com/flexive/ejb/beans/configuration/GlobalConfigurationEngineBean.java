@@ -309,36 +309,13 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
         boolean available = false;
         Connection con = null;
         try {
-            Context c = EJBLookup.getInitialContext();
-            try {
-                con = ((DataSource) c.lookup(dataSource)).getConnection();
-            } catch (NamingException e) {
-                try {
-                    //try in java: private namespace
-                    con = ((DataSource) c.lookup("java:" + dataSource)).getConnection();
-                    dataSource = "java:" + dataSource;
-                } catch (NamingException e1) {
-                    //last exit: geronimo global scope
-                    String name = dataSource;
-                    if (name.startsWith("jdbc/"))
-                        name = name.substring(5);
-                    Object o = c.lookup("jca:/console.dbpool/" + name + "/JCAManagedConnectionFactory/" + name);
-                    try {
-                        con = ((DataSource) o.getClass().getMethod("$getResource").invoke(o)).getConnection();
-                    } catch (Exception ex) {
-                        String sErr = "Unable to retrieve Connection to [" + dataSource
-                                + "]: " + ex.getMessage();
-                        LOG.error(sErr);
-                        throw new SQLException(sErr);
-                    }
-                }
-            }
+            con = Database.getDataSource(dataSource).getConnection();
             DatabaseMetaData dbmd = con.getMetaData();
             dbVendor = dbmd.getDatabaseProductName();
             dbVersion = dbmd.getDatabaseProductVersion();
             available = true;
         } catch (NamingException e) {
-            LOG.error("Failed to get global datasource " + dataSource + " (flagged inactive)");
+            LOG.error("Failed to get datasource " + dataSource + " (flagged inactive)");
         } catch (SQLException e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Failed to get database meta information: " + e.getMessage(), e);

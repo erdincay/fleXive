@@ -398,17 +398,16 @@ public class EJBLookup {
      * @param type        the class
      * @return appName (may have changed)
      */
-    private static <T> String discoverStrategy(String appName, Hashtable<String, String> environment, Class<T> type) {
+    private static <T> String discoverStrategy(String appName, final Hashtable<String, String> environment, Class<T> type) {
         InitialContext ctx = null;
-        if (environment == null)
-            environment = new Hashtable<String, String>();
         for (STRATEGY strat : STRATEGY.values()) {
             if (strat == STRATEGY.UNKNOWN)
                 continue;
             used_strategy = strat;
             try {
-                prepareEnvironment(strat, environment);
-                ctx = new InitialContext(environment);
+                final Hashtable<String, String> env = environment != null ? environment : new Hashtable<String, String>();
+                prepareEnvironment(strat, env);
+                ctx = new InitialContext(env);
                 ctx.lookup(buildName(appName, type));
                 return appName;
             } catch (Exception e) {

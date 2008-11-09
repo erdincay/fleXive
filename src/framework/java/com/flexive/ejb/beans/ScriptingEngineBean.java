@@ -39,6 +39,7 @@ import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.EJBLookup;
 import static com.flexive.shared.EJBLookup.getDivisionConfigurationEngine;
 import com.flexive.shared.configuration.Parameter;
 import com.flexive.shared.configuration.SystemParameters;
@@ -63,6 +64,7 @@ import org.codehaus.groovy.control.CompilationFailedException;
 
 import javax.annotation.Resource;
 import javax.ejb.*;
+import javax.transaction.SystemException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.PrintWriter;
@@ -844,7 +846,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      * @param applicationName the corresponding application name (for debug messages)
      * @throws FxApplicationException on errors
      */
-    private static void runOnce(Parameter<Boolean> param, String prefix, String applicationName) throws FxApplicationException {
+    private void runOnce(Parameter<Boolean> param, String prefix, String applicationName) throws FxApplicationException {
         synchronized(RUNONCE_LOCK) {
             try {
                 Boolean executed = getDivisionConfigurationEngine().get(param);
@@ -896,13 +898,14 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                     try {
                         internal_runScript(file[0], binding, FxSharedUtils.loadFromInputStream(cl.getResourceAsStream(prefix + "/scripts/runonce/" + file[0]), -1));
                     } catch (Throwable e) {
+                        System.out.println("Caught ERROR!!!");
                         runInfo.endExecution(false);
                         final Throwable reported = e instanceof GenericScriptException ? e.getCause() : e;
                         StringWriter sw = new StringWriter();
                         reported.printStackTrace(new PrintWriter(sw));
                         runInfo.setErrorMessage(sw.toString());
-                        // already logged in internal_runScript
-                        //LOG.error("Failed to run script " + file[0] + ": " + reported.getMessage(), e);
+                        // play safe and always log exceptions, although this may lead to duplicates
+                        LOG.error("Failed to run script " + file[0] + ": " + reported.getMessage(), reported);
                     }
                     try {
                         Thread.sleep(100); //play nice ...
@@ -910,6 +913,11 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                         //ignore
                     }
                     runInfo.endExecution(true);
+                    if (ctx.getRollbackOnly()) {
+                        // something in the script caused a rollback, so we have to bail out
+                        LOG.fatal("Failed to complete run-once scripts for '" + applicationName + "' because of a transaction rollback.");
+                        return;
+                    }
                 }
                 divisionRunOnceInfos.clear();
                 divisionRunOnceInfos.addAll(runOnceInfos);

@@ -53,17 +53,18 @@
         <fileset dir="${flexive.lib.dir}" includes="*.jar" excludes="qdox.jar"/>
         <fileset dir="${flexive.lib.dir}/testNG" includes="*.jar"/>
         <fileset dir="${flexive.lib.dir}/xstream" includes="*.jar"/>
+        <fileset dir="${flexive.lib.dir}/groovy" includes="*.jar"/>
+        <fileset dir="${flexive.lib.dir}/jsf" includes="*.jar"/>
         <path refid="emma.lib"/>
     	<path path="${build.ui.classes.dir}"/>
         <path path="${build.ui.shared.classes.dir}"/>
-        <fileset dir="${flexive.lib.dir}" includes="**/*.jar" excludes="pmd/*"/>
     </path>
 
     <path id="ejb3-embedded.classpath">
-        <path refid="flexive.ejb3-embedded.classpath"/>
-        <fileset dir="${flexive.lib.dir}/jsf" includes="*.jar"/>
         <path refid="build.classpath.testng"/>
-        <path path="${build.ui.classes.dir}"/>
+        <fileset dir="${flexive.lib.dir}/jsf" includes="*.jar"/>
+        <fileset dir="${flexive.lib.dir}/text_extraction" includes="*.jar"/>
+        <path refid="flexive.ejb3-embedded.classpath"/>
     </path>
 
     <!-- ========================== tasks / macros ====================== -->
@@ -282,12 +283,15 @@
             }
         </groovy>
         <copy file="${tests.resources.dir}/testlog4j.xml" todir="${tests.classes.dir}"/>
+
+        <!--<property name="myclasspath" refid="ejb3-embedded.classpath"/>-->
+        <!--<echo>${myclasspath}</echo>-->
+
         <testng classpathref="ejb3-embedded.classpath"
                 outputDir="${testng.report.dir}" groups="${tests.groups}">
             <classpath>
                 <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar"/>
                 <fileset dir="${build.ui.jar.dir}" includes="*.jar"/>
-                <!--<fileset dir="${flexive.lib.dir}" includes="**/*.jar"/>-->
                 <!-- include .properties -->
             	<path path="${build.ui.jar.dir}/WEB-INF"/>
             	<path path="${tests.classes.dir}"/>
@@ -306,6 +310,9 @@
             <jvmarg value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
             <jvmarg value="-Dlog4j.configuration=testlog4j.xml"/>
             <jvmarg value="-Dcompiler.fork=true"/>  <!-- Overwrite default buildfile settings for dist tests -->
+            <jvmarg value="-Dopenejb.home=${flexive.openejb.dir}"/>
+            <jvmarg value="-Dopenejb.configuration=${flexive.openejb.dir}/openejb-tests.conf.xml"/>
+            <jvmarg value="-Dopenejb.embedded.remotable=true"/>
             <classfileset dir="${tests.classes.dir}" includes="com/flexive/tests/**/*.class"/>
         </testng>
         <junitreport todir="${testng.report.dir}">

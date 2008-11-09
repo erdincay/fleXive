@@ -4,9 +4,6 @@ deploy.ear.path=${user.home}/as/jboss/server/default/deploy
 # path to deploy needed runtime libs like emma.jar
 deploy.lib.path=${user.home}/as/jboss/server/default/lib
 
-# path to the embedded jboss ejb3 container neededfor unit testing
-jboss.embedded.path=${user.home}/as/jboss-embeddable/
-
 # Remove comment to enable emma profiling (needs emma.jar in your application server /lib directory)
 # tests.emma.enabled=true
 

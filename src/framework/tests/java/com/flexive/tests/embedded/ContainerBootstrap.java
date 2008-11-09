@@ -31,33 +31,28 @@
  ***************************************************************/
 package com.flexive.tests.embedded;
 
-import com.flexive.core.security.UserTicketImpl;
+import org.testng.annotations.Test;
+import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.AfterSuite;
+import org.apache.openejb.loader.SystemInstance;
+import org.apache.openejb.spi.ContainerSystem;
+import com.flexive.shared.FxContext;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
-import com.flexive.shared.FxContext;
-import com.flexive.shared.configuration.DivisionData;
-import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.interfaces.AccountEngine;
 import com.flexive.shared.security.UserTicket;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.jboss.ejb3.embedded.EJB3StandaloneBootstrap;
-import org.jboss.ejb3.embedded.EJB3StandaloneDeployer;
-import org.testng.annotations.AfterSuite;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.Test;
+import com.flexive.shared.interfaces.AccountEngine;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.configuration.DivisionData;
+import com.flexive.core.security.UserTicketImpl;
+import com.flexive.core.Database;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
+import javax.naming.Context;
+import javax.naming.NamingException;
 import java.util.Collections;
-import java.util.List;
 
 /**
- * JBoss EJB3 embedded container bootstrap
+ * OpenEJB embedded container bootstrap
  *
- * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 @Test(groups = {"bootstrap", "ejb", "configuration", "content", "structure", "jsf", "security",
@@ -65,93 +60,33 @@ import java.util.List;
         "search", "tutorial", "benchmark", "environment", "mandator", "importexport",
         "roles"})
 public class ContainerBootstrap {
-    private static final Log LOG = LogFactory.getLog(ContainerBootstrap.class);
-
-    private EJB3StandaloneDeployer deployer;
-    private List<Object> deployedBeans = new ArrayList<Object>();
-    protected final List<URL> deployDirectories = new ArrayList<URL>();
-
     @BeforeSuite
-    public void startup() throws FxApplicationException {
-        System.out.println("=== starting EJB3 container ===");
+    public void startup() {
         try {
-            System.setProperty("java.naming.factory.initial", "org.jnp.interfaces.LocalOnlyContextFactory");
-            System.setProperty("java.naming.factory.url.pkgs", "org.jboss.naming:org.jnp.interfaces");
-            EJB3StandaloneBootstrap.boot(null);
-            // enable security manager
-            EJB3StandaloneBootstrap.deployXmlResource("security-beans.xml");
-            deployer = EJB3StandaloneBootstrap.createDeployer();
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Running on: " + System.getProperty("os.name") + " " + System.getProperty("os.version"));
-            }
-
-            deployDirectories.add(0, new URL(escapeUrl(getFileUrl(getFlexiveBaseDir()) + getFlexiveDistDir())));
-            for (URL url : deployDirectories) {
-                deployDirectory(url);
-            }
-
-            deployer.getArchivesByResource().add(getFlexiveBaseDir() + "/src/META-INF/embeddedJBossCacheConfig.xml");
-
-//            deployer.setMbeanServer(MBeanServerFactory.createMBeanServer("flexive"));
-
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Deploying...");
-            }
-            deployer.create();
-            deployer.start();
-
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("MBeanServer: " + deployer.getMbeanServer());
-            }
-            /*
-                        FxCacheMBean cache = new FxCache();
-                        cache.create();
-                        deployer.getMbeanServer().registerMBean(cache, new ObjectName(CacheAdmin.CACHE_SERVICE_NAME));
-                        deployedBeans.add(cache);
-
-                        StructureMBean structure = new Structure();
-                        structure.create();
-                        deployer.getMbeanServer().registerMBean(structure, new ObjectName(StructureAdmin.STRUCTURE_SERVICE_NAME));
-                        deployedBeans.add(structure);
-            */
+            // set current thread to test division
             FxContext.get().setDivisionId(DivisionData.DIVISION_TEST);
             FxContext.get().setContextPath("flexiveTests");
             FxContext.get().setTicket(UserTicketImpl.getGuestTicket());
+
+            // force DS lookup now since the JNDI context does not always contain the resource entries
+            // This is a known issue with OpenEJB up until 3.1, so this may not be necessary for future versions
+            Database.getGlobalDataSource();
+            Database.getDataSource("jdbc/flexiveTest");
+            Database.getDataSource();
+
+            // force flexive initialization
             FxContext.get().runAsSystem();
             try {
                 CacheAdmin.getEnvironment();
             } finally {
                 FxContext.get().stopRunAsSystem();
             }
+            // load guest ticket
             FxContext.get().setTicket(UserTicketImpl.getGuestTicket());
             TestUsers.initializeUsers();
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
-    }
-
-    protected String escapeUrl(String url) {
-        return StringUtils.replace(url, " ", "%20");
-    }
-
-    protected String getFlexiveDistDir() {
-        return "/build/framework/jar";
-    }
-
-    protected void deployDirectory(URL deployDir) throws MalformedURLException {
-        deployer.getDeployDirs().add(deployDir);
-    }
-
-    protected String getFileUrl(String fileName) {
-        return "file:" + (System.getProperty("os.name").toLowerCase().indexOf("windows") >= 0 ? "/" : "") + fileName;
-    }
-
-    protected String getFlexiveBaseDir() {
-        return getBuildDir();
-    }
-
-    protected String getBuildDir() {
-        return System.getProperty("user.dir");
     }
 
     @AfterSuite
@@ -164,21 +99,6 @@ public class ContainerBootstrap {
             AccountEngine accountEngine = EJBLookup.getAccountEngine();
             for (UserTicket ticket : accountEngine.getActiveUserTickets())
                 System.out.println("Still logged in: " + ticket);
-
-            // destroy MBeans (in reverse order)
-            Collections.reverse(deployedBeans);
-            for (Object bean : deployedBeans) {
-                try {
-                    bean.getClass().getMethod("destroy", new Class[0]).invoke(bean, new Object[0]);
-                } catch (Exception e) {
-                    System.out.println("Failed to destroy MBean: " + e.getMessage());
-                    e.printStackTrace();
-                }
-            }
-
-            deployer.stop();
-//            deployer.destroy();
-//            EJB3StandaloneBootstrap.shutdown();
         } catch (Exception ex) {
             ex.printStackTrace();
             throw new RuntimeException(ex);
