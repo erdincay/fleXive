@@ -1,19 +1,19 @@
 <?xml version="1.0"?>
 <openejb>
-  <Resource id="jdbc/flexiveConfiguration" type="DataSource">
-    JdbcDriver com.mysql.jdbc.Driver
-    JdbcUrl jdbc:mysql://localhost/flexiveConfiguration
-    UserName root
-    Password
-  </Resource>
-  <Resource id="jdbc/flexiveTest" type="DataSource">
-    JdbcDriver com.mysql.jdbc.Driver
-    JdbcUrl jdbc:mysql://localhost/flexiveTest
-    UserName root
-    Password
-  </Resource>
-  <SecurityService id="Default Security Service"/>
-  <Deployments jar="e:/dev/netbeans-workspace/flexive-trunk/build/framework/jar/flexive-ejb.jar"/>
-  <!--TransactionService id="Default Transaction Manager"/-->
+    <Resource id="jdbc/flexiveConfiguration" type="DataSource">
+        JdbcDriver com.mysql.jdbc.Driver
+        JdbcUrl jdbc:mysql://localhost/flexiveConfiguration
+        UserName root
+        Password a
+    </Resource>
+    <Resource id="jdbc/flexiveTest" type="DataSource">
+        JdbcDriver com.mysql.jdbc.Driver
+        JdbcUrl jdbc:mysql://localhost/flexiveTest
+        UserName root
+        Password a
+    </Resource>
+    <SecurityService id="Default Security Service"/>
+    <Deployments jar="../../build/framework/jar/flexive-ejb.jar"/>
+    <!--TransactionService id="Default Transaction Manager"/-->
 </openejb>
 
