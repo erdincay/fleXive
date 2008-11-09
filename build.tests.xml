@@ -270,7 +270,13 @@
     </target>
     
     <target name="tests.groups" depends="tests.groups.run,emma.report"/>
-    <target name="tests.groups.run" depends="tests.compile.all, db.update.test">
+
+    <target name="tests.groups.prepare">
+        <available file="${flexive.openejb.dir}/openejb-tests.conf.xml" property="openEjbConfigExists"/>
+        <fail unless="openEjbConfigExists" message="OpenEJB configuration file (${flexive.openejb.dir}/openejb-tests.conf.xml) not found. A template can be found at ${flexive.openejb.dir}/openejb-tests.conf.xml.sample."/>
+    </target>
+
+    <target name="tests.groups.run" depends="tests.groups.prepare, tests.compile.all, db.update.test">
     	<!-- Run a given test group (set via the tests.groups property, e.g. via -Dtests.groups=...) -->
         <echo>Test groups can be specified in the tests.groups property,</echo>
         <echo>e.g. "ant tests.groups -Dtests.groups=shared,configuration"</echo>
