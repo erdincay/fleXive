@@ -35,6 +35,7 @@ import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.search.genericSQL.GenericSQLDataFilter;
 import com.flexive.core.search.genericSQL.GenericSQLDataSelector;
+import com.flexive.core.search.H2.H2SQLDataSelector;
 import com.flexive.shared.*;
 import com.flexive.shared.configuration.DBVendor;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -259,8 +260,8 @@ public class SqlSearch {
             stmt.close();
 
             stmt = con.createStatement();
-            stmt.setQueryTimeout(params.getQueryTimeout());
-
+            if( Database.isQueryTimeoutSupported() )
+                stmt.setQueryTimeout(params.getQueryTimeout());
             // Fetch the result
             ResultSet rs = stmt.executeQuery(selectSql);
             int dbSearchTime = (int) (java.lang.System.currentTimeMillis() - startTime);
@@ -400,6 +401,7 @@ public class SqlSearch {
             vendor = Database.getDivisionData().getDbVendor();
             switch (vendor) {
                 case H2:
+                    return new H2SQLDataSelector(this);
                 case MySQL:
                     return new GenericSQLDataSelector(this);
                 default:

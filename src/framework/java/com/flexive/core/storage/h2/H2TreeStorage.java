@@ -36,7 +36,7 @@ import com.flexive.core.storage.mySQL.MySQLTreeStorage;
 import com.flexive.core.storage.genericSQL.GenericTreeStorageSpreaded;
 
 /**
- * MySQL specific tree storage implementation
+ * H2 specific tree storage implementation
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */

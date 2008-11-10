@@ -341,19 +341,20 @@ public class StoredProcedures {
     /**
      * Get the id of a tree path's leaf
      *
-     * @param con   connection provided by the database
-     * @param _path requested path
-     * @param live  live or edit tree?
+     * @param con       connection provided by the database
+     * @param startNode the start node
+     * @param _path     requested path
+     * @param live      live or edit tree?
      * @return id of a tree path's leaf
      * @throws SQLException on errors
      */
-    public static Long tree_pathToId(Connection con, String _path, Boolean live) throws SQLException {
+    public static Long tree_pathToId(Connection con, Long startNode, String _path, Boolean live) throws SQLException {
         if ("/".equals(_path) || _path == null || _path.length() == 0)
             return 1L; //root node
         PreparedStatement ps = con.prepareStatement("SELECT ID FROM FXS_TREE" + (live ? "_LIVE" : "") + " WHERE NAME=? AND PARENT=?");
         String[] names = _path.substring(1).split("/");
         ResultSet rs;
-        long currentParent = 1L; //start with root node
+        long currentParent = startNode;
         try {
             for (String name : names) {
                 ps.setString(1, name);
@@ -583,15 +584,15 @@ public class StoredProcedures {
         PreparedStatement ps = con.prepareStatement("SELECT ID FROM " + TABLE + " WHERE PARENT=? ORDER BY LFT");
         try {
             int pos = 0;
-            if( parentId == null )
+            if (parentId == null)
                 ps.setNull(1, java.sql.Types.NUMERIC);
             else
                 ps.setLong(1, parentId);
             ResultSet rs = ps.executeQuery();
             while (rs != null && rs.next()) {
-                pos++;
                 if (rs.getLong(1) == nodeId)
                     return pos;
+                pos++;
             }
             return null;
         } finally {

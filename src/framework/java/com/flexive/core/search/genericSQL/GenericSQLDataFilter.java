@@ -190,7 +190,8 @@ public class GenericSQLDataFilter extends DataFilter {
             }
             sql = "INSERT INTO " + search.getCacheTable() + " " + dataSelect;
             stmt = getConnection().createStatement();
-            stmt.setQueryTimeout(search.getParams().getQueryTimeout());
+            if( Database.isQueryTimeoutSupported() )
+                stmt.setQueryTimeout(search.getParams().getQueryTimeout());
             stmt.executeUpdate(sql);
             analyzeResult();
         } catch (FxSqlSearchException exc) {

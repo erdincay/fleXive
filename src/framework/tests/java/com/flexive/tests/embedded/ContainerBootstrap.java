@@ -34,8 +34,6 @@ package com.flexive.tests.embedded;
 import org.testng.annotations.Test;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.AfterSuite;
-import org.apache.openejb.loader.SystemInstance;
-import org.apache.openejb.spi.ContainerSystem;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
@@ -45,10 +43,6 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.core.security.UserTicketImpl;
 import com.flexive.core.Database;
-
-import javax.naming.Context;
-import javax.naming.NamingException;
-import java.util.Collections;
 
 /**
  * OpenEJB embedded container bootstrap

@@ -398,7 +398,7 @@ public final class Database {
     }
 
     private static String[] getPossibleJndiNames(String dataSourceName) {
-        return new String[] {
+        return new String[]{
                 dataSourceName,
                 "java:" + dataSourceName,
                 "java:comp/env/" + dataSourceName,
@@ -510,6 +510,23 @@ public final class Database {
             throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage()).asRuntimeException();
         }
         return false;
+    }
+
+    /**
+     * Does the database support query timeouts?
+     *
+     * @return database supports query timeouts
+     * @throws SQLException on errors
+     */
+    public static boolean isQueryTimeoutSupported() throws SQLException {
+        switch (getDivisionData().getDbVendor()) {
+            case MySQL:
+                return true;
+            case H2:
+                return false;
+            default:
+                return true;
+        }
     }
 
     /**

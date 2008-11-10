@@ -36,7 +36,7 @@ import com.flexive.core.storage.mySQL.MySQLHierarchicalStorage;
 import com.flexive.core.storage.genericSQL.GenericHierarchicalStorage;
 
 /**
- * MySQL implementation of hierarchical content handling
+ * H2 implementation of hierarchical content handling
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
@@ -46,7 +46,7 @@ public class H2HierarchicalStorage extends GenericHierarchicalStorage {
     /**
      * Singleton getter
      *
-     * @return MySQLHierarchicalTypes
+     * @return ContentStorage
      */
     public static ContentStorage getInstance() {
         return instance;

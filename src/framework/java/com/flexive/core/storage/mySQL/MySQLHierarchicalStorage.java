@@ -45,7 +45,7 @@ public class MySQLHierarchicalStorage extends GenericHierarchicalStorage {
     /**
      * Singleton getter
      *
-     * @return MySQLHierarchicalTypes
+     * @return ContentStorage
      */
     public static ContentStorage getInstance() {
         return instance;

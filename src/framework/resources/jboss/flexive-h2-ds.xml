@@ -14,9 +14,9 @@
         <jndi-name>jdbc/flexiveDivision1</jndi-name>
         <xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
         <!-- Note: "&amp;" has to be used instead of "&" for parameters -->
-        <xa-datasource-property name="URL">jdbc:h2:tcp://localhost:9092/~/flexive;SCHEMA=flexive;LOCK_TIMEOUT=10000</xa-datasource-property>
+        <xa-datasource-property name="URL">jdbc:h2:tcp://localhost:9092/~/flexive;SCHEMA=flexive;MVCC=TRUE;LOCK_TIMEOUT=10000</xa-datasource-property>
         <user-name>sa</user-name>
-        <password></password>
+        <!--<password></password>-->
 
         <transaction-isolation>TRANSACTION_READ_COMMITTED</transaction-isolation>
         <no-tx-separate-pools/>
@@ -43,9 +43,9 @@
         <jndi-name>jdbc/flexiveDivision1NoTX</jndi-name>
         <driver-class>org.h2.Driver</driver-class>
         <!-- Note: "&amp;" has to be used instead of "&" for parameters -->
-        <connection-url>jdbc:h2:tcp://localhost:9092/~/flexive;SCHEMA=flexive;LOCK_TIMEOUT=10000;LOCK_MODE=0</connection-url>
+        <connection-url>jdbc:h2:tcp://localhost:9092/~/flexive;SCHEMA=flexive;MVCC=TRUE;LOCK_TIMEOUT=10000</connection-url>
         <user-name>sa</user-name>
-        <password></password>
+        <!--<password></password>-->
 
         <!--pooling parameters-->
         <min-pool-size>5</min-pool-size>
@@ -61,9 +61,9 @@
         <jndi-name>jdbc/flexiveConfiguration</jndi-name>
         <xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
         <!-- Note: "&amp;" has to be used instead of "&" for parameters -->
-        <xa-datasource-property name="URL">jdbc:h2:tcp://localhost:9092/~/flexiveConfiguration</xa-datasource-property>
+        <xa-datasource-property name="URL">jdbc:h2:tcp://localhost:9092/~/flexiveConfiguration;MVCC=TRUE</xa-datasource-property>
         <user-name>sa</user-name>
-        <password></password>
+        <!--<password></password>-->
 
         <transaction-isolation>TRANSACTION_READ_COMMITTED</transaction-isolation>
         <no-tx-separate-pools/>

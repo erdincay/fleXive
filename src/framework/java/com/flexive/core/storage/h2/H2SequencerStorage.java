@@ -34,7 +34,7 @@ public class H2SequencerStorage extends GenericSequencerStorage {
     private final static String SQL_DELETE = "DROP SEQUENCE " + H2_SEQ_PREFIX;
     private final static String SQL_EXIST = "SELECT COUNT(*) FROM " + TBL_H2_SEQUENCES + " WHERE SEQUENCE_NAME=?";
     private final static String SQL_GET_USER = "SELECT SUBSTR(SEQUENCE_NAME," + H2_SEQ_PREFIX.length() + "), FALSE, CURRENT_VALUE FROM " +
-            TBL_H2_SEQUENCES + " WHERE NAME NOT LIKE '" + H2_SEQ_PREFIX + "SYS_%' ORDER BY NAME ASC";
+            TBL_H2_SEQUENCES + " WHERE SEQUENCE_NAME NOT LIKE '" + H2_SEQ_PREFIX + "SYS_%' ORDER BY SEQUENCE_NAME ASC";
 
     /**
      * Singleton getter
@@ -106,9 +106,7 @@ public class H2SequencerStorage extends GenericSequencerStorage {
         try {
             con = Database.getDbConnection();
             stmt = con.createStatement();
-            stmt.executeUpdate(SQL_CREATE + name + " START WITH 1 INCREMEMT BY 1");
-            if (stmt.getUpdateCount() == 0)
-                throw new FxCreateException(LOG, "ex.sequencer.create.failed", name);
+            stmt.executeUpdate(SQL_CREATE + name + " START WITH 1 INCREMENT BY 1");
         } catch (SQLException exc) {
             throw new FxCreateException(LOG, exc, "ex.sequencer.create.failed", name);
         } finally {

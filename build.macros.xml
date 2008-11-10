@@ -79,14 +79,19 @@
                     CREATE SCHEMA @{database};
                 </transaction>
             </sql-call>
-
+            <!-- Replace URL parameters @DATABASE@ with @{Database}-->
+            <groovy>
+                <arg value="@{Database}"/>
+                properties['db.url.full'] = properties['database.url.base']+args[0]+properties['database.url.parameters']
+                properties['db.url.full'] = properties['db.url.full'].replace("@DATABASE@", args[0])
+            </groovy>
             <sql-call database="${database.schema.root}" includes="*.sql" excludes="SP*.sql"
-                    url="${database.url.base}@{database}${database.url.parameters}"/>
+                    url="${db.url.full}"/>
             <!-- Stored procedures setup -->
             <sql-call database="@{database}" delimiter="|" includes="SP*.sql"
-                    url="${database.url.base}@{database}${database.url.parameters}"/>
+                    url="${db.url.full}"/>
             <sql-call database="@{database}" delimiter="|" includes="tree/*.sql"
-                    url="${database.url.base}@{database}${database.url.parameters}"/>
+                    url="${db.url.full}"/>
 
             <echo taskname="flexive">Successfully initialized a flexive division at ${database.url.base}@{database}</echo>
         </sequential>

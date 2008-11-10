@@ -35,6 +35,7 @@ import com.flexive.core.Database;
 import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.FxTreeNodeInfoSpreaded;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.configuration.DBVendor;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -736,9 +737,13 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             try {
                 stmt = con.createStatement();
                 stmt2 = con.createStatement();
+                String using = "";
+                //MySQL needs a USING(ID) whereas H2 must not have this. TODO: better abstraction layer
+                if( Database.getDivisionData().getDbVendor() == DBVendor.MySQL)
+                    using = "USING (ID)";
                 ResultSet rs = stmt.executeQuery("SELECT DISTINCT a.ID FROM (SELECT ID FROM " + getTable(FxTreeMode.Live) + " WHERE PARENT=" +
-                        nodeId + ") a LEFT \n" +
-                        "JOIN (SELECT ID FROM " + getTable(FxTreeMode.Live) + " WHERE PARENT=" + nodeId + ") b USING (ID) WHERE b.ID IS NULL");
+                        nodeId + ") a LEFT " +
+                        "JOIN (SELECT ID FROM " + getTable(FxTreeMode.Live) + " WHERE PARENT=" + nodeId + ") b "+using+" WHERE b.ID IS NULL");
                 while (rs != null && rs.next()) {
                     long deleteId = rs.getLong(1);
                     stmt2.addBatch(Database.getReferentialIntegrityChecksStatement(false));

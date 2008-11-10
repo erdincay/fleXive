@@ -681,7 +681,7 @@ database.H2.schema.root=flexive
 database.H2.schema.config=flexiveConfiguration
 database.H2.driver=org.h2.Driver
 database.H2.url.base=jdbc:h2:tcp://${database.H2.host}:${database.H2.port}/~/
-database.H2.url.parameters=;SCHEMA=flexive
+database.H2.url.parameters=;SCHEMA=flexive;MVCC=TRUE
 
 
 #select the database vendor to use

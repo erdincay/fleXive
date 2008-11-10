@@ -31,10 +31,10 @@
  ***************************************************************/
 package com.flexive.core.storage.genericSQL;
 
+import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.LifeCycleInfoImpl;
-import com.flexive.core.Database;
 import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
@@ -63,8 +63,8 @@ import com.flexive.shared.workflow.StepDefinition;
 import com.flexive.shared.workflow.Workflow;
 import com.flexive.stream.ServerLocation;
 import com.thoughtworks.xstream.XStream;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.tidy.Tidy;
@@ -2423,7 +2423,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @param con         an open and valid Connection
      * @param mimeMetaMap optional mimeMetaMap to avoid saving duplicates, if <code>null</code>, binary will be transfered to the real binary space
      * @param binary      the binary to process (BinaryDescriptor's may be altered or replaced after calling this method!)
-     * @throws java.sql.SQLException on errors
+     * @throws java.sql.SQLException  on errors
      * @throws FxApplicationException on errors
      */
     public void prepareBinary(Connection con, Map<String, String[]> mimeMetaMap, FxBinary binary) throws SQLException, FxApplicationException {
@@ -2442,7 +2442,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 binary.setTranslation(lang, bdNew);
             } else {
                 BinaryDescriptor bdNew = identifyAndTransferTransitBinary(con, bd);
-                if( mimeMetaMap == null )
+                if (mimeMetaMap == null)
                     bdNew = binaryTransit(con, bdNew);
                 binary.setTranslation(lang, bdNew);
                 if (mimeMetaMap != null)
@@ -2472,29 +2472,14 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @param con    an open and valid Connection
      * @param binary the binary to identify
      * @return BinaryDescriptor
-     * @throws SQLException on errors
+     * @throws SQLException           on errors
      * @throws FxApplicationException on errors
      */
     private BinaryDescriptor identifyAndTransferTransitBinary(Connection con, BinaryDescriptor binary) throws SQLException, FxApplicationException {
-        PreparedStatement ps;
         //check if already identified
         if (!StringUtils.isEmpty(binary.getMetadata()))
             return binary;
-        ps = con.prepareStatement(BINARY_TRANSIT_HEADER);
-        ps.setString(1, binary.getHandle());
-        ResultSet rs = ps.executeQuery();
-        String mimeType = "unknown";
-        if (rs.next()) {
-            byte[] header = null;
-            try {
-                header = rs.getBlob(1).getBytes(1, 48);
-            } catch (Throwable t) {
-                // ignore, header migth be smaller than 48
-            }
-            mimeType = FxMediaEngine.detectMimeType(header, binary.getName());
-        }
-        String metaData = "<empty/>";
-
+        PreparedStatement ps = null;
         File binaryFile = null;
         File previewFile1 = null, previewFile2 = null, previewFile3 = null;
         InputStream in = null;
@@ -2503,7 +2488,24 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         int[] dimensionsPreview1 = {0, 0};
         int[] dimensionsPreview2 = {0, 0};
         int[] dimensionsPreview3 = {0, 0};
+        String mimeType = "unknown";
+        String metaData = "<empty/>";
+        ResultSet rs = null;
         try {
+            ps = con.prepareStatement(BINARY_TRANSIT_HEADER);
+            ps.setString(1, binary.getHandle());
+
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                byte[] header = null;
+                try {
+                    header = rs.getBlob(1).getBytes(1, 48);
+                } catch (Throwable t) {
+                    // ignore, header migth be smaller than 48
+                }
+                mimeType = FxMediaEngine.detectMimeType(header, binary.getName());
+            }
+
             binaryFile = File.createTempFile("FXBIN_", "_TEMP");
             in = rs.getBlob(1).getBinaryStream();
             fos = new FileOutputStream(binaryFile);
@@ -2577,6 +2579,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
             if (!useDefaultPreview) {
                 ps.close();
+//                ps = con.prepareStatement("SELECT * FROM "+TBL_BINARY_TRANSIT+" WHERE BKEY=? FOR UPDATE");
+//                ps.setString(1, binary.getHandle());
+//                ps.executeQuery();
+//                ps.close();
                 ps = con.prepareStatement(BINARY_TRANSIT_PREVIEWS);
                 pin1 = new FileInputStream(previewFile1);
                 pin2 = new FileInputStream(previewFile2);
@@ -2629,6 +2635,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 previewFile2.deleteOnExit();
             if (previewFile3 != null && !previewFile3.delete())
                 previewFile3.deleteOnExit();
+            if( rs != null )
+                rs.close();
             if (ps != null)
                 ps.close();
         }

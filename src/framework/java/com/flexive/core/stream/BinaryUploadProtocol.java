@@ -141,7 +141,7 @@ public class BinaryUploadProtocol extends StreamProtocol<BinaryUploadPayload> im
         Connection con = null;
         PreparedStatement ps = null;
         try {
-            con = Database.getNonTXDataSource(division).getConnection();
+            con = Database.getDbConnection(division);
             ps = con.prepareStatement("INSERT INTO " + DatabaseConst.TBL_BINARY_TRANSIT + " (BKEY,FBLOB,TFER_DONE,EXPIRE) VALUES(?,?,FALSE,?)");
             ps.setString(1, handle);
             ps.setBinaryStream(2, pin, (int) expectedLength);
@@ -171,7 +171,6 @@ public class BinaryUploadProtocol extends StreamProtocol<BinaryUploadPayload> im
         PreparedStatement ps = null;
         try {
             con = Database.getDbConnection(division);
-
             ps = con.prepareStatement("UPDATE " + DatabaseConst.TBL_BINARY_TRANSIT + " SET TFER_DONE=?, BLOBSIZE=? WHERE BKEY=?");
             ps.setBoolean(1, true);
             ps.setLong(2, size);
