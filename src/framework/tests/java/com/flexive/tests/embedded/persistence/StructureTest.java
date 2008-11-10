@@ -339,8 +339,8 @@ public class StructureTest {
 
     @Test
     public void assignmentGroupProperty() throws Exception {
-        Context c = new InitialContext();
-        UserTransaction ut = (UserTransaction) c.lookup("UserTransaction");
+        Context c = EJBLookup.getInitialContext();
+        UserTransaction ut = (UserTransaction) c.lookup("java:comp/UserTransaction");
         ut.begin();
         FxString desc = new FxString("group description...");
         desc.setTranslation(2, "gruppen beschreibung");
