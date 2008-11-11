@@ -513,23 +513,6 @@ public final class Database {
     }
 
     /**
-     * Does the database support query timeouts?
-     *
-     * @return database supports query timeouts
-     * @throws SQLException on errors
-     */
-    public static boolean isQueryTimeoutSupported() throws SQLException {
-        switch (getDivisionData().getDbVendor()) {
-            case MySQL:
-                return true;
-            case H2:
-                return false;
-            default:
-                return true;
-        }
-    }
-
-    /**
      * Load a FxString from a translation table
      *
      * @param con         an open connection

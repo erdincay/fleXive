@@ -1195,7 +1195,7 @@ public class SearchEngineTest {
 
     @Test
     public void searchLanguageFallbackTest_FX260() throws FxApplicationException {
-        final int maxRows = 20;
+        final int maxRows = 10;
         final UserTicket ticket = FxContext.getUserTicket();
         final FxLanguage oldLanguage = ticket.getLanguage();
 
@@ -1206,7 +1206,7 @@ public class SearchEngineTest {
                     .type(TEST_TYPE)
                     .maxRows(maxRows)
                     .getResult();
-            assert result.getRowCount() == maxRows;
+            assert result.getRowCount() == maxRows : "Expected " + maxRows + " rows but got " + result.getRowCount();
             final FxPK pk = result.getResultRow(0).getPk(1);
 
             // get reference value from the content engine

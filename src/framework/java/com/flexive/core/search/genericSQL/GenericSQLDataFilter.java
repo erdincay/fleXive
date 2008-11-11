@@ -190,7 +190,7 @@ public class GenericSQLDataFilter extends DataFilter {
             }
             sql = "INSERT INTO " + search.getCacheTable() + " " + dataSelect;
             stmt = getConnection().createStatement();
-            if( Database.isQueryTimeoutSupported() )
+            if( isQueryTimeoutSupported() )
                 stmt.setQueryTimeout(search.getParams().getQueryTimeout());
             stmt.executeUpdate(sql);
             analyzeResult();
@@ -729,5 +729,11 @@ public class GenericSQLDataFilter extends DataFilter {
         return search.getSearchLanguage() == null ? "" : " AND lang IN (0," + search.getSearchLanguage().getId() + ") ";
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isQueryTimeoutSupported() {
+        //defaults to true, implementations for databases that do not support timeouts have to override this method
+        return true;
+    }
 }

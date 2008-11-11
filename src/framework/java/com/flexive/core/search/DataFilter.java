@@ -48,26 +48,57 @@ public abstract class DataFilter {
     protected SqlSearch search;
     private Connection con;
 
+    /**
+     * Ctor
+     *
+     * @param con    an open and valid connection
+     * @param search the SqlSearch object operated on
+     */
     public DataFilter(Connection con, SqlSearch search) {
         this.search = search;
         this.con = con;
     }
 
+    /**
+     * Get the underlying FxStatement
+     *
+     * @return FxStatement
+     */
     protected FxStatement getStatement() {
         return search.getFxStatement();
     }
 
+    /**
+     * Get the used property resolver
+     *
+     * @return property resolver
+     */
     protected PropertyResolver getPropertyResolver() {
         return search.getPropertyResolver();
     }
 
+    /**
+     * Get the current database connection
+     *
+     * @return database connection
+     */
     protected Connection getConnection() {
         return con;
     }
 
+    /**
+     * Build the filter
+     *
+     * @throws FxSqlSearchException on errors
+     */
     public abstract void build() throws FxSqlSearchException;
 
 
+    /**
+     * Perform cleanup code
+     *
+     * @throws FxSqlSearchException on errors
+     */
     public abstract void cleanup() throws FxSqlSearchException;
 
     /**
@@ -90,4 +121,11 @@ public abstract class DataFilter {
      * @return a list of all content types that are part of the resultset
      */
     public abstract List<FxFoundType> getContentTypes();
+
+    /**
+     * Does the database support query timeouts?
+     *
+     * @return database supports query timeouts
+     */
+    public abstract boolean isQueryTimeoutSupported();
 }

@@ -36,6 +36,7 @@ import com.flexive.core.DatabaseConst;
 import com.flexive.core.search.genericSQL.GenericSQLDataFilter;
 import com.flexive.core.search.genericSQL.GenericSQLDataSelector;
 import com.flexive.core.search.H2.H2SQLDataSelector;
+import com.flexive.core.search.H2.H2SQLDataFilter;
 import com.flexive.shared.*;
 import com.flexive.shared.configuration.DBVendor;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -260,7 +261,7 @@ public class SqlSearch {
             stmt.close();
 
             stmt = con.createStatement();
-            if( Database.isQueryTimeoutSupported() )
+            if( df.isQueryTimeoutSupported() )
                 stmt.setQueryTimeout(params.getQueryTimeout());
             // Fetch the result
             ResultSet rs = stmt.executeQuery(selectSql);
@@ -424,9 +425,10 @@ public class SqlSearch {
         try {
             vendor = Database.getDivisionData().getDbVendor();
             switch (vendor) {
-                case H2:
                 case MySQL:
                     return new GenericSQLDataFilter(con, this);
+                case H2:
+                    return new H2SQLDataFilter(con, this);
                 default:
                     throw new FxSqlSearchException(LOG, "ex.db.filter.undefined", vendor);
             }

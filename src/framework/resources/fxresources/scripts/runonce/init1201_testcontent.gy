@@ -80,7 +80,7 @@ EJBLookup.scriptingEngine.runScript(scriptInfo.id)
 
 //create test data
 
-int instanceCount = 5
+int instanceCount = 10
 
 Date buildDate(int counter) {
     final Random random = new Random();
