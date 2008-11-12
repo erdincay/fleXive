@@ -135,10 +135,15 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
         } catch (FxInvalidParameterException e) {
             throw e.asRuntimeException();
         }
-        FxValue defaultValue = ConversionEngine.getFxValue("defaultValue", this, reader, ctx);
+        FxValue defaultValue = null;//ConversionEngine.getFxValue("defaultValue", this, reader, ctx);
 
-        if (reader.hasMoreChildren()) { //optional property as last subnode
+        while (reader.hasMoreChildren()) { //optional property and default value as subnodes
             reader.moveDown();
+            if( "defaultValue".equals(reader.getNodeName())) {
+                defaultValue = (FxValue) ctx.convertAnother(this, FxValue.class);
+                reader.moveUp();
+                continue;
+            }
             //only allowed child is the property if it is not derived
             if (!ConversionEngine.KEY_PROPERTY.equals(reader.getNodeName()))
                 throw new FxConversionException("ex.conversion.wrongNode", ConversionEngine.KEY_PROPERTY, reader.getNodeName()).asRuntimeException();
@@ -151,8 +156,18 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
             UniqueMode propUniqueMode = UniqueMode.valueOf(reader.getAttribute("uniqueMode"));
             FxString propLabel = (FxString) ConversionEngine.getFxValue("label", this, reader, ctx);
             FxString propHint = (FxString) ConversionEngine.getFxValue("hint", this, reader, ctx);
-            FxValue propDefaultValue = ConversionEngine.getFxValue("defaultValue", this, reader, ctx);
-            List<FxStructureOption> options = super.unmarshallOptions(reader, ctx);
+            List<FxStructureOption> options=null;
+            FxValue propDefaultValue = null;//ConversionEngine.getFxValue("defaultValue", this, reader, ctx);
+            if (reader.hasMoreChildren()) {
+                reader.moveDown();
+                if( "defaultValue".equals(reader.getNodeName())) {
+                    defaultValue = (FxValue) ctx.convertAnother(this, FxValue.class);
+                    reader.moveUp();
+                }
+                options = super.unmarshallOptions(reader, ctx);
+                if( propDefaultValue == null )
+                    reader.moveUp();
+            }
             if (env.propertyExists(propName)) {
                 FxPropertyEdit prop = env.getProperty(propName).asEditable();
                 prop.setACL(propACL);

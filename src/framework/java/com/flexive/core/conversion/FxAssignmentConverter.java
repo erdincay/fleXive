@@ -37,7 +37,6 @@ import com.flexive.shared.structure.FxAssignment;
 import com.flexive.shared.structure.FxMultiplicity;
 import com.flexive.shared.structure.FxStructureOption;
 import com.flexive.shared.value.FxString;
-import com.flexive.shared.value.FxValue;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
@@ -211,7 +210,9 @@ public abstract class FxAssignmentConverter implements Converter {
     protected List<FxStructureOption> unmarshallOptions(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
         if (!reader.hasMoreChildren())
             throw new FxConversionException("ex.conversion.missingNode", "options").asRuntimeException();
-        reader.moveDown();
+        boolean goDown = !"options".equals(reader.getNodeName());
+        if( goDown )
+            reader.moveDown();
         if (!"options".equals(reader.getNodeName()))
             throw new FxConversionException("ex.conversion.wrongNode", "options", reader.getNodeName()).asRuntimeException();
         List<FxStructureOption> options = new ArrayList<FxStructureOption>(20);
@@ -223,7 +224,8 @@ public abstract class FxAssignmentConverter implements Converter {
                     Boolean.valueOf(reader.getAttribute("set")), reader.getAttribute("value")));
             reader.moveUp();
         }
-        reader.moveUp();
+        if( goDown )
+            reader.moveUp();
         return options;
     }
 
