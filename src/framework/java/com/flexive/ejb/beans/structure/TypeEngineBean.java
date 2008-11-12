@@ -757,13 +757,12 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             //remove property and group assignment option entries
             sql.setLength(0);
             for (FxPropertyAssignment pa : allPropertyAssignments) {
-                if (pa.getBaseAssignmentId() == FxAssignment.NO_PARENT &&
-                        //exclude the "ID" property whose Id is "0" which is "NO_PARENT"
+                if ( //exclude the "ID" property whose Id is "0" which is "NO_PARENT"
                         !(pa.getProperty().getId() == FxAssignment.NO_PARENT)) {
                     if (sql.length() == 0) {
                         sql.append(" WHERE ASSID IN(").append(pa.getId());
                     } else
-                        sql.append(',').append(pa.getProperty().getId());
+                        sql.append(',').append(pa.getId());
                 }
             }
             if (sql.length() > 0) {
@@ -778,7 +777,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                     if (sql.length() == 0) {
                         sql.append(" WHERE ASSID IN(").append(ga.getId());
                     } else
-                        sql.append(',').append(ga.getGroup().getId());
+                        sql.append(',').append(ga.getId());
                 }
             }
             if (sql.length() > 0) {
@@ -790,6 +789,14 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
 
             //remove the assignments
             sql.setLength(0);
+            //clear parent key refs for removal to avoid referential integrity issues within the type itself
+//            sql.append("UPDATE ").append(TBL_STRUCT_ASSIGNMENTS).append(" SET PARENTGROUP=ID WHERE TYPEDEF=?");
+//            ps = con.prepareStatement(sql.toString());
+//            ps.setLong(1, type.getId());
+//            ps.executeUpdate();
+//            ps.close();
+//            sql.setLength(0);
+            ps = con.prepareStatement(sql.toString());
             sql.append("DELETE FROM ").append(TBL_STRUCT_ASSIGNMENTS).append(" WHERE TYPEDEF=? AND ID=?");
             ps = con.prepareStatement(sql.toString());
             ps.setLong(1, type.getId());

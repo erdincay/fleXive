@@ -139,7 +139,7 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
 
         while (reader.hasMoreChildren()) { //optional property and default value as subnodes
             reader.moveDown();
-            if( "defaultValue".equals(reader.getNodeName())) {
+            if ("defaultValue".equals(reader.getNodeName())) {
                 defaultValue = (FxValue) ctx.convertAnother(this, FxValue.class);
                 reader.moveUp();
                 continue;
@@ -154,19 +154,22 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
             ACL propACL = env.getACL(reader.getAttribute("acl"));
             boolean propOverrideACL = Boolean.valueOf(reader.getAttribute("overrideACL"));
             UniqueMode propUniqueMode = UniqueMode.valueOf(reader.getAttribute("uniqueMode"));
+            FxType refType = null;
+            if (!StringUtils.isEmpty(reader.getAttribute("refType")))
+                refType = env.getType(reader.getAttribute("refType"));
             FxString propLabel = (FxString) ConversionEngine.getFxValue("label", this, reader, ctx);
             FxString propHint = (FxString) ConversionEngine.getFxValue("hint", this, reader, ctx);
-            List<FxStructureOption> options=null;
+            List<FxStructureOption> options = null;
             FxValue propDefaultValue = null;//ConversionEngine.getFxValue("defaultValue", this, reader, ctx);
-            if (reader.hasMoreChildren()) {
+            while (reader.hasMoreChildren()) {
                 reader.moveDown();
-                if( "defaultValue".equals(reader.getNodeName())) {
+                if ("defaultValue".equals(reader.getNodeName())) {
                     defaultValue = (FxValue) ctx.convertAnother(this, FxValue.class);
-                    reader.moveUp();
-                }
-                options = super.unmarshallOptions(reader, ctx);
-                if( propDefaultValue == null )
-                    reader.moveUp();
+                } else if ("options".equals(reader.getNodeName())) {
+                    options = super.unmarshallOptions(reader, ctx);
+                } else
+                    throw new FxConversionException("ex.conversion.unexcpectedNode", reader.getNodeName()).asRuntimeException();
+                reader.moveUp();
             }
             if (env.propertyExists(propName)) {
                 FxPropertyEdit prop = env.getProperty(propName).asEditable();
@@ -178,6 +181,8 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
                 prop.setUniqueMode(propUniqueMode);
                 prop.setDefaultValue(propDefaultValue);
                 prop.setOptions(options);
+                if (refType != null)
+                    prop.setReferencedType(refType);
                 try {
                     EJBLookup.getAssignmentEngine().save(prop);
                     env = CacheAdmin.getEnvironment(); //refresh environment
@@ -208,6 +213,8 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
                 prop.setUniqueMode(propUniqueMode);
                 prop.setDefaultValue(propDefaultValue);
                 prop.setOptions(options);
+                if (refType != null)
+                    prop.setReferencedType(refType);
                 try {
                     EJBLookup.getAssignmentEngine().createProperty(type.getId(), prop, parentXPath, data.getAlias());
                     env = CacheAdmin.getEnvironment(); //refresh environment
