@@ -73,8 +73,8 @@ public class SequencerTest {
         String seq2 = "B" + RandomStringUtils.randomAlphanumeric(16).toUpperCase();
         String seq3 = "C" + RandomStringUtils.randomAlphanumeric(16).toUpperCase();
         id.createSequencer(seq1, true, 0);
-        id.createSequencer(seq2, true, SequencerEngine.MAX_ID);
-        id.createSequencer(seq3, false, SequencerEngine.MAX_ID);
+        id.createSequencer(seq2, true, id.getMaxId());
+        id.createSequencer(seq3, false, id.getMaxId());
         assert id.sequencerExists(seq1) : "Expected sequencer " + seq1 + " to exist!";
         assert id.sequencerExists(seq2) : "Expected sequencer " + seq2 + " to exist!";
         assert id.sequencerExists(seq3) : "Expected sequencer " + seq3 + " to exist!";
@@ -83,6 +83,8 @@ public class SequencerTest {
         assert i2 > i1 : "Expected a higher id after 2nd getId()!";
         i1 = id.getId(seq2); //call should cause the sequencer to roll over
         assert i1 == 0 : "Expected: " + 0 + ", got: " + i1;
+        i1 = id.getId(seq2); //should be 1 after rollover
+        assert i1 == 1 : "Expected: " + 1 + ", got: " + i1;
 
         try {
             id.getId(seq3);

@@ -51,9 +51,9 @@ import com.flexive.shared.structure.FxSelectListEdit;
 import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.structure.FxSelectListItemEdit;
 import com.flexive.shared.value.FxString;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Resource;
 import javax.ejb.*;
@@ -213,8 +213,9 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             ps.close();
             sb.setLength(0);
             //fix item references
-            sb.append("UPDATE ").append(TBL_SELECTLIST_ITEM).append(" i1, ").append(TBL_SELECTLIST_ITEM).
-                    append(" i2 SET i1.PARENTID=? WHERE i1.PARENTID=i2.ID AND i2.LISTID=?");
+            sb.append("UPDATE ").append(TBL_SELECTLIST_ITEM).
+                    append(" SET PARENTID=? WHERE PARENTID IN (SELECT p.ID FROM ").append(TBL_SELECTLIST_ITEM).
+                    append(" p WHERE p.LISTID=?)");
             ps = con.prepareStatement(sb.toString());
             ps.setNull(1, java.sql.Types.INTEGER);
             ps.setLong(2, list.getId());
@@ -437,7 +438,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             return newId;
         } catch (SQLException e) {
             try {
-                if( Database.isUniqueConstraintViolation(e))
+                if (Database.isUniqueConstraintViolation(e))
                     throw new FxCreateException(LOG, e, "ex.selectlist.item.name.notUnique", item.getName());
                 throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
             } finally {
@@ -488,7 +489,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
                     con, TBL_SELECTLIST_ITEM, "LABEL", "ID", item.getId());
         } catch (SQLException e) {
             try {
-                if( Database.isUniqueConstraintViolation(e))
+                if (Database.isUniqueConstraintViolation(e))
                     throw new FxUpdateException(LOG, e, "ex.selectlist.item.name.notUnique", item.getName());
                 throw new FxUpdateException(LOG, e, "ex.db.sqlError", e.getMessage());
             } finally {
@@ -502,9 +503,9 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
     private void checkValidListParameters(FxSelectListEdit list) throws FxInvalidParameterException {
         if (list.getName() == null || list.getName().equals(""))
             throw new FxInvalidParameterException("Name", "ex.selectlist.name.empty");
-        if( list.getName().indexOf('.')>0)
-            throw new FxInvalidParameterException("Name", "ex.selectlist.name.containsDot");    
-        if( list.getName().indexOf(',')>0)
+        if (list.getName().indexOf('.') > 0)
+            throw new FxInvalidParameterException("Name", "ex.selectlist.name.containsDot");
+        if (list.getName().indexOf(',') > 0)
             throw new FxInvalidParameterException("Name", "ex.selectlist.name.containsComma");
     }
 
@@ -513,7 +514,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             throw new FxInvalidParameterException("Name", "ex.selectlist.item.name.empty");
         if (item.getLabel() == null || item.getLabel().getIsEmpty())
             throw new FxInvalidParameterException("Label", "ex.selectlist.item.label.empty");
-        if( item.getName().indexOf(',')>0)
+        if (item.getName().indexOf(',') > 0)
             throw new FxInvalidParameterException("Name", "ex.selectlist.item.name.containsComma");
     }
 

@@ -34,6 +34,7 @@ package com.flexive.ejb.beans;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.CustomSequencer;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.interfaces.SequencerEngine;
 import com.flexive.shared.interfaces.SequencerEngineLocal;
 
@@ -54,6 +55,14 @@ import java.util.List;
 public class SequencerEngineBean implements SequencerEngine, SequencerEngineLocal {
     @Resource
     javax.ejb.SessionContext ctx;
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public long getMaxId() throws FxNotFoundException {
+        return StorageManager.getSequencerStorage().getMaxId();
+    }
 
     /**
      * {@inheritDoc}

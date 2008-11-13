@@ -33,8 +33,13 @@ public class H2SequencerStorage extends GenericSequencerStorage {
     private final static String SQL_CREATE = "CREATE SEQUENCE ";
     private final static String SQL_DELETE = "DROP SEQUENCE " + H2_SEQ_PREFIX;
     private final static String SQL_EXIST = "SELECT COUNT(*) FROM " + TBL_H2_SEQUENCES + " WHERE SEQUENCE_NAME=?";
-    private final static String SQL_GET_USER = "SELECT SUBSTR(SEQUENCE_NAME," + H2_SEQ_PREFIX.length() + "), FALSE, CURRENT_VALUE FROM " +
-            TBL_H2_SEQUENCES + " WHERE SEQUENCE_NAME NOT LIKE '" + H2_SEQ_PREFIX + "SYS_%' ORDER BY SEQUENCE_NAME ASC";
+    private final static String SQL_GET_COMMENT = "SELECT r.REMARKS FROM " + TBL_H2_SEQUENCES + " r WHERE r.SEQUENCE_NAME=";
+    private final static String SQL_SET_COMMENT = "COMMENT ON SEQUENCE ";
+    private final static String SQL_GET_USER = "SELECT SUBSTR(s.SEQUENCE_NAME," + (H2_SEQ_PREFIX.length() + 1) + "), (" + SQL_GET_COMMENT + "s.SEQUENCE_NAME) AS ROLLOVER, s.CURRENT_VALUE FROM " +
+            TBL_H2_SEQUENCES + " s WHERE s.SEQUENCE_NAME NOT LIKE '" + H2_SEQ_PREFIX + "SYS_%' ORDER BY s.SEQUENCE_NAME ASC";
+
+    private final String NOROLLOVER = "NOROLLOVER";
+    private final String ROLLOVER = "ROLLOVER";
 
     /**
      * Singleton getter
@@ -73,14 +78,24 @@ public class H2SequencerStorage extends GenericSequencerStorage {
                 newId = rs.getLong(2);
             } else
                 throw new FxCreateException(LOG, "ex.sequencer.fetch.failed", name);
-            if (curr == newId) {
+            if (curr == newId || curr < -1 || newId >= getMaxId()) {
+                if (!name.startsWith("SYS_")) {
+                    //get allowRollover setting
+                    ps.close();
+                    ps = con.prepareStatement(SQL_GET_COMMENT + "?");
+                    ps.setString(1, H2_SEQ_PREFIX + name);
+                    ResultSet rso = ps.executeQuery();
+                    if (rso == null || !rso.next())
+                        throw new FxCreateException(LOG, "ex.sequencer.fetch.failed", name);
+                    allowRollover = ROLLOVER.equals(rso.getString(1));
+                }
                 if (!allowRollover)
                     throw new FxCreateException("ex.sequencer.exhausted", name);
                 //reset it
                 ps.close();
-                ps = con.prepareStatement("ALTER SEQUENCE " + H2_SEQ_PREFIX + name + " RESTART WITH 2");
+                ps = con.prepareStatement("ALTER SEQUENCE " + H2_SEQ_PREFIX + name + " RESTART WITH 1");
                 ps.executeUpdate();
-                newId = 1;
+                newId = 0;
             }
             // Return new id
             return newId;
@@ -106,7 +121,8 @@ public class H2SequencerStorage extends GenericSequencerStorage {
         try {
             con = Database.getDbConnection();
             stmt = con.createStatement();
-            stmt.executeUpdate(SQL_CREATE + name + " START WITH 1 INCREMENT BY 1");
+            stmt.executeUpdate(SQL_CREATE + H2_SEQ_PREFIX + name + " START WITH " + startNumber + " INCREMENT BY 1");
+            stmt.executeUpdate(SQL_SET_COMMENT + H2_SEQ_PREFIX + name + " IS '" + (allowRollover ? ROLLOVER : NOROLLOVER) + "'");
         } catch (SQLException exc) {
             throw new FxCreateException(LOG, exc, "ex.sequencer.create.failed", name);
         } finally {
@@ -126,10 +142,8 @@ public class H2SequencerStorage extends GenericSequencerStorage {
             con = Database.getDbConnection();
             stmt = con.createStatement();
             stmt.executeUpdate(SQL_DELETE + name);
-            if (stmt.getUpdateCount() == 0)
-                throw new FxCreateException(LOG, "ex.sequencer.remove.failed", name);
         } catch (SQLException exc) {
-            throw new FxCreateException(LOG, exc, "ex.sequencer.remove.failed", name);
+            throw new FxCreateException(LOG, exc, "ex.sequencer.remove.failed", name, exc.getMessage());
         } finally {
             Database.closeObjects(H2SequencerStorage.class, con, stmt);
         }
@@ -168,7 +182,7 @@ public class H2SequencerStorage extends GenericSequencerStorage {
             ps = con.prepareStatement(SQL_GET_USER);
             ResultSet rs = ps.executeQuery();
             while (rs != null && rs.next())
-                res.add(new CustomSequencer(rs.getString(1), rs.getBoolean(2), rs.getLong(3)));
+                res.add(new CustomSequencer(rs.getString(1), ROLLOVER.equals(rs.getString(2)), rs.getLong(3)));
         } catch (SQLException exc) {
             throw new FxDbException(LOG, exc, "ex.db.sqlError", exc.getMessage());
         } finally {
@@ -186,7 +200,7 @@ public class H2SequencerStorage extends GenericSequencerStorage {
         try {
             con = Database.getDbConnection();
             ps = con.prepareStatement("ALTER SEQUENCE " + H2_SEQ_PREFIX + name + " RESTART WITH ?");
-            ps.setLong(1, newId+1);
+            ps.setLong(1, newId + 1);
             ps.executeUpdate();
         } catch (SQLException exc) {
             throw new FxDbException(LOG, exc, "ex.db.sqlError", exc.getMessage());

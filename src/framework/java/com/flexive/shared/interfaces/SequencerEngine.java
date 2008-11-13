@@ -33,6 +33,7 @@ package com.flexive.shared.interfaces;
 
 import com.flexive.shared.CustomSequencer;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxNotFoundException;
 
 import javax.ejb.Remote;
 import java.util.List;
@@ -80,9 +81,12 @@ public interface SequencerEngine {
     }
 
     /**
-     * Maximum possible id
+     * Return the maximum possible id that can be created
+     *
+     * @return maximum possible id that can be created
+     * @throws FxNotFoundException if no sequencer engine could be found
      */
-    public final static long MAX_ID = ((long) Integer.MAX_VALUE) * 2 - 50;
+    long getMaxId() throws FxNotFoundException;
 
     /**
      * Get a new unique id for the requested type.
