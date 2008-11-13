@@ -246,12 +246,12 @@ public interface FxEnvironment extends Serializable {
     boolean propertyExists(String name);
 
     /**
-     * Check if an assignment with the requested name exists
+     * Check if an assignment with the requested XPath exists
      *
-     * @param name name of the assignment
+     * @param xPath XPath of the assignment
      * @return exists
      */
-    boolean assignmentExists(String name);
+    boolean assignmentExists(String xPath);
 
     /**
      * Check if a group with the requested name exists

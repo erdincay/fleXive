@@ -7,7 +7,7 @@
       xmlns:c="http://java.sun.com/jstl/core"
       xmlns:fx="http://www.flexive.com/jsf/core">
 <head>
-    <title>[fleXive] announcement submission example application</title>
+    <title>[fleXive] Security Tutorial 01</title>
     <!-- Add flexive includes -->
     <fx:includes all="true"/>
     <!-- Add our own stylesheet -->
@@ -21,33 +21,43 @@
 
 <!-- The main menu -->
 <h:form id="menuForm">
-    <ul id="mainmenu">
-        <li><h:commandLink action="#{fxAuthenticationBean.logout}">Logout</h:commandLink></li>
-        <li><h:outputLink value="index.xhtml">Back</h:outputLink></li>
-    </ul>
+    <div id="mainmenu">
+        <h:commandButton action="#{fxAuthenticationBean.logout}" value="Logout"/>
+        <h:outputLink value="index.xhtml">Back</h:outputLink>
+    </div>
 </h:form>
 
-<p class="message">Create Announcement</p>
+<p class="message">On this page editors are able to create new announcements,
+    whereas visitors will provoke an error when trying to create a new announcement.
+    Furthermore editors have the possibility to assign an Access Control List to the newly created announcement instance,
+    which only grants editors the permission to read this assignment.
+ <br/>
+    <h:outputText value="Feel free to modify the access control lists in the "/>
+    <h:outputLink value="http://www.flexive.org/docs/website/adm_ACL.html">administration interfaces</h:outputLink>
+    <h:outputText value=" of the "/><h:outputLink value="http://localhost:8080/flexive/adm/">backend
+    application</h:outputLink>.
+</p>
 
 <h:form id="entryForm">
     <fx:content typeName="announcementEntry" var="entry">
-        <fx:value property="entryTitle"/><br/>
-        <fx:value property="submissionDate"/><br/>
+        <fx:value property="caption"/><br/>
+        <fx:value property="announcementText"/><br/>
         <fx:value property="publishDate"/><br/>
-        <fx:value property="submissionURL"/><br/>
         <fx:value property="publishURL"/><br/>
-        <fx:value property="entryAnnouncementText"/><br/>
-        <h:commandLink action="#{asubmissionBean.save}">
+        <h:commandButton action="#{asubmissionBean.saveReadAll}" value='Save with "Read all" ACL'>
             <f:setPropertyActionListener target="#{asubmissionBean.content}" value="#{entry_content}"/>
-            Save
-        </h:commandLink>
+        </h:commandButton>
+        <br/>
+        <h:commandButton action="#{asubmissionBean.saveEditorsOnly}" value='Save with "Editors only" ACL'>
+            <f:setPropertyActionListener target="#{asubmissionBean.content}" value="#{entry_content}"/>
+        </h:commandButton>
     </fx:content>
 </h:form>
 
 <p><h:outputLink
         onclick="window.open('http://wiki.flexive.org/confluence/display/FX/Creating+a+new+announcement', 'In_depth_explanation', 'width=950,height=600,left=50,top=200,scrollbars=yes,resizable=yes');"
         value="#">
-    What happens on this page?
+    See the announcement creation form explained
 </h:outputLink>
 </p>
 

@@ -301,8 +301,8 @@ public final class FxFilteredEnvironment implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
-    public boolean assignmentExists(String name) {
-        return environment.assignmentExists(name);
+    public boolean assignmentExists(String xPath) {
+        return environment.assignmentExists(xPath);
     }
 
     /**

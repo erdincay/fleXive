@@ -46,6 +46,24 @@
     </navigation-rule>
 
     <navigation-rule>
+        <from-view-id>/protected.area/edit.xhtml</from-view-id>
+        <navigation-case>
+            <from-outcome>instance_created</from-outcome>
+            <to-view-id>/protected.area/index.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+
+    <navigation-rule>
+        <from-view-id>/protected.area/create.xhtml</from-view-id>
+        <navigation-case>
+            <from-outcome>instance_created</from-outcome>
+            <to-view-id>/protected.area/index.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+
+    <navigation-rule>
         <from-view-id>*</from-view-id>
         <navigation-case>
             <from-outcome>login</from-outcome>

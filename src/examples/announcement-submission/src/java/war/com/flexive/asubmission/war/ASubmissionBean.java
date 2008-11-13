@@ -37,12 +37,12 @@ public class ASubmissionBean {
     public DataModel getAnnouncementEntries() throws FxApplicationException {
         if (announcementEntries == null) {
             final FxResultSet result = new SqlQueryBuilder()
-                    .select("@permissions", "@pk",
-                            "announcementEntry/entryTitle",
-                            "announcementEntry/submissionDate",
+                    .select("@permissions",
+                            "announcementEntry/caption",
+                            "announcementEntry/announcementText",
                             "announcementEntry/publishDate",
-                            "announcementEntry/submissionURL",
-                            "announcementEntry/publishURL")
+                            "announcementEntry/publishURL",
+                            "@pk")
                     .type("announcementEntry")
                     .orderBy("announcementEntry/publishDate", SortDirection.DESCENDING)
                     .getResult();
@@ -52,19 +52,35 @@ public class ASubmissionBean {
     }
 
     /**
-     * Save content instance
+     * Save content instance with "Read All" permission
      *
      * @return null because the page is reloaded
      */
-    public String save() {
+    public String saveReadAll() {
         try {
-            if (content.getPk().isNew()) // Instance ACL Id only set for new instances
-                content.setAclId(CacheAdmin.getEnvironment().getACL("Announcement_Entry_ACL").getId());
+            content.setAclId(CacheAdmin.getEnvironment().getACL("Announcement Instance Read All").getId());
             EJBLookup.getContentEngine().save(content.copy());
         } catch (FxApplicationException e) {
             new FxFacesMsgErr(e).addToContext();
+            return null;
         }
-        return null;
+        return "instance_created";
+    }
+
+    /**
+     * Save content instance with "Editors Only" permission
+     *
+     * @return null because the page is reloaded
+     */
+    public String saveEditorsOnly() {
+        try {
+            content.setAclId(CacheAdmin.getEnvironment().getACL("Announcement Instance Editors Only").getId());
+            EJBLookup.getContentEngine().save(content.copy());
+        } catch (FxApplicationException e) {
+            new FxFacesMsgErr(e).addToContext();
+            return null;
+        }
+        return "instance_created";
     }
 
     /**
@@ -106,7 +122,8 @@ public class ASubmissionBean {
      * @return true if the user may create announcements
      */
     public boolean isMayCreateAnnouncement() {
-        if (FxContext.getUserTicket().mayCreateACL(ACL.Category.STRUCTURE.getDefaultId(), -1L))
+        if (FxContext.getUserTicket().mayCreateACL(
+                CacheAdmin.getEnvironment().getACL("Announcement Type ACL").getId(), -1L))
             return true;
         return false;
     }

@@ -129,10 +129,12 @@ public final class FxFormatUtils {
      *          if the email is invalid
      */
     public static String checkEmail(String email) throws FxInvalidParameterException {
-        final boolean valid = email != null && email.indexOf('@') > 0
+        final boolean valid = !StringUtils.isEmpty(email) && email.indexOf('@') > 0
                 && (StringUtils.countMatches(email, "@") == 1)
                 && (email.indexOf('@') < email.length() - 1);
         if (!valid) {
+            if (StringUtils.isEmpty(email))
+                throw new FxInvalidParameterException("EMAIL", "ex.account.email.empty");
             throw new FxInvalidParameterException("EMAIL", "ex.account.email.invalid", email);
         }
         return email.trim();

@@ -11,7 +11,7 @@
     <fx:includes/>
     <!-- Add our own stylesheet -->
     <link rel="stylesheet" type="text/css" href="css/announcement-submission.css"/>
-    <title>[fleXive] announcement submission example application</title>
+    <title>[fleXive] Security Tutorial 01</title>
 </head>
 
 <body>
@@ -20,52 +20,44 @@
 <h:messages showDetail="true" errorClass="errorMessage" infoClass="infoMessage"/>
 
 <div class="message">
-    <p><b>Welcome to the [fleXive] announcement submission example application</b></p>
+    <p><b>[fleXive] Security Tutorial 01: Announcement submission application</b></p>
 
-    <p class="message"><b>What this example application is doing</b><br/>
-        Announcements like software release messages are submitted on news websites etc.<br/>
-        Every time an announcement is submitted, it is logged in the announcement submission application.<br/>
-        When it got published, the publishing information (date, URL) is logged in addition.<br/>
-        This application supports user authentication and content security.
+    <p class="message"><b>What to learn in this Tutorial</b><br/>
+        This tutorial covers the basics of user account creation, user authentication and content security.<br/>
+        The basic idea is to have 2 separate user groups for creating and reading announcements:<br/>
+        The "editors" user group is able to read, create, edit and delete all announcements,
+        whereas the "visitors" user group may only read certain announcements.
     </p>
 
-    <p>There have been two user groups set up by the runonce script <code
-            class="generic">asubmission001.groovy</code>.<br/>
-    </p>
-
-    <p>
-        Each user group has a user assigned.
-    </p>
-
-    <p>For the first group it's</p>
-    <ul>
-        <li>Username: announcement.editor</li>
-        <li>Password: password</li>
-    </ul>
-    <p>For the second group it's</p>
-    <ul>
-        <li>Username: announcement.visitor</li>
-        <li>Password: password</li>
-    </ul>
-
-    <p>Users of the first group may <code class="generic">read</code>, <code class="generic">create</code>,
-        <code class="generic">edit</code> and <code class="generic">delete</code> content instances.<br/>
-        Users of the second group may only <code class="generic">read</code> content instances.</p>
-
-    <p><h:outputLink
+    <p>First the blueprint of an announcement, two user groups, two users and access control have been set up by the runonce script <code
+            class="generic">asubmission001.groovy</code>. This is where the magic happens:
+        <h:outputLink
             onclick="window.open('http://wiki.flexive.org/confluence/display/FX/Initial+setup', 'In_depth_explanation', 'width=950,height=600,left=50,top=200,scrollbars=yes,resizable=yes');"
             value="#">
-        How does the <code
-            class="generic">asubmission001.groovy</code> script work?
-    </h:outputLink>
+       See the <code
+            class="generic">asubmission001.groovy</code> script explained
+        </h:outputLink>
     </p>
 
     <p>
-        <h:outputText value="Feel free to modify the access control lists in the "/>
-        <h:outputLink value="http://www.flexive.org/docs/website/adm_ACL.html">administration interfaces</h:outputLink>
-        <h:outputText value=" of the "/><h:outputLink value="http://localhost:8080/flexive/adm/">backend
-        application</h:outputLink>.
+        Each user group has a user assigned:
     </p>
+
+    <p>For the editors group it's</p>
+    <ul>
+        <li>Username: announcement.editor</li>
+        <li>Password: editor</li>
+    </ul>
+    <p>For the visitors group it's</p>
+    <ul>
+        <li>Username: announcement.visitor</li>
+        <li>Password: visitor</li>
+    </ul>
+
+    <p>Users of the editors group may <code class="generic">read</code>, <code class="generic">create</code>,
+        <code class="generic">edit</code> and <code class="generic">delete</code> announcement instances.<br/>
+        Users of the visitors group may only <code class="generic">read</code> certain announcement instances.</p>
+        Go ahead and try it out!
 </div>
 
 <h:form>
@@ -76,14 +68,14 @@
         <h:inputSecret id="password" value="#{fxAuthenticationBean.password}"/><br/>
         <h:selectBooleanCheckbox id="takeover" value="#{fxAuthenticationBean.takeover}"/>
         <h:outputText value="Take over"/><br/>
-        <h:commandLink action="#{fxAuthenticationBean.login}">Login</h:commandLink>
+        <h:commandButton action="#{fxAuthenticationBean.login}" value="Login"/>
     </fx:fieldSet>
 </h:form>
 
 <p><h:outputLink
         onclick="window.open('http://wiki.flexive.org/confluence/display/FX/Logging+in', 'In_depth_explanation', 'width=950,height=600,left=50,top=200,scrollbars=yes,resizable=yes');"
         value="#">
-    What happens on this page?
+    See the login form explained
 </h:outputLink>
 </p>
 

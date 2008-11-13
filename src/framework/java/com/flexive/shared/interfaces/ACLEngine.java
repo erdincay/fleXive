@@ -84,7 +84,7 @@ public interface ACLEngine {
     void remove(long aclId) throws FxApplicationException;
 
     /**
-     * Updates a existing ACL.
+     * Updates an existing ACL.
      * <p/>
      * The calling user needs to be in ACLManagement, and may only update ACLs belonging to his
      * mandator.<br>
@@ -104,7 +104,7 @@ public interface ACLEngine {
             throws FxApplicationException;
 
     /**
-     * Loads a ACL definied by its unique id.
+     * Loads an ACL definied by its unique id.
      * <p/>
      * The caller may only load ACLs belonging to his mandator, or ACLs that the caller is assigned to.<br>
      * GROUP_GLOBAL_SUPERVISOR may load all ACLs.
@@ -117,7 +117,7 @@ public interface ACLEngine {
 
 
     /**
-     * Loads a ACL definied by its unique id.
+     * Loads an ACL definied by its unique id.
      * <p/>
      * If ignoreSecurity is true the following permissison checks are performed:<br>
      * The caller may only load ACLs belonging to his mandator.<br>
@@ -132,12 +132,12 @@ public interface ACLEngine {
 
 
     /**
-     * Defines a ACL assignment between a group and a ACL.
+     * Defines an ACL assignment between a group and an ACL.
      *
-     * If all permissions are set to false no assignments is created, and any old assignment is removed.<br>
-     * Any existing assignment between this group and the ACL is overwritten.<br>
-     * The caller must be in ACLManagement and may only assign group and acls belonging zo his mandator.<br>
-     * GROUP_EVERYONE and PRIVATE my be assigned regardless of their mandator.<br>
+     * If all permissions are set to false, no assignment is created and any old assignment is removed.<br>
+     * If an assignment between the specified group and the specified ACL already exists, its permissions are overwritten.<br>
+     * The caller must be in role ACLManagement and may only assign groups and ACLs belonging to his mandator.<br>
+     * GROUP_EVERYONE and PRIVATE may be assigned regardless of their mandator.<br>
      * GLOBAL_SUPERVISOR may assign acls and groups of any mandator.
      *
      * @param aclId the acl
@@ -193,7 +193,7 @@ public interface ACLEngine {
     List<ACLAssignment> loadAssignments(long aclId) throws FxApplicationException;
 
     /**
-     * Removes an ACLAssignment defined by its groupId and aclId.
+     * Removes an ACL assignment defined by its groupId and aclId.
      *
      * Only callers in ACLManagement may unassign ACLAssignments of groups and acl belonging to his mandator.<br>
      * GROUP_EVERYONE and PRIVATE my be assigned regardless of their mandator.<br>

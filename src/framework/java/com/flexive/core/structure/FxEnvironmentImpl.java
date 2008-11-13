@@ -624,10 +624,17 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
-    public boolean assignmentExists(String name) {
-        for(FxAssignment check: assignments)
-            if( check.getXPath().equalsIgnoreCase(name))
-                return true;
+    public boolean assignmentExists(String xPath) {
+        if (xPath != null && xPath.trim().length() > 0) {
+            try {
+                xPath = XPathElement.toXPathNoMult(xPath);
+            } catch (FxInvalidParameterException e) {
+                throw e.asRuntimeException();
+            }
+            for (FxAssignment as : assignments)
+                if (xPath.equals(as.getXPath()))
+                    return true;
+        }
         return false;
     }
 
