@@ -86,7 +86,14 @@ public class FxBackingCacheProviderFactory {
             } catch (FxCacheException e) {
                 LOG.info("Failed to instantiate FxJBossExternalCacheProvider: " + e.getMessage());
             }
-            instance = new FxJBossEmbeddedCacheProvider();
+            try {
+                instance = new FxJBossEmbeddedCacheProvider();
+                instance.init();
+            } catch (FxCacheException e) {
+                final String message = "Failed to instantiate embedded cahce: " + e.getMessage();
+                LOG.error(message, e);
+                throw new IllegalStateException(message, e);
+            }
         } finally {
             if (instance != null)
                 LOG.info("Using FxBackingCacheProvider instance " + instance.getClass().getCanonicalName());

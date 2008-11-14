@@ -18,9 +18,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.sun.facelets</groupId>
+            <groupId>com.flexive</groupId>
             <artifactId>jsf-facelets</artifactId>
-            <version>1.1.11</version>
+            <version>1.1.15-beta-patched</version>
             <optional>false</optional>
         </dependency>
 

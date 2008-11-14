@@ -1,0 +1,47 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<head>
+    <fx:includes/>
+    <title>[fleXive] test application, ${symbol_pound}{exampleBean.buildInfo}</title>
+</head>
+
+<body>
+    <p>
+        Welcome to your [fleXive] application.
+    </p>
+
+    <p>
+        <c:if test="${symbol_pound}{empty fxSystemBean.buildInfoVerbose}">
+            Build information could not be retrieved. Something may be wrong with your installation,
+            please check the log files.
+        </c:if>
+        <c:if test="${symbol_pound}{!empty fxSystemBean.buildInfoVerbose}">
+            <pre>${symbol_pound}{fxSystemBean.buildInfoVerbose}</pre>
+            <p>
+                This request is using division
+                ${symbol_pound}{fxSystemBean.context.divisionId}.
+            </p>
+
+            <!-- Render instance counts as returned by the EJBExample engine using the JSF ManagedExampleBean -->
+            <table>
+                <caption style="white-space:nowrap">[fleXive] content instances (visible to the guest user)</caption>
+                <c:forEach items="${symbol_pound}{exampleBean.instanceCounts}" var="instanceCount">
+                    <tr>
+                        <td>${symbol_pound}{instanceCount.value}</td>
+                        <td>${symbol_pound}{instanceCount.key.label}</td>
+                    </tr>
+                </c:forEach>
+            </table>
+
+        </c:if>
+    </p>
+
+</body>
+
+</html>

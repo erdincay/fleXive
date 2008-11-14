@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+        <artifactId>${rootArtifactId}</artifactId>
+        <groupId>${groupId}</groupId>
+        <version>${version}</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>${artifactId}</artifactId>
+    <packaging>war</packaging>
+    <name>war</name>
+    <dependencies>
+        <dependency>
+            <groupId>${groupId}</groupId>
+            <artifactId>shared</artifactId>
+            <version>${version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <type>jar</type>
+            <version>2.5</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.faces</groupId>
+            <artifactId>jsf-api</artifactId>
+            <version>1.2</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-plugin-jsf-core</artifactId>
+            <type>jar</type>
+            <version>3.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <finalName>yourWarName</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.mortbay.jetty</groupId>
+                <artifactId>maven-jetty-plugin</artifactId>
+                <version>6.1.12</version>
+                <configuration>
+                    <scanIntervalSeconds>10</scanIntervalSeconds>
+                    <stopKey>foo</stopKey>
+                    <stopPort>9999</stopPort>
+
+                    <!--<webAppSourceDirectory>${basedir}/war/src/main/webapp</webAppSourceDirectory>-->
+                    <!--<classesDirectory>${basedir}/war/target/classes</classesDirectory>-->
+                    <!--<webXml>${basedir}/war/src/main/webapp/WEB-INF/web.xml</webXml>-->
+                    <!--<tmpDir>${basedir}/war/target</tmpDir>-->
+                    <!--webApp>${basedir}/war/target/yourWarName.war</webApp-->
+
+                    <!-- set OpenEJB configuration home -->
+                    <systemProperties>
+                        <systemProperty>
+                            <name>openejb.base</name>
+                            <value>${basedir}/../openejb</value>
+                        </systemProperty>
+                    </systemProperties>
+                </configuration>
+                <dependencies>
+                    <!-- Deploy flexive shared environment -->
+                    <dependency>
+                        <groupId>com.flexive</groupId>
+                        <artifactId>flexive-shared</artifactId>
+                        <version>3.1-SNAPSHOT</version>
+                    </dependency>
+
+                    <!-- Deploy our required library versions -->
+                    <dependency>
+                        <groupId>commons-lang</groupId>
+                        <artifactId>commons-lang</artifactId>
+                        <version>2.4</version>
+                        <optional>false</optional>
+                    </dependency>
+
+                    <!-- Deploy JSF libs -->
+                    <dependency>
+                        <groupId>javax.faces</groupId>
+                        <artifactId>jsf-api</artifactId>
+                        <version>1.2_10</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>javax.faces</groupId>
+                        <artifactId>jsf-impl</artifactId>
+                        <version>1.2_10</version>
+                    </dependency>
+
+                    <!-- Deploy OpenEJB -->
+                    <dependency>
+                        <groupId>org.apache.openejb</groupId>
+                        <artifactId>openejb-ejbd</artifactId>
+                        <version>3.1</version>
+                    </dependency>
+
+                    <!-- Deploy flexive JSF environment -->
+                    <dependency>
+                        <groupId>com.flexive</groupId>
+                        <artifactId>flexive-plugin-jsf-core</artifactId>
+                        <version>3.1-SNAPSHOT</version>
+                    </dependency>
+
+                    <!-- Deploy flexive EJBs -->
+
+                    <dependency>
+                        <groupId>com.flexive</groupId>
+                        <artifactId>flexive-ejb</artifactId>
+                        <version>3.1-SNAPSHOT</version>
+                    </dependency>
+
+                    <dependency>
+                        <groupId>mysql</groupId>
+                        <artifactId>mysql-connector-java</artifactId>
+                        <version>5.0.8</version>
+                    </dependency>
+
+                    <!-- Deploy JBoss common library -->
+                    <dependency>
+                        <groupId>org.jboss</groupId>
+                        <artifactId>jboss-common-core</artifactId>
+                        <version>2.2.3.GA</version>
+                    </dependency>
+
+                    <!-- Deploy our EJB and shared classes -->
+                    <dependency>
+                        <groupId>${groupId}</groupId>
+                        <artifactId>shared</artifactId>
+                        <version>${version}</version>
+                        <type>jar</type>
+                    </dependency>
+
+                    <dependency>
+                        <groupId>${groupId}</groupId>
+                        <artifactId>ejb-jar</artifactId>
+                        <type>ejb</type>
+                        <version>${version}</version>
+                    </dependency>
+
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
+</project>

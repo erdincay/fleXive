@@ -64,9 +64,9 @@ public class ContainerBootstrap {
 
             // force DS lookup now since the JNDI context does not always contain the resource entries
             // This is a known issue with OpenEJB up until 3.1, so this may not be necessary for future versions
-            Database.getGlobalDataSource();
-            Database.getDataSource("jdbc/flexiveTest");
-            Database.getDataSource();
+//            Database.getGlobalDataSource();
+//            Database.getDataSource("jdbc/flexiveTest");
+//            Database.getDataSource();
 
             // force flexive initialization
             FxContext.get().runAsSystem();

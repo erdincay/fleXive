@@ -58,6 +58,7 @@
         <fileset dir="${flexive.lib.dir}/xstream" includes="*.jar"/>
         <fileset dir="${flexive.lib.dir}/groovy" includes="*.jar"/>
         <fileset dir="${flexive.lib.dir}/mail" includes="*.jar"/>
+        <fileset dir="${flexive.lib.dir}/openejb-3.1/lib" includes="*.jar"/>
     </path>
 
     <path id="classpath.build.plugin">
@@ -714,18 +715,27 @@ database.vendor=MySQL
 
         <!-- Also package libraries that are not available on common public servers -->
         <maven-deploy file="${flexive.lib.dir}/sanselan.jar" pom="sanselan.pom"/>
+        <maven-deploy file="${flexive.lib.dir}/jsf/jsf-facelets.jar" pom="jsf-facelets.pom"/>
+
+        <!-- Deploy archetypes -->
+<!--
+        <maven-deploy file="${flexive.resources.framework.dir}/maven/archetypes/flexive-ear-archetype/target/flexive-ear-archetype-3.1-SNAPSHOT.jar"
+                      pomPath="${flexive.resources.framework.dir}/maven/archetypes/flexive-ear-archetype"
+                      pom="pom.xml"/>
+-->
     </target>
 
     <macrodef name="maven-deploy">
         <attribute name="file"/>
         <attribute name="pom"/>
+        <attribute name="pomPath" default="${flexive.resources.framework.dir}/maven"/>
         <sequential>
-            <copy file="${flexive.resources.framework.dir}/maven/@{pom}" todir="${flexive.base.build.dir}">
+            <copy file="@{pomPath}/@{pom}" todir="${flexive.base.build.dir}">
                 <filterset>
                     <filter token="FLEXIVE_VERSION" value="${flexive.version}"/>
                 </filterset>
             </copy>
-            <artifact:deploy file="@{file}">
+            <artifact:deploy file="@{file}" uniqueversion="false">
                 <remoterepository url="${maven.dist.repo}">
                     <snapshots updatePolicy="always"/>
                 </remoterepository>

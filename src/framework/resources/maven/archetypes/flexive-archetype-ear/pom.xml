@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.flexive</groupId>
+    <artifactId>flexive-archetype-ear</artifactId>
+    <packaging>maven-archetype</packaging>
+    <name>flexive-archetype-ear</name>
+    <version>0.0.1-SNAPSHOT</version>
+    <build>
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.archetype</groupId>
+                <artifactId>archetype-packaging</artifactId>
+                <version>2.0-alpha-4</version>
+            </extension>
+        </extensions>
+        <plugins>
+            <plugin>
+                <artifactId>maven-archetype-plugin</artifactId>
+                <version>2.0-alpha-4</version>
+                <extensions>true</extensions>
+            </plugin>
+        </plugins>
+    </build>
+    <distributionManagement>
+        <snapshotRepository>
+            <id>repo</id>
+            <name>Repository Name</name>
+            <url>file:///home/daniel/repos/flexive-snapshot-local</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+</project>

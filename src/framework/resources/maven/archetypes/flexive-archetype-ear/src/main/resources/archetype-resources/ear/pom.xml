@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<parent>
+		<artifactId>${rootArtifactId}</artifactId>
+		<groupId>${groupId}</groupId>
+		<version>${version}</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>${artifactId}</artifactId>
+	<packaging>ear</packaging>
+	<name>ear</name>
+	<dependencies>
+		<dependency>
+			<groupId>${groupId}</groupId>
+			<artifactId>ejb-jar</artifactId>
+			<type>ejb</type>
+			<version>${version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${groupId}</groupId>
+			<artifactId>war</artifactId>
+			<type>war</type>
+			<version>${version}</version>
+		</dependency>
+
+		<dependency>
+		    <groupId>com.flexive</groupId>
+		    <artifactId>flexive-shared</artifactId>
+		    <type>jar</type>
+		    <version>3.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+		    <groupId>com.flexive</groupId>
+		    <artifactId>flexive-ejb</artifactId>
+		    <type>ejb</type>
+		    <version>3.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+		    <groupId>com.flexive</groupId>
+		    <artifactId>flexive-backend</artifactId>
+		    <type>jar</type>
+		    <version>3.1-SNAPSHOT</version>
+		</dependency>
+
+	</dependencies>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>codehaus snapshot repository</id>
+			<url>http://snapshots.repository.codehaus.org/</url>
+			<releases>
+			</releases>
+		</pluginRepository>
+	</pluginRepositories>
+	<build>
+		<finalName>your-ear-name</finalName>
+		<plugins>
+			<plugin>
+				<artifactId>maven-ear-plugin</artifactId>
+				<configuration>
+    				<defaultLibBundleDir>lib</defaultLibBundleDir>
+					<modules>
+						<ejbModule>
+							<groupId>${groupId}</groupId>
+							<artifactId>ejb-jar</artifactId>
+						</ejbModule>
+						<webModule>
+							<groupId>${groupId}</groupId>
+							<artifactId>war</artifactId>
+						</webModule>
+					</modules>
+					<jboss>
+             			<version>4</version>
+             			<loader-repository>${groupId}:archive=your-ear-name.ear</loader-repository>
+           			</jboss>					
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.cargo</groupId>
+				<artifactId>cargo-maven2-plugin</artifactId>
+				<version>0.3-SNAPSHOT</version>
+				<configuration>
+					<container>
+						<containerId>jboss4x</containerId>
+						<type>remote</type>
+					</container>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
