@@ -326,9 +326,9 @@ public class MessageBean extends HashMap {
                 final URL jarURL = new URL("file", null, resourceURL.getPath().substring("file:".length(), jarDelim + 4));
                 addResourceBundle(baseName, jarURL);
 
-                LOG.info("Added plugin message resources for " + jarURL.getPath());
+                LOG.info("Added message resources for " + resourceURL.getPath());
             } catch (Exception e) {
-                LOG.error("Failed to add plugin resources for URL " + resourceURL.getPath() + ": " + e.getMessage(), e);
+                LOG.error("Failed to add message resources for URL " + resourceURL.getPath() + ": " + e.getMessage(), e);
             }
         }
     }
