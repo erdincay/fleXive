@@ -169,11 +169,18 @@ public class ContentTreeWriter implements Serializable {
         enableAction(actionsDisabled, contentAvailable && node.isMayEdit(), "editContent", "rename");
         enableAction(actionsDisabled, node.isMayEdit(), "editNode", "cutNode");
         enableAction(actionsDisabled, node.getDirectChildCount() > 0, "searchSubtree");
-        final boolean editNodeActions = !node.isLive() && node.isMayEdit() && liveTreeEnabled;
+        final boolean editNodeActions =
+                !node.isLive()
+                && node.isMayEdit()
+                && liveTreeEnabled;
         enableAction(actionsDisabled, editNodeActions, "activateNode", "activateNodeAndChildren", "removeNode");
         enableAction(actionsDisabled, editNodeActions && node.getDirectChildCount() > 0, "removeNodeAndChildren");
         enableAction(actionsDisabled, !node.isLive(), "createContent", "createFolder");
-        final boolean liveNodeActions = node.isLive() && liveTreeEnabled && node.isMayEdit();
+        final boolean liveNodeActions =
+                node.isLive()
+                && liveTreeEnabled
+                && node.isMayEdit()
+                && node.getId() != FxTreeNode.ROOT_NODE;
         enableAction(actionsDisabled, liveNodeActions, "deactivateNode");
         enableAction(actionsDisabled, liveNodeActions && node.getDirectChildCount() > 0, "deactivateNodeAndChildren");
     }
