@@ -730,9 +730,9 @@ database.vendor=MySQL
         <attribute name="pom"/>
         <attribute name="pomPath" default="${flexive.resources.framework.dir}/maven"/>
         <sequential>
-            <copy file="@{pomPath}/@{pom}" todir="${flexive.base.build.dir}">
+            <copy file="@{pomPath}/@{pom}" todir="${flexive.base.build.dir}" overwrite="true">
                 <filterset>
-                    <filter token="FLEXIVE_VERSION" value="${flexive.version}"/>
+                    <filter token="FLEXIVE_VERSION" value="${flexive.maven.version}"/>
                 </filterset>
             </copy>
             <artifact:deploy file="@{file}" uniqueversion="false">
