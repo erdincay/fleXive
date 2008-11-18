@@ -310,7 +310,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 throw (FxCreateException) e;
             if (e instanceof FxInvalidParameterException)
                 throw (FxInvalidParameterException) e;
-            throw new FxCreateException(e);
+            throw new FxCreateException(LOG, e);
         }
         return pk;
     }

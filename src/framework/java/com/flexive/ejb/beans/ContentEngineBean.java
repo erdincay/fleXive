@@ -373,6 +373,9 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
         } catch (FxInvalidParameterException e) {
             ctx.setRollbackOnly();
             throw new FxCreateException(e);
+        } catch (FxCreateException e) {
+            ctx.setRollbackOnly();
+            throw e;
         } catch (Throwable t) {
             ctx.setRollbackOnly();
             if( t instanceof FxApplicationException )

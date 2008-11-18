@@ -67,9 +67,10 @@ public class FxApplicationException extends Exception implements FxLocalizedExce
      * @param converted the message to convert
      */
     public FxApplicationException(FxApplicationException converted) {
-        super(converted.message.getKey());
+        super(converted.message.getKey(), converted);
         this.message = converted.message;
         this.affectedXPath = converted.affectedXPath;
+        this.messageLogged = converted.isMessageLogged();
     }
 
     /**
