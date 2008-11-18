@@ -109,16 +109,29 @@ public abstract class NumberQueryInputMapper<T, BaseType extends FxValue<T, ?>> 
         @Override
         protected FxReference doDecode(FxString value) {
             if (value.isMultiLanguage()) {
-                final FxReference reference = new FxReference(value.getDefaultLanguage(),
-                        getReferencedContent(value.getDefaultTranslation()));
+                final FxReference reference = createReference(value);
                 for (long languageId : value.getTranslatedLanguages()) {
-                    reference.setTranslation(languageId, getReferencedContent(value.getTranslation(languageId)));
+                    final ReferencedContent referencedContent = getReferencedContent(value.getTranslation(languageId));
+                    if (!referencedContent.isNew()) {
+                        reference.setTranslation(languageId, referencedContent);
+                    }
                 }
                 return reference;
             } else {
-                final String query = value.getDefaultTranslation();
-                return new FxReference(false, getReferencedContent(query));
+                return createReference(value);
             }
+        }
+
+        private FxReference createReference(FxString value) {
+            final ReferencedContent rc = getReferencedContent(value.getDefaultTranslation());
+            final FxReference reference = value.isMultiLanguage()
+                    ? new FxReference(value.getDefaultLanguage(), rc)
+                    : new FxReference(false, rc);
+            // FX-360 - set empty flag on decoded value
+            if (rc.isNew()) {
+                reference.setEmpty();
+            }
+            return reference;
         }
     }
 
