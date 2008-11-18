@@ -39,19 +39,22 @@ import com.flexive.core.search.SqlSearch;
 import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.genericSQL.GenericTreeStorage;
-import com.flexive.shared.*;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.FxContext;
+import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
-import com.flexive.shared.search.FxFoundType;
 import com.flexive.shared.search.DateFunction;
+import com.flexive.shared.search.FxFoundType;
 import com.flexive.shared.search.query.VersionFilter;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.sqlParser.*;
 import static com.flexive.sqlParser.Condition.Comparator;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -60,8 +63,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Date;
+import java.util.List;
 
 // NVL --> IFNULL((select sub.id from FX_CONTENT_DATA sub where sub.id=filter.id),1)
 
@@ -190,7 +193,7 @@ public class GenericSQLDataFilter extends DataFilter {
             }
             sql = "INSERT INTO " + search.getCacheTable() + " " + dataSelect;
             stmt = getConnection().createStatement();
-            if( isQueryTimeoutSupported() )
+            if (isQueryTimeoutSupported())
                 stmt.setQueryTimeout(search.getParams().getQueryTimeout());
             stmt.executeUpdate(sql);
             analyzeResult();
@@ -450,8 +453,8 @@ public class GenericSQLDataFilter extends DataFilter {
             // Fulltext search
             return "(SELECT DISTINCT ft.id,ft.ver,ft.lang " +
                     "FROM " + tableFulltext + " ft," + DatabaseConst.TBL_CONTENT + " cd WHERE\n" +
-                    "cd.ver=ft.ver AND cd.id=ft.id and\n" +
-                    "MATCH (value) AGAINST (" + constant.getValue() + ")\n" +
+                    "cd.ver=ft.ver AND cd.id=ft.id AND\n" +
+                    fulltextMatch("value", constant.getValue()) + " " +
                     getLanguageFilter() +
                     getVersionFilter("cd") +
                     getDeactivatedTypesFilter("cd") +
@@ -483,6 +486,17 @@ public class GenericSQLDataFilter extends DataFilter {
         } else {
             return buildPropertyCondition(stmt, cond, cond.getProperty());
         }
+    }
+
+    /**
+     * Perform a fulltext match
+     *
+     * @param column column to match
+     * @param expr   expression to match against
+     * @return sql snippet
+     */
+    protected String fulltextMatch(String column, String expr) {
+        return "MATCH (" + column + ") AGAINST (" + expr + ")";
     }
 
     /**
@@ -541,7 +555,7 @@ public class GenericSQLDataFilter extends DataFilter {
                     value = FxFormatUtils.unquote(value);
                     // single quotes ("'") should be quoted already, otherwise the
                     // parser would have failed
-                    
+
                     // Convert back to an SQL string
                     value = "'" + value + "'";
                 }
@@ -594,7 +608,7 @@ public class GenericSQLDataFilter extends DataFilter {
                     // use a date function - currently all MySQL date functions may be used
                     value = constant.getValue();
                 } else {
-                    value = "'" + FxFormatUtils.getDateFormat().format(FxFormatUtils.toDate(constant.getValue())) + "'";
+                    value = "'" + FxFormatUtils.getDateTimeFormat().format(FxFormatUtils.toDate(constant.getValue())) + "'";
                 }
                 break;
             case DateTime:
@@ -608,7 +622,7 @@ public class GenericSQLDataFilter extends DataFilter {
                     value = constant.getValue();
                     if (PropertyEntry.isDateMillisColumn(entry.getFilterColumn())) {
                         // need to convert from milliseconds
-                        column = prop.getFunctionsStart() + "FROM_UNIXTIME(" + entry.getFilterColumn() + "/1000)" + prop.getFunctionsEnd();
+                        column = prop.getFunctionsStart() + toDBTime(entry.getFilterColumn()) + prop.getFunctionsEnd();
                     }
                 } else {
                     final Date date = FxFormatUtils.toDateTime(constant.getValue());
@@ -666,9 +680,19 @@ public class GenericSQLDataFilter extends DataFilter {
         }
     }
 
+    /**
+     * Convert a column with a timestamp in long format to a database understandable timestamp
+     *
+     * @param expr long column to convert
+     * @return database time compliant expression
+     */
+    protected String toDBTime(String expr) {
+        return "FROM_UNIXTIME(" + expr + "/1000)";
+    }
+
     private boolean isWithDateFunction(Property property, Constant constant) {
         // check if only valid date functions are present
-        for (String function: property.getSqlFunctions()) {
+        for (String function : property.getSqlFunctions()) {
             DateFunction.getBySqlName(function);
         }
         return StringUtils.isNumeric(constant.getValue()) && !property.getSqlFunctions().isEmpty();

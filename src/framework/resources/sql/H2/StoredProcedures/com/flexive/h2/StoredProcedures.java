@@ -38,6 +38,7 @@ import java.sql.*;
  * <p/>
  * Usage:
  * CREATE ALIAS IF NOT EXISTS TIMEMILLIS FOR "com.flexive.h2.StoredProcedures.getTimeMillis";
+ * CREATE ALIAS IF NOT EXISTS TOTIMESTAMP FOR "com.flexive.h2.StoredProcedures.toTimestamp";
  * CREATE ALIAS IF NOT EXISTS PERMISSIONS FOR "com.flexive.h2.StoredProcedures.permissions";
  * CREATE ALIAS IF NOT EXISTS PERMISSIONS2 FOR "com.flexive.h2.StoredProcedures.permissions2";
  * CREATE ALIAS IF NOT EXISTS MAYREADINSTANCE FOR "com.flexive.h2.StoredProcedures.mayReadInstance";
@@ -51,6 +52,7 @@ import java.sql.*;
  * CREATE ALIAS IF NOT EXISTS TREE_CAPTIONPATHTOID FOR "com.flexive.h2.StoredProcedures.tree_captionPathToID";
  * CREATE ALIAS IF NOT EXISTS TREE_NODEINDEX FOR "com.flexive.h2.StoredProcedures.tree_nodeIndex";
  * CREATE ALIAS IF NOT EXISTS TREE_GETPOSITION FOR "com.flexive.h2.StoredProcedures.tree_getPosition";
+ * CREATE ALIAS IF NOT EXISTS CONCAT_WS FOR "com.flexive.h2.StoredProcedures.concat_ws";
  * <p/>
  * Examples:
  * SELECT TIMEMILLIS(NOW());
@@ -71,9 +73,20 @@ public class StoredProcedures {
      * @param ts timestamp
      * @return long (BIGINT) value
      */
-    public static long getTimeMillis(java.sql.Timestamp ts) {
+    public static long getTimeMillis(Timestamp ts) {
         return ts.getTime();
     }
+
+    /**
+     * Convert a long value to a timestamp
+     *
+     * @param expr long value
+     * @return timestamp
+     */
+    public static Timestamp toTimestamp(long expr) {
+        return new Timestamp(expr);
+    }
+
 
     //no permissions granted
     private final static String PERM_NOPERMISSIONS = "000000";
@@ -600,4 +613,21 @@ public class StoredProcedures {
         }
     }
 
+    /**
+     * Concatenate with separator (mimics MySQL CONCAT_WS function)
+     *
+     * @param separator separator to use
+     * @param args      arguments to concatenate
+     * @return concatenated arguments using the separator
+     * @see http://dev.mysql.com/doc/refman/5.0/en/string-functions.html#function_concat-ws
+     */
+    public static String concat_ws(String separator, String... args) {
+        StringBuilder ret = new StringBuilder(500);
+        for (String arg : args) {
+            if (ret.length() > 0)
+                ret.append(separator);
+            ret.append(arg);
+        }
+        return ret.toString();
+    }
 }

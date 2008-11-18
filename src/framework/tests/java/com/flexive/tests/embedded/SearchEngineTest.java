@@ -768,9 +768,9 @@ public class SearchEngineTest {
                 assertEquals(row.getString(name + ".login_name"), account.getLoginName(), "Invalid value for field: login_name");
                 assertEquals(row.getString(name + ".email"), account.getEmail(), "Invalid value for field: email");
                 assertEquals(row.getLong(name + ".contact_id"), account.getContactDataId(), "Invalid value for field: contact_id");
-                assertEquals(row.getLong(name + ".is_active"), account.isActive() ? 1 : 0, "Invalid value for field: is_active");
-                assertEquals(row.getLong(name + ".is_validated"), account.isValidated() ? 1 : 0, "Invalid value for field: is_validated");
-                assertEquals(row.getLong(name + ".allow_multilogin"), account.isAllowMultiLogin() ? 1 : 0, "Invalid value for field: allow_multilogin");
+                assertEquals(row.getBoolean(name + ".is_active"), account.isActive(), "Invalid value for field: is_active");
+                assertEquals(row.getBoolean(name + ".is_validated"), account.isValidated(), "Invalid value for field: is_validated");
+                assertEquals(row.getBoolean(name + ".allow_multilogin"), account.isAllowMultiLogin(), "Invalid value for field: allow_multilogin");
                 assertEquals(row.getLong(name + ".lang"), account.getLanguage().getId(), "Invalid value for field: lang");
                 // default_node is not supported yet
                 //assertEquals(row.getLong(name + ".default_node"), account.getDefaultNode(), "Invalid value for field: default_node");

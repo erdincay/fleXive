@@ -64,4 +64,20 @@ public class H2SQLDataFilter extends GenericSQLDataFilter {
         //H2 does not support timeouts (or they don't work at least...)
         return false;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected String toDBTime(String expr) {
+        return "TOTIMESTAMP(" + expr + ")";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected String fulltextMatch(String column, String expr) {
+        return column + " LIKE '%" + expr.replaceAll("'", "" ) + "%'";
+    }
 }

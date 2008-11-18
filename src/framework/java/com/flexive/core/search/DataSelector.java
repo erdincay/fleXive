@@ -117,4 +117,14 @@ public abstract class DataSelector {
         }
         return values[index];
     }
+
+    /**
+     * Get the database vendor specific statement to increase a counter
+     *
+     * @param counter sql counter variable
+     * @return database vendor specific statement to increase a counter
+     */
+    public String getCounterStatement(String counter) {
+        return "@"+counter+":=@"+counter+"+1 "+counter;
+    }
 }

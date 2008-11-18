@@ -110,6 +110,25 @@ public class FxResultRow {
         return (FxValue) getValue(columnName);
     }
 
+    public boolean getBoolean(String columnName) {
+        return getBoolean(getColumnIndex(columnName));
+    }
+
+    public boolean getBoolean(int column) {
+        final Object value = getValue(column);
+        if (value instanceof FxBoolean) {
+            return ((FxBoolean) value).getBestTranslation();
+        } else if (value instanceof Number) {
+            return ((Number) value).longValue() == 1;
+        } else if (value instanceof FxNumber) {
+            return ((FxNumber) value).getBestTranslation() == 1;
+        } else if (value instanceof FxLargeNumber) {
+            return ((FxLargeNumber) value).getBestTranslation() == 1;
+        }
+        throw new FxInvalidParameterException("column", "ex.sqlSearch.resultRow.invalidType",
+                column, getColumnNames()[column - 1], "Boolean", value.getClass().getName()).asRuntimeException();
+    }
+
     public long getLong(int column) {
         final Object value = getValue(column);
         if (value instanceof Number) {
@@ -118,6 +137,8 @@ public class FxResultRow {
             return ((FxNumber) value).getBestTranslation();
         } else if (value instanceof FxLargeNumber) {
             return ((FxLargeNumber) value).getBestTranslation();
+        } else if (value instanceof FxBoolean) {
+            return ((FxBoolean) value).getBestTranslation() ? 1 : 0;
         }
         throw new FxInvalidParameterException("column", "ex.sqlSearch.resultRow.invalidType",
                 column, getColumnNames()[column - 1], "Long", value.getClass().getName()).asRuntimeException();
@@ -133,6 +154,8 @@ public class FxResultRow {
             return ((Number) value).intValue();
         } else if (value instanceof FxNumber) {
             return ((FxNumber) value).getBestTranslation();
+        } else if (value instanceof FxBoolean) {
+            return ((FxBoolean) value).getBestTranslation() ? 1 : 0;
         }
         throw new FxInvalidParameterException("column", "ex.sqlSearch.resultRow.invalidType",
                 column, getColumnNames()[column - 1], "Integer", value.getClass().getName()).asRuntimeException();

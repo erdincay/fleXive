@@ -32,7 +32,11 @@
 package com.flexive.core.search.H2;
 
 import com.flexive.core.search.SqlSearch;
+import com.flexive.core.search.PropertyEntry;
 import com.flexive.core.search.genericSQL.GenericSQLDataSelector;
+import com.flexive.core.DatabaseConst;
+import com.flexive.shared.structure.FxDataType;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * H2 specific data selector
@@ -55,7 +59,46 @@ public class H2SQLDataSelector extends GenericSQLDataSelector {
      * {@inheritDoc}
      */
     @Override
-    public String getRowNumberCounterStatement() {
-        return "@rownr=@rownr+1 rownr";
+    public String getCounterStatement(String counter) {
+        return "@"+counter+"=@"+counter+"+1 "+counter;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected String getContentDataSubselect(String column, PropertyEntry entry, boolean xpath) {
+        //H2 needs the ISMLDEF column in select clause to perform the ORDER,
+        //hence we have to select check for the selected language before we use the multilang default
+        String _select = "SELECT " + SUBSEL_ALIAS + "." + column + /*", " + SUBSEL_ALIAS + ".ismldef" +*/
+                " FROM " + DatabaseConst.TBL_CONTENT_DATA + " " +
+                SUBSEL_ALIAS + " WHERE " +
+                SUBSEL_ALIAS + ".ID=" +
+                FILTER_ALIAS + ".ID AND " +
+                SUBSEL_ALIAS + ".VER=" +
+                FILTER_ALIAS + ".VER AND " +
+                (entry.isAssignment()
+                        ? "ASSIGN=" + entry.getAssignment().getId()
+                        : "TPROP=" + entry.getProperty().getId()) + " AND ";
+        String select = "(IFNULL(("+_select+" "+ SUBSEL_ALIAS + ".LANG=" + search.getLanguage().getId() + " LIMIT 1),("+
+                _select+" "+SUBSEL_ALIAS + ".ISMLDEF=TRUE LIMIT 1)))";
+        if (!xpath && entry.getProperty().getDataType() == FxDataType.Binary) {
+            // select string-coded form of the BLOB properties
+            // TODO link version/quality filtering to the main object version
+            select = "(SELECT CONCAT_WS('" + BINARY_DELIM + "'," +
+                    StringUtils.join(BINARY_COLUMNS, ',') + ") " +
+                    "FROM " + DatabaseConst.TBL_CONTENT_BINARY + " " +
+                    "WHERE ID=" + select + " " +
+                    " AND VER=1 AND QUALITY=1)";
+        }
+        return select;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected String toDBTime(String expr) {
+        return "TOTIMESTAMP("+expr+")";
     }
 }

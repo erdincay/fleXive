@@ -33,10 +33,10 @@ package com.flexive.core.search;
 
 import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
+import com.flexive.core.search.H2.H2SQLDataFilter;
+import com.flexive.core.search.H2.H2SQLDataSelector;
 import com.flexive.core.search.genericSQL.GenericSQLDataFilter;
 import com.flexive.core.search.genericSQL.GenericSQLDataSelector;
-import com.flexive.core.search.H2.H2SQLDataSelector;
-import com.flexive.core.search.H2.H2SQLDataFilter;
 import com.flexive.shared.*;
 import com.flexive.shared.configuration.DBVendor;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -100,18 +100,18 @@ public class SqlSearch {
     /**
      * Ctor
      *
-     * @param seq          reference to the sequencer
-     * @param briefcase    reference to the briefcase engine
-     * @param treeEngine   reference to the tree engine
-     * @param query        the query to execute
-     * @param startIndex   the start index (0 based)
-     * @param maxFetchRows the number of rows to return with the resultset, or -1 to fetch all rows
-     * @param params       all aditional search parameters
-     * @param conf         the result set configuration
-     * @param location     the location that started the search
-     * @param viewType     the view type @throws com.flexive.shared.exceptions.FxSqlSearchException
-     *                     if the search failed
-     * @param searchLanguage     the search language. If set, contents will be queried only in the given language.
+     * @param seq            reference to the sequencer
+     * @param briefcase      reference to the briefcase engine
+     * @param treeEngine     reference to the tree engine
+     * @param query          the query to execute
+     * @param startIndex     the start index (0 based)
+     * @param maxFetchRows   the number of rows to return with the resultset, or -1 to fetch all rows
+     * @param params         all aditional search parameters
+     * @param conf           the result set configuration
+     * @param location       the location that started the search
+     * @param viewType       the view type @throws com.flexive.shared.exceptions.FxSqlSearchException
+     *                       if the search failed
+     * @param searchLanguage the search language. If set, contents will be queried only in the given language.
      * @throws com.flexive.shared.exceptions.FxSqlSearchException
      *          if the search engine could not be initialized
      */
@@ -125,7 +125,7 @@ public class SqlSearch {
         if (maxFetchRows == 0) {
             throw new FxSqlSearchException(LOG, "ex.sqlSearch.parameter.fetchRows", maxFetchRows);
         }
-        
+
         // Init
         this.seq = seq;
         this.briefcase = briefcase;
@@ -205,8 +205,11 @@ public class SqlSearch {
             con = Database.getDbConnection();
             pr = new PropertyResolver(con);
 
-            // Find all matching objects
+            //init filter and selector
             df = getDataFilter(con);
+            ds = getDataSelector();
+
+            // Find all matching objects
             df.build();
 
             // Wildcard handling depending on the found entries
@@ -231,7 +234,7 @@ public class SqlSearch {
             // If specified create a briefcase with the found data
             long createdBriefcaseId = -1;
             if (params.getWillCreateBriefcase()) {
-                createdBriefcaseId = copyToBriefcase(con);
+                createdBriefcaseId = copyToBriefcase(con, ds);
             }
 
             final UserTicket ticket = FxContext.getUserTicket();
@@ -253,7 +256,6 @@ public class SqlSearch {
             }
 
             // Select all desired rows for the resultset
-            ds = getDataSelector();
             selectSql = ds.build(con);
 
             stmt = con.createStatement();
@@ -261,7 +263,7 @@ public class SqlSearch {
             stmt.close();
 
             stmt = con.createStatement();
-            if( df.isQueryTimeoutSupported() )
+            if (df.isQueryTimeoutSupported())
                 stmt.setQueryTimeout(params.getQueryTimeout());
             // Fetch the result
             ResultSet rs = stmt.executeQuery(selectSql);
@@ -367,7 +369,15 @@ public class SqlSearch {
         }
     }
 
-    private long copyToBriefcase(Connection con) throws FxSqlSearchException {
+    /**
+     * Copy the query result to a briefcase
+     *
+     * @param con connection
+     * @param ds  DataSelector
+     * @return briefcase id
+     * @throws FxSqlSearchException on errors
+     */
+    private long copyToBriefcase(Connection con, DataSelector ds) throws FxSqlSearchException {
         FxSQLSearchParams.BriefcaseCreationData bcd = params.getBriefcaseCreationData();
         Statement stmt = null;
         try {
@@ -377,7 +387,7 @@ public class SqlSearch {
             stmt.addBatch("SET @pos=0;");
             String sSql = "insert into " + DatabaseConst.TBL_BRIEFCASE_DATA +
                     "(BRIEFCASE_ID,POS,ID,AMOUNT) " +
-                    "(select " + bid + ",@pos:=@pos+1 pos,data.id,1 from " +
+                    "(select " + bid + "," + ds.getCounterStatement("pos") + ",data.id,1 from " +
                     "(SELECT DISTINCT data2.id FROM " + getCacheTable() + " data2 WHERE data2.search_id="
                     + getSearchId() + ") data)";
             stmt.addBatch(sSql);

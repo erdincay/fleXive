@@ -60,7 +60,7 @@ public class GenericSQLDataSelector extends DataSelector {
     /**
      * All field selectors supported by this implementation
      */
-    private static final Map<String, FieldSelector> SELECTORS = new HashMap<String, FieldSelector>();
+    protected static final Map<String, FieldSelector> SELECTORS = new HashMap<String, FieldSelector>();
 
     static {
         SELECTORS.put("MANDATOR", new GenericSQLGenericSelector(DatabaseConst.TBL_MANDATORS, "id"));
@@ -70,12 +70,12 @@ public class GenericSQLDataSelector extends DataSelector {
         SELECTORS.put("STEP", new GenericSQLStepSelector());
     }
 
-    private static final String[] CONTENT_DIRECT_SELECT = {"ID", "VERSION"};
-    private static final String[] CONTENT_DIRECT_SELECT_PROP = {"ID", "VER"};
-    private static final String FILTER_ALIAS = "filter";
-    private static final String SUBSEL_ALIAS = "sub";
+    protected static final String[] CONTENT_DIRECT_SELECT = {"ID", "VERSION"};
+    protected static final String[] CONTENT_DIRECT_SELECT_PROP = {"ID", "VER"};
+    protected static final String FILTER_ALIAS = "filter";
+    protected static final String SUBSEL_ALIAS = "sub";
 
-    private SqlSearch search;
+    protected SqlSearch search;
 
 
     /**
@@ -184,7 +184,7 @@ public class GenericSQLDataSelector extends DataSelector {
         // create select columns
         for (String column: INTERNAL_RESULTCOLS) {
             if ("rownr".equals(column)) {
-                columns.add(getRowNumberCounterStatement());
+                columns.add(getCounterStatement(column));
             } else {
                 columns.add(filterProperties(column));
             }
@@ -234,15 +234,6 @@ public class GenericSQLDataSelector extends DataSelector {
     }
 
     /**
-     * Get the database vendor specific statement to increase the rownr counter
-     *
-     * @return database vendor specific statement to increase the rownr counter
-     */
-    public String getRowNumberCounterStatement() {
-        return "@rownr:=@rownr+1 rownr";
-    }
-
-    /**
      * Returns a comma-separated list of the given property names after adding FILTER_ALIAS to every property.
      *
      * @param names the property name(s)
@@ -261,7 +252,7 @@ public class GenericSQLDataSelector extends DataSelector {
      * @return the SubSelectValues
      * @throws FxSqlSearchException if anything goes wrong
      */
-    private SubSelectValues selectFromTbl(PropertyEntry entry, Value prop, int resultPos) throws FxSqlSearchException {
+    protected SubSelectValues selectFromTbl(PropertyEntry entry, Value prop, int resultPos) throws FxSqlSearchException {
         final SubSelectValues result = new SubSelectValues(resultPos, getSortDirection(resultPos));
         if (prop instanceof Constant || entry == null) {
             result.addItem(prop.getValue().toString(), resultPos, false);
@@ -287,7 +278,7 @@ public class GenericSQLDataSelector extends DataSelector {
                             String expr = SUBSEL_ALIAS + "." + column;
                             if (!prop.getSqlFunctions().isEmpty() && PropertyEntry.isDateMillisColumn(column)) {
                                 // need to convert to date before applying a date function
-                                expr = "FROM_UNIXTIME(" + expr + "/1000)";
+                                expr = toDBTime(expr);
                             } 
                             final String val = "(SELECT " + expr + " FROM " + DatabaseConst.TBL_CONTENT +
                                     " " + SUBSEL_ALIAS + " WHERE " + SUBSEL_ALIAS + ".id=" + FILTER_ALIAS + ".id AND " +
@@ -310,6 +301,16 @@ public class GenericSQLDataSelector extends DataSelector {
         }
 
         return result.prepare(this, prop, entry);
+    }
+
+    /**
+     * Convert a column with a timestamp in long format to a database understandable timestamp
+     *
+     * @param expr long column to convert
+     * @return database time compliant expression
+     */
+    protected String toDBTime(String expr) {
+        return "FROM_UNIXTIME(" + expr + "/1000)";
     }
 
     /**
@@ -336,7 +337,7 @@ public class GenericSQLDataSelector extends DataSelector {
      * @param xpath  if true, the XPath (and not the actual value column(s)) will be selected
      * @return the subselect for FX_CONTENT_DATA.
      */
-    private String getContentDataSubselect(String column, PropertyEntry entry, boolean xpath) {
+    protected String getContentDataSubselect(String column, PropertyEntry entry, boolean xpath) {
         String select = "(SELECT " + SUBSEL_ALIAS + "." + column +
                 " FROM " + DatabaseConst.TBL_CONTENT_DATA + " " +
                 SUBSEL_ALIAS + " WHERE " +

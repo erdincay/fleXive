@@ -3,6 +3,7 @@
 -- to build the flexive-h2.jar, call the ant target "h2.jar" in the source distribution of flexive
 
 CREATE ALIAS IF NOT EXISTS TIMEMILLIS FOR "com.flexive.h2.StoredProcedures.getTimeMillis";
+CREATE ALIAS IF NOT EXISTS TOTIMESTAMP FOR "com.flexive.h2.StoredProcedures.toTimestamp";
 CREATE ALIAS IF NOT EXISTS PERMISSIONS FOR "com.flexive.h2.StoredProcedures.permissions";
 CREATE ALIAS IF NOT EXISTS PERMISSIONS2 FOR "com.flexive.h2.StoredProcedures.permissions2";
 CREATE ALIAS IF NOT EXISTS MAYREADINSTANCE FOR "com.flexive.h2.StoredProcedures.mayReadInstance";
@@ -16,3 +17,4 @@ CREATE ALIAS IF NOT EXISTS TREE_FTEXT1024_PATHS FOR "com.flexive.h2.StoredProced
 CREATE ALIAS IF NOT EXISTS TREE_CAPTIONPATHTOID FOR "com.flexive.h2.StoredProcedures.tree_captionPathToID";
 CREATE ALIAS IF NOT EXISTS TREE_NODEINDEX FOR "com.flexive.h2.StoredProcedures.tree_nodeIndex";
 CREATE ALIAS IF NOT EXISTS TREE_GETPOSITION FOR "com.flexive.h2.StoredProcedures.tree_getPosition";
+CREATE ALIAS IF NOT EXISTS CONCAT_WS FOR "com.flexive.h2.StoredProcedures.concat_ws";
