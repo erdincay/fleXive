@@ -12,8 +12,8 @@ deploy.lib.path=${user.home}/as/jboss/server/default/lib
 profile.netbeans.root=/opt/netbeans-5.0/profiler1
 profile.netbeans.agent=lib/deployed/jdk15/linux/libprofilerinterface.so
 
-# Maven repository path
-maven.dist.repo.snapshot=/var/repo/flexive
+# Maven repository URL
+maven.dist.repo.snapshot=file:///var/repo/flexive
 
 # This is the database configuration file used by the flexive setup tasks.
 #
