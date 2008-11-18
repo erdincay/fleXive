@@ -50,7 +50,7 @@ var flexive = new function() {
     this.baseUrl = null;
     /** Weblets resource provider root URL. */
     this.componentsWebletUrl = null;
-}
+};
 
 // miscellaneous utility functions
 flexive.util = new function() {
@@ -95,7 +95,7 @@ flexive.util = new function() {
                  version: parseInt(pk.substr(pk.indexOf(".") + 1)), 
                  toString: function() { return this.id + "." + this.version }
         };
-    }
+    };
 
     /**
      * Extracts the object IDs of the given PK array.
@@ -104,12 +104,12 @@ flexive.util = new function() {
      * @return  the IDs of the given PKs
      */
     this.getPkIds = function(/* Array[PK] */ pks) {
-        var result = []
+        var result = [];
         for (var i = 0; i < pks.length; i++) {
             result[i] = pks[i].id;
         }
         return result;
-    }
+    };
 
     this.JSON_RPC_CLIENT = null;
     this.getJsonRpc = function() {
@@ -117,7 +117,7 @@ flexive.util = new function() {
             this.JSON_RPC_CLIENT = new JSONRpcClient(flexive.baseUrl + "/adm/JSON-RPC");
         }
         return this.JSON_RPC_CLIENT;
-    }
+    };
 
     /**
      * Adds "zero padding" to a number, e.g.: flexive.util.zeroPad(51, 4) --> "0051"
@@ -131,9 +131,9 @@ flexive.util = new function() {
             result = "0" + result;
         }
         return result;
-    }
+    };
 
-}
+};
 
 // Yahoo UI (YUI) helper methods and classes
 flexive.yui = new function() {
@@ -160,7 +160,7 @@ flexive.yui = new function() {
                 });
             loader.insert();
         }
-    }
+    };
 
     /**
      * Adds the given function to flexive.yui.onYahooLoaded.
@@ -169,7 +169,7 @@ flexive.yui = new function() {
      */
     this.onYahooLoaded = function(fn) {
         this.onYahooLoadedFunctions.push(fn);
-    }
+    };
 
     /**
      * Adds the given Yahoo component to the required components of this page.
@@ -187,7 +187,7 @@ flexive.yui = new function() {
         if (!found) {
             this.requiredComponents.push(component);
         }
-    }
+    };
 
     /**
      * Call setup methods of flexive components after yahoo has been initialized.
@@ -198,7 +198,7 @@ flexive.yui = new function() {
             this.onYahooLoadedFunctions[i]();
         }
         this.onYahooLoadedFunctions = [];
-    }
+    };
 
     /**
      * Updates a property of a menu item.
@@ -214,8 +214,8 @@ flexive.yui = new function() {
             return;
         }
         item.cfg.setProperty(property, value);
-    }
-}
+    };
+};
 
 flexive.yui.datatable = new function() {
     /**
@@ -227,7 +227,7 @@ flexive.yui.datatable = new function() {
         return result.viewType == "THUMBNAILS"
                 ? new flexive.yui.datatable.ThumbnailView(result)
                 : new flexive.yui.datatable.ListView(result);
-    }
+    };
 
     /**
      * <p>Return the primary key of the result table row/column of the given element (e.g. an event target).
@@ -241,7 +241,7 @@ flexive.yui.datatable = new function() {
      */
     this.getPk = function(/* YAHOO.widget.DataTable */ dataTable, /* Element */ element) {
         return flexive.util.parsePk(this.getRecordValue(dataTable, element, "pk"));
-    }
+    };
 
     /**
      * <p>Return the permissions object of the result table row/column of the given element (e.g. an event target).
@@ -271,7 +271,7 @@ flexive.yui.datatable = new function() {
             "export": (p & 16) > 0,
             "relate": (p & 32) > 0
         };
-    }
+    };
 
     /**
      * Extracts a property from the data record of the row/column indicated by the given element
@@ -299,7 +299,7 @@ flexive.yui.datatable = new function() {
             var col = dataTable.getColumn(elCol);
             return data[property][col.getKeyIndex()];
         }
-    }
+    };
 
     /**
      * <p>Returns the currently selected PKs of the given datatable.</p>
@@ -328,8 +328,8 @@ flexive.yui.datatable = new function() {
             }
         }
         return selectedPks;
-    }
-}
+    };
+};
 
 /**
  * List result view - returns the linear result list of the search result
@@ -338,7 +338,7 @@ flexive.yui.datatable = new function() {
 flexive.yui.datatable.ListView = function(result) {
     this.result = result;
     this.rowsPerPage = 25;
-}
+};
 
 flexive.yui.datatable.ListView.prototype = {
     getColumns: function() {
@@ -352,7 +352,7 @@ flexive.yui.datatable.ListView.prototype = {
     getRows: function() {
         return this.result.rows;
     }
-}
+};
 
 /**
  * Thumbnail view - projects the linear result list to a thumbnail grid
@@ -363,7 +363,7 @@ flexive.yui.datatable.ThumbnailView = function(result) {
     this.previewSize = flexive.PreviewSizes.PREVIEW2;
     this.gridColumns = Math.max(1, Math.round(YAHOO.util.Dom.getViewportWidth() / (this.previewSize.size * 1.3)));
     this.rowsPerPage = 5;
-}
+};
 
 flexive.yui.datatable.ThumbnailView.prototype = {
     // return the columns of the thumbnail grid
@@ -414,13 +414,13 @@ flexive.yui.datatable.ThumbnailView.prototype = {
         }
         return { "fields": fields };
     }
-}
+};
 
 flexive.yui.AutoCompleteHandler = function(queryFn) {
     if (queryFn != null) {
         this.query = queryFn;
     }
-}
+};
 
 flexive.yui.AutoCompleteHandler.prototype = {
     /**
@@ -456,7 +456,7 @@ flexive.yui.AutoCompleteHandler.prototype = {
     formatResult: function(/* Object */ item, /* String */ query) {
         return item[1];
     }
-}
+};
 
 flexive.input = new function() {
     this.fxValueInputList = [];   // a global list of all registered FxValueInput elements on the current page
@@ -477,7 +477,7 @@ flexive.input = new function() {
         }
         flexive.input.fxValueInputList = newList;     // store new list without defunct inputs
         flexive.input._fixHtmlEditorsIE();
-    }
+    };
 
     // trigger tinyMCE repaint on IE
     this._fixHtmlEditorsIE = function() {
@@ -488,7 +488,7 @@ flexive.input = new function() {
                 }
             }
         }
-    }
+    };
 
     // initialize the TinyMCE HTML editor
     this.initHtmlEditor = function(autoPopulate) {
@@ -524,7 +524,7 @@ flexive.input = new function() {
             alert("initHtml exception: " + e);
             // HTML editor component not configured
         }
-    }
+    };
 
     // TODO: implement for usage outside the backend
     this.openReferenceQueryPopup = function(xpath, updateInputId, formName) {
@@ -532,9 +532,9 @@ flexive.input = new function() {
                 + updateInputId + "&formName=" + formName,
                 "searchReferences", "scrollbars=yes,width=800,height=600,toolbar=no,menubar=no,location=no");
         win.focus();
-    }
+    };
 
-}
+};
 
 /**
  * JS object for fx:fxValueInput components.
@@ -575,7 +575,7 @@ flexive.input.FxMultiLanguageValueInput.prototype = {
         // show row for this language
         this.showRow(languageId >= 0 ? this.baseRowId + languageId : null);
         // update language select
-        var options = document.getElementById(this.languageSelectId).options
+        var options = document.getElementById(this.languageSelectId).options;
         for (var i = 0; i < options.length; i++) {
             options[i].selected = (options[i].value == languageId);
         }
@@ -617,7 +617,7 @@ flexive.input.FxMultiLanguageValueInput.prototype = {
             }
         }
     }
-}
+};
 
 flexive.dojo = new function() {
     /** Creates a DOJO menu from a JSON object. Based on Dojo example code. */
@@ -644,5 +644,5 @@ flexive.dojo = new function() {
             menu2.addChild(item);
         });
         return menu2;
-    }
-}
+    };
+};
