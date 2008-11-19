@@ -80,4 +80,26 @@ public class H2SQLDataFilter extends GenericSQLDataFilter {
     protected String fulltextMatch(String column, String expr) {
         return column + " LIKE '%" + expr.replaceAll("'", "" ) + "%'";
     }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected String getSubQueryLimit() {
+        /* H2 currently chokes on unions of queries with row limits like this:
+
+        SELECT * FROM (
+            (SELECT  DISTINCT cd.id,cd.ver,cd.lang FROM FLEXIVETEST.FX_CONTENT_DATA cd WHERE UFCLOB like 'FOLDER COMMENT 1' AND TPROP=83 AND cd.ismax_ver=TRUE
+             LIMIT 10000 )
+            UNION
+            (SELECT DISTINCT  cd.id,cd.ver,cd.lang FROM FLEXIVETEST.FX_CONTENT_DATA cd WHERE UFCLOB like 'FOLDER COMMENT 2' AND TPROP=83 AND cd.ismax_ver=TRUE
+             LIMIT 10000 )
+        )
+
+         When the subquery limits are removed, the query returns correct results. With subquery limits,
+         only one row is returned.
+       */
+        return "";
+    }
 }

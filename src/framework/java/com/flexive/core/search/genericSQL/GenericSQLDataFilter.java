@@ -745,7 +745,7 @@ public class GenericSQLDataFilter extends DataFilter {
             return ""; //empty
     }
 
-    private String getSubQueryLimit() {
+    protected String getSubQueryLimit() {
         return SUBQUERY_LIMIT == -1 ? "" : " LIMIT " + SUBQUERY_LIMIT + " ";
     }
 
