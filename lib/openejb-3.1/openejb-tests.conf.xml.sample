@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <openejb>
+    <!-- MySQL settings -->
     <Resource id="jdbc/flexiveConfiguration" type="DataSource">
         JdbcDriver com.mysql.jdbc.Driver
         JdbcUrl jdbc:mysql://localhost/flexiveConfiguration
@@ -12,6 +13,21 @@
         UserName root
         Password a
     </Resource>
+    <!-- H2 settings -->
+    <!--
+    <Resource id="jdbc/flexiveConfiguration" type="DataSource">
+        JdbcDriver org.h2.Driver
+        JdbcUrl jdbc:h2:tcp://localhost:9092/~/flexiveConfiguration;SCHEMA=flexiveConfiguration;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0
+        UserName sa
+        Password
+    </Resource>
+    <Resource id="jdbc/flexiveTest" type="DataSource">
+        JdbcDriver org.h2.Driver
+        JdbcUrl jdbc:h2:tcp://localhost:9092/~/flexiveTest;SCHEMA=flexiveTest;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0
+        UserName sa
+        Password
+    </Resource>
+    -->
     <SecurityService id="Default Security Service"/>
     <Deployments jar="../../build/framework/jar/flexive-ejb.jar"/>
     <!--TransactionService id="Default Transaction Manager"/-->
