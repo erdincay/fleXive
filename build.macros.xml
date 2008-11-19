@@ -72,8 +72,17 @@
     <macrodef name="division-setup" description="Creates all database structures for the given database name">
         <attribute name="database" description="The database name"/>
         <sequential >
+            <groovy>
+                <arg value="@{Database}"/>
+                if( "H2".equals(properties['database.vendor']) ) {
+                    //special case for H2: the URL needs to contain the schema which is the database name
+                    //to be created
+                    properties['database.url.create'] = properties['database.url.base'] + args[0]    
+                } else
+                    properties['database.url.create'] = properties['database.url.base']
+            </groovy>
             <!-- call with no url parameters to allow schema creation -->
-            <sql-call database="${database.schema.root}" url="${database.url.base}">
+            <sql-call database="${database.schema.root}" url="${database.url.create}">
                 <transaction >
                     DROP SCHEMA IF EXISTS @{database};
                     CREATE SCHEMA @{database};
