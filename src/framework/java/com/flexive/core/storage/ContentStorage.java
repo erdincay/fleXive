@@ -72,6 +72,17 @@ public interface ContentStorage {
     String getUppercaseColumn(FxProperty prop);
 
     /**
+     * Get the (optional) uppercase column used for this data type for search queries.
+     * This method handles the special case of HTML columns which use the UFCLOB column
+     * to store the extracted data and returns an SQL-UPPER call for the column.
+     * If no uppercase column is used, <code>null</code> is returned.
+     *
+     * @param property requested FxPropery
+     * @return uppercase column name or <code>null</code>
+     */
+    String getQueryUppercaseColumn(FxProperty property);
+
+    /**
      * Get the database columns used for this data type
      *
      * @param prop requested FxProperty
@@ -154,7 +165,7 @@ public interface ContentStorage {
      * @return primary key of the saved content
      * @throws FxUpdateException           on errors
      * @throws FxInvalidParameterException on errors
-     * @throws FxNoAccessException if property permissions are violated
+     * @throws FxNoAccessException         if property permissions are violated
      */
     FxPK contentSave(Connection con, FxEnvironment env, StringBuilder sql, FxContent content, long fqnPropertyId) throws FxUpdateException, FxInvalidParameterException, FxNoAccessException;
 
@@ -308,9 +319,9 @@ public interface ContentStorage {
     /**
      * Prepare, identify and transfer a binary to the binary space
      *
-     * @param con         an open and valid Connection
-     * @param binary      the binary to process (BinaryDescriptor's may be altered or replaced after calling this method!)
-     * @throws java.sql.SQLException on errors
+     * @param con    an open and valid Connection
+     * @param binary the binary to process (BinaryDescriptor's may be altered or replaced after calling this method!)
+     * @throws java.sql.SQLException  on errors
      * @throws FxApplicationException on errors
      */
     void prepareBinary(Connection con, FxBinary binary) throws SQLException, FxApplicationException;

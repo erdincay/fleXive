@@ -36,7 +36,6 @@ import static com.flexive.core.DatabaseConst.ML;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxLanguage;
-import com.flexive.shared.configuration.DBVendor;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.GlobalConfigurationEngine;
@@ -501,15 +500,20 @@ public final class Database {
             return false;
         }
         try {
-            if (getDivisionData().getDbVendor() == DBVendor.MySQL) {
-                //see http://dev.mysql.com/doc/refman/5.0/en/error-messages-server.html
-                int errorCode = ((SQLException) exc).getErrorCode();
-                return errorCode == 1451 || errorCode == 1217;
+            final int errorCode = ((SQLException) exc).getErrorCode();
+            switch (getDivisionData().getDbVendor()) {
+                case MySQL:
+                    //see http://dev.mysql.com/doc/refman/5.0/en/error-messages-server.html
+                    return errorCode == 1451 || errorCode == 1217;
+                case H2:
+                    //see http://h2database.com/javadoc/org/h2/constant/ErrorCode.html#c23002
+                    return errorCode == 23002 || errorCode == 23003;
+                default:
+                    return false;
             }
         } catch (SQLException e) {
             throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage()).asRuntimeException();
         }
-        return false;
     }
 
     /**

@@ -319,7 +319,7 @@ public class PropertyEntry {
         } else {
             this.readColumns = storage.getColumns(this.property);
         }
-        String fcol = ignoreCase ? storage.getUppercaseColumn(this.property) : this.readColumns[0];
+        String fcol = ignoreCase ? storage.getQueryUppercaseColumn(this.property) : this.readColumns[0];
         if (fcol == null) {
             fcol = this.readColumns == null ? null : this.readColumns[0];
         }

@@ -36,7 +36,7 @@ public class H2SequencerStorage extends GenericSequencerStorage {
     private final static String SQL_GET_COMMENT = "SELECT r.REMARKS FROM " + TBL_H2_SEQUENCES + " r WHERE r.SEQUENCE_NAME=";
     private final static String SQL_SET_COMMENT = "COMMENT ON SEQUENCE ";
     private final static String SQL_GET_USER = "SELECT SUBSTR(s.SEQUENCE_NAME," + (H2_SEQ_PREFIX.length() + 1) + "), (" + SQL_GET_COMMENT + "s.SEQUENCE_NAME) AS ROLLOVER, s.CURRENT_VALUE FROM " +
-            TBL_H2_SEQUENCES + " s WHERE s.SEQUENCE_NAME NOT LIKE '" + H2_SEQ_PREFIX + "SYS_%' ORDER BY s.SEQUENCE_NAME ASC";
+            TBL_H2_SEQUENCES + " s WHERE s.SEQUENCE_NAME NOT LIKE '" + H2_SEQ_PREFIX + "SYS_%' AND s.SEQUENCE_NAME LIKE '"+H2_SEQ_PREFIX+"%' ORDER BY s.SEQUENCE_NAME ASC";
 
     private final String NOROLLOVER = "NOROLLOVER";
     private final String ROLLOVER = "ROLLOVER";
