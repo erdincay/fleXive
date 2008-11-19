@@ -73,7 +73,7 @@
         <attribute name="database" description="The database name"/>
         <sequential >
             <!-- call with no url parameters to allow schema creation -->
-            <sql-call database="${database.schema.root}" url="${database.url.base}@{database}">
+            <sql-call database="${database.schema.root}" url="${database.url.base}">
                 <transaction >
                     DROP SCHEMA IF EXISTS @{database};
                     CREATE SCHEMA @{database};
