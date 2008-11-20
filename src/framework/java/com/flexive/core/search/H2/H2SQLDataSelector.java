@@ -101,4 +101,12 @@ public class H2SQLDataSelector extends GenericSQLDataSelector {
     protected String toDBTime(String expr) {
         return "TOTIMESTAMP("+expr+")";
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected boolean supportsCounterAfterOrderBy() {
+        return false;
+    }
 }

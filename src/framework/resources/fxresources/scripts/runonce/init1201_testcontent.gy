@@ -136,13 +136,19 @@ void buildGroupData(String prefix, FxContent co, int counter, folderPks) {
 long start = System.currentTimeMillis()
 final List<FxPK> folderPks = new SqlQueryBuilder().select("@pk").type("FOLDER").getResult().collectColumn(1)
 int instances = 0
+final List<Integer> indices = [*1..instanceCount]
+Collections.shuffle(indices)
 instanceCount.times { int counter ->
     final ContentEngine contentEngine = EJBLookup.contentEngine
     final FxEnvironment env = CacheAdmin.environment
     FxContent co = contentEngine.initialize(env.getType("SearchTest").id)
-    buildGroupData("", co, counter, folderPks)
-    buildGroupData("/GroupTop", co, counter, folderPks)
-    buildGroupData("/GroupTop/GroupNested", co, counter, folderPks)
+    // use shuffled index for numeric values to prevent saving all contents
+    // in ascending sort order (this will trigger bugs that rely on the DB's natural
+    // ordering)
+    final int index = indices.get(counter)
+    buildGroupData("", co, index, folderPks)
+    buildGroupData("/GroupTop", co, index, folderPks)
+    buildGroupData("/GroupTop/GroupNested", co, index, folderPks)
     FxContent dbContent = contentEngine.load(EJBLookup.contentEngine.save(co))
     instances++
     final Workflow workflow = env.getWorkflow(env.getStep(dbContent.stepId).workflowId)

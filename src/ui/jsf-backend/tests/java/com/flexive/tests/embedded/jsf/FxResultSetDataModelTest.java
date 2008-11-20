@@ -50,7 +50,7 @@ import org.testng.annotations.Test;
  *  
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Test(groups = "jsf")
+@Test(groups = {"jsf", "search"})
 public class FxResultSetDataModelTest extends AbstractSqlQueryTest {
 
     @Override

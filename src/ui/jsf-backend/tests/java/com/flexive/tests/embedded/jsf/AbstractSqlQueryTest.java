@@ -43,6 +43,7 @@ import com.flexive.shared.interfaces.AssignmentEngine;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.TypeEngine;
 import com.flexive.shared.search.FxResultSet;
+import com.flexive.shared.search.SortDirection;
 import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.search.query.QueryOperatorNode;
 import com.flexive.shared.search.query.SqlQueryBuilder;
@@ -67,7 +68,7 @@ public class AbstractSqlQueryTest {
     protected static final int TOTALROWS = 25;
     protected static final String TEST_TYPE = "FXRESULTSET_TYPE";
     protected final static String TEST_PROPERTY = "FXRESULTSET_TESTPROPERTY";
-    protected static final String SELECT_ALL = "SELECT co.@PK, @* FROM content co WHERE co." + TEST_PROPERTY + " like 'testValue%'";
+    protected static final String SELECT_ALL = "SELECT co.@PK, @* FROM content co WHERE co." + TEST_PROPERTY + " like 'testValue%' ORDER BY 1";
 
     protected ACL structureAcl;
     protected ACL contentAcl;
@@ -161,11 +162,9 @@ public class AbstractSqlQueryTest {
 
 
     protected SqlQueryBuilder getSelectAllBuilder() {
-        SqlQueryBuilder builder = new SqlQueryBuilder();
-        builder.enterSub(QueryOperatorNode.Operator.AND);
-        builder.condition(CacheAdmin.getEnvironment().getAssignment(assignmentId),
-                    PropertyValueComparator.LIKE, new FxString("testValue%"));
-        builder.closeSub();
-        return builder;
+        return new SqlQueryBuilder()
+            .condition(CacheAdmin.getEnvironment().getAssignment(assignmentId),
+                    PropertyValueComparator.LIKE, new FxString("testValue%"))
+            .orderBy(1, SortDirection.ASCENDING);
     }
 }

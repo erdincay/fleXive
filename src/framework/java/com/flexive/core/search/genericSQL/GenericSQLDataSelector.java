@@ -184,7 +184,9 @@ public class GenericSQLDataSelector extends DataSelector {
         // create select columns
         for (String column: INTERNAL_RESULTCOLS) {
             if ("rownr".equals(column)) {
-                columns.add(getCounterStatement(column));
+                if (supportsCounterAfterOrderBy()) {
+                    columns.add(getCounterStatement(column));
+                }
             } else {
                 columns.add(filterProperties(column));
             }
@@ -224,6 +226,12 @@ public class GenericSQLDataSelector extends DataSelector {
             orderByNumbers.add("3 asc");
         }
         sql.append("ORDER BY ").append(StringUtils.join(orderByNumbers, ','));
+
+        if (!supportsCounterAfterOrderBy()) {
+            // insert outer SELECT
+            sql.insert(0, "SELECT " + getCounterStatement("rownr") + ", * FROM (");
+            sql.append(")");
+        }
 
         // Evaluate the order by, then limit the result by the desired range if needed
         if (search.getStartIndex() > 0 && search.getFetchRows() < Integer.MAX_VALUE) {
@@ -365,5 +373,20 @@ public class GenericSQLDataSelector extends DataSelector {
         return select;
     }
 
+    /**
+     * <p>Indicate whether the database row index returned by {@link #getCounterStatement(String)}
+     * is applied before or after an "order by" for the statement.</p>
+     *
+     * <p>If "true", the row index expression will be included in the select clause of the actual statement. For example:
+     * {@code SELECT @rowNum=@rowNum+1, id, caption FROM ... ORDER BY caption}
+     * </p>
+     * <p>If "false", the row index expression will be added in an outer select clause, for example:
+     * {@code SELECT @rowNum=@rowNum+1, * FROM (SELECT id, caption FROM ... ORDER BY caption) }
+     * </p>
+     * @return  true if the counter statement is evaluated after the "order by" clause, false otherwise.
+     */
+    protected boolean supportsCounterAfterOrderBy() {
+        return true;
+    }
 
 }
