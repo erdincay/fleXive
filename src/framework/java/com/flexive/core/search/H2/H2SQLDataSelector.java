@@ -60,7 +60,7 @@ public class H2SQLDataSelector extends GenericSQLDataSelector {
      */
     @Override
     public String getCounterStatement(String counter) {
-        return "@"+counter+"=@"+counter+"+1 "+counter;
+        return "SET(@"+counter+",@"+counter+"+1) "+counter;
     }
 
     /**

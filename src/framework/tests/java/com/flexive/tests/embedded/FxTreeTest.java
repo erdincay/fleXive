@@ -508,4 +508,19 @@ public class FxTreeTest {
             index++;
         }
     }
+
+    @Test
+    public void treeCaptionPathToIdTest() throws FxApplicationException {
+        tree.clear(FxTreeMode.Edit);
+        FxTreeNodeEdit tn = FxTreeNodeEdit.createNew("NodeName");
+        tn.setLabel(new FxString(false, "NodeLabel"));
+        tn.setParentNodeId(FxTreeNode.ROOT_NODE);
+        long nodeId = tree.save(tn);
+        assert tree.getIdByLabelPath(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, "/NodeLabel") == nodeId;
+        FxTreeNodeEdit tn2 = FxTreeNodeEdit.createNew("NodeName2");
+        tn2.setLabel(new FxString(false, "NodeLabel2"));
+        tn2.setParentNodeId(nodeId);
+        long nodeId2 = tree.save(tn2);
+        assert tree.getIdByLabelPath(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, "/NodeLabel/NodeLabel2") == nodeId2;
+    }
 }

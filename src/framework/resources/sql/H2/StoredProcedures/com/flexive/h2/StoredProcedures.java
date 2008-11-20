@@ -546,8 +546,54 @@ public class StoredProcedures {
         return sb.toString();
     }
 
-    public static String tree_captionPathToID(Connection con, Long _startNode, String _path, Integer _lang, Long _tprop, Boolean _live) throws SQLException {
-        return "<tree_captionPathToID: not implemented yet>";
+    /**
+     * Find the node-Id from a Caption-Path.
+     * The path is being processed from left to right to match the name
+     *
+     * @param con       provided connection
+     * @param startNode the start node to start looking at
+     * @param path      requested caption path
+     * @param tprop     property containing the caption
+     * @param lang      desired language
+     * @param live      live or edit tree?
+     * @return node id or null if not found
+     * @throws SQLException on errors
+     */
+    public static Long tree_captionPathToID(Connection con, Long startNode, String path, Long tprop, Integer lang, Boolean live) throws SQLException {
+        if (startNode == null)
+            startNode = 1L;
+        if (path == null || path.length() == 0 || path.equals("/")) {
+            if (startNode == 1L)
+                return 1L; //root node
+            return null; //invalid
+        }
+        //remove trailing '/'
+        if (path.startsWith("/"))
+            path = path.substring(1);
+        String[] nodes = path.split("/");
+        final String TABLE = "FXS_TREE" + (live ? "_LIVE" : "");
+        String sql = "SELECT ID FROM " + TABLE + " node WHERE " +
+                "IFNULL(IFNULL(" +
+                "(SELECT f.FTEXT1024 FROM FX_CONTENT_DATA f WHERE f.TPROP=" + tprop + " AND LANG IN (" + lang + ",0) AND f.ISMAX_VER=TRUE AND f.ID=node.REF LIMIT 1)," +
+                "(SELECT f.FTEXT1024 FROM FX_CONTENT_DATA f WHERE f.TPROP=" + tprop + " AND ISMLDEF=TRUE AND f.ISMAX_VER=TRUE AND f.ID=node.REF LIMIT 1)" +
+                "),node.NAME)=? AND PARENT=?";
+        long _result = startNode;
+        PreparedStatement ps = con.prepareStatement(sql);
+        ResultSet rs;
+        try {
+            for (String node : nodes) {
+                ps.setString(1, node);
+                ps.setLong(2, _result);
+                rs = ps.executeQuery();
+                if (rs != null && rs.next())
+                    _result = rs.getLong(1);
+                else
+                    return null;
+            }
+        } finally {
+            ps.close();
+        }
+        return _result;
     }
 
     /**
