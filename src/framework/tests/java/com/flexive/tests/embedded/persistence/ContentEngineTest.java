@@ -454,7 +454,8 @@ public class ContentEngineTest {
         test.setValue("/TestGroup1[2]/TestProperty1_3", testValue);
         pk = co.save(test);
         FxContent testLoad = co.load(pk);
-        assert TEST_IT.equals(((FxString) testLoad.getPropertyData("/TestGroup1[2]/TestProperty1_3").getValue()).getTranslation(FxLanguage.ITALIAN));
+        final String transIt = ((FxString) testLoad.getPropertyData("/TestGroup1[2]/TestProperty1_3").getValue()).getTranslation(FxLanguage.ITALIAN);
+        assert TEST_IT.equals(transIt) : "Expected italian translation '" + TEST_IT + "', got: '" + transIt + "'";
         co.remove(pk);
         pk = co.save(test);
         FxContent testLoad2 = co.load(pk);
@@ -486,7 +487,8 @@ public class ContentEngineTest {
         assert 42.42f == ((FxFloat) testLoad3.getPropertyData("/TestFloat").getValue()).getDefaultTranslation() : "Default translation invalid (should be 42.42f for german, before save)";
         assert 43.43f == ((FxFloat) testLoad3.getPropertyData("/TestFloat").getValue()).getTranslation(FxLanguage.ENGLISH) : "English translation invalid (should be 43.43f, before save)";
         assert testLoad3.getPropertyData("/TestFloat").getValue().hasDefaultLanguage() : "Missing default language after load";
-        assert TEST_IT.equals(((FxString) testLoad3.getPropertyData("/TestGroup1[2]/TestProperty1_3").getValue()).getTranslation(FxLanguage.ITALIAN));
+        final String transIt2 = ((FxString) testLoad3.getPropertyData("/TestGroup1[2]/TestProperty1_3").getValue()).getTranslation(FxLanguage.ITALIAN);
+        assert TEST_IT.equals(transIt2) : "Expected italian translation '" + TEST_IT + "', got: '" + transIt2 + "'";
         assert 1 == co.removeForType(testType.getId()) : "Only one instance should be removed!";
         assert 0 == co.removeForType(testType.getId()) : "No instance should be left to remove!";
 

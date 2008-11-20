@@ -272,8 +272,9 @@
     <target name="tests.groups" depends="tests.groups.run,emma.report"/>
 
     <target name="tests.groups.prepare">
-        <available file="${flexive.openejb.dir}/openejb-tests.conf.xml" property="openEjbConfigExists"/>
-        <fail unless="openEjbConfigExists" message="OpenEJB configuration file (${flexive.openejb.dir}/openejb-tests.conf.xml) not found. A template can be found at ${flexive.openejb.dir}/openejb-tests.conf.xml.sample."/>
+        <property name="tests.openejb.configFile" value="${flexive.openejb.dir}/openejb-tests-${database.vendor}.conf.xml"/>
+        <available file="${tests.openejb.configFile}" property="openEjbConfigExists"/>
+        <fail unless="openEjbConfigExists" message="OpenEJB configuration file (${tests.openejb.configFile}) not found. A template can be found at ${flexive.openejb.dir}/openejb-tests.conf.xml.sample."/>
     </target>
 
     <target name="tests.groups.run" depends="tests.groups.prepare, tests.compile.all, db.update.test">
@@ -317,7 +318,7 @@
             <jvmarg value="-Dlog4j.configuration=testlog4j.xml"/>
             <jvmarg value="-Dcompiler.fork=true"/>  <!-- Overwrite default buildfile settings for dist tests -->
             <jvmarg value="-Dopenejb.home=${flexive.openejb.dir}"/>
-            <jvmarg value="-Dopenejb.configuration=${flexive.openejb.dir}/openejb-tests.conf.xml"/>
+            <jvmarg value="-Dopenejb.configuration=${tests.openejb.configFile}"/>
             <jvmarg value="-Dopenejb.embedded.remotable=true"/>
             <classfileset dir="${tests.classes.dir}" includes="com/flexive/tests/**/*.class"/>
         </testng>
