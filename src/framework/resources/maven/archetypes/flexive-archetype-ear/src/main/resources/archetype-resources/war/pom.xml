@@ -41,6 +41,35 @@
     <build>
         <finalName>yourWarName</finalName>
         <plugins>
+            <!-- Copy the backend application to target/backend/flexive-backend-war.war (for Jetty deployment) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <stripVersion>true</stripVersion>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.flexive</groupId>
+                                    <artifactId>flexive-backend-war</artifactId>
+                                    <version>3.1-SNAPSHOT</version>
+                                    <type>war</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>target/backend</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Enable Jetty container (use jetty:run to execute) -->
             <plugin>
                 <groupId>org.mortbay.jetty</groupId>
                 <artifactId>maven-jetty-plugin</artifactId>
@@ -49,6 +78,7 @@
                     <scanIntervalSeconds>10</scanIntervalSeconds>
                     <stopKey>foo</stopKey>
                     <stopPort>9999</stopPort>
+                    <jettyConfig>jetty.xml</jettyConfig>
 
                     <!--<webAppSourceDirectory>${basedir}/war/src/main/webapp</webAppSourceDirectory>-->
                     <!--<classesDirectory>${basedir}/war/target/classes</classesDirectory>-->
@@ -142,6 +172,13 @@
                         <version>${version}</version>
                     </dependency>
 
+                    <!-- Deploy flexive backend classes -->
+                    <dependency>
+                        <groupId>com.flexive</groupId>
+                        <artifactId>flexive-backend</artifactId>
+                        <version>3.1-SNAPSHOT</version>
+                    </dependency>
+                    
                 </dependencies>
             </plugin>
         </plugins>

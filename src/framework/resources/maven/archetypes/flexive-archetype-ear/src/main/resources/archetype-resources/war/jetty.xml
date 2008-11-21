@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
+
+<Configure id="Server" class="org.mortbay.jetty.Server">
+    <!--
+        This file contains additional configuration for the Jetty container.
+        It also deploys the packaged flexive backend application.
+    -->
+
+    <!-- =========================================================== -->
+    <!-- Set handler Collection Structure                            -->
+    <!-- =========================================================== -->
+    <Set name="handler">
+      <!-- the collection of handlers that will handle the request -->
+        <New id="Handlers" class="org.mortbay.jetty.handler.HandlerCollection">
+            <Set name="handlers">
+                <Array type="org.mortbay.jetty.Handler">
+           <!-- primarily handles the request and maps the request to a ContextHandler -->
+                    <Item>
+                        <New id="Contexts" class="org.mortbay.jetty.handler.ContextHandlerCollection"/>
+                    </Item>
+
+           <!-- The default handler ... handles the request if not yet handled -->
+                    <Item>
+                        <New id="DefaultHandler" class="org.mortbay.jetty.handler.DefaultHandler"/>
+                    </Item>
+
+           <!-- The handler for your request logs -->
+                    <Item>
+                        <New id="RequestLog" class="org.mortbay.jetty.handler.RequestLogHandler"/>
+                    </Item>
+                </Array>
+            </Set>
+        </New>
+    </Set>
+
+    <!-- Remove the following call to disable the backend application -->
+    <Call name="addLifeCycle">
+        <Arg>
+            <New class="org.mortbay.jetty.deployer.WebAppDeployer">
+                <Set name="contexts">
+                    <Ref id="Contexts"/>
+                </Set>
+                <Set name="webAppDir">
+                    target/backend
+                </Set>
+                <Set name="parentLoaderPriority">true</Set>
+                <Set name="extract">false</Set>
+                <Set name="allowDuplicates">false</Set>
+            </New>
+        </Arg>
+    </Call>
+</Configure>

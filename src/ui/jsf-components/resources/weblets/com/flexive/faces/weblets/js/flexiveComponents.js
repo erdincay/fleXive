@@ -114,7 +114,7 @@ flexive.util = new function() {
     this.JSON_RPC_CLIENT = null;
     this.getJsonRpc = function() {
         if (this.JSON_RPC_CLIENT == null) {
-            this.JSON_RPC_CLIENT = new JSONRpcClient(flexive.baseUrl + "/adm/JSON-RPC");
+            this.JSON_RPC_CLIENT = new JSONRpcClient(flexive.baseUrl + "adm/JSON-RPC");
         }
         return this.JSON_RPC_CLIENT;
     };
