@@ -710,12 +710,20 @@ database.vendor=MySQL
         <maven-deploy file="${flexive.lib.dir}/flexive-extractor.jar" pom="flexive-extractor.pom"/>
         <maven-deploy file="${flexive.lib.dir}/flexive-sqlParser.jar" pom="flexive-sqlParser.pom"/>
         <maven-deploy file="${flexive.lib.dir}/fxStream.jar" pom="fxStream.pom"/>
+        <maven-deploy file="${flexive.lib.dir}/flexive-h2.jar" pom="flexive-h2.pom"/>
 
         <maven-deploy file="${flexive.base.build.dir}/ui/flexive.war" pom="flexive-backend-war.pom"/>
 
         <!-- Also package libraries that are not available on common public servers -->
         <maven-deploy file="${flexive.lib.dir}/sanselan.jar" pom="sanselan.pom"/>
         <maven-deploy file="${flexive.lib.dir}/jsf/jsf-facelets.jar" pom="jsf-facelets.pom"/>
+
+        <!-- ZIP SQL Schemas -->
+        <jar file="${flexive.base.build.dir}/flexive-sql-schemas.jar">
+            <zipfileset prefix="com/flexive/schemas" dir="${flexive.resources.framework.dir}/sql" includes="**/*"/>
+        </jar>
+        <maven-deploy file="${flexive.base.build.dir}/flexive-sql-schemas.jar" pom="flexive-sql-schemas.pom"/>
+
 
         <!-- Deploy archetypes -->
 <!--
