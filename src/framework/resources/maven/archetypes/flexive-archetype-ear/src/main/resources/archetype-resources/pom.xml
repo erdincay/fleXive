@@ -9,6 +9,7 @@
 
     <properties>
         <flexive.version>3.1-SNAPSHOT</flexive.version>
+        <openejb.version>3.1</openejb.version>
     </properties>
 
     <!-- Set module versions -->
@@ -32,6 +33,16 @@
             <dependency>
                 <groupId>${pom.groupId}</groupId>
                 <artifactId>war</artifactId>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${pom.groupId}</groupId>
+                <artifactId>consoleapp</artifactId>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${pom.groupId}</groupId>
+                <artifactId>database</artifactId>
                 <version>${pom.version}</version>
             </dependency>
 
@@ -81,6 +92,21 @@
                 <groupId>com.flexive</groupId>
                 <artifactId>flexive-sql-schemas</artifactId>
                 <version>${flexive.version}</version>
+            </dependency>
+
+            <!-- Configure common dependencies -->
+            <dependency>
+                <groupId>org.apache.openejb</groupId>
+                <artifactId>openejb-ejbd</artifactId>
+                <version>${openejb.version}</version>
+                <exclusions>
+                    <!-- Exclude activeio compile dependency, because it currently
+                         fails to resolve on public repos -->
+                    <exclusion>
+                        <groupId>org.apache.activemq</groupId>
+                        <artifactId>activeio-core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>

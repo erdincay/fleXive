@@ -20,5 +20,7 @@
         <resource>openejb/conf/openejb.conf</resource>
         <resource>openejb/conf/logging.properties</resource>
         <resource>database/pom.xml</resource>
+        <resource>consoleapp/pom.xml</resource>
+        <resource>consoleapp/src/main/java/com/flexive/example/console/App.java</resource>
     </resources>
 </archetype>
