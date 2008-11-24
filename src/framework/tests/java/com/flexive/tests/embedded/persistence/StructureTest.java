@@ -51,7 +51,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.transaction.UserTransaction;
 
 /**
@@ -69,7 +68,6 @@ public class StructureTest {
 
     @BeforeClass
     public void beforeClass() throws FxLookupException, FxLoginFailedException, FxAccountInUseException {
-        System.out.println("setting up structure test");
         te = EJBLookup.getTypeEngine();
         ae = EJBLookup.getAssignmentEngine();
         acl = EJBLookup.getAclEngine();
@@ -455,6 +453,45 @@ public class StructureTest {
             Assert.assertTrue(false, "Non-overrideable option must not be overridden!");
         } catch (FxInvalidParameterException ipe) {
             //expected
+        }
+    }
+
+    public void defaultValueLanguageTest() throws FxApplicationException {
+        FxPropertyEdit prop = FxPropertyEdit.createNew("testDefLang",
+                new FxString("Test Priority"),
+                new FxString("Priority"),
+                FxMultiplicity.MULT_1_1,
+                CacheAdmin.getEnvironment().getACL(ACL.Category.STRUCTURE.getDefaultId()),
+                FxDataType.Number);
+
+        FxString defML = new FxString(true, "test");
+        FxString defSL = new FxString(false, "test");
+        long asId = -1 ;
+
+        try {
+            prop.setMultiLang(false);
+            try {
+                prop.setDefaultValue(defML);
+                asId = ae.createProperty(FxType.ROOT_ID, prop, "/");
+                Assert.fail("Expected create property to fail with a multilang default value for a singlelang assignment");
+            } catch (FxRuntimeException e) {
+                //expected
+            }
+            prop.setMultiLang(true);
+            try {
+                prop.setDefaultValue(defSL);
+                asId = ae.createProperty(FxType.ROOT_ID, prop, "/");
+                Assert.fail("Expected create property to fail with a singlelang default value for a singlelang assignment");
+            } catch (FxRuntimeException e) {
+                //expected
+            }
+            prop.setMultiLang(true);
+            prop.setDefaultValue(defML);
+            asId = ae.createProperty(FxType.ROOT_ID, prop, "/");
+            //this should work
+        } finally {
+            if( asId != -1)
+                ae.removeAssignment(asId);
         }
     }
 }
