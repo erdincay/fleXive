@@ -146,9 +146,7 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
      * @return this
      */
     public FxPropertyAssignmentEdit setDefaultValue(FxValue defaultValue) {
-        if( defaultValue == null )
-            return this;
-        if( defaultValue.isMultiLanguage() != this.isMultiLang() ) {
+        if( defaultValue != null && defaultValue.isMultiLanguage() != this.isMultiLang() ) {
             if( defaultValue.isMultiLanguage() )
                 throw new FxInvalidParameterException("value", "ex.content.value.invalid.multilanguage.prop.single", getXPath()).asRuntimeException();
             else

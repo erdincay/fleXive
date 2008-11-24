@@ -554,9 +554,7 @@ public class FxPropertyEdit extends FxProperty {
      * @return the property itself, useful for chained calls
      */
     public FxPropertyEdit setDefaultValue(FxValue value) {
-        if( value == null )
-            return this;
-        if( value.isMultiLanguage() != this.isMultiLang() ) {
+        if( value != null && value.isMultiLanguage() != this.isMultiLang() ) {
             if( value.isMultiLanguage() )
                 throw new FxInvalidParameterException("value", "ex.content.value.invalid.multilanguage.prop.single", getName()).asRuntimeException();
             else
