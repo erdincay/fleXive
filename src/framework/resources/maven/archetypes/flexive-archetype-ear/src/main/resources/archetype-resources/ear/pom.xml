@@ -26,22 +26,17 @@
 		<dependency>
 		    <groupId>com.flexive</groupId>
 		    <artifactId>flexive-shared</artifactId>
-		    <type>jar</type>
-		    <version>3.1-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 		    <groupId>com.flexive</groupId>
 		    <artifactId>flexive-ejb</artifactId>
-		    <type>ejb</type>
-		    <version>3.1-SNAPSHOT</version>
+            <type>ejb</type>
 		</dependency>
 
 		<dependency>
 		    <groupId>com.flexive</groupId>
 		    <artifactId>flexive-backend</artifactId>
-		    <type>jar</type>
-		    <version>3.1-SNAPSHOT</version>
 		</dependency>
 
 	</dependencies>

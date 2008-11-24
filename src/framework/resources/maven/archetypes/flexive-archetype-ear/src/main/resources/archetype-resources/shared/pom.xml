@@ -20,8 +20,7 @@
             <groupId>com.flexive</groupId>
             <artifactId>flexive-shared</artifactId>
             <type>jar</type>
-            <version>3.1-SNAPSHOT</version>
-	    <scope>provided</scope>
+    	    <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

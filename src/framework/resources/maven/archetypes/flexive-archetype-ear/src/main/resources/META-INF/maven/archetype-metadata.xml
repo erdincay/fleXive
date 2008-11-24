@@ -9,6 +9,7 @@
         </fileSet>
     </fileSets>
     <modules>
+        <module id="database" dir="database" name="database"/>
         <module id="ear" dir="ear" name="ear"/>
         <module id="war" dir="war" name="war">
             <fileSets>

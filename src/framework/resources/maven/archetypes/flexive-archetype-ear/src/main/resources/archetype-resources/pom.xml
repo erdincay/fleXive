@@ -7,6 +7,10 @@
     <packaging>pom</packaging>
     <version>${version}</version>
 
+    <properties>
+        <flexive.version>3.1-SNAPSHOT</flexive.version>
+    </properties>
+
     <!-- Set module versions -->
     <dependencyManagement>
         <dependencies>
@@ -29,6 +33,54 @@
                 <groupId>${pom.groupId}</groupId>
                 <artifactId>war</artifactId>
                 <version>${pom.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-backend-war</artifactId>
+                <version>${flexive.version}</version>
+                <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-backend</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-ejb</artifactId>
+                <type>ejb</type>
+                <version>${flexive.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-h2</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-plugin-globalconfig</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-plugin-jsf-core</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-plugin-jsf-feedback</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-shared</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-sql-schemas</artifactId>
+                <version>${flexive.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

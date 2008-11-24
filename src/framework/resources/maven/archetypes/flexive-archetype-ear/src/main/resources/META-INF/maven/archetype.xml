@@ -19,5 +19,6 @@
         <resource>ejb-jar/pom.xml</resource>
         <resource>openejb/conf/openejb.conf</resource>
         <resource>openejb/conf/logging.properties</resource>
+        <resource>database/pom.xml</resource>
     </resources>
 </archetype>
