@@ -175,7 +175,7 @@ var TreeHandler = function(params) {
     for (var param in params) {
         this[param] = params[param];
     }
-}
+};
 
 TreeHandler.prototype = {
     /**
@@ -224,13 +224,13 @@ TreeHandler.prototype = {
             }
         }
     }
-}
+};
 
 
 // A simple clipboard for content objects
 var ContentClipboard = function() {
     this.ids = [];
-}
+};
 
 ContentClipboard.prototype = {
     // set the clipboard content to the given object ID array
@@ -256,7 +256,7 @@ ContentClipboard.prototype = {
     isEmpty: function() {
         return this.get().length == 0;
     }
-}
+};
 
 /**
  * DHTML replacement for Javascript's confirm() dialog

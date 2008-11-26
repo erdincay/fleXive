@@ -706,7 +706,7 @@ function _confirmDialog(message, onConfirmed, onCancel) {
     dialog.disableButtons = function() {
         this.getButtons()[0].disabled = true;
         this.getButtons()[1].disabled = true;
-    }
+    };
     dialog.setHeader(messages["Global.dialog.confirm.title"]);
 	dialog.setBody(message);
 	dialog.cfg.setProperty("icon",YAHOO.widget.SimpleDialog.ICON_WARN);
@@ -719,8 +719,6 @@ function _confirmDialog(message, onConfirmed, onCancel) {
  * Don't invoke directly, use alertDialog(...) from admin.js.
  *
  * @param message       the message to be displayed
- * @param onConfirmed   the function to be executed when the user confirmed the message
- * @param onCancel      the function to be executed when the user did not confirm (optional)
  */
 function _alertDialog(message) {
     var dialog = new YAHOO.widget.SimpleDialog("dlg", {
@@ -755,6 +753,10 @@ function _promptDialog(message, defaultValue, onSuccess) {
     document.getElementById("promptInput").value = defaultValue != null ? defaultValue : "";
 
     if (e.dialog == null) {
+        var handleSubmit = function() {
+            e.onSuccess(document.getElementById("promptInput").value);
+            e.dialog.hide();
+        };
         e.dialog = new YAHOO.widget.Dialog("promptDialog", {
             width: "40em",
             fixedcenter:true,
@@ -764,12 +766,19 @@ function _promptDialog(message, defaultValue, onSuccess) {
             postmethod: "none",
             constraintoviewport: true,
             buttons:  [   { text: messages["Global.dialog.prompt.submit"],
-                            handler: function() { e.onSuccess(document.getElementById("promptInput").value); e.dialog.hide(); },
+                            handler: handleSubmit,
                             isDefault:true },
                           { text: messages["Global.dialog.prompt.cancel"],
                             handler:function() { e.dialog.hide(); } }
                       ]
         });
+        var kl = new YAHOO.util.KeyListener(e,
+            { keys: 13 },
+            { fn: handleSubmit, scope: e.dialog, correctScope:true }
+        );
+        e.dialog.cfg.queueProperty("keylisteners", kl);
+
+
         document.getElementById("promptDialog").style.display = "block";
         e.dialog.render();
     }
