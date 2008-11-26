@@ -1546,6 +1546,174 @@
             -->
         </section>
 
+        <section xml:id="jcl_navigation">
+            <title>
+                Navigation components
+            </title>
+
+            <para>
+                &Flexive; offers a powerful way for mapping web page navigation structures
+                through its
+                <link linkend="core_tree">tree engine</link>.
+                <!-- TODO: link to a tutorial with a "tree-backed" web page -->
+                The components in this section allow rendering of (parts of) the
+                tree in HTML, e.g. web page menus or trees.
+            </para>
+
+            <section xml:id="jcl_fx_navigation">
+                <title>
+                    <code language="xhtml">&lt;fx:navigation></code>
+                </title>
+
+                <para>
+                    Renders part of the topic tree as nested
+                    <code>&lt;ul></code>
+                    elements. These can be styled via CSS to resemble menus or even pop-up menus, or enhanced with
+                    JavaScript using YahooUI components.
+                </para>
+
+
+                <section xml:id="jcl_fx_navigation_synopsis">
+                    <title>Synopsis</title>
+                    <para>
+                        <programlisting language="xhtml"><![CDATA[<fx:navigation var="varname" [output="default|csspopup|yui"] [path="/treepath"] [mode="live|edit"] [depth="int"] [selectedNodeId="nodeId"]>
+    <f:facet name="item">
+        <ui:fragment>
+            <a href="/content/#{node.id}">#{node.label}</a>
+        </ui:fragment>
+    </f:facet>
+</fx:navigation>
+]]></programlisting>
+                    </para>
+                </section>
+
+                <section xml:id="jcl_fx_navigation_parameters">
+                    <title>Parameters</title>
+                    <variablelist>
+                        <varlistentry>
+                            <term>var</term>
+                            <listitem>
+                                <para>
+                                    The variable name where the current tree node of type
+                                    <ulink url="&flexiveJavadocBase;shared/com/flexive/shared/tree/FxTreeNode.html">
+                                        FxTreeNode
+                                    </ulink>
+                                    will be exposed to the page.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>output</term>
+                            <listitem>
+                                <para>
+                                    The output format.
+                                    <variablelist>
+                                        <varlistentry>
+                                            <term>default</term>
+                                            <listitem>
+                                                <para>Plain HTML output.</para>
+                                            </listitem>
+                                        </varlistentry>
+                                        <varlistentry>
+                                            <term>csspopup</term>
+                                            <listitem>
+                                                <para>
+                                                    Renders additional CSS classes that will show only
+                                                    the first tree level and open the subfolders when the
+                                                    mouse hovers over them.
+                                                </para>
+                                            </listitem>
+                                        </varlistentry>
+                                        <varlistentry>
+                                            <term>yui</term>
+                                            <listitem>
+                                                <para>
+                                                    Renders additional markup that allows the Yahoo UI
+                                                    Menu component to build a menu. If JavaScript is disabled,
+                                                    the plain HTML markup is shown to the use.
+                                                    Note that you have to include YUI on the page with
+                                                    <link linkend="jcl_fx_includes">&lt;fx:includes></link>.
+                                                </para>
+                                            </listitem>
+                                        </varlistentry>
+                                    </variablelist>
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>path</term>
+                            <listitem>
+                                <para>
+                                    The tree folder to be rendered. If none is specified, the root folder
+                                    ("/") is rendered.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>mode</term>
+                            <listitem>
+                                <para>
+                                    The tree mode, "edit" or "live" (default).
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>depth</term>
+                            <listitem>
+                                <para>
+                                    The maximum tree depth for sub folders. For example, a value of 2 will render
+                                    content of the given tree path and the first level of subfolders.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>selectedNodeId</term>
+                            <listitem>
+                                <para>
+                                    If specified, the given tree node ID will be highlighted in the HTML output.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </section>
+
+                <section xml:id="jcl_fx_navigation_ex">
+                    <title>Examples</title>
+
+                    <example xml:id="jcl_fx_navigation_ex_text">
+                        <title>A JSF/HTML navigation that selects the clicked node</title>
+                        <para>
+                            <programlisting language="xhtml"><![CDATA[<fx:navigation var="node" path="/" depth="5" selectedNodeId="#{navigationBean.selectedNodeId}">
+    <f:facet name="item">
+        <h:commandLink>
+            <f:setPropertyActionListener value="#{node.id}" target="#{navigationBean.selectedNodeId}"/>
+            #{node.label}
+        </h:commandLink>
+    </f:facet>
+</fx:navigation>
+]]></programlisting>
+                            The JSF backing bean stores the selected node ID and will be updated through
+                            the commandLink.
+
+                            <programlisting language="java"><![CDATA[public class NavigationBean {
+    private long selectedNodeId;
+
+    public long getSelectedNodeId() {
+        return selectedNodeId;
+    }
+
+    public void setSelectedNodeId(long selectedNodeId) {
+        this.selectedNodeId = selectedNodeId;
+    }
+}]]></programlisting>
+                        </para>
+                    </example>
+                </section>
+            </section>
+
+        </section>
+
+
         <section xml:id="jcl_framework">
             <title>
                 Framework components

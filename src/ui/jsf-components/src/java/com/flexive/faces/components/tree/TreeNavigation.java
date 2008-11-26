@@ -62,7 +62,7 @@ import java.io.IOException;
  * <pre> {@code <f:facet name="item">
  *   <ui:fragment>
  *     <a href="/content/#{node.id}">#{node.label}</a>
- *   </ui:fragment
+ *   </ui:fragment>
  * </f:facet>}</pre>
  * </dd>
  * </dl>
