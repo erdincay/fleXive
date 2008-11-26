@@ -47,8 +47,7 @@ import java.util.Map.Entry;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class TreeNodeWriter implements Serializable {
-    private static final long serialVersionUID = 7784356269972240269L;
+public class TreeNodeWriter {
     private final static Map<String, Object> EMPTY_MAP = new HashMap<String, Object>();
 
     /**
@@ -133,7 +132,7 @@ public class TreeNodeWriter implements Serializable {
      * Formats the label of a given tree node, e.g. adds
      * HTML markup for formatting.
      */
-    public static interface NodeFormatter {
+    public static interface NodeFormatter extends Serializable {
         String format(Node node, RelativeUriMapper uriMapper);
     }
 
@@ -143,6 +142,8 @@ public class TreeNodeWriter implements Serializable {
      * Preferred to FORMAT_ADMINTREE if inline node editing is required.
      */
     public static final NodeFormatter FORMAT_PLAIN = new NodeFormatter() {
+        private static final long serialVersionUID = -6205709223249640378L;
+
         /** {@inheritDoc} */
         public String format(Node node, RelativeUriMapper uriMapper) {
             return node.title;
@@ -153,6 +154,7 @@ public class TreeNodeWriter implements Serializable {
      * Format the node using the default style for the admin backend trees.
      */
     public static final NodeFormatter FORMAT_ADMINTREE = new NodeFormatter() {
+        private static final long serialVersionUID = 7271762591207000704L;
         private static final String ICON_CLASS = "treeNodeV3Icon";
         private static final String ICON_PATH = "adm/images/tree/";
 
@@ -169,6 +171,8 @@ public class TreeNodeWriter implements Serializable {
     };
 
     public static final NodeFormatter FORMAT_CONTENTTREE = new NodeFormatter() {
+        private static final long serialVersionUID = -7586232861308540856L;
+
         /** {@inheritDoc} */
         public String format(Node node, RelativeUriMapper uriMapper) {
             final StringBuilder style = new StringBuilder();

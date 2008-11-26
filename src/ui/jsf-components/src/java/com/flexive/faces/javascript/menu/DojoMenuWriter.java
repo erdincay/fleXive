@@ -51,6 +51,9 @@ public class DojoMenuWriter extends AbstractMenuWriter<DojoMenuItemData> impleme
     private static final long serialVersionUID = -4416660810793208460L;
     public static final String ICON_PATH = "adm/images/menu";
 
+    public DojoMenuWriter() {
+    }
+
     public DojoMenuWriter(JsonWriter out, String widgetId, RelativeUriMapper uriMapper) throws IOException {
         super(out, widgetId, uriMapper);
     }

@@ -52,6 +52,9 @@ public class YahooMenuWriter extends AbstractMenuWriter<YahooMenuItemData> imple
     public static final String ICON_PATH = "adm/images/menu";
     private int submenuCounter = 1;
 
+    public YahooMenuWriter() {
+    }
+
     public YahooMenuWriter(JsonWriter out, String widgetId, RelativeUriMapper uriMapper) throws IOException {
         super(out, widgetId, uriMapper);
     }

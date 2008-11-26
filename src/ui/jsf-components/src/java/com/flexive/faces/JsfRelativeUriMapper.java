@@ -33,6 +33,8 @@ package com.flexive.faces;
 
 import com.flexive.faces.javascript.RelativeUriMapper;
 
+import java.io.Serializable;
+
 /**
  * Generate absolute URIs using the JSF context. Works only in a JSF request environment,
  * i.e. not in JSON-RPC-Java requests.
@@ -40,7 +42,9 @@ import com.flexive.faces.javascript.RelativeUriMapper;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class JsfRelativeUriMapper implements RelativeUriMapper {
+public class JsfRelativeUriMapper implements RelativeUriMapper, Serializable {
+    private static final long serialVersionUID = 2513024207963090647L;
+
     /**
      * {@inheritDoc}
      */

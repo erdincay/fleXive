@@ -33,17 +33,20 @@ package com.flexive.faces.javascript.menu;
 
 import com.flexive.war.JsonWriter;
 import com.flexive.faces.javascript.RelativeUriMapper;
+import com.flexive.faces.JsfRelativeUriMapper;
 
 import java.util.Map;
 import java.util.HashMap;
 import java.io.IOException;
 import java.io.Writer;
+import java.io.Serializable;
 
 /**
   * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
   * @version $Rev$
  */
-public abstract class AbstractMenuWriter<TMenuItem extends AbstractMenuItemData<TMenuItem>> {
+public abstract class AbstractMenuWriter<TMenuItem extends AbstractMenuItemData<TMenuItem>> implements Serializable {
+    private static final long serialVersionUID = 4018501739265494515L;
 
     protected JsonWriter out;
     protected final RelativeUriMapper uriMapper;
@@ -51,6 +54,15 @@ public abstract class AbstractMenuWriter<TMenuItem extends AbstractMenuItemData<
     protected Map<String, String> engageSubscriptions = new HashMap<String, String>();
     protected int itemIdCounter = 0;
     protected final String menuId;
+
+    /**
+     * Default constructor.
+     */
+    protected AbstractMenuWriter() {
+        this.uriMapper = new JsfRelativeUriMapper();
+        this.menuId = "undefined";
+        this.out = new JsonWriter();
+    }
 
     /**
      * Create a new menu writer using the given JSON writer.
