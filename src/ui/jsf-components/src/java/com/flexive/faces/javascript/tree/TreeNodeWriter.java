@@ -36,6 +36,7 @@ import com.flexive.war.JsonWriter;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -46,7 +47,8 @@ import java.util.Map.Entry;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class TreeNodeWriter {
+public class TreeNodeWriter implements Serializable {
+    private static final long serialVersionUID = 7784356269972240269L;
     private final static Map<String, Object> EMPTY_MAP = new HashMap<String, Object>();
 
     /**

@@ -55,6 +55,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.Serializable;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -585,7 +586,9 @@ class EditModeHelper extends RenderHelper {
      * row switcher.
      */
     public static class LanguageSelectWriter extends DeferredInputWriter {
-        public static class InputRowInfo {
+        public static class InputRowInfo implements Serializable {
+            private static final long serialVersionUID = -2146282630839499609L;
+            
             private final String rowId;
             private final String inputId;
 

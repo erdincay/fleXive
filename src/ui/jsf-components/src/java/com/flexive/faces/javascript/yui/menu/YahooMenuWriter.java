@@ -39,6 +39,7 @@ import com.flexive.faces.javascript.menu.MenuItemContainer;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.io.Serializable;
 
 /**
  * JSON renderer for Yahoo-style menus.
@@ -46,7 +47,8 @@ import java.io.Writer;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class YahooMenuWriter extends AbstractMenuWriter<YahooMenuItemData> {
+public class YahooMenuWriter extends AbstractMenuWriter<YahooMenuItemData> implements Serializable {
+    private static final long serialVersionUID = -6786448793772348178L;
     public static final String ICON_PATH = "adm/images/menu";
     private int submenuCounter = 1;
 

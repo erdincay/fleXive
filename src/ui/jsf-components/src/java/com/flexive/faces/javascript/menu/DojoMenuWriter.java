@@ -38,6 +38,7 @@ import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -46,7 +47,8 @@ import java.util.Map;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class DojoMenuWriter extends AbstractMenuWriter<DojoMenuItemData> {
+public class DojoMenuWriter extends AbstractMenuWriter<DojoMenuItemData> implements Serializable {
+    private static final long serialVersionUID = -4416660810793208460L;
     public static final String ICON_PATH = "adm/images/menu";
 
     public DojoMenuWriter(JsonWriter out, String widgetId, RelativeUriMapper uriMapper) throws IOException {

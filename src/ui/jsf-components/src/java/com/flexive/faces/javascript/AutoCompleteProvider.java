@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.Serializable;
 import java.net.URLDecoder;
 
 import org.apache.commons.lang.StringUtils;
@@ -62,7 +63,8 @@ import javax.servlet.http.HttpServletRequest;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class AutoCompleteProvider {
+public class AutoCompleteProvider implements Serializable {
+    private static final long serialVersionUID = 8437543826523719386L;
     private static final int MAX_ITEMS = 10;
 
     private static class ResponseLine {

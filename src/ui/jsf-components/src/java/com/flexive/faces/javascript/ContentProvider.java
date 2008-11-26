@@ -5,13 +5,16 @@ import com.flexive.shared.EJBLookup;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.exceptions.FxApplicationException;
 
+import java.io.Serializable;
+
 /**
  * Provides access to content instances via JSON/RPC.
  *
  * @author Daniel Lichtenberger, UCS
  * @version $Rev$
  */
-public class ContentProvider {
+public class ContentProvider implements Serializable {
+    private static final long serialVersionUID = 8529840536101737397L;
 
     /**
      * Returns the caption of the content with the given PK.
