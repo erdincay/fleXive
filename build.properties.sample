@@ -13,7 +13,14 @@ profile.netbeans.root=/opt/netbeans-5.0/profiler1
 profile.netbeans.agent=lib/deployed/jdk15/linux/libprofilerinterface.so
 
 # Maven repository URL
-maven.dist.repo.snapshot=file:///var/repo/flexive
+maven.dist.repo=file:///var/repos/flexive
+#maven.dist.repo=scp://host/path
+# User name for repository
+maven.dist.user=
+# Password for repository
+maven.dist.password=
+# Private key for SCP
+maven.dist.privatekey=
 
 # This is the database configuration file used by the flexive setup tasks.
 #

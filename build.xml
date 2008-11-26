@@ -743,9 +743,12 @@ database.vendor=MySQL
                     <filter token="FLEXIVE_VERSION" value="${flexive.maven.version}"/>
                 </filterset>
             </copy>
+            <artifact:install-provider groupid="org.apache.maven.wagon" artifactid="wagon-ssh" version="1.0-beta-1"/>
             <artifact:deploy file="@{file}" uniqueversion="false">
                 <remoterepository url="${maven.dist.repo}">
                     <snapshots updatePolicy="always"/>
+                    <authentication username="${maven.dist.user}" password="${maven.dist.password}"
+                                    privateKey="${maven.dist.privatekey}"/>
                 </remoterepository>
                 <pom file="${flexive.base.build.dir}/@{pom}"/>
             </artifact:deploy>
