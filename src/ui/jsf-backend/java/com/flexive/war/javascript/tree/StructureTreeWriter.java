@@ -58,13 +58,19 @@ import java.util.*;
 public class StructureTreeWriter implements Serializable {
     private static final long serialVersionUID = 7930729560359590725L;
     private static final Log LOG = LogFactory.getLog(StructureTreeWriter.class);
-
+    //doc types
     public static final String DOC_TYPE_GROUP = "Group";
     public static final String DOC_TYPE_TYPE = "Type";
     public static final String DOC_TYPE_TYPE_RELATION = "TypeRelation";
     public static final String DOC_TYPE_ASSIGNMENT = "Assignment";
     public static final String DOC_TYPE_ASSIGNMENT_SYSTEMINTERNAL = "AssignmentSystemInternal";
     public static final String DOC_TYPE_TYPEID = "Type_";
+    //node types
+    public static final String NODE_TYPE_TYPE="Type";
+    public static final String NODE_TYPE_TYPE_RELATION="TypeRelation";
+    public static final String NODE_TYPE_ASSIGNMENT="Assignment";
+    public static final String NODE_TYPE_ASSIGNMENT_SYSTEMINTERNAL = "AssignmentSystemInternal";
+    public static final String NODE_TYPE_GROUP="Group";
 
     /**
      * Render the structure tree to the node writer set in the current request.
@@ -149,6 +155,7 @@ public class StructureTreeWriter implements Serializable {
                 : type.getIcon() != null && !type.getIcon().isEmpty()
                 ? DOC_TYPE_TYPEID + type.getId()
                 : DOC_TYPE_TYPE;
+        nodeProperties.put("nodeType", type.isRelation() ? NODE_TYPE_TYPE_RELATION : NODE_TYPE_TYPE);
         writer.startNode(new Node(String.valueOf(type.getId()), type.getDisplayName(), docType, nodeProperties));
         writer.startChildren();
         // write derived types
@@ -187,6 +194,7 @@ public class StructureTreeWriter implements Serializable {
         nodeProperties.clear();
         nodeProperties.put("assignmentId", String.valueOf(assignment.getId()));
         nodeProperties.put("propertyId", String.valueOf(assignment.getProperty().getId()));
+        nodeProperties.put("nodeType", assignment.isSystemInternal() ? NODE_TYPE_ASSIGNMENT_SYSTEMINTERNAL : NODE_TYPE_ASSIGNMENT);
         writer.writeNode(new Node(String.valueOf(assignment.getId()), assignment.getDisplayName(),
                 assignment.isSystemInternal() ? DOC_TYPE_ASSIGNMENT_SYSTEMINTERNAL : DOC_TYPE_ASSIGNMENT, nodeProperties));
     }
@@ -204,6 +212,7 @@ public class StructureTreeWriter implements Serializable {
     private void writeGroupAssignment(TreeNodeWriter writer, Map<String, Object> nodeProperties, FxGroupAssignment group) throws IOException {
         nodeProperties.clear();
         nodeProperties.put("assignmentId", String.valueOf(group.getId()));
+        nodeProperties.put("nodeType",NODE_TYPE_GROUP);
         writer.startNode(new Node(String.valueOf(group.getId()), group.getDisplayName(), DOC_TYPE_GROUP, nodeProperties));
         writer.startChildren();
 

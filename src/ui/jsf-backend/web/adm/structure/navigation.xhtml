@@ -152,7 +152,7 @@
                 for (var i=0;i<childArray.length;i++) {
                     var node = childArray[i];
                     if (node.isExpanded) {
-                       harray.push(new Array(getNodeId(node), node.nodeDocType));
+                       harray.push(new Array(getNodeId(node), node.nodeType));
                        harray = _buildExpandedArray(node.children, harray)
                     }
                 }
@@ -217,14 +217,14 @@
                 var propertyId = node["assignmentId"] != null ? node["assignmentId"] : node["typeId"];
                 if (propertyId != null && propertyId != -1 && parent.frames["contentFrame"].addQueryNode) {
                     // add to search query
-                    if (node.nodeDocType=="AssignmentSystemInternal" || node.nodeDocType=="Assignment") {
+                    if (node.nodeType=="AssignmentSystemInternal" || node.nodeType=="Assignment") {
                         if (flexive.util.getJsonRpc().StructureTreeEditor.isSearchable(propertyId))
-                            parent.frames["contentFrame"].addQueryNode(propertyId, node.nodeDocType);
+                            parent.frames["contentFrame"].addQueryNode(propertyId, node.nodeType);
                         else
                             alertDialog("#{fxMessageBean['StructureTree.message.property.notSearchable']}");
                     }
                     else
-                        parent.frames["contentFrame"].addQueryNode(propertyId, node.nodeDocType);
+                        parent.frames["contentFrame"].addQueryNode(propertyId, node.nodeType);
                     //alertDialog("sturctureTreeClickHandler, addProperty branch");
                 }
                 else doContentActionFromContextMenu(node, defaultAction);
@@ -232,13 +232,13 @@
 
             //should be invoked from the nodes in the context menu
             function doContentActionFromContextMenu(node, defaultAction) {
-                if ("Assignment" == node.nodeDocType || "AssignmentSystemInternal" == node.nodeDocType) {
+                if ("Assignment" == node.nodeType || "AssignmentSystemInternal" == node.nodeType) {
                     invokeContentAction("adm/structure/propertyAssignmentEditor.jsf", defaultAction, {id: node["assignmentId"]});
                 }
-                else if (isType(node.nodeDocType)) {
+                else if (isType(node.nodeType)) {
                     invokeContentAction("adm/structure/typeEditor.jsf", defaultAction, {id: node["typeId"]});
                 }
-                else if ("Group" == node.nodeDocType) {
+                else if ("Group" == node.nodeType) {
                     invokeContentAction("adm/structure/groupAssignmentEditor.jsf", defaultAction, {id: node["assignmentId"]});
                 }
             }
@@ -258,8 +258,27 @@
                 var menu = dojo.widget.byId("structureTreeMenu");
                 var parentId = getNodeId(menu.getTreeNode());
 
-                invokeContentAction("adm/structure/propertyEditor.jsf", "createProperty", {id: parentId, nodeType: menu.getTreeNode().nodeDocType});
+                invokeContentAction("adm/structure/propertyEditor.jsf", "createProperty", {id: parentId, nodeType: menu.getTreeNode().nodeType});
                 //contentPage=null;
+            }
+
+            // create a derived type of the current node
+            function createDerivedType(menuItem) {
+                var menu = dojo.widget.byId("structureTreeMenu");
+                var parentId = getNodeId(menu.getTreeNode());
+
+                promptAlias(function(alias) {
+                    if (alias!=null && alias!="") {
+                        try {
+                            newTypeId =flexive.util.getJsonRpc().StructureTreeEditor.createDerivedType(parentId, alias);
+                            reloadAndKeepExpanded();
+                            selectNode(newTypeId, true);
+                        }
+                        catch (e) {
+                            alertDialog(e.message);
+                        }
+                    }
+                });
             }
 
              // create a new group as child of the current node
@@ -267,7 +286,7 @@
                 var menu = dojo.widget.byId("structureTreeMenu");
                 var parentId = getNodeId(menu.getTreeNode());
 
-                invokeContentAction("adm/structure/groupEditor.jsf", "createGroup", {id: parentId, nodeType: menu.getTreeNode().nodeDocType});
+                invokeContentAction("adm/structure/groupEditor.jsf", "createGroup", {id: parentId, nodeType: menu.getTreeNode().nodeType});
                 //contentPage=null;
             }
 
@@ -287,7 +306,7 @@
                 var menu = dojo.widget.byId("structureTreeMenu");
                 var parentId = menu.getTreeNode().assignmentId;
 
-                invokeContentAction("adm/structure/groupAssignmentEditor.jsf", "assignGroup", {id: parentId, nodeType: menu.getTreeNode().nodeDocType});
+                invokeContentAction("adm/structure/groupAssignmentEditor.jsf", "assignGroup", {id: parentId, nodeType: menu.getTreeNode().nodeType});
                 contentPage=null;
             }
 
@@ -295,7 +314,7 @@
                 var menu = dojo.widget.byId("structureTreeMenu");
                 var parentId = menu.getTreeNode().assignmentId;
 
-                invokeContentAction("adm/structure/propertyAssignmentEditor.jsf", "assignProperty", {id: parentId, nodeType: menu.getTreeNode().nodeDocType});
+                invokeContentAction("adm/structure/propertyAssignmentEditor.jsf", "assignProperty", {id: parentId, nodeType: menu.getTreeNode().nodeType});
                 contentPage=null;
             }
           */
@@ -327,7 +346,7 @@
                 confirmDialog("#{fxMessageBean['StructureTree.message.delete.assignment']}", function() {
                     try {
                         flexive.util.getJsonRpc().StructureTreeEditor.deleteAssignment(id);
-                        if (copyNode!=null && copyNode.assignmentId ==id && (copyNode.nodeDocType=="Group" || copyNode.nodeDocType=="Assignment"))
+                        if (copyNode!=null && copyNode.assignmentId ==id && (copyNode.nodeType=="Group" || copyNode.nodeType=="Assignment"))
                             copyNode=null;
                         reloadStructureTree();
                         if (!isContentFrameValidAfterDeletion()) {
@@ -399,15 +418,15 @@
             function pasteBelow(menuItem, alias) {
                 var menu = dojo.widget.byId("structureTreeMenu");
                 var destId = getNodeId(menu.getTreeNode());
-                var destDocType=menu.getTreeNode().nodeDocType;
+                var destNodeType=menu.getTreeNode().nodeType;
                 try {
                     if (copyMode) {
-                        var newAssignmentId = flexive.util.getJsonRpc().StructureTreeEditor.pasteAssignmentRelative(getNodeId(copyNode), copyNode.nodeDocType , destId, destDocType ,alias, 1);
+                        var newAssignmentId = flexive.util.getJsonRpc().StructureTreeEditor.pasteAssignmentRelative(getNodeId(copyNode), copyNode.nodeType , destId, destNodeType ,alias, 1);
                         reloadAndKeepExpanded();
                         expandToNodeWithId(newAssignmentId, false);
                     }
                     else {
-                        flexive.util.getJsonRpc().StructureTreeEditor.moveAssignmentRelative(getNodeId(copyNode), copyNode.nodeDocType, destId, 1);
+                        flexive.util.getJsonRpc().StructureTreeEditor.moveAssignmentRelative(getNodeId(copyNode), copyNode.nodeType, destId, 1);
                         reloadAndKeepExpanded();
                         expandToNodeWithId(getNodeId(copyNode), false);
                     }
@@ -428,15 +447,15 @@
             function pasteAbove(menuItem, alias) {
                 var menu = dojo.widget.byId("structureTreeMenu");
                 var destId = getNodeId(menu.getTreeNode());
-                var destDocType=menu.getTreeNode().nodeDocType;
+                var destNodeType=menu.getTreeNode().nodeType;
                 try {
                     if (copyMode) {
-                        var newAssignmentId = flexive.util.getJsonRpc().StructureTreeEditor.pasteAssignmentRelative(getNodeId(copyNode), copyNode.nodeDocType , destId, destDocType, alias, 0);
+                        var newAssignmentId = flexive.util.getJsonRpc().StructureTreeEditor.pasteAssignmentRelative(getNodeId(copyNode), copyNode.nodeType , destId, destNodeType, alias, 0);
                         reloadAndKeepExpanded();
                         expandToNodeWithId(newAssignmentId, false);
                     }
                     else {
-                        flexive.util.getJsonRpc().StructureTreeEditor.moveAssignmentRelative(getNodeId(copyNode), copyNode.nodeDocType, destId, 0);
+                        flexive.util.getJsonRpc().StructureTreeEditor.moveAssignmentRelative(getNodeId(copyNode), copyNode.nodeType, destId, 0);
                         reloadAndKeepExpanded();
                         expandToNodeWithId(getNodeId(copyNode), false);
                     }
@@ -457,9 +476,9 @@
             function pasteInto(menuItem, alias) {
                 var menu = dojo.widget.byId("structureTreeMenu");
                 var parentId = getNodeId(menu.getTreeNode());
-                var parentType= menu.getTreeNode().nodeDocType;
+                var parentType= menu.getTreeNode().nodeType;
                 try {
-                    var newAssignmentId = flexive.util.getJsonRpc().StructureTreeEditor.pasteAssignmentInto(getNodeId(copyNode), copyNode.nodeDocType , parentId, parentType, alias);
+                    var newAssignmentId = flexive.util.getJsonRpc().StructureTreeEditor.pasteAssignmentInto(getNodeId(copyNode), copyNode.nodeType , parentId, parentType, alias);
                     reloadAndKeepExpanded();
                     expandToNodeWithId(newAssignmentId, false);
                 }
@@ -493,7 +512,7 @@
             function searchContents(menuItem) {
                 var menu = dojo.widget.byId("structureTreeMenu");
                 var nodeId = getNodeId(menu.getTreeNode());
-                var docType = menu.getTreeNode().nodeDocType;
+                var nodeType = menu.getTreeNode().nodeType;
                 var propertyId = menu.getTreeNode().propertyId;
 
                 if (propertyId != null && !flexive.util.getJsonRpc().StructureTreeEditor.isSearchable(propertyId)) {
@@ -502,10 +521,10 @@
                 }
                 if (parent.frames["contentFrame"].isQueryEditor) {
                     // add node to query
-                    parent.frames["contentFrame"].addQueryNode(nodeId, docType);
+                    parent.frames["contentFrame"].addQueryNode(nodeId, nodeType);
                 } else {
                     // open query editor
-                    if (isType(docType)) {
+                    if (isType(nodeType)) {
                         invokeContentAction("adm/search/query.jsf", "typeSearch", {typeId: nodeId});
                     } else {
                         invokeContentAction("adm/search/query.jsf", "assignmentSearch", {assignmentId: nodeId});
@@ -540,7 +559,7 @@
             function createTestData(menuItem) {
                 var menu = dojo.widget.byId("structureTreeMenu");
                 var nodeId = getNodeId(menu.getTreeNode());
-                if (isType(menu.getTreeNode().nodeDocType))
+                if (isType(menu.getTreeNode().nodeType))
                     invokeContentAction("adm/content/createTestData.jsf", "setTypeId", {typeId: nodeId});
             }
 
@@ -572,51 +591,52 @@
                     return;
                 }
                 var node = menu.getTreeNode();
-                if (!node.nodeDocType)
+                if (!node.nodeType)
                     return;
                 var lackRole = #{not fxSystemBean.isInRole['StructureManagement']};
                 var notGlobalSupervisor = #{not fxSystemBean.isInRole['GlobalSupervisor']};
                 var mayOpen = !lackRole || #{fxSystemBean.isInRole['ScriptManagement']};
-                setActionDisabled(menu.getTreeNode(), "editNode", !mayOpen || (node.nodeDocType =="AssignmentSystemInternal" && notGlobalSupervisor));
-                setActionDisabled(menu.getTreeNode(), "createContent", !isType(node.nodeDocType));
-                setActionDisabled(menu.getTreeNode(), "createProperty", !(node.nodeDocType=="Group" || isType(node.nodeDocType)) || lackRole);
-                setActionDisabled(menu.getTreeNode(), "createGroup", !(node.nodeDocType=="Group" || isType(node.nodeDocType)) || lackRole);
-                setActionDisabled(menu.getTreeNode(), "deleteAssignment", (node.nodeDocType!="Group" && node.nodeDocType!="Assignment") || lackRole || (node.nodeDocType =="AssignmentSystemInternal" && notGlobalSupervisor));
-                setActionDisabled(menu.getTreeNode(), "deleteType", !isType(node.nodeDocType) || lackRole);
-                setActionDisabled(menu.getTreeNode(), "copyAssignment", lackRole || node.nodeDocType!="Group" && node.nodeDocType!="Assignment");
-                setActionDisabled(menu.getTreeNode(), "searchContents", !isType(node.nodeDocType) && !isAssignment(node.nodeDocType));
-                setActionDisabled(menu.getTreeNode(), "searchContentsImmediate", !isType(node.nodeDocType));
-                setActionDisabled(menu.getTreeNode(), "searchPropertyContents", !isAssignment(node.nodeDocType));
-                setActionDisabled(menu.getTreeNode(), "cutAssignment", lackRole || node.nodeDocType!="Assignment" && node.nodeDocType!="Group");
+                setActionDisabled(menu.getTreeNode(), "editNode", !mayOpen || (node.nodeType =="AssignmentSystemInternal" && notGlobalSupervisor));
+                setActionDisabled(menu.getTreeNode(), "createContent", !isType(node.nodeType));
+                setActionDisabled(menu.getTreeNode(), "createProperty", !(node.nodeType=="Group" || isType(node.nodeType)) || lackRole);
+                setActionDisabled(menu.getTreeNode(), "createGroup", !(node.nodeType=="Group" || isType(node.nodeType)) || lackRole);
+                setActionDisabled(menu.getTreeNode(), "createDerivedType", !(node.nodeType=="Type" || lackRole));
+                setActionDisabled(menu.getTreeNode(), "deleteAssignment", (node.nodeType!="Group" && node.nodeType!="Assignment") || lackRole || (node.nodeType =="AssignmentSystemInternal" && notGlobalSupervisor));
+                setActionDisabled(menu.getTreeNode(), "deleteType", !isType(node.nodeType) || lackRole);
+                setActionDisabled(menu.getTreeNode(), "copyAssignment", lackRole || node.nodeType!="Group" && node.nodeType!="Assignment");
+                setActionDisabled(menu.getTreeNode(), "searchContents", !isType(node.nodeType) && !isAssignment(node.nodeType));
+                setActionDisabled(menu.getTreeNode(), "searchContentsImmediate", !isType(node.nodeType));
+                setActionDisabled(menu.getTreeNode(), "searchPropertyContents", !isAssignment(node.nodeType));
+                setActionDisabled(menu.getTreeNode(), "cutAssignment", lackRole || node.nodeType!="Assignment" && node.nodeType!="Group");
                 //paste a copied assignment node into a different Type below another assignment
-                setActionDisabled(menu.getTreeNode(), "pasteBelow", lackRole || copyNode==null || cutMode || (copyMode && (node.nodeDocType!="Assignment" && node.nodeDocType!="Group") ||
+                setActionDisabled(menu.getTreeNode(), "pasteBelow", lackRole || copyNode==null || cutMode || (copyMode && (node.nodeType!="Assignment" && node.nodeType!="Group") ||
                                 flexive.util.getJsonRpc().StructureTreeEditor.isSameLevel(copyNode.assignmentId, node.assignmentId)));
                 //only allowed at same level/Type and if the node is different than the right clicked node
-                setActionDisabled(menu.getTreeNode(), "pasteBelowAfterCut", lackRole || copyNode==null || copyMode || (node.nodeDocType!="Assignment" && node.nodeDocType!="Group") ||
+                setActionDisabled(menu.getTreeNode(), "pasteBelowAfterCut", lackRole || copyNode==null || copyMode || (node.nodeType!="Assignment" && node.nodeType!="Group") ||
                                 getNodeId(copyNode) == getNodeId(node) ||(cutMode && !flexive.util.getJsonRpc().StructureTreeEditor.isSameLevel(copyNode.assignmentId, node.assignmentId)));
                 //paste a copied assignment node into a different Type above another assignment
-                setActionDisabled(menu.getTreeNode(), "pasteAbove", lackRole || copyNode==null || cutMode || (copyMode && (node.nodeDocType!="Assignment" && node.nodeDocType!="Group") ||
+                setActionDisabled(menu.getTreeNode(), "pasteAbove", lackRole || copyNode==null || cutMode || (copyMode && (node.nodeType!="Assignment" && node.nodeType!="Group") ||
                                 flexive.util.getJsonRpc().StructureTreeEditor.isSameLevel(copyNode.assignmentId, node.assignmentId)));
                 //only allowed at same level/Type and if the node is different than the right clicked node
-                setActionDisabled(menu.getTreeNode(), "pasteAboveAfterCut", lackRole || copyNode==null || copyMode || (node.nodeDocType!="Assignment" && node.nodeDocType!="Group") ||
+                setActionDisabled(menu.getTreeNode(), "pasteAboveAfterCut", lackRole || copyNode==null || copyMode || (node.nodeType!="Assignment" && node.nodeType!="Group") ||
                                 getNodeId(copyNode) == getNodeId(node) || (cutMode && !flexive.util.getJsonRpc().StructureTreeEditor.isSameLevel(copyNode.assignmentId, node.assignmentId)));
-                setActionDisabled(menu.getTreeNode(), "pasteInto", lackRole || copyNode==null || cutMode || (!isType(node.nodeDocType) && node.nodeDocType!="Group") ||
-                                flexive.util.getJsonRpc().StructureTreeEditor.isChild(copyNode.assignmentId, getNodeId(node), node.nodeDocType));
-                setActionDisabled(menu.getTreeNode(), "pasteBelowAs", lackRole || copyNode==null || cutMode ||(node.nodeDocType!="Assignment" && node.nodeDocType!="Group"));
-                setActionDisabled(menu.getTreeNode(), "pasteAboveAs", lackRole || copyNode==null || cutMode ||(node.nodeDocType!="Assignment" && node.nodeDocType!="Group"));
-                setActionDisabled(menu.getTreeNode(), "pasteIntoAs", lackRole || copyNode==null || cutMode || (!isType(node.nodeDocType) && node.nodeDocType!="Group"));
+                setActionDisabled(menu.getTreeNode(), "pasteInto", lackRole || copyNode==null || cutMode || (!isType(node.nodeType) && node.nodeType!="Group") ||
+                                flexive.util.getJsonRpc().StructureTreeEditor.isChild(copyNode.assignmentId, getNodeId(node), node.nodeType));
+                setActionDisabled(menu.getTreeNode(), "pasteBelowAs", lackRole || copyNode==null || cutMode ||(node.nodeType!="Assignment" && node.nodeType!="Group"));
+                setActionDisabled(menu.getTreeNode(), "pasteAboveAs", lackRole || copyNode==null || cutMode ||(node.nodeType!="Assignment" && node.nodeType!="Group"));
+                setActionDisabled(menu.getTreeNode(), "pasteIntoAs", lackRole || copyNode==null || cutMode || (!isType(node.nodeType) && node.nodeType!="Group"));
                 setActionDisabled(menu.getTreeNode(), "pasteSubMenu", lackRole || copyNode==null || cutMode);
-                setActionDisabled(menu.getTreeNode(), "createTestData", lackRole || !isType(node.nodeDocType));
-                setActionDisabled(menu.getTreeNode(), "exportType", lackRole || !isType(node.nodeDocType));
+                setActionDisabled(menu.getTreeNode(), "createTestData", lackRole || !isType(node.nodeType));
+                setActionDisabled(menu.getTreeNode(), "exportType", lackRole || !isType(node.nodeType));
                 menu.show_();
             }
 
-            function isType(docType) {
-                return docType.indexOf("Type") == 0;
+            function isType(nodeType) {
+                return nodeType.indexOf("Type") == 0;
             }
 
-            function isAssignment(docType) {
-                return docType == "Assignment" || docType == "AssignmentSystemInternal";
+            function isAssignment(nodeType) {
+                return nodeType == "Assignment" || nodeType == "AssignmentSystemInternal";
             }
 
             function enableSearchMode() {
@@ -644,6 +664,7 @@
                 <adm:treeContextMenuItem icon="export" treeActions="exportType" labelKey="StructureTree.menu.exportType" clickHandler="exportType"/>
                 <adm:treeContextMenuItem icon="property" treeActions="createProperty" labelKey="StructureTree.menu.createProperty" clickHandler="createProperty"/>
                 <adm:treeContextMenuItem icon="group" treeActions="createGroup" labelKey="StructureTree.menu.createGroup" clickHandler="createGroup" />
+                <adm:treeContextMenuItem icon="fxType" treeActions="createDerivedType" labelKey="StructureTree.menu.createDerivedType" clickHandler="createDerivedType" />
                 <adm:treeContextMenuItem icon="search" treeActions="searchContents" labelKey="StructureTree.menu.searchContents" clickHandler="searchContents"/>
                 <adm:treeContextMenuItem icon="search" treeActions="searchContentsImmediate" labelKey="StructureTree.menu.searchContentsImmediate" clickHandler="searchContentsImmediate"/>
                 <adm:treeContextMenuItem icon="search" treeActions="searchPropertyContents" labelKey="StructureTree.menu.searchContents.property" clickHandler="searchContentsByProperty"/>

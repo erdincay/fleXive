@@ -35,6 +35,7 @@ package com.flexive.war.javascript.tree;
 
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.value.FxString;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
@@ -116,24 +117,24 @@ public class StructureTreeEditor implements Serializable {
         FxType targetType = null;
         long assignmentId = -1;
 
-        if (StructureTreeWriter.DOC_TYPE_GROUP.equals(targetNodeType)) {
+        if (StructureTreeWriter.NODE_TYPE_GROUP.equals(targetNodeType)) {
             FxGroupAssignment ga = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(targetId);
             targetType = ga.getAssignedType();
             targetXPath = ga.getXPath();
-        } else if (StructureTreeWriter.DOC_TYPE_TYPE.equals(targetNodeType) ||
-                StructureTreeWriter.DOC_TYPE_TYPE_RELATION.equals(targetNodeType)) {
+        } else if (StructureTreeWriter.NODE_TYPE_TYPE.equals(targetNodeType) ||
+                StructureTreeWriter.NODE_TYPE_TYPE_RELATION.equals(targetNodeType)) {
             targetType = CacheAdmin.getEnvironment().getType(targetId);
         }
 
         //paste assignment into the target group/type
-        if (StructureTreeWriter.DOC_TYPE_ASSIGNMENT.equals(parentNodeType)) {
+        if (StructureTreeWriter.NODE_TYPE_ASSIGNMENT.equals(parentNodeType)) {
             assignmentId = EJBLookup.getAssignmentEngine().
                     save(createReusedPropertyAssignment(parentAssId, newName, targetXPath, targetType).setPosition(0), false);
             //move property assignment to first position
             //FxPropertyAssignmentEdit pa = ((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(assignmentId)).asEditable();
             //pa.setPosition(0);
             //EJBLookup.getAssignmentEngine().save(pa, false);
-        } else if (StructureTreeWriter.DOC_TYPE_GROUP.equals(parentNodeType)) {
+        } else if (StructureTreeWriter.NODE_TYPE_GROUP.equals(parentNodeType)) {
             FxGroupAssignment assignment = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(parentAssId);
             assignmentId = EJBLookup.getAssignmentEngine().save(FxGroupAssignmentEdit.createNew(assignment, targetType, newName == null ? assignment.getAlias() : newName, targetXPath).setPosition(0), true);
             //move group assignment to first position
@@ -166,16 +167,16 @@ public class StructureTreeEditor implements Serializable {
         FxType destType = destAssignment.getAssignedType();
 
         //get destination xpath
-        if (StructureTreeWriter.DOC_TYPE_GROUP.equals(destNodeType)) {
+        if (StructureTreeWriter.NODE_TYPE_GROUP.equals(destNodeType)) {
             destXPath = destAssignment.getXPath();
-        } else if (StructureTreeWriter.DOC_TYPE_ASSIGNMENT.equals(destNodeType)) {
+        } else if (StructureTreeWriter.NODE_TYPE_ASSIGNMENT.equals(destNodeType)) {
             if (destAssignment.hasParentGroupAssignment())
                 destXPath = destAssignment.getParentGroupAssignment().getXPath();
         } else {
             throw new FxInvalidParameterException("nodeType", "ex.structureTreeEditor.nodeType.invalid", destNodeType);
         }
 
-        if (StructureTreeWriter.DOC_TYPE_GROUP.equals(srcNodeType)) {
+        if (StructureTreeWriter.NODE_TYPE_GROUP.equals(srcNodeType)) {
             FxGroupAssignment srcAssignment = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(srcId);
             //create assignment
             FxGroupAssignmentEdit newAssignment = FxGroupAssignmentEdit.createNew(srcAssignment, destType, newName == null ? srcAssignment.getAlias() : newName, destXPath);
@@ -183,7 +184,7 @@ public class StructureTreeEditor implements Serializable {
             newAssignment.setPosition(destAssignment.getPosition() + steps);
             //save newly created assignment to db
             assignmentId = EJBLookup.getAssignmentEngine().save(newAssignment, true);
-        } else if (StructureTreeWriter.DOC_TYPE_ASSIGNMENT.equals(srcNodeType)) {
+        } else if (StructureTreeWriter.NODE_TYPE_ASSIGNMENT.equals(srcNodeType)) {
             //create assignment
             FxPropertyAssignmentEdit newAssignment = createReusedPropertyAssignment(srcId, newName, destXPath, destType);
             //set position
@@ -212,7 +213,7 @@ public class StructureTreeEditor implements Serializable {
      */
     public void moveAssignmentRelative(long srcId, String srcNodeType, long destId, int steps) throws FxApplicationException {
         FxAssignment dest = CacheAdmin.getEnvironment().getAssignment(destId);
-        if (StructureTreeWriter.DOC_TYPE_GROUP.equals(srcNodeType)) {
+        if (StructureTreeWriter.NODE_TYPE_GROUP.equals(srcNodeType)) {
             FxGroupAssignmentEdit src = ((FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(srcId)).asEditable();
              //if the source position is smaller than the destination position, an offset of -1 needs to be added
             if (src.getPosition() < dest.getPosition())
@@ -220,7 +221,7 @@ public class StructureTreeEditor implements Serializable {
             src.setPosition(dest.getPosition() + steps);
             EJBLookup.getAssignmentEngine().save(src, false);
 
-        } else if (StructureTreeWriter.DOC_TYPE_ASSIGNMENT.equals(srcNodeType)) {
+        } else if (StructureTreeWriter.NODE_TYPE_ASSIGNMENT.equals(srcNodeType)) {
             FxPropertyAssignmentEdit src = ((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(srcId)).asEditable();
              //if the source position is smaller than the destination position, an offset of -1 needs to be added
             if (src.getPosition() < dest.getPosition())
@@ -274,14 +275,14 @@ public class StructureTreeEditor implements Serializable {
      */
 
     public boolean isChild(long assId, long parentId, String parentNodeType) throws FxInvalidParameterException, FxNotFoundException {
-        if (StructureTreeWriter.DOC_TYPE_GROUP.equals(parentNodeType)) {
+        if (StructureTreeWriter.NODE_TYPE_GROUP.equals(parentNodeType)) {
             FxGroupAssignment ga = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(parentId);
             for (FxAssignment a : ga.getAssignments()) {
                 if (a.getId() == assId)
                     return true;
             }
-        } else if (StructureTreeWriter.DOC_TYPE_TYPE.equals(parentNodeType) ||
-                StructureTreeWriter.DOC_TYPE_TYPE_RELATION.equals(parentNodeType)) {
+        } else if (StructureTreeWriter.NODE_TYPE_TYPE.equals(parentNodeType) ||
+                StructureTreeWriter.NODE_TYPE_TYPE_RELATION.equals(parentNodeType)) {
             FxType type = CacheAdmin.getEnvironment().getType(parentId);
             for (FxAssignment a : type.getConnectedAssignments("/")) {
                 if (a.getId() == assId)
@@ -337,5 +338,20 @@ public class StructureTreeEditor implements Serializable {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Creates a derived type with the specified alias of the type with the specified parent
+     * id and returns the id of the derived type.
+     *
+     * @param parentId the id of the parent type
+     * @param alias the name of derived type
+     * @return the id of the derived type
+     */
+    public long createDerivedType(long parentId, String alias) throws FxApplicationException {
+        FxType parent = CacheAdmin.getEnvironment().getType(parentId);
+        FxTypeEdit derived = FxTypeEdit.createNew(alias, new FxString(parent.getDescription().isMultiLanguage(),alias), parent.getACL(), parent);
+        derived.setIcon(parent.getIcon());
+        return EJBLookup.getTypeEngine().save(derived);
     }
 }

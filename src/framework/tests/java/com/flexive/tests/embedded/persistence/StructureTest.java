@@ -42,6 +42,8 @@ import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
+import com.flexive.shared.value.FxValue;
+import com.flexive.shared.value.FxBoolean;
 import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
 import com.flexive.tests.embedded.TestUsers;

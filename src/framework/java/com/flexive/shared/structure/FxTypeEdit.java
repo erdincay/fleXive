@@ -200,7 +200,6 @@ public class FxTypeEdit extends FxType implements Serializable {
                 maxVersions, maxRelSource, maxRelDestination);
     }
 
-
     /**
      * Set the LifeCycleInfo - this can only be assigned when there is no LifeCycleInfo available
      * (which is when it is <code>null</code>)

@@ -110,11 +110,11 @@ public class GroupEditorBean {
 
                 parentXPath = "/";
 
-                if (StructureTreeWriter.DOC_TYPE_TYPE.equals(nodeType) || StructureTreeWriter.DOC_TYPE_TYPE_RELATION.equals(nodeType)) {
+                if (StructureTreeWriter.NODE_TYPE_TYPE.equals(nodeType) || StructureTreeWriter.NODE_TYPE_TYPE_RELATION.equals(nodeType)) {
                     parentType = CacheAdmin.getEnvironment().getType(id);
                 }
 
-                if (StructureTreeWriter.DOC_TYPE_GROUP.equals(nodeType)) {
+                if (StructureTreeWriter.NODE_TYPE_GROUP.equals(nodeType)) {
                     FxGroupAssignment ga = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(id);
                     parentType = ga.getAssignedType();
                     parentXPath = ga.getXPath();
