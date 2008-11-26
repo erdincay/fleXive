@@ -244,6 +244,24 @@ WHERE IS DIRECT CHILD OF 1]]></programlisting>
                     <programlisting language="sql"><![CDATA[SELECT @path WHERE IS CHILD OF 1]]></programlisting>
                 </para>
             </section>
+
+            <section xml:id="csst_nodeposition">
+                <title>Using the tree sort order</title>
+                <para>
+                    Tree nodes have a position field that explicitly specifies the ordering of
+                    nodes in a folder. You can access the node position in the
+                    <code>SELECT</code>
+                    and
+                    <code>ORDER BY</code>
+                    clauses using the
+                    <glossterm>virtual property</glossterm>
+                    <code>@node_position</code>.
+
+                    <programlisting language="sql"><![CDATA[SELECT @pk, @node_position, caption
+WHERE IS DIRECT CHILD OF 1     -- select all nodes of the root folder
+ORDER BY @node_position DESC   -- invert tree sort order]]></programlisting>
+                </para>
+            </section>
         </section>
 
         <section xml:id="css_datetime">
