@@ -8,4 +8,14 @@
     <artifactId>flexive-plugin-globalconfig</artifactId>
     <version>@FLEXIVE_VERSION@</version>
     <description>Flexive global division configuration plugin.</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-plugin-jsf-core</artifactId>
+            <version>@FLEXIVE_VERSION@</version>
+            <optional>false</optional>
+        </dependency>
+    </dependencies>
+    
 </project>

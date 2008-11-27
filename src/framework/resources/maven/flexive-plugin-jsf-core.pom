@@ -17,6 +17,8 @@
             <optional>false</optional>
         </dependency>
 
+        <!-- Non-optional dependencies -->
+
         <dependency>
             <groupId>com.flexive</groupId>
             <artifactId>jsf-facelets</artifactId>
@@ -44,6 +46,7 @@
             <version>1.0</version>
             <optional>false</optional>
         </dependency>
+        
         <dependency>
             <groupId>net.java.dev.weblets</groupId>
             <artifactId>weblets-impl</artifactId>
@@ -51,5 +54,21 @@
             <optional>false</optional>
         </dependency>
 
+        <!-- Provided dependencies -->
+        <dependency>
+            <groupId>javax.faces</groupId>
+            <artifactId>jsf-api</artifactId>
+            <version>1.2</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <type>jar</type>
+            <version>2.5</version>
+            <scope>provided</scope>
+        </dependency>
+        
     </dependencies>
 </project>

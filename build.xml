@@ -696,21 +696,84 @@ database.vendor=MySQL
         </copy>
     </target>
 
+    <target name="jar.maven.sources" description="Creates the source JAR files">
+        <mkdir dir="${flexive.build.repo.dir}"/>
 
-    <target name="maven.deploy" description="Publish to Maven repository set in maven.dist.repo" depends="jar.all">
-        <maven-deploy file="${flexive.build.framework.jar.dir}/flexive-ejb.jar" pom="flexive-ejb.pom"/>
-        <maven-deploy file="${flexive.build.framework.jar.dir}/flexive-shared.jar" pom="flexive-shared.pom"/>
+        <maven-build-sources artifactId="flexive-ejb"
+                             label="[fleXive] EJB classes"
+                             srcdir="${flexive.src.framework.dir}"
+                             prefix="com/flexive/ejb" packagenames="com.flexive.ejb.*,com.flexive.core.*,com.flexive.shared.*">
+            <fileset dir="${flexive.src.framework.dir}">
+                <include name="com/flexive/core/**/*.java"/>
+            </fileset>
+        </maven-build-sources>
 
-        <maven-deploy file="${build.ui.jar.dir}/flexive-web-shared.jar" pom="flexive-web-shared.pom"/>
-        <maven-deploy file="${build.ui.jar.dir}/flexive-plugin-jsf-core.jar" pom="flexive-plugin-jsf-core.pom"/>
-        <maven-deploy file="${build.ui.jar.dir}/flexive-plugin-jsf-globalconfig.jar" pom="flexive-plugin-jsf-globalconfig.pom"/>
-        <maven-deploy file="${build.ui.jar.dir}/flexive-plugin-jsf-feedbackPlugin.jar" pom="flexive-plugin-jsf-feedback.pom"/>
-        <maven-deploy file="${build.ui.jar.dir}/flexive-backend.jar" pom="flexive-backend.pom"/>
+        <maven-build-sources artifactId="flexive-shared"
+                             label="[fleXive] shared classes"
+                             srcdir="${flexive.src.framework.dir}"
+                             prefix="com/flexive/shared/" packagenames="com.flexive.shared.*"/>
 
-        <maven-deploy file="${flexive.lib.dir}/flexive-extractor.jar" pom="flexive-extractor.pom"/>
-        <maven-deploy file="${flexive.lib.dir}/flexive-sqlParser.jar" pom="flexive-sqlParser.pom"/>
+        <maven-build-sources artifactId="flexive-web-shared" label="[fleXive] shared web classes" srcdir="${flexive.src.ui.shared.dir}"/>
+        <maven-build-sources artifactId="flexive-plugin-jsf-core" label="[fleXive] JSF components" srcdir="${flexive.src.ui.components.dir}"/>
+        <maven-build-sources artifactId="flexive-plugin-jsf-globalconfig" label="[fleXive] global (division) configuration plugin" srcdir="${flexive.base.ui.dir}/jsf-globalconfig/src/java"/>
+        <maven-build-sources artifactId="flexive-plugin-jsf-feedbackPlugin" label="[fleXive] backend feedback plugin" srcdir="${flexive.base.ui.dir}/jsf-feedbackPlugin/src/java"/>
+        <maven-build-sources artifactId="flexive-backend" label="[fleXive] backend application" srcdir="${flexive.src.ui.jsf.dir}"/>
+
+        <maven-build-sources artifactId="flexive-extractor" label="[fleXive] document extraction library" srcdir="${flexive.src.framework.dir}"
+                             prefix="com/flexive/extractor/" packagenames="com.flexive.extractor.*"/>
+        <maven-build-sources artifactId="flexive-sqlParser" label="[fleXive] FxSQL parser" srcdir="${flexive.src.framework.dir}"
+                             prefix="com/flexive/sqlParser/" packagenames="com.flexive.sqlParser.*"/>
+        <maven-build-sources artifactId="flexive-h2" label="[fleXive] H2 database support" srcdir="${flexive.resources.framework.dir}/sql/H2/StoredProcedures"/>
+
+    </target>
+
+    <macrodef name="maven-build-sources">
+        <attribute name="artifactId" description="The artifact name"/>
+        <attribute name="label" description="The artifact label (displayed in the JavaDoc documentation)"/>
+        <attribute name="srcdir"/>
+        <attribute name="prefix" default="" description="Path prefix to limit include filter"/>
+        <attribute name="packagenames" default="*" description="Packages to include for JavaDoc (see jdoc-call macro)"/>
+        <element name="args" implicit="true" optional="true"/>
+
+        <sequential>
+            <!-- Create source JAR -->
+            <jar file="${flexive.build.repo.dir}/@{artifactId}-sources.jar">
+                <fileset dir="@{srcdir}">
+                    <include name="@{prefix}**/*.java"/>
+                    <include name="@{prefix}**/*.groovy"/>
+                    <include name="@{prefix}**/*.gy"/>
+                    <include name="@{prefix}**/*.jj"/>
+                </fileset>
+                <args/>
+            </jar>
+
+            <!-- Create JavaDocs -->
+            <jdoc-call srcdir="@{srcdir}"
+                       destdir="${flexive.build.repo.dir}/javadoc/@{artifactId}"
+                       name="@{artifactId}"
+                       packagenames="@{packagenames}"
+                       doctitle="@{label}"/>
+            <jar file="${flexive.build.repo.dir}/@{artifactId}-javadoc.jar">
+                <fileset dir="${flexive.build.repo.dir}/javadoc/@{artifactId}" includes="**/*"/>
+            </jar>
+        </sequential>
+    </macrodef>
+
+    <target name="maven.deploy" description="Publish to Maven repository set in maven.dist.repo" depends="jar.all,jar.maven.sources">
+        <maven-deploy-with-sources path="${flexive.build.framework.jar.dir}" name="flexive-ejb"/>
+
+        <maven-deploy-with-sources path="${flexive.build.framework.jar.dir}" name="flexive-shared"/>
+
+        <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-web-shared"/>
+        <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-plugin-jsf-core"/>
+        <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-plugin-jsf-globalconfig"/>
+        <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-plugin-jsf-feedbackPlugin"/>
+        <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-backend"/>
+
+        <maven-deploy-with-sources path="${flexive.lib.dir}" name="flexive-extractor"/>
+        <maven-deploy-with-sources path="${flexive.lib.dir}" name="flexive-sqlParser"/>
         <maven-deploy file="${flexive.lib.dir}/fxStream.jar" pom="fxStream.pom"/>
-        <maven-deploy file="${flexive.lib.dir}/flexive-h2.jar" pom="flexive-h2.pom"/>
+        <maven-deploy-with-sources path="${flexive.lib.dir}" name="flexive-h2"/>
 
         <maven-deploy file="${flexive.base.build.dir}/ui/flexive.war" pom="flexive-backend-war.pom"/>
 
@@ -733,10 +796,22 @@ database.vendor=MySQL
 -->
     </target>
 
+    <macrodef name="maven-deploy-with-sources">
+        <attribute name="path" description="Path to the JAR file"/>
+        <attribute name="name" description="Base file name without extension. Will be used for the JAR, POM, and sources JAR file."/>
+        <sequential>
+            <maven-deploy file="@{path}/@{name}.jar" pom="@{name}.pom">
+                <attach file="${flexive.build.repo.dir}/@{name}-sources.jar" classifier="sources"/>
+                <attach file="${flexive.build.repo.dir}/@{name}-javadoc.jar" classifier="javadoc"/>
+            </maven-deploy>
+        </sequential>
+    </macrodef>
+
     <macrodef name="maven-deploy">
         <attribute name="file"/>
         <attribute name="pom"/>
         <attribute name="pomPath" default="${flexive.resources.framework.dir}/maven"/>
+        <element name="args" optional="true" implicit="true"/>
         <sequential>
             <copy file="@{pomPath}/@{pom}" todir="${flexive.base.build.dir}" overwrite="true">
                 <filterset>
@@ -751,6 +826,8 @@ database.vendor=MySQL
                                     privateKey="${maven.dist.privatekey}"/>
                 </remoterepository>
                 <pom file="${flexive.base.build.dir}/@{pom}"/>
+
+                <args/>
             </artifact:deploy>
         </sequential>
     </macrodef>

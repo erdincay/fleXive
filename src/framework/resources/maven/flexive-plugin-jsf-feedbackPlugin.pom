@@ -8,4 +8,14 @@
     <artifactId>flexive-plugin-jsf-feedback</artifactId>
     <version>@FLEXIVE_VERSION@</version>
     <description>Flexive feedback plugin for the backend administration</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-plugin-jsf-core</artifactId>
+            <version>@FLEXIVE_VERSION@</version>
+            <optional>false</optional>
+        </dependency>
+    </dependencies>
+    
 </project>

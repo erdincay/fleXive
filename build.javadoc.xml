@@ -20,6 +20,7 @@
         <attribute name="srcdir"/>
         <attribute name="excludepackagenames" default=""/>
         <attribute name="windowtitle" default="@{name} JavaDoc"/>
+        <attribute name="doctitle" default="@{name}"/>
         <attribute name="destdir" default="${base.jdoc.dir}/@{name}" description="Target Javadoc directory"/>
         <sequential>
             <delete dir="@{destdir}" failonerror="false"/>
@@ -33,7 +34,7 @@
                     use="true"
                     package="true"
                     windowtitle="@{windowtitle}"
-                    doctitle="javadoc"
+                    doctitle="@{doctitle}"
                     extdirs="${flexive.lib.dir}"
                     >
                 <sourcepath>
