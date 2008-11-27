@@ -108,8 +108,17 @@
 
     <macrodef name="globalconfig-setup" description="The global configuration setup.">
         <sequential >
+            <groovy>
+                <arg value="@{Database}"/>
+                if( "H2".equals(properties['database.vendor']) ) {
+                    //special case for H2: the URL needs to contain the schema which is the database name
+                    //to be created
+                    properties['database.url.create'] = properties['database.url.base'] + 'flexiveConfiguration'
+                } else
+                    properties['database.url.create'] = properties['database.url.base']
+            </groovy>
             <!-- Create global configuration -->
-            <sql-call database="${database.schema.config}"  url="${database.url.base}flexiveConfiguration">
+            <sql-call database="${database.schema.config}"  url="${database.url.create}">
                 <transaction >
                     DROP SCHEMA IF EXISTS flexiveConfiguration;
                     CREATE SCHEMA flexiveConfiguration;
