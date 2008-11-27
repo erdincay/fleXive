@@ -148,7 +148,7 @@ public class FxTypeEdit extends FxType implements Serializable {
     }
 
     /**
-     * Create a new FxTypeEdit instance for creating a new FxType
+     * Create a new FxTypeEdit instance derived from an existing FxType
      *
      * @param name        name of the type
      * @param description description

@@ -65,7 +65,15 @@
 
            <fx:formRow labelKey="TypeEditor.label.description" id="description">
                     <fx:fxValueInput id="description" value="#{typeEditorBean.description}" readOnly="#{not typeEditorBean.editMode}"/>
-            </fx:formRow>
+           </fx:formRow>
+
+            <ui:fragment rendered="#{not empty typeEditorBean.type.parent}">
+                <fx:formRow labelKey="TypeEditor.label.derivedFrom">
+                     <h:commandLink onclick="var treeframe=parent.getStructureNavFrame(); treeframe.selectNode(#{typeEditorBean.type.parent.id}, true);">
+                        <h:outputText value="#{typeEditorBean.type.parent.name}"/>
+                    </h:commandLink>
+                </fx:formRow>
+            </ui:fragment>
 
             <fx:formRow labelKey="TypeEditor.label.languageMode" id="languageMode">
                 <t:selectOneListbox size="1" id="languageMode" value="#{typeEditorBean.languageMode}"

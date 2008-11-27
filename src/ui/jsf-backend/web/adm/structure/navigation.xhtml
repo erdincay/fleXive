@@ -36,6 +36,8 @@
             //flag indicating if the content tree nav frame needs reloading
             //at the moment this is the case when a type has been created or deleted
             var reloadContentTreeNavFrame=false;
+            //flag indicating if the tree is shown hierarchically or flat
+            var isViewFlat=true;
 
                 //actions defined in StructureTreeControllerBean
             function doTreeAction(action, id, value) {
@@ -99,7 +101,7 @@
             }
 
             function reloadStructureTree() {
-                var newChildren = eval("(" + flexive.util.getJsonRpc().StructureTreeWriter.renderStructureTree(-1) + ")");
+                var newChildren = eval("(" + flexive.util.getJsonRpc().StructureTreeWriter.renderStructureTree(-1, isViewFlat) + ")");
                 dojo.widget.byId('structureTree').setChildren(newChildren);
                 //contentPage=null;
             }
@@ -267,7 +269,7 @@
                 var menu = dojo.widget.byId("structureTreeMenu");
                 var parentId = getNodeId(menu.getTreeNode());
 
-                promptAlias(function(alias) {
+                promptName(function(alias) {
                     if (alias!=null && alias!="") {
                         try {
                             newTypeId =flexive.util.getJsonRpc().StructureTreeEditor.createDerivedType(parentId, alias);
@@ -409,6 +411,17 @@
                     var valid = flexive.util.getJsonRpc().StructureTreeEditor.validateAlias(alias);
                     if (!valid) {
                         alertDialog("#{fxMessageBean['StructureTree.message.err.invalidAlias']}");
+                    } else {
+                        onSuccess(alias);
+                    }
+                });
+            }
+
+            function promptName(onSuccess) {
+                promptDialog("#{fxMessageBean['StructureTree.message.enterName.derivedType']}", "", function(alias) {
+                    var valid = flexive.util.getJsonRpc().StructureTreeEditor.validateAlias(alias);
+                    if (!valid) {
+                        alertDialog("#{fxMessageBean['StructureTree.message.err.invalidName']}");
                     } else {
                         onSuccess(alias);
                     }
@@ -646,7 +659,13 @@
             function disableSearchMode() {
                 removeBackgroundImage();
             }
-                
+
+            function toggleHierarchyView() {
+                isViewFlat = !isViewFlat;
+                setImage("mainNavForm:imgTreeHierarchy", "adm/images/layout/tree_view_" + (isViewFlat ? "flat" : "hierarchical") + ".png");
+                reloadAndKeepExpanded();
+            }
+
             dojo.addOnLoad(function() {
                 if (getContentFrame().isQueryEditor) {
                     enableSearchMode();
@@ -690,7 +709,7 @@
                 <adm:treeContextMenuItem icon="delete" treeActions="deleteType" labelKey="StructureTree.menu.delete.type" clickHandler="deleteType"/>
             </adm:treeContextMenu>
 
-            <adm:jsonRpcCall method="StructureTreeWriter.renderStructureTree" args="-1"/>
+            <adm:jsonRpcCall method="StructureTreeWriter.renderStructureTree" args="-1, true"/>
     	</adm:tree>
     	
         <div id="structureTreeContainer">
@@ -713,6 +732,7 @@
     </ui:define>
 
     <ui:define name="reloadButton">
+        <a href="javascript:toggleHierarchyView()"><t:graphicImage id="imgTreeHierarchy" url="/adm/images/layout/tree_view_flat.png" alt="#{fxMessageBean['StructureTree.button.toggleHierarchyView']}" title="#{fxMessageBean['StructureTree.button.toggleHierarchyView']}" style="position:absolute;right:55px;margin-top:2px;border:0;"/></a>
         <a href="javascript:reloadStructureTree()"><t:graphicImage url="/adm/images/layout/reload.png" alt="reload" style="position:absolute;right:15px;margin-top:2px;border:0;"/></a>
     </ui:define>
 

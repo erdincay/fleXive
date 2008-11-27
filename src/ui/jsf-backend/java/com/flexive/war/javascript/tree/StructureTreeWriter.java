@@ -78,9 +78,10 @@ public class StructureTreeWriter implements Serializable {
      *
      * @param request the current request
      * @param typeId  the type to be rendered (or -1 for all structures)
+     * @param isViewFlat if the tree is rendered flat or hierarchically
      * @return nothing
      */
-    public String renderStructureTree(HttpServletRequest request, long typeId) {
+    public String renderStructureTree(HttpServletRequest request, long typeId, boolean isViewFlat) {
         StringWriter localWriter = null;
         try {
             // if embedded in a tree component, use the component's tree writer
@@ -90,7 +91,7 @@ public class StructureTreeWriter implements Serializable {
                 localWriter = new StringWriter();
                 writer = new TreeNodeWriter(localWriter, new RequestRelativeUriMapper(request), TreeNodeWriter.FORMAT_PLAIN);
             }
-            writeStructureTree(writer, typeId, request);
+            writeStructureTree(writer, typeId, isViewFlat, request);
             if (localWriter != null) {
                 writer.finishResponse();
             }
@@ -107,17 +108,18 @@ public class StructureTreeWriter implements Serializable {
      * @param writer  the tree node writer
      * @param typeId  the start type ID (-1 for all types)
      * @param request the current servlet request
+     * @param isViewFlat if the tree is rendered flat or hierarchically
      * @throws IOException if the tree could not be written
      */
-    public void writeStructureTree(TreeNodeWriter writer, long typeId, HttpServletRequest request) throws IOException {
+    public void writeStructureTree(TreeNodeWriter writer, long typeId, boolean isViewFlat, HttpServletRequest request) throws IOException {
         final FxEnvironment environment = CacheAdmin.getFilteredEnvironment();
         Map<String, Object> nodeProperties = new HashMap<String, Object>();
         if (typeId == -1) {
             // print whole tree
 
             // print root types
-            for (FxType type : environment.getTypes(true, false, true, true)) {
-                writeType(writer, nodeProperties, type);
+            for (FxType type : environment.getTypes(true, isViewFlat, true, true)) {
+                writeType(writer, nodeProperties, type, isViewFlat);
             }
             // print root properties
 
@@ -132,7 +134,7 @@ public class StructureTreeWriter implements Serializable {
 
         } else {
             // print chosen node
-            writeType(writer, nodeProperties, environment.getType(typeId));
+            writeType(writer, nodeProperties, environment.getType(typeId), isViewFlat);
         }
     }
 
@@ -142,11 +144,12 @@ public class StructureTreeWriter implements Serializable {
      *
      * @param writer         the tree node writer
      * @param type           the type to be rendered
+     * @param isViewFlat if the tree is rendered flat or hierarchically
      * @param nodeProperties an existing hashmap for storing additional JS properties (cleared on entry)
      * @throws IOException if the tree could not be written
      */
 
-    private void writeType(TreeNodeWriter writer, Map<String, Object> nodeProperties, FxType type) throws IOException {
+    private void writeType(TreeNodeWriter writer, Map<String, Object> nodeProperties, FxType type, boolean isViewFlat) throws IOException {
         nodeProperties.clear();
         nodeProperties.put("typeId", String.valueOf(type.getId()));
 
@@ -158,9 +161,13 @@ public class StructureTreeWriter implements Serializable {
         nodeProperties.put("nodeType", type.isRelation() ? NODE_TYPE_TYPE_RELATION : NODE_TYPE_TYPE);
         writer.startNode(new Node(String.valueOf(type.getId()), type.getDisplayName(), docType, nodeProperties));
         writer.startChildren();
+
         // write derived types
-        for (FxType child : type.getDerivedTypes()) {
-            writeType(writer, nodeProperties, child);
+        //if the view is not flat, add derived types as child nodes
+        if (!isViewFlat) {
+            for (FxType child : type.getDerivedTypes()) {
+                writeType(writer, nodeProperties, child, isViewFlat);
+            }
         }
 
         //sort group and property assignments
