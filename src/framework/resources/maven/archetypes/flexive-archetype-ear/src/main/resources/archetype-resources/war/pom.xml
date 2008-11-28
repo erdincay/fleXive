@@ -88,6 +88,7 @@
                                 <artifactItem>
                                     <groupId>mygroup</groupId>
                                     <artifactId>ejb-jar</artifactId>
+                                    <version>${version}</version>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>target/openejb-deploy</outputDirectory>
                                 </artifactItem>
