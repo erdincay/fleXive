@@ -48,6 +48,7 @@
                 </classpath>
             </javadoc>
             <!-- Append entry to index file -->
+            <mkdir dir="${base.jdoc.dir}"/>
             <echo file="${javadoc.index.file}" append="true">
                 &lt;p>
                 &lt;a href="@{name}/index.html">@{windowtitle}&lt;/a>
