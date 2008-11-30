@@ -45,6 +45,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Response Wrapper to provide access to the content length and status.
@@ -89,7 +90,7 @@ public class FxResponseWrapper extends HttpServletResponseWrapper {
     }
 
     private static SimpleDateFormat getHttpDateFormat() {
-        return new SimpleDateFormat(HTTP_MODIFIED_AT_FORMATER_TXT);
+        return new SimpleDateFormat(HTTP_MODIFIED_AT_FORMATER_TXT, Locale.ENGLISH);
     }
 
     /**
