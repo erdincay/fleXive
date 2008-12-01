@@ -57,26 +57,7 @@ public class ContainerBootstrap {
     @BeforeSuite
     public void startup() {
         try {
-            // set current thread to test division
-            FxContext.get().setDivisionId(DivisionData.DIVISION_TEST);
-            FxContext.get().setContextPath("flexiveTests");
-            FxContext.get().setTicket(UserTicketImpl.getGuestTicket());
-
-            // force DS lookup now since the JNDI context does not always contain the resource entries
-            // This is a known issue with OpenEJB up until 3.1, so this may not be necessary for future versions
-//            Database.getGlobalDataSource();
-//            Database.getDataSource("jdbc/flexiveTest");
-//            Database.getDataSource();
-
-            // force flexive initialization
-            FxContext.get().runAsSystem();
-            try {
-                CacheAdmin.getEnvironment();
-            } finally {
-                FxContext.get().stopRunAsSystem();
-            }
-            // load guest ticket
-            FxContext.get().setTicket(UserTicketImpl.getGuestTicket());
+            FxContext.initializeSystem(DivisionData.DIVISION_TEST, "flexiveTests");
             TestUsers.initializeUsers();
         } catch (Exception ex) {
             throw new RuntimeException(ex);

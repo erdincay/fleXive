@@ -124,6 +124,14 @@ public interface AccountEngine {
     UserTicket getUserTicket();
 
     /**
+     * Returns a guest user ticket.
+     *
+     * @return  a guest user ticket.
+     * @since 3.1
+     */
+    UserTicket getGuestTicket();
+
+    /**
      * Gets the groups a user is assigned to.
      * <p/>
      * A user may only see the groups assigned to other users within his mandator.

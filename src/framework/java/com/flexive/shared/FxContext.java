@@ -77,6 +77,7 @@ public class FxContext implements Serializable {
     private static final Log LOG = LogFactory.getLog(FxContext.class);
     private static ThreadLocal<FxContext> info = new ThreadLocal<FxContext>() {
     };
+    private static boolean MANUAL_INIT_CALLED = false;
 
     private final String requestURI;
     private final String remoteHost;
@@ -466,7 +467,6 @@ public class FxContext implements Serializable {
         return "/" + getApplicationId() + path;
     }
 
-
     /**
      * Gets the session information for the running thread
      *
@@ -574,6 +574,36 @@ public class FxContext implements Serializable {
         return contextPath;
     }
 
+
+    /**
+     * Returns an independent copy of this context. Also clones the user ticket.
+     *
+     * @return  an independent copy of this context
+     * @since 3.1
+     */
+    public FxContext copy() {
+        final FxContext result = new FxContext();
+        result.setTicket(ticket.copy());
+        result.setDivisionId(division);
+        result.setContextPath(contextPath);
+        result.setGlobalAuthenticated(globalAuthenticated);
+        result.setNodeId(nodeId);
+        result.setSessionID(sessionID);
+        if (treeWasModified) {
+            result.setTreeWasModified();
+        }
+        return result;
+    }
+
+    /**
+     * Stores the FxContext instance in the current thread. Will overwrite an existing context.
+     *
+     * @since 3.1
+     */
+    public void replace() {
+        info.set(this);
+    }
+
     /**
      * Stores the needed informations about the sessions.
      *
@@ -638,12 +668,42 @@ public class FxContext implements Serializable {
     }
 
     /**
+     * Helper method to bootstrap a [fleXive] system outside an application server
+     * (e.g. in unit tests or an standalone application). Should only be called on application
+     * startup. Will initialize a FxContext in the current thread with guest user privileges.
+     *
+     * @param divisionId    the desired division ID (will determin the application datasource)
+     * @param applicationName   the application name (mostly used as "imaginary context path")
+     * @since 3.1
+     */
+    public static synchronized void initializeSystem(int divisionId, String applicationName) {
+        if (MANUAL_INIT_CALLED) {
+            throw new IllegalStateException("System already initialized");
+        }
+        get().setDivisionId(divisionId);
+        get().setContextPath(applicationName);
+        get().setTicket(EJBLookup.getAccountEngine().getGuestTicket());
+
+        // force flexive initialization
+        get().runAsSystem();
+        try {
+            CacheAdmin.getEnvironment();
+        } finally {
+            get().stopRunAsSystem();
+        }
+        // load guest ticket
+        get().setTicket(EJBLookup.getAccountEngine().getGuestTicket());
+
+        MANUAL_INIT_CALLED = true;
+    }
+
+    /**
      * Returns a string representation of the object.
      *
      * @return a string representation of the object.
      */
+    @Override
     public String toString() {
         return this.getClass() + "[sessionId:" + sessionID + ";requestUri:" + requestURI + "]";
     }
-
 }

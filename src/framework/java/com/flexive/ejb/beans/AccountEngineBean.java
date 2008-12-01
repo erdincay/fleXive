@@ -36,6 +36,7 @@ import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.core.security.LoginLogoutHandler;
 import com.flexive.core.security.UserTicketStore;
+import com.flexive.core.security.UserTicketImpl;
 import com.flexive.shared.*;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
@@ -223,6 +224,14 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public UserTicket getUserTicket() {
         return UserTicketStore.getTicket();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public UserTicket getGuestTicket() {
+        return UserTicketImpl.getGuestTicket();
     }
 
     /**

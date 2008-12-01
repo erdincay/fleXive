@@ -336,6 +336,14 @@ public interface UserTicket extends Serializable {
      * @param language language to override
      */
     public void setLanguage(FxLanguage language);
+
+    /**
+     * Creates an independent copy of this ticket.
+     *
+     * @return  an independent copy of this ticket.
+     * @since 3.1
+     */
+    public UserTicket copy();
 }
 
 
