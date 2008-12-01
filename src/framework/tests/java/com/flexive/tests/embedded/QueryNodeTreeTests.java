@@ -39,10 +39,7 @@ import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.search.query.*;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.tree.FxTreeMode;
-import com.flexive.shared.value.FxBoolean;
-import com.flexive.shared.value.FxNumber;
-import com.flexive.shared.value.FxString;
-import com.flexive.shared.value.FxValue;
+import com.flexive.shared.value.*;
 import com.flexive.shared.value.mapper.InputMapper;
 import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.DataProvider;
@@ -57,10 +54,6 @@ import java.util.List;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class QueryNodeTreeTests {
-    private static FxPropertyAssignment getTestAssignment() {
-        return (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment("root/caption");
-    }
-
     /**
      * A primitive test node class.
      */
@@ -553,6 +546,37 @@ public class QueryNodeTreeTests {
                 : "Comparators should be " + allowedComparators + ", is: " + node.getAvailableComparators();
     }
 
+    /**
+     * Checks if queries containing empty/not empty queries on binary properties are valid.
+     */
+    @Test(groups = {"ejb", "search"})
+    public void emptyBinaryValidTest_FX371() {
+        QueryRootNode root = new QueryRootNode(0, QueryRootNode.Type.CONTENTSEARCH);
+        final FxPropertyAssignment assignment = getTestBinaryAssignment();
+
+        final AssignmentValueNode avn = new AssignmentValueNode(root.getNewId(), assignment.getId());
+        avn.setComparator(PropertyValueComparator.NOT_EMPTY);
+        avn.setValue(null);
+        root.addChild(avn);
+
+        final AssignmentValueNode avn2 = new AssignmentValueNode(root.getNewId(), assignment.getId());
+        avn2.setComparator(PropertyValueComparator.NOT_EMPTY);
+        avn2.setValue(new FxVoid());
+        root.addChild(avn2);
+
+        final PropertyValueNode pvn = new PropertyValueNode(root.getNewId(), assignment.getProperty().getId());
+        pvn.setComparator(PropertyValueComparator.NOT_EMPTY);
+        pvn.setValue(null);
+        root.addChild(pvn);
+        
+        final PropertyValueNode pvn2 = new PropertyValueNode(root.getNewId(), assignment.getProperty().getId());
+        pvn2.setComparator(PropertyValueComparator.NOT_EMPTY);
+        pvn2.setValue(new FxVoid());
+        root.addChild(pvn2);
+
+        assert root.isValid() : "Query should be valid: " + root.getSqlQuery();
+    }
+
     private void removeFromParent(QueryNode node) {
         node.getParent().removeChild(node);
     }
@@ -706,4 +730,14 @@ public class QueryNodeTreeTests {
         }
 
     }
+
+    private static FxPropertyAssignment getTestAssignment() {
+        return (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment("root/caption");
+    }
+
+    private static FxPropertyAssignment getTestBinaryAssignment() {
+        return (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment("image/imagebinary");
+    }
+
+
 }

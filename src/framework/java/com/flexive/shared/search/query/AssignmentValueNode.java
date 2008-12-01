@@ -38,6 +38,7 @@ import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
+import com.flexive.shared.value.FxVoid;
 import com.flexive.shared.value.mapper.IdentityInputMapper;
 import com.flexive.shared.value.mapper.InputMapper;
 import com.flexive.shared.CacheAdmin;
@@ -91,7 +92,7 @@ public class AssignmentValueNode extends QueryValueNode<FxValue, PropertyValueCo
         try {
             this.comparator.getSql(getAssignment(), value);
             // if we can generate a SQL epxression, check additional assignment constraints
-            return getAssignment().isValid(value);
+            return value == null || value instanceof FxVoid || getAssignment().isValid(value);
         } catch (RuntimeException e) {
             // if we can't generate a SQL expression, we aren't valid
             return false;
