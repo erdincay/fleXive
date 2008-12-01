@@ -43,9 +43,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 
 /**
  * Response Wrapper to provide access to the content length and status.
@@ -55,7 +53,6 @@ import java.util.Locale;
  */
 public class FxResponseWrapper extends HttpServletResponseWrapper {
 
-    private static final String HTTP_MODIFIED_AT_FORMATER_TXT = "EEE, dd MMM yyyy HH:mm:ss z";
     private static final String HTTP_HEADER_EXPIRES = "Expires";
     private static final String HTTP_HEADER_LAST_MODIFIED = "Last-Modified";
     private static final String HTTP_HEADER_X_POWERED_BY = "X-Powered-By";
@@ -89,25 +86,6 @@ public class FxResponseWrapper extends HttpServletResponseWrapper {
         NO_CACHE, PUBLIC, PRIVATE
     }
 
-    private static SimpleDateFormat getHttpDateFormat() {
-        return new SimpleDateFormat(HTTP_MODIFIED_AT_FORMATER_TXT, Locale.ENGLISH);
-    }
-
-    /**
-     * Returns the modified-at date for a http response with
-     * the given time.
-     * <p/>
-     * This function uses the HTTP standard time format ("Sat, 07 Apr 2001 00:58:08 GMT")
-     *
-     * @param date the date to use
-     * @return the modified-at date with the current time
-     */
-    protected static String buildModifiedAtDate(Date date) {
-        // HTTP standard time format: "Sat, 07 Apr 2001 00:58:08 GMT"
-        // Apache server SSI format: Saturday, 08-Sep-2001 21:46:40 EDT
-        return getHttpDateFormat().format(date);
-    }
-
     /**
      * Returns the setting of the ClientWriteThrough option.
      *
@@ -123,7 +101,7 @@ public class FxResponseWrapper extends HttpServletResponseWrapper {
      * @param date the date to use
      */
     public void setModifiedAtDate(Date date) {
-        setHeader(HTTP_HEADER_LAST_MODIFIED, buildModifiedAtDate(date));
+        setDateHeader(HTTP_HEADER_LAST_MODIFIED, date.getTime());
     }
 
     /**
@@ -142,7 +120,7 @@ public class FxResponseWrapper extends HttpServletResponseWrapper {
      */
     public void disableBrowserCache() {
         setModifiedAtDate(new Date());
-        setHeader(HTTP_HEADER_EXPIRES, getHttpDateFormat().format(new Date(0)));
+        setDateHeader(HTTP_HEADER_EXPIRES, 0);
         setHeader(HTTP_HEADER_CACHE_CONTROL, "no-cache, must-revalidate");
         setHeader(HTTP_HEADER_PRAGMA, "no-cache");
     }
