@@ -515,7 +515,7 @@ public class SearchEngineTest {
         assert result.getRowCount() > 0;
         for (FxResultRow row: result.getResultRows()) {
             assert row.getInt(1) == year : "Expected " + year + ", got: " + row.getInt(1);
-            assert row.getInt(2) != year && row.getInt(2) < 12 : "Invalid month value: " + row.getInt(2);
+            assert row.getInt(2) != year && row.getInt(2) <= 12 : "Invalid month value: " + row.getInt(2);
         }
     }
 
