@@ -679,6 +679,18 @@ function reloadBriefcases() {
  * @param onCancel      the function to be executed when the user did not confirm (optional)
  */
 function _confirmDialog(message, onConfirmed, onCancel) {
+    var handleConfirm = function() {
+        dialog.disableButtons();
+        onConfirmed();
+        dialog.hide();
+        dialog.destroy();
+    };
+    var handleCancel = function() {
+        dialog.disableButtons();
+        if (onCancel) onCancel();
+        dialog.hide();
+        dialog.destroy();
+    };
     var dialog = new YAHOO.widget.SimpleDialog("dlg", {
 	    width: Math.min(message.length + 5, 40) + "em",
 	    fixedcenter:true,
@@ -687,20 +699,10 @@ function _confirmDialog(message, onConfirmed, onCancel) {
 	    draggable:true,
         constraintoviewport: true,
         buttons:  [   { text: messages["Global.dialog.confirm.yes"],
-	                    handler: function() {
-                            dialog.disableButtons();
-                            onConfirmed();
-                            dialog.hide();
-                            dialog.destroy();
-                        },
+	                    handler: handleConfirm,
                         isDefault:true },
                       { text: messages["Global.dialog.confirm.no"],
-                        handler:function() {
-                            dialog.disableButtons();
-                            if (onCancel) onCancel();
-                            dialog.hide();
-                            dialog.destroy();
-                        } }
+                        handler: handleCancel }
                   ]
     });
     dialog.disableButtons = function() {
@@ -710,6 +712,10 @@ function _confirmDialog(message, onConfirmed, onCancel) {
     dialog.setHeader(messages["Global.dialog.confirm.title"]);
 	dialog.setBody(message);
 	dialog.cfg.setProperty("icon",YAHOO.widget.SimpleDialog.ICON_WARN);
+    dialog.cfg.queueProperty("keylisteners", [
+        // bind escape key to cancel button
+        new YAHOO.util.KeyListener(document, { keys: 27 }, { fn: handleCancel, scope: dialog, correctScope:true })
+    ]);
     dialog.render(document.body);
     dialog.show();
 }
@@ -772,11 +778,12 @@ function _promptDialog(message, defaultValue, onSuccess) {
                             handler:function() { e.dialog.hide(); } }
                       ]
         });
-        var kl = new YAHOO.util.KeyListener(e,
-            { keys: 13 },
-            { fn: handleSubmit, scope: e.dialog, correctScope:true }
-        );
-        e.dialog.cfg.queueProperty("keylisteners", kl);
+        e.dialog.cfg.queueProperty("keylisteners", [
+            // bind enter key to submit button
+            new YAHOO.util.KeyListener(e, { keys: 13 }, { fn: handleSubmit, scope: e.dialog, correctScope:true }),
+            // bind escape key to cancel button
+            new YAHOO.util.KeyListener(e, { keys: 27 }, { fn: function() { e.dialog.hide(); }, scope: e.dialog, correctScope:true })
+        ]);
 
 
         document.getElementById("promptDialog").style.display = "block";
