@@ -581,7 +581,7 @@ public class ContentEngineTest {
             assert "Text english2".equals(((FxString) test.getPropertyData("/TEXT[2]").getValue()).getTranslation(FxLanguage.ENGLISH));
         }
         //            for( int i=0; i<100;i++)
-        FxPK pk = co.save(test);
+        FxPK pk = test.save().getPk();
         FxContent comp = co.load(pk);
         assert comp != null;
         assert comp.getPk().getId() == pk.getId() : "Id failed";
@@ -678,9 +678,18 @@ public class ContentEngineTest {
     public void setValueTest() throws Exception {
         FxType testType = CacheAdmin.getEnvironment().getType(TEST_TYPE);
         FxContent test = co.initialize(testType.getId());
-        FxString testValue = new FxString("Hello world");
-        test.setValue("/TestGroup1[2]/TestGroup1_2[3]/TestProperty1_2_2[4]", testValue);
-        assert test.getValue("/TestGroup1[2]/TestGroup1_2[3]/TestProperty1_2_2[4]").equals(testValue);
+        final String TEST_VALUE_EN = "Hello world";
+        final String TEST_VALUE_DE = "Hallo welt";
+        final String TEST_XPATH = "/TestGroup1[2]/TestGroup1_2[3]/TestProperty1_2_2[4]";
+
+        FxString testValue = new FxString(TEST_VALUE_EN);
+        test.setValue(TEST_XPATH, testValue);
+        assert test.getValue(TEST_XPATH).equals(testValue);
+        test.setValue(TEST_XPATH, TEST_VALUE_EN);
+        test.setValue(TEST_XPATH, FxLanguage.GERMAN, TEST_VALUE_DE);
+        assert test.getValue(TEST_XPATH).getTranslation(FxLanguage.ENGLISH).equals(TEST_VALUE_EN);
+        assert test.getValue(TEST_XPATH).getTranslation(FxLanguage.GERMAN).equals(TEST_VALUE_DE);
+        assert test.getValue(TEST_XPATH).getDefaultTranslation().equals(TEST_VALUE_EN);
     }
 
     @Test

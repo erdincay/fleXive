@@ -523,12 +523,29 @@ public class FxContent implements Serializable {
      *
      * @param XPath FQ XPath
      * @param value value to apply
+     * @return this FxContent instance to allow chained calls
      * @throws FxNotFoundException         if the requested XPath does not exist
      * @throws FxInvalidParameterException if the request XPath is invalid
      * @throws FxNoAccessException         if the property for this XPath is marked readonly or no access
      * @throws FxCreateException           if missing XPath entries failed to be created
      */
-    public void setValue(String XPath, FxValue value) throws FxNotFoundException, FxInvalidParameterException, FxNoAccessException, FxCreateException {
+    public FxContent setValue(String XPath, FxValue value) throws FxNotFoundException, FxInvalidParameterException, FxNoAccessException, FxCreateException {
+        getProperyData(XPath).setValue(value);
+        return this;
+    }
+
+    /**
+     * Get the FxPropertyData entry for an XPath.
+     * If the entry does not exist yet, it will be created.
+     *
+     * @param XPath requested xpath
+     * @return FxPropertyData
+     * @throws FxInvalidParameterException on errors
+     * @throws FxNotFoundException         on errors
+     * @throws FxCreateException           on errors
+     * @throws FxNoAccessException         on errors
+     */
+    private FxPropertyData getProperyData(String XPath) throws FxInvalidParameterException, FxNotFoundException, FxCreateException, FxNoAccessException {
         XPath = XPathElement.stripType(XPath);
         createXPath(XPath);
         List<FxData> prop = getData(XPath);
@@ -536,7 +553,66 @@ public class FxContent implements Serializable {
             throw new FxInvalidParameterException("XPATH", "ex.xpath.element.ambiguous.property", XPath);
         if (!(prop.get(0) instanceof FxPropertyData))
             throw new FxInvalidParameterException("XPATH", "ex.xpath.element.noProperty", XPath);
-        ((FxPropertyData) prop.get(0)).setValue(value);
+        return ((FxPropertyData) prop.get(0));
+    }
+
+    /**
+     * Depending on the underlying FxValue's multilanguage setting set either the default
+     * translation or the single language value
+     *
+     * @param XPath requested XPath
+     * @param value the value (has to match the FxValue's data type)
+     * @return this FxContent instance to allow chained calls
+     * @throws FxNotFoundException         on errors
+     * @throws FxInvalidParameterException on errors
+     * @throws FxNoAccessException         on errors
+     * @throws FxCreateException           on errors
+     * @since 3.0.2
+     */
+    @SuppressWarnings({"unchecked"})
+    public FxContent setValue(String XPath, Object value) throws FxNotFoundException, FxInvalidParameterException, FxNoAccessException, FxCreateException {
+        FxValue val = getPropertyData(XPath).getValue();
+        if (val.isMultiLanguage())
+            val.setDefaultTranslation(value);
+        else
+            val.setValue(value);
+        return this;
+    }
+
+    /**
+     * Depending on the underlying FxValue's multilanguage setting set either the
+     * translation in the requested language or the single language value
+     *
+     * @param XPath      requested XPath
+     * @param languageId requested language (ignored if single value)
+     * @param value      the value (has to match the FxValue's data type)
+     * @return this FxContent instance to allow chained calls
+     * @throws FxNotFoundException         on errors
+     * @throws FxInvalidParameterException on errors
+     * @throws FxNoAccessException         on errors
+     * @throws FxCreateException           on errors
+     * @since 3.0.2
+     */
+    @SuppressWarnings({"unchecked"})
+    public FxContent setValue(String XPath, long languageId, Object value) throws FxNotFoundException, FxInvalidParameterException, FxNoAccessException, FxCreateException {
+        FxValue val = getPropertyData(XPath).getValue();
+        if (val.isMultiLanguage())
+            val.setTranslation(languageId, value);
+        else
+            val.setValue(value);
+        return this;
+    }
+
+    /**
+     * Convenience method which saves this FxContent and returns the loaded instance.
+     *
+     * @return saved FxContent
+     * @throws FxApplicationException on errors
+     * @since 3.0.2
+     */
+    public FxContent save() throws FxApplicationException {
+        final ContentEngine ce = EJBLookup.getContentEngine();
+        return ce.load(ce.save(this));
     }
 
     /**
