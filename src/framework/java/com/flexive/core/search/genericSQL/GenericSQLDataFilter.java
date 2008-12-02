@@ -526,7 +526,7 @@ public class GenericSQLDataFilter extends DataFilter {
 
             //mp: wrong properties selected for a join/union and braces missing for limit statement
             //    was:        return "select distinct da.assign,da.tprop,ct.id,ct.ver from "+tableMain+" ct\n" +
-            return "(SELECT DISTINCT da.id,da.ver,da.lang FROM " + tableMain + " ct\n" +
+            return "(SELECT DISTINCT ct.id, ct.ver, null AS lang FROM " + tableMain + " ct\n" +
                     "LEFT JOIN " + tableContentData + " da ON (ct.id=da.id AND ct.ver=da.ver AND da." + filter + ")\n" +
                     "WHERE da.tprop IS NULL " +
                     getVersionFilter("ct") +

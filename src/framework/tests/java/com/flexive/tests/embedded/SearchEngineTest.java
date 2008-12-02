@@ -1251,6 +1251,26 @@ public class SearchEngineTest {
         }
     }
 
+    @Test
+    public void isEmptyQueryTest_FX381() throws FxApplicationException {
+        final SqlQueryBuilder builder = new SqlQueryBuilder()
+                .condition(getTestPropertyAssignment("string"), PropertyValueComparator.EMPTY, null);
+        assert builder.getResult().getRows().isEmpty() : "Did not expect to find empty instances";
+        FxPK pk = null;
+        try {
+            pk = getContentEngine().save(getContentEngine().initialize(TEST_TYPE));
+            assert !getContentEngine().load(pk).containsValue("/" + getTestPropertyName("string"))
+                    : "Instance should not contain a value for property " + getTestPropertyName("string");
+            final FxResultSet result = builder.getResult();
+            assert !result.getRows().isEmpty() : "Should have returned instance " + pk;
+            assert result.getRowCount() == 1 : "Expected 1 row, got " + result.getRowCount(); 
+        } finally {
+            if (pk != null) {
+                getContentEngine().remove(pk);
+            }
+        }
+    }
+
     private void queryForCaption(String name) throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().select("caption").condition("caption", PropertyValueComparator.EQ, name).getResult();
         assert result.getRowCount() == 1 : "Expected one result row, got: " + result.getRowCount();
