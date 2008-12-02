@@ -413,6 +413,9 @@ public class EJBLookup {
                 ctx.lookup(buildName(appName, type));
                 return appName;
             } catch (Exception e) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Strategy " + strat + " failed: " + e.getMessage(), e);
+                }
                 //ignore and try next
             }
         }

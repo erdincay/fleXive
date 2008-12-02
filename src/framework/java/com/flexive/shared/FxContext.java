@@ -500,10 +500,12 @@ public class FxContext implements Serializable {
      * As a safeguard, the context can only be replaced if the current UserTicket is <code>null</code>
      *
      * @param context the FxContext to use as replacement
+     * @deprecated use {@link com.flexive.shared.FxContext#replace()} 
      */
+    @Deprecated
     public static void replace(FxContext context) {
         if (FxContext.getUserTicket() == null)
-            info.set(context);
+            context.replace();
     }
 
     /**

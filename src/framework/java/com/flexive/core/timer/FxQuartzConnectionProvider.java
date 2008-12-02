@@ -57,7 +57,7 @@ public class FxQuartzConnectionProvider implements ConnectionProvider {
         if( savedCtx == null )
             savedCtx = FxContext.get();
         if(FxContext.getUserTicket() == null ) {
-            FxContext.replace(savedCtx);
+            savedCtx.replace();
         }
 
         return Database.getDbConnection();

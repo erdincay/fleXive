@@ -62,7 +62,7 @@ public class MaintenanceJob implements Job {
 //        System.out.println("Last: " + context.getPreviousFireTime() + " Next: " + context.getNextFireTime() + " Refire count: " + context.getRefireCount());
 //        System.out.println("My Thread: " + Thread.currentThread() + " I am: " + FxContext.get());
         try {
-            FxContext.replace((FxContext) context.getScheduler().getContext().get("com.flexive.ctx"));
+            ((FxContext) context.getScheduler().getContext().get("com.flexive.ctx")).replace();
         } catch (SchedulerException e) {
             LOG.error("Failed to replace FxContext: " + e.getMessage(), e);
         }

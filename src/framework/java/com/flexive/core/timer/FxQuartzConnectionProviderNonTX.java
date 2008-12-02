@@ -59,7 +59,7 @@ public class FxQuartzConnectionProviderNonTX implements ConnectionProvider {
             savedCtx = FxContext.get();
         if(FxContext.getUserTicket() == null ) {
 //            System.out.println("Replacing context");
-            FxContext.replace(savedCtx);
+            savedCtx.replace();
         }
 //        System.out.println("Quartz requested a non-TX connection ... Thread: " + Thread.currentThread() + "; I am: " + this);
 //        System.out.println("Ctx-Info -> Division: " + FxContext.get().getDivisionId() + " Ticket: " + FxContext.getUserTicket());
