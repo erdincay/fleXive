@@ -128,14 +128,6 @@ public class FxFilter implements Filter {
                 return;
             }
 
-            if (request.getRequestURIWithoutContext().startsWith("/faces/")) {
-                // skip all generic faces-servlet invokations. This is bad because it's hardcoded,
-                // but currently saves us from miscellaneous headaches, most importantly
-                // a bug in Weblets 1.0 that fails to parse our cache headers (sometimes)
-                filterChain.doFilter(servletRequest, servletResponse);
-                return;
-            }
-
             // Cache data for jsp,jsf,and xhtml pages only
             /* TODO: fix/implements response caching.
                The 'catchData' mode doesn't work for static 
