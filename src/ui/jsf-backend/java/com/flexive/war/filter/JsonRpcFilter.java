@@ -39,7 +39,6 @@ import com.flexive.war.javascript.BriefcaseEditor;
 import com.flexive.war.javascript.ContentEditor;
 import com.flexive.war.javascript.SearchQueryEditor;
 import com.flexive.war.javascript.SystemInformation;
-import com.flexive.war.javascript.search.SearchResultWriter;
 import com.flexive.war.javascript.tree.ContentTreeEditor;
 import com.flexive.war.javascript.tree.ContentTreeWriter;
 import com.flexive.war.javascript.tree.StructureTreeEditor;
@@ -95,7 +94,6 @@ public class JsonRpcFilter implements Filter {
             }
             session.setAttribute(SESSION_INITIALIZED, true);
             final JSONRPCBridge bridge = getJsonRpcBridge(session, true);
-            bridge.registerObject("SearchResultWriter", new SearchResultWriter());
             bridge.registerObject("StructureTreeWriter", new StructureTreeWriter());
             bridge.registerObject("StructureTreeEditor", new StructureTreeEditor());
             bridge.registerObject("ContentTreeWriter", new ContentTreeWriter());
