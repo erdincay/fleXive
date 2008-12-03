@@ -34,18 +34,23 @@
 package com.flexive.faces.javascript.yui;
 
 import com.flexive.faces.FxJsfUtils;
-import com.flexive.shared.EJBLookup;
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.security.PermissionSet;
-import com.flexive.shared.structure.FxProperty;
-import com.flexive.shared.structure.FxEnvironment;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxRuntimeException;
-import com.flexive.shared.search.*;
+import com.flexive.shared.search.FxFoundType;
+import com.flexive.shared.search.FxResultRow;
+import com.flexive.shared.search.FxResultSet;
+import com.flexive.shared.security.PermissionSet;
+import com.flexive.shared.structure.FxEnvironment;
+import com.flexive.shared.structure.FxProperty;
+import com.flexive.shared.value.FxDouble;
+import com.flexive.shared.value.FxFloat;
+import com.flexive.shared.value.FxValue;
+import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import com.flexive.war.JsonWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -122,8 +127,16 @@ public class YahooResultProvider implements Serializable {
         for (FxResultRow row : result.getResultRows()) {
             writer.startMap();
             for (int i = firstColumn; i <= result.getColumnCount(); i++) {
-                writer.writeAttribute(getColumnKey(result, i),
-                        FxJsfUtils.formatResultValue(row.getValue(i), null, null, null));
+                final Object value = row.getValue(i);
+                final String output;
+                if (value instanceof FxFloat || value instanceof FxDouble) {
+                    // always format decimal numbers in English locale, because
+                    // the YUI datatable currently does not work with "," as separator (instead of ".")
+                    output = FxValueRendererFactory.getInstance(null).format((FxValue) value);
+                } else {
+                    output = FxJsfUtils.formatResultValue(value, null, null, null);
+                }
+                writer.writeAttribute(getColumnKey(result, i), output);
             }
             if (result.getColumnIndex("@pk") != -1) {
                 // add special PK column
@@ -172,6 +185,9 @@ public class YahooResultProvider implements Serializable {
                 }
             } catch (FxRuntimeException e) {
                 // property not found, use default
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Property '" + result.getColumnName(i) + " not found (ignored): " + e.getMessage(), e);
+                }
             }
             writer.writeAttribute("parser", parser, false);
             writer.closeMap();
