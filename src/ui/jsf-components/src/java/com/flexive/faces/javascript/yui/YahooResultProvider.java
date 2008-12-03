@@ -178,10 +178,15 @@ public class YahooResultProvider implements Serializable {
             writer.writeAttribute("key", getColumnKey(result, i));
             String parser = "YAHOO.util.DataSource.parseString";    // the YUI data parser used for sorting
             try {
-                // set parser according to property type
-                final FxProperty property = environment.getProperty(result.getColumnName(i));
-                if (property.getEmptyValue().getDefaultTranslation() instanceof Number) {
+                if ("@pk".equals(result.getColumnName(i))) {
+                    // PKs get rendered as <id>.<version>
                     parser = "YAHOO.util.DataSource.parseNumber";
+                } else {
+                    // set parser according to property type
+                    final FxProperty property = environment.getProperty(result.getColumnName(i));
+                    if (property.getEmptyValue().getDefaultTranslation() instanceof Number) {
+                        parser = "YAHOO.util.DataSource.parseNumber";
+                    }
                 }
             } catch (FxRuntimeException e) {
                 // property not found, use default
