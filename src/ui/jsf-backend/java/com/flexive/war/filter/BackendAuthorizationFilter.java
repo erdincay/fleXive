@@ -38,7 +38,11 @@ import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
 
 import javax.servlet.*;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Handles security checks for the backend administration - checks if the calling user has the role
@@ -60,7 +64,12 @@ public class BackendAuthorizationFilter implements Filter {
         final UserTicket ticket = FxContext.getUserTicket();
         if (ticket.isGuest()) {
             // not logged in at all - forward to login page
-            servletRequest.getRequestDispatcher("/pub/login.jsf").forward(servletRequest, servletResponse);
+            FilterUtils.sendRedirect(servletRequest, servletResponse,
+                    "/pub/login.jsf"
+                    // guess whether we got a session timeout (from within the backend) or a new request
+                    + (StringUtils.indexOf(((HttpServletRequest) servletRequest).getHeader("Referer"), "/adm/") != -1
+                            ? "?sessionExpired=true" : "")
+            );
         } else if (!ticket.isInRole(Role.BackendAccess)) {
             // logged in, but lacks role for backend access - show error page
             servletRequest.getRequestDispatcher("/pub/backendRestricted.jsf").forward(servletRequest, servletResponse);

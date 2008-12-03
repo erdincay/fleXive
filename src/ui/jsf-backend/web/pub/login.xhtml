@@ -39,6 +39,11 @@
                                 #{fxMessageBean['Login.error.unsupportedBrowser']}
                             </span>
                         </ui:fragment>
+                        <ui:fragment rendered="#{param['sessionExpired'] eq 'true'}">
+                            <span class="errorMessage">
+                                #{fxMessageBean['Login.error.sessionExpired']}
+                            </span>
+                        </ui:fragment>
                     </div>
                 </td></tr>
                 <tr>
