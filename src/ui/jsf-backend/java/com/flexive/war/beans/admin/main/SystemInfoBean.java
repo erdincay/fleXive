@@ -90,6 +90,18 @@ public class SystemInfoBean {
             return System.getProperty("product.name");
         } else if (System.getProperty("jboss.home.dir") != null) {
             return "JBoss"; // TODO: determine JBoss version
+        } else if (System.getProperty("openejb.version") != null) {
+            // try to get Jetty version
+            String jettyVersion = "";
+            try {
+                final Class<?> cls = Class.forName("org.mortbay.jetty.Server");
+                jettyVersion = " (Jetty "
+                        + cls.getClass().getPackage().getImplementationVersion()
+                        + ")";
+            } catch (ClassNotFoundException e) {
+                // no Jetty version...
+            }
+            return "OpenEJB " + System.getProperty("openejb.version") + jettyVersion;
         } else {
             return "unknown";
         }
