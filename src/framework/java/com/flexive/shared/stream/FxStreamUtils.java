@@ -184,7 +184,7 @@ public class FxStreamUtils {
                 nif = nifs.nextElement();
                 if (LOG.isDebugEnabled())
                     LOG.debug("Probing " + nif.getDisplayName() + " ...");
-                if (nif.getDisplayName().startsWith("vmnet"))
+                if (nif.getDisplayName().startsWith("vmnet") || nif.getDisplayName().startsWith("vnet"))
                     continue;
                 Enumeration<InetAddress> inas = nif.getInetAddresses();
                 while (inas.hasMoreElements()) {
