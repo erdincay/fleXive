@@ -105,21 +105,18 @@
         <!--  Cache wide default -->
           <region name="/_default_">
              <attribute name="maxNodes">0</attribute>
-             <attribute name="timeToIdleSeconds">0</attribute>
              <attribute name="timeToLiveSeconds">0</attribute>
           </region>
 
            <!-- cache region for contents -->
            <region name="/Division1/FxContent">
              <attribute name="maxNodes">1000</attribute>
-             <attribute name="timeToIdleSeconds">300</attribute>
              <attribute name="timeToLiveSeconds">1000</attribute>
            </region>
 
           <!-- cache region for user configuration -->
           <region name="/Division1/userConfig">
               <attribute name="maxNodes">10000</attribute>
-              <attribute name="timeToIdleSeconds">300</attribute>
               <attribute name="timeToLiveSeconds">1000</attribute>
           </region>
       </config>

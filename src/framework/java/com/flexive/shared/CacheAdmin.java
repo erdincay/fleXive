@@ -61,17 +61,19 @@ import java.util.List;
 public class CacheAdmin {
     private static final Log LOG = LogFactory.getLog(CacheAdmin.class);
 
-    public final static String ROOT_USERTICKETSTORE = "/UserTicketStore";
-    public final static String ROOT_WEBDAV_USERTICKETSTORE = "/WebdavUserTicketStore";
-    public final static String CACHE_SERVICE_NAME = "flexive:service=FxCache";
-    public final static String LANGUAGES_ID = "/FxLang/Id";
-    public final static String LANGUAGES_ISO = "/FxLang/ISO";
-    public final static String LANGUAGES_ALL = "/FxLang/ISO";
-    public final static String ENVIRONMENT_BASE = "/FxEnvironment";
+    public static final String ROOT_USERTICKETSTORE = "/UserTicketStore";
+    public static final String ROOT_WEBDAV_USERTICKETSTORE = "/WebdavUserTicketStore";
+    public static final String CACHE_SERVICE_NAME = "flexive:service=FxCache";
+    public static final String LANGUAGES_ID = "/FxLang/Id";
+    public static final String LANGUAGES_ISO = "/FxLang/ISO";
+    public static final String LANGUAGES_ALL = "/FxLang/ISO";
+    public static final String ENVIRONMENT_BASE = "/FxEnvironment";
     public static final Object ENVIRONMENT_RUNTIME = "runtime";
-    public final static String STREAMSERVER_BASE = "/FxStreamServers";
-    public final static String STREAMSERVER_EJB_KEY = "ejb_servers";
-    public final static String CONTENTCACHE_BASE = "/FxContent";
+    public static final String STREAMSERVER_BASE = "/FxStreamServers";
+    public static final String STREAMSERVER_EJB_KEY = "ejb_servers";
+    public static final String CONTENTCACHE_BASE = "/FxContent";
+
+    private static final String CONTENTCACHE_KEY_STORE = "content";
 
     private static final Parameter<Boolean> DROP_RUNONCE = ParameterFactory.newInstance(Boolean.class,
             "/cacheAdmin/dropInRunOnce", ParameterScope.DIVISION_ONLY, false);
@@ -270,14 +272,18 @@ public class CacheAdmin {
      */
     public static void cacheContent(FxCachedContent content) {
         try {
+            final String cachePath = getContentCachePath(content.getContent().getId());
             FxCachedContentContainer container =
-                    (FxCachedContentContainer) getInstance().get(CONTENTCACHE_BASE, content.getContent().getId());
+                    (FxCachedContentContainer) getInstance().get(
+                            cachePath,
+                            CONTENTCACHE_KEY_STORE
+                    );
             if (container == null) {
                 container = new FxCachedContentContainer(content);
             } else {
                 container.add(content);
             }
-            getInstance().put(CONTENTCACHE_BASE, container.getId(), container);
+            getInstance().put(cachePath, CONTENTCACHE_KEY_STORE, container);
         } catch (FxCacheException e) {
             LOG.warn(e.getMessage(), e);
         }
@@ -291,7 +297,10 @@ public class CacheAdmin {
      */
     public static FxCachedContent getCachedContent(FxPK pk) {
         try {
-            FxCachedContentContainer container = (FxCachedContentContainer) getInstance().get(CONTENTCACHE_BASE, pk.getId());
+            FxCachedContentContainer container = (FxCachedContentContainer) getInstance().get(
+                    getContentCachePath(pk.getId()),
+                    CONTENTCACHE_KEY_STORE
+            );
             if (container != null)
                 return container.get(pk);
             return null;
@@ -300,6 +309,11 @@ public class CacheAdmin {
             return null;
         }
     }
+
+    private static String getContentCachePath(long id) {
+        return CONTENTCACHE_BASE + "/" + id;
+    }
+
 
     /**
      * Expire all cached versions of a content with the requested id
@@ -310,7 +324,7 @@ public class CacheAdmin {
         if (id <= 0)
             return;
         try {
-            getInstance().remove(CONTENTCACHE_BASE, id);
+            getInstance().remove(getContentCachePath(id), CONTENTCACHE_KEY_STORE);
         } catch (FxCacheException e) {
             LOG.warn(e.getMessage(), e);
         }
