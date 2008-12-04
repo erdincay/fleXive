@@ -36,6 +36,7 @@ import com.flexive.shared.cache.FxBackingCacheProvider;
 import com.flexive.shared.cache.FxCacheException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.StringUtils;
 import org.jboss.cache.*;
 import org.jboss.cache.eviction.LRUConfiguration;
 import org.jboss.cache.eviction.LRUPolicy;
@@ -46,6 +47,11 @@ import org.jboss.cache.eviction.LRUPolicy;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class FxJBossEmbeddedCacheProvider extends AbstractBackingCacheProvider<FxJBossTreeCacheWrapper> {
+    /**
+     * System property holding the XML configuration file for the embedded cache.
+     * The path must be available either on the file system or in the classpath. 
+     */
+    public static final String SYSTEM_CACHE_CONFIG = "flexive.cache.config";
     private static final Log LOG = LogFactory.getLog(FxJBossEmbeddedCacheProvider.class);
     private static final String CONFIG_FILE = "embeddedJBossCacheConfig.xml";
 
@@ -63,15 +69,15 @@ public class FxJBossEmbeddedCacheProvider extends AbstractBackingCacheProvider<F
         if (cache != null)
             return;
         try {
-            final Cache<Object, Object> tc = DefaultCacheFactory.getInstance().createCache(CONFIG_FILE);
+            final Cache<Object, Object> tc = DefaultCacheFactory.getInstance().createCache(
+                    StringUtils.defaultString(System.getProperty(SYSTEM_CACHE_CONFIG), CONFIG_FILE)
+            );
             tc.create();
             tc.start();
             cache = new FxJBossTreeCacheWrapper(tc);
         } catch (Exception e) {
             LOG.error("Failed to start TreeCache. Error: " + e.getMessage(), e);
             throw new FxCacheException(e);
-//            System.err.println("!!! Failed to start TreeCache !!!! Error: " + e.getMessage());
-//            e.printStackTrace();
         }
     }
 
