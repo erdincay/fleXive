@@ -343,8 +343,15 @@ public class FxCache implements FxCacheMBean, DynamicMBean {
      */
     public void setEvictionStrategy(Integer divisionId, String path, Integer maxContents, Integer timeToIdle,
                                     Integer timeToLive) throws FxCacheException {
+        setEvictionStrategy(divisionId, path, maxContents, timeToIdle, timeToLive, true);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setEvictionStrategy(Integer divisionId, String path, Integer maxContents, Integer timeToIdle, Integer timeToLive, Boolean overwrite) throws FxCacheException {
         cacheProvider.setEvictionStrategy("/Division" + divisionId + (path.charAt(0) == '/' ? path : '/' + path),
-                maxContents, timeToIdle, timeToLive);
+                maxContents, timeToIdle, timeToLive, overwrite);
     }
 
     /**
@@ -444,6 +451,10 @@ public class FxCache implements FxCacheMBean, DynamicMBean {
             } else if ("setEvictionStrategy".equals(actionName) && params.length == 5) {
                 setEvictionStrategy((Integer) params[0], (String) params[1],
                         (Integer) params[2], (Integer) params[3], (Integer) params[4]);
+            } else if ("setEvictionStrategy".equals(actionName) && params.length == 6) {
+                setEvictionStrategy((Integer) params[0], (String) params[1],
+                        (Integer) params[2], (Integer) params[3], (Integer) params[4],
+                        (Boolean) params[5]);
             } else {
                 LOG.warn("Tried to call [" + actionName + "] which is not implemented!");
             }

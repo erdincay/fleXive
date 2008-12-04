@@ -164,6 +164,21 @@ public interface FxCacheMBean extends FxBackingCache {
      * @param maxContents max. number of entries to allow (0=unlimited)
      * @param timeToIdle  time a value has to be idle to be evicted (0=forever)
      * @param timeToLive  time to live (0=forever)
+     * @throws com.flexive.shared.cache.FxCacheException    on cache errors
      */
     void setEvictionStrategy(Integer divisionId, String path, Integer maxContents, Integer timeToIdle, Integer timeToLive) throws FxCacheException;
+
+    /**
+     * Set the eviction strategy for a path (if the backing cache supports this)
+     *
+     * @param divisionId  division
+     * @param path        path
+     * @param maxContents max. number of entries to allow (0=unlimited)
+     * @param timeToIdle  time a value has to be idle to be evicted (0=forever)
+     * @param timeToLive  time to live (0=forever)
+     * @param overwrite   if an existing policy should be overwritten
+     * @throws com.flexive.shared.cache.FxCacheException    on cache errors
+     * @since 3.0.2
+     */
+    void setEvictionStrategy(Integer divisionId, String path, Integer maxContents, Integer timeToIdle, Integer timeToLive, Boolean overwrite) throws FxCacheException;
 }

@@ -415,4 +415,27 @@ public class FxCacheProxy implements FxCacheMBean {
             e.printStackTrace();
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setEvictionStrategy(Integer divisionId, String path, Integer maxContents, Integer timeToIdle, Integer timeToLive, Boolean overwrite) throws FxCacheException {
+        try {
+                server.invoke(name, "setEvictionStrategy", new Object[]{
+                        divisionId, path, maxContents, timeToIdle, timeToLive, overwrite},
+                        new String[]{
+                                "java.lang.Integer",
+                                "java.lang.String",
+                                "java.lang.Integer",
+                                "java.lang.Integer",
+                                "java.lang.Integer",
+                                "java.lang.Boolean" });
+            } catch (InstanceNotFoundException e) {
+                e.printStackTrace();
+            } catch (MBeanException e) {
+                e.printStackTrace();
+            } catch (ReflectionException e) {
+                e.printStackTrace();
+            }
+    }
 }

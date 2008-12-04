@@ -52,12 +52,21 @@ public abstract class AbstractBackingCacheProvider<T extends FxBackingCache> imp
     /**
      * {@inheritDoc}
      */
-    public void setEvictionStrategy(String path, int maxContents, int timeToIdle, int timeToLive) throws FxCacheException {
+    public void setEvictionStrategy(String path, int maxContents, int timeToIdle, int timeToLive, boolean overwrite) throws FxCacheException {
         RegionManager rm = ((CacheSPI) cache.getCache()).getRegionManager();
         LRUConfiguration config = new LRUConfiguration();
         config.setMaxNodes(maxContents);
         config.setMaxAgeSeconds(timeToIdle);
         config.setTimeToLiveSeconds(timeToLive);
-        rm.getRegion(Fqn.fromString(path), true).setEvictionPolicy(config);
+        if (overwrite || rm.getRegion(Fqn.fromString(path), true).getEvictionPolicy() == null) {
+            rm.getRegion(Fqn.fromString(path), true).setEvictionPolicy(config);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setEvictionStrategy(String path, int maxContents, int timeToIdle, int timeToLive) throws FxCacheException {
+        setEvictionStrategy(path, maxContents, timeToIdle, timeToLive, true);
     }
 }
