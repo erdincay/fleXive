@@ -85,6 +85,9 @@ public abstract class AbstractJBossTreeCacheWrapper implements FxBackingCache {
         try {
             final Node<Object, Object> node = getNode(path);
             if (node != null) {
+                for (Object name : node.getChildrenNames()) {
+                    node.removeChild(name);
+                }
                 node.clearData();
             }
         } catch (CacheException e) {
