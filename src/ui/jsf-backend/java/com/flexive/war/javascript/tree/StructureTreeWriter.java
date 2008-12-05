@@ -79,9 +79,10 @@ public class StructureTreeWriter implements Serializable {
      * @param request the current request
      * @param typeId  the type to be rendered (or -1 for all structures)
      * @param isViewFlat if the tree is rendered flat or hierarchically
+     * @param isShowLabels     true if labels should be shown, false if the Alias should be shown
      * @return nothing
      */
-    public String renderStructureTree(HttpServletRequest request, long typeId, boolean isViewFlat) {
+    public String renderStructureTree(HttpServletRequest request, long typeId, boolean isViewFlat, boolean isShowLabels) {
         StringWriter localWriter = null;
         try {
             // if embedded in a tree component, use the component's tree writer
@@ -91,7 +92,7 @@ public class StructureTreeWriter implements Serializable {
                 localWriter = new StringWriter();
                 writer = new TreeNodeWriter(localWriter, new RequestRelativeUriMapper(request), TreeNodeWriter.FORMAT_PLAIN);
             }
-            writeStructureTree(writer, typeId, isViewFlat, request);
+            writeStructureTree(writer, typeId, isViewFlat, isShowLabels, request);
             if (localWriter != null) {
                 writer.finishResponse();
             }
@@ -109,9 +110,10 @@ public class StructureTreeWriter implements Serializable {
      * @param typeId  the start type ID (-1 for all types)
      * @param request the current servlet request
      * @param isViewFlat if the tree is rendered flat or hierarchically
+     * @param isShowLabels     true if labels should be shown, false if the Alias should be shown
      * @throws IOException if the tree could not be written
      */
-    public void writeStructureTree(TreeNodeWriter writer, long typeId, boolean isViewFlat, HttpServletRequest request) throws IOException {
+    public void writeStructureTree(TreeNodeWriter writer, long typeId, boolean isViewFlat, boolean isShowLabels, HttpServletRequest request) throws IOException {
         final FxEnvironment environment = CacheAdmin.getFilteredEnvironment();
         Map<String, Object> nodeProperties = new HashMap<String, Object>();
         if (typeId == -1) {
@@ -119,7 +121,7 @@ public class StructureTreeWriter implements Serializable {
 
             // print root types
             for (FxType type : environment.getTypes(true, isViewFlat, true, true)) {
-                writeType(writer, nodeProperties, type, isViewFlat);
+                writeType(writer, nodeProperties, type, isViewFlat, isShowLabels);
             }
             // print root properties
 
@@ -129,12 +131,12 @@ public class StructureTreeWriter implements Serializable {
             Collections.sort(systemInternalprops, new FxSharedUtils.AssignmentPositionSorter());
 
             for (FxPropertyAssignment property : systemInternalprops) {
-                writePropertyAssignment(writer, nodeProperties, property);
+                writePropertyAssignment(writer, nodeProperties, property, isShowLabels);
             }
 
         } else {
             // print chosen node
-            writeType(writer, nodeProperties, environment.getType(typeId), isViewFlat);
+            writeType(writer, nodeProperties, environment.getType(typeId), isViewFlat, isShowLabels);
         }
     }
 
@@ -146,10 +148,11 @@ public class StructureTreeWriter implements Serializable {
      * @param type           the type to be rendered
      * @param isViewFlat if the tree is rendered flat or hierarchically
      * @param nodeProperties an existing hashmap for storing additional JS properties (cleared on entry)
+     * @param isShowLabels     true if labels should be shown, false if the Alias should be shown
      * @throws IOException if the tree could not be written
      */
 
-    private void writeType(TreeNodeWriter writer, Map<String, Object> nodeProperties, FxType type, boolean isViewFlat) throws IOException {
+    private void writeType(TreeNodeWriter writer, Map<String, Object> nodeProperties, FxType type, boolean isViewFlat, boolean isShowLabels) throws IOException {
         nodeProperties.clear();
         nodeProperties.put("typeId", String.valueOf(type.getId()));
 
@@ -158,15 +161,16 @@ public class StructureTreeWriter implements Serializable {
                 : type.getIcon() != null && !type.getIcon().isEmpty()
                 ? DOC_TYPE_TYPEID + type.getId()
                 : DOC_TYPE_TYPE;
+        nodeProperties.put("alias", type.getName().toUpperCase());
         nodeProperties.put("nodeType", type.isRelation() ? NODE_TYPE_TYPE_RELATION : NODE_TYPE_TYPE);
-        writer.startNode(new Node(String.valueOf(type.getId()), type.getDisplayName(), docType, nodeProperties));
+        writer.startNode(new Node(String.valueOf(type.getId()), isShowLabels ? type.getDisplayName() : (String)nodeProperties.get("alias"), docType, nodeProperties));
         writer.startChildren();
 
         // write derived types
         //if the view is not flat, add derived types as child nodes
         if (!isViewFlat) {
             for (FxType child : type.getDerivedTypes()) {
-                writeType(writer, nodeProperties, child, isViewFlat);
+                writeType(writer, nodeProperties, child, isViewFlat, isShowLabels);
             }
         }
 
@@ -179,9 +183,9 @@ public class StructureTreeWriter implements Serializable {
         //write group and property assignments
         for (FxAssignment a : assignments) {
             if (a instanceof FxPropertyAssignment && !a.isSystemInternal())
-                writePropertyAssignment(writer, nodeProperties, (FxPropertyAssignment)a);
+                writePropertyAssignment(writer, nodeProperties, (FxPropertyAssignment)a, isShowLabels);
             else if (a instanceof FxGroupAssignment)
-                writeGroupAssignment(writer, nodeProperties, (FxGroupAssignment)a);
+                writeGroupAssignment(writer, nodeProperties, (FxGroupAssignment)a, isShowLabels);
         }
 
         writer.closeChildren();
@@ -195,14 +199,16 @@ public class StructureTreeWriter implements Serializable {
      * @param writer         the tree node writer
      * @param nodeProperties an existing hashmap for storing additional JS properties (cleared on entry)
      * @param assignment       the property to be rendered
+     * @param isShowLabels     true if labels should be shown, false if the Alias should be shown
      * @throws IOException if the tree could not be written
      */
-    private void writePropertyAssignment(TreeNodeWriter writer, Map<String, Object> nodeProperties, FxPropertyAssignment assignment) throws IOException {
+    private void writePropertyAssignment(TreeNodeWriter writer, Map<String, Object> nodeProperties, FxPropertyAssignment assignment, boolean isShowLabels) throws IOException {
         nodeProperties.clear();
+        nodeProperties.put("alias", assignment.getAlias());
         nodeProperties.put("assignmentId", String.valueOf(assignment.getId()));
         nodeProperties.put("propertyId", String.valueOf(assignment.getProperty().getId()));
         nodeProperties.put("nodeType", assignment.isSystemInternal() ? NODE_TYPE_ASSIGNMENT_SYSTEMINTERNAL : NODE_TYPE_ASSIGNMENT);
-        writer.writeNode(new Node(String.valueOf(assignment.getId()), assignment.getDisplayName(),
+        writer.writeNode(new Node(String.valueOf(assignment.getId()), isShowLabels ? assignment.getDisplayName() : (String)nodeProperties.get("alias"),
                 assignment.isSystemInternal() ? DOC_TYPE_ASSIGNMENT_SYSTEMINTERNAL : DOC_TYPE_ASSIGNMENT, nodeProperties));
     }
 
@@ -213,14 +219,16 @@ public class StructureTreeWriter implements Serializable {
      * @param writer         the tree node writer
      * @param nodeProperties an existing hashmap for storing additional JS properties (cleared on entry)
      * @param group          the group to be rendered
+     * @param isShowLabels     true if labels should be shown, false if the Alias should be shown
      * @throws IOException if the tree could not be written
      */
 
-    private void writeGroupAssignment(TreeNodeWriter writer, Map<String, Object> nodeProperties, FxGroupAssignment group) throws IOException {
+    private void writeGroupAssignment(TreeNodeWriter writer, Map<String, Object> nodeProperties, FxGroupAssignment group, boolean isShowLabels) throws IOException {
         nodeProperties.clear();
+        nodeProperties.put("alias", group.getAlias());
         nodeProperties.put("assignmentId", String.valueOf(group.getId()));
         nodeProperties.put("nodeType",NODE_TYPE_GROUP);
-        writer.startNode(new Node(String.valueOf(group.getId()), group.getDisplayName(), DOC_TYPE_GROUP, nodeProperties));
+        writer.startNode(new Node(String.valueOf(group.getId()), isShowLabels ? group.getDisplayName() : (String)nodeProperties.get("alias"), DOC_TYPE_GROUP, nodeProperties));
         writer.startChildren();
 
         // sort and write nested groups
@@ -228,7 +236,7 @@ public class StructureTreeWriter implements Serializable {
         nested.addAll(group.getAssignedGroups());
         Collections.sort(nested, new FxSharedUtils.AssignmentPositionSorter());
         for (FxGroupAssignment nestedGroup : nested) {
-            writeGroupAssignment(writer, nodeProperties, nestedGroup);
+            writeGroupAssignment(writer, nodeProperties, nestedGroup, isShowLabels);
         }
 
         // sort and write properties
@@ -237,7 +245,7 @@ public class StructureTreeWriter implements Serializable {
         Collections.sort(props, new FxSharedUtils.AssignmentPositionSorter());
         for (FxPropertyAssignment property : props) {
             if (!property.isSystemInternal()) {
-                writePropertyAssignment(writer, nodeProperties, property);
+                writePropertyAssignment(writer, nodeProperties, property, isShowLabels);
             }
         }
 		// add assigned properties

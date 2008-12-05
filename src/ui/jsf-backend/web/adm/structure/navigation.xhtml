@@ -38,6 +38,7 @@
             var reloadContentTreeNavFrame=false;
             //flag indicating if the tree is shown hierarchically or flat
             var isViewFlat=true;
+            var isViewLabels=true;
 
                 //actions defined in StructureTreeControllerBean
             function doTreeAction(action, id, value) {
@@ -101,7 +102,7 @@
             }
 
             function reloadStructureTree() {
-                var newChildren = eval("(" + flexive.util.getJsonRpc().StructureTreeWriter.renderStructureTree(-1, isViewFlat) + ")");
+                var newChildren = eval("(" + flexive.util.getJsonRpc().StructureTreeWriter.renderStructureTree(-1, isViewFlat, isViewLabels) + ")");
                 dojo.widget.byId('structureTree').setChildren(newChildren);
                 //contentPage=null;
             }
@@ -666,6 +667,12 @@
                 reloadAndKeepExpanded();
             }
 
+            function toggleAliasView() {
+                isViewLabels = !isViewLabels;
+                setImage("mainNavForm:imgTreeLabelView", "adm/images/layout/tree_label_" + (isViewLabels ? "label" : "alias") + ".png");
+                reloadAndKeepExpanded();
+            }
+
             dojo.addOnLoad(function() {
                 if (getContentFrame().isQueryEditor) {
                     enableSearchMode();
@@ -709,7 +716,7 @@
                 <adm:treeContextMenuItem icon="delete" treeActions="deleteType" labelKey="StructureTree.menu.delete.type" clickHandler="deleteType"/>
             </adm:treeContextMenu>
 
-            <adm:jsonRpcCall method="StructureTreeWriter.renderStructureTree" args="-1, true"/>
+            <adm:jsonRpcCall method="StructureTreeWriter.renderStructureTree" args="-1, true, true"/>
     	</adm:tree>
     	
         <div id="structureTreeContainer">
@@ -733,6 +740,7 @@
 
     <ui:define name="reloadButton">
         <a href="javascript:toggleHierarchyView()"><t:graphicImage id="imgTreeHierarchy" url="/adm/images/layout/tree_view_flat.png" alt="#{fxMessageBean['StructureTree.button.toggleHierarchyView']}" title="#{fxMessageBean['StructureTree.button.toggleHierarchyView']}" style="position:absolute;right:55px;margin-top:2px;border:0;"/></a>
+        <a href="javascript:toggleAliasView()"><t:graphicImage id="imgTreeLabelView" url="/adm/images/layout/tree_label_label.png" alt="#{fxMessageBean['StructureTree.button.toggleAliasView']}" title="#{fxMessageBean['StructureTree.button.toggleAliasView']}" style="position:absolute;right:35px;margin-top:2px;border:0;"/></a>
         <a href="javascript:reloadStructureTree()"><t:graphicImage url="/adm/images/layout/reload.png" alt="reload" style="position:absolute;right:15px;margin-top:2px;border:0;"/></a>
     </ui:define>
 
