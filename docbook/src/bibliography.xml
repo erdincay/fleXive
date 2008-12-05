@@ -62,4 +62,15 @@
             </author>
         </authorgroup>
     </biblioentry>
+
+    <biblioentry xml:id="bib_blog_maven2">
+        <abbrev>Getting started with [fleXive] and Maven 2</abbrev>
+        <title><link xlink:href="http://blog.flexive.org/2008/11/29/getting-started-with-flexive-and-maven-2/">Getting started with [fleXive] and Maven 2</link></title>
+        <author>
+            <personname>
+                <firstname>Daniel</firstname>
+                <surname>Lichtenberger</surname>
+            </personname>
+        </author>
+    </biblioentry>
 </bibliography>

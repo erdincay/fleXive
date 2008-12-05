@@ -5,6 +5,7 @@
 <!ENTITY messagekey "message key">
 <!ENTITY flexiveJavadocBase "http://www.flexive.org/docs/javadoc/">
 <!ENTITY flexiveJavadoc "<ulink url='&flexiveJavadocBase;'>&flexive; JavaDoc</ulink>">
+<!ENTITY flexiveIssues "<ulink url='http://issuetracker.flexive.org/jira/secure/Dashboard.jspa'>issue tracker</ulink>">
 <!ENTITY fisheyeBase "http://source.flexive.org/browse/fleXive/trunk/">
 <!ENTITY flexiveApi "&flexive; API">
 <!ENTITY weblets "<ulink url='https://weblets.dev.java.net/'><glossterm>Weblets</glossterm></ulink>">
@@ -22,6 +23,9 @@
 <!ENTITY templateProject "&flexive; template project">
 <!ENTITY jdk6 "<ulink url='http://java.sun.com/javase/downloads/index.jsp'>JDK 6</ulink>">
 <!ENTITY ant "<ulink url='http://ant.apache.org/'>Apache Ant</ulink>">
+<!ENTITY maven "<ulink url='http://maven.apache.org/'>Apache Maven</ulink>">
+<!ENTITY mavenRepo "<ulink url='http://repo.flexive.org/maven2/'>http://repo.flexive.org/maven2</ulink>">
+<!ENTITY mavenVersion "3.1-SNAPSHOT"> 
 <!ENTITY eclipse "<ulink url='http://www.eclipse.org/'>Eclipse</ulink>">
 <!ENTITY idea "<ulink url='http://www.jetbrains.com/idea/'>IntelliJ IDEA</ulink>">
 <!ENTITY productsArticle "<ulink url='http://www.onjava.com/pub/a/onjava/2008/04/30/introducing-flexive-a-complementary-approach-to-java-ee-5-web-development.html'>an ONJava.com article</ulink>"> 
