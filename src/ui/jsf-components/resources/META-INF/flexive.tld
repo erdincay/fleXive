@@ -725,4 +725,45 @@
         <name>regularExpressionValidator</name>
         <body-content>JSP</body-content>
     </tag>
+
+    <tag>
+        <name>navigation</name>
+        <body-content>JSP</body-content>
+        <attribute>
+          <name>var</name>
+          <required>false</required>
+          <rtexprvalue>true</rtexprvalue>
+          <description>The variable name where the current tree node of type FxTreeNode will be exposed to the page.</description>
+        </attribute>
+        <attribute>
+          <name>output</name>
+          <required>false</required>
+          <rtexprvalue>true</rtexprvalue>
+          <description>The output format. default Plain HTML output. csspopup Renders additional CSS classes that will show only  the first tree level and open the subfolders when the  mouse hovers over them. yui Renders additional markup that allows the Yahoo UI  Menu component to build a menu. If JavaScript is disabled,  the plain HTML markup is shown to the use.  Note that you have to include YUI on the page with &lt;fx:includes&gt; .</description>
+        </attribute>
+        <attribute>
+          <name>path</name>
+          <required>false</required>
+          <rtexprvalue>true</rtexprvalue>
+          <description>The tree folder to be rendered. If none is specified, the root folder  ("/") is rendered.</description>
+        </attribute>
+        <attribute>
+          <name>mode</name>
+          <required>false</required>
+          <rtexprvalue>true</rtexprvalue>
+          <description>The tree mode, "edit" or "live" (default).</description>
+        </attribute>
+        <attribute>
+          <name>depth</name>
+          <required>false</required>
+          <rtexprvalue>true</rtexprvalue>
+          <description>The maximum tree depth for sub folders. For example, a value of 2 will render  content of the given tree path and the first level of subfolders.</description>
+        </attribute>
+        <attribute>
+          <name>selectedNodeId</name>
+          <required>false</required>
+          <rtexprvalue>true</rtexprvalue>
+          <description>If specified, the given tree node ID will be highlighted in the HTML output.</description>
+        </attribute>
+    </tag>
 </taglib>

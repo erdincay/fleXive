@@ -274,17 +274,16 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                     insertPosition, insertSpace, insertBoundaries, depthDelta, destinationNode, createMode, createKeepIds);
         }
 
-        BigDecimal SPACING = nodeInfo.getDefaultSpacing();
-        if (overrideSpacing != null && overrideSpacing.compareTo(SPACING) < 0) {
-            SPACING = overrideSpacing;
+        BigDecimal spacing = nodeInfo.getDefaultSpacing();
+        if (overrideSpacing != null && overrideSpacing.compareTo(spacing) < 0) {
+            spacing = overrideSpacing;
         } else {
-            if (SPACING.compareTo(GO_UP) < 0) {
+            if (spacing.compareTo(GO_UP) < 0) {
                 return reorganizeSpace(con, seq, sourceMode, destMode, nodeInfo.getParentId(), includeNodeId, overrideSpacing, overrideLeft, insertParent,
                         insertPosition, insertSpace, insertBoundaries, depthDelta, destinationNode, createMode, createKeepIds);
             }
         }
 
-        //long time = System.currentTimeMillis();
         Statement stmt = null;
         PreparedStatement ps = null;
         ResultSet rs;
@@ -294,6 +293,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         long counter = 0;
         long newId = -1;
         try {
+            final long start = System.currentTimeMillis();
             String createProps = createMode ? ",PARENT,REF,NAME,TEMPLATE" : "";
             String sql = " SELECT ID,TOTAL_CHILDCOUNT,CHILDCOUNT, LFT LFTORD,RGT,DEPTH" + createProps +
                     " FROM (SELECT ID,TOTAL_CHILDCOUNT,CHILDCOUNT,LFT,RGT,DEPTH" + createProps + " FROM " + getTable(sourceMode) + " WHERE " +
@@ -301,7 +301,6 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                     "ORDER BY LFTORD ASC";
             stmt = con.createStatement();
             rs = stmt.executeQuery(sql);
-            //long time2 = System.currentTimeMillis();
             if (createMode) {
                 //                                                                 1  2      3     4     5   6        7   8
                 ps = con.prepareStatement("INSERT INTO " + getTable(destMode) + " (ID,PARENT,DEPTH,DIRTY,REF,TEMPLATE,LFT,RGT," +
@@ -346,11 +345,11 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                     data = rs.getString(10);
                     if (rs.wasNull()) data = null;
                 }
-                left = left.add(SPACING).add(BigDecimal.ONE);
+                left = left.add(spacing).add(BigDecimal.ONE);
 
                 // Handle depth differences
                 if (lastDepth - depth > 0) {
-                    BigDecimal depthDifference = SPACING.add(BigDecimal.ONE);
+                    BigDecimal depthDifference = spacing.add(BigDecimal.ONE);
                     left = left.add(depthDifference.multiply(new BigDecimal(lastDepth - depth)));
                 }
                 if (createMode) {
@@ -362,11 +361,11 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                     }
                 }
 
-                right = left.add(SPACING).add(BigDecimal.ONE);
+                right = left.add(spacing).add(BigDecimal.ONE);
 
                 // add child space if needed
                 if (total_childs > 0) {
-                    BigDecimal childSpace = SPACING.multiply(new BigDecimal(total_childs * 2));
+                    BigDecimal childSpace = spacing.multiply(new BigDecimal(total_childs * 2));
                     childSpace = childSpace.add(new BigDecimal((total_childs * 2) - 1));
                     right = right.add(childSpace);
                     nextLeft = left;
@@ -441,9 +440,12 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             stmt = null;
             ps.executeBatch();
 
-            //System.out.println("Cleanup: "+counter+" spaceLen="+SPACING+
-            //        " time:"+(System.currentTimeMillis()-time)+
-            //        " time2:"+(System.currentTimeMillis()-time2));
+            if (LOG.isDebugEnabled()) {
+                final long time = System.currentTimeMillis() - start;
+
+                LOG.debug("Tree reorganization of "+counter+" items completed in "
+                        + time + " ms (spaceLen="+spacing + ")");
+            }
             return firstCreatedNodeId;
         } catch (Throwable e) {
             throw new FxTreeException(LOG, e, "ex.tree.reorganize.failed", counter, left, right, e.getMessage());
