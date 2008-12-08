@@ -455,7 +455,7 @@ public class ContentEngineTest {
         pk = co.save(test);
         FxContent testLoad = co.load(pk);
         final String transIt = ((FxString) testLoad.getPropertyData("/TestGroup1[2]/TestProperty1_3").getValue()).getTranslation(FxLanguage.ITALIAN);
-        assert TEST_IT.equals(transIt) : "Expected italian translation '" + TEST_IT + "', got: '" + transIt + "'";
+        assert TEST_IT.equals(transIt) : "Expected italian translation '" + TEST_IT + "', got: '" + transIt + "' for pk "+pk;
         co.remove(pk);
         pk = co.save(test);
         FxContent testLoad2 = co.load(pk);
