@@ -31,14 +31,8 @@
  ***************************************************************/
 package com.flexive.tests.embedded.benchmark;
 
-import com.ociweb.xml.WAX;
-import com.flexive.tests.embedded.benchmark.logger.ResultLogger;
-import com.flexive.tests.embedded.benchmark.logger.AbstractResultLogger;
 import com.flexive.tests.embedded.benchmark.logger.PlainTextLogger;
-
-import java.util.Formatter;
-import java.io.StringWriter;
-import java.io.Writer;
+import com.flexive.tests.embedded.benchmark.logger.ResultLogger;
 
 /**
  * Some utility methods for our benchmarks. The result logger class can be specified using the system property
