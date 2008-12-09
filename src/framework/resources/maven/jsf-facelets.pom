@@ -11,4 +11,11 @@
         but includes the patch for Facelets bug 286.
     </description>
 
+    <licenses>
+        <license>
+            <name>Apache License</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
 </project>

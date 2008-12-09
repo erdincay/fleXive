@@ -9,4 +9,11 @@
     <version>0.87-incubator</version>
     <description>Sanselan image manipulation library</description>
 
+    <licenses>
+        <license>
+            <name>Apache License</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+    
 </project>

@@ -9,6 +9,13 @@
     <version>@FLEXIVE_VERSION@</version>
     <description>Flexive Metadata Extractor</description>
 
+    <licenses>
+        <license>
+              <name>GNU Lesser General Public License (LGPL)</name>
+              <url>http://www.fsf.org/licensing/licenses/lgpl.txt</url>
+           </license>
+    </licenses>
+
     <dependencies>
         <dependency>
             <groupId>pdfbox</groupId>
