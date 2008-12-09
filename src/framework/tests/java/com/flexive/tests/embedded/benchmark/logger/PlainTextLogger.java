@@ -29,35 +29,29 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.tests.embedded.benchmark;
+package com.flexive.tests.embedded.benchmark.logger;
 
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.FxContext;
-import static com.flexive.tests.embedded.benchmark.FxBenchmarkUtils.getResultLogger;
-import org.testng.annotations.Test;
+import java.util.Formatter;
 
 /**
- * A simple benchmark that reloads the entire structure environment
- * several times and returns the average load time.
+ * Basic result logger printing plain text results.
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-@Test(groups = "benchmark", enabled = true)
-public class StructureReloadBenchmark {
+public class PlainTextLogger extends AbstractResultLogger {
+    private final StringBuilder out = new StringBuilder();
 
-    public void benchStructureReload() throws Exception {
-        FxContext.get().runAsSystem();
-        try {
-            CacheAdmin.reloadEnvironment(); // warm up
-            CacheAdmin.reloadEnvironment();
-            long start = System.currentTimeMillis();
-            for (int i = 0; i < 200; i++) {
-                CacheAdmin.reloadEnvironment();
-            }
-            getResultLogger().logTime("reloadEnvironment", start, 200, "reload");
-        } finally {
-            FxContext.get().stopRunAsSystem();
-        }
+    /** {@inheritDoc} */
+    @Override
+    protected void logResult(String name, double time, String measurement, String unit) {
+        out.append(new Formatter().format("%.30s: %." + (time < 1.0 ? "5" : "1") + "f%s per %s%n", name, time, unit, measurement));
+    }
+
+    /** {@inheritDoc} */
+    public String getOutput() {
+        final String result = out.toString();
+        out.delete(0, out.length());
+        return result;
     }
 }

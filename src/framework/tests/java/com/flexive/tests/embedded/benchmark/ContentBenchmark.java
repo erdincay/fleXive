@@ -36,13 +36,21 @@ import com.flexive.shared.EJBLookup;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxLoginFailedException;
+import com.flexive.shared.exceptions.FxAccountInUseException;
+import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxString;
+import com.flexive.tests.embedded.TestUsers;
+import com.flexive.tests.embedded.FxTestUtils;
+import static com.flexive.tests.embedded.benchmark.FxBenchmarkUtils.getResultLogger;
 import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Test;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.AfterClass;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,13 +61,23 @@ import java.util.List;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-@Test(groups = "benchmark", enabled = false)
 public class ContentBenchmark {
     public static int scriptCtr1 = 0;
     public static int scriptCtr2 = 0;
     private static final String SCRIPT1 = "ContentBenchmark.test1.gy";
     private static final String SCRIPT2 = "ContentBenchmark.test2.gy";
 
+    @BeforeClass(groups = "benchmark")
+    public void init() throws FxLoginFailedException, FxAccountInUseException {
+        FxTestUtils.login(TestUsers.SUPERVISOR);
+    }
+
+    @AfterClass(groups = "benchmark")
+    public void cleanup() throws FxLogoutFailedException {
+        FxTestUtils.logout();
+    }
+
+    @Test(groups = "benchmark")
     public void createContactDataBenchmark() throws FxApplicationException {
         // register some scripts
         final FxScriptInfo script1 = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.AfterContentCreate, SCRIPT1, "",
@@ -82,7 +100,7 @@ public class ContentBenchmark {
             assertEquals(scriptCtr1, runs);
             assertEquals(scriptCtr2, runs);
         } finally {
-            FxBenchmarkUtils.logExecutionTime("createContactData", startTime, 100, "instance");
+            getResultLogger().logTime("createContactData", startTime, 100, "instance");
             final long deleteStart = System.currentTimeMillis();
             for (FxPK pk : result) {
                 try {
@@ -91,7 +109,7 @@ public class ContentBenchmark {
                     System.err.println("Failed to remove content " + pk + ": " + e.getMessage());
                 }
             }
-            FxBenchmarkUtils.logExecutionTime("deleteContactData", deleteStart, 100, "instance");
+            getResultLogger().logTime("deleteContactData", deleteStart, 100, "instance");
             EJBLookup.getScriptingEngine().remove(script1.getId());
             EJBLookup.getScriptingEngine().remove(script2.getId());
         }
@@ -108,6 +126,7 @@ public class ContentBenchmark {
         return content;
     }
 
+    @Test(groups = "benchmark")
     public void getContentData() throws FxApplicationException {
         final FxContent content = createContactData(EJBLookup.getContentEngine());
         final long startTime = System.currentTimeMillis();
@@ -117,6 +136,6 @@ public class ContentBenchmark {
             content.getData("/address/zipCode");
             content.getData("/address/street");
         }
-        FxBenchmarkUtils.logExecutionTime("getContentData", startTime, 100000 * 4, "instance property lookup");
+        getResultLogger().logTime("getContentData", startTime, 100000 * 4, "instance property lookup");
     }
 }

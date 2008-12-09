@@ -31,16 +31,43 @@
  ***************************************************************/
 package com.flexive.tests.embedded.benchmark;
 
+import com.ociweb.xml.WAX;
+import com.flexive.tests.embedded.benchmark.logger.ResultLogger;
+import com.flexive.tests.embedded.benchmark.logger.AbstractResultLogger;
+import com.flexive.tests.embedded.benchmark.logger.PlainTextLogger;
+
+import java.util.Formatter;
+import java.io.StringWriter;
+import java.io.Writer;
+
 /**
- * Some utility methods for our benchmarks.
+ * Some utility methods for our benchmarks. The result logger class can be specified using the system property
+ * {@code flexive.benchmark.resultlogger}.
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
 class FxBenchmarkUtils {
-
-    public static void logExecutionTime(String name, long startTimeMillis, int factor, String unit) {
-        final double time = ((double) System.currentTimeMillis() - startTimeMillis) / factor;
-        System.out.printf("%.30s: %." + (time < 1.0 ? "5" : "1") + "fms per %s%n", name, time, unit);
+    private static final ResultLogger RESULT_LOG;
+    static {
+        final String loggerClass = System.getProperty("flexive.benchmark.resultlogger");
+        if (loggerClass != null) {
+            try {
+                RESULT_LOG = (ResultLogger) Class.forName(loggerClass).newInstance();
+            } catch (InstantiationException e) {
+                throw new IllegalArgumentException(e);
+            } catch (IllegalAccessException e) {
+                throw new IllegalArgumentException(e);
+            } catch (ClassNotFoundException e) {
+                throw new IllegalArgumentException(e);
+            }
+        } else {
+            RESULT_LOG = new PlainTextLogger();
+        }
     }
+
+    public static ResultLogger getResultLogger() {
+        return RESULT_LOG;
+    }
+
 }

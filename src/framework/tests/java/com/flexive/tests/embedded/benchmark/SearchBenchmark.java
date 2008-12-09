@@ -45,6 +45,7 @@ import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.tests.embedded.TestUsers;
 import com.flexive.tests.embedded.FxTestUtils;
+import static com.flexive.tests.embedded.benchmark.FxBenchmarkUtils.getResultLogger;
 import static com.flexive.tests.embedded.FxTestUtils.login;
 import org.testng.annotations.Test;
 
@@ -56,7 +57,7 @@ import java.util.List;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-@Test(groups = "benchmark", enabled = false)
+@Test(groups = "benchmark", enabled = true)
 public class SearchBenchmark {
 
     public void selectTreePathsBenchmark() throws FxApplicationException, FxLoginFailedException, FxAccountInUseException, FxLogoutFailedException {
@@ -72,8 +73,7 @@ public class SearchBenchmark {
                 EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("test test test " + i)
                         .setParentNodeId(rootNode).setLabel(label));
                 if (i % 100 == 99) {
-                    FxBenchmarkUtils.logExecutionTime("createTreeNodes[" + (i - 99) + "-" + i + "]",
-                            startCreateNode, 100, "tree node");
+                    getResultLogger().logTime("createTreeNodes[" + (i - 99) + "-" + i + "]", startCreateNode, 100, "tree node");
                     startCreateNode = System.currentTimeMillis();
                 }
             }
@@ -85,7 +85,7 @@ public class SearchBenchmark {
             final SqlQueryBuilder builder = new SqlQueryBuilder().select("@pk", "@path").maxRows(numNodes).isChild(rootNode);
             final long startSearch = System.currentTimeMillis();
             final FxResultSet result = builder.getResult();
-            FxBenchmarkUtils.logExecutionTime("selectTreePath", startSearch, numNodes, "row");
+            getResultLogger().logTime("selectTreePath", startSearch, numNodes, "row");
             assert result.getRowCount() == numNodes : "Expected " + numNodes + " rows, got: " + result.getRowCount();
         } finally {
             if (rootNode != -1) {

@@ -29,35 +29,34 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.tests.embedded.benchmark;
-
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.FxContext;
-import static com.flexive.tests.embedded.benchmark.FxBenchmarkUtils.getResultLogger;
-import org.testng.annotations.Test;
+package com.flexive.tests.embedded.benchmark.logger;
 
 /**
- * A simple benchmark that reloads the entire structure environment
- * several times and returns the average load time.
+ * Base result logger implementation.
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
- */
-@Test(groups = "benchmark", enabled = true)
-public class StructureReloadBenchmark {
+*/
+public abstract class AbstractResultLogger implements ResultLogger {
 
-    public void benchStructureReload() throws Exception {
-        FxContext.get().runAsSystem();
-        try {
-            CacheAdmin.reloadEnvironment(); // warm up
-            CacheAdmin.reloadEnvironment();
-            long start = System.currentTimeMillis();
-            for (int i = 0; i < 200; i++) {
-                CacheAdmin.reloadEnvironment();
-            }
-            getResultLogger().logTime("reloadEnvironment", start, 200, "reload");
-        } finally {
-            FxContext.get().stopRunAsSystem();
-        }
+    /**
+     * Log a benchmark result.
+     *
+     * @param name  unique name of the result
+     * @param value the value to be logged
+     * @param measurement   the human-readable measured action (e.g. "content creation")
+     * @param unit  the human-readable result unit (e.g. "ms")
+     */
+    protected abstract void logResult(String name, double value, String measurement, String unit);
+
+    /** {@inheritDoc} */
+    public synchronized void logTime(String name, long startTimeMillis, int factor, String measurement) {
+        logResult(name, getLoggedResult(startTimeMillis, factor), measurement, "ms");
     }
+
+
+    protected double getLoggedResult(long startTimeMillis, int factor) {
+        return ((double) System.currentTimeMillis() - startTimeMillis) / factor;
+    }
+
 }
