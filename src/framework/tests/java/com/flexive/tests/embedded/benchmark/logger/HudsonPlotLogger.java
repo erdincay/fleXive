@@ -55,7 +55,10 @@ public class HudsonPlotLogger extends PlainTextLogger {
     @Override
     protected void logResult(String name, double time, String measurement, String unit) {
         super.logResult(name, time, measurement, unit);
-        final String filename = OUTPUT_DIRECTORY + File.separator + StringUtils.replace(name, File.separator, "_");
+        final String filename = OUTPUT_DIRECTORY
+                + File.separator
+                + StringUtils.replace(name, File.separator, "_")
+                + ".properties";
         if (!new File(OUTPUT_DIRECTORY).exists() && !new File(OUTPUT_DIRECTORY).mkdirs()) {
             LOG.warn("Failed to create output directory " + OUTPUT_DIRECTORY);
             return;
