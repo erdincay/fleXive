@@ -37,7 +37,6 @@ import com.flexive.shared.security.ACLAssignment;
 import com.flexive.shared.value.FxString;
 
 import javax.ejb.Remote;
-import java.util.ArrayList;
 import java.util.List;
 
 /**

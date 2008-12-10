@@ -132,6 +132,17 @@ public final class FxSharedUtils {
     }
 
     /**
+     * Get the named resource from the current thread's classloader
+     *
+     * @param name name of the resource
+     * @return inputstream for the resource
+     */
+    public static InputStream getResourceStream(String name) {
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        return cl.getResourceAsStream(name);
+    }
+
+    /**
      * Get a list of all installed and deployed drops
      *
      * @return list of all installed and deployed drops
@@ -942,8 +953,8 @@ public final class FxSharedUtils {
     /**
      * Extract the unique IDs of the given {@link SelectableObject} collection.
      *
-     * @param values    the input values
-     * @return          the IDs of the input values
+     * @param values the input values
+     * @return the IDs of the input values
      */
     public static long[] getSelectableObjectIds(Collection<? extends SelectableObject> values) {
         final long[] result = new long[values.size()];
@@ -957,9 +968,9 @@ public final class FxSharedUtils {
     /**
      * Returns the index of the {@link SelectableObject} with the given ID, or -1 if none was found.
      *
-     * @param values    the values to be examined
-     * @param id        the target ID
-     * @return          the index of the {@link SelectableObject} with the given ID, or -1 if none was found.          
+     * @param values the values to be examined
+     * @param id     the target ID
+     * @return the index of the {@link SelectableObject} with the given ID, or -1 if none was found.
      */
     public static int indexOfSelectableObject(List<? extends SelectableObject> values, long id) {
         for (int i = 0; i < values.size(); i++) {
