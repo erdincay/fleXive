@@ -38,6 +38,7 @@ import com.flexive.core.storage.TreeStorage;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.*;
 import com.flexive.shared.configuration.SystemParameters;
+import com.flexive.shared.configuration.DBVendor;
 import com.flexive.shared.content.*;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.ContentEngine;
@@ -527,11 +528,23 @@ public abstract class GenericTreeStorage implements TreeStorage {
             ps.setBoolean(4, mode == FxTreeMode.Live);
             for (long id : nodeIds) {
                 ps.setLong(1, id);
-                rs = ps.executeQuery();
-                if (rs != null && rs.next())
-                    ret.add(stripNodeInfos ? stripNodeInfos(rs.getString(1)) : rs.getString(1));
-                else
-                    ret.add("/<unknown:" + id + ">");
+                try {
+                    rs = ps.executeQuery();
+                    if (rs != null && rs.next()) {
+                        final String path = rs.getString(1);
+                        if (!StringUtils.isEmpty(path))
+                            ret.add(stripNodeInfos ? stripNodeInfos(path) : path);
+                        else
+                            addUnknownNodeId(ret, id);
+                    } else
+                        addUnknownNodeId(ret, id);
+                } catch (SQLException e) {
+                    if (Database.getDivisionData().getDbVendor() == DBVendor.MySQL && "22001".equals(e.getSQLState())) {
+                        //invalid node id in MySQL
+                        addUnknownNodeId(ret, id);
+                    } else
+                        throw e;
+                }
             }
             return ret;
         } catch (SQLException e) {
@@ -543,6 +556,16 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 //ignore
             }
         }
+    }
+
+    /**
+     * Helper to add an unknown node id
+     *
+     * @param ret result list
+     * @param id unknown node id
+     */
+    private void addUnknownNodeId(List<String> ret, long id) {
+        ret.add("/<unknown:" + id + ">");
     }
 
     /**
