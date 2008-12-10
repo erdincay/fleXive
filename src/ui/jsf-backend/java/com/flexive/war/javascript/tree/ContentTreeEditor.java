@@ -147,7 +147,7 @@ public class ContentTreeEditor implements Serializable {
      * @throws Exception if an error occured
      */
     public String moveAbove(long nodeId, long targetId, int index, boolean live) throws Exception {
-        return moveNear(nodeId, targetId, live, -1, new MoveOp());
+        return moveNear(nodeId, targetId, live, 0, new MoveOp());
     }
 
     /**
@@ -231,7 +231,7 @@ public class ContentTreeEditor implements Serializable {
     }
 
     public String copyAbove(long nodeId, long targetId, int index, boolean live) throws Exception {
-        return moveNear(nodeId, targetId, live, -1, new CopyOp());
+        return moveNear(nodeId, targetId, live, 0, new CopyOp());
     }
 
     public String copyBelow(long nodeId, long targetId, int index, boolean live) throws Exception {
