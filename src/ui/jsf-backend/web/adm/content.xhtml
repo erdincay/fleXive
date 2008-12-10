@@ -81,9 +81,9 @@
         <!--<a href="javascript:promptDialog('Please enter your name:', null, function(n) { alertDialog('your name: ' + n); })">Enter it!</a>-->
 
         <h:form id="searchForm">
-        <table class="welcometbl" width="100%">
+        <table class="welcometbl">
             <tr>
-                <td>
+                <td width="200px">
                     <table class="dojoTable" width="100%">
                         <thead>
                             <tr>
@@ -134,7 +134,75 @@
                         </tbody>
                     </table>
                 </td>
-                <td>
+                <td width="200px">
+                    <c:if test="#{fn:length(fxSystemBean.drops) > 0 }">
+                        <table class="dojoTable links" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>#{fxMessageBean['Welcome.label.drops']}</th>
+                                </tr>
+                            </thead>
+                            <c:forEach var="drop" items="#{fxSystemBean.drops}">
+                                <tr>
+                                    <td><a href="#{fxSystemBean.serverBase}/#{drop}" target="#{drop}">#{drop}</a></td>
+                                </tr>
+                            </c:forEach>
+                        </table>
+                    </c:if>
+                </td>
+                <td>&nbsp;</td>
+            </tr>
+        </table>
+
+
+        <table class="welcometbl welcomeweb">
+            <thead>
+                <tr>
+                    <th colspan="3">
+                        #{fxMessageBean['Welcome.label.webresources']}
+                    </th>
+                </tr>
+            </thead>
+            <tr>
+                <td width="400px">
+                    <table class="dojoTable" width="100%">
+                        <thead>
+                            <tr>
+                                <th colspan="3">#{fxMessageBean['Welcome.label.explore']}</th>
+                            </tr>
+                        </thead>
+                        <tr>
+                            <td align="center">
+                                <a      href="http://www.flexive.org/explore-javaee-framework-flexive/what-is-flexive.html?source=backend"
+                                        target="_new"
+                                        onmouseout="img_01.src='http://www.flexive.org/fileadmin/user_upload/button_flexive_website_explore_0.jpg?source=backend';"
+                                        onmouseover="img_01.src='http://www.flexive.org/fileadmin/user_upload/button_flexive_website_explore_1.jpg?source=backend';"><img
+                                        name="img_01"
+                                        src="http://www.flexive.org/fileadmin/user_upload/button_flexive_website_explore_0.jpg?source=backend"
+                                        style="width: 110px; height: 71px;" alt="" border="0"/></a>
+                            </td>
+                            <td align="center">
+                                <a      href="http://www.flexive.org/explore-javaee-framework-flexive/screencasts.html?source=backend"
+                                        target="_new"
+                                        onmouseout="img_03.src='http://www.flexive.org/fileadmin/user_upload/button_flexive_website_see_0.jpg?source=backend';"
+                                        onmouseover="img_03.src='http://www.flexive.org/fileadmin/user_upload/button_flexive_website_see_1.jpg?source=backend';"><img
+                                        name="img_03"
+                                        src="http://www.flexive.org/fileadmin/user_upload/button_flexive_website_see_0.jpg?source=backend"
+                                        style="width: 110px; height: 71px;" alt="" border="0"/></a>
+                            </td>
+                            <td align="center">
+                                <a      href="http://www.flexive.org/community.html?source=backend"
+                                        target="_new"
+                                        onmouseout="img_04.src='http://www.flexive.org/fileadmin/user_upload/button_flexive_website_communicate_0.jpg?source=backend';"
+                                        onmouseover="img_04.src='http://www.flexive.org/fileadmin/user_upload/button_flexive_website_communicate_1.jpg?source=backend';"><img
+                                        name="img_04"
+                                        src="http://www.flexive.org/fileadmin/user_upload/button_flexive_website_communicate_0.jpg?source=backend"
+                                        style="width: 110px; height: 71px;" alt="" border="0"/></a>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td rowspan="2" width="250px">
                     <table class="dojoTable links" width="100%">
                         <thead>
                             <tr>
@@ -161,23 +229,24 @@
                         </tr>
                     </table>
                 </td>
+            </tr>
+            <tr>
                 <td>
-                    <c:if test="#{fn:length(fxSystemBean.drops) > 0 }">
-                        <table class="dojoTable links" width="100%">
-                            <thead>
-                                <tr>
-                                    <th>#{fxMessageBean['Welcome.label.drops']}</th>
-                                </tr>
-                            </thead>
-                            <c:forEach var="drop" items="#{fxSystemBean.drops}">
-                                <tr>
-                                    <td><a href="#{fxSystemBean.serverBase}/#{drop}" target="#{drop}">#{drop}</a></td>
-                                </tr>
-                            </c:forEach>
-                        </table>
-                    </c:if>
+                    <table class="dojoTable links" width="100%">
+                        <thead>
+                            <tr>
+                                <th>#{fxMessageBean['Welcome.label.blog']}</th>
+                            </tr>
+                        </thead>
+                        <ui:repeat var="item" value="#{rssProviderBean.feed['http://blog.flexive.org/feed/?source=backend']}">
+                            <tr>
+                                <td>
+                                    <a href="#{item.link}" target="_new">#{item.title}</a>
+                                </td>
+                            </tr>
+                        </ui:repeat>
+                    </table>
                 </td>
-                <td>&nbsp;</td>
             </tr>
         </table>
     </h:form>

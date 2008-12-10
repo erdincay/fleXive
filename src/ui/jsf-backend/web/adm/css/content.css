@@ -314,6 +314,15 @@ table.welcometbl tbody tr td table.links tbody tr td {
     padding-left: 26px;
 }
 
+table.welcomeweb {
+    margin-top: 20px;
+    background-color: #F8F8F8;
+    border: 1px solid lightgray;
+}
+
+table.welcomeweb td {
+    padding: 5px;
+}
 
 /** YUI styles */
 
