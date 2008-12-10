@@ -38,6 +38,7 @@ import java.util.Formatter;
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
+ * @since 3.1
  */
 public class PlainTextLogger extends AbstractResultLogger {
     private final StringBuilder out = new StringBuilder();

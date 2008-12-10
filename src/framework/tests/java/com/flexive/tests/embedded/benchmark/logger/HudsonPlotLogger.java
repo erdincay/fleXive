@@ -47,6 +47,7 @@ import java.io.IOException;
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
+ * @since 3.1
  */
 public class HudsonPlotLogger extends PlainTextLogger {
     private static final Log LOG = LogFactory.getLog(HudsonPlotLogger.class);

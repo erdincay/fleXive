@@ -32,10 +32,12 @@
 package com.flexive.tests.embedded.benchmark.logger;
 
 /**
- * Logger for benchmark results.
+ * Logger for benchmark results. The implementation can be selected with the
+ * {@code flexive.benchmark.resultlogger} system property (specify the fully qualified classname).
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
+ * @since 3.1
  */
 public interface ResultLogger {
     /**

@@ -36,6 +36,7 @@ package com.flexive.tests.embedded.benchmark.logger;
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
+ * @since 3.1
 */
 public abstract class AbstractResultLogger implements ResultLogger {
 
