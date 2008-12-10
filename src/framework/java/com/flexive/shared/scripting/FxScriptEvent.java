@@ -128,7 +128,7 @@ public enum FxScriptEvent {
             "FxContent content"),
 
     /**
-     * Fired before a FxData update of an existing existance<br/><br/>
+     * Fired before a FxData update of an existing instance<br/><br/>
      * Passed variables:<br/>
      * <i>FxContent content</i>: the content to be updated<br/>
      * <i>FxDeltaChange change</i>: information about the change<br/>
@@ -137,7 +137,7 @@ public enum FxScriptEvent {
             "FxContent content", "FxDeltaChange change"),
 
     /**
-     * Fired after a FxData update of an existing existance<br/><br/>
+     * Fired after a FxData update of an existing instance<br/><br/>
      * Passed variables:<br/>
      * <i>FxContent content</i>: the content to be updated<br/>
      * <i>FxDeltaChange change</i>: information about the change<br/>
@@ -146,7 +146,7 @@ public enum FxScriptEvent {
             "FxContent content", "FxDeltaChange change"),
 
     /**
-     * Fired before a FxData is removed from an existing existance, instance will <b>not</b> be removed!<br/><br/>
+     * Fired before a FxData is removed from an existing instance, instance will <b>not</b> be removed!<br/><br/>
      * Passed variables:<br/>
      * <i>FxContent content</i>: the content to be updated<br/>
      * <i>FxDeltaChange change</i>: information about the change<br/>
@@ -155,7 +155,7 @@ public enum FxScriptEvent {
             "FxContent content", "FxDeltaChange change"),
 
     /**
-     * Fired after a FxData is removed from an existing existance, instance will <b>not</b> be removed!<br/><br/>
+     * Fired after a FxData is removed from an existing instance, instance will <b>not</b> be removed!<br/><br/>
      * Passed variables:<br/>
      * <i>FxContent content</i>: the content to be updated<br/>
      * <i>FxDeltaChange change</i>: information about the change<br/>
@@ -164,7 +164,7 @@ public enum FxScriptEvent {
             "FxContent content", "FxDeltaChange change"),
 
     /**
-     * Fired before a FxData is updated in an existing existance<br/><br/>
+     * Fired before a FxData is updated in an existing instance<br/><br/>
      * Passed variables:<br/>
      * <i>FxContent content</i>: the content to be updated<br/>
      * <i>FxDeltaChange change</i>: information about the change<br/>
@@ -173,7 +173,7 @@ public enum FxScriptEvent {
             "FxContent content", "FxDeltaChange change"),
 
     /**
-     * Fired after a FxData is updated in an existing existance<br/><br/>
+     * Fired after a FxData is updated in an existing instance<br/><br/>
      * Passed variables:<br/>
      * <i>FxContent content</i>: the content to be updated<br/>
      * <i>FxDeltaChange change</i>: information about the change<br/>

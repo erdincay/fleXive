@@ -161,6 +161,16 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         throw new FxNotFoundException("ex.stepdefinition.load.notFound", id).asRuntimeException();
     }
 
+     /**
+     * {@inheritDoc}
+     */
+    public StepDefinition getStepDefinition(String name) {
+        for (StepDefinition sdef : stepDefinitions)
+            if (sdef.getName().toUpperCase().equals(name.toUpperCase()))
+                return sdef;
+        throw new FxNotFoundException("ex.stepdefinition.load.notFound", name).asRuntimeException();
+    }
+
     /**
      * {@inheritDoc}
      */

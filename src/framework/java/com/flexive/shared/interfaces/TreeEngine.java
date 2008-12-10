@@ -93,7 +93,7 @@ public interface TreeEngine {
     void remove(FxTreeMode mode, long nodeId, boolean removeReferencedContent, boolean removeChildren) throws FxApplicationException;
 
     /**
-     * Create a tree folders of the given path relative to the parent node, creating all folders
+     * Create tree folders of the given path relative to the parent node, creating all folders
      * stored in <code>path</code> if they dont exist (similar to {@link java.io.File#mkdirs()}).
      *
      * @param mode         operate on live or edit tree?

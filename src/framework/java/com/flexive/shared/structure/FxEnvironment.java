@@ -393,6 +393,14 @@ public interface FxEnvironment extends Serializable {
     StepDefinition getStepDefinition(long id);
 
     /**
+     * Returns a step defined by its unique name.
+     *
+     * @param name the unique step definition id
+     * @return the step definition object
+     */
+    StepDefinition getStepDefinition(String name);
+
+    /**
      * Get all defined step definitions
      *
      * @return ArrayList<StepDefinition>

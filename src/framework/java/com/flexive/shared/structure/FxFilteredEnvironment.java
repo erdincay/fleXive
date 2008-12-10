@@ -85,6 +85,13 @@ public final class FxFilteredEnvironment implements FxEnvironment {
         return environment.getStepDefinition(id);
     }
 
+     /**
+     * {@inheritDoc}
+     */
+    public StepDefinition getStepDefinition(String name) {
+        return environment.getStepDefinition(name);
+    }
+
     /**
      * {@inheritDoc}
      */
