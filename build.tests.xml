@@ -306,7 +306,8 @@
             <jvmarg value="-Dtests.users=${tests.users}"/>
             <jvmarg value="-Demma.coverage.out.file=${coverage.dir}/coverage.ec"/>
             <jvmarg value="-Demma.coverage.out.merge=true"/>
-            <jvmarg value="-Dflexive.benchmark.resultlogger=com.flexive.tests.embedded.benchmark.logger.XmlLogger"/>
+            <jvmarg value="-Dflexive.benchmark.resultlogger=com.flexive.tests.embedded.benchmark.logger.HudsonPlotLogger"/>
+            <!--<jvmarg value="-Dflexive.benchmark.resultlogger=com.flexive.tests.embedded.benchmark.logger.XmlLogger"/>-->
             <jvmarg line="${run.debug.settings}"/>
             <jvmarg line="${run.profile.settings}"/>
             <jvmarg line="${run.dist.settings}"/>

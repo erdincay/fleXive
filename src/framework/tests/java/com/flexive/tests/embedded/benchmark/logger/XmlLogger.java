@@ -48,7 +48,7 @@ import org.apache.commons.logging.LogFactory;
 public class XmlLogger extends AbstractResultLogger {
     private static final Log LOG = LogFactory.getLog(XmlLogger.class);
 
-    private static final String OUTPUT_DIRECTORY = "reports";
+    private static final String OUTPUT_DIRECTORY = "reports/benchmark";
     private static final String OUTPUT_FILE = "benchmark-results.xml";
 
     private final Writer out = new StringWriter();
@@ -84,13 +84,21 @@ public class XmlLogger extends AbstractResultLogger {
             final String targetName = OUTPUT_DIRECTORY + File.separator + OUTPUT_FILE;
             LOG.info("Writing XML benchmark results to " + targetName);
             final File f = new File(targetName);
+            FileWriter fw = null;
             try {
-                final FileWriter fw = new FileWriter(f);
+                fw = new FileWriter(f);
                 fw.write(out.toString());
-                fw.close();
             } catch (IOException e) {
                 throw new IllegalStateException(e);
-            } 
+            } finally {
+                if (fw != null) {
+                    try {
+                        fw.close();
+                    } catch (IOException e) {
+                        LOG.error("Failed to close file: " + e.getMessage(), e);
+                    }
+                }
+            }
         }
         return out.toString();
     }

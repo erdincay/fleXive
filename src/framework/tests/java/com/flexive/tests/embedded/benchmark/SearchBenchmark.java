@@ -72,8 +72,8 @@ public class SearchBenchmark {
                 final FxString label = new FxString(FxLanguage.ENGLISH, "English label " + i).setTranslation(FxLanguage.GERMAN, "Deutsches Label " + i);
                 EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("test test test " + i)
                         .setParentNodeId(rootNode).setLabel(label));
-                if (i % 100 == 99) {
-                    getResultLogger().logTime("createTreeNodes[" + (i - 99) + "-" + i + "]", startCreateNode, 100, "tree node");
+                if (i % 500 == 499) {
+                    getResultLogger().logTime("createTreeNodes[" + (i - 499) + "-" + i + "]", startCreateNode, 500, "tree node");
                     startCreateNode = System.currentTimeMillis();
                 }
             }
