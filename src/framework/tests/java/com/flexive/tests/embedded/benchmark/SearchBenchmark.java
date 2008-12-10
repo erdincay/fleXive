@@ -84,7 +84,7 @@ public class SearchBenchmark {
             // select the tree paths of all linked contents
             final SqlQueryBuilder builder = new SqlQueryBuilder().select("@pk", "@path").maxRows(numNodes).isChild(rootNode);
             final long startSearch = System.currentTimeMillis();
-            final FxResultSet result = builder.getResult();
+            final FxResultSet result = builder.timeout(1000).getResult();
             getResultLogger().logTime("selectTreePath", startSearch, numNodes, "row");
             assert result.getRowCount() == numNodes : "Expected " + numNodes + " rows, got: " + result.getRowCount();
         } finally {

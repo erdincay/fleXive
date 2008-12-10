@@ -695,10 +695,20 @@ public class SqlQueryBuilder implements Serializable {
      * @return  this
      */
     public SqlQueryBuilder saveInBriefcase(String name, String description, long aclId) {
-        if (params == null) {
-            params = new FxSQLSearchParams();
-        }
-        params.saveResultInBriefcase(name, description, aclId != -1 ? aclId : null);
+        getParams().saveResultInBriefcase(name, description, aclId != -1 ? aclId : null);
+        return this;
+    }
+
+    /**
+     * Sets the query timeout in seconds. Will be applied only when the result is fetched with
+     * {@link #getResult()}.
+     *
+     * @param seconds   the query timeout in seconds (default: 120 seconds)
+     * @return  this
+     * @since 3.0.2
+     */
+    public SqlQueryBuilder timeout(int seconds) {
+        getParams().setQueryTimeout(seconds);
         return this;
     }
 
@@ -781,5 +791,12 @@ public class SqlQueryBuilder implements Serializable {
     private boolean isWildcardSelected() {
         final List<String> names = getColumnNames();
         return names.contains(SearchEngine.PROP_WILDCARD) || names.contains(SearchEngine.PROP_USERWILDCARD);
+    }
+
+    private FxSQLSearchParams getParams() {
+        if (params == null) {
+            params = new FxSQLSearchParams();
+        }
+        return params;
     }
 }
