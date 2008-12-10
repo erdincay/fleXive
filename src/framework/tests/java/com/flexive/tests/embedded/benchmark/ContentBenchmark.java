@@ -33,6 +33,9 @@ package com.flexive.tests.embedded.benchmark;
 
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.search.query.SqlQueryBuilder;
+import com.flexive.shared.search.query.PropertyValueComparator;
+import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -99,8 +102,14 @@ public class ContentBenchmark {
             }
             assertEquals(scriptCtr1, runs);
             assertEquals(scriptCtr2, runs);
-        } finally {
             getResultLogger().logTime("createContactData", startTime, 100, "instance");
+
+            // perform a basic contact data query
+            final long resultStart = System.currentTimeMillis();
+            final FxResultSet rs = new SqlQueryBuilder().select("@pk").condition("name", PropertyValueComparator.EQ, "Peter").getResult();
+            assert rs.getRowCount() > 0;
+            getResultLogger().logTime("queryContactData", resultStart, rs.getRowCount(), "row");
+        } finally {
             final long deleteStart = System.currentTimeMillis();
             for (FxPK pk : result) {
                 try {
