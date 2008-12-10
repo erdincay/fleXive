@@ -36,8 +36,6 @@ import com.flexive.shared.interfaces.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.openejb.loader.SystemInstance;
-import org.apache.openejb.spi.ContainerSystem;
 
 import javax.ejb.SessionContext;
 import javax.naming.*;
@@ -483,15 +481,35 @@ public class EJBLookup {
      */
     public static Context getInitialContext() throws NamingException {
         if (used_strategy == STRATEGY.GERONIMO_LOCAL || used_strategy == STRATEGY.GERONIMO_REMOTE) {
-            // TODO: avoid compiletime dependency?
-            // return OpenEJB's system context to enable access to the configured datasource 
-            // in every bean
-            return SystemInstance.get().getComponent(ContainerSystem.class).getJNDIContext();
-//            Hashtable<String, String> env = new Hashtable<String, String>(2);
-//            EJBLookup.prepareEnvironment(used_strategy, env);
-//            return new InitialContext(env);
+            return getOpenEJBRootContext();
+
         } else
             return new InitialContext();
+    }
+
+    private static Context getOpenEJBRootContext() {
+        // use reflection to return OpenEJB's system context to enable access to the configured datasource
+        // in every bean - the standard OpenEJB context leads to quirky workarounds for the datasources
+        try {
+            final Class<?> clsSystem = Class.forName("org.apache.openejb.loader.SystemInstance");
+
+            // invoke static method SystemInstance.get()
+            final Object systemInstance = clsSystem.getMethod("get").invoke(null);
+
+            // invoke getComponent on systemInstance
+            final Class<?> clsContainer = Class.forName("org.apache.openejb.spi.ContainerSystem");
+            final Object containerSystem =
+                    clsSystem.getMethod("getComponent", Class.class)
+                    .invoke(systemInstance, clsContainer);
+
+            // return system JNDI context - containerSystem.getJNDIContext()
+            return (Context) clsContainer.getMethod("getJNDIContext").invoke(containerSystem);
+        } catch (ClassNotFoundException e) {
+            throw new IllegalStateException("Lookup strategy is OpenEJB, but OpenEJB classes missing: "
+                    + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
     }
 
     /**
