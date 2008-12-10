@@ -55,7 +55,7 @@ public class FxTreeNodeEdit extends FxTreeNode implements Serializable {
     private boolean activateWithChildren = false;
 
     /**
-     * Ctor
+     * Ctor to make a FxTreeNode editable
      *
      * @param node the tree node to make editable
      */
@@ -68,6 +68,33 @@ public class FxTreeNodeEdit extends FxTreeNode implements Serializable {
         this.newName = node.getName();
         this.originalMode = node.getMode();
         this.parentNodeId = node.getParentNodeId();
+    }
+
+    /**
+     * Ctor to create a new node attached to the root node
+     *
+     * @param name name of the new node
+     */
+    public FxTreeNodeEdit(String name) {
+        super(FxTreeMode.Edit, (System.currentTimeMillis() * -1), ROOT_NODE,
+                FxPK.createNewPK(), ACL.Category.INSTANCE.getDefaultId(), name, "", new FxString(false, name), Integer.MAX_VALUE,
+                new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
+                System.currentTimeMillis(), "", true, true, true, true, true);
+        this.isNew = true;
+    }
+
+    /**
+     * Ctor to create a new node attached to a parent node
+     *
+     * @param name       name of the node
+     * @param parentNode parent node id
+     */
+    public FxTreeNodeEdit(String name, long parentNode) {
+        super(FxTreeMode.Edit, (System.currentTimeMillis() * -1), parentNode,
+                FxPK.createNewPK(), ACL.Category.INSTANCE.getDefaultId(), name, "", new FxString(false, name), Integer.MAX_VALUE,
+                new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
+                System.currentTimeMillis(), "", true, true, true, true, true);
+        this.isNew = true;
     }
 
     /**
