@@ -1,6 +1,8 @@
 
 <!--
- JBoss Datasource Configuration
+ JBoss H2 Datasource Configuration
+
+ Please make sure h2.jar is copied to the <JBoss>/server/<profile>/lib directory!
 
  See http://www.redhat.com/docs/manuals/jboss/jboss-eap-4.3/doc/Server_Configuration_Guide/html/Connectors_on_JBoss-Configuring_JDBC_DataSources.html
  for detailed configuration infos

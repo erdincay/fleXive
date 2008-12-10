@@ -17,6 +17,7 @@
     <import file="build.shared-dist.xml"/>
     <import file="build.properties-dist.xml"/>
     <import file="build.global-properties.xml"/>
+    <import file="build.h2.xml"/>
 
     <path id="lib.path">
         <fileset dir="lib" includes="**/*.jar"/>
@@ -52,7 +53,10 @@ ear
     ]]>${applications.dir}.<![CDATA[
 
 glassfish.libs
-    Copies libraries needed for Glassfish compatibility to a directory]]>
+    Copies libraries needed for Glassfish compatibility to a directory
+
+h2.[start|stop|web]
+    Start and stop the bundled H2 database as background task or launch the web console.]]>
 
 [fleXive] is using ${database.vendor} database settings... (this can be changed in database.properties)            
         </echo>

@@ -25,8 +25,9 @@
                 <link xlink:href="http://www.flexive.org/download">&Flexive; source code
                 </link>
                 and an IDE like
-                <link xlink:href="http://www.eclipse.org/">Eclipse</link>
-                or a proprietary solution.
+                <link xlink:href="http://www.eclipse.org/">Eclipse</link>,
+                <link xlink:href="http://www.netbeans.org/">Netbeans</link> or
+                <link xlink:href="http://www.jetbrains.com/idea">IDEA</link>.
             </para>
             <para>The following sections are good starting points for future &Flexive; developers:</para>
             <para>
@@ -76,6 +77,13 @@
                             driver</link>)
                     </para>
                 </listitem>
+                <listitem>
+                    <para>
+                        or
+                        <filename>h2.jar</filename>
+                        if you are using the H2 database.
+                    </para>
+                </listitem>
             </itemizedlist>
         </section>
         <section xml:id="jboss_installation_system_configuration">
@@ -89,9 +97,12 @@
                             <filename>${jboss.home}/server/default/deploy/</filename>
                             and adapt to your datasource(s)
                             or simply copy it from the &Flexive; source tree, if available.
+                            For the H2 database, we provide the
+                            <filename>flexive-h2-ds.xml</filename>
+                            configuration file as a template.
                             In the
-                            <filename>flexive-ds.xml</filename>
-                            configure your database connections as follows:
+                            <filename>flexive-[h2-]ds.xml</filename>
+                            configure your database connections as follows if using MySQL:
                             For the
                             <code>flexive</code>
                             database
@@ -103,6 +114,11 @@
                             <filename>flexive-ds.xml</filename>
                             <programlisting language="xml">
                                 <xi:include href="../../src/framework/resources/jboss/flexive-ds.xml" parse="text"/>
+                            </programlisting>
+
+                            If you are using H2 please apply the following settings:
+                            <programlisting language="xml">
+                                <xi:include href="../../src/framework/resources/jboss/flexive-h2-ds.xml" parse="text"/>
                             </programlisting>
                         </para>
                     </listitem>
@@ -120,21 +136,63 @@
                     <para>Adapt the
                         <filename>database.properties</filename>
                         file located in your
-
                         <filename>flexive-dist</filename>
                         directory of your &Flexive; distribution to your needs:
                         <programlisting><![CDATA[
 # This is the database configuration file used by the flexive setup tasks.
 #
 # Enter the settings for your database server connection to be used for development.
+# Please use the database.vendor property at the bottom of this file to select
+# the database vendor to use.
+
+# MySQL database settings
 
 # The server host or IP
-database.host=localhost
+database.MySQL.host=localhost
 # The server port
-database.port=3306
+database.MySQL.port=3306
 # The user name and password to be used for creating flexive database structures
-database.username=root
-database.password=a]]></programlisting>
+database.MySQL.username=root
+database.MySQL.password=a
+# The root schema where the flexive schemas can be dropped and created
+database.MySQL.schema.root=mysql
+database.MySQL.schema.config=mysql
+# JDBC Driver
+database.MySQL.driver=com.mysql.jdbc.Driver
+# JDBC base URL, will be appended by the database name and the url parameters
+database.MySQL.url.base=jdbc:mysql://${database.MySQL.host}:${database.MySQL.port}/
+# Optional URL parameters to append to the JDBC connect string
+database.MySQL.url.parameters=?useUnicode=true&amp;characterEncoding=UTF-8
+
+# H2 database settings
+
+# The server host or IP
+database.H2.host=localhost
+# The server port
+database.H2.port=9092
+# The user name and password to be used for creating flexive database structures
+database.H2.username=sa
+database.H2.password=
+database.H2.schema.root=flexive
+database.H2.schema.config=flexiveConfiguration
+database.H2.driver=org.h2.Driver
+database.H2.url.base=jdbc:h2:tcp://${database.H2.host}:${database.H2.port}/~/
+database.H2.url.parameters=;SCHEMA=@DATABASE@;MVCC=TRUE
+
+
+#select the database vendor to use
+#database.vendor=H2
+database.vendor=MySQL]]></programlisting>
+                        <filename>database.properties</filename>
+                        contains settings for all currently supported database vendors of &Flexive;. You can adapt the
+                        setting like choosing different ports or locations for the database.
+                        The probably most important setting are the lines at the end of the file:
+                        <programlisting><![CDATA[
+#select the database vendor to use
+#database.vendor=H2
+database.vendor=MySQL]]></programlisting>
+                        Here you can select the database vendor to use by commenting out the appropriate line. In this
+                        example MySQL is the database vendor to be used.
                     </para>
                 </listitem>
                 <listitem>
@@ -173,7 +231,7 @@ database.password=a]]></programlisting>
             </title>
             <itemizedlist>
                 <listitem>
-                    <para>Currently JBoss (4.2) uses the Java's default maximum heap size,
+                    <para>Currently JBoss 4.2.x uses the Java's default maximum heap size,
                         which means that &flexive; will probably run out of memory during the
                         first startup. You have to set the maximum heap size using
                         <code>-Xmx</code>
@@ -197,8 +255,7 @@ database.password=a]]></programlisting>
                     </para>
                     <para>
                         On Windows launch JBoss using
-                        <programlisting>
-                            <![CDATA[start run.bat -c default -Djboss.bind.address=0.0.0.0]]></programlisting>
+                        <programlisting><![CDATA[start run.bat -c default -Djboss.bind.address=0.0.0.0]]></programlisting>
                     </para>
                 </listitem>
                 <listitem>
@@ -253,11 +310,9 @@ database.password=a]]></programlisting>
                         JBoss 4.2 uses JBoss Cache 1.x) you need to modify the deployment scanner in
                         <filename>${jboss.home}/server/default/conf/jboss-service.xml</filename>:
                         replace the entry
-                        <programlisting language="xml">
-                            <![CDATA[<attribute name="URLComparator">org.jboss.deployment.DeploymentSorter</attribute>]]></programlisting>
+                        <programlisting language="xml"><![CDATA[<attribute name="URLComparator">org.jboss.deployment.DeploymentSorter</attribute>]]></programlisting>
                         with
-                        <programlisting language="xml">
-                            <![CDATA[<attribute name="URLComparator">org.jboss.deployment.scanner.AlphaNumericDeploymentSorter</attribute>]]></programlisting>
+                        <programlisting language="xml"><![CDATA[<attribute name="URLComparator">org.jboss.deployment.scanner.AlphaNumericDeploymentSorter</attribute>]]></programlisting>
                         This ensures that the cache service is started after flexive.ear is deployed and thus
                         can use its cache implementation classes (this deployment scanner allows to influence
                         the deployment order with a numeric prefix, otherwise it's the same as the default one).
@@ -407,7 +462,7 @@ database.password=a]]></programlisting>
                 and one for the configuration database, have to be set up.
             </para>
             <para>
-                Copy and paste the following data-source definitions to a file (e.g.
+                For MySQL copy and paste the following data-source definitions to a file (e.g.
                 <code>flexive-ds.xml</code>)
                 and update your database connection settings:
             </para>
@@ -415,9 +470,17 @@ database.password=a]]></programlisting>
                 <xi:include parse="text" href="../../src/framework/resources/glassfish/flexive-ds.xml"/>
             </programlisting>
             <para>
+                Respectively apply these settings for H2:
+            </para>
+            <programlisting language="xml">
+                <xi:include parse="text" href="../../src/framework/resources/glassfish/flexive-h2-ds.xml"/>
+            </programlisting>
+            <para>
                 While Glassfish is running, execute
                 <command>${glassfish.home}/bin/asadmin add-resources /path/to/flexive-ds.xml</command>
-                to create the connection pools and JDBC resources.
+                to create the connection pools and JDBC resources for MySQL or
+                <command>${glassfish.home}/bin/asadmin add-resources /path/to/flexive-h2-ds.xml</command>
+                if you are using the H2 database.
                 You have to pass the absolute path to your XML file, otherwise Glassfish looks
                 in its own config directory.
             </para>
