@@ -104,7 +104,7 @@
                             <td>
                                 #{fxMessageBean['Welcome.label.createContent']}<br/>
                                 <div style="margin-top:3px;">
-                                    <t:selectOneListbox size="1" id="type" value="#{contentEditorBean.type}">
+                                    <t:selectOneListbox size="1" style="width:150px" id="type" value="#{contentEditorBean.type}">
                                         <f:selectItems value="#{contentEditorBean.editableTypes}"/>
                                     </t:selectOneListbox>
                                     <h:commandLink action="#{contentEditorBean.createNewContent}">
@@ -179,7 +179,7 @@
                                         onmouseover="img_01.src='http://www.flexive.org/fileadmin/user_upload/button_flexive_website_explore_1.jpg?source=backend';"><img
                                         name="img_01"
                                         src="http://www.flexive.org/fileadmin/user_upload/button_flexive_website_explore_0.jpg?source=backend"
-                                        style="width: 110px; height: 71px;" alt="" border="0"/></a>
+                                        style="width: 110px; height: 71px;" alt="Explore" border="0"/></a>
                             </td>
                             <td align="center">
                                 <a      href="http://www.flexive.org/explore-javaee-framework-flexive/screencasts.html?source=backend"
@@ -188,7 +188,7 @@
                                         onmouseover="img_03.src='http://www.flexive.org/fileadmin/user_upload/button_flexive_website_see_1.jpg?source=backend';"><img
                                         name="img_03"
                                         src="http://www.flexive.org/fileadmin/user_upload/button_flexive_website_see_0.jpg?source=backend"
-                                        style="width: 110px; height: 71px;" alt="" border="0"/></a>
+                                        style="width: 110px; height: 71px;" alt="Screencasts" border="0"/></a>
                             </td>
                             <td align="center">
                                 <a      href="http://www.flexive.org/community.html?source=backend"
@@ -197,7 +197,7 @@
                                         onmouseover="img_04.src='http://www.flexive.org/fileadmin/user_upload/button_flexive_website_communicate_1.jpg?source=backend';"><img
                                         name="img_04"
                                         src="http://www.flexive.org/fileadmin/user_upload/button_flexive_website_communicate_0.jpg?source=backend"
-                                        style="width: 110px; height: 71px;" alt="" border="0"/></a>
+                                        style="width: 110px; height: 71px;" alt="Communicate" border="0"/></a>
                             </td>
                         </tr>
                     </table>
@@ -223,6 +223,9 @@
                         </tr>
                         <tr>
                             <td><a href="http://wiki.flexive.org" target="wiki.flexive.org">#{fxMessageBean['Welcome.link.wiki']}</a></td>
+                        </tr>
+                        <tr>
+                            <td><a href="http://blog.flexive.org" target="blog.flexive.org">#{fxMessageBean['Welcome.link.blog']}</a></td>
                         </tr>
                         <tr>
                             <td><a href="http://issuetracker.flexive.org" target="issuetracker.flexive.org">#{fxMessageBean['Welcome.link.issuetracker']}</a></td>
