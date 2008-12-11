@@ -44,8 +44,8 @@
             var input = document.searchForm.query;
             var query = input.value;
             if (query == null || query.length == 0) {
-                alertDialog("#{fxMessageBean['Global.dialog.emptyQuery']}");
                 input.focus();
+                alertDialog("#{fxMessageBean['Global.dialog.emptyQuery']}");
                 return;
             }
             parent.invokeContentAction("adm/search/searchResult.jsf", "fulltextSearch", {query: query});
