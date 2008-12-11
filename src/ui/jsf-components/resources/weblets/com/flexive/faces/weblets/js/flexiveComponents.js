@@ -609,8 +609,9 @@ flexive.input.FxMultiLanguageValueInput.prototype = {
         for (var i in this.rowInfos) {
             var rowInfo = this.rowInfos[i];
             var input = document.getElementById(rowInfo.inputId);
-            if (input != null && input.type == "text" && this.defaultLanguageId > 0) {
-                input.value = document.getElementById(this.rowInfos[this.defaultLanguageId].inputId).value;
+            if (input != null && input.type == "text" && this.defaultLanguageId > 0 && input.value == "") {
+                //input.value = document.getElementById(this.rowInfos[this.defaultLanguageId].inputId).value;
+                // TODO: implement "grey default language values" (must not be submitted to the server)
                 input.setAttribute("defaultLanguageSet", true);
             } else if (input != null) {
                 input.removeAttribute("defaultLanguageSet");
