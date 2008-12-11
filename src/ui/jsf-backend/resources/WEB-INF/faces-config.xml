@@ -196,14 +196,6 @@
     </managed-bean>
 
     <managed-bean>
-        <managed-bean-name>searchResultWriter</managed-bean-name>
-        <managed-bean-class>
-            com.flexive.war.javascript.search.SearchResultWriter
-        </managed-bean-class>
-        <managed-bean-scope>request</managed-bean-scope>
-    </managed-bean>
-
-    <managed-bean>
         <managed-bean-name>resultPreferencesBean</managed-bean-name>
         <managed-bean-class>
             com.flexive.war.beans.admin.search.ResultPreferencesBean

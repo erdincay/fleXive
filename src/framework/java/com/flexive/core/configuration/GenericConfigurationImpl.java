@@ -58,9 +58,7 @@ import java.util.Map;
  * </p>
  * <p>
  * The <code>setParameter/getParameter</code> methods may be overridden
- * to implement custom behavior, e.g. caching of parameter values. Some
- * set- and get-methods are declared final because they are wrappers
- * for the (non-final) main set/get method.
+ * to implement custom behavior, e.g. caching of parameter values.
  * </p>
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
@@ -258,7 +256,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
-    public final <T> void put(Parameter<T> parameter, T value) throws FxApplicationException {
+    public <T> void put(Parameter<T> parameter, T value) throws FxApplicationException {
         put(parameter, parameter.getData().getKey(), value);
     }
 
@@ -307,14 +305,14 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
-    public final <T> T get(Parameter<T> parameter) throws FxApplicationException {
+    public <T> T get(Parameter<T> parameter) throws FxApplicationException {
         return get(parameter, parameter.getData().getKey());
     }
 
     /**
      * {@inheritDoc}
      */
-    public final <T> T get(Parameter<T> parameter, String key)
+    public <T> T get(Parameter<T> parameter, String key)
             throws FxApplicationException {
         try {
             return parameter.getValue(getParameter(parameter, parameter.getPath().getValue(), key));
@@ -330,7 +328,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
-    public final <T> T get(Parameter<T> parameter, String key, boolean ignoreDefault)
+    public <T> T get(Parameter<T> parameter, String key, boolean ignoreDefault)
             throws FxApplicationException {
         try {
             return parameter.getValue(getParameter(parameter, parameter.getPath().getValue(), key));
@@ -346,7 +344,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
-    public final <T> Map<String, T> getAll(Parameter<T> parameter) throws FxApplicationException {
+    public <T> Map<String, T> getAll(Parameter<T> parameter) throws FxApplicationException {
         Connection conn = null;
         PreparedStatement stmt = null;
         ParameterData<T> data = parameter.getData();
@@ -370,7 +368,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
-    public final <T> Collection<String> getKeys(Parameter<T> parameter) throws FxApplicationException {
+    public <T> Collection<String> getKeys(Parameter<T> parameter) throws FxApplicationException {
         return getAll(parameter).keySet();
     }
 
@@ -406,7 +404,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
-    public final <T> void remove(Parameter<T> parameter)
+    public <T> void remove(Parameter<T> parameter)
             throws FxApplicationException {
         remove(parameter, parameter.getKey());
     }
@@ -414,7 +412,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
-    public final <T> void removeAll(Parameter<T> parameter)
+    public <T> void removeAll(Parameter<T> parameter)
             throws FxApplicationException {
         remove(parameter, null);
     }

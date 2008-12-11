@@ -108,7 +108,7 @@
     </servlet-mapping>
 
     <welcome-file-list>
-        <welcome-file>/index.xhtml</welcome-file>
+        <welcome-file>index.xhtml</welcome-file>
     </welcome-file-list>
 
     <listener>
