@@ -46,6 +46,7 @@ import java.util.regex.Pattern;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class FxThumbnailURIConfigurator extends FxMediaSelector {
+    private static final long serialVersionUID = 6390146854535411006L;
 
     private final static Pattern pPK = Pattern.compile("^pk(\\d+(\\.(\\d+|MAX|LIVE))?|TYPE)");
     private final static Pattern pXPath = Pattern.compile("^xp.+");

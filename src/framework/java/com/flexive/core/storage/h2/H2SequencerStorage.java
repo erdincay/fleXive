@@ -38,8 +38,8 @@ public class H2SequencerStorage extends GenericSequencerStorage {
     private final static String SQL_GET_USER = "SELECT SUBSTR(s.SEQUENCE_NAME," + (H2_SEQ_PREFIX.length() + 1) + "), (" + SQL_GET_COMMENT + "s.SEQUENCE_NAME) AS ROLLOVER, s.CURRENT_VALUE FROM " +
             TBL_H2_SEQUENCES + " s WHERE s.SEQUENCE_NAME NOT LIKE '" + H2_SEQ_PREFIX + "SYS_%' AND s.SEQUENCE_NAME LIKE '"+H2_SEQ_PREFIX+"%' ORDER BY s.SEQUENCE_NAME ASC";
 
-    private final String NOROLLOVER = "NOROLLOVER";
-    private final String ROLLOVER = "ROLLOVER";
+    private static final String NOROLLOVER = "NOROLLOVER";
+    private static final String ROLLOVER = "ROLLOVER";
 
     /**
      * Singleton getter

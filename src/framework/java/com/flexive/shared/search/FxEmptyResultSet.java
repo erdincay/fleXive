@@ -220,8 +220,6 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
      * Dummy interator
      */
     private class RowIterator implements Iterator<FxResultRow> {
-        int index = 0;
-
         /**
          * {@inheritDoc}
          */
