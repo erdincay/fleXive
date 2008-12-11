@@ -186,7 +186,10 @@ public class FxSelectOne extends FxValue<FxSelectListItem, FxSelectOne> implemen
      */
     @Override
     public FxSelectListItem fromString(String value) {
-        return CacheAdmin.getEnvironment().getSelectListItem(Long.parseLong(value));
+        final long id = Long.parseLong(value);
+        return list != null
+                ? list.getItem(id) 
+                : CacheAdmin.getEnvironment().getSelectListItem(id);
     }
 
     /**

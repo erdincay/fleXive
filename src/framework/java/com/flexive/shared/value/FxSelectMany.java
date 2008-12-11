@@ -36,6 +36,7 @@ import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.structure.FxSelectList;
 import com.flexive.shared.structure.FxSelectListItem;
+import com.flexive.shared.structure.FxEnvironment;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
@@ -204,10 +205,16 @@ public class FxSelectMany extends FxValue<SelectMany, FxSelectMany> implements S
     public SelectMany fromString(String value) {
         if (StringUtils.isEmpty(value))
             throw new FxInvalidParameterException("value", "ex.content.value.invalid.list").asRuntimeException();
-        List<FxSelectListItem> items = new ArrayList<FxSelectListItem>(10);
-        Scanner sc = new Scanner(value).useDelimiter(",");
+        final List<FxSelectListItem> items = new ArrayList<FxSelectListItem>(10);
+        final Scanner sc = new Scanner(value).useDelimiter(",");
+        final FxEnvironment environment = CacheAdmin.getEnvironment();
         while (sc.hasNextLong()) {
-            items.add(CacheAdmin.getEnvironment().getSelectListItem(sc.nextLong()));
+            final long id = sc.nextLong();
+            items.add(
+                    list != null
+                    ? list.getItem(id)
+                    : environment.getSelectListItem(id)
+            );
         }
         if (items.size() == 0)
             throw new FxInvalidParameterException("value", "ex.content.value.invalid.list").asRuntimeException();

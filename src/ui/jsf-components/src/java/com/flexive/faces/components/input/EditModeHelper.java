@@ -264,7 +264,7 @@ class EditModeHelper extends RenderHelper {
         listbox.setStyleClass(FxValueInputRenderer.CSS_INPUTELEMENTWIDTH + singleLanguageStyle(language));
         // update posted value
         if (selectValue.getTranslation(language) != null) {
-            listbox.setValue(String.valueOf(selectValue.getTranslation(language).getId()));
+            listbox.setValue(selectValue.getTranslation(language).getId());
         }
         storeSelectItems(listbox, selectValue.getSelectList());
     }
@@ -272,9 +272,9 @@ class EditModeHelper extends RenderHelper {
     private void renderSelectMany(UIComponent parent, String inputId, FxLanguage language) {
         final FxSelectMany selectValue = (FxSelectMany) value;
         final SelectMany sm = selectValue.getTranslation(language) != null ? selectValue.getTranslation(language) : new SelectMany(selectValue.getSelectList());
-        final String[] selected = new String[sm.getSelected().size()];
+        final Long[] selected = new Long[sm.getSelected().size()];
         for (int i = 0; i < selected.length; i++) {
-            selected[i] = String.valueOf(sm.getSelected().get(i).getId());
+            selected[i] = sm.getSelected().get(i).getId();
         }
         if (component.isForceLineInput()) {
             // render a single line dropdown
