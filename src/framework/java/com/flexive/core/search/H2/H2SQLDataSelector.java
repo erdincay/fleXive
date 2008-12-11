@@ -42,7 +42,7 @@ import org.apache.commons.lang.StringUtils;
  * H2 specific data selector
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
- * @version $Rev: 787 $
+ * @version $Rev$
  */
 public class H2SQLDataSelector extends GenericSQLDataSelector {
 

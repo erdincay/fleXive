@@ -41,7 +41,7 @@ import java.sql.Connection;
  * H2 specific data filter
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
- * @version $Rev: 787 $
+ * @version $Rev$
  */
 public class H2SQLDataFilter extends GenericSQLDataFilter {
 
