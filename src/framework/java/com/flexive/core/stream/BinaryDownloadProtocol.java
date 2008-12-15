@@ -80,6 +80,7 @@ public class BinaryDownloadProtocol extends StreamProtocol<BinaryDownloadPayload
             String mimeType;
             int datasize;
             try {
+                assert con == null : "processPacket called twice";
                 con = Database.getDbConnection(dataPacket.getPayload().getDivision());
                 String column = "FBLOB";
                 String sizeColumn = "BLOBSIZE";

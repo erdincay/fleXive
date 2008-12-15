@@ -36,7 +36,7 @@ import org.apache.commons.lang.StringUtils;
 
 /**
  * <p>
- * PluginExecutor that allows to add buttons to a toolbar. Pages
+ * PluginExecutor that allows to add buttons to the backend administration toolbars. Pages
  * are identified by their URI relative to the administration application root (/adm).
  * For example:
  * </p>
@@ -83,12 +83,12 @@ public interface ToolbarPluginExecutor extends PluginExecutor {
      */
     void addToolbarSeparatorButton();
 
-    final static String SEPARATOR_ID = "@@separator@@";
+    String SEPARATOR_ID = "@@separator@@";
 
     /**
      * A toolbar separator
      */
-    public final static Button SEPARATOR = new Button(SEPARATOR_ID);
+    Button SEPARATOR = new Button(SEPARATOR_ID);
 
 
     /**

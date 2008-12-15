@@ -45,31 +45,31 @@ package com.flexive.faces.plugin;
  * <pre>
  * // PluginExecutor interface
  * private static interface TestExecutor extends PluginExecutor {
- * void pushResult(int result);
+ *     void pushResult(int result);
  * }
- * <p/>
+ * 
  * // TestExecutor implementation
  * private static class TestExecutorImpl implements TestExecutor {
- * private final Stack&lt;Integer> results = new Stack&lt;Integer>();
- * <p/>
- * public void pushResult(int result) {
- * results.push(result);
+ *     private final Stack&lt;Integer> results = new Stack&lt;Integer>();
+ *
+ *     public void pushResult(int result) {
+ *         results.push(result);
+ *     }
+ *
+ *     public int popResult() {
+ *         return results.isEmpty() ? -1 : results.pop();
+ *     }
  * }
- * <p/>
- * public int popResult() {
- * return results.isEmpty() ? -1 : results.pop();
- * }
- * }
- * <p/>
+ *
  * // An extension point
  * public static final ExtensionPoint&lt;TestExecutor> EXTENSIONPOINT =
- * new ExtensionPoint&lt;TestExecutor>("Unique extension point name") { }</b>;
- * <p/>
+ *     new ExtensionPoint&lt;TestExecutor>("Unique extension point name") { }</b>;
+ *
  * // A sample plugin, provided by the plugin developer
  * private static class TestPlugin implements Plugin&lt;TestExecutor> {
- * public void apply(TestExecutor executor) {
- * executor.pushResult(42);
- * }
+ *     public void apply(TestExecutor executor) {
+ *         executor.pushResult(42);
+ *     }
  * }
  * </pre>
  * </p>

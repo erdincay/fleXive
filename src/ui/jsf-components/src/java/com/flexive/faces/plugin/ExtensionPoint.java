@@ -46,7 +46,7 @@ package com.flexive.faces.plugin;
  * <b>new ExtensionPoint&lt;MyPluginExecutorInterface>("myExtensionName") { }</b>;
  * </pre>
  * <p><i>Note: it should be possible to use ExtensionPoint directly through a generic
- * instantiation (i.e. {@code new ExtensionPoint&lt;MyExecutor>()}), however this requires a
+ * instantiation (i.e. {@code new ExtensionPoint<MyExecutor>()}), however this requires a
  * more powerful type resolver than the plugin registry's simple implementation. JDK7
  * will have this.</i></p>
  *

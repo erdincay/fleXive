@@ -15,9 +15,8 @@ import org.apache.commons.logging.LogFactory;
 import java.io.Serializable;
 
 /**
- * <p>Page controller that holds general information about the current page being displayed that is stored in
- * the URL (for example the output language).</p>
- *
+ * <p>Page descriptor bean that holds general information about the current page that was extracted from the URL.</p>
+ * <p/>
  * This includes
  * <ul>
  * <li>the locale (possibly encoded in the URL),</li>
@@ -29,30 +28,34 @@ import java.io.Serializable;
  * in the components {@code faces-config.xml},
  * but must be added to your own application's <code>faces-config.xml</code>, for example using:
  * <pre>{@code <managed-bean>
- * <managed-bean-name>fxPageBean</managed-bean-name>
- * <managed-bean-class>com.flexive.faces.beans.PageBean</managed-bean-class>
- * <managed-bean-scope>request</managed-bean-scope>
- * <managed-property>
- * <property-name>languageCode</property-name>
- * <value>#{param.fxLanguageCode}</value>
- * </managed-property>
- * <managed-property>
- * <property-name>pageId</property-name>
- * <value>#{param.fxPageId}</value>
- * </managed-property>
- * <managed-property>
- * <property-name>treePath</property-name>
- * <value>#{param.fxTreePath}</value>
- * </managed-property>
- * <managed-property>
- * <property-name>url</property-name>
- * <value>#{param.fxUrl}</value>
- * </managed-property>
+ *      <managed-bean-name>fxPageBean</managed-bean-name>
+ *      <managed-bean-class>com.flexive.faces.beans.PageBean</managed-bean-class>
+ *      <managed-bean-scope>request</managed-bean-scope>
+ *      <managed-property>
+ *          <property-name>languageCode</property-name>
+ *          <value>#{param.fxLanguageCode}</value>
+ *      </managed-property>
+ *      <managed-property>
+ *          <property-name>pageId</property-name>
+ *          <value>#{param.fxPageId}</value>
+ *      </managed-property>
+ *      <managed-property>
+ *          <property-name>treePath</property-name>
+ *          <value>#{param.fxTreePath}</value>
+ *      </managed-property>
+ *      <managed-property>
+ *          <property-name>url</property-name>
+ *          <value>#{param.fxUrl}</value>
+ *      </managed-property>
  * </managed-bean>}</pre>
  * <p/>
  * By changing the implementation class ({@code managed-bean-class}) you can use your own implementation
  * which will also be used for the JSF-EL methods for generating URLs
  * ({@code fx:url} and {@code fx:urlWithLocale}).
+ * </p>
+ * <p>
+ * For calling the non-static methods with parameters, you will need to use a JSF-EL
+ * resolver that supports function calls (for instance JBoss EL, which is part of JBoss Seam).
  * </p>
  *
  * @author Daniel Lichtenberger, UCS
@@ -62,9 +65,25 @@ public class PageBean implements Serializable {
     private static final long serialVersionUID = -4274184717568826256L;
     private static final Log LOG = LogFactory.getLog(PageBean.class);
 
+    /**
+     * The language code of the current page. This corresponds to the value returned by
+     * {@link com.flexive.shared.FxLanguage#getIso2digit()} (in lowercase).
+     */
     protected String languageCode;
+    /**
+     * The page ID. It can be interpreted arbitrarily, usually it will identify
+     * a tree node or content instance.
+     */
     protected long pageId = -1;
+    /**
+     * The tree path of the current page. Tree paths can be used to identify
+     * tree nodes (and their referenced content) through a human-readable path built from
+     * the content FQNs of the path nodes.
+     */
     protected String treePath;
+    /**
+     * The actual page URL, <strong>without</strong> the locale information.
+     */
     protected String url;
 
     /**
@@ -106,7 +125,7 @@ public class PageBean implements Serializable {
      * Return the language code of the current page. This corresponds to the value returned by
      * {@link com.flexive.shared.FxLanguage#getIso2digit()} (in lowercase).
      *
-     * @return  the language code of the current page
+     * @return the language code of the current page
      */
     public String getLanguageCode() {
         return languageCode;
@@ -131,7 +150,7 @@ public class PageBean implements Serializable {
      * Return the page ID. It can be interpreted arbitrarily, usually it will identify
      * a tree node or content instance.
      *
-     * @return  the page ID. If no page ID is set, -1 will be returned.
+     * @return the page ID. If no page ID is set, -1 will be returned.
      */
     public Long getPageId() {
         return pageId;
@@ -146,7 +165,7 @@ public class PageBean implements Serializable {
      * tree nodes (and their referenced content) through a human-readable path built from
      * the content FQNs of the path nodes.
      *
-     * @return  the tree path of the current page
+     * @return the tree path of the current page
      */
     public String getTreePath() {
         return treePath;

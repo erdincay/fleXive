@@ -63,6 +63,7 @@ import java.util.Map;
  *
  * @author Daniel Lichtenberger, UCS
  * @version $Rev$
+ * @since 3.1
  */
 public class RssProviderBean {
     private static final Log LOG = LogFactory.getLog(RssProviderBean.class);

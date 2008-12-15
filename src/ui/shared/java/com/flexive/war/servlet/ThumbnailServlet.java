@@ -176,12 +176,12 @@ public class ThumbnailServlet implements Servlet {
                 if (conf.getXPath().indexOf('/') == -1) {
                     //probably a property
                     FxProperty prop = CacheAdmin.getFilteredEnvironment().getProperty(conf.getXPath());
-                    binaryId = getStuctureBinaryId(conf, prop.getDefaultValue());
+                    binaryId = getStructureBinaryId(conf, prop.getDefaultValue());
                 } else {
                     FxAssignment as = CacheAdmin.getFilteredEnvironment().getAssignment(conf.getXPath());
                     if (as instanceof FxPropertyAssignment) {
                         FxPropertyAssignment pa = (FxPropertyAssignment) as;
-                        binaryId = getStuctureBinaryId(conf, pa.getDefaultValue());
+                        binaryId = getStructureBinaryId(conf, pa.getDefaultValue());
                     } else
                         binaryId = BinaryDescriptor.SYS_UNKNOWN;
                 }
@@ -213,7 +213,7 @@ public class ThumbnailServlet implements Servlet {
      * @return binary id
      * @throws FxApplicationException on errors
      */
-    private long getStuctureBinaryId(FxThumbnailURIConfigurator conf, FxValue val) throws FxApplicationException {
+    private long getStructureBinaryId(FxThumbnailURIConfigurator conf, FxValue val) throws FxApplicationException {
         long binaryId;
         if (val instanceof FxBinary) {
             if (conf.getLanguage() != null)

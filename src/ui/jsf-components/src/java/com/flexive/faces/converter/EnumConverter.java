@@ -38,7 +38,8 @@ import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 
 /**
- * Generic JSF enum converter. Drop this as soon as we migrate to JSF 1.2.
+ * Generic JSF Enum converter. Stores the Enum class in the value (unlike the JSF 1.2 Enum converter,
+ * where the target class must be passed in the constructor), thus no further configuration is necessary. 
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
