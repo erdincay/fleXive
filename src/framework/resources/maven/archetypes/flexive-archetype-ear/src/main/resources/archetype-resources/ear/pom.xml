@@ -40,14 +40,6 @@
 		</dependency>
 
 	</dependencies>
-	<pluginRepositories>
-		<pluginRepository>
-			<id>codehaus snapshot repository</id>
-			<url>http://snapshots.repository.codehaus.org/</url>
-			<releases>
-			</releases>
-		</pluginRepository>
-	</pluginRepositories>
 	<build>
 		<finalName>your-ear-name</finalName>
 		<plugins>
@@ -69,17 +61,6 @@
              			<version>4</version>
              			<loader-repository>${groupId}:archive=your-ear-name.ear</loader-repository>
            			</jboss>					
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.cargo</groupId>
-				<artifactId>cargo-maven2-plugin</artifactId>
-				<version>0.3-SNAPSHOT</version>
-				<configuration>
-					<container>
-						<containerId>jboss4x</containerId>
-						<type>remote</type>
-					</container>
 				</configuration>
 			</plugin>
 		</plugins>
