@@ -62,7 +62,7 @@ public final class FxSharedUtils {
      */
     public static final String SHARED_BUNDLE = "FxSharedMessages";
 
-    private static String fxVersion = "3.0";
+    private static String fxVersion = "3.1";
     private static String fxEdition = "framework";
     private static String fxProduct = "[fleXive]";
     private static String fxBuild = "unknown";

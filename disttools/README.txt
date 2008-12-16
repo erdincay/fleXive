@@ -1,4 +1,4 @@
-[fleXive] 3.0 README
+[fleXive] 3.1 README
 ====================
 
 Thank you for using [fleXive]. This directory contains all [fleXive] 
