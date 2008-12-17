@@ -703,9 +703,9 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
         String sql;
         try {
             //            1          2             3      4
-            sql = "SELECT ASSIGNMENT,DERIVED_USAGE,ACTIVE,STYPE FROM " + TBL_SCRIPT_MAPPING_ASSIGN + " WHERE SCRIPT=?";
+            sql = "SELECT ASSIGNMENT,DERIVED_USAGE,ACTIVE,STYPE FROM " + TBL_SCRIPT_MAPPING_ASSIGN + " WHERE SCRIPT=? ORDER BY ASSIGNMENT";
             ps_a = con.prepareStatement(sql);
-            sql = "SELECT TYPEDEF,DERIVED_USAGE,ACTIVE,STYPE FROM " + TBL_SCRIPT_MAPPING_TYPES + " WHERE SCRIPT=?";
+            sql = "SELECT TYPEDEF,DERIVED_USAGE,ACTIVE,STYPE FROM " + TBL_SCRIPT_MAPPING_TYPES + " WHERE SCRIPT=? ORDER BY TYPEDEF";
             ps_t = con.prepareStatement(sql);
             ResultSet rs;
             for (FxScriptInfo si : environment.getScripts()) {
