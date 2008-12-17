@@ -72,7 +72,7 @@
                     <callout arearefs="cst_newgroup_10">
                         <para>This parameter is optional, since it is the default value. We set the group mode to allow
                             any
-                            of the groups children to be present. An alternative would be
+                            of the group's children to be present. An alternative would be
                             <constant>OneOf</constant>
                             where only one child of the group may be set. (See
                             <xref linkend="core_structure_groups_mode"/>
@@ -133,8 +133,8 @@
                         </td>
                         <td>&list_yes;</td>
                         <td>&list_yes_restrictions;</td>
-                        <td>Set the group mode to allow any of its possible children or just one. Can only be changed
-                            for existing groups/assignments if no instances exit (See
+                        <td>Set the group mode to allow any of its possible children or just one to be present.
+                            Can only be changed for existing groups/assignments if no instances exist (See
                             <xref linkend="core_structure_groups_mode"/>
                             for more information)
                         </td>
@@ -211,7 +211,7 @@
                         <td>&list_no;</td>
                         <td>Set the name of this group. This name is used in assignments as a proposal for the
                             XPath alias (unless a different one is requested). Currently the name can not be changed
-                            for existing group.
+                            for an existing group.
                         </td>
                     </tr>
                     <tr>

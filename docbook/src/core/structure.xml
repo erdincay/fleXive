@@ -63,7 +63,7 @@
             To enable reuse of properties and groups these entities are independent of types and need to be
             <emphasis>assigned</emphasis>
             to types (and respectively groups). The benefit of this system - although it might sound a bit confusing at
-            first look - is
+            first glance - is
             that different types and assignments can share the same property which can be a big advantage for query
             operations
             <footnote>
@@ -128,7 +128,7 @@
                         <td>A property defines a name and a datatype (and some options). Thats all there is to it! It
                             can only exist (and is of relevance) if it is assigned to a type or group. The purpose of
                             keeping properties and their assignments separate is the ability to share them and query
-                            across multiple types with a single properties.
+                            across multiple types with a single property.
                         </td>
                     </tr>
                     <tr>
@@ -172,7 +172,7 @@
                 </tbody>
             </table>
             Following the convention on how to update or create new instances of classes in &flexive;, for every class
-            exists (or should at least ;-) ) an editable class. These editable classes can either be instantiated with
+            exists (or should exist ;-) ) an editable class. These editable classes can either be instantiated with
             <code>ClassName.createNew(..)</code>
             or
             <code>classInstance.asEditable()</code>
@@ -189,9 +189,9 @@
 
         <section xml:id="core_structure_root_type">
             <title>Root Type</title>
-            <para>A system internal and somewhat special type is the "Root" type: It serves as virtual that can
-                be used to assign groups or properties to. These can be reused in other types or assignments without the
-                need of inheritance and thus serves as some kind of repository.
+            <para>A system internal and somewhat special type is the "Root" type: It serves as a virtual repository
+                to which groups or properties can be assigned, which in turn can be reused in other types or assignments
+                without the need of inheritance.
             </para>
         </section>
 
@@ -257,7 +257,7 @@
                                 <classname>FxContent</classname>
                                 instances provide an<methodname>isValid(long time)</methodname>-Method to check if they
                                 are valid at the requested time. This feature is particularly useful in queries since
-                                only valid content instances will be returned. Using this features allows for instance
+                                only valid content instances will be returned. Using this feature allows for instance
                                 time triggered publication (and removal) of articles.
                             </td>
                         </tr>
@@ -295,7 +295,7 @@
                                 <code>trackHistory</code>
                                 is enabled for this type, the
                                 <code>historyAge</code>
-                                determines the timeframe history entries exist. All entries older than
+                                determines the duration for which history entries exist. All entries older than
                                 this time (in milliseconds) will be removed. History entries are changes to the type or
                                 instances and are not fully implemented yet.
                             </td>
@@ -425,10 +425,10 @@
                             </td>
                             <td>&list_no;</td>
                             <td>&list_yes_restrictions;</td>
-                            <td>Only applies to relations: If relation entries are removed (for example you dont want to
-                                be able any longer to relate Type A and B with this relation), should all instances of
+                            <td>Only applies to relations: If relation entries are removed (for instance,
+                                you no longer want to relate Type A and B using this relation), all instances of
                                 this relation type that relate the removed
-                                <classname>FxTypeRelation</classname>
+                                <classname>FxTypeRelation</classname> will also be removed.
                             </td>
                         </tr>
                         <tr>
@@ -502,7 +502,7 @@
                                 be checked. Enable these checks if you want to prevent users from seeing/using instances
                                 in certain steps (i.e. an editor should not be allowed to edit already published
                                 articles - this is something only users from the quality assurance department should be
-                                allowed to).
+                                allowed to do).
                             </td>
                         </tr>
                         <tr>
@@ -612,8 +612,8 @@
     <section xml:id="core_structure_properties_datatypes">
         <title>Data types</title>
         <para>
-            Every data type can potentially support values for different languages - depending on the properties and
-            property assignments multilingual support settings.
+            Every data type can potentially support values for different languages - depending on the properties' and
+            property assignments' multilingual support settings.
             <table xml:id="csdt_table" class="flexive">
                 <caption>&Flexive; data types
                 </caption>
@@ -1266,7 +1266,7 @@
             <classname>String</classname>
             or
             <classname>Boolean</classname>
-            value and if define if assignments to the property or group may override the value. The name of an option
+            value and, if defined, the assignments to the property or group may override the value. The name of an option
             must be unique.
             See the API documentation of class <classname>FxStructureOption</classname> for more details.
         </para>

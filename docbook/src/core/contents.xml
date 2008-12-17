@@ -143,16 +143,16 @@ def person = CacheAdmin.environment.getType("Person")]]></programlisting>
             for more information) the first thing that needs to be done is to initialize a new (empty) content instance
             <coref linkend="cc_fxco_1"/>. Initializing a content instance creates as many property or group entries as
             defined in the respective
-            assignments
+            assignments'
             <emphasis>default multiplicity</emphasis>. Setting a value to a property assignment
             <coref linkend="cc_fxco_2"/>
             is done by creating a new
             <classname>FxValue</classname>
-            instance corresponding to the properties
+            instance corresponding to the property's
             <link linkend="core_structure_properties_datatypes">data type</link>
-            for the &xpath; of the assignment. The same applies if a group is involved, like shown in
+            for the &xpath; of the assignment. The same applies if a group is involved, as shown in
             <coref linkend="cc_fxco_4"/>
-            for the street properts of the first address group. Adding a new index is done by simply setting the &xpath;
+            for the street property of the first address group. Adding a new index is done by simply setting the &xpath;
             to the desired value like in
             <coref linkend="cc_fxco_3"/>
             or

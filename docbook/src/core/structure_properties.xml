@@ -9,7 +9,7 @@
     <title>Properties and property assignments</title>
     <para>A property defines a name and a datatype (and some options). It can only exist (and is of relevance) if it
         is assigned to a type or group. The purpose of keeping properties and their assignments separate is the
-        ability to share them and query across multiple types with a single properties.
+        ability to share them and query across multiple types with a single property.
     </para>
     <para>
         There are two ways to assign a property to an existing type or group:
@@ -67,7 +67,7 @@
                     <para>Since properties can not exist if they are not assigned to a type, we assign them to the type
                         with the id
                         <varname>typeId</varname>
-                        to the root group ("/" - for an example how to assign it to a group of choice see<xref
+                        to the root group ("/" - for an example how to assign it to a group of choice see <xref
                             linkend="core_structure_groups"/>). Property names have to be unique but since "Name" is
                         very
                         likely to be
@@ -210,7 +210,7 @@
                         </td>
                         <td>&list_yes;</td>
                         <td>&list_yes;</td>
-                        <td>Allow multilingual values for this property? This is a convenience method to
+                        <td>Allow multilingual values for this property. This is a convenience method to
                             set an option (See
                             <xref linkend="core_structures_options"/>). The constant
                             <constant>FxStructureOption.OPTION_MULTILANG</constant>
@@ -261,7 +261,7 @@
                         <td>&list_yes;</td>
                         <td>&list_yes;</td>
                         <td>
-                            Option related operations. See<xref linkend="core_structures_options"/>.
+                            Option related operations. See <xref linkend="core_structures_options"/>.
                         </td>
                     </tr>
                     <tr>
@@ -486,7 +486,7 @@
                         <td>&list_yes;</td>
                         <td>&list_yes_restrictions;</td>
                         <td>If the properties data type is
-                            <constant>Referemce</constant>
+                            <constant>Reference</constant>
                             (See
                             <xref linkend="core_structure_properties_datatypes"/>
                             for more information) the referenced type (See
@@ -502,7 +502,7 @@
                         <td>&list_yes;</td>
                         <td>&list_yes_restrictions;</td>
                         <td>Set the uniqueness level of this property. May only be changed if no content instances
-                            using this property exit. (See
+                            using this property exist. (See
                             <xref linkend="core_structure_properties_uniqueness"/>
                             for more information).
                         </td>
@@ -589,7 +589,7 @@
                         <td>&list_yes;</td>
                         <td>&list_yes;</td>
                         <td>Set the position of the assignment (within the same parent group). Changing an
-                            assignments position will be upate all affected other assignments within the
+                            assignment's position will be update all other affected assignments within the
                             same group. Invalid values will be adjusted (to 0 or the max. possible position)
                         </td>
                     </tr>

@@ -57,11 +57,6 @@
                 </listitem>
                 <listitem>
                     <para>
-                        <methodname>getLanguage()</methodname>: the current users preferred language
-                    </para>
-                </listitem>
-                <listitem>
-                    <para>
                         <methodname>getTicket()</methodname>: the current users
                         <classname>UserTicket</classname>
                         instance
@@ -105,7 +100,7 @@
         <para>
             Mandators are - contrary to
             <link linkend="core_security_divisions">divisions</link>
-            - not transparent to the user but a mean to separate accounts and data. Data can be shared between mandators
+            - not transparent to the user but a means of separating accounts and data. Data can be shared between mandators
             by assigning user groups from multiple mandators to access control lists. Transfer of data between mandators
             is a planned upcoming feature of &flexive;. An example when mandators should be used is e.g. to model
             different departments of a larger company.
@@ -171,8 +166,8 @@
         <title>Role Based Security</title>
         <para>
             Roles can be assigned individually to users and groups. Every user (or account) is eligible to use any role
-            assigned to the user or any group he belongs to. Best practise is to assign roles to groups and only in very
-            rare cases (like flagging someone as global supervisor) should be assigned individually.
+            assigned to the user or any group he belongs to. It is considered best practice to assign roles to groups and only in very
+            rare cases (e.g. flagging someone as a global supervisor) should the role assignments be done on an individual (per user) basis.
         </para>
         <para>
             &Flexive; provides the following roles:
