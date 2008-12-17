@@ -126,7 +126,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
         this.lifeCycleInfo = lifeCycleInfo;
         this.derivedTypes = derivedTypes;
         this.relations = relations;
-        this.scriptMapping = new HashMap<FxScriptEvent, long[]>(10);
+        this.scriptMapping = new LinkedHashMap<FxScriptEvent, long[]>(10);
         this.icon = new FxReference(false, FxReference.EMPTY).setEmpty();
     }
 
