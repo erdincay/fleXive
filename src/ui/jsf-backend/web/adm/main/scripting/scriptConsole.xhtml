@@ -1,4 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:h="http://java.sun.com/jsf/html"
@@ -23,14 +24,21 @@
                     <br/>
                     #{fxMessageBean['ScriptConsole.label.Language']}&nbsp;
                     <h:selectOneListbox label="XXX" size="1" value="#{scriptConsoleBean.language}">
-                        <f:selectItems value="#{fxSelectBean.scriptingEngines}" />
+                        <f:selectItems value="#{fxSelectBean.scriptingEngines}"/>
+                        <a4j:support event="onclick" reRender="verifyButton"/>
                     </h:selectOneListbox>
                     <br/>
-                    <h:selectBooleanCheckbox title="#{fxMessageBean['ScriptConsole.label.runAtWeb']}" value="#{scriptConsoleBean.web}"/>
+                    <h:selectBooleanCheckbox title="#{fxMessageBean['ScriptConsole.label.runAtWeb']}"
+                                             value="#{scriptConsoleBean.web}"/>
                     #{fxMessageBean['ScriptConsole.label.runAtWeb']}<br/><br/>
                     <a4j:commandButton id="executeButton" reRender="resultPanel"
                                        value="#{fxMessageBean['ScriptConsole.button.execute']}"
-                            onclick="parent.lockScreen()" oncomplete="parent.unlockScreen()"/>
+                                       onclick="parent.lockScreen()" oncomplete="parent.unlockScreen()"/>
+                    <a4j:outputPanel ajaxRendered="true" id="verifyPanel">
+                        <a4j:commandButton id="verifyButton" value="#{fxMessageBean['Script.button.verify']}"
+                                           rendered="#{scriptConsoleBean.verifyButtonEnabled}"
+                                           action="#{scriptConsoleBean.checkScriptSyntax}" style="margin-left:20px"/>
+                    </a4j:outputPanel>
                 </fieldset>
 
                 <br/><br/>

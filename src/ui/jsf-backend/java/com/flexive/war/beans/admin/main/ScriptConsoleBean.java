@@ -40,7 +40,6 @@ import com.flexive.shared.security.Role;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 import org.apache.commons.lang.StringUtils;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Formatter;
@@ -55,7 +54,8 @@ public class ScriptConsoleBean {
     private String code;
     private long executionTime;
     private boolean web;
-    private String language;
+    private String language = "groovy"; // initial setting for script syntax check
+    private boolean verifyButtonEnabled = false;
 
     public String getCode() {
         return code;
@@ -95,14 +95,14 @@ public class ScriptConsoleBean {
         }
         long start = System.currentTimeMillis();
         try {
-            if (web && FxSharedUtils.isGroovyScript("console."+language)) {
-                if( !FxContext.getUserTicket().isInRole(Role.ScriptExecution))
+            if (web && FxSharedUtils.isGroovyScript("console." + language)) {
+                if (!FxContext.getUserTicket().isInRole(Role.ScriptExecution))
                     return "No permission to execute scripts!";
                 GroovyShell shell = new GroovyShell();
                 Script script = shell.parse(code);
                 return script.run();
             } else {
-                return EJBLookup.getScriptingEngine().runScript("console."+language, null, code).getResult();
+                return EJBLookup.getScriptingEngine().runScript("console." + language, null, code).getResult();
             }
         } catch (Exception e) {
             StringWriter writer = new StringWriter();
@@ -112,5 +112,31 @@ public class ScriptConsoleBean {
         } finally {
             executionTime = System.currentTimeMillis() - start;
         }
+    }
+
+    /**
+     * @param verifyButtonEnabled Sets the boolean value for verifyButtonEnabled
+     */
+    public void setVerifyButtonEnabled(boolean verifyButtonEnabled) {
+        this.verifyButtonEnabled = verifyButtonEnabled;
+    }
+
+    /**
+     * @return Returns true if the current selected scripting language is "Groovy"
+     */
+    public boolean isVerifyButtonEnabled() {
+        if (FxSharedUtils.isGroovyScript("console." + language)) {
+            setVerifyButtonEnabled(true);
+        } else {
+            setVerifyButtonEnabled(false);
+        }
+        return this.verifyButtonEnabled;
+    }
+
+    /**
+     * Verifies the syntax of a given groovy script
+     */
+    public void checkScriptSyntax() {
+        ScriptBean.checkScriptSyntax("dummyName.groovy", getCode());
     }
 }

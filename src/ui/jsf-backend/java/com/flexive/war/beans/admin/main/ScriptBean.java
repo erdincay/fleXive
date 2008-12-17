@@ -40,6 +40,7 @@ import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.ScriptingEngine;
 import com.flexive.shared.scripting.*;
@@ -49,11 +50,16 @@ import com.flexive.shared.security.UserTicket;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.faces.model.SelectItem;
+import javax.script.ScriptEngineFactory;
+import javax.script.ScriptEngineManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import groovy.lang.GroovyShell;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * JSF scripting bean
@@ -76,6 +82,9 @@ public class ScriptBean {
     private FxScriptScope selectedScope = null;
     private long selectedScriptEventId = -1;
     private FxScriptRunInfo currentRunInfo;
+    private String nameErrorMsg;
+    private boolean inputFieldDisabled = true;
+    private boolean verifyButtonEnabled = false;
 
     private static final String ID_CACHE_KEY = ScriptBean.class + "_id";
 
@@ -335,7 +344,7 @@ public class ScriptBean {
     }
 
     public List<Map.Entry<Long, String>> getTypeMappingNames() {
-        if( this.typeMappingNames == null )
+        if (this.typeMappingNames == null)
             this.typeMappingNames = new HashMap<Long, String>();
         ArrayList<Map.Entry<Long, String>> list = new ArrayList<Map.Entry<Long, String>>(this.typeMappingNames.entrySet().size());
         for (Map.Entry<Long, String> entry : this.typeMappingNames.entrySet()) {
@@ -345,7 +354,7 @@ public class ScriptBean {
     }
 
     public List<Map.Entry<Long, String>> getAssignmentMappingNames() {
-        if( this.assignmentMappingNames == null )
+        if (this.assignmentMappingNames == null)
             this.assignmentMappingNames = new HashMap<Long, String>();
         ArrayList<Map.Entry<Long, String>> list = new ArrayList<Map.Entry<Long, String>>(this.assignmentMappingNames.entrySet().size());
         for (Map.Entry<Long, String> entry : this.assignmentMappingNames.entrySet()) {
@@ -359,10 +368,10 @@ public class ScriptBean {
     }
 
     public List<WrappedRunOnceInfo> getRunOnceInformation() {
-        List<WrappedRunOnceInfo>runInfo = new ArrayList<WrappedRunOnceInfo>();
+        List<WrappedRunOnceInfo> runInfo = new ArrayList<WrappedRunOnceInfo>();
         try {
             for (FxScriptRunInfo ri : EJBLookup.getScriptingEngine().getRunOnceInformation())
-                runInfo.add(new WrappedRunOnceInfo(ri)); 
+                runInfo.add(new WrappedRunOnceInfo(ri));
         }
         catch (Throwable t) {
             new FxFacesMsgErr(t.getMessage()).addToContext();
@@ -413,12 +422,131 @@ public class ScriptBean {
         }
 
         public String getShortErrorMessage() {
-            if (runInfo.getErrorMessage() != null && runInfo.getErrorMessage().length() >25) {
-                return runInfo.getErrorMessage().substring(0,25)+"..";
-            }
-            else
+            if (runInfo.getErrorMessage() != null && runInfo.getErrorMessage().length() > 25) {
+                return runInfo.getErrorMessage().substring(0, 25) + "..";
+            } else
                 return runInfo.getErrorMessage();
         }
     }
+
+    /**
+     * Sets the error message
+     *
+     * @param nameErrorMsg String containing the error message
+     */
+    public void setNameErrorMsg(String nameErrorMsg) {
+        this.nameErrorMsg = nameErrorMsg;
+    }
+
+    /**
+     * Returns the error message after script name verification
+     *
+     * @return Returns the error message
+     */
+    public String getNameErrorMsg() {
+        verifyScriptName();
+        return this.nameErrorMsg;
+    }
+
+    /**
+     * Sets the boolean inputFieldDisabled
+     *
+     * @param inputFieldDisabled boolean value enabling or disabling the input fields
+     */
+    public void setInputFieldDisabled(boolean inputFieldDisabled) {
+        this.inputFieldDisabled = inputFieldDisabled;
+    }
+
+    /**
+     * @return boolean inputFieldDisabled
+     */
+    public boolean isInputFieldDisabled() {
+        return this.inputFieldDisabled;
+    }
+
+    /**
+     * @param verifyButtonEnabled Sets the verifyButtonEnabled
+     */
+    public void setVerifyButtonEnabled(boolean verifyButtonEnabled) {
+        this.verifyButtonEnabled = verifyButtonEnabled;
+    }
+
+    /**
+     * @return Returns true to enable the syntax check button
+     */
+    public boolean isVerifyButtonEnabled() {
+        return this.verifyButtonEnabled;
+    }
+
+    /**
+     * Verifies the script name (i.e. the file extension) against the available script engines
+     * sets inputFieldDisabled(true/false) and nameErrorMsg(String msg)
+     */
+    private void verifyScriptName() {
+        final String name = sinfo.getName();
+        if(StringUtils.isBlank(name)) {
+            setNameErrorMsg(null);
+            setInputFieldDisabled(true);
+            setVerifyButtonEnabled(false);
+        } else if (!FxSharedUtils.isGroovyScript(name) && !checkScriptEngineExtensions(name)) {
+            setNameErrorMsg(MessageBean.getInstance().getMessage("Script.err.name"));
+            setInputFieldDisabled(true);
+            setVerifyButtonEnabled(false);
+        } else {
+            setNameErrorMsg(null);
+            setInputFieldDisabled(false);
+            // separately enable the Groovy syntax verification button
+            if (FxSharedUtils.isGroovyScript(name)) {
+                setVerifyButtonEnabled(true);
+            }
+        }
+    }
+
+    /**
+     * Checks all available extensions from the ScriptEngineFactory
+     *
+     * @param scriptName Name of the script
+     * @return true if the given script name contains a valid extension found in the scripting engine
+     */
+    private boolean checkScriptEngineExtensions(String scriptName) {
+        boolean validExtension = false;
+        for (ScriptEngineFactory f : new ScriptEngineManager().getEngineFactories()) {
+            for (String ext : f.getExtensions()) {
+                if (scriptName.toLowerCase().contains("." + ext)) {
+                    validExtension = true;
+                    break;
+                }
+            }
+        }
+        return validExtension;
+    }
+
+    /**
+     * Verifies the syntax of a given groovy script
+     */
+    public void checkScriptSyntax() {
+        checkScriptSyntax(sinfo.getName(), sinfo.getCode());
+    }
+
+    /**
+     * Static method to verify the syntax of a given Groovy script
+     *
+     * @param name The script name
+     * @param code The script code
+     */
+    static void checkScriptSyntax(String name, String code) {
+        if (!FxSharedUtils.isGroovyScript(name) || StringUtils.isBlank(code)) {
+            new FxFacesMsgErr("Script.err.verifyFailed", name).addToContext();
+        } else {
+            try {
+                new GroovyShell().parse(code);
+                new FxFacesMsgInfo("Script.nfo.scriptVerified").addToContext();
+            } catch (Exception e) {
+                new FxFacesMsgErr("Script.err.syntaxError").addToContext();
+                new FxFacesMsgErr(e).addToContext();
+            }
+        }
+    }
+
 
 }

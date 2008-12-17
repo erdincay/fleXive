@@ -48,7 +48,6 @@ import com.flexive.shared.search.query.QueryOperatorNode;
 import com.flexive.shared.security.*;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.BinaryDescriptor;
-
 import javax.faces.model.SelectItem;
 import java.io.Serializable;
 import java.util.ArrayList;

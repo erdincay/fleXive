@@ -80,12 +80,12 @@ public class FxScriptInfoEdit extends FxScriptInfo {
     /**
      * Constructs a editable script info object from FxScriptInfo.
      *
-     * @param si    the script info object
+     * @param si the script info object
      */
     public FxScriptInfoEdit(FxScriptInfo si) {
         this.id = si.id;
-        this.name =si.name;
-        this.event =si.event;
+        this.name = si.name;
+        this.event = si.event;
         this.description = si.description;
         this.code = si.code;
         this.active = si.active;
