@@ -104,6 +104,83 @@
                 </calloutlist>
             </programlistingco>
         </example>
+        <para>Here's another example for creating groups using the
+            <classname>GroovyTypeBuilder</classname>
+            and for attaching content using the <classname>GroovyContentBuilder</classname>:
+        </para>
+        <example xml:id="core_structre_ex_newGroup_groovy">
+            <title>Creating a new group using the
+                <classname>GroovyTypeBuilder</classname>
+            </title>
+            <programlistingco>
+                <xi:include href="../listings/core_structure_newgroup_groovy.xml"/>
+                <calloutlist>
+                    <callout arearefs="cst_newgroup_1">
+                        <para>Create the type "Person" using the
+                            <classname>GroovyTypeBuilder</classname>
+                            ..
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_newgroup_2">
+                        <para>.. use the default ACLs ..</para>
+                    </callout>
+                    <callout arearefs="cst_newgroup_3">
+                        <para>.. and set the type to support multiple languages.
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_newgroup_4">
+                        <para>Create the first property "firstname".
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_newgroup_5">
+                        <para>Another property for the last name (implicitly required because auf the
+                            default multiplicity of 1..N), which is a derived assignment from "FIRSTNAME".
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_newgroup_6">
+                        <para>Here, the group "Address" having the XPath "ADDRESS" is created.
+                            Important: UPPERCASE LETTERS (Either the whole group name or simply the first letter, as in
+                            "Address") always denote the creation of a Group.
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_newgroup_7">
+                        <para>The group's only property: "street".</para>
+                    </callout>
+                    <callout arearefs="cst_newgroup_8">
+                        <para>Retrieve a
+                            <classname>GroovyContentBuilder</classname>
+                            instance.
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_newgroup_9">
+                        <para>Call the builder passing the parameters (XPathname([contentValue]):
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_newgroup_10">
+                        <para>Set the firstname to "John".
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_newgroup_11">
+                        <para>Set the lastname to "Doe".
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_newgroup_12">
+                        <para>"Open up" the group's XPath value using "address".
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_newgroup_13">
+                        <para>Pass the value "Ameaningfulstreetname 444" to the XPath ADDRESS/STREET
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_newgroup_14">
+                        <para>Save the content by retrieving the ContentEngine EJB and calling its
+                            <methodname>save()</methodname>
+                            method.
+                        </para>
+                    </callout>
+                </calloutlist>
+            </programlistingco>
+        </example>
     </para>
 
     <section xml:id="core_structures_group_parameters">

@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]><programlisting language="java" xml:id="core_structure_newgroup_groovy" xmlns="http://docbook.org/ns/docbook">        import com.flexive.shared.scripting.groovy.*
+        import com.flexive.shared.value.*
+        import com.flexive.shared.security.*
+        import com.flexive.shared.*
+        import com.flexive.shared.structure.*
+
+<co xml:id="cst_newgroup_groovy_1"/>      new GroovyTypeBuilder().person(description: new FxString("Person"),
+<co xml:id="cst_newgroup_groovy_2"/>                acl: CacheAdmin.environment.getACL(ACL.Category.STRUCTURE.defaultId),
+<co xml:id="cst_newgroup_groovy_3"/>                multilang: true) {
+<co xml:id="cst_newgroup_groovy_4"/>                    firstname(dataType: FxDataType.String1024,
+                        multilang: false,
+                        description: new FxString(FxLanguage.ENGLISH, "First name"),
+                        multiplicity: FxMultiplicity.MULT_0_N)
+
+<co xml:id="cst_newgroup_groovy_5"/>                    lastname(assignment: "PERSON/FIRSTNAME",
+                       description: new FxString(FxLanguage.ENGLISH, "Last name"),
+                       hint: new FxString(FxLanguage.ENGLISH, "Last name required"),
+                       multiplicity: FxMultiplicity.MULT_1_N)
+
+<co xml:id="cst_newgroup_groovy_6"/>                    ADDRESS(description: new FxString(FxLanguage.ENGLISH, "Address"),
+                        multiplicity: FxMultiplicity.MULT_0_N) {
+
+<co xml:id="cst_newgroup_groovy_7"/>                         street(dataType: FxDataType.String1024,
+                             description: new FxString(FxLanguage.ENGLISH, "Street (Nr)"),
+                             multiplicity: FxMultiplicity.MULT_0_N)
+                     }
+        }
+
+<co xml:id="cst_newgroup_groovy_8"/>      def builder = new GroovyContentBuilder("PERSON")
+
+<co xml:id="cst_newgroup_groovy_9"/>      builder {
+<co xml:id="cst_newgroup_groovy_10"/>           firstname("John")
+<co xml:id="cst_newgroup_groovy_11"/>           lastname("Doe")
+<co xml:id="cst_newgroup_groovy_12"/>           address {
+<co xml:id="cst_newgroup_groovy_13"/>               street(new FxString(false, "Ameaningfulstreetname 444"))
+            }
+         }
+<co xml:id="cst_newgroup_groovy_14"/>       EJBLookup.getContentEngine().save(builder.getContent())
+</programlisting>
+
+
