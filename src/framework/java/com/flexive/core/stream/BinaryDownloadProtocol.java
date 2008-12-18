@@ -155,7 +155,7 @@ public class BinaryDownloadProtocol extends StreamProtocol<BinaryDownloadPayload
 
 
     @Override
-    public void cleanup() {
+    public void closeResources() {
         if (bin != null) {
             Database.closeObjects(BinaryUploadProtocol.class, con, ps);
         }
