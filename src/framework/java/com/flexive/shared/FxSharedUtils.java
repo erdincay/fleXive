@@ -33,17 +33,24 @@ package com.flexive.shared;
 
 import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.structure.FxAssignment;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.base.Function;
+import com.google.common.base.Nullable;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import static org.apache.commons.lang.StringUtils.defaultString;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
+import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.Collator;
@@ -85,7 +92,9 @@ public final class FxSharedUtils {
      */
     public static final String COOKIE_FORCE_TEST_DIVISION = "ForceTestDivision";
 
-    private static List<String> drops = null;
+    private static List<String> drops;
+    private static List<FxDropApplication> dropApplications;
+
     public static MessageDigest digest = null;
 
     /**
@@ -93,6 +102,7 @@ public final class FxSharedUtils {
      */
     public final static boolean USE_JDK6_EXTENSION;
     public final static boolean WINDOWS = System.getProperty("os.name").indexOf("Windows") >= 0;
+    private static final String FLEXIVE_PROPERTIES = "flexive-application.properties";
 
     static {
         int major = -1, minor = -1;
@@ -148,25 +158,124 @@ public final class FxSharedUtils {
      * @return list of all installed and deployed drops
      */
     public static synchronized List<String> getDrops() {
-        if (drops != null)
-            return drops;
-        String dropsList;
-        try {
-            dropsList = loadFromInputStream(Thread.currentThread().getContextClassLoader().
-                    getResourceAsStream("drops.archives"), -1);
-        } catch (Exception e) {
-            drops = new ArrayList<String>(0);
-            return drops;
+        if (drops == null) {
+            initDropApplications();
         }
-        if (StringUtils.isEmpty(dropsList)) {
-            drops = new ArrayList<String>(0);
-            return drops;
-        }
-        String[] d = dropsList.split(",");
-        drops = new ArrayList<String>(d.length);
-        drops.addAll(Arrays.asList(d));
+
         return drops;
     }
+
+    private static synchronized void initDropApplications() {
+        final List<FxDropApplication> apps = new ArrayList<FxDropApplication>();
+
+        addDropsFromArchiveIndex(apps);
+        addDropsFromClasspath(apps);
+
+        // sort lexically
+        Collections.sort(apps, new Comparator<FxDropApplication>() {
+            public int compare(FxDropApplication o1, FxDropApplication o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
+        dropApplications = Collections.unmodifiableList(apps);
+        drops = new ArrayList<String>(dropApplications.size());
+        for (FxDropApplication dropApplication : dropApplications) {
+            drops.add(dropApplication.getName());
+        }
+        drops = Collections.unmodifiableList(drops);
+
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Detected [fleXive] drop applications: " + drops);
+        }
+    }
+
+    /**
+     * Get a list of all installed and deployed drops.
+     *
+     * @return  a list of all installed and deployed drops.
+     * @since 3.0.2
+     */
+    public static synchronized List<FxDropApplication> getDropApplications() {
+        getDrops();
+        return dropApplications;
+    }
+
+    /**
+     * Returns the drop application with the given name.
+     *
+     * @param name  the application name
+     * @return  the drop application with the given name.
+     * @since 3.0.2
+     */
+    public static synchronized FxDropApplication getDropApplication(String name) {
+        for (FxDropApplication dropApplication : getDropApplications()) {
+            if (dropApplication.getName().equalsIgnoreCase(name)) {
+                return dropApplication;
+            }
+        }
+        throw new FxNotFoundException("ex.sharedUtils.drop.notFound", name).asRuntimeException();
+    }
+
+    /**
+     * Add drop applications explicitly mentioned in the drops.archives file.
+     *
+     * @param dropApplications  list of drop application info objects to be populated
+     */
+    private static void addDropsFromArchiveIndex(List<FxDropApplication> dropApplications) {
+        try {
+            final String dropsList = loadFromInputStream(
+                    Thread.currentThread().getContextClassLoader().getResourceAsStream("drops.archives")
+            );
+            if (StringUtils.isNotEmpty(dropsList)) {
+                for (String name : dropsList.split(",")) {
+                    dropApplications.add(new FxDropApplication(name));
+                }
+            }
+        } catch (Exception e) {
+            LOG.error("Failed to parse drops.archives: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Add drop applications from the classpath (based on a file called flexive.properties).
+     *
+     * @param dropApplications  list of drop application info objects to be populated
+     */
+    private static void addDropsFromClasspath(List<FxDropApplication> dropApplications) {
+        try {
+            final Enumeration<URL> fileUrls =
+                    Thread.currentThread().getContextClassLoader().getResources(FLEXIVE_PROPERTIES);
+            while (fileUrls.hasMoreElements()) {
+                final URL url = fileUrls.nextElement();
+
+                // load properties from file
+                final Properties properties = new Properties();
+                properties.load(url.openStream());
+
+                // load drop configuration parameters
+                final String name = properties.getProperty("name");
+                final String contextRoot = properties.getProperty("contextRoot");
+                final String displayName = properties.getProperty("displayName");
+                if (StringUtils.isNotBlank(name)) {
+                    String path = url.getPath().replace("/" + FLEXIVE_PROPERTIES, "");
+                    if (path.endsWith("!")) {
+                        path = StringUtils.chop(path);
+                    }
+                    dropApplications.add(
+                            new FxDropApplication(
+                                    name,
+                                    defaultString(contextRoot, name),
+                                    defaultString(displayName, name),
+                                    path
+                            )
+                    );
+                }
+            }
+        } catch (IOException e) {
+            LOG.error("Failed to initialize drops from the classpath: " + e.getMessage(), e);
+        }
+    }
+
 
     /**
      * Return the index of the given column name. If <code>name</code> has no
@@ -458,10 +567,24 @@ public final class FxSharedUtils {
      * Load a String from an InputStream (until end of stream)
      *
      * @param in     InputStream
+     * @return the input stream contents, or an empty string if {@code in} was null.
+     * @since 3.0.2
+     */
+    public static String loadFromInputStream(InputStream in) {
+        return loadFromInputStream(in, -1);
+    }
+
+    /**
+     * Load a String from an InputStream (until end of stream)
+     *
+     * @param in     InputStream
      * @param length length of the string if &gt; -1 (NOT number of bytes to read!)
-     * @return String
+     * @return the input stream contents, or an empty string if {@code in} was null.
      */
     public static String loadFromInputStream(InputStream in, int length) {
+        if (in == null) {
+            return "";
+        }
         StringBuilder sb = new StringBuilder(length > 0 ? length : 5000);
         try {
             int read;

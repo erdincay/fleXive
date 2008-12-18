@@ -1019,6 +1019,121 @@ BUILD SUCCESSFUL]]></screen>
             </para>
         </section>
 
+
+        <section xml:id="writing_applications_maven_archetypes">
+            <title>
+                Project archetypes
+            </title>
+            <para>
+                Archetypes provide a quick start for new projects. Currently we offer a archetype for
+                a full enterprise application with web and console frontends. Since the archetype includes
+                setup scripts for the H2 database, it can be used without external dependencies like MySQL.
+                However, for administration tasks such as database setup you currently have to use
+                the tools provided by the &flexive; distribution.
+            </para>
+            <para>
+                The archetypes are (as the rest of the Maven modules) still under development, so please
+                report rough edges or missing features in our &flexiveIssues;.
+            </para>
+
+            <section xml:id="writing_applications_maven_archetypes_ear">
+                <title>The EAR archetype</title>
+                <para>
+                    The archetype
+                    <code>flexive-archetype-ear</code>
+                    creates a multi-module enterprise application, which will be deployed as an EAR.
+                    It also allows easy integration testing with OpenEJB and offers a standalone
+                    webserver using Jetty and H2.
+                </para>
+                <para>
+                    To get started, create a new project using the following command:
+                </para>
+                <para>
+                    <command>mvn archetype:generate -DarchetypeGroupId=com.flexive
+                        -DarchetypeArtifactId=flexive-archetype-ear -DarchetypeVersion=0.0.1-SNAPSHOT
+                        -DarchetypeRepository=http://repo.flexive.org/maven2/ -DgroupId=mygroup
+                        -DartifactId=hello-flexive -Dversion=0.1-SNAPSHOT
+                    </command>
+                </para>
+                <para>
+                    This will create a new project called "hello-flexive" in the current directory.
+                    The &flexive; version to be used can be specified in the main module's
+                    <filename>pom.xml</filename>
+                    file. Please note that some features are dependent on the &flexive; version:
+                    H2/OpenEJB/Jetty support is only available in 3.1 or later.
+                    The following commands (issued in the project directory) will walk you through the most important
+                    features:
+                </para>
+                <variablelist>
+                    <varlistentry>
+                        <term>
+                            <code>mvn package</code>
+                        </term>
+                        <listitem>
+                            <para>
+                                Compile and package the application. The resulting EAR file can be deployed
+                                in any supported application server (for setup instructions, consult
+                                <xref linkend="installation"/>).
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <code>mvn install</code>
+                        </term>
+                        <listitem>
+                            <para>
+                                Compile, package and install the application. If executed for the first time,
+                                the H2 database schemas will also be created in the
+                                <filename>database/h2</filename>
+                                subdirectory.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <code>mvn install -Pflexive-db-setup-h2</code>
+                        </term>
+                        <listitem>
+                            <para>
+                                Compile, package and install the application. Manually activate the profile
+                                <code>flexive-db-setup-h2</code>
+                                to reset the H2 database in the
+                                <filename>database/h2</filename>
+                                subdirectory.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <code>cd war</code>
+                        </term>
+                        <term>
+                            <code>mvn jetty:run</code>
+                        </term>
+                        <listitem>
+                            <para>
+                                Start an instance of the Jetty WebServer to deploy our application (including the
+                                &backendGui;) and OpenEJB. The available applications can be browsed at
+                                <ulink url='http://localhost:8080'>http://localhost:8080</ulink>.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+                <para>
+                    Additional information on working with the Maven archetypes can be found in the following
+                    blog entries:
+                    <itemizedlist>
+                        <listitem>
+                            <para>
+                                <biblioref linkend="bib_blog_maven2"/>
+                            </para>
+                        </listitem>
+                    </itemizedlist>
+                </para>
+            </section>
+        </section>
+
         <section xml:id="writing_applications_maven_packages">
             <title>
                 &flexive; artifacts
@@ -1115,106 +1230,6 @@ BUILD SUCCESSFUL]]></screen>
             </para>
         </section>
 
-        <section xml:id="writing_applications_maven_archetypes">
-            <title>
-                Project archetypes
-            </title>
-            <para>
-                Archetypes provide a quick start for new projects. Currently we offer a archetype for
-                a full enterprise application with web and console frontends. Since the archetype includes
-                setup scripts for the H2 database, it can be used without external dependencies like MySQL.
-                However, for administration tasks such as database setup you currently have to use
-                the tools provided by the &flexive; distribution.
-            </para>
-            <para>
-                The archetypes are (as the rest of the Maven modules) still under development, so please
-                report rough edges or missing features in our &flexiveIssues;.
-            </para>
-
-            <section xml:id="writing_applications_maven_archetypes_ear">
-                <title>The EAR archetype</title>
-                <para>
-                    The archetype
-                    <code>flexive-archetype-ear</code>
-                    creates a multi-module enterprise application, which will be deployed as an EAR.
-                    It also allows easy integration testing with OpenEJB and offers a standalone
-                    webserver using Jetty and H2.
-                </para>
-                <para>
-                    To get started, create a new project using the following command:
-                </para>
-                <para>
-                    <command>mvn archetype:generate -DarchetypeGroupId=com.flexive
-                        -DarchetypeArtifactId=flexive-archetype-ear -DarchetypeVersion=0.0.1-SNAPSHOT
-                        -DarchetypeRepository=http://repo.flexive.org/maven2/ -DgroupId=mygroup
-                        -DartifactId=hello-flexive -Dversion=0.1-SNAPSHOT
-                    </command>
-                </para>
-                <para>
-                    This will create a new project called "hello-flexive" in the current directory.
-                    The &flexive; version to be used can be specified in the main module's
-                    <filename>pom.xml</filename>
-                    file. Please note that some features are dependent on the &flexive; version:
-                    H2/OpenEJB/Jetty support is only available in 3.1 or later.
-                    The following commands (issued in the project directory) will walk you through the most important
-                    features:
-                </para>
-                <variablelist>
-                    <varlistentry>
-                        <term>
-                            <code>mvn package</code>
-                        </term>
-                        <listitem>
-                            <para>
-                                Compile and package the application. The resulting EAR file can be deployed
-                                in any supported application server (for setup instructions, consult
-                                <xref linkend="installation"/>).
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <code>mvn install -Pflexive-db-setup-h2</code>
-                        </term>
-                        <listitem>
-                            <para>
-                                Compile, package and install the application. The profile
-                                <code>flexive-db-setup-h2</code>
-                                creates a new H2 database in the
-                                <filename>database</filename>
-                                subdirectory.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <code>cd war</code>
-                        </term>
-                        <term>
-                            <code>mvn jetty:run</code>
-                        </term>
-                        <listitem>
-                            <para>
-                                Start an instance of the Jetty WebServer to deploy our application (including the
-                                &backendGui;) and OpenEJB. The available applications can be browsed at
-                                <ulink url='http://localhost:8080'>http://localhost:8080</ulink>.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                </variablelist>
-                <para>
-                    Additional information on working with the Maven archetypes can be found in the following
-                    blog entries:
-                    <itemizedlist>
-                        <listitem>
-                            <para>
-                                <biblioref linkend="bib_blog_maven2"/>
-                            </para>
-                        </listitem>
-                    </itemizedlist>
-                </para>
-            </section>
-        </section>
     </section>
 
     <!-- TODO POSTLAUNCH 

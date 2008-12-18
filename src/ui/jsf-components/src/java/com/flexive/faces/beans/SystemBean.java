@@ -317,12 +317,21 @@ public class SystemBean implements Serializable {
     }
 
     /**
-     * Get a list of all installed and deployed drops
+     * Get a list of all installed and deployed drop names.
      *
-     * @return list of all installed and deployed drops
+     * @return list of all installed and deployed drop names.
      */
-    public synchronized List<String> getDrops() {
+    public List<String> getDrops() {
         return FxSharedUtils.getDrops();
+    }
+
+    /**
+     * Get a list of all installed and deployed drops.
+     *
+     * @return  a list of all installed and deployed drops.
+     */
+    public List<FxDropApplication> getDropApplications() {
+        return FxSharedUtils.getDropApplications();
     }
 
     /**

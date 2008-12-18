@@ -62,7 +62,7 @@ public class FxScriptRunInfo implements Serializable {
      * @param successful script executed successful?
      */
     public void endExecution(boolean successful) {
-        this.endTime = System.currentTimeMillis()-100;
+        this.endTime = System.currentTimeMillis();
         this.successful = errorMessage == null && successful;
     }
 

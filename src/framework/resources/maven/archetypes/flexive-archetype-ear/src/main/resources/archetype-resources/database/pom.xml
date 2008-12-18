@@ -17,8 +17,26 @@
     <profiles>
         <profile>
             <id>flexive-db-setup-h2</id>
+            <!--
+                Activate the profile automatically when the database files are missing.
+
+                Unfortunately, we have to hardcode the module path since this is usually invoked
+                from the parent project and Maven 2.0.x does not support "module-relative" paths
+                for file-based profile activation.
+
+                This means that the profile is always activated when this POM is invoked directly. 
+
+                http://jira.codehaus.org/browse/MNG-2363
+                http://jira.codehaus.org/browse/MNG-3140
+            -->
+            <activation>
+                <file>
+                    <missing>database/h2/flexive.data.db</missing>
+                </file>
+            </activation>
             <build>
                 <plugins>
+                    <!-- Extract schema artifact -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-dependency-plugin</artifactId>
@@ -45,6 +63,7 @@
                         </executions>
                     </plugin>
 
+                    <!-- Run SQL setup scripts -->
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>sql-maven-plugin</artifactId>

@@ -13,6 +13,9 @@
         <resource>shared/src/main/java/com/flexive/example/shared/interfaces/EJBExample.java</resource>
         <resource>shared/src/main/java/com/flexive/example/shared/interfaces/EJBExampleLocal.java</resource>
         <resource>shared/src/main/resources/ApplicationMessages.properties</resource>
+        <resource>shared/src/main/resources/flexive-application.properties</resource>
+        <resource>shared/src/main/resources/scripts/runonce/01-runonce.groovy</resource>
+        <resource>shared/src/main/resources/scripts/startup/01-startup.groovy</resource>
         <resource>shared/pom.xml</resource>
         <resource>ear/pom.xml</resource>
         <resource>ejb-jar/src/main/java/com/flexive/example/ejb/EJBExampleBean.java</resource>

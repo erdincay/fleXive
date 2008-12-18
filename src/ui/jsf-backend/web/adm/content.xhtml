@@ -135,16 +135,16 @@
                     </table>
                 </td>
                 <td width="200px">
-                    <c:if test="#{fn:length(fxSystemBean.drops) > 0 }">
+                    <c:if test="#{fn:length(fxSystemBean.dropApplications) > 0 }">
                         <table class="dojoTable links" width="100%">
                             <thead>
                                 <tr>
                                     <th>#{fxMessageBean['Welcome.label.drops']}</th>
                                 </tr>
                             </thead>
-                            <c:forEach var="drop" items="#{fxSystemBean.drops}">
+                            <c:forEach var="drop" items="#{fxSystemBean.dropApplications}">
                                 <tr>
-                                    <td><a href="#{fxSystemBean.serverBase}/#{drop}" target="#{drop}">#{drop}</a></td>
+                                    <td><a href="#{fxSystemBean.serverBase}/#{drop.contextRoot}" target="#{drop.name}">#{drop.displayName}</a></td>
                                 </tr>
                             </c:forEach>
                         </table>

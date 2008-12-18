@@ -40,6 +40,7 @@ import com.flexive.shared.CacheAdmin;
 import static com.flexive.shared.EJBLookup.getDivisionConfigurationEngine;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.FxDropApplication;
 import com.flexive.shared.configuration.Parameter;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.content.FxPermissionUtils;
@@ -66,11 +67,14 @@ import javax.ejb.*;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.jar.JarInputStream;
+import java.util.jar.JarEntry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -894,7 +898,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void executeRunOnceScripts() throws FxApplicationException {
         final long start = System.currentTimeMillis();
-        runOnce(SystemParameters.DIVISION_RUNONCE, "fxresources", "[fleXive]");
+        runOnce(SystemParameters.DIVISION_RUNONCE, "flexive", "fxresources", "[fleXive]");
         if (LOG.isInfoEnabled()) {
             LOG.info("Executed flexive run-once scripts in " + (System.currentTimeMillis() - start) + "ms");
         }
@@ -905,83 +909,32 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      * Execute all runOnce scripts in the resource denoted by prefix if param is "false"
      *
      * @param param           boolean parameter that will be flagged as "true" once the scripts are run
+     * @param dropName        the drop application name
      * @param prefix          resource directory prefix
      * @param applicationName the corresponding application name (for debug messages)
      * @throws FxApplicationException on errors
      */
-    private void runOnce(Parameter<Boolean> param, String prefix, String applicationName) throws FxApplicationException {
+    private void runOnce(Parameter<Boolean> param, String dropName, String prefix, String applicationName) throws FxApplicationException {
         synchronized (RUNONCE_LOCK) {
             try {
                 Boolean executed = getDivisionConfigurationEngine().get(param);
                 if (executed) {
-                    //                System.out.println("=============> skip run-once <==============");
                     return;
                 }
             } catch (FxApplicationException e) {
                 LOG.error(e);
                 return;
             }
-            //        System.out.println("<=============> run run-once <==============>");
             //noinspection unchecked
             final List<FxScriptRunInfo> divisionRunOnceInfos = getDivisionConfigurationEngine().get(SystemParameters.DIVISION_RUNONCE_INFOS);
 
             LocalScriptingCache.runOnceInfos = new CopyOnWriteArrayList<FxScriptRunInfo>();
             LocalScriptingCache.runOnceInfos.addAll(divisionRunOnceInfos);
 
-            final InputStream scriptIndex = FxSharedUtils.getResourceStream(prefix + "/scripts/runonce/scriptindex.flexive");
-            if (scriptIndex == null) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("No run-once scripts defined for " + applicationName);
-                }
-                return;
-            }
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Executing run-once scripts for " + applicationName);
-            }
-            String[] files = FxSharedUtils.loadFromInputStream(scriptIndex, -1).
-                    replaceAll("\r", "").split("\n");
-            final UserTicket originalTicket = FxContext.getUserTicket();
+            executeInitializerScripts("runonce", dropName, prefix, applicationName, new RunonceScriptExecutor(applicationName));
+
             FxContext.get().runAsSystem();
             try {
-                FxScriptBinding binding = new FxScriptBinding();
-                UserTicket ticket = ((UserTicketImpl) UserTicketImpl.getGuestTicket()).cloneAsGlobalSupervisor();
-                binding.setVariable("ticket", ticket);
-                FxContext.get().overrideTicket(ticket);
-                for (String temp : files) {
-                    String[] file = temp.split("\\|");
-                    if (StringUtils.isBlank(file[0])) {
-                        continue;
-                    }
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("running run-once-script [" + file[0] + "] ...");
-                    }
-                    FxScriptRunInfo runInfo = new FxScriptRunInfo(System.currentTimeMillis(), applicationName, file[0]);
-                    LocalScriptingCache.runOnceInfos.add(runInfo);
-                    try {
-                        LocalScriptingCache.internal_runScript(file[0], binding,
-                                FxSharedUtils.loadFromInputStream(FxSharedUtils.getResourceStream(prefix + "/scripts/runonce/" + file[0]), -1));
-                    } catch (Throwable e) {
-                        System.out.println("Caught ERROR!!!");
-                        runInfo.endExecution(false);
-                        final Throwable reported = e instanceof GenericScriptException ? e.getCause() : e;
-                        StringWriter sw = new StringWriter();
-                        reported.printStackTrace(new PrintWriter(sw));
-                        runInfo.setErrorMessage(sw.toString());
-                        // play safe and always log exceptions, although this may lead to duplicates
-                        LOG.error("Failed to run script " + file[0] + ": " + reported.getMessage(), reported);
-                    }
-                    try {
-                        Thread.sleep(100); //play nice ...
-                    } catch (InterruptedException e) {
-                        //ignore
-                    }
-                    runInfo.endExecution(true);
-                    if (ctx.getRollbackOnly()) {
-                        // something in the script caused a rollback, so we have to bail out
-                        LOG.fatal("Failed to complete run-once scripts for '" + applicationName + "' because of a transaction rollback.");
-                        return;
-                    }
-                }
                 divisionRunOnceInfos.clear();
                 divisionRunOnceInfos.addAll(LocalScriptingCache.runOnceInfos);
                 getDivisionConfigurationEngine().put(SystemParameters.DIVISION_RUNONCE_INFOS, divisionRunOnceInfos);
@@ -989,7 +942,6 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                 LocalScriptingCache.runOnceInfos = null;
             } finally {
                 FxContext.get().stopRunAsSystem();
-                FxContext.get().overrideTicket(originalTicket);
             }
         }
     }
@@ -1001,7 +953,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
     public void executeDropRunOnceScripts(Parameter<Boolean> param, String dropName) throws FxApplicationException {
         if (!FxSharedUtils.getDrops().contains(dropName))
             throw new FxInvalidParameterException("dropName", "ex.scripting.drop.notFound", dropName);
-        runOnce(param, dropName + "Resources", dropName);
+        runOnce(param, dropName, dropName + "Resources", dropName);
     }
 
     /**
@@ -1009,7 +961,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void executeStartupScripts() {
-        executeStartupScripts("fxresources", "[fleXive]");
+        executeInitializerScripts("startup", "flexive", "fxresources", "[fleXive]", new DefaultScriptExecutor());
     }
 
     /**
@@ -1019,28 +971,139 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
     public void executeDropStartupScripts(String dropName) throws FxApplicationException {
         if (!FxSharedUtils.getDrops().contains(dropName))
             throw new FxInvalidParameterException("dropName", "ex.scripting.drop.notFound", dropName);
-        executeStartupScripts(dropName + "Resources", "drop " + dropName);
+        executeInitializerScripts("startup", dropName, dropName + "Resources", "drop " + dropName,
+                new DefaultScriptExecutor());
+    }
+
+    private void executeInitializerScripts(String folder, String dropName, String prefix, String applicationName,
+                                           ScriptExecutor scriptExecutor) {
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Executing " + folder + " scripts for " + applicationName);
+        }
+        final InputStream scriptIndex = FxSharedUtils.getResourceStream(prefix + "/scripts/" + folder + "/scriptindex.flexive");
+        if (scriptIndex != null) {
+            // load cached file list from script index file
+            for (String entry : FxSharedUtils.loadFromInputStream(scriptIndex, -1).replaceAll("\r", "").split("\n")) {
+                final String[] values = entry.split("\\|"); // name, size
+                if (StringUtils.isNotBlank(values[0])) {
+                    scriptExecutor.runScript(
+                            values[0],
+                            FxSharedUtils.loadFromInputStream(
+                                    FxSharedUtils.getResourceStream(prefix + "/scripts/" + folder + "/" + values[0])
+                            )
+                    );
+                }
+            }
+        } else {
+            // scan classpath from shared resource JAR
+            JarInputStream jarStream = null;
+            try {
+                final FxDropApplication dropApplication = FxSharedUtils.getDropApplication(dropName);
+                jarStream = dropApplication.getResourceJarStream();
+                if (jarStream != null) {
+                    JarEntry entry;
+                    while ((entry = jarStream.getNextJarEntry()) != null) {
+                        if (!entry.isDirectory() && entry.getName().startsWith("scripts/" + folder + "/")) {
+                            // extract filename
+                            final String name = entry.getName().substring(entry.getName().lastIndexOf("/") + 1);
+
+                            // allocate buffer for the entire (uncompressed) script code
+                            final byte[] buffer = new byte[(int) entry.getSize()];
+
+                            // decompress JAR entry
+                            if (jarStream.read(buffer, 0, (int) entry.getSize()) != entry.getSize()) {
+                                LOG.error("Failed to read complete script code for script: " + entry.getName());
+                                continue;
+                            }
+
+                            //
+                            final String code = new String(buffer, "UTF-8");
+                            scriptExecutor.runScript(name, code);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                LOG.error("Failed to load " + folder + " scripts for " + dropName + " from JAR file: " + e.getMessage(), e);
+            } finally {
+                if (jarStream != null) {
+                    try {
+                        jarStream.close();
+                    } catch (IOException e) {
+                        LOG.warn("Failed to close stream: " + e.getMessage(), e);
+                    }
+                }
+            }
+        }
     }
 
     /**
-     * Eexecute startup scripts within the given subfolder identified by prefix
-     *
-     * @param prefix          subfolder for scripts
-     * @param applicationName the corresponding application name (for debug messages)
+     * Helper interface to provide customized "script executors" (startup, runonce scripts).
      */
-    private void executeStartupScripts(String prefix, String applicationName) {
-        final InputStream scriptIndex = FxSharedUtils.getResourceStream(prefix + "/scripts/startup/scriptindex.flexive");
-        if (scriptIndex == null) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("No startup scripts defined for " + applicationName);
+    private interface ScriptExecutor {
+        /**
+         * Run the given script.
+         *
+         * @param name the script filename (extension determines language)
+         * @param code the code to be executed
+         * @return true if script evaluation should continue
+         */
+        boolean runScript(String name, String code);
+    }
+
+    private class DefaultScriptExecutor implements ScriptExecutor {
+        /**
+         * {@inheritDoc}
+         */
+        public boolean runScript(String name, String code) {
+            try {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Running script: " + name);
+                }
+                runInitializerScript(name, code);
+            } catch (Exception e) {
+                LOG.error("Failed to run initializer script: " + e.getMessage(), e);
             }
-            return;
+            // continue unless rollback performed due to a script error
+            return !ctx.getRollbackOnly();
         }
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Executing startup scripts for " + applicationName);
+    }
+
+    private class RunonceScriptExecutor extends DefaultScriptExecutor {
+        private final String applicationName;
+
+        private RunonceScriptExecutor(String applicationName) {
+            this.applicationName = applicationName;
         }
-        String[] files = FxSharedUtils.loadFromInputStream(scriptIndex, -1).
-                replaceAll("\r", "").split("\n");
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean runScript(String name, String code) {
+            FxScriptRunInfo runInfo = new FxScriptRunInfo(System.currentTimeMillis(), applicationName, name);
+            // TODO: write in tree cache for cluster support
+            LocalScriptingCache.runOnceInfos.add(runInfo);
+            boolean result = false;
+            try {
+                result = super.runScript(name, code);
+                runInfo.endExecution(true);
+            } catch (Exception e) {
+                runInfo.endExecution(false);
+                final Throwable reported = e instanceof GenericScriptException ? e.getCause() : e;
+                StringWriter sw = new StringWriter();
+                reported.printStackTrace(new PrintWriter(sw));
+                runInfo.setErrorMessage(sw.toString());
+            }
+            try {
+                Thread.sleep(50); //play nice for GUI list updates ...
+            } catch (InterruptedException e) {
+                //ignore
+            }
+            return result;
+        }
+    }
+
+    private void runInitializerScript(String name, String code) throws FxApplicationException {
         final UserTicket originalTicket = FxContext.getUserTicket();
         FxContext.get().runAsSystem();
         try {
@@ -1048,19 +1111,8 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             UserTicket ticket = ((UserTicketImpl) UserTicketImpl.getGuestTicket()).cloneAsGlobalSupervisor();
             binding.setVariable("ticket", ticket);
             FxContext.get().overrideTicket(ticket);
-            for (String temp : files) {
-                String[] file = temp.split("\\|");
-                if (StringUtils.isBlank(file[0])) {
-                    continue;
-                }
-                LOG.info("running startup-script [" + file[0] + "] ...");
-                try {
-                    LocalScriptingCache.internal_runScript(file[0], binding,
-                            FxSharedUtils.loadFromInputStream(FxSharedUtils.getResourceStream(prefix + "/scripts/startup/" + file[0]), -1));
-                } catch (Throwable e) {
-                    LOG.error("Failed to run script " + file[0] + ": " + e.getMessage(), e);
-                }
-            }
+            
+            LocalScriptingCache.internal_runScript(name, binding, code);
         } finally {
             FxContext.get().stopRunAsSystem();
             FxContext.get().overrideTicket(originalTicket);
