@@ -190,8 +190,12 @@ public class JsonWriter {
 
     private void writeStringValue(String value) throws IOException {
         out.write(singleQuotesForStrings
-                ? "'" + StringUtils.replace(value, "'", "\\'") + "'"
-                : "\"" + StringUtils.replace(value, "\"", "\\\"") + "\"");
+                ? "'" + escapeStringValue(StringUtils.replace(value, "'", "\\'")) + "'"
+                : "\"" + escapeStringValue(StringUtils.replace(value, "\"", "\\\"")) + "\"");
+    }
+
+    private String escapeStringValue(String quotesReplacedValue) {
+        return StringUtils.replace(quotesReplacedValue, "\n", "\\\n");
     }
 
     /**

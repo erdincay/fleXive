@@ -427,4 +427,17 @@ public class JsonWriterTest {
         assert writer.toString().contains("'" + ResultViewType.THUMBNAILS + "'")
                 : "Enum value not escaped: " + writer.toString();
     }
+
+    @Test
+    public void testWriteStringNewline_FX421() throws IOException {
+        newlineEncodingTest(new JsonWriter());
+        newlineEncodingTest(new JsonWriter().setSingleQuotesForStrings(false));
+    }
+
+    private void newlineEncodingTest(JsonWriter jsonWriter) throws IOException {
+        final String output = jsonWriter.startMap()
+                .writeAttribute("newlineValue", "This text\ncontains a line break")
+                .closeMap().finishResponse().toString();
+        assert output.contains("text\\\ncontains") : "Line break not encoded properly: " + output;
+    }
 }
