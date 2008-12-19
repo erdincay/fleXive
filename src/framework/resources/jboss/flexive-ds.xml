@@ -18,7 +18,7 @@
         <!-- Note: "&amp;" has to be used instead of "&" for parameters -->
         <xa-datasource-property name="URL">jdbc:mysql://localhost:3306/flexive?useUnicode=true&amp;characterEncoding=utf8&amp;characterResultSets=utf8</xa-datasource-property>
         <user-name>root</user-name>
-        <password>snark</password>
+        <password>a</password>
 
         <transaction-isolation>TRANSACTION_READ_COMMITTED</transaction-isolation>
         <no-tx-separate-pools/>
@@ -57,7 +57,7 @@
         <!-- Note: "&amp;" has to be used instead of "&" for parameters -->
         <connection-url>jdbc:mysql://localhost:3306/flexive?useUnicode=true&amp;characterEncoding=utf8&amp;characterResultSets=utf8</connection-url>
         <user-name>root</user-name>
-        <password>snark</password>
+        <password>a</password>
 
         <!--pooling parameters-->
         <min-pool-size>5</min-pool-size>
@@ -85,7 +85,7 @@
         <!-- Note: "&amp;" has to be used instead of "&" for parameters -->
         <xa-datasource-property name="URL">jdbc:mysql://localhost:3306/flexiveConfiguration?useUnicode=true&amp;characterEncoding=utf8&amp;characterResultSets=utf8</xa-datasource-property>
         <user-name>root</user-name>
-        <password>snark</password>
+        <password>a</password>
 
         <transaction-isolation>TRANSACTION_READ_COMMITTED</transaction-isolation>
         <no-tx-separate-pools/>

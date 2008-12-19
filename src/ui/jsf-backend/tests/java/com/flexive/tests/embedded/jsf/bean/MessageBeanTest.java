@@ -37,6 +37,11 @@ import com.flexive.faces.beans.MessageBean;
 import com.flexive.shared.exceptions.FxAccountInUseException;
 import com.flexive.shared.exceptions.FxLoginFailedException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.FxContext;
+import com.flexive.shared.FxLanguage;
+import com.flexive.shared.EJBLookup;
+import com.flexive.shared.security.UserTicket;
 import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
 import com.flexive.tests.embedded.TestUsers;
@@ -113,4 +118,19 @@ public class MessageBeanTest {
         assert expected.equals(message) : "Expected: " + expected + ", got: " + message;
     }
 
+    @Test
+    public void getMessageByLanguage_FX419() throws FxApplicationException {
+        final UserTicket ticket = FxContext.getUserTicket();
+        final FxLanguage origLanguage = ticket.getLanguage();
+        try {
+            ticket.setLanguage(EJBLookup.getLanguageEngine().load(FxLanguage.ENGLISH));
+            assert ((String) messageBean.get(KEY_1)).startsWith("Test message")
+                    : "Expected english translation, got: " + messageBean.get(KEY_1);
+            ticket.setLanguage(EJBLookup.getLanguageEngine().load(FxLanguage.GERMAN));
+            assert ((String) messageBean.get(KEY_1)).startsWith("Testmeldung")
+                    : "Expected german translation, got: " + messageBean.get(KEY_1);
+        } finally {
+            ticket.setLanguage(origLanguage);
+        }
+    }
 }
