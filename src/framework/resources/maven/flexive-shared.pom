@@ -25,6 +25,13 @@
         </dependency>
 
         <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>jboss-common-core-42-compat</artifactId>
+            <version>@FLEXIVE_VERSION@</version>
+            <optional>false</optional>
+        </dependency>
+
+        <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
             <version>1.3</version>
@@ -70,6 +77,12 @@
             <artifactId>commons-validator</artifactId>
             <version>1.3.1</version>
             <optional>false</optional>
+            <exclusions>
+                <exclusion>
+                    <groupId>xml-apis</groupId>
+                    <artifactId>xml-apis</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

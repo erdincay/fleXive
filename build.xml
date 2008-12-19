@@ -780,6 +780,7 @@ database.vendor=MySQL
         <!-- Also package libraries that are not available on common public servers -->
         <maven-deploy file="${flexive.lib.dir}/sanselan.jar" pom="sanselan.pom"/>
         <maven-deploy file="${flexive.lib.dir}/jsf/jsf-facelets.jar" pom="jsf-facelets.pom"/>
+        <maven-deploy file="${flexive.lib.dir}/jboss-common-core-42-compat.jar" pom="jboss-common-core-42-compat.pom"/>
 
         <!-- ZIP SQL Schemas -->
         <jar file="${flexive.base.build.dir}/flexive-sql-schemas.jar">

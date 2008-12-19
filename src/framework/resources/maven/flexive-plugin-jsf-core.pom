@@ -38,6 +38,12 @@
             <artifactId>tomahawk12</artifactId>
             <version>1.1.7</version>
             <optional>false</optional>
+            <exclusions>
+                <exclusion>
+                    <groupId>xml-apis</groupId>
+                    <artifactId>xmlParserAPIs</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

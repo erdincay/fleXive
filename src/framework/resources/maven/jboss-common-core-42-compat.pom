@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.flexive</groupId>
+    <artifactId>jboss-common-core-42-compat</artifactId>
+    <version>3.1-SNAPSHOT</version>
+    <description>JBoss core classes needed for compatibility with JBoss up to 4.2.
+        Since we use a newer cache implementation than JBoss 4.2, but do not want to replace
+        the application server's core implementation classes, we provide the missing classes
+        in this package. It should have no effect on other application servers, which can use newer
+        versions of jboss-common-core at will.
+    </description>
+
+    <licenses>
+        <license>
+              <name>GNU Lesser General Public License (LGPL)</name>
+              <url>http://www.fsf.org/licensing/licenses/lgpl.txt</url>
+       </license>
+    </licenses>
+
+</project>
