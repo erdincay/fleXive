@@ -433,7 +433,7 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
      * @return mapped script ids or <code>null</code> if mappings do not exist for this assignment
      */
     public long[] getScriptMapping(FxScriptEvent event) {
-        long[] ret = scriptMapping.get(event);
+        long[] ret = scriptMapping != null ? scriptMapping.get(event) : EMPTY_SCRIPTMAPPING;
         return ret != null ? ret : EMPTY_SCRIPTMAPPING;
     }
 
