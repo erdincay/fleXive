@@ -8,22 +8,24 @@
       xmlns:t="http://myfaces.apache.org/tomahawk"
       xmlns:fx="http://www.flexive.com/jsf/core"
       xmlns:products="http://www.flexive.com/jsf/examples/products">
-<head>
-    <fx:includes/>
-    <t:stylesheet path="/products.css"/>
-</head>
 
-<body>
+<fx:content var="product" content="#{fxPageBean.pageContent}">
 
-    <h:form>
-        <t:saveState value="#{productBean.pk}"/>
-        <t:saveState value="#{productBean.articleNumber}"/>
+    <head>
+        <fx:includes/>
+        <t:stylesheet path="/products.css"/>
+        <title>
+            #{product.name} - #{fxMessageBean['products.page.title']}
+        </title>
+    </head>
 
-        <h:outputLink value="#{fx:url('')}">
-            #{fxMessageBean['products.button.backToProducts']}
-        </h:outputLink>
+    <body>
 
-        <fx:content var="product" pk="#{productBean.pk}">
+        <h:form>
+            <h:outputLink value="#{fx:url('')}">
+                #{fxMessageBean['products.button.backToProducts']}
+            </h:outputLink>
+
             <div class="product">
                 <h1>
                     #{product.name}
@@ -80,11 +82,12 @@
                     <h:outputText value="#{product.description}" escape="false"/>
                 </div>
             </div>
-        </fx:content>
-    </h:form>
+        </h:form>
 
-    <products:footer/>
+        <products:footer/>
 
-</body>
+    </body>
+
+</fx:content>
 
 </html>

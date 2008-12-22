@@ -19,6 +19,10 @@ import com.flexive.shared.structure.FxSelectListItemEdit
 import com.flexive.shared.value.FxBinary
 import com.flexive.shared.value.BinaryDescriptor
 import com.flexive.shared.search.*
+import com.flexive.shared.tree.FxTreeNode
+import com.flexive.shared.tree.FxTreeMode
+import com.flexive.shared.scripting.FxScriptEvent
+import com.flexive.shared.scripting.FxScriptInfo
 
 // create colors select list
 final ACL itemAcl = environment.getACL(ACL.Category.SELECTLISTITEM.getDefaultId())
@@ -132,6 +136,18 @@ EJBLookup.resultPreferencesEngine.saveSystemDefault(
         AdminResultLocations.values()
 )
 
+// create web page folder and automatically store new products there
+final long manuFolderId = EJBLookup.treeEngine.createNodes(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, -1, "Products/Manufacturers")[-1]
+final FxScriptInfo productsTreeScriptId =
+    EJBLookup.scriptingEngine.createScriptFromDropLibrary("products", FxScriptEvent.AfterContentCreate,
+            "productsTree.groovy", "ProductsTree.groovy", "Stores new products in the manufacturer folder")
+EJBLookup.scriptingEngine.createTypeScriptMapping(
+        productsTreeScriptId.id,
+        CacheAdmin.environment.getType("product").id,
+        true,
+        true
+)
+EJBLookup.treeEngine.activate(FxTreeMode.Edit, manuFolderId, true);
 
 // create test data
 
@@ -226,3 +242,6 @@ int currentArticleNr = new Random().nextInt(50000)
     }
     EJBLookup.contentEngine.save(builder.content)
 }
+
+// activate our demo content
+EJBLookup.treeEngine.activate(FxTreeMode.Edit, manuFolderId, true);

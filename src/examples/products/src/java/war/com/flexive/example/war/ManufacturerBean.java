@@ -18,28 +18,16 @@ import javax.faces.model.DataModel;
  * @version $Rev$
  */
 public class ManufacturerBean {
-    /** PK of the displayed manufacturer (in detail view) */
-    private FxPK pk;
     /** All products of the current PK */
     private DataModel products;
 
-    public FxPK getPk() {
-        if (PageBean.getInstance().getPageId() != -1) {
-            return new FxPK(PageBean.getInstance().getPageId(), FxPK.LIVE);
-        }
-        return pk;
-    }
-
-    public void setPk(FxPK pk) {
-        this.pk = pk;
-    }
-
     public DataModel getProducts() throws FxApplicationException {
-        if (products == null && getPk() != null) {
+        final FxPK pk = PageBean.getInstance().getPagePK();
+        if (products == null && !pk.isNew()) {
             final FxResultSet result = new SqlQueryBuilder()
                     .select("@pk", "product/name", "product/price", "product/variant/articlenumber")
                     .filterVersion(VersionFilter.LIVE)
-                    .condition("product/manufacturer", PropertyValueComparator.EQ, getPk().getId())
+                    .condition("product/manufacturer", PropertyValueComparator.EQ, pk)
                     .getResult();
             products = new FxResultSetDataModel(result);
         }

@@ -2,6 +2,8 @@ package com.flexive.faces.beans;
 
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.content.FxPK;
+import com.flexive.shared.content.FxContent;
 import com.flexive.shared.configuration.Parameter;
 import com.flexive.shared.configuration.SystemParameterPaths;
 import com.flexive.shared.configuration.ParameterScope;
@@ -60,6 +62,7 @@ import java.io.Serializable;
  *
  * @author Daniel Lichtenberger, UCS
  * @version $Rev$
+ * @since 3.1
  */
 public class PageBean implements Serializable {
     private static final long serialVersionUID = -4274184717568826256L;
@@ -85,6 +88,10 @@ public class PageBean implements Serializable {
      * The actual page URL, <strong>without</strong> the locale information.
      */
     protected String url;
+    /**
+     * Page content instance (cached in request)
+     */
+    protected transient FxContent pageContent;
 
     /**
      * Return the page bean for the current request. Note that the implementation class
@@ -158,6 +165,37 @@ public class PageBean implements Serializable {
 
     public void setPageId(Long pageId) {
         this.pageId = pageId != null ? pageId : -1;
+    }
+
+    /**
+     * Interpret the page ID returned by {@link #getPageId()} as a content ID and return
+     * the PK for the live version of this content. Override this method to customize the lookup,
+     * e.g. to load the PK from a tree node reference.
+     *
+     * @return the PK set through the page ID
+     */
+    public FxPK getPagePK() {
+        return new FxPK(pageId, FxPK.LIVE);
+    }
+
+    /**
+     * Return the content identified by {@link #getPagePK()}, or null if no PK is available.
+     *
+     * @return the content identified by {@link #getPagePK()}, or null if no PK is available.
+     */
+    public FxContent getPageContent() {
+        final FxPK pk = getPagePK();
+        if (pk.isNew()) {
+            return null;
+        }
+        if (pageContent == null || !pageContent.getPk().equals(pk)) {
+            try {
+                pageContent = EJBLookup.getContentEngine().load(pk);
+            } catch (FxApplicationException e) {
+                throw e.asRuntimeException();
+            }
+        }
+        return pageContent;
     }
 
     /**

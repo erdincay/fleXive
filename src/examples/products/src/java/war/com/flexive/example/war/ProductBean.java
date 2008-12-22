@@ -19,8 +19,6 @@ import javax.faces.model.DataModel;
  */
 public class ProductBean {
     private DataModel products;
-    /** PK of the displayed product (in detail view) */
-    private FxPK pk;
     /** The currently selected article number (if any) */
     private FxString articleNumber;
 
@@ -36,17 +34,6 @@ public class ProductBean {
             products = new FxResultSetDataModel(result);
         }
         return products;
-    }
-
-    public FxPK getPk() {
-        if (PageBean.getInstance().getPageId() != -1) {
-            return new FxPK(PageBean.getInstance().getPageId(), FxPK.LIVE);
-        }
-        return pk;
-    }
-
-    public void setPk(FxPK pk) {
-        this.pk = pk;
     }
 
     public FxString getArticleNumber() {

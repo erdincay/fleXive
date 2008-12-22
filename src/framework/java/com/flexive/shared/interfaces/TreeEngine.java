@@ -213,7 +213,7 @@ public interface TreeEngine {
      * @param mode   tree mode to use (Live or Edit tree)
      * @param nodeId the parent node ID
      * @param name   name of the requested node @return  the tree node
-     * @return the selected node. If no node was found, a runtime exception is thrown.
+     * @return the selected node. If no node was found, a FxNotFoundException is thrown.
      * @throws FxApplicationException on errors
      */
     FxTreeNode findChild(FxTreeMode mode, long nodeId, String name) throws FxApplicationException;
@@ -224,7 +224,7 @@ public interface TreeEngine {
      * @param mode        tree mode to use (Live or Edit tree)
      * @param nodeId      the parent node ID
      * @param referenceId the reference ID
-     * @return the selected node. If no node was found, a runtime exception is thrown.
+     * @return the selected node. If no node was found, a FxNotFoundException is thrown.
      * @throws FxApplicationException on errors
      */
     FxTreeNode findChild(FxTreeMode mode, long nodeId, long referenceId) throws FxApplicationException;
@@ -235,7 +235,7 @@ public interface TreeEngine {
      * @param mode   tree mode to use (Live or Edit tree)
      * @param nodeId the parent node ID
      * @param pk     the reference
-     * @return the selected node. If no node was found, a runtime exception is thrown.
+     * @return the selected node. If no node was found, a FxNotFoundException is thrown.
      * @throws FxApplicationException on errors
      */
     FxTreeNode findChild(FxTreeMode mode, long nodeId, FxPK pk) throws FxApplicationException;
@@ -246,7 +246,7 @@ public interface TreeEngine {
      * @param mode      tree mode to use (Live or Edit tree)
      * @param nodeId    the parent node ID
      * @param reference the reference
-     * @return the selected node. If no node was found, a runtime exception is thrown.
+     * @return the selected node. If no node was found, a FxNotFoundException is thrown.
      * @throws FxApplicationException on errors
      */
     FxTreeNode findChild(FxTreeMode mode, long nodeId, FxReference reference) throws FxApplicationException;

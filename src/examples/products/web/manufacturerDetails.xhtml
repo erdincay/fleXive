@@ -8,25 +8,26 @@
       xmlns:t="http://myfaces.apache.org/tomahawk"
       xmlns:fx="http://www.flexive.com/jsf/core"
       xmlns:products="http://www.flexive.com/jsf/examples/products">
-<head>
-    <fx:includes/>
-    <t:stylesheet path="/products.css"/>
-    
-    <t:saveState value="#{manufacturerBean.pk}"/>
-    <fx:content var="manufacturer" pk="#{manufacturerBean.pk}">
-        <title>#{fxMessageBean['products.manufacturer.title']}: #{manufacturer.name}</title>
-    </fx:content>
-</head>
 
-<body>
+<fx:content var="manufacturer" content="#{fxPageBean.pageContent}">
 
-    <h:form>
+    <head>
+        <fx:includes/>
+        <t:stylesheet path="/products.css"/>
 
-        <h:outputLink value="#{fx:url('')}">
-            #{fxMessageBean['products.button.backToProducts']}
-        </h:outputLink>
+        <title>
+            #{manufacturer.name} - #{fxMessageBean['products.page.title']}
+        </title>
+    </head>
 
-        <fx:content var="manufacturer" pk="#{manufacturerBean.pk}">
+    <body>
+
+        <h:form>
+
+            <h:outputLink value="#{fx:url('')}">
+                #{fxMessageBean['products.button.backToProducts']}
+            </h:outputLink>
+
             <div class="manufacturer">
                 <h1>
                     #{manufacturer.name}
@@ -46,15 +47,16 @@
                 </div>
 
                 <h3>#{fxMessageBean['products.manufacturer.products']} #{manufacturer.name}:</h3>
-                
+
                 <products:productTable value="#{manufacturerBean.products}"/>
 
             </div>
-        </fx:content>
-    </h:form>
+        </h:form>
 
-    <products:footer/>
+        <products:footer/>
 
-</body>
+    </body>
+
+</fx:content>
 
 </html>
