@@ -464,8 +464,8 @@ public class SearchEngineTest {
     public void dateConditionFunctionsTest() throws FxApplicationException {
         for (String name: new String[] { "date", "datetime" }) {
             testDateFunctionLT(name, 2020, DateFunction.YEAR, Calendar.YEAR);
-            testDateFunctionLT(name, 5, DateFunction.MONTH, Calendar.MONTH);
-            testDateFunctionLT(name, 15, DateFunction.DAY, Calendar.DAY_OF_MONTH);
+            testDateFunctionLT(name, 8, DateFunction.MONTH, Calendar.MONTH);
+            testDateFunctionLT(name, 20, DateFunction.DAY, Calendar.DAY_OF_MONTH);
         }
         testDateFunctionLT("datetime", 12, DateFunction.HOUR, Calendar.HOUR);
         testDateFunctionLT("datetime", 30, DateFunction.MINUTE, Calendar.MINUTE);
