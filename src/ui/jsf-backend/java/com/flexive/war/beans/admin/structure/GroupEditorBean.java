@@ -35,6 +35,7 @@ package com.flexive.war.beans.admin.structure;
 
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.messages.FxFacesMsgErr;
+import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.security.Role;
@@ -399,6 +400,7 @@ public class GroupEditorBean {
                 EJBLookup.getAssignmentEngine().save(group);
                 StructureTreeControllerBean s = (StructureTreeControllerBean) FxJsfUtils.getManagedBean("structureTreeControllerBean");
                 s.addAction(StructureTreeControllerBean.ACTION_RENAME_ASSIGNMENT, assignment.getId(), assignment.getDisplayName());
+                new FxFacesMsgInfo("GroupEditor.message.info.savedChanges", assignment.getLabel()).addToContext();
             }
             catch (Throwable t) {
                 new FxFacesMsgErr(t).addToContext();
@@ -422,7 +424,6 @@ public class GroupEditorBean {
                     assignmentId = EJBLookup.getAssignmentEngine().createGroup(group, parentXPath);
                 StructureTreeControllerBean s = (StructureTreeControllerBean) FxJsfUtils.getManagedBean("structureTreeControllerBean");
                 s.addAction(StructureTreeControllerBean.ACTION_RELOAD_SELECT_ASSIGNMENT, assignmentId, "");
-
             }
             catch (Throwable t) {
                 new FxFacesMsgErr(t).addToContext();
