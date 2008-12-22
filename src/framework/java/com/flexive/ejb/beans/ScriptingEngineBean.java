@@ -961,7 +961,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void executeStartupScripts() {
-        executeInitializerScripts("startup", "flexive", "fxresources", "[fleXive]", new DefaultScriptExecutor());
+        executeInitializerScripts("startup", "flexive", "fxresources", "[fleXive]", new NonFailingScriptExecutor());
     }
 
     /**
@@ -972,7 +972,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         if (!FxSharedUtils.getDrops().contains(dropName))
             throw new FxInvalidParameterException("dropName", "ex.scripting.drop.notFound", dropName);
         executeInitializerScripts("startup", dropName, dropName + "Resources", "drop " + dropName,
-                new DefaultScriptExecutor());
+                new NonFailingScriptExecutor());
     }
 
     private void executeInitializerScripts(String folder, String dropName, String prefix, String applicationName,
@@ -1050,7 +1050,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         boolean runScript(String name, String code);
     }
 
-    private class DefaultScriptExecutor implements ScriptExecutor {
+    private class NonFailingScriptExecutor implements ScriptExecutor {
         /**
          * {@inheritDoc}
          */
@@ -1068,7 +1068,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         }
     }
 
-    private class RunonceScriptExecutor extends DefaultScriptExecutor {
+    private class RunonceScriptExecutor implements ScriptExecutor {
         private final String applicationName;
 
         private RunonceScriptExecutor(String applicationName) {
@@ -1078,14 +1078,12 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         /**
          * {@inheritDoc}
          */
-        @Override
         public boolean runScript(String name, String code) {
             FxScriptRunInfo runInfo = new FxScriptRunInfo(System.currentTimeMillis(), applicationName, name);
             // TODO: write in tree cache for cluster support
             LocalScriptingCache.runOnceInfos.add(runInfo);
-            boolean result = false;
             try {
-                result = super.runScript(name, code);
+                runInitializerScript(name, code);
                 runInfo.endExecution(true);
             } catch (Exception e) {
                 runInfo.endExecution(false);
@@ -1099,7 +1097,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             } catch (InterruptedException e) {
                 //ignore
             }
-            return result;
+            return !ctx.getRollbackOnly();
         }
     }
 
