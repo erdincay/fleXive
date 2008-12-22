@@ -51,7 +51,7 @@
                         // open content editor
                         invokeContentAction("adm/content/contentEditor.jsf", "editInstance", {id: node.referenceId, readOnly: true});
                     }
-                } else if (parent.frames["contentFrame"].addTreeNode) {
+                } else if (parent.frames["contentFrame"].addTreeNode && !parent.frames["contentFrame"].isContentEditor) {
                     // add to query
                     parent.frames["contentFrame"].addTreeNode(node.objectId, treeLiveMode);
                 }

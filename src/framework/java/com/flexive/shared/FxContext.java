@@ -246,15 +246,9 @@ public class FxContext implements Serializable {
      * @return the user ticket
      */
     public static UserTicket getTicketFromEJB(final HttpSession session) {
-        try {
-            UserTicket ticket = EJBLookup.getAccountEngine().getUserTicket();
-            setLastUserTicket(session, ticket);
-            return ticket;
-        } catch (Exception e) {
-            System.err.println("Failed: " + e.getMessage() + "<br>");
-            e.printStackTrace();
-            return null;
-        }
+        UserTicket ticket = EJBLookup.getAccountEngine().getUserTicket();
+        setLastUserTicket(session, ticket);
+        return ticket;
     }
 
 
