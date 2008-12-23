@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="java" xml:id="core_structure_propassign_concept"  xmlns="http://docbook.org/ns/docbook">import com.flexive.shared.scripting.groovy.*
+import com.flexive.shared.value.*
+import com.flexive.shared.security.*
+import com.flexive.shared.*
+import com.flexive.shared.structure.*
+
+new GroovyTypeBuilder().person(description: new FxString("Person"),                     <co xml:id="cst_propassign_conc_1"/>
+        acl: CacheAdmin.environment.getACL(ACL.Category.STRUCTURE.defaultId),
+        multilang: true) {
+}
+// we "reload" the "Person" type to show the means of adding properties using the
+// GroovyTypeBuilder after type creation.
+def builder = new GroovyTypeBuilder("Person")                                           <co xml:id="cst_propassign_conc_2"/>
+builder {
+    firstname(dataType: FxDataType.String1024,                                          <co xml:id="cst_propassign_conc_3"/>
+            multilang: false,
+            description: new FxString(FxLanguage.ENGLISH, "A person's first name"),     <co xml:id="cst_propassign_conc_4"/>
+            multiplicity: FxMultiplicity.MULT_0_N)
+}
+
+new GroovyTypeBuilder().anotherperson(description: new FxString("Anotherperson"),       <co xml:id="cst_propassign_conc_5"/>
+        acl: CacheAdmin.environment.getACL(ACL.Category.STRUCTURE.defaultId),
+        multilang: true) {
+            anotherfirstname(assignment: "PERSON/FIRSTNAME",                            <co xml:id="cst_propassign_conc_6"/>
+            description: new FxString(FxLanguage.ENGLISH, "Another's first name"))      <co xml:id="cst_propassign_conc_7"/>
+}
+
+def name = ""
+def type = CacheAdmin.getEnvironment().getType("person")
+FxPropertyAssignment propAssign = type.getPropertyAssignment("PERSON/FIRSTNAME")
+name = propAssign.getLabel()
+EJBLookup.getAssignmentEngine().removeAssignment(propAss.getId(), false, false);        <co xml:id="cst_propassign_conc_8"/>
+
+
+FxProperty prop = CacheAdmin.getEnvironment().getProperty("firstname");                 <co xml:id="cst_propassign_conc_9"/>
+return "Removed assigned (label): " + name + "; Retained label for property: "
+    + String.valueOf(prop.getLabel())                                                   <co xml:id="cst_propassign_conc_10"/>
+</programlisting>

@@ -67,15 +67,15 @@
                     <para>Since properties can not exist if they are not assigned to a type, we assign them to the type
                         with the id
                         <varname>typeId</varname>
-                        to the root group ("/" - for an example how to assign it to a group of choice see <xref
-                            linkend="core_structure_groups"/>). Property names have to be unique but since "Name" is
+                        to the root group ("/" - for an example how to assign it to a group of choice see<xref
+                                linkend="core_structure_groups"/>). Property names have to be unique but since "Name" is
                         very
                         likely to be
                         used by another property already we allow &flexive; to auto-generate a unique property name (in
                         the form of "propertyname_"+running number) and make use of the feature that most setters return
                         the object itself (in this case the FxPropertyEdit object) which we pass to the<methodname>
-                        createProperty(..)</methodname>-method. This method will create the property and assign it to
-                        the type we passed as first argument - creating a new property and property-assignment entry.
+                            createProperty(..)</methodname>-method. This method will create the property and assign it
+                        to the type we passed as first argument - creating a new property and property-assignment entry.
                     </para>
                 </callout>
             </calloutlist>
@@ -134,7 +134,108 @@
             </calloutlist>
         </example>
     </para>
+    <section xml:id="core_structures_propassign_concept">
+        <title>Conceptual explanation of property assignments</title>
+        <para>
+            <para>
+                One of the most important concepts of &flexive; is the relation between properties (or groups) and their
+                assignments to types (or groups).
+                As mentioned in the introduction to this chapter: "A property defines a name and a datatype (and some
+                options). It can only exist (and is of relevance) if it is assigned to a type or group. The purpose of
+                keeping properties and their assignments separate is the ability to share them and query across multiple
+                types with a single property."
+            </para>
+            <para>
+                Essentially this means, that while a property does have unique attributes (which can be overwritten),
+                its
+                assignments to different types imply that these attributes can differ from the "original". As soon as a
+                property has no more assignments (i.e. is no longer associated to a type), it is removed from &flexive;
+                The ability to further assign the same property to multiple types enables &flexive; to carry out queries
+                for
+                these properties and returning results from any type they are attached to.
+            </para>
+            <para>
+                A simple, theoretical example:
+                Given the types "A" and "B", and property "T" having its label set to "foo".
+                First, "T" is assigned to "A"
+                Second, "T" is assigned to "B" and the assignment's label set to "bar".
 
+                Step I.) Querying "T"'s label (i.e. loading the <classname>FxProperty</classname>) will yield "foo".
+                Step II.) Querying for "T"'s assignment to "B" will yield "bar".
+                Step III.) After deleting the assignment of "T" to "A", the query in Step I.) will still yield "foo".
+            </para>
+            <para>This concept is best explained by giving a comprehensive example using actual &flexive; code:
+                The types "Person" and "Anotherperson" are created. The
+                property firstname will first be assigned to "Person",
+                then an assignment of the same property is made to "Anotherperson".
+                The original property assignment is then removed from "Person" showing that the property will still
+                retain the attributes it received during creation.
+            </para>
+            <para>Please note that the concepts explained here also apply to groups and their assignments.</para>
+            <example xml:id="core_structure_propassign_concept">
+                <title>Property assignment concepts</title>
+                <xi:include href="../listings/core_structure_propassign_concept.xml"/>
+                <calloutlist>
+                    <callout arearefs="cst_propassign_conc_1">
+                        <para>The type "Person" is created.
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_propassign_conc_2">
+                        <para>The
+                            <classname>GroovyTypeBuilder</classname>
+                            is called again loading the just created type. Incidentally this also shows how to create
+                            properties for a type using the builder after type creation.
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_propassign_conc_3">
+                        <para>Here we create / assign the property "firstname" and ..
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_propassign_conc_4">
+                        <para>.. set its label to "A person's first name".
+                            <para>Note that the
+                                <classname>GroovyTypeBuilder</classname>
+                                both creates an
+                                <classname>FxProperty</classname>
+                                as well as assigns it to the given type within the same block of code.
+                            </para>
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_propassign_conc_5">
+                        <para>The type "Anotherperson" is created ..
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_propassign_conc_6">
+                        <para>.. and the firstname property is assigned to this type having the alias
+                            "anotherfirstname".
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_propassign_conc_7">
+                        <para>The label is set to "Another's first name".
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_propassign_conc_8">
+                        <para>After temporarily storing the property's label (for later reference) we remove the
+                            assignment of the property "firstname" from the type "Person".
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_propassign_conc_9">
+                        <para>Since only the assignment was removed, we can still load the "original" property.
+                        </para>
+                    </callout>
+                    <callout arearefs="cst_propassign_conc_10">
+                        <para>We can then return both the assignment's label which was just removed, and for comparison
+                            reasons the label of the "stand-alone" property,
+                            showing they will be the same. The script will return the text:
+                            <code>Removed assigned (label): A person's name; Retained label for property: A person's
+                                name
+                            </code>
+                        </para>
+                    </callout>
+                </calloutlist>
+            </example>
+        </para>
+    </section>
     <section xml:id="core_structures_property_parameters">
         <title>Property parameters</title>
         <para>
@@ -261,7 +362,7 @@
                         <td>&list_yes;</td>
                         <td>&list_yes;</td>
                         <td>
-                            Option related operations. See <xref linkend="core_structures_options"/>.
+                            Option related operations. See<xref linkend="core_structures_options"/>.
                         </td>
                     </tr>
                     <tr>
