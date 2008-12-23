@@ -37,13 +37,13 @@
         <a4j:commandLink reRender="all" actionListener="#{srcEditor.moveElementUp}" eventsQueue="ceQueue"
                          onmouseover='ignoreEvent(event)'  onclick="if (!preA4jAction('#{group.XPathFull}','moveElementUp')) return false;">
             <f:setPropertyActionListener target="#{srcEditor.element}" value="#{group}"/>
-            <t:graphicImage alt="moveUp" url="/adm/images/contentEditor/up.png" style="#{upDownStyle};margin-left:3px"/>
+            <t:graphicImage alt="up" url="/adm/images/contentEditor/up.png" style="#{upDownStyle};margin-left:3px"/>
         </a4j:commandLink>
 
         <a4j:commandLink reRender="all" actionListener="#{srcEditor.moveElementDown}" eventsQueue="ceQueue"
                          onmouseover='ignoreEvent(event)'  onclick="if (!preA4jAction('#{group.XPathFull}','moveElementDown')) return false;">
             <f:setPropertyActionListener target="#{srcEditor.element}" value="#{group}"/>
-            <t:graphicImage alt="moveDown" url="/adm/images/contentEditor/down.png" style="#{upDownStyle}"/>
+            <t:graphicImage alt="down" url="/adm/images/contentEditor/down.png" style="#{upDownStyle}"/>
         </a4j:commandLink>
     </c:if>
 

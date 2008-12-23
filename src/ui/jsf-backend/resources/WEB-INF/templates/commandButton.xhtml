@@ -8,9 +8,25 @@
       xmlns:fn="http://java.sun.com/jsp/jstl/functions"
       xmlns:t="http://myfaces.apache.org/tomahawk">
 
-Basic [fleXive] submit button.
+Description:
+Backend submit button.
 
-See commandElement template for the parameter documentation
+Parameters:
+ label - the button label
+ labelKey - message key for the button label (overrides label when specified)
+ confirmKey - [optional] message key for a confirm dialog that will be displayed before the action is called
+ bean - the bean that the action belongs to
+ action - the action to call
+ immediate - [optional] the jsf immediate flag
+ page - [optional] the page to render when the button is clicked
+ location - [optional] The location where the icon is displayed [content|toolbar|both]. The default is content
+ separator - [optional], [before|after|none] If displayed in the toolbar a separator will be placed before or after the icon.
+ onclick - [optional] the onClick event of the action link
+ lockscreen - [optional] if false, the screen will not be locked when clicking this button
+ icon - [optional] the name of the icon to be displayed. the icon name is mapped to the url "adm/images/commandButton/${icon}.png"
+ iconUrl - [optional] the url (aboslute, including the context path)
+                      of the icon to be displayed (i.e. /flexive/images/myIcon.png)
+ rendered - [optional] flag to supress rendering of the whole component
 
 <ui:composition template="/adm/templates/commandElement.xhtml">
 
@@ -32,7 +48,7 @@ See commandElement template for the parameter documentation
 
     </ui:define>
 
-        </ui:composition>
+</ui:composition>
 
 
-        </html>
+</html>

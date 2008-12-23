@@ -14,7 +14,7 @@
 <ui:composition template="/adm/contentTemplate.xhtml">
     <ui:define name="head">
         <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/selection.js"> </script>
-        <script type="text/javascript" src="#{weblet:url('com.flexive.faces.weblets','/js/lytebox.js')}"/>
+        <script type="text/javascript" src="#{weblet:url('com.flexive.faces.weblets','/js/lytebox.js')}"></script>
     </ui:define>
 
     <ui:define name="body">
@@ -23,10 +23,6 @@
             <h:inputHidden value="#{fxSearchResultBean.viewType}"/>
 
             <adm:resultTabs activeTab="results"/>
-
-            <adm:commandButton id="listButton" labelKey="SearchResult.button.view.list" bean="#{fxSearchResultBean}" action="listView" icon="view_list" location="toolbar"/>
-            <adm:commandButton id="thumbsButton" labelKey="SearchResult.button.view.thumbs" bean="#{fxSearchResultBean}" action="thumbView" icon="view_thumbs" location="toolbar"/>
-            <adm:commandButton id="preferencesButton" location="toolbar" labelKey="ResultPreferences.button.open" bean="#{resultPreferencesBean}" action="show" icon="configure"/>
 
             <script type="text/javascript">
             <!--
@@ -175,6 +171,21 @@
                     </h:commandLink>
                 </div>
             </c:if>
+
+            <br/>
+            <adm:commandButton id="listButton" labelKey="SearchResult.button.view.list"
+                               bean="#{fxSearchResultBean}" action="listView"
+                               icon="view_list" location="both"
+                               rendered="#{fxSearchResultBean.viewType != 'LIST'}"/>
+            <adm:commandButton id="thumbsButton" labelKey="SearchResult.button.view.thumbs"
+                               bean="#{fxSearchResultBean}" action="thumbView"
+                               icon="view_thumbs" location="both"
+                               rendered="#{fxSearchResultBean.viewType != 'THUMBNAILS'}"/>
+            <adm:commandButton id="preferencesButton" labelKey="ResultPreferences.button.open" bean="#{resultPreferencesBean}" action="show" icon="configure" location="both">
+                <f:setPropertyActionListener value="#{fxSearchResultBean.typeId}" target="#{resultPreferencesBean.type}"/>
+                <f:setPropertyActionListener value="#{fxSearchResultBean.viewType}" target="#{resultPreferencesBean.viewType}"/>
+            </adm:commandButton>
+
             <adm:toolbarPluginButtons/>
 
         </a4j:form>

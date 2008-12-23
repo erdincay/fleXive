@@ -125,7 +125,7 @@
                 </transaction>
             </sql-call>
             <sql-call database="flexiveConfiguration" includes="config/*.sql"  url="${database.url.base}flexiveConfiguration"/>
-            <echo taskname="flexive">Successfully initialized a the flexive configuration database at ${database.url.base}${database.schema.config}</echo>
+            <echo taskname="flexive">Successfully initialized a the flexive configuration database at ${database.url.base}flexiveConfiguration</echo>
         </sequential>
     </macrodef>
 
