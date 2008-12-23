@@ -134,7 +134,7 @@
             </calloutlist>
         </example>
     </para>
-    <section xml:id="core_structures_propassign_concept">
+    <section xml:id="core_structures_propassign_concept_sec">
         <title>Conceptual explanation of property assignments</title>
         <para>
             <para>
@@ -172,7 +172,7 @@
                 retain the attributes it received during creation.
             </para>
             <para>Please note that the concepts explained here also apply to groups and their assignments.</para>
-            <example xml:id="core_structure_propassign_concept">
+            <example xml:id="core_structure_ex_propassign_concept">
                 <title>Property assignment concepts</title>
                 <xi:include href="../listings/core_structure_propassign_concept.xml"/>
                 <calloutlist>
