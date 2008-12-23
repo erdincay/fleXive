@@ -152,13 +152,7 @@ public class ResultPreferencesEngineTest {
     public void resultPreferencesWithAssignment() throws FxApplicationException {
         final long folderTypeId = CacheAdmin.getEnvironment().getType("folder").getId();
         try {
-            getResultPreferencesEngine().save(new ResultPreferences(
-                    Arrays.asList(new ResultColumnInfo("#folder/caption")),
-                    Arrays.asList(new ResultOrderByInfo("#folder/caption", SortDirection.ASCENDING)),
-                    25,
-                    75),
-                    folderTypeId,
-                    ResultViewType.LIST, AdminResultLocations.DEFAULT);
+            createFolderPreferences(folderTypeId);
             final FxResultSet result = new SqlQueryBuilder().select("@*").type("folder").getResult();
             assert result.getColumnCount() == 1 : "Expected one column, got: " + Arrays.toString(result.getColumnNames());
             assert result.getColumnName(1).equals("folder/caption") : "Invalid column name: " + result.getColumnName(1);
@@ -166,6 +160,30 @@ public class ResultPreferencesEngineTest {
             getResultPreferencesEngine().remove(folderTypeId, ResultViewType.LIST, AdminResultLocations.DEFAULT);
         }
     }
+
+    @Test
+    public void resultPreferencesAssignmentChecked_FX430() throws FxApplicationException {
+        final long folderTypeId = CacheAdmin.getEnvironment().getType("folder").getId();
+        try {
+            createFolderPreferences(folderTypeId);
+            assert getResultPreferencesEngine()
+                    .load(folderTypeId, ResultViewType.LIST, AdminResultLocations.DEFAULT)
+                    .getOrderByColumns().size() > 0 : "OrderBy with assignment removed by internal check routine";
+        } finally {
+            getResultPreferencesEngine().remove(folderTypeId, ResultViewType.LIST, AdminResultLocations.DEFAULT);
+        }
+    }
+
+    private void createFolderPreferences(long folderTypeId) throws FxApplicationException {
+        getResultPreferencesEngine().save(new ResultPreferences(
+                Arrays.asList(new ResultColumnInfo("#folder/caption")),
+                Arrays.asList(new ResultOrderByInfo("#folder/caption", SortDirection.ASCENDING)),
+                25,
+                75),
+                folderTypeId,
+                ResultViewType.LIST, AdminResultLocations.DEFAULT);
+    }
+
 
     private ResultPreferences createResultPreferences() {
         final List<ResultColumnInfo> selectedColumns = Arrays.asList(

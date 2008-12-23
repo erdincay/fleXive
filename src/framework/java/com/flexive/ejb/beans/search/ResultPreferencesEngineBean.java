@@ -200,7 +200,11 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
                 continue;
             }
             try {
-                environment.getProperty(info.getPropertyName());
+                if (info.getPropertyName().startsWith("#")) {
+                    environment.getAssignment(info.getPropertyName().substring(1));
+                } else {
+                    environment.getProperty(info.getPropertyName());
+                }
             } catch (FxRuntimeException e) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Removing property " + info.getPropertyName()
