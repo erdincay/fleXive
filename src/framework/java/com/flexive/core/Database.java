@@ -615,18 +615,22 @@ public final class Database {
                 FxString[] entry = result.get(id);
                 if (entry == null) {
                     entry = new FxString[columns.length];
-                    for (int i = 0; i < entry.length; i++) {
+                    /*for (int i = 0; i < entry.length; i++) {
                         entry[i] = new FxString(true, "");
                     }
-                    result.put(id, entry);
+                    result.put(id, entry);*/
                 }
                 for (int i = 0; i < columns.length; i++) {
                     final String translation = rs.getString(startIndex + i);
-                    entry[i].setTranslation(lang, translation);
+                    if( entry[i] == null )
+                        entry[i] = new FxString(true, lang, translation);
+                    else
+                        entry[i].setTranslation(lang, translation);
                     if (defLang) {
                         entry[i].setDefaultLanguage(lang);
                     }
                 }
+                result.put(id, entry);
             }
         } finally {
             closeObjects(Database.class, null, stmt);
