@@ -7,10 +7,12 @@
       xmlns:c="http://java.sun.com/jstl/core"
       xmlns:fn="http://java.sun.com/jsp/jstl/functions"
       xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:rich="http://richfaces.org/rich"
       xmlns:fx="http://www.flexive.com/jsf/core">
 <head>
     <t:stylesheet path="/adm/css/content.css"/>
-    <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/admin.js"/>
+    <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/admin.js"></script>
     <script type="text/javascript">
         <!--
         if( parent != null && parent.beginPage) {
@@ -153,8 +155,10 @@
                 <td>&nbsp;</td>
             </tr>
         </table>
+        </h:form>
 
 
+        <a4j:outputPanel id="flexiveWebRegion">
         <table class="welcometbl welcomeweb">
             <thead>
                 <tr>
@@ -241,27 +245,57 @@
                                 <th>#{fxMessageBean['Welcome.label.blog']}</th>
                             </tr>
                         </thead>
-                        <ui:repeat var="item" value="#{rssProviderBean.feed['http://blog.flexive.org/feed/?source=backend']}">
+
+                        <c:set var="blogsRendered" value="#{rssProviderBean.feedAvailable['http://blog.flexive.org/feed/?source=backend'] or fxSystemBean.ajaxRequest}"/>
+                        <ui:fragment rendered="#{blogsRendered}">
+                            <ui:repeat var="item" value="#{rssProviderBean.feed['http://blog.flexive.org/feed/?source=backend']}">
+                                <tr>
+                                    <td>
+                                        <a href="#{item.link}" target="_new">#{item.title}</a>
+                                    </td>
+                                </tr>
+                            </ui:repeat>
+                        </ui:fragment>
+                        <ui:fragment rendered="#{not blogsRendered}">
                             <tr>
                                 <td>
-                                    <a href="#{item.link}" target="_new">#{item.title}</a>
+                                    <h:graphicImage value="/pub/images/loading.gif" style="border:0"/>
                                 </td>
                             </tr>
-                        </ui:repeat>
+                        </ui:fragment>
                     </table>
                 </td>
             </tr>
         </table>
-    </h:form>
 
-    <script type="text/javascript">
-    <!--
-        if (parent && parent.pageLoaded) {
-            parent.pageLoaded(#{fxSystemBean.pageId}, #{fxSystemBean.pageRenderTime}, #{fxSystemBean.treeModified});
 
-        }
-    -->
-    </script>
+        <!-- Lazy loading of developer posts -->
+        <a4j:form id="updateBlogsForm">
+            <a4j:commandButton id="updateButton" reRender="flexiveWebRegion" style="display:none"/>
+        </a4j:form>
+        <ui:fragment rendered="#{not blogsRendered}">
+            <script type="text/javascript">
+            <!--
+                window.setTimeout(
+                        function() {
+                            document.getElementById("updateBlogsForm:updateButton").onclick()
+                        },
+                        500
+                );
+                
+            //-->
+            </script>
+        </ui:fragment>
+            
+        </a4j:outputPanel>
 
+        <script type="text/javascript">
+        <!--
+            if (parent && parent.pageLoaded) {
+                parent.pageLoaded(#{fxSystemBean.pageId}, #{fxSystemBean.pageRenderTime}, #{fxSystemBean.treeModified});
+
+            }
+        -->
+        </script>
 </body>
 </html>

@@ -54,10 +54,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Basic RSS provider bean (used on the start page). Feeds are cached in the session.
- *
+ * <p/>
  * <h3>Usage:</h3>
  * {@code #{rssProviderBean.feed['http://blog.flexive.org/feed/']}}
  *
@@ -93,7 +94,7 @@ public class RssProviderBean {
     }
 
     // cached feeds
-    private final Map<String, List<RssEntry>> feeds = new HashMap<String, List<RssEntry>>();
+    private final Map<String, List<RssEntry>> feeds = new ConcurrentHashMap<String, List<RssEntry>>();
     // Map function that returns RssEntries for String URLs
     private final Map<String, List<RssEntry>> feedMapper =
             FxSharedUtils.getMappedFunction(
@@ -111,6 +112,16 @@ public class RssProviderBean {
                             return feeds.get(url);
                         }
                     });
+    private final Map<String, Boolean> feedAvailableMapper =
+            new HashMap<String, Boolean>() {
+                private static final long serialVersionUID = 6292859461365973501L;
+
+                @SuppressWarnings({"SuspiciousMethodCalls"})
+                @Override
+                public Boolean get(Object key) {
+                    return feeds.containsKey(key);
+                }
+            };
 
     /**
      * Return a map that returns the items for a given feed URL, e.g.:
@@ -118,16 +129,29 @@ public class RssProviderBean {
      * {@code #{rssProviderBean.feed['http://blog.flexive.org/feed/']}}
      * </p>
      *
-     * @return  a map that returns the items for a given feed URL.
+     * @return a map that returns the items for a given feed URL.
      */
     public Map<String, List<RssEntry>> getFeed() {
         return feedMapper;
     }
 
     /**
+     * Return a map that returns a boolean flag if the given feed URL has already been fetched, e.g.:.
+     * <p/>
+     * <p>
+     * {@code #{rssProviderBean.feedAvailable['http://blog.flexive.org/feed']}}
+     * </p>
+     *
+     * @return a map that returns a boolean flag if the given feed URL has already been fetched.
+     */
+    public Map<String, Boolean> getFeedAvailable() {
+        return feedAvailableMapper;
+    }
+
+    /**
      * Fetch and parse a news feed (currently only tested with blog.flexive.org).
      *
-     * @param url the feed URL
+     * @param url      the feed URL
      * @param maxItems the maximum number of items returned
      * @return the news items
      */
