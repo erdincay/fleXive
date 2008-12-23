@@ -159,6 +159,8 @@ flexive.yui = new function() {
                         }
                 });
             loader.insert();
+        } else {
+            flexive.yui.processOnYahoo();   // FX-428
         }
     };
 
