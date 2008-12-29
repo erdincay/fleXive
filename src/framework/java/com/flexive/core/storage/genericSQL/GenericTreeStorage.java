@@ -904,7 +904,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
             }
             final FxTreeNode root = data.get(nodeId);
             if (root == null)
-                throw new FxLoadException(LOG, "ex.tree.node.notFound", nodeId, mode);
+                throw new FxNotFoundException(LOG, "ex.tree.node.notFound", nodeId, mode);
             FxTreeNode _root = getNode(con, mode, root.getId());
             root._applyPath(getPathById(con, mode, root.getId()));
             root._applyPosition(_root.getPosition());
