@@ -211,6 +211,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     //                                                                                                                                                                          1         2             3
     protected static final String BINARY_DESC_LOAD = "SELECT NAME,BLOBSIZE,XMLMETA,CREATED_AT,MIMETYPE,ISIMAGE,RESOLUTION,WIDTH,HEIGHT FROM " + TBL_CONTENT_BINARY + " WHERE ID=? AND VER=? AND QUALITY=?";
 
+    protected static final String CONTENT_FULLTEXT_INSERT = "INSERT INTO " + TBL_CONTENT_DATA_FT + "(ID,VER,LANG,ASSIGN,XMULT,VALUE) VALUES (?,?,?,?,?,?)";
+    //                                                                                                    1          2         3          4            5           6
+    protected static final String CONTENT_FULLTEXT_UPDATE = "UPDATE " + TBL_CONTENT_DATA_FT + " SET VALUE=? WHERE ID=? AND VER=? AND LANG=? AND ASSIGN=? AND XMULT=?";
+
     /**
      * {@inheritDoc}
      */
@@ -303,10 +307,13 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         content.getRootGroup().compactPositions(true);
         content.checkValidity();
         FxPK pk = createMainEntry(con, newId, 1, content);
+        PreparedStatement ps_ft = null;
         try {
             if (sql == null)
                 sql = new StringBuilder(2000);
-            createDetailEntries(con, env, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
+            ps_ft = con.prepareStatement(CONTENT_FULLTEXT_INSERT);
+            createDetailEntries(con, ps_ft, env, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
+            ps_ft.executeBatch();
             checkUniqueConstraints(con, env, sql, pk, content.getTypeId());
             content.resolveBinaryPreview();
             updateContentBinaryEntry(con, pk, content.getBinaryPreviewId(), content.getBinaryPreviewACL());
@@ -320,6 +327,16 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             if (e instanceof FxInvalidParameterException)
                 throw (FxInvalidParameterException) e;
             throw new FxCreateException(LOG, e);
+        } catch (SQLException e) {
+            throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
+        } finally {
+            if( ps_ft != null )
+                try {
+                    ps_ft.close();
+                } catch (SQLException e) {
+                    //noinspection ThrowFromFinallyBlock
+                    throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
+                }
         }
         return pk;
     }
@@ -386,13 +403,16 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         content.checkValidity();
 
         FxPK pk;
+        PreparedStatement ps_ft = null;
         try {
             int new_version = getContentVersionInfo(con, content.getPk().getId()).getMaxVersion() + 1;
             updateStepDependencies(con, content.getPk().getId(), new_version, env, env.getType(content.getTypeId()), content.getStepId());
             pk = createMainEntry(con, content.getPk().getId(), new_version, content);
             if (sql == null)
                 sql = new StringBuilder(2000);
-            createDetailEntries(con, env, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
+            ps_ft = con.prepareStatement(CONTENT_FULLTEXT_INSERT);
+            createDetailEntries(con, ps_ft, env, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
+            ps_ft.executeBatch();
             checkUniqueConstraints(con, env, sql, pk, content.getTypeId());
             updateContentBinaryEntry(con, pk, content.getBinaryPreviewId(), content.getBinaryPreviewACL());
         } catch (FxApplicationException e) {
@@ -401,6 +421,16 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             if (e instanceof FxInvalidParameterException)
                 throw (FxInvalidParameterException) e;
             throw new FxCreateException(e);
+        } catch (SQLException e) {
+            throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
+        } finally {
+            if( ps_ft != null )
+                try {
+                    ps_ft.close();
+                } catch (SQLException e) {
+                    //noinspection ThrowFromFinallyBlock
+                    throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
+                }
         }
 
         try {
@@ -593,6 +623,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * Create all detail entries for a content instance
      *
      * @param con         an open and valid connection
+     * @param ps_ft       batch prepared statement for fulltext inserts
      * @param env         FxEnvironment
      * @param sql         an optional StringBuffer
      * @param pk          primary key of the content
@@ -603,7 +634,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @throws FxDbException       on errors
      * @throws FxCreateException   on errors
      */
-    protected void createDetailEntries(Connection con, FxEnvironment env, StringBuilder sql, FxPK pk,
+    protected void createDetailEntries(Connection con, PreparedStatement ps_ft, FxEnvironment env, StringBuilder sql, FxPK pk,
                                        boolean maxVersion, boolean liveVersion, List<FxData> data) throws FxNotFoundException, FxDbException, FxCreateException {
         try {
             FxProperty prop;
@@ -611,10 +642,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 if (curr.isProperty()) {
                     prop = ((FxPropertyAssignment) env.getAssignment(curr.getAssignmentId())).getProperty();
                     if (!prop.isSystemInternal())
-                        insertPropertyData(prop, data, con, sql, pk, ((FxPropertyData) curr), maxVersion, liveVersion);
+                        insertPropertyData(prop, data, con, ps_ft, sql, pk, ((FxPropertyData) curr), maxVersion, liveVersion);
                 } else {
                     insertGroupData(con, sql, pk, ((FxGroupData) curr), maxVersion, liveVersion);
-                    createDetailEntries(con, env, sql, pk, maxVersion, liveVersion, ((FxGroupData) curr).getChildren());
+                    createDetailEntries(con, ps_ft, env, sql, pk, maxVersion, liveVersion, ((FxGroupData) curr).getChildren());
                 }
             }
         } catch (SQLException e) {
@@ -655,21 +686,22 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @param prop      thepropery
      * @param allData   List of all data belonging to this property (for cascaded updates like binaries to avoid duplicates)
      * @param con       an open and valid connection
+     * @param ps_ft     batch prepared statement for fulltext inserts
      * @param sql       an optional StringBuffer
      * @param pk        primary key of the content
      * @param data      the value
      * @param isMaxVer  is this content in the max. version?
-     * @param isLiveVer is this content in the live version?
-     * @throws SQLException        on errors
+     * @param isLiveVer is this content in the live version? @throws SQLException        on errors
      * @throws FxDbException       on errors
      * @throws FxUpdateException   on errors
      * @throws FxNoAccessException for FxNoAccess values
+     * @throws SQLException        on SQL errors
      */
-    protected void insertPropertyData(FxProperty prop, List<FxData> allData, Connection con, StringBuilder sql, FxPK pk,
+    protected void insertPropertyData(FxProperty prop, List<FxData> allData, Connection con, PreparedStatement ps_ft, StringBuilder sql, FxPK pk,
                                       FxPropertyData data, boolean isMaxVer, boolean isLiveVer) throws SQLException, FxDbException, FxUpdateException, FxNoAccessException {
         if (data == null || data.isEmpty())
             return;
-        PreparedStatement ps = null, ps_ft = null;
+        PreparedStatement ps = null;
         if (sql == null)
             sql = new StringBuilder(1000);
         else
@@ -715,11 +747,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setLong(14, prop.getId());
             ps.setString(15, XPathElement.stripType(data.getParent().getXPathFull()));
 
-            sql.setLength(0);
-            sql.append("INSERT INTO ").append(TBL_CONTENT_DATA_FT).
-                    append("(ID,VER,LANG,ASSIGN,XMULT,VALUE) VALUES (?,?,?,?,?,?)");
-            ps_ft = con.prepareStatement(sql.toString());
-
             ps_ft.setLong(1, pk.getId());
             ps_ft.setInt(2, pk.getVersion());
             if (!data.getValue().isMultiLanguage()) {
@@ -733,8 +760,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } finally {
             if (ps != null)
                 ps.close();
-            if (ps_ft != null)
-                ps_ft.close();
         }
     }
 
@@ -745,6 +770,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @param prop    the property unless change is a group change
      * @param allData all content data unless change is a group change
      * @param con     an open and valid connection
+     * @param ps_ft   batch prepared statement for fulltext updates
      * @param sql     sql
      * @param pk      primary key
      * @param data    property data unless change is a group change
@@ -754,11 +780,11 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @throws FxNoAccessException for FxNoAccess values
      */
     protected void updatePropertyData(FxDelta.FxDeltaChange change, FxProperty prop, List<FxData> allData,
-                                      Connection con, StringBuilder sql, FxPK pk, FxPropertyData data)
+                                      Connection con, PreparedStatement ps_ft, StringBuilder sql, FxPK pk, FxPropertyData data)
             throws SQLException, FxDbException, FxUpdateException, FxNoAccessException {
         if ((change.isProperty() && (data == null || data.isEmpty())) || !(change.isDataChange() || change.isPositionChange()))
             return;
-        PreparedStatement ps = null, ps_ft = null;
+        PreparedStatement ps = null;
         if (sql == null)
             sql = new StringBuilder(1000);
         else
@@ -814,11 +840,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 return;
             }
 
-            sql.setLength(0);
-            //                                                                   1          2         3          4            5           6
-            sql.append("UPDATE ").append(TBL_CONTENT_DATA_FT).append(" SET VALUE=? WHERE ID=? AND VER=? AND LANG=? AND ASSIGN=? AND XMULT=?");
-            ps_ft = con.prepareStatement(sql.toString());
-
             ps_ft.setLong(2, pk.getId());
             ps_ft.setInt(3, pk.getVersion());
             //3==lang
@@ -828,8 +849,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } finally {
             if (ps != null)
                 ps.close();
-            if (ps_ft != null)
-                ps_ft.close();
         }
     }
 
@@ -1057,7 +1076,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 }
                 ps.executeUpdate();
                 if (prop.isFulltextIndexed())
-                    ps_ft.executeUpdate();
+                    ps_ft.addBatch();
             }
         } else {
             switch (prop.getDataType()) {
@@ -1828,6 +1847,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             //delta-updates:
             List<FxDelta.FxDeltaChange> updatesRemaining = new ArrayList<FxDelta.FxDeltaChange>(delta.getUpdates());
 
+            PreparedStatement ps_ft_insert = con.prepareStatement(CONTENT_FULLTEXT_INSERT);
+            PreparedStatement ps_ft_update = con.prepareStatement(CONTENT_FULLTEXT_UPDATE);
+
             while (updatesRemaining.size() > 0) {
                 FxDelta.FxDeltaChange change = updatesRemaining.get(0);
                 //noinspection CaughtExceptionImmediatelyRethrown
@@ -1842,17 +1864,17 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         if (change.isGroup()) {
                             if (change.isPositionChange() && !change.isDataChange()) {
                                 //groups can only change position
-                                updatePropertyData(change, null, null, con, sql, pk, null);
+                                updatePropertyData(change, null, null, con, ps_ft_update, sql, pk, null);
                             }
                         } else {
                             FxProperty prop = env.getProperty(((FxPropertyData) change.getNewData()).getPropertyId());
                             if (!change._isUpdateable()) {
                                 deleteDetailData(con, sql, pk, change.getOriginalData());
-                                insertPropertyData(prop, content.getData("/"), con, sql, pk,
+                                insertPropertyData(prop, content.getData("/"), con, ps_ft_insert, sql, pk,
                                         ((FxPropertyData) change.getNewData()),
                                         content.isMaxVersion(), content.isLiveVersion());
                             } else {
-                                updatePropertyData(change, prop, content.getData("/"), con, sql, pk,
+                                updatePropertyData(change, prop, content.getData("/"), con, ps_ft_update, sql, pk,
                                         ((FxPropertyData) change.getNewData()));
                             }
                             //check if the property changed is a FQN
@@ -1896,7 +1918,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         insertGroupData(con, sql, pk, (FxGroupData) change.getNewData(), content.isMaxVersion(), content.isLiveVersion());
                     else
                         insertPropertyData(env.getProperty(((FxPropertyData) change.getNewData()).getPropertyId()),
-                                content.getData("/"), con, sql, pk, ((FxPropertyData) change.getNewData()),
+                                content.getData("/"), con, ps_ft_insert, sql, pk, ((FxPropertyData) change.getNewData()),
                                 content.isMaxVersion(), content.isLiveVersion());
                 }
                 if (checkScripting)
@@ -1906,6 +1928,11 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         scripting.runScript(scriptId, binding);
                     }
             }
+
+            ps_ft_insert.executeBatch();
+            ps_ft_insert.close();
+            ps_ft_update.executeBatch();
+            ps_ft_update.close();
 
             checkUniqueConstraints(con, env, sql, pk, content.getTypeId());
             if (delta.isInternalPropertyChanged()) {

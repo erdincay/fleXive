@@ -593,15 +593,15 @@ public final class Database {
         final StringBuilder sql = new StringBuilder();
         final Map<Long, FxString[]> result = new HashMap<Long, FxString[]>();
         try {
-            sql.append("SELECT id, lang");
+            sql.append("SELECT ID, LANG");
             final boolean hasDefLang = columns.length == 1; // deflang is only meaningful for single-column tables
             if (hasDefLang) {
-                sql.append(", deflang");
+                sql.append(", DEFLANG");
             }
             for (String column : columns) {
                 sql.append(',').append(column);
             }
-            sql.append(" FROM ").append(table).append(ML);
+            sql.append(" FROM ").append(table).append(ML).append(" ORDER BY LANG");
             final int startIndex = hasDefLang ? 4 : 3;
             stmt = con.createStatement();
             final ResultSet rs = stmt.executeQuery(sql.toString());
