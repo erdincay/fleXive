@@ -101,6 +101,15 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         return data;
     }
 
+    /**
+     * Helper to convert a var array of int to a 'real' int array
+     *
+     * @param data ints to put into an array
+     * @return int array from parameters
+     */
+    protected static int[] array(int... data) {
+        return data;
+    }
 
     private static final Log LOG = LogFactory.getLog(GenericHierarchicalStorage.class);
 
@@ -137,6 +146,35 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             "FDATE1,FDATE2,FBLOB,FCLOB,FINT,FBIGINT,FTEXT1024,FDOUBLE,FFLOAT,FBOOL,FSELECT,FREF FROM " + TBL_CONTENT_DATA +
             //         1         2
             " WHERE ID=? AND VER=? ORDER BY XDEPTH ASC, POS ASC, ASSIGN ASC, XMULT ASC";
+
+    //single insert statement for content data
+    protected static final String CONTENT_DATA_INSERT = "INSERT INTO " + TBL_CONTENT_DATA +
+            //1  2   3   4    5      6     7         8     9      10          11        12                 13      14    15          16
+            "(ID,VER,POS,LANG,ASSIGN,XPATH,XPATHMULT,XMULT,XINDEX,PARENTXMULT,ISMAX_VER,ISLIVE_VER,ISGROUP,ISMLDEF,TPROP,PARENTXPATH,XDEPTH," +
+            //17     18   19     20       21       22       23        24        25
+            "FSELECT,FREF,FDATE1,FDATE1_Y,FDATE1_M,FDATE1_D,FDATE1_HH,FDATE1_MM,FDATE1_SS," +
+            //26    27       28       29       30        31        32        33    34    35     36   37      38
+            "FDATE2,FDATE2_Y,FDATE2_M,FDATE2_D,FDATE2_HH,FDATE2_MM,FDATE2_SS,FBLOB,FCLOB,UFCLOB,FINT,FBIGINT,FTEXT1024," +
+            //39        40      41     42
+            "UFTEXT1024,FDOUBLE,FFLOAT,FBOOL)" +
+            //                              ISGROUP     16
+            "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,false,?,?,?,?," +
+            "?,?,?,?,?,?,?,?,?," +
+            "?,?,?,?,?,?,?,?,?,?,?,?,?," +
+            "?,?,?,?)";
+
+    //single update statement for content data
+    protected static final String CONTENT_DATA_UPDATE = "UPDATE " + TBL_CONTENT_DATA +
+            //        1         2
+            " SET POS=?,ISMLDEF=?," +
+            //       3      4        5          6          7          8           9           10          11
+            "FSELECT=?,FREF=?,FDATE1=?,FDATE1_Y=?,FDATE1_M=?,FDATE1_D=?,FDATE1_HH=?,FDATE1_MM=?,FDATE1_SS=?," +
+            //      12         13         14         15          16          17          18      19      20       21
+            "FDATE2=?,FDATE2_Y=?,FDATE2_M=?,FDATE2_D=?,FDATE2_HH=?,FDATE2_MM=?,FDATE2_SS=?,FBLOB=?,FCLOB=?,UFCLOB=?," +
+            //    22        23          24           25        26       27      28
+            "FINT=?,FBIGINT=?,FTEXT1024=?,UFTEXT1024=?,FDOUBLE=?,FFLOAT=?,FBOOL=? " +
+            //        29        30         31           32              33
+            "WHERE ID=? AND VER=? AND LANG=? AND ASSIGN=? AND XPATHMULT=?";
 
     //                                                                                                       1         2
     protected static final String CONTENT_DATA_REMOVE_VERSION = "DELETE FROM " + TBL_CONTENT_DATA + " WHERE ID=? AND VER=?";
@@ -215,6 +253,37 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     //                                                                                                    1          2         3          4            5           6
     protected static final String CONTENT_FULLTEXT_UPDATE = "UPDATE " + TBL_CONTENT_DATA_FT + " SET VALUE=? WHERE ID=? AND VER=? AND LANG=? AND ASSIGN=? AND XMULT=?";
 
+    //prepared statement positions
+    protected final static int INSERT_LANG_POS = 4;
+    protected final static int INSERT_ISDEF_LANG_POS = 13;
+    //position of first value
+    protected final static int INSERT_VALUE_POS = 16;
+    //position of last value
+    protected final static int INSERT_END_POS = 42;
+    //position of the id field (start of the wqhere clause) for detail updates
+    protected final static int UPDATE_ID_POS = 29;
+    protected final static int UPDATE_POS_POS = 1;
+    protected final static int UPDATE_MLDEF_POS = 2;
+
+    protected final static int FT_LANG_POS_INSERT = 3;
+    protected final static int FT_VALUE_POS_INSERT = 6;
+    protected final static int FT_LANG_POS_UPDATE = 4;
+    protected final static int FT_VALUE_POS_UPDATE = 1;
+
+    /**
+     * Set a prepared statements values to <code>NULL</code> from startPos to endPos
+     *
+     * @param ps       prepared statement
+     * @param startPos start position
+     * @param endPos   end position
+     * @throws SQLException on errors
+     */
+    protected static void clearPreparedStatement(PreparedStatement ps, int startPos, int endPos) throws SQLException {
+        for (int i = startPos; i <= endPos; i++)
+            ps.setNull(i, Types.NULL);
+    }
+
+
     /**
      * {@inheritDoc}
      */
@@ -232,39 +301,97 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     }
 
     /**
+     * Get the insert position of the uppercase column for a detail property or <code>-1</code> if no uppercase column exists
+     *
+     * @param prop   detail property
+     * @param insert get column pos for an insert or update?
+     * @return insert position of the uppercase column for a detail property or <code>-1</code> if no uppercase column exists
+     */
+    public int getUppercaseColumnPos(FxProperty prop, boolean insert) {
+        if (prop.isSystemInternal())
+            return -1;
+        switch (prop.getDataType()) {
+            case String1024:
+                return insert ? 39 : 25; //UFTEXT1024
+            case Text:
+                return insert ? 35 : 21; //UFCLOB
+            default:
+                return -1;
+        }
+    }
+
+    /**
      * {@inheritDoc}
      */
     public String getQueryUppercaseColumn(FxProperty property) {
-        if(!property.isSystemInternal() && property.getDataType() == FxDataType.HTML)
+        if (!property.isSystemInternal() && property.getDataType() == FxDataType.HTML)
             return "UPPER(UFCLOB)";
         return getUppercaseColumn(property);
     }
 
-    // propertyId -> columns
+    // propertyId -> column names
     protected static final HashMap<Long, String[]> mainColumnHash;
-    // dataType -> columns
-    protected static final HashMap<FxDataType, String[]> detailColumnHash;
+    // dataType -> column names
+    protected static final HashMap<FxDataType, String[]> detailColumnNameHash;
+    // dataType -> column insert positions
+    protected static final HashMap<FxDataType, int[]> detailColumnInsertPosHash;
+    // dataType -> column update positions
+    protected static final HashMap<FxDataType, int[]> detailColumnUpdatePosHash;
 
     static {
-        detailColumnHash = new HashMap<FxDataType, String[]>(20);
-        detailColumnHash.put(FxDataType.Binary, array("FBLOB"));
-        detailColumnHash.put(FxDataType.Boolean, array("FBOOL"));
-        detailColumnHash.put(FxDataType.Date, array("FDATE1", "FDATE1_Y", "FDATE1_M", "FDATE1_D"));
-        detailColumnHash.put(FxDataType.DateRange, array("FDATE1", "FDATE1_Y", "FDATE1_M", "FDATE1_D",
+        detailColumnNameHash = new HashMap<FxDataType, String[]>(20);
+        detailColumnInsertPosHash = new HashMap<FxDataType, int[]>(20);
+        detailColumnUpdatePosHash = new HashMap<FxDataType, int[]>(20);
+        detailColumnNameHash.put(FxDataType.Binary, array("FBLOB"));
+        detailColumnInsertPosHash.put(FxDataType.Binary, array(33));
+        detailColumnUpdatePosHash.put(FxDataType.Binary, array(19));
+        detailColumnNameHash.put(FxDataType.Boolean, array("FBOOL"));
+        detailColumnInsertPosHash.put(FxDataType.Boolean, array(42));
+        detailColumnUpdatePosHash.put(FxDataType.Boolean, array(28));
+        detailColumnNameHash.put(FxDataType.Date, array("FDATE1", "FDATE1_Y", "FDATE1_M", "FDATE1_D"));
+        detailColumnInsertPosHash.put(FxDataType.Date, array(19, 20, 21, 22));
+        detailColumnUpdatePosHash.put(FxDataType.Date, array(5, 6, 7, 8));
+        detailColumnNameHash.put(FxDataType.DateRange, array("FDATE1", "FDATE1_Y", "FDATE1_M", "FDATE1_D",
                 "FDATE2", "FDATE2_Y", "FDATE2_M", "FDATE2_D"));
-        detailColumnHash.put(FxDataType.DateTime, array("FDATE1", "FDATE1_Y", "FDATE1_M", "FDATE1_D", "FDATE1_HH", "FDATE1_MM", "FDATE1_SS"));
-        detailColumnHash.put(FxDataType.DateTimeRange, array("FDATE1", "FDATE1_Y", "FDATE1_M", "FDATE1_D", "FDATE1_HH", "FDATE1_MM", "FDATE1_SS",
+        detailColumnInsertPosHash.put(FxDataType.DateRange, array(19, 20, 21, 22, 26, 27, 28, 29));
+        detailColumnUpdatePosHash.put(FxDataType.DateRange, array(5, 6, 7, 8, 12, 13, 14, 15));
+        detailColumnNameHash.put(FxDataType.DateTime, array("FDATE1", "FDATE1_Y", "FDATE1_M", "FDATE1_D", "FDATE1_HH", "FDATE1_MM", "FDATE1_SS"));
+        detailColumnInsertPosHash.put(FxDataType.DateTime, array(19, 20, 21, 22, 23, 24, 25));
+        detailColumnUpdatePosHash.put(FxDataType.DateTime, array(5, 6, 7, 8, 9, 10, 11));
+        detailColumnNameHash.put(FxDataType.DateTimeRange, array("FDATE1", "FDATE1_Y", "FDATE1_M", "FDATE1_D", "FDATE1_HH", "FDATE1_MM", "FDATE1_SS",
                 "FDATE2", "FDATE2_Y", "FDATE2_M", "FDATE2_D", "FDATE2_HH", "FDATE2_MM", "FDATE2_SS"));
-        detailColumnHash.put(FxDataType.Double, array("FDOUBLE"));
-        detailColumnHash.put(FxDataType.Float, array("FFLOAT"));
-        detailColumnHash.put(FxDataType.LargeNumber, array("FBIGINT"));
-        detailColumnHash.put(FxDataType.Number, array("FINT"));
-        detailColumnHash.put(FxDataType.Reference, array("FREF"));
-        detailColumnHash.put(FxDataType.String1024, array("FTEXT1024"));
-        detailColumnHash.put(FxDataType.Text, array("FCLOB"));
-        detailColumnHash.put(FxDataType.HTML, array("FCLOB", "FBOOL", "UFCLOB"));
-        detailColumnHash.put(FxDataType.SelectOne, array("FSELECT"));
-        detailColumnHash.put(FxDataType.SelectMany, array("FSELECT", "FTEXT1024"/*comma separated list of selected id's*/));
+        detailColumnInsertPosHash.put(FxDataType.DateTimeRange, array(19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32));
+        detailColumnUpdatePosHash.put(FxDataType.DateTimeRange, array(5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18));
+        detailColumnNameHash.put(FxDataType.Double, array("FDOUBLE"));
+        detailColumnInsertPosHash.put(FxDataType.Double, array(40));
+        detailColumnUpdatePosHash.put(FxDataType.Double, array(26));
+        detailColumnNameHash.put(FxDataType.Float, array("FFLOAT"));
+        detailColumnInsertPosHash.put(FxDataType.Float, array(41));
+        detailColumnUpdatePosHash.put(FxDataType.Float, array(27));
+        detailColumnNameHash.put(FxDataType.LargeNumber, array("FBIGINT"));
+        detailColumnInsertPosHash.put(FxDataType.LargeNumber, array(37));
+        detailColumnUpdatePosHash.put(FxDataType.LargeNumber, array(23));
+        detailColumnNameHash.put(FxDataType.Number, array("FINT"));
+        detailColumnInsertPosHash.put(FxDataType.Number, array(36));
+        detailColumnUpdatePosHash.put(FxDataType.Number, array(22));
+        detailColumnNameHash.put(FxDataType.Reference, array("FREF"));
+        detailColumnInsertPosHash.put(FxDataType.Reference, array(18));
+        detailColumnUpdatePosHash.put(FxDataType.Reference, array(4));
+        detailColumnNameHash.put(FxDataType.String1024, array("FTEXT1024"));
+        detailColumnInsertPosHash.put(FxDataType.String1024, array(38));
+        detailColumnUpdatePosHash.put(FxDataType.String1024, array(24));
+        detailColumnNameHash.put(FxDataType.Text, array("FCLOB"));
+        detailColumnInsertPosHash.put(FxDataType.Text, array(34));
+        detailColumnUpdatePosHash.put(FxDataType.Text, array(20));
+        detailColumnNameHash.put(FxDataType.HTML, array("FCLOB", "FBOOL", "UFCLOB"));
+        detailColumnInsertPosHash.put(FxDataType.HTML, array(34, 42, 35));
+        detailColumnUpdatePosHash.put(FxDataType.HTML, array(20, 28, 21));
+        detailColumnNameHash.put(FxDataType.SelectOne, array("FSELECT"));
+        detailColumnInsertPosHash.put(FxDataType.SelectOne, array(17));
+        detailColumnUpdatePosHash.put(FxDataType.SelectOne, array(3));
+        detailColumnNameHash.put(FxDataType.SelectMany, array("FSELECT", "FTEXT1024"/*comma separated list of selected id's*/));
+        detailColumnInsertPosHash.put(FxDataType.SelectMany, array(17, 38/*comma separated list of selected id's*/));
+        detailColumnUpdatePosHash.put(FxDataType.SelectMany, array(3, 24/*comma separated list of selected id's*/));
 
         mainColumnHash = new HashMap<Long, String[]>(20);
         mainColumnHash.put(0L, array("ID"));
@@ -296,7 +423,27 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     public String[] getColumns(FxProperty prop) {
         if (prop.isSystemInternal())
             return mainColumnHash.get(prop.getId());
-        return detailColumnHash.get(prop.getDataType());
+        return detailColumnNameHash.get(prop.getDataType());
+    }
+
+    /**
+     * Get the insert positions for the given detail properties
+     *
+     * @param prop property
+     * @return insert positions for the prepared statement
+     */
+    protected int[] getColumnPosInsert(FxProperty prop) {
+        return detailColumnInsertPosHash.get(prop.getDataType());
+    }
+
+    /**
+     * Get the insert positions for the given detail properties
+     *
+     * @param prop property
+     * @return insert positions for the prepared statement
+     */
+    protected int[] getColumnPosUpdate(FxProperty prop) {
+        return detailColumnUpdatePosHash.get(prop.getDataType());
     }
 
     /**
@@ -307,12 +454,15 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         content.getRootGroup().compactPositions(true);
         content.checkValidity();
         FxPK pk = createMainEntry(con, newId, 1, content);
+        PreparedStatement ps = null;
         PreparedStatement ps_ft = null;
         try {
             if (sql == null)
                 sql = new StringBuilder(2000);
+            ps = con.prepareStatement(CONTENT_DATA_INSERT);
             ps_ft = con.prepareStatement(CONTENT_FULLTEXT_INSERT);
-            createDetailEntries(con, ps_ft, env, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
+            createDetailEntries(con, ps, ps_ft, env, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
+            ps.executeBatch();
             ps_ft.executeBatch();
             checkUniqueConstraints(con, env, sql, pk, content.getTypeId());
             content.resolveBinaryPreview();
@@ -330,7 +480,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } catch (SQLException e) {
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
-            if( ps_ft != null )
+            if (ps_ft != null)
                 try {
                     ps_ft.close();
                 } catch (SQLException e) {
@@ -403,6 +553,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         content.checkValidity();
 
         FxPK pk;
+        PreparedStatement ps = null;
         PreparedStatement ps_ft = null;
         try {
             int new_version = getContentVersionInfo(con, content.getPk().getId()).getMaxVersion() + 1;
@@ -410,8 +561,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             pk = createMainEntry(con, content.getPk().getId(), new_version, content);
             if (sql == null)
                 sql = new StringBuilder(2000);
+            ps = con.prepareStatement(CONTENT_DATA_INSERT);
             ps_ft = con.prepareStatement(CONTENT_FULLTEXT_INSERT);
-            createDetailEntries(con, ps_ft, env, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
+            createDetailEntries(con, ps, ps_ft, env, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
+            ps.executeBatch();
             ps_ft.executeBatch();
             checkUniqueConstraints(con, env, sql, pk, content.getTypeId());
             updateContentBinaryEntry(con, pk, content.getBinaryPreviewId(), content.getBinaryPreviewACL());
@@ -424,7 +577,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } catch (SQLException e) {
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
-            if( ps_ft != null )
+            if (ps_ft != null)
                 try {
                     ps_ft.close();
                 } catch (SQLException e) {
@@ -623,6 +776,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * Create all detail entries for a content instance
      *
      * @param con         an open and valid connection
+     * @param ps          batch prepared statement for detail inserts
      * @param ps_ft       batch prepared statement for fulltext inserts
      * @param env         FxEnvironment
      * @param sql         an optional StringBuffer
@@ -634,7 +788,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @throws FxDbException       on errors
      * @throws FxCreateException   on errors
      */
-    protected void createDetailEntries(Connection con, PreparedStatement ps_ft, FxEnvironment env, StringBuilder sql, FxPK pk,
+    protected void createDetailEntries(Connection con, PreparedStatement ps, PreparedStatement ps_ft, FxEnvironment env, StringBuilder sql, FxPK pk,
                                        boolean maxVersion, boolean liveVersion, List<FxData> data) throws FxNotFoundException, FxDbException, FxCreateException {
         try {
             FxProperty prop;
@@ -642,10 +796,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 if (curr.isProperty()) {
                     prop = ((FxPropertyAssignment) env.getAssignment(curr.getAssignmentId())).getProperty();
                     if (!prop.isSystemInternal())
-                        insertPropertyData(prop, data, con, ps_ft, sql, pk, ((FxPropertyData) curr), maxVersion, liveVersion);
+                        insertPropertyData(prop, data, con, ps, ps_ft, sql, pk, ((FxPropertyData) curr), maxVersion, liveVersion);
                 } else {
                     insertGroupData(con, sql, pk, ((FxGroupData) curr), maxVersion, liveVersion);
-                    createDetailEntries(con, ps_ft, env, sql, pk, maxVersion, liveVersion, ((FxGroupData) curr).getChildren());
+                    createDetailEntries(con, ps, ps_ft, env, sql, pk, maxVersion, liveVersion, ((FxGroupData) curr).getChildren());
                 }
             }
         } catch (SQLException e) {
@@ -672,20 +826,13 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         return "1"; //attached to root
     }
 
-    protected final static int INSERT_LANG_POS = 4;
-    protected final static int INSERT_ISDEF_LANG_POS = 13;
-    protected final static int INSERT_VALUE_POS = 16;
-    protected final static int FT_LANG_POS_INSERT = 3;
-    protected final static int FT_VALUE_POS_INSERT = 6;
-    protected final static int FT_LANG_POS_UPDATE = 4;
-    protected final static int FT_VALUE_POS_UPDATE = 1;
-
     /**
      * Insert property detail data into the database
      *
      * @param prop      thepropery
      * @param allData   List of all data belonging to this property (for cascaded updates like binaries to avoid duplicates)
      * @param con       an open and valid connection
+     * @param ps        batch prepared statement for detail inserts
      * @param ps_ft     batch prepared statement for fulltext inserts
      * @param sql       an optional StringBuffer
      * @param pk        primary key of the content
@@ -697,70 +844,40 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @throws FxNoAccessException for FxNoAccess values
      * @throws SQLException        on SQL errors
      */
-    protected void insertPropertyData(FxProperty prop, List<FxData> allData, Connection con, PreparedStatement ps_ft, StringBuilder sql, FxPK pk,
+    protected void insertPropertyData(FxProperty prop, List<FxData> allData, Connection con,
+                                      PreparedStatement ps, PreparedStatement ps_ft, StringBuilder sql, FxPK pk,
                                       FxPropertyData data, boolean isMaxVer, boolean isLiveVer) throws SQLException, FxDbException, FxUpdateException, FxNoAccessException {
         if (data == null || data.isEmpty())
             return;
-        PreparedStatement ps = null;
-        if (sql == null)
-            sql = new StringBuilder(1000);
-        else
-            sql.setLength(0);
-        try {
-            String[] columns = getColumns(prop);
-            String upperColumn = getUppercaseColumn(prop);
-            sql.append("INSERT INTO ").append(TBL_CONTENT_DATA).
-                    //                1  2   3   4    5      6     7         8     9      10          11        12                 13      14    15          16
-                            append(" (ID,VER,POS,LANG,ASSIGN,XPATH,XPATHMULT,XMULT,XINDEX,PARENTXMULT,ISMAX_VER,ISLIVE_VER,ISGROUP,ISMLDEF,TPROP,PARENTXPATH,XDEPTH,");
-            for (String col : columns)
-                sql.append(col).append(',');
-            if (upperColumn != null)
-                sql.append(upperColumn);
-            else
-                sql.deleteCharAt(sql.length() - 1); //delete last ','
-            sql.append(")VALUES(?,?,?,?,?,?,?,?,?,?,?,?,false,?,?,?,");
-            //calculate depth
-            sql.append(data.getIndices().length).append(',');
-            int s = 0;
-            while (s < columns.length) {
-                sql.append("?,");
-                s++;
-            }
-            if (upperColumn != null)
-                sql.append('?');
-            else
-                sql.deleteCharAt(sql.length() - 1); //delete last ',' if no uppercase column
-            sql.append(')');
-            ps = con.prepareStatement(sql.toString());
-            ps.setLong(1, pk.getId());
-            ps.setInt(2, pk.getVersion());
-            ps.setInt(3, data.getPos());
-            ps.setLong(5, data.getAssignmentId());
-            ps.setString(6, XPathElement.stripType(data.getXPath()));
-            ps.setString(7, XPathElement.stripType(data.getXPathFull()));
-            String xmult = StringUtils.join(ArrayUtils.toObject(data.getIndices()), ',');
-            ps.setString(8, xmult);
-            ps.setInt(9, data.getIndex());
-            ps.setString(10, getParentGroupXMult(xmult));
-            ps.setBoolean(11, isMaxVer);
-            ps.setBoolean(12, isLiveVer);
-            ps.setLong(14, prop.getId());
-            ps.setString(15, XPathElement.stripType(data.getParent().getXPathFull()));
+        clearPreparedStatement(ps, INSERT_VALUE_POS, INSERT_END_POS);
+        ps.setLong(17, 0); //FSELECT has to be set to 0 and not null
 
-            ps_ft.setLong(1, pk.getId());
-            ps_ft.setInt(2, pk.getVersion());
-            if (!data.getValue().isMultiLanguage()) {
-                ps.setBoolean(INSERT_LANG_POS, true);
-                ps_ft.setInt(FT_LANG_POS_INSERT, (int) FxLanguage.DEFAULT_ID);
-            } else
-                ps.setBoolean(INSERT_ISDEF_LANG_POS, false);
-            ps_ft.setLong(4, data.getAssignmentId());
-            ps_ft.setString(5, xmult);
-            setPropertyData(true, -1, prop, allData, con, data, ps, ps_ft, upperColumn);
-        } finally {
-            if (ps != null)
-                ps.close();
-        }
+        ps.setLong(1, pk.getId());
+        ps.setInt(2, pk.getVersion());
+        ps.setInt(3, data.getPos());
+        ps.setLong(5, data.getAssignmentId());
+        ps.setString(6, XPathElement.stripType(data.getXPath()));
+        ps.setString(7, XPathElement.stripType(data.getXPathFull()));
+        String xmult = StringUtils.join(ArrayUtils.toObject(data.getIndices()), ',');
+        ps.setString(8, xmult);
+        ps.setInt(9, data.getIndex());
+        ps.setString(10, getParentGroupXMult(xmult));
+        ps.setBoolean(11, isMaxVer);
+        ps.setBoolean(12, isLiveVer);
+        ps.setLong(14, prop.getId());
+        ps.setString(15, XPathElement.stripType(data.getParent().getXPathFull()));
+        ps.setInt(16, data.getIndices().length);
+
+        ps_ft.setLong(1, pk.getId());
+        ps_ft.setInt(2, pk.getVersion());
+        if (!data.getValue().isMultiLanguage()) {
+            ps.setBoolean(INSERT_LANG_POS, true);
+            ps_ft.setInt(FT_LANG_POS_INSERT, (int) FxLanguage.DEFAULT_ID);
+        } else
+            ps.setBoolean(INSERT_ISDEF_LANG_POS, false);
+        ps_ft.setLong(4, data.getAssignmentId());
+        ps_ft.setString(5, xmult);
+        setPropertyData(true, prop, allData, con, data, ps, ps_ft, getUppercaseColumnPos(prop, true));
     }
 
     /**
@@ -770,6 +887,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @param prop    the property unless change is a group change
      * @param allData all content data unless change is a group change
      * @param con     an open and valid connection
+     * @param ps      batch prepared statement for detail updates
      * @param ps_ft   batch prepared statement for fulltext updates
      * @param sql     sql
      * @param pk      primary key
@@ -780,98 +898,68 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @throws FxNoAccessException for FxNoAccess values
      */
     protected void updatePropertyData(FxDelta.FxDeltaChange change, FxProperty prop, List<FxData> allData,
-                                      Connection con, PreparedStatement ps_ft, StringBuilder sql, FxPK pk, FxPropertyData data)
+                                      Connection con, PreparedStatement ps, PreparedStatement ps_ft, StringBuilder sql, FxPK pk, FxPropertyData data)
             throws SQLException, FxDbException, FxUpdateException, FxNoAccessException {
         if ((change.isProperty() && (data == null || data.isEmpty())) || !(change.isDataChange() || change.isPositionChange()))
             return;
-        PreparedStatement ps = null;
-        if (sql == null)
-            sql = new StringBuilder(1000);
+        clearPreparedStatement(ps, 1, UPDATE_ID_POS);
+        ps.setLong(3, 0); //FSELECT has to be set to 0 and not null!
+
+        if (change.isPositionChange())
+            ps.setInt(UPDATE_POS_POS, change.getNewData().getPos());
         else
-            sql.setLength(0);
-        try {
+            ps.setInt(UPDATE_POS_POS, change.getOriginalData().getPos());
 
-            int pos_idx = 1;
-            String upperColumn = null;
-            sql.append("UPDATE ").append(TBL_CONTENT_DATA).append(" SET ");
-
-            if (change.isDataChange() && !change.isGroup()) {
-                String[] columns = getColumns(prop);
-                upperColumn = getUppercaseColumn(prop);
-                sql.append("ISMLDEF=?,");
-                for (String col : columns)
-                    sql.append(col).append("=?,");
-                if (upperColumn != null)
-                    sql.append(upperColumn).append("=?,");
-
-                pos_idx = columns.length + (upperColumn == null ? 2 : 3);
-            }
-
-            if (change.isPositionChange())
-                sql.append("POS=?");
-            else {
-                pos_idx--;
-                sql.deleteCharAt(sql.length() - 1); //remove last ","
-            }
-            //                    1         2          3            4               5
-            sql.append(" WHERE ID=? AND VER=? AND LANG=? AND ASSIGN=? AND XPATHMULT=?");
-
-            ps = con.prepareStatement(sql.toString());
-            if (change.isPositionChange())
-                ps.setInt(pos_idx, change.getNewData().getPos());
-            ps.setLong(pos_idx + 1, pk.getId());
-            ps.setInt(pos_idx + 2, pk.getVersion());
+        ps.setLong(UPDATE_ID_POS, pk.getId());
+        ps.setInt(UPDATE_ID_POS + 1, pk.getVersion());
 //            ps.setInt(pos_idx+3, /*lang*/);
-            ps.setLong(pos_idx + 4, change.getNewData().getAssignmentId());
-            ps.setString(pos_idx + 5, XPathElement.stripType(change.getNewData().getXPathFull()) + (data == null ? "/" : ""));
+        ps.setLong(UPDATE_ID_POS + 3, change.getNewData().getAssignmentId());
+        ps.setString(UPDATE_ID_POS + 4, XPathElement.stripType(change.getNewData().getXPathFull()) + (data == null ? "/" : ""));
 
-            if (change.isGroup()) {
-                ps.setInt(pos_idx + 3, (int) FxLanguage.SYSTEM_ID);
-                ps.executeUpdate();
-                return;
-            }
-
-            if (change.isPositionChange() && !change.isDataChange()) {
-                //just update positions
-                for (long lang : data.getValue().getTranslatedLanguages()) {
-                    ps.setInt(pos_idx + 3, (int) lang);
-                    ps.executeUpdate();
-                }
-                return;
-            }
-
-            ps_ft.setLong(2, pk.getId());
-            ps_ft.setInt(3, pk.getVersion());
-            //3==lang
-            ps_ft.setLong(5, data.getAssignmentId());
-            ps_ft.setString(6, StringUtils.join(ArrayUtils.toObject(data.getIndices()), ','));
-            setPropertyData(false, pos_idx, prop, allData, con, data, ps, ps_ft, upperColumn);
-        } finally {
-            if (ps != null)
-                ps.close();
+        if (change.isGroup()) {
+            ps.setInt(UPDATE_ID_POS + 2, (int) FxLanguage.SYSTEM_ID);
+            ps.addBatch();
+            return;
         }
+
+        if (change.isPositionChange() && !change.isDataChange()) {
+            //just update positions
+            assert data != null;
+            for (long lang : data.getValue().getTranslatedLanguages()) {
+                ps.setInt(UPDATE_ID_POS + 2, (int) lang);
+                ps.addBatch();
+            }
+            return;
+        }
+
+        ps_ft.setLong(2, pk.getId());
+        ps_ft.setInt(3, pk.getVersion());
+        //3==lang
+        assert data != null;
+        ps_ft.setLong(5, data.getAssignmentId());
+        ps_ft.setString(6, StringUtils.join(ArrayUtils.toObject(data.getIndices()), ','));
+        setPropertyData(false, prop, allData, con, data, ps, ps_ft, getUppercaseColumnPos(prop, false));
     }
 
     /**
      * Set a properties data for inserts or updates
      *
-     * @param insert              perform insert or update?
-     * @param update_position_idx position in the prepared statement to start at
-     * @param prop                current property
-     * @param allData             all data of the instance (might be needed to buld references, etc.)
-     * @param con                 an open and valid connection
-     * @param data                current property data
-     * @param ps                  prepared statement for the data table
-     * @param ps_ft               prepared statement for the fulltext table
-     * @param upperColumn         name of the uppercase column (if present)
+     * @param insert         perform insert or update?
+     * @param prop           current property
+     * @param allData        all data of the instance (might be needed to buld references, etc.)
+     * @param con            an open and valid connection
+     * @param data           current property data
+     * @param ps             prepared statement for the data table
+     * @param ps_ft          prepared statement for the fulltext table
+     * @param upperColumnPos position of the uppercase column (if present, else <code>-1</code>)
      * @throws SQLException        on errors
      * @throws FxUpdateException   on errors
      * @throws FxDbException       on errors
      * @throws FxNoAccessException for FxNoAccess values
      */
-    private void setPropertyData(boolean insert, int update_position_idx, FxProperty prop, List<FxData> allData,
+    private void setPropertyData(boolean insert, FxProperty prop, List<FxData> allData,
                                  Connection con, FxPropertyData data, PreparedStatement ps, PreparedStatement ps_ft,
-                                 String upperColumn) throws SQLException, FxUpdateException, FxDbException, FxNoAccessException {
+                                 int upperColumnPos) throws SQLException, FxUpdateException, FxDbException, FxNoAccessException {
         FxValue value = data.getValue();
         if (value instanceof FxNoAccess) {
             throw new FxNoAccessException("ex.content.value.noaccess");
@@ -885,9 +973,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             else
                 throw new FxUpdateException("ex.content.value.invalid.multilanguage.ass.single", data.getXPathFull());
         }
-        int pos_lang = insert ? INSERT_LANG_POS : update_position_idx + 3;
-        int pos_isdef_lang = insert ? INSERT_ISDEF_LANG_POS : 1;
-        int pos_value = insert ? INSERT_VALUE_POS : 2;
+        int pos_lang = insert ? INSERT_LANG_POS : UPDATE_ID_POS + 2;
+        int pos_isdef_lang = insert ? INSERT_ISDEF_LANG_POS : UPDATE_MLDEF_POS;
         if (prop.getDataType().isSingleRowStorage()) {
             //Data types that just use one db row can be handled in a very similar way
             Object translatedValue;
@@ -902,33 +989,32 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     ps.setBoolean(pos_isdef_lang, true);
                 else
                     ps.setBoolean(pos_isdef_lang, value.isDefaultLanguage(value.getTranslatedLanguages()[i]));
-                if (upperColumn != null)
-                    ps.setString(pos_value + 1, translatedValue.toString().toUpperCase());
+                if (upperColumnPos != -1)
+                    ps.setString(upperColumnPos, translatedValue.toString().toUpperCase());
                 ps_ft.setLong(insert ? FT_LANG_POS_INSERT : FT_LANG_POS_UPDATE, value.getTranslatedLanguages()[i]);
                 ps_ft.setString(insert ? FT_VALUE_POS_INSERT : FT_VALUE_POS_UPDATE, translatedValue.toString());
+                int[] pos = insert ? getColumnPosInsert(prop) : getColumnPosUpdate(prop);
                 switch (prop.getDataType()) {
                     case Double:
                         checkDataType(FxDouble.class, value, data.getXPathFull());
-                        ps.setDouble(pos_value, (Double) translatedValue);
-//                        ps.setBigDecimal(pos_value, new BigDecimal((Double) translatedValue));
+                        ps.setDouble(pos[0], (Double) translatedValue);
                         break;
                     case Float:
                         checkDataType(FxFloat.class, value, data.getXPathFull());
-                        ps.setFloat(pos_value, (Float) translatedValue);
-//                        ps.setBigDecimal(pos_value, new BigDecimal(((Float) translatedValue).doubleValue()));
+                        ps.setFloat(pos[0], (Float) translatedValue);
                         break;
                     case LargeNumber:
                         checkDataType(FxLargeNumber.class, value, data.getXPathFull());
-                        ps.setLong(pos_value, (Long) translatedValue);
+                        ps.setLong(pos[0], (Long) translatedValue);
                         break;
                     case Number:
                         checkDataType(FxNumber.class, value, data.getXPathFull());
-                        ps.setInt(pos_value, (Integer) translatedValue);
+                        ps.setInt(pos[0], (Integer) translatedValue);
                         break;
                     case HTML:
                         checkDataType(FxHTML.class, value, data.getXPathFull());
                         boolean useTidy = ((FxHTML) value).isTidyHTML();
-                        ps.setBoolean(pos_value + 1, useTidy);
+                        ps.setBoolean(pos[1], useTidy);
                         if (useTidy)
                             translatedValue = doTidy(data.getXPathFull(), (String) translatedValue);
                         String extracted;
@@ -939,17 +1025,17 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                             throw new FxUpdateException("ex.content.value.extraction.failed");
                         } else
                             extracted = xd.getText();
-                        ps.setString(pos_value + 2, extracted);
-                        ps.setString(pos_value, (String) translatedValue);
+                        ps.setString(pos[2], extracted);
+                        ps.setString(pos[0], (String) translatedValue);
                         break;
                     case String1024:
                     case Text:
                         checkDataType(FxString.class, value, data.getXPathFull());
-                        ps.setString(pos_value, (String) translatedValue);
+                        ps.setString(pos[0], (String) translatedValue);
                         break;
                     case Boolean:
                         checkDataType(FxBoolean.class, value, data.getXPathFull());
-                        ps.setBoolean(pos_value, (Boolean) translatedValue);
+                        ps.setBoolean(pos[0], (Boolean) translatedValue);
                         break;
                     case Date:
                         checkDataType(FxDate.class, value, data.getXPathFull());
@@ -961,22 +1047,22 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         gc.set(GregorianCalendar.MINUTE, 0);
                         gc.set(GregorianCalendar.SECOND, 0);
                         gc.set(GregorianCalendar.MILLISECOND, 0);
-                        ps.setDate(pos_value, new java.sql.Date(gc.getTimeInMillis()));
-                        ps.setInt(pos_value + 1, gc.get(GregorianCalendar.YEAR));
-                        ps.setInt(pos_value + 2, gc.get(GregorianCalendar.MONTH) + 1);
-                        ps.setInt(pos_value + 3, gc.get(GregorianCalendar.DAY_OF_MONTH));
+                        ps.setDate(pos[0], new java.sql.Date(gc.getTimeInMillis()));
+                        ps.setInt(pos[1], gc.get(GregorianCalendar.YEAR));
+                        ps.setInt(pos[2], gc.get(GregorianCalendar.MONTH) + 1);
+                        ps.setInt(pos[3], gc.get(GregorianCalendar.DAY_OF_MONTH));
                         break;
                     case DateTime:
                         checkDataType(FxDateTime.class, value, data.getXPathFull());
                         if (gc == null) gc = new GregorianCalendar();
                         gc.setTime((java.util.Date) translatedValue);
-                        ps.setTimestamp(pos_value, new Timestamp(gc.getTimeInMillis()));
-                        ps.setInt(pos_value + 1, gc.get(GregorianCalendar.YEAR));
-                        ps.setInt(pos_value + 2, gc.get(GregorianCalendar.MONTH) + 1);
-                        ps.setInt(pos_value + 3, gc.get(GregorianCalendar.DAY_OF_MONTH));
-                        ps.setInt(pos_value + 4, gc.get(GregorianCalendar.HOUR_OF_DAY));
-                        ps.setInt(pos_value + 5, gc.get(GregorianCalendar.MINUTE));
-                        ps.setInt(pos_value + 6, gc.get(GregorianCalendar.SECOND));
+                        ps.setTimestamp(pos[0], new Timestamp(gc.getTimeInMillis()));
+                        ps.setInt(pos[1], gc.get(GregorianCalendar.YEAR));
+                        ps.setInt(pos[2], gc.get(GregorianCalendar.MONTH) + 1);
+                        ps.setInt(pos[3], gc.get(GregorianCalendar.DAY_OF_MONTH));
+                        ps.setInt(pos[4], gc.get(GregorianCalendar.HOUR_OF_DAY));
+                        ps.setInt(pos[5], gc.get(GregorianCalendar.MINUTE));
+                        ps.setInt(pos[6], gc.get(GregorianCalendar.SECOND));
                         break;
                     case DateRange:
                         checkDataType(FxDateRange.class, value, data.getXPathFull());
@@ -986,50 +1072,50 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         gc.set(GregorianCalendar.MINUTE, 0);
                         gc.set(GregorianCalendar.SECOND, 0);
                         gc.set(GregorianCalendar.MILLISECOND, 0);
-                        ps.setDate(pos_value, new java.sql.Date(gc.getTimeInMillis()));
-                        ps.setInt(pos_value + 1, gc.get(GregorianCalendar.YEAR));
-                        ps.setInt(pos_value + 2, gc.get(GregorianCalendar.MONTH) + 1);
-                        ps.setInt(pos_value + 3, gc.get(GregorianCalendar.DAY_OF_MONTH));
+                        ps.setDate(pos[0], new java.sql.Date(gc.getTimeInMillis()));
+                        ps.setInt(pos[1], gc.get(GregorianCalendar.YEAR));
+                        ps.setInt(pos[2], gc.get(GregorianCalendar.MONTH) + 1);
+                        ps.setInt(pos[3], gc.get(GregorianCalendar.DAY_OF_MONTH));
                         gc.setTime(((DateRange) translatedValue).getUpper());
                         gc.set(GregorianCalendar.HOUR, 0);
                         gc.set(GregorianCalendar.MINUTE, 0);
                         gc.set(GregorianCalendar.SECOND, 0);
                         gc.set(GregorianCalendar.MILLISECOND, 0);
-                        ps.setDate(pos_value + 4, new java.sql.Date(gc.getTimeInMillis()));
-                        ps.setInt(pos_value + 5, gc.get(GregorianCalendar.YEAR));
-                        ps.setInt(pos_value + 6, gc.get(GregorianCalendar.MONTH) + 1);
-                        ps.setInt(pos_value + 7, gc.get(GregorianCalendar.DAY_OF_MONTH));
+                        ps.setDate(pos[4], new java.sql.Date(gc.getTimeInMillis()));
+                        ps.setInt(pos[5], gc.get(GregorianCalendar.YEAR));
+                        ps.setInt(pos[6], gc.get(GregorianCalendar.MONTH) + 1);
+                        ps.setInt(pos[7], gc.get(GregorianCalendar.DAY_OF_MONTH));
                         break;
                     case DateTimeRange:
                         checkDataType(FxDateTimeRange.class, value, data.getXPathFull());
                         if (gc == null) gc = new GregorianCalendar();
                         gc.setTime(((DateRange) translatedValue).getLower());
-                        ps.setTimestamp(pos_value, new Timestamp(gc.getTimeInMillis()));
-                        ps.setInt(pos_value + 1, gc.get(GregorianCalendar.YEAR));
-                        ps.setInt(pos_value + 2, gc.get(GregorianCalendar.MONTH) + 1);
-                        ps.setInt(pos_value + 3, gc.get(GregorianCalendar.DAY_OF_MONTH));
-                        ps.setInt(pos_value + 4, gc.get(GregorianCalendar.HOUR_OF_DAY));
-                        ps.setInt(pos_value + 5, gc.get(GregorianCalendar.MINUTE));
-                        ps.setInt(pos_value + 6, gc.get(GregorianCalendar.SECOND));
+                        ps.setTimestamp(pos[0], new Timestamp(gc.getTimeInMillis()));
+                        ps.setInt(pos[1], gc.get(GregorianCalendar.YEAR));
+                        ps.setInt(pos[2], gc.get(GregorianCalendar.MONTH) + 1);
+                        ps.setInt(pos[3], gc.get(GregorianCalendar.DAY_OF_MONTH));
+                        ps.setInt(pos[4], gc.get(GregorianCalendar.HOUR_OF_DAY));
+                        ps.setInt(pos[5], gc.get(GregorianCalendar.MINUTE));
+                        ps.setInt(pos[6], gc.get(GregorianCalendar.SECOND));
                         gc.setTime(((DateRange) translatedValue).getUpper());
-                        ps.setTimestamp(pos_value + 7, new Timestamp(gc.getTimeInMillis()));
-                        ps.setInt(pos_value + 8, gc.get(GregorianCalendar.YEAR));
-                        ps.setInt(pos_value + 9, gc.get(GregorianCalendar.MONTH) + 1);
-                        ps.setInt(pos_value + 10, gc.get(GregorianCalendar.DAY_OF_MONTH));
-                        ps.setInt(pos_value + 11, gc.get(GregorianCalendar.HOUR_OF_DAY));
-                        ps.setInt(pos_value + 12, gc.get(GregorianCalendar.MINUTE));
-                        ps.setInt(pos_value + 13, gc.get(GregorianCalendar.SECOND));
+                        ps.setTimestamp(pos[7], new Timestamp(gc.getTimeInMillis()));
+                        ps.setInt(pos[8], gc.get(GregorianCalendar.YEAR));
+                        ps.setInt(pos[9], gc.get(GregorianCalendar.MONTH) + 1);
+                        ps.setInt(pos[10], gc.get(GregorianCalendar.DAY_OF_MONTH));
+                        ps.setInt(pos[11], gc.get(GregorianCalendar.HOUR_OF_DAY));
+                        ps.setInt(pos[12], gc.get(GregorianCalendar.MINUTE));
+                        ps.setInt(pos[13], gc.get(GregorianCalendar.SECOND));
                         break;
                     case Binary:
                         checkDataType(FxBinary.class, value, data.getXPathFull());
                         BinaryDescriptor binary = (BinaryDescriptor) translatedValue;
                         if (!binary.isNewBinary()) {
-                            ps.setLong(pos_value, binary.getId());
+                            ps.setLong(pos[0], binary.getId());
                         } else {
                             try {
                                 //transfer the binary from the transit table to the binary table
                                 BinaryDescriptor created = binaryTransit(con, binary);
-                                ps.setLong(pos_value, created.getId());
+                                ps.setLong(pos[0], created.getId());
                                 //check all other properties if they contain the same handle
                                 //and replace with the data of the new binary
                                 for (FxData _curr : allData) {
@@ -1050,7 +1136,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         break;
                     case SelectOne:
                         checkDataType(FxSelectOne.class, value, data.getXPathFull());
-                        ps.setLong(pos_value, ((FxSelectListItem) translatedValue).getId());
+                        ps.setLong(pos[0], ((FxSelectListItem) translatedValue).getId());
                         break;
                     case SelectMany:
                         checkDataType(FxSelectMany.class, value, data.getXPathFull());
@@ -1059,22 +1145,22 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                             FxSelectListItem item = sm.getSelected().get(i1);
                             if (i1 > 0)
                                 ps.executeUpdate();
-                            ps.setLong(pos_value, item.getId());
-                            ps.setString(pos_value + 1, sm.getSelectedIdsList());
+                            ps.setLong(pos[0], item.getId());
+                            ps.setString(pos[1], sm.getSelectedIdsList());
                         }
                         if (sm.getSelected().size() == 0)
-                            ps.setLong(pos_value, 0); //write the virtual item as a marker to have a valid row
+                            ps.setLong(pos[0], 0); //write the virtual item as a marker to have a valid row
                         break;
                     case Reference:
                         checkDataType(FxReference.class, value, data.getXPathFull());
                         checkReference(con, prop.getReferencedType(), ((ReferencedContent) translatedValue), data.getXPathFull());
-                        ps.setLong(pos_value, ((ReferencedContent) translatedValue).getId());
+                        ps.setLong(pos[0], ((ReferencedContent) translatedValue).getId());
                         break;
                     case InlineReference:
                     default:
                         throw new FxDbException(LOG, "ex.db.notImplemented.store", prop.getDataType().getName());
                 }
-                ps.executeUpdate();
+                ps.addBatch();
                 if (prop.isFulltextIndexed())
                     ps_ft.addBatch();
             }
@@ -1119,7 +1205,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     //ignore
                 }
         }
-        //To change body of created methods use File | Settings | File Templates.
     }
 
     /**
@@ -1847,92 +1932,105 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             //delta-updates:
             List<FxDelta.FxDeltaChange> updatesRemaining = new ArrayList<FxDelta.FxDeltaChange>(delta.getUpdates());
 
-            PreparedStatement ps_ft_insert = con.prepareStatement(CONTENT_FULLTEXT_INSERT);
-            PreparedStatement ps_ft_update = con.prepareStatement(CONTENT_FULLTEXT_UPDATE);
+            PreparedStatement ps_insert = null;
+            PreparedStatement ps_update = null;
+            PreparedStatement ps_ft_insert = null;
+            PreparedStatement ps_ft_update = null;
 
-            while (updatesRemaining.size() > 0) {
-                FxDelta.FxDeltaChange change = updatesRemaining.get(0);
-                //noinspection CaughtExceptionImmediatelyRethrown
-                try {
-                    if (checkScripting)
-                        for (long scriptId : change.getOriginalData().getAssignment().
-                                getScriptMapping(FxScriptEvent.BeforeDataChangeUpdate)) {
-                            binding.setVariable("change", change);
-                            scripting.runScript(scriptId, binding);
-                        }
-                    if (!change.getOriginalData().isSystemInternal()) {
-                        if (change.isGroup()) {
-                            if (change.isPositionChange() && !change.isDataChange()) {
-                                //groups can only change position
-                                updatePropertyData(change, null, null, con, ps_ft_update, sql, pk, null);
+            try {
+                ps_insert = con.prepareStatement(CONTENT_DATA_INSERT);
+                ps_update = con.prepareStatement(CONTENT_DATA_UPDATE);
+                ps_ft_insert = con.prepareStatement(CONTENT_FULLTEXT_INSERT);
+                ps_ft_update = con.prepareStatement(CONTENT_FULLTEXT_UPDATE);
+
+                while (updatesRemaining.size() > 0) {
+                    FxDelta.FxDeltaChange change = updatesRemaining.get(0);
+                    //noinspection CaughtExceptionImmediatelyRethrown
+                    try {
+                        if (checkScripting)
+                            for (long scriptId : change.getOriginalData().getAssignment().
+                                    getScriptMapping(FxScriptEvent.BeforeDataChangeUpdate)) {
+                                binding.setVariable("change", change);
+                                scripting.runScript(scriptId, binding);
                             }
-                        } else {
-                            FxProperty prop = env.getProperty(((FxPropertyData) change.getNewData()).getPropertyId());
-                            if (!change._isUpdateable()) {
-                                deleteDetailData(con, sql, pk, change.getOriginalData());
-                                insertPropertyData(prop, content.getData("/"), con, ps_ft_insert, sql, pk,
-                                        ((FxPropertyData) change.getNewData()),
-                                        content.isMaxVersion(), content.isLiveVersion());
+                        if (!change.getOriginalData().isSystemInternal()) {
+                            if (change.isGroup()) {
+                                if (change.isPositionChange() && !change.isDataChange()) {
+                                    //groups can only change position
+                                    updatePropertyData(change, null, null, con, ps_update, ps_ft_update, sql, pk, null);
+                                }
                             } else {
-                                updatePropertyData(change, prop, content.getData("/"), con, ps_ft_update, sql, pk,
-                                        ((FxPropertyData) change.getNewData()));
-                            }
-                            //check if the property changed is a FQN
-                            if (prop.getId() == fqnPropertyId) {
-                                FxValue val = ((FxPropertyData) change.getNewData()).getValue();
-                                if (!val.isEmpty() && val instanceof FxString)
-                                    StorageManager.getTreeStorage().syncFQNName(con, pk.getId(), content.isMaxVersion(), content.isLiveVersion(), (String) val.getBestTranslation());
+                                FxProperty prop = env.getProperty(((FxPropertyData) change.getNewData()).getPropertyId());
+                                if (!change._isUpdateable()) {
+                                    deleteDetailData(con, sql, pk, change.getOriginalData());
+                                    insertPropertyData(prop, content.getData("/"), con, ps_insert, ps_ft_insert, sql, pk,
+                                            ((FxPropertyData) change.getNewData()),
+                                            content.isMaxVersion(), content.isLiveVersion());
+                                } else {
+                                    updatePropertyData(change, prop, content.getData("/"), con, ps_update, ps_ft_update, sql, pk,
+                                            ((FxPropertyData) change.getNewData()));
+                                }
+                                //check if the property changed is a FQN
+                                if (prop.getId() == fqnPropertyId) {
+                                    FxValue val = ((FxPropertyData) change.getNewData()).getValue();
+                                    if (!val.isEmpty() && val instanceof FxString)
+                                        StorageManager.getTreeStorage().syncFQNName(con, pk.getId(), content.isMaxVersion(), content.isLiveVersion(), (String) val.getBestTranslation());
+                                }
                             }
                         }
+                        if (checkScripting)
+                            for (long scriptId : change.getOriginalData().getAssignment().
+                                    getScriptMapping(FxScriptEvent.AfterDataChangeUpdate)) {
+                                binding.setVariable("change", change);
+                                scripting.runScript(scriptId, binding);
+                            }
+                        updatesRemaining.remove(0);
+                    } catch (SQLException e) {
+                        change._increaseRetries();
+                        if (change._getRetryCount() > 100)
+                            throw e;
+                        updatesRemaining.remove(0);
+                        updatesRemaining.add(change); //add as last
+                    }
+                }
+
+                //delta-adds:
+                for (FxDelta.FxDeltaChange change : delta.getAdds()) {
+                    if (type.usePropertyPermissions()) {
+                        if (!ticket.mayCreateACL(type.getPropertyAssignment(change.getXPath()).getACL().getId(), content.getLifeCycleInfo().getCreatorId()))
+                            throw new FxNoAccessException("ex.acl.noAccess.property.create", change.getXPath());
                     }
                     if (checkScripting)
-                        for (long scriptId : change.getOriginalData().getAssignment().
-                                getScriptMapping(FxScriptEvent.AfterDataChangeUpdate)) {
+                        for (long scriptId : change.getNewData().getAssignment().
+                                getScriptMapping(FxScriptEvent.BeforeDataChangeAdd)) {
                             binding.setVariable("change", change);
                             scripting.runScript(scriptId, binding);
                         }
-                    updatesRemaining.remove(0);
-                } catch (SQLException e) {
-                    change._increaseRetries();
-                    if (change._getRetryCount() > 100)
-                        throw e;
-                    updatesRemaining.remove(0);
-                    updatesRemaining.add(change); //add as last
-                }
-            }
-
-            //delta-adds:
-            for (FxDelta.FxDeltaChange change : delta.getAdds()) {
-                if (type.usePropertyPermissions()) {
-                    if (!ticket.mayCreateACL(type.getPropertyAssignment(change.getXPath()).getACL().getId(), content.getLifeCycleInfo().getCreatorId()))
-                        throw new FxNoAccessException("ex.acl.noAccess.property.create", change.getXPath());
-                }
-                if (checkScripting)
-                    for (long scriptId : change.getNewData().getAssignment().
-                            getScriptMapping(FxScriptEvent.BeforeDataChangeAdd)) {
-                        binding.setVariable("change", change);
-                        scripting.runScript(scriptId, binding);
+                    if (!change.getNewData().isSystemInternal()) {
+                        if (change.isGroup())
+                            insertGroupData(con, sql, pk, (FxGroupData) change.getNewData(), content.isMaxVersion(), content.isLiveVersion());
+                        else
+                            insertPropertyData(env.getProperty(((FxPropertyData) change.getNewData()).getPropertyId()),
+                                    content.getData("/"), con, ps_insert, ps_ft_insert, sql, pk, ((FxPropertyData) change.getNewData()),
+                                    content.isMaxVersion(), content.isLiveVersion());
                     }
-                if (!change.getNewData().isSystemInternal()) {
-                    if (change.isGroup())
-                        insertGroupData(con, sql, pk, (FxGroupData) change.getNewData(), content.isMaxVersion(), content.isLiveVersion());
-                    else
-                        insertPropertyData(env.getProperty(((FxPropertyData) change.getNewData()).getPropertyId()),
-                                content.getData("/"), con, ps_ft_insert, sql, pk, ((FxPropertyData) change.getNewData()),
-                                content.isMaxVersion(), content.isLiveVersion());
+                    if (checkScripting)
+                        for (long scriptId : change.getNewData().getAssignment().
+                                getScriptMapping(FxScriptEvent.AfterDataChangeAdd)) {
+                            binding.setVariable("change", change);
+                            scripting.runScript(scriptId, binding);
+                        }
                 }
-                if (checkScripting)
-                    for (long scriptId : change.getNewData().getAssignment().
-                            getScriptMapping(FxScriptEvent.AfterDataChangeAdd)) {
-                        binding.setVariable("change", change);
-                        scripting.runScript(scriptId, binding);
-                    }
+                ps_update.executeBatch();
+                ps_insert.executeBatch();
+                ps_ft_insert.executeBatch();
+                ps_ft_update.executeBatch();
+            } finally {
+                if (ps_update != null) ps_update.close();
+                if (ps_insert != null) ps_insert.close();
+                if (ps_ft_insert != null) ps_ft_insert.close();
+                if (ps_ft_update != null) ps_ft_update.close();
             }
-
-            ps_ft_insert.executeBatch();
-            ps_ft_insert.close();
-            ps_ft_update.executeBatch();
-            ps_ft_update.close();
 
             checkUniqueConstraints(con, env, sql, pk, content.getTypeId());
             if (delta.isInternalPropertyChanged()) {
@@ -2671,7 +2769,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 previewFile2.deleteOnExit();
             if (previewFile3 != null && !previewFile3.delete())
                 previewFile3.deleteOnExit();
-            if( rs != null )
+            if (rs != null)
                 rs.close();
             if (ps != null)
                 ps.close();
