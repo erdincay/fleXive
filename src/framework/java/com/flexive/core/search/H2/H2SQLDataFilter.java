@@ -60,15 +60,6 @@ public class H2SQLDataFilter extends GenericSQLDataFilter {
      * {@inheritDoc}
      */
     @Override
-    public boolean isQueryTimeoutSupported() {
-        //H2 does not support timeouts (or they don't work at least...)
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     protected String toDBTime(String expr) {
         return "TOTIMESTAMP(" + expr + ")";
     }
@@ -79,27 +70,5 @@ public class H2SQLDataFilter extends GenericSQLDataFilter {
     @Override
     protected String fulltextMatch(String column, String expr) {
         return " UPPER(" + column + ") LIKE '%" + expr.replaceAll("'", "" ).toUpperCase() + "%'";
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected String getSubQueryLimit() {
-        /* H2 currently chokes on unions of queries with row limits like this:
-
-        SELECT * FROM (
-            (SELECT  DISTINCT cd.id,cd.ver,cd.lang FROM FLEXIVETEST.FX_CONTENT_DATA cd WHERE UFCLOB like 'FOLDER COMMENT 1' AND TPROP=83 AND cd.ismax_ver=TRUE
-             LIMIT 10000 )
-            UNION
-            (SELECT DISTINCT  cd.id,cd.ver,cd.lang FROM FLEXIVETEST.FX_CONTENT_DATA cd WHERE UFCLOB like 'FOLDER COMMENT 2' AND TPROP=83 AND cd.ismax_ver=TRUE
-             LIMIT 10000 )
-        )
-
-         When the subquery limits are removed, the query returns correct results. With subquery limits,
-         only one row is returned.
-       */
-        return "";
     }
 }

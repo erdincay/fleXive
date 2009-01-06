@@ -55,22 +55,12 @@ public class H2SQLDataSelector extends GenericSQLDataSelector {
         super(search);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getCounterStatement(String counter) {
-        return "SET(@"+counter+",@"+counter+"+1) "+counter;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
+    /*
+     //mp: keeping this code as a reference, H2 supports this kind of subqueries since v1.105 
     protected String getContentDataSubselect(String column, PropertyEntry entry, boolean xpath) {
         //H2 needs the ISMLDEF column in select clause to perform the ORDER,
         //hence we have to select check for the selected language before we use the multilang default
-        String _select = "SELECT " + SUBSEL_ALIAS + "." + column + /*", " + SUBSEL_ALIAS + ".ismldef" +*/
+        String _select = "SELECT " + SUBSEL_ALIAS + "." + column +
                 " FROM " + DatabaseConst.TBL_CONTENT_DATA + " " +
                 SUBSEL_ALIAS + " WHERE " +
                 SUBSEL_ALIAS + ".ID=" +
@@ -93,6 +83,7 @@ public class H2SQLDataSelector extends GenericSQLDataSelector {
         }
         return select;
     }
+    */
 
     /**
      * {@inheritDoc}
