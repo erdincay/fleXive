@@ -211,12 +211,12 @@
                 return foundnode;
             }
 
-            function structureTreeClickHandler(node) {
-                doContentAction(node, "openInstance");
+            function structureTreeClickHandler(node, doubleClick) {
+                doContentAction(node, "openInstance", doubleClick);
             }
 
             //should be invoked by the click handler when normally clicking on tree nodes
-            function doContentAction(node, defaultAction) {
+            function doContentAction(node, defaultAction, doubleClick) {
                 var propertyId = node["assignmentId"] != null ? node["assignmentId"] : node["typeId"];
                 if (propertyId != null && propertyId != -1 && parent.frames["contentFrame"].addQueryNode) {
                     // add to search query
@@ -229,6 +229,10 @@
                     else
                         parent.frames["contentFrame"].addQueryNode(propertyId, node.nodeType);
                     //alertDialog("sturctureTreeClickHandler, addProperty branch");
+                }
+                else if (defaultAction == "openInstance") {
+                    if (doubleClick)
+                        doContentActionFromContextMenu(node, defaultAction);
                 }
                 else doContentActionFromContextMenu(node, defaultAction);
             }
