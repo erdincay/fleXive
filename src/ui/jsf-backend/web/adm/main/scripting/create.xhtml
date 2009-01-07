@@ -61,6 +61,9 @@
             <adm:commandButton id="cancelButton" labelKey="Script.button.cancel"
                                icon="cancel" action="scriptOverview"/>
 
+            <adm:commandButton id="defaultImports" labelKey="Script.button.defaultImports"
+                               icon="compact" bean="#{scriptBean}" action="addDefaultImports"/>
+
             <a4j:outputPanel ajaxRendered="true" id="verifyPanel" layout="block">
                 <a4j:commandButton id="verifyButton" action="#{scriptBean.checkScriptSyntax}"
                                    value="#{fxMessageBean['Script.button.verify']}"

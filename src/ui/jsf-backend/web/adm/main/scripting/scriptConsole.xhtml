@@ -20,12 +20,14 @@
             <a4j:outputPanel id="systemInfos">
                 <fieldset class="formFields">
                     <legend>#{fxMessageBean['ScriptConsole.group.code']}</legend>
-                    <h:inputTextarea cols="120" rows="30" value="#{scriptConsoleBean.code}"/>
+                    <a4j:outputPanel ajaxRendered="true" layout="block">
+                        <h:inputTextarea id="codeArea" cols="120" rows="30" value="#{scriptConsoleBean.code}"/>
+                    </a4j:outputPanel>
                     <br/>
                     #{fxMessageBean['ScriptConsole.label.Language']}&nbsp;
                     <h:selectOneListbox label="XXX" size="1" value="#{scriptConsoleBean.language}">
                         <f:selectItems value="#{fxSelectBean.scriptingEngines}"/>
-                        <a4j:support event="onclick" reRender="verifyButton"/>
+                        <a4j:support event="onchange" reRender="verifyButton"/>
                     </h:selectOneListbox>
                     <br/>
                     <h:selectBooleanCheckbox title="#{fxMessageBean['ScriptConsole.label.runAtWeb']}"
@@ -34,6 +36,10 @@
                     <a4j:commandButton id="executeButton" reRender="resultPanel"
                                        value="#{fxMessageBean['ScriptConsole.button.execute']}"
                                        onclick="parent.lockScreen()" oncomplete="parent.unlockScreen()"/>
+                    <a4j:commandButton id="defaultImports" value="#{fxMessageBean['Script.button.defaultImports']}"
+                                       action="#{scriptConsoleBean.addDefaultImports}" reRender="codeArea"
+                                       eventsQueue="main" requestDelay="300"
+                                       style="margin-left:20px"/>
                     <a4j:outputPanel ajaxRendered="true" id="verifyPanel">
                         <a4j:commandButton id="verifyButton" value="#{fxMessageBean['Script.button.verify']}"
                                            rendered="#{scriptConsoleBean.verifyButtonEnabled}"

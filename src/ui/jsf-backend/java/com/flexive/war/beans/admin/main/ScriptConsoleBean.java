@@ -139,4 +139,14 @@ public class ScriptConsoleBean {
     public void checkScriptSyntax() {
         ScriptBean.checkScriptSyntax("dummyName.groovy", getCode());
     }
+
+    /**
+     * Adds the default [fleXive] imports for a given script
+     * (Configured in Script.properties and Script_de.properties: Script.defaultImports.[script extension],
+     * e.g. "Script.defaultImports.groovy")
+     */
+    public void addDefaultImports() {
+        String code = getCode() == null ? "" : getCode();
+        setCode(ScriptBean.getClassImports(language) + code);
+    }
 }

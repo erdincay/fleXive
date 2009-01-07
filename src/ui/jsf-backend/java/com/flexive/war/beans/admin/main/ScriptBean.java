@@ -484,7 +484,7 @@ public class ScriptBean {
      */
     private void verifyScriptName() {
         final String name = sinfo.getName();
-        if(StringUtils.isBlank(name)) {
+        if (StringUtils.isBlank(name)) {
             setNameErrorMsg(null);
             setInputFieldDisabled(true);
             setVerifyButtonEnabled(false);
@@ -548,5 +548,36 @@ public class ScriptBean {
         }
     }
 
+    /**
+     * This method adds the default [fleXive] imports for a given script
+     * (Configured in Script.properties and Script_de.properties: Script.defaultImports.[script extension],
+     * e.g. "Script.defaultImports.groovy")
+     */
+    public void addDefaultImports() {
+        String code = sinfo.getCode() == null ? "" : sinfo.getCode();
+        final String name = sinfo.getName();
+        if (StringUtils.isNotBlank(name)) {
+            sinfo.setCode(getClassImports(name.substring(name.lastIndexOf(".") + 1, name.length())) + code);
+        }
+    }
 
+    /**
+     * This method retrieves the default imports for a given scripttype
+     *
+     * @param scriptType The type of the script by extension, e.g.: "groovy" or "js"
+     * @return Returns the default imports for a scripting engine known by [fleXive]
+     */
+    static String getClassImports(String scriptType) {
+        scriptType = scriptType.replaceAll("gy", "groovy");
+        String importProperty = "Script.defaultImports." + scriptType;
+        String defImports = "";
+        if (!scriptType.equals("")) {
+            defImports = MessageBean.getInstance().getMessage(importProperty);
+            if (defImports.equals("??" + importProperty + "??")) {
+                defImports = "";
+                new FxFacesMsgErr("Script.err.noImports", scriptType).addToContext();
+            }
+        }
+        return defImports;
+    }
 }
