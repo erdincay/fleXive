@@ -40,6 +40,7 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.structure.*;
+import com.flexive.faces.beans.MessageBean;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
@@ -104,9 +105,9 @@ public class StructureTreeEditor implements Serializable {
      * the target group or type at the first position. A new alias can also be specified.
      *
      * @param parentAssId          the id from which the assignment will be derived
-     * @param parentNodeType  the nodeType from which the assignment will be derived (i.e. StructureTreeWriter.DOC_TYPE_GROUP, StructureTreeWriter.DOC_TYPE_ASSIGNMENT)
+     * @param parentNodeType  the nodeType from which the assignment will be derived (i.e. StructureTreeWriter.NODE_TYPE_GROUP, StructureTreeWriter.NODE_TYPE_ASSIGNMENT)
      * @param targetId       the id of the group or type the assignment will be pasted into.
-     * @param targetNodeType the node type of the target (i.e. StructureTreeWriter.DOC_TYPE_GROUP, StructureTreeWriter.DOC_TYPE_TYPE).
+     * @param targetNodeType the node type of the target (i.e. StructureTreeWriter.NODE_TYPE_GROUP, StructureTreeWriter.NODE_TYPE_TYPE).
      * @param newName        the new alias. if ==null the old will be taken.
      * @return the id of the newly created assignment
      * @throws com.flexive.shared.exceptions.FxApplicationException
@@ -151,7 +152,7 @@ public class StructureTreeEditor implements Serializable {
      * A new alias can also be specified.
      *
      * @param srcId        the id from which the assignment will be derived
-     * @param srcNodeType  the nodeType from which the assignment will be derived (i.e. StructureTreeWriter.DOC_TYPE_GROUP, StructureTreeWriter.DOC_TYPE_ASSIGNMENT)
+     * @param srcNodeType  the nodeType from which the assignment will be derived (i.e. StructureTreeWriter.NODE_TYPE_GROUP, StructureTreeWriter.NODE_TYPE_ASSIGNMENT)
      * @param destId       the id of the destination assignment, where the assignment will be pasted at a relative position
      * @param destNodeType the node type of the destination assignment
      * @param newName      the new alias. if ==null the old will be taken.
@@ -209,7 +210,7 @@ public class StructureTreeEditor implements Serializable {
      * @param destId      the id of the destination assignment relative to which the source assignment will be moved.
      * @param steps       relative position offset.
      * @throws com.flexive.shared.exceptions.FxApplicationException
-     *          if the node type doesn't match StructureTreeWriter.DOC_TYPE_GROUP or StructureTreeWriter.DOC_TYPE_ASSIGNMENT
+     *          if the node type doesn't match StructureTreeWriter.NODE_TYPE_GROUP or StructureTreeWriter.NODE_TYPE_ASSIGNMENT
      */
     public void moveAssignmentRelative(long srcId, String srcNodeType, long destId, int steps) throws FxApplicationException {
         FxAssignment dest = CacheAdmin.getEnvironment().getAssignment(destId);
@@ -267,7 +268,7 @@ public class StructureTreeEditor implements Serializable {
      *
      * @param assId          id of the assignment
      * @param parentId       id of type or group assignment
-     * @param parentNodeType the nodeDocType  (i.e. StructureTreeWriter.DOC_TYPE_GROUP, StructureTreeWriter.DOC_TYPE_TYPE) of the parent
+     * @param parentNodeType the nodeDocType  (i.e. StructureTreeWriter.NODE_TYPE_GROUP, StructureTreeWriter.NODE_TYPE_TYPE) of the parent
      * @return true if the assignment is a direct child of the type or group
      * @throws FxInvalidParameterException for invalid nodeDocTypes
      * @throws com.flexive.shared.exceptions.FxNotFoundException
@@ -354,4 +355,21 @@ public class StructureTreeEditor implements Serializable {
         derived.setIcon(parent.getIcon());
         return EJBLookup.getTypeEngine().save(derived);
     }
+
+    /**
+     * Returns the display label for the given Type/Group/Assignment with the specified id.
+     *
+     * @param id the id
+     * @param nodeType the nodeDocType  (i.e. StructureTreeWriter.NODE_TYPE_GROUP, StructureTreeWriter.NODE_TYPE_TYPE,..)
+     * @return the display label
+     */
+    public String getLabel(long id, String nodeType) {
+        if  (StructureTreeWriter.NODE_TYPE_ASSIGNMENT.equals(nodeType)
+                || StructureTreeWriter.NODE_TYPE_ASSIGNMENT_SYSTEMINTERNAL.equals(nodeType)
+                || StructureTreeWriter.NODE_TYPE_GROUP.equals(nodeType)) {   
+            return CacheAdmin.getEnvironment().getAssignment(id).getDisplayName();
+        }
+        else return CacheAdmin.getEnvironment().getType(id).getDescription().getBestTranslation();
+    }
+
 }

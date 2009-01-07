@@ -342,11 +342,15 @@
             function deleteAssignment(menuItem) {
                 var menu = dojo.widget.byId("structureTreeMenu");
                 var id = menu.getTreeNode().assignmentId;
-                _deleteAssignment(id);
+                var label = menu.getTreeNode().title;
+                var nodeType = menu.getTreeNode().nodeType;
+                _deleteAssignment(id, label, nodeType);
             }
 
-            function _deleteAssignment(id) {
-                confirmDialog("#{fxMessageBean['StructureTree.message.delete.assignment']}", function() {
+            function _deleteAssignment(id, label, nodeType) {
+                var messageAssignment = "#{fxMessageBean['StructureTree.message.delete.assignment']}";
+                var messageGroup= "#{fxMessageBean['StructureTree.message.delete.group']}";
+                confirmDialog(nodeType == "Group" ? messageGroup.replace("{0}", label) : messageAssignment.replace("{0}", label), function() {
                     try {
                         flexive.util.getJsonRpc().StructureTreeEditor.deleteAssignment(id);
                         if (copyNode!=null && copyNode.assignmentId ==id && (copyNode.nodeType=="Group" || copyNode.nodeType=="Assignment"))
@@ -370,11 +374,13 @@
             function deleteType(menuItem) {
                 var menu = dojo.widget.byId("structureTreeMenu");
                 var id = menu.getTreeNode().typeId;
-                _deleteType(id);
+                var label = menu.getTreeNode().title;
+                _deleteType(id, label);
             }
 
-            function _deleteType(id) {
-                confirmDialog("#{fxMessageBean['StructureTree.message.delete.type']}", function() {
+            function _deleteType(id, label) {
+                var message = "#{fxMessageBean['StructureTree.message.delete.type']}";
+                confirmDialog(message.replace("{0}", label), function() {
                     try {
                         flexive.util.getJsonRpc().StructureTreeEditor.deleteType(id);
                         reloadStructureTree();
@@ -615,7 +621,8 @@
                 setActionDisabled(menu.getTreeNode(), "createProperty", !(node.nodeType=="Group" || isType(node.nodeType)) || lackRole);
                 setActionDisabled(menu.getTreeNode(), "createGroup", !(node.nodeType=="Group" || isType(node.nodeType)) || lackRole);
                 setActionDisabled(menu.getTreeNode(), "createDerivedType", !(node.nodeType=="Type" || lackRole));
-                setActionDisabled(menu.getTreeNode(), "deleteAssignment", (node.nodeType!="Group" && node.nodeType!="Assignment") || lackRole || (node.nodeType =="AssignmentSystemInternal" && notGlobalSupervisor));
+                setActionDisabled(menu.getTreeNode(), "deleteAssignment", node.nodeType!="Assignment" || lackRole || (node.nodeType =="AssignmentSystemInternal" && notGlobalSupervisor));
+                setActionDisabled(menu.getTreeNode(), "deleteGroup", node.nodeType!="Group" || lackRole);
                 setActionDisabled(menu.getTreeNode(), "deleteType", !isType(node.nodeType) || lackRole);
                 setActionDisabled(menu.getTreeNode(), "copyAssignment", lackRole || node.nodeType!="Group" && node.nodeType!="Assignment");
                 setActionDisabled(menu.getTreeNode(), "searchContents", !isType(node.nodeType) && !isAssignment(node.nodeType));
@@ -713,6 +720,7 @@
                 </adm:treeContextMenuItem>
                 <adm:treeContextMenuItem icon="cut" treeActions="cutAssignment" labelKey="StructureTree.menu.cut.assignment" clickHandler="cutAssignment"/>
                 <adm:treeContextMenuItem icon="delete" treeActions="deleteAssignment" labelKey="StructureTree.menu.delete.assignment" clickHandler="deleteAssignment"/>
+                <adm:treeContextMenuItem icon="delete" treeActions="deleteGroup" labelKey="StructureTree.menu.delete.group" clickHandler="deleteAssignment"/>
                 <adm:treeContextMenuItem icon="delete" treeActions="deleteType" labelKey="StructureTree.menu.delete.type" clickHandler="deleteType"/>
             </adm:treeContextMenu>
 

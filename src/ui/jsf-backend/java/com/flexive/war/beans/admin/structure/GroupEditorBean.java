@@ -124,31 +124,6 @@ public class GroupEditorBean {
                 group = FxGroupEdit.createNew("NEWGROUP", new FxString(""), new FxString(""), false, FxMultiplicity.MULT_0_1);
                 initNewGroupEditing();
             }
-            /* not used anymore
-            else if ("assignGroup".equals(action)) {
-                editMode = false;
-                structureManagement = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
-                if (structureManagement) {
-                    long id = FxJsfUtils.getLongParameter("id");
-                    String nodeType = FxJsfUtils.getParameter("nodeType");
-
-                    parentXPath = "/";
-
-                    if (StructureTreeWriter.DOC_TYPE_TYPE.equals(nodeType) || StructureTreeWriter.DOC_TYPE_TYPE_RELATION.equals(nodeType)) {
-                        parentType = CacheAdmin.getEnvironment().getType(id);
-                    }
-
-                    if (StructureTreeWriter.DOC_TYPE_GROUP.equals(nodeType)) {
-                        FxGroupAssignment ga = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(id);
-                        parentType = ga.getAssignedType();
-                        parentXPath = ga.getXPath();
-                    }
-                    long assignmentId = EJBLookup.getAssignmentEngine().save(FxGroupAssignmentEdit.createNew(assignment, parentType, assignment.getAlias(), parentXPath), true);
-                    StructureTreeControllerBean s = (StructureTreeControllerBean) FxJsfUtils.getManagedBean("structureTreeControllerBean");
-                    s.addAction(StructureTreeControllerBean.ACTION_RELOAD_SELECT_ASSIGNMENT, assignmentId, "");
-                }
-            }
-            */
         } catch (Throwable t) {
             LOG.error("Failed to parse request parameters: " + t.getMessage(), t);
             new FxFacesMsgErr(t).addToContext();
