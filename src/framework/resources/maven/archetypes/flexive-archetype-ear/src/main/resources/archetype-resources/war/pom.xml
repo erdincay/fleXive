@@ -220,7 +220,6 @@
                     <dependency>
                         <groupId>com.h2database</groupId>
                         <artifactId>h2</artifactId>
-                        <version>1.1.103</version>
                         <scope>provided</scope>
                     </dependency>
                     <dependency>
