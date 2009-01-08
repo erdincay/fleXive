@@ -58,7 +58,7 @@
                 }
                 if (action=="RELOAD_SELECT_TYPE") {
                     reloadAndKeepExpanded();
-                    structureTreeClickHandler(selectNode(id, true));
+                    openNode(id, true);
                 }
                 if (action=="RELOAD_SELECT_ASSIGNMENT") {
                     reloadAndKeepExpanded();
@@ -88,7 +88,7 @@
             /* expands the tree, selects node and performs click operation
              */
             function openNode(id, isType) {
-                structureTreeClickHandler(selectNode(id,isType));
+                structureTreeClickHandler(selectNode(id,isType), true);
             }
 
             /*
@@ -218,7 +218,7 @@
             //should be invoked by the click handler when normally clicking on tree nodes
             function doContentAction(node, defaultAction, doubleClick) {
                 var propertyId = node["assignmentId"] != null ? node["assignmentId"] : node["typeId"];
-                if (propertyId != null && propertyId != -1 && parent.frames["contentFrame"].addQueryNode) {
+                if (!doubleClick && propertyId != null && propertyId != -1 && parent.frames["contentFrame"].addQueryNode) {
                     // add to search query
                     if (node.nodeType=="AssignmentSystemInternal" || node.nodeType=="Assignment") {
                         if (flexive.util.getJsonRpc().StructureTreeEditor.isSearchable(propertyId))

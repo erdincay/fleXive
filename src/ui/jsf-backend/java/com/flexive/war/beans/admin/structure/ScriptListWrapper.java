@@ -135,6 +135,7 @@ public class ScriptListWrapper implements Serializable {
     private int ctr=0;
     private Comparator<ScriptListEntry> scriptComparator = new ScriptInfoSorter();
     private Comparator<ScriptListEntry> eventComparator = new ScriptEventSorter();
+    private boolean isType;
 
     /**
      * Constructs a new script list wrapper
@@ -143,11 +144,12 @@ public class ScriptListWrapper implements Serializable {
      * @param isType    if the id is from a type or assignment
      */
     ScriptListWrapper(long id, boolean isType) {
-        scriptList = buildScriptList(id, isType);
+        this.isType =isType;
+        scriptList = buildScriptList(id);
         sortByScripts();
     }
 
-    private List<ScriptListEntry> buildScriptList(long id, boolean isType) {
+    private List<ScriptListEntry> buildScriptList(long id) {
         //determine if type or assignment are derived
         boolean isDerived=false;
         if (isType) {
@@ -160,12 +162,11 @@ public class ScriptListWrapper implements Serializable {
         }
         List<ScriptListEntry> list = new ArrayList<ScriptListEntry>();
 
-        //set remaining propterties
+        //set remaining properties
         for (FxScriptInfo s : CacheAdmin.getEnvironment().getScripts())
             for (FxScriptMappingEntry e : isType? CacheAdmin.getFilteredEnvironment().getScriptMapping(s.getId()).getMappedTypes() :
                     CacheAdmin.getFilteredEnvironment().getScriptMapping(s.getId()).getMappedAssignments()) {
-                FxScriptMappingEntry debug=e;
-                //determine if script is active and if it should be derived
+                //determine if script is active and derived usage
                 if (e.getId() ==id &&  s.getId() == e.getScriptId()) {
                     list.add(new ScriptListEntry(ctr++, s, e.getScriptEvent(), false, -1, e.isDerivedUsage(), e.isActive()));
                 }
@@ -182,21 +183,20 @@ public class ScriptListWrapper implements Serializable {
         return list;
     }
 
-        /**
+   /**
      * builds the delta to the original scriptMapping. Returns a List of ScriptListEntry objects,
      * where the id is set to ScriptListWrapper.ID_SCRIPT_REMOVED for scripts that where removed from
      * the script list and where the id is set to ScriptListWrapper.ID_SCRIPT_ADDED for scripts that
      * where added to the script list. ID_SCRIPT_UPDATED for scripts that have been updated.
      *
      * @param id                        the id of the type or assignment for the script mapping
-     * @param isType                    if the script mapping is from a type or assignment
      * @return  a list of ScriptEntry objects which have changed in the script list relative to
      *          the original scriptMapping.
      */
 
-    public List<ScriptListEntry> getDelta(long id, boolean isType) {
+    public List<ScriptListEntry> getDelta(long id) {
         List<ScriptListEntry> delta = new ArrayList<ScriptListEntry>();
-        List<ScriptListEntry> original = buildScriptList(id, isType);
+        List<ScriptListEntry> original = buildScriptList(id);
         for (ScriptListEntry s : original) {
             if (!hasEntry(s)) {
                 s.setId(ID_SCRIPT_REMOVED);
@@ -224,7 +224,7 @@ public class ScriptListWrapper implements Serializable {
     }
 
     /**
-     * checks the script list for a script list entry with matching script id and event.
+     * checks the script list for a script list entry with matching script id, event and derived source.
      *
      * @param key   a script list entry
      * @return      true if another script list entry with matching script id and event was found
@@ -232,7 +232,8 @@ public class ScriptListWrapper implements Serializable {
     private boolean hasEntry(ScriptListEntry key) {
         for (ScriptListEntry le: scriptList) {
             if (le.getScriptEvent().getId() == key.getScriptEvent().getId()
-                && le.getScriptInfo().getId() == key.getScriptInfo().getId())
+                && le.getScriptInfo().getId() == key.getScriptInfo().getId()
+                && le.getDerivedFrom()== key.getDerivedFrom())
                 return true;
         }
         return false;
@@ -250,13 +251,14 @@ public class ScriptListWrapper implements Serializable {
     private boolean hasEntry(List<ScriptListEntry> scriptList, ScriptListEntry key) {
         for (ScriptListEntry le: scriptList) {
             if (le.getScriptEvent().getId() == key.getScriptEvent().getId()
-                && le.getScriptInfo().getId() == key.getScriptInfo().getId())
+                && le.getScriptInfo().getId() == key.getScriptInfo().getId()
+                && le.getDerivedFrom() == key.getDerivedFrom())
                 return true;
         }
         return false;
     }
 
-    public void add(long scriptInfo, long scirptEvent, boolean derivedUsage, boolean active ) throws FxEntryExistsException, FxNotFoundException {
+    public void add(long scriptInfo, long scirptEvent, boolean derivedUsage, boolean active) throws FxEntryExistsException, FxNotFoundException {
         ScriptListEntry e = new ScriptListEntry(ctr++, CacheAdmin.getEnvironment().getScript(scriptInfo), FxScriptEvent.getById(scirptEvent), false, -1, derivedUsage, active);
         if (!hasEntry(e)) {
             scriptList.add(e);
@@ -264,7 +266,7 @@ public class ScriptListWrapper implements Serializable {
             sortStatusEvent=SORT_STATUS_UNSORTED;
         }
         else
-            throw new FxEntryExistsException(e.getScriptInfo().getName()+":"+e.getScriptEvent().getName(), "ex.scriptListWrapper.entryExists",e.getScriptInfo().getName()+":"+e.getScriptEvent().getName());
+            throw new FxEntryExistsException("ex.scriptListWrapper.entryExists",e.getScriptInfo().getName(),e.getScriptEvent().getName());
     }
 
     public void remove(int entryId) {
@@ -354,107 +356,4 @@ public class ScriptListWrapper implements Serializable {
                 return multiplicator*this.collator.compare(o1.getScriptInfo().getName(), o2.getScriptInfo().getName());
         }
     }
-
-     /* alternative Constructor for FxType.getScriptsView()
-    ScriptListWrapper(Map<FxScriptInfo, List<FxScriptEvent>> scriptMap) {
-        scriptList = new ArrayList<ScriptListEntry>();
-        for (FxScriptInfo s: scriptMap.keySet()) {
-            for (FxScriptEvent event : scriptMap.get(s)) {
-                scriptList.add(new ScriptListEntry(ctr++, s,event));
-            }
-        }
-        sortByScripts();
-    }
-    */
-    /*
-    private List<ScriptListEntry> buildScriptList(Map<FxScriptEvent, long[]> scriptMapping, long id, boolean isType) {
-        //determine if type or assignment are derived
-        boolean isDerived=false;
-        if (isType) {
-            FxType type= CacheAdmin.getEnvironment().getType(id);
-            isDerived = type.isDerived();
-        }
-        else {
-            FxAssignment ass = CacheAdmin.getEnvironment().getAssignment(id);
-            isDerived = ass.isDerivedAssignment();
-        }
-        List<ScriptListEntry> list = new ArrayList<ScriptListEntry>();
-        for (FxScriptEvent e: scriptMapping.keySet())
-            for (long scriptId: scriptMapping.get(e)) {
-                list.add(new ScriptListEntry(ctr++, CacheAdmin.getEnvironment().getScript(scriptId), e, false, -1, false, false));
-            }
-
-        //set remaining propterties
-        for (ScriptListEntry se : list)
-            for (FxScriptMappingEntry e : CacheAdmin.getFilteredEnvironment().getScriptMapping(se.getScriptInfo().getId()).getMappedTypes() ) {
-                //determine if script is active and if it should be derived
-                if (e.getId() ==id && se.getScriptEvent().getId() == e.getScriptEvent().getId() && se.getScriptInfo().getId() == e.getScriptId()) {
-                    se.setActive(e.isActive());
-                    se.setDerivedUsage(e.isDerivedUsage());
-                }
-                //determine if script is derived and from which id
-                else if(isDerived && e.isDerivedUsage() && se.getScriptEvent().getId() == e.getScriptEvent().getId() && se.getScriptInfo().getId() == e.getScriptId()) {
-                    for (long derivedId : e.getDerivedIds()) {
-                        if (id == derivedId) {
-                            se.setDerived(true);
-                            se.setDerivedFrom(e.getId());
-                            break;
-                        }
-                    }
-                }
-            }
-        return list;
-    }
-    */
-    /**
-     * Constructs a new script list wrapper
-     *
-     * @param scriptMapping     the script mapping
-     * @param id                the id of the type or assignment for the script mapping
-     * @param isType            if the script mapping is from a type or assignment
-     */
-    /*
-    ScriptListWrapper(Map<FxScriptEvent, long[]> scriptMapping, long id, boolean isType) {
-        scriptList = buildScriptList(scriptMapping, id, isType);
-        sortByScripts();
-    }
-    */
-    /**
-     * builds the delta to the original scriptMapping. Returns a List of ScriptListEntry objects,
-     * where the id is set to ScriptListWrapper.ID_SCRIPT_REMOVED for scripts that where removed from
-     * the script list and where the id is set to ScriptListWrapper.ID_SCRIPT_ADDED for scripts that
-     * where added to the script list.
-     *
-     * @param originalScriptMapping     the original scriptMapping
-     * @param id                        the id of the type or assignment for the script mapping
-     * @param isType                    if the script mapping is from a type or assignment
-     * @return  a list of ScriptEntry objects which have changed in the script list relative to
-     *          the original scriptMapping.
-     */
-    /*
-    public List<ScriptListEntry> getDelta(Map<FxScriptEvent, long[]> originalScriptMapping, long id, boolean isType) {
-        List<ScriptListEntry> delta = new ArrayList<ScriptListEntry>();
-        List<ScriptListEntry> original = buildScriptList(originalScriptMapping, id, isType);
-        for (ScriptListEntry s : original) {
-            if (!hasEntry(s)) {
-                s.setId(ID_SCRIPT_REMOVED);
-                delta.add(s);
-            }
-        }
-
-        for (ScriptListEntry s : scriptList) {
-            if (!hasEntry(original, s)) {
-                delta.add(new ScriptListEntry(ID_SCRIPT_ADDED, s.getScriptInfo(), s.getScriptEvent(), s.isDerived(), s.getDerivedFrom(), s.derivedUsage, s.isActive()));
-            }
-        }
-
-        for (ScriptListEntry s: scriptList)
-            if (!hasEntry(delta, s )) {
-                //TODO: check if value has really changed versus the original before marking UPDATED ->would increase computing time but decrease DB accesses
-                delta.add(new ScriptListEntry(ID_SCRIPT_UPDATED, s.getScriptInfo(), s.getScriptEvent(), s.isDerived(), s.getDerivedFrom(), s.derivedUsage, s.isActive()));
-            }
-
-        return delta;
-    }
-    */
 }

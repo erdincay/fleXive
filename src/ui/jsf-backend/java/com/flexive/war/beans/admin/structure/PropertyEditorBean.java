@@ -35,6 +35,7 @@ package com.flexive.war.beans.admin.structure;
 
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.beans.ActionBean;
+import com.flexive.faces.beans.SelectBean;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.*;
@@ -99,7 +100,7 @@ public class PropertyEditorBean implements ActionBean {
     private int scriptListFiler = -1;
     private FxScriptInfo selectedScriptInfo = null;
     private long selectedScriptEventId = -1;
-    private boolean selectedDerivedUsage = false;
+    private boolean selectedDerivedUsage = true;
     private boolean selectedActive = true;
     private int defaultMultiplicity = -1;
 
@@ -1177,6 +1178,11 @@ public class PropertyEditorBean implements ActionBean {
     }
 
     public FxScriptInfo getSelectedScriptInfo() {
+        if (selectedScriptInfo == null) {
+            SelectBean b= new SelectBean();
+            if (b.getAssignmentScripts().size()>0)
+                selectedScriptInfo = (FxScriptInfo)b.getAssignmentScripts().get(0).getValue();
+        }
         return selectedScriptInfo;
     }
 
@@ -1218,8 +1224,7 @@ public class PropertyEditorBean implements ActionBean {
             this.selectedScriptInfo.getEvent().getId();
         }
         catch (Throwable t) {
-            //TODO: print error message, a4j tags do not support faces message erros
-            //new FxFacesMsgErr(t).addToContext();
+            new FxFacesMsgErr(t).addToContext();
         }
     }
 
@@ -1238,14 +1243,19 @@ public class PropertyEditorBean implements ActionBean {
      *          on errors
      */
     private void saveScriptChanges() throws FxApplicationException {
-        for (ScriptListWrapper.ScriptListEntry e : scriptWrapper.getDelta(assignment.getId(), false)) {
+        for (ScriptListWrapper.ScriptListEntry e : scriptWrapper.getDelta(assignment.getId())) {
             if (e.getId() == ScriptListWrapper.ID_SCRIPT_ADDED)
-                EJBLookup.getScriptingEngine().createAssignmentScriptMapping(e.getScriptEvent(), e.getScriptInfo().getId(), assignment.getId(), e.isActive(), e.isDerivedUsage());
+                EJBLookup.getScriptingEngine().createAssignmentScriptMapping(e.getScriptEvent(),
+                        e.getScriptInfo().getId(), e.isDerived() ? e.getDerivedFrom() : assignment.getId(), 
+                        e.isActive(), e.isDerivedUsage());
             else if (e.getId() == ScriptListWrapper.ID_SCRIPT_REMOVED)
-                EJBLookup.getScriptingEngine().removeAssignmentScriptMappingForEvent(e.getScriptInfo().getId(), assignment.getId(), e.getScriptEvent());
+                EJBLookup.getScriptingEngine().removeAssignmentScriptMappingForEvent(e.getScriptInfo().getId(),
+                        e.isDerived() ? e.getDerivedFrom() : assignment.getId(), e.getScriptEvent());
             else if (e.getId() == ScriptListWrapper.ID_SCRIPT_UPDATED)
-                EJBLookup.getScriptingEngine().updateAssignmentScriptMappingForEvent(e.getScriptInfo().getId(), assignment.getId(), e.getScriptEvent(), e.isActive(), e.isDerivedUsage());
-        }
+                EJBLookup.getScriptingEngine().updateAssignmentScriptMappingForEvent(e.getScriptInfo().getId(),
+                        e.isDerived() ? e.getDerivedFrom() : assignment.getId(), e.getScriptEvent(), e.isActive(),
+                        e.isDerivedUsage());
+        }                  
     }
 
     /****script editor tab end*********/

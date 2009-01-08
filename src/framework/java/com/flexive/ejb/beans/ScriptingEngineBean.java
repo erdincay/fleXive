@@ -559,6 +559,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         boolean success = false;
         //check existance
         CacheAdmin.getEnvironment().getScript(scriptId);
+        checkAssignmentScriptConsistency(scriptId, assignmentId, scriptEvent, active, derivedUsage);
         try {
             long[] derived;
             if (!derivedUsage)
@@ -619,6 +620,8 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         boolean success = false;
         //check existance
         CacheAdmin.getEnvironment().getScript(scriptId);
+        //check consistency
+        checkTypeScriptConsistency(scriptId, typeId ,scriptEvent, active, derivedUsage);
         try {
             long[] derived;
             if (!derivedUsage)
@@ -803,8 +806,9 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         PreparedStatement ps = null;
         String sql;
         boolean success = false;
-        //check existance
+        //check script existance
         CacheAdmin.getEnvironment().getScript(scriptId);
+        checkAssignmentScriptConsistency(scriptId, assignmentId, event, active, derivedUsage);
         try {
             long[] derived;
             if (!derivedUsage)
@@ -855,6 +859,8 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         boolean success = false;
         //check existance
         CacheAdmin.getEnvironment().getScript(scriptId);
+        //check consistency
+        checkTypeScriptConsistency(scriptId, typeId ,event, active, derivedUsage);
         try {
             long[] derived;
             if (!derivedUsage)
@@ -1218,5 +1224,91 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         }
         return mapping;
 
+    }
+
+    /**
+     * Checks if an assignment script mapping is consitent with
+     * derived assignment script mappings that are already present in the DB.
+     *
+     * @param scriptId      scriptId
+     * @param assignmentId  assignmentId
+     * @param event         script event
+     * @param active        active
+     * @param derivedUsage  derivedUsage
+     * @throws FxEntryExistsException
+     */
+    public void checkAssignmentScriptConsistency(long scriptId, long assignmentId, FxScriptEvent event, boolean active, boolean derivedUsage) throws FxEntryExistsException {
+        // in case script is set to active,
+        // check if an active derived script assignment for this event already exists for this assignment
+        if (active) {
+            List<FxScriptMappingEntry> scriptMappings = CacheAdmin.getFilteredEnvironment().getScriptMapping(scriptId).getMappedAssignments();
+            for (FxScriptMappingEntry sme : scriptMappings) {
+                if (sme.isActive() && sme.getScriptEvent().getId() == event.getId()) {
+                    for (int i =0; i<sme.getDerivedIds().length;i++) {
+                        if (sme.getDerivedIds()[i] == assignmentId)
+                            throw new FxEntryExistsException("ex.scripting.mapping.assign.derived.active.exists",
+                                    CacheAdmin.getEnvironment().getScript(scriptId).getName(),
+                                    event.getName(), CacheAdmin.getEnvironment().getAssignment(assignmentId).getXPath());
+                    }
+                }
+            }
+            // in case of derived usage and active,
+            // check if an active script assignment for this event already exists for a sub-assignment
+            if (derivedUsage) {
+                for (FxAssignment a :  CacheAdmin.getEnvironment().getDerivedAssignments(assignmentId)) {
+                    for (FxScriptMappingEntry sme : scriptMappings) {
+                        if (sme.getId()==a.getId() && sme.isActive() && sme.getScriptEvent().getId() == event.getId()) {
+                            throw new FxEntryExistsException("ex.scripting.mapping.assign.active.derived.exists",
+                                    CacheAdmin.getEnvironment().getScript(scriptId).getName(),
+                                    event.getName(), a.getXPath());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Checks if a type script mapping is consitent with
+     * derived type script mappings that are already present in the DB.
+     *
+     * @param scriptId      scriptId
+     * @param typeId        typeId
+     * @param event         script event
+     * @param active        active
+     * @param derivedUsage  derivedUsage
+     * @throws FxEntryExistsException if check fails
+     */
+    public void checkTypeScriptConsistency(long scriptId, long typeId, FxScriptEvent event, boolean active, boolean derivedUsage) throws FxEntryExistsException {
+        // in case script is set to active,
+        // check if an active derived script assignment for this event already exists for this type
+        if (active) {
+            List<FxScriptMappingEntry> scriptMappings = CacheAdmin.getFilteredEnvironment().getScriptMapping(scriptId).getMappedTypes();
+            for (FxScriptMappingEntry sme : scriptMappings) {
+                if (sme.isActive() && sme.getScriptEvent().getId() == event.getId()) {
+                    for (int i =0; i<sme.getDerivedIds().length;i++) {
+                        if (sme.getDerivedIds()[i] == typeId)
+                            throw new FxEntryExistsException("ex.scripting.mapping.type.derived.active.exists",
+                                    CacheAdmin.getEnvironment().getScript(scriptId).getName(),
+                                    event.getName(),
+                                    CacheAdmin.getEnvironment().getType(typeId).getName());
+                    }
+                }
+            }
+            // in case of derived usage and active,
+            // check if an active script assignment for this event already exists for a sub-type
+            if (derivedUsage) {
+                for (FxType t :  CacheAdmin.getEnvironment().getType(typeId).getDerivedTypes()) {
+                    for (FxScriptMappingEntry sme : scriptMappings) {
+                        if (sme.getId()==t.getId() && sme.isActive() && sme.getScriptEvent().getId() == event.getId()) {
+                            throw new FxEntryExistsException("ex.scripting.mapping.type.active.derived.exists",
+                                    CacheAdmin.getEnvironment().getScript(scriptId).getName(),
+                                    event.getName(),
+                                    t.getName());
+                        }
+                    }
+                }
+            }
+        }
     }
 }

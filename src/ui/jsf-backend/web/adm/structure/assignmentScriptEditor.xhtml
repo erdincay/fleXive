@@ -46,129 +46,149 @@
             <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor.readonly']} [#{propertyEditorBean.scriptCount}]" active="true" id="tab4ro"/>
         </ui:fragment>
     </c:if>
-        <div class="scriptTable">
-            <fx:fieldSet legend="#{fxMessageBean['ScriptEditor.label.assignedScripts']}">
-                <a4j:outputPanel id="scripts">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>
-                                    <a4j:commandLink action="#{propertyEditorBean.scriptWrapper.sortByScripts}" reRender="scripts" styleClass="sortArrow">
-                                        #{fxMessageBean['ScriptEditor.label.name']}
-                                        <ui:fragment rendered="#{propertyEditorBean.scriptWrapper.sortStatusScriptInfo == 1}">
-                                            <h:graphicImage value="/adm/images/commandButton/down.png"/>
-                                        </ui:fragment>
-                                        <ui:fragment rendered="#{propertyEditorBean.scriptWrapper.sortStatusScriptInfo == 2}">
-                                            <h:graphicImage value="/adm/images/commandButton/up.png"/>
-                                        </ui:fragment>
-                                    </a4j:commandLink>
-                                </th>
-                                <th>
-                                    <a4j:commandLink action="#{propertyEditorBean.scriptWrapper.sortByEvents}" reRender="scripts" styleClass="sortArrow">
-                                        #{fxMessageBean['ScriptEditor.label.event']}
-                                        <ui:fragment rendered="#{propertyEditorBean.scriptWrapper.sortStatusEvent == 1}">
-                                            <h:graphicImage value="/adm/images/commandButton/down.png"/>
-                                        </ui:fragment>
-                                        <ui:fragment rendered="#{propertyEditorBean.scriptWrapper.sortStatusEvent == 2}">
-                                            <h:graphicImage value="/adm/images/commandButton/up.png"/>
-                                        </ui:fragment>
-                                    </a4j:commandLink>
-                                </th>
-                                <th>#{fxMessageBean['ScriptEditor.label.active']}</th>
-                                <th>#{fxMessageBean['ScriptEditor.label.derivedUsage']}</th>
-                                <th>#{fxMessageBean['ScriptEditor.label.actions']}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        <c:forEach var="listEntry" items="#{propertyEditorBean.scriptWrapper.scriptList}">
-                            <tr>
-                                <td>
-                                    <h:commandLink id="editScript_#{listEntry.id}_#{propertyEditorBean.assignment.id}" action="#{scriptBean.editScript}"
-                                           value="#{listEntry.scriptInfo.name}" actionListener="#{scriptBean.structureListen}">
-                                    <f:param name="oid" value="#{listEntry.scriptInfo.id}"/>
-                                    </h:commandLink>
-                                </td>
-                                <td style="padding-left:15px">
-                                    <h:outputText value="#{listEntry.scriptEvent.name}"/>
-                                </td>
-                                <td style="padding-left:15px">
-                                    <h:selectBooleanCheckbox id="active_#{listEntry.id}_#{propertyEditorBean.assignment.id}" value="#{listEntry.active}" disabled="#{listEntry.derived || not propertyEditorBean.editMode || not fxSystemBean.isInRole['ScriptManagement']}"/>
-                                </td>
-                                <td style="padding-left:15px">
-                                    <h:selectBooleanCheckbox id="derivedUsage_#{listEntry.id}_#{propertyEditorBean.assignment.id}" value="#{listEntry.derivedUsage}" disabled="#{listEntry.derived || not propertyEditorBean.editMode || not fxSystemBean.isInRole['ScriptManagement']}"/>
-                                </td>
-                                <td style="padding-left:15px">
-                                    <ui:fragment rendered="#{propertyEditorBean.editMode and not listEntry.derived and fxSystemBean.isInRole['ScriptManagement']}">
-                                            <a4j:commandButton id="removeScript_#{listEntry.id}_#{propertyEditorBean.assignment.id}" action="#{propertyEditorBean.removeScript}" reRender="scripts, tab2"
-                                                               image="/adm/images/commandButton/delete.png" onclick=" var disabled=!confirm('#{fxMessageBean['ScriptEditor.message.remove']}'); if (disabled) return false;">
-                                                <f:setPropertyActionListener target="#{propertyEditorBean.scriptListFiler}" value="#{listEntry.id}"/>
-                                            </a4j:commandButton>
+    <!-- edit script assignments-->
+    <div class="scriptTable">
+        <fx:fieldSet legend="#{fxMessageBean['ScriptEditor.label.assignedScripts']}">
+            <a4j:outputPanel id="scripts">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>
+                                <a4j:commandLink action="#{propertyEditorBean.scriptWrapper.sortByScripts}" reRender="scripts" styleClass="sortArrow">
+                                    #{fxMessageBean['ScriptEditor.label.name']}
+                                    <ui:fragment rendered="#{propertyEditorBean.scriptWrapper.sortStatusScriptInfo == 1}">
+                                        <h:graphicImage value="/adm/images/commandButton/down.png"/>
                                     </ui:fragment>
-                                    <ui:fragment rendered="#{listEntry.derived}">
-                                            <a4j:commandLink id="gotoAssignmentButton_#{listEntry.id}_#{propertyEditorBean.assignment.id}"
-                                                 onclick="var treeframe=parent.getStructureNavFrame(); treeframe.selectNode(#{listEntry.derivedFrom}, false);">
-                                                <h:outputText value="#{fxMessageBean['ScriptEditor.label.derivedFrom']} #{propertyEditorBean.assignmentNameForId[listEntry.derivedFrom]}"/>
-                                            </a4j:commandLink>
+                                    <ui:fragment rendered="#{propertyEditorBean.scriptWrapper.sortStatusScriptInfo == 2}">
+                                        <h:graphicImage value="/adm/images/commandButton/up.png"/>
                                     </ui:fragment>
-                                </td>
-                            </tr>
-                            </c:forEach>
-                            <ui:fragment rendered="#{propertyEditorBean.editMode and fxSystemBean.isInRole['ScriptManagement']}">
-                                <tr>
-                                    <td>
-                                        <h:selectOneListbox size="1" id="selectedScriptInfo" value="#{propertyEditorBean.selectedScriptInfo}"
-                                                converter="SelectableConverter" disabled="#{not propertyEditorBean.editMode}">
-                                            <f:selectItems value="#{fxSelectBean.assignmentScripts}"/>
-                                            <a4j:support event="onchange" reRender="selectedScriptEvent" />
-                                        </h:selectOneListbox>
-                                    </td>
-                                    <td style="padding-left:15px">
-                                         <h:selectOneListbox size="1" id="selectedScriptEvent" value="#{propertyEditorBean.selectedScriptEventId}"
-                                                 disabled="#{not propertyEditorBean.editMode}">
-                                            <f:selectItems value="#{fxSelectBean.assignmentScriptEvents}"/>
-                                        </h:selectOneListbox>
-                                    </td>
-                                    <td style="padding-left:15px">
-                                        <h:selectBooleanCheckbox id="selectedActive" value="#{propertyEditorBean.selectedActive}"/>
-                                    </td>
-                                    <td style="padding-left:15px">
-                                        <h:selectBooleanCheckbox id="selectedDerivedUsage" value="#{propertyEditorBean.selectedDerivedUsage}"/>
-                                    </td>
-                                    <td style="padding-left:15px">
-                                        <a4j:commandButton id="addScript" action="#{propertyEditorBean.addScript}" reRender="scripts, tab2"
-                                                           image="/adm/images/commandButton/new.png">
+                                </a4j:commandLink>
+                            </th>
+                            <th>
+                                <a4j:commandLink action="#{propertyEditorBean.scriptWrapper.sortByEvents}" reRender="scripts" styleClass="sortArrow">
+                                    #{fxMessageBean['ScriptEditor.label.event']}
+                                    <ui:fragment rendered="#{propertyEditorBean.scriptWrapper.sortStatusEvent == 1}">
+                                        <h:graphicImage value="/adm/images/commandButton/down.png"/>
+                                    </ui:fragment>
+                                    <ui:fragment rendered="#{propertyEditorBean.scriptWrapper.sortStatusEvent == 2}">
+                                        <h:graphicImage value="/adm/images/commandButton/up.png"/>
+                                    </ui:fragment>
+                                </a4j:commandLink>
+                            </th>
+                            <th>#{fxMessageBean['ScriptEditor.label.active']}</th>
+                            <th>#{fxMessageBean['ScriptEditor.label.derivedUsage']}</th>
+                            <th>#{fxMessageBean['ScriptEditor.label.actions']}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <c:forEach var="listEntry" items="#{propertyEditorBean.scriptWrapper.scriptList}">
+                        <tr>
+                            <td>
+                                <h:commandLink id="editScript_#{listEntry.id}_#{propertyEditorBean.assignment.id}" action="#{scriptBean.editScript}"
+                                       value="#{listEntry.scriptInfo.name}" actionListener="#{scriptBean.structureListen}">
+                                <f:param name="oid" value="#{listEntry.scriptInfo.id}"/>
+                                </h:commandLink>
+                            </td>
+                            <td style="padding-left:15px">
+                                <h:outputText value="#{listEntry.scriptEvent.name}"/>
+                            </td>
+                            <td style="padding-left:15px">
+                                <h:selectBooleanCheckbox id="active_#{listEntry.id}_#{propertyEditorBean.assignment.id}" value="#{listEntry.active}" disabled="#{listEntry.derived || not propertyEditorBean.editMode || not fxSystemBean.isInRole['ScriptManagement']}"/>
+                            </td>
+                            <td style="padding-left:15px">
+                                <h:selectBooleanCheckbox id="derivedUsage_#{listEntry.id}_#{propertyEditorBean.assignment.id}" value="#{listEntry.derivedUsage}" disabled="#{listEntry.derived || not propertyEditorBean.editMode || not fxSystemBean.isInRole['ScriptManagement']}"/>
+                            </td>
+                            <td style="padding-left:15px">
+                                <ui:fragment rendered="#{propertyEditorBean.editMode and not listEntry.derived and fxSystemBean.isInRole['ScriptManagement']}">
+                                        <a4j:commandButton id="removeScript_#{listEntry.id}_#{propertyEditorBean.assignment.id}" action="#{propertyEditorBean.removeScript}" reRender="scripts, tab2"
+                                                           image="/adm/images/commandButton/delete.png">
+                                            <f:setPropertyActionListener target="#{propertyEditorBean.scriptListFiler}" value="#{listEntry.id}"/>
                                         </a4j:commandButton>
-                                    </td>
-                                </tr>
-                            </ui:fragment>
-                        </tbody>
-                        </table>
-                </a4j:outputPanel>
+                                </ui:fragment>
+                                <ui:fragment rendered="#{listEntry.derived}">
+                                    <a4j:commandLink id="gotoAssignmentButton_#{listEntry.id}_#{propertyEditorBean.assignment.id}"
+                                            onclick="var treeframe=parent.getStructureNavFrame(); treeframe.openNode(#{listEntry.derivedFrom}, false);">
+                                        <h:outputText value="#{fxMessageBean['ScriptEditor.label.derivedFrom']} #{propertyEditorBean.assignmentNameForId[listEntry.derivedFrom]}"/>
+                                    </a4j:commandLink>
+                                </ui:fragment>
+                            </td>
+                        </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
+            </a4j:outputPanel>
+        </fx:fieldSet>
+    </div>
+
+    <!-- assign script -->
+    <ui:fragment rendered="#{propertyEditorBean.editMode and fxSystemBean.isInRole['ScriptManagement']}">
+        <div class="scriptTable">
+            <fx:fieldSet legend="#{fxMessageBean['ScriptEditor.label.assignScript']}">
+                 <table>
+                    <thead>
+                        <tr>
+                            <th>#{fxMessageBean['ScriptEditor.label.name']}</th>
+                            <th>#{fxMessageBean['ScriptEditor.label.event']}</th>
+                            <th>#{fxMessageBean['ScriptEditor.label.active']}</th>
+                            <th>#{fxMessageBean['ScriptEditor.label.derivedUsage']}</th>
+                            <th>#{fxMessageBean['ScriptEditor.label.actions']}</th>
+                        </tr>
+                    </thead>
+                     <tbody>
+                        <tr>
+                            <td>
+                                <h:selectOneListbox size="1" id="selectedScriptInfo" value="#{propertyEditorBean.selectedScriptInfo}"
+                                        converter="SelectableConverter" disabled="#{not propertyEditorBean.editMode}">
+                                    <f:selectItems value="#{fxSelectBean.assignmentScripts}"/>
+                                    <a4j:support event="onchange" reRender="selectedScriptEvent" />
+                                </h:selectOneListbox>
+                            </td>
+                            <td style="padding-left:15px">
+                                 <h:selectOneListbox size="1" id="selectedScriptEvent" value="#{propertyEditorBean.selectedScriptEventId}"
+                                         disabled="#{not propertyEditorBean.editMode}">
+                                    <f:selectItems value="#{fxSelectBean.assignmentScriptEvents}"/>
+                                </h:selectOneListbox>
+                            </td>
+                            <td style="padding-left:15px">
+                                <h:selectBooleanCheckbox id="selectedActive" value="#{propertyEditorBean.selectedActive}"/>
+                            </td>
+                            <td style="padding-left:15px">
+                                <h:selectBooleanCheckbox id="selectedDerivedUsage" value="#{propertyEditorBean.selectedDerivedUsage}"/>
+                            </td>
+                            <td style="padding-left:15px">
+                                <a4j:commandButton id="addScript" action="#{propertyEditorBean.addScript}" reRender="scripts, tab2"
+                                                   image="/adm/images/commandButton/add.png">
+                                </a4j:commandButton>
+                            </td>
+                        </tr>
+                     </tbody>
+                </table>
             </fx:fieldSet>
         </div>
+    </ui:fragment>
     
-        <ui:fragment rendered="#{(not propertyEditorBean.property.new) and (not propertyEditorBean.editMode) and (propertyEditorBean.structureManagement || fxSystemBean.isInRole['ScriptManagement'])}">
-                <adm:commandButton labelKey="PropertyEditor.button.editMode" location="both"
-                        icon="edit"  action="toggleEditMode"  bean="#{propertyEditorBean}" id="editModeButton"/>
-        </ui:fragment>
+    <ui:fragment rendered="#{(not propertyEditorBean.property.new) and (not propertyEditorBean.editMode) and (propertyEditorBean.structureManagement || fxSystemBean.isInRole['ScriptManagement'])}">
+            <adm:commandButton labelKey="PropertyEditor.button.editMode" location="both"
+                    icon="edit"  action="toggleEditMode"  bean="#{propertyEditorBean}" id="editModeButton"/>
+    </ui:fragment>
 
-        <ui:fragment rendered="#{not propertyEditorBean.property.new and propertyEditorBean.editMode and (propertyEditorBean.structureManagement || fxSystemBean.isInRole['ScriptManagement'])}">
-            <adm:commandButton labelKey="PropertyEditor.button.save" location="both"
-                            icon="save"  action="saveChanges"  bean="#{propertyEditorBean}" id="saveChangesButton">
-            </adm:commandButton>
-        </ui:fragment>
+    <ui:fragment rendered="#{not propertyEditorBean.property.new and propertyEditorBean.editMode and (propertyEditorBean.structureManagement || fxSystemBean.isInRole['ScriptManagement'])}">
+        <adm:commandButton labelKey="PropertyEditor.button.save" location="both"
+                        icon="save"  action="saveChanges"  bean="#{propertyEditorBean}" id="saveChangesButton">
+        </adm:commandButton>
+    </ui:fragment>
 
-        <ui:fragment rendered="#{not propertyEditorBean.property.new and propertyEditorBean.editMode}">
-                <adm:commandButton labelKey="PropertyEditor.button.cancel" location="both" lockscreen="false"
-                        icon="cancel" id="cancelButton"
-                        onclick="parent.getStructureNavFrame().openNode(#{propertyEditorBean.assignment.id}, false);return false;"/>
-        </ui:fragment>
+    <ui:fragment rendered="#{not propertyEditorBean.property.new and propertyEditorBean.editMode}">
+            <adm:commandButton labelKey="PropertyEditor.button.cancel" location="both" lockscreen="false"
+                    icon="cancel" id="cancelButton"
+                    onclick="parent.getStructureNavFrame().openNode(#{propertyEditorBean.assignment.id}, false);return false;"/>
+    </ui:fragment>
 
-        <!-- help button-->
-        <ui:include src="../templates/structureEditorHelpButton.xhtml"/>
+    <!-- help button-->
+    <ui:include src="../templates/structureEditorHelpButton.xhtml"/>
 
-        <adm:toolbarPluginButtons/>
-     </h:form>
+    <adm:toolbarPluginButtons/>
+ </h:form>
 </ui:define>
 </ui:composition>
 </body>

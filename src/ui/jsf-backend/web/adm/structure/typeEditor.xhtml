@@ -69,7 +69,7 @@
 
             <ui:fragment rendered="#{not empty typeEditorBean.type.parent}">
                 <fx:formRow labelKey="TypeEditor.label.derivedFrom">
-                     <h:commandLink onclick="var treeframe=parent.getStructureNavFrame(); treeframe.selectNode(#{typeEditorBean.type.parent.id}, true);">
+                     <h:commandLink onclick="var treeframe=parent.getStructureNavFrame(); treeframe.openNode(#{typeEditorBean.type.parent.id}, true);">
                         <h:outputText value="#{typeEditorBean.type.parent.name}"/>
                     </h:commandLink>
                 </fx:formRow>
@@ -270,7 +270,7 @@
                     <tbody>
                         <ui:repeat value="#{typeEditorBean.referencingRelations}" var="r">
                             <h:commandLink id="gotoPropertyRelationButton_#{r.id}"
-                                 onclick="var treeframe=parent.getStructureNavFrame(); treeframe.selectNode(#{r.id}, true);">
+                                 onclick="var treeframe=parent.getStructureNavFrame(); treeframe.openNode(#{r.id}, true);">
                                     <h:outputText value="#{r.name}"/>
                             </h:commandLink>
                             <br/>

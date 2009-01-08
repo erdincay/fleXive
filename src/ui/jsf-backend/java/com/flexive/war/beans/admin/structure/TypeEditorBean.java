@@ -35,6 +35,7 @@ package com.flexive.war.beans.admin.structure;
 
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.beans.MessageBean;
+import com.flexive.faces.beans.SelectBean;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.CacheAdmin;
@@ -101,7 +102,7 @@ public class TypeEditorBean {
     private int scriptListFiler = -1;
     private FxScriptInfo selectedScriptInfo = null;
     private long selectedScriptEventId = -1;
-    private boolean selectedDerivedUsage = false;
+    private boolean selectedDerivedUsage = true;
     private boolean selectedActive = true;
 
     public String getParseRequestParameters() {
@@ -796,6 +797,11 @@ public class TypeEditorBean {
     }
 
     public FxScriptInfo getSelectedScriptInfo() {
+        if (selectedScriptInfo == null) {
+            SelectBean b= new SelectBean();
+            if (b.getTypeScripts().size()>0)
+                selectedScriptInfo = (FxScriptInfo)b.getTypeScripts().get(0).getValue();
+        }
         return selectedScriptInfo;
     }
 
@@ -836,8 +842,7 @@ public class TypeEditorBean {
             this.selectedScriptInfo.getEvent().getId();
         }
         catch (Throwable t) {
-            //TODO: print error message, a4j tags do not support faces message erros
-            //new FxFacesMsgErr(t).addToContext();
+            new FxFacesMsgErr(t).addToContext();
         }
     }
 
@@ -856,7 +861,7 @@ public class TypeEditorBean {
      *          on errors
      */
     public void saveScriptChanges() throws FxApplicationException {
-        for (ScriptListWrapper.ScriptListEntry e : scriptWrapper.getDelta(type.getId(), true)) {
+        for (ScriptListWrapper.ScriptListEntry e : scriptWrapper.getDelta(type.getId())) {
             if (e.getId() == ScriptListWrapper.ID_SCRIPT_ADDED)
                 EJBLookup.getScriptingEngine().createTypeScriptMapping(e.getScriptEvent(), e.getScriptInfo().getId(), type.getId(), e.isActive(), e.isDerivedUsage());
             else if (e.getId() == ScriptListWrapper.ID_SCRIPT_REMOVED)
