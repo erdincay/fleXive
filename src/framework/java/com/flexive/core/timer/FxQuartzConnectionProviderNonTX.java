@@ -49,22 +49,31 @@ public class FxQuartzConnectionProviderNonTX implements ConnectionProvider {
     /**
      * Context from the parent thread
      */
-    private volatile FxContext savedCtx = null;
+//    private volatile FxContext savedCtx = null;
+    private int divisionId = -42;
+
+    public void setDivisionId(String div) {
+//        System.out.println("======> Set division id to "+div);
+        this.divisionId = Integer.parseInt(div);
+    }
 
     /**
      * {@inheritDoc}
      */
     public Connection getConnection() throws SQLException {
-        if( savedCtx == null )
+        if(divisionId == -42)
+            throw new SQLException("No divisionId configured for "+FxQuartzConnectionProviderNonTX.class.getCanonicalName());
+//        System.out.println("===> REQUESTED CON FOR "+divisionId);
+        /*if( savedCtx == null )
             savedCtx = FxContext.get();
         if(FxContext.getUserTicket() == null ) {
 //            System.out.println("Replacing context");
             savedCtx.replace();
-        }
+        }*/
 //        System.out.println("Quartz requested a non-TX connection ... Thread: " + Thread.currentThread() + "; I am: " + this);
 //        System.out.println("Ctx-Info -> Division: " + FxContext.get().getDivisionId() + " Ticket: " + FxContext.getUserTicket());
 
-        return Database.getNonTXDataSource().getConnection();
+        return Database.getNonTXDataSource(divisionId).getConnection();
     }
 
     /**

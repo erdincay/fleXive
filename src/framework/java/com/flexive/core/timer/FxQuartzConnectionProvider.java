@@ -33,11 +33,10 @@ package com.flexive.core.timer;
 
 import com.flexive.core.Database;
 import com.flexive.shared.FxContext;
-
-import java.sql.SQLException;
-import java.sql.Connection;
-
 import org.quartz.utils.ConnectionProvider;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * A connection provider for the Quartz scheduler
@@ -49,18 +48,27 @@ public class FxQuartzConnectionProvider implements ConnectionProvider {
 
     private FxContext savedCtx;
 
+    private int divisionId = -42;
+
+    public void setDivisionId(String div) {
+//        System.out.println("======> TX - Set division id to " + div);
+        this.divisionId = Integer.parseInt(div);
+    }
+
     /**
      * {@inheritDoc}
      */
     public Connection getConnection() throws SQLException {
-//        System.out.println("Quartz requested a TX connection ... Thread: " + Thread.currentThread() + "; I am: " + this);
-        if( savedCtx == null )
-            savedCtx = FxContext.get();
-        if(FxContext.getUserTicket() == null ) {
-            savedCtx.replace();
-        }
-
-        return Database.getDbConnection();
+//        System.out.println("Quartz requested a TX connection ("+divisionId+") ... Thread: " + Thread.currentThread() + "; I am: " + this);
+        if (divisionId == -42) {
+            if (savedCtx == null)
+                savedCtx = FxContext.get();
+            if (FxContext.getUserTicket() == null) {
+                savedCtx.replace();
+            }
+            return Database.getDbConnection();
+        } else
+            return Database.getDbConnection(divisionId);
     }
 
     /**

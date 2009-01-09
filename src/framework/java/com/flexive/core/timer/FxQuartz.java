@@ -33,6 +33,7 @@ package com.flexive.core.timer;
 
 import com.flexive.core.security.UserTicketImpl;
 import com.flexive.core.timer.jobs.MaintenanceJob;
+import com.flexive.core.Database;
 import com.flexive.shared.FxContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,9 +44,11 @@ import org.quartz.SimpleTrigger;
 import org.quartz.impl.SchedulerRepository;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.jdbcjobstore.JobStoreCMT;
+import org.quartz.impl.jdbcjobstore.StdJDBCDelegate;
 import org.quartz.simpl.SimpleThreadPool;
 
 import java.util.Properties;
+import java.sql.SQLException;
 
 /**
  * Quartz scheduler [fleXive] integration
@@ -78,7 +81,7 @@ public class FxQuartz {
 
         FxContext currCtx = FxContext.get();
         if (currCtx.isTestDivision()) {
-            //disable scheduler for embedded JBoss container (I couldn't figure out how to configure a non managed connection ...)
+            //disable scheduler for embedded containers
             LOG.info("Quartz scheduler disabled for embedded (test) container.");
             return;
         }
@@ -87,20 +90,46 @@ public class FxQuartz {
         // see http://wiki.opensymphony.com/display/QRTZ1/ConfigJobStoreCMT for more options
         Properties props = new Properties();
         props.put(StdSchedulerFactory.PROP_DATASOURCE_PREFIX, "fxQuartzDS");
-        props.put("org.quartz.dataSource.fxQuartzDS." + StdSchedulerFactory.PROP_CONNECTION_PROVIDER_CLASS, FxQuartzConnectionProviderNonTX.class.getCanonicalName());
+        props.put("org.quartz.jobStore.dataSource", "fxQuartzDS");
+        props.put("org.quartz.dataSource.fxQuartzDS." + StdSchedulerFactory.PROP_CONNECTION_PROVIDER_CLASS,
+                FxQuartzConnectionProviderNonTX.class.getCanonicalName());
+        props.put("org.quartz.dataSource.fxQuartzDS.divisionId", String.valueOf(currCtx.getDivisionId()));
         props.put(StdSchedulerFactory.PROP_JOB_STORE_CLASS, JobStoreCMT.class.getCanonicalName());
+        /*
+        props.put("org.quartz.jobStore.driverDelegateClass", StdJDBCDelegate.class.getCanonicalName());
+        props.put("org.quartz.jobStore.dataSource", "fxQuartzDS");
+        try {
+            props.put("org.quartz.dataSource.fxQuartzDS.jndiURL", Database.getDivisionData().getDataSource());
+        } catch (SQLException e) {
+            LOG.error("Quartz scheduler disabled! Failed to lookup DataSource for org.quartz.dataSource.fxQuartzDS.jndiURL: " + e.getMessage());
+            return;
+        }
+
+        System.out.println("==> QUARTZ DS: "+props.get("org.quartz.dataSource.fxQuartzDS.jndiURL"));
+        */
         props.put(StdSchedulerFactory.PROP_JOB_STORE_PREFIX, "QRTZ_");
         props.put("org.quartz.scheduler.instanceId", StdSchedulerFactory.AUTO_GENERATE_INSTANCE_ID);
+//        props.put("org.quartz.scheduler.xaTransacted", "false");
         props.put(StdSchedulerFactory.PROP_THREAD_POOL_CLASS, SimpleThreadPool.class.getCanonicalName());
         props.put("org.quartz.threadPool.threadCount", String.valueOf(5));
-        props.put("org.quartz.jobStore.dataSource", "fxQuartzDS");
         props.put("org.quartz.jobStore.nonManagedTXDataSource", "fxQuartzNoTXDS");
-        props.put("org.quartz.dataSource.fxQuartzNoTXDS." + StdSchedulerFactory.PROP_CONNECTION_PROVIDER_CLASS, FxQuartzConnectionProviderNonTX.class.getCanonicalName());
+
         props.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, "FxQuartzScheduler_Division_" + FxContext.get().getDivisionId());
         props.put("org.quartz.jobStore.isClustered", "true");
-        props.put("org.quartz.jobStore.txIsolationLevelSerializable", "true");
+//        props.put("org.quartz.jobStore.txIsolationLevelSerializable", "false");
+        props.put("org.quartz.jobStore.txIsolationLevelReadCommitted", "true");
         // lower db load
         props.put("org.quartz.jobStore.clusterCheckinInterval", "60000");
+
+
+
+        props.put("org.quartz.dataSource.fxQuartzNoTXDS." + StdSchedulerFactory.PROP_CONNECTION_PROVIDER_CLASS, FxQuartzConnectionProviderNonTX.class.getCanonicalName());
+        props.put("org.quartz.dataSource.fxQuartzNoTXDS.divisionId", String.valueOf(currCtx.getDivisionId()));
+
+        /*props.put("org.quartz.dataSource.fxQuartzNoTXDS.driver","com.mysql.jdbc.Driver");
+        props.put("org.quartz.dataSource.fxQuartzNoTXDS.URL", "jdbc:mysql://localhost:3306/flexive?useUnicode=true&amp;characterEncoding=utf8&amp;characterResultSets=utf8");
+        props.put("org.quartz.dataSource.fxQuartzNoTXDS.user", "root");
+        props.put("org.quartz.dataSource.fxQuartzNoTXDS.password", "a");*/
 
         Scheduler scheduler = new StdSchedulerFactory(props).getScheduler();
         FxContext ctx = FxContext._getEJBContext(currCtx);
@@ -109,18 +138,27 @@ public class FxQuartz {
         // and start it off
         scheduler.start();
 
-        //delete maintenance job incase it exists or is persisted
-        scheduler.deleteJob(JOB_MAINTENANCE, GROUP_INTERNAL);
+        boolean found = false;
+        for(String existingJob: scheduler.getJobNames(GROUP_INTERNAL))
+                if( JOB_MAINTENANCE.equals(existingJob)) {
+                    found = true;
+                    break;
+                }
+
+        if( found ) {
+//            System.out.println("Maintenance job already exists - done.");
+            LOG.info("Quartz started.");
+            return;
+        }
 
         JobDetail job = new JobDetail(JOB_MAINTENANCE, GROUP_INTERNAL, MaintenanceJob.class);
-        job.setVolatility(true);
+        job.setVolatility(false);
         //trigger every 30 minutes
         SimpleTrigger tr = new SimpleTrigger(JOB_MAINTENANCE, GROUP_INTERNAL);
         tr.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
         tr.setRepeatInterval(1800000L); //30 minutes
 //        tr.setRepeatInterval(10000L); //10 seconds for testing purposes
-        tr.setVolatility(true);
-
+        tr.setVolatility(false);
         scheduler.scheduleJob(job, tr);
         LOG.info("Quartz started and maintenance job is scheduled.");
     }
