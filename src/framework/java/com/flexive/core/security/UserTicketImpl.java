@@ -74,7 +74,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     private long creationTime;
     private FxPK contactData;
 
-    private static long STRUCTURE_TIMESTAMP = -1;
+    private static volatile long STRUCTURE_TIMESTAMP = -1;
     private static ACLAssignment[] guestACLAssignments = null;
     private static Role[] guestRoles = null;
     private static long[] guestGroups = null;
@@ -86,18 +86,24 @@ public class UserTicketImpl implements UserTicket, Serializable {
      * Returns a guest ticket, based on the request information data.
      * <p/>
      * The guest ticket always belong to the MANDATOR_PUBLIC.
+     * <p/>
      *
      * @return the guest ticket
      */
-    public static synchronized UserTicket getGuestTicket() {
+    public static UserTicket getGuestTicket() {
         FxContext si = FxContext.get();
         if (CacheAdmin.isEnvironmentLoaded() && CacheAdmin.getEnvironment().getTimeStamp() != STRUCTURE_TIMESTAMP) {
             STRUCTURE_TIMESTAMP = CacheAdmin.getEnvironment().getTimeStamp();
             reloadGuestTicketAssignments(false);
         }
-        return new UserTicketImpl(si.getApplicationId(), si.isWebDAV(), "GUEST", "GUEST", Account.USER_GUEST,
-                guestContactData, Mandator.MANDATOR_FLEXIVE, true, guestGroups, guestRoles, guestACLAssignments,
-                FxLanguage.DEFAULT, 0, AuthenticationSource.None);
+        synchronized(UserTicketImpl.class) {
+            // Don't use the class lock for the entire method, because otherwise it could
+            // deadlock when reloadGuestTicketAssignments is called from another thread (FX-435)
+            
+            return new UserTicketImpl(si.getApplicationId(), si.isWebDAV(), "GUEST", "GUEST", Account.USER_GUEST,
+                    guestContactData, Mandator.MANDATOR_FLEXIVE, true, guestGroups, guestRoles, guestACLAssignments,
+                    FxLanguage.DEFAULT, 0, AuthenticationSource.None);
+        }
     }
 
     /**
