@@ -25,8 +25,8 @@
                 <adm:tab label="#{fxMessageBean['Script.tabtitle.create']}" active="true" id="tab1"/>
                 <fx:formRow labelKey="Script.field.name" id="name">
                     <h:inputText id="name" value="#{scriptBean.sinfo.name}" size="30">
-                        <a4j:support event="onkeyup" reRender="scriptnameerror,all" eventsQueue="main"
-                                     requestDelay="300"/>
+                        <a4j:support event="onkeyup" reRender="scriptnameerror,all, verifyPanel" eventsQueue="main"
+                                     requestDelay="300" oncomplete="registerAjaxComponent()"/>
                     </h:inputText>
                 </fx:formRow>
 
@@ -53,26 +53,22 @@
                     </fx:formRow>
                 </a4j:outputPanel>
 
+                <adm:commandButton id="saveButton" labelKey="Script.button.create"
+                                   icon="save" bean="#{scriptBean}" action="createScript"/>
+
+                <adm:commandButton id="cancelButton" labelKey="Script.button.cancel"
+                                   icon="cancel" action="scriptOverview"/>
+
+                <adm:commandButton id="defaultImports" labelKey="Script.button.defaultImports"
+                                   icon="compact" bean="#{scriptBean}" action="addDefaultImports"/>
+
+                <a4j:outputPanel id="verifyPanel" layout="block">
+                    <adm:commandButton id="verifyButton" labelKey="Script.button.verify" bean="#{scriptBean}"
+                                       action="checkScriptSyntax" icon="check"
+                                       rendered="#{scriptBean.verifyButtonEnabled}"/>
+                </a4j:outputPanel>
+                <adm:toolbarPluginButtons/>
             </a4j:region>
-
-            <adm:commandButton id="saveButton" labelKey="Script.button.create"
-                               icon="save" bean="#{scriptBean}" action="createScript"/>
-
-            <adm:commandButton id="cancelButton" labelKey="Script.button.cancel"
-                               icon="cancel" action="scriptOverview"/>
-
-            <adm:commandButton id="defaultImports" labelKey="Script.button.defaultImports"
-                               icon="compact" bean="#{scriptBean}" action="addDefaultImports"/>
-
-            <a4j:outputPanel ajaxRendered="true" id="verifyPanel" layout="block">
-                <a4j:commandButton id="verifyButton" action="#{scriptBean.checkScriptSyntax}"
-                                   value="#{fxMessageBean['Script.button.verify']}"
-                                   rendered="#{scriptBean.verifyButtonEnabled}"
-                                   alt="Groovy Syntax Check"
-                                   style="color:blue; height:20px; right:150px; vertical-align:middle; position:absolute"/>
-            </a4j:outputPanel>
-
-            <adm:toolbarPluginButtons/>
         </h:form>
     </ui:define>
 </ui:composition>

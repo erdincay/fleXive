@@ -34,7 +34,10 @@ Parameters:
         <c:if test="#{empty iconUrl}">
             <c:set var="iconUrl" value="/adm/images/commandButton/#{icon}.png"/>
         </c:if>
-        <img alt="#{id}_icon" src="#{iconUrl}" class="commandIcon"/>
+
+        <a href="javascript:void(0)" onclick="triggerCommandElement_#{id}();return false" >
+            <img alt="#{id}_icon" src="#{iconUrl}" class="commandIcon"/>
+        </a>
 
     </ui:define>
 

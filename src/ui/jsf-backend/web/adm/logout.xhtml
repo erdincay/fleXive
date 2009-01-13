@@ -1,4 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:h="http://java.sun.com/jsf/html"
@@ -18,24 +19,13 @@
             <adm:toolbarPluginButtons/>
             <adm:tab label="#{fxMessageBean['Logout.tabtitle']}" active="true" id="logout"/>
 
-            <table>
-                <tr>
-                    <td>
-                        <div class="infoMessage" style="padding-bottom: 20px">
-                            #{fxMessageBean['Logout.message']}
-                        </div >
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <adm:commandButton id="logoutButton" bean="#{fxAuthenticationBean}" action="logout"
-                            location="content" icon="ok" labelKey="Logout.button.confirm"/>
-                        <adm:commandButton id="cancelButton" action="contentPage"
-                           location="content" icon="cancel" labelKey="Logout.button.cancel"/>
-                    </td>
-                </tr>
-            </table>
-
+            <div class="infoMessage" style="padding-bottom: 20px">
+                #{fxMessageBean['Logout.message']}
+            </div>
+            <adm:commandButton id="logoutButton" bean="#{fxAuthenticationBean}" action="logout"
+                               location="content" icon="ok" labelKey="Logout.button.confirm"/>
+            <adm:commandButton id="cancelButton" action="contentPage"
+                               location="content" icon="cancel" labelKey="Logout.button.cancel"/>
         </h:form>
 
     </ui:define>

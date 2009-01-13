@@ -75,11 +75,11 @@ Parameters:
             parent.registerCommandElement(this,'#{id}','#{fxMessageBean[confirmKey]}',#{lockscreen});
             function triggerCommandElement_#{id}() {
                 eval(parent.getCommandElementScript(self,'#{id}'))
-           }
+            }
         </script>
 
         <c:if test="${location=='both' || location=='content'}">
-            <a href="javascript:void(0)" onclick="triggerCommandElement_#{id}();return false" ><ui:insert name="content">Content</ui:insert></a>
+            <ui:insert name="content">Content</ui:insert>
         </c:if>
 
         <c:if test="${location=='both' || location=='toolbar'}">
@@ -100,6 +100,5 @@ Parameters:
     </ui:fragment>
 
 </ui:composition>
-
 
 </html>

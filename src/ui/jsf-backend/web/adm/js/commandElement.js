@@ -24,6 +24,20 @@ function registerCommandElement(callerWindow,id,confirmTxt,lockscreen) {
         }
         // Store the action within the caller
         eval("callerWindow.commandElementAction_"+id+"=\""+onClickAction+"\"");
+        if (callerWindow.flexive != null) {
+            callerWindow.flexive.yui.onYahooLoaded(
+                function() {
+                    if (callerWindow.document.getElementById("commandButton_" + id) != null) {
+                        callerWindow.document.getElementById("commandButton_" + id).onclick =
+                                    function() {
+                                        callerWindow.eval(onClickAction);
+                                        return false;
+                                    };
+                    }
+                }
+            );
+        }
+
     } catch (e) {
         alertDialog("Unable to register the command element '"+id+"': "+e);
     }

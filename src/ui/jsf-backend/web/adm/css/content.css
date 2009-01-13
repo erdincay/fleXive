@@ -24,22 +24,35 @@ a {
     margin-right: 5px;
     overflow: hidden;
     cursor: pointer;
+    position:relative;
 }
 
 .commandButtonRight {
     background-image: url("../images/commandButton/buttonRight.gif");
     overflow: hidden;
     width: 6px;
+    height:22px;
+    float:left;
+    vertical-align: middle;
 }
 
 .commandButtonLabel {
     background-image: url("../images/commandButton/buttonBG.gif");
     overflow: hidden;
-    padding-top: 1px;
     padding-right: 5px;
     text-decoration: none;
     color: gray;
     font-weight: bold;
+    height:22px;
+    float:left;
+    margin:auto;
+}
+
+.commandButtonLabelText {
+    text-decoration: none;
+    color: gray;
+    font-weight: bold;
+    padding-top:3px;
 }
 
 .commandButtonIcon {
@@ -49,6 +62,8 @@ a {
     padding-right: 8px;
     padding-left: 7px;
     padding-top: 2px;
+    height:22px;
+    float:left;
 }
 
 .commandButton:hover .commandButtonLabel, .commandButton:hover .commandButtonIcon {

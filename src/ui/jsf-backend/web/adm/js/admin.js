@@ -291,7 +291,6 @@ function promptDialog(message, defaultValue, onSuccess) {
     }
 }
 
-
 /**
  * DHTML replacement for Javascript's alertDialog() dialog
  * Don't invoke directly, use alertDialog(...) from admin.js.
@@ -308,4 +307,12 @@ function alertDialog(message) {
     if (wnd != null) {
         wnd._alertDialog(message);
     }
+}
+
+/**
+ * Helper function for Ajax requests, initialises Yahoo components
+ * after completion of a request.
+ */
+function registerAjaxComponent() {
+    flexive.yui.processOnYahoo();
 }
