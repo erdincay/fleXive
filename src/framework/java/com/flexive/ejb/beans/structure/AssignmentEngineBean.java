@@ -838,13 +838,9 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 if (!XPathElement.isValidXPath(XPathElement.stripType(group.getXPath())) ||
                         group.getAlias().equals(XPathElement.lastElement(XPathElement.stripType(org.getXPath())).getAlias()))
                     throw new FxUpdateException("ex.structure.assignment.noXPath");
-                try {
-                    //avoid duplicates
-                    org.getAssignedType().getAssignment(group.getXPath());
+                //avoid duplicates
+                if (org.getAssignedType().isXPathValid(group.getXPath(), true))
                     throw new FxUpdateException("ex.structure.assignment.exists", group.getXPath(), group.getAssignedType().getName());
-                } catch (FxNotFoundException e) {
-                    //expected
-                }
                 //TODO: make sure just the alias changed
                 if (ps != null) ps.close();
                 ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET XPATH=?, XALIAS=? WHERE ID=?");
@@ -2110,8 +2106,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             if (affectedAssignments.size() > 0)
                 throw lastEx;
 
-            removeOrphanedProperties(con);
-            removeOrphanedGroups(con);
+            FxStructureUtils.removeOrphanedProperties(con);
+            FxStructureUtils.removeOrphanedGroups(con);
             StructureLoader.reload(con);
             htracker.track(assignment.getAssignedType(),
                     disableAssignment ? "history.assignment.remove" : "history.assignment.disable",
@@ -2186,48 +2182,6 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         for (FxGroupAssignment subga : ga.getAssignedGroups()) {
             affectedAssignments.add(subga);
             _addSubAssignments(affectedAssignments, subga);
-        }
-    }
-
-    /**
-     * Remove all properties that are no longer referenced
-     *
-     * @param con a valid connection
-     * @throws SQLException on errors
-     */
-    protected static void removeOrphanedProperties(Connection con) throws SQLException {
-        Statement stmt = null;
-        try {
-            stmt = con.createStatement();
-            stmt.executeUpdate("DELETE FROM " + TBL_STRUCT_PROPERTIES + ML + " WHERE ID NOT IN(SELECT DISTINCT APROPERTY FROM " + TBL_STRUCT_ASSIGNMENTS + " WHERE APROPERTY IS NOT NULL)");
-            stmt.executeUpdate("DELETE FROM " + TBL_PROPERTY_OPTIONS + " WHERE ID NOT IN(SELECT DISTINCT APROPERTY FROM " + TBL_STRUCT_ASSIGNMENTS + " WHERE APROPERTY IS NOT NULL)");
-            int removed = stmt.executeUpdate("DELETE FROM " + TBL_STRUCT_PROPERTIES + " WHERE ID NOT IN(SELECT DISTINCT APROPERTY FROM " + TBL_STRUCT_ASSIGNMENTS + " WHERE APROPERTY IS NOT NULL)");
-            if (removed > 0)
-                LOG.info(removed + " orphaned properties removed.");
-        } finally {
-            if (stmt != null)
-                stmt.close();
-        }
-    }
-
-    /**
-     * Remove all groups that are no longer referenced
-     *
-     * @param con a valid connection
-     * @throws SQLException on errors
-     */
-    protected static void removeOrphanedGroups(Connection con) throws SQLException {
-        Statement stmt = null;
-        try {
-            stmt = con.createStatement();
-            stmt.executeUpdate("DELETE FROM " + TBL_STRUCT_GROUPS + ML + " WHERE ID NOT IN(SELECT DISTINCT AGROUP FROM " + TBL_STRUCT_ASSIGNMENTS + " WHERE AGROUP IS NOT NULL)");
-            stmt.executeUpdate("DELETE FROM " + TBL_GROUP_OPTIONS + " WHERE ID NOT IN(SELECT DISTINCT AGROUP FROM " + TBL_STRUCT_ASSIGNMENTS + " WHERE AGROUP IS NOT NULL)");
-            int removed = stmt.executeUpdate("DELETE FROM " + TBL_STRUCT_GROUPS + " WHERE ID NOT IN(SELECT DISTINCT AGROUP FROM " + TBL_STRUCT_ASSIGNMENTS + " WHERE AGROUP IS NOT NULL)");
-            if (removed > 0)
-                LOG.info(removed + " orphaned groups removed.");
-        } finally {
-            if (stmt != null)
-                stmt.close();
         }
     }
 

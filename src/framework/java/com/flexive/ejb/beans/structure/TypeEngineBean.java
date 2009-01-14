@@ -808,8 +808,8 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             ps.close();
 
             //remove eventually orphaned properties and groups
-            AssignmentEngineBean.removeOrphanedProperties(con);
-            AssignmentEngineBean.removeOrphanedGroups(con);
+            FxStructureUtils.removeOrphanedProperties(con);
+            FxStructureUtils.removeOrphanedGroups(con);
 
             sql.setLength(0);
             sql.append("DELETE FROM ").append(TBL_STRUCT_TYPERELATIONS).append(" WHERE TYPEDEF=? OR TYPESRC=? OR TYPEDST=?");
@@ -830,8 +830,8 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             ps = con.prepareStatement(sql.toString());
             ps.setLong(1, type.getId());
             ps.executeUpdate();
-            AssignmentEngineBean.removeOrphanedGroups(con);
-            AssignmentEngineBean.removeOrphanedProperties(con);
+            FxStructureUtils.removeOrphanedGroups(con);
+            FxStructureUtils.removeOrphanedProperties(con);
             StructureLoader.reload(con);
             htracker.track(type, "history.type.remove", type.getName(), type.getId());
         } catch (SQLException e) {
@@ -845,9 +845,6 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             ctx.setRollbackOnly();
             throw new FxRemoveException(LOG, e, "ex.cache", e.getMessage());
         } catch (FxLoadException e) {
-            ctx.setRollbackOnly();
-            throw new FxRemoveException(e);
-        } catch (FxInvalidParameterException e) {
             ctx.setRollbackOnly();
             throw new FxRemoveException(e);
         } finally {

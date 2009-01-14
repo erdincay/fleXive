@@ -560,19 +560,15 @@ public class FxGroupData extends FxData {
         FxType type;
         List<FxAssignment> childAssignments;
         boolean checkOneOf;
-        try {
-            if (this.isRootGroup()) {
-                type = CacheAdmin.getEnvironment().getAssignment(this.getChildren().get(0).getAssignmentId()).getAssignedType();
-                childAssignments = type.getConnectedAssignments("/");
-                checkOneOf = false;
-            } else {
-                type = CacheAdmin.getEnvironment().getAssignment(this.getAssignmentId()).getAssignedType();
-                FxGroupAssignment thisAssignment = ((FxGroupAssignment) type.getAssignment(this.getXPath()));
-                childAssignments = thisAssignment.getAssignments();
-                checkOneOf = thisAssignment.getMode() == GroupMode.OneOf;
-            }
-        } catch (FxApplicationException e) {
-            throw e.asRuntimeException();
+        if (this.isRootGroup()) {
+            type = CacheAdmin.getEnvironment().getAssignment(this.getChildren().get(0).getAssignmentId()).getAssignedType();
+            childAssignments = type.getConnectedAssignments("/");
+            checkOneOf = false;
+        } else {
+            type = CacheAdmin.getEnvironment().getAssignment(this.getAssignmentId()).getAssignedType();
+            FxGroupAssignment thisAssignment = ((FxGroupAssignment) type.getAssignment(this.getXPath()));
+            childAssignments = thisAssignment.getAssignments();
+            checkOneOf = thisAssignment.getMode() == GroupMode.OneOf;
         }
 
         int count;

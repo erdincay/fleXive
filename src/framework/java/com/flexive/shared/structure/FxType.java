@@ -682,23 +682,27 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      *
      * @param parentXPath desired XPath
      * @return FxAssignment
-     * @throws FxInvalidParameterException if XPath is not valid
-     * @throws FxNotFoundException         XPath not found
      */
-    public FxAssignment getAssignment(String parentXPath) throws FxInvalidParameterException, FxNotFoundException {
+    public FxAssignment getAssignment(String parentXPath)  {
         if (StringUtils.isEmpty(parentXPath) || "/".equals(parentXPath))
             return null; //connected to the root
         parentXPath = XPathElement.stripType(parentXPath);
-        List<XPathElement> xpe = XPathElement.split(parentXPath.toUpperCase());
-        if (xpe.size() == 0)
-            return null; //play safe, but should not happen
-        for (FxGroupAssignment rga : getAssignedGroups())
-            if (rga.getAlias().equals(xpe.get(0).getAlias()))
-                return rga.getAssignment(xpe, parentXPath);
-        for (FxPropertyAssignment rpa : getAssignedProperties())
-            if (rpa.getAlias().equals(xpe.get(0).getAlias()))
-                return rpa;
-        throw new FxNotFoundException("ex.structure.assignment.notFound.xpath", parentXPath);
+        try {
+            List<XPathElement> xpe = XPathElement.split(parentXPath.toUpperCase());
+            if (xpe.size() == 0)
+                return null; //play safe, but should not happen
+            for (FxGroupAssignment rga : getAssignedGroups())
+                if (rga.getAlias().equals(xpe.get(0).getAlias()))
+                    return rga.getAssignment(xpe, parentXPath);
+            for (FxPropertyAssignment rpa : getAssignedProperties())
+                if (rpa.getAlias().equals(xpe.get(0).getAlias()))
+                    return rpa;
+        } catch (FxInvalidParameterException e) {
+            throw e.asRuntimeException();
+        } catch (FxNotFoundException e) {
+            throw e.asRuntimeException();
+        }
+        throw new FxNotFoundException("ex.structure.assignment.notFound.xpath", parentXPath).asRuntimeException();
     }
 
     /**
@@ -708,14 +712,12 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      *
      * @param parentXPath desired XPath
      * @return FxAssignment
-     * @throws FxInvalidParameterException if XPath is not valid or a group
-     * @throws FxNotFoundException         XPath not found
      */
-    public FxPropertyAssignment getPropertyAssignment(String parentXPath) throws FxInvalidParameterException, FxNotFoundException {
+    public FxPropertyAssignment getPropertyAssignment(String parentXPath)  {
         FxAssignment pa = getAssignment(parentXPath);
         if (pa instanceof FxPropertyAssignment)
             return (FxPropertyAssignment) pa;
-        throw new FxInvalidParameterException("parentXPath", "ex.structure.assignment.noProperty", parentXPath);
+        throw new FxInvalidParameterException("parentXPath", "ex.structure.assignment.noProperty", parentXPath).asRuntimeException();
     }
 
     /**
@@ -725,14 +727,12 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      *
      * @param parentXPath desired XPath
      * @return FxAssignment
-     * @throws FxInvalidParameterException if XPath is not valid or a propery
-     * @throws FxNotFoundException         XPath not found
      */
-    public FxGroupAssignment getGroupAssignment(String parentXPath) throws FxInvalidParameterException, FxNotFoundException {
+    public FxGroupAssignment getGroupAssignment(String parentXPath) {
         FxAssignment pa = getAssignment(parentXPath);
         if (pa instanceof FxGroupAssignment)
             return (FxGroupAssignment) pa;
-        throw new FxInvalidParameterException("parentXPath", "ex.structure.assignment.noGroup", parentXPath);
+        throw new FxInvalidParameterException("parentXPath", "ex.structure.assignment.noGroup", parentXPath).asRuntimeException();
     }
 
     /**
@@ -779,10 +779,8 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      *
      * @param parentXPath desired XPath
      * @return ArrayList of FxAssignment
-     * @throws FxInvalidParameterException if XPath is not valid
-     * @throws FxNotFoundException         XPath not found
      */
-    public List<FxAssignment> getConnectedAssignments(String parentXPath) throws FxInvalidParameterException, FxNotFoundException {
+    public List<FxAssignment> getConnectedAssignments(String parentXPath) {
         List<FxAssignment> assignments = new ArrayList<FxAssignment>(10);
         if (StringUtils.isEmpty(parentXPath) || "/".equals(parentXPath)) {
             for (FxGroupAssignment rga : getAssignedGroups())
@@ -795,15 +793,15 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
         }
         //check if the parentXPath is a group
         if (!(getAssignment(parentXPath) instanceof FxGroupAssignment))
-            throw new FxInvalidParameterException("ex.structure.assignment.noGroup", parentXPath);
+            throw new FxInvalidParameterException("ex.structure.assignment.noGroup", parentXPath).asRuntimeException();
         for (FxGroupAssignment rga : getAssignedGroups())
             if (rga.getXPath().equals(parentXPath))
                 return rga.getAssignments();
-        throw new FxNotFoundException("ex.structure.assignments.notFound.xpath", parentXPath);
+        throw new FxNotFoundException("ex.structure.assignments.notFound.xpath", parentXPath).asRuntimeException();
     }
 
     /**
-     * Check if the given XPath is valid for this content
+     * Check if the given XPath is valid for this type
      *
      * @param XPath         the XPath to check
      * @param checkProperty should the XPath point to a property?

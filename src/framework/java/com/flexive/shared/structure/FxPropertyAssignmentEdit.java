@@ -389,12 +389,8 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
     public FxPropertyAssignmentEdit setXPath(String XPath) throws FxInvalidParameterException {
         if (StringUtils.isEmpty(alias))
             throw new FxInvalidParameterException("XPATH", "ex.structure.assignment.noXPath");
-        try {
-            this.getAssignedType().getAssignment(XPath);
+        if (this.getAssignedType().isXPathValid(XPath, true))
             throw new FxInvalidParameterException("XPATH", "ex.structure.assignment.exists", XPath, getAssignedType().getName());
-        } catch (FxNotFoundException e) {
-            //ok, it really is new
-        }
         this.XPath = XPath;
         return this;
     }

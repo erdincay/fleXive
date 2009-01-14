@@ -34,10 +34,7 @@ package com.flexive.tests.embedded.persistence;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
-import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.exceptions.FxLogoutFailedException;
-import com.flexive.shared.exceptions.FxNotFoundException;
-import com.flexive.shared.exceptions.FxRemoveException;
+import com.flexive.shared.exceptions.*;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
@@ -357,7 +354,7 @@ public class InheritanceTest extends StructureTestBase {
             try {
                 CacheAdmin.getEnvironment().getType(derived.getId()).getAssignment(xpath);
                 assert false : "Expected that [" + xpath + "] has been removed!";
-            } catch (FxNotFoundException e) {
+            } catch (FxRuntimeException e) {
                 //expected
             }
         }
