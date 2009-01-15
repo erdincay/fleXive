@@ -51,6 +51,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Class handling Database stuff
@@ -250,6 +251,13 @@ public final class Database {
             Object o = c.lookup("jca:/console.dbpool/" + name + "/JCAManagedConnectionFactory/" + name);
             try {
                 dataSource = (DataSource) o.getClass().getMethod("$getResource").invoke(o);
+            } catch (NoSuchMethodException e) {
+                if( o instanceof DataSource )
+                    return (DataSource)o;
+                String sErr = "Unable to retrieve Connection to [" + dataSourceName
+                        + "]: JNDI resource is no DataSource and method $getResource not found!";
+                LOG.error(sErr);
+                throw new SQLException(sErr);
             } catch (Exception ex) {
                 String sErr = "Unable to retrieve Connection to [" + dataSourceName
                         + "]: " + ex.getMessage();
@@ -377,10 +385,17 @@ public final class Database {
                 }
             }
             if (globalDataSource == null) {
-                //try the wierd geronimo logic as last resort
+                //try the weird geronimo logic as last resort
+                Object o = null;
                 try {
-                    Object o = EJBLookup.getInitialContext().lookup("jca:/console.dbpool/flexiveConfiguration/JCAManagedConnectionFactory/flexiveConfiguration");
+                    o = EJBLookup.getInitialContext().lookup("jca:/console.dbpool/flexiveConfiguration/JCAManagedConnectionFactory/flexiveConfiguration");
                     globalDataSource = (DataSource) o.getClass().getMethod("$getResource").invoke(o);
+                } catch (NoSuchMethodException e) {
+                    if (o instanceof DataSource)
+                        return (DataSource) o;
+                    String sErr = "Unable to retrieve Connection to [" + DS_GLOBAL_CONFIG + "]: JNDI resource is no DataSource and method $getResource not found!";
+                    LOG.error(sErr);
+                    throw new SQLException(sErr);
                 } catch (Exception ex) {
                     String msg = "Unable to retrieve Connection to [" + DS_GLOBAL_CONFIG + "]: " + ex.getMessage();
                     LOG.error(msg);
