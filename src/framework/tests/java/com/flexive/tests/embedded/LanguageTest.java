@@ -34,12 +34,19 @@ package com.flexive.tests.embedded;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.interfaces.LanguageEngine;
+import static com.flexive.tests.embedded.FxTestUtils.login;
+import static com.flexive.tests.embedded.FxTestUtils.logout;
 import org.testng.annotations.Test;
-
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.AfterClass;
+import static org.testng.Assert.*;
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Tests for the language beans.
@@ -49,10 +56,21 @@ import java.util.List;
 @Test(groups = "ejb")
 public class LanguageTest {
 
+    @BeforeClass
+    public void beforeClass() throws Exception {
+        login(TestUsers.SUPERVISOR);
+    }
+
+    @AfterClass
+    public void afterClass() throws FxLogoutFailedException {
+        logout();
+    }
+
     /**
      * Asserts that all language labels are different
-     * 
-     * @throws com.flexive.shared.exceptions.FxApplicationException on errors
+     *
+     * @throws com.flexive.shared.exceptions.FxApplicationException
+     *          on errors
      */
     @Test
     public void testLanguageLabels() throws FxApplicationException {
@@ -64,5 +82,82 @@ public class LanguageTest {
             assert !defaultTranslations.contains(name) : "Language name '" + name + "' occurs at least twice.";
             defaultTranslations.add(name);
         }
+    }
+
+    /**
+     * Asserts setting and loading available languages, removal of used languages
+     *
+     * @throws com.flexive.shared.exceptions.FxApplicationException
+     *          on errors
+     */
+    @Test
+    public void testSetAvailable() throws FxApplicationException {
+        LanguageEngine languageBean = EJBLookup.getLanguageEngine();
+        List<FxLanguage> origLanguages = languageBean.loadAvailable(false);
+
+        List<FxLanguage> testLanguages = new ArrayList<FxLanguage>();
+
+        // reset the db langs
+        languageBean.setAvailable(origLanguages, true);
+        // test by ignoring the languages in use
+        testLanguages.add(new FxLanguage("it"));
+        testLanguages.add(new FxLanguage("fr"));
+        languageBean.setAvailable(testLanguages, true);
+        testLanguages = languageBean.loadAvailable();
+
+        // assert available language and the new default lang set to "it"
+        assertEquals(testLanguages.size(), 2);
+        assertEquals(testLanguages.get(0).getIso2digit(), "it");
+
+        // reset the db langs
+        languageBean.setAvailable(origLanguages, true);
+        testLanguages.add(new FxLanguage("fr"));
+        testLanguages.add(new FxLanguage("it"));
+        // test by retaining the usage of the system default "en"
+        try {
+            languageBean.setAvailable(testLanguages, false);
+            fail("\"setAvailable(testLanguages, false)\" should have failed");
+        } catch (FxInvalidParameterException e) {
+            assertNotNull(e);
+        }
+
+        // now assert that "en" is one of the ~136 disabled languages
+        for(FxLanguage l : languageBean.loadDisabled()) {
+            assertEquals(false, l.getIso2digit().equals("en"));
+        }
+
+        // reset the db langs
+        languageBean.setAvailable(origLanguages, true);
+    }
+
+    /**
+     * Asserts that an ArrayList of FxLanguage is returned and that the elements are FxLanguage Objects
+     * For loadAvailable(false) this test asserts that none of the returned testLanguages is the system language.
+     *
+     * @throws com.flexive.shared.exceptions.FxApplicationException on errors
+     */
+    @Test
+    public void testLoadAvailable() throws FxApplicationException {
+        LanguageEngine languageBean = EJBLookup.getLanguageEngine();
+        List<FxLanguage> languages = languageBean.loadAvailable(true);
+        assertTrue(languages instanceof ArrayList);
+        for (FxLanguage l : languages) {
+            assertTrue(l != null);
+        }
+        // assert that none of the returned languages is the systemlanguage
+        languages = languageBean.loadAvailable(false);
+        for (FxLanguage l : languages) {
+            assertTrue(l.getId() != 0);
+        }
+    }
+
+    /**
+     * Asserts that an invalid ID returns "false" for LanguageBean#isValid(id)
+     *
+     * @throws com.flexive.shared.exceptions.FxApplicationException on errors
+     */
+    @Test public void testValidException() throws FxApplicationException {
+        LanguageEngine languageBean = EJBLookup.getLanguageEngine();
+        assertTrue(!languageBean.isValid(5000));
     }
 }
