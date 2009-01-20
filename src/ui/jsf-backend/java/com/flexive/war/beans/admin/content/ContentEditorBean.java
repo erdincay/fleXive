@@ -105,6 +105,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
     private int compareSourceVersion;
     private int compareDestinationVersion;
     private Map<FxValue, FxValueFormatter> customValueFormatters;
+    private Map<Long, String> treeLabelMap;
 
     /**
      * uploaded file for import
@@ -657,6 +658,35 @@ public class ContentEditorBean implements ActionBean, Serializable {
             new FxFacesMsgErr(t).addToContext();
         }
     }
+
+    /**
+     * Mapped function to return the label path for a tree node (id)
+     *
+     * @return label path for a given tree node in the calling users locale
+     */
+    public Map<Long, String> getTreeLabelPath() {
+        if (treeLabelMap == null) {
+            treeLabelMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Long, String>() {
+                public String get(Object key) {
+                    try {
+                        long id = (Long)key;
+                        if( id < 0 ) {
+                            for( FxTreeNode node: treeNodes) {
+                                if( node.getId() == id )
+                                    return tree.getLabels(FxTreeMode.Edit, node.getParentNodeId()).get(0)+"/*";
+                            }
+                            return "unknown/*";
+                        } else
+                            return tree.getLabels(FxTreeMode.Edit, id).get(0);
+                    } catch (FxApplicationException e) {
+                        return "unknown";
+                    }
+                }
+            });
+        }
+        return treeLabelMap;
+    }
+
 
     public void setType(long type) {
         this.type = type;
