@@ -297,6 +297,10 @@
                 return dojo.widget.byId('contentTree').fxController;
             }
 
+            function getFxSelector() {
+                return dojo.widget.byId('contentTree').fxSelector;
+            }
+
             function showTreeMenu() {
                 var menu = dojo.widget.byId("contentTreeMenu");
                 if (menu.getTreeNode() == null) {

@@ -42,6 +42,7 @@ import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
+import com.flexive.war.JsonWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -94,6 +95,36 @@ public class ContentTreeWriter implements Serializable {
             LOG.error("Failed to render content tree: " + e.getMessage(), e);
         }
         return localWriter != null ? localWriter.toString() : "";
+    }
+
+    /**
+     * Get the chain of node id's "leading" to the given node
+     *
+     * @param nodeId   requested node
+     * @param liveTree live or edit tree?
+     * @return chain of node id's "leading" to the given node
+     */
+    public String getIdChain(Long nodeId, boolean liveTree) {
+        try {
+            long[] chain = EJBLookup.getTreeEngine().getIdChain(liveTree ? FxTreeMode.Live : FxTreeMode.Edit, nodeId);
+            StringWriter out = new StringWriter();
+            JsonWriter writer = new JsonWriter(out);
+            writer.startMap();
+            writer.startAttribute("nodes");
+            writer.startArray();
+            for (long node : chain)
+                writer.writeLiteral("node_"+node);
+            writer.closeArray();
+            writer.closeMap();
+            writer.finishResponse();
+            return out.toString();
+        } catch (FxApplicationException e) {
+            LOG.error("Failed to get idChain for node #" + nodeId + ", live tree:" + liveTree, e);
+            return "[]";
+        } catch (IOException e) {
+            LOG.error("Failed to instantiate JSON writer", e);
+            return "[]";
+        }
     }
 
     /**
@@ -160,7 +191,7 @@ public class ContentTreeWriter implements Serializable {
      * @param actionsDisabled list of disabled actions
      * @param node            the node to be processed
      * @param liveTreeEnabled if the live/edit tree switch is available (all treemode-related actions will be disabled
-     * if this parameter is false)
+     *                        if this parameter is false)
      */
     private void setAllowedActions(List<String> actionsDisabled, FxTreeNode node, boolean liveTreeEnabled) {
         final boolean contentAvailable = node.hasReference();
@@ -171,16 +202,16 @@ public class ContentTreeWriter implements Serializable {
         enableAction(actionsDisabled, node.getDirectChildCount() > 0, "searchSubtree");
         final boolean editNodeActions =
                 !node.isLive()
-                && node.isMayEdit()
-                && liveTreeEnabled;
+                        && node.isMayEdit()
+                        && liveTreeEnabled;
         enableAction(actionsDisabled, editNodeActions, "activateNode", "activateNodeAndChildren", "removeNode");
         enableAction(actionsDisabled, editNodeActions && node.getDirectChildCount() > 0, "removeNodeAndChildren");
         enableAction(actionsDisabled, !node.isLive(), "createContent", "createFolder");
         final boolean liveNodeActions =
                 node.isLive()
-                && liveTreeEnabled
-                && node.isMayEdit()
-                && node.getId() != FxTreeNode.ROOT_NODE;
+                        && liveTreeEnabled
+                        && node.isMayEdit()
+                        && node.getId() != FxTreeNode.ROOT_NODE;
         enableAction(actionsDisabled, liveNodeActions, "deactivateNode");
         enableAction(actionsDisabled, liveNodeActions && node.getDirectChildCount() > 0, "deactivateNodeAndChildren");
     }

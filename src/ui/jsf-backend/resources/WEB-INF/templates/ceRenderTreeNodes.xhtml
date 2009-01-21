@@ -20,8 +20,6 @@
         <c:set var="nodeStyle" value="editableNodes"/>
     </c:if>
 
-
-
     <a4j:outputPanel id="treeNodes">
         <h:inputHidden id="treeNodeParent" value="#{srcEditor.treeNodeParent}" />
         <!--<div style="width:40px;float:left;padding-top:2px">#{fxMessageBean['Content.field.nodes']}</div>-->
@@ -50,7 +48,7 @@
                             </td>
 
                             <td nowrap="true" style="padding-right:5px">
-                                #{srcEditor.treeLabelPath[node.id]}
+                                <a href="javascript:expandNode(#{node.id}, #{node.parentNodeId});">#{srcEditor.treeLabelPath[node.id]}</a>
                             </td>
                         </tr>
                     </c:if>

@@ -21,7 +21,16 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../../lib/jsf/weblets-api-1.1.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../../lib/jsf/weblets-api-1.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../../../lib/javaee.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

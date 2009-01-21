@@ -1,5 +1,5 @@
 /*
- * Flexive RPC tree controller. Based on DOJO's RPC controller
+ * [fleXive] RPC tree controller. Based on DOJO's RPC controller
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
 */
@@ -42,6 +42,10 @@ dojo.widget.defineWidget(
             name: "ContentTreeWriter.renderContentTree",
             params: ["this.rootNodeId", "kw.params.controller.getMaxExpandedLevel()", "kw.params.controller.liveMode", "kw.params.controller.pathMode"]
         },
+        /*"getIdChain": {
+            name: "ContentTreeWriter.getIdPChain",
+            params: ["kw.params.node.objectId", "this.liveMode"]
+        },*/
         "move": {
             name: "ContentTreeEditor.move",
             params: ["kw.params.child.objectId", "kw.params.newParent.objectId", "kw.params.newIndex", "this.liveMode"]
@@ -51,7 +55,19 @@ dojo.widget.defineWidget(
             params: ["kw.params.node.objectId", "this.removeContent", "this.liveMode", "false"]
         }
     },
-    listenNodeFilter: function(elem) { return elem instanceof dojo.widget.Widget}, 
+    listenNodeFilter: function(elem) { return elem instanceof dojo.widget.Widget},
+
+    expandToNode: function(nodeId) {
+        var result = eval("("+flexive.util.getJsonRpc().ContentTreeWriter.getIdChain(nodeId, this.liveMode)+")");
+        var rootNode = dojo.widget.byId('node_' + this.rootNodeId);
+        this.collapseAll(rootNode);
+        this.expandedNodes.length = 0;
+        for(var i=0; i<result.nodes.length; i++)
+            this.expandedNodes.push(result.nodes[i]);
+        this.maxExpandedLevel = null;
+        this.expandOldView();
+        getFxSelector().select(dojo.widget.byId('node_' + nodeId))
+    },
 
     expand: function(node, sync) {
         if (node.children.length > 0 ||

@@ -86,3 +86,8 @@ function preA4jAction(xpath,action) {
         return true;
     }
 }
+
+function expandNode(nodeId, parentNodeId) {
+    parent.gotoNavMenu(0);
+    parent.getContentNavFrame().getFxController().expandToNode(nodeId > 0 ? nodeId : parentNodeId);
+}
