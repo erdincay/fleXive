@@ -56,8 +56,11 @@ import java.util.Set;
 @Test(groups = "ejb")
 public class LanguageTest {
 
+    private LanguageEngine le;
+
     @BeforeClass
     public void beforeClass() throws Exception {
+        le = EJBLookup.getLanguageEngine();
         login(TestUsers.SUPERVISOR);
     }
 
@@ -92,42 +95,41 @@ public class LanguageTest {
      */
     @Test
     public void testSetAvailable() throws FxApplicationException {
-        LanguageEngine languageBean = EJBLookup.getLanguageEngine();
-        List<FxLanguage> origLanguages = languageBean.loadAvailable(false);
+        List<FxLanguage> origLanguages = le.loadAvailable(false);
 
         List<FxLanguage> testLanguages = new ArrayList<FxLanguage>();
 
         // reset the db langs
-        languageBean.setAvailable(origLanguages, true);
+        le.setAvailable(origLanguages, true);
         // test by ignoring the languages in use
         testLanguages.add(new FxLanguage("it"));
         testLanguages.add(new FxLanguage("fr"));
-        languageBean.setAvailable(testLanguages, true);
-        testLanguages = languageBean.loadAvailable();
+        le.setAvailable(testLanguages, true);
+        testLanguages = le.loadAvailable();
 
         // assert available language and the new default lang set to "it"
         assertEquals(testLanguages.size(), 2);
         assertEquals(testLanguages.get(0).getIso2digit(), "it");
 
         // reset the db langs
-        languageBean.setAvailable(origLanguages, true);
+        le.setAvailable(origLanguages, true);
         testLanguages.add(new FxLanguage("fr"));
         testLanguages.add(new FxLanguage("it"));
         // test by retaining the usage of the system default "en"
         try {
-            languageBean.setAvailable(testLanguages, false);
+            le.setAvailable(testLanguages, false);
             fail("\"setAvailable(testLanguages, false)\" should have failed");
         } catch (FxInvalidParameterException e) {
             assertNotNull(e);
         }
 
         // now assert that "en" is one of the ~136 disabled languages
-        for(FxLanguage l : languageBean.loadDisabled()) {
+        for(FxLanguage l : le.loadDisabled()) {
             assertEquals(false, l.getIso2digit().equals("en"));
         }
 
         // reset the db langs
-        languageBean.setAvailable(origLanguages, true);
+        le.setAvailable(origLanguages, true);
     }
 
     /**
@@ -138,14 +140,13 @@ public class LanguageTest {
      */
     @Test
     public void testLoadAvailable() throws FxApplicationException {
-        LanguageEngine languageBean = EJBLookup.getLanguageEngine();
-        List<FxLanguage> languages = languageBean.loadAvailable(true);
+        List<FxLanguage> languages = le.loadAvailable(true);
         assertTrue(languages instanceof ArrayList);
         for (FxLanguage l : languages) {
             assertTrue(l != null);
         }
         // assert that none of the returned languages is the systemlanguage
-        languages = languageBean.loadAvailable(false);
+        languages = le.loadAvailable(false);
         for (FxLanguage l : languages) {
             assertTrue(l.getId() != 0);
         }
@@ -157,7 +158,6 @@ public class LanguageTest {
      * @throws com.flexive.shared.exceptions.FxApplicationException on errors
      */
     @Test public void testValidException() throws FxApplicationException {
-        LanguageEngine languageBean = EJBLookup.getLanguageEngine();
-        assertTrue(!languageBean.isValid(5000));
+        assertTrue(!le.isValid(5000));
     }
 }

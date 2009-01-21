@@ -13,8 +13,8 @@
         <para>
             Quite often it is desireable to adjust (or automatically generate) some values in a content instance, send
             emails or perform functionality that the original developer of a software component didn't have in mind when
-            he wrote it. Changing the component is one way - but it doesn't endorse reuseability of neither the
-            component nor the modification or required actions.
+            he wrote it. Changing the component is one way - but this neither endorses reusability of the component nor
+            the modification of the required actions.
         </para>
         <para>
             &Flexive; is built with the intention to allow various kinds of scripting. Scripts can be either executed
@@ -54,7 +54,7 @@
             &Flexive; allows the definition of scripts which are executed once during the initial setup of a division
             (database) called
             <emphasis>run-once</emphasis>
-            scripts or every time the application server is started called
+            scripts, or for every time the application server is started called
             <emphasis>startup</emphasis>
             scripts.
             These scripts are located in the

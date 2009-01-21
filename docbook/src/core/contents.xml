@@ -11,12 +11,10 @@
     <section xml:id="core_contents_overview">
         <title>Overview</title>
         <para>
-            When the perisistence engines (structure and content) of &flexive; were designed we tried not to walk the
-            path
-            of other frameworks like hibernate and access data instances with (auto)generated classes but use a generic
-            approach. Since we wanted to use hierarchical data structures which are quite like XML in nature the weapon
-            of
-            choice was an XPath-like approach: Values are accessed using their XPath.
+            When the persistence engines (structure and content) of &flexive; were designed, we tried to solve this problem
+            by using a generic approach (unlike hibernate, which accesses data instances with (auto)generated classes).
+            Since we wanted to use hierarchical data structures which are quite like XML in nature, the weapon
+            of choice was an XPath-like approach: Values are accessed using their <emphasis>XPath</emphasis>.
         </para>
         <para>
             As a simple example lets consider the following XML file:

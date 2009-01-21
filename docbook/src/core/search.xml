@@ -14,7 +14,7 @@
         &Flexive; contents can be queried using a SQL-like dialect called
         <glossterm>&fxsql;</glossterm>.
         The core idea of &fxsql; is to provide a flat virtual table that contains all content instances
-        visible to the current user, with full support for &flexive; data types and multilinguality.
+        visible to the current user, with full support for &flexive; data types and multilingualism.
     </para>
     <para>
         While it is possible to submit queries in plain &fxsql;, there are alternatives
