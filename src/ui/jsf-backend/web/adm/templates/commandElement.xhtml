@@ -33,7 +33,7 @@ Parameters:
     <c:if test="#{empty rendered}">
         <c:set var="rendered" value="#{true}"/>
     </c:if>
-    
+
     <ui:fragment rendered="#{rendered}">
         <c:if test="#{!empty labelKey}">
             <c:set var="label" value="#{fxMessageBean[labelKey]}"/>
@@ -62,6 +62,10 @@ Parameters:
 
         <c:if test="#{not empty icon}">
             <c:set var="iconUrl" value="#{fxSystemBean.contextPath}/adm/images/commandButton/#{icon}.png"/>
+        </c:if>
+
+        <c:if test="${location == 'content'}">
+            <c:set var="id" value="#{id}_LOCCONTENT"/>
         </c:if>
 
         <div id="commandElement_#{id}" style="display:none">

@@ -389,6 +389,7 @@ var toolbarImages = [];
 var toolbarHelp   = [];
 var toolbarClick  = [];
 var toolbarIds    = [];
+var ajaxButtonIds = [];
 
 function clearToolbar() {
     toolbarImages=[];

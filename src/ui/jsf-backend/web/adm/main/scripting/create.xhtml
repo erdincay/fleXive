@@ -26,7 +26,7 @@
                 <fx:formRow labelKey="Script.field.name" id="name">
                     <h:inputText id="name" value="#{scriptBean.sinfo.name}" size="30">
                         <a4j:support event="onkeyup" reRender="scriptnameerror,all, verifyPanel" eventsQueue="main"
-                                     requestDelay="300" oncomplete="registerAjaxComponent()"/>
+                                     requestDelay="500" oncomplete="ajaxButtonRequest()"/>
                     </h:inputText>
                 </fx:formRow>
 
