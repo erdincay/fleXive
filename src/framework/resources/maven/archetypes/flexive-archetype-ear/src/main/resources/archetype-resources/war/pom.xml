@@ -33,7 +33,6 @@
         <dependency>
             <groupId>com.flexive</groupId>
             <artifactId>flexive-plugin-jsf-core</artifactId>
-            <version>${flexive.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
