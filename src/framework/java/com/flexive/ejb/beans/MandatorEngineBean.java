@@ -39,7 +39,9 @@ import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.content.FxPermissionUtils;
+import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.security.Mandator;
@@ -153,7 +155,38 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void assignMetaData(int mandatorId, long contentId) throws FxApplicationException {
-        //TODO: code me!
+        final UserTicket ticket = FxContext.getUserTicket();
+        final FxEnvironment environment;
+        // Security
+        FxPermissionUtils.checkRole(ticket, Role.GlobalSupervisor);
+        environment = CacheAdmin.getEnvironment();
+        // check existance
+        Mandator mand = environment.getMandator(mandatorId);
+        EJBLookup.getContentEngine().load(new FxPK(contentId)); // throws exception if content doesn't exist
+        Connection con = null;
+        PreparedStatement ps = null;
+        String sql;
+
+        try {
+            // get Database connection
+            con = Database.getDbConnection();             //1             //2            //3        //4
+            sql = "UPDATE " + TBL_MANDATORS + " SET METADATA=?, MODIFIED_BY=?, MODIFIED_AT=? WHERE ID=?";
+            final long NOW = System.currentTimeMillis();
+            ps = con.prepareStatement(sql);
+            ps.setLong(1, contentId);
+            ps.setLong(2, ticket.getUserId());
+            ps.setLong(3, NOW);
+            ps.setLong(4, mandatorId);
+            ps.executeUpdate();
+            StructureLoader.updateMandator(FxContext.get().getDivisionId(), new Mandator(mand.getId(), mand.getName(),
+                    contentId, true, new LifeCycleInfoImpl(mand.getLifeCycleInfo().getCreatorId(),
+                    mand.getLifeCycleInfo().getCreationTime(), ticket.getUserId(), NOW)));
+        } catch(SQLException e) {
+            ctx.setRollbackOnly();
+            throw new FxUpdateException(LOG, e, "ex.mandator.assignMetaDataFailed", contentId, mand.getName(), mand.getId(), e.getMessage());
+        } finally {
+            Database.closeObjects(MandatorEngineBean.class, con, ps);
+        }
     }
 
     /**
@@ -161,7 +194,37 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void removeMetaData(int mandatorId) throws FxApplicationException {
-        //TODO: code me!
+        final UserTicket ticket = FxContext.getUserTicket();
+        final FxEnvironment environment;
+        final long metadataId = -1;
+        // Security
+        FxPermissionUtils.checkRole(ticket, Role.GlobalSupervisor);
+        environment = CacheAdmin.getEnvironment();
+        // check existance
+        Mandator mand = environment.getMandator(mandatorId);
+        Connection con = null;
+        PreparedStatement ps = null;
+        String sql;
+
+        try {
+            // get Database connection
+            con = Database.getDbConnection();                                //1            //2        //3
+            sql = "UPDATE " + TBL_MANDATORS + " SET METADATA=NULL, MODIFIED_BY=?, MODIFIED_AT=? WHERE ID=?";
+            final long NOW = System.currentTimeMillis();
+            ps = con.prepareStatement(sql);
+            ps.setLong(1, ticket.getUserId());
+            ps.setLong(2, NOW);
+            ps.setLong(3, mandatorId);
+            ps.executeUpdate();
+            StructureLoader.updateMandator(FxContext.get().getDivisionId(), new Mandator(mand.getId(), mand.getName(),
+                    metadataId, true, new LifeCycleInfoImpl(mand.getLifeCycleInfo().getCreatorId(),
+                    mand.getLifeCycleInfo().getCreationTime(), ticket.getUserId(), NOW)));
+        } catch(SQLException e) {
+            ctx.setRollbackOnly();
+            throw new FxUpdateException(LOG, e, "ex.mandator.removeMetaDataFailed", mand.getMetadataId(), mand.getName(), mand.getId(), e.getMessage());
+        } finally {
+            Database.closeObjects(MandatorEngineBean.class, con, ps);
+        }
     }
 
     /**

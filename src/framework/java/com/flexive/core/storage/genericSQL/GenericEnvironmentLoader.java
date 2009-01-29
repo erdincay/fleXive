@@ -120,7 +120,11 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
             ResultSet rs = ps.executeQuery();
             ArrayList<Mandator> result = new ArrayList<Mandator>(20);
             while (rs != null && rs.next()) {
-                result.add(new Mandator(rs.getInt(1), rs.getString(2), rs.getInt(3),
+                int metaDataId = rs.getInt(3);
+                if (rs.wasNull()) {
+                    metaDataId = -1;
+                }
+                result.add(new Mandator(rs.getInt(1), rs.getString(2), metaDataId,
                         rs.getBoolean(4), LifeCycleInfoImpl.load(rs, 5, 6, 7, 8)));
             }
             // return the result

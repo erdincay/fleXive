@@ -34,18 +34,19 @@ package com.flexive.tests.embedded;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxLanguage;
+import com.flexive.shared.value.FxString;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.MandatorEngine;
 import com.flexive.shared.interfaces.TypeEngine;
+import com.flexive.shared.interfaces.AssignmentEngine;
 import com.flexive.shared.search.query.SqlQueryBuilder;
-import com.flexive.shared.security.Account;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.AccountEdit;
-import com.flexive.shared.structure.FxType;
-import com.flexive.shared.structure.FxTypeEdit;
+import com.flexive.shared.security.ACL;
+import com.flexive.shared.structure.*;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.tree.FxTreeNodeEdit;
@@ -54,11 +55,10 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
+import static org.testng.Assert.*;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import java.util.Date;
 
 /**
  * Mandator tests.
@@ -74,6 +74,7 @@ public class MandatorTest {
     private MandatorEngine me = null;
     private TypeEngine te = null;
     private ContentEngine ce = null;
+    private AssignmentEngine ass = null;
     private long testMandator = -1;
     private long testType = -1;
 
@@ -82,6 +83,7 @@ public class MandatorTest {
         me = EJBLookup.getMandatorEngine();
         te = EJBLookup.getTypeEngine();
         ce = EJBLookup.getContentEngine();
+        ass = EJBLookup.getAssignmentEngine();
         login(TestUsers.SUPERVISOR);
         try {
             testMandator = me.create("MANDATOR_" + RandomStringUtils.randomAlphanumeric(10), true);
@@ -339,5 +341,73 @@ public class MandatorTest {
         me.activate(testMandator);
         Assert.assertEquals(new SqlQueryBuilder().type(testType).getResult().getRowCount(), org, "Expected " + org + " results!");
         ce.remove(pk);
+    }
+
+    @Test(dependsOnMethods = {"createRemoveMandator"})
+    /**
+     * Tests the MandatorEngine#changeName(long id, String name) method
+     * @throws FxApplicationException on errors
+     */
+    public void changeNameTest() throws FxApplicationException {
+        int mandatorId = me.create("TestMandatorName", false);
+        Mandator mand = CacheAdmin.getEnvironment().getMandator(mandatorId);
+        assertTrue(mand.getName().equals("TestMandatorName"));
+        try {
+            me.changeName(mandatorId, "TestMandatorNameNew");
+        } catch (FxUpdateException e) {
+            // this shouldn't happen
+        }
+        mand = CacheAdmin.getEnvironment().getMandator(mandatorId);
+        assertEquals(mand.getName(), "TestMandatorNameNew");
+
+        // clean up
+        me.remove(mandatorId);
+    }
+
+    @Test(dependsOnMethods = {"createRemoveMandator"})
+    /**
+     * This method tests both the MandatorEngine#assignMetaData(int mandatorId, long contentId)
+     * as well as the #removeMetaData(int mandatorId) methods.
+     * Above mentioned methods have not been implemented yet!
+     */
+    public void metaDataAssignment() throws FxApplicationException {
+        // create a type and a content instance to which the mandator can be attached
+        final String TEST_PROPERTY = "TEST_PROPERTY_" + RandomStringUtils.random(16, true, true);
+        ACL defACL = CacheAdmin.getEnvironment().getACL(ACL.Category.STRUCTURE.getDefaultId());
+        FxPropertyEdit propEd = FxPropertyEdit.createNew(TEST_PROPERTY, new FxString("testprop"), new FxString("testprophint"),
+                FxMultiplicity.MULT_0_1, defACL, FxDataType.String1024);
+        long assignmentId = ass.createProperty(testType, propEd.setAutoUniquePropertyName(true), "/");
+
+        // create a content instance for the above property / type
+        FxContent co = ce.initialize(testType);
+        co.setValue("/" + TEST_PROPERTY, new FxString(false, "testicus"));
+        FxPK contentPK = ce.save(co);
+        int mandatorId = me.create("TestMandatorName", false);
+
+        long contentId = ce.load(contentPK).getId();
+        try { // assign
+            me.assignMetaData(mandatorId, contentId);
+        } catch (FxApplicationException e) {
+            // this shouldn't happen
+        }
+
+        Mandator mand = CacheAdmin.getEnvironment().getMandator(mandatorId);
+        assertTrue(mand.hasMetadata());
+        assertEquals(mand.getMetadataId(), contentId);
+
+        try { // remove
+            me.removeMetaData(mandatorId);
+        } catch (FxApplicationException e) {
+            // this shouldn't happen
+        }
+
+        mand = CacheAdmin.getEnvironment().getMandator(mandatorId);
+        assertFalse(mand.hasMetadata());
+        assertEquals(mand.getMetadataId(), -1);
+
+        // clean up
+        ce.remove(contentPK);
+        ass.removeAssignment(assignmentId);
+        me.remove(mandatorId);
     }
 }
