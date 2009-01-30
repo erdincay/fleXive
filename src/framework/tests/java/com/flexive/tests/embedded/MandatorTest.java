@@ -46,6 +46,7 @@ import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.AccountEdit;
 import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
@@ -369,7 +370,7 @@ public class MandatorTest {
     public void metaDataAssignment() throws FxApplicationException {
         // create a type and a content instance to which the mandator can be attached
         final String TEST_PROPERTY = "TEST_PROPERTY_" + RandomStringUtils.random(16, true, true);
-        ACL defACL = CacheAdmin.getEnvironment().getACL(ACL.Category.STRUCTURE.getDefaultId());
+        ACL defACL = CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId());
         FxPropertyEdit propEd = FxPropertyEdit.createNew(TEST_PROPERTY, new FxString("testprop"), new FxString("testprophint"),
                 FxMultiplicity.MULT_0_1, defACL, FxDataType.String1024);
         long assignmentId = ass.createProperty(testType, propEd.setAutoUniquePropertyName(true), "/");

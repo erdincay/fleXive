@@ -278,7 +278,7 @@ public class AccountTest {
 
         // add a role and verify the account has that privilege
         accountEngine.addRole(accountId, Role.MandatorSupervisor.getId());
-        List<Role> roleList = accountEngine.getRoles(accountId, AccountEngine.RoleLoadMode.FROM_USER_ONLY);
+        List<Role> roleList = accountEngine.getRoles(accountId, RoleLoadMode.FROM_USER_ONLY);
         for (Role r : roleList) {
             assertEquals(r.getId(), Role.MandatorSupervisor.getId());
         }
