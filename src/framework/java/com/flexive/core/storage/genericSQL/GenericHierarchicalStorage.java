@@ -46,7 +46,6 @@ import com.flexive.shared.content.*;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.HistoryTrackerEngine;
 import com.flexive.shared.interfaces.ScriptingEngine;
-import com.flexive.shared.interfaces.SequencerEngine;
 import com.flexive.shared.media.FxMediaEngine;
 import com.flexive.shared.scripting.FxScriptBinding;
 import com.flexive.shared.scripting.FxScriptEvent;
@@ -54,6 +53,7 @@ import com.flexive.shared.scripting.FxScriptResult;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.security.ACLPermission;
 import com.flexive.shared.stream.BinaryUploadPayload;
 import com.flexive.shared.stream.FxStreamUtils;
 import com.flexive.shared.structure.*;
@@ -1265,7 +1265,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @throws FxApplicationException on errors looking up the sequencer
      */
     private BinaryDescriptor binaryTransit(Connection con, BinaryDescriptor binary) throws FxApplicationException, SQLException {
-        long id = EJBLookup.getSequencerEngine().getId(SequencerEngine.System.BINARY);
+        long id = EJBLookup.getSequencerEngine().getId(FxSystemSequencer.BINARY);
         return binaryTransit(con, binary, id, 1, 1);
     }
 
@@ -1758,7 +1758,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 ref.setAccessGranted(
                         FxPermissionUtils.checkPermission(
                                 FxContext.getUserTicket(),
-                                ownerId, ACL.Permission.READ,
+                                ownerId, ACLPermission.READ,
                                 env.getType(typeId),
                                 ref.getStep().getAclId(),
                                 ref.getAcl().getId(),
@@ -1889,7 +1889,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         }
 
         if (type.usePropertyPermissions() && !ticket.isGlobalSupervisor())
-            FxPermissionUtils.checkPropertyPermissions(content.getLifeCycleInfo().getCreatorId(), delta, ACL.Permission.EDIT);
+            FxPermissionUtils.checkPropertyPermissions(content.getLifeCycleInfo().getCreatorId(), delta, ACLPermission.EDIT);
 
         if (delta.isInternalPropertyChanged())
             updateMainEntry(con, content);

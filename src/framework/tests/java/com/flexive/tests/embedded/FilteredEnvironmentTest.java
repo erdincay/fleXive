@@ -40,6 +40,7 @@ import com.flexive.shared.exceptions.FxLoginFailedException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Mandator;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
 import static com.flexive.tests.embedded.FxTestUtils.login;
@@ -101,13 +102,13 @@ public class FilteredEnvironmentTest extends EnvironmentTest {
 
             // create a new type, property, and property assignment with the test mandator
             login(TestUsers.SUPERVISOR);
-            final ACL acl = getEnvironment().getDefaultACL(ACL.Category.STRUCTURE);
+            final ACL acl = getEnvironment().getDefaultACL(ACLCategory.STRUCTURE);
             typeId = EJBLookup.getTypeEngine().save(FxTypeEdit.createNew(TYPE_NAME, new FxString("test"), acl));
             final long originalPropertiesSize = getEnvironment().getProperties(true, true).size();
             final int originalAssignmentsSize = getEnvironment().getPropertyAssignments().size();
             EJBLookup.getAssignmentEngine().createProperty(typeId, FxPropertyEdit.createNew(PROPERTY_NAME,
                     new FxString(""), new FxString(""), FxMultiplicity.MULT_0_1,
-                    getEnvironment().getDefaultACL(ACL.Category.STRUCTURE),
+                    getEnvironment().getDefaultACL(ACLCategory.STRUCTURE),
                     FxDataType.String1024), "/");
             logout();
 

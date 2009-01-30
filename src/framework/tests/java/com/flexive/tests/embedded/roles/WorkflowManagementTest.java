@@ -38,9 +38,9 @@ import static com.flexive.shared.EJBLookup.getWorkflowStepEngine;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.interfaces.StepDefinitionEngine;
-import com.flexive.shared.security.ACL;
 import static com.flexive.shared.security.Role.WorkflowManagement;
 import com.flexive.shared.security.UserGroup;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.workflow.Route;
 import com.flexive.shared.workflow.Step;
@@ -127,7 +127,7 @@ public class WorkflowManagementTest extends AbstractRoleTest {
     }
 
     private long getDefaultAclId() {
-        return CacheAdmin.getEnvironment().getDefaultACL(ACL.Category.WORKFLOW).getId();
+        return CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.WORKFLOW).getId();
     }
 
     private void createWorkflow() throws FxApplicationException {

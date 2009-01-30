@@ -59,7 +59,7 @@ import java.sql.Statement;
 import java.util.Collection;
 
 @javax.ejb.TransactionManagement(javax.ejb.TransactionManagementType.CONTAINER)
-@Stateless(name = "SearchEngine")
+@Stateless(name = "SearchEngine", mappedName="SearchEngine")
 public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     private static final Log LOG = LogFactory.getLog(SearchEngineBean.class);
     private static final String DEFAULT_QUERY_NAME = SearchEngineBean.class.getName() + ".DEFAULTQUERY";

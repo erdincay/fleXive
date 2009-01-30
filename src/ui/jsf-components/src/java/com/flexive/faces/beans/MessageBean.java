@@ -317,13 +317,19 @@ public class MessageBean extends HashMap {
                     LOG.warn("Cannot use message resources because they are not stored in a jar file: " + resourceURL.getPath());
                     continue;
                 }
-                if (!resourceURL.getPath().startsWith("file:")) {
-                    LOG.warn("Cannot use message resources because they are not served from the file system: " + resourceURL.getPath());
-                    continue;
-                }
+                String path = resourceURL.getPath();
+                if (!path.startsWith("file:")) {
+                    if (path.startsWith("/") || path.charAt(1) == ':') {
+                        LOG.warn("Trying a filesystem message resource without an explicit file: protocol identifier for " + path);
+                    } else {
+                        LOG.warn("Cannot use message resources because they are not served from the file system: " + resourceURL.getPath());
+                        continue;
+                    }
+                } else
+                    path = path.substring("file:".length(), jarDelim + 4);
 
                 // "file:" and everything after ".jar" gets stripped for the class loader URL
-                final URL jarURL = new URL("file", null, resourceURL.getPath().substring("file:".length(), jarDelim + 4));
+                final URL jarURL = new URL("file", null, path);
                 addResourceBundle(baseName, jarURL);
 
                 LOG.info("Added message resources for " + resourceURL.getPath());

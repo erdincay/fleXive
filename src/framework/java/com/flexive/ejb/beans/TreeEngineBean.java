@@ -46,8 +46,8 @@ import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.scripting.FxScriptBinding;
 import com.flexive.shared.scripting.FxScriptEvent;
-import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
@@ -72,7 +72,7 @@ import java.util.List;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "TreeEngine")
+@Stateless(name = "TreeEngine", mappedName="TreeEngine")
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
@@ -749,7 +749,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
             long nodeId = createNode(node.getParentNodeId(), node.getName(), node.getLabel(), node.getPosition(),
                     node.getReference(), node.getData(), node.getMode());
             if ((node.getReference() == null || node.getReference().isNew()) &&
-                    node.getACLId() != ACL.Category.INSTANCE.getDefaultId()) {
+                    node.getACLId() != ACLCategory.INSTANCE.getDefaultId()) {
                 //requested a non-default ACL for a folder
                 FxTreeNode created = getNode(node.getMode(), nodeId);
                 FxContent co = contentEngine.load(created.getReference());

@@ -33,7 +33,7 @@ package com.flexive.tests.embedded;
 
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.security.ACL;
-import com.flexive.shared.security.ACL.Category;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.workflow.Step;
@@ -65,15 +65,15 @@ public class EnvironmentTest {
     @Test(groups = {"ejb", "environment"})
     public void testGetACLs() {
         List<ACL> acls = getEnvironment().getACLs();
-        testUnmodifiableList("environment.getACLs()", acls, new ACL(1, "test", null, -1, null, null, null, ACL.Category.INSTANCE, null));
+        testUnmodifiableList("environment.getACLs()", acls, new ACL(1, "test", null, -1, null, null, null, ACLCategory.INSTANCE, null));
         assert acls.equals(getEnvironment().getACLs());
     }
 
     @Test(groups = {"ejb", "environment"})
     public void testGetACLsByCategory() {
-        for (Category category : Category.values()) {
+        for (ACLCategory category : ACLCategory.values()) {
             List<ACL> acls = getEnvironment().getACLs(category);
-            testUnmodifiableList("environment.getACLs()", acls, new ACL(1, "test", null, -1, null, null, null, ACL.Category.INSTANCE, null));
+            testUnmodifiableList("environment.getACLs()", acls, new ACL(1, "test", null, -1, null, null, null, ACLCategory.INSTANCE, null));
             assert acls.equals(getEnvironment().getACLs(category));
         }
     }

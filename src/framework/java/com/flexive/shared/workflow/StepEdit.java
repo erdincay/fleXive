@@ -31,7 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.workflow;
 
-import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.ACLCategory;
 
 import java.io.Serializable;
 
@@ -100,7 +100,7 @@ public class StepEdit extends Step implements Serializable {
      * @param stepDefinitionId step definition to use
      */
     public StepEdit(long stepDefinitionId) {
-        super(-1, stepDefinitionId, -1, ACL.Category.WORKFLOW.getDefaultId());
+        super(-1, stepDefinitionId, -1, ACLCategory.WORKFLOW.getDefaultId());
     }
 
     /**

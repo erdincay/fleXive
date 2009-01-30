@@ -41,6 +41,7 @@ import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.interfaces.ACLEngine;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.value.FxString;
 
 /**
@@ -115,7 +116,7 @@ public class FxTestUtils {
      * @return created ACL's
      * @throws FxApplicationException
      */
-    public static ACL[] createACLs(String[] name, ACL.Category[] category, long mandator) throws FxApplicationException {
+    public static ACL[] createACLs(String[] name, ACLCategory[] category, long mandator) throws FxApplicationException {
         assert name != null && category != null && name.length == category.length : "Invalid parameter(s) for createACL!";
         ACL[] acls = new ACL[name.length];
         ACLEngine acl = EJBLookup.getAclEngine();
@@ -136,8 +137,8 @@ public class FxTestUtils {
      * @return
      * @throws FxApplicationException
      */
-    public static ACL createACL(String name, ACL.Category category, long mandator) throws FxApplicationException {
-        return createACLs(new String[]{name}, new ACL.Category[]{category}, mandator)[0];
+    public static ACL createACL(String name, ACLCategory category, long mandator) throws FxApplicationException {
+        return createACLs(new String[]{name}, new ACLCategory[]{category}, mandator)[0];
     }
 
     /**

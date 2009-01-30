@@ -64,6 +64,7 @@ public class EJBLookup {
         SIMPLENAME_REMOTE,
         GERONIMO_LOCAL,
         GERONIMO_REMOTE,
+        WEBLOGIC_REMOTE,
         UNKNOWN
     }
 
@@ -366,6 +367,7 @@ public class EJBLookup {
         // Cache miss: obtain interface and store it in the cache
         synchronized (EJBLookup.class) {
             String name;
+            InitialContext ctx = null;
             try {
                 if (used_strategy == null) {
                     appName = discoverStrategy(appName, environment, type);
@@ -378,7 +380,7 @@ public class EJBLookup {
                 if (environment == null)
                     environment = new Hashtable<String, String>();
                 prepareEnvironment(used_strategy, environment);
-                InitialContext ctx = new InitialContext(environment);
+                ctx = new InitialContext(environment);
                 name = buildName(appName, type);
                 ointerface = ctx.lookup(name);
                 ejbCache.putIfAbsent(type.getName(), ointerface);
@@ -386,6 +388,13 @@ public class EJBLookup {
                 return type.cast(ointerface);
             } catch (Exception exc) {
                 throw new FxLookupException(LOG, exc, "ex.ejb.lookup.failure", type, exc).asRuntimeException();
+            } finally {
+                if (ctx != null)
+                    try {
+                        ctx.close();
+                    } catch (NamingException e) {
+                        LOG.error("Failed to close context: " + e.getMessage(), e);
+                    }
             }
         }
     }
@@ -500,7 +509,7 @@ public class EJBLookup {
             final Class<?> clsContainer = Class.forName("org.apache.openejb.spi.ContainerSystem");
             final Object containerSystem =
                     clsSystem.getMethod("getComponent", Class.class)
-                    .invoke(systemInstance, clsContainer);
+                            .invoke(systemInstance, clsContainer);
 
             // return system JNDI context - containerSystem.getJNDIContext()
             return (Context) clsContainer.getMethod("getJNDIContext").invoke(containerSystem);
@@ -537,6 +546,8 @@ public class EJBLookup {
                 return "/" + type.getSimpleName() + "Local";
             case GERONIMO_REMOTE:
                 return "/" + type.getSimpleName() + "Remote";
+            case WEBLOGIC_REMOTE:
+                return type.getSimpleName() + "#" + type.getCanonicalName();
             default:
                 throw new FxLookupException("Unsupported/unknown lookup strategy " + used_strategy + "!").asRuntimeException();
         }

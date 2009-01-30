@@ -29,28 +29,39 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.shared.interfaces;
+package com.flexive.shared.security;
 
-import com.flexive.shared.cache.FxCacheException;
-
-import javax.ejb.Remote;
-import java.io.Serializable;
+import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.ObjectWithLabel;
+import com.flexive.shared.value.FxString;
 
 /**
- * Stateless test beans interface.
- *  
- * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * ACL permissions
+ *
+ * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Remote
-public interface StatelessTest {
+public enum ACLPermission implements ObjectWithLabel {
+    CREATE, READ, EDIT, DELETE, RELATE, EXPORT,
+    NOT_CREATE, NOT_READ, NOT_EDIT, NOT_DELETE, NOT_RELATE, NOT_EXPORT;
 
-	/**
-	 * Puts object O in the cache, then rollbacks.
-	 * 
-	 * @param path	cache path
-	 * @param key	cache key
-	 * @param value	object to be stored in the tree cache
-	 * @throws FxCacheException	if the object could not be stored in the cache
-	 */
-	void cachePutRollback(String path, String key, Serializable value) throws FxCacheException;
+    /**
+     * Check if <code>check</code> is contained in perms
+     *
+     * @param check Perm to check
+     * @param perms array of Perm's
+     * @return if <code>check</code> is contained in perms
+     */
+    public static boolean contains(ACLPermission check, ACLPermission... perms) {
+        for (ACLPermission perm : perms)
+            if (perm == check)
+                return true;
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public FxString getLabel() {
+        return FxSharedUtils.getEnumLabel(this);
+    }
 }

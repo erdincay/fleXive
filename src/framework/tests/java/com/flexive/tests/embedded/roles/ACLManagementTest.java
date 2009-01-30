@@ -36,11 +36,8 @@ import com.flexive.shared.FxContext;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.interfaces.ACLEngine;
-import com.flexive.shared.security.ACL;
-import com.flexive.shared.security.ACLAssignment;
-import com.flexive.shared.security.Mandator;
 import static com.flexive.shared.security.Role.ACLManagement;
-import com.flexive.shared.security.UserGroup;
+import com.flexive.shared.security.*;
 import com.flexive.shared.value.FxString;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
@@ -129,7 +126,7 @@ public class ACLManagementTest extends AbstractRoleTest {
             assertSuccess(ACLManagement, mandatorId);
             ae.update(aclId, "new name", new FxString(true, "new label"), "#000000", "descr",
                     Arrays.asList(new ACLAssignment(aclId, UserGroup.GROUP_EVERYONE, true, true, false,
-                            true, true, false, ACL.Category.INSTANCE, null)));
+                            true, true, false, ACLCategory.INSTANCE, null)));
             assertSuccess(ACLManagement, mandatorId);
             assert ae.load(aclId).getName().equals("new name");
             assert ae.loadAssignments(aclId, UserGroup.GROUP_EVERYONE).size() == 1;
@@ -141,7 +138,7 @@ public class ACLManagementTest extends AbstractRoleTest {
 
     private void createAcl(long mandatorId) throws FxApplicationException {
         aclId = EJBLookup.getAclEngine().create("acl management test", new FxString(true, "label"),
-                mandatorId, "", "", ACL.Category.INSTANCE);
+                mandatorId, "", "", ACLCategory.INSTANCE);
         assertSuccess(ACLManagement, mandatorId);
     }
 }

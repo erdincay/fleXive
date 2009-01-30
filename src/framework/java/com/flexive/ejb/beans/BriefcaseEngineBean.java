@@ -35,12 +35,11 @@ import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxSystemSequencer;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.search.Briefcase;
-import com.flexive.shared.security.ACL;
-import com.flexive.shared.security.LifeCycleInfo;
-import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.security.*;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -62,7 +61,7 @@ import java.util.Set;
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "BriefcaseEngine")
+@Stateless(name = "BriefcaseEngine", mappedName="BriefcaseEngine")
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLocal {
@@ -110,7 +109,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
             con = Database.getDbConnection();
 
             // Obtain a new id
-            long newId = seq.getId(SequencerEngine.System.BRIEFCASE);
+            long newId = seq.getId(FxSystemSequencer.BRIEFCASE);
 
             sql = "INSERT INTO " + DatabaseConst.TBL_BRIEFCASE + "(" +
                     //1,   2,  3        ,  4         , 5 ,    6        7         8              9      , 10     , 11
@@ -415,7 +414,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
      * @param perms             the permissions that are needed
      * @return a sql filter, eg '([briefcaseTblAlias.]CREATED_BY=12 OR ACL IS NOT NULL)'
      */
-    public static String getSqlAccessFilter(String briefcaseTblAlias, boolean includeShared, ACL.Permission... perms) {
+    public static String getSqlAccessFilter(String briefcaseTblAlias, boolean includeShared, ACLPermission... perms) {
         final UserTicket ticket = FxContext.getUserTicket();
         StringBuffer filter = new StringBuffer(1024);
         if (briefcaseTblAlias == null) {
@@ -434,13 +433,13 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
                 filter.append(" OR ").append(colACL).append(" IS NOT null");
             } else if (ticket.isMandatorSupervisor()) {
                 // add all shared(match by ACL or mandator)
-                String acls = ticket.getACLsCSV(0/*owner is irrelevant here*/, ACL.Category.INSTANCE, perms);
+                String acls = ticket.getACLsCSV(0/*owner is irrelevant here*/, ACLCategory.INSTANCE, perms);
                 filter.append((acls.length() > 0) ? (" OR " + colACL + " IN (" + acls + ") ") : "").
                         append(" OR (").append(colACL).append(" IS NOT null AND ").
                         append(colMANDATOR).append("=").append(ticket.getMandatorId()).append(")");
             } else {
                 // add all shared(match by ACL)
-                String acls = ticket.getACLsCSV(0/*owner is irrelevant here*/, ACL.Category.INSTANCE, perms);
+                String acls = ticket.getACLsCSV(0/*owner is irrelevant here*/, ACLCategory.INSTANCE, perms);
                 if (acls.length() > 0) {
                     filter.append(" OR ").append(colACL).append(" IN (").append(acls).append(") ");
                 }
@@ -473,7 +472,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
                     // 12
                     "(SELECT COUNT(*) FROM " + DatabaseConst.TBL_BRIEFCASE_DATA + " bd WHERE bd.briefcase_id=b.id) AS size " +
                     "from " + DatabaseConst.TBL_BRIEFCASE + " b where ";
-            sql += getSqlAccessFilter(null, includeShared, ACL.Permission.READ);
+            sql += getSqlAccessFilter(null, includeShared, ACLPermission.READ);
             if (idFilter != null) {
                 sql += " and id=" + idFilter;
             }

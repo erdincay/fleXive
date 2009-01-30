@@ -39,14 +39,15 @@ import com.flexive.core.structure.FxPreloadType;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxSystemSequencer;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
-import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.thoughtworks.xstream.converters.ConversionException;
 import org.apache.commons.lang.StringUtils;
@@ -66,7 +67,7 @@ import java.util.List;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "TypeEngine")
+@Stateless(name = "TypeEngine", mappedName="TypeEngine")
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
@@ -128,12 +129,12 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             throw new FxInvalidParameterException("NAME", "ex.structure.create.nameMissing");
         if (!type.getStorageMode().isSupported())
             throw new FxInvalidParameterException("STORAGEMODE", "ex.structure.typeStorageMode.notSupported", type.getStorageMode().getLabel().getBestTranslation(ticket));
-        if (type.getACL().getCategory() != ACL.Category.STRUCTURE)
-            throw new FxInvalidParameterException("aclId", "ex.acl.category.invalid", type.getACL().getCategory().name(), ACL.Category.STRUCTURE.name());
+        if (type.getACL().getCategory() != ACLCategory.STRUCTURE)
+            throw new FxInvalidParameterException("aclId", "ex.acl.category.invalid", type.getACL().getCategory().name(), ACLCategory.STRUCTURE.name());
 
         Connection con = null;
         PreparedStatement ps = null;
-        long newId = seq.getId(SequencerEngine.System.TYPEDEF);
+        long newId = seq.getId(FxSystemSequencer.TYPEDEF);
         final long NOW = System.currentTimeMillis();
         try {
             con = Database.getDbConnection();
@@ -493,8 +494,8 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
 
             //start ACL changes
             if (!type.getACL().equals(orgType.getACL())) {
-                if (type.getACL().getCategory() != ACL.Category.STRUCTURE)
-                    throw new FxInvalidParameterException("ACL", "ex.acl.category.invalid", type.getACL().getCategory(), ACL.Category.STRUCTURE);
+                if (type.getACL().getCategory() != ACLCategory.STRUCTURE)
+                    throw new FxInvalidParameterException("ACL", "ex.acl.category.invalid", type.getACL().getCategory(), ACLCategory.STRUCTURE);
                 sql.setLength(0);
                 sql.append("UPDATE ").append(TBL_STRUCT_TYPES).append(" SET ACL=? WHERE ID=?");
                 if (ps != null) ps.close();

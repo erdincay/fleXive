@@ -43,8 +43,8 @@ import com.flexive.shared.interfaces.ACLEngine;
 import com.flexive.shared.interfaces.AssignmentEngine;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.TypeEngine;
-import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Role;
+import com.flexive.shared.security.ACLPermission;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxNoAccess;
 import com.flexive.shared.value.FxString;
@@ -162,9 +162,9 @@ public class ContentPropertySecurityTest {
 
     @Test
     public void securityFullAccess() throws FxApplicationException {
-        TestUsers.assignACL(user, contentACL, ACL.Permission.CREATE, ACL.Permission.DELETE, ACL.Permission.EDIT, ACL.Permission.READ);
-        TestUsers.assignACL(user, prop1ACL, ACL.Permission.CREATE, ACL.Permission.DELETE, ACL.Permission.EDIT, ACL.Permission.READ);
-        TestUsers.assignACL(user, prop2ACL, ACL.Permission.CREATE, ACL.Permission.DELETE, ACL.Permission.EDIT, ACL.Permission.READ);
+        TestUsers.assignACL(user, contentACL, ACLPermission.CREATE, ACLPermission.DELETE, ACLPermission.EDIT, ACLPermission.READ);
+        TestUsers.assignACL(user, prop1ACL, ACLPermission.CREATE, ACLPermission.DELETE, ACLPermission.EDIT, ACLPermission.READ);
+        TestUsers.assignACL(user, prop2ACL, ACLPermission.CREATE, ACLPermission.DELETE, ACLPermission.EDIT, ACLPermission.READ);
         FxContent test = co.initialize(typeId, TestUsers.getTestMandator(), contentACL, stepId, TestUsers.getEnglishLanguageId());
         test.setValue("/" + PROP1_NAME, PROP1_VALUE);
         test.setValue("/" + PROP2_NAME, new FxString(PROP2_VALUE));
@@ -183,9 +183,9 @@ public class ContentPropertySecurityTest {
 
     @Test
     public void securityReadOnlyAccess() throws FxApplicationException {
-        TestUsers.assignACL(user, contentACL, ACL.Permission.READ);
-        TestUsers.assignACL(user, prop1ACL, ACL.Permission.READ);
-        TestUsers.assignACL(user, prop2ACL, ACL.Permission.READ);
+        TestUsers.assignACL(user, contentACL, ACLPermission.READ);
+        TestUsers.assignACL(user, prop1ACL, ACLPermission.READ);
+        TestUsers.assignACL(user, prop2ACL, ACLPermission.READ);
         FxContent comp = co.load(refpk);
 
         assert comp.getPropertyData("/" + PROP1_NAME).getValue().equals(PROP1_VALUE);
@@ -199,8 +199,8 @@ public class ContentPropertySecurityTest {
 
     @Test
     public void securityNoAccess() throws FxApplicationException {
-        TestUsers.assignACL(user, contentACL, ACL.Permission.READ, ACL.Permission.EDIT);
-        TestUsers.assignACL(user, prop1ACL, ACL.Permission.READ, ACL.Permission.EDIT);
+        TestUsers.assignACL(user, contentACL, ACLPermission.READ, ACLPermission.EDIT);
+        TestUsers.assignACL(user, prop1ACL, ACLPermission.READ, ACLPermission.EDIT);
         TestUsers.assignACL(user, prop2ACL);
         FxContent comp = co.load(refpk);
         //check if prop1 is full editable

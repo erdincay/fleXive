@@ -36,16 +36,13 @@ import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxSystemSequencer;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
-import com.flexive.shared.interfaces.SequencerEngine;
 import com.flexive.shared.interfaces.SequencerEngineLocal;
 import com.flexive.shared.interfaces.StepEngine;
 import com.flexive.shared.interfaces.StepEngineLocal;
-import com.flexive.shared.security.ACL.Category;
-import com.flexive.shared.security.Role;
-import com.flexive.shared.security.UserGroup;
-import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.security.*;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
@@ -72,7 +69,7 @@ import java.util.List;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "StepEngine")
+@Stateless(name = "StepEngine", mappedName="StepEngine")
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class StepEngineBean implements StepEngine, StepEngineLocal {
@@ -123,7 +120,7 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
             }
 
             // Create the step
-            long newStepId = seq.getId(SequencerEngine.System.STEP);
+            long newStepId = seq.getId(FxSystemSequencer.STEP);
             try {
                 stmt = con.createStatement();
                 sql = "INSERT INTO " + TBL_STEP + " (ID, STEPDEF, WORKFLOW, ACL) VALUES (" + newStepId + ","
@@ -182,7 +179,7 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
                         + " FROM " + TBL_ACLS + " acl," + TBL_ASSIGN_ACLS + " aclug," + TBL_STEP + " step"
                         + " WHERE"
                         + " aclug.ACL=acl.ID"
-                        + " AND acl.CAT_TYPE=" + Category.WORKFLOW.getId()
+                        + " AND acl.CAT_TYPE=" + ACLCategory.WORKFLOW.getId()
                         + " AND aclug.USERGROUP IN (SELECT DISTINCT USERGROUP FROM " + TBL_ASSIGN_GROUPS
                         + " WHERE ACCOUNT=" + userId + " AND USERGROUP<>" + UserGroup.GROUP_OWNER + ")"
                         + " AND step.ACL=acl.ID";

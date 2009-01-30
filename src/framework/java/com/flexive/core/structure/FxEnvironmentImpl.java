@@ -43,6 +43,7 @@ import com.flexive.shared.scripting.FxScriptMappingEntry;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.workflow.Route;
 import com.flexive.shared.workflow.Step;
@@ -409,7 +410,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
-    public List<ACL> getACLs(ACL.Category category) {
+    public List<ACL> getACLs(ACLCategory category) {
         List<ACL> result = new ArrayList<ACL>(acls.size());
         for (ACL acl : acls) {
             if (acl.getCategory() == category) {
@@ -436,7 +437,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
-    public List<ACL> getACLs(long mandatorId, ACL.Category category, boolean includeForeignAccessible) {
+    public List<ACL> getACLs(long mandatorId, ACLCategory category, boolean includeForeignAccessible) {
         final UserTicket ticket = FxContext.getUserTicket();
         final List<ACL> result = new ArrayList<ACL>();
         for (ACL acl : acls) {
@@ -452,7 +453,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
-    public ACL getDefaultACL(ACL.Category category) {
+    public ACL getDefaultACL(ACLCategory category) {
         return getACL(category.getDefaultId());
     }
 

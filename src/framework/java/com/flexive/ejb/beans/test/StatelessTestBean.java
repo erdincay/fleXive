@@ -38,6 +38,7 @@ import com.flexive.shared.interfaces.StatelessTestLocal;
 
 import javax.annotation.Resource;
 import javax.ejb.*;
+import java.io.Serializable;
 
 /**
  * A stateless test beans containing special cases needed for automated testing.
@@ -45,7 +46,7 @@ import javax.ejb.*;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  *
  */
-@Stateless(name = "StatelessTest")
+@Stateless(name = "StatelessTest", mappedName="StatelessTest")
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class StatelessTestBean implements StatelessTest, StatelessTestLocal {
@@ -54,7 +55,7 @@ public class StatelessTestBean implements StatelessTest, StatelessTestLocal {
 	
 	/** {@inheritDoc} */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	public void cachePutRollback(String path, String key, Object value) throws FxCacheException {
+	public void cachePutRollback(String path, String key, Serializable value) throws FxCacheException {
 		CacheAdmin.getInstance().put(path, key, value);
 		ctx.setRollbackOnly();
 	}

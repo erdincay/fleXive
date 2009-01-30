@@ -195,7 +195,7 @@ public class SqlSearch {
                 case OFF:
                 case READ_ONLY:
                     cacheTbl = DatabaseConst.TBL_SEARCHCACHE_MEMORY;
-                    searchId = seq.getId(SequencerEngine.System.SEARCHCACHE_MEMORY);
+                    searchId = seq.getId(FxSystemSequencer.SEARCHCACHE_MEMORY);
                     break;
                 default:
                     // Can never happen

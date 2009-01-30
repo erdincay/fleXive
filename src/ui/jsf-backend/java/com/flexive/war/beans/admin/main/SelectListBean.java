@@ -46,6 +46,7 @@ import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Role;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.FxSelectList;
 import com.flexive.shared.structure.FxSelectListEdit;
 import com.flexive.shared.structure.FxSelectListItemEdit;
@@ -70,8 +71,8 @@ public class SelectListBean {
     private FxString selectListLabel = new FxString("");
     private FxString selectListDescription = new FxString("");
     private boolean selectListAllowDynamicCreation = true;
-    private long selectListCreateItemACLId = ACL.Category.SELECTLIST.getDefaultId();
-    private long selectListDefaultItemACLId = ACL.Category.SELECTLISTITEM.getDefaultId();
+    private long selectListCreateItemACLId = ACLCategory.SELECTLIST.getDefaultId();
+    private long selectListDefaultItemACLId = ACLCategory.SELECTLISTITEM.getDefaultId();
 
     private long listItemId = -1;
     private String itemName = null;
@@ -268,7 +269,7 @@ public class SelectListBean {
      */
 
     public List<SelectItem> getSelectListItemACLs() {
-        return FxJsfUtils.asSelectList(CacheAdmin.getEnvironment().getACLs(ACL.Category.SELECTLISTITEM), false);
+        return FxJsfUtils.asSelectList(CacheAdmin.getEnvironment().getACLs(ACLCategory.SELECTLISTITEM), false);
     }
 
     private static class ItemIdSorter implements Comparator<FxSelectListItemEdit>, Serializable {
@@ -325,8 +326,8 @@ public class SelectListBean {
         selectListLabel = new FxString("");
         selectListDescription = new FxString("");
         selectListAllowDynamicCreation = true;
-        selectListCreateItemACLId = ACL.Category.SELECTLIST.getDefaultId();
-        selectListDefaultItemACLId = ACL.Category.SELECTLISTITEM.getDefaultId();
+        selectListCreateItemACLId = ACLCategory.SELECTLIST.getDefaultId();
+        selectListDefaultItemACLId = ACLCategory.SELECTLISTITEM.getDefaultId();
         itemLabel = new FxString("");
         itemName = null;
         itemACL = CacheAdmin.getEnvironment().getACL(selectListDefaultItemACLId);

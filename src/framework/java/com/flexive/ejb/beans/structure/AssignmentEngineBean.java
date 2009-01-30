@@ -37,10 +37,7 @@ import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.structure.StructureLoader;
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.FxContext;
-import com.flexive.shared.FxLanguage;
-import com.flexive.shared.XPathElement;
+import com.flexive.shared.*;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
@@ -70,7 +67,7 @@ import java.util.List;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "AssignmentEngine")
+@Stateless(name = "AssignmentEngine", mappedName="AssignmentEngine")
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineLocal {
@@ -122,7 +119,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 throw new FxInvalidParameterException("ex.structure.assignment.noGroup", parentXPath);
             property.checkConsistency();
             //parentXPath is valid, create the property, then assign it to root
-            newPropertyId = seq.getId(SequencerEngine.System.TYPEPROP);
+            newPropertyId = seq.getId(FxSystemSequencer.TYPEPROP);
             FxValue defValue = property.getDefaultValue();
             if( defValue instanceof FxBinary) {
                 ContentStorage storage = StorageManager.getContentStorage(type.getStorageMode());
@@ -211,7 +208,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                             "ACL,DEFAULT_VALUE)" +
                             "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
             ps = con.prepareStatement(sql.toString());
-            newAssignmentId = seq.getId(SequencerEngine.System.ASSIGNMENT);
+            newAssignmentId = seq.getId(FxSystemSequencer.ASSIGNMENT);
             ps.setLong(1, newAssignmentId);
             ps.setInt(2, FxAssignment.TYPE_PROPERTY);
             ps.setBoolean(3, true);
@@ -592,7 +589,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             if (tmp != null && tmp instanceof FxPropertyAssignment)
                 throw new FxInvalidParameterException("ex.structure.assignment.noGroup", parentXPath);
             //parentXPath is valid, create the group, then assign it to root
-            newGroupId = seq.getId(SequencerEngine.System.TYPEGROUP);
+            newGroupId = seq.getId(FxSystemSequencer.TYPEGROUP);
             con = Database.getDbConnection();
             //create group
             sql.append("INSERT INTO ").append(TBL_STRUCT_GROUPS).
@@ -630,7 +627,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                             append("(ID,ATYPE,ENABLED,TYPEDEF,MINMULT,MAXMULT,DEFMULT,POS,XPATH,XALIAS,BASE,PARENTGROUP,AGROUP,GROUPMODE)" +
                             "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
             ps = con.prepareStatement(sql.toString());
-            newAssignmentId = seq.getId(SequencerEngine.System.ASSIGNMENT);
+            newAssignmentId = seq.getId(FxSystemSequencer.ASSIGNMENT);
             ps.setLong(1, newAssignmentId);
             ps.setInt(2, FxAssignment.TYPE_GROUP);
             ps.setBoolean(3, true);
@@ -1095,7 +1092,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 if (ps != null)
                     ps.close();
                 ps = con.prepareStatement(sql.toString());
-                newAssignmentId = seq.getId(SequencerEngine.System.ASSIGNMENT);
+                newAssignmentId = seq.getId(FxSystemSequencer.ASSIGNMENT);
                 ps.setLong(1, newAssignmentId);
                 ps.setInt(2, FxAssignment.TYPE_GROUP);
                 ps.setBoolean(3, group.isEnabled());
@@ -1771,7 +1768,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             if (ps != null)
                 ps.close();
             ps = con.prepareStatement(sql.toString());
-            newAssignmentId = seq.getId(SequencerEngine.System.ASSIGNMENT);
+            newAssignmentId = seq.getId(FxSystemSequencer.ASSIGNMENT);
             ps.setLong(1, newAssignmentId);
             ps.setInt(2, FxAssignment.TYPE_PROPERTY);
             ps.setBoolean(3, prop.isEnabled());

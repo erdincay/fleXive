@@ -239,7 +239,7 @@ public class UserTicketStore {
             AccountEngine ae = EJBLookup.getAccountEngine();
             Account acc = ae.load(loginName);
             final List<UserGroup> groups = ae.getGroups(acc.getId());
-            final List<Role> roleList = ae.getRoles(acc.getId(), AccountEngine.RoleLoadMode.ALL);
+            final List<Role> roleList = ae.getRoles(acc.getId(), RoleLoadMode.ALL);
             final Role[] roles = roleList.toArray(new Role[roleList.size()]);
             final List<ACLAssignment> assignmentList = ae.loadAccountAssignments(acc.getId());
             ACLAssignment[] aad = assignmentList.toArray(new ACLAssignment[assignmentList.size()]);

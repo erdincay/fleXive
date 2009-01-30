@@ -38,6 +38,7 @@ import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.LifeCycleInfo;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxReference;
 import com.flexive.shared.workflow.Workflow;
@@ -132,7 +133,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      */
     public static FxTypeEdit createNew(String name) {
         return createNew(name, new FxString(FxLanguage.DEFAULT_ID, name),
-                CacheAdmin.getEnvironment().getACL(com.flexive.shared.security.ACL.Category.STRUCTURE.getDefaultId()), null);
+                CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()), null);
     }
 
     /**

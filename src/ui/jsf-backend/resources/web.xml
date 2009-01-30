@@ -304,5 +304,8 @@
     <listener>
         <listener-class>com.flexive.war.listener.SessionTimeoutListener</listener-class>
     </listener>
+    <listener>
+        <listener-class>com.sun.faces.config.ConfigureListener</listener-class>
+    </listener>
 
 </web-app>

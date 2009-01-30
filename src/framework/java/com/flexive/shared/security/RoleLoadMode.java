@@ -29,28 +29,14 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.shared.interfaces;
+package com.flexive.shared.security;
 
-import com.flexive.shared.cache.FxCacheException;
-
-import javax.ejb.Remote;
-import java.io.Serializable;
 
 /**
- * Stateless test beans interface.
- *  
- * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * Enum defining how to load roles
+ *
+ * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Remote
-public interface StatelessTest {
-
-	/**
-	 * Puts object O in the cache, then rollbacks.
-	 * 
-	 * @param path	cache path
-	 * @param key	cache key
-	 * @param value	object to be stored in the tree cache
-	 * @throws FxCacheException	if the object could not be stored in the cache
-	 */
-	void cachePutRollback(String path, String key, Serializable value) throws FxCacheException;
+public enum RoleLoadMode {
+    FROM_USER_ONLY, FROM_GROUPS_ONLY, ALL;
 }

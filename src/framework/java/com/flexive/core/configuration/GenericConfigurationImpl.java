@@ -36,6 +36,8 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.configuration.Parameter;
 import com.flexive.shared.configuration.ParameterData;
+import com.flexive.shared.configuration.parameters.NullParameter;
+import com.flexive.shared.configuration.parameters.UnsetParameter;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.GenericConfigurationEngine;
 import org.apache.commons.logging.Log;
@@ -66,21 +68,6 @@ import java.util.Map;
 
 public abstract class GenericConfigurationImpl implements GenericConfigurationEngine {
     private static final Log LOG = LogFactory.getLog(GenericConfigurationImpl.class);
-
-    /**
-     * Helper class to place unset parameters in the configuration cache.
-     */
-    protected static class UnsetParameter implements Serializable {
-        private static final long serialVersionUID = -289868789320707584L;
-    }
-
-    /**
-     * Helper class to represent null value in the cache (since an unset
-     * parameter would also be null).
-     */
-    protected static class NullParameter implements Serializable {
-        private static final long serialVersionUID = -3959509316291057862L;
-    }
 
     /**
      * Return a (new or existing) Connection to the configuration table.

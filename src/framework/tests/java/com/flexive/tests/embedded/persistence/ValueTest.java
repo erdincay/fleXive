@@ -42,6 +42,7 @@ import com.flexive.shared.interfaces.AssignmentEngine;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.TypeEngine;
 import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.*;
 import static com.flexive.tests.embedded.FxTestUtils.login;
@@ -97,10 +98,10 @@ public class ValueTest {
                         "CONTENT_" + RandomStringUtils.random(16, true, true)
 
                 },
-                new ACL.Category[]{
-                        ACL.Category.STRUCTURE,
-                        ACL.Category.WORKFLOW,
-                        ACL.Category.INSTANCE
+                new ACLCategory[]{
+                        ACLCategory.STRUCTURE,
+                        ACLCategory.WORKFLOW,
+                        ACLCategory.INSTANCE
                 },
                 TestUsers.getTestMandator()
         );

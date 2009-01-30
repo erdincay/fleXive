@@ -43,6 +43,7 @@ import com.flexive.shared.interfaces.AssignmentEngine;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.TypeEngine;
 import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxSelectMany;
 import com.flexive.shared.value.FxSelectOne;
@@ -95,9 +96,9 @@ public class SelectListTest {
                         "ITEM_" + RandomStringUtils.random(16, true, true),
 
                 },
-                new ACL.Category[]{
-                        ACL.Category.SELECTLIST,
-                        ACL.Category.SELECTLISTITEM
+                new ACLCategory[]{
+                        ACLCategory.SELECTLIST,
+                        ACLCategory.SELECTLISTITEM
                 },
                 TestUsers.getTestMandator()
         );
@@ -243,7 +244,7 @@ public class SelectListTest {
 
         // create a type and the respective property referencing the selectlist
         FxSelectList loadedList = CacheAdmin.getEnvironment().getSelectList(listId);
-        ACL defACL = CacheAdmin.getEnvironment().getACL(ACL.Category.STRUCTURE.getDefaultId());
+        ACL defACL = CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId());
         FxTypeEdit testTypeEd = FxTypeEdit.createNew(TEST_TYPE);
         long typeId = typeEng.save(testTypeEd);
         FxPropertyEdit propEd = FxPropertyEdit.createNew(TEST_PROPERTY, new FxString("description"), new FxString("hint"),

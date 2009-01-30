@@ -37,12 +37,12 @@ import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxSystemSequencer;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.SelectListEngine;
 import com.flexive.shared.interfaces.SelectListEngineLocal;
-import com.flexive.shared.interfaces.SequencerEngine;
 import com.flexive.shared.interfaces.SequencerEngineLocal;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
@@ -68,7 +68,7 @@ import java.util.List;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "SelectListEngine")
+@Stateless(name = "SelectListEngine", mappedName="SelectListEngine")
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class SelectListEngineBean implements SelectListEngine, SelectListEngineLocal {
@@ -306,7 +306,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
     private long createList(FxSelectListEdit list) throws FxApplicationException {
         FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.SelectListEditor);
         checkValidListParameters(list);
-        long newId = seq.getId(SequencerEngine.System.SELECTLIST);
+        long newId = seq.getId(FxSystemSequencer.SELECTLIST);
         list._synchronizeId(newId);
 //        System.out.println("Creating list " + list.getLabel() + " new id is " + newId);
         Connection con = null;
@@ -418,7 +418,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
                 throw new FxNoAccessException("ex.selectlist.item.create.noPerm", item.getList().getLabel(),
                         item.getList().getCreateItemACL().getLabel());
         }
-        long newId = seq.getId(SequencerEngine.System.SELECTLIST_ITEM);
+        long newId = seq.getId(FxSystemSequencer.SELECTLIST_ITEM);
 //        System.out.println("Creating item " + item.getLabel() + " for list with id " + item.getList().getId());
         Connection con = null;
         PreparedStatement ps = null;

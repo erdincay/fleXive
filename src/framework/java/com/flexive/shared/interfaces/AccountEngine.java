@@ -47,11 +47,6 @@ import java.util.List;
 @Remote
 public interface AccountEngine {
 
-    // For the loadRoles function
-    enum RoleLoadMode {
-        FROM_USER_ONLY, FROM_GROUPS_ONLY, ALL
-    }
-
     /**
      * Perform a login
      *

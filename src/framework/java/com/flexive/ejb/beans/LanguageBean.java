@@ -64,7 +64,7 @@ import java.util.Map;
  * @version $Rev$
  */
 
-@Stateless(name = "LanguageEngine")
+@Stateless(name = "LanguageEngine", mappedName="LanguageEngine")
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class LanguageBean implements LanguageEngine, LanguageEngineLocal {

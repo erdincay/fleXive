@@ -32,6 +32,7 @@
 package com.flexive.shared.interfaces;
 
 import com.flexive.shared.CustomSequencer;
+import com.flexive.shared.FxSystemSequencer;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 
@@ -51,36 +52,6 @@ import java.util.List;
 public interface SequencerEngine {
 
     /**
-     * System defined sequencers
-     */
-    enum System {
-        CONTENT, ACCOUNT, GROUP, ACL, MANDATOR, TYPEDEF, TYPEGROUP, TYPEPROP, ASSIGNMENT, BINARY,
-        WORKFLOW, ROUTE, STEPDEFINITION, SCRIPTS, STEP, BRIEFCASE, SEARCHCACHE_MEMORY(true), SEARCHCACHE_PERM(true),
-        TEMPLATE, SELECTLIST, SELECTLIST_ITEM, TREE_EDIT, TREE_LIVE;
-
-        private boolean allowRollover;
-        private String sequencerName;
-
-        System(boolean allowRollover) {
-            this.allowRollover = allowRollover;
-            this.sequencerName = "SYS_" + this.name();
-        }
-
-        System() {
-            this.allowRollover = false;
-            this.sequencerName = "SYS_" + this.name();
-        }
-
-        public boolean isAllowRollover() {
-            return allowRollover;
-        }
-
-        public String getSequencerName() {
-            return sequencerName;
-        }
-    }
-
-    /**
      * Return the maximum possible id that can be created
      *
      * @return maximum possible id that can be created
@@ -96,7 +67,7 @@ public interface SequencerEngine {
      * @return new id
      * @throws FxApplicationException on errors
      */
-    long getId(System type) throws FxApplicationException;
+    long getId(FxSystemSequencer type) throws FxApplicationException;
 
     /**
      * Create a new sequencer

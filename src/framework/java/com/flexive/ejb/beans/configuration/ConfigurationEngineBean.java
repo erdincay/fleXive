@@ -45,7 +45,7 @@ import java.util.*;
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "ConfigurationEngine")
+@Stateless(name = "ConfigurationEngine", mappedName="ConfigurationEngine")
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class ConfigurationEngineBean implements ConfigurationEngine, ConfigurationEngineLocal {

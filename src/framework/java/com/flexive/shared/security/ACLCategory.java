@@ -29,36 +29,69 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.shared.search;
+package com.flexive.shared.security;
 
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.ObjectWithLabel;
+import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.value.FxString;
 
-import java.io.Serializable;
-
 /**
- * Administration area result locations
+ * ACL categories and their defaults
  *
- * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
- * @version $Rev$
+ * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public enum AdminResultLocations implements ResultLocation {
-    /** Main admin search results */
-    ADMIN,
-    /** Default location to be used when no location is specified */
-    DEFAULT,
-    /** Browse references popup (FxReference input helper) */
-    BROWSE_REFERENCES;
+public enum ACLCategory implements ObjectWithLabel {
+    INSTANCE(1, 2),
+    STRUCTURE(2, 7),
+    WORKFLOW(3, 3),
+    BRIEFCASE(4, 4),
+    SELECTLIST(5, 5),
+    SELECTLISTITEM(6, 6);
 
-    /** {@inheritDoc} */
+    private int id;
+    private long defaultId;
+
+    ACLCategory(int id, long defaultId) {
+        this.id = id;
+        this.defaultId = defaultId;
+    }
+
+    /**
+     * Getter for the internal id
+     *
+     * @return internal id
+     */
+    public int getId() {
+        return id;
+    }
+
+    /**
+     * Get the Id of the default ACL for given category
+     *
+     * @return Id of the default ACL for given category
+     */
+    public long getDefaultId() {
+        return defaultId;
+    }
+
+    /**
+     * Get a TypeMode by its id
+     *
+     * @param id the id
+     * @return TypeMode the type
+     */
+    public static ACLCategory getById(int id) {
+        for (ACLCategory cat : ACLCategory.values())
+            if (cat.id == id)
+                return cat;
+        throw new FxNotFoundException("ex.acl.category.notFound.id", id).asRuntimeException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public FxString getLabel() {
         return FxSharedUtils.getEnumLabel(this);
     }
-
-    /** {@inheritDoc} */
-    public String getName() {
-        return getClass().getName() + "." + name();
-    }
-
-
 }

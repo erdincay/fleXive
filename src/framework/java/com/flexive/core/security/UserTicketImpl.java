@@ -116,7 +116,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
             AccountEngine accountInterface = EJBLookup.getAccountEngine();
             final List<ACLAssignment> assignmentList = accountInterface.loadAccountAssignments(Account.USER_GUEST);
             guestACLAssignments = assignmentList.toArray(new ACLAssignment[assignmentList.size()]);
-            final List<Role> roles = accountInterface.getRoles(Account.USER_GUEST, AccountEngine.RoleLoadMode.ALL);
+            final List<Role> roles = accountInterface.getRoles(Account.USER_GUEST, RoleLoadMode.ALL);
             guestRoles = roles.toArray(new Role[roles.size()]);
             guestGroups = FxSharedUtils.getSelectableObjectIds(accountInterface.getGroups(Account.USER_GUEST));
             guestContactData = accountInterface.load(Account.USER_GUEST).getContactData();
@@ -536,14 +536,14 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
-    public ACLAssignment[] getACLAssignments(ACL.Category category, long ownerId, ACL.Permission... perms) {
+    public ACLAssignment[] getACLAssignments(ACLCategory category, long ownerId, ACLPermission... perms) {
         Boolean mayCreate = null;
         Boolean mayRead = null;
         Boolean mayEdit = null;
         Boolean mayDelete = null;
         Boolean mayRelate = null;
         Boolean mayExport = null;
-        for (ACL.Permission perm : perms) {
+        for (ACLPermission perm : perms) {
             switch (perm) {
                 case CREATE:
                     mayCreate = true;
@@ -601,7 +601,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
-    public String getACLsCSV(long ownerId, ACL.Category category, ACL.Permission... perms) {
+    public String getACLsCSV(long ownerId, ACLCategory category, ACLPermission... perms) {
         String result = "";
         Long ACLs[] = getACLsId(ownerId, category, perms);
         for (long acl : ACLs) {
@@ -613,14 +613,14 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
-    public Long[] getACLsId(long ownerId, ACL.Category category, ACL.Permission... perms) {
+    public Long[] getACLsId(long ownerId, ACLCategory category, ACLPermission... perms) {
         Boolean mayCreate = null;
         Boolean mayRead = null;
         Boolean mayEdit = null;
         Boolean mayDelete = null;
         Boolean mayRelate = null;
         Boolean mayExport = null;
-        for (ACL.Permission perm : perms) {
+        for (ACLPermission perm : perms) {
             switch (perm) {
                 case CREATE:
                     mayCreate = true;
@@ -672,12 +672,12 @@ public class UserTicketImpl implements UserTicket, Serializable {
             if (rights == null) {
                 rights = new boolean[]{false, false, false, false, false, false, false};
             }
-            if (acl.getMayRead()) rights[ACL.Permission.READ.ordinal()] = true;
-            if (acl.getMayEdit()) rights[ACL.Permission.EDIT.ordinal()] = true;
-            if (acl.getMayDelete()) rights[ACL.Permission.DELETE.ordinal()] = true;
-            if (acl.getMayRelate()) rights[ACL.Permission.RELATE.ordinal()] = true;
-            if (acl.getMayExport()) rights[ACL.Permission.EXPORT.ordinal()] = true;
-            if (acl.getMayCreate() && !acl.isOwnerGroupAssignment()) rights[ACL.Permission.CREATE.ordinal()] = true;
+            if (acl.getMayRead()) rights[ACLPermission.READ.ordinal()] = true;
+            if (acl.getMayEdit()) rights[ACLPermission.EDIT.ordinal()] = true;
+            if (acl.getMayDelete()) rights[ACLPermission.DELETE.ordinal()] = true;
+            if (acl.getMayRelate()) rights[ACLPermission.RELATE.ordinal()] = true;
+            if (acl.getMayExport()) rights[ACLPermission.EXPORT.ordinal()] = true;
+            if (acl.getMayCreate() && !acl.isOwnerGroupAssignment()) rights[ACLPermission.CREATE.ordinal()] = true;
             hlp.put(key, rights);
         }
 
@@ -687,12 +687,12 @@ public class UserTicketImpl implements UserTicket, Serializable {
         while (keys.hasMoreElements()) {
             Long aclId = (Long) keys.nextElement();
             boolean[] rights = hlp.get(aclId);
-            if (mayRead != null && mayRead != rights[ACL.Permission.READ.ordinal()]) continue;
-            if (mayEdit != null && mayEdit != rights[ACL.Permission.EDIT.ordinal()]) continue;
-            if (mayDelete != null && mayDelete != rights[ACL.Permission.DELETE.ordinal()]) continue;
-            if (mayRelate != null && mayRelate != rights[ACL.Permission.RELATE.ordinal()]) continue;
-            if (mayExport != null && mayExport != rights[ACL.Permission.EXPORT.ordinal()]) continue;
-            if (mayCreate != null && mayCreate != rights[ACL.Permission.CREATE.ordinal()]) continue;
+            if (mayRead != null && mayRead != rights[ACLPermission.READ.ordinal()]) continue;
+            if (mayEdit != null && mayEdit != rights[ACLPermission.EDIT.ordinal()]) continue;
+            if (mayDelete != null && mayDelete != rights[ACLPermission.DELETE.ordinal()]) continue;
+            if (mayRelate != null && mayRelate != rights[ACLPermission.RELATE.ordinal()]) continue;
+            if (mayExport != null && mayExport != rights[ACLPermission.EXPORT.ordinal()]) continue;
+            if (mayCreate != null && mayCreate != rights[ACLPermission.CREATE.ordinal()]) continue;
             result.add(aclId);
         }
         return result.toArray(new Long[result.size()]);
@@ -701,7 +701,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
     /**
      * {@inheritDoc}
      */
-    public ACL[] getACLs(long owner, ACL.Category category, ACL.Permission... perms) {
+    public ACL[] getACLs(long owner, ACLCategory category, ACLPermission... perms) {
         Long[] acls = getACLsId(owner, category, perms);
         List<ACL> res = new ArrayList<ACL>(acls.length);
         FxEnvironment struct;

@@ -39,6 +39,7 @@ import com.flexive.shared.CacheAdmin;
 import static com.flexive.shared.CacheAdmin.getEnvironment;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.FxSystemSequencer;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
@@ -68,7 +69,7 @@ import java.util.Set;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "StepDefinitionEngine")
+@Stateless(name = "StepDefinitionEngine", mappedName="StepDefinitionEngine")
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefinitionEngineLocal {
@@ -184,7 +185,7 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
             // Create the new workflow instance
             sql = "INSERT INTO " + TBL_STEPDEFINITION + " (ID,NAME,UNIQUE_TARGET) VALUES (?,?,?)";
             ps = con.prepareStatement(sql);
-            newId = seq.getId(SequencerEngine.System.STEPDEFINITION);
+            newId = seq.getId(FxSystemSequencer.STEPDEFINITION);
             ps.setLong(1, newId);
             ps.setString(2, name);
             if (uniqueTargetId != -1) {

@@ -43,8 +43,9 @@ import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.scripting.FxScriptBinding;
 import com.flexive.shared.scripting.FxScriptEvent;
-import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.security.ACLCategory;
+import com.flexive.shared.security.ACLPermission;
 import com.flexive.shared.structure.FxAssignment;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxType;
@@ -70,7 +71,7 @@ import java.util.List;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "ContentEngine")
+@Stateless(name = "ContentEngine", mappedName="ContentEngine")
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
@@ -108,13 +109,13 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
         try {
             environment.getACL(acl);
         } catch (Exception e) {
-            acl = ACL.Category.INSTANCE.getDefaultId();
+            acl = ACLCategory.INSTANCE.getDefaultId();
             if (!ticket.isGlobalSupervisor() && type.useInstancePermissions() &&
                     !(ticket.mayCreateACL(acl, ticket.getUserId()) &&
                             ticket.mayReadACL(acl, ticket.getUserId()) &&
                             ticket.mayEditACL(acl, ticket.getUserId()))) {
                 //get best fit if possible
-                Long[] acls = ticket.getACLsId(ticket.getUserId(), ACL.Category.INSTANCE, ACL.Permission.CREATE, ACL.Permission.EDIT, ACL.Permission.READ);
+                Long[] acls = ticket.getACLsId(ticket.getUserId(), ACLCategory.INSTANCE, ACLPermission.CREATE, ACLPermission.EDIT, ACLPermission.READ);
                 if (acls.length > 0)
                     acl = acls[0];
                 else
@@ -214,7 +215,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             //security check start
             UserTicket ticket = FxContext.getUserTicket();
             FxType type = env.getType(cachedContent.getContent().getTypeId());
-            FxPermissionUtils.checkPermission(ticket, content.getLifeCycleInfo().getCreatorId(), ACL.Permission.READ, type,
+            FxPermissionUtils.checkPermission(ticket, content.getLifeCycleInfo().getCreatorId(), ACLPermission.READ, type,
                     cachedContent.getSecurityInfo().getStepACL(),
                     cachedContent.getSecurityInfo().getContentACL(), true);
             FxPermissionUtils.checkMandatorExistance(content.getMandatorId());
@@ -280,16 +281,16 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             Step step = env.getStep(content.getStepId());
             UserTicket ticket = FxContext.getUserTicket();
             if (content.getPk().isNew()) {
-                FxPermissionUtils.checkPermission(ticket, ticket.getUserId(), ACL.Permission.CREATE, type, step.getAclId(), content.getAclId(), true);
+                FxPermissionUtils.checkPermission(ticket, ticket.getUserId(), ACLPermission.CREATE, type, step.getAclId(), content.getAclId(), true);
                 beforeAssignmentScript = FxScriptEvent.BeforeAssignmentDataCreate;
                 afterAssignmentScript = FxScriptEvent.AfterAssignmentDataCreate;
             } else {
-                FxPermissionUtils.checkPermission(ticket, content.getLifeCycleInfo().getCreatorId(), ACL.Permission.EDIT, type, step.getAclId(), content.getAclId(), true);
+                FxPermissionUtils.checkPermission(ticket, content.getLifeCycleInfo().getCreatorId(), ACLPermission.EDIT, type, step.getAclId(), content.getAclId(), true);
                 beforeAssignmentScript = FxScriptEvent.BeforeAssignmentDataSave;
                 afterAssignmentScript = FxScriptEvent.AfterAssignmentDataSave;
             }
             if (type.usePropertyPermissions() && !ticket.isGlobalSupervisor() && content.getPk().isNew())
-                FxPermissionUtils.checkPropertyPermissions(content, ACL.Permission.CREATE);
+                FxPermissionUtils.checkPropertyPermissions(content, ACLPermission.CREATE);
             //security check end
 
             storage.prepareSave(con, content);
@@ -330,7 +331,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             }
             //scripting before end
             if (content.getPk().isNew()) {
-                pk = storage.contentCreate(con, env, null, seq.getId(SequencerEngine.System.CONTENT), content);
+                pk = storage.contentCreate(con, env, null, seq.getId(FxSystemSequencer.CONTENT), content);
                 if (LOG.isDebugEnabled())
                     LOG.debug("creating new content for type " + CacheAdmin.getEnvironment().getType(content.getTypeId()).getName());
             } else {
@@ -404,7 +405,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             UserTicket ticket = FxContext.getUserTicket();
             FxPermissionUtils.checkMandatorExistance(content.getMandatorId());
             FxPermissionUtils.checkTypeAvailable(type.getId(), false);
-            FxPermissionUtils.checkPermission(ticket, ticket.getUserId(), ACL.Permission.CREATE, type, step.getAclId(), content.getAclId(), true);
+            FxPermissionUtils.checkPermission(ticket, ticket.getUserId(), ACLPermission.CREATE, type, step.getAclId(), content.getAclId(), true);
             //security check end
             ContentStorage storage = StorageManager.getContentStorage(content.getPk().getStorageMode());
             con = Database.getDbConnection();
@@ -489,7 +490,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                 for (int currVer : cvi.getVersions()) {
                     currPK = new FxPK(pk.getId(), currVer);
                     FxContentSecurityInfo si = storage.getContentSecurityInfo(con, currPK);
-                    FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACL.Permission.DELETE, si, true);
+                    FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACLPermission.DELETE, si, true);
                 }
             }
             //security check end
@@ -584,7 +585,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             FxType type = CacheAdmin.getEnvironment().getType(si.getTypeId());
             FxPermissionUtils.checkMandatorExistance(si.getMandatorId());
             FxPermissionUtils.checkTypeAvailable(type.getId(), false);
-            FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACL.Permission.DELETE, si, true);
+            FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACLPermission.DELETE, si, true);
             //security check end
 
             storage.contentRemoveVersion(con, type, pk);
@@ -630,7 +631,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                         //security check start
                         FxContentSecurityInfo si = storage.getContentSecurityInfo(con, pk);
                         if (!ticket.isGlobalSupervisor())
-                            FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACL.Permission.DELETE, si, true);
+                            FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACLPermission.DELETE, si, true);
                         //note: instances of deactivated mandators are silently ignored and erased on purposed!
                         //security check end
                         //scripting before start
@@ -800,7 +801,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                     FxType type = CacheAdmin.getEnvironment().getType(co.getTypeId());
                     if (type.usePermissions()) {
                         FxContentSecurityInfo si = storage.getContentSecurityInfo(con, pk);
-                        FxPermissionUtils.checkPermission(ticket, ACL.Permission.READ, si, true);
+                        FxPermissionUtils.checkPermission(ticket, ACLPermission.READ, si, true);
                     }
                 }
                 return co.getBinaryPreviewId();

@@ -42,9 +42,9 @@ import com.flexive.shared.*;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.scripting.FxScriptInfo;
-import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
@@ -138,7 +138,7 @@ public class PropertyEditorBean implements ActionBean {
         //only react to changes
         if (isOverrideACL() != overrideACL) {
             if (overrideACL)
-                assignment.setACL(CacheAdmin.getEnvironment().getACL(ACL.Category.STRUCTURE.getDefaultId()));
+                assignment.setACL(CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()));
             else
                 assignment.setACL(null);
         }
@@ -857,7 +857,7 @@ public class PropertyEditorBean implements ActionBean {
                 }
 
                 property = FxPropertyEdit.createNew("NEWPROPERTY", new FxString(""), new FxString(""),
-                        FxMultiplicity.MULT_0_1, CacheAdmin.getEnvironment().getDefaultACL(ACL.Category.STRUCTURE),
+                        FxMultiplicity.MULT_0_1, CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.STRUCTURE),
                         FxDataType.Text);
                 initNewPropertyEditing();
             }

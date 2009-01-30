@@ -46,7 +46,7 @@ public class ACLAssignment implements Serializable, Cloneable {
 
     private long aclId;
     private long groupId;
-    private ACL.Category category;
+    private ACLCategory category;
     private boolean mayRead;
     private boolean mayEdit;
     private boolean mayRelate;
@@ -114,7 +114,7 @@ public class ACLAssignment implements Serializable, Cloneable {
      * @param lifeCycleInfo the lifecycle information
      */
     public ACLAssignment(long aclId, long groupId, boolean read, boolean edit, boolean relate, boolean delete,
-                         boolean export, boolean create, ACL.Category category, LifeCycleInfo lifeCycleInfo) {
+                         boolean export, boolean create, ACLCategory category, LifeCycleInfo lifeCycleInfo) {
         this.aclId = aclId;
         this.groupId = groupId;
         this.mayRead = read;
@@ -135,7 +135,7 @@ public class ACLAssignment implements Serializable, Cloneable {
      * @param category      the assignment category
      * @param lifeCycleInfo the lifecycle information
      */
-    protected ACLAssignment(long aclId, long groupId, ACL.Category category, LifeCycleInfo lifeCycleInfo) {
+    protected ACLAssignment(long aclId, long groupId, ACLCategory category, LifeCycleInfo lifeCycleInfo) {
         this.aclId = aclId;
         this.groupId = groupId;
         this.mayRead = false;
@@ -235,7 +235,7 @@ public class ACLAssignment implements Serializable, Cloneable {
      *
      * @return the type of the ACL
      */
-    public ACL.Category getACLCategory() {
+    public ACLCategory getACLCategory() {
         return this.category;
     }
 
@@ -301,8 +301,8 @@ public class ACLAssignment implements Serializable, Cloneable {
      * @param userId     id of the calling user
      * @return granted
      */
-    public boolean getPermission(ACL.Permission permission, long ownerId, long userId) {
-        if (isOwnerGroupAssignment() && (ownerId != userId || permission == ACL.Permission.CREATE))
+    public boolean getPermission(ACLPermission permission, long ownerId, long userId) {
+        if (isOwnerGroupAssignment() && (ownerId != userId || permission == ACLPermission.CREATE))
             return false;
         switch (permission) {
             case CREATE:
@@ -331,14 +331,14 @@ public class ACLAssignment implements Serializable, Cloneable {
      * @param permissions set of permissions
      * @return ACLAssignment
      */
-    public static ACLAssignment createNew(ACL acl, long groupId, ACL.Permission... permissions) {
+    public static ACLAssignment createNew(ACL acl, long groupId, ACLPermission... permissions) {
         boolean mayRead = false;
         boolean mayEdit = false;
         boolean mayRelate = false;
         boolean mayCreate = false;
         boolean mayDelete = false;
         boolean mayExport = false;
-        for (ACL.Permission perm : permissions) {
+        for (ACLPermission perm : permissions) {
             switch (perm) {
                 case READ:
                     mayRead = true;

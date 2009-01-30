@@ -35,6 +35,7 @@ import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Mandator;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.workflow.Route;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
@@ -95,7 +96,7 @@ public interface FxEnvironment extends Serializable {
      * @param category ACL category to be filtered
      * @return all ACLs of the given category.
      */
-    List<ACL> getACLs(ACL.Category category);
+    List<ACL> getACLs(ACLCategory category);
 
     /**
      * Return all ACLs of a given mandatorId.
@@ -126,7 +127,7 @@ public interface FxEnvironment extends Serializable {
      *                                 even if they belong to another mandator.
      * @return the ACLs
      */
-    List<ACL> getACLs(long mandatorId, ACL.Category category, boolean includeForeignAccessible);
+    List<ACL> getACLs(long mandatorId, ACLCategory category, boolean includeForeignAccessible);
 
     /**
      * Get the default ACL for given categors
@@ -134,7 +135,7 @@ public interface FxEnvironment extends Serializable {
      * @param category the category to get a default ACL for
      * @return the default ACL for given categors
      */
-    ACL getDefaultACL(ACL.Category category);
+    ACL getDefaultACL(ACLCategory category);
 
     /**
      * Get a Workflow by its id

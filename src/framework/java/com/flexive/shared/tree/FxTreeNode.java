@@ -36,7 +36,7 @@ import com.flexive.shared.SelectableObject;
 import com.flexive.shared.SelectableObjectWithLabel;
 import com.flexive.shared.SelectableObjectWithName;
 import com.flexive.shared.content.FxPK;
-import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.value.FxString;
 
 import java.io.Serializable;
@@ -466,7 +466,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
      */
     public static FxTreeNode createErrorNode(long nodeId, String message) {
         return new FxTreeNode(FxTreeMode.Edit, nodeId, 0,
-                FxPK.createNewPK(), ACL.Category.INSTANCE.getDefaultId(), "Error", message, new FxString(false, "Error"), Integer.MAX_VALUE,
+                FxPK.createNewPK(), ACLCategory.INSTANCE.getDefaultId(), "Error", message, new FxString(false, "Error"), Integer.MAX_VALUE,
                 new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
                 System.currentTimeMillis(), "", true, true, true, true, true);
     }
@@ -507,7 +507,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
      */
     public static FxTreeNode createNewTemporaryChildNode(FxTreeNode parentNode) {
         FxTreeNode n = new FxTreeNode(parentNode.getMode(), (System.currentTimeMillis() * -1), parentNode.getId(),
-                FxPK.createNewPK(), ACL.Category.INSTANCE.getDefaultId(), "@@TMP", "",
+                FxPK.createNewPK(), ACLCategory.INSTANCE.getDefaultId(), "@@TMP", "",
                 new FxString(parentNode.getLabel().isMultiLanguage(), ""), Integer.MAX_VALUE,
                 new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
                 System.currentTimeMillis(), "", true, true, true, true, true).flagTemporary();

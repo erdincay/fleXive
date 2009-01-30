@@ -51,6 +51,7 @@ import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.scripting.FxScriptMappingEntry;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Mandator;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.*;
 import com.flexive.shared.workflow.Route;
@@ -97,7 +98,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                 final long id = rs.getLong(1);
                 result.add(new ACL(id, rs.getString(2),
                         getTranslation(labels, id, 0),
-                        rs.getInt(6), rs.getString(7), rs.getString(4), rs.getString(5), ACL.Category.getById(rs.getInt(3)),
+                        rs.getInt(6), rs.getString(7), rs.getString(4), rs.getString(5), ACLCategory.getById(rs.getInt(3)),
                         LifeCycleInfoImpl.load(rs, 8, 9, 10, 11)));
             }
         } catch (SQLException exc) {

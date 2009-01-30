@@ -504,6 +504,7 @@
             </metainf>
             <metainf dir="${resources.ui.shared.dir}">
                 <include name="geronimo-application.xml"/>
+                <include name="weblogic-application.xml"/>
             </metainf>
             <fileset dir="${flexive.build.framework.jar.dir}" includes="*-ejb.jar,*.par"/>
             <zipfileset prefix="lib" dir="${flexive.build.framework.jar.dir}" includes="*.jar" excludes="${sqlparser.jar},${htmlparser.jar},*-ejb.jar"/>

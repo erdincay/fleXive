@@ -72,7 +72,7 @@ import java.util.*;
 
 @TransactionManagement(TransactionManagementType.CONTAINER)
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
-@Stateless(name = "GlobalConfigurationEngine")
+@Stateless(name = "GlobalConfigurationEngine", mappedName = "GlobalConfigurationEngine")
 public class GlobalConfigurationEngineBean extends GenericConfigurationImpl implements GlobalConfigurationEngine, GlobalConfigurationEngineLocal {
     /**
      * Maximum number of cached domains per hit/miss cache
@@ -357,7 +357,7 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public synchronized void saveDivisions(List<? extends DivisionData> divisions) throws FxApplicationException {
+    public void saveDivisions(List<? extends DivisionData> divisions) throws FxApplicationException {
         removeAll(SystemParameters.GLOBAL_DATASOURCES);
         removeAll(SystemParameters.GLOBAL_DIVISIONS_DOMAINS);
         clearDivisionCache();
@@ -415,7 +415,7 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public synchronized void clearDivisionCache() {
+    public void clearDivisionCache() {
         FxCacheMBean cache = CacheAdmin.getInstance();
         try {
             // clear local cache

@@ -58,7 +58,7 @@ import java.util.List;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "HistoryTrackerEngine")
+@Stateless(name = "HistoryTrackerEngine", mappedName="HistoryTrackerEngine")
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTrackerEngineLocal {
 

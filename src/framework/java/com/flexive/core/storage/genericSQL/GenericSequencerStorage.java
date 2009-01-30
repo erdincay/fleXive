@@ -33,11 +33,8 @@ package com.flexive.core.storage.genericSQL;
 
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxCreateException;
-import com.flexive.shared.CustomSequencer;
-import com.flexive.shared.interfaces.SequencerEngine;
+import com.flexive.shared.FxSystemSequencer;
 import com.flexive.core.storage.SequencerStorage;
-
-import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -55,7 +52,7 @@ public abstract class GenericSequencerStorage implements SequencerStorage {
     /**
      * {@inheritDoc}
      */
-    public long getId(SequencerEngine.System type) throws FxApplicationException {
+    public long getId(FxSystemSequencer type) throws FxApplicationException {
         return fetchId(type.getSequencerName(), type.isAllowRollover());
     }
 

@@ -36,9 +36,7 @@ import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.security.ACL;
-import com.flexive.shared.security.Account;
-import com.flexive.shared.security.Role;
+import com.flexive.shared.security.*;
 import com.flexive.shared.value.FxString;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
@@ -141,13 +139,13 @@ public class TestUsers {
     private static synchronized void createTestGroupAssignments() throws FxApplicationException {
         // create a content ACL where test users have read/write access
         sharedInstanceAclId = EJBLookup.getAclEngine().create("test content ACL", new FxString(FxLanguage.ENGLISH,  "Test content ACL"),
-                getTestMandator(), "", "", ACL.Category.INSTANCE);
+                getTestMandator(), "", "", ACLCategory.INSTANCE);
         // assign all permissions
-        EJBLookup.getAclEngine().assign(sharedInstanceAclId, sharedTestGroupId, ACL.Permission.values());
+        EJBLookup.getAclEngine().assign(sharedInstanceAclId, sharedTestGroupId, ACLPermission.values());
 
         // update search test type ACLs to include edit&create&delete permissions for the test user
         final long searchTypeAclId = CacheAdmin.getEnvironment().getType("SEARCHTEST").getACL().getId();
-        final long workflowAclId = CacheAdmin.getEnvironment().getDefaultACL(ACL.Category.WORKFLOW).getId();
+        final long workflowAclId = CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.WORKFLOW).getId();
         for (long aclId: new long[] { searchTypeAclId, workflowAclId }) {
             EJBLookup.getAclEngine().assign(aclId, sharedTestGroupId, true, true, false, true, false, true);
         }
@@ -179,7 +177,7 @@ public class TestUsers {
      * @param permissions permissions to assign for the acl
      * @throws FxApplicationException on errors
      */
-    public static synchronized void assignACL(TestUser user, long aclId, ACL.Permission... permissions) throws FxApplicationException {
+    public static synchronized void assignACL(TestUser user, long aclId, ACLPermission... permissions) throws FxApplicationException {
         EJBLookup.getAclEngine().assign(aclId, user.getUserGroupId(), permissions);
     }
 
@@ -250,7 +248,7 @@ public class TestUsers {
      */
     public static long newContentACL(String name) throws FxApplicationException {
         return EJBLookup.getAclEngine().create("TEST_" + name + RandomStringUtils.random(16, true, true), new FxString(name + " (content)"), TestUsers.getTestMandator(),
-                "#112233", "", ACL.Category.INSTANCE);
+                "#112233", "", ACLCategory.INSTANCE);
     }
 
     /**
@@ -262,7 +260,7 @@ public class TestUsers {
      */
     public static long newStructureACL(String name) throws FxApplicationException {
         return EJBLookup.getAclEngine().create("TEST_" + name + RandomStringUtils.random(16, true, true), new FxString(name + " (structure)"), TestUsers.getTestMandator(),
-                "#112233", "", ACL.Category.STRUCTURE);
+                "#112233", "", ACLCategory.STRUCTURE);
     }
 
     /**
@@ -274,7 +272,7 @@ public class TestUsers {
      */
     public static long newWorkflowACL(String name) throws FxApplicationException {
         return EJBLookup.getAclEngine().create("TEST_" + name + RandomStringUtils.random(16, true, true), new FxString(name + " (workflow)"), TestUsers.getTestMandator(),
-                "#112233", "", ACL.Category.WORKFLOW);
+                "#112233", "", ACLCategory.WORKFLOW);
     }
 
     public static synchronized ACL getInstanceAcl() {

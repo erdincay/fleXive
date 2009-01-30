@@ -43,12 +43,11 @@ import com.flexive.shared.EJBLookup;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.scripting.FxScriptInfo;
-import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Role;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxReference;
-import com.flexive.shared.value.ReferencedContent;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -120,12 +119,12 @@ public class TypeEditorBean {
                 editType(propId);
             } else if ("createType".equals(action)) {
                 editMode = true;
-                type = FxTypeEdit.createNew("NEWTYPE", new FxString(""), CacheAdmin.getEnvironment().getDefaultACL(ACL.Category.STRUCTURE));
+                type = FxTypeEdit.createNew("NEWTYPE", new FxString(""), CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.STRUCTURE));
                 initEditing();
                 setTypeMode(TypeMode.Content);
             } else if ("createTypeRelation".equals(action)) {
                 editMode = true;
-                type = FxTypeEdit.createNew("NEWTYPE", new FxString(""), CacheAdmin.getEnvironment().getDefaultACL(ACL.Category.STRUCTURE));
+                type = FxTypeEdit.createNew("NEWTYPE", new FxString(""), CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.STRUCTURE));
                 initEditing();
                 setTypeMode(TypeMode.Relation);
             }

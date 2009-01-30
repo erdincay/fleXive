@@ -1,9 +1,9 @@
 package com.flexive.core.storage;
 
 import com.flexive.shared.CustomSequencer;
+import com.flexive.shared.FxSystemSequencer;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxCreateException;
-import com.flexive.shared.interfaces.SequencerEngine;
 
 import java.util.List;
 
@@ -42,7 +42,7 @@ public interface SequencerStorage {
      * @throws com.flexive.shared.exceptions.FxApplicationException
      *          on errors
      */
-    long getId(SequencerEngine.System type) throws FxApplicationException;
+    long getId(FxSystemSequencer type) throws FxApplicationException;
 
     /**
      * Create a new sequencer

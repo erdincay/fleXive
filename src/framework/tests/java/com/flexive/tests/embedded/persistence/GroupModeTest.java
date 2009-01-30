@@ -38,6 +38,7 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
 import com.flexive.tests.embedded.FxTestUtils;
@@ -79,10 +80,10 @@ public class GroupModeTest extends StructureTestBase {
                         "CONTENT_" + RandomStringUtils.random(16, true, true)
 
                 },
-                new ACL.Category[]{
-                        ACL.Category.STRUCTURE,
-                        ACL.Category.WORKFLOW,
-                        ACL.Category.INSTANCE
+                new ACLCategory[]{
+                        ACLCategory.STRUCTURE,
+                        ACLCategory.WORKFLOW,
+                        ACLCategory.INSTANCE
                 },
                 TestUsers.getTestMandator()
         );

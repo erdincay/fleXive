@@ -52,7 +52,7 @@ import java.util.Arrays;
  * @version $Rev$
  */
 @TransactionManagement(TransactionManagementType.CONTAINER)
-@Stateless(name = "ResultPreferencesEngine")
+@Stateless(name = "ResultPreferencesEngine", mappedName="ResultPreferencesEngine")
 public class ResultPreferencesEngineBean implements ResultPreferencesEngine, ResultPreferencesEngineLocal {
     private static final Log LOG = LogFactory.getLog(ResultPreferencesEngineBean.class);
 

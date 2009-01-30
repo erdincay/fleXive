@@ -68,7 +68,7 @@ import java.util.List;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "AccountEngine")
+@Stateless(name = "AccountEngine", mappedName="AccountEngine")
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
@@ -432,7 +432,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             con = Database.getDbConnection();
 
             // Get a new Id
-            long newId = seq.getId(SequencerEngine.System.ACCOUNT);
+            long newId = seq.getId(FxSystemSequencer.ACCOUNT);
 
             password = password == null ? "" : FxFormatUtils.encodePassword(newId, password);
             curSql = "INSERT INTO " + TBL_ACCOUNTS + "(" +
@@ -1425,7 +1425,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                 }*/
                 result.add(new ACLAssignment(rs.getLong(2), groupId,
                         rs.getBoolean(3), rs.getBoolean(4), rs.getBoolean(7), rs.getBoolean(5),
-                        rs.getBoolean(6), rs.getBoolean(8), ACL.Category.getById(rs.getByte(9)),
+                        rs.getBoolean(6), rs.getBoolean(8), ACLCategory.getById(rs.getByte(9)),
                         LifeCycleInfoImpl.load(rs, 10, 11, 12, 13)));
             }
             return result;

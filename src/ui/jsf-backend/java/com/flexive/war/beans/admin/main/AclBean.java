@@ -294,8 +294,8 @@ public class AclBean {
      * @return all available categories
      */
     public List<SelectItem> getCategories() {
-        List<SelectItem> result = new ArrayList<SelectItem>(ACL.Category.values().length);
-        for (ACL.Category cat : ACL.Category.values()) {
+        List<SelectItem> result = new ArrayList<SelectItem>(ACLCategory.values().length);
+        for (ACLCategory cat : ACLCategory.values()) {
             result.add(new SelectItem(String.valueOf(cat.getId()), String.valueOf(cat)));
         }
         return result;

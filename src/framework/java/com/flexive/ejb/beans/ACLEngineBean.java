@@ -35,7 +35,6 @@ import com.flexive.core.Database;
 import com.flexive.core.LifeCycleInfoImpl;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.security.UserTicketStore;
-import com.flexive.core.security.UserTicketImpl;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.*;
 import com.flexive.shared.content.FxPermissionUtils;
@@ -62,7 +61,7 @@ import java.util.List;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "ACLEngine")
+@Stateless(name = "ACLEngine", mappedName="ACLEngine")
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
@@ -130,7 +129,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public long create(String name, FxString label, long mandatorId, String color, String description, ACL.Category category)
+    public long create(String name, FxString label, long mandatorId, String color, String description, ACLCategory category)
             throws FxApplicationException {
 
         final UserTicket ticket = FxContext.getUserTicket();
@@ -163,7 +162,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             con = Database.getDbConnection();
 
             // Obtain a new id
-            int newId = (int) seq.getId(SequencerEngine.System.ACL);
+            int newId = (int) seq.getId(FxSystemSequencer.ACL);
             sql = "INSERT INTO " + TBL_ACLS + "(" +
                     //       1      2     3          4              5       6        7         8              9
                     "ID,CAT_TYPE,COLOR,DESCRIPTION,MANDATOR,NAME,CREATED_BY,CREATED_AT,MODIFIED_BY,MODIFIED_AT)" +
@@ -445,7 +444,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             String color = rs.getString(5);
             FxString label = Database.loadFxString(con, TBL_ACLS, "LABEL", "ID=" + id);
             String sMandator = environment.getMandator(mandatorId).getName();
-            ACL theACL = new ACL(id, name, label, mandatorId, sMandator, desc, color, ACL.Category.getById(cat),
+            ACL theACL = new ACL(id, name, label, mandatorId, sMandator, desc, color, ACLCategory.getById(cat),
                     LifeCycleInfoImpl.load(rs, 6, 7, 8, 9));
             if (ignoreSecurity && mandatorId != FxContext.getUserTicket().getMandatorId())
                 throw new FxNoAccessException(LOG, "ex.acl.loadFailed.foreignMandator", theACL.getName());
@@ -535,14 +534,14 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void assign(long aclId, long groupId, ACL.Permission... permissions) throws FxApplicationException {
+    public void assign(long aclId, long groupId, ACLPermission... permissions) throws FxApplicationException {
         boolean mayRead = false;
         boolean mayEdit = false;
         boolean mayRelate = false;
         boolean mayDelete = false;
         boolean mayExport = false;
         boolean mayCreate = false;
-        for (ACL.Permission perm : permissions) {
+        for (ACLPermission perm : permissions) {
             switch (perm) {
                 case CREATE:
                     mayCreate = true;
@@ -683,7 +682,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             while (rs != null && rs.next())
                 result.add(new ACLAssignment(rs.getLong(2), rs.getLong(1),
                         rs.getBoolean(3), rs.getBoolean(4), rs.getBoolean(7), rs.getBoolean(5), rs.getBoolean(6),
-                        rs.getBoolean(8), ACL.Category.getById(rs.getByte(9)),
+                        rs.getBoolean(8), ACLCategory.getById(rs.getByte(9)),
                         LifeCycleInfoImpl.load(rs, 10, 11, 12, 13)));
 
             // Return the found entries

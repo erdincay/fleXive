@@ -40,10 +40,9 @@ import com.flexive.shared.interfaces.AssignmentEngine;
 import com.flexive.shared.interfaces.TypeEngine;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Mandator;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
-import com.flexive.shared.value.FxValue;
-import com.flexive.shared.value.FxBoolean;
 import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
 import com.flexive.tests.embedded.TestUsers;
@@ -102,7 +101,7 @@ public class StructureTest {
         long testId = -1;
         try {
             testId = te.save(FxTypeEdit.createNew("TestCD", new FxString("description..."),
-                    CacheAdmin.getEnvironment().getACL(ACL.Category.STRUCTURE.getDefaultId()), null));
+                    CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()), null));
 //            testId = te.create(1, 1, 1, new ArrayList<Mandator>(2), "TestCD",
 //                    new FxString("description..."), null, false,
 //                    TypeStorageMode.Hierarchical, TypeCategory.User, TypeMode.Content,
@@ -114,7 +113,7 @@ public class StructureTest {
             ae.createGroup(testId, ge, "/");
             ACL structACL = null;
             for (ACL a : CacheAdmin.getEnvironment().getACLs())
-                if (a.getCategory() == ACL.Category.STRUCTURE) {
+                if (a.getCategory() == ACLCategory.STRUCTURE) {
                     structACL = a;
                     break;
                 }
@@ -176,7 +175,7 @@ public class StructureTest {
     public void derivedType() throws Exception {
         long testId = -1;
         try {
-            testId = te.save(FxTypeEdit.createNew("TestCDP", new FxString("description..."), CacheAdmin.getEnvironment().getACLs(ACL.Category.STRUCTURE).get(0), null));
+            testId = te.save(FxTypeEdit.createNew("TestCDP", new FxString("description..."), CacheAdmin.getEnvironment().getACLs(ACLCategory.STRUCTURE).get(0), null));
 //            testId = te.create(1, 1, 1, new ArrayList<Mandator>(2), "TestCDP",
 //                    new FxString("description..."), null, false,
 //                    TypeStorageMode.Hierarchical, TypeCategory.User, TypeMode.Content,
@@ -186,7 +185,7 @@ public class StructureTest {
             FxString hint = new FxString("Hint text ...");
             ACL structACL = null;
             for (ACL a : CacheAdmin.getEnvironment().getACLs())
-                if (a.getCategory() == ACL.Category.STRUCTURE) {
+                if (a.getCategory() == ACLCategory.STRUCTURE) {
                     structACL = a;
                     break;
                 }
@@ -208,7 +207,7 @@ public class StructureTest {
 
         long testDerivedId;
         testDerivedId = te.save(FxTypeEdit.createNew("TestCDDerived", new FxString("description..."),
-                CacheAdmin.getEnvironment().getACLs(ACL.Category.STRUCTURE).get(0), testType).setEnableParentAssignments(false));
+                CacheAdmin.getEnvironment().getACLs(ACLCategory.STRUCTURE).get(0), testType).setEnableParentAssignments(false));
 //        testDerivedId = te.create(1, 1, 1, new ArrayList<Mandator>(2), "TestCDDerived",
 //                new FxString("description..."), testType, false,
 //                TypeStorageMode.Hierarchical, TypeCategory.User, TypeMode.Content,
@@ -273,7 +272,7 @@ public class StructureTest {
         } catch (Exception e) {
             //ok, create the type
         }
-        long aid = acl.create("ContactsTest", new FxString("Contact ACL"), Mandator.MANDATOR_FLEXIVE, "#AA0000", "ACL for ContactsTest", ACL.Category.STRUCTURE);
+        long aid = acl.create("ContactsTest", new FxString("Contact ACL"), Mandator.MANDATOR_FLEXIVE, "#AA0000", "ACL for ContactsTest", ACLCategory.STRUCTURE);
         ACL contactACL = CacheAdmin.getEnvironment().getACL(aid);
         FxString desc = new FxString("Template for contact data");
         desc.setTranslation(FxLanguage.GERMAN, "Kontaktdaten Vorlage");
@@ -369,7 +368,7 @@ public class StructureTest {
         FxString hint = new FxString("Hint text ...");
         FxString desc = new FxString("Test data structure");
         try {
-            testId = te.save(FxTypeEdit.createNew("TestAssignmentRemove", new FxString("description..."), CacheAdmin.getEnvironment().getACLs(ACL.Category.STRUCTURE).get(0), null));
+            testId = te.save(FxTypeEdit.createNew("TestAssignmentRemove", new FxString("description..."), CacheAdmin.getEnvironment().getACLs(ACLCategory.STRUCTURE).get(0), null));
 //                    te.create(1, 1, 1, new ArrayList<Mandator>(2), "TestAssignmentRemove",
 //                    new FxString("description..."), null, false,
 //                    TypeStorageMode.Hierarchical, TypeCategory.User, TypeMode.Content,
@@ -377,7 +376,7 @@ public class StructureTest {
             desc.setTranslation(FxLanguage.GERMAN, "Testdaten Strukturen");
             structACL = null;
             for (ACL a : CacheAdmin.getEnvironment().getACLs())
-                if (a.getCategory() == ACL.Category.STRUCTURE) {
+                if (a.getCategory() == ACLCategory.STRUCTURE) {
                     structACL = a;
                     break;
                 }
@@ -463,7 +462,7 @@ public class StructureTest {
                 new FxString("Test Priority"),
                 new FxString("Priority"),
                 FxMultiplicity.MULT_1_1,
-                CacheAdmin.getEnvironment().getACL(ACL.Category.STRUCTURE.getDefaultId()),
+                CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
                 FxDataType.Number);
 
         FxString defML = new FxString(true, "test");

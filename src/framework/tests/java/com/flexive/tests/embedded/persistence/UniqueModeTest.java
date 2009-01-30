@@ -38,6 +38,7 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
 import static com.flexive.tests.embedded.FxTestUtils.login;
@@ -99,7 +100,7 @@ public class UniqueModeTest extends StructureTestBase {
     }
 
     private long[] createTypes(UniqueMode mode) throws FxApplicationException {
-        ACL structACL = CacheAdmin.getEnvironment().getACL(ACL.Category.STRUCTURE.getDefaultId());
+        ACL structACL = CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId());
         long typeA = type.save(FxTypeEdit.createNew(TYPE_A, new FxString("Test type " + TYPE_A),
                 structACL, null));
         createProperty(typeA, structACL, PROP_NAME, "/", mode);

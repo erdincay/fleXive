@@ -54,7 +54,7 @@ import java.sql.Connection;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "FxTimerService")
+@Stateless(name = "FxTimerService", mappedName="FxTimerService")
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {

@@ -36,6 +36,7 @@ import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
 import com.flexive.tests.embedded.FxTestUtils;
@@ -109,10 +110,10 @@ public class InheritanceTest extends StructureTestBase {
                         "CONTENT_" + RandomStringUtils.random(16, true, true)
 
                 },
-                new ACL.Category[]{
-                        ACL.Category.STRUCTURE,
-                        ACL.Category.WORKFLOW,
-                        ACL.Category.INSTANCE
+                new ACLCategory[]{
+                        ACLCategory.STRUCTURE,
+                        ACLCategory.WORKFLOW,
+                        ACLCategory.INSTANCE
                 },
                 TestUsers.getTestMandator()
         );

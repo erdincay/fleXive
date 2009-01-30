@@ -252,7 +252,7 @@ public interface UserTicket extends Serializable {
      * @param perms    ACL.PERM
      * @return all ACLAssignments for the user matching the filter parameters, may be a empty array but is never null
      */
-    ACLAssignment[] getACLAssignments(ACL.Category category, long ownerId, ACL.Permission... perms);
+    ACLAssignment[] getACLAssignments(ACLCategory category, long ownerId, ACLPermission... perms);
 
     /**
      * Returns the id of all ACLs for the user matching the filter parameters.
@@ -265,7 +265,7 @@ public interface UserTicket extends Serializable {
      * @param perms    ACL.PERM
      * @return all ACL ids for the user matching the filter parameters, may be an empty array but is never null
      */
-    Long[] getACLsId(long ownerId, ACL.Category category, ACL.Permission... perms);
+    Long[] getACLsId(long ownerId, ACLCategory category, ACLPermission... perms);
 
     /**
      * Returns the id of all ACLs for the user matching the filter parameters as comma separated list.
@@ -278,7 +278,7 @@ public interface UserTicket extends Serializable {
      * @param perms    ACL.PERM
      * @return all ACL ids for the user matching the filter parameters  as comma separated list.
      */
-    String getACLsCSV(long ownerId, ACL.Category category, ACL.Permission... perms);
+    String getACLsCSV(long ownerId, ACLCategory category, ACLPermission... perms);
 
     /**
      * Returns the id of all ACLs for the user matching the filter parameters.
@@ -291,7 +291,7 @@ public interface UserTicket extends Serializable {
      * @param perms    ACL.PERM
      * @return all ACL ids for the user matching the filter parameters, may be an empty array but is never null
      */
-    ACL[] getACLs(long owner, ACL.Category category, ACL.Permission... perms);
+    ACL[] getACLs(long owner, ACLCategory category, ACLPermission... perms);
 
     /**
      * Get the default language of this user

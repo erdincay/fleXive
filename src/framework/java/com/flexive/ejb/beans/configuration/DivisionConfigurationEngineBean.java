@@ -71,7 +71,7 @@ import java.util.List;
 
 @TransactionManagement(TransactionManagementType.CONTAINER)
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
-@Stateless(name = "DivisionConfigurationEngine")
+@Stateless(name = "DivisionConfigurationEngine", mappedName="DivisionConfigurationEngine")
 public class DivisionConfigurationEngineBean extends GenericConfigurationImpl implements DivisionConfigurationEngine, DivisionConfigurationEngineLocal {
     private static final Log LOG = LogFactory.getLog(DivisionConfigurationEngineBean.class);
     /**

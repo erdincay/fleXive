@@ -29,28 +29,36 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.shared.interfaces;
-
-import com.flexive.shared.cache.FxCacheException;
-
-import javax.ejb.Remote;
-import java.io.Serializable;
+package com.flexive.shared;
 
 /**
- * Stateless test beans interface.
- *  
- * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * System defined sequencers
+ *
+ * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Remote
-public interface StatelessTest {
+public enum FxSystemSequencer {
+    CONTENT, ACCOUNT, GROUP, ACL, MANDATOR, TYPEDEF, TYPEGROUP, TYPEPROP, ASSIGNMENT, BINARY,
+    WORKFLOW, ROUTE, STEPDEFINITION, SCRIPTS, STEP, BRIEFCASE, SEARCHCACHE_MEMORY(true), SEARCHCACHE_PERM(true),
+    TEMPLATE, SELECTLIST, SELECTLIST_ITEM, TREE_EDIT, TREE_LIVE;
 
-	/**
-	 * Puts object O in the cache, then rollbacks.
-	 * 
-	 * @param path	cache path
-	 * @param key	cache key
-	 * @param value	object to be stored in the tree cache
-	 * @throws FxCacheException	if the object could not be stored in the cache
-	 */
-	void cachePutRollback(String path, String key, Serializable value) throws FxCacheException;
+    private boolean allowRollover;
+    private String sequencerName;
+
+    FxSystemSequencer(boolean allowRollover) {
+        this.allowRollover = allowRollover;
+        this.sequencerName = "SYS_" + this.name();
+    }
+
+    FxSystemSequencer() {
+        this.allowRollover = false;
+        this.sequencerName = "SYS_" + this.name();
+    }
+
+    public boolean isAllowRollover() {
+        return allowRollover;
+    }
+
+    public String getSequencerName() {
+        return sequencerName;
+    }
 }

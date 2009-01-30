@@ -44,6 +44,7 @@ import com.flexive.shared.interfaces.WorkflowEngine;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.UserGroup;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.workflow.*;
 import static com.flexive.tests.embedded.FxTestUtils.login;
@@ -79,7 +80,7 @@ public class WorkflowBeanTest {
         aclEngine = EJBLookup.getAclEngine();
         login(TestUsers.SUPERVISOR);
         workflowAcl = aclEngine.load(aclEngine.create("WorkflowBeanTestACL", new FxString("Test ACL"),
-                Mandator.MANDATOR_FLEXIVE, "#000000", null, ACL.Category.WORKFLOW));
+                Mandator.MANDATOR_FLEXIVE, "#000000", null, ACLCategory.WORKFLOW));
     }
 
     @AfterClass

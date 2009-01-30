@@ -45,10 +45,10 @@ import com.flexive.shared.interfaces.TypeEngine;
 import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.search.SortDirection;
 import com.flexive.shared.search.query.PropertyValueComparator;
-import com.flexive.shared.search.query.QueryOperatorNode;
 import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Mandator;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
 import com.flexive.tests.embedded.FxTestUtils;
@@ -86,9 +86,9 @@ public class AbstractSqlQueryTest {
         // create structure
         tearDownStructures();
         this.structureAcl = FxTestUtils.createACL("Test:" + FxResultSetDataModelTest.class,
-                ACL.Category.STRUCTURE, Mandator.MANDATOR_FLEXIVE);
+                ACLCategory.STRUCTURE, Mandator.MANDATOR_FLEXIVE);
         this.contentAcl = FxTestUtils.createACL("Test_Content:" + FxResultSetDataModelTest.class,
-                ACL.Category.INSTANCE, Mandator.MANDATOR_FLEXIVE);
+                ACLCategory.INSTANCE, Mandator.MANDATOR_FLEXIVE);
         FxPropertyEdit pe = FxPropertyEdit.createNew(TEST_PROPERTY, new FxString(""),
                 new FxString(""), FxMultiplicity.MULT_0_1, structureAcl, FxDataType.String1024);
         pe.setAutoUniquePropertyName(true);

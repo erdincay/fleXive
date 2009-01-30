@@ -34,13 +34,15 @@ package com.flexive.shared.search;
 import com.flexive.shared.ObjectWithLabel;
 import com.flexive.shared.value.FxString;
 
+import java.io.Serializable;
+
 /**
  * Interface for query result locations
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public interface ResultLocation extends ObjectWithLabel {
+public interface ResultLocation extends ObjectWithLabel, Serializable {
     FxString getLabel();
 
     String getName();

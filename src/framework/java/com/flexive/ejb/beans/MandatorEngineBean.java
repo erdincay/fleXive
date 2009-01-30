@@ -36,10 +36,7 @@ import static com.flexive.core.DatabaseConst.TBL_GROUP;
 import static com.flexive.core.DatabaseConst.TBL_MANDATORS;
 import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.core.structure.StructureLoader;
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.FxContext;
-import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.EJBLookup;
+import com.flexive.shared.*;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.*;
@@ -62,7 +59,7 @@ import java.sql.SQLException;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "MandatorEngine")
+@Stateless(name = "MandatorEngine", mappedName="MandatorEngine")
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
     // Our logger
@@ -102,7 +99,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
             con = Database.getDbConnection();
 
             // Obtain a new id
-            int newId = (int) seq.getId(SequencerEngine.System.MANDATOR);
+            int newId = (int) seq.getId(FxSystemSequencer.MANDATOR);
 
             sql = "INSERT INTO " + TBL_MANDATORS + "(" +
                     //1 2    3        4         5          6          7           8
@@ -124,7 +121,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
                     "(ID,MANDATOR,AUTOMANDATOR,ISSYSTEM,NAME,COLOR,CREATED_BY,CREATED_AT,MODIFIED_BY,MODIFIED_AT) VALUES (" +
                     "?,?," + newId + ",TRUE,?,?,?,?,?,?)";
             ps = con.prepareStatement(sql);
-            long gid = seq.getId(SequencerEngine.System.GROUP);
+            long gid = seq.getId(FxSystemSequencer.GROUP);
             ps.setLong(1, gid);
             ps.setLong(2, newId);
             ps.setString(3, "Everyone (" + name.trim() + ")");

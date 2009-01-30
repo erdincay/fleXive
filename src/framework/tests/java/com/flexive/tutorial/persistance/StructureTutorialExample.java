@@ -39,6 +39,7 @@ import com.flexive.shared.interfaces.AssignmentEngine;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.TypeEngine;
 import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
 
@@ -63,7 +64,7 @@ public class StructureTutorialExample {
         FxString typeDesc = new FxString(true, FxLanguage.ENGLISH, "A generic customer");
         typeDesc.setTranslation(FxLanguage.GERMAN, "Ein generischer Kunde");
         ACL customerACL = CacheAdmin.getEnvironment().
-                getACL(ACL.Category.STRUCTURE.getDefaultId());
+                getACL(ACLCategory.STRUCTURE.getDefaultId());
 
         FxTypeEdit type = FxTypeEdit.createNew(BASE_TYPE, typeDesc, customerACL);
 
@@ -89,7 +90,7 @@ public class StructureTutorialExample {
     public void addNameProperty(long typeId) throws FxApplicationException {
         AssignmentEngine assignmentEngine = EJBLookup.getAssignmentEngine();
         ACL customerACL = CacheAdmin.getEnvironment().
-                getACL(ACL.Category.STRUCTURE.getDefaultId());
+                getACL(ACLCategory.STRUCTURE.getDefaultId());
 
         FxPropertyEdit name =
                 FxPropertyEdit.createNew("Name",
@@ -137,7 +138,7 @@ public class StructureTutorialExample {
     public void createAddressGroup(long typeId) throws FxApplicationException {
         AssignmentEngine assignmentEngine = EJBLookup.getAssignmentEngine();
         ACL customerACL = CacheAdmin.getEnvironment().
-                getACL(ACL.Category.STRUCTURE.getDefaultId());
+                getACL(ACLCategory.STRUCTURE.getDefaultId());
 
         assignmentEngine.createGroup(
                 typeId,
@@ -239,7 +240,7 @@ public class StructureTutorialExample {
 
         FxString relDesc = new FxString("Relation Customer<->Products");
         ACL relationACL = CacheAdmin.getEnvironment().
-                getACL(ACL.Category.STRUCTURE.getDefaultId());
+                getACL(ACLCategory.STRUCTURE.getDefaultId());
 
         FxTypeEdit relEdit = FxTypeEdit.createNew(
                 "CustProd", relDesc, relationACL).
@@ -281,7 +282,7 @@ public class StructureTutorialExample {
 
         FxString productDesc = new FxString("Product description ...");
         ACL productACL = CacheAdmin.getEnvironment().
-                getACL(ACL.Category.STRUCTURE.getDefaultId());
+                getACL(ACLCategory.STRUCTURE.getDefaultId());
         //create hard- and software
         typeEngine.save(FxTypeEdit.createNew("Hardware", productDesc, productACL));
         typeEngine.save(FxTypeEdit.createNew("Software", productDesc, productACL));

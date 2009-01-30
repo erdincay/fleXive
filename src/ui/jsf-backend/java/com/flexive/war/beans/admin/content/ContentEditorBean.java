@@ -46,6 +46,7 @@ import com.flexive.shared.interfaces.TreeEngine;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.security.LifeCycleInfo;
+import com.flexive.shared.security.ACLPermission;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
@@ -248,7 +249,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
     public boolean isMayExport() {
         try {
             return FxPermissionUtils.checkPermission(FxContext.getUserTicket(), content.getLifeCycleInfo().getCreatorId(),
-                    ACL.Permission.EXPORT, environment.getType(content.getTypeId()),
+                    ACLPermission.EXPORT, environment.getType(content.getTypeId()),
                     environment.getStep(content.getStepId()).getAclId(), content.getAclId(), false);
         } catch (FxNoAccessException e) {
             LOG.warn(e);
@@ -264,7 +265,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
     public boolean isMayImport() {
         try {
             return FxPermissionUtils.checkPermission(FxContext.getUserTicket(), content.getLifeCycleInfo().getCreatorId(),
-                    ACL.Permission.EDIT, environment.getType(content.getTypeId()),
+                    ACLPermission.EDIT, environment.getType(content.getTypeId()),
                     environment.getStep(content.getStepId()).getAclId(), content.getAclId(), false);
         } catch (FxNoAccessException e) {
             LOG.warn(e);
@@ -790,11 +791,11 @@ public class ContentEditorBean implements ActionBean, Serializable {
                 : null;
         if (editAble && id != -1) {
             if (fxType.usePermissions())
-                editAble = FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACL.Permission.EDIT,
+                editAble = FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACLPermission.EDIT,
                         si, false);
         }
         if (fxType.usePermissions() && id != -1)
-            deleteAble = FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACL.Permission.DELETE,
+            deleteAble = FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACLPermission.DELETE,
                     si, false);
         versionDeleteAble = deleteAble;
         if (versionInfo.getVersionCount() <= 1)

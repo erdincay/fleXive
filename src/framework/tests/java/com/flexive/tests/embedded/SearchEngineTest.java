@@ -58,7 +58,7 @@ import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.search.query.VersionFilter;
 import static com.flexive.shared.search.query.PropertyValueComparator.EQ;
 import com.flexive.shared.security.*;
-import static com.flexive.shared.security.ACL.Permission;
+import com.flexive.shared.security.ACLPermission;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.*;
 import static com.flexive.tests.embedded.FxTestUtils.login;
@@ -1125,9 +1125,9 @@ public class SearchEngineTest {
                     .setUseStepPermissions(false)
                     .setUseTypePermissions(false));
             aclId = getAclEngine().create("prop_no_delete", new FxString(""),
-                    TestUsers.getTestMandator(), "#000000", "property description", ACL.Category.STRUCTURE);
+                    TestUsers.getTestMandator(), "#000000", "property description", ACLCategory.STRUCTURE);
             getAclEngine().assign(aclId, TestUsers.REGULAR.getUserGroupId(),
-                    Permission.CREATE, Permission.EDIT, Permission.READ);
+                    ACLPermission.CREATE, ACLPermission.EDIT, ACLPermission.READ);
             getAssignmentEngine().createProperty(typeId,
                     FxPropertyEdit.createNew(
                             "prop_no_delete", new FxString(""), new FxString(""),

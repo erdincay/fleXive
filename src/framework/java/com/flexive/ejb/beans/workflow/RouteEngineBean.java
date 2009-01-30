@@ -37,16 +37,12 @@ import static com.flexive.core.DatabaseConst.TBL_STEP;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxSystemSequencer;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
-import com.flexive.shared.interfaces.RouteEngine;
-import com.flexive.shared.interfaces.RouteEngineLocal;
-import com.flexive.shared.interfaces.SequencerEngine.System;
-import com.flexive.shared.interfaces.SequencerEngineLocal;
-import com.flexive.shared.interfaces.UserGroupEngineLocal;
+import com.flexive.shared.interfaces.*;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.security.Role;
-import com.flexive.shared.workflow.Route;
 import com.flexive.shared.workflow.Step;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,7 +63,7 @@ import java.util.List;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "RouteEngine")
+@Stateless(name = "RouteEngine", mappedName="RouteEngine")
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class RouteEngineBean implements RouteEngine, RouteEngineLocal {
@@ -155,7 +151,7 @@ public class RouteEngineBean implements RouteEngine, RouteEngineLocal {
 
             // Create the new route
             stmt = con.createStatement();
-            long routeId = seq.getId(System.ROUTE);
+            long routeId = seq.getId(FxSystemSequencer.ROUTE);
             sql = "INSERT INTO " + TBL_ROUTES + " (ID,FROM_STEP,TO_STEP,USERGROUP) VALUES ("
                     + routeId + "," + fromStep.getId() + "," + toStep.getId() + "," + groupId + ")";
             stmt.executeUpdate(sql);

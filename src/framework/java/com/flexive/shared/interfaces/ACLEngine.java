@@ -34,6 +34,8 @@ package com.flexive.shared.interfaces;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.ACLAssignment;
+import com.flexive.shared.security.ACLCategory;
+import com.flexive.shared.security.ACLPermission;
 import com.flexive.shared.value.FxString;
 
 import javax.ejb.Remote;
@@ -65,7 +67,7 @@ public interface ACLEngine {
      * @throws FxApplicationException creation failed, acl with the given name exists, calling user lacks
      *      permissions, parameter (name,mandator,color,category) was invalid, mandator does not exist
      */
-    long create(String name, FxString label, long mandatorId, String color, String description, ACL.Category category)
+    long create(String name, FxString label, long mandatorId, String color, String description, ACLCategory category)
             throws FxApplicationException;
     /**
      * Remove an existing ACL identified by its unique id.
@@ -165,7 +167,7 @@ public interface ACLEngine {
      *                                assignments,when the group or ACL does not exist
      * @see #assign(long,long,boolean,boolean,boolean,boolean,boolean,boolean)
      */
-    void assign(long aclId, long groupId, ACL.Permission... permissions) throws FxApplicationException;
+    void assign(long aclId, long groupId, ACLPermission... permissions) throws FxApplicationException;
 
     /**
      * Loads all ACL assignments of a group.

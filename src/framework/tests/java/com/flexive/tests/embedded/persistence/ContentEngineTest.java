@@ -42,6 +42,7 @@ import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.TypeEngine;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Mandator;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.stream.FxStreamUtils;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.*;
@@ -241,14 +242,14 @@ public class ContentEngineTest {
                 true, new FxMultiplicity(0, 1),
                 true, structACL, FxDataType.String1024, new FxString(FxString.EMPTY),
                 true, null, null, null).setAutoUniquePropertyName(true).setMultiLang(true).setOverrideMultiLang(true);
-        long articleId = type.save(FxTypeEdit.createNew(TYPE_ARTICLE, new FxString("Article test type"), CacheAdmin.getEnvironment().getACLs(ACL.Category.STRUCTURE).get(0), null));
+        long articleId = type.save(FxTypeEdit.createNew(TYPE_ARTICLE, new FxString("Article test type"), CacheAdmin.getEnvironment().getACLs(ACLCategory.STRUCTURE).get(0), null));
         ass.createProperty(articleId, pe, "/");
         pe.setName("Text");
         pe.setDataType(FxDataType.Text);
         pe.setMultiplicity(new FxMultiplicity(0, 2));
         ass.createProperty(articleId, pe, "/");
 
-        long testDataId = type.save(FxTypeEdit.createNew(TEST_TYPE, new FxString("Test data"), CacheAdmin.getEnvironment().getACLs(ACL.Category.STRUCTURE).get(0), null));
+        long testDataId = type.save(FxTypeEdit.createNew(TEST_TYPE, new FxString("Test data"), CacheAdmin.getEnvironment().getACLs(ACLCategory.STRUCTURE).get(0), null));
         FxGroupAssignment ga = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment("ROOT/" + TEST_GROUP);
         FxGroupAssignmentEdit gae = FxGroupAssignmentEdit.createNew(ga, CacheAdmin.getEnvironment().getType(TEST_TYPE), null, "/");
         ass.save(gae, true);
@@ -277,22 +278,22 @@ public class ContentEngineTest {
         try {
             CacheAdmin.getEnvironment().getACL("Test ACL Content 1");
         } catch (FxRuntimeException e) {
-            acl.create("Test ACL Content 1", new FxString("Test ACL Content 1"), Mandator.MANDATOR_FLEXIVE, "#00CCDD", "", ACL.Category.INSTANCE);
+            acl.create("Test ACL Content 1", new FxString("Test ACL Content 1"), Mandator.MANDATOR_FLEXIVE, "#00CCDD", "", ACLCategory.INSTANCE);
         }
         try {
             CacheAdmin.getEnvironment().getACL("Test ACL Structure 1");
         } catch (FxRuntimeException e) {
-            acl.create("Test ACL Structure 1", new FxString("Test ACL Structure 1"), Mandator.MANDATOR_FLEXIVE, "#BBCCDD", "", ACL.Category.STRUCTURE);
+            acl.create("Test ACL Structure 1", new FxString("Test ACL Structure 1"), Mandator.MANDATOR_FLEXIVE, "#BBCCDD", "", ACLCategory.STRUCTURE);
         }
         try {
             CacheAdmin.getEnvironment().getACL("Test ACL Workflow 1");
         } catch (FxRuntimeException e) {
-            acl.create("Test ACL Workflow 1", new FxString("Test ACL Workflow 1"), Mandator.MANDATOR_FLEXIVE, "#BB00DD", "", ACL.Category.WORKFLOW);
+            acl.create("Test ACL Workflow 1", new FxString("Test ACL Workflow 1"), Mandator.MANDATOR_FLEXIVE, "#BB00DD", "", ACLCategory.WORKFLOW);
         }
         try {
             CacheAdmin.getEnvironment().getACL("Article ACL");
         } catch (FxRuntimeException e) {
-            acl.create("Article ACL", new FxString("ACL for articles"), Mandator.MANDATOR_FLEXIVE, "#00CC00", "", ACL.Category.INSTANCE);
+            acl.create("Article ACL", new FxString("ACL for articles"), Mandator.MANDATOR_FLEXIVE, "#00CC00", "", ACLCategory.INSTANCE);
         }
     }
 

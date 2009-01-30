@@ -48,11 +48,8 @@ import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.search.query.QueryOperatorNode;
 import com.flexive.shared.search.query.SqlQueryBuilder;
-import com.flexive.shared.security.ACL;
-import static com.flexive.shared.security.ACL.Permission.*;
-import com.flexive.shared.security.ACLAssignment;
-import com.flexive.shared.security.Role;
-import com.flexive.shared.security.UserGroup;
+import static com.flexive.shared.security.ACLPermission.*;
+import com.flexive.shared.security.*;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxNoAccess;
 import com.flexive.shared.value.FxString;
@@ -102,22 +99,22 @@ public class ContentSecurityTest {
                 groups[i] = ug.load(ug.create("UG" + (i + 1), "#FFFFFF", mandator));
             typeACL = ae.load(ae.create("TYPE_" + RandomStringUtils.randomAlphanumeric(5), new FxString("Type ACL"),
                     mandator, "#FFFFFF", "Type ACL",
-                    ACL.Category.STRUCTURE));
+                    ACLCategory.STRUCTURE));
             instanceACL = ae.load(ae.create("INSTANCE_" + RandomStringUtils.randomAlphanumeric(5), new FxString("Instance ACL"),
                     mandator, "#FFFFFF", "Instance ACL",
-                    ACL.Category.INSTANCE));
+                    ACLCategory.INSTANCE));
             property1ACL = ae.load(ae.create("PROPERTY1_" + RandomStringUtils.randomAlphanumeric(5), new FxString("Property1 ACL"),
                     mandator, "#FFFFFF", "Property1 ACL",
-                    ACL.Category.STRUCTURE));
+                    ACLCategory.STRUCTURE));
             property2ACL = ae.load(ae.create("PROPERTY2_" + RandomStringUtils.randomAlphanumeric(5), new FxString("Property2 ACL"),
                     mandator, "#FFFFFF", "Property2 ACL",
-                    ACL.Category.STRUCTURE));
+                    ACLCategory.STRUCTURE));
             editACL = ae.load(ae.create("EDIT_" + RandomStringUtils.randomAlphanumeric(5), new FxString("Edit ACL"),
                     mandator, "#FFFFFF", "Edit ACL",
-                    ACL.Category.WORKFLOW));
+                    ACLCategory.WORKFLOW));
             liveACL = ae.load(ae.create("LIVE_" + RandomStringUtils.randomAlphanumeric(5), new FxString("Live ACL"),
                     mandator, "#FFFFFF", "Live ACL",
-                    ACL.Category.WORKFLOW));
+                    ACLCategory.WORKFLOW));
 
             WorkflowEdit wfEdit = WorkflowEdit.createNew("Security_Workflow_" + RandomStringUtils.randomAlphanumeric(5));
             wfEdit.getSteps().add(StepEdit.createNew(StepDefinition.EDIT_STEP_ID));

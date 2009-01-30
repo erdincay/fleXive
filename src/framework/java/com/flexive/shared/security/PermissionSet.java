@@ -31,7 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.security;
 
-import static com.flexive.shared.security.ACL.Permission;
+import com.flexive.shared.security.ACLPermission;
 
 import java.io.Serializable;
 
@@ -49,41 +49,41 @@ public final class PermissionSet implements Serializable {
     private final int permissions;
 
     public PermissionSet(boolean mayEdit, boolean mayRelate, boolean mayDelete, boolean mayExport, boolean mayCreate) {
-        int set = 1 << Permission.READ.ordinal();
-        set |= (mayEdit ? 1 : 0) << Permission.EDIT.ordinal();
-        set |= (mayRelate ? 1 : 0) << Permission.RELATE.ordinal();
-        set |= (mayDelete ? 1 : 0) << Permission.DELETE.ordinal();
-        set |= (mayExport ? 1 : 0) << Permission.EXPORT.ordinal();
-        set |= (mayCreate ? 1 : 0) << Permission.CREATE.ordinal();
+        int set = 1 << ACLPermission.READ.ordinal();
+        set |= (mayEdit ? 1 : 0) << ACLPermission.EDIT.ordinal();
+        set |= (mayRelate ? 1 : 0) << ACLPermission.RELATE.ordinal();
+        set |= (mayDelete ? 1 : 0) << ACLPermission.DELETE.ordinal();
+        set |= (mayExport ? 1 : 0) << ACLPermission.EXPORT.ordinal();
+        set |= (mayCreate ? 1 : 0) << ACLPermission.CREATE.ordinal();
         this.permissions = set;
     }
 
-    public boolean isPermitted(ACL.Permission permission) {
+    public boolean isPermitted(ACLPermission permission) {
         return (permissions & (1 << permission.ordinal())) > 0;
     }
 
     public boolean isMayRead() {
-        return isPermitted(Permission.READ);
+        return isPermitted(ACLPermission.READ);
     }
 
     public boolean isMayEdit() {
-        return isPermitted(Permission.EDIT);
+        return isPermitted(ACLPermission.EDIT);
     }
 
     public boolean isMayRelate() {
-        return isPermitted(Permission.RELATE);
+        return isPermitted(ACLPermission.RELATE);
     }
 
     public boolean isMayDelete() {
-        return isPermitted(Permission.DELETE);
+        return isPermitted(ACLPermission.DELETE);
     }
 
     public boolean isMayExport() {
-        return isPermitted(Permission.EXPORT);
+        return isPermitted(ACLPermission.EXPORT);
     }
 
     public boolean isMayCreate() {
-        return isPermitted(Permission.CREATE);
+        return isPermitted(ACLPermission.CREATE);
     }
 
     @Override
@@ -105,7 +105,7 @@ public final class PermissionSet implements Serializable {
     public String toString() {
         final StringBuilder out = new StringBuilder(50);
         out.append("permissions[");
-        for (Permission permission: Permission.values()) {
+        for (ACLPermission permission: ACLPermission.values()) {
             if (isPermitted(permission)) {
                 out.append(permission.name()).append(',');
             }

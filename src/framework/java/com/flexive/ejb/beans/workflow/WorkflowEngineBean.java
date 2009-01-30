@@ -37,6 +37,7 @@ import static com.flexive.core.DatabaseConst.TBL_WORKFLOW;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxSystemSequencer;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
@@ -68,7 +69,7 @@ import java.util.Map;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "WorkflowEngine")
+@Stateless(name = "WorkflowEngine", mappedName="WorkflowEngine")
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
@@ -383,7 +384,7 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
             // Create the new workflow instance
             sCurSql = "INSERT INTO " + TBL_WORKFLOW + " (ID,NAME,DESCRIPTION) VALUES (?,?,?)";
             stmt = con.prepareStatement(sCurSql);
-            id = seq.getId(SequencerEngine.System.WORKFLOW);
+            id = seq.getId(FxSystemSequencer.WORKFLOW);
             stmt.setLong(1, id);
             stmt.setString(2, workflow.getName());
             stmt.setString(3, StringUtils.defaultString(workflow.getDescription()));

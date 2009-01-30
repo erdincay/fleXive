@@ -37,6 +37,7 @@ import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
@@ -46,7 +47,6 @@ import org.apache.commons.lang.StringUtils;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.io.Serializable;
 
 /**
@@ -353,7 +353,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
         final String structureName = (String) name;
         if (this.type == null) {
             // root node, create type
-            final ACL acl = (ACL) FxSharedUtils.get(attributes, "acl", CacheAdmin.getEnvironment().getACL(ACL.Category.STRUCTURE.getDefaultId()));
+            final ACL acl = (ACL) FxSharedUtils.get(attributes, "acl", CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()));
             final FxString description = (FxString) FxSharedUtils.get(attributes, "description", new FxString(structureName));
             final String parentTypeName = (String) FxSharedUtils.get(attributes, "parentTypeName", null);
             final Boolean useInstancePermissions = (Boolean) FxSharedUtils.get(attributes, "useInstancePermissions", null);
@@ -391,7 +391,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
         final String elementName = (String) FxSharedUtils.get(attributes, "name", StringUtils.capitalize(structureName));
         final FxString description = (FxString) FxSharedUtils.get(attributes, "description", new FxString(elementName));
         final FxString hint = (FxString) FxSharedUtils.get(attributes, "hint", new FxString(""));
-        final ACL acl = (ACL) FxSharedUtils.get(attributes, "acl", CacheAdmin.getEnvironment().getACL(ACL.Category.STRUCTURE.getDefaultId()));
+        final ACL acl = (ACL) FxSharedUtils.get(attributes, "acl", CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()));
         final String assignment = (String) FxSharedUtils.get(attributes, "assignment", null);
         final String alias = (String) FxSharedUtils.get(attributes, "alias", elementName);
         final int defaultMultiplicity = (Integer) FxSharedUtils.get(attributes, "defaultMultiplicity", 1);

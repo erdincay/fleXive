@@ -37,6 +37,7 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
 import static com.flexive.tests.embedded.FxTestUtils.login;
@@ -76,7 +77,7 @@ public class UpdateTest extends StructureTestBase {
     }
 
     private void createStructure() throws FxApplicationException {
-        ACL structACL = CacheAdmin.getEnvironment().getACL(ACL.Category.STRUCTURE.getDefaultId());
+        ACL structACL = CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId());
         typeId = type.save(FxTypeEdit.createNew(TEST_TYPE, new FxString("Test type"),
                 structACL, null));
         createProperty(typeId, structACL, "P0", "/");

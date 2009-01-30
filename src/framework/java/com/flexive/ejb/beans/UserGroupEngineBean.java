@@ -56,7 +56,7 @@ import java.util.List;
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "UserGroupEngine")
+@Stateless(name = "UserGroupEngine", mappedName="UserGroupEngine")
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLocal {
     private static final Log LOG = LogFactory.getLog(UserGroupEngineBean.class);
@@ -233,7 +233,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             con = Database.getDbConnection();
 
             // Obtain a new id
-            long groupId = seq.getId(SequencerEngine.System.GROUP);
+            long groupId = seq.getId(FxSystemSequencer.GROUP);
 
             // Create the new group
             sql = "INSERT INTO " + TBL_GROUP + " " +
@@ -669,7 +669,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
                         "?,?," + m.getId() + ",TRUE,?,?,?,?,?,?)";
                 if (ps == null)
                     ps = con.prepareStatement(sql);
-                long gid = seq.getId(SequencerEngine.System.GROUP);
+                long gid = seq.getId(FxSystemSequencer.GROUP);
                 ps.setLong(1, gid);
                 ps.setLong(2, m.getId());
                 ps.setString(3, "Everyone (" + m.getName() + ")");

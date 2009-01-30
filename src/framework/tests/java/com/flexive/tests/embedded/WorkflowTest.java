@@ -39,6 +39,7 @@ import com.flexive.shared.interfaces.*;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserGroup;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.workflow.*;
 import static com.flexive.tests.embedded.FxTestUtils.*;
@@ -91,7 +92,7 @@ public class WorkflowTest {
         // create test ACL
         login(TestUsers.SUPERVISOR);
         myWorkflowACL = aclEngine.load(aclEngine.create("CACTUS_TEST_WORKFLOW", new FxString("Test workflow"), getUserTicket().getMandatorId(),
-                "#000000", "cactus test ACL (ignore)", ACL.Category.WORKFLOW));
+                "#000000", "cactus test ACL (ignore)", ACLCategory.WORKFLOW));
         aclEngine.assign(myWorkflowACL.getId(), UserGroup.GROUP_EVERYONE, true, true, true, true, true, true);
     }
 
@@ -606,8 +607,8 @@ public class WorkflowTest {
             stepDefinitions.addAll(Arrays.asList(definition1, definition2));
 
             // create a workflow and auto-create steps using intermediate IDs
-            final Step step1 = new Step(-10, definition1.getId(), ACL.Category.WORKFLOW.getDefaultId());
-            final Step step2 = new Step(-20, definition2.getId(), ACL.Category.WORKFLOW.getDefaultId());
+            final Step step1 = new Step(-10, definition1.getId(), ACLCategory.WORKFLOW.getDefaultId());
+            final Step step2 = new Step(-20, definition2.getId(), ACLCategory.WORKFLOW.getDefaultId());
 
             // create a route between step1 and step2
             final Route route = new Route(-1, UserGroup.GROUP_EVERYONE, -10, -20);
@@ -659,7 +660,7 @@ public class WorkflowTest {
      */
     private long createAcl() throws FxApplicationException {
         return aclEngine.create(ACL_NAME + ctr++, new FxString(ACL_LABEL), getUserTicket().getMandatorId(),
-                "#000000", "", ACL.Category.WORKFLOW);
+                "#000000", "", ACLCategory.WORKFLOW);
     }
 
     /**

@@ -42,11 +42,8 @@ import static com.flexive.shared.EJBLookup.getTypeEngine;
 import static com.flexive.shared.FxContext.getUserTicket;
 import com.flexive.shared.interfaces.ACLEngine;
 import com.flexive.shared.exceptions.*;
-import com.flexive.shared.security.ACL;
-import com.flexive.shared.security.UserTicket;
-import com.flexive.shared.security.ACLAssignment;
-import com.flexive.shared.security.UserGroup;
-import static com.flexive.shared.security.ACL.Permission;
+import com.flexive.shared.security.*;
+import com.flexive.shared.security.ACLPermission;
 import com.flexive.shared.value.FxString;
 import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
@@ -69,10 +66,10 @@ public class ACLEngineTest {
     public void createAclTest() throws FxApplicationException, FxLoginFailedException, FxAccountInUseException, FxLogoutFailedException {
         login(TestUsers.SUPERVISOR);
         final long aclId = getAclEngine().create("create-acl-test", new FxString("first label"), TestUsers.getTestMandator(),
-                "#000000", "", ACL.Category.INSTANCE);
+                "#000000", "", ACLCategory.INSTANCE);
         try {
                 getAclEngine().create("create-acl-test", new FxString("first label"), TestUsers.getTestMandator(),
-                "#000000", "", ACL.Category.INSTANCE);
+                "#000000", "", ACLCategory.INSTANCE);
                 assert false:"ACL's must have unique names";
             }
             catch (Exception e) {
@@ -91,7 +88,7 @@ public class ACLEngineTest {
 
             getAclEngine().update(aclId, "new-acl-test", new FxString("test"), null, "new description",
                     Arrays.asList(new ACLAssignment(aclId, groupId, true, true, true, false, false, false,
-                            ACL.Category.INSTANCE, null)));
+                            ACLCategory.INSTANCE, null)));
             final ACL updatedAcl = CacheAdmin.getFilteredEnvironment().getACL(aclId);
             assertEquals(updatedAcl.getName(), "new-acl-test");
             assertEquals(updatedAcl.getDescription(), "new description");
@@ -108,12 +105,12 @@ public class ACLEngineTest {
         login(TestUsers.SUPERVISOR);
         final ACLEngine aclEngine = getAclEngine();
         final long aclId = aclEngine.create("create-acl-test", new FxString("first label"), TestUsers.getTestMandator(),
-                "#000000", "", ACL.Category.INSTANCE);
+                "#000000", "", ACLCategory.INSTANCE);
         try {
             final UserTicket ticket = getUserTicket();
             assert ticket.getGroups().length > 0;
             for (long group: ticket.getGroups()) {
-                aclEngine.assign(aclId, group, Permission.EDIT, Permission.CREATE);
+                aclEngine.assign(aclId, group, ACLPermission.EDIT, ACLPermission.CREATE);
             }
             final List<ACLAssignment> assignments = aclEngine.loadAssignments(aclId);
             for (long group: ticket.getGroups()) {
@@ -157,8 +154,8 @@ public class ACLEngineTest {
         try {
             FxContext.get().runAsSystem();
             aclId = getAclEngine().create("acl-fx349", new FxString("label"), TestUsers.getTestMandator(),
-                    "#000000", "", ACL.Category.STRUCTURE);
-            getAclEngine().assign(aclId, UserGroup.GROUP_EVERYONE, Permission.READ);
+                    "#000000", "", ACLCategory.STRUCTURE);
+            getAclEngine().assign(aclId, UserGroup.GROUP_EVERYONE, ACLPermission.READ);
             typeId = getTypeEngine().save(FxTypeEdit.createNew("fx349")
                     .setUseTypePermissions(true)
                     .setUseInstancePermissions(false)
@@ -178,7 +175,7 @@ public class ACLEngineTest {
             // remove create perm
             try {
                 FxContext.get().runAsSystem();
-                getAclEngine().assign(aclId, UserGroup.GROUP_EVERYONE, Permission.READ, Permission.CREATE);
+                getAclEngine().assign(aclId, UserGroup.GROUP_EVERYONE, ACLPermission.READ, ACLPermission.CREATE);
             } finally {
                 FxContext.get().stopRunAsSystem();
             }

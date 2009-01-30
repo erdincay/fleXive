@@ -33,6 +33,7 @@ package com.flexive.ejb.beans;
 
 import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.CustomSequencer;
+import com.flexive.shared.FxSystemSequencer;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.interfaces.SequencerEngine;
@@ -50,7 +51,7 @@ import java.util.List;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "SequencerEngine")
+@Stateless(name = "SequencerEngine", mappedName="SequencerEngine")
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class SequencerEngineBean implements SequencerEngine, SequencerEngineLocal {
     @Resource
@@ -68,7 +69,7 @@ public class SequencerEngineBean implements SequencerEngine, SequencerEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public long getId(final System type) throws FxApplicationException {
+    public long getId(final FxSystemSequencer type) throws FxApplicationException {
         try {
             return StorageManager.getSequencerStorage().getId(type);
         } catch (FxApplicationException e) {

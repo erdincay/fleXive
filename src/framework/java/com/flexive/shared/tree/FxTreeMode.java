@@ -31,7 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.tree;
 
-import com.flexive.shared.interfaces.SequencerEngine;
+import com.flexive.shared.FxSystemSequencer;
 
 import java.io.Serializable;
 
@@ -41,8 +41,8 @@ import java.io.Serializable;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public enum FxTreeMode implements Serializable {
-    Live(SequencerEngine.System.TREE_LIVE),
-    Edit(SequencerEngine.System.TREE_EDIT);
+    Live(FxSystemSequencer.TREE_LIVE),
+    Edit(FxSystemSequencer.TREE_EDIT);
 
     /**
      * All available modes
@@ -52,14 +52,14 @@ public enum FxTreeMode implements Serializable {
     /**
      * sequencer to use
      */
-    private SequencerEngine.System sequencer;
+    private FxSystemSequencer sequencer;
 
     /**
      * Ctor
      *
      * @param sequencer the sequencer to use
      */
-    FxTreeMode(SequencerEngine.System sequencer) {
+    FxTreeMode(FxSystemSequencer sequencer) {
         this.sequencer = sequencer;
     }
 
@@ -68,7 +68,7 @@ public enum FxTreeMode implements Serializable {
      *
      * @return sequencer type
      */
-    public SequencerEngine.System getSequencer() {
+    public FxSystemSequencer getSequencer() {
         return sequencer;
     }
 

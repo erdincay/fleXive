@@ -39,6 +39,7 @@ import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.workflow.Route;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
@@ -172,7 +173,7 @@ public final class FxFilteredEnvironment implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
-    public List<ACL> getACLs(ACL.Category category) {
+    public List<ACL> getACLs(ACLCategory category) {
         return environment.getACLs(category);
     }
 
@@ -193,7 +194,7 @@ public final class FxFilteredEnvironment implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
-    public List<ACL> getACLs(long mandatorId, ACL.Category category, boolean includeForeignAccessible) {
+    public List<ACL> getACLs(long mandatorId, ACLCategory category, boolean includeForeignAccessible) {
         final UserTicket ticket = FxContext.getUserTicket();
         if (!ticket.isGlobalSupervisor() && mandatorId != ticket.getMandatorId()) {
             throw new FxNoAccessException("ex.acl.loadAllFailed.foreignMandator").asRuntimeException();
@@ -204,7 +205,7 @@ public final class FxFilteredEnvironment implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
-    public ACL getDefaultACL(ACL.Category category) {
+    public ACL getDefaultACL(ACLCategory category) {
         return environment.getDefaultACL(category);
     }
 

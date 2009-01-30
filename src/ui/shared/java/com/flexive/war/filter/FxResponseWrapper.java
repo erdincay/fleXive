@@ -202,7 +202,7 @@ public class FxResponseWrapper extends HttpServletResponseWrapper {
 
     @Override
     public void setContentType(String s) {
-        if (s.equals("text/plain") && contentType != null) {
+        if (s != null && s.equals("text/plain") && contentType != null) {
             return;
         }
         super.setContentType(s);

@@ -36,18 +36,14 @@ import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.security.UserTicketImpl;
 import com.flexive.core.structure.FxEnvironmentImpl;
 import com.flexive.core.structure.StructureLoader;
-import com.flexive.shared.CacheAdmin;
 import static com.flexive.shared.EJBLookup.getDivisionConfigurationEngine;
-import com.flexive.shared.FxContext;
-import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.FxDropApplication;
+import com.flexive.shared.*;
 import com.flexive.shared.configuration.Parameter;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.ScriptingEngine;
 import com.flexive.shared.interfaces.ScriptingEngineLocal;
-import com.flexive.shared.interfaces.SequencerEngine;
 import com.flexive.shared.interfaces.SequencerEngineLocal;
 import com.flexive.shared.scripting.*;
 import com.flexive.shared.security.Role;
@@ -84,7 +80,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "ScriptingEngine")
+@Stateless(name = "ScriptingEngine", mappedName="ScriptingEngine")
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLocal {
 
@@ -379,7 +375,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         String sql;
         boolean success = false;
         try {
-            si = new FxScriptInfo(seq.getId(SequencerEngine.System.SCRIPTS), event, name, description, code, true);
+            si = new FxScriptInfo(seq.getId(FxSystemSequencer.SCRIPTS), event, name, description, code, true);
             if (code == null)
                 code = "";
             // Obtain a database connection

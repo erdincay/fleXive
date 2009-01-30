@@ -458,7 +458,7 @@ public class AccountBean {
         try {
             ensureAccountIdSet();
             this.account = new AccountEditBean(accountInterface.load(this.accountIdFilter));
-            this.roles = accountInterface.getRoles(this.accountIdFilter, AccountEngine.RoleLoadMode.FROM_USER_ONLY);
+            this.roles = accountInterface.getRoles(this.accountIdFilter, RoleLoadMode.FROM_USER_ONLY);
             this.groups = accountInterface.getGroups(this.accountIdFilter);
             return "accountEdit";
         } catch (Throwable t) {
@@ -476,7 +476,7 @@ public class AccountBean {
         try {
             this.account = new AccountEditBean(accountInterface.load(FxContext.getUserTicket().getUserId()));
             setAccountIdFilter(this.account.getId());
-            this.roles = accountInterface.getRoles(this.accountIdFilter, AccountEngine.RoleLoadMode.ALL);
+            this.roles = accountInterface.getRoles(this.accountIdFilter, RoleLoadMode.ALL);
             this.groups = accountInterface.getGroups(this.accountIdFilter);
             this.contactData = null;
             this.contactData = EJBLookup.getContentEngine().load(this.account.getContactData());

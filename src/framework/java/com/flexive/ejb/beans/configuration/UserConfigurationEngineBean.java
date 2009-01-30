@@ -53,7 +53,7 @@ import java.sql.SQLException;
 
 @TransactionManagement(TransactionManagementType.CONTAINER)
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
-@Stateless(name = "UserConfigurationEngine")
+@Stateless(name = "UserConfigurationEngine", mappedName="UserConfigurationEngine")
 public class UserConfigurationEngineBean extends GenericConfigurationImpl implements UserConfigurationEngine, UserConfigurationEngineLocal {
     /**
      * User config cache root. Be sure to set timeout for this cache

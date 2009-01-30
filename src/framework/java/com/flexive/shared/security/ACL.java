@@ -32,7 +32,6 @@
 package com.flexive.shared.security;
 
 import com.flexive.shared.*;
-import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.value.FxString;
 
 import java.io.Serializable;
@@ -58,99 +57,12 @@ public class ACL extends AbstractSelectableObjectWithName implements Serializabl
     private String color;
     private long id;
     private long mandatorId;
-    private Category category;
+    private ACLCategory category;
     private String description;
     private String name;
     private FxString label;
     private String mandator;
     private LifeCycleInfo lifeCycleInfo = null;
-
-    /**
-     * ACL categories and their defaults
-     */
-    public enum Category implements ObjectWithLabel {
-        INSTANCE(1, 2),
-        STRUCTURE(2, 7),
-        WORKFLOW(3, 3),
-        BRIEFCASE(4, 4),
-        SELECTLIST(5, 5),
-        SELECTLISTITEM(6, 6);
-
-        private int id;
-        private long defaultId;
-
-        Category(int id, long defaultId) {
-            this.id = id;
-            this.defaultId = defaultId;
-        }
-
-        /**
-         * Getter for the internal id
-         *
-         * @return internal id
-         */
-        public int getId() {
-            return id;
-        }
-
-        /**
-         * Get the Id of the default ACL for given category
-         *
-         * @return Id of the default ACL for given category
-         */
-        public long getDefaultId() {
-            return defaultId;
-        }
-
-        /**
-         * Get a TypeMode by its id
-         *
-         * @param id the id
-         * @return TypeMode the type
-         */
-        public static Category getById(int id) {
-            for (Category cat : Category.values())
-                if (cat.id == id)
-                    return cat;
-            throw new FxNotFoundException("ex.acl.category.notFound.id", id).asRuntimeException();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public FxString getLabel() {
-            return FxSharedUtils.getEnumLabel(this);
-        }
-    }
-
-    /**
-     * ACL permissions
-     */
-    public enum Permission implements ObjectWithLabel {
-        CREATE, READ, EDIT, DELETE, RELATE, EXPORT,
-        NOT_CREATE, NOT_READ, NOT_EDIT, NOT_DELETE, NOT_RELATE, NOT_EXPORT;
-
-        /**
-         * Check if <code>check</code> is contained in perms
-         *
-         * @param check Perm to check
-         * @param perms array of Perm's
-         * @return if <code>check</code> is contained in perms
-         */
-        public static boolean contains(Permission check, Permission... perms) {
-            for (Permission perm : perms)
-                if (perm == check)
-                    return true;
-            return false;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public FxString getLabel() {
-            return FxSharedUtils.getEnumLabel(this);
-        }
-    }
 
     /**
      * Constructor
@@ -190,7 +102,7 @@ public class ACL extends AbstractSelectableObjectWithName implements Serializabl
      * @param lifeCycleInfo lifecycle information
      */
     public ACL(long id, String name, FxString label, long mandatorId, String mandator, String description,
-               String color, Category category, LifeCycleInfo lifeCycleInfo) {
+               String color, ACLCategory category, LifeCycleInfo lifeCycleInfo) {
         this.color = color;
         this.id = id;
         this.mandatorId = mandatorId;
@@ -245,7 +157,7 @@ public class ACL extends AbstractSelectableObjectWithName implements Serializabl
      *
      * @return the category of the ACL
      */
-    public Category getCategory() {
+    public ACLCategory getCategory() {
         return this.category;
     }
 
@@ -317,7 +229,7 @@ public class ACL extends AbstractSelectableObjectWithName implements Serializabl
      *
      * @param cat the category of the ACL
      */
-    public void setCategory(Category cat) {
+    public void setCategory(ACLCategory cat) {
         this.category = cat;
     }
 
