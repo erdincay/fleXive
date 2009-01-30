@@ -110,7 +110,6 @@ public class MandatorTest {
      *
      * @throws Exception if an error occured
      */
-    @Test
     public void currentMandatorActive() throws Exception {
         Mandator mandator = CacheAdmin.getEnvironment().getMandator(getUserTicket().getMandatorId());
         assert mandator.isActive() : "Current mandator is inactive.";
@@ -121,7 +120,6 @@ public class MandatorTest {
      *
      * @throws Exception if an error occured
      */
-    @Test
     public void createRemoveMandator() throws Exception {
         int mandatorId = me.create("TestMandator", false);
         Mandator test = null;
@@ -343,7 +341,6 @@ public class MandatorTest {
         ce.remove(pk);
     }
 
-    @Test(dependsOnMethods = {"createRemoveMandator"})
     /**
      * Tests the MandatorEngine#changeName(long id, String name) method
      * @throws FxApplicationException on errors
@@ -364,7 +361,6 @@ public class MandatorTest {
         me.remove(mandatorId);
     }
 
-    @Test(dependsOnMethods = {"createRemoveMandator"})
     /**
      * This method tests both the MandatorEngine#assignMetaData(int mandatorId, long contentId)
      * as well as the #removeMetaData(int mandatorId) methods.
