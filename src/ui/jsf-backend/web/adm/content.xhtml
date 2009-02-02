@@ -66,13 +66,14 @@
         <h:form>
             <adm:toolbarPluginButtons/>
         </h:form>
+        <adm:tab id="tab1" active="true" label="#{fxMessageBean['Welcome.welcome']}"/>
 
     <!--
         Access the environment to keep the loading message until the environment has been initialized
         after the first login:
         #{fxSystemBean.environment}
     -->
-        #{fxMessageBean['Welcome.welcome']} #{fxSystemBean.buildInfoVerbose}<br/>
+        #{fxSystemBean.buildInfoVerbose}<br/>
 
         <ui:fragment rendered="#{fxSystemBean.failedLoginAttempts > 0}">
             <div class="errorMessage">
@@ -283,18 +284,17 @@
                         },
                         500
                 );
-                
+
             //-->
             </script>
         </ui:fragment>
-            
+
         </a4j:outputPanel>
 
         <script type="text/javascript">
         <!--
             if (parent && parent.pageLoaded) {
                 parent.pageLoaded(#{fxSystemBean.pageId}, #{fxSystemBean.pageRenderTime}, #{fxSystemBean.treeModified});
-
             }
         -->
         </script>

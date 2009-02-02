@@ -97,7 +97,7 @@ function init() {
     fxToolbar =document.getElementById("fxToolbar");
     lockFrame = document.getElementById("lockFrame");
     windowResize();
-    renderTabs();
+    //renderTabs(); // disabled because of FX-444 (IE8)
 
     gotoNavMenu(0);
     if( loadingDiv )
@@ -517,9 +517,9 @@ function renderTabs() {
     }
     var tabCount = tabTitels.length;
     var height = (tabCount==0)?"19":"18";
-    var html =
-            '<table cellpadding="0" cellspacing="0" id="contentHeaderTabTbl">\n'+
-            ' <tr>\n';
+    var out = [];
+    out.push('<table cellpadding="0" cellspacing="0" id="contentHeaderTabTbl">\n'+
+            ' <tr>\n');
 
     for (var pos=0;pos<tabCount;pos++) {
         var tabDiv = _caller.document.getElementById(tabId[pos]+"_content");
@@ -529,19 +529,18 @@ function renderTabs() {
         var act = tabActive[pos]?"Active":"";
         var prefix = (pos==0)?"First":"";
         var onClick = (tabActive[pos] || tabUri[pos]==null || tabUri.length=='')?"":" onClick=\""+tabUri[pos]+"\" ";
-        html+=
+        out.push(
         '  <td><img src="adm/images/layout/tabs/TabLinks'+prefix+act+'.gif" alt="tabImg" /></td>\n'+
         '  <td '+onClick+' class="tabText'+act+'">'+tabTitels[pos]+'</td>\n'+
-        '  <td><img src="adm/images/layout/tabs/TabRechts'+act+'.gif" alt="tabImg" /></td>\n';
+        '  <td><img src="adm/images/layout/tabs/TabRechts'+act+'.gif" alt="tabImg" /></td>\n');
     }
-
-    html+=
+    out.push(
     '  <td width="100%" align="right">\n'+
     '    <div id="renderTime" style="height:'+height+'px;border-bottom:1px solid #bdbdbd">&nbsp;</div>\n'+
     '  </td>\n'+
     ' </tr>\n'+
-    '</table>\n';
-    contentHeader.innerHTML=html;
+    '</table>\n');
+    contentHeader.innerHTML=out.join("");
 }
 
 
