@@ -803,9 +803,9 @@ public class SelectBean implements Serializable {
     }
 
     /**
-     * Return the enum ACL.CATEGORY as SelectList
+     * Return the enum ACLCategory as SelectList
      *
-     * @return the enum ACL.CATEGORY as SelectList
+     * @return the enum ACLCategory as SelectList
      */
     public List<SelectItem> getACLCategories() {
         if (aclCategories == null)

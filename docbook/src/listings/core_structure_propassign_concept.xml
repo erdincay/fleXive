@@ -10,7 +10,7 @@ import com.flexive.shared.*
 import com.flexive.shared.structure.*
 
 new GroovyTypeBuilder().person(description: new FxString("Person"),                     <co xml:id="cst_propassign_conc_1"/>
-        acl: CacheAdmin.environment.getACL(ACL.Category.STRUCTURE.defaultId),
+        acl: CacheAdmin.environment.getACL(ACLCategory.STRUCTURE.defaultId),
         multilang: true) {
 }
 // we "reload" the "Person" type to show the means of adding properties using the
@@ -24,7 +24,7 @@ builder {
 }
 
 new GroovyTypeBuilder().anotherperson(description: new FxString("Anotherperson"),       <co xml:id="cst_propassign_conc_5"/>
-        acl: CacheAdmin.environment.getACL(ACL.Category.STRUCTURE.defaultId),
+        acl: CacheAdmin.environment.getACL(ACLCategory.STRUCTURE.defaultId),
         multilang: true) {
             anotherfirstname(assignment: "PERSON/FIRSTNAME",                            <co xml:id="cst_propassign_conc_6"/>
             description: new FxString(FxLanguage.ENGLISH, "Another's first name"))      <co xml:id="cst_propassign_conc_7"/>

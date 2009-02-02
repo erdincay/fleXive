@@ -42,12 +42,12 @@
 
 import com.flexive.shared.*
 import com.flexive.shared.structure.*
-import com.flexive.shared.security.ACL
+import com.flexive.shared.security.*
 import com.flexive.shared.value.FxString
 
 def cl = Thread.currentThread().getContextClassLoader()
 def final environment = CacheAdmin.getEnvironment()
-def final ACL itemAcl = environment.getACL(ACL.Category.SELECTLISTITEM.getDefaultId())
+def final ACL itemAcl = environment.getACL(ACLCategory.SELECTLISTITEM.getDefaultId())
 final translations = [:]
 
 ["de", "en"].each { languageIso ->

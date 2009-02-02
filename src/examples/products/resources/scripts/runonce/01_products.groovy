@@ -14,7 +14,7 @@ import com.flexive.shared.value.FxReference
 import com.flexive.shared.value.ReferencedContent
 import com.flexive.shared.structure.UniqueMode
 import com.flexive.shared.structure.FxSelectListEdit
-import com.flexive.shared.security.ACL
+import com.flexive.shared.security.*
 import com.flexive.shared.structure.FxSelectListItemEdit
 import com.flexive.shared.value.FxBinary
 import com.flexive.shared.value.BinaryDescriptor
@@ -25,7 +25,7 @@ import com.flexive.shared.scripting.FxScriptEvent
 import com.flexive.shared.scripting.FxScriptInfo
 
 // create colors select list
-final ACL itemAcl = environment.getACL(ACL.Category.SELECTLISTITEM.getDefaultId())
+final ACL itemAcl = environment.getACL(ACLCategory.SELECTLISTITEM.getDefaultId())
 final FxSelectListEdit colorsEdit = FxSelectListEdit.createNew("ARTICLE_COLORS",
         new FxString(true, FxLanguage.ENGLISH, "Article Colors").setTranslation(FxLanguage.GERMAN, "Farben f\u00FCr Artikel"),
         new FxString(true, FxLanguage.ENGLISH, "Article Colors").setTranslation(FxLanguage.GERMAN, "Farben f\u00FCr Artikel"),

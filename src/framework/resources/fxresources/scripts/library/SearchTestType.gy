@@ -35,7 +35,7 @@ import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
 import com.flexive.shared.structure.FxDataType
 import com.flexive.shared.structure.FxMultiplicity
 import com.flexive.shared.value.FxString
-import com.flexive.shared.security.ACL
+import com.flexive.shared.security.*
 import com.flexive.shared.exceptions.FxRuntimeException
 import com.flexive.shared.structure.FxSelectListEdit
 import com.flexive.shared.structure.FxSelectListItemEdit
@@ -55,8 +55,8 @@ try {
 }
 
 // create SelectLists
-ACL aclList = CacheAdmin.getEnvironment().getDefaultACL(ACL.Category.SELECTLIST);
-ACL aclItem = CacheAdmin.getEnvironment().getDefaultACL(ACL.Category.SELECTLISTITEM);
+ACL aclList = CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.SELECTLIST);
+ACL aclItem = CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.SELECTLISTITEM);
 FxSelectListEdit searchTestList = FxSelectListEdit.createNew("SearchTest SelectList", new FxString("SearchTest SelectList"), new FxString("SelectList used for search testcases"),
         false, aclList, aclItem);
 10.times {i ->
@@ -64,9 +64,9 @@ FxSelectListEdit searchTestList = FxSelectListEdit.createNew("SearchTest SelectL
 }
 EJBLookup.getSelectListEngine().save(searchTestList);
 
-final ACL defaultInstanceACL = CacheAdmin.getEnvironment().getDefaultACL(ACL.Category.STRUCTURE)
+final ACL defaultInstanceACL = CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.STRUCTURE)
 final long instanceAclId = EJBLookup.aclEngine.create("Test type ACL", new FxString(FxLanguage.ENGLISH, "Test type ACL"),
-        defaultInstanceACL.mandatorId, "#000000", "ACL for type SearchTest", ACL.Category.STRUCTURE);
+        defaultInstanceACL.mandatorId, "#000000", "ACL for type SearchTest", ACLCategory.STRUCTURE);
 final ACL instanceACL = CacheAdmin.environment.getACL(instanceAclId);
 
 new GroovyTypeBuilder().SearchTest(acl: instanceACL, useTypePermissions: true, useStepPermissions: true,

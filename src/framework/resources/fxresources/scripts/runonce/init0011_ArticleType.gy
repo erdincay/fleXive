@@ -1,18 +1,12 @@
-import com.flexive.shared.CacheAdmin
-import com.flexive.shared.EJBLookup
-import com.flexive.shared.FxLanguage
+import com.flexive.shared.*
 import com.flexive.shared.configuration.SystemParameters
 import com.flexive.shared.exceptions.FxRuntimeException
 import com.flexive.shared.interfaces.*
-import com.flexive.shared.search.ResultColumnInfo
-import com.flexive.shared.search.ResultOrderByInfo
-import com.flexive.shared.search.ResultPreferences
-import com.flexive.shared.security.ACL
+import com.flexive.shared.search.*
+import com.flexive.shared.security.*
 import com.flexive.shared.structure.*
 import com.flexive.shared.value.FxString
-import com.flexive.shared.search.SortDirection
-import com.flexive.shared.search.ResultViewType
-import com.flexive.shared.search.AdminResultLocations
+import com.flexive.shared.search.*
 
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
@@ -75,24 +69,24 @@ try {
 //try {
 //    CacheAdmin.getEnvironment().getACL(TYPE_ACL);
 //} catch (FxRuntimeException e) {
-//    long typeACL = acl.create(TYPE_ACL, new FxString("ACL for the Article Type"), Mandator.MANDATOR_FLEXIVE, "#00CCDD", "", ACL.Category.STRUCTURE);
+//    long typeACL = acl.create(TYPE_ACL, new FxString("ACL for the Article Type"), Mandator.MANDATOR_FLEXIVE, "#00CCDD", "", ACLCategory.STRUCTURE);
 //    acl.assign(typeACL, UserGroup.GROUP_EVERYONE, true, true, true, true, true, true)
 //}
 //try {
 //    CacheAdmin.getEnvironment().getACL(CONTENT_ACL);
 //} catch (FxRuntimeException e) {
-//    long coACL = acl.create(CONTENT_ACL, new FxString("ACL for contents of the Article Type"), Mandator.MANDATOR_FLEXIVE, "#00CCDD", "", ACL.Category.INSTANCE);
+//    long coACL = acl.create(CONTENT_ACL, new FxString("ACL for contents of the Article Type"), Mandator.MANDATOR_FLEXIVE, "#00CCDD", "", ACLCategory.INSTANCE);
 //    acl.assign(coACL, UserGroup.GROUP_EVERYONE, true, true, true, true, true, true)
 //}
 //try {
 //    CacheAdmin.getEnvironment().getACL(WF_ACL);
 //} catch (FxRuntimeException e) {
-//    long wfACL = acl.create(WF_ACL, new FxString("ACL for the workflow of the Article Type"), Mandator.MANDATOR_FLEXIVE, "#00CCDD", "", ACL.Category.WORKFLOW);
+//    long wfACL = acl.create(WF_ACL, new FxString("ACL for the workflow of the Article Type"), Mandator.MANDATOR_FLEXIVE, "#00CCDD", "", ACLCategory.WORKFLOW);
 //    acl.assign(wfACL, UserGroup.GROUP_EVERYONE, true, true, true, true, true, true)
 //}
 
 //def ACL typeACL = CacheAdmin.getEnvironment().getACL(TYPE_ACL);
-def ACL typeACL = CacheAdmin.getEnvironment().getACL(ACL.Category.STRUCTURE.defaultId)
+def ACL typeACL = CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.defaultId)
 def long typeId = type.save(FxTypeEdit.createNew(ARTICLE_TYPE, new FxString(FxLanguage.ENGLISH, "Article").setTranslation(FxLanguage.GERMAN, "Artikel"), typeACL, null));
 
 ass.save(FxPropertyAssignmentEdit.createNew(CacheAdmin.getEnvironment().getAssignment((Long) EJBLookup.configurationEngine.get(SystemParameters.TREE_CAPTION_ROOTASSIGNMENT)),

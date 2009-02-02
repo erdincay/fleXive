@@ -38,7 +38,7 @@ import com.flexive.shared.FxLanguage
 import com.flexive.shared.configuration.SystemParameters
 import com.flexive.shared.scripting.FxScriptInfo
 import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
-import com.flexive.shared.security.ACL
+import com.flexive.shared.security.*
 import com.flexive.shared.structure.*
 import com.flexive.shared.value.FxString
 import com.flexive.shared.scripting.FxScriptEvent
@@ -49,7 +49,7 @@ def label(labelEn, labelDe) {
 }
 
 def long typeId = EJBLookup.getTypeEngine().save(FxTypeEdit.createNew(FxType.CONTACTDATA, new FxString(FxLanguage.ENGLISH, "Contact Data").setTranslation(FxLanguage.GERMAN, "Kontaktdaten"),
-        CacheAdmin.getEnvironment().getACL(ACL.Category.STRUCTURE.defaultId), null))
+        CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.defaultId), null))
 def builder = new GroovyTypeBuilder(typeId)
 builder {
     fqn(assignment: CacheAdmin.getEnvironment().getAssignment((Long) EJBLookup.configurationEngine.get(SystemParameters.TREE_FQN_ROOTASSIGNMENT)).getXPath())

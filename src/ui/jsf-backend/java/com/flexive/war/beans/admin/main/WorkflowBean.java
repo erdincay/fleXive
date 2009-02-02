@@ -105,7 +105,7 @@ public class WorkflowBean {
               ACL myWorkflowACL = EJBLookup.getAclInterface().load(EJBLookup.getAclInterface()
                   .create("CACTUS_TEST_WORKFLOW", new FxString("Test workflow"),
                   FxContext.get().getUserTicket().getMandatorId(),
-                      "#000000", "cactus test ACL (ignore)", ACL.CATEGORY.WORKFLOW));
+                      "#000000", "cactus test ACL (ignore)", ACLCategory.WORKFLOW));
               EJBLookup.getAclInterface().assign(myWorkflowACL.getId(), Group.GROUP_EVERYONE,
                       true, true, true, true, true, true);
               WorkflowEdit editWorkflow = new WorkflowEdit(CacheAdmin.getEnvironment().getWorkflow(workflowId));

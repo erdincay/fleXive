@@ -9,7 +9,7 @@
         import com.flexive.shared.structure.*
 
 <co xml:id="cst_newgroup_groovy_1"/>      new GroovyTypeBuilder().person(description: new FxString("Person"),
-<co xml:id="cst_newgroup_groovy_2"/>                acl: CacheAdmin.environment.getACL(ACL.Category.STRUCTURE.defaultId),
+<co xml:id="cst_newgroup_groovy_2"/>                acl: CacheAdmin.environment.getACL(ACLCategory.STRUCTURE.defaultId),
 <co xml:id="cst_newgroup_groovy_3"/>                multilang: true) {
 <co xml:id="cst_newgroup_groovy_4"/>                    firstname(dataType: FxDataType.String1024,
                         multilang: false,

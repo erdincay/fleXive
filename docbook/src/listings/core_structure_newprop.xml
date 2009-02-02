@@ -4,7 +4,7 @@
         %global_entities;
         ]>
 <programlisting language="java" xml:id="core_structure_newprop"  xmlns="http://docbook.org/ns/docbook"><co xml:id="cst_newprop_1"/>        AssignmentEngine assignmentEngine = EJBLookup.getAssignmentEngine();
-<co xml:id="cst_newprop_2"/>        ACL customerACL = CacheAdmin.getEnvironment().getACL(ACL.Category.STRUCTURE.getDefaultId());
+<co xml:id="cst_newprop_2"/>        ACL customerACL = CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId());
 
 <co xml:id="cst_newprop_3"/>        FxPropertyEdit name = FxPropertyEdit.createNew("Name",
 <co xml:id="cst_newprop_4"/>                        new FxString("Name of the person"),

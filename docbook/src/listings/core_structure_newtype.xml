@@ -7,7 +7,7 @@
 
 <co xml:id="cst_newtype_2"/>        FxString typeDesc = new FxString("A generic customer");
 <co xml:id="cst_newtype_3"/>        typeDesc.setTranslation(FxLanguage.GERMAN, "Ein generischer Kunde");
-<co xml:id="cst_newtype_4"/>        ACL customerACL = CacheAdmin.getEnvironment().getACL(ACL.Category.STRUCTURE.getDefaultId());
+<co xml:id="cst_newtype_4"/>        ACL customerACL = CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId());
 
 <co xml:id="cst_newtype_5"/>        FxTypeEdit type = FxTypeEdit.createNew("Customer", typeDesc, customerACL);
 

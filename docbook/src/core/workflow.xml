@@ -148,8 +148,8 @@ definition2.setId(EJBLookup.getWorkflowStepDefinitionEngine().create(definition2
                 from the database) and perform some validity checks.
             </para>
             <programlisting language="java"><![CDATA[// create a workflow and auto-create steps using intermediate IDs
-final Step step1 = new Step(-10, definition1.getId(), ACL.Category.WORKFLOW.getDefaultId());
-final Step step2 = new Step(-20, definition2.getId(), ACL.Category.WORKFLOW.getDefaultId());
+final Step step1 = new Step(-10, definition1.getId(), ACLCategory.WORKFLOW.getDefaultId());
+final Step step2 = new Step(-20, definition2.getId(), ACLCategory.WORKFLOW.getDefaultId());
 
 // create a route between step1 and step2
 final Route route = new Route(-1, UserGroup.GROUP_EVERYONE, -10, -20);

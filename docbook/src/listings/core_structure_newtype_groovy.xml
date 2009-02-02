@@ -10,7 +10,7 @@ import com.flexive.shared.*
 
 def typeDesc = new FxString("A generic customer")
 typeDesc.setTranslation(FxLanguage.GERMAN, "Ein generischer Kunde")
-new GroovyTypeBuilder().customer(description: typeDesc, acl: CacheAdmin.environment.getACL(ACL.Category.STRUCTURE.defaultId)) {
+new GroovyTypeBuilder().customer(description: typeDesc, acl: CacheAdmin.environment.getACL(ACLCategory.STRUCTURE.defaultId)) {
 }
 def type = CacheAdmin.environment.getType("Customer")
 return type.name
