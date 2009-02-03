@@ -198,3 +198,24 @@ function getPreElementContent(elementName) {
     } else
         return document.getElementById(elementName).innerText;
 }
+
+// evaluates command when the 'enter' key was pressed
+function onReturnEval(event, expression) {
+    var keycode;
+    if (event && event.keyCode) {
+        keycode = event.keyCode;
+    } else if (window.event) {
+        keycode = window.event.keyCode;
+    } else if (event) {
+        keycode = event.which;
+    } else {
+        alert("onReturnEval: no event object found.");
+        return true;
+    }
+    if (keycode != 13) {
+        return true;
+    }
+    eval(expression);
+    return false;   // don't "execute" the enter key
+}
+

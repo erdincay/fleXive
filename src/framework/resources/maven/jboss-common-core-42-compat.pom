@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.flexive</groupId>
     <artifactId>jboss-common-core-42-compat</artifactId>
-    <version>3.1-SNAPSHOT</version>
+    <version>@FLEXIVE_VERSION@</version>
     <description>JBoss core classes needed for compatibility with JBoss up to 4.2.
         Since we use a newer cache implementation than JBoss 4.2, but do not want to replace
         the application server's core implementation classes, we provide the missing classes

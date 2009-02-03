@@ -11,13 +11,20 @@
     <link rel="shortcut icon" href="#{fxSystemBean.contextPath}/pub/images/favicon.ico" type="image/vnd.microsoft.icon" />
     <title>#{fxSystemBean.header}</title>
     <link rel="stylesheet" type="text/css" href="#{fxSystemBean.contextPath}/pub/css/login.css" />
+    <script type="text/javascript" src="js/shared.js"> </script>
     <script language='JavaScript' type='text/javascript'>
-         if (this.parent.frames[1]) {
-            this.parent.location.href=this.location.href;
+        if (this.parent.frames[1]) {
+            this.parent.location.href = this.location.href;
+        }
+
+        function setFocus() {
+            var userInput = document.getElementById("loginForm:username");
+            userInput.focus();
+            userInput.select();
         }
     </script>
 </head>
-<body style="margin:0">
+<body style="margin:0" onload="setFocus()">
 <!-- +++++++++ UCS Logo ++++++++++ -->
 <a href="http://www.ucs.at" target="ucs">
   <h:graphicImage alt="Login" url="/pub/images/LogoUcs.gif" id="UcsLogo"/>
@@ -49,14 +56,16 @@
                 <tr>
                     <td align="right" id="username"><label for="loginForm:username">#{fxMessageBean['Login.field.name']}</label></td>
                     <td align="left" colspan="2" width="241">
-                        <h:inputText id="username" styleClass="inputs" value="#{fxAuthenticationBean.username}"/>
+                        <h:inputText id="username" styleClass="inputs" value="#{fxAuthenticationBean.username}"
+                                onkeypress="return onReturnEval(event, 'document.getElementById(\'loginForm:loginButton\').onclick()')"/>
                     </td>
                 </tr>
                 <tr><td colspan="3" height="11"></td></tr>
                 <tr>
                     <td align="right" id="password"><label for="loginForm:password">#{fxMessageBean['Login.field.password']}</label></td>
                     <td align="left" colspan="2">
-                        <h:inputSecret id="password" styleClass="inputs" value="#{fxAuthenticationBean.password}"/>
+                        <h:inputSecret id="password" styleClass="inputs" value="#{fxAuthenticationBean.password}"
+                                onkeypress="return onReturnEval(event, 'document.getElementById(\'loginForm:loginButton\').onclick()')"/>
                     </td>
                 </tr>
                 <tr><td colspan="3" height="11"></td></tr>

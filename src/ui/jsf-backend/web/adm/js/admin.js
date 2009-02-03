@@ -46,26 +46,6 @@ function loadContentPage(url) {
     getContentFrame().location.href = getBase() + url;
 }
 
-// evaluates command when the 'enter' key was pressen
-function onReturnEval(event, expression) {
-    var keycode;
-    if (event && event.keyCode) {
-        keycode = event.keyCode;
-    } else if (window.event) {
-        keycode = window.event.keyCode;
-    } else if (event) {
-        keycode = event.which;
-    } else {
-        alertDialog("onReturnEval: no event object found.");
-        return true;
-    }
-    if (keycode != 13) {
-        return true;
-    }
-    eval(expression);
-    return false;   // don't "execute" the enter key
-}
-
 // writes the current document's size (width x height) in the given form variables
 function updateClientSize(varClientSizeX, varClientSizeY) {
     var clientSizeX = getWindowWidth();
