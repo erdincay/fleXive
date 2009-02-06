@@ -25,6 +25,8 @@ body {
     display: block;
     padding: 10px;
     border: 1px outset #3D3D3D;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
     background-color: #F9FCF1;
     color: #000;
     overflow: auto;
@@ -56,17 +58,30 @@ h5.title {
     font-size: 1em;
 }
 
+div.warning, div.tip {
+    border: 1px solid #a4aaa4;
+    padding: 0 1.5em 0 1.5em;
+    margin: 1em 0 1em 0;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+}
+
 div.warning {
     background-color: #fffcd0;
-    border: 1px solid #a4aaa4;
-    padding: 5px;
 }
+
+div.tip {
+    background-color: #f9fcf1;
+}
+
 
 /* Code example boxes */
 div.example {
     padding: 0.5em;
     margin: 0.5em;
     border: 1px solid gray;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
 }
 
 div.example p.title {

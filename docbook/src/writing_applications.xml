@@ -1059,8 +1059,44 @@ BUILD SUCCESSFUL]]></screen>
                     This will create a new project called "hello-flexive" in the current directory.
                     The &flexive; version to be used can be specified in the main module's
                     <filename>pom.xml</filename>
-                    file. Please note that some features are dependent on the &flexive; version:
-                    H2/OpenEJB/Jetty support is only available in 3.1 or later.
+                    file. By default, it is set to the current release required for all features
+                    (currently this is
+                    <code>3.1-SNAPSHOT</code>).
+                    For a list of available versions, please look at the Maven repository
+                    (e.g.
+                    <ulink url="&mavenRepoUrl;com/flexive/flexive-shared/">here</ulink>).
+                </para>
+                <warning>
+                    <title>Warning: version 3.0.x and embedded containers</title>
+                    <para>Please note that some features are dependent on the &flexive; version:
+                        H2/OpenEJB/Jetty support is only available in 3.1 or later.
+                        In order to build your project with &flexive; 3.0.x, you have to disable the
+                        <code>database</code>
+                        and
+                        <code>consoleapp</code>
+                        modules in your root
+                        <filename>pom.xml</filename>.
+                        Then you can package an EAR file using the
+                        <command>mvn package</command>
+                        command.
+                    </para>
+                </warning>
+                <tip>
+                    <title>Maven snapshot versions</title>
+                    <para>
+                        The snapshot versions in our Maven repository (
+                        <code>3.0-SNAPSHOT</code>
+                        and
+                        <code>3.1-SNAPSHOT</code>)
+                        are updated automatically from our internal Continuous Integration server (&hudson;)
+                        with the latest stable build of the corresponding branch. A build is considered
+                        "stable" in this context if no testcase fails.
+                        The snapshot versions are a convenient way of getting and testing the latest features,
+                        however these builds are not tested manually and may cause all kinds of havoc
+                        including data loss. If possible, it is recommended to use stable versions.
+                    </para>
+                </tip>
+                <para>
                     The following commands (issued in the project directory) will walk you through the most important
                     features:
                 </para>
@@ -1093,6 +1129,7 @@ BUILD SUCCESSFUL]]></screen>
                     <varlistentry>
                         <term>
                             <code>mvn install -Pflexive-db-setup-h2</code>
+                            (since 3.1)
                         </term>
                         <listitem>
                             <para>
@@ -1110,6 +1147,7 @@ BUILD SUCCESSFUL]]></screen>
                         </term>
                         <term>
                             <code>mvn jetty:run</code>
+                            (since 3.1)
                         </term>
                         <listitem>
                             <para>
