@@ -321,6 +321,8 @@ public class MessageBean extends HashMap {
                 if (!path.startsWith("file:")) {
                     if (path.startsWith("/") || path.charAt(1) == ':') {
                         LOG.warn("Trying a filesystem message resource without an explicit file: protocol identifier for " + path);
+                        addResourceBundle(baseName, resourceURL);
+                        continue;
                     } else {
                         LOG.warn("Cannot use message resources because they are not served from the file system: " + resourceURL.getPath());
                         continue;

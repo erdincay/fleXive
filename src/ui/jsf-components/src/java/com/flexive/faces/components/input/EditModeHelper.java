@@ -808,6 +808,10 @@ class EditModeHelper extends RenderHelper {
             this.rows = rows;
         }
 
+        public int getRows() {
+            return rows;
+        }
+
         public void setUseHTMLEditor(boolean useHTMLEditor) {
             this.useHTMLEditor = useHTMLEditor;
         }
