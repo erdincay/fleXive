@@ -43,6 +43,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.Formatter;
+import java.util.Map;
 
 /**
  * JSF Bean exposing miscellaneous system/runtime parameters.
@@ -89,9 +90,40 @@ public class SystemInfoBean {
 
     public String getApplicationServerName() {
         if (System.getProperty("product.name") != null) {
-            return System.getProperty("product.name");
+            String ver =  System.getProperty("product.name");
+            if (System.getProperty("com.sun.jbi.domain.name") != null)
+                ver = " Domain: " + System.getProperty("com.sun.jbi.domain.name");
+            return ver;
         } else if (System.getProperty("jboss.home.dir") != null) {
-            return "JBoss"; // TODO: determine JBoss version
+            try {
+                final Class<?> cls = Class.forName("org.jboss.Version");
+                Method m = cls.getMethod("getInstance");
+                Object v = m.invoke(null);
+                Method pr = cls.getMethod("getProperties");
+                Map props = (Map)pr.invoke(v);
+                String ver = "JBoss";
+                if( props.containsKey("version.major") && props.containsKey("version.minor")) {
+                    if( props.containsKey("version.name"))
+                        ver = ver + " [" + props.get("version.name")+"]";
+                    ver = ver + " "+props.get("version.major") + "." + props.get("version.minor");
+                    if( props.containsKey("version.revision"))
+                        ver = ver + "." + props.get("version.revision");
+                    if( props.containsKey("version.tag"))
+                        ver = ver + " " + props.get("version.tag");
+                    if( props.containsKey("build.day"))
+                        ver = ver + " built "+props.get("build.day");
+                }
+                return ver;
+            } catch (ClassNotFoundException e) {
+                //ignore
+            } catch (NoSuchMethodException e) {
+                //ignore
+            } catch (IllegalAccessException e) {
+                //ignore
+            } catch (InvocationTargetException e) {
+                //ignore
+            }
+            return "JBoss";
         } else if (System.getProperty("openejb.version") != null) {
             // try to get Jetty version
             String jettyVersion = "";
