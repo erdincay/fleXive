@@ -33,12 +33,14 @@
  ***************************************************************/
 package com.flexive.war.beans.admin.main;
 
-import com.flexive.shared.media.FxMediaEngine;
 import com.flexive.shared.EJBLookup;
-import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.configuration.SystemParameters;
-import com.flexive.core.Database;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.media.FxMediaEngine;
+import org.apache.commons.lang.StringUtils;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.Formatter;
 
@@ -55,7 +57,7 @@ public class SystemInfoBean {
     }
 
     public String getJavaVersion() {
-        return System.getProperty("java.version");
+        return System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ")";
     }
 
     public int getProcessors() {
@@ -80,7 +82,7 @@ public class SystemInfoBean {
     public String getIMVersion() {
         return FxMediaEngine.getImageMagickVersion();
     }
-    
+
     public boolean isUseIMIdentify() {
         return FxMediaEngine.isImageMagickIdentifySupported();
     }
@@ -102,6 +104,28 @@ public class SystemInfoBean {
                 // no Jetty version...
             }
             return "OpenEJB " + System.getProperty("openejb.version") + jettyVersion;
+        } else if (System.getProperty("weblogic.home") != null) {
+            String server = System.getProperty("weblogic.Name");
+            String wlVersion = "";
+            try {
+                final Class<?> cls = Class.forName("weblogic.common.internal.VersionInfo");
+                Method m = cls.getMethod("theOne");
+                Object serverVersion = m.invoke(null);
+                Method sv = m.invoke(null).getClass().getMethod("getImplementationVersion");
+                wlVersion = " " + String.valueOf(sv.invoke(serverVersion));
+            } catch (ClassNotFoundException e) {
+                //ignore
+            } catch (NoSuchMethodException e) {
+                //ignore
+            } catch (InvocationTargetException e) {
+                //ignore
+            } catch (IllegalAccessException e) {
+                //ignore
+            }
+            if (StringUtils.isEmpty(server))
+                return "WebLogic" + wlVersion;
+            else
+                return "WebLogic" + wlVersion + " (server: " + server + ")";
         } else {
             return "unknown";
         }
