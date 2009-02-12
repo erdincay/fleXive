@@ -877,7 +877,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setBoolean(INSERT_ISDEF_LANG_POS, false);
         ps_ft.setLong(4, data.getAssignmentId());
         ps_ft.setString(5, xmult);
-        setPropertyData(true, prop, allData, con, data, ps, ps_ft, getUppercaseColumnPos(prop, true));
+        setPropertyData(true, prop, allData, con, data, ps, ps_ft, getUppercaseColumnPos(prop, true), true);
     }
 
     /**
@@ -927,7 +927,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             assert data != null;
             for (long lang : data.getValue().getTranslatedLanguages()) {
                 ps.setInt(UPDATE_ID_POS + 2, (int) lang);
-                ps.addBatch();
+                setPropertyData(false, prop, allData, con, data, ps, ps_ft, getUppercaseColumnPos(prop, false), false);
             }
             return;
         }
@@ -938,20 +938,21 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         assert data != null;
         ps_ft.setLong(5, data.getAssignmentId());
         ps_ft.setString(6, StringUtils.join(ArrayUtils.toObject(data.getIndices()), ','));
-        setPropertyData(false, prop, allData, con, data, ps, ps_ft, getUppercaseColumnPos(prop, false));
+        setPropertyData(false, prop, allData, con, data, ps, ps_ft, getUppercaseColumnPos(prop, false), true);
     }
 
     /**
      * Set a properties data for inserts or updates
      *
-     * @param insert         perform insert or update?
-     * @param prop           current property
-     * @param allData        all data of the instance (might be needed to buld references, etc.)
-     * @param con            an open and valid connection
-     * @param data           current property data
-     * @param ps             prepared statement for the data table
-     * @param ps_ft          prepared statement for the fulltext table
-     * @param upperColumnPos position of the uppercase column (if present, else <code>-1</code>)
+     * @param insert          perform insert or update?
+     * @param prop            current property
+     * @param allData         all data of the instance (might be needed to buld references, etc.)
+     * @param con             an open and valid connection
+     * @param data            current property data
+     * @param ps              prepared statement for the data table
+     * @param ps_ft           prepared statement for the fulltext table
+     * @param upperColumnPos  position of the uppercase column (if present, else <code>-1</code>)
+     * @param includeFullText add fulltext table entries? Will be skipped for position only changes
      * @throws SQLException        on errors
      * @throws FxUpdateException   on errors
      * @throws FxDbException       on errors
@@ -959,7 +960,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      */
     private void setPropertyData(boolean insert, FxProperty prop, List<FxData> allData,
                                  Connection con, FxPropertyData data, PreparedStatement ps, PreparedStatement ps_ft,
-                                 int upperColumnPos) throws SQLException, FxUpdateException, FxDbException, FxNoAccessException {
+                                 int upperColumnPos, boolean includeFullText) throws SQLException, FxUpdateException, FxDbException, FxNoAccessException {
         FxValue value = data.getValue();
         if (value instanceof FxNoAccess) {
             throw new FxNoAccessException("ex.content.value.noaccess");
@@ -1161,7 +1162,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         throw new FxDbException(LOG, "ex.db.notImplemented.store", prop.getDataType().getName());
                 }
                 ps.addBatch();
-                if (prop.isFulltextIndexed())
+                if (prop.isFulltextIndexed() && includeFullText)
                     ps_ft.addBatch();
             }
         } else {
