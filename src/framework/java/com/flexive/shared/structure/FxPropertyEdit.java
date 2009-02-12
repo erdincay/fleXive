@@ -176,7 +176,7 @@ public class FxPropertyEdit extends FxProperty {
     public static FxPropertyEdit createNew(String name, FxString description, FxString hint,
                                            FxMultiplicity multiplicity, ACL acl, FxDataType dataType) {
         return new FxPropertyEdit(name, description, hint, true, multiplicity, true, acl,
-                dataType, null, true, null, null, FxStructureOption.getEmptyOptionList(5));
+                dataType, null, dataType.isTextType(), null, null, FxStructureOption.getEmptyOptionList(5));
     }
 
 
