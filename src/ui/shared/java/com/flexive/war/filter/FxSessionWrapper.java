@@ -51,6 +51,7 @@ import java.util.Vector;
 public class FxSessionWrapper implements HttpSession {
 
     private HttpSession wrappedSession = null;
+    private boolean invalidated = false;
 
     protected static UserTicket getLastUserTicket(HttpSession session) {
         return (UserTicket) session.getAttribute("LAST_USERTICKET");
@@ -150,7 +151,10 @@ public class FxSessionWrapper implements HttpSession {
      * Invalidates this session then unbinds any objects bound to it.
      */
     public void invalidate() {
-        wrappedSession.invalidate();
+        synchronized (this) {
+            wrappedSession.invalidate();
+            invalidated = true;
+        }
     }
 
     /**
@@ -173,7 +177,7 @@ public class FxSessionWrapper implements HttpSession {
      * @return the object with the specified name
      */
     public Object getAttribute(String name) {
-        return wrappedSession.getAttribute(encodeAttributeName(name));
+        return invalidated ? null : wrappedSession.getAttribute(encodeAttributeName(name));
     }
 
     /**
@@ -182,7 +186,7 @@ public class FxSessionWrapper implements HttpSession {
      * @deprecated As of Version 2.2, this method is replaced by getAttribute(java.lang.String).
      */
     public Object getValue(String name) {
-        return wrappedSession.getValue(encodeAttributeName(name));
+        return invalidated ? null : wrappedSession.getValue(encodeAttributeName(name));
     }
 
     /**
@@ -192,9 +196,9 @@ public class FxSessionWrapper implements HttpSession {
      */
     public Enumeration<String> getAttributeNames() {
         Vector<String> result = new Vector<String>(25);
-        for (Enumeration e = wrappedSession.getAttributeNames(); e.hasMoreElements();) {
-            result.add(decodeAttributeName((String) e.nextElement()));
-        }
+        if (!invalidated)
+            for (Enumeration e = wrappedSession.getAttributeNames(); e.hasMoreElements();)
+                result.add(decodeAttributeName((String) e.nextElement()));
         return result.elements();
     }
 
@@ -204,9 +208,9 @@ public class FxSessionWrapper implements HttpSession {
      */
     public String[] getValueNames() {
         Vector<String> result = new Vector<String>(25);
-        for (Enumeration e = wrappedSession.getAttributeNames(); e.hasMoreElements();) {
-            result.add(decodeAttributeName((String) e.nextElement()));
-        }
+        if (!invalidated)
+            for (Enumeration e = wrappedSession.getAttributeNames(); e.hasMoreElements();)
+                result.add(decodeAttributeName((String) e.nextElement()));
         return result.toArray(new String[result.size()]);
     }
 
@@ -225,7 +229,8 @@ public class FxSessionWrapper implements HttpSession {
      * @param value the object to be bound
      */
     public void setAttribute(String name, Object value) {
-        wrappedSession.setAttribute(encodeAttributeName(name), value);
+        if (!invalidated)
+            wrappedSession.setAttribute(encodeAttributeName(name), value);
     }
 
     /**
@@ -234,7 +239,8 @@ public class FxSessionWrapper implements HttpSession {
      * @deprecated As of Version 2.2, this method is replaced by setAttribute(java.lang.String, java.lang.Object)
      */
     public void putValue(String name, Object value) {
-        wrappedSession.putValue(encodeAttributeName(name), value);
+        if (!invalidated)
+            wrappedSession.putValue(encodeAttributeName(name), value);
     }
 
     /**
@@ -247,7 +253,8 @@ public class FxSessionWrapper implements HttpSession {
      * @deprecated
      */
     public void removeAttribute(String name) {
-        wrappedSession.removeAttribute(encodeAttributeName(name));
+        if (!invalidated)
+            wrappedSession.removeAttribute(encodeAttributeName(name));
     }
 
     /**
@@ -255,7 +262,8 @@ public class FxSessionWrapper implements HttpSession {
      * @deprecated As of Version 2.2, this method is replaced by removeAttribute(java.lang.String)
      */
     public void removeValue(String name) {
-        wrappedSession.removeValue(encodeAttributeName(name));
+        if (!invalidated)
+            wrappedSession.removeValue(encodeAttributeName(name));
     }
 
     /**
