@@ -158,6 +158,24 @@ public class SystemInfoBean {
                 return "WebLogic" + wlVersion;
             else
                 return "WebLogic" + wlVersion + " (server: " + server + ")";
+        } else if (System.getProperty("org.apache.geronimo.home.dir") != null) {
+            String gVersion = "";
+            try {
+                final Class<?> cls = Class.forName("org.apache.geronimo.system.serverinfo.ServerConstants");
+                Method m = cls.getMethod("getVersion");
+                gVersion = " " + String.valueOf(m.invoke(null));
+                m = cls.getMethod("getBuildDate");
+                gVersion = gVersion + " ("+String.valueOf(m.invoke(null))+")";
+            } catch (ClassNotFoundException e) {
+                //ignore
+            } catch (NoSuchMethodException e) {
+                //ignore
+            } catch (InvocationTargetException e) {
+                //ignore
+            } catch (IllegalAccessException e) {
+                //ignore
+            }
+            return "Apache Geronimo "+gVersion;
         } else {
             return "unknown";
         }

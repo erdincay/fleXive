@@ -319,7 +319,7 @@ public class SelectBean implements Serializable {
         UserTicket ticket = FxJsfUtils.getRequest().getUserTicket();
         List<FxSelectList> selectLists = CacheAdmin.getFilteredEnvironment().getSelectLists();
         ArrayList<SelectItem> result = new ArrayList<SelectItem>(selectLists.size() + 1);
-        result.add(new SelectItem((long) -1, ""));
+        result.add(new SelectItem(-1L, ""));
         for (FxSelectList list : selectLists) {
             result.add(new SelectItem(list.getId(), list.getLabel().getBestTranslation(ticket),
                     list.getDescription().getBestTranslation(ticket)));

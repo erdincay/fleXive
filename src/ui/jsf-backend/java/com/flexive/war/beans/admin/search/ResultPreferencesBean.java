@@ -268,7 +268,7 @@ public class ResultPreferencesBean {
                     break;
                 }
             }
-            types.add(0, new SelectItem(-1, FxJsfUtils.getLocalizedMessage("ResultPreferences.label.allTypes")));
+            types.add(0, new SelectItem(-1L, FxJsfUtils.getLocalizedMessage("ResultPreferences.label.allTypes")));
         }
         return types;
     }

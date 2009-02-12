@@ -286,7 +286,7 @@ public class SearchResultBean implements ActionBean, Serializable {
     public List<SelectItem> getContentTypeItems() {
         final List<SelectItem> items = new ArrayList<SelectItem>(getContentTypes().size() + 1);
         // "all results" item
-        items.add(new SelectItem(-1, MessageBean.getInstance().getMessage("SearchResult.label.type.all")));
+        items.add(new SelectItem(-1L, MessageBean.getInstance().getMessage("SearchResult.label.type.all")));
         // add an entry for every found content type
         for (FxFoundType type : getContentTypes()) {
             final String label = type.getDisplayName() + " (" + type.getFoundEntries() + ")";

@@ -48,6 +48,13 @@
         <param-value>false</param-value>
     </context-param>
 
+    <!-- When using MyFaces, state saving has to be set to "client" to avoid ViewExpiredException's -->
+    <context-param>
+        <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
+        <param-value>server</param-value>
+    </context-param>
+
+
     <context-param>
         <param-name>org.apache.myfaces.COMPRESS_STATE_IN_SESSION</param-name>
         <param-value>false</param-value>
@@ -305,7 +312,7 @@
         <listener-class>com.flexive.war.listener.SessionTimeoutListener</listener-class>
     </listener>
     
-    <!-- uncomment for e.g. weblogic
+    <!-- uncomment for e.g. weblogic when using the Sun RI
     <listener>
         <listener-class>com.sun.faces.config.ConfigureListener</listener-class>
     </listener>

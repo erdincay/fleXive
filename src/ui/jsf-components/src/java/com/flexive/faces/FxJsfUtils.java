@@ -827,7 +827,7 @@ public class FxJsfUtils {
         final List<SelectItem> result = new ArrayList<SelectItem>(items.size());
         final UserTicket ticket = FxContext.getUserTicket();
         if (addEmptyElement) {
-            result.add(new SelectItem(-1, ""));
+            result.add(new SelectItem(-1L, ""));
         }
         for (SelectableObjectWithLabel item : items) {
             result.add(new SelectItem(item.getId(), item.getLabel().getBestTranslation(ticket)));

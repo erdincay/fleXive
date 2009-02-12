@@ -266,6 +266,7 @@ abstract class RenderHelper {
 
                 if (!descriptor.isNewBinary() && downloadLink) {
                     final HtmlOutputLink link = (HtmlOutputLink) FxJsfUtils.createComponent(HtmlOutputLink.COMPONENT_TYPE);
+                    link.setId(facesContext.getViewRoot().createUniqueId());
                     final String downloadURL = FxJsfUtils.getServletContext().getContextPath() +
                             "/cefiledownload/" +
                             (value.isMultiLanguage() ? "lang:" + language.getIso2digit() : "") +
@@ -273,6 +274,7 @@ abstract class RenderHelper {
                     link.setValue(downloadURL);
 
                     final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(link, HtmlGraphicImage.COMPONENT_TYPE);
+                    image.setId(facesContext.getViewRoot().createUniqueId());
                     image.setUrl("/adm/images/contentEditor/download.png");
                     image.setStyleClass("binaryDownloadIcon");
                     link.encodeAll(facesContext);
