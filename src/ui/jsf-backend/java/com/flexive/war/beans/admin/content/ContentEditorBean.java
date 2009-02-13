@@ -1231,8 +1231,8 @@ public class ContentEditorBean implements ActionBean, Serializable {
                     }
                     if (!assignmentExists) {
                         String name = null;
-                        if (content.containsValue("/CAPTION")) {
-                            name = ((FxString) content.getValue("/CAPTION")).getBestTranslation();
+                        if (content.hasCaption()) {
+                            name = content.getCaption().getBestTranslation();
                         }
                         if (StringUtils.isBlank(name)) {
                             name = environment.getType(type).getName() + "_" + pk.getId() + "." + pk.getVersion();
