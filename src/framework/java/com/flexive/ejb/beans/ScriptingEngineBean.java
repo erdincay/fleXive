@@ -57,20 +57,17 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.groovy.control.CompilationFailedException;
-
 import javax.annotation.Resource;
 import javax.ejb.*;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.jar.JarInputStream;
-import java.util.jar.JarEntry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -80,7 +77,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "ScriptingEngine", mappedName="ScriptingEngine")
+@Stateless(name = "ScriptingEngine", mappedName = "ScriptingEngine")
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLocal {
 
@@ -422,10 +419,30 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxScriptInfo createScriptFromDropLibrary(String dropName, FxScriptEvent event, String libraryname, String name, String description) throws FxApplicationException {
+        boolean fnf = true;
         FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
         String code = FxSharedUtils.loadFromInputStream(FxSharedUtils.getResourceStream(dropName + "Resources/scripts/library/" + libraryname), -1);
-        if (code == null || code.length() == 0)
+        if (code == null || code.length() == 0) { // this might be a jar file
+            LOG.info("Failed to locate script in regular application library, checking for drop application in classpath JARs");
+            JarInputStream jarStream;
+            try {
+                final FxDropApplication dropApplication = FxSharedUtils.getDropApplication(dropName);
+                jarStream = dropApplication.getResourceJarStream();
+                Map<String, String> jarContents = FxSharedUtils.getContentsFromJarStream(jarStream, libraryname, true);
+                if ((jarContents.get(libraryname)) != null) {
+                    code = jarContents.get(libraryname);
+                    fnf = false;
+                }
+            } catch (Exception e) {
+                LOG.error("Failed to load library scripts for " + dropName + " from JAR file: " + e.getMessage(), e);
+            }
+        } else {
+            fnf = false;
+        }
+
+        if (fnf) {
             throw new FxNotFoundException("ex.scripting.load.library.failed", libraryname);
+        }
         return createScript(event, name, description, code);
     }
 
@@ -617,7 +634,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         //check existance
         CacheAdmin.getEnvironment().getScript(scriptId);
         //check consistency
-        checkTypeScriptConsistency(scriptId, typeId ,scriptEvent, active, derivedUsage);
+        checkTypeScriptConsistency(scriptId, typeId, scriptEvent, active, derivedUsage);
         try {
             long[] derived;
             if (!derivedUsage)
@@ -856,7 +873,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         //check existance
         CacheAdmin.getEnvironment().getScript(scriptId);
         //check consistency
-        checkTypeScriptConsistency(scriptId, typeId ,event, active, derivedUsage);
+        checkTypeScriptConsistency(scriptId, typeId, event, active, derivedUsage);
         try {
             long[] derived;
             if (!derivedUsage)
@@ -905,7 +922,6 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             LOG.info("Executed flexive run-once scripts in " + (System.currentTimeMillis() - start) + "ms");
         }
     }
-
 
     /**
      * Execute all runOnce scripts in the resource denoted by prefix if param is "false"
@@ -998,42 +1014,20 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             }
         } else {
             // scan classpath from shared resource JAR
-            JarInputStream jarStream = null;
+            JarInputStream jarStream;
             try {
                 final FxDropApplication dropApplication = FxSharedUtils.getDropApplication(dropName);
                 jarStream = dropApplication.getResourceJarStream();
-                if (jarStream != null) {
-                    JarEntry entry;
-                    while ((entry = jarStream.getNextJarEntry()) != null) {
-                        if (!entry.isDirectory() && entry.getName().startsWith("scripts/" + folder + "/")) {
-                            // extract filename
-                            final String name = entry.getName().substring(entry.getName().lastIndexOf("/") + 1);
-
-                            // allocate buffer for the entire (uncompressed) script code
-                            final byte[] buffer = new byte[(int) entry.getSize()];
-
-                            // decompress JAR entry
-                            if (jarStream.read(buffer, 0, (int) entry.getSize()) != entry.getSize()) {
-                                LOG.error("Failed to read complete script code for script: " + entry.getName());
-                                continue;
-                            }
-
-                            //
-                            final String code = new String(buffer, "UTF-8");
-                            scriptExecutor.runScript(name, code);
-                        }
+                Map<String, String> jarContents = FxSharedUtils.getContentsFromJarStream(jarStream, "scripts/" + folder + "/", false);
+                if (jarContents != null) {
+                    for (String scriptName : jarContents.keySet()) {
+                        scriptExecutor.runScript(scriptName, jarContents.get(scriptName));
                     }
+                } else {
+                    LOG.info("Found no scripts in drop " + dropName + " in path \"scripts/" + folder + "/\"");
                 }
             } catch (Exception e) {
                 LOG.error("Failed to load " + folder + " scripts for " + dropName + " from JAR file: " + e.getMessage(), e);
-            } finally {
-                if (jarStream != null) {
-                    try {
-                        jarStream.close();
-                    } catch (IOException e) {
-                        LOG.warn("Failed to close stream: " + e.getMessage(), e);
-                    }
-                }
             }
         }
     }
@@ -1111,7 +1105,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             UserTicket ticket = ((UserTicketImpl) UserTicketImpl.getGuestTicket()).cloneAsGlobalSupervisor();
             binding.setVariable("ticket", ticket);
             FxContext.get().overrideTicket(ticket);
-            
+
             LocalScriptingCache.internal_runScript(name, binding, code);
         } finally {
             FxContext.get().stopRunAsSystem();
@@ -1223,15 +1217,15 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
     }
 
     /**
-     * Checks if an assignment script mapping is consitent with
+     * Checks if an assignment script mapping is consistent with
      * derived assignment script mappings that are already present in the DB.
      *
-     * @param scriptId      scriptId
-     * @param assignmentId  assignmentId
-     * @param event         script event
-     * @param active        active
-     * @param derivedUsage  derivedUsage
-     * @throws FxEntryExistsException
+     * @param scriptId     scriptId
+     * @param assignmentId assignmentId
+     * @param event        script event
+     * @param active       active
+     * @param derivedUsage derivedUsage
+     * @throws FxEntryExistsException on errors
      */
     public void checkAssignmentScriptConsistency(long scriptId, long assignmentId, FxScriptEvent event, boolean active, boolean derivedUsage) throws FxEntryExistsException {
         // in case script is set to active,
@@ -1240,7 +1234,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             List<FxScriptMappingEntry> scriptMappings = CacheAdmin.getFilteredEnvironment().getScriptMapping(scriptId).getMappedAssignments();
             for (FxScriptMappingEntry sme : scriptMappings) {
                 if (sme.isActive() && sme.getScriptEvent().getId() == event.getId()) {
-                    for (int i =0; i<sme.getDerivedIds().length;i++) {
+                    for (int i = 0; i < sme.getDerivedIds().length; i++) {
                         if (sme.getDerivedIds()[i] == assignmentId)
                             throw new FxEntryExistsException("ex.scripting.mapping.assign.derived.active.exists",
                                     CacheAdmin.getEnvironment().getScript(scriptId).getName(),
@@ -1251,9 +1245,9 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             // in case of derived usage and active,
             // check if an active script assignment for this event already exists for a sub-assignment
             if (derivedUsage) {
-                for (FxAssignment a :  CacheAdmin.getEnvironment().getDerivedAssignments(assignmentId)) {
+                for (FxAssignment a : CacheAdmin.getEnvironment().getDerivedAssignments(assignmentId)) {
                     for (FxScriptMappingEntry sme : scriptMappings) {
-                        if (sme.getId()==a.getId() && sme.isActive() && sme.getScriptEvent().getId() == event.getId()) {
+                        if (sme.getId() == a.getId() && sme.isActive() && sme.getScriptEvent().getId() == event.getId()) {
                             throw new FxEntryExistsException("ex.scripting.mapping.assign.active.derived.exists",
                                     CacheAdmin.getEnvironment().getScript(scriptId).getName(),
                                     event.getName(), a.getXPath());
@@ -1265,14 +1259,14 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
     }
 
     /**
-     * Checks if a type script mapping is consitent with
+     * Checks if a type script mapping is consistent with
      * derived type script mappings that are already present in the DB.
      *
-     * @param scriptId      scriptId
-     * @param typeId        typeId
-     * @param event         script event
-     * @param active        active
-     * @param derivedUsage  derivedUsage
+     * @param scriptId     scriptId
+     * @param typeId       typeId
+     * @param event        script event
+     * @param active       active
+     * @param derivedUsage derivedUsage
      * @throws FxEntryExistsException if check fails
      */
     public void checkTypeScriptConsistency(long scriptId, long typeId, FxScriptEvent event, boolean active, boolean derivedUsage) throws FxEntryExistsException {
@@ -1282,7 +1276,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             List<FxScriptMappingEntry> scriptMappings = CacheAdmin.getFilteredEnvironment().getScriptMapping(scriptId).getMappedTypes();
             for (FxScriptMappingEntry sme : scriptMappings) {
                 if (sme.isActive() && sme.getScriptEvent().getId() == event.getId()) {
-                    for (int i =0; i<sme.getDerivedIds().length;i++) {
+                    for (int i = 0; i < sme.getDerivedIds().length; i++) {
                         if (sme.getDerivedIds()[i] == typeId)
                             throw new FxEntryExistsException("ex.scripting.mapping.type.derived.active.exists",
                                     CacheAdmin.getEnvironment().getScript(scriptId).getName(),
@@ -1294,9 +1288,9 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             // in case of derived usage and active,
             // check if an active script assignment for this event already exists for a sub-type
             if (derivedUsage) {
-                for (FxType t :  CacheAdmin.getEnvironment().getType(typeId).getDerivedTypes()) {
+                for (FxType t : CacheAdmin.getEnvironment().getType(typeId).getDerivedTypes()) {
                     for (FxScriptMappingEntry sme : scriptMappings) {
-                        if (sme.getId()==t.getId() && sme.isActive() && sme.getScriptEvent().getId() == event.getId()) {
+                        if (sme.getId() == t.getId() && sme.isActive() && sme.getScriptEvent().getId() == event.getId()) {
                             throw new FxEntryExistsException("ex.scripting.mapping.type.active.derived.exists",
                                     CacheAdmin.getEnvironment().getScript(scriptId).getName(),
                                     event.getName(),

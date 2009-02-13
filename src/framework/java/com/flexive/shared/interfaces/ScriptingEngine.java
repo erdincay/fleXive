@@ -306,7 +306,7 @@ public interface ScriptingEngine {
     void removeTypeScriptMappingForEvent(long scriptId, long typeId, FxScriptEvent event) throws FxApplicationException;
 
     /**
-     * Update a mapping for assignments
+     * Update a mapping for assignments (activate or deactivate a mapping, toggle derived usage)
      *
      * @param scriptId     id of the script
      * @param assignmentId id of the assignment
@@ -319,7 +319,7 @@ public interface ScriptingEngine {
     FxScriptMappingEntry updateAssignmentScriptMappingForEvent(long scriptId, long assignmentId, FxScriptEvent event, boolean active, boolean derivedUsage) throws FxApplicationException;
 
     /**
-     * Update a mapping for types
+     * Update a mapping for types (activate or deactivate a mapping, toggle derived usage)
      *
      * @param scriptId     id of the script
      * @param typeId       id of the type

@@ -39,10 +39,6 @@ import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.base.Function;
-import com.google.common.base.Nullable;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import static org.apache.commons.lang.StringUtils.defaultString;
@@ -55,6 +51,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.Collator;
 import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
 
 /**
  * Flexive shared utility functions.
@@ -153,6 +151,94 @@ public final class FxSharedUtils {
     }
 
     /**
+     * This method returns all entries in a JarInputStream for a given search pattern within the jar as a Map
+     * having the filename as the key and the file content as its respective value (String).
+     * The boolean flag "isFile" marks the search pattern as a file, otherwise the pattern will be treated as
+     * a path to be found in the jarStream
+     * A successful search either returns a map of all entries for a given path or a map of all entries for a given file
+     * (again, depending on the "isFile" flag).
+     * Null will be returned if no occurrences of the search pattern were found.
+     *
+     * @param jarStream     the given JarInputStream
+     * @param searchPattern the pattern to be examined as a String
+     * @param isFile        if true, the searchPattern is treated as a file name, if false, the searchPattern will be treated as a path
+     * @return Returns all entries found for the given search pattern as a Map<String, String>, or null if no matches were found
+     */
+    public static Map<String, String> getContentsFromJarStream(JarInputStream jarStream, String searchPattern, boolean isFile) {
+        Map<String, String> jarContents = null;
+        int found = 0;
+        try {
+            if (jarStream != null) {
+                JarEntry entry;
+                jarContents = new HashMap<String, String>();
+                while ((entry = jarStream.getNextJarEntry()) != null) {
+                    if (isFile) {
+                        if (!entry.isDirectory() && entry.getName().endsWith(searchPattern)) {
+                            final String name = entry.getName().substring(entry.getName().lastIndexOf("/") + 1);
+                            jarContents.put(name, readFromJarEntry(jarStream, entry));
+                            found++;
+                        }
+                    } else {
+                        if (!entry.isDirectory() && entry.getName().startsWith(searchPattern)) {
+                            jarContents.put(entry.getName(), readFromJarEntry(jarStream, entry));
+                            found++;
+                        }
+                    }
+                }
+                LOG.info("Found " + found + " entries in the JarInputStream for the pattern " + searchPattern);
+            }
+        } catch (Exception e) {
+            LOG.error("Failed to load entries from JAR file: " + e.getMessage(), e);
+        } finally {
+            if (jarStream != null) {
+                try {
+                    jarStream.close();
+                } catch (IOException e) {
+                    LOG.warn("Failed to close stream: " + e.getMessage(), e);
+                }
+            } else {
+                LOG.error("JarInputStream parameter was null, no search performed");
+            }
+        }
+
+        if (jarContents.isEmpty())
+                jarContents = null;
+        return jarContents;
+    }
+
+    /**
+     * Reads the content of a given entry in a Jar file (JarInputStream) and returns it as a String
+     * 
+     * @param jarStream the given JarInputStream
+     * @param entry     the given entry in the jar file
+     * @return the entry's content as a String
+     */
+    public static String readFromJarEntry(JarInputStream jarStream, JarEntry entry) {
+        String fileContent = "";
+        try {
+            if (entry.getSize() >= 0) {
+                // allocate buffer for the entire (uncompressed) script code
+                final byte[] buffer = new byte[(int) entry.getSize()];
+                // decompress JAR entry
+                if (jarStream.read(buffer, 0, (int) entry.getSize()) != entry.getSize()) {
+                    LOG.error("Failed to read complete script code for script: " + entry.getName());
+                }
+                fileContent = new String(buffer, "UTF-8").trim();
+            } else {
+                // use this method if the file size cannot be determined
+                //(might be the case with jar files created with some jar tools)
+                int currentByte;
+                while ((currentByte = jarStream.read()) != -1) {
+                    fileContent = fileContent + (char) currentByte;
+                }
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+        }
+        return fileContent;
+    }
+
+    /**
      * Get a list of all installed and deployed drops
      *
      * @return list of all installed and deployed drops
@@ -192,7 +278,7 @@ public final class FxSharedUtils {
     /**
      * Get a list of all installed and deployed drops.
      *
-     * @return  a list of all installed and deployed drops.
+     * @return a list of all installed and deployed drops.
      * @since 3.0.2
      */
     public static synchronized List<FxDropApplication> getDropApplications() {
@@ -203,8 +289,8 @@ public final class FxSharedUtils {
     /**
      * Returns the drop application with the given name.
      *
-     * @param name  the application name
-     * @return  the drop application with the given name.
+     * @param name the application name
+     * @return the drop application with the given name.
      * @since 3.0.2
      */
     public static synchronized FxDropApplication getDropApplication(String name) {
@@ -219,7 +305,7 @@ public final class FxSharedUtils {
     /**
      * Add drop applications explicitly mentioned in the drops.archives file.
      *
-     * @param dropApplications  list of drop application info objects to be populated
+     * @param dropApplications list of drop application info objects to be populated
      */
     private static void addDropsFromArchiveIndex(List<FxDropApplication> dropApplications) {
         try {
@@ -239,7 +325,7 @@ public final class FxSharedUtils {
     /**
      * Add drop applications from the classpath (based on a file called flexive.properties).
      *
-     * @param dropApplications  list of drop application info objects to be populated
+     * @param dropApplications list of drop application info objects to be populated
      */
     private static void addDropsFromClasspath(List<FxDropApplication> dropApplications) {
         try {
@@ -566,7 +652,7 @@ public final class FxSharedUtils {
     /**
      * Load a String from an InputStream (until end of stream)
      *
-     * @param in     InputStream
+     * @param in InputStream
      * @return the input stream contents, or an empty string if {@code in} was null.
      * @since 3.0.2
      */
