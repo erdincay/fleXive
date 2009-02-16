@@ -33,19 +33,24 @@ package com.flexive.tests.embedded.benchmark;
 
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.structure.FxEnvironment;
 import static com.flexive.tests.embedded.benchmark.FxBenchmarkUtils.getResultLogger;
 import org.testng.annotations.Test;
 
 /**
- * A simple benchmark that reloads the entire structure environment
- * several times and returns the average load time.
+ * Structure-related benchmarks (FxEnvironment and structure classes).
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
 @Test(groups = "benchmark", enabled = true)
-public class StructureReloadBenchmark {
+public class StructureBenchmark {
 
+    /**
+     * A simple benchmark that reloads the entire structure environment
+     * several times and returns the average load time.
+     * @throws Exception on errors
+     */
     public void benchStructureReload() throws Exception {
         FxContext.get().runAsSystem();
         try {
@@ -58,6 +63,56 @@ public class StructureReloadBenchmark {
             getResultLogger().logTime("reloadEnvironment", start, 200, "reload");
         } finally {
             FxContext.get().stopRunAsSystem();
+        }
+    }
+
+    public void benchGetAssignmentByXPath() {
+        final String[] xpaths = {
+                "article/id",
+                "contactdata/surname",
+                "image/step",
+                "folder/acl"
+        };
+        // warm up
+        final FxEnvironment env = CacheAdmin.getEnvironment();
+        fetchAssignments(env, xpaths, 10000);
+
+        // do benchmark
+        final long start = System.currentTimeMillis();
+        fetchAssignments(env, xpaths, 100000);
+        getResultLogger().logTime("getAssignmentByXPath", start, 100000, "lookup");
+    }
+
+    private void fetchAssignments(FxEnvironment environment, String[] xpaths, int times) {
+        for (int i = 0; i < times; i++) {
+            for (String xpath: xpaths) {
+                environment.getAssignment(xpath);
+            }
+        }
+    }
+
+    public void benchGetAssignmentById() {
+        final FxEnvironment env = CacheAdmin.getEnvironment();
+        final long[] assignmentIds = {
+                env.getAssignment("article/id").getId(),
+                env.getAssignment("contactdata/surname").getId(),
+                env.getAssignment("image/step").getId(),
+                env.getAssignment("folder/acl").getId()
+        };
+        // warm up
+        fetchAssignmentsById(env, assignmentIds, 10000);
+
+        // do benchmark
+        final long start = System.currentTimeMillis();
+        fetchAssignmentsById(env, assignmentIds, 100000);
+        getResultLogger().logTime("getAssignmentById", start, 100000, "lookup");
+    }
+
+    private void fetchAssignmentsById(FxEnvironment environment, long[] ids, int times) {
+        for (int i = 0; i < times; i++) {
+            for (long id : ids) {
+                environment.getAssignment(id);
+            }
         }
     }
 }
