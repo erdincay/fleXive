@@ -165,12 +165,11 @@ public final class FxSharedUtils {
      * @return Returns all entries found for the given search pattern as a Map<String, String>, or null if no matches were found
      */
     public static Map<String, String> getContentsFromJarStream(JarInputStream jarStream, String searchPattern, boolean isFile) {
-        Map<String, String> jarContents = null;
+        Map<String, String> jarContents = new HashMap<String, String>();
         int found = 0;
         try {
             if (jarStream != null) {
                 JarEntry entry;
-                jarContents = new HashMap<String, String>();
                 while ((entry = jarStream.getNextJarEntry()) != null) {
                     if (isFile) {
                         if (!entry.isDirectory() && entry.getName().endsWith(searchPattern)) {
