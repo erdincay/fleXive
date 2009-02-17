@@ -264,7 +264,7 @@ public class StructureTreeEditor implements Serializable {
     }
 
     /**
-     * Checks if an assignment is the child of a given type or group.
+     * Checks if an assignment is the direct child of a given type or group.
      *
      * @param assId          id of the assignment
      * @param parentId       id of type or group assignment
@@ -275,7 +275,7 @@ public class StructureTreeEditor implements Serializable {
      *                                     on errors
      */
 
-    public boolean isChild(long assId, long parentId, String parentNodeType) throws FxInvalidParameterException, FxNotFoundException {
+    public boolean isDirectChild(long assId, long parentId, String parentNodeType) throws FxInvalidParameterException, FxNotFoundException {
         if (StructureTreeWriter.NODE_TYPE_GROUP.equals(parentNodeType)) {
             FxGroupAssignment ga = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(parentId);
             for (FxAssignment a : ga.getAssignments()) {
@@ -292,6 +292,23 @@ public class StructureTreeEditor implements Serializable {
         } else
             throw new FxInvalidParameterException("nodeType", "ex.structureTreeEditor.nodeType.invalid", parentNodeType);
 
+        return false;
+    }
+
+    /**
+     * Returns if an assignment with the specified id is the parent assignment of a child assignment with specified id.
+     *
+     * @param parent parent assignment id
+     * @param child  child assignment id
+     * @return true the parent assignment is the parent of the child assignment.
+     */
+    public boolean isParentAssignment(long parent, long child) {
+        FxAssignment a = CacheAdmin.getEnvironment().getAssignment(child);
+        while (a.hasParentGroupAssignment()) {
+            if (a.getParentGroupAssignment().getId() == parent)
+                return true;
+            a = a.getParentGroupAssignment();
+        }
         return false;
     }
 
