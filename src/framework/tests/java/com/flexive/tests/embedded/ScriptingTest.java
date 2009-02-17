@@ -360,6 +360,45 @@ public class ScriptingTest {
     }
 
     /**
+     * This method tests if type script assignments are properly propagated to derived types
+     *
+     * @throws Exception on errors
+     */
+    @Test
+    public void derivedTypeScriptMapping() throws Exception {
+        FxScriptInfo si = null;
+        long parent = -1;
+        long derived = -1;
+        try {
+            //create parent
+            parent = EJBLookup.getTypeEngine().save(FxTypeEdit.createNew("TY_SCRIPTING_PARENT", new FxString("Type scripting parent test type"),
+                    CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()), null));
+            FxType parentT = CacheAdmin.getEnvironment().getType(parent);
+            FxScriptEvent event = FxScriptEvent.PrepareContentCreate;
+            //assign script
+            si= createScriptForType(event, parentT);
+            //create derived type
+            derived = EJBLookup.getTypeEngine().save(FxTypeEdit.createNew("TY_SCRIPTING_DERIVED", new FxString(true, "TY_SCRIPTING_DERIVED"), parentT.getACL(), parentT));
+            FxType derivedT = CacheAdmin.getEnvironment().getType(derived);
+            //check if same script is assigned to parent and derived type
+            assertTrue(derivedT.getScriptMapping(event)[0] == si.getId() && si.getId() == parentT.getScriptMapping(event)[0]);
+
+            //cancel derived usage
+            se.updateTypeScriptMappingForEvent(si.getId(), parentT.getId(), FxScriptEvent.PrepareContentCreate, true, false);
+            //check if script is still assigned
+            assertTrue(CacheAdmin.getEnvironment().getType(derived).getScriptMapping(event)==null);
+        }
+        finally {
+            if (derived != -1)
+                EJBLookup.getTypeEngine().remove(derived);
+            if (parent != -1)
+                EJBLookup.getTypeEngine().remove(parent);
+            if (si != null)
+                se.remove(si.getId());
+        }
+    }
+
+    /**
      * This method tests script assignments to types
      *
      * @throws Exception on errors

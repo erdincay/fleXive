@@ -64,10 +64,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * generic sql environment loader implementation
@@ -737,10 +734,17 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                     if (!rs.getBoolean(2))
                         derived = new long[0];
                     else {
-                        List<FxType> types = environment.getType(rs.getLong(1)).getDerivedTypes();
-                        derived = new long[types.size()];
-                        for (int i = 0; i < types.size(); i++)
-                            derived[i] = types.get(i).getId();
+                        // determine derived types "manually" as resolveReferences()
+                        // which sets the derived types has not been called yet
+                        List<Long> derivedList = new ArrayList<Long>(5);
+                        for (FxType t : environment.getTypes()) {
+                            if (t.isDerived() && t.getParent().getId() == rs.getLong(1))
+                                derivedList.add(t.getId());
+                        }
+                        derived = new long[derivedList.size()];
+                        int i=0;
+                        for (long l : derivedList)
+                            derived[i++]=l;
                     }
                     e_types.add(new FxScriptMappingEntry(FxScriptEvent.getById(rs.getLong(4)), si.getId(), rs.getBoolean(3), rs.getBoolean(2), rs.getLong(1), derived));
                 }
