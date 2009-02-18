@@ -39,6 +39,7 @@ import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.scripting.FxScriptMappingEntry;
 import com.flexive.shared.value.FxString;
+import com.flexive.shared.SelectableObjectWithLabel;
 
 import java.io.Serializable;
 import java.util.*;
@@ -48,7 +49,7 @@ import java.util.*;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public abstract class FxAssignment implements Serializable, Comparable<FxAssignment> {
+public abstract class FxAssignment implements Serializable, Comparable<FxAssignment>, SelectableObjectWithLabel {
     private static final long serialVersionUID = -6127833297182838935L;
 
     /**

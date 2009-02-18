@@ -32,6 +32,7 @@
 package com.flexive.shared.structure;
 
 import com.flexive.shared.SelectableObjectWithName;
+import com.flexive.shared.SelectableObjectWithLabel;
 import com.flexive.shared.value.FxString;
 
 import java.io.Serializable;
@@ -42,7 +43,7 @@ import java.util.List;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public abstract class FxStructureElement implements Serializable, SelectableObjectWithName {
+public abstract class FxStructureElement implements Serializable, SelectableObjectWithName, SelectableObjectWithLabel {
     private static final long serialVersionUID = -5878281678610887810L;
     private long id;
     protected String name;
