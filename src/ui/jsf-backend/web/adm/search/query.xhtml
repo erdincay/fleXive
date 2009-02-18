@@ -77,7 +77,7 @@
             </adm:commandButton>
 			<adm:commandButton id="saveButtonJs" location="both" labelKey="QueryEditor.button.save" icon="save" lockscreen="false"
                     onclick="onSaveQuery();return false"/>
-            <div style="display:none">
+            <div id="saveButtonHidden" style="display:none">
                 <adm:commandButton id="saveButton" location="content" bean="#{fxQueryEditorBean}" icon="save" action="saveQuery">
                     <f:setPropertyActionListener target="#{fxQueryEditorBean.location}" value="#{fxSystemBean.adminResultLocation}"/>
                 </adm:commandButton>
@@ -95,7 +95,11 @@
                     promptDialog("#{fxMessageBean['QueryEditor.dialog.save']}", "#{fxMessageBean['QueryEditor.dialog.save.default']}",
                             function(name) {
                                 document.getElementById("frm:queryName").value = name;
-                                document.getElementById("frm:saveButton").onclick();
+                                if(document.all) {
+                                    document.getElementById("saveButtonHidden").childNodes[2].onclick();
+                                } else {
+                                    document.getElementById("saveButtonHidden").childNodes[5].onclick();
+                                }
                             }
                     );
                 }
