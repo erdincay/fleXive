@@ -64,7 +64,7 @@ public class EJBLookup {
         SIMPLENAME_REMOTE,
         GERONIMO_LOCAL,
         GERONIMO_REMOTE,
-        WEBLOGIC_REMOTE,
+        MAPPED_NAME_REMOTE,
         UNKNOWN
     }
 
@@ -369,6 +369,8 @@ public class EJBLookup {
             String name;
             InitialContext ctx = null;
             try {
+                if (environment == null)
+                    environment = new Hashtable<String, String>();
                 if (used_strategy == null) {
                     appName = discoverStrategy(appName, environment, type);
                     if (used_strategy != null) {
@@ -377,8 +379,6 @@ public class EJBLookup {
                         LOG.error("No working lookup strategy found! Possibly because of pending redeployment.");
                     }
                 }
-                if (environment == null)
-                    environment = new Hashtable<String, String>();
                 prepareEnvironment(used_strategy, environment);
                 ctx = new InitialContext(environment);
                 name = buildName(appName, type);
@@ -387,6 +387,22 @@ public class EJBLookup {
 
                 return type.cast(ointerface);
             } catch (Exception exc) {
+                //try one more time with a strategy rediscovery for that bean
+                //this can happen if some beans use mapped names and some not
+                used_strategy = null;
+                try {
+                    appName = discoverStrategy(appName, environment, type);
+                    if (used_strategy != null) {
+                        prepareEnvironment(used_strategy, environment);
+                        ctx = new InitialContext(environment);
+                        name = buildName(appName, type);
+                        ointerface = ctx.lookup(name);
+                        ejbCache.putIfAbsent(type.getName(), ointerface);
+                        return type.cast(ointerface);
+                    }
+                } catch (Exception e) {
+                    LOG.warn("Attempt to rediscover lookup strategy for " + type + " failed!", e);
+                }
                 throw new FxLookupException(LOG, exc, "ex.ejb.lookup.failure", type, exc).asRuntimeException();
             } finally {
                 if (ctx != null)
@@ -546,7 +562,7 @@ public class EJBLookup {
                 return "/" + type.getSimpleName() + "Local";
             case GERONIMO_REMOTE:
                 return "/" + type.getSimpleName() + "Remote";
-            case WEBLOGIC_REMOTE:
+            case MAPPED_NAME_REMOTE:
                 return type.getSimpleName() + "#" + type.getCanonicalName();
             default:
                 throw new FxLookupException("Unsupported/unknown lookup strategy " + used_strategy + "!").asRuntimeException();
