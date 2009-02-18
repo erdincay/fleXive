@@ -90,9 +90,10 @@ public class SystemInfoBean {
 
     public String getApplicationServerName() {
         if (System.getProperty("product.name") != null) {
+            // Glassfish / Sun AS
             String ver =  System.getProperty("product.name");
             if (System.getProperty("com.sun.jbi.domain.name") != null)
-                ver = " Domain: " + System.getProperty("com.sun.jbi.domain.name");
+                ver += " (Domain: " + System.getProperty("com.sun.jbi.domain.name") + ")";
             return ver;
         } else if (System.getProperty("jboss.home.dir") != null) {
             try {
