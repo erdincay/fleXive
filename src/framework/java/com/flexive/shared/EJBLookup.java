@@ -313,6 +313,16 @@ public class EJBLookup {
     }
 
     /**
+     * Lookup of the CmisSearchEngine EJB.
+     *
+     * @return  a reference to the CmisSearchEngine EJB.
+     * @since 3.1
+     */
+    public static CmisSearchEngine getCmisSearchEngine() {
+        return getEngine(CmisSearchEngine.class);
+    }
+
+    /**
      * Get a reference of the transaction manager
      *
      * @return TransactionManager
@@ -365,22 +375,24 @@ public class EJBLookup {
         }
 
         // Cache miss: obtain interface and store it in the cache
+        Hashtable<String, String> env;
         synchronized (EJBLookup.class) {
             String name;
             InitialContext ctx = null;
+            env = new Hashtable<String, String>(10);
             try {
-                if (environment == null)
-                    environment = new Hashtable<String, String>();
+                if(environment != null )
+                    env.putAll(environment);
                 if (used_strategy == null) {
-                    appName = discoverStrategy(appName, environment, type);
+                    appName = discoverStrategy(appName, env, type);
                     if (used_strategy != null) {
                         LOG.info("Working lookup strategy: " + used_strategy);
                     } else {
                         LOG.error("No working lookup strategy found! Possibly because of pending redeployment.");
                     }
                 }
-                prepareEnvironment(used_strategy, environment);
-                ctx = new InitialContext(environment);
+                prepareEnvironment(used_strategy, env);
+                ctx = new InitialContext(env);
                 name = buildName(appName, type);
                 ointerface = ctx.lookup(name);
                 ejbCache.putIfAbsent(type.getName(), ointerface);
@@ -391,10 +403,13 @@ public class EJBLookup {
                 //this can happen if some beans use mapped names and some not
                 used_strategy = null;
                 try {
-                    appName = discoverStrategy(appName, environment, type);
+                    env.clear();
+                    if(environment != null )
+                        env.putAll(environment);
+                    appName = discoverStrategy(appName, env, type);
                     if (used_strategy != null) {
-                        prepareEnvironment(used_strategy, environment);
-                        ctx = new InitialContext(environment);
+                        prepareEnvironment(used_strategy, env);
+                        ctx = new InitialContext(env);
                         name = buildName(appName, type);
                         ointerface = ctx.lookup(name);
                         ejbCache.putIfAbsent(type.getName(), ointerface);
@@ -430,7 +445,7 @@ public class EJBLookup {
                 continue;
             used_strategy = strat;
             try {
-                final Hashtable<String, String> env = environment != null ? environment : new Hashtable<String, String>();
+                final Hashtable<String, String> env = environment != null ? new Hashtable<String, String>(environment) : new Hashtable<String, String>();
                 prepareEnvironment(strat, env);
                 ctx = new InitialContext(env);
                 ctx.lookup(buildName(appName, type));
