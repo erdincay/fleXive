@@ -1961,7 +1961,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 sql.setLength(0);
             } else if (!disableAssignment) {
                 //find all (directly) derived assignments, flag them as 'regular' assignments and set them as new base
-                ps = breakAssignmentInheritance(con, assignment, sql);
+                breakAssignmentInheritance(con, ps, sql, affectedAssignments.toArray(new FxAssignment[affectedAssignments.size()]));
             }
 
             //security checks
@@ -2128,35 +2128,40 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      * Find all (directly) derived assignments and flag them as 'regular' assignments and set them as new base
      *
      * @param con        an open and valid connection
-     * @param assignment the assignment to 'break'
-     * @param sql        query builder
+     * @param ps         prepared statement
+     * @param sql        string builder
+     * @param assignments the assignments to 'break'
      * @return used ps
      * @throws FxNotFoundException         on errors
      * @throws FxInvalidParameterException on errors
      * @throws java.sql.SQLException       on errors
      */
-    private PreparedStatement breakAssignmentInheritance(Connection con, FxAssignment assignment,
-                                                         StringBuilder sql) throws SQLException, FxNotFoundException, FxInvalidParameterException {
+    private void breakAssignmentInheritance(Connection con, PreparedStatement ps,
+                                                         StringBuilder sql, FxAssignment... assignments) throws SQLException, FxNotFoundException, FxInvalidParameterException {
+        sql.setLength(0);
         sql.append("UPDATE ").append(TBL_STRUCT_ASSIGNMENTS).append(" SET BASE=? WHERE BASE=?"); // AND TYPEDEF=?");
-        PreparedStatement ps = con.prepareStatement(sql.toString());
+        if (ps != null && !ps.isClosed())
+            ps.close();
+        ps = con.prepareStatement(sql.toString());
         ps.setNull(1, Types.NUMERIC);
-        ps.setLong(2, assignment.getId());
-        int count = 0;
-        //'toplevel' fix
-//        for(FxType types: assignment.getAssignedType().getDerivedTypes() ) {
-//            ps.setLong(3, types.getId());
-        count += ps.executeUpdate();
-//        }
-        LOG.info("Updated " + count + " assignments to become the new base assignment");
-        /* sql.setLength(0);
-        //now fix 'deeper' inherited assignments
-        for(FxType types: assignment.getAssignedType().getDerivedTypes() ) {
-            for( FxType subderived: types.getDerivedTypes())
-                _fixSubInheritance(ps, subderived, types.getAssignment(assignment.getXPath()).getId(), assignment.getId());
-        }*/
+        for(FxAssignment as: assignments) {
+            ps.setLong(2, as.getId());
+            int count = 0;
+            //'toplevel' fix
+    //        for(FxType types: assignment.getAssignedType().getDerivedTypes() ) {
+    //            ps.setLong(3, types.getId());
+            count += ps.executeUpdate();
+    //        }
+            LOG.info("Updated " + count + " assignments to become the new base assignment");
+            /* sql.setLength(0);
+            //now fix 'deeper' inherited assignments
+            for(FxType types: assignment.getAssignedType().getDerivedTypes() ) {
+                for( FxType subderived: types.getDerivedTypes())
+                    _fixSubInheritance(ps, subderived, types.getAssignment(assignment.getXPath()).getId(), assignment.getId());
+            }*/
+        }
         ps.close();
         sql.setLength(0);
-        return ps;
     }
 
     /*private void _fixSubInheritance(PreparedStatement ps, FxType type, long newBase, long assignmentId) throws SQLException, FxInvalidParameterException, FxNotFoundException {

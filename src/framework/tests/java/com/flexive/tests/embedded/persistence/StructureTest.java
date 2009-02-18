@@ -437,6 +437,52 @@ public class StructureTest {
         assert testType.getAssignment("/TestAssignmentRemoveProperty2").getBaseAssignmentId() == FxAssignment.NO_PARENT;
         assert testType.getAssignment("/TestAssignmentRemoveProperty3").getBaseAssignmentId() == testType.getAssignment("/TestAssignmentRemoveProperty2").getId();
 
+        // test if derived sub-assignments of a derived group are correctly
+        // dereferenced from base assignments if parent group is removed
+
+        //create base group with assignment
+        FxGroupEdit ge = FxGroupEdit.createNew("TestRemoveGroupBase", desc, hint, true, new FxMultiplicity(0, 1));
+        long baseGrpId = ae.createGroup(testId, ge, "/");
+        FxGroupAssignment baseGrp = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(baseGrpId);
+        FxPropertyEdit basePe = FxPropertyEdit.createNew("TestRemoveGroupBaseProperty", desc, hint, true, new FxMultiplicity(0, 1),
+                true, structACL, FxDataType.String1024, new FxString(FxString.EMPTY),
+                true, null, null, null);
+        long baseAssId = ae.createProperty(testId, basePe, baseGrp.getXPath());
+
+        //verify that property assignment is child of group
+        FxPropertyAssignment baseAss= (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(baseAssId);
+        assert baseAss.getParentGroupAssignment().getId() == baseGrp.getId();
+
+        //create derived group assignment with derived sub assignments
+        long derivedGrpId = ae.save(FxGroupAssignmentEdit.createNew(baseGrp, CacheAdmin.getEnvironment().getType(testId), "TestRemoveGroupDerived", "/"), true);
+        FxGroupAssignment derivedGrp = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(derivedGrpId);
+
+        //verify that group is derived
+        assert derivedGrp.isDerivedAssignment() && derivedGrp.getBaseAssignmentId() == baseGrp.getId();
+
+        //verify that derived group contains derived assignment from base group
+        boolean found = false;
+        long derivedAssId=-1;
+        for (FxAssignment a : derivedGrp.getAssignments()) {
+            if (a.isDerivedAssignment() && a.getBaseAssignmentId() == baseAss.getId()) {
+                found = true;
+                derivedAssId = a.getId();
+                break;
+            }
+        }
+        assert found;
+
+        //remove base group (together with its sub assignments)
+        ae.removeAssignment(baseGrp.getId());
+
+        //verify that derived group exists and has been dereferenced
+        assert !CacheAdmin.getEnvironment().getAssignment(derivedGrp.getId()).isDerivedAssignment() &&
+                CacheAdmin.getEnvironment().getAssignment(derivedGrp.getId()).getBaseAssignmentId() == FxAssignment.NO_PARENT;
+
+        //verify that derived assignment exists and has been dereferenced
+        assert !CacheAdmin.getEnvironment().getAssignment(derivedAssId).isDerivedAssignment() &&
+                CacheAdmin.getEnvironment().getAssignment(derivedAssId).getBaseAssignmentId() == FxAssignment.NO_PARENT;
+
         te.remove(testId);
     }
 

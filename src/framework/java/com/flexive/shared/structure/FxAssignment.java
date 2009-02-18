@@ -226,7 +226,7 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
     }
 
     /**
-     * Returns if this assignment is the child of another assignment or if it is directly attached to a FxType
+     * Returns true if this assignment is the child of another assignment or false if it is directly attached to a FxType
      *
      * @return parent assignment
      */
