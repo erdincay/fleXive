@@ -13,6 +13,12 @@
 <ui:composition template="/adm/contentTemplate.xhtml">
 
 <ui:define name="body">
+    <script type="text/javascript">
+            function transferValueToUserName() {
+                var value = document.getElementById("frm:loginName").value;
+                document.getElementById("frm:name").value = value;
+            }
+    </script>
     <a4j:form id="frm" >
         <adm:tab label="#{fxMessageBean['Account.label.create']}" active="true" id="tab1"/>
         <t:saveState value="#{accountBean.groups}"/>
@@ -23,7 +29,7 @@
             <c:if test="${fxSystemBean.userTicket.globalSupervisor}">
                 <h:selectOneListbox id="mandator" value="#{accountBean.mandator}" size="1"
                                     converter="SelectableConverter" required="true">
-                    <f:selectItems value="#{fxSelectBean.mandatorsForEdit}" />
+                    <f:selectItems value="#{fxSelectBean.mandatorsForEditNoEmpty}" />
                     <a4j:support ajaxSingle="true" event="onchange" reRender="groups" eventsQueue="updateResults"/>
                 </h:selectOneListbox>
             </c:if>
@@ -39,7 +45,7 @@
 
         <!-- ============================================ -->
         <fx:formRow label="#{fxMessageBean['Account.field.loginName']}" id="loginName" newLine="false">
-            <h:inputText id="loginName" value="#{accountBean.account.loginName}"/>
+            <h:inputText id="loginName" value="#{accountBean.account.loginName}"  onkeyup="transferValueToUserName();"/>
         </fx:formRow>
         <fx:formRow label="#{fxMessageBean['Account.field.userName']}" id="name">
             <h:inputText id="name" value="#{accountBean.account.name}"/>
