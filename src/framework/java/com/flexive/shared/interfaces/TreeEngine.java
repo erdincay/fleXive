@@ -322,8 +322,9 @@ public interface TreeEngine {
      * @param mode tree mode to use (Live or Edit tree)
      * @param id   the id to start with
      * @return the id chain, or null if the node does not exist
+     * @throws FxApplicationException on errors
      */
-    long[] getReverseIdChain(FxTreeMode mode, long id);
+    long[] getReverseIdChain(FxTreeMode mode, long id) throws FxApplicationException;
 
     /**
      * Returns a list of paths made up of FQN's for the given id's
@@ -375,10 +376,11 @@ public interface TreeEngine {
     //----------------------
 
     /**
-     * Populate the tree with test data
+     * Populate the tree with test data. If no maxLevel is given, a default of 3 is assumed.
      *
      * @param mode tree mode
+     * @param maxLevel the number of nodes to be created as children of the root node (0 will not create any data, no value will create 3).
      * @throws FxApplicationException on errors
      */
-    void populate(FxTreeMode mode) throws FxApplicationException;
+    void populate(FxTreeMode mode, int... maxLevel) throws FxApplicationException;
 }

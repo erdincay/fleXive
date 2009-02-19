@@ -32,27 +32,37 @@
 package com.flexive.tests.embedded;
 
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxLanguage;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.content.FxPK;
-import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.exceptions.FxLogoutFailedException;
-import com.flexive.shared.interfaces.ContentEngine;
-import com.flexive.shared.interfaces.ScriptingEngine;
-import com.flexive.shared.interfaces.TreeEngine;
+import com.flexive.shared.content.FxContent;
+import com.flexive.shared.exceptions.*;
+import com.flexive.shared.interfaces.*;
 import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.scripting.FxScriptInfo;
-import com.flexive.shared.structure.FxType;
+import com.flexive.shared.structure.*;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.tree.FxTreeNodeEdit;
 import com.flexive.shared.value.FxString;
+import com.flexive.shared.value.FxReference;
+import com.flexive.shared.value.ReferencedContent;
 import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
+import com.flexive.core.storage.genericSQL.GenericTreeStorageSpreaded;
+import com.flexive.core.Database;
 import org.testng.Assert;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
+import static org.testng.Assert.assertTrue;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.apache.commons.lang.StringUtils;
+import java.util.List;
+import java.sql.Connection;
 
 /**
  * Tree engine tests.
@@ -63,12 +73,16 @@ import org.apache.commons.lang.StringUtils;
 public class FxTreeTest {
     TreeEngine tree;
     ScriptingEngine scripting;
+    ContentEngine ce;
+    TypeEngine ty;
 
     @BeforeClass
     public void beforeClass() throws Exception {
         login(TestUsers.SUPERVISOR);
         tree = EJBLookup.getTreeEngine();
         scripting = EJBLookup.getScriptingEngine();
+        ce = EJBLookup.getContentEngine();
+        ty = EJBLookup.getTypeEngine();
         EJBLookup.getDivisionConfigurationEngine().put(SystemParameters.TREE_CHECKS_ENABLED, true);
     }
 
@@ -209,6 +223,10 @@ public class FxTreeTest {
                 equals(tree.getLabels(mode, node1_2_loaded.getId()).get(0)) :
                 "Expected [/" + getNodeLabel(42).getBestTranslation() + "/" + getNodeLabel(2).getBestTranslation() + "] got: [" +
                         tree.getLabels(mode, node1_2_loaded.getId()).get(0) + "]";
+        // verify unknown id return value
+        final int invalidId = 999999;
+        final String expectedOutcome = "/<unknown:" + invalidId + ">";
+        assertEquals(tree.getLabels(mode, invalidId).get(0), expectedOutcome);
         FxTreeNodeEdit node1_3 = FxTreeNodeEdit.createNewChildNode(node1_loaded).setName("3").setLabel(getNodeLabel(3)).setMode(mode);
         long id1_3 = tree.save(node1_3);
         FxTreeNode node1_3_loaded = tree.getNode(mode, id1_3);
@@ -320,15 +338,83 @@ public class FxTreeTest {
 
     /**
      * Test behaviour when contents that are references of a tree node are removed
+     * Expected behaviour: every tree node is a contentinstance itself. Removing the respective
+     * content instance should therefore remove the relevant entry from the tree;
+     * Live tree: childNodes are always removed!
      *
      * @throws FxApplicationException on errors
      */
     @Test
     public void contentRemoval() throws FxApplicationException {
         //clear live and edit tree
-        tree.clear(FxTreeMode.Edit);
+        FxPK contentPK;
+        FxTreeMode mode = FxTreeMode.Edit;
+        tree.clear(mode);
         tree.clear(FxTreeMode.Live);
-        //TODO: code me!
+        long[] nodes = createTestTree(mode);
+
+        FxTreeNode n1 = tree.getNode(mode, nodes[0]);
+        FxTreeNode n2 = tree.getNode(mode, nodes[1]);
+        FxTreeNode n3 = tree.getNode(mode, nodes[2]);
+        FxTreeNode childNode = tree.findChild(mode, nodes[1], "node_2_1");
+
+        assertEquals(tree.getPathById(mode, n1.getId()), "/node_1");
+        assertEquals(tree.getPathById(mode, n2.getId()), "/node_1/node_2");
+        assertEquals(tree.getPathById(mode, n3.getId()), "/node_1/node_2/node_3");
+        assertEquals(tree.getPathById(mode, childNode.getId()), "/node_1/node_2/node_2_1");
+
+        // get the content reference of node2 and remove the content
+        contentPK = n2.getReference();
+        ce.remove(contentPK);
+
+        // get the child node of nodes[0] which now must be "node_2_1"
+        FxTreeNode n4 = tree.findChild(mode, nodes[0], "node_2_1");
+        assertEquals(n4.getId(), childNode.getId());
+        // check the new paths
+        assertEquals(tree.getPathById(mode, n1.getId()), "/node_1");
+        assertEquals(tree.getPathById(mode, n3.getId()), "/node_1/node_3");
+        assertEquals(tree.getPathById(mode, childNode.getId()), "/node_1/node_2_1");
+        assertEquals(tree.getPathById(mode, n2.getId()), "_"); // no path for the removed node
+
+        try {
+            tree.getNode(mode, nodes[1]);
+            fail("Retrieving node " + nodes[1] + " should have thrown an exception");
+        } catch (FxLoadException e) {
+            // expected
+        }
+
+        // clean up
+        tree.remove(mode, nodes[0], true, true);
+
+        // perform tests in live tree: Removing a node from the live tree removes all its children (to avoid
+        // inconsistencies with the edit tree)
+        mode = FxTreeMode.Live;
+        nodes = createTestTree(mode);
+
+        n1 = tree.getNode(mode, nodes[0]);
+        n2 = tree.getNode(mode, nodes[1]);
+        n3 = tree.getNode(mode, nodes[2]);
+        childNode = tree.findChild(mode, nodes[1], "node_2_1");
+
+        assertEquals(tree.getPathById(mode, n1.getId()), "/node_1");
+        assertEquals(tree.getPathById(mode, n2.getId()), "/node_1/node_2");
+        assertEquals(tree.getPathById(mode, n3.getId()), "/node_1/node_2/node_3");
+        assertEquals(tree.getPathById(mode, childNode.getId()), "/node_1/node_2/node_2_1");
+
+        contentPK = n2.getReference();
+        ce.remove(contentPK);
+
+        try { // trying to find the same child node as in the edit tree should throw an exception
+            tree.findChild(mode, nodes[0], "node_2_1");
+            fail("Trying to retrieve node_2_1 should have thrown an exception");
+        } catch (FxNotFoundException e) {
+            // expected
+        }
+        assertEquals(tree.getPathById(mode, n1.getId()), "/node_1");
+        assertEquals(tree.getPathById(mode, childNode.getId()), "_");
+
+        // clean up
+        tree.remove(mode, nodes[0], true, true);
     }
 
     /**
@@ -359,7 +445,6 @@ public class FxTreeTest {
     private void createSubNodes(FxTreeNode parent, int count) throws FxApplicationException {
         FxTreeNodeEdit node;
         for (int i = 0; i < count; i++) {
-//            System.out.println("Creating "+parent.getPath()+"/Node"+i);
             node = FxTreeNodeEdit.createNewChildNode(parent).setName("Node" + i);
             tree.save(node);
         }
@@ -457,13 +542,13 @@ public class FxTreeTest {
         ContentEngine co = EJBLookup.getContentEngine();
         FxPK testContent = co.save(co.initialize(FxType.ROOT_ID));
         String code = "println \"[Groovy script]=== AfterTreeNodeFolderReplacement node ${node.id}: ${node.path}. co-pk: ${content}, folder-pk: ${node.reference} ===\"\n" +
-                "com.flexive.tests.embedded.FxTreeTest.scriptCounter=42\n"+
+                "com.flexive.tests.embedded.FxTreeTest.scriptCounter=42\n" +
                 "if(content.id == node.reference.id) com.flexive.tests.embedded.FxTreeTest.scriptCounter=-1";
         FxScriptInfo siAfterTreeNodeFolderReplacement = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.AfterTreeNodeFolderReplacement,
                 "treeNodeFolderReplacement.gy", "Test script", code);
         try {
             Assert.assertEquals(scriptCounter, 0);
-            long nodeId = tree.save(FxTreeNodeEdit.createNew("Test1").
+            tree.save(FxTreeNodeEdit.createNew("Test1").
                     setMode(mode).
                     setParentNodeId(FxTreeNode.ROOT_NODE).
                     setReference(testContent));
@@ -484,10 +569,10 @@ public class FxTreeTest {
     @Test
     public void treeIteratorTest() throws FxApplicationException {
         tree.clear(FxTreeMode.Edit);
-        final String[] names = { "my", "virtual", "directory" };
+        final String[] names = {"my", "virtual", "directory"};
         final long[] nodes = tree.createNodes(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, 0, StringUtils.join(names, "/"));
         int index = 0;
-        for (FxTreeNode node: tree.getTree(FxTreeMode.Edit, nodes[0], 5)) {
+        for (FxTreeNode node : tree.getTree(FxTreeMode.Edit, nodes[0], 5)) {
             assert node.getName().equals(names[index]) : "Expected node name: " + names[index] + ", got: " + node.getName();
             index++;
         }
@@ -522,5 +607,402 @@ public class FxTreeTest {
         tn2.setParentNodeId(nodeId);
         long nodeId2 = tree.save(tn2);
         assert tree.getIdByLabelPath(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, "/NodeLabel/NodeLabel2") == nodeId2;
+    }
+
+    /**
+     * Tests #findChild and #getNodesWithReference methods
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test
+    public void findChildrenTest() throws FxApplicationException {
+        final String node2 = "node_2";
+        FxTreeMode mode1, mode2;
+        FxTreeNode result;
+        List<FxTreeNode> nodesWithRefResults;
+        FxPK pk;
+        final String contentXPath = "TREETESTTYPE/TESTPROP";
+        final String testData = "testdata, default lang 1234567890";
+        mode1 = FxTreeMode.Edit;
+        mode2 = FxTreeMode.Live;
+        long[] nodes = createTestTree(mode1);
+
+        // find by name
+        result = tree.findChild(mode1, nodes[0], node2);
+        assertEquals(result.getName(), node2);
+        try { // let's cause an exception
+            tree.findChild(mode2, nodes[0], node2);
+            fail("Should not be able to find " + node2 + " in Live tree");
+        } catch (FxNotFoundException e) {
+            // expected
+        }
+
+        pk = result.getReference();
+        // find by reference id
+        result = tree.findChild(mode1, nodes[0], pk.getId());
+        assertEquals(result.getName(), node2);
+        try { // let's cause an exception
+            tree.findChild(mode2, nodes[0], pk.getId());
+            fail("Should not be able to find " + node2 + " in Live tree");
+        } catch (FxNotFoundException e) {
+            // expected
+        }
+
+        // find by pk (reference)
+        result = tree.findChild(mode1, nodes[0], pk);
+        assertEquals(result.getName(), node2);
+        try { // let's cause an exception
+            tree.findChild(mode2, nodes[0], pk);
+            fail("Should not be able to find " + node2 + " in Live tree");
+        } catch (FxNotFoundException e) {
+            // expected
+        }
+
+        // find by FxReference
+        // this also tests creating a content instance of a type and using it as a tree node
+        FxTreeNode parent = tree.getNode(mode1, nodes[0]);
+        long typeId = createTestType();
+        FxPK contentPK = createTestContent(parent, typeId, testData);
+        FxReference ref = new FxReference(false, new ReferencedContent(contentPK));
+        result = tree.findChild(mode1, nodes[0], ref);
+        assertEquals(result.getReference(), contentPK);
+        try { // let's cause an exception
+            tree.findChild(mode2, nodes[0], ref);
+            fail("Should not be able to find " + contentPK + " in Live tree");
+        } catch (FxNotFoundException e) {
+            // expected
+        }
+
+        // retrieve all nodes with references
+        nodesWithRefResults = tree.getNodesWithReference(mode1, ref.getBestTranslation().getId());
+        int resultOK = 0;
+        FxTreeNode tmp = null;
+        for (FxTreeNode node : nodesWithRefResults) {
+            if (node.getParentNodeId() == nodes[0]) {
+                resultOK++;
+                tmp = node;
+            }
+        }
+        assertEquals(resultOK, 1); // should find exactly one node with a content reference
+        try {
+            FxContent co = ce.load(tmp.getReference());
+            assertEquals(co.getValue(contentXPath).toString(), testData);
+        } catch (NullPointerException e) { // Idea satisfaction guaranteed
+            fail("The FxContent should have been found");
+        }
+
+        // clean up
+        ce.remove(contentPK);
+        ty.remove(typeId);
+        tree.remove(mode1, nodes[0], true, true);
+    }
+
+    /**
+     * Tests the #getPaths() and #getPathById methods
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test
+    public void getPathsTest() throws FxApplicationException {
+        FxTreeMode mode;
+        mode = FxTreeMode.Edit;
+        long[] nodes = createTestTree(mode);
+        final String node2_2 = "node_2_2";
+        final String expectedPath1 = "/node_1/node_2/node_2_2";
+        final String expectedPath2 = "/node_1/node_2/node_3";
+        final long invalidNodeId = 1234567890;
+        int pathsOK = 0;
+
+        FxTreeNode node = tree.findChild(mode, nodes[1], node2_2);
+
+        // retrieve the paths for node_2.2 and node_3
+        for (String path : tree.getPaths(mode, nodes[2], node.getId())) {
+            if (path.equals(expectedPath1) || path.equals(expectedPath2))
+                pathsOK++;
+        }
+        assertEquals(pathsOK, 2); // should find 2 correct paths
+        pathsOK = 0; // reset
+
+        // assert that an invalid node id will result in an empty path (represented by "_")
+        String returnedPath = "";
+        for (String path : tree.getPaths(mode, invalidNodeId)) {
+            if (path == null || path.equals("_")) // returns an underscore if no path was found
+                returnedPath = path;
+            pathsOK++;
+        }
+        assertTrue(pathsOK > 0);
+        assertEquals(returnedPath, "_");
+
+        // test getPathById()
+        String path = tree.getPathById(mode, nodes[2]);
+        assertEquals(path, expectedPath2);
+
+        // clean up
+        tree.remove(mode, nodes[0], true, true);
+    }
+
+    /**
+     * STUB TEST: #setData and #getData are not implemented yet!!
+     * Tests the #setData and #getData methods
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test
+    public void setAndGetDataTest() throws FxApplicationException {
+        FxTreeMode mode = FxTreeMode.Edit;
+        final String data1 = "Template A";
+        final String data2 = "Template B";
+        long nodes[] = createTestTree(mode);
+
+        try {
+            tree.setData(mode, nodes[0], data1);
+            tree.setData(mode, nodes[1], data2);
+        } catch (RuntimeException e) {
+            // expected, method throws UnsupportedOperationException
+        }
+
+        try {
+            tree.getDatas(mode, nodes[2]);
+        } catch (RuntimeException e) {
+            // expected, method throws UnsupportedOperationException
+        }
+        // clean up
+        tree.remove(mode, nodes[0], true, true);
+    }
+
+    /**
+     * Tests the #getIdChain and #getReverseIdChainmethods
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test
+    public void getIdsTest() throws FxApplicationException {
+        FxTreeMode mode = FxTreeMode.Edit;
+        long nodes[] = createTestTree(mode);
+        long invalidId = 1234567890;
+
+        long[] ids = tree.getIdChain(mode, nodes[2]); // should return 1, nodes[0], nodes[1], nodes[2]
+        assertEquals(ids[0], 1);
+        assertEquals(ids[1], nodes[0]);
+        assertEquals(ids[2], nodes[1]);
+        assertEquals(ids[3], nodes[2]);
+
+        assertEquals(tree.getIdChain(mode, invalidId), null); // should be null
+
+        ids = tree.getReverseIdChain(mode, nodes[2]); // should return nodes[2], nodes[1], nodes[0], 1
+        assertEquals(ids[0], nodes[2]);
+        assertEquals(ids[1], nodes[1]);
+        assertEquals(ids[2], nodes[0]);
+        assertEquals(ids[3], 1);
+
+        // clean up
+        tree.remove(mode, nodes[0], true, true);
+    }
+
+    /**
+     * This tests the #populate method
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test
+    public void populateTest() throws FxApplicationException {
+        // create the testdata in the live tree, assert that names of the root nodes
+        FxTreeMode mode = FxTreeMode.Live;
+        FxTreeNode n1, n2, n3;
+        int maxLevel = 1;
+        final String node1 = "Level2_0_";
+        final String node2 = "Level3_0_9_";
+        final String node3 = "Level4_0_9_99_";
+
+        try {
+            tree.populate(mode, maxLevel);
+        } catch (FxApplicationException e) {
+            fail(e.getMessage());
+        }
+        n1 = tree.findChild(mode, 1, node1);
+        n2 = tree.findChild(mode, n1.getId(), node2);
+        n3 = tree.findChild(mode, n2.getId(), node3);
+
+        assertEquals(n1.getName(), node1);
+        assertEquals(n2.getName(), node2);
+        assertEquals(n3.getName(), node3);
+
+        //clean up
+        tree.remove(mode, n1.getId(), true, true);
+    }
+
+
+    /**
+     * GenericTreeStorage: #setData method
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test
+    public void genericTreeStorageSetDataTest() throws FxApplicationException {
+        FxTreeMode mode = FxTreeMode.Edit;
+        long[] nodes = createTestTree(mode);
+        String data = "TEMPLATE A";
+        TreeStorage treeStorage = new TreeStorage();
+
+        Connection con = null;
+        try {
+            con = Database.getDbConnection();
+            treeStorage.setData(con, mode, nodes[0], data);
+
+            FxTreeNode n = tree.getNode(mode, nodes[0]);
+            assertEquals(n.getData(), data);
+
+        } catch (Throwable t) {
+            fail("GenericTreeStorage #setData shouldn't throw an exception. Exception: " + t.getMessage());
+            t.printStackTrace();
+        } finally {
+            Database.closeObjects(FxTreeTest.class, con, null);
+            // clean up
+            tree.remove(mode, nodes[0], true, true);
+        }
+    }
+
+    /**
+     * GenericTreeStorage: #copy & #getCopyOfCount (explicitly)
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test
+    public void genericTreeStorageGetCopyOfCountTest() throws FxApplicationException {
+        FxTreeMode mode = FxTreeMode.Edit;
+        long[] nodes = createTestTree(mode);
+        long typeId = createTestType();
+        FxTreeNode node = tree.getNode(mode, nodes[0]);
+        final String testData = "TESTDATA TO BE COPIED";
+        final int expectedCopyCount = 1; // expected copy count result - we will copy a node exactly once
+        TreeStorage treeStorage = new TreeStorage();
+        FxPK contentPK = createTestContent(node, typeId, testData);
+        FxTreeNode contentNode1 = tree.findChild(mode, nodes[0], contentPK);
+
+        long copyId = tree.copy(mode, contentNode1.getId(), nodes[2], 0);
+        FxTreeNode contentNode2 = tree.findChild(mode, nodes[2], contentPK); // get the new tree node
+
+        assertEquals(copyId, contentNode2.getId());
+        assertEquals(contentNode2.getName(), contentNode1.getName());
+        assertEquals(contentNode1.getReference(), contentNode2.getReference());
+
+        Connection con = null;
+        try {
+            con = Database.getDbConnection();
+            int actualCopyCount = treeStorage.getCopyOfCount(con, mode, "", nodes[2], copyId);
+            assertEquals(actualCopyCount, expectedCopyCount);
+        } catch (Exception e) {
+            fail("GenericTreeStorage #getCopyOfCount shouldn't throw an exception. Exception: " + e.getMessage());
+        } finally {
+            Database.closeObjects(FxTreeTest.class, con, null);
+            // clean up
+            ce.remove(contentPK);
+            ty.remove(typeId);
+            tree.remove(mode, nodes[0], true, true);
+        }
+    }
+
+    /**
+     * GenericTreeStorage: #flagDirty method
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test
+    public void genericTreeStorageFlagDirtyTest() throws FxApplicationException {
+        TreeStorage treeStorage = new TreeStorage();
+        FxTreeMode mode = FxTreeMode.Edit;
+        long nodeId = createTestTree(mode)[0];
+
+        Connection con = null;
+        try {
+            con = Database.getDbConnection();
+            treeStorage.flagDirty(con, mode, nodeId);
+            FxTreeNode n = tree.getNode(mode, nodeId);
+            assertTrue(n.isDirty());
+        } catch (Exception e) {
+            fail("Failed to flag node " + nodeId + " dirty. Exception: " + e.getMessage());
+        } finally {
+            Database.closeObjects(FxTreeTest.class, con, null);
+            // clean up
+            tree.remove(mode, nodeId, true, true);
+        }
+    }
+
+    /**
+     * Helper class for testing GenericTreeStorage methods
+     */
+    class TreeStorage extends GenericTreeStorageSpreaded {
+        public TreeStorage() {
+            super();
+        }
+
+        public int getCopyOfCount(Connection con, FxTreeMode mode, String copyOfPrefix, long parentNodeId, long nodeId) throws FxTreeException {
+            return super.getCopyOfCount(con, mode, copyOfPrefix, parentNodeId, nodeId);
+        }
+
+        public void setData(Connection con, FxTreeMode mode, long nodeId, String data) throws FxApplicationException {
+            super.setData(con, mode, nodeId, data);
+        }
+
+        public void flagDirty(Connection con, FxTreeMode mode, long nodeId) throws FxUpdateException {
+            super.flagDirty(con, mode, nodeId);
+        }
+    }
+
+
+    /**
+     * Helper method creates a test tree
+     *
+     * @param mode FxTreeMode (e.g. .Edit)
+     * @return long[] array of tree node ids
+     * @throws FxApplicationException on errors
+     */
+    private long[] createTestTree(FxTreeMode mode) throws FxApplicationException {
+        final long[] nodes = tree.createNodes(mode, FxTreeNode.ROOT_NODE, 0, "node_1/node_2/node_3");
+        tree.createNodes(mode, (int) nodes[1], 0, "node_2_1");
+        tree.createNodes(mode, (int) nodes[1], 1, "node_2_2");
+        tree.createNodes(mode, (int) nodes[2], 0, "node_3_1");
+        return nodes;
+    }
+
+    /**
+     * Creates a test type
+     *
+     * @return the id of the test type
+     * @throws FxApplicationException on errors
+     */
+    private long createTestType() throws FxApplicationException {
+        long typeId = EJBLookup.getTypeEngine().save(FxTypeEdit.createNew("TREETESTTYPE", new FxString("Tree test type"),
+                CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()), null));
+
+        EJBLookup.getAssignmentEngine().createProperty(typeId, FxPropertyEdit.createNew(
+                "TESTPROP", new FxString(true, FxLanguage.ENGLISH, "TESTPROP"), new FxString(true, FxLanguage.ENGLISH, "TESTPROP"),
+                new FxMultiplicity(0, 5), CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                FxDataType.String1024).setMultiLang(false), "/");
+
+        return typeId;
+    }
+
+    /**
+     * Creates a test content instance for the reference search and attaches the content to a given FxTreeNode
+     *
+     * @param parentNode the parent FxTreeNode to which the content should be attached
+     * @param typeId     the id of the type for which the content instance will be created
+     * @param testData   a String value for test data
+     * @return FxPK the content instance PK
+     * @throws FxApplicationException on errors
+     */
+    private FxPK createTestContent(FxTreeNode parentNode, long typeId, String testData) throws FxApplicationException {
+        // create content for testing - will produce console output
+        FxString data = new FxString(false, testData);
+
+        FxContent co = ce.initialize(typeId);
+        FxPK contentPK = ce.save(co);
+        co = ce.load(contentPK);
+        co.setValue("/TESTPROP[1]", data);
+        contentPK = ce.save(co);
+        tree.save(FxTreeNodeEdit.createNew(String.valueOf(contentPK)).setParentNodeId(parentNode.getId()).setReference(contentPK));
+
+        return contentPK;
     }
 }

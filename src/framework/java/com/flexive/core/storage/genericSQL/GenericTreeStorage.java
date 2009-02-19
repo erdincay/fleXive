@@ -1209,7 +1209,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
             // Update the childcount of the new parents
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM " + getTable(mode) + " WHERE PARENT=" + parentNodeId + " AND NAME LIKE " +
-                    "(SELECT CONCAT(CONCAT('" + copyOfPrefix + "%',NAME),'(%)') FROM " + getTable(mode) + " WHERE ID=" + nodeId + ")");
+                    "(SELECT CONCAT(CONCAT('" + copyOfPrefix + "%',NAME),'%') FROM " + getTable(mode) + " WHERE ID=" + nodeId + ")");
             int result = 0;
             if (rs.next()) {
                 result = rs.getInt(1);
@@ -1229,9 +1229,8 @@ public abstract class GenericTreeStorage implements TreeStorage {
     /**
      * {@inheritDoc}
      */
-    public void populate(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode) throws FxApplicationException {
+    public void populate(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, int maxLevel) throws FxApplicationException {
         try {
-            int maxLevel = 3;
             for (int i = 0; i < maxLevel; i++) {
                 LOG.info("Creating level [" + (i + 1) + "/" + maxLevel + "]");
                 String name = "Level2_[" + i + "]";

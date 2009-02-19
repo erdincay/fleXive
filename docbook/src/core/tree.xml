@@ -102,6 +102,13 @@
             dirty in the edit tree. All nodes in the edit tree that do not exist in the live tree are flagged dirty
             as well. The dirty flag basically helps to visualize which nodes in the edit tree differ from nodes in the live tree.
         </para>
+        <para>
+            Removing a node from the
+            <emphasis>live</emphasis>
+            tree will also remove all of its subnodes. This ensures
+            <emphasis>data consistency</emphasis>
+            between the two trees.
+        </para>
     </section>
 
     <section xml:id="core_tree_examples">

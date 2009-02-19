@@ -57,9 +57,9 @@ import com.flexive.shared.tree.FxTreeNodeEdit;
 import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.FxString;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import javax.annotation.Resource;
 import javax.ejb.*;
 import java.sql.Connection;
@@ -679,15 +679,17 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public String[] getDatas(FxTreeMode mode, long id) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     /**
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public long[] getReverseIdChain(FxTreeMode mode, long id) {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public long[] getReverseIdChain(FxTreeMode mode, long id) throws FxApplicationException {
+        long[] chain = getIdChain(mode, id);
+        ArrayUtils.reverse(chain);
+        return chain;
     }
 
     /**
@@ -695,7 +697,24 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void setData(FxTreeMode mode, long nodeId, String data) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        throw new UnsupportedOperationException("Not yet implemented");
+        // provisional implementation
+        /*
+        Connection con = null;
+        try {
+            con = Database.getDbConnection();
+            StorageManager.getTreeStorage().setData(con, mode, nodeId, data);
+            FxContext.get().setTreeWasModified();
+        } catch (FxApplicationException e) {
+            ctx.setRollbackOnly();
+            throw e;
+        } catch (Throwable t) {
+            ctx.setRollbackOnly();
+            throw new FxUpdateException(LOG, t, "ex.tree.setData.failed", data, nodeId, t.getMessage());
+        } finally {
+            Database.closeObjects(TreeEngineBean.class, con, null);
+        }
+        */
     }
 
     /**
@@ -804,11 +823,12 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void populate(FxTreeMode mode) throws FxApplicationException {
+    public void populate(FxTreeMode mode, int... maxLevel) throws FxApplicationException {
+        final int defLevel = 3; // "default" of 3 data population nodes
         Connection con = null;
         try {
             con = Database.getDbConnection();
-            StorageManager.getTreeStorage().populate(con, seq, contentEngine, mode);
+            StorageManager.getTreeStorage().populate(con, seq, contentEngine, mode, (maxLevel.length > 0 ? maxLevel[0] : defLevel));
             FxContext.get().setTreeWasModified();
         } catch (FxApplicationException ae) {
             ctx.setRollbackOnly();
