@@ -35,6 +35,7 @@ package com.flexive.war.beans.admin.main;
 
 
 import com.flexive.faces.FxJsfUtils;
+import com.flexive.faces.beans.SelectBean;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.*;
@@ -286,6 +287,11 @@ public class AccountBean {
     }
 
     public Mandator getMandator() {
+        if (this.mandator == null) {
+            List<SelectItem> mandators = FxJsfUtils.getManagedBean(SelectBean.class).getMandatorsForEditNoEmpty();
+            if (mandators.size() >0)
+            setMandator((Mandator)mandators.get(0).getValue());
+        }
         return mandator;
     }
 
