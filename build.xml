@@ -502,6 +502,9 @@
             <metainf dir="${flexive.base.framework.dir}/resources/jboss">
                 <include name="jboss-app.xml"/>
             </metainf>
+            <metainf dir="${flexive.base.framework.dir}/resources/glassfish">
+                <include name="sun-application.xml"/>
+            </metainf>
             <metainf dir="${resources.ui.shared.dir}">
                 <include name="geronimo-application.xml"/>
                 <include name="weblogic-application.xml"/>
@@ -631,9 +634,10 @@
         </copy>
         <delete dir="${flexive.dist.extlib.dir}" includes="el-ri.jar, el-api.jar, jsf-impl.jar"/>
 
-        <!-- Copy global deployment descriptots -->
+        <!-- Copy global deployment descriptors -->
         <copy todir="${flexive.dist.meta.dir}">
             <fileset file="${flexive.base.framework.dir}/resources/jboss/jboss-app.xml"/>
+            <fileset file="${flexive.base.framework.dir}/resources/glassfish/sun-application.xml"/>
         </copy>
         <!--<copy file="${flexive.base.build.dir}/flexive.ear" tofile="${flexive.dist.dir}/flexive.ear" overwrite="true"/>-->
 

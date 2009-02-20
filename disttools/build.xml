@@ -180,6 +180,7 @@ Base directory:      ${project.basedir}]]>
             <zipfileset prefix="lib" dir="${dist.extlib.dir}" includes="**/*" excludes="${extlib.excludes}"/>
             <zipfileset prefix="META-INF" file="META-INF/jboss-app.xml"/>
             <zipfileset prefix="META-INF" file="META-INF/geronimo-application.xml"/>
+            <zipfileset prefix="META-INF" file="META-INF/sun-application.xml"/>
             <fileset file="${dist.lib.dir}/flexive-ejb.jar"/>
 
             <!-- Include flexive applications. The WAR and EJB files have been registered in

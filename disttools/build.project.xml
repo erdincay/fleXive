@@ -150,6 +150,7 @@ db.config.create
             <zipfileset prefix="lib" dir="${basedir}/lib" includes="**/*.jar"/>
             <zipfileset prefix="lib" dir="${build.dir}" includes="flexive-drop-resources.jar"/>
             <zipfileset prefix="META-INF" file="${dist.basedir}/META-INF/geronimo-application.xml"/>
+            <zipfileset prefix="META-INF" file="${dist.basedir}/META-INF/sun-application.xml"/>
             <zipfileset prefix="META-INF" file="${dist.basedir}/META-INF/jboss-app.xml"/>
             <fileset file="${dist.lib.dir}/flexive-ejb.jar"/>
 
