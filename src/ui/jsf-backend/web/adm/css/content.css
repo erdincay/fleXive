@@ -39,6 +39,8 @@ a {
     background-image: url("../images/commandButton/buttonBG.gif");
     overflow: hidden;
     padding-right: 5px;
+    padding-top:4px;
+    [if IE] padding-top:3px;
     text-decoration: none;
     color: gray;
     font-weight: bold;
@@ -51,7 +53,7 @@ a {
     text-decoration: none;
     color: gray;
     font-weight: bold;
-    padding-top:3px;
+    vertical-align:middle;
 }
 
 .commandButtonIcon {
@@ -60,7 +62,7 @@ a {
     background-image: url("../images/commandButton/buttonBG.gif");
     padding-right: 8px;
     padding-left: 7px;
-    padding-top: 2px;
+    padding-top: 3px;
     height:22px;
     float:left;
 }
