@@ -1,23 +1,52 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
       xmlns:t="http://myfaces.apache.org/tomahawk"
       xmlns:c="http://java.sun.com/jstl/core"
-      xmlns:s="http://myfaces.apache.org/sandbox"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
       xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
       xmlns:fx="http://www.flexive.com/jsf/core">
 <body>
 
 <ui:composition template="/adm/contentTemplate.xhtml">
 
     <ui:define name="body">
+        <a4j:region>
+            <h:form>
+                <a4j:poll id="poll" interval="1000" enabled="#{testRunnerBean.running}" reRender="info"/>
+            </h:form>
+        </a4j:region>
         <h:form id="frm">
+
             <adm:tab label="#{fxMessageBean['TestRunner.tabtitle.main']}" active="true" id="tab1"/>
 
-            I'm testrunner
-            <adm:commandButton id="runTests" bean="#{testRunnerBean}" action="runTests" label="TestRunner.button.runTests" location="both" icon="search"/> 
+            <h:panelGrid columns="2" id="path" rendered="#{!testRunnerBean.running}">
+                <h:column>#{fxMessageBean['TestRunner.field.outputPath']}</h:column>
+                <h:column><h:inputText rendered="#{!testRunnerBean.running}" value="#{testRunnerBean.outputPath}"/></h:column>
+            </h:panelGrid>
+
+
+            <h:panelGrid columns="2" id="info" rendered="#{testRunnerBean.running}">
+                <h:column>#{fxMessageBean['TestRunner.field.currentTest']}</h:column>
+                <h:column>#{testRunnerBean.currentTest}</h:column>
+
+                <h:column>#{fxMessageBean['TestRunner.field.success']}</h:column>
+                <h:column>#{testRunnerBean.testSuccess}</h:column>
+
+                <h:column>#{fxMessageBean['TestRunner.field.failure']}</h:column>
+                <h:column>#{testRunnerBean.testFailure}</h:column>
+
+                <h:column>#{fxMessageBean['TestRunner.field.skipped']}</h:column>
+                <h:column>#{testRunnerBean.testSkipped}</h:column>
+            </h:panelGrid>
+
+            <br/>
+            <br/>
+            <adm:commandButton id="runTests" bean="#{testRunnerBean}" action="runTests" rendered="#{!testRunnerBean.running}"
+                               labelKey="TestRunner.button.runTests" location="both" icon="search"/>
         </h:form>
     </ui:define>
 

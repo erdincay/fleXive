@@ -66,6 +66,8 @@
         <path path="${build.ui.shared.classes.dir}"/>
         <path path="${build.ui.components.dir}/jsf-core/classes"/>
         <path refid="classpath.build.framework"/>
+        <!-- Include TestNG for test runner plugin -->
+        <fileset dir="${flexive.lib.dir}/testNG" includes="*.jar"/>
     </path>
 
     <fileset id="jar.ejb.classes" dir="${build.framework.classes.dir}">
@@ -521,23 +523,14 @@
             <zipfileset prefix="lib" dir="${build.ui.jar.dir}" includes="*.jar"/>
             <zipfileset prefix="lib" dir="${flexive.lib.dir}/xstream" includes="*.jar"/>
             <zipfileset prefix="lib" dir="${flexive.lib.dir}/mail" includes="*.jar"/>
-            <zipfileset prefix="lib" dir="${flexive.lib.dir}/text_extraction" includes="*.jar"/>
+            <zipfileset prefix="lib" dir="${flexive.lib.dir}/text_extraction"  includes="*.jar"/>
+            <zipfileset prefix="lib" dir="${flexive.lib.dir}/testNG">
+                <!-- include testNG only if target test.package.ear was invoked -->
+                <include name="testng*jar" if="package.testNG"/>
+            </zipfileset>
 
             <zipfileset prefix="lib" dir="${flexive.lib.dir}/jsf" includes="*.jar" excludes="jsf-api.jar, jsf-impl.jar,el-*.jar"/>
             <zipfileset prefix="lib" refid="flexive.lib.ui.ajax4jsf"/>
-
-            <!-- uncomment to create lib folder in ear -->
-            <!--<zipfileset dir="${lib.dir}" prefix="lib">
-				<include name="${sqlparser.jar}"/>
-                <include name="${htmlparser.jar}"/>
-            </zipfileset>
-            <zipfileset dir="${lib.dir}/groovy" prefix="lib">
-				<include name="*.jar"/>
-			</zipfileset>
-            <zipfileset dir="${build.ui.jar.dir}" prefix="lib">
-				<include name="flexive-webdav.jar"/>
-                <include name="flexive-web-shared.jar"/>
-            </zipfileset>-->
         </jar>
 	</target>
 

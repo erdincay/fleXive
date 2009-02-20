@@ -163,7 +163,18 @@
             </fileset>
         </jar>
     </target>
-	
+
+    <target name="tests.package.ear" depends="tests.compile.all" description="Builds flexive-tests.jar for inclusion in flexive.ear, including all testcases">
+        <mkdir dir="${flexive.build.framework.jar.dir}"/>
+        <jar destfile="${flexive.build.framework.jar.dir}/flexive-tests.jar">
+            <fileset dir="${tests.classes.dir}">
+                <include name="com/flexive/tests/**/*"/>
+                <include name="*.properties"/>
+            </fileset>
+        </jar>
+        <property name="package.testNG" value="true"/>
+    </target>
+
     <target name="tests.prepare" depends="emma.enable, compile.ui.shared, profile.netbeans.enable">
         <echo message="Preparing for tests ..."/>
         <mkdir dir="${tests.classes.dir}"/>

@@ -322,7 +322,6 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="OpenEJB" level="project" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>

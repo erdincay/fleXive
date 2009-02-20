@@ -31,18 +31,15 @@
  ***************************************************************/
 package com.flexive.tests.embedded;
 
-import org.testng.annotations.Test;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.AfterSuite;
-import com.flexive.shared.FxContext;
-import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
-import com.flexive.shared.security.UserTicket;
-import com.flexive.shared.interfaces.AccountEngine;
-import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.FxContext;
 import com.flexive.shared.configuration.DivisionData;
-import com.flexive.core.security.UserTicketImpl;
-import com.flexive.core.Database;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.interfaces.AccountEngine;
+import com.flexive.shared.security.UserTicket;
+import org.testng.annotations.AfterSuite;
+import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.Test;
 
 /**
  * OpenEJB embedded container bootstrap
@@ -54,6 +51,16 @@ import com.flexive.core.Database;
         "search", "tutorial", "benchmark", "environment", "mandator", "importexport",
         "roles"})
 public class ContainerBootstrap {
+
+    /**
+     * Check if tests are run from within an application server (ear)
+     *
+     * @return tests are run from within an application server (ear)
+     */
+    public static boolean runInEAR() {
+        return System.getProperty("flexive.tests.ear") != null;
+    }
+
     @BeforeSuite
     public void startup() {
         try {
@@ -70,7 +77,7 @@ public class ContainerBootstrap {
             ScriptingTest.allowTearDown = true;
             ScriptingTest.suiteShutDown();
             TestUsers.deleteUsers();
-            System.out.println("=== shutting down EJB3 container ===");
+            System.out.println("=== shutting down tests ===");
             AccountEngine accountEngine = EJBLookup.getAccountEngine();
             for (UserTicket ticket : accountEngine.getActiveUserTickets())
                 System.out.println("Still logged in: " + ticket);

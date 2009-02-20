@@ -44,6 +44,8 @@ import com.flexive.shared.value.mapper.InputMapper;
 import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import org.testng.annotations.BeforeClass;
+import org.testng.Assert;
 
 import java.util.Arrays;
 import java.util.List;
@@ -54,6 +56,9 @@ import java.util.List;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class QueryNodeTreeTests {
+
+    private final static int MAX_TRIES = 1000;
+
     /**
      * A primitive test node class.
      */
@@ -168,9 +173,12 @@ public class QueryNodeTreeTests {
         assert flatTree.getChildren().indexOf(child) == -1 : "Child not removed";
         assert flatTree.getChildren().size() == children - 2 : "Incorrent number of children";
 
+        int counter = 0;
         while (flatTree.getChildren().size() > 0) {
             assert flatTree.removeChild(flatTree.getChildren().get(0)).equals(
                     flatTree) : "Incorrent parent node";
+            if( counter++ > MAX_TRIES )
+                Assert.fail("Max tries exceeded! Remaining childs: "+flatTree.getChildren().size());
         }
 
         // test nested tree
@@ -187,9 +195,12 @@ public class QueryNodeTreeTests {
         QueryNode emptyNode = innerTree.getChild(innerTree.getChildren().size() - 1);
         assert emptyNode instanceof QueryOperatorNode : "Unexpected node type: " + emptyNode.getClass();
         assert innerTree.getChildren().indexOf(emptyNode) != -1 : "Test node not found";
+        counter = 0;
         while (emptyNode.getChildren().size() > 0) {
             QueryNode node = emptyNode.getChild(0);
             emptyNode.removeChild(node);
+            if( counter++ > MAX_TRIES )
+                Assert.fail("Max tries exceeded! Remaining childs: "+flatTree.getChildren().size());
         }
         assert innerTree.getChildren().indexOf(emptyNode) == -1 : "Empty test node not removed.";
     }

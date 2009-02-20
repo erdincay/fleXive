@@ -506,6 +506,8 @@ public class ScriptingTest {
      */
     @Test
     public void dropScriptTest() throws Exception {
+        if( ContainerBootstrap.runInEAR() )
+            return; //drops can not be tested within an ear
         Parameter<Boolean> dropParameter = ParameterFactory.newInstance(Boolean.class, "/scripts/runonce/", ParameterScope.DIVISION, "booleanParam", false);
         FxScriptInfo si;
         String dropName = "flexiveDropTest";

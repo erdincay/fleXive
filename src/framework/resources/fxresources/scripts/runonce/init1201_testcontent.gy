@@ -64,6 +64,13 @@ if (!FxContext.get().testDivision) {
     println "Not creating test fixture..."
     return
 }
+/*try {
+  Class.forName("com.flexive.tests.shared.FxValueTest")
+} catch (ClassNotFoundException e) {
+  println "Testclasses are not found/packaged ... not creating test fixture ..."
+  return
+}*/
+
 println "Creating test fixture - content..."
 
 // create 25 folder instances with single-language caption and comment

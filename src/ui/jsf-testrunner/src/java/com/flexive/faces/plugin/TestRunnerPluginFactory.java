@@ -53,7 +53,7 @@ public class TestRunnerPluginFactory implements PluginFactory {
                     new Plugin<TreePluginExecutor>() {
                         public void apply(TreePluginExecutor executor) {
                             executor.addNode("system", new TreeNodeWriter.Node("testRunnerNode",
-                                    "Test Runner", TreeNodeWriter.Node.TITLE_CLASS_LEAF, "search",
+                                    "Test Runner", TreeNodeWriter.Node.TITLE_CLASS_LEAF, "",
                                     FxJsfUtils.getRequest().getContextPath() + "/com.flexive.faces.web/testrunner/testRunner.jsf"));
                         }
                     });

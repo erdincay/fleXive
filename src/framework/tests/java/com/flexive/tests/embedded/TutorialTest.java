@@ -50,7 +50,7 @@ import org.testng.annotations.Test;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Test(groups = {"ejb", "tutorial"})
+@Test(groups = {"ejb", "tutorial", "skip.ear"})
 public class TutorialTest {
 
     private StructureTutorialExample st;

@@ -48,7 +48,7 @@ import java.io.File;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Test(groups = {"image", "imageParser"})
+@Test(groups = {"image", "imageParser", "skip.ear"})
 public class ImageParserTest {
 
     private static String testData =
@@ -122,7 +122,9 @@ public class ImageParserTest {
     public void parserTest() throws Exception {
         if (!FxMediaEngine.isImageMagickIdentifySupported())
             return;
-        assert IMParser.parse(new ByteArrayInputStream(FxSharedUtils.getBytes(testData))).startsWith(TEST_RESULT);
+        String parsed = IMParser.parse(new ByteArrayInputStream(FxSharedUtils.getBytes(testData)));
+        //xml header can vary depending on the underlying parser (encoding info, " vs ')
+        assert parsed.substring(parsed.indexOf("?>")).equals(TEST_RESULT.substring(TEST_RESULT.indexOf("?>")));
         FxSharedUtils.ProcessResult res = FxSharedUtils.executeCommand("identify", "-verbose", TEST_FILE_EXIF);
         String result = IMParser.parse(new ByteArrayInputStream(FxSharedUtils.getBytes(res.getStdOut())));
         assert result.indexOf("<Profile-exif>4604 bytes</Profile-exif>") > 0;

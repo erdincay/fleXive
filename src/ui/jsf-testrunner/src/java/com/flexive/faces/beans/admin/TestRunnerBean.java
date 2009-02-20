@@ -32,17 +32,90 @@
 package com.flexive.faces.beans.admin;
 
 import com.flexive.faces.messages.FxFacesMsgInfo;
+import com.flexive.testRunner.FxTestRunner;
+import com.flexive.testRunner.FxTestRunnerCallback;
+import org.testng.ITestResult;
+
 
 /**
  * JSF beans providing a simple runner for our TestNG tests.
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class TestRunnerBean {
+public class TestRunnerBean implements FxTestRunnerCallback {
+    protected boolean running = false;
+    protected int testSuccess = 0;
+    protected int testFailure = 0;
+    protected int testSkipped = 0;
+    protected ITestResult currentTest = null;
+    private String outputPath = null;
+
+
+    public void started(ITestResult iTestResult) {
+        this.currentTest = iTestResult;
+    }
+
+    public void addFailure(ITestResult iTestResult) {
+        testFailure++;
+    }
+
+    public void addSuccess(ITestResult iTestResult) {
+        testSuccess++;
+    }
+
+    public void addSkipped(ITestResult iTestResult) {
+        testSkipped++;
+    }
+
+    public void setRunning(boolean state) {
+        this.running = state;
+    }
+
+    public String getCurrentTest() {
+        return currentTest == null ? "-none-" : currentTest.getTestClass().getName() + "." + currentTest.getMethod().getMethodName();
+    }
+
+    public void resetTestInfo() {
+        testSuccess = 0;
+        testSkipped = 0;
+        testFailure = 0;
+        currentTest = null;
+    }
+
+    public boolean isRunning() {
+        return running;
+    }
+
+    public int getTestSuccess() {
+        return testSuccess;
+    }
+
+    public int getTestFailure() {
+        return testFailure;
+    }
+
+    public int getTestSkipped() {
+        return testSkipped;
+    }
+
+    public String getOutputPath() {
+        return outputPath;
+    }
+
+    public void setOutputPath(String outputPath) {
+        this.outputPath = outputPath;
+    }
+
     public String runTests() {
-        new FxFacesMsgInfo("TestRunner.nfo.running").addToContext();
-        // TODO: implement me
+        if (!isRunning()) {
+            if (!FxTestRunner.checkTestConditions(getOutputPath(), true))
+                return null;
+            FxTestRunner.runTests(this, getOutputPath());
+            new FxFacesMsgInfo("TestRunner.nfo.running").addToContext();
+        } else
+            new FxFacesMsgInfo("TestRunner.nfo.progress").addToContext();
         return null;
     }
 }
