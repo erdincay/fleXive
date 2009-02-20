@@ -121,7 +121,7 @@ public class FxCache implements FxCacheMBean, DynamicMBean {
             else if (!servers.contains(thisServer)) //only add if not contained already and not bound to a local address
                 servers.add(thisServer);
             globalPut(CacheAdmin.STREAMSERVER_BASE, CacheAdmin.STREAMSERVER_EJB_KEY, servers);
-            LOG.info("Added " + thisServer + " to available StreamServers (" + servers.size() + " total)");
+            LOG.info("Added " + thisServer + " to available StreamServers (" + servers.size() + " total) for cache " + getBackingCache().toString());
         } catch (Exception e) {
             LOG.error("Failed to start StreamServer. Error: " + e.getMessage(), e);
         }
