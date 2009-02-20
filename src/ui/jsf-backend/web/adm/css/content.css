@@ -39,8 +39,7 @@ a {
     background-image: url("../images/commandButton/buttonBG.gif");
     overflow: hidden;
     padding-right: 5px;
-    padding-top:4px;
-    [if IE] padding-top:3px;
+    padding-top:5px;
     text-decoration: none;
     color: gray;
     font-weight: bold;
