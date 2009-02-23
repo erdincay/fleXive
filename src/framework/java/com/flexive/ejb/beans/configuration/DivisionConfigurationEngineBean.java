@@ -243,7 +243,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
             }
             //lets see if we have a patch we can apply
             try {
-                final DBVendor dbVendor = Database.getDivisionData().getDbVendor();
+                final DBVendor dbVendor = FxContext.get().getDivisionData().getDbVendor();
                 final String dir = "fxresources/sql/" + dbVendor + "/";
                 String idxFile = dir + "resourceindex.flexive";
                 ClassLoader cl = Thread.currentThread().getContextClassLoader();
@@ -394,12 +394,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
      * {@inheritDoc}
      */
     public String getDatabaseInfo() {
-        try {
-            final DivisionData divisionData = Database.getDivisionData();
-            return "Division #" + divisionData.getId() + " - " + divisionData.getDbVendor().name() + " " + divisionData.getDbVersion();
-        } catch (SQLException e) {
-            LOG.error(e);
-            return "unknown";
-        }
+        final DivisionData divisionData = FxContext.get().getDivisionData();
+        return "Division #" + divisionData.getId() + " - " + divisionData.getDbVendor().name() + " " + divisionData.getDbVersion();
     }
 }

@@ -94,6 +94,7 @@ public class FxContext implements Serializable {
     private int runAsSystem;
     private UserTicket ticket;
     private long nodeId = -1;
+    private DivisionData divisionData;
 
     protected static UserTicket getLastUserTicket(HttpSession session) {
         return (UserTicket) session.getAttribute("LAST_USERTICKET");
@@ -570,6 +571,19 @@ public class FxContext implements Serializable {
         return contextPath;
     }
 
+    public DivisionData getDivisionData() {
+        if (divisionData == null) {
+            if (!DivisionData.isValidDivisionId(division)) {
+                throw new IllegalArgumentException("Unable to obtain DivisionData: Division not defined (" + division + ")");
+            }
+            try {
+                divisionData = EJBLookup.getGlobalConfigurationEngine().getDivisionData(division);
+            } catch (FxApplicationException e) {
+                throw e.asRuntimeException();
+            }
+        }
+        return divisionData;
+    }
 
     /**
      * Returns an independent copy of this context. Also clones the user ticket.

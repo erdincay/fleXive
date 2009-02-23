@@ -213,7 +213,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             ps.close();
             sb.setLength(0);
             //fix item references
-            switch (Database.getDivisionData().getDbVendor()) {
+            switch (FxContext.get().getDivisionData().getDbVendor()) {
                 case H2:
                     sb.append("UPDATE ").append(TBL_SELECTLIST_ITEM).
                             append(" SET PARENTID=? WHERE PARENTID IN (SELECT p.ID FROM ").append(TBL_SELECTLIST_ITEM).

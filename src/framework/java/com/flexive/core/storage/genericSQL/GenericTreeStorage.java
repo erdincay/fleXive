@@ -539,7 +539,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                     } else
                         addUnknownNodeId(ret, id);
                 } catch (SQLException e) {
-                    if (Database.getDivisionData().getDbVendor() == DBVendor.MySQL && "22001".equals(e.getSQLState())) {
+                    if (FxContext.get().getDivisionData().getDbVendor() == DBVendor.MySQL && "22001".equals(e.getSQLState())) {
                         //invalid node id in MySQL
                         addUnknownNodeId(ret, id);
                     } else

@@ -51,7 +51,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * Class handling Database stuff
@@ -270,46 +269,16 @@ public final class Database {
     }
 
     /**
-     * Retrieves DivisionData for current division
-     *
-     * @return DivisionData
-     * @throws SQLException If no DivisionData could be retrieved
-     */
-    public static DivisionData getDivisionData() throws SQLException {
-        final FxContext inf = FxContext.get();
-        // Check division
-        if (!DivisionData.isValidDivisionId(inf.getDivisionId())) {
-            throw new SQLException("Unable to obtain DivisionData: Division not defined (" + inf.getDivisionId() + ")");
-        }
-        try {
-            GlobalConfigurationEngine globalConfiguration = EJBLookup.getGlobalConfigurationEngine();
-            return globalConfiguration.getDivisionData(inf.getDivisionId());
-        } catch (FxNotFoundException exc) {
-            String sErr = "Failed to retrieve DivisionData for division " + inf.getDivisionId() + " (not configured).";
-            LOG.error(sErr);
-            throw new SQLException(sErr);
-        } catch (FxApplicationException exc) {
-            String sErr = "Failed to load configuration: " + exc.getMessage();
-            LOG.error(sErr);
-            throw new SQLException(sErr);
-        }
-    }
-
-    /**
      * Get a database vendor specific timestamp of the current time in milliseconds as Long
      *
      * @return database vendor specific timestamp of the current time in milliseconds as Long
      */
     public static String getTimestampFunction() {
-        try {
-            switch (getDivisionData().getDbVendor()) {
-                case MySQL:
-                    return "UNIX_TIMESTAMP()*1000";
-                case H2:
-                    return "TIMEMILLIS(NOW())";
-            }
-        } catch (SQLException e) {
-            LOG.error(e);
+        switch (FxContext.get().getDivisionData().getDbVendor()) {
+            case MySQL:
+                return "UNIX_TIMESTAMP()*1000";
+            case H2:
+                return "TIMEMILLIS(NOW())";
         }
         //default fallback
         return "UNIX_TIMESTAMP()*1000";
@@ -321,15 +290,11 @@ public final class Database {
      * @return database vendor specific "IF" function
      */
     public static String getIfFunction() {
-        try {
-            switch (getDivisionData().getDbVendor()) {
-                case MySQL:
-                    return "IF";
-                case H2:
-                    return "CASEWHEN";
-            }
-        } catch (SQLException e) {
-            LOG.error(e);
+        switch (FxContext.get().getDivisionData().getDbVendor()) {
+            case MySQL:
+                return "IF";
+            case H2:
+                return "CASEWHEN";
         }
         //default fallback
         return "IF";
@@ -342,15 +307,11 @@ public final class Database {
      * @return database vendor specific statement to enable or disable referential integrity checks
      */
     public static String getReferentialIntegrityChecksStatement(boolean enable) {
-        try {
-            switch (getDivisionData().getDbVendor()) {
-                case MySQL:
-                    return "SET FOREIGN_KEY_CHECKS=" + (enable ? 1 : 0);
-                case H2:
-                    return "SET REFERENTIAL_INTEGRITY " + (enable ? "TRUE" : "FALSE");
-            }
-        } catch (SQLException e) {
-            LOG.error(e);
+        switch (FxContext.get().getDivisionData().getDbVendor()) {
+            case MySQL:
+                return "SET FOREIGN_KEY_CHECKS=" + (enable ? 1 : 0);
+            case H2:
+                return "SET REFERENTIAL_INTEGRITY " + (enable ? "TRUE" : "FALSE");
         }
         //default fallback: nothing
         return "";
@@ -476,19 +437,15 @@ public final class Database {
         if (!(exc instanceof SQLException)) {
             return false;
         }
-        try {
-            int sqlErr = ((SQLException) exc).getErrorCode();
-            switch (getDivisionData().getDbVendor()) {
-                case MySQL:
-                    //see http://dev.mysql.com/doc/refman/5.1/en/error-messages-server.html
-                    // 1582 Example error: Duplicate entry 'ABSTRACT' for key 'UK_TYPEPROPS_NAME'
-                    return (sqlErr == 1062 || sqlErr == 1582);
-                case H2:
-                    return sqlErr == 23001;
+        int sqlErr = ((SQLException) exc).getErrorCode();
+        switch (FxContext.get().getDivisionData().getDbVendor()) {
+            case MySQL:
+                //see http://dev.mysql.com/doc/refman/5.1/en/error-messages-server.html
+                // 1582 Example error: Duplicate entry 'ABSTRACT' for key 'UK_TYPEPROPS_NAME'
+                return (sqlErr == 1062 || sqlErr == 1582);
+            case H2:
+                return sqlErr == 23001;
 
-            }
-        } catch (SQLException e) {
-            return false;
         }
 
         // final String sMsg = (exc.getMessage() == null) ? "" : exc.getMessage().toLowerCase();
@@ -514,20 +471,16 @@ public final class Database {
         if (!(exc instanceof SQLException)) {
             return false;
         }
-        try {
-            final int errorCode = ((SQLException) exc).getErrorCode();
-            switch (getDivisionData().getDbVendor()) {
-                case MySQL:
-                    //see http://dev.mysql.com/doc/refman/5.0/en/error-messages-server.html
-                    return errorCode == 1451 || errorCode == 1217;
-                case H2:
-                    //see http://h2database.com/javadoc/org/h2/constant/ErrorCode.html#c23002
-                    return errorCode == 23002 || errorCode == 23003;
-                default:
-                    return false;
-            }
-        } catch (SQLException e) {
-            throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage()).asRuntimeException();
+        final int errorCode = ((SQLException) exc).getErrorCode();
+        switch (FxContext.get().getDivisionData().getDbVendor()) {
+            case MySQL:
+                //see http://dev.mysql.com/doc/refman/5.0/en/error-messages-server.html
+                return errorCode == 1451 || errorCode == 1217;
+            case H2:
+                //see http://h2database.com/javadoc/org/h2/constant/ErrorCode.html#c23002
+                return errorCode == 23002 || errorCode == 23003;
+            default:
+                return false;
         }
     }
 
