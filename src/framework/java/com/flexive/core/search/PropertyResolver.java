@@ -70,6 +70,15 @@ public class PropertyResolver {
         public String getTableName() {
             return tableName;
         }
+
+        public static Table forTableName(String tableName) {
+            for (Table table : values()) {
+                if (table.getTableName().equalsIgnoreCase(tableName)) {
+                    return table;
+                }
+            }
+            throw new IllegalArgumentException("Invalid table name: " + tableName);
+        }
     }
 
     private static final Log LOG = LogFactory.getLog(PropertyResolver.class);

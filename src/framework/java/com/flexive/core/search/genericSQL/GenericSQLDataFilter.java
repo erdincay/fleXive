@@ -39,11 +39,7 @@ import com.flexive.core.search.SqlSearch;
 import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.genericSQL.GenericTreeStorage;
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.FxContext;
-import com.flexive.shared.FxFormatUtils;
-import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.content.FxPK;
+import com.flexive.shared.*;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.search.DateFunction;
@@ -63,7 +59,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 // NVL --> IFNULL((select sub.id from FX_CONTENT_DATA sub where sub.id=filter.id),1)
@@ -161,9 +156,7 @@ public class GenericSQLDataFilter extends DataFilter {
         String sql = null;
         try {
             final String dataSelect;
-            final String securityFilter = ticket.isGlobalSupervisor() ? "" :
-                    "mayReadInstance2(data2.id,data2.ver," + ticket.getUserId() + "," +
-                            ticket.getMandatorId() + "," + ticket.isMandatorSupervisor() + "," + ticket.isGlobalSupervisor() + ")\n";
+            final String securityFilter = getSecurityFilter(ticket);
             if (getStatement().getType() == FxStatement.Type.ALL) {
                 // The statement will not filter the data
                 final String filters = StringUtils.defaultIfEmpty(securityFilter, "1=1")
@@ -206,6 +199,12 @@ public class GenericSQLDataFilter extends DataFilter {
         } finally {
             Database.closeObjects(GenericSQLDataFilter.class, null, stmt);
         }
+    }
+
+    private String getSecurityFilter(UserTicket ticket) {
+        return ticket.isGlobalSupervisor() ? "" :
+                "mayReadInstance2(data2.id,data2.ver," + ticket.getUserId() + "," +
+                        ticket.getMandatorId() + "," + ticket.isMandatorSupervisor() + "," + ticket.isGlobalSupervisor() + ")\n";
     }
 
     /**
@@ -539,122 +538,19 @@ public class GenericSQLDataFilter extends DataFilter {
                     getSubQueryLimit() + ")";
         }
 
-        String column = prop.getFunctionsStart() +
-                entry.getFilterColumn() +
-                prop.getFunctionsEnd();
-        String value;
-        switch (entry.getProperty().getDataType()) {
-            case String1024:
-            case Text:
-            case HTML:
-                value = constant.getValue();
-                if (value == null) {
-                    value = "NULL";
-                } else {
-                    // First remove surrounding "'" characters
-                    value = FxFormatUtils.unquote(value);
-                    // single quotes ("'") should be quoted already, otherwise the
-                    // parser would have failed
-
-                    // Convert back to an SQL string
-                    value = "'" + value + "'";
-                }
-                break;
-            case LargeNumber:
-                if ("STEP".equals(column)) {
-                    // filter by workflow step definition, not internal step ID
-                    column = "(SELECT sd.stepdef FROM " + DatabaseConst.TBL_STEP + " sd " +
-                            " WHERE sd.id=cd." + column + ")";
-                }
-                value = "" + FxFormatUtils.toLong(constant.getValue());
-                break;
-            case Number:
-                value = "" + FxFormatUtils.toInteger(constant.getValue());
-                break;
-            case Double:
-                value = "" + FxFormatUtils.toDouble(constant.getValue());
-                break;
-            case Float:
-                value = "" + FxFormatUtils.toFloat(constant.getValue());
-                break;
-            case SelectOne:
-                if (StringUtils.isNumeric(constant.getValue())) {
-                    //list item id, nothing to lookup
-                    value = constant.getValue();
-                } else {
-                    //list item data (of first matching item)
-                    value = "" + entry.getProperty().getReferencedList().
-                            getItemByData(FxFormatUtils.unquote(constant.getValue())).getId();
-                }
-                break;
-            case SelectMany:
-                if (Comparator.EQUAL.equals(cond.getComperator()) || Comparator.NOT_EQUAL.equals(cond.getComperator())) {
-                    // exact match, so we use the text column that stores the comma-separated list of selected items
-                    column = "FTEXT1024";
-                    value = "'" + StringUtils.join(constant.iterator(), ',') + "'";
-                } else {
-                    throw new FxSqlSearchException(LOG, "ex.sqlSearch.reader.type.invalidOperator",
-                            entry.getProperty().getDataType(), cond.getComperator());
-                }
-                break;
-            case Boolean:
-                value = FxFormatUtils.toBoolean(constant.getValue()) ? "1" : "0";
-                break;
-            case Date:
-            case DateRange:
-                if (constant.getValue() == null) {
-                    value = "NULL";
-                } else if (isWithDateFunction(prop, constant)) {
-                    // use a date function - currently all MySQL date functions may be used
-                    value = constant.getValue();
-                } else {
-                    value = "'" + FxFormatUtils.getDateTimeFormat().format(FxFormatUtils.toDate(constant.getValue())) + "'";
-                }
-                break;
-            case DateTime:
-            case DateTimeRange:
-                // CREATED_AT and MODIFIED_AT store the date in a "long" column with millisecond precision
-
-                if (constant.getValue() == null) {
-                    value = "NULL";
-                } else if (isWithDateFunction(prop, constant)) {
-                    // use a date function - currently all MySQL date functions may be used
-                    value = constant.getValue();
-                    if (PropertyEntry.isDateMillisColumn(entry.getFilterColumn())) {
-                        // need to convert from milliseconds
-                        column = prop.getFunctionsStart() + toDBTime(entry.getFilterColumn()) + prop.getFunctionsEnd();
-                    }
-                } else {
-                    final Date date = FxFormatUtils.toDateTime(constant.getValue());
-                    if (PropertyEntry.isDateMillisColumn(entry.getFilterColumn())) {
-                        value = String.valueOf(date.getTime());
-                    } else {
-                        value = "'" + FxFormatUtils.getDateTimeFormat().format(date) + "'";
-                    }
-                }
-                break;
-            case Binary:
-                if (cond.getComperator().equals(Comparator.IS_NOT) && constant.isNull()) {
-                    value = "NULL";
-                    break;
-                }
-                throw new FxSqlSearchException(LOG, "ex.sqlSearch.reader.type.invalidOperator",
-                        entry.getProperty().getDataType(), cond.getComperator());
-            case Reference:
-                value = String.valueOf(FxPK.fromString(constant.getValue()).getId());
-                break;
-            default:
-                throw new FxSqlSearchException(LOG, "ex.sqlSearch.reader.unknownPropertyColumnType",
-                        entry.getProperty().getDataType(), prop.getPropertyName());
-        }
-
-        // IGNORE_CASE Filter
-        if (stmt.getIgnoreCase()) {
-            value = value.toUpperCase();
-        }
 
         // Apply all Functions
-        value = constant.getFunctionsStart() + value + constant.getFunctionsEnd();
+
+
+        final Pair<String, String> select = getValueCondition(prop, constant, entry, cond.getComperator());
+        if (select == null) {
+            throw new FxSqlSearchException(LOG, "ex.sqlSearch.reader.unknownPropertyColumnType",
+                    entry.getProperty().getDataType(), prop.getPropertyName());
+        }
+        final String column = prop.getFunctionsStart() + select.getFirst() + prop.getFunctionsEnd();
+        final String value = constant.getFunctionsStart()
+                + (stmt.getIgnoreCase() ? select.getSecond().toUpperCase() : select.getSecond())
+                + constant.getFunctionsEnd();
 
         // Build the final filter statement
         if (entry.getTableName().equals(DatabaseConst.TBL_CONTENT)) {
@@ -678,6 +574,51 @@ public class GenericSQLDataFilter extends DataFilter {
                     getSubQueryLimit() +
                     ") ";
         }
+    }
+
+    protected Pair<String, String> getValueCondition(Property prop, Constant constant, PropertyEntry entry, Condition.Comparator comparator) throws FxSqlSearchException {
+        String column = entry.getFilterColumn();
+        String value = null;
+        switch (entry.getProperty().getDataType()) {
+            case SelectMany:
+                if (Comparator.EQUAL.equals(comparator) || Comparator.NOT_EQUAL.equals(comparator)) {
+                    // exact match, so we use the text column that stores the comma-separated list of selected items
+                    column = "FTEXT1024";
+                    value = "'" + StringUtils.join(constant.iterator(), ',') + "'";
+                } else {
+                    throw new FxSqlSearchException(LOG, "ex.sqlSearch.reader.type.invalidOperator",
+                            entry.getProperty().getDataType(), comparator);
+                }
+                break;
+            case Date:
+            case DateRange:
+                if (isWithDateFunction(prop, constant)) {
+                    // use a date function - currently all MySQL date functions may be used
+                    value = constant.getValue();
+                }
+                break;
+            case DateTime:
+            case DateTimeRange:
+                // CREATED_AT and MODIFIED_AT store the date in a "long" column with millisecond precision
+
+                if (isWithDateFunction(prop, constant)) {
+                    // use a date function - currently all MySQL date functions may be used
+                    value = constant.getValue();
+                    if (PropertyEntry.isDateMillisColumn(entry.getFilterColumn())) {
+                        // need to convert from milliseconds
+                        column = toDBTime(entry.getFilterColumn());
+                    }
+                }
+                break;
+            case Binary:
+                if (comparator.equals(Comparator.IS_NOT) && constant.isNull()) {
+                    value = "NULL";
+                    break;
+                }
+                throw new FxSqlSearchException(LOG, "ex.sqlSearch.reader.type.invalidOperator",
+                        entry.getProperty().getDataType(), comparator);
+        }
+        return value != null ? new Pair<String, String>(column, value) : entry.getComparisonCondition(constant.getValue());
     }
 
     /**

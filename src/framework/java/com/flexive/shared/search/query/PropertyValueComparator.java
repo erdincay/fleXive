@@ -34,6 +34,7 @@ package com.flexive.shared.search.query;
 import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxInvalidStateException;
+import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.search.Table;
 import com.flexive.shared.structure.FxAssignment;
 import com.flexive.shared.structure.FxDataType;
@@ -93,7 +94,26 @@ public enum PropertyValueComparator implements ValueComparator {
 
     private String id;
 	private boolean needsInput;
-	
+
+    /**
+     * Return the value comparator for the given comparison operator ("=", ">=", ...")
+     *
+     * @param comparison    the comparison operator
+     * @return  the value comparator for the given comparison
+     * @since 3.1
+     */
+    public static PropertyValueComparator forComparison(String comparison) {
+        if ("<>".equals(comparison)) {
+            return NE;
+        }
+        for (PropertyValueComparator comparator : PropertyValueComparator.values()) {
+            if (comparator.id.equals(comparison)) {
+                return comparator;
+            }
+        }
+        throw new FxNotFoundException("ex.sqlQueryBuilder.comparator.id", comparison).asRuntimeException();
+    }
+
 	private PropertyValueComparator(String id) {
 		this(id, true);
 	}
@@ -102,8 +122,8 @@ public enum PropertyValueComparator implements ValueComparator {
 		this.id = id;
 		this.needsInput = needsInput;
 	}
-	
-	public final String getSql(FxAssignment assignment, FxValue value) {
+
+    public final String getSql(FxAssignment assignment, FxValue value) {
         final String sqlValue;
         if (needsInput) {
             if (value.isEmpty()) {

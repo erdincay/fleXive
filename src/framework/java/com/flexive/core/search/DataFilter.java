@@ -128,4 +128,5 @@ public abstract class DataFilter {
      * @return database supports query timeouts
      */
     public abstract boolean isQueryTimeoutSupported();
+
 }

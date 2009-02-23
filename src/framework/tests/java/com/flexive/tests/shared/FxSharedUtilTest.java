@@ -33,6 +33,8 @@ package com.flexive.tests.shared;
 
 import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.TimestampRecorder;
+import com.flexive.shared.Pair;
 import com.flexive.shared.value.FxString;
 import org.apache.commons.lang.StringUtils;
 import org.testng.Assert;
@@ -109,6 +111,18 @@ public class FxSharedUtilTest {
         Assert.assertEquals(FxSharedUtils.getColumnIndex(columns, "pk"), -1);
         Assert.assertEquals(FxSharedUtils.getColumnIndex(columns, "@value"), 3);
         Assert.assertEquals(FxSharedUtils.getColumnIndex(columns, "co.list.@value"), 3);
+    }
+
+    @Test
+    public void timestampRecorder() throws InterruptedException {
+        final TimestampRecorder tsr = new TimestampRecorder();
+        tsr.begin();
+        Thread.sleep(50);
+        tsr.timestamp("test");
+        final Pair<String,Long> timestamp = tsr.getTimestamps().get(0);
+        assert "test".equals(timestamp.getFirst());
+        final double millis = timestamp.getSecond() / 1000000.0;
+        assert Math.abs(50.0 - millis) < 5.0 : "Timestamp does not match expected 50ms: " + millis;
     }
 
     private void assertSplitResult(String[] result, String[] expected) {

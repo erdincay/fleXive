@@ -98,7 +98,6 @@ public class GenericSQLDataSelector extends DataSelector {
     /**
      * {@inheritDoc}
      */
-    @Override
     public String build(final Connection con) throws FxSqlSearchException {
         StringBuffer select = new StringBuffer();
         buildColumnSelectList(select);
@@ -111,7 +110,6 @@ public class GenericSQLDataSelector extends DataSelector {
     /**
      * {@inheritDoc}
      */
-    @Override
     public void cleanup(Connection con) throws FxSqlSearchException {
         // nothing to do
     }

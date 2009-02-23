@@ -92,10 +92,6 @@ public abstract class DataSelector {
         BINARY_COLUMN_INDICES = Collections.unmodifiableMap(indices);
     }
 
-    public abstract String build(final Connection con) throws FxSqlSearchException;
-
-    public abstract void cleanup(Connection con) throws FxSqlSearchException;
-
     public abstract Map<String, FieldSelector> getSelectors();
 
     /**

@@ -1174,6 +1174,21 @@ public final class FxSharedUtils {
     }
 
     /**
+     * Extract the unique IDs of the given {@link SelectableObject} collection.
+     *
+     * @param values the input values
+     * @return the IDs of the input values
+     * @since 3.1
+     */
+    public static List<Long> getSelectableObjectIdList(Collection<? extends SelectableObject> values) {
+        final List<Long> result = new ArrayList<Long>(values.size());
+        for (SelectableObject value : values) {
+            result.add(value.getId());
+        }
+        return result;
+    }
+
+    /**
      * Returns the index of the {@link SelectableObject} with the given ID, or -1 if none was found.
      *
      * @param values the values to be examined

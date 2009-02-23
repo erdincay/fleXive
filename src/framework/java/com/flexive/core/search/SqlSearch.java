@@ -181,7 +181,7 @@ public class SqlSearch {
         Connection con = null;
         FxResultSetImpl fx_result = null;
         final long startTime = java.lang.System.currentTimeMillis();
-        DataSelector ds = null;
+        GenericSQLDataSelector ds = null;
         DataFilter df = null;
         String selectSql = null;
         try {
@@ -281,7 +281,7 @@ public class SqlSearch {
                 Object[] row = new Object[pr.getResultSetColumns().size()];
                 int i = 0;
                 for (PropertyEntry entry : pr.getResultSetColumns()) {
-                    Object val = entry.getResultValue(rs, language);
+                    Object val = entry.getResultValue(rs, language.getId(), true);
 
                     //in case we have types with property permissions enabled, inaccessible
                     //properties have to be wrapped with with FxNoAccess objects
@@ -406,7 +406,7 @@ public class SqlSearch {
      * @return DataSelector the data selecttor implementation
      * @throws FxSqlSearchException if the function fails
      */
-    public DataSelector getDataSelector() throws FxSqlSearchException {
+    public GenericSQLDataSelector getDataSelector() throws FxSqlSearchException {
         final DBVendor vendor = FxContext.get().getDivisionData().getDbVendor();
         switch (vendor) {
             case H2:

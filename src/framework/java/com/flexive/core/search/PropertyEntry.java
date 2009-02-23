@@ -40,6 +40,7 @@ import com.flexive.shared.value.*;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.Pair;
+import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.search.FxPaths;
 import com.flexive.shared.search.FxSQLFunction;
 import com.flexive.shared.content.FxPK;
@@ -175,11 +176,11 @@ public class PropertyEntry {
             super(Type.PK,
                     PropertyResolver.Table.T_CONTENT,
                     new String[]{"ID", "VERSION"},
-                    null, false, null);
+                    null, false, null, null);
         }
 
         @Override
-        public Object getResultValue(ResultSet rs, FxLanguage language) throws FxSqlSearchException {
+        public Object getResultValue(ResultSet rs, long languageId, boolean xpathAvailable) throws FxSqlSearchException {
             try {
                 final long id = rs.getLong(positionInResultSet);
                 final int ver = rs.getInt(positionInResultSet + 1);
@@ -198,11 +199,11 @@ public class PropertyEntry {
             super(Type.PATH,
                     PropertyResolver.Table.T_CONTENT,
                     new String[]{""},    // select one column (function will be inserted by DB adapter)
-                    null, false, null);
+                    null, false, null, null);
         }
 
         @Override
-        public Object getResultValue(ResultSet rs, FxLanguage language) throws FxSqlSearchException {
+        public Object getResultValue(ResultSet rs, long languageId, boolean xpathAvailable) throws FxSqlSearchException {
             try {
                 return new FxPaths(rs.getString(positionInResultSet));
             } catch (SQLException e) {
@@ -218,11 +219,11 @@ public class PropertyEntry {
         private NodePositionEntry() {
             super(Type.NODE_POSITION, PropertyResolver.Table.T_CONTENT,
                     new String[]{""},    // select one column (function will be inserted by DB adapter)
-                    null, false, FxDataType.Number);
+                    null, false, FxDataType.Number, null);
         }
 
         @Override
-        public Object getResultValue(ResultSet rs, FxLanguage language) throws FxSqlSearchException {
+        public Object getResultValue(ResultSet rs, long languageId, boolean xpathAvailable) throws FxSqlSearchException {
             try {
                 return rs.getLong(positionInResultSet);
             } catch (SQLException e) {
@@ -238,12 +239,12 @@ public class PropertyEntry {
 
         private PermissionsEntry() {
             super(Type.PERMISSIONS, PropertyResolver.Table.T_CONTENT, READ_COLUMNS,
-                    null, false, null);
+                    null, false, null, null);
             this.environment = CacheAdmin.getEnvironment();
         }
 
         @Override
-        public Object getResultValue(ResultSet rs, FxLanguage language) throws FxSqlSearchException {
+        public Object getResultValue(ResultSet rs, long languageId, boolean xpathAvailable) throws FxSqlSearchException {
             try {
                 final long aclId = rs.getLong(positionInResultSet + getIndex("acl"));
                 final long createdBy = rs.getLong(positionInResultSet + getIndex("created_by"));
@@ -350,26 +351,27 @@ public class PropertyEntry {
 
     protected FxDataType overrideDataType;
 
-    protected PropertyEntry(Type type, PropertyResolver.Table tbl, String[] readColumns, String filterColumn, boolean multilanguage, FxDataType overrideDataType) {
+    public PropertyEntry(Type type, PropertyResolver.Table tbl, String[] readColumns, String filterColumn, boolean multilanguage, FxDataType overrideDataType, FxProperty property) {
         this.readColumns = readColumns;
         this.filterColumn = filterColumn;
         this.tbl = tbl;
         this.type = type;
         this.multilanguage = multilanguage;
         this.overrideDataType = overrideDataType;
-        this.property = null;
-        this.tableName = null;
+        this.property = property;
+        this.tableName = tbl != null ? tbl.getTableName() : null;
     }
 
     /**
      * Return the result value of this property entry in a given result set.
      *
      * @param rs       the SQL result set
-     * @param language the result language
+     * @param languageId
+     * @param xpathAvailable if the XPath was selected as an additional column for content table entries
      * @return the value of this property (column) in the result set
      * @throws FxSqlSearchException if the database cannot read the value
      */
-    public Object getResultValue(ResultSet rs, FxLanguage language) throws FxSqlSearchException {
+    public Object getResultValue(ResultSet rs, long languageId, boolean xpathAvailable) throws FxSqlSearchException {
         final FxValue result;
         final int pos = positionInResultSet;
         // Handle by type
@@ -456,14 +458,14 @@ public class PropertyEntry {
             }
 
             if (rs.wasNull()) {
-                result.setEmpty(language.getId());
+                result.setEmpty(languageId);
             }
 
 
-            if (getTableType() == PropertyResolver.Table.T_CONTENT_DATA) {
+            if (xpathAvailable && getTableType() == PropertyResolver.Table.T_CONTENT_DATA) {
                 // Get the XPATH if we are reading from the content data table
                 result.setXPath(rs.getString(positionInResultSet + getReadColumns().length));
-            } else if (getTableType() == PropertyResolver.Table.T_CONTENT && property != null) {
+            } else if (xpathAvailable && getTableType() == PropertyResolver.Table.T_CONTENT && property != null) {
                 // set XPath for system-internal properties
                 result.setXPath("ROOT/" + property.getName());
             }
@@ -534,7 +536,7 @@ public class PropertyEntry {
      *
      * @param positionInResultSet   the entry's result set index
      */
-    void setPositionInResultSet(int positionInResultSet) {
+    public void setPositionInResultSet(int positionInResultSet) {
         this.positionInResultSet = positionInResultSet;
     }
 
@@ -615,4 +617,93 @@ public class PropertyEntry {
         return "CREATED_AT".equalsIgnoreCase(columnName)
                 || "MODIFIED_AT".equalsIgnoreCase(columnName);
     }
+
+    /**
+     * Returns a (column, value) pair for a SQL comparison condition against the given constant value.
+     *
+     * @param constantValue the value to be compared, as returned by the SQL parser
+     * @return              (column, value) for the comparison condition. The value is already escaped
+     *                      for use in a SQL query.
+     */
+    public Pair<String, String> getComparisonCondition(String constantValue) {
+        String column = getFilterColumn();
+        String value = null;
+        switch (getProperty().getDataType()) {
+            case String1024:
+            case Text:
+            case HTML:
+                value = constantValue;
+                if (value == null) {
+                    value = "NULL";
+                } else {
+                    // First remove surrounding "'" characters
+                    value = FxFormatUtils.unquote(value);
+                    // single quotes ("'") should be quoted already, otherwise the
+                    // parser would have failed
+
+                    // Convert back to an SQL string
+                    value = "'" + value + "'";
+                }
+                break;
+            case LargeNumber:
+                if ("STEP".equals(column)) {
+                    // filter by workflow step definition, not internal step ID
+                    column = "(SELECT sd.stepdef FROM " + DatabaseConst.TBL_STEP + " sd " +
+                            " WHERE sd.id=cd." + column + ")";
+                }
+                value = "" + FxFormatUtils.toLong(constantValue);
+                break;
+            case Number:
+                value = "" + FxFormatUtils.toInteger(constantValue);
+                break;
+            case Double:
+                value = "" + FxFormatUtils.toDouble(constantValue);
+                break;
+            case Float:
+                value = "" + FxFormatUtils.toFloat(constantValue);
+                break;
+            case SelectOne:
+                if (StringUtils.isNumeric(constantValue)) {
+                    //list item id, nothing to lookup
+                    value = constantValue;
+                } else {
+                    //list item data (of first matching item)
+                    value = "" + getProperty().getReferencedList().
+                            getItemByData(FxFormatUtils.unquote(constantValue)).getId();
+                }
+                break;
+            case Boolean:
+                value = FxFormatUtils.toBoolean(constantValue) ? "1" : "0";
+                break;
+            case Date:
+            case DateRange:
+                if (constantValue == null) {
+                    value = "NULL";
+                } else {
+                    value = "'" + FxFormatUtils.getDateTimeFormat().format(FxFormatUtils.toDate(constantValue)) + "'";
+                }
+                break;
+            case DateTime:
+            case DateTimeRange:
+                // CREATED_AT and MODIFIED_AT store the date in a "long" column with millisecond precision
+
+                if (constantValue == null) {
+                    value = "NULL";
+                } else {
+                    final Date date = FxFormatUtils.toDateTime(constantValue);
+                    if (isDateMillisColumn(getFilterColumn())) {
+                        value = String.valueOf(date.getTime());
+                    } else {
+                        value = "'" + FxFormatUtils.getDateTimeFormat().format(date) + "'";
+                    }
+                }
+                break;
+            case Reference:
+                value = String.valueOf(FxPK.fromString(constantValue).getId());
+                break;
+        }
+        return value != null ? new Pair<String, String>(column, value) : null;
+    }
+
+
 }
