@@ -407,19 +407,14 @@ public class SqlSearch {
      * @throws FxSqlSearchException if the function fails
      */
     public DataSelector getDataSelector() throws FxSqlSearchException {
-        DBVendor vendor;
-        try {
-            vendor = Database.getDivisionData().getDbVendor();
-            switch (vendor) {
-                case H2:
-                    return new H2SQLDataSelector(this);
-                case MySQL:
-                    return new GenericSQLDataSelector(this);
-                default:
-                    throw new FxSqlSearchException(LOG, "ex.db.selector.undefined", vendor);
-            }
-        } catch (SQLException e) {
-            throw new FxSqlSearchException(LOG, "ex.db.vendor.notFound", FxContext.get().getDivisionId(), e);
+        final DBVendor vendor = FxContext.get().getDivisionData().getDbVendor();
+        switch (vendor) {
+            case H2:
+                return new H2SQLDataSelector(this);
+            case MySQL:
+                return new GenericSQLDataSelector(this);
+            default:
+                throw new FxSqlSearchException(LOG, "ex.db.selector.undefined", vendor);
         }
     }
 
@@ -431,19 +426,14 @@ public class SqlSearch {
      * @throws FxSqlSearchException if the function fails
      */
     public DataFilter getDataFilter(Connection con) throws FxSqlSearchException {
-        DBVendor vendor;
-        try {
-            vendor = Database.getDivisionData().getDbVendor();
-            switch (vendor) {
-                case MySQL:
-                    return new GenericSQLDataFilter(con, this);
-                case H2:
-                    return new H2SQLDataFilter(con, this);
-                default:
-                    throw new FxSqlSearchException(LOG, "ex.db.filter.undefined", vendor);
-            }
-        } catch (SQLException e) {
-            throw new FxSqlSearchException(LOG, "ex.db.vendor.notFound", FxContext.get().getDivisionId(), e);
+        final DBVendor vendor = FxContext.get().getDivisionData().getDbVendor();
+        switch (vendor) {
+            case MySQL:
+                return new GenericSQLDataFilter(con, this);
+            case H2:
+                return new H2SQLDataFilter(con, this);
+            default:
+                throw new FxSqlSearchException(LOG, "ex.db.filter.undefined", vendor);
         }
     }
 
