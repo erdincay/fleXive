@@ -38,6 +38,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.flexive.shared.exceptions.FxInvalidParameterException;
+
 /**
  * Option for structure elements (groups, properties, assignments)
  *
@@ -216,6 +218,8 @@ public class FxStructureOption implements Serializable {
      */
     public static void setOption(List<FxStructureOption> options, String key, boolean overrideable, String value) {
         synchronized (options) {
+            if (StringUtils.isEmpty(key))
+                throw new FxInvalidParameterException("key","ex.structure.option.key.empty", value).asRuntimeException();
             if (hasOption(key, options)) {
                 FxStructureOption opt = getOption(key, options);
                 opt.overrideable = overrideable;

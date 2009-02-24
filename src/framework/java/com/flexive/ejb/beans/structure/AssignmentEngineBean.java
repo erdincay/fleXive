@@ -50,6 +50,7 @@ import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.FxBinary;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Resource;
 import javax.ejb.*;
@@ -270,7 +271,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     * @return if the options changed.
     */
 
-    private boolean updateGroupOptions(Connection con, FxGroupEdit group) throws SQLException {
+    private boolean updateGroupOptions(Connection con, FxGroupEdit group) throws SQLException, FxInvalidParameterException {
         boolean changed = false;
         FxGroupEdit org = new FxGroupEdit(CacheAdmin.getEnvironment().getGroup(group.getId()));
         if (org.getOptions().size() != group.getOptions().size()) {
@@ -299,7 +300,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      * @return if the options changed.
      */
 
-    private boolean updatePropertyOptions(Connection con, FxPropertyEdit prop) throws SQLException {
+    private boolean updatePropertyOptions(Connection con, FxPropertyEdit prop) throws SQLException, FxInvalidParameterException {
         boolean changed = false;
         FxPropertyEdit org = new FxPropertyEdit(CacheAdmin.getEnvironment().getProperty(prop.getId()));
         if (org.getOptions().size() != prop.getOptions().size()) {
@@ -328,7 +329,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     * @return if the options changed.
     */
 
-    private boolean updateGroupAssignmentOptions(Connection con, FxGroupAssignment ga) throws SQLException {
+    private boolean updateGroupAssignmentOptions(Connection con, FxGroupAssignment ga) throws SQLException, FxInvalidParameterException {
         boolean changed = false;
         FxGroupAssignmentEdit org = ((FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(ga.getId())).asEditable();
         FxGroupAssignmentEdit group = ga.asEditable();
@@ -358,7 +359,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      * @return if the options changed.
      */
 
-    private boolean updatePropertyAssignmentOptions(Connection con, FxPropertyAssignment original, FxPropertyAssignment modified) throws SQLException {
+    private boolean updatePropertyAssignmentOptions(Connection con, FxPropertyAssignment original, FxPropertyAssignment modified) throws SQLException, FxInvalidParameterException {
         boolean changed = false;
         FxPropertyAssignmentEdit org = original.asEditable();
         FxPropertyAssignmentEdit prop = modified.asEditable();
@@ -391,7 +392,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      * @param options           the option list to store (e.g. FxPropertyAssignmentEdit.getOptions())
      */
     private void storeOptions(Connection con, String table, String primaryColumn, long primaryId, Long assignmentId,
-                              List<FxStructureOption> options) throws SQLException {
+                              List<FxStructureOption> options) throws SQLException, FxInvalidParameterException {
         PreparedStatement ps = null;
         try {
             if (assignmentId == null) {
@@ -412,6 +413,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     ps.setLong(2, assignmentId);
                 else
                     ps.setNull(2, java.sql.Types.NUMERIC);
+                if (StringUtils.isEmpty(option.getKey()))
+                    throw new FxInvalidParameterException("key","ex.structure.option.key.empty", option.getValue());
                 ps.setString(3, option.getKey());
                 ps.setBoolean(4, option.isOverrideable());
                 ps.setString(5, option.getValue());
