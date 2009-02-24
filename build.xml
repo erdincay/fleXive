@@ -520,7 +520,11 @@
             <!-- Shared libraries -->
             <zipfileset prefix="lib" dir="${flexive.lib.dir}" includes="${sqlparser.jar},${extractor.jar},cglib*.jar,fxStream.jar,commons-io-1.1.jar,sanselan.jar,quartz*.jar,PDFRenderer.jar,commons-*.jar,jbosscache-core.jar,jgroups.jar,jboss-common-core-42-compat.jar,urlrewrite-*.jar,google-collect*.jar,jsr173_1.0_api.jar,jtidy.jar"/>
             <zipfileset prefix="lib" dir="${flexive.lib.dir}/groovy" includes="*.jar"/>
-            <zipfileset prefix="lib" dir="${build.ui.jar.dir}" includes="*.jar"/>
+            <zipfileset prefix="lib" dir="${build.ui.jar.dir}" includes="*.jar" excludes="flexive-plugin-jsf-testrunner.jar"/>
+            <zipfileset prefix="lib" dir="${build.ui.jar.dir}">
+                <!-- only include the testrunner plugin if target test.package.ear was invoked -->
+                <include name="flexive-plugin-jsf-testrunner.jar" if="package.testNG"/>
+            </zipfileset>
             <zipfileset prefix="lib" dir="${flexive.lib.dir}/xstream" includes="*.jar"/>
             <zipfileset prefix="lib" dir="${flexive.lib.dir}/mail" includes="*.jar"/>
             <zipfileset prefix="lib" dir="${flexive.lib.dir}/text_extraction"  includes="*.jar"/>
@@ -679,7 +683,7 @@ database.H2.schema.root=flexive
 database.H2.schema.config=flexiveConfiguration
 database.H2.driver=org.h2.Driver
 database.H2.url.base=jdbc:h2:tcp://$${database.H2.host}:$${database.H2.port}/~/
-database.H2.url.parameters=;SCHEMA=flexive;MVCC=TRUE
+database.H2.url.parameters=;SCHEMA=@DATABASE@;MVCC=TRUE
 
 
 #select the database vendor to use

@@ -73,7 +73,7 @@
         <attribute name="database" description="The database name"/>
         <sequential >
             <groovy>
-                <arg value="@{Database}"/>
+                <arg value="@{database}"/>
                 if( "H2".equals(properties['database.vendor']) ) {
                     //special case for H2: the URL needs to contain the schema which is the database name
                     //to be created
@@ -90,7 +90,7 @@
             </sql-call>
             <!-- Replace URL parameters @DATABASE@ with @{Database}-->
             <groovy>
-                <arg value="@{Database}"/>
+                <arg value="@{database}"/>
                 properties['db.url.full'] = properties['database.url.base']+args[0]+properties['database.url.parameters']
                 properties['db.url.full'] = properties['db.url.full'].replace("@DATABASE@", args[0])
             </groovy>
@@ -107,9 +107,10 @@
     </macrodef>
 
     <macrodef name="globalconfig-setup" description="The global configuration setup.">
+        <attribute name="database" description="The database name"/>
         <sequential >
             <groovy>
-                <arg value="@{Database}"/>
+                <arg value="@{database}"/>
                 if( "H2".equals(properties['database.vendor']) ) {
                     //special case for H2: the URL needs to contain the schema which is the database name
                     //to be created
