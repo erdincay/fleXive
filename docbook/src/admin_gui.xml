@@ -974,8 +974,12 @@
                 </orderedlist>
             </para>
             <para>
-                <imagedata fileref="images/adm_ui_instance_editor/content_instance.png"
-                           format="PNG" contentwidth="100%"/>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_instance_editor/content_instance.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
             </para>
             <para>After saving you will get the following screen. You can see that the fields which have not been filled
                 in,
@@ -983,8 +987,12 @@
                 by clicking on the symbol for the grouped fields (2).
             </para>
             <para>
-                <imagedata fileref="images/adm_ui_instance_editor/content_instance_saved.png"
-                           format="PNG" contentwidth="100%"/>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_instance_editor/content_instance_saved.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
             </para>
             <para>It is possible to create a new version of the instance.</para>
             <para>To learn more about versioning in &Flexive; see the
@@ -1034,8 +1042,12 @@
                 </orderedlist>
             </para>
             <para>
-                <imagedata fileref="images/adm_ui_content_tree/tree_live_edit_switch.png"
-                           format="PNG" contentwidth="100%"/>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_content_tree/tree_live_edit_switch.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
             </para>
             <para>See the core components chapter
                 <link linkend="core_tree_live_edit">edit and live modes</link>
@@ -1050,8 +1062,12 @@
                 loaded into the instance editor before.
             </para>
             <para>
-                <imagedata fileref="images/adm_ui_content_tree/content_tree_contextmenu.png"
-                           format="PNG" contentwidth="100%"/>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_content_tree/content_tree_contextmenu.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
             </para>
             <para>
                 The context menu provides the following functionality:
@@ -1212,6 +1228,12 @@
             <link linkend="adm_content_tree">content tree</link>
             or saved into a briefcase, which can be shared among users. A query can also be saved.
         </para>
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref="images/adm_ui_query_editor/build_query.png"
+                           format="PNG" contentwidth="100%"/>
+            </imageobject>
+        </mediaobject>
         <section xml:id="adm_query_editor_creating_queries">
             <title>Creating queries with the visual query editor</title>
             <para>To access the query editor go to the
@@ -1333,23 +1355,27 @@
                     </varlistentry>
                 </variablelist>
             </para>
-            <para>
-                <imagedata fileref="images/adm_ui_query_editor/build_query.png"
-                           format="PNG" contentwidth="100%"/>
-            </para>
             <section xml:id="adm_query_editor_result">
                 <title>Query results</title>
                 <para>If the query with your provided search criteria was successful, the result set will be
                     displayed.
                 </para>
                 <para>
-                    <imagedata fileref="images/adm_ui_query_editor/query_result.png"
-                               format="PNG" contentwidth="100%"/>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_query_editor/query_result.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
                 </para>
                 <para>Rightclick on an item of the result set to activate the context menu.</para>
                 <para>
-                    <imagedata fileref="images/adm_ui_query_editor/query_result_context_menu.png"
-                               format="PNG" contentwidth="100%"/>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_query_editor/query_result_context_menu.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
                 </para>
                 <para>
                     <variablelist>
@@ -1401,8 +1427,12 @@
                     tab of the &Flexive; backend administration.
                 </para>
                 <para>
-                    <imagedata fileref="images/adm_ui_query_editor/search_tab.png"
-                               format="PNG" contentwidth="100%"/>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_query_editor/search_tab.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
                 </para>
             </section>
         </section>
@@ -1434,8 +1464,12 @@
             <code>content</code>.
         </para>
         <para>
-            <imagedata fileref="images/adm_ui_query_editor/fxsql_search.png"
-                       format="PNG" contentwidth="100%"/>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/adm_ui_query_editor/fxsql_search.png"
+                               format="PNG" contentwidth="100%"/>
+                </imageobject>
+            </mediaobject>
         </para>
     </section>
 
@@ -1461,8 +1495,12 @@
                 </orderedlist>
             </para>
             <para>
-                <imagedata fileref="images/adm_ui_user/create_user.png"
-                           format="PNG" contentwidth="100%"/>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_user/create_user.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
             </para>
             <para>After creation, you will be redirected to the user account overview where you can edit and delete
                 users.
@@ -1490,8 +1528,12 @@
                 These two accounts cannot be removed.
             </para>
             <para>
-                <imagedata fileref="images/adm_ui_user/user_overview.png"
-                           format="PNG" contentwidth="100%"/>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_user/user_overview.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
             </para>
         </section>
     </section>
@@ -1501,8 +1543,12 @@
             assign roles to the group.
         </para>
         <para>
-            <imagedata fileref="images/adm_ui_user_groups/usergroup_editor.png"
-                       format="PNG" contentwidth="100%"/>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/adm_ui_user_groups/usergroup_editor.png"
+                               format="PNG" contentwidth="100%"/>
+                </imageobject>
+            </mediaobject>
         </para>
         After saving you will be redirected to the user group overview.
         <section xml:id="adm_user_group_overview">
@@ -1539,8 +1585,12 @@
                 </variablelist>
             </para>
             <para>
-                <imagedata fileref="images/adm_ui_user_groups/usergroup_overview.png"
-                           format="PNG" contentwidth="100%"/>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_user_groups/usergroup_overview.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
             </para>
         </section>
     </section>
@@ -1558,8 +1608,12 @@
                 activation flag.
             </para>
             <para>
-                <imagedata fileref="images/adm_ui_mandator/mandator_editor.png"
-                           format="PNG" contentwidth="100%"/>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_mandator/mandator_editor.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
             </para>
             After creating a mandator, you will be redirected to the overview for mandators.
         </section>
@@ -1571,8 +1625,12 @@
                 fictitious parent company, and mandators for each subsidiary .
             </para>
             <para>
-                <imagedata fileref="images/adm_ui_mandator/mandator_overview.png"
-                           format="PNG" contentwidth="100%"/>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_mandator/mandator_overview.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
             </para>
         </section>
     </section>
@@ -1640,8 +1698,12 @@
                 </orderedlist>
             </para>
             <para>
-                <imagedata fileref="images/adm_ui_acl/acl_editor.png"
-                           format="PNG" contentwidth="100%"/>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_acl/acl_editor.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
             </para>
             After saving you will be able to fill in the permission matrix.
         </section>
@@ -1652,8 +1714,12 @@
                 and fill in the matrix to grant permissions.
             </para>
             <para>
-                <imagedata fileref="images/adm_ui_acl/acl_editor_saved.png"
-                           format="PNG" contentwidth="100%"/>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_acl/acl_editor_saved.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
             </para>
             <para>
                 In this example
@@ -1681,8 +1747,12 @@
             </para>
             <para>You can switch between different mandators with the select box on top of the list.</para>
             <para>
-                <imagedata fileref="images/adm_ui_acl/acl_overview.png"
-                           format="PNG" contentwidth="100%"/>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_acl/acl_overview.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
             </para>
         </section>
     </section>
@@ -1706,21 +1776,33 @@
                 (1) for a step definition.
             </para>
             <para>
-                <imagedata fileref="images/adm_ui_workflow/create_step_def.png"
-                           format="PNG" contentwidth="100%"/>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_workflow/create_step_def.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
             </para>
             <para>The following screen shows the step definition overview.</para>
             <para>
-                <imagedata fileref="images/adm_ui_workflow/step_def_overview.png"
-                           format="PNG" contentwidth="100%"/>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_workflow/step_def_overview.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
             </para>
         </section>
         <section xml:id="adm_workflow_create">
             <title>Creating a workflow</title>
             <para>Create a workflow and provide a name and an optional description.</para>
             <para>
-                <imagedata fileref="images/adm_ui_workflow/create_workflow.png"
-                           format="PNG" contentwidth="100%"/>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_workflow/create_workflow.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
             </para>
             <para>After the creation of the workflow, the extended workflow editor, shown on the following screen, will
                 be loaded.
@@ -1760,13 +1842,21 @@
                 </variablelist>
             </para>
             <para>
-                <imagedata fileref="images/adm_ui_workflow/edit_workflow.png"
-                           format="PNG" contentwidth="100%"/>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_workflow/edit_workflow.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
             </para>
             <para>The following diagram illustrates the routes defined in this workflow.</para>
             <para>
-                <imagedata fileref="images/adm_ui_workflow/workflow_routes.png"
-                           format="PNG" contentwidth="100%"/>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_workflow/workflow_routes.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
             </para>
         </section>
         <section xml:id="adm_workflow_overview">
@@ -1775,8 +1865,12 @@
                 Mind that you cannot delete workflows which are already in use.
             </para>
             <para>
-                <imagedata fileref="images/adm_ui_workflow/workflow_overview.png"
-                           format="PNG" contentwidth="100%"/>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_workflow/workflow_overview.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
             </para>
         </section>
     </section>
@@ -1796,8 +1890,12 @@
                 <code>BeforeContentSave</code>.
             </para>
             <para>
-                <imagedata fileref="images/adm_ui_scripts/create_script.png"
-                           format="PNG" contentwidth="100%"/>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_scripts/create_script.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
             </para>
             <para>If the default script event is set to
                 <code>Manual</code>, the script can be executed via the
@@ -1941,8 +2039,12 @@
                 <link linkend="adm_scripts_create">events</link>.
             </para>
             <para>
-                <imagedata fileref="images/adm_ui_scripts/script_overview.png"
-                           format="PNG" contentwidth="100%"/>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_scripts/script_overview.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
             </para>
         </section>
         <section xml:id="adm_scripts_console">
@@ -1978,8 +2080,12 @@
                 <code>NodeLabel</code>.
             </para>
             <para>
-                <imagedata fileref="images/adm_ui_scripts/script_console.png"
-                           format="PNG" contentwidth="100%"/>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_scripts/script_console.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
             </para>
             <para>You might want to copy paste the example and try it out:</para>
             <para>
@@ -2003,8 +2109,12 @@
             <title>The System Information</title>
             <para>The system information gives you a brief overview of the system &Flexive; is running on.</para>
             <para>
-                <imagedata fileref="images/adm_ui_system/sysinfo.png"
-                           format="PNG" contentwidth="100%"/>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_system/sysinfo.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
             </para>
         </section>
         <section xml:id="adm_system_language">
@@ -2021,8 +2131,12 @@
                 has been filled in by a user in this language.
             </para>
             <para>
-                <imagedata fileref="images/adm_ui_system/language_settings.png"
-                           format="PNG" contentwidth="100%"/>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_system/language_settings.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
             </para>
         </section>
     </section>
@@ -2090,8 +2204,13 @@
                                 </itemizedlist>
                             </para>
                             <para>
-                                <imagedata fileref="images/adm_ui_selectlists/def_selectlist_create_acl_matrix.png"
-                                           format="PNG" contentwidth="100%"/>
+                                <mediaobject>
+                                    <imageobject>
+                                        <imagedata
+                                                fileref="images/adm_ui_selectlists/def_selectlist_create_acl_matrix.png"
+                                                format="PNG" contentwidth="100%"/>
+                                    </imageobject>
+                                </mediaobject>
                             </para>
                         </listitem>
                     </varlistentry>
@@ -2114,8 +2233,13 @@
                                 </itemizedlist>
                             </para>
                             <para>
-                                <imagedata fileref="images/adm_ui_selectlists/def_selectlist_item_acl_matrix.png"
-                                           format="PNG" contentwidth="100%"/>
+                                <mediaobject>
+                                    <imageobject>
+                                        <imagedata
+                                                fileref="images/adm_ui_selectlists/def_selectlist_item_acl_matrix.png"
+                                                format="PNG" contentwidth="100%"/>
+                                    </imageobject>
+                                </mediaobject>
                             </para>
                         </listitem>
                     </varlistentry>
@@ -2126,8 +2250,12 @@
                 option after creation of the select list.
             </para>
             <para>
-                <imagedata fileref="images/adm_ui_selectlists/create_selectlist.png"
-                           format="PNG" contentwidth="100%"/>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_selectlists/create_selectlist.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
             </para>
         </section>
         <section xml:id="adm_selectlists_edit">
@@ -2183,8 +2311,12 @@
                 </variablelist>
             </para>
             <para>
-                <imagedata fileref="images/adm_ui_selectlists/edit_selectlist.png"
-                           format="PNG" contentwidth="100%"/>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_selectlists/edit_selectlist.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
             </para>
         </section>
     </section>
