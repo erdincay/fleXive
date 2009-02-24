@@ -426,7 +426,7 @@ public class FxGroupData extends FxData {
         int index = elements.get(elements.size() - 1).getIndex();
         FxPropertyData data = new FxPropertyData(this.xpPrefix, assignment.getAlias(), index,
                 XPathElement.stripType(XPathElement.toXPathNoMult(xPath)), xPath, XPathElement.getIndices(xPath), assignment.getId(), assignment.getProperty().getId(),
-                assignment.getMultiplicity(), pos, parentGroup, value, assignment.isSystemInternal());
+                assignment.getMultiplicity(), pos, parentGroup, value, assignment.isSystemInternal(), assignment.getOption(FxStructureOption.OPTION_MAXLENGTH));
 
         FxData check = parentGroup.containsChild(data.getXPathElement());
         if (check != null)

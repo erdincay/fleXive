@@ -38,8 +38,10 @@ import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.structure.FxMultiplicity;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.GroupMode;
+import com.flexive.shared.structure.FxStructureOption;
 import com.flexive.shared.value.FxNoAccess;
 import com.flexive.shared.value.FxValue;
+import com.flexive.shared.value.FxString;
 import org.apache.commons.lang.ArrayUtils;
 
 import java.util.ArrayList;
@@ -55,16 +57,18 @@ public class FxPropertyData extends FxData {
     private FxValue value;
     private long propertyId;
     private boolean containsDefaultValue;
+    private FxStructureOption maxLength;
 
     public FxPropertyData(String xpPrefix, String alias, int index, String xPath, String xPathFull, int[] indices,
                           long assignmentId, long propertyId, FxMultiplicity assignmentMultiplicity, int pos, FxGroupData parent,
-                          FxValue value, boolean systemInternal) throws FxInvalidParameterException {
+                          FxValue value, boolean systemInternal, FxStructureOption maxLength) throws FxInvalidParameterException {
         super(xpPrefix, alias, index, xPath, xPathFull, indices, assignmentId, assignmentMultiplicity, pos, parent, systemInternal);
         this.value = value;
         this.propertyId = propertyId;
         this.containsDefaultValue = false;
         if (this.value != null)
             this.value.setXPath(xpPrefix + this.getXPathFull());
+        this.maxLength=maxLength;
     }
 
     /**
@@ -206,6 +210,16 @@ public class FxPropertyData extends FxData {
                     this.getAssignmentMultiplicity().toString()).setAffectedXPath(this.getXPathFull());
     }
 
+    public void checkMaxLength() throws FxInvalidParameterException {
+        if (!this.getMaxLength().isSet() || value ==null || value.isEmpty())
+            return;
+         for (long lang :value.getTranslatedLanguages()) {
+            if (value.getTranslation(lang).toString().length() >maxLength.getIntValue())
+                throw new FxInvalidParameterException(this.getAlias(), "ex.content.value.invalid.maxLength",
+                        this.getXPath(), getMaxLength().getIntValue(), value.toString(), value.toString().length()).setAffectedXPath(this.getXPathFull());
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -236,6 +250,15 @@ public class FxPropertyData extends FxData {
         //only removeable if not null, system internal or not non accessible or readonly
         return !this.isSystemInternal() &&
                 (!(this.value != null && (this.value instanceof FxNoAccess || this.value.isReadOnly())) || this.value == null);
+    }
+
+    /**
+     * Returns the value of the assignment's FxStructureOption.MAXLENGTH, or -1 of the option is not set.
+     *
+     * @return the value of the assignment's FxStructureOption.MAXLENGTH, or -1 of the option is not set
+     */
+    public FxStructureOption getMaxLength() {
+        return maxLength;
     }
 
     /**
@@ -288,7 +311,7 @@ public class FxPropertyData extends FxData {
         try {
             clone = new FxPropertyData(xpPrefix, getAlias(), getIndex(), getXPath(), getXPathFull(),
                     ArrayUtils.clone(getIndices()), getAssignmentId(), getPropertyId(), getAssignmentMultiplicity(),
-                    getPos(), parent, value.copy(), isSystemInternal());
+                    getPos(), parent, value.copy(), isSystemInternal(), maxLength);
         } catch (FxInvalidParameterException e) {
             throw e.asRuntimeException();
         }

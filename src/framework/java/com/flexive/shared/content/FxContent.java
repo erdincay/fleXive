@@ -806,6 +806,7 @@ public class FxContent implements Serializable {
         for (FxData curr : data.getChildren()) {
             if (curr instanceof FxPropertyData) {
                 ((FxPropertyData) curr).checkRequired();
+                ((FxPropertyData) curr).checkMaxLength();
             } else
                 _checkGroupValidity((FxGroupData) curr);
         }
