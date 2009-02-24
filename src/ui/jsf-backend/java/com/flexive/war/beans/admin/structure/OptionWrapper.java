@@ -33,15 +33,12 @@
  ***************************************************************/
 package com.flexive.war.beans.admin.structure;
 
-import com.flexive.faces.messages.FxFacesMsgErr;
-import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.structure.FxStructureOption;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Arrays;
+import java.util.*;
+
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Conveniently wraps FxStructureOptions to simplify GUI Manipulaiton.
@@ -245,7 +242,7 @@ public class OptionWrapper {
     }
 
     /**
-     * Add create a new option to the specified options list.
+     * Adds a new option to the specified options list.
      *
      * @param options       the option list to add the new option to
      * @param key           the option key
@@ -254,8 +251,8 @@ public class OptionWrapper {
      * @throws FxInvalidParameterException    on errors (empty key or empty value)
      */
     public void addOption(List<WrappedOption> options, String key, String value, boolean overridable) throws FxInvalidParameterException {
-        if (key != null && !"".equals(key.trim())) {
-            if (value != null && !"".equals(value.trim())) {
+        if (!StringUtils.isEmpty(key)) {
+            if (!StringUtils.isEmpty(value)) {
                 options.add(new WrappedOption(key, value, overridable, true));
             } else
                 throw new FxInvalidParameterException("value", "ex.optionWrapper.noValue");
@@ -349,12 +346,12 @@ public class OptionWrapper {
      */
     public Map<String, Boolean> getIsAssignmentOptionValidMap() {
         if (assignmentOptionValidMap == null) {
-            assignmentOptionValidMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<String, Boolean>() {
+            assignmentOptionValidMap = new HashMap<String,Boolean>() {
                 public Boolean get(Object key) {
-                    return !(key == null || "".equals(key) || countKeyOccurence(assignmentOptions, (String) key) > 1
+                    return !(key == null || "".equals(key.toString().trim()) || countKeyOccurence(assignmentOptions, (String) key) > 1
                             || isRedundant((String) key));
                 }
-            });
+            };
         }
         return assignmentOptionValidMap;
     }
@@ -366,11 +363,11 @@ public class OptionWrapper {
      */
     public Map<String, Boolean> getIsAssignmentOptionOverridableMap() {
         if (assignmentOptionOverridableMap == null) {
-            assignmentOptionOverridableMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<String, Boolean>() {
+            assignmentOptionOverridableMap =  new HashMap<String,Boolean>() {
                 public Boolean get(Object key) {
                     return mayOverrideOption((String) key);
                 }
-            });
+            };
         }
         return assignmentOptionOverridableMap;
     }
@@ -382,11 +379,11 @@ public class OptionWrapper {
      */
     public Map<String, Boolean> getIsStructureOptionValidMap() {
         if (structureOptionValidMap == null) {
-            structureOptionValidMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<String, Boolean>() {
+            structureOptionValidMap =  new HashMap<String,Boolean>() {
                 public Boolean get(Object key) {
-                    return !(key == null || "".equals(key) || countKeyOccurence(structureOptions, (String) key) > 1);
+                    return !(key == null || "".equals(key.toString().trim()) || countKeyOccurence(structureOptions, (String) key) > 1);
                 }
-            });
+            };
         }
         return structureOptionValidMap;
     }
