@@ -34,6 +34,7 @@ package com.flexive.tests.shared;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 /**
  * Test for the localized flexive exception messages
@@ -72,7 +73,7 @@ public class ExceptionTest {
             throwsRuntimeException();
         } catch (RuntimeException e) {
             StackTraceElement[] stackTrace = e.getStackTrace();
-            assert "throwsRuntimeException".equals(stackTrace[0].getMethodName()) : "First stack trace element of wrapped application exception should be the original method call.";
+            Assert.assertTrue("throwsRuntimeException".equals(stackTrace[0].getMethodName()), "First stack trace element of wrapped application exception should be the original method call.");
         }
     }
 

@@ -34,6 +34,7 @@
 package com.flexive.tests.embedded.jsf
 
 import org.testng.annotations.Test
+import org.testng.Assert
 
 /**
 * Sample JSF/Groovy test.
@@ -45,7 +46,7 @@ class GroovyJsfDemoTest {
 
     @Test (groups = ["jsf"])
     void groovyJsfTest() {
-        assert 2 == com.flexive.faces.FxJsfUtils.evalInt("#{1+1}")
+        Assert.assertEquals(2, com.flexive.faces.FxJsfUtils.evalInt("#{1+1}"))
     }
 
 }

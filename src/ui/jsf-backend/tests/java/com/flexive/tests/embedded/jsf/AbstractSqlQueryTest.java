@@ -57,6 +57,7 @@ import static com.flexive.tests.embedded.FxTestUtils.logout;
 import com.flexive.tests.embedded.TestUsers;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.Assert;
 
 /**
  * Base class for SQL query tests, including test data generation.
@@ -137,8 +138,8 @@ public class AbstractSqlQueryTest {
 
     protected FxResultSet getRows(int startRow, int maxRows) throws FxApplicationException {
         FxResultSet rs = EJBLookup.getSearchEngine().search(SELECT_ALL, startRow, maxRows, null);
-        assert rs.getRowCount() == maxRows : "Unexpected number of results: " + rs.getRowCount()
-                + ", expected: " + maxRows;
+        Assert.assertEquals(rs.getRowCount(), maxRows, "Unexpected number of results: " + rs.getRowCount()
+                + ", expected: " + maxRows);
         assertTotalRowCount(rs);
         return rs;
     }
@@ -150,14 +151,13 @@ public class AbstractSqlQueryTest {
 			final Object[] refRow = refResult.getRows().get(i - startIndex);
 			final FxPK refPk = (FxPK) refRow[0];
 			final FxPK pk = (FxPK) ((Object[]) model.getRowData())[0];
-			assert refPk.equals(pk) :
-				"Rows should be equal:\n" + "Lazy-load: " + pk + "\nPreload: " + refPk;
-            assert model.getRowIndex() == i : "Expected row index: " + i + ", got: " + model.getRowIndex();
+			Assert.assertEquals(refPk, pk, "Rows should be equal:\n" + "Lazy-load: " + pk + "\nPreload: " + refPk);
+            Assert.assertTrue(model.getRowIndex() == i, "Expected row index: " + i + ", got: " + model.getRowIndex());
         }
     }
 
 	protected void assertTotalRowCount(FxResultSet rs) {
-		assert rs.getTotalRowCount() == TOTALROWS : "Unexpected total rows: " + rs.getTotalRowCount();
+		Assert.assertTrue(rs.getTotalRowCount() == TOTALROWS, "Unexpected total rows: " + rs.getTotalRowCount());
 	}
 
 

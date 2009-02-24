@@ -117,7 +117,7 @@ public class StructureTest {
                     structACL = a;
                     break;
                 }
-            assert structACL != null : "No available ACL for structure found!";
+            Assert.assertTrue(structACL != null, "No available ACL for structure found!");
             FxPropertyEdit pe = FxPropertyEdit.createNew("TestDirectProperty1", desc, hint, true, new FxMultiplicity(0, 1),
                     true, structACL, FxDataType.String1024, new FxString(FxString.EMPTY),
                     true, null, null, null);
@@ -131,7 +131,7 @@ public class StructureTest {
             pe.setMultiplicity(new FxMultiplicity(0, 5));
             ae.createProperty(testId, pe, "/");
         } catch (FxApplicationException e) {
-            assert false : e.getMessage();
+            Assert.fail(e.getMessage());
         }
         FxTypeEdit testEdit = new FxTypeEdit(CacheAdmin.getEnvironment().getType("TestCD"));
         long propCount = testEdit.getAssignedProperties().size();
@@ -142,27 +142,27 @@ public class StructureTest {
         testEdit.setState(TypeState.Unavailable);
         te.save(testEdit);
         FxType testType = CacheAdmin.getEnvironment().getType("TestCDNewName");
-        assert testType.getAssignedProperties().size() == propCount : "Property count mismatch";
-        assert testType.getAssignment("/TestDirectProperty2").getXPath().equals("TESTCDNEWNAME/TESTDIRECTPROPERTY2") :
-                "Expected [TESTCDNEWNAME/TESTDIRECTPROPERTY2] but got: [" + testType.getAssignment("/TestDirectProperty2").getXPath() + "]";
-        assert testType.usePermissions();
-        assert testType.useInstancePermissions();
-        assert !testType.usePropertyPermissions();
-        assert !testType.useStepPermissions();
-        assert !testType.useTypePermissions();
-        assert testType.getState() == TypeState.Unavailable;
+        Assert.assertTrue(testType.getAssignedProperties().size() == propCount, "Property count mismatch");
+        Assert.assertEquals(testType.getAssignment("/TestDirectProperty2").getXPath(), "TESTCDNEWNAME/TESTDIRECTPROPERTY2",
+                "Expected [TESTCDNEWNAME/TESTDIRECTPROPERTY2] but got: [" + testType.getAssignment("/TestDirectProperty2").getXPath() + "]");
+        Assert.assertTrue(testType.usePermissions());
+        Assert.assertTrue(testType.useInstancePermissions());
+        Assert.assertTrue(!testType.usePropertyPermissions());
+        Assert.assertTrue(!testType.useStepPermissions());
+        Assert.assertTrue(!testType.useTypePermissions());
+        Assert.assertTrue(testType.getState() == TypeState.Unavailable);
 
         try {
-            assert testId == testType.getId() : "Wrong id for type!";
+            Assert.assertTrue(testId == testType.getId(), "Wrong id for type!");
             te.remove(testType.getId());
             try {
                 CacheAdmin.getEnvironment().getType("TestCD");
-                assert false : "TestCD could be loaded after remove!";
+                Assert.fail("TestCD could be loaded after remove!");
             } catch (Exception e) {
                 //ok
             }
         } catch (FxApplicationException e) {
-            assert false : e.getMessage();
+            Assert.fail(e.getMessage());
         }
     }
 
@@ -189,7 +189,7 @@ public class StructureTest {
                     structACL = a;
                     break;
                 }
-            assert structACL != null : "No available ACL for structure found!";
+            Assert.assertTrue(structACL != null, "No available ACL for structure found!");
             FxPropertyEdit pe = FxPropertyEdit.createNew("TestDirectProperty1", desc, hint, true, new FxMultiplicity(0, 1),
                     true, structACL, FxDataType.String1024, new FxString(FxString.EMPTY),
                     true, null, null, null);
@@ -200,10 +200,10 @@ public class StructureTest {
             pe.setMultiplicity(new FxMultiplicity(0, 1));
             ae.createProperty(testId, pe, "/TestGroup");
         } catch (FxApplicationException e) {
-            assert false : e.getMessage();
+            Assert.fail(e.getMessage());
         }
         FxType testType = CacheAdmin.getEnvironment().getType("TestCDP");
-        assert testId == testType.getId() : "Wrong id for type!";
+        Assert.assertTrue(testId == testType.getId(), "Wrong id for type!");
 
         long testDerivedId;
         testDerivedId = te.save(FxTypeEdit.createNew("TestCDDerived", new FxString("description..."),
@@ -213,54 +213,54 @@ public class StructureTest {
 //                TypeStorageMode.Hierarchical, TypeCategory.User, TypeMode.Content,
 //                true, LanguageMode.Multiple, TypeState.Available, (byte) 0, true, 0, 0, 0, 0);
         FxType testTypeDerived = CacheAdmin.getEnvironment().getType("TestCDDerived");
-        assert testTypeDerived.getId() == testDerivedId : "Derived type id does not match!";
-        assert testTypeDerived.getParent().getId() == testType.getId() : "Derived types parent does not match!";
+        Assert.assertTrue(testTypeDerived.getId() == testDerivedId, "Derived type id does not match!");
+        Assert.assertTrue(testTypeDerived.getParent().getId() == testType.getId(), "Derived types parent does not match!");
         FxAssignment dp = null;
         try {
             dp = testTypeDerived.getAssignment("/TestDirectProperty1");
         } catch (Exception e) {
-            assert false : "Failed to retrieved derived property: " + e.getMessage();
+            Assert.fail("Failed to retrieved derived property: " + e.getMessage());
         }
-        assert !dp.isEnabled() : "Property should be disabled!";
+        Assert.assertTrue(!dp.isEnabled(), "Property should be disabled!");
         FxPropertyAssignmentEdit dpe = new FxPropertyAssignmentEdit((FxPropertyAssignment) dp);
         dpe.setEnabled(true);
         ae.save(dpe, false);
         testTypeDerived = CacheAdmin.getEnvironment().getType("TestCDDerived");
         dp = testTypeDerived.getAssignment("/TestDirectProperty1");
-        assert dp.isEnabled() : "Property should be enabled!";
+        Assert.assertTrue(dp.isEnabled(), "Property should be enabled!");
 
 
         try {
             dp = testTypeDerived.getAssignment("/TestGroup/TestDirectProperty2");
         } catch (Exception e) {
-            assert false : "Failed to retrieved derived property: " + e.getMessage();
+            Assert.fail("Failed to retrieved derived property: " + e.getMessage());
         }
-        assert !dp.isEnabled() : "Property should be disabled!";
+        Assert.assertTrue(!dp.isEnabled(), "Property should be disabled!");
 
         FxGroupAssignmentEdit gae = new FxGroupAssignmentEdit((FxGroupAssignment) testTypeDerived.getAssignment("/TestGroup"));
         gae.setEnabled(true);
         ae.save(gae, false);
         testTypeDerived = CacheAdmin.getEnvironment().getType("TestCDDerived");
         dp = testTypeDerived.getAssignment("/TestGroup/TestDirectProperty2");
-        assert dp.isEnabled() : "Property should be enabled!";
+        Assert.assertTrue(dp.isEnabled(), "Property should be enabled!");
 
         try {
             te.remove(testTypeDerived.getId());
             try {
                 CacheAdmin.getEnvironment().getType("TestCDDerived");
-                assert false : "TestCDDerived could be loaded after remove!";
+                Assert.fail("TestCDDerived could be loaded after remove!");
             } catch (Exception e) {
                 //ok
             }
             te.remove(testType.getId());
             try {
                 CacheAdmin.getEnvironment().getType("TestCDP");
-                assert false : "TestCD could be loaded after remove!";
+                Assert.fail("TestCD could be loaded after remove!");
             } catch (Exception e) {
                 //ok
             }
         } catch (FxApplicationException e) {
-            assert false : e.getMessage();
+            Assert.fail(e.getMessage());
         }
     }
 
@@ -380,41 +380,41 @@ public class StructureTest {
                     structACL = a;
                     break;
                 }
-            assert structACL != null : "No available ACL for structure found!";
+            Assert.assertTrue(structACL != null, "No available ACL for structure found!");
             FxPropertyEdit pe = FxPropertyEdit.createNew("TestAssignmentRemoveProperty1", desc, hint, true, new FxMultiplicity(0, 1),
                     true, structACL, FxDataType.String1024, new FxString(FxString.EMPTY),
                     true, null, null, null);
             ae.createProperty(testId, pe, "/");
         } catch (FxApplicationException e) {
-            assert false : e.getMessage();
+            Assert.fail(e.getMessage());
         }
         FxType testType = CacheAdmin.getEnvironment().getType("TestAssignmentRemove");
-        assert testId == testType.getId() : "Wrong id for type!";
+        Assert.assertTrue(testId == testType.getId(), "Wrong id for type!");
         FxPropertyAssignment pa = null;
         long rmId = -1;
         try {
             pa = (FxPropertyAssignment) testType.getAssignment("/TestAssignmentRemoveProperty1");
-            assert pa != null : "Created Property Assignment is null!";
+            Assert.assertTrue(pa != null, "Created Property Assignment is null!");
             rmId = pa.getId();
         } catch (Exception e) {
-            assert false : "Created Property Assignment does not exist!";
+            Assert.fail("Created Property Assignment does not exist!");
         }
         FxPropertyAssignmentEdit pae = FxPropertyAssignmentEdit.createNew(pa, testType, "TestAssignmentRemoveProperty2", "/");
         try {
             long paId = ae.save(pae, true);
             pa = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(paId);
         } catch (Exception e) {
-            assert false : "Failed to retrieve derived assignment(2): " + e.getMessage();
+            Assert.fail("Failed to retrieve derived assignment(2): " + e.getMessage());
         }
         //create derived assignment over 3 hops
         ae.save(FxPropertyAssignmentEdit.createNew(pa, testType, "TestAssignmentRemoveProperty3", "/"), true);
         //check base's
         testType = CacheAdmin.getEnvironment().getType(testId);
-        assert testType.getAssignment("/TestAssignmentRemoveProperty1").getBaseAssignmentId() == FxAssignment.NO_PARENT;
-        assert testType.getAssignment("/TestAssignmentRemoveProperty2").getBaseAssignmentId() == testType.getAssignment("/TestAssignmentRemoveProperty1").getId();
-        assert testType.getAssignment("/TestAssignmentRemoveProperty3").getBaseAssignmentId() == testType.getAssignment("/TestAssignmentRemoveProperty2").getId();
+        Assert.assertTrue(testType.getAssignment("/TestAssignmentRemoveProperty1").getBaseAssignmentId() == FxAssignment.NO_PARENT);
+        Assert.assertTrue(testType.getAssignment("/TestAssignmentRemoveProperty2").getBaseAssignmentId() == testType.getAssignment("/TestAssignmentRemoveProperty1").getId());
+        Assert.assertTrue(testType.getAssignment("/TestAssignmentRemoveProperty3").getBaseAssignmentId() == testType.getAssignment("/TestAssignmentRemoveProperty2").getId());
         ae.removeAssignment(rmId, true, true);
-        assert CacheAdmin.getEnvironment().getSystemInternalRootPropertyAssignments().size() == CacheAdmin.getEnvironment().getType(testId).getAssignedProperties().size() : "Expected to have " + CacheAdmin.getEnvironment().getSystemInternalRootPropertyAssignments().size() + " assignments to the type!";
+        Assert.assertTrue(CacheAdmin.getEnvironment().getSystemInternalRootPropertyAssignments().size() == CacheAdmin.getEnvironment().getType(testId).getAssignedProperties().size(), "Expected to have " + CacheAdmin.getEnvironment().getSystemInternalRootPropertyAssignments().size() + " assignments to the type!");
 
         //recreate
         FxPropertyEdit pe = FxPropertyEdit.createNew("TestAssignmentRemoveProperty1", desc, hint, true, new FxMultiplicity(0, 1),
@@ -428,14 +428,14 @@ public class StructureTest {
         ae.save(FxPropertyAssignmentEdit.createNew(pa, testType, "TestAssignmentRemoveProperty3", "/"), true);
         //recheck
         testType = CacheAdmin.getEnvironment().getType(testId);
-        assert testType.getAssignment("/TestAssignmentRemoveProperty1").getBaseAssignmentId() == FxAssignment.NO_PARENT;
-        assert testType.getAssignment("/TestAssignmentRemoveProperty2").getBaseAssignmentId() == testType.getAssignment("/TestAssignmentRemoveProperty1").getId();
-        assert testType.getAssignment("/TestAssignmentRemoveProperty3").getBaseAssignmentId() == testType.getAssignment("/TestAssignmentRemoveProperty2").getId();
+        Assert.assertTrue(testType.getAssignment("/TestAssignmentRemoveProperty1").getBaseAssignmentId() == FxAssignment.NO_PARENT);
+        Assert.assertTrue(testType.getAssignment("/TestAssignmentRemoveProperty2").getBaseAssignmentId() == testType.getAssignment("/TestAssignmentRemoveProperty1").getId());
+        Assert.assertTrue(testType.getAssignment("/TestAssignmentRemoveProperty3").getBaseAssignmentId() == testType.getAssignment("/TestAssignmentRemoveProperty2").getId());
 
         ae.removeAssignment(testType.getAssignment("/TestAssignmentRemoveProperty1").getId(), false, false);
         testType = CacheAdmin.getEnvironment().getType(testId);
-        assert testType.getAssignment("/TestAssignmentRemoveProperty2").getBaseAssignmentId() == FxAssignment.NO_PARENT;
-        assert testType.getAssignment("/TestAssignmentRemoveProperty3").getBaseAssignmentId() == testType.getAssignment("/TestAssignmentRemoveProperty2").getId();
+        Assert.assertTrue(testType.getAssignment("/TestAssignmentRemoveProperty2").getBaseAssignmentId() == FxAssignment.NO_PARENT);
+        Assert.assertTrue(testType.getAssignment("/TestAssignmentRemoveProperty3").getBaseAssignmentId() == testType.getAssignment("/TestAssignmentRemoveProperty2").getId());
 
         // test if derived sub-assignments of a derived group are correctly
         // dereferenced from base assignments if parent group is removed
@@ -451,14 +451,14 @@ public class StructureTest {
 
         //verify that property assignment is child of group
         FxPropertyAssignment baseAss= (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(baseAssId);
-        assert baseAss.getParentGroupAssignment().getId() == baseGrp.getId();
+        Assert.assertTrue(baseAss.getParentGroupAssignment().getId() == baseGrp.getId());
 
         //create derived group assignment with derived sub assignments
         long derivedGrpId = ae.save(FxGroupAssignmentEdit.createNew(baseGrp, CacheAdmin.getEnvironment().getType(testId), "TestRemoveGroupDerived", "/"), true);
         FxGroupAssignment derivedGrp = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(derivedGrpId);
 
         //verify that group is derived
-        assert derivedGrp.isDerivedAssignment() && derivedGrp.getBaseAssignmentId() == baseGrp.getId();
+        Assert.assertTrue(derivedGrp.isDerivedAssignment() && derivedGrp.getBaseAssignmentId() == baseGrp.getId());
 
         //verify that derived group contains derived assignment from base group
         boolean found = false;
@@ -470,18 +470,18 @@ public class StructureTest {
                 break;
             }
         }
-        assert found;
+        Assert.assertTrue(found);
 
         //remove base group (together with its sub assignments)
         ae.removeAssignment(baseGrp.getId());
 
         //verify that derived group exists and has been dereferenced
-        assert !CacheAdmin.getEnvironment().getAssignment(derivedGrp.getId()).isDerivedAssignment() &&
-                CacheAdmin.getEnvironment().getAssignment(derivedGrp.getId()).getBaseAssignmentId() == FxAssignment.NO_PARENT;
+        Assert.assertTrue(!CacheAdmin.getEnvironment().getAssignment(derivedGrp.getId()).isDerivedAssignment() &&
+                CacheAdmin.getEnvironment().getAssignment(derivedGrp.getId()).getBaseAssignmentId() == FxAssignment.NO_PARENT);
 
         //verify that derived assignment exists and has been dereferenced
-        assert !CacheAdmin.getEnvironment().getAssignment(derivedAssId).isDerivedAssignment() &&
-                CacheAdmin.getEnvironment().getAssignment(derivedAssId).getBaseAssignmentId() == FxAssignment.NO_PARENT;
+        Assert.assertTrue(!CacheAdmin.getEnvironment().getAssignment(derivedAssId).isDerivedAssignment() &&
+                CacheAdmin.getEnvironment().getAssignment(derivedAssId).getBaseAssignmentId() == FxAssignment.NO_PARENT);
 
         te.remove(testId);
     }

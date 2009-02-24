@@ -54,6 +54,7 @@ import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -174,8 +175,8 @@ public class ValueTest {
 
 
         public TestData(FxDataType dataType, T _single, T _multi) {
-            assert !_single.isMultiLanguage() : "1st value argument has to be single language!";
-            assert _multi.isMultiLanguage() : "2nd value argument has to be multi language!";
+            Assert.assertTrue(!_single.isMultiLanguage(), "1st value argument has to be single language!");
+            Assert.assertTrue(_multi.isMultiLanguage(), "2nd value argument has to be multi language!");
             this.dataType = dataType;
             this._single = _single;
             this._multi = _multi;
@@ -188,29 +189,29 @@ public class ValueTest {
         }
 
         public void testConsistency() throws Exception {
-            assert !_single.equals(_multi);
-            assert _single.getDefaultTranslation().equals(_multi.getDefaultTranslation());
-            assert _multi.getTranslation(FxLanguage.ENGLISH).equals(en_value);
-            assert _multi.getTranslation(FxLanguage.GERMAN).equals(de_value);
-            assert _multi.getTranslatedLanguages().length == 2;
-            assert _single.getTranslatedLanguages().length == 1;
-            assert _single.getTranslation(FxLanguage.GERMAN).equals(en_value);
+            Assert.assertTrue(!_single.equals(_multi));
+            Assert.assertTrue(_single.getDefaultTranslation().equals(_multi.getDefaultTranslation()));
+            Assert.assertTrue(_multi.getTranslation(FxLanguage.ENGLISH).equals(en_value));
+            Assert.assertTrue(_multi.getTranslation(FxLanguage.GERMAN).equals(de_value));
+            Assert.assertTrue(_multi.getTranslatedLanguages().length == 2);
+            Assert.assertTrue(_single.getTranslatedLanguages().length == 1);
+            Assert.assertTrue(_single.getTranslation(FxLanguage.GERMAN).equals(en_value));
             _single.setTranslation(FxLanguage.ENGLISH, de_value);
-            assert _single.getTranslation(FxLanguage.GERMAN).equals(de_value);
+            Assert.assertTrue(_single.getTranslation(FxLanguage.GERMAN).equals(de_value));
             _single.setDefaultLanguage(FxLanguage.ITALIAN);
-            assert !_single.hasDefaultLanguage();
-            assert _single.getTranslation(FxLanguage.ENGLISH).equals(de_value);
-            assert _multi.hasDefaultLanguage();
+            Assert.assertTrue(!_single.hasDefaultLanguage());
+            Assert.assertTrue(_single.getTranslation(FxLanguage.ENGLISH).equals(de_value));
+            Assert.assertTrue(_multi.hasDefaultLanguage());
             //TODO: more asserts for standard behaviour ...
         }
 
         public void testSingleValue(FxValue compare) throws Exception {
             if (compare instanceof FxBinary) {
                 BinaryDescriptor desc = ((FxBinary) compare).getBestTranslation();
-                assert desc.isImage() : "Expected an image!";
-                assert desc.getWidth() == 2048 : "Wrong image width!";
-                assert desc.getHeight() == 1536 : "Wrong image height!";
-                assert desc.getResolution() == 72.0 || desc.getResolution() == 180.0 : "Wrong image resolution! Expected [72.0] or [180.0] depending on ImageMagick version but got [" + desc.getResolution() + "]";
+                Assert.assertTrue(desc.isImage(), "Expected an image!");
+                Assert.assertTrue(desc.getWidth() == 2048, "Wrong image width!");
+                Assert.assertTrue(desc.getHeight() == 1536, "Wrong image height!");
+                Assert.assertTrue(desc.getResolution() == 72.0 || desc.getResolution() == 180.0, "Wrong image resolution! Expected [72.0] or [180.0] depending on ImageMagick version but got [" + desc.getResolution() + "]");
                 //download
                 File f = File.createTempFile("FxBinary", ".bin");
                 FileOutputStream fout = new FileOutputStream(f);
@@ -222,11 +223,11 @@ public class ValueTest {
                 f.deleteOnExit();
                 return;
             } else if (compare instanceof FxHTML) {
-                assert ((String) compare.getBestTranslation()).indexOf((String) _single.getBestTranslation()) >= 0 : "Original single value was not found in tidied value!";
+                Assert.assertTrue(((String) compare.getBestTranslation()).indexOf((String) _single.getBestTranslation()) >= 0, "Original single value was not found in tidied value!");
                 return;
             }
             //cant use regular compare since even single language values will be loaded as multi language if the assignment is multilinugual!
-            assert _single.getBestTranslation().equals(compare.getBestTranslation()) : _single.getClass().getCanonicalName() + " mismatch for single language value (DataType " + dataType.name() + "): " + _single.toString() + "!=" + compare.toString();
+            Assert.assertTrue(_single.getBestTranslation().equals(compare.getBestTranslation()), _single.getClass().getCanonicalName() + " mismatch for single language value (DataType " + dataType.name() + "): " + _single.toString() + "!=" + compare.toString());
         }
 
         public void testMultiValue(FxValue compare) throws Exception {
@@ -235,7 +236,7 @@ public class ValueTest {
 //            else if( compare instanceof FxHTML ) {
 //                return;
 //            }
-            assert _multi.equals(compare) : _multi.getClass().getCanonicalName() + " mismatch for multi language value (DataType " + dataType.name() + "): " + _multi.toString() + "!=" + compare.toString();
+            Assert.assertTrue(_multi.equals(compare), _multi.getClass().getCanonicalName() + " mismatch for multi language value (DataType " + dataType.name() + "): " + _multi.toString() + "!=" + compare.toString());
         }
     }
 
@@ -352,7 +353,7 @@ public class ValueTest {
                         //set to a new pk
                         content.setValue("/VTS" + test.dataType.name() + "[1]", new FxReference(new ReferencedContent(new FxPK())));
                         co.save(content); //expected to fail
-                        assert false : "Invalid PK (new) for a reference should fail!";
+                        Assert.fail("Invalid PK (new) for a reference should fail!");
                     } catch (FxApplicationException e) {
                         //expected
                     }
@@ -360,7 +361,7 @@ public class ValueTest {
                         //set to a non existing pk
                         content.setValue("/VTS" + test.dataType.name() + "[1]", new FxReference(new ReferencedContent(new FxPK(123456))));
                         co.save(content); //expected to fail
-                        assert false : "Invalid PK (non existant) for a reference should fail!";
+                        Assert.fail("Invalid PK (non existant) for a reference should fail!");
                     } catch (FxApplicationException e) {
                         //expected
                     }
@@ -368,7 +369,7 @@ public class ValueTest {
                         //set to an existing pk, but wrong type
                         content.setValue("/VTS" + test.dataType.name() + "[1]", new FxReference(new ReferencedContent(RPK2)));
                         co.save(content); //expected to fail
-                        assert false : "Invalid PK (wrong type) for a reference should fail!";
+                        Assert.fail("Invalid PK (wrong type) for a reference should fail!");
                     } catch (FxApplicationException e) {
                         //expected
                     }
@@ -381,7 +382,7 @@ public class ValueTest {
             }
         }
         if (sbErr.length() > 0)
-            assert false : sbErr.toString();
+            Assert.fail(sbErr.toString());
     }
 
     /**
@@ -393,6 +394,6 @@ public class ValueTest {
                 new FxString("a"), new FxString("c"), new FxString("a0")));
         Collections.sort(strings);
         final String sortedStrings = StringUtils.join(strings.iterator(), ',');
-        assert sortedStrings.equals("a,a0,b,c") : "Expected lexical order 'a,a0,b,c', got: " + sortedStrings;
+        Assert.assertTrue(sortedStrings.equals("a,a0,b,c"), "Expected lexical order 'a,a0,b,c', got: " + sortedStrings);
     }
 }

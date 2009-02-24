@@ -43,6 +43,7 @@ import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.value.FxString;
+import org.testng.Assert;
 
 /**
  * Helper base class to provide user login/logout and UserTicket information for tests
@@ -117,7 +118,7 @@ public class FxTestUtils {
      * @throws FxApplicationException
      */
     public static ACL[] createACLs(String[] name, ACLCategory[] category, long mandator) throws FxApplicationException {
-        assert name != null && category != null && name.length == category.length : "Invalid parameter(s) for createACL!";
+        Assert.assertTrue(name != null && category != null && name.length == category.length, "Invalid parameter(s) for createACL!");
         ACL[] acls = new ACL[name.length];
         ACLEngine acl = EJBLookup.getAclEngine();
         FxString label = new FxString("Unit Test ACL Label");

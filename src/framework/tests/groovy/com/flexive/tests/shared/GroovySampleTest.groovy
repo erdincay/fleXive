@@ -34,6 +34,7 @@
 package com.flexive.tests.shared
 
 import org.testng.annotations.Test
+import org.testng.Assert
 
 /**
  * A simple Groovy TestNG test.
@@ -45,6 +46,6 @@ class GroovySampleTest {
 
     @Test (groups = ["shared"])
     void groovySharedTest() {
-        assert 1 == 1
+        Assert.assertTrue(true)
     }
 }

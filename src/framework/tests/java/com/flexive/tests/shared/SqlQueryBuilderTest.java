@@ -44,6 +44,7 @@ import com.flexive.shared.value.FxString;
 import com.flexive.tests.embedded.QueryNodeTreeTests.AssignmentNodeGenerator;
 import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 import java.util.Date;
 import java.util.Formatter;
@@ -63,7 +64,7 @@ public class SqlQueryBuilderTest {
     public void simpleQuery() {
         AssignmentNodeGenerator generator = new AssignmentNodeGenerator(FxDataType.String1024, new FxString("test"));
         AssignmentValueNode node = generator.createNode(0);
-        assert node.getValue().getDefaultTranslation().equals("test");
+        Assert.assertTrue(node.getValue().getDefaultTranslation().equals("test"));
         node.setComparator(PropertyValueComparator.EQ);
 
         SqlQueryBuilder builder = new SqlQueryBuilder().andSub();
@@ -153,18 +154,18 @@ public class SqlQueryBuilderTest {
     @Test
     public void getColumnNames() {
         SqlQueryBuilder builder = new SqlQueryBuilder();
-        assert !builder.getColumnNames().isEmpty() : "Default column must not be empty";
-        assert builder.getColumnNames().contains("@pk") : "Primary key must be selected by default.";
+        Assert.assertTrue(!builder.getColumnNames().isEmpty(), "Default column must not be empty");
+        Assert.assertTrue(builder.getColumnNames().contains("@pk"), "Primary key must be selected by default.");
     }
 
     private void assertConditions(SqlQueryBuilder builder, final String expected) {
         String conditions = builder.getConditions();
         final String commentsPattern = "/\\*.+?\\*/\\s*";
         conditions = conditions.replaceAll(commentsPattern, "");  // strip comments
-        assert expected.equalsIgnoreCase(conditions)
-                : "Invalid conditions: " + conditions + ", expected: " + expected;
-        assert builder.getQuery().replaceAll(commentsPattern, "").toUpperCase().indexOf(expected.toUpperCase()) > 0
-                : "Query must contain conditions: " + expected + ", generated getResult:\n" + builder.getQuery();
+        Assert.assertTrue(expected.equalsIgnoreCase(conditions),
+                "Invalid conditions: " + conditions + ", expected: " + expected);
+        Assert.assertTrue(builder.getQuery().replaceAll(commentsPattern, "").toUpperCase().indexOf(expected.toUpperCase()) > 0,
+                "Query must contain conditions: " + expected + ", generated getResult:\n" + builder.getQuery());
     }
 
     private void buildAssignmentNode(SqlQueryBuilder builder, AssignmentValueNode node) {
@@ -199,9 +200,9 @@ public class SqlQueryBuilderTest {
         final SqlQueryBuilder builder = new SqlQueryBuilder().condition("caption", PropertyValueComparator.LIKE, "test%");
         final String query = builder.getQuery();
         final String query2 = builder.getQuery();
-        assert query.equals(query2) : "Second call to getQuery() returned a different "
+        Assert.assertEquals(query, query2, "Second call to getQuery() returned a different "
                 + "result than the first one:\n"
-                + "[1]: " + query + "\n[2]: " + query2;
+                + "[1]: " + query + "\n[2]: " + query2);
     }
 
     @Test
@@ -209,38 +210,38 @@ public class SqlQueryBuilderTest {
         final SqlQueryBuilder builder = new SqlQueryBuilder().condition("title", PropertyValueComparator.LIKE, "test%");
         final SqlQueryBuilder builder2 = new SqlQueryBuilder(builder);
         builder2.condition("title", PropertyValueComparator.LIKE, "123%");
-        assert !builder.getQuery().equals(builder2.getQuery()) : "Queries should not be equal - copy constructor not implemented correctly";
+        Assert.assertTrue(!builder.getQuery().equals(builder2.getQuery()), "Queries should not be equal - copy constructor not implemented correctly");
     }
 
     @Test
     public void copyQueryBuilderSelectTest() {
         final SqlQueryBuilder builder = new SqlQueryBuilder().select("@pk").condition("title", PropertyValueComparator.LIKE, "test%");
         final SqlQueryBuilder builder2 = new SqlQueryBuilder(builder).select("@pk", "version");
-        assert !builder.getQuery().equals(builder2.getQuery()) : "Queries should not be equal";
-        assert !builder.getQuery().contains("@pk, version");
-        assert builder2.getQuery().contains("@pk, version");
+        Assert.assertTrue(!builder.getQuery().equals(builder2.getQuery()), "Queries should not be equal");
+        Assert.assertTrue(!builder.getQuery().contains("@pk, version"));
+        Assert.assertTrue(builder2.getQuery().contains("@pk, version"));
     }
 
     @Test
     public void filterTypeTest() {
         final SqlQueryBuilder builder = new SqlQueryBuilder().select("@pk").filterType("MYTYPE");
-        assert builder.getFilters().indexOf("TYPE=MYTYPE") != -1 : "Filter missing: " + builder.getFilters();
-        assert builder.getQuery().contains("TYPE=MYTYPE") : "Filter not contained in getResult: " + builder.getQuery();
+        Assert.assertTrue(builder.getFilters().indexOf("TYPE=MYTYPE") != -1, "Filter missing: " + builder.getFilters());
+        Assert.assertTrue(builder.getQuery().contains("TYPE=MYTYPE"), "Filter not contained in getResult: " + builder.getQuery());
 
         final SqlQueryBuilder builder2 = new SqlQueryBuilder().select("@pk").filterType(21);
-        assert builder2.getFilters().indexOf("TYPE=21") != -1 : "Filter missing: " + builder2.getFilters();
-        assert builder2.getQuery().contains("TYPE=21") : "Filter not contained in getResult: " + builder2.getQuery();
+        Assert.assertTrue(builder2.getFilters().indexOf("TYPE=21") != -1, "Filter missing: " + builder2.getFilters());
+        Assert.assertTrue(builder2.getQuery().contains("TYPE=21"), "Filter not contained in getResult: " + builder2.getQuery());
         // remove filter
         builder2.filterType(-1);
-        assert builder2.getFilters().indexOf("TYPE=") == -1 : "Type filter not removed: " + builder2.getFilters();
-        assert !builder2.getQuery().contains("TYPE=21") : "Filter still present in getResult: " + builder2.getQuery();
+        Assert.assertTrue(builder2.getFilters().indexOf("TYPE=") == -1, "Type filter not removed: " + builder2.getFilters());
+        Assert.assertTrue(!builder2.getQuery().contains("TYPE=21"), "Filter still present in getResult: " + builder2.getQuery());
     }
 
     @Test
     public void filterVersionTest() {
         final SqlQueryBuilder builder = new SqlQueryBuilder().select("@pk").filterVersion(VersionFilter.ALL);
         assertEquals(builder.getFilters(), "VERSION=ALL");
-        assert builder.getQuery().contains("FILTER VERSION=ALL") : "Filter no contained: " + builder.getQuery();
+        Assert.assertTrue(builder.getQuery().contains("FILTER VERSION=ALL"), "Filter no contained: " + builder.getQuery());
 
         builder.filterVersion(VersionFilter.MAX);
         assertEquals(builder.getFilters(), "VERSION=MAX");
@@ -254,13 +255,13 @@ public class SqlQueryBuilderTest {
         try {
             final SqlQueryBuilder builder = new SqlQueryBuilder().orSub().isChild(1).closeSub()
                     .andSub().isChild(5);
-            assert false : "Query builder assembled illegal getResult: " + builder.getQuery();
+            Assert.fail("Query builder assembled illegal getResult: " + builder.getQuery());
         } catch (FxRuntimeException e) {
             // pass
         }
         try {
             final SqlQueryBuilder builder2 = new SqlQueryBuilder().orSub().isChild(1).closeSub().isChild(5);
-            assert false : "Query builder assembled illegal getResult: " + builder2.getQuery();
+            Assert.fail("Query builder assembled illegal getResult: " + builder2.getQuery());
         } catch (FxRuntimeException e) {
             // pass
         }
@@ -269,15 +270,15 @@ public class SqlQueryBuilderTest {
     @Test
     public void orderByTest() {
         final SqlQueryBuilder builder = new SqlQueryBuilder().select("property", "anotherProperty").orderBy("property", SortDirection.ASCENDING);
-        assert builder.getQuery().contains("ORDER BY property") : "Order by not contained in getResult: " + builder.getQuery();
+        Assert.assertTrue(builder.getQuery().contains("ORDER BY property"), "Order by not contained in getResult: " + builder.getQuery());
         builder.orderBy("anotherProperty", SortDirection.DESCENDING);
-        assert !builder.getQuery().contains("ORDER BY property") : "Old order by should be removed: " + builder.getQuery();
-        assert builder.getQuery().contains("ORDER BY anotherProperty DESC") : "Order by not contained in getResult: " + builder.getQuery();
+        Assert.assertTrue(!builder.getQuery().contains("ORDER BY property"), "Old order by should be removed: " + builder.getQuery());
+        Assert.assertTrue(builder.getQuery().contains("ORDER BY anotherProperty DESC"), "Order by not contained in getResult: " + builder.getQuery());
         builder.orderBy(1, SortDirection.ASCENDING);
         builder.orderBy(2, SortDirection.DESCENDING);
         try {
             builder.orderBy(3, SortDirection.ASCENDING);
-            assert false : "Column 2 doesn't exist";
+            Assert.fail("Column 2 doesn't exist");
         } catch (Exception e) {
             // pass
         }
@@ -289,7 +290,7 @@ public class SqlQueryBuilderTest {
                 new SqlQueryBuilder().select("mycontent/mycaption"),
                 new SqlQueryBuilder().select("#mycontent/mycaption")
         }) {
-            assert builder.getQuery().contains("SELECT #mycontent/mycaption") : "Expected assignment query: " + builder.getQuery();
+            Assert.assertTrue(builder.getQuery().contains("SELECT #mycontent/mycaption"), "Expected assignment query: " + builder.getQuery());
         }
     }
 
@@ -298,7 +299,7 @@ public class SqlQueryBuilderTest {
         for (String prop: new String[] { "dateprop", "searchtest/dateprop" }) {
             final String query = new SqlQueryBuilder().select("id").condition("year(" + prop + ")", PropertyValueComparator.EQ, 2008).getQuery();
             final String fun = "year(" + (prop.indexOf('/') != -1 ? "#" + prop : prop) + ") = 2008";
-            assert query.toUpperCase().contains(fun.toUpperCase()) : "Expected query to contain " + fun + ", got: " + query;
+            Assert.assertTrue(query.toUpperCase().contains(fun.toUpperCase()), "Expected query to contain " + fun + ", got: " + query);
         }
     }
 }

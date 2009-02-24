@@ -47,6 +47,7 @@ import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -122,16 +123,16 @@ public class WorkflowTest {
             workflowId = createTestWorkflow();
             try {
                 createTestWorkflow();
-                assert false:"Workflows must have unique names";
+                Assert.fail("Workflows must have unique names");
             }
             catch (Exception e) {
                 //ok
             }
-            assert getUserTicket().isInRole(Role.WorkflowManagement) : "User is not in role workflow management - call should have failed.";
+            Assert.assertTrue(getUserTicket().isInRole(Role.WorkflowManagement), "User is not in role workflow management - call should have failed.");
             Workflow workflow = getEnvironment().getWorkflow(workflowId);
-            assert workflowId == workflow.getId() : "Workflow ID not set/returned correctly.";
-            assert WORKFLOW_NAME.equals(workflow.getName()) : "Workflow name was not stored correctly.";
-            assert WORKFLOW_DESCRIPTION.equals(workflow.getDescription()) : "Workflow description was not stored correctly.";
+            Assert.assertTrue(workflowId == workflow.getId(), "Workflow ID not set/returned correctly.");
+            Assert.assertTrue(WORKFLOW_NAME.equals(workflow.getName()), "Workflow name was not stored correctly.");
+            Assert.assertTrue(WORKFLOW_DESCRIPTION.equals(workflow.getDescription()), "Workflow description was not stored correctly.");
         } finally {
             // cleanup
             if (workflowId != -1) {
@@ -149,10 +150,10 @@ public class WorkflowTest {
     public void deleteWorkflow() throws Exception {
         long workflowId = createTestWorkflow();
         workflowEngine.remove(workflowId);
-        assert getUserTicket().isInRole(Role.WorkflowManagement) : "User is not in role workflow management - call should have failed.";
+        Assert.assertTrue(getUserTicket().isInRole(Role.WorkflowManagement), "User is not in role workflow management - call should have failed.");
         try {
             getEnvironment().getWorkflow(workflowId);
-            assert false : "Able to retrieve deleted workflow.";
+            Assert.fail("Able to retrieve deleted workflow.");
         } catch (Exception e) {
             // succeed
         }
@@ -175,11 +176,11 @@ public class WorkflowTest {
             editWorkflow.getRoutes().add(new Route(-1, UserGroup.GROUP_EVERYONE, -1, -2));
             workflowEngine.update(editWorkflow);
             Workflow workflow = getEnvironment().getWorkflow(workflowId);
-            assert getUserTicket().isInRole(Role.WorkflowManagement) : "User is not in role workflow management - call should have failed.";
-            assert StringUtils.reverse(WORKFLOW_NAME).equals(workflow.getName()) : "Workflow name not updated properly.";
-            assert StringUtils.reverse(WORKFLOW_DESCRIPTION).equals(workflow.getDescription()) : "Workflow description not updated properly.";
-            assert workflow.getSteps().size() == 2 : "Unexpected number of workflow steps: " + workflow.getSteps().size();
-            assert workflow.getRoutes().size() == 1 : "Unexpected number of workflow routes: " + workflow.getRoutes();
+            Assert.assertTrue(getUserTicket().isInRole(Role.WorkflowManagement), "User is not in role workflow management - call should have failed.");
+            Assert.assertTrue(StringUtils.reverse(WORKFLOW_NAME).equals(workflow.getName()), "Workflow name not updated properly.");
+            Assert.assertTrue(StringUtils.reverse(WORKFLOW_DESCRIPTION).equals(workflow.getDescription()), "Workflow description not updated properly.");
+            Assert.assertTrue(workflow.getSteps().size() == 2, "Unexpected number of workflow steps: " + workflow.getSteps().size());
+            Assert.assertTrue(workflow.getRoutes().size() == 1, "Unexpected number of workflow routes: " + workflow.getRoutes());
         } finally {
             // cleanup
             workflowEngine.remove(workflowId);
@@ -205,11 +206,11 @@ public class WorkflowTest {
             List<Step> cachedSteps = getEnvironment().getSteps();
             try {
                 workflowEngine.update(editWorkflow);
-                assert false : "Should not be able to successfully create workflows with invalid routes.";
+                Assert.fail("Should not be able to successfully create workflows with invalid routes.");
             } catch (Exception e) {
-                assert cachedSteps.equals(getEnvironment().getSteps()) :
+                Assert.assertEquals(cachedSteps, getEnvironment().getSteps(),
                         "Steps should have been rollbacked.\nSteps before update: " + cachedSteps.toString()
-                                + "\nEnvironment: " + getEnvironment().getSteps();
+                                + "\nEnvironment: " + getEnvironment().getSteps());
             }
         } finally {
             workflowEngine.remove(workflowId);
@@ -232,7 +233,7 @@ public class WorkflowTest {
             stepDefinitionId = createStepDefinition(null);
             try {
                 createStepDefinition(null);
-                assert false:"Step definitions must have unique names for a specific language";
+                Assert.fail("Step definitions must have unique names for a specific language");
             }
             catch (Exception e) {
                 //ok
@@ -244,17 +245,17 @@ public class WorkflowTest {
             workflowId = workflowEngine.create(workflow);
             workflow = getEnvironment().getWorkflow(workflowId);
             // try to remove previously created step
-            assert 1 == workflow.getSteps().size() : "Step initialized with workflow not created automatically";
+            Assert.assertTrue(1 == workflow.getSteps().size(), "Step initialized with workflow not created automatically");
 
             // update step
             acl2Id = createAcl();
             long stepId = workflow.getSteps().get(0).getId();
             stepEngine.updateStep(stepId, acl2Id);
-            assert getEnvironment().getStep(stepId).getAclId() == acl2Id;
+            Assert.assertTrue(getEnvironment().getStep(stepId).getAclId() == acl2Id);
 
             stepEngine.removeStep(stepId);
             workflow = getEnvironment().getWorkflow(workflowId);
-            assert 0 == workflow.getSteps().size() : "Step not removed in CacheAdmin.getEnvironment().";
+            Assert.assertTrue(0 == workflow.getSteps().size(), "Step not removed in CacheAdmin.getEnvironment().");
             // generate some steps...
             List<StepDefinition> stepDefinitions = getEnvironment().getStepDefinitions();
             for (StepDefinition stepDefinition : stepDefinitions) {
@@ -262,7 +263,7 @@ public class WorkflowTest {
             }
             // check if structure was updated properly
             workflow = getEnvironment().getWorkflow(workflowId);
-            assert stepDefinitions.size() == workflow.getSteps().size() : "Created steps not reflected in CacheAdmin.getEnvironment().";
+            Assert.assertTrue(stepDefinitions.size() == workflow.getSteps().size(), "Created steps not reflected in CacheAdmin.getEnvironment().");
             // create some routes...
             steps = workflow.getSteps();
             int routes = 0;
@@ -282,21 +283,21 @@ public class WorkflowTest {
                             }
                         }
                         if (!found) {
-                            assert false : "Created route target not found with getTargets().";
+                            Assert.fail("Created route target not found with getTargets().");
                         }
                         routes++;
                     }
                 }
             }
             workflow = getEnvironment().getWorkflow(workflowId);
-            assert routes == workflow.getRoutes().size() : "Created routes not reflected in CacheAdmin.getEnvironment().";
+            Assert.assertTrue(routes == workflow.getRoutes().size(), "Created routes not reflected in CacheAdmin.getEnvironment().");
             // delete some routes...
             routeEngine.remove(workflow.getRoutes().get(0).getId());
             workflow = getEnvironment().getWorkflow(workflowId);
-            assert routes - 1 == workflow.getRoutes().size() : "Deleted routes not reflected in CacheAdmin.getEnvironment().";
-            assert workflow.getRoutes().size() > 0;
+            Assert.assertTrue(routes - 1 == workflow.getRoutes().size(), "Deleted routes not reflected in CacheAdmin.getEnvironment().");
+            Assert.assertTrue(workflow.getRoutes().size() > 0);
             routeEngine.remove(workflow.getRoutes().get(0).getId());
-            assert getEnvironment().getWorkflow(workflowId).getRoutes().size() == 0 : "Not all routes deleted.";
+            Assert.assertTrue(getEnvironment().getWorkflow(workflowId).getRoutes().size() == 0, "Not all routes deleted.");
         } finally {
             if (workflowId != -1) {
                 workflowEngine.remove(workflowId);
@@ -340,8 +341,8 @@ public class WorkflowTest {
             // check if the workflow contains a step for sd2
             Workflow workflow = getEnvironment().getWorkflow(workflowId);
             List<StepDefinition> usedStepDefinitions = FxSharedUtils.getUsedStepDefinitions(workflow.getSteps(), getEnvironment().getStepDefinitions());
-            assert usedStepDefinitions.contains(getEnvironment().getStepDefinition(sd1)) : "No step exists for step definition " + sd1;
-            assert usedStepDefinitions.contains(getEnvironment().getStepDefinition(sd2)) : "No step created for step definition " + sd2;
+            Assert.assertTrue(usedStepDefinitions.contains(getEnvironment().getStepDefinition(sd1)), "No step exists for step definition " + sd1);
+            Assert.assertTrue(usedStepDefinitions.contains(getEnvironment().getStepDefinition(sd2)), "No step created for step definition " + sd2);
         } finally {
             if (workflowId != -1) {
                 workflowEngine.remove(workflowId);
@@ -368,10 +369,10 @@ public class WorkflowTest {
         long stepDefinitionId = -1;
         try {
             stepDefinitionId = createStepDefinition(null);
-            assert stepDefinitionId != -1 : "Failed to create step definition";
+            Assert.assertTrue(stepDefinitionId != -1, "Failed to create step definition");
             StepDefinition stepDefinition = getEnvironment().getStepDefinition(stepDefinitionId);
-            assert new FxString(STEPDEF_NAME).equals(stepDefinition.getLabel()) : "Invalid label: " + stepDefinition.getLabel();
-            assert STEPDEF_NAME.equals(stepDefinition.getName()) : "Invalid name: " + stepDefinition.getName();
+            Assert.assertTrue(new FxString(STEPDEF_NAME).equals(stepDefinition.getLabel()), "Invalid label: " + stepDefinition.getLabel());
+            Assert.assertTrue(STEPDEF_NAME.equals(stepDefinition.getName()), "Invalid name: " + stepDefinition.getName());
             StepDefinitionEdit definitionEdit = new StepDefinitionEdit(stepDefinition);
             definitionEdit.setName(StringUtils.reverse(stepDefinition.getName()));
             FxString label = new FxString(STEPDEF_NAME);
@@ -379,8 +380,8 @@ public class WorkflowTest {
             definitionEdit.setLabel(label);
             stepDefinitionEngine.update(definitionEdit);
             stepDefinition = getEnvironment().getStepDefinition(stepDefinitionId);
-            assert StringUtils.reverse(STEPDEF_NAME).equals(stepDefinition.getName()) : "Invalid name: " + stepDefinition.getName();
-            assert label.equals(stepDefinition.getLabel()) : "Invalid label: " + stepDefinition.getLabel();
+            Assert.assertTrue(StringUtils.reverse(STEPDEF_NAME).equals(stepDefinition.getName()), "Invalid name: " + stepDefinition.getName());
+            Assert.assertTrue(label.equals(stepDefinition.getLabel()), "Invalid label: " + stepDefinition.getLabel());
         } finally {
             if (stepDefinitionId != -1) {
                 stepDefinitionEngine.remove(stepDefinitionId);
@@ -401,8 +402,8 @@ public class WorkflowTest {
             long defaultLanguage = languages.get(languages.size() - 1).getId();
             stepDefinition.getLabel().setDefaultLanguage(defaultLanguage);
             stepDefinitionEngine.update(stepDefinition);
-            assert getEnvironment().getStepDefinition(stepDefinitionId).getLabel().getDefaultLanguage() == defaultLanguage
-                    : "Default language not preserved correctly.";
+            Assert.assertTrue(getEnvironment().getStepDefinition(stepDefinitionId).getLabel().getDefaultLanguage() == defaultLanguage,
+                    "Default language not preserved correctly.");
         } finally {
             if (stepDefinitionId != -1) {
                 stepDefinitionEngine.remove(stepDefinitionId);
@@ -420,8 +421,8 @@ public class WorkflowTest {
             StepDefinitionEdit stepDefinition = new StepDefinitionEdit(getEnvironment().getStepDefinition(stepDefinitionId));
             stepDefinition.setUniqueTargetId(targetStepDefinitionId);
             stepDefinitionEngine.update(stepDefinition);
-            assert CacheAdmin.getEnvironment().getStepDefinition(stepDefinitionId).getUniqueTargetId() == targetStepDefinitionId
-                    : "Target step definition ID not updated.";
+            Assert.assertEquals(CacheAdmin.getEnvironment().getStepDefinition(stepDefinitionId).getUniqueTargetId(), targetStepDefinitionId,
+                    "Target step definition ID not updated.");
         } finally {
             if (stepDefinitionId != -1) {
                 stepDefinitionEngine.remove(stepDefinitionId);
@@ -442,7 +443,7 @@ public class WorkflowTest {
             stepDefinitionId = createStepDefinition(null);
             stepId = stepEngine.createStep(new Step(-1, stepDefinitionId, workflowId, myWorkflowACL.getId()));
             List<StepPermission> stepPermissions = stepEngine.loadAllStepsForUser(FxContext.getUserTicket().getUserId());
-            assert stepPermissions.size() > 0 : "No steps/step permissions returned.";
+            Assert.assertTrue(stepPermissions.size() > 0, "No steps/step permissions returned.");
             // TODO add more checks
         } finally {
             if (stepId != -1) {
@@ -469,23 +470,23 @@ public class WorkflowTest {
         long id = -1;
         try {
             id = stepDefinitionEngine.create(new StepDefinition(-1, new FxString("base"), "base", -1));
-            assert getEnvironment().getStepDefinition(id).getUniqueTargetId() == -1;
+            Assert.assertTrue(getEnvironment().getStepDefinition(id).getUniqueTargetId() == -1);
             // set unique target to itself
             StepDefinitionEdit edit = new StepDefinitionEdit(getEnvironment().getStepDefinition(id));
             try {
                 // first try: sdedit should catch this
                 edit.setUniqueTargetId(id);
-                assert false : "It should not be possible to set the unique target ID to the ID of the "
-                        + " step definition itself in StepDefinitionEdit";
+                Assert.fail("It should not be possible to set the unique target ID to the ID of the "
+                        + " step definition itself in StepDefinitionEdit");
             } catch (FxRuntimeException e) {
                 // pass
             }
             try {
                 // second try: the stepdef constructor should catch this too
-                assert edit.getId() != -1;
+                Assert.assertTrue(edit.getId() != -1);
                 new StepDefinition(edit.getId(), new FxString("test"), "test", edit.getId());
-                assert false : "The StepDefinition constructor should check if the unique target ID "
-                        + " is equal to the step definition ID.";
+                Assert.fail("The StepDefinition constructor should check if the unique target ID "
+                        + " is equal to the step definition ID.");
             } catch (FxRuntimeException e) {
                 // pass
             }
@@ -511,17 +512,17 @@ public class WorkflowTest {
             sd1 = stepDefinitionEngine.create(new StepDefinition(-1, new FxString("base"), "base", -1));
             sd2 = stepDefinitionEngine.create(new StepDefinition(-1, new FxString("derived"), "derived", sd1));
             // until now, the step definitions are valid and no cycle is created
-            assert getEnvironment().getStepDefinition(sd2).getUniqueTargetId() == sd1
-                    : "Invalid unique target: " + getEnvironment().getStepDefinition(sd2).getUniqueTargetId();
-            assert getEnvironment().getStepDefinition(sd1).getUniqueTargetId() == -1
-                    : "Invalid unique target: " + getEnvironment().getStepDefinition(sd1).getUniqueTargetId();
+            Assert.assertEquals(getEnvironment().getStepDefinition(sd2).getUniqueTargetId(), sd1,
+                    "Invalid unique target: " + getEnvironment().getStepDefinition(sd2).getUniqueTargetId());
+            Assert.assertEquals(getEnvironment().getStepDefinition(sd1).getUniqueTargetId(), -1,
+                    "Invalid unique target: " + getEnvironment().getStepDefinition(sd1).getUniqueTargetId());
             // create cycle by changing sd1's unique target to sd2
             StepDefinitionEdit sdEdit = new StepDefinitionEdit(getEnvironment().getStepDefinition(sd1));
             sdEdit.setUniqueTargetId(sd2);
             try {
                 stepDefinitionEngine.update(sdEdit);
                 createdCycle = true;
-                assert false : "Possible to create cycles in unique target definitions";
+                Assert.fail("Possible to create cycles in unique target definitions");
             } catch (FxApplicationException e) {
                 // pass
             }
@@ -560,10 +561,10 @@ public class WorkflowTest {
             long previousId = -1;
             for (Long id : ids) {
                 StepDefinition sd = getEnvironment().getStepDefinition(id);
-                assert sd.getId() != -1;
+                Assert.assertTrue(sd.getId() != -1);
                 if (previousId != -1) {
-                    assert sd.getUniqueTargetId() == previousId : "Unique target for step " + sd.getId()
-                            + " is " + sd.getUniqueTargetId() + ", expected: " + previousId;
+                    Assert.assertEquals(sd.getUniqueTargetId(), previousId, "Unique target for step " + sd.getId()
+                            + " is " + sd.getUniqueTargetId() + ", expected: " + previousId);
                 }
                 previousId = id;
             }
@@ -573,7 +574,7 @@ public class WorkflowTest {
             sdEdit.setUniqueTargetId(ids.get(ids.size() - 1));
             try {
                 stepDefinitionEngine.update(sdEdit);
-                assert false : "Cycle created, nodes = " + ids;
+                Assert.fail("Cycle created, nodes = " + ids);
             } catch (FxApplicationException e) {
                 // pass
             }
@@ -619,12 +620,12 @@ public class WorkflowTest {
             final long workflowId = EJBLookup.getWorkflowEngine().create(workflow);
             final Workflow dbWorkflow = CacheAdmin.getEnvironment().getWorkflow(workflowId);
             workflows.add(dbWorkflow);
-            assert dbWorkflow.getRoutes().size() == 1;      // route available?
-            assert dbWorkflow.getSteps().size() == 2;       // both steps available?
+            Assert.assertTrue(dbWorkflow.getRoutes().size() == 1);      // route available?
+            Assert.assertTrue(dbWorkflow.getSteps().size() == 2);       // both steps available?
             
             // check from and to steps of our route
-            assert dbWorkflow.getRoutes().get(0).getFromStepId() == dbWorkflow.getSteps().get(0).getId();
-            assert dbWorkflow.getRoutes().get(0).getToStepId() == dbWorkflow.getSteps().get(1).getId();
+            Assert.assertTrue(dbWorkflow.getRoutes().get(0).getFromStepId() == dbWorkflow.getSteps().get(0).getId());
+            Assert.assertTrue(dbWorkflow.getRoutes().get(0).getToStepId() == dbWorkflow.getSteps().get(1).getId());
         } finally {
             for (Workflow workflow: workflows) {
                 EJBLookup.getWorkflowEngine().remove(workflow.getId());

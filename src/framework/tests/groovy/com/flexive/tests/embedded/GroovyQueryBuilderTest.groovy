@@ -38,6 +38,7 @@ import com.flexive.shared.search.query.SqlQueryBuilder
 import com.flexive.shared.FxFormatUtils;
 import org.testng.annotations.Test
 import com.flexive.shared.value.FxDateTime
+import org.testng.Assert
 
 /**
  * Test scripts for the query builder test bean
@@ -58,7 +59,7 @@ class GroovyQueryBuilderTest {
         }
         def cond = "(CAPTION = 'bla' AND FILENAME IS NOT NULL AND (ID > 0 OR ID < 100) AND CREATED_AT < " + FxFormatUtils.escapeForSql(new FxDateTime(new Date(0))) + ")"
         def result = root.sqlQuery
-        assert result.toUpperCase().indexOf(cond.toUpperCase()) > 0: "Expected condition: " + cond + ", \ngot:\n" + result
+        Assert.assertTrue(result.toUpperCase().indexOf(cond.toUpperCase()) > 0, "Expected condition: " + cond + ", \ngot:\n" + result)
     }
 
     @Test (groups = ["scripting", "ejb", "search"])
@@ -69,7 +70,7 @@ class GroovyQueryBuilderTest {
         }
         def query = root.sqlQuery
         def query2 = root.sqlQuery
-        assert query == query2: "Second call to getSqlQuery() returned a different result, \n[1]: " + query + "\n[2]: " + query2
+        Assert.assertEquals(query, query2, "Second call to getSqlQuery() returned a different result, \n[1]: " + query + "\n[2]: " + query2)
     }
 
     @Test (groups = ["scripting", "ejb", "search"])
@@ -78,7 +79,7 @@ class GroovyQueryBuilderTest {
             filterBriefcase(21)
         }
         def query = root.sqlQuery
-        assert query.indexOf("briefcase=21") > 0: "Query should contain briefcase=21 filter: " + query
+        Assert.assertTrue(query.indexOf("briefcase=21") > 0, "Query should contain briefcase=21 filter: " + query)
         // check if search can be submitted
         root.queryBuilder.getResult()
     }
@@ -89,7 +90,7 @@ class GroovyQueryBuilderTest {
         new GroovyQueryBuilder(builder).select(["@pk"]) {
             filterBriefcase(21)
         }
-        assert builder.query.indexOf("briefcase=21") > 0: "Query should contain briefcase=21 filter: " + builder.query
+        Assert.assertTrue(builder.query.indexOf("briefcase=21") > 0, "Query should contain briefcase=21 filter: " + builder.query)
         // check if search can be submitted
         builder.getResult()
     }

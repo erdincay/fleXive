@@ -48,6 +48,7 @@ import com.flexive.war.beans.admin.main.UserGroupBean;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 import java.util.List;
 
@@ -74,7 +75,7 @@ public class UserGroupBeanTest {
     @Test
     public void testGetList() {
         List<UserGroup> groups = userGroupBean.getList();
-        assert groups.size() > 0 : "No user groups defined";
+        Assert.assertTrue(groups.size() > 0, "No user groups defined");
     }
 
     @Test
@@ -85,7 +86,7 @@ public class UserGroupBeanTest {
             userGroupBean.setName("TESTNG_TEST_GROUP");
             userGroupBean.setMandator(CacheAdmin.getEnvironment().getMandator(FxContext.getUserTicket().getMandatorId()));
             String result = userGroupBean.create();
-            assert "userGroupOverview".equals(result) : "Invalid outcome: " + result;
+            Assert.assertTrue("userGroupOverview".equals(result), "Invalid outcome: " + result);
         } finally {
             deleteUserGroup();
         }

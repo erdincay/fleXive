@@ -35,6 +35,7 @@ import com.flexive.shared.configuration.ParameterPath;
 import com.flexive.shared.configuration.ParameterScope;
 import com.flexive.shared.configuration.SystemParameterPaths;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 import java.util.List;
 
@@ -105,10 +106,10 @@ public class ParameterTest {
      */
     private void checkFallbacks(ParameterPath path, ParameterScope... expected) {
         List<ParameterScope> fallbacks = path.getScope().getFallbacks();
-        assert expected.length == fallbacks.size() : "Number of fallback scopes mismatch.";
+        Assert.assertTrue(expected.length == fallbacks.size(), "Number of fallback scopes mismatch.");
         for (ParameterScope scope : expected) {
             if (fallbacks.indexOf(scope) == -1) {
-                assert false : "Expected fallback scope not found: " + scope;
+                Assert.fail("Expected fallback scope not found: " + scope);
             }
         }
     }

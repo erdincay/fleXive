@@ -207,7 +207,7 @@ public class ImageTypeTest {
             FileOutputStream fos = new FileOutputStream(comp);
             bin.getBestTranslation().download(fos);
             fos.close();
-            assert comp.length() == testFile.length() : "Files differ in length";
+            Assert.assertTrue(comp.length() == testFile.length(), "Files differ in length");
             if (!comp.delete())
                 comp.deleteOnExit();
         } finally {

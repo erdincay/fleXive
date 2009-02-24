@@ -99,11 +99,11 @@ public class QueryNodeTreeTests {
 
     @Test(groups ={"ejb", "search"})
     public void testNodeEquals() {
-        assert new InnerTestNode().equals(new InnerTestNode()) : "Two new node instances should be equal.";
+        Assert.assertTrue(new InnerTestNode().equals(new InnerTestNode()), "Two new node instances should be equal.");
         //noinspection ObjectEqualsNull
-        assert !new InnerTestNode().equals(null) : "A test node is not equal to null.";
-        assert new InnerTestNode(10).equals(new InnerTestNode(10)) : "Node IDs not checked properly";
-        assert !new InnerTestNode(10).equals(new InnerTestNode(9)) : "Nodes with different IDs should not be equal.";
+        Assert.assertTrue(!new InnerTestNode().equals(null), "A test node is not equal to null.");
+        Assert.assertTrue(new InnerTestNode(10).equals(new InnerTestNode(10)), "Node IDs not checked properly");
+        Assert.assertTrue(!new InnerTestNode(10).equals(new InnerTestNode(9)), "Nodes with different IDs should not be equal.");
     }
 
     /**
@@ -128,28 +128,28 @@ public class QueryNodeTreeTests {
      */
     @Test(groups = {"ejb", "search"})
     public void checkTreeValidity() {
-        assert buildFlatTree(
+        Assert.assertTrue(buildFlatTree(
                 new AssignmentNodeGenerator(FxDataType.String1024, new FxString("Test")), 5)
-                .isValid() : "Simple string tree should be valid";
+                .isValid(), "Simple string tree should be valid");
         StringBuilder bigString = new StringBuilder();
         for (int i = 0; i < 1000; i++) {
             bigString.append("1234567890");
         }
-        assert bigString.length() == 10000 : "String length to be expected 10000";
-        assert !buildFlatTree(
+        Assert.assertTrue(bigString.length() == 10000, "String length to be expected 10000");
+        Assert.assertFalse(buildFlatTree(
                 new AssignmentNodeGenerator(FxDataType.String1024, new FxString(bigString
-                        .substring(0, 1100))), 5).isValid() : "Tree with 1100 character strings shouldn't be valid";
+                        .substring(0, 1100))), 5).isValid(), "Tree with 1100 character strings shouldn't be valid");
 //		assert !buildNestedTree(
 //				25,
 //				new AssignmentNodeGenerator(FxDataType.String1024, bigString
 //						.substring(0, 256))).isValid() : "256 character string should'nt be valid";
-        assert buildNestedTree(
+        Assert.assertTrue(buildNestedTree(
                 25,
                 new AssignmentNodeGenerator(FxDataType.String1024, new FxString(bigString
-                        .substring(0, 255))), 5).isValid() : "255 character string should be valid";
-        assert !buildFlatTree(
+                        .substring(0, 255))), 5).isValid(), "255 character string should be valid");
+        Assert.assertFalse(buildFlatTree(
                 new AssignmentNodeGenerator(FxDataType.String1024, null), 5)
-                .isValid() : "Null string tree should'nt be valid.";
+                .isValid(), "Null string tree should'nt be valid.");
 
         // TODO check other data types
     }
@@ -163,20 +163,19 @@ public class QueryNodeTreeTests {
         int children = flatTree.getChildren().size();
         // remove first child
         QueryNode child = flatTree.getChildren().get(0);
-        assert flatTree.removeChild(child).equals(flatTree) : "Incorrent parent node returned";
-        assert flatTree.getChildren().indexOf(child) == -1 : "Child not removed";
-        assert flatTree.getChildren().size() == children - 1 : "Incorrect number of children";
+        Assert.assertTrue(flatTree.removeChild(child).equals(flatTree), "Incorrent parent node returned");
+        Assert.assertTrue(flatTree.getChildren().indexOf(child) == -1, "Child not removed");
+        Assert.assertTrue(flatTree.getChildren().size() == children - 1, "Incorrect number of children");
 
         // remove last child
         child = flatTree.getChildren().get(flatTree.getChildren().size() - 1);
-        assert flatTree.removeChild(child).equals(flatTree) : "Incorrent parent node returned";
-        assert flatTree.getChildren().indexOf(child) == -1 : "Child not removed";
-        assert flatTree.getChildren().size() == children - 2 : "Incorrent number of children";
+        Assert.assertTrue(flatTree.removeChild(child).equals(flatTree), "Incorrent parent node returned");
+        Assert.assertTrue(flatTree.getChildren().indexOf(child) == -1, "Child not removed");
+        Assert.assertTrue(flatTree.getChildren().size() == children - 2, "Incorrent number of children");
 
         int counter = 0;
         while (flatTree.getChildren().size() > 0) {
-            assert flatTree.removeChild(flatTree.getChildren().get(0)).equals(
-                    flatTree) : "Incorrent parent node";
+            Assert.assertEquals(flatTree.removeChild(flatTree.getChildren().get(0)), flatTree, "Incorrent parent node");
             if( counter++ > MAX_TRIES )
                 Assert.fail("Max tries exceeded! Remaining childs: "+flatTree.getChildren().size());
         }
@@ -185,16 +184,15 @@ public class QueryNodeTreeTests {
         QueryNode nestedTree = buildNestedTree(5, new InnerNodeGenerator(), 5);
         for (QueryNode node : nestedTree.getChildren()) {
             if (node instanceof QueryOperatorNode) {
-                assert nestedTree.removeChild(node.getChildren().get(0))
-                        .equals(node) : "Returned incorrent parent node in nested tree.";
+                Assert.assertEquals(nestedTree.removeChild(node.getChildren().get(0)), node, "Returned incorrent parent node in nested tree.");
             }
         }
 
         // test automatic removal of empty inner operator nodes
         QueryNode innerTree = buildNestedTree(5, new InnerNodeGenerator(), 5);
         QueryNode emptyNode = innerTree.getChild(innerTree.getChildren().size() - 1);
-        assert emptyNode instanceof QueryOperatorNode : "Unexpected node type: " + emptyNode.getClass();
-        assert innerTree.getChildren().indexOf(emptyNode) != -1 : "Test node not found";
+        Assert.assertTrue(emptyNode instanceof QueryOperatorNode, "Unexpected node type: " + emptyNode.getClass());
+        Assert.assertTrue(innerTree.getChildren().indexOf(emptyNode) != -1, "Test node not found");
         counter = 0;
         while (emptyNode.getChildren().size() > 0) {
             QueryNode node = emptyNode.getChild(0);
@@ -202,7 +200,7 @@ public class QueryNodeTreeTests {
             if( counter++ > MAX_TRIES )
                 Assert.fail("Max tries exceeded! Remaining childs: "+flatTree.getChildren().size());
         }
-        assert innerTree.getChildren().indexOf(emptyNode) == -1 : "Empty test node not removed.";
+        Assert.assertTrue(innerTree.getChildren().indexOf(emptyNode) == -1, "Empty test node not removed.");
     }
 
     @Test(groups = {"ejb", "search"})
@@ -211,12 +209,12 @@ public class QueryNodeTreeTests {
         // (i.e. operator nodes that contain only a single operator node)
         QueryRootNode outerTree = buildNestedTree(5, new InnerNodeGenerator(), 5);
         QueryNode newRootNode = outerTree.getChild(outerTree.getChildren().size() - 1);
-        assert newRootNode instanceof QueryOperatorNode : "Unexpected node type: " + newRootNode.getClass();
+        Assert.assertTrue(newRootNode instanceof QueryOperatorNode, "Unexpected node type: " + newRootNode.getClass());
         for (int i = 0; i < 5; i++) {
             outerTree.removeChild(outerTree.getChild(0));
         }
         // now the children of newRootNode should be attached to the root node
-        assert outerTree.getChildren().size() == 6 : "Unexpected number of children: " + outerTree.getChildren().size() + ",\n Tree=" + outerTree.toString();
+        Assert.assertTrue(outerTree.getChildren().size() == 6, "Unexpected number of children: " + outerTree.getChildren().size() + ",\n Tree=" + outerTree.toString());
     }
 
     @Test(groups = {"ejb", "search"})
@@ -227,11 +225,11 @@ public class QueryNodeTreeTests {
         for (int i = 0; i < 3; i++) {
             operatorNode1.removeChild(operatorNode1.getChild(0));
         }
-        assert operatorNode1.getChildren().size() == 2 : "Expected 2 children, got: " + operatorNode1.getChildren().size();
-        assert nestedTree2.getChildren().size() == 6 : "Expected 6 children, got: " + nestedTree2.getChildren().size();
+        Assert.assertTrue(operatorNode1.getChildren().size() == 2, "Expected 2 children, got: " + operatorNode1.getChildren().size());
+        Assert.assertTrue(nestedTree2.getChildren().size() == 6, "Expected 6 children, got: " + nestedTree2.getChildren().size());
         QueryNode lastChild = operatorNode1.getChild(1);
         operatorNode1.removeChild(operatorNode1.getChild(0));
-        assert lastChild.equals(nestedTree2.getChildren().get(nestedTree2.getChildren().size() - 1)) : "Tree not compacted properly: " + nestedTree2.toString();
+        Assert.assertTrue(lastChild.equals(nestedTree2.getChildren().get(nestedTree2.getChildren().size() - 1)), "Tree not compacted properly: " + nestedTree2.toString());
     }
 
     /**
@@ -243,24 +241,24 @@ public class QueryNodeTreeTests {
     public void treeNodeFind() throws FxNotFoundException {
         QueryNode nestedTree = buildNestedTree(5, new InnerNodeGenerator(), 5);
         // check basic queries
-        assert nestedTree.findChild(nestedTree.getChild(0).getId()) != null;
-        assert nestedTree.findChild(nestedTree.getChild(nestedTree.getChildren().size() - 1).getId()) != null;
-        assert nestedTree.findChild(nestedTree.getId()) != null;
+        Assert.assertTrue(nestedTree.findChild(nestedTree.getChild(0).getId()) != null);
+        Assert.assertTrue(nestedTree.findChild(nestedTree.getChild(nestedTree.getChildren().size() - 1).getId()) != null);
+        Assert.assertTrue(nestedTree.findChild(nestedTree.getId()) != null);
 
         // check nested find queries
         QueryNode innerNode = nestedTree.getChild(nestedTree.getChildren().size() - 1);
-        assert nestedTree.findChild(innerNode.getChild(0).getId()) != null;
+        Assert.assertTrue(nestedTree.findChild(innerNode.getChild(0).getId()) != null);
 
         // check exception
         try {
             nestedTree.findChild(-1);
-            assert false : "Invalid node found!";
+            Assert.fail("Invalid node found!");
         } catch (Exception e) {
             // pass
         }
         try {
             nestedTree.getChild(0).findChild(nestedTree.getChild(0).getId());
-            assert false : "Searching in leaf nodes should not be allowed";
+            Assert.fail("Searching in leaf nodes should not be allowed");
         } catch (Exception e) {
             // pass
         }
@@ -271,13 +269,13 @@ public class QueryNodeTreeTests {
     public void simpleNodeVisitor() {
         CountingNodeVisitor visitor = new CountingNodeVisitor();
         buildFlatTree(new InnerNodeGenerator(), 25).visit(visitor);
-        assert visitor.getOpNodes() == 1 : "Unexpected number of operator nodes: " + visitor.getOpNodes();
-        assert visitor.getValueNodes() == 25 : "Unexpected number of value nodes: " + visitor.getValueNodes();
+        Assert.assertTrue(visitor.getOpNodes() == 1, "Unexpected number of operator nodes: " + visitor.getOpNodes());
+        Assert.assertTrue(visitor.getValueNodes() == 25, "Unexpected number of value nodes: " + visitor.getValueNodes());
 
         visitor = new CountingNodeVisitor();
         buildNestedTree(50, new InnerNodeGenerator(), 10).visit(visitor);
-        assert visitor.getOpNodes() == 51 : "Unexpected number of operator nodes: " + visitor.getOpNodes();
-        assert visitor.getValueNodes() == 51 * 10 : "Unexpected number of value nodes: " + visitor.getValueNodes();
+        Assert.assertTrue(visitor.getOpNodes() == 51, "Unexpected number of operator nodes: " + visitor.getOpNodes());
+        Assert.assertTrue(visitor.getValueNodes() == 51 * 10, "Unexpected number of value nodes: " + visitor.getValueNodes());
     }
 
     @Test(groups = {"ejb", "search"})
@@ -285,12 +283,12 @@ public class QueryNodeTreeTests {
         MaxNodeIdVisitor maxIdVisitor = new MaxNodeIdVisitor();
         nodeId = 0;
         buildFlatTree(new InnerNodeGenerator(), 25).visit(maxIdVisitor);
-        assert maxIdVisitor.getMaxId() == 25 : "Unexpected max ID: " + maxIdVisitor.getMaxId();
+        Assert.assertTrue(maxIdVisitor.getMaxId() == 25, "Unexpected max ID: " + maxIdVisitor.getMaxId());
 
         maxIdVisitor = new MaxNodeIdVisitor();
         nodeId = 0;
         buildNestedTree(10, new InnerNodeGenerator(), 10).visit(maxIdVisitor);
-        assert maxIdVisitor.getMaxId() == 11 * 11 - 1 : "Unexpected max ID: " + maxIdVisitor.getMaxId();
+        Assert.assertTrue(maxIdVisitor.getMaxId() == 11 * 11 - 1, "Unexpected max ID: " + maxIdVisitor.getMaxId());
     }
 
     /**
@@ -302,8 +300,8 @@ public class QueryNodeTreeTests {
         final QueryRootNode root = buildNestedTree(5, new AssignmentNodeGenerator(FxDataType.String1024, new FxString("test value")), 5);
         final String query = root.getSqlQuery();
         final String query2 = root.getSqlQuery();
-        assert query.equals(query2) : "Second call to getSqlQuery() returned different result than first one : "
-                + "\n[1]: " + query + "\n[2]: " + query2;
+        Assert.assertEquals(query, query2, "Second call to getSqlQuery() returned different result than first one : "
+                + "\n[1]: " + query + "\n[2]: " + query2);
     }
 
     /**
@@ -318,9 +316,9 @@ public class QueryNodeTreeTests {
         final String query = builder.getQuery();
         root.buildSqlQuery(builder);
         final String query2 = builder.getQuery();
-        assert StringUtils.isNotBlank(query) && query.equals(query2)
-                : "Second call to getQuery() returned different result than first one : "
-                + "\n[1]: " + query + "\n[2]: " + query2;
+        Assert.assertTrue(StringUtils.isNotBlank(query) && query.equals(query2),
+                "Second call to getQuery() returned different result than first one : "
+                + "\n[1]: " + query + "\n[2]: " + query2);
     }
 
     /**
@@ -332,8 +330,8 @@ public class QueryNodeTreeTests {
         final SqlQueryBuilder builder = new SqlQueryBuilder();
         final QueryRootNode root = new QueryRootNode(QueryRootNode.Type.CONTENTSEARCH);
         root.buildSqlQuery(builder);
-        assert !builder.getQuery().contains("FROM WHERE") : "Query contains invalid FROM clause: " + builder.getQuery();
-        assert !builder.getQuery().contains("WHERE ()") : "Query contains invalid WHERE clause: " + builder.getQuery();
+        Assert.assertTrue(!builder.getQuery().contains("FROM WHERE"), "Query contains invalid FROM clause: " + builder.getQuery());
+        Assert.assertTrue(!builder.getQuery().contains("WHERE ()"), "Query contains invalid WHERE clause: " + builder.getQuery());
     }
 
 
@@ -353,7 +351,7 @@ public class QueryNodeTreeTests {
         removeFromParent(root.getChild(1).getChild(1));
         removeFromParent(root.getChild(1).getChild(0));
         removeFromParent(root.getChild(1).getChild(0));
-        assert root.getChildren().size() == 2 : "Expected 2 children, got: " + root.getChildren().size();
+        Assert.assertTrue(root.getChildren().size() == 2, "Expected 2 children, got: " + root.getChildren().size());
     }
 
     /**
@@ -362,74 +360,74 @@ public class QueryNodeTreeTests {
     @Test(groups = {"ejb", "search"})
     public static void nodeLevelTest() {
         QueryRootNode root = buildNestedTree(5, new InnerNodeGenerator(), 1);
-        assert root.getLevel() == 0 : "Root level should be 0, got: " + root.getLevel();
-        assert root.getChild(0).getLevel() == 1 : "First child level should be 1, got: " + root.getChild(0).getLevel();
-        assert root.getChild(1).getLevel() == 1;
-        assert root.getChild(1).getChild(0).getLevel() == 2;
-        assert root.getChild(1).getChild(1).getLevel() == 2;
-        assert root.getChild(1).getChild(1).getChild(0).getLevel() == 3;
+        Assert.assertTrue(root.getLevel() == 0, "Root level should be 0, got: " + root.getLevel());
+        Assert.assertTrue(root.getChild(0).getLevel() == 1, "First child level should be 1, got: " + root.getChild(0).getLevel());
+        Assert.assertTrue(root.getChild(1).getLevel() == 1);
+        Assert.assertTrue(root.getChild(1).getChild(0).getLevel() == 2);
+        Assert.assertTrue(root.getChild(1).getChild(1).getLevel() == 2);
+        Assert.assertTrue(root.getChild(1).getChild(1).getChild(0).getLevel() == 3);
     }
 
     @Test(groups = {"ejb", "search"})
     public void joinNodesFlat() {
         QueryRootNode root = buildNestedTree(0, new InnerNodeGenerator(), 3);
         QueryOperatorNode operatorNode = root.joinNodes(Arrays.asList(root.getChild(0).getId(), root.getChild(1).getId()), QueryOperatorNode.Operator.OR);
-        assert operatorNode.getChildren().size() == 2 : "New operator node must have 2 children, got: " + operatorNode.getChildren().size();
-        assert operatorNode.getParent() == root : "Operator node should be attached to root.";
-        assert root.getChildren().size() == 2 : "Root node should have two children, got: " + root.getChildren().size();
+        Assert.assertTrue(operatorNode.getChildren().size() == 2, "New operator node must have 2 children, got: " + operatorNode.getChildren().size());
+        Assert.assertTrue(operatorNode.getParent() == root, "Operator node should be attached to root.");
+        Assert.assertTrue(root.getChildren().size() == 2, "Root node should have two children, got: " + root.getChildren().size());
     }
 
     @Test(groups = {"ejb", "search"})
     public void joinNodesNested() {
         QueryRootNode root = buildNestedTree(1, new InnerNodeGenerator(), 4);
-        assert root.getChildren().size() == 5 : "Expected 5 root children, got: " + root.getChildren().size();
-        assert root.getChild(4).getChildren().size() == 4 : "Expected 4 children, got: " + root.getChild(4).getChildren().size();
+        Assert.assertTrue(root.getChildren().size() == 5, "Expected 5 root children, got: " + root.getChildren().size());
+        Assert.assertTrue(root.getChild(4).getChildren().size() == 4, "Expected 4 children, got: " + root.getChild(4).getChildren().size());
         QueryOperatorNode operatorNode = root.joinNodes(Arrays.asList(root.getChild(4).getChild(0).getId(), root.getChild(4).getChild(2).getId()), QueryOperatorNode.Operator.OR);
-        assert root.getChildren().size() == 5 : "Expected 5 root children, got: " + root.getChildren().size();
-        assert root.getChild(4).getChildren().size() == 3 : "Expected 2 children, got: " + root.getChild(4).getChildren().size();
-        assert operatorNode.getChildren().size() == 2;
-        assert operatorNode.getParent() == root.getChild(4);
+        Assert.assertTrue(root.getChildren().size() == 5, "Expected 5 root children, got: " + root.getChildren().size());
+        Assert.assertTrue(root.getChild(4).getChildren().size() == 3, "Expected 2 children, got: " + root.getChild(4).getChildren().size());
+        Assert.assertTrue(operatorNode.getChildren().size() == 2);
+        Assert.assertTrue(operatorNode.getParent() == root.getChild(4));
     }
 
     @Test(groups = {"ejb", "search"})
     public void joinNodesNestedCompact() {
         QueryRootNode root = buildNestedTree(1, new InnerNodeGenerator(), 3);
-        assert root.getChildren().size() == 4 : "Expected 4 root children, got: " + root.getChildren().size();
-        assert root.getChild(3).getChildren().size() == 3 : "Expected 3 children, got: " + root.getChild(3).getChildren().size();
+        Assert.assertTrue(root.getChildren().size() == 4, "Expected 4 root children, got: " + root.getChildren().size());
+        Assert.assertTrue(root.getChild(3).getChildren().size() == 3, "Expected 3 children, got: " + root.getChild(3).getChildren().size());
         // join 2 of the 3 childs in root child #3, then the remaining node should be reattached to the root node itself
         QueryNode compactedChild = root.getChild(3).getChild(2);    // this node should be reattached to root automatically
-        assert compactedChild.getParent() != root;
+        Assert.assertTrue(compactedChild.getParent() != root);
         final QueryNode joinNode = root.getChild(3);
         QueryOperatorNode operatorNode = root.joinNodes(Arrays.asList(joinNode.getChild(0).getId
                 (), joinNode.getChild(1).getId(), joinNode.getParent().getChild(0).getId()), QueryOperatorNode.Operator.OR);
-        assert compactedChild.getParent() == root : "Single child should have been reattached to root";
-        assert root.getChildren().size() == 4 : "Expected 4 root children, got: " + root.getChildren().size();
-        assert operatorNode.getChildren().size() == 3;
-        assert operatorNode.getParent() == root;
+        Assert.assertTrue(compactedChild.getParent() == root, "Single child should have been reattached to root");
+        Assert.assertTrue(root.getChildren().size() == 4, "Expected 4 root children, got: " + root.getChildren().size());
+        Assert.assertTrue(operatorNode.getChildren().size() == 3);
+        Assert.assertTrue(operatorNode.getParent() == root);
     }
 
     @Test(groups = {"ejb", "search"})
     public void joinNodesNested2() {
         QueryRootNode root = buildNestedTree(2, new InnerNodeGenerator(), 3);
-        assert root.getChildren().size() == 4;
-        assert root.getChild(3).getChildren().size() == 4;
-        assert root.getChild(3).getChild(3).getChildren().size() == 3;
+        Assert.assertTrue(root.getChildren().size() == 4);
+        Assert.assertTrue(root.getChild(3).getChildren().size() == 4);
+        Assert.assertTrue(root.getChild(3).getChild(3).getChildren().size() == 3);
         // combine two nodes in the third level - should attach as a child to the third level root, not the second level one
         final QueryNode joinRoot = root.getChild(3).getChild(3);
         final QueryOperatorNode operatorNode = root.joinNodes(Arrays.asList(joinRoot.getChild(0).getId(), joinRoot.getChild(1).getId()), QueryOperatorNode.Operator.OR);
-        assert joinRoot.getChildren().size() == 2 : "Joined node should attach to previous parent";
-        assert joinRoot.getParent().getChildren().size() == 4;
+        Assert.assertTrue(joinRoot.getChildren().size() == 2, "Joined node should attach to previous parent");
+        Assert.assertTrue(joinRoot.getParent().getChildren().size() == 4);
     }
 
     @Test(groups = {"ejb", "search"})
     public void joinNodesLevelAll() {
         QueryRootNode root = buildNestedTree(0, new InnerNodeGenerator(), 3);
-        assert root.getChildren().size() == 3;
+        Assert.assertTrue(root.getChildren().size() == 3);
         QueryOperatorNode operatorNode = root.joinNodes(Arrays.asList(root.getChild(0).getId(),
                 root.getChild(1).getId(), root.getChild(2).getId()), QueryOperatorNode.Operator.OR);
-        assert operatorNode == root : "Nodes should have been attached to the root node.";
-        assert operatorNode.getChildren().size() == 3 : "All 3 nodes should be attached to the operator node";
-        assert operatorNode.getOperator().equals(QueryOperatorNode.Operator.OR);
+        Assert.assertTrue(operatorNode == root, "Nodes should have been attached to the root node.");
+        Assert.assertTrue(operatorNode.getChildren().size() == 3, "All 3 nodes should be attached to the operator node");
+        Assert.assertTrue(operatorNode.getOperator().equals(QueryOperatorNode.Operator.OR));
     }
 
     @Test(groups = {"ejb", "search"})
@@ -442,20 +440,20 @@ public class QueryNodeTreeTests {
         final QueryNode child1_0 = root.getChild(0);
         final QueryNode child1_1 = root.getChild(1);
         root.joinNodes(Arrays.asList(child1_0.getId(), child1_1.getId()), QueryOperatorNode.Operator.OR);
-        assert root.getChildren().size() == 2;
+        Assert.assertTrue(root.getChildren().size() == 2);
         final QueryNode sub0 = root.getChild(0);    // subquery 0
         final QueryNode sub1 = root.getChild(1);    // subquery 1
-        assert sub0.getChildren().containsAll(Arrays.asList(child0_0, child0_1));
-        assert sub1.getChildren().containsAll(Arrays.asList(child1_0, child1_1));
+        Assert.assertTrue(sub0.getChildren().containsAll(Arrays.asList(child0_0, child0_1)));
+        Assert.assertTrue(sub1.getChildren().containsAll(Arrays.asList(child1_0, child1_1)));
 
         // join second node from sub0 with first node from sub1
         QueryOperatorNode joinRoot = root.joinNodes(Arrays.asList(child0_1.getId(), child1_0.getId()), QueryOperatorNode.Operator.AND);
         // expected result: [child0_0, child1_1, AND[child_0_1, child1_0]]
-        assert root.getChildren().size() == 3 : "Root should have three children now.";
-        assert joinRoot.getParent() == root : "Join root should have been attached to root";
-        assert root.getChild(1).isValueNode() : "Node 1 should be value node";
-        assert root.getChild(2).isValueNode() : "Node 2 should be value node";
-        assert !root.getChild(0).isValueNode() : "Node 0 should not be value node";
+        Assert.assertTrue(root.getChildren().size() == 3, "Root should have three children now.");
+        Assert.assertTrue(joinRoot.getParent() == root, "Join root should have been attached to root");
+        Assert.assertTrue(root.getChild(1).isValueNode(), "Node 1 should be value node");
+        Assert.assertTrue(root.getChild(2).isValueNode(), "Node 2 should be value node");
+        Assert.assertTrue(!root.getChild(0).isValueNode(), "Node 0 should not be value node");
     }
 
     // tests against a bug where a joined group is duplicated in itself
@@ -470,15 +468,15 @@ public class QueryNodeTreeTests {
         final QueryNode child1_0 = root.getChild(0);
         final QueryNode child1_1 = root.getChild(1);
         root.joinNodes(Arrays.asList(child1_0.getId(), child1_1.getId()), QueryOperatorNode.Operator.OR);
-        assert root.getChildren().size() == 2;
+        Assert.assertTrue(root.getChildren().size() == 2);
         final QueryNode sub0 = root.getChild(0);    // subquery 0
         final QueryNode sub1 = root.getChild(1);    // subquery 1
-        assert sub0.getChildren().containsAll(Arrays.asList(child0_0, child0_1));
-        assert sub1.getChildren().containsAll(Arrays.asList(child1_0, child1_1));
+        Assert.assertTrue(sub0.getChildren().containsAll(Arrays.asList(child0_0, child0_1)));
+        Assert.assertTrue(sub1.getChildren().containsAll(Arrays.asList(child1_0, child1_1)));
 
         // join both nodes from sub1 again
         QueryOperatorNode joinRoot = root.joinNodes(Arrays.asList(child1_0.getId(), child1_1.getId()), QueryOperatorNode.Operator.AND);
-        assert joinRoot.getParent() == root : "Joined nodes should have been attached to the root node";
+        Assert.assertTrue(joinRoot.getParent() == root, "Joined nodes should have been attached to the root node");
     }
 
     @Test(groups = {"ejb", "search"})
@@ -490,9 +488,9 @@ public class QueryNodeTreeTests {
         final TreeValueNode child2 = new TreeValueNode(root.getNewId(), 2, FxTreeMode.Edit, new FxString(false, "node 2"));
         child2.setComparator(TreeValueNode.TreeValueComparator.CHILD);
         root.addChild(child2);
-        assert root.isValid();
-        assert child1.getAvailableComparators().containsAll(Arrays.asList(TreeValueNode.TreeValueComparator.values()));
-        assert root.getSqlQuery().contains("IS DIRECT CHILD OF 1 AND IS CHILD OF 2");
+        Assert.assertTrue(root.isValid());
+        Assert.assertTrue(child1.getAvailableComparators().containsAll(Arrays.asList(TreeValueNode.TreeValueComparator.values())));
+        Assert.assertTrue(root.getSqlQuery().contains("IS DIRECT CHILD OF 1 AND IS CHILD OF 2"));
     }
 
     @Test(groups = {"ejb", "search"})
@@ -508,9 +506,9 @@ public class QueryNodeTreeTests {
         final SelectValueNode child2 = new SelectValueNode(root.getNewId(), assignment, item2);
         child2.setComparator(PropertyValueComparator.NE);
         root.addChild(child2);
-        assert root.isValid();
-        assert root.getSqlQuery().toUpperCase().contains("#" + assignment.getXPath().toUpperCase() + " = " + item1.getId());
-        assert root.getSqlQuery().toUpperCase().contains("#" + assignment.getXPath().toUpperCase() + " != " + item2.getId());
+        Assert.assertTrue(root.isValid());
+        Assert.assertTrue(root.getSqlQuery().toUpperCase().contains("#" + assignment.getXPath().toUpperCase() + " = " + item1.getId()));
+        Assert.assertTrue(root.getSqlQuery().toUpperCase().contains("#" + assignment.getXPath().toUpperCase() + " != " + item2.getId()));
     }
 
     @Test(groups = {"ejb", "search"})
@@ -525,17 +523,17 @@ public class QueryNodeTreeTests {
         child2.setComparator(PropertyValueComparator.NE);
         child2.setValue(new FxNumber(2));
         root.addChild(child2);
-        assert root.isValid();
+        Assert.assertTrue(root.isValid());
         final String conditions = property.getName() + " = 1 AND " + property.getName() + " != 2";
-        assert root.getSqlQuery().toUpperCase().contains(conditions.toUpperCase())
-                : "Expected conditions: " + conditions + ", got: " + root.getSqlQuery();
+        Assert.assertTrue(root.getSqlQuery().toUpperCase().contains(conditions.toUpperCase()),
+                "Expected conditions: " + conditions + ", got: " + root.getSqlQuery());
     }
 
     @Test(groups = {"ejb", "search"})
     public void inputMapperComparatorTest() {
         final List<PropertyValueComparator> allowedComparators = Arrays.asList(PropertyValueComparator.EMPTY, PropertyValueComparator.EQ);
         final InnerTestNode node = new InnerTestNode(1);
-        assert node.getAvailableComparators().equals(Arrays.asList(PropertyValueComparator.values()));
+        Assert.assertTrue(node.getAvailableComparators().equals(Arrays.asList(PropertyValueComparator.values())));
         node.setInputMapper(new InputMapper<FxString, FxBoolean>() {
             @Override
             protected FxBoolean doEncode(FxString value) {
@@ -552,9 +550,9 @@ public class QueryNodeTreeTests {
                 return allowedComparators;
             }
         });
-        assert node.getAvailableComparators().containsAll(allowedComparators)
-                && allowedComparators.size() == node.getAvailableComparators().size()
-                : "Comparators should be " + allowedComparators + ", is: " + node.getAvailableComparators();
+        Assert.assertTrue(node.getAvailableComparators().containsAll(allowedComparators)
+                && allowedComparators.size() == node.getAvailableComparators().size(),
+                "Comparators should be " + allowedComparators + ", is: " + node.getAvailableComparators());
     }
 
     /**
@@ -585,7 +583,7 @@ public class QueryNodeTreeTests {
         pvn2.setValue(new FxVoid());
         root.addChild(pvn2);
 
-        assert root.isValid() : "Query should be valid: " + root.getSqlQuery();
+        Assert.assertTrue(root.isValid(), "Query should be valid: " + root.getSqlQuery());
     }
 
     private void removeFromParent(QueryNode node) {
@@ -608,7 +606,7 @@ public class QueryNodeTreeTests {
      */
     public static void assertEqualTrees(QueryNode root1, QueryNode root2) {
         if ((root1 == null && root2 != null) || !root1.equals(root2)) {
-            assert false : "Trees are not equal: " + root1 + ", " + root2;
+            Assert.fail("Trees are not equal: " + root1 + ", " + root2);
         }
         if (root1.getChildren().size() == root2.getChildren().size()) {
             for (int i = 0; i < root1.getChildren().size(); i++) {
@@ -616,9 +614,9 @@ public class QueryNodeTreeTests {
                         .getChildren().get(i));
             }
         } else {
-            assert false : "Tree children are different: "
+            Assert.fail("Tree children are different: "
                     + root1.getChildren().size() + " != "
-                    + root2.getChildren().size();
+                    + root2.getChildren().size());
         }
     }
 

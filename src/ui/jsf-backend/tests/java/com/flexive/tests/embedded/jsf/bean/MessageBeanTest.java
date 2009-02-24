@@ -49,6 +49,7 @@ import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 /**
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
@@ -73,49 +74,49 @@ public class MessageBeanTest {
     @Test
     public void getMessageNoArgs() {
         String message = (String) messageBean.get(KEY_1);
-        assert MSG_1.equals(message) : "Expected: " + MSG_1 + ", got: " + message;
+        Assert.assertTrue(MSG_1.equals(message), "Expected: " + MSG_1 + ", got: " + message);
     }
 
     @Test
     public void getMessageArgsInt() {
         String message = (String) messageBean.get(KEY_1 + ",42");
         String expected = StringUtils.replace(MSG_1, "{0}", "42");
-        assert expected.equals(message) : "Expected: " + expected + ", got: " + message;
+        Assert.assertTrue(expected.equals(message), "Expected: " + expected + ", got: " + message);
     }
 
     @Test
     public void getMessageArgsString() {
         String message = (String) messageBean.get(KEY_1 + ",random,string");
         String expected = StringUtils.replace(MSG_1, "{0}", "random");
-        assert expected.equals(message) : "Expected: " + expected + ", got: " + message;
+        Assert.assertTrue(expected.equals(message), "Expected: " + expected + ", got: " + message);
     }
 
     @Test
     public void getMessageArgsEscapedString() {
         String message = (String) messageBean.get(KEY_1 + ",'random string, with comma'");
         String expected = StringUtils.replace(MSG_1, "{0}", "random string, with comma");
-        assert expected.equals(message) : "Expected: " + expected + ", got: " + message;
+        Assert.assertTrue(expected.equals(message), "Expected: " + expected + ", got: " + message);
     }
 
     @Test
     public void getMessageArgsElInt() {
         String message = (String) messageBean.get(KEY_1 + ",#{41+1}");
         String expected = StringUtils.replace(MSG_1, "{0}", "42");
-        assert expected.equals(message) : "Expected: " + expected + ", got: " + message;
+        Assert.assertTrue(expected.equals(message), "Expected: " + expected + ", got: " + message);
     }
 
     @Test
     public void getMessageArgsElString() {
         String message = (String) messageBean.get(KEY_1 + ",#{'some string value'}");
         String expected = StringUtils.replace(MSG_1, "{0}", "some string value");
-        assert expected.equals(message) : "Expected: " + expected + ", got: " + message;
+        Assert.assertTrue(expected.equals(message), "Expected: " + expected + ", got: " + message);
     }
 
     @Test
     public void getMessageArgsElStringWithComma() {
         String message = (String) messageBean.get(KEY_1 + ",#{'some string value, with comma'}");
         String expected = StringUtils.replace(MSG_1, "{0}", "some string value, with comma");
-        assert expected.equals(message) : "Expected: " + expected + ", got: " + message;
+        Assert.assertTrue(expected.equals(message), "Expected: " + expected + ", got: " + message);
     }
 
     @Test
@@ -124,11 +125,11 @@ public class MessageBeanTest {
         final FxLanguage origLanguage = ticket.getLanguage();
         try {
             ticket.setLanguage(EJBLookup.getLanguageEngine().load(FxLanguage.ENGLISH));
-            assert ((String) messageBean.get(KEY_1)).startsWith("Test message")
-                    : "Expected english translation, got: " + messageBean.get(KEY_1);
+            Assert.assertTrue(((String) messageBean.get(KEY_1)).startsWith("Test message"),
+                    "Expected english translation, got: " + messageBean.get(KEY_1));
             ticket.setLanguage(EJBLookup.getLanguageEngine().load(FxLanguage.GERMAN));
-            assert ((String) messageBean.get(KEY_1)).startsWith("Testmeldung")
-                    : "Expected german translation, got: " + messageBean.get(KEY_1);
+            Assert.assertTrue(((String) messageBean.get(KEY_1)).startsWith("Testmeldung"),
+                    "Expected german translation, got: " + messageBean.get(KEY_1));
         } finally {
             ticket.setLanguage(origLanguage);
         }

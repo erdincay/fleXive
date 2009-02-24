@@ -124,16 +124,16 @@ public class ImageParserTest {
             return;
         String parsed = IMParser.parse(new ByteArrayInputStream(FxSharedUtils.getBytes(testData)));
         //xml header can vary depending on the underlying parser (encoding info, " vs ')
-        assert parsed.substring(parsed.indexOf("?>")).equals(TEST_RESULT.substring(TEST_RESULT.indexOf("?>")));
+        Assert.assertTrue(parsed.substring(parsed.indexOf("?>")).equals(TEST_RESULT.substring(TEST_RESULT.indexOf("?>"))));
         FxSharedUtils.ProcessResult res = FxSharedUtils.executeCommand("identify", "-verbose", TEST_FILE_EXIF);
         String result = IMParser.parse(new ByteArrayInputStream(FxSharedUtils.getBytes(res.getStdOut())));
-        assert result.indexOf("<Profile-exif>4604 bytes</Profile-exif>") > 0;
-        assert result.indexOf("<Geometry>2048x1536+0+0</Geometry>") > 0;
-        assert result.indexOf("<Channel-depth><Red>8-bit</Red><Green>8-bit</Green>") > 0;
+        Assert.assertTrue(result.indexOf("<Profile-exif>4604 bytes</Profile-exif>") > 0);
+        Assert.assertTrue(result.indexOf("<Geometry>2048x1536+0+0</Geometry>") > 0);
+        Assert.assertTrue(result.indexOf("<Channel-depth><Red>8-bit</Red><Green>8-bit</Green>") > 0);
         res = FxSharedUtils.executeCommand("identify", "-verbose", TEST_FILE_GIF);
         result = IMParser.parse(new ByteArrayInputStream(FxSharedUtils.getBytes(res.getStdOut())));
-        assert result.indexOf("<Signature>2f0ab5863f31c675bab16309bfa161fd331e55e6c6781ec1f6cd0305f725cfa9</Signature>") > 0;
-        assert result.indexOf("<Compression>LZW</Compression>") > 0;
+        Assert.assertTrue(result.indexOf("<Signature>2f0ab5863f31c675bab16309bfa161fd331e55e6c6781ec1f6cd0305f725cfa9</Signature>") > 0);
+        Assert.assertTrue(result.indexOf("<Compression>LZW</Compression>") > 0);
     }
 
     @Test
@@ -146,7 +146,7 @@ public class ImageParserTest {
         System.out.println("Error: [" + res.getStdErr() + "]");
         System.out.println("Out: [" + res.getStdOut() + "]");
         if (res.getExitCode() != 0 || res.getStdOut().indexOf("ImageMagick") <= 0) {
-            assert false : "Please install ImageMagick (and add it to your path) for imaging tests to work!";
+            Assert.fail("Please install ImageMagick (and add it to your path) for imaging tests to work!");
         }
     }
 

@@ -40,6 +40,7 @@ import com.flexive.faces.plugin.PluginExecutor;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 import java.util.Stack;
 
@@ -177,7 +178,7 @@ public class PluginRegistryBeanTest {
                         }
                     });
             assertEquals(pluginRegistry.getPlugins(EP).size(), 2);
-            assert false : "Plugin registry allowed to register incompatible types.";
+            Assert.fail( "Plugin registry allowed to register incompatible types.");
         } catch (FxRuntimeException e) {
             // pass
             assertEquals(pluginRegistry.getPlugins(EP).size(), 1);
@@ -194,7 +195,7 @@ public class PluginRegistryBeanTest {
                 public void apply(NullExecutor executor) {
                 }
             });
-            assert false : "Unbound type variables should be rejected";
+            Assert.fail( "Unbound type variables should be rejected");
         } catch (FxRuntimeException e) {
             // pass
         }

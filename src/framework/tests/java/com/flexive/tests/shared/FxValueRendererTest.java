@@ -36,6 +36,7 @@ import com.flexive.shared.value.*;
 import com.flexive.shared.value.renderer.FxValueRenderer;
 import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -58,21 +59,21 @@ public class FxValueRendererTest {
         FxDate date = new FxDate(new Date(0));
         String englishDate = FORMAT_EN.format(date);
         String germanDate = FORMAT_DE.format(date);
-        assert !englishDate.equals(germanDate);
+        Assert.assertTrue(!englishDate.equals(germanDate));
     }
 
     @Test
     public void floatFormatTest() {
         FxFloat value = new FxFloat(1234.56f);
-        assert "1,234.56".equals(FORMAT_EN.format(value));
-        assert "1.234,56".equals(FORMAT_DE.format(value));
+        Assert.assertTrue("1,234.56".equals(FORMAT_EN.format(value)));
+        Assert.assertTrue("1.234,56".equals(FORMAT_DE.format(value)));
     }
 
     @Test
     public void doubleFormatTest() {
         FxDouble value = new FxDouble(1234.56);
-        assert "1,234.56".equals(FORMAT_EN.format(value));
-        assert "1.234,56".equals(FORMAT_DE.format(value));
+        Assert.assertTrue("1,234.56".equals(FORMAT_EN.format(value)));
+        Assert.assertTrue("1.234,56".equals(FORMAT_DE.format(value)));
     }
 
     @Test
@@ -80,8 +81,8 @@ public class FxValueRendererTest {
         FxString value = new FxString(true, "default");
         value.setTranslation(FxLanguage.ENGLISH, "english");
         value.setTranslation(FxLanguage.GERMAN, "deutsch");
-        assert "english".equals(FORMAT_EN.format(value)) : "Expected english translation, got: " + FORMAT_EN.format(value);
-        assert "deutsch".equals(FORMAT_DE.format(value)) : "Expected german translation, got: " + FORMAT_DE.format(value);
+        Assert.assertTrue("english".equals(FORMAT_EN.format(value)), "Expected english translation, got: " + FORMAT_EN.format(value));
+        Assert.assertTrue("deutsch".equals(FORMAT_DE.format(value)), "Expected german translation, got: " + FORMAT_DE.format(value));
     }
 
     @Test
@@ -91,16 +92,16 @@ public class FxValueRendererTest {
         FxDouble value = new FxDouble(1234.56);
         FORMAT_EN.render(en, value);
         FORMAT_DE.render(de, value);
-        assert "1,234.56".equals(en.toString()) : "Expected 1,234.56, got: " + en;
-        assert "1.234,56".equals(de.toString()) : "Expected 1.234,56, got: " + de;
+        Assert.assertTrue("1,234.56".equals(en.toString()), "Expected 1,234.56, got: " + en);
+        Assert.assertTrue("1.234,56".equals(de.toString()), "Expected 1.234,56, got: " + de);
     }
 
     @Test
     public void renderEmptyTest() {
         final FxString empty = new FxString(false, "");
-        assert FORMAT_EN.format(empty).equals("") : "Empty string translation should be empty";
-        assert FORMAT_DE.format(empty).equals("") : "Empty string translation should be empty";
-        assert empty.toString().equals("") : "Empty string translation should be empty";
+        Assert.assertTrue(FORMAT_EN.format(empty).equals(""), "Empty string translation should be empty");
+        Assert.assertTrue(FORMAT_DE.format(empty).equals(""), "Empty string translation should be empty");
+        Assert.assertTrue(empty.toString().equals(""), "Empty string translation should be empty");
     }
 
     @Test
@@ -119,11 +120,11 @@ public class FxValueRendererTest {
         }) {
             try {
                 final String output = FxValueRendererFactory.getInstance().format(fxValue);
-                assert output.equals(input) : "Expected output '" + input + "', got: '" + output + "'"
-                        + ", class: " + fxValue.getClass().getName();
+                Assert.assertEquals(output, input, "Expected output '" + input + "', got: '" + output + "'"
+                        + ", class: " + fxValue.getClass().getName());
             } catch (Exception e) {
-                assert false : "Failed to format invalid input value in "
-                        + fxValue.getClass().getName() + ": " + e.getMessage();
+                Assert.fail("Failed to format invalid input value in "
+                        + fxValue.getClass().getName() + ": " + e.getMessage());
             }
         }
 

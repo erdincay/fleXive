@@ -113,7 +113,7 @@ public class MandatorTest {
      */
     public void currentMandatorActive() throws Exception {
         Mandator mandator = CacheAdmin.getEnvironment().getMandator(getUserTicket().getMandatorId());
-        assert mandator.isActive() : "Current mandator is inactive.";
+        Assert.assertTrue(mandator.isActive(), "Current mandator is inactive.");
     }
 
     /**
@@ -127,41 +127,41 @@ public class MandatorTest {
         try {
             test = CacheAdmin.getEnvironment().getMandator(mandatorId);
         } catch (Exception e) {
-            assert false : "Failed to get created mandator from cache: " + e.getMessage();
+            Assert.fail("Failed to get created mandator from cache: " + e.getMessage());
         }
-        assert test != null : "Loaded mandator is null!";
-        assert test.getName().equals("TestMandator") : "Name mismatch!";
-        assert !test.hasMetadata() : "Mandator should have no meta data attached!";
-        assert !test.isActive() : "Mandator should be inactive!";
+        Assert.assertTrue(test != null, "Loaded mandator is null!");
+        Assert.assertTrue(test.getName().equals("TestMandator"), "Name mismatch!");
+        Assert.assertTrue(!test.hasMetadata(), "Mandator should have no meta data attached!");
+        Assert.assertTrue(!test.isActive(), "Mandator should be inactive!");
         me.activate(test.getId());
         try {
             test = CacheAdmin.getEnvironment().getMandator(mandatorId);
         } catch (Exception e) {
-            assert false : "Failed to get activated mandator from cache: " + e.getMessage();
+            Assert.fail("Failed to get activated mandator from cache: " + e.getMessage());
         }
-        assert test.isActive() : "Mandator should be active!";
+        Assert.assertTrue(test.isActive(), "Mandator should be active!");
         me.deactivate(test.getId());
         try {
             test = CacheAdmin.getEnvironment().getMandator(mandatorId);
         } catch (Exception e) {
-            assert false : "Failed to get deactivated mandator from cache: " + e.getMessage();
+            Assert.fail("Failed to get deactivated mandator from cache: " + e.getMessage());
         }
-        assert !test.isActive() : "Mandator should be deactivated!";
+        Assert.assertTrue(!test.isActive(), "Mandator should be deactivated!");
 
         me.remove(test.getId());
         try {
             CacheAdmin.getEnvironment().getMandator(mandatorId);
-            assert false : "Removed mandator could be retrieved from cache!";
+            Assert.fail("Removed mandator could be retrieved from cache!");
         } catch (Exception e) {
             //ignore
         }
         try {
             me.remove(Mandator.MANDATOR_FLEXIVE); //try to remove the public mandator -> got to fail
-            assert false : "Removing the public mandator should have failed!";
+            Assert.fail("Removing the public mandator should have failed!");
         } catch (FxEntryInUseException e) {
             //ok
         } catch (Exception e) {
-            assert false : "Unexpected exception: " + e.getMessage();
+            Assert.fail("Unexpected exception: " + e.getMessage());
         }
     }
 

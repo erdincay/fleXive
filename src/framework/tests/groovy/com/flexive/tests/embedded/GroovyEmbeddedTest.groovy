@@ -35,6 +35,7 @@ package com.flexive.tests.embedded
 
 import com.flexive.shared.EJBLookup
 import org.testng.annotations.Test
+import org.testng.Assert
 
 /**
  * Sample embedded groovy test.
@@ -44,6 +45,6 @@ import org.testng.annotations.Test
 class GroovyEmbeddedTest {
     @Test (groups = ["ejb"])
     void groovyEmbeddedTest() {
-        assert "de" == EJBLookup.languageEngine.load("de").getIso2digit()
+        Assert.assertEquals("de", EJBLookup.languageEngine.load("de").getIso2digit())
     }
 }

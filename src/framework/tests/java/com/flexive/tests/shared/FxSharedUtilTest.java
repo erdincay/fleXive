@@ -33,8 +33,8 @@ package com.flexive.tests.shared;
 
 import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.TimestampRecorder;
 import com.flexive.shared.Pair;
+import com.flexive.shared.TimestampRecorder;
 import com.flexive.shared.value.FxString;
 import org.apache.commons.lang.StringUtils;
 import org.testng.Assert;
@@ -58,20 +58,20 @@ public class FxSharedUtilTest {
      */
     @Test
     public void formatResource() {
-        assert "ABC".equals(FxFormatUtils.formatResource("{0}", -1, "ABC")) : "Did not replace single argument correctly";
-        assert "Test:-ABC-".equals(FxFormatUtils.formatResource("Test:-{0}-", -1, "ABC")) : "Did not replace single argument correctly";
-        assert "Test:-ABC-".equals(FxFormatUtils.formatResource("Test:-{0}{1}C{2}", -1, "A", "B", "-")) : "Did not replace multiple arguments correctly";
+        Assert.assertTrue("ABC".equals(FxFormatUtils.formatResource("{0}", -1, "ABC")), "Did not replace single argument correctly");
+        Assert.assertTrue("Test:-ABC-".equals(FxFormatUtils.formatResource("Test:-{0}-", -1, "ABC")), "Did not replace single argument correctly");
+        Assert.assertTrue("Test:-ABC-".equals(FxFormatUtils.formatResource("Test:-{0}{1}C{2}", -1, "A", "B", "-")), "Did not replace multiple arguments correctly");
         Map<Long, String> translations = new HashMap<Long, String>();
         translations.put(1L, "translation1");
         translations.put(2L, "translation2");
         FxString translatedString = new FxString(translations);
-        assert "Test: translation1".equals(FxFormatUtils.formatResource("Test: {0}", 1, translatedString)) : "Did not replace FxString argument correctly";
-        assert "Test: translation2".equals(FxFormatUtils.formatResource("Test: {0}", 2, translatedString)) : "Did not replace FxString argument correctly";
-        assert "Test: translation2==translation2".equals(FxFormatUtils.formatResource("Test: {0}=={1}", 2,
-                translatedString, translatedString)) : "Did not replace multiple FxString arguments correctly";
-        assert "".equals(FxFormatUtils.formatResource("", -1)) : "Did not treat empty string value correctly.";
-        assert "".equals(FxFormatUtils.formatResource(null, -1)) : "Did not treat null string value correctly.";
-        assert "\t \t \n".equals(FxFormatUtils.formatResource("\t{0}\t \n", -1, " ")) : "Did not preserve whitespace correctly.";
+        Assert.assertTrue("Test: translation1".equals(FxFormatUtils.formatResource("Test: {0}", 1, translatedString)), "Did not replace FxString argument correctly");
+        Assert.assertTrue("Test: translation2".equals(FxFormatUtils.formatResource("Test: {0}", 2, translatedString)), "Did not replace FxString argument correctly");
+        Assert.assertEquals("Test: translation2==translation2", FxFormatUtils.formatResource("Test: {0}=={1}", 2,
+                translatedString, translatedString), "Did not replace multiple FxString arguments correctly");
+        Assert.assertTrue("".equals(FxFormatUtils.formatResource("", -1)), "Did not treat empty string value correctly.");
+        Assert.assertTrue("".equals(FxFormatUtils.formatResource(null, -1)), "Did not treat null string value correctly.");
+        Assert.assertTrue("\t \t \n".equals(FxFormatUtils.formatResource("\t{0}\t \n", -1, " ")), "Did not preserve whitespace correctly.");
     }
 
     /**
@@ -90,7 +90,7 @@ public class FxSharedUtilTest {
 
     @Test
     public void splitLiterals() {
-        assert FxSharedUtils.splitLiterals(null).length == 0 : "Null parameters should return an empty array.";
+        Assert.assertTrue(FxSharedUtils.splitLiterals(null).length == 0, "Null parameters should return an empty array.");
         assertSplitResult(FxSharedUtils.splitLiterals("literal value"), new String[]{"literal value"});
         assertSplitResult(FxSharedUtils.splitLiterals("value 1, value 2"), new String[]{"value 1", "value 2"});
         assertSplitResult(FxSharedUtils.splitLiterals(","), new String[]{"", ""});
@@ -119,14 +119,14 @@ public class FxSharedUtilTest {
         tsr.begin();
         Thread.sleep(50);
         tsr.timestamp("test");
-        final Pair<String,Long> timestamp = tsr.getTimestamps().get(0);
-        assert "test".equals(timestamp.getFirst());
+        final Pair<String, Long> timestamp = tsr.getTimestamps().get(0);
+        Assert.assertEquals("test", timestamp.getFirst());
         final double millis = timestamp.getSecond() / 1000000.0;
-        assert Math.abs(50.0 - millis) < 5.0 : "Timestamp does not match expected 50ms: " + millis;
+        Assert.assertTrue(Math.abs(50.0 - millis) < 5.0, "Timestamp does not match expected 50ms: " + millis);
     }
 
     private void assertSplitResult(String[] result, String[] expected) {
-        assert Arrays.asList(result).equals(Arrays.asList(expected))
-                : "Expected split result: " + Arrays.asList(expected) + ", got: " + Arrays.asList(result);
+        Assert.assertEquals(Arrays.asList(result), Arrays.asList(expected),
+                "Expected split result: " + Arrays.asList(expected) + ", got: " + Arrays.asList(result));
     }
 }

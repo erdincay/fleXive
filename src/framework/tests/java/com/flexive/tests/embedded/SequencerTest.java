@@ -42,6 +42,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 import java.util.List;
 
@@ -75,36 +76,36 @@ public class SequencerTest {
         id.createSequencer(seq1, true, 0);
         id.createSequencer(seq2, true, id.getMaxId());
         id.createSequencer(seq3, false, id.getMaxId());
-        assert id.sequencerExists(seq1) : "Expected sequencer " + seq1 + " to exist!";
-        assert id.sequencerExists(seq2) : "Expected sequencer " + seq2 + " to exist!";
-        assert id.sequencerExists(seq3) : "Expected sequencer " + seq3 + " to exist!";
+        Assert.assertTrue(id.sequencerExists(seq1), "Expected sequencer " + seq1 + " to exist!");
+        Assert.assertTrue(id.sequencerExists(seq2), "Expected sequencer " + seq2 + " to exist!");
+        Assert.assertTrue(id.sequencerExists(seq3), "Expected sequencer " + seq3 + " to exist!");
         long i1 = id.getId(seq1);
         long i2 = id.getId(seq1);
-        assert i2 > i1 : "Expected a higher id after 2nd getId()!";
+        Assert.assertTrue(i2 > i1, "Expected a higher id after 2nd getId()!");
         i1 = id.getId(seq2); //call should cause the sequencer to roll over
-        assert i1 == 0 : "Expected: " + 0 + ", got: " + i1;
+        Assert.assertTrue(i1 == 0, "Expected: " + 0 + ", got: " + i1);
         i1 = id.getId(seq2); //should be 1 after rollover
-        assert i1 == 1 : "Expected: " + 1 + ", got: " + i1;
+        Assert.assertTrue(i1 == 1, "Expected: " + 1 + ", got: " + i1);
 
         try {
             id.getId(seq3);
-            assert false : "Expected an exception since seq3 should be exhausted!";
+            Assert.fail("Expected an exception since seq3 should be exhausted!");
         } catch (FxApplicationException e) {
             //expected
         }
 
         List<CustomSequencer> g2 = id.getCustomSequencers();
         g2.removeAll(startList);
-        assert g2.size() == 3 : "Expected a size of 3, but got " + g2.size();
-        assert g2.get(0).getName().equals(seq1) : "Expected " + seq1 + " got " + g2.get(0).getName();
-        assert g2.get(1).getName().equals(seq2) : "Expected " + seq2 + " got " + g2.get(1).getName();
-        assert g2.get(2).getName().equals(seq3) : "Expected " + seq3 + " got " + g2.get(2).getName();
-        assert g2.get(0).isAllowRollover();
-        assert g2.get(1).isAllowRollover();
-        assert !g2.get(2).isAllowRollover();
+        Assert.assertTrue(g2.size() == 3, "Expected a size of 3, but got " + g2.size());
+        Assert.assertTrue(g2.get(0).getName().equals(seq1), "Expected " + seq1 + " got " + g2.get(0).getName());
+        Assert.assertTrue(g2.get(1).getName().equals(seq2), "Expected " + seq2 + " got " + g2.get(1).getName());
+        Assert.assertTrue(g2.get(2).getName().equals(seq3), "Expected " + seq3 + " got " + g2.get(2).getName());
+        Assert.assertTrue(g2.get(0).isAllowRollover());
+        Assert.assertTrue(g2.get(1).isAllowRollover());
+        Assert.assertTrue(!g2.get(2).isAllowRollover());
         id.removeSequencer(seq1);
         id.removeSequencer(seq2);
         id.removeSequencer(seq3);
-        assert id.getCustomSequencers().size() == startList.size();
+        Assert.assertTrue(id.getCustomSequencers().size() == startList.size());
     }
 }

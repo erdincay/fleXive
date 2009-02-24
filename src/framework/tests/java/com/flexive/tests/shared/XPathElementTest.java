@@ -50,31 +50,31 @@ public class XPathElementTest {
     @Test
     public void toElement() throws FxInvalidParameterException {
         XPathElement xpe = XPathElement.toElement("/Test/A/B", "B[3]");
-        assert ("B".equals(xpe.getAlias()) && xpe.getIndex() == 3) : "expected B[3]";
+        Assert.assertTrue(("B".equals(xpe.getAlias()) && xpe.getIndex() == 3), "expected B[3]");
         xpe = XPathElement.toElement("/Test/A/B", "B");
-        assert ("B".equals(xpe.getAlias()) && xpe.getIndex() == 1) : "expected B[1]";
+        Assert.assertTrue(("B".equals(xpe.getAlias()) && xpe.getIndex() == 1), "expected B[1]");
     }
 
     @Test
     public void lastElement() throws FxInvalidParameterException {
-        assert "C[1]".equals(XPathElement.lastElement("/A/B/C").toString());
-        assert "C[123]".equals(XPathElement.lastElement("/A/B/C[123]").toString());
-        assert "C[2]".equals(XPathElement.lastElement("/C[2]").toString());
+        Assert.assertTrue("C[1]".equals(XPathElement.lastElement("/A/B/C").toString()));
+        Assert.assertTrue("C[123]".equals(XPathElement.lastElement("/A/B/C[123]").toString()));
+        Assert.assertTrue("C[2]".equals(XPathElement.lastElement("/C[2]").toString()));
         try {
             XPathElement.lastElement("/A/B/C[123]s");
-            assert false : "expected exception";
+            Assert.fail("expected exception");
         } catch (FxInvalidParameterException e) {
             //ok
         }
         try {
             XPathElement.lastElement("A/B/C[123]");
-            assert false : "expected exception";
+            Assert.fail("expected exception");
         } catch (FxInvalidParameterException e) {
             //ok
         }
         try {
             XPathElement.lastElement("/A/B/C[a]");
-            assert false : "expected exception";
+            Assert.fail("expected exception");
         } catch (FxInvalidParameterException e) {
             //ok
         }
@@ -104,9 +104,9 @@ public class XPathElementTest {
                 "A[]/A",
         };
         for (String valid : validPatterns)
-            assert XPathElement.isValidXPath(valid) : "Pattern " + valid + " was expected to be valid!";
+            Assert.assertTrue(XPathElement.isValidXPath(valid), "Pattern " + valid + " was expected to be valid!");
         for (String valid : invalidPatterns)
-            assert !XPathElement.isValidXPath(valid) : "Pattern " + valid + " was expected to be invalid!";
+            Assert.assertTrue(!XPathElement.isValidXPath(valid), "Pattern " + valid + " was expected to be invalid!");
     }
 
     @Test
@@ -118,21 +118,21 @@ public class XPathElementTest {
                 {"/A[1]", "/A"}
         };
         for (String[] pattern : validPatterns)
-            assert pattern[0].equals(XPathElement.toXPath(XPathElement.split(pattern[1])));
+            Assert.assertTrue(pattern[0].equals(XPathElement.toXPath(XPathElement.split(pattern[1]))));
     }
 
     @Test
     public void cardinalities() throws FxInvalidParameterException {
         int[] card = XPathElement.getIndices("/A/B[2]/C[3]/D");
-        assert card.length == 4 && card[0] == 1 && card[1] == 2 && card[2] == 3 && card[3] == 1 : "multiplicity didn't match!";
-        assert "/A[1]/B[2]/C[1]".equals(XPathElement.toXPathMult("/A/B[2]/C"));
-        assert "/A/B/C".equals(XPathElement.toXPathNoMult("/A[2]/B/C[1234]"));
-        assert "XY/A/B/C".equals(XPathElement.toXPathNoMult("XY[@pk=NEW]/A[2]/B/C[1234]")) : "Expected XY/A/B/C but got " + XPathElement.toXPathNoMult("XY[@pk=NEW]/A[2]/B/C[1234]");
+        Assert.assertTrue(card.length == 4 && card[0] == 1 && card[1] == 2 && card[2] == 3 && card[3] == 1, "multiplicity didn't match!");
+        Assert.assertTrue("/A[1]/B[2]/C[1]".equals(XPathElement.toXPathMult("/A/B[2]/C")));
+        Assert.assertTrue("/A/B/C".equals(XPathElement.toXPathNoMult("/A[2]/B/C[1234]")));
+        Assert.assertTrue("XY/A/B/C".equals(XPathElement.toXPathNoMult("XY[@pk=NEW]/A[2]/B/C[1234]")), "Expected XY/A/B/C but got " + XPathElement.toXPathNoMult("XY[@pk=NEW]/A[2]/B/C[1234]"));
         List<XPathElement> xp = XPathElement.split("/A/B[1]/C/D[2]");
-        assert !xp.get(0).isIndexDefined();
-        assert xp.get(1).isIndexDefined();
-        assert !xp.get(2).isIndexDefined();
-        assert xp.get(3).isIndexDefined();
+        Assert.assertTrue(!xp.get(0).isIndexDefined());
+        Assert.assertTrue(xp.get(1).isIndexDefined());
+        Assert.assertTrue(!xp.get(2).isIndexDefined());
+        Assert.assertTrue(xp.get(3).isIndexDefined());
     }
 
     @Test
@@ -148,9 +148,9 @@ public class XPathElementTest {
                 {{"/A/B/C"}, {null, "A", null, "B", "/C"}}
         };
         for (String[][] test : testsNoSlash)
-            assert test[0][0].equals(XPathElement.buildXPath(false, test[1]));
+            Assert.assertTrue(test[0][0].equals(XPathElement.buildXPath(false, test[1])));
         for (String[][] test : testsSlash)
-            assert test[0][0].equals(XPathElement.buildXPath(true, test[1]));
+            Assert.assertTrue(test[0][0].equals(XPathElement.buildXPath(true, test[1])));
     }
 
     @Test

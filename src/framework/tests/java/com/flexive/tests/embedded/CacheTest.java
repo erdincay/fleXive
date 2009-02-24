@@ -36,6 +36,7 @@ import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.mbeans.FxCacheMBean;
 import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 import java.util.Set;
 
@@ -51,65 +52,65 @@ public class CacheTest {
     @Test
     public void testGlobalPutGetRemove() throws FxCacheException {
         FxCacheMBean cache = CacheAdmin.getInstance();
-        assert !cache.globalExists(PATH_TEST, 0) : PATH_TEST + " not empty";
+        Assert.assertTrue(!cache.globalExists(PATH_TEST, 0), PATH_TEST + " not empty");
         for (int i = 0; i < 100; i++) {
             cache.globalPut(PATH_TEST, i, "Test value " + i);
-            assert cache.globalExists(PATH_TEST, i);
+            Assert.assertTrue(cache.globalExists(PATH_TEST, i));
         }
         Set keys = cache.globalGetKeys(PATH_TEST);
-        assert keys.size() == 100;
+        Assert.assertTrue(keys.size() == 100);
         for (int i = 0; i < 100; i++) {
-            assert keys.contains(i) : "Key " + i + " not returned by globalGetKeys.";
-            assert ("Test value " + i).equals(cache.globalGet(PATH_TEST, i)) : "Got unexpected cache value: " + cache.globalGet(PATH_TEST, i);
+            Assert.assertTrue(keys.contains(i), "Key " + i + " not returned by globalGetKeys.");
+            Assert.assertTrue(("Test value " + i).equals(cache.globalGet(PATH_TEST, i)), "Got unexpected cache value: " + cache.globalGet(PATH_TEST, i));
             cache.globalPut(PATH_TEST, i, "Test: " + i);
-            assert cache.globalExists(PATH_TEST, i);
-            assert ("Test: " + i).equals(cache.globalGet(PATH_TEST, i)) : "Got unexpected cache value: " + cache.globalGet(PATH_TEST, i);
+            Assert.assertTrue(cache.globalExists(PATH_TEST, i));
+            Assert.assertTrue(("Test: " + i).equals(cache.globalGet(PATH_TEST, i)), "Got unexpected cache value: " + cache.globalGet(PATH_TEST, i));
             cache.globalRemove(PATH_TEST, i);
-            assert !cache.globalExists(PATH_TEST, i) : "Removed key still exists: " + i;
+            Assert.assertTrue(!cache.globalExists(PATH_TEST, i), "Removed key still exists: " + i);
         }
         cache.globalPut(PATH_TEST, 0, "Test value");
         cache.globalPut(PATH_TEST, 1, "Test value");
         cache.globalRemove(PATH_TEST);
-        assert !cache.globalExists(PATH_TEST, 0) : "Global cache remove did not clear key 0";
-        assert !cache.globalExists(PATH_TEST, 1) : "Global cache remove did not clear key 1";
+        Assert.assertTrue(!cache.globalExists(PATH_TEST, 0), "Global cache remove did not clear key 0");
+        Assert.assertTrue(!cache.globalExists(PATH_TEST, 1), "Global cache remove did not clear key 1");
     }
 
     @Test
     public void testPutGetRemove() throws FxCacheException {
         FxCacheMBean cache = CacheAdmin.getInstance();
-        assert !cache.exists(PATH_TEST, 0) : PATH_TEST + " not empty";
+        Assert.assertTrue(!cache.exists(PATH_TEST, 0), PATH_TEST + " not empty");
         for (int i = 0; i < 100; i++) {
             cache.put(PATH_TEST, i, "Test value " + i);
-            assert cache.exists(PATH_TEST, i);
+            Assert.assertTrue(cache.exists(PATH_TEST, i));
         }
         Set keys = cache.getKeys(PATH_TEST);
-        assert keys.size() == 100;
+        Assert.assertTrue(keys.size() == 100);
         for (int i = 0; i < 100; i++) {
-            assert keys.contains(i) : "Key " + i + " not returned by getKeys.";
-            assert ("Test value " + i).equals(cache.get(PATH_TEST, i)) : "Got unexpected cache value: " + cache.get(PATH_TEST, i);
+            Assert.assertTrue(keys.contains(i), "Key " + i + " not returned by getKeys.");
+            Assert.assertTrue(("Test value " + i).equals(cache.get(PATH_TEST, i)), "Got unexpected cache value: " + cache.get(PATH_TEST, i));
             cache.put(PATH_TEST, i, "Test: " + i);
-            assert cache.exists(PATH_TEST, i);
-            assert ("Test: " + i).equals(cache.get(PATH_TEST, i)) : "Got unexpected cache value: " + cache.get(PATH_TEST, i);
+            Assert.assertTrue(cache.exists(PATH_TEST, i));
+            Assert.assertTrue(("Test: " + i).equals(cache.get(PATH_TEST, i)), "Got unexpected cache value: " + cache.get(PATH_TEST, i));
             cache.remove(PATH_TEST, i);
-            assert !cache.exists(PATH_TEST, i) : "Removed key still exists: " + i;
+            Assert.assertTrue(!cache.exists(PATH_TEST, i), "Removed key still exists: " + i);
         }
         cache.put(PATH_TEST, 0, "Test value");
         cache.put(PATH_TEST, 1, "Test value");
         cache.remove(PATH_TEST);
-        assert !cache.exists(PATH_TEST, 0) : "Cache remove did not clear key 0";
-        assert !cache.exists(PATH_TEST, 1) : "Cache remove did not clear key 1";
+        Assert.assertTrue(!cache.exists(PATH_TEST, 0), "Cache remove did not clear key 0");
+        Assert.assertTrue(!cache.exists(PATH_TEST, 1), "Cache remove did not clear key 1");
     }
 
     @Test
     public void testAttributes() {
         FxCacheMBean cache = CacheAdmin.getInstance();
-        assert StringUtils.isNotBlank(cache.getDeploymentId()) : "Deployment ID not set.";
-        assert cache.getSystemStartTime() < System.currentTimeMillis()
+        Assert.assertTrue(StringUtils.isNotBlank(cache.getDeploymentId()), "Deployment ID not set.");
+        Assert.assertTrue(cache.getSystemStartTime() < System.currentTimeMillis()
                 && cache.getSystemStartTime() > System.currentTimeMillis() - 60 * 3600 * 1000
-                : "System start time in the future or more than one hour in the past: " + cache.getSystemStartTime();
-        assert cache.getNodeStartTime() < System.currentTimeMillis()
+                , "System start time in the future or more than one hour in the past: " + cache.getSystemStartTime());
+        Assert.assertTrue(cache.getNodeStartTime() < System.currentTimeMillis()
                 && cache.getNodeStartTime() > System.currentTimeMillis() - 60 * 3600 * 1000
-                : "Node start time in the future or more than one hour in the past: " + cache.getNodeStartTime();
-        assert cache.getSystemStartTime() <= cache.getNodeStartTime() : "System start time later than node start time.";
+                , "Node start time in the future or more than one hour in the past: " + cache.getNodeStartTime());
+        Assert.assertTrue(cache.getSystemStartTime() <= cache.getNodeStartTime(), "System start time later than node start time.");
     }
 }

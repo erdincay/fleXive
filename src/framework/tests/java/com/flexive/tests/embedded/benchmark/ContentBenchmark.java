@@ -54,6 +54,7 @@ import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Test;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.AfterClass;
+import org.testng.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -107,7 +108,7 @@ public class ContentBenchmark {
             // perform a basic contact data query
             final long resultStart = System.currentTimeMillis();
             final FxResultSet rs = new SqlQueryBuilder().select("@pk").condition("name", PropertyValueComparator.EQ, "Peter").getResult();
-            assert rs.getRowCount() > 0;
+            Assert.assertTrue(rs.getRowCount() > 0);
             getResultLogger().logTime("queryContactData", resultStart, rs.getRowCount(), "row");
         } finally {
             final long deleteStart = System.currentTimeMillis();

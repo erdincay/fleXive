@@ -34,6 +34,7 @@ package com.flexive.tests.shared;
 import com.flexive.shared.search.*;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 import java.util.Arrays;
 import java.util.List;
@@ -76,22 +77,22 @@ public class ResultPreferencesTest {
         ResultPreferencesEdit rpe = rp.getEditObject();
 
         // add a column info, check if base object remains unchanged
-        assert rp.getSelectedColumns().size() == 0;
-        assert rpe.getSelectedColumns().size() == 0;
+        Assert.assertTrue(rp.getSelectedColumns().size() == 0);
+        Assert.assertTrue(rpe.getSelectedColumns().size() == 0);
         final ResultColumnInfo ci = INFOS_EQUAL[0][0];
         rpe.addSelectedColumn(ci);
-        assert rp.getSelectedColumns().size() == 0;
-        assert rpe.getSelectedColumns().size() == 1;
-        assert rpe.getSelectedColumns().get(0).equals(ci);
+        Assert.assertTrue(rp.getSelectedColumns().size() == 0);
+        Assert.assertTrue(rpe.getSelectedColumns().size() == 1);
+        Assert.assertTrue(rpe.getSelectedColumns().get(0).equals(ci));
 
         // add a order by info, check if base object remains unchanged
-        assert rp.getOrderByColumns().size() == 0;
-        assert rpe.getOrderByColumns().size() == 0;
+        Assert.assertTrue(rp.getOrderByColumns().size() == 0);
+        Assert.assertTrue(rpe.getOrderByColumns().size() == 0);
         final ResultOrderByInfo obi = ORDERBY_EQUAL[0][0];
         rpe.addOrderByColumn(obi);
-        assert rpe.getOrderByColumns().size() == 1;
-        assert rp.getOrderByColumns().size() == 0;
-        assert rpe.getOrderByColumns().get(0).equals(obi);
+        Assert.assertTrue(rpe.getOrderByColumns().size() == 1);
+        Assert.assertTrue(rp.getOrderByColumns().size() == 0);
+        Assert.assertTrue(rpe.getOrderByColumns().get(0).equals(obi));
     }
 
     @Test
@@ -99,34 +100,34 @@ public class ResultPreferencesTest {
         final List<ResultColumnInfo> selectedColumns = Arrays.asList(INFOS_UNEQUAL[0]);
         final List<ResultOrderByInfo> orderByColumns = Arrays.asList(ORDERBY_UNEQUAL[0]);
         ResultPreferences rp = new ResultPreferences(selectedColumns, orderByColumns, 15, 150);
-        assert rp.getSelectedColumns().size() == 2;
-        assert rp.getOrderByColumns().size() == 2;
-        assert rp.getSelectedColumns().equals(selectedColumns);
-        assert rp.getOrderByColumns().equals(orderByColumns);
+        Assert.assertTrue(rp.getSelectedColumns().size() == 2);
+        Assert.assertTrue(rp.getOrderByColumns().size() == 2);
+        Assert.assertTrue(rp.getSelectedColumns().equals(selectedColumns));
+        Assert.assertTrue(rp.getOrderByColumns().equals(orderByColumns));
         ResultPreferencesEdit rpe = rp.getEditObject();
-        assert rp.equals(rpe);
+        Assert.assertTrue(rp.equals(rpe));
 
         // remove column, assert unequal, then restore previous state
         final ResultColumnInfo ci = rpe.removeSelectedColumn(1);
-        assert !rp.equals(rpe);
+        Assert.assertTrue(!rp.equals(rpe));
         rpe.addSelectedColumn(ci);
-        assert rp.equals(rpe);
+        Assert.assertTrue(rp.equals(rpe));
 
         // remove order by, assert unequal, then restore previous state
         final ResultOrderByInfo obi = rpe.removeOrderByColumn(1);
-        assert (!rp.equals(rpe));
+        Assert.assertTrue((!rp.equals(rpe)));
         rpe.addOrderByColumn(obi);
-        assert rp.equals(rpe);
+        Assert.assertTrue(rp.equals(rpe));
 
         // other tests
         rpe.setThumbBoxSize(10);
-        assert !rp.equals(rpe);
+        Assert.assertTrue(!rp.equals(rpe));
         rpe.setThumbBoxSize(rp.getThumbBoxSize());
-        assert rp.equals(rpe);
+        Assert.assertTrue(rp.equals(rpe));
         rpe.setRowsPerPage(100);
-        assert !rp.equals(rpe);
+        Assert.assertTrue(!rp.equals(rpe));
         rpe.setRowsPerPage(rp.getRowsPerPage());
-        assert rp.equals(rpe);
+        Assert.assertTrue(rp.equals(rpe));
     }
 
     @Test
@@ -135,13 +136,13 @@ public class ResultPreferencesTest {
         ResultPreferencesEdit rpe = rp.getEditObject();
         try {
             rpe.addSelectedColumn(null);
-            assert false : "It should not be possible to add null column infos";
+            Assert.fail("It should not be possible to add null column infos");
         } catch (RuntimeException e) {
             // pass
         }
         try {
             rpe.addOrderByColumn(null);
-            assert false : "It should not be possible to add null order by column infos";
+            Assert.fail("It should not be possible to add null order by column infos");
         } catch (RuntimeException e) {
             // pass
         }
@@ -149,22 +150,22 @@ public class ResultPreferencesTest {
 
     @Test(dataProvider = "equalColumnInfos")
     public void columnInfoEqual(ResultColumnInfo ci1, ResultColumnInfo ci2) {
-        assert ci1.equals(ci2) && ci2.equals(ci1) : ci1 + " should be equal to " + ci2;
+        Assert.assertTrue(ci1.equals(ci2) && ci2.equals(ci1), ci1 + " should be equal to " + ci2);
     }
 
     @Test(dataProvider = "unequalColumnInfos")
     public void columnInfoUnequal(ResultColumnInfo ci1, ResultColumnInfo ci2) {
-        assert !ci1.equals(ci2) && !ci2.equals(ci1) : ci1 + " should not be equal to " + ci2;
+        Assert.assertTrue(!ci1.equals(ci2) && !ci2.equals(ci1), ci1 + " should not be equal to " + ci2);
     }
 
     @Test(dataProvider = "equalOrderByInfos")
     public void orderByEqual(ResultOrderByInfo obi1, ResultOrderByInfo obi2) {
-        assert obi1.equals(obi2) && obi2.equals(obi1) : obi1 + " should be equal to " + obi2;
+        Assert.assertTrue(obi1.equals(obi2) && obi2.equals(obi1), obi1 + " should be equal to " + obi2);
     }
 
     @Test(dataProvider = "unequalOrderByInfos")
     public void orderByUnequal(ResultOrderByInfo obi1, ResultOrderByInfo obi2) {
-        assert !obi1.equals(obi2) && !obi2.equals(obi1) : obi1 + " should not be equal to " + obi2;
+        Assert.assertTrue(!obi1.equals(obi2) && !obi2.equals(obi1), obi1 + " should not be equal to " + obi2);
     }
 
     @DataProvider(name = "equalColumnInfos")

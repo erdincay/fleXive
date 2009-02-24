@@ -41,6 +41,7 @@ import com.flexive.shared.security.*;
 import com.flexive.shared.value.FxString;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 import java.util.Arrays;
 import java.util.List;
@@ -74,7 +75,7 @@ public class ACLManagementTest extends AbstractRoleTest {
 
     @Test
     public void createForeignAclTest() throws FxApplicationException {
-        assert ticket.getMandatorId() != Mandator.MANDATOR_FLEXIVE;
+        Assert.assertTrue(ticket.getMandatorId() != Mandator.MANDATOR_FLEXIVE);
         try {
             createAcl(Mandator.MANDATOR_FLEXIVE);
         } catch (FxNoAccessException e) {
@@ -104,7 +105,7 @@ public class ACLManagementTest extends AbstractRoleTest {
                     break;
                 }
             }
-            assert foreignUserGroupId != -1 : "No suitable user group found";
+            Assert.assertTrue(foreignUserGroupId != -1, "No suitable user group found");
         } finally {
             FxContext.get().stopRunAsSystem();
         }
@@ -128,8 +129,8 @@ public class ACLManagementTest extends AbstractRoleTest {
                     Arrays.asList(new ACLAssignment(aclId, UserGroup.GROUP_EVERYONE, true, true, false,
                             true, true, false, ACLCategory.INSTANCE, null)));
             assertSuccess(ACLManagement, mandatorId);
-            assert ae.load(aclId).getName().equals("new name");
-            assert ae.loadAssignments(aclId, UserGroup.GROUP_EVERYONE).size() == 1;
+            Assert.assertTrue(ae.load(aclId).getName().equals("new name"));
+            Assert.assertTrue(ae.loadAssignments(aclId, UserGroup.GROUP_EVERYONE).size() == 1);
             assertSuccess(ACLManagement, mandatorId);
         } catch (FxNoAccessException e) {
             assertNoAccess(e, ACLManagement, mandatorId);

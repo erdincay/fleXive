@@ -32,6 +32,7 @@
 package com.flexive.tests.shared;
 
 import org.testng.annotations.Test;
+import org.testng.Assert;
 import com.flexive.shared.value.DateRange;
 
 import java.util.Date;
@@ -49,7 +50,7 @@ public class DateRangeTest {
     @Test(groups = "shared")
     public void dateRangeStringRep() {
         final DateRange range = new DateRange(new Date(0), new Date());
-        assert new DateRange(range.toString()).equals(range)
-                : "Range constructed from '" + range + "' not equal to original object.";
+        Assert.assertTrue(new DateRange(range.toString()).equals(range),
+                "Range constructed from '" + range + "' not equal to original object.");
     }
 }

@@ -32,22 +32,21 @@
 package com.flexive.tests.embedded;
 
 import com.flexive.shared.EJBLookup;
-import com.flexive.shared.FxLanguage;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxLanguage;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.AccountEngine;
-import com.flexive.shared.interfaces.UserGroupEngine;
 import com.flexive.shared.interfaces.ContentEngine;
+import com.flexive.shared.interfaces.UserGroupEngine;
 import com.flexive.shared.security.*;
 import static com.flexive.tests.embedded.FxTestUtils.*;
 import org.apache.commons.lang.StringUtils;
+import org.testng.Assert;
+import static org.testng.Assert.*;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
-import static org.testng.Assert.assertTrue;
 
 import java.util.Date;
 import java.util.List;
@@ -95,13 +94,13 @@ public class AccountTest {
         long accountId = createAccount(0, 100, true, false);
         try {
             if (!getUserTicket().isInRole(Role.AccountManagement)) {
-                assert false : "Test user is not in role user management.";
+                Assert.fail("Test user is not in role user management.");
             }
             Account account = accountEngine.load(accountId);
-            assert USERNAME.equals(account.getName().substring(1)) : "Username not stored correctly.";
-            assert LOGINNAME.equals(account.getLoginName().substring(1)) : "Login not stored correctly.";
-            assert account.isActive() : "Activation flag not set correctly.";
-            assert !account.isValidated() : "Confirmation flag not set correctly.";
+            Assert.assertTrue(USERNAME.equals(account.getName().substring(1)), "Username not stored correctly.");
+            Assert.assertTrue(LOGINNAME.equals(account.getLoginName().substring(1)), "Login not stored correctly.");
+            Assert.assertTrue(account.isActive(), "Activation flag not set correctly.");
+            Assert.assertTrue(!account.isValidated(), "Confirmation flag not set correctly.");
         } finally {
             // cleanup
             accountEngine.remove(accountId);
@@ -118,8 +117,8 @@ public class AccountTest {
         long accountId = createAccount(-1, 2, true, true);
         try {
             Account account = accountEngine.load(accountId);
-            assert new Date().after(account.getValidFrom()) : "Validation date not set correctly.";
-            assert new Date().before(account.getValidTo()) : "Validation date not set correctly.";
+            Assert.assertTrue(new Date().after(account.getValidFrom()), "Validation date not set correctly.");
+            Assert.assertTrue(new Date().before(account.getValidTo()), "Validation date not set correctly.");
         } finally {
             accountEngine.remove(accountId);
         }
@@ -136,8 +135,8 @@ public class AccountTest {
         try {
             accountId = createAccount(-10, 2, true, true);
             Account account = accountEngine.load(accountId);
-            assert false : "Able to create expired account (from = " + account.getValidFromString()
-                    + ", to = " + account.getValidToString() + ")";
+            Assert.fail("Able to create expired account (from = " + account.getValidFromString()
+                    + ", to = " + account.getValidToString() + ")");
         } catch (Exception e) {
             // passed test
         } finally {
@@ -158,8 +157,8 @@ public class AccountTest {
         try {
             accountId = createAccount(1, -2, true, true);
             Account account = accountEngine.load(accountId);
-            assert false : "Able to create account with invalid dates (from = "
-                    + account.getValidFromString() + ", to = " + account.getValidToString() + ")";
+            Assert.fail("Able to create account with invalid dates (from = "
+                    + account.getValidFromString() + ", to = " + account.getValidToString() + ")");
         } catch (Exception e) {
             // passed test
         } finally {
@@ -377,13 +376,14 @@ public class AccountTest {
         accountPK = accIdLoad.getContactData();
         accFxPKLoad = accountEngine.loadForContactData(accountPK);
         compareAccounts(accIdLoad, accFxPKLoad);
-        
+
         // clean up
         accountEngine.remove(accountId);
     }
 
     /**
      * Tests the equality of two accounts' attributes
+     *
      * @param acc1 the first Account to compare
      * @param acc2 the second Account to compare
      */

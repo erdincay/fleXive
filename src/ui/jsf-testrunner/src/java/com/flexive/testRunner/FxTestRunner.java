@@ -90,13 +90,14 @@ public class FxTestRunner {
                 new FxFacesMsgErr("TestRunner.err.testDivision").addToContext();
             ok = false;
         }
+        /* tests should run without assert enabled now using only testNG's Assert
         @SuppressWarnings({"UnusedAssignment"}) boolean assertsEnabled = false;
         assert assertsEnabled = true;
         if (!assertsEnabled) {
             if (addMessagesToContext)
                 new FxFacesMsgErr("TestRunner.err.asserts").addToContext();
             ok = false;
-        }
+        }*/
         if (StringUtils.isEmpty(outputPath)) {
             if (addMessagesToContext)
                 new FxFacesMsgErr("TestRunner.err.path").addToContext();

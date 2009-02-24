@@ -49,6 +49,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 /**
  * Test for the group mode (one-of and any-of) of group assignments
@@ -139,7 +140,7 @@ public class GroupModeTest extends StructureTestBase {
     @Test
     public void groupModeTest() throws Exception {
         FxContent test = co.initialize(typeId);
-        assert test.getGroupData("/B").getCreateableChildren(false).size() == 2 : "2 creatable children expected!";
+        Assert.assertTrue(test.getGroupData("/B").getCreateableChildren(false).size() == 2, "2 creatable children expected!");
         FxString testValue = new FxString(false, "Test...");
         test.setValue("/A/A_P1", testValue);
         test.setValue("/A/A_P2", testValue);
@@ -147,19 +148,19 @@ public class GroupModeTest extends StructureTestBase {
         test.setValue("/C/C_P1", testValue);
         try {
             test.setValue("/B/B_P2", testValue);
-            assert false : "One-Of groups used twice!";
+            Assert.fail("One-Of groups used twice!");
         } catch (FxCreateException e) {
             //ok
         }
-        assert test.getGroupData("/B").getCreateableChildren(false).size() == 0 : "No creatable children should be returned!";
+        Assert.assertTrue(test.getGroupData("/B").getCreateableChildren(false).size() == 0, "No creatable children should be returned!");
         FxPK pk = co.save(test);
         FxContent loaded = co.load(pk);
-        assert loaded.getValue("/A/A_P1").equals(testValue);
-        assert loaded.getValue("/A/A_P2").equals(testValue);
-        assert loaded.getValue("/B/B_P1").equals(testValue);
+        Assert.assertTrue(loaded.getValue("/A/A_P1").equals(testValue));
+        Assert.assertTrue(loaded.getValue("/A/A_P2").equals(testValue));
+        Assert.assertTrue(loaded.getValue("/B/B_P1").equals(testValue));
         try {
             loaded.setValue("/B/B_P2", testValue);
-            assert false : "One-Of groups used twice!";
+            Assert.fail("One-Of groups used twice!");
         } catch (FxCreateException e) {
             //ok
         }
@@ -167,7 +168,7 @@ public class GroupModeTest extends StructureTestBase {
         loaded.setValue("/B/B_P2", testValue);
         try {
             loaded.setValue("/C/C_G1/C_G1_P1", testValue);
-            assert false : "One-Of groups used twice!";
+            Assert.fail("One-Of groups used twice!");
         } catch (FxCreateException e) {
             //ok
         }
@@ -175,13 +176,13 @@ public class GroupModeTest extends StructureTestBase {
         loaded.setValue("/C/C_G1/C_G1_P1", testValue);
         try {
             loaded.setValue("/C/C_G1/C_G1_P2", testValue);
-            assert false : "One-Of groups used twice!";
+            Assert.fail("One-Of groups used twice!");
         } catch (FxCreateException e) {
             //ok
         }
         co.save(loaded);
         loaded = co.load(pk);
-        assert loaded.getValue("/B/B_P2").equals(testValue);
+        Assert.assertTrue(loaded.getValue("/B/B_P2").equals(testValue));
         FxContent random = co.initialize(typeId).randomize();
         pk = co.save(random);
         co.load(pk);

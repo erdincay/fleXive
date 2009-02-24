@@ -42,6 +42,7 @@ import static com.flexive.tests.embedded.FxTestUtils.logout;
 import com.flexive.tests.embedded.TestUser;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.Assert;
 
 /**
  * Role test base class.
@@ -73,15 +74,15 @@ public abstract class AbstractRoleTest {
     protected void assertSuccess(Role role, long mandatorId) {
         final String msg = accessAllowed(role, mandatorId);
         if (msg == null) {
-            assert false : "User should not be allowed to succeed on call"
-                    + (role != null ? " without role " + role.name() : "");
+            Assert.fail("User should not be allowed to succeed on call"
+                    + (role != null ? " without role " + role.name() : ""));
         }
     }
 
     protected void assertNoAccess(FxNoAccessException nae, Role role, long mandatorId) {
         final String msg = accessAllowed(role, mandatorId);
         if (msg != null) {
-            assert false : msg + " (" + nae.getMessage() + ")";
+            Assert.fail(msg + " (" + nae.getMessage() + ")");
         }
     }
 

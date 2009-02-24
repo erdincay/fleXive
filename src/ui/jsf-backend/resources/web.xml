@@ -322,10 +322,9 @@
         <listener-class>com.flexive.war.listener.SessionTimeoutListener</listener-class>
     </listener>
     
-    <!-- uncomment for e.g. weblogic when using the Sun RI
+    <!-- uncomment for e.g. weblogic when using the Sun RI-->
     <listener>
         <listener-class>com.sun.faces.config.ConfigureListener</listener-class>
     </listener>
-    -->
 
 </web-app>

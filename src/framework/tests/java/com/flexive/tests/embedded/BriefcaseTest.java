@@ -94,7 +94,7 @@ public class BriefcaseTest {
             for (FxResultRow row : result.getResultRows()) {
                 ids.add(row.getPk(1).getId());
             }
-            assert !ids.isEmpty() : "No objects found for testing the briefcase engine";
+            Assert.assertTrue(!ids.isEmpty(), "No objects found for testing the briefcase engine");
             be.addItems(briefcaseId, ArrayUtils.toPrimitive(ids.toArray(new Long[ids.size()])));
             Assert.assertEquals(be.getItems(briefcaseId).length, ids.size());
             // add them again - shouldn't change briefcase

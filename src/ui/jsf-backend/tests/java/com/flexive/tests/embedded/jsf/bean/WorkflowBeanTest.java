@@ -54,6 +54,7 @@ import com.flexive.war.beans.admin.main.WorkflowBean;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,9 +94,9 @@ public class WorkflowBeanTest {
     public void testGetWorkflows() {
         List<Workflow> workflows = workflowBean.getList();
         List<Workflow> environmentWorkflows = CacheAdmin.getEnvironment().getWorkflows();
-        assert workflows.size() == environmentWorkflows.size();
+        Assert.assertEquals(workflows.size(), environmentWorkflows.size());
         for (int i = 0; i < workflows.size(); i++) {
-            assert (workflows.get(i).equals(environmentWorkflows.get(i)));
+            Assert.assertEquals(workflows.get(i), environmentWorkflows.get(i));
         }
     }
 
@@ -106,12 +107,12 @@ public class WorkflowBeanTest {
             workflowBean.setWorkflow(new WorkflowEdit(getTestWorkflow()));
             String result = workflowBean.create();
             workflowId = workflowBean.getWorkflow().getId();
-            assert "workflowEdit".equals(result) : "Unexpected result for workflowBean.create: " + result;
-            assert workflowId != -1 : "Workflow not created successfully";
+            Assert.assertTrue("workflowEdit".equals(result), "Unexpected result for workflowBean.create: " + result);
+            Assert.assertTrue(workflowId != -1, "Workflow not created successfully");
             try {
                 CacheAdmin.getEnvironment().getWorkflow(workflowId);
             } catch (Exception e) {
-                assert false : "Created workflow not found in CacheAdmin.getEnvironment().";
+                Assert.fail( "Created workflow not found in CacheAdmin.getEnvironment().");
             }
         } finally {
             if (workflowId != -1) {
@@ -127,7 +128,7 @@ public class WorkflowBeanTest {
             workflowBean.setWorkflow(new WorkflowEdit(getTestWorkflow()));
             String result = workflowBean.create();
             workflowId = workflowBean.getWorkflow().getId();
-            assert "workflowEdit".equals(result) : "Unexpected result for workflowBean.create: " + result;
+            Assert.assertTrue("workflowEdit".equals(result), "Unexpected result for workflowBean.create: " + result);
             // add live and edit steps
             workflowBean.setStepDefinitionId(StepDefinition.EDIT_STEP_ID);
             workflowBean.setStepACL(workflowAcl.getId());
@@ -142,8 +143,8 @@ public class WorkflowBeanTest {
             // persist to database
             workflowBean.save();
             Workflow workflow = CacheAdmin.getEnvironment().getWorkflow(workflowBean.getWorkflow().getId());
-            assert workflow.getSteps().size() == 2 : "Unexpected number of steps: " + workflow.getSteps().size();
-            assert workflow.getRoutes().size() == 1 : "Unexpected number of routes: " + workflow.getRoutes().size();
+            Assert.assertTrue(workflow.getSteps().size() == 2, "Unexpected number of steps: " + workflow.getSteps().size());
+            Assert.assertTrue(workflow.getRoutes().size() == 1, "Unexpected number of routes: " + workflow.getRoutes().size());
         } finally {
             if (workflowId != -1) {
                 workflowEngine.remove(workflowId);
@@ -158,13 +159,13 @@ public class WorkflowBeanTest {
             workflowBean.setWorkflow(new WorkflowEdit(getTestWorkflow()));
             workflowBean.create();
             workflowId = workflowBean.getWorkflow().getId();
-            assert workflowId != -1 : "Workflow not created successfully";
+            Assert.assertTrue(workflowId != -1, "Workflow not created successfully");
             workflowBean.setWorkflowId(workflowId);
             String result = workflowBean.delete();
-            assert "workflowOverview".equals(result) : "Unexpected result for workflowBean.delete: " + result;
+            Assert.assertTrue("workflowOverview".equals(result), "Unexpected result for workflowBean.delete: " + result);
             try {
                 CacheAdmin.getEnvironment().getWorkflow(workflowId);
-                assert false : "Workflow " + workflowId + " should be deleted.";
+                Assert.fail( "Workflow " + workflowId + " should be deleted.");
             } catch (Exception e) {
                 // pass
                 workflowId = -1;
@@ -183,9 +184,9 @@ public class WorkflowBeanTest {
             workflowBean.setWorkflow(new WorkflowEdit(getTestWorkflow()));
             workflowBean.create();
             workflowId = workflowBean.getWorkflow().getId();
-            assert workflowId != -1;
-            assert workflowBean.getStepsForAdding().size() == CacheAdmin.getEnvironment().getStepDefinitions().size()
-                    : "Expected to get all step definitions for an empty workflow.";
+            Assert.assertTrue(workflowId != -1);
+            Assert.assertTrue(workflowBean.getStepsForAdding().size() == CacheAdmin.getEnvironment().getStepDefinitions().size(),
+                    "Expected to get all step definitions for an empty workflow.");
         } finally {
             if (workflowId != -1) {
                 workflowEngine.remove(workflowId);

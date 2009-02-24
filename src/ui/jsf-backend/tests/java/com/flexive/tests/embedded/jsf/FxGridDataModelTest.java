@@ -44,6 +44,7 @@ import com.flexive.shared.search.FxResultSet;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 import javax.faces.model.DataModel;
 
@@ -74,19 +75,19 @@ public class FxGridDataModelTest extends AbstractSqlQueryTest {
         FxResultSet result = getRows(0, 25);
         FxResultSetDataModel resultModel = new FxResultSetDataModel(result);
         FxGridDataModel gridModel = new FxGridDataModel(resultModel, 5);    // 5x5 grid
-        assert gridModel.getRowCount() == 5;
+        Assert.assertEquals(gridModel.getRowCount(), 5);
         for (int i = 0; i < gridModel.getRowCount(); i++) {
             gridModel.setRowIndex(i);
-            assert gridModel.isRowAvailable();
+            Assert.assertTrue(gridModel.isRowAvailable());
             Object[] row = (Object[]) gridModel.getRowData();
-            assert row.length == 5;
+            Assert.assertEquals(row.length, 5);
             for (int j = 0; j < row.length; j++) {
                 final Object[] refRow = result.getRows().get(i * 5 + j);
-                assert row[j] != null && row[j] == refRow : "Expected grid column to be equal to reference row.";
+                Assert.assertTrue(row[j] != null && row[j] == refRow, "Expected grid column to be equal to reference row.");
             }
         }
         gridModel.setRowIndex(6);
-        assert !gridModel.isRowAvailable();
+        Assert.assertFalse(gridModel.isRowAvailable());
     }
 
     @Test
@@ -105,15 +106,15 @@ public class FxGridDataModelTest extends AbstractSqlQueryTest {
         FxGridDataModel gridModel = new FxGridDataModel(resultModel, 5);    // 5x5 grid
         assertAvailableRows(gridModel, 1, 0);
         gridModel.setRowIndex(0);
-        assert gridModel.isRowAvailable();
+        Assert.assertTrue(gridModel.isRowAvailable());
         Object[] row = (Object[]) gridModel.getRowData();
-        assert gridModel.isRowAvailable();  // assert that the backing datamodel index has not changed
-        assert row.length == 5;
+        Assert.assertTrue(gridModel.isRowAvailable());  // assert that the backing datamodel index has not changed
+        Assert.assertEquals(row.length, 5);
         for (int i = 0; i < 3; i++) {
-            assert row[i] != null && row[i] == result.getRows().get(i);
+            Assert.assertTrue(row[i] != null && row[i] == result.getRows().get(i));
         }
-        assert row[3] == null;
-        assert row[4] == null;
+        Assert.assertNull(row[3]);
+        Assert.assertNull(row[4]);
     }
 
     @Test
@@ -132,9 +133,9 @@ public class FxGridDataModelTest extends AbstractSqlQueryTest {
     private void assertAvailableRows(DataModel model, int rows, int startRow) {
         for (int i = startRow; i < rows; i++) {
             model.setRowIndex(startRow + i);
-            assert model.isRowAvailable() : "Row " + i + " should be available in " + model;
+            Assert.assertTrue(model.isRowAvailable(), "Row " + i + " should be available in " + model);
         }
         //model.setRowIndex(startRow + rows);
-        //assert !model.isRowAvailable() : "No more than " + rows + " rows should be available in " + model;
+        //Assert.assertTrue(!model.isRowAvailable(), "No more than " + rows + " rows should be available in " + model);
     }
 }

@@ -45,6 +45,7 @@ import com.flexive.tests.shared.TestParameters;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.*;
+import org.testng.Assert;
 
 import java.io.Serializable;
 import java.util.*;
@@ -163,11 +164,11 @@ public class ConfigurationTest {
             try {
                 configuration.remove(parameter);
                 if (!mayUpdateConfig())
-                    assert false : "Should not be permitted to delete parameter " + parameter + " in " + configuration;
-                assert parameter.getDefaultValue().equals(configuration.get(parameter)) : "Default value incorrect.";
+                    Assert.fail("Should not be permitted to delete parameter " + parameter + " in " + configuration);
+                Assert.assertTrue(parameter.getDefaultValue().equals(configuration.get(parameter)), "Default value incorrect.");
             } catch (FxNoAccessException e) {
                 if (mayUpdateConfig())
-                    assert false : "Failed to delete parameter although privileges exist.";
+                    Assert.fail("Failed to delete parameter although privileges exist.");
             }
         }
 
@@ -180,14 +181,14 @@ public class ConfigurationTest {
             try {
                 configuration.put(parameter, value);
                 if (!mayUpdateConfig())
-                    assert false : "Should not be permitted to set parameter " + parameter + " in " + configuration;
+                    Assert.fail("Should not be permitted to set parameter " + parameter + " in " + configuration);
 
                 T dbValue = configuration.get(parameter);
-                assert !((dbValue == null && value != null) || (dbValue != null && value == null));
-                assert dbValue == null || dbValue.equals(value) : "Parameter value not stored correctly or incorrect implementation of \"Object#equals\"";
+                Assert.assertTrue(!((dbValue == null && value != null) || (dbValue != null && value == null)));
+                Assert.assertTrue(dbValue == null || dbValue.equals(value), "Parameter value not stored correctly or incorrect implementation of \"Object#equals\"");
             } catch (FxNoAccessException e) {
                 if (mayUpdateConfig())
-                    assert false : "Failed to put parameter although privileges exist for parameter " + parameter + " in " + configuration;
+                    Assert.fail("Failed to put parameter although privileges exist for parameter " + parameter + " in " + configuration);
 
             } finally {
                 safeDelete();
@@ -203,23 +204,23 @@ public class ConfigurationTest {
             try {
                 configuration.put(parameter, value);
                 if (!mayUpdateConfig())
-                    assert false : "Should not be permitted to set parameter " + parameter + " in " + configuration;
+                    Assert.fail("Should not be permitted to set parameter " + parameter + " in " + configuration);
 
                 configuration.get(parameter);
                 configuration.remove(parameter);
                 if (!mayUpdateConfig())
-                    assert false : "Should not be permitted to delete parameter " + parameter + " in " + configuration;
+                    Assert.fail("Should not be permitted to delete parameter " + parameter + " in " + configuration);
 
                 try {
                     configuration.get(parameter, parameter.getKey(), true);
-                    assert false : "Parameter deleted but still retrievable with get(): " + parameter;
+                    Assert.fail("Parameter deleted but still retrievable with get(): " + parameter);
                 } catch (FxNotFoundException e) {
                     // succeed
                 }
             } catch (FxNoAccessException e) {
                 if (mayUpdateConfig())
-                    assert false : "Failed to update/delete parameter although privileges exist "
-                            + "for parameter " + parameter + " in " + configuration;
+                    Assert.fail("Failed to update/delete parameter although privileges exist "
+                            + "for parameter " + parameter + " in " + configuration);
             } finally {
                 safeDelete();
             }
@@ -232,17 +233,17 @@ public class ConfigurationTest {
          */
         private void testUpdate() throws Exception {
             try {
-                assert !parameter.getDefaultValue().equals(value) : "Default value and value must not be the same!";
+                Assert.assertTrue(!parameter.getDefaultValue().equals(value), "Default value and value must not be the same!");
                 configuration.put(parameter, parameter.getDefaultValue());
-                assert parameter.getDefaultValue().equals(configuration.get(parameter)) : "Failed to load value.";
+                Assert.assertTrue(parameter.getDefaultValue().equals(configuration.get(parameter)), "Failed to load value.");
                 configuration.put(parameter, value);
                 if (!mayUpdateConfig())
-                    assert false : "Should not be permitted to set parameter " + parameter + " in " + configuration;
-                assert (configuration.get(parameter) == null && value == null) || configuration.get(parameter).equals(value) : "Failed to load updated value.";
+                    Assert.fail("Should not be permitted to set parameter " + parameter + " in " + configuration);
+                Assert.assertTrue((configuration.get(parameter) == null && value == null) || configuration.get(parameter).equals(value), "Failed to load updated value.");
             } catch (FxNoAccessException e) {
                 if (mayUpdateConfig())
-                    assert false : "Failed to update parameter although privileges exist "
-                            + "for parameter " + parameter + " in " + configuration;
+                    Assert.fail("Failed to update parameter although privileges exist "
+                            + "for parameter " + parameter + " in " + configuration);
             } finally {
                 safeDelete();
             }
@@ -260,29 +261,29 @@ public class ConfigurationTest {
                 configuration.put(parameter, "key3", value);
                 configuration.put(parameter, "key4", value);
                 if (!mayUpdateConfig())
-                    assert false : "Should not be permitted to set parameter " + parameter
-                            + " in " + configuration;
+                    Assert.fail("Should not be permitted to set parameter " + parameter
+                            + " in " + configuration);
 
                 Map<String, T> params = configuration.getAll(parameter);
-                assert 4 == params.entrySet().size() : "Should have retrieved four parameters.";
+                Assert.assertTrue(4 == params.entrySet().size(), "Should have retrieved four parameters.");
                 int ctr = 1;
                 final String[] keyValues = {"key1", "key2", "key3", "key4"};
                 for (String key : keyValues) {
                     if (params.get(key) != null) {
-                        assert params.get(key).equals(ctr == 1 ? parameter.getDefaultValue() : value) : "Invalid parameter value";
+                        Assert.assertTrue(params.get(key).equals(ctr == 1 ? parameter.getDefaultValue() : value), "Invalid parameter value");
                     }
                     ctr++;
                 }
 
                 final Collection<String> keys = configuration.getKeys(parameter);
-                assert 4 == keys.size() : "Should have retrieved for parameters.";
+                Assert.assertTrue(4 == keys.size(), "Should have retrieved for parameters.");
                 for (String key: keyValues) {
-                    assert keys.contains(key) : "Key " + key + " not found in result returned by getKeys.";
+                    Assert.assertTrue(keys.contains(key), "Key " + key + " not found in result returned by getKeys.");
                 }
             } catch (FxNoAccessException e) {
                 if (mayUpdateConfig()) {
-                    assert false : "Failed to update/delete parameter although privileges exist "
-                            + "for parameter " + parameter + " in " + configuration;
+                    Assert.fail("Failed to update/delete parameter although privileges exist "
+                            + "for parameter " + parameter + " in " + configuration);
                 }
             } finally {
                 safeDelete();
@@ -300,7 +301,7 @@ public class ConfigurationTest {
                 configuration.removeAll(parameter);
             } catch (FxNoAccessException e) {
                 if (mayUpdateConfig()) {
-                    assert false : "Failed to delete parameter although privileges exist.";
+                    Assert.fail("Failed to delete parameter although privileges exist.");
                 }
             }
         }
@@ -344,7 +345,7 @@ public class ConfigurationTest {
         try {
             FxContext.get().setGlobalAuthenticated(false);
             globalConfiguration.put(TestParameters.CACTUS_TEST, "test");
-            assert false : "Global configuration modifiable without global admin login!";
+            Assert.fail("Global configuration modifiable without global admin login!");
         } catch (FxNoAccessException e) {
             // pass
         }
@@ -361,18 +362,18 @@ public class ConfigurationTest {
         int[] divisionIds = config.getDivisionIds();
         int ctr = 0;
         for (DivisionData data : config.getDivisions()) {
-            assert ArrayUtils.contains(divisionIds, data.getId()) : "Division ID not returned by getDivisionIds().";
-            assert StringUtils.isNotBlank(data.getDataSource()) : "Division data source not returned";
-            assert StringUtils.isNotBlank(data.getDomainRegEx()) : "Domain regexp missing";
+            Assert.assertTrue(ArrayUtils.contains(divisionIds, data.getId()), "Division ID not returned by getDivisionIds().");
+            Assert.assertTrue(StringUtils.isNotBlank(data.getDataSource()), "Division data source not returned");
+            Assert.assertTrue(StringUtils.isNotBlank(data.getDomainRegEx()), "Domain regexp missing");
             if (data.isAvailable()) {
-                assert StringUtils.isNotBlank(data.getDbVersion()) : "DB version missing";
-                assert data.getDbVendor().getId() >= 0 : "DB vendor missing";
+                Assert.assertTrue(StringUtils.isNotBlank(data.getDbVersion()), "DB version missing");
+                Assert.assertTrue(data.getDbVendor().getId() >= 0, "DB vendor missing");
             }
             config.clearDivisionCache();
-            assert config.getDivisionData(data.getId()).equals(data);
+            Assert.assertTrue(config.getDivisionData(data.getId()).equals(data));
             ctr++;
         }
-        assert ctr == divisionIds.length : "getDivisions() and getDivisionIds() array length don't match";
+        Assert.assertTrue(ctr == divisionIds.length, "getDivisions() and getDivisionIds() array length don't match");
 
         // test division table update
         final DivisionData[] orig = config.getDivisions();
@@ -380,11 +381,11 @@ public class ConfigurationTest {
         try {
             final DivisionData newDivision = new DivisionData(1, false, "test", "xxx", DBVendor.Unknown, "1.2");
             config.saveDivisions(Arrays.asList(newDivision));
-            assert config.getDivisions().length == 1 : "Division table not updated";
-            assert config.getDivisions()[0].equals(newDivision) : "New division not written properly";
+            Assert.assertTrue(config.getDivisions().length == 1, "Division table not updated");
+            Assert.assertTrue(config.getDivisions()[0].equals(newDivision), "New division not written properly");
         } finally {
             config.saveDivisions(Arrays.asList(orig));
-            assert Arrays.equals(config.getDivisions(), orig);
+            Assert.assertTrue(Arrays.equals(config.getDivisions(), orig));
             FxContext.get().setGlobalAuthenticated(false);
         }
     }
@@ -419,7 +420,7 @@ public class ConfigurationTest {
         try {
             FxContext.get().setGlobalAuthenticated(false);
             configuration.put(TestParameters.CACTUS_TEST, "test");
-            assert false : "User allowed to set global config parameters without auth.";
+            Assert.fail("User allowed to set global config parameters without auth.");
         } catch (FxNoAccessException e) {
             // pass
         }
@@ -445,9 +446,9 @@ public class ConfigurationTest {
         final Parameter<Boolean> param = ParameterFactory.newInstance(Boolean.class, SystemParameterPaths.TEST_DIVISION_ONLY, "testKey", true);
         try {
             configuration.putInSource(param, false); // put in source without an existing database entry
-            assert !configuration.get(param);
+            Assert.assertTrue(!configuration.get(param));
             configuration.putInSource(param, true);  // overwrite existing value
-            assert configuration.get(param);
+            Assert.assertTrue(configuration.get(param));
         } finally {
             try {
                 EJBLookup.getConfigurationEngine().remove(param);
@@ -474,7 +475,7 @@ public class ConfigurationTest {
         new GenericConfigurationTest<Integer>(configuration, TestParameters.CACTUS_TEST_INT, -1032412).runTests();
         try {
             new GenericConfigurationTest<Integer>(configuration, TestParameters.CACTUS_TEST_INT, null).runTests();
-            assert false : "Should not be able to put null values in int parameters.";
+            Assert.fail("Should not be able to put null values in int parameters.");
         } catch (Exception e) {
             // pass
         }
@@ -483,7 +484,7 @@ public class ConfigurationTest {
         new GenericConfigurationTest<Long>(configuration, TestParameters.CACTUS_TEST_LONG, -1032412L).runTests();
         try {
             new GenericConfigurationTest<Long>(configuration, TestParameters.CACTUS_TEST_LONG, null).runTests();
-            assert false : "Should not be able to put null values in long parameters.";
+            Assert.fail("Should not be able to put null values in long parameters.");
         } catch (Exception e) {
             // pass
         }
@@ -496,7 +497,7 @@ public class ConfigurationTest {
         new GenericConfigurationTest<Boolean>(configuration, TestParameters.CACTUS_TEST_BOOL, false).runTests();
         try {
             new GenericConfigurationTest<Boolean>(configuration, TestParameters.CACTUS_TEST_BOOL, null).runTests();
-            assert false : "Should not be able to put null values in boolean parameters.";
+            Assert.fail("Should not be able to put null values in boolean parameters.");
         } catch (Exception e) {
             // pass
         }
@@ -504,7 +505,7 @@ public class ConfigurationTest {
         new GenericConfigurationTest<FxPK>(configuration, TestParameters.TEST_OBJ, new FxPK(5, 1)).runTests();
         try {
             new GenericConfigurationTest<FxPK>(configuration, TestParameters.TEST_OBJ, null).runTests();
-            assert false : "Should not be able to put null values in object parameters.";
+            Assert.fail("Should not be able to put null values in object parameters.");
         } catch (Exception e) {
             // pass
         }
@@ -591,10 +592,10 @@ public class ConfigurationTest {
                 } else if (scope == ParameterScope.USER || scope == ParameterScope.USER_ONLY) {
                     value = userConfiguration.get(parameter, parameter.getData().getKey(), true);
                 } else {
-                    assert false : "Unexpected parameter scope: " + scope;
+                    Assert.fail("Unexpected parameter scope: " + scope);
                 }
                 // parameter exists in config, check value and return
-                assert (expected == null && value == null) || expected.equals(value) : "Unexpected parameter value";
+                Assert.assertTrue((expected == null && value == null) || expected.equals(value), "Unexpected parameter value");
                 return;
             } catch (FxNotFoundException e) {
                 // continue with next configuration
@@ -602,9 +603,9 @@ public class ConfigurationTest {
         }
         // parameter does not exist in db - check default value
         if (parameter.getDefaultValue() != null) {
-            assert parameter.getDefaultValue().equals(expected) : "Configuration should have returned the default value.";
+            Assert.assertTrue(parameter.getDefaultValue().equals(expected), "Configuration should have returned the default value.");
         } else {
-            assert false : "Parameter does not found: " + parameter;
+            Assert.fail("Parameter does not found: " + parameter);
         }
     }
 
@@ -629,14 +630,14 @@ public class ConfigurationTest {
     private void assertNoAccess(Parameter<?> parameter, ParameterScope scope) {
         UserTicket ticket = FxContext.getUserTicket();
         if (scope == ParameterScope.USER || scope == ParameterScope.USER_ONLY) {
-            assert false : "User parameters should always be writable for the user: " + parameter;
+            Assert.fail("User parameters should always be writable for the user: " + parameter);
         }
         if ((scope == ParameterScope.DIVISION || scope == ParameterScope.DIVISION_ONLY)
                 && ticket.isGlobalSupervisor()) {
-            assert false : "User is global supervisor, but cannot update division parameter: " + parameter;
+            Assert.fail("User is global supervisor, but cannot update division parameter: " + parameter);
         }
         if (scope == ParameterScope.GLOBAL && FxContext.get().isGlobalAuthenticated()) {
-            assert false : "User is authenticated for global config, but may not update parameter: " + parameter;
+            Assert.fail("User is authenticated for global config, but may not update parameter: " + parameter);
         }
     }
 
@@ -653,10 +654,10 @@ public class ConfigurationTest {
         UserTicket ticket = FxContext.getUserTicket();
         if ((scope == ParameterScope.DIVISION || scope == ParameterScope.DIVISION_ONLY)
                 && !ticket.isGlobalSupervisor()) {
-            assert false : "User is NOT global supervisor, but can update division parameter: " + parameter;
+            Assert.fail("User is NOT global supervisor, but can update division parameter: " + parameter);
         }
         if (scope == ParameterScope.GLOBAL && !FxContext.get().isGlobalAuthenticated()) {
-            assert false : "User is NOT authenticated for global config, but may update global parameter: " + parameter;
+            Assert.fail("User is NOT authenticated for global config, but may update global parameter: " + parameter);
         }
     }
 

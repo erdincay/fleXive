@@ -37,6 +37,7 @@ import com.flexive.war.JsonWriter;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.search.ResultViewType;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -59,7 +60,7 @@ public class JsonWriterTest {
 		writer.startArray();
 		writer.closeArray();
 		writer.finishResponse();
-		assert "[]".equals(out.toString());
+		Assert.assertEquals("[]", out.toString());
 	}
 	
 	@Test
@@ -69,7 +70,7 @@ public class JsonWriterTest {
 		writer.startMap();
 		writer.closeMap();
 		writer.finishResponse();
-		assert "{}".equals(out.toString());
+		Assert.assertEquals("{}", out.toString());
 	}
 	
 	@Test
@@ -81,8 +82,8 @@ public class JsonWriterTest {
 		writer.writeAttribute("intProperty", 1234);
 		writer.closeMap();
 		writer.finishResponse();
-		assert "{\"simpleStringProperty\":'test',\"intProperty\":1234}".equals(out.toString()) 
-			: "Unexpected output: " + out.toString();
+		Assert.assertEquals("{\"simpleStringProperty\":'test',\"intProperty\":1234}", out.toString(),
+			"Unexpected output: " + out.toString());
 	}
 
 	@Test
@@ -94,7 +95,7 @@ public class JsonWriterTest {
 		writer.writeLiteral(1234);
 		writer.closeArray();
 		writer.finishResponse();
-		assert "['abc',1234]".equals(out.toString()) : "Unexpected output: " + out.toString();
+		Assert.assertTrue("['abc',1234]".equals(out.toString()), "Unexpected output: " + out.toString());
 	}
 	
 	@Test
@@ -114,7 +115,7 @@ public class JsonWriterTest {
 		expected += "]";
 		writer.closeArray();
 		writer.finishResponse();
-		assert expected.equals(out.toString()) : "Unexpected output: " + out.toString();
+		Assert.assertTrue(expected.equals(out.toString()), "Unexpected output: " + out.toString());
 	}
 
     @Test
@@ -128,9 +129,9 @@ public class JsonWriterTest {
                 .writeAttribute("map", map)
                 .closeMap()
                 .finishResponse();
-        assert out.toString().contains("first value") : "Unexpected output: " + out.toString();
-        assert out.toString().contains("second value") : "Unexpected output: " + out.toString();
-        assert out.toString().charAt(0) == '{' : "Unexpected output: " + out.toString();
+        Assert.assertTrue(out.toString().contains("first value"), "Unexpected output: " + out.toString());
+        Assert.assertTrue(out.toString().contains("second value"), "Unexpected output: " + out.toString());
+        Assert.assertTrue(out.toString().charAt(0) == '{', "Unexpected output: " + out.toString());
     }
 	
 	@Test
@@ -140,12 +141,12 @@ public class JsonWriterTest {
 		writer.startArray();
 		try {
 			writer.closeMap();
-			assert false : "Map should not be closed if an array was opened before.";
+			Assert.fail( "Map should not be closed if an array was opened before.");
 		} catch (Exception e) {
 			writer.closeArray();
 		}
 		writer.finishResponse();
-		assert "[]".equals(out.toString());
+		Assert.assertEquals("[]", out.toString());
 	}
 
 	@Test
@@ -155,12 +156,12 @@ public class JsonWriterTest {
 		writer.startMap();
 		try {
 			writer.closeArray();
-			assert false : "Array should not be closed if a map was opened before.";
+			Assert.fail( "Array should not be closed if a map was opened before.");
 		} catch (Exception e) {
 			writer.closeMap();
 		}
 		writer.finishResponse();
-		assert "{}".equals(out.toString());
+		Assert.assertEquals("{}", out.toString());
 	}
 	
 	@Test
@@ -170,7 +171,7 @@ public class JsonWriterTest {
 		writer.startArray();
 		try {
 			writer.writeAttribute("test", "test");
-			assert false : "Attributes may not be written in arrays.";
+			Assert.fail( "Attributes may not be written in arrays.");
 		} catch (Exception e) {
 			// pass
 		}
@@ -179,7 +180,7 @@ public class JsonWriterTest {
 		writer.closeMap();
 		writer.closeArray();
 		writer.finishResponse();
-		assert "[{\"id\":1234}]".equals(out.toString()) : "Unexpected output: " + out.toString();
+		Assert.assertTrue("[{\"id\":1234}]".equals(out.toString()), "Unexpected output: " + out.toString());
 	}
 	
 	@Test
@@ -188,7 +189,7 @@ public class JsonWriterTest {
 		JsonWriter writer = new JsonWriter(out);
 		try {
 			writer.writeAttribute("test", 1234);
-			assert false : "Attributes must be contained in maps.";
+			Assert.fail( "Attributes must be contained in maps.");
 		} catch (Exception e) {
 			// pass
 		}
@@ -200,7 +201,7 @@ public class JsonWriterTest {
 		JsonWriter writer = new JsonWriter(out);
 		try {
 			writer.writeLiteral(1234);
-			assert false : "Literals must be contained in arrays.";
+			Assert.fail( "Literals must be contained in arrays.");
 		} catch (Exception e) {
 			// pass
 		}
@@ -214,14 +215,14 @@ public class JsonWriterTest {
 		writer.startMap();
 		try {
 			writer.writeLiteral(1234);
-			assert false : "Literals must be contained in arrays.";
+			Assert.fail( "Literals must be contained in arrays.");
 		} catch (Exception e) {
 			writer.closeMap();
 		}
 		writer.writeLiteral(4567);
 		writer.closeArray();
 		writer.finishResponse();
-		assert "[{},4567]".equals(out.toString()) : "Unexpected output: " + out.toString();
+		Assert.assertTrue("[{},4567]".equals(out.toString()), "Unexpected output: " + out.toString());
 	}
 	
 	@Test
@@ -231,11 +232,11 @@ public class JsonWriterTest {
 		writer.startArray();
 		try {
 			writer.finishResponse();
-			assert false : "Response invalid, finishResponse may not succeed.";
+			Assert.fail( "Response invalid, finishResponse may not succeed.");
 		} catch (Exception e) {
 			// pass
 		}
-		assert "[".equals(out.toString());
+		Assert.assertEquals("[", out.toString());
 	}
 	
 	@Test
@@ -246,14 +247,14 @@ public class JsonWriterTest {
 		writer.startAttribute("name");
 		try {
 			writer.closeMap();
-			assert false : "Map must not be closed before attribute is written.";
+			Assert.fail( "Map must not be closed before attribute is written.");
 		} catch (Exception e) {
 			// pass
 		}
 		writer.writeAttributeValue("test");
 		writer.closeMap();
 		writer.finishResponse();
-		assert "{\"name\":'test'}".equals(out.toString());
+		Assert.assertEquals("{\"name\":'test'}", out.toString());
 	}
 	
 	@Test
@@ -263,12 +264,12 @@ public class JsonWriterTest {
 		writer.startMap();
 		try {
 			writer.writeAttributeValue(1234);
-			assert false : "May not write attribute value without attribute name.";
+			Assert.fail( "May not write attribute value without attribute name.");
 		} catch (Exception e) {
 			// pass
 		}
 		writer.closeMap();
-		assert "{}".equals(out.toString());
+		Assert.assertEquals("{}", out.toString());
 	}
 	
 	@Test
@@ -280,7 +281,7 @@ public class JsonWriterTest {
 		writer.writeAttribute("name2", "'test'");
 		writer.closeMap();
 		writer.finishResponse();
-		assert "{\"name\":'\"test\"',\"name2\":'\\'test\\''}".equals(out.toString()) : "Unexpected response: " + out.toString();
+		Assert.assertTrue("{\"name\":'\"test\"',\"name2\":'\\'test\\''}".equals(out.toString()), "Unexpected response: " + out.toString());
 	}
 	
 	@Test
@@ -314,7 +315,7 @@ public class JsonWriterTest {
 		writer.closeArray();
 		writer.closeMap();
 		writer.finishResponse();
-		assert "{\"id\":1234,\"myList\":[1,2,3],\"name\":'test',\"anotherList\":[99],\"nestedList\":[[1,2],3,[4,5]]}".equals(out.toString()) : "Unexpected response: " + out.toString();
+		Assert.assertTrue("{\"id\":1234,\"myList\":[1,2,3],\"name\":'test',\"anotherList\":[99],\"nestedList\":[[1,2],3,[4,5]]}".equals(out.toString()), "Unexpected response: " + out.toString());
 	}
 	
 	@Test
@@ -345,7 +346,7 @@ public class JsonWriterTest {
 		
 		writer.closeArray();
 		writer.finishResponse();
-		assert "[{\"child\":{\"id\":1234,\"group\":{\"value\":21}}},42,{\"child\":{\"id\":44}}]".equals(out.toString()) : "Unexpected output: " + out.toString(); 
+		Assert.assertTrue("[{\"child\":{\"id\":1234,\"group\":{\"value\":21}}},42,{\"child\":{\"id\":44}}]".equals(out.toString()), "Unexpected output: " + out.toString());
 	}
 	
 	@Test
@@ -357,7 +358,7 @@ public class JsonWriterTest {
 		writer.writeAttribute("name", "\"quotedValue\"");
 		writer.closeMap();
 		writer.finishResponse();
-		assert "{\"name\":\"\\\"quotedValue\\\"\"}".equals(out.toString()) : "Unexpected output: " + out.toString();
+		Assert.assertTrue("{\"name\":\"\\\"quotedValue\\\"\"}".equals(out.toString()), "Unexpected output: " + out.toString());
 	}
 
     @Test
@@ -368,7 +369,7 @@ public class JsonWriterTest {
         writer.writeAttribute("value", Arrays.asList(new Object[] { "stringValue", 123, 123.456 }));
         writer.closeMap();
         writer.finishResponse();
-        assert "{\"value\":['stringValue',123,123.456]}".equals(out.toString()) : "Unexpected output: " + out.toString();
+        Assert.assertTrue("{\"value\":['stringValue',123,123.456]}".equals(out.toString()), "Unexpected output: " + out.toString());
     }
 
     @Test
@@ -379,7 +380,7 @@ public class JsonWriterTest {
         writer.writeLiteral(new Date(0));
         writer.closeArray();
         writer.finishResponse();
-        assert ("['" + DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.ENGLISH).format(new Date(0)) + "']").equals(out.toString()) : "Unexepcted output: " + out.toString();
+        Assert.assertTrue(("['" + DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.ENGLISH).format(new Date(0)) + "']").equals(out.toString()), "Unexepcted output: " + out.toString());
     }
 
     @Test
@@ -393,7 +394,7 @@ public class JsonWriterTest {
         writer.closeMap();
         try {
             writer.startMap();
-            assert false : "Map outside array";
+            Assert.fail( "Map outside array");
         } catch (FxRuntimeException e) {
             // succeed
         }
@@ -410,7 +411,7 @@ public class JsonWriterTest {
         writer.closeMap();
         try {
             writer.startArray();
-            assert false : "Array outside array";
+            Assert.fail( "Array outside array");
         } catch (FxRuntimeException e) {
             // succeed
         }
@@ -424,8 +425,8 @@ public class JsonWriterTest {
               .writeAttribute("enum", ResultViewType.THUMBNAILS)
               .closeMap()
               .finishResponse();
-        assert writer.toString().contains("'" + ResultViewType.THUMBNAILS + "'")
-                : "Enum value not escaped: " + writer.toString();
+        Assert.assertTrue(writer.toString().contains("'" + ResultViewType.THUMBNAILS + "'"),
+                "Enum value not escaped: " + writer.toString());
     }
 
     @Test
@@ -438,6 +439,6 @@ public class JsonWriterTest {
         final String output = jsonWriter.startMap()
                 .writeAttribute("newlineValue", "This text\ncontains a line break")
                 .closeMap().finishResponse().toString();
-        assert output.contains("text\\\ncontains") : "Line break not encoded properly: " + output;
+        Assert.assertTrue(output.contains("text\\\ncontains"), "Line break not encoded properly: " + output);
     }
 }

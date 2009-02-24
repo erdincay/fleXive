@@ -88,7 +88,7 @@ public class SearchQueryTest {
         searchEngine.remove(AdminResultLocations.DEFAULT, QUERYNAME);
         try {
             searchEngine.load(AdminResultLocations.DEFAULT, QUERYNAME);
-            assert false : "Query " + QUERYNAME + " should have been deleted.";
+            Assert.fail("Query " + QUERYNAME + " should have been deleted.");
         } catch (FxNotFoundException e) {
             // pass
         }

@@ -56,6 +56,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 /**
  * Security test for the ContentEngine (for property permissions)
@@ -150,11 +151,11 @@ public class ContentPropertySecurityTest {
     @Test
     public void checkTypePermissionSetup() throws FxApplicationException {
         FxType type = CacheAdmin.getEnvironment().getType(typeId);
-        assert type.usePermissions();
-        assert type.useInstancePermissions();
-        assert type.usePropertyPermissions();
-        assert !type.useStepPermissions();
-        assert !type.useTypePermissions();
+        Assert.assertTrue(type.usePermissions());
+        Assert.assertTrue(type.useInstancePermissions());
+        Assert.assertTrue(type.usePropertyPermissions());
+        Assert.assertTrue(!type.useStepPermissions());
+        Assert.assertTrue(!type.useTypePermissions());
     }
 
     public void securityLoad() throws FxApplicationException {
@@ -171,13 +172,13 @@ public class ContentPropertySecurityTest {
         FxPK pk = co.save(test);
         FxContent comp = co.load(pk);
 
-        assert comp.getPropertyData("/" + PROP1_NAME).getValue().equals(PROP1_VALUE);
-        assert !comp.getPropertyData("/" + PROP1_NAME).getValue().isReadOnly();
-        assert comp.getPropertyData("/" + PROP1_NAME).mayCreateMore();
+        Assert.assertTrue(comp.getPropertyData("/" + PROP1_NAME).getValue().equals(PROP1_VALUE));
+        Assert.assertTrue(!comp.getPropertyData("/" + PROP1_NAME).getValue().isReadOnly());
+        Assert.assertTrue(comp.getPropertyData("/" + PROP1_NAME).mayCreateMore());
 
-        assert comp.getPropertyData("/" + PROP2_NAME).getValue().equals(PROP2_VALUE);
-        assert !comp.getPropertyData("/" + PROP2_NAME).getValue().isReadOnly();
-        assert comp.getPropertyData("/" + PROP2_NAME).mayCreateMore();
+        Assert.assertTrue(comp.getPropertyData("/" + PROP2_NAME).getValue().equals(PROP2_VALUE));
+        Assert.assertTrue(!comp.getPropertyData("/" + PROP2_NAME).getValue().isReadOnly());
+        Assert.assertTrue(comp.getPropertyData("/" + PROP2_NAME).mayCreateMore());
         co.remove(pk);
     }
 
@@ -188,13 +189,13 @@ public class ContentPropertySecurityTest {
         TestUsers.assignACL(user, prop2ACL, ACLPermission.READ);
         FxContent comp = co.load(refpk);
 
-        assert comp.getPropertyData("/" + PROP1_NAME).getValue().equals(PROP1_VALUE);
-        assert comp.getPropertyData("/" + PROP1_NAME).getValue().isReadOnly();
-        assert comp.getPropertyData("/" + PROP1_NAME).mayCreateMore();
+        Assert.assertTrue(comp.getPropertyData("/" + PROP1_NAME).getValue().equals(PROP1_VALUE));
+        Assert.assertTrue(comp.getPropertyData("/" + PROP1_NAME).getValue().isReadOnly());
+        Assert.assertTrue(comp.getPropertyData("/" + PROP1_NAME).mayCreateMore());
 
-        assert comp.getPropertyData("/" + PROP2_NAME).getValue().equals(PROP2_VALUE);
-        assert comp.getPropertyData("/" + PROP2_NAME).getValue().isReadOnly();
-        assert comp.getPropertyData("/" + PROP2_NAME).mayCreateMore();
+        Assert.assertTrue(comp.getPropertyData("/" + PROP2_NAME).getValue().equals(PROP2_VALUE));
+        Assert.assertTrue(comp.getPropertyData("/" + PROP2_NAME).getValue().isReadOnly());
+        Assert.assertTrue(comp.getPropertyData("/" + PROP2_NAME).mayCreateMore());
     }
 
     @Test
@@ -204,37 +205,37 @@ public class ContentPropertySecurityTest {
         TestUsers.assignACL(user, prop2ACL);
         FxContent comp = co.load(refpk);
         //check if prop1 is full editable
-        assert comp.getPropertyData("/" + PROP1_NAME).getValue().equals(PROP1_VALUE);
-        assert comp.getPropertyData("/" + PROP1_NAME).mayCreateMore();
-        assert !comp.getPropertyData("/" + PROP1_NAME).getValue().isReadOnly();
-        assert !(comp.getPropertyData("/" + PROP1_NAME).getValue() instanceof FxNoAccess);
+        Assert.assertTrue(comp.getPropertyData("/" + PROP1_NAME).getValue().equals(PROP1_VALUE));
+        Assert.assertTrue(comp.getPropertyData("/" + PROP1_NAME).mayCreateMore());
+        Assert.assertTrue(!comp.getPropertyData("/" + PROP1_NAME).getValue().isReadOnly());
+        Assert.assertTrue(!(comp.getPropertyData("/" + PROP1_NAME).getValue() instanceof FxNoAccess));
         //check if prop2 is not accessible
-        assert !comp.getPropertyData("/" + PROP2_NAME).getValue().equals(PROP2_VALUE);
-        assert !comp.getPropertyData("/" + PROP2_NAME).mayCreateMore();
-        assert comp.getPropertyData("/" + PROP2_NAME).getValue().isReadOnly();
-        assert comp.getPropertyData("/" + PROP2_NAME).getValue() instanceof FxNoAccess;
+        Assert.assertTrue(!comp.getPropertyData("/" + PROP2_NAME).getValue().equals(PROP2_VALUE));
+        Assert.assertTrue(!comp.getPropertyData("/" + PROP2_NAME).mayCreateMore());
+        Assert.assertTrue(comp.getPropertyData("/" + PROP2_NAME).getValue().isReadOnly());
+        Assert.assertTrue(comp.getPropertyData("/" + PROP2_NAME).getValue() instanceof FxNoAccess);
         //set prop1 to a new value and check if its set
         comp.getPropertyData("/" + PROP1_NAME).setValue(PROP1_NEW_VALUE);
-        assert comp.getPropertyData("/" + PROP1_NAME).getValue().equals(PROP1_NEW_VALUE);
+        Assert.assertTrue(comp.getPropertyData("/" + PROP1_NAME).getValue().equals(PROP1_NEW_VALUE));
         //try to set prop2 to a new value and check if it remains unchanged and still not accessible
         try {
             comp.getPropertyData("/" + PROP2_NAME).setValue(PROP1_NEW_VALUE);
-            assert false : "FxNoAccessException expected!";
+            Assert.fail("FxNoAccessException expected!");
         } catch (FxNoAccessException e) {
             //ok this was expected
         }
-        assert !comp.getPropertyData("/" + PROP2_NAME).getValue().equals(PROP2_VALUE);
-        assert comp.getPropertyData("/" + PROP2_NAME).getValue().isReadOnly();
-        assert comp.getPropertyData("/" + PROP2_NAME).getValue() instanceof FxNoAccess;
+        Assert.assertTrue(!comp.getPropertyData("/" + PROP2_NAME).getValue().equals(PROP2_VALUE));
+        Assert.assertTrue(comp.getPropertyData("/" + PROP2_NAME).getValue().isReadOnly());
+        Assert.assertTrue(comp.getPropertyData("/" + PROP2_NAME).getValue() instanceof FxNoAccess);
         co.save(comp);
         FxContext.get().runAsSystem();
         comp = co.load(refpk);
         //check for correct changes
-        assert comp.getPropertyData("/" + PROP1_NAME).getValue().equals(PROP1_NEW_VALUE);
-        assert comp.getPropertyData("/" + PROP2_NAME).getValue().equals(PROP2_VALUE);
+        Assert.assertTrue(comp.getPropertyData("/" + PROP1_NAME).getValue().equals(PROP1_NEW_VALUE));
+        Assert.assertTrue(comp.getPropertyData("/" + PROP2_NAME).getValue().equals(PROP2_VALUE));
         comp.getPropertyData("/" + PROP1_NAME).setValue(PROP1_VALUE);
-        assert comp.getPropertyData("/" + PROP1_NAME).mayCreateMore();
-        assert comp.getPropertyData("/" + PROP2_NAME).mayCreateMore();
+        Assert.assertTrue(comp.getPropertyData("/" + PROP1_NAME).mayCreateMore());
+        Assert.assertTrue(comp.getPropertyData("/" + PROP2_NAME).mayCreateMore());
         co.save(comp); //re-save with original prop1 value
         FxContext.get().stopRunAsSystem();
     }

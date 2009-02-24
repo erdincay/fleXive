@@ -34,6 +34,7 @@ package com.flexive.tests.shared;
 import com.flexive.shared.AbstractSelectableObjectWithLabel;
 import com.flexive.shared.value.FxString;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 /**
  * Selectable object tests, especially equality and comparable tests.
@@ -73,12 +74,12 @@ public class SelectableObjectWithLabelTest {
     public void selectableFromAbstractEquals() {
         SelectableFromAbstract sfa1 = new SelectableFromAbstract(1, new FxString("test"));
         SelectableFromAbstract sfa2 = new SelectableFromAbstract(2, new FxString("test"));
-        assert !sfa1.equals(sfa2);
-        assert !sfa2.equals(sfa1);
+        Assert.assertTrue(!sfa1.equals(sfa2));
+        Assert.assertTrue(!sfa2.equals(sfa1));
         //noinspection ObjectEqualsNull
-        assert !sfa1.equals(null);  // check for NPE
+        Assert.assertTrue(!sfa1.equals(null));  // check for NPE
         SelectableFromAbstract sfa2_2 = new SelectableFromAbstract(2, new FxString("test"));
-        assert sfa2.equals(sfa2_2);
+        Assert.assertTrue(sfa2.equals(sfa2_2));
     }
 
     /**
@@ -88,6 +89,6 @@ public class SelectableObjectWithLabelTest {
     public void selectableFromAbstractSubclassEquals() {
         SelectableFromAbstract sfa = new SelectableFromAbstract(1, new FxString("test"));
         SubSelectableFromAbstract ssfa = new SubSelectableFromAbstract(1, new FxString("test"));
-        assert !sfa.equals(ssfa);
+        Assert.assertTrue(!sfa.equals(ssfa));
     }
 }

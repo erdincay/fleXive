@@ -40,6 +40,7 @@ import com.flexive.shared.interfaces.StatelessTest;
 import com.flexive.shared.structure.FxEnvironment;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -120,9 +121,9 @@ public class TransactionTest {
         final String key = value.getClass().toString();
         CacheAdmin.getInstance().put(PATH, key, value);
         statelessTest.cachePutRollback(PATH, key, new NeverEqualObject());
-        assert CacheAdmin.getInstance().get(PATH, key) == value
-                : "Transaction rollback, but original object removed from cache: " + value
-                + " (cached object = " + CacheAdmin.getInstance().get(PATH, key) + ")";
+        Assert.assertTrue(CacheAdmin.getInstance().get(PATH, key) == value,
+                "Transaction rollback, but original object removed from cache: " + value
+                + " (cached object = " + CacheAdmin.getInstance().get(PATH, key) + ")");
     }
 
     @Test
@@ -132,9 +133,9 @@ public class TransactionTest {
         final String key = value.getClass().toString();
         CacheAdmin.getInstance().put(PATH, key, value);
         statelessTest.cachePutRollback(PATH, key, new AlwaysEqualObject());
-        assert CacheAdmin.getInstance().get(PATH, key) == value
-                : "Transaction rollback, but original object removed from cache: " + value
-                + " (cached object = " + CacheAdmin.getInstance().get(PATH, key) + ")";
+        Assert.assertTrue(CacheAdmin.getInstance().get(PATH, key) == value,
+                "Transaction rollback, but original object removed from cache: " + value
+                + " (cached object = " + CacheAdmin.getInstance().get(PATH, key) + ")");
     }
 
     @Test
@@ -158,8 +159,8 @@ public class TransactionTest {
         // assert that all environments are the same object
         FxEnvironment environment = CacheAdmin.getEnvironment();
         for (String id : environmentIds) {
-            assert id.equals(environment.toString()) : "Thread got different environment instance: "
-                    + id + " (main thread: " + environment.toString() + ")";
+            Assert.assertEquals(id, environment.toString(), "Thread got different environment instance: "
+                    + id + " (main thread: " + environment.toString() + ")");
         }
     }
 

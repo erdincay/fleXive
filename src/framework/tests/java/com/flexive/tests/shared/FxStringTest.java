@@ -33,6 +33,7 @@ package com.flexive.tests.shared;
 
 import com.flexive.shared.value.FxString;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -54,12 +55,12 @@ public class FxStringTest {
             translations.put(i, "a");
         }
         FxString testA = new FxString(true, translations);
-        assert "a".equals(testA.getDefaultTranslation()) : "Default translation: " + testA.getDefaultTranslation() + ", expected: a";
+        Assert.assertTrue("a".equals(testA.getDefaultTranslation()), "Default translation: " + testA.getDefaultTranslation() + ", expected: a");
         for (long i = 0; i < 5; i++) {
             translations.put(i, "b");
         }
-        assert "a".equals(testA.getDefaultTranslation()) : "Default translation: " + testA.getDefaultTranslation() + ", expected: a";
+        Assert.assertTrue("a".equals(testA.getDefaultTranslation()), "Default translation: " + testA.getDefaultTranslation() + ", expected: a");
         FxString testB = new FxString(true, translations);
-        assert "b".equals(testB.getDefaultTranslation()) : "Default translation: " + testB.getDefaultTranslation() + ", expected: b";
+        Assert.assertTrue("b".equals(testB.getDefaultTranslation()), "Default translation: " + testB.getDefaultTranslation() + ", expected: b");
     }
 }

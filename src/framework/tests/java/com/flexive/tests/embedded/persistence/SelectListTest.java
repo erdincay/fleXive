@@ -61,6 +61,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
+import org.testng.Assert;
+
 import java.util.Iterator;
 
 /**
@@ -153,14 +155,14 @@ public class SelectListTest {
 
         new FxSelectListItemEdit("item4", aclItem, list1_load, new FxString("item4.label"), "item4.data", "item4.color");
         le.save(list1_load.asEditable());
-        assert !CacheAdmin.getEnvironment().getSelectList(list1Id).hasDefaultItem() : "No default item expected for list 1!";
+        Assert.assertTrue(!CacheAdmin.getEnvironment().getSelectList(list1Id).hasDefaultItem(), "No default item expected for list 1!");
         boolean found = false;
         for (FxSelectListItem item : CacheAdmin.getEnvironment().getSelectList(list1Id).getItems()) {
             found = found || item.getData().equals("item4.data");
         }
-        assert found : "item4 was not saved!";
-        assert TEST_NAME1.equals(list1_load.getName()) : "Wrong name! Got [" + list1_load.getName() + "] but expected [" + TEST_NAME1 + "]!";
-        assert list1_load.getItems().size() == 3 : "Wrong number of items. Expected 3 but got " + list1_load.getItems().size();
+        Assert.assertTrue(found, "item4 was not saved!");
+        Assert.assertTrue(TEST_NAME1.equals(list1_load.getName()), "Wrong name! Got [" + list1_load.getName() + "] but expected [" + TEST_NAME1 + "]!");
+        Assert.assertTrue(list1_load.getItems().size() == 3, "Wrong number of items. Expected 3 but got " + list1_load.getItems().size());
 
         FxSelectListEdit list2 = FxSelectListEdit.createNew(list1_load, TEST_NAME2, new FxString("label2"), new FxString("description2"),
                 false, aclList, aclItem);
@@ -169,14 +171,14 @@ public class SelectListTest {
                 .setDefaultItem();
         long list2Id = le.save(list2);
         FxSelectList _list2 = CacheAdmin.getEnvironment().getSelectList(list2Id);
-        assert _list2.hasDefaultItem() : "list 2 is expected to have a default item";
-        assert _list2.getDefaultItem().getList().getId() == _list2.getId() : "Wrong list id for default item!";
-        assert _list2.hasParentList() : "list 2 is expected to have a parent list!";
+        Assert.assertTrue(_list2.hasDefaultItem(), "list 2 is expected to have a default item");
+        Assert.assertTrue(_list2.getDefaultItem().getList().getId() == _list2.getId(), "Wrong list id for default item!");
+        Assert.assertTrue(_list2.hasParentList(), "list 2 is expected to have a parent list!");
         le.save(_list2.asEditable().setDefaultItem(null));
         _list2 = CacheAdmin.getEnvironment().getSelectList(list2Id);
-        assert !_list2.hasDefaultItem() : "list 2 should no longer have a default item!";
+        Assert.assertTrue(!_list2.hasDefaultItem(), "list 2 should no longer have a default item!");
         le.remove(list1_load);
-        assert !CacheAdmin.getEnvironment().getSelectList(list2Id).hasParentList() : "list 2 is not expected to have a parent list anymore!";
+        Assert.assertTrue(!CacheAdmin.getEnvironment().getSelectList(list2Id).hasParentList(), "list 2 is not expected to have a parent list anymore!");
         le.remove(CacheAdmin.getEnvironment().getSelectList(list2Id));
     }
 
@@ -207,8 +209,8 @@ public class SelectListTest {
             final FxSelectOne selectOne = new FxSelectOne(item1);
             final String labelEn = formatEn.format(selectOne);
             final String labelDe = formatDe.format(selectOne);
-            assert labelEn.equals(label1En) : "Expected select list label '" + label1En + "', got: " + labelEn;
-            assert labelDe.equals(label1De) : "Expected select list label '" + label1De + "', got: " + labelDe;
+            Assert.assertTrue(labelEn.equals(label1En), "Expected select list label '" + label1En + "', got: " + labelEn);
+            Assert.assertTrue(labelDe.equals(label1De), "Expected select list label '" + label1De + "', got: " + labelDe);
 
             final SelectMany many = new SelectMany(loadedList);
             many.selectItem(item1);
@@ -216,10 +218,12 @@ public class SelectListTest {
             final FxSelectMany selectMany = new FxSelectMany(many);
             final String labelManyEn = formatEn.format(selectMany);
             final String labelManyDe = formatDe.format(selectMany);
-            assert labelManyEn.equals(label1En.compareTo(label2En) < 0
-                    ? label1En + ", " + label2En : label2En + ", " + label1En) : "Unexpected label: " + labelManyEn;
-            assert labelManyDe.equals(label1De.compareTo(label2De) < 0
-                    ? label1De + ", " + label2De : label2De + ", " + label1De) : "Unexpected label: " + labelManyDe;
+            Assert.assertTrue(labelManyEn.equals(label1En.compareTo(label2En) < 0
+                    ? label1En + ", " + label2En : label2En + ", " + label1En),
+                    "Unexpected label: " + labelManyEn);
+            Assert.assertTrue(labelManyDe.equals(label1De.compareTo(label2De) < 0
+                    ? label1De + ", " + label2De : label2De + ", " + label1De),
+                    "Unexpected label: " + labelManyDe);
         } finally {
             le.remove(loadedList);
         }

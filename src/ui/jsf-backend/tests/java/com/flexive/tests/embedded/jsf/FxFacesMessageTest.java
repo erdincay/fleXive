@@ -43,6 +43,7 @@ import com.flexive.tests.embedded.TestUsers;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 /**
  * FxFacesMessage tests.
@@ -68,25 +69,25 @@ public class FxFacesMessageTest {
     public void equalsNullDetails() {
         FxFacesMessage message1 = new FxFacesMessage(FxFacesMessage.SEVERITY_ERROR, MSG_TEST_1);
         FxFacesMessage message2 = new FxFacesMessage(FxFacesMessage.SEVERITY_ERROR, MSG_TEST_1);
-        assert message1.equals(message2) : "Messages not equal.";
-        assert message1.hashCode() == message2.hashCode() : "Hashcodes not equal";
+        Assert.assertTrue(message1.equals(message2), "Messages not equal.");
+        Assert.assertTrue(message1.hashCode() == message2.hashCode(), "Hashcodes not equal");
     }
 
     @Test
     public void unequalsArgs() {
         FxFacesMessage message1 = new FxFacesMessage(FxFacesMessage.SEVERITY_ERROR, MSG_TEST_1, 21);
         FxFacesMessage message2 = new FxFacesMessage(FxFacesMessage.SEVERITY_ERROR, MSG_TEST_1, 22);
-        assert !message1.equals(message2) : "Messages with different object args considered equal."
-                + "\nMessage 1: " + message1.getSummary() + ", Message 2: " + message2.getSummary();
-        assert message1.hashCode() != message2.hashCode() : "Different messages should have different hash codes";
+        Assert.assertTrue(!message1.equals(message2), "Messages with different object args considered equal."
+                + "\nMessage 1: " + message1.getSummary() + ", Message 2: " + message2.getSummary());
+        Assert.assertTrue(message1.hashCode() != message2.hashCode(), "Different messages should have different hash codes");
     }
 
     @Test
     public void equalsArgs() {
         FxFacesMessage message1 = new FxFacesMessage(FxFacesMessage.SEVERITY_ERROR, MSG_TEST_1, 21);
         FxFacesMessage message2 = new FxFacesMessage(FxFacesMessage.SEVERITY_ERROR, MSG_TEST_1, 21);
-        assert message1.equals(message2) : "Messages with same object args considered unequal."
-                + "\nMessage 1: " + message1.getSummary() + ", Message 2: " + message2.getSummary();
-        assert message1.hashCode() == message2.hashCode() : "Hashcodes not equal";
+        Assert.assertEquals(message1, message2, "Messages with same object args considered unequal."
+                + "\nMessage 1: " + message1.getSummary() + ", Message 2: " + message2.getSummary());
+        Assert.assertTrue(message1.hashCode() == message2.hashCode(), "Hashcodes not equal");
     }
 }

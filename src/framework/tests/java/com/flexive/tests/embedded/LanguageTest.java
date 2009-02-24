@@ -43,6 +43,8 @@ import org.testng.annotations.Test;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.AfterClass;
 import static org.testng.Assert.*;
+import org.testng.Assert;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -82,7 +84,7 @@ public class LanguageTest {
         Set<String> defaultTranslations = new HashSet<String>();
         for (FxLanguage language : languages) {
             String name = language.getLabel().getDefaultTranslation();
-            assert !defaultTranslations.contains(name) : "Language name '" + name + "' occurs at least twice.";
+            Assert.assertTrue(!defaultTranslations.contains(name), "Language name '" + name + "' occurs at least twice.");
             defaultTranslations.add(name);
         }
     }

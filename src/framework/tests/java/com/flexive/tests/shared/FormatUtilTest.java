@@ -69,7 +69,7 @@ public class FormatUtilTest {
      * @param expectedResult if the code is expected to be valid
      */
     private void checkRgb(String code, boolean expectedResult) {
-        assert expectedResult == FxFormatUtils.isRGBCode(code) : "Failed to check RGB code " + code;
+        Assert.assertTrue(expectedResult == FxFormatUtils.isRGBCode(code), "Failed to check RGB code " + code);
     }
 
     /**
@@ -77,9 +77,9 @@ public class FormatUtilTest {
      */
     @Test
     public void colorCodeToStyle() {
-        assert "style=\"color:#F0F0F0\"".equals(FxFormatUtils.colorCodeToStyle("#F0F0F0").trim()) : "Failed to convert color code";
-        assert "style=\"color:#000000\"".equals(FxFormatUtils.colorCodeToStyle("000000").trim()) : "Failed to convert color code";
-        assert "class=\"test123\"".equals(FxFormatUtils.colorCodeToStyle("test123").trim()) : "Failed to convert color code";
+        Assert.assertTrue("style=\"color:#F0F0F0\"".equals(FxFormatUtils.colorCodeToStyle("#F0F0F0").trim()), "Failed to convert color code");
+        Assert.assertTrue("style=\"color:#000000\"".equals(FxFormatUtils.colorCodeToStyle("000000").trim()), "Failed to convert color code");
+        Assert.assertTrue("class=\"test123\"".equals(FxFormatUtils.colorCodeToStyle("test123").trim()), "Failed to convert color code");
     }
 
     /**
@@ -103,10 +103,10 @@ public class FormatUtilTest {
      */
     private void checkEmail(String eMail, boolean valid) {
         try {
-            assert FxFormatUtils.checkEmail(eMail).equals((eMail != null) ? eMail.trim() : "INV") : "Failed to return valid email address: " + eMail;
+            Assert.assertTrue(FxFormatUtils.checkEmail(eMail).equals((eMail != null) ? eMail.trim() : "INV"), "Failed to return valid email address: " + eMail);
         } catch (FxInvalidParameterException e) {
             if (valid) {
-                assert false : "Failed to recognize valid email address: " + eMail;
+                Assert.fail("Failed to recognize valid email address: " + eMail);
             }
         }
     }
@@ -132,10 +132,10 @@ public class FormatUtilTest {
      */
     private void checkColorString(String value, boolean valid) {
         try {
-            assert value.equals(FxFormatUtils.processColorString("TEST", value)) : "Failed to recognize valid color string: " + value;
+            Assert.assertTrue(value.equals(FxFormatUtils.processColorString("TEST", value)), "Failed to recognize valid color string: " + value);
         } catch (FxInvalidParameterException e) {
             if (valid) {
-                assert false : "Failed to recognize valid color string " + value;
+                Assert.fail("Failed to recognize valid color string " + value);
             }
         }
     }

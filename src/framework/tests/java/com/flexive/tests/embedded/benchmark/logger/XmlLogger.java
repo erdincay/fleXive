@@ -38,6 +38,7 @@ import java.util.Formatter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.testng.Assert;
 
 /**
  * Result logger with XML output.
@@ -63,7 +64,7 @@ public class XmlLogger extends AbstractResultLogger {
     /** {@inheritDoc} */
     @Override
     protected synchronized void logResult(String name, double value, String measurement, String unit) {
-        assert active : "ResultLogger invoked after getOutput has been called";
+        Assert.assertTrue(active, "ResultLogger invoked after getOutput has been called");
         wax.start("result")
            .child("name", name)
            .child("value", new Formatter().format("%.5f", value).toString())

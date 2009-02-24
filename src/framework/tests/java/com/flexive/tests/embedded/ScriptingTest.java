@@ -121,12 +121,12 @@ public class ScriptingTest {
         Object result = "hello world";
 
         FxScriptInfo si = se.createScript(FxScriptEvent.Manual, name, desc, code);
-        assert si != null : "No FxScriptInfo returned!";
-        assert si.getId() > 0 : "Invalid script id";
-        assert si.getName().equals(name) : "Invalid name";
-        assert si.getDescription().equals(desc) : "Invalid description";
-        assert si.getEvent().equals(FxScriptEvent.Manual) : "Invalid script type";
-        assert se.runScript(si.getId(), new FxScriptBinding()).getResult().equals(result) : "Invalid result from script!";
+        Assert.assertTrue(si != null, "No FxScriptInfo returned!");
+        Assert.assertTrue(si.getId() > 0, "Invalid script id");
+        Assert.assertTrue(si.getName().equals(name), "Invalid name");
+        Assert.assertTrue(si.getDescription().equals(desc), "Invalid description");
+        Assert.assertTrue(si.getEvent().equals(FxScriptEvent.Manual), "Invalid script type");
+        Assert.assertTrue(se.runScript(si.getId(), new FxScriptBinding()).getResult().equals(result), "Invalid result from script!");
         // test remaining #runScript methods
         assertEquals(se.runScript(si.getId()).getResult(), result);
         assertEquals(se.runScript(name, new FxScriptBinding()).getResult(), result);

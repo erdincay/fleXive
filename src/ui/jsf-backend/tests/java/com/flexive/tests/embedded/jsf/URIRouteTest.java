@@ -39,6 +39,7 @@ import com.flexive.shared.exceptions.FxRuntimeException;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -91,7 +92,7 @@ public class URIRouteTest {
         }) {
             try {
                 new ContentURIRoute("", pattern, "TEST");
-                assert false : "Pattern " + pattern + " is invalid, but ContentURIMapper constructor succeeds.";
+                Assert.fail( "Pattern " + pattern + " is invalid, but ContentURIMapper constructor succeeds.");
             } catch (FxRuntimeException e) {
                 // pass
             } 
@@ -120,7 +121,7 @@ public class URIRouteTest {
         parameters.remove("param1");
         try {
             route.getMappedUri(parameters);
-            assert false : "Not all parameters specified";
+            Assert.fail( "Not all parameters specified");
         } catch (FxRuntimeException e) {
             // pass
         }

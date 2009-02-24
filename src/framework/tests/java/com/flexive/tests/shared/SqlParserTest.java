@@ -32,6 +32,7 @@
 package com.flexive.tests.shared;
 
 import org.testng.annotations.Test;
+import org.testng.Assert;
 import org.apache.commons.lang.StringUtils;
 import com.flexive.sqlParser.*;
 import com.flexive.shared.search.query.PropertyValueComparator;
@@ -61,13 +62,13 @@ public class SqlParserTest {
         parse("SELECT id", "id");
         try {
             parse("SELECT co.id FROM content co WHERE", "co.id");
-            assert false : "WHERE specified, but no conditions - expected failure";
+            Assert.fail("WHERE specified, but no conditions - expected failure");
         } catch (SqlParserException e) {
             // pass
         }
         try {
             parse("SELECT id WHERE", "id");
-            assert false : "WHERE specified, but no conditions - expected failure";
+            Assert.fail("WHERE specified, but no conditions - expected failure");
         } catch (SqlParserException e) {
             // pass
         }
@@ -95,22 +96,22 @@ public class SqlParserTest {
     @Test(groups = {"shared", "search"})
     public void contentTypeFilter() throws SqlParserException {
         final FxStatement stmt1 = parse("SELECT co.id FROM content co FILTER co.TYPE=21", "co.id");
-        assert stmt1.getContentTypeFilter().equals("21") : "Content type filter was " + stmt1.getContentTypeFilter() + ", expected: 21";
+        Assert.assertTrue(stmt1.getContentTypeFilter().equals("21"), "Content type filter was " + stmt1.getContentTypeFilter() + ", expected: 21");
 
         final FxStatement stmt2 = parse("SELECT co.id FROM content co FILTER co.TYPE=mytype", "co.id");
-        assert stmt2.getContentTypeFilter().equalsIgnoreCase("mytype") : "Content type filter was " + stmt2.getContentTypeFilter() + ", expected: mytype";
+        Assert.assertTrue(stmt2.getContentTypeFilter().equalsIgnoreCase("mytype"), "Content type filter was " + stmt2.getContentTypeFilter() + ", expected: mytype");
     }
 
     @Test(groups = {"shared", "search"})
     public void versionFilter() throws SqlParserException {
-        assert parse("SELECT co.id FROM content co FILTER co.VERSION=max").getVersionFilter().equals(VersionFilter.MAX);
-        assert parse("SELECT co.id FROM content co FILTER co.VERSION=LIVE").getVersionFilter().equals(VersionFilter.LIVE);
-        assert parse("SELECT co.id FROM content co FILTER co.VERSION=ALL").getVersionFilter().equals(VersionFilter.ALL);
+        Assert.assertTrue(parse("SELECT co.id FROM content co FILTER co.VERSION=max").getVersionFilter().equals(VersionFilter.MAX));
+        Assert.assertTrue(parse("SELECT co.id FROM content co FILTER co.VERSION=LIVE").getVersionFilter().equals(VersionFilter.LIVE));
+        Assert.assertTrue(parse("SELECT co.id FROM content co FILTER co.VERSION=ALL").getVersionFilter().equals(VersionFilter.ALL));
         // auto gets the version through some user session magic, but it should definitely not return auto
-        assert !parse("SELECT co.id FROM content co FILTER co.VERSION=AUTO").getVersionFilter().equals(VersionFilter.AUTO);
+        Assert.assertTrue(!parse("SELECT co.id FROM content co FILTER co.VERSION=AUTO").getVersionFilter().equals(VersionFilter.AUTO));
         try {
             parse("SELECT co.id FROM content co FILTER co.VERSION=15");
-            assert false : "Specific versions cannot be selected.";
+            Assert.fail("Specific versions cannot be selected.");
         } catch (SqlParserException e) {
             // pass
         }
@@ -118,21 +119,21 @@ public class SqlParserTest {
 
     @Test(groups = {"shared", "search"})
     public void ignoreCaseFilter() throws SqlParserException {
-        assert parse("SELECT co.id FROM content co FILTER IGNORE_CASE=T").getIgnoreCase();
-        assert parse("SELECT co.id FROM content co FILTER IGNORE_CASE=t").getIgnoreCase();
-        assert parse("SELECT co.id FROM content co FILTER IGNORE_CASE=true").getIgnoreCase();
-        assert !parse("SELECT co.id FROM content co FILTER IGNORE_CASE=F").getIgnoreCase();
-        assert !parse("SELECT co.id FROM content co FILTER IGNORE_CASE=f").getIgnoreCase();
-        assert !parse("SELECT co.id FROM content co FILTER IGNORE_CASE=false").getIgnoreCase();
+        Assert.assertTrue(parse("SELECT co.id FROM content co FILTER IGNORE_CASE=T").getIgnoreCase());
+        Assert.assertTrue(parse("SELECT co.id FROM content co FILTER IGNORE_CASE=t").getIgnoreCase());
+        Assert.assertTrue(parse("SELECT co.id FROM content co FILTER IGNORE_CASE=true").getIgnoreCase());
+        Assert.assertTrue(!parse("SELECT co.id FROM content co FILTER IGNORE_CASE=F").getIgnoreCase());
+        Assert.assertTrue(!parse("SELECT co.id FROM content co FILTER IGNORE_CASE=f").getIgnoreCase());
+        Assert.assertTrue(!parse("SELECT co.id FROM content co FILTER IGNORE_CASE=false").getIgnoreCase());
     }
 
     @Test(groups = {"shared", "search"})
     public void maxResultRowsFilter() throws SqlParserException {
-        assert parse("SELECT co.id FROM content co FILTER MAX_RESULTROWS=21").getMaxResultRows() == 21;
-        assert parse("SELECT co.id FROM content co FILTER MAX_RESULTROWS=0").getMaxResultRows() == 0;
+        Assert.assertTrue(parse("SELECT co.id FROM content co FILTER MAX_RESULTROWS=21").getMaxResultRows() == 21);
+        Assert.assertTrue(parse("SELECT co.id FROM content co FILTER MAX_RESULTROWS=0").getMaxResultRows() == 0);
         try {
             parse("SELECT co.id FROM content co FILTER MAX_RESULTROWS=-1");
-            assert false : "Negative values should not be allowed for filter value MAX_RESULTROWS.";
+            Assert.fail("Negative values should not be allowed for filter value MAX_RESULTROWS.");
         } catch (SqlParserException e) {
             // pass
         }
@@ -140,18 +141,18 @@ public class SqlParserTest {
 
     @Test(groups = {"shared", "search"})
     public void searchLanguagesFilter() throws SqlParserException {
-        assert parse("SELECT co.id FROM content co").getTableByAlias("co").getSearchLanguages().length == 0;
-        assert parse("SELECT co.id FROM content co FILTER co.SEARCH_LANGUAGES=de").getTableByAlias("co").getSearchLanguages()[0].equals("de");
-        assert parse("SELECT co.id FROM content co FILTER co.SEARCH_LANGUAGES=de|en").getTableByAlias("co").getSearchLanguages()[0].equals("de");
-        assert parse("SELECT co.id FROM content co FILTER co.SEARCH_LANGUAGES=de|en").getTableByAlias("co").getSearchLanguages()[1].equals("en");
+        Assert.assertTrue(parse("SELECT co.id FROM content co").getTableByAlias("co").getSearchLanguages().length == 0);
+        Assert.assertTrue(parse("SELECT co.id FROM content co FILTER co.SEARCH_LANGUAGES=de").getTableByAlias("co").getSearchLanguages()[0].equals("de"));
+        Assert.assertTrue(parse("SELECT co.id FROM content co FILTER co.SEARCH_LANGUAGES=de|en").getTableByAlias("co").getSearchLanguages()[0].equals("de"));
+        Assert.assertTrue(parse("SELECT co.id FROM content co FILTER co.SEARCH_LANGUAGES=de|en").getTableByAlias("co").getSearchLanguages()[1].equals("en"));
     }
 
     @Test(groups = {"shared", "search"})
     public void briefcaseFilter() throws SqlParserException {
-        assert parse("SELECT co.id FROM content co").getBriefcaseFilter().length == 0;
-        assert parse("SELECT co.id FROM content co FILTER briefcase=1").getBriefcaseFilter()[0] == 1;
-        assert parse("SELECT co.id FROM content co FILTER briefcase=1|21").getBriefcaseFilter()[0] == 1;
-        assert parse("SELECT co.id FROM content co FILTER briefcase=1|21").getBriefcaseFilter()[1] == 21;
+        Assert.assertTrue(parse("SELECT co.id FROM content co").getBriefcaseFilter().length == 0);
+        Assert.assertTrue(parse("SELECT co.id FROM content co FILTER briefcase=1").getBriefcaseFilter()[0] == 1);
+        Assert.assertTrue(parse("SELECT co.id FROM content co FILTER briefcase=1|21").getBriefcaseFilter()[0] == 1);
+        Assert.assertTrue(parse("SELECT co.id FROM content co FILTER briefcase=1|21").getBriefcaseFilter()[1] == 21);
     }
 
     @Test(groups = {"shared", "search"})
@@ -159,12 +160,12 @@ public class SqlParserTest {
         final FxStatement stmt = parse("SELECT co.id FROM content co \n" +
                 "FILTER IGNORE_CASE=false, max_resultrows=21, co.SEARCH_LANGUAGES=fr|it, briefcase=2|3,\n" +
                 "       co.version=max, co.type=mine\n");
-        assert !stmt.getIgnoreCase();
-        assert stmt.getMaxResultRows() == 21;
-        assert stmt.getTableByAlias("co").getSearchLanguages()[0].equals("fr");
-        assert stmt.getTableByAlias("co").getSearchLanguages()[1].equals("it");
-        assert stmt.getBriefcaseFilter()[0] == 2;
-        assert stmt.getBriefcaseFilter()[1] == 3;
+        Assert.assertTrue(!stmt.getIgnoreCase());
+        Assert.assertTrue(stmt.getMaxResultRows() == 21);
+        Assert.assertTrue(stmt.getTableByAlias("co").getSearchLanguages()[0].equals("fr"));
+        Assert.assertTrue(stmt.getTableByAlias("co").getSearchLanguages()[1].equals("it"));
+        Assert.assertTrue(stmt.getBriefcaseFilter()[0] == 2);
+        Assert.assertTrue(stmt.getBriefcaseFilter()[1] == 3);
     }
 
     @Test(groups = {"shared", "search"})
@@ -174,8 +175,8 @@ public class SqlParserTest {
             try {
                 parse(query);
             } catch (SqlParserException e) {
-                assert false : "Failed to submit query with comparator " + comp + ":\n"
-                        + query + "\n\nError message: " + e.getMessage();
+                Assert.fail("Failed to submit query with comparator " + comp + ":\n"
+                        + query + "\n\nError message: " + e.getMessage());
             }
         }
     }
@@ -193,25 +194,25 @@ public class SqlParserTest {
 
                 // check root expression
                 final Brace root = stmt.getRootBrace();
-                assert root.isAnd() : "Root expression should be AND";
-                assert root.getElements().length == 2 : "Root should have two children, has: " + Arrays.asList(root.getElements());
+                Assert.assertTrue(root.isAnd(), "Root expression should be AND");
+                Assert.assertTrue(root.getElements().length == 2, "Root should have two children, has: " + Arrays.asList(root.getElements()));
                 checkStatementCondition(root.getElementAt(0), comp, "co.p1", "1");
 
                 // check first nested level
                 final Brace level1 = (Brace) root.getElementAt(1);
-                assert level1.isOr() : "Level 1 expression should be 'or'";
-                assert level1.getElements().length == 2 : "Level1 should have two children, has: " + Arrays.asList(level1.getElements());
+                Assert.assertTrue(level1.isOr(), "Level 1 expression should be 'or'");
+                Assert.assertTrue(level1.getElements().length == 2, "Level1 should have two children, has: " + Arrays.asList(level1.getElements()));
                 checkStatementCondition(level1.getElementAt(0), comp, "co.p2", FxFormatUtils.escapeForSql("stringval"));
 
                 // check innermost level
                 final Brace level2 = (Brace) level1.getElementAt(1);
-                assert level2.isAnd() : "Level 2 expression should be 'and'";
-                assert level2.getElements().length == 2 : "Level2 should have two children, has: " + Arrays.asList(level2.getElements());
+                Assert.assertTrue(level2.isAnd(), "Level 2 expression should be 'and'");
+                Assert.assertTrue(level2.getElements().length == 2, "Level2 should have two children, has: " + Arrays.asList(level2.getElements()));
                 checkStatementCondition(level2.getElementAt(0), comp, "co.p3", "2");
                 checkStatementCondition(level2.getElementAt(1), comp, "co.p4", FxFormatUtils.escapeForSql(date));
             } catch (Exception e) {
-                assert false : "Failed to submit query with comparator " + comp + ":\n"
-                        + query + "\n\nError message: " + e.getMessage();
+                Assert.fail("Failed to submit query with comparator " + comp + ":\n"
+                        + query + "\n\nError message: " + e.getMessage());
             }
         }
     }
@@ -240,18 +241,18 @@ public class SqlParserTest {
         for (FxValue value : testData) {
             final FxStatement stmt = parse("SELECT co.id FROM content co WHERE co.value = " + FxFormatUtils.escapeForSql(value));
             final Object conditionValue = ((Condition) stmt.getRootBrace().getElementAt(0)).getRValueInfo().getValue();
-            assert StringUtils.isNotBlank(value.getSqlValue());
-            assert conditionValue.equals(value.getSqlValue()) : "SQL condition value should be " + value.getSqlValue() + ", is: " + conditionValue;
+            Assert.assertTrue(StringUtils.isNotBlank(value.getSqlValue()));
+            Assert.assertTrue(conditionValue.equals(value.getSqlValue()), "SQL condition value should be " + value.getSqlValue() + ", is: " + conditionValue);
         }
     }
 
     @Test(groups = {"shared", "search"})
     public void selectFunctions() throws SqlParserException {
-        assert parse("SELECT minute(co.created_at) FROM content co").getSelectedValues().get(0)
-                .getValue().getSqlFunctions().get(0).equalsIgnoreCase("minute");
+        Assert.assertTrue(parse("SELECT minute(co.created_at) FROM content co").getSelectedValues().get(0)
+                .getValue().getSqlFunctions().get(0).equalsIgnoreCase("minute"));
         final Value val1 = parse("SELECT co.id, year(month(day(co.created_at))) FROM content co").getSelectedValues().get(1).getValue();
-        assert val1.getSqlFunctions().equals(Arrays.asList("YEAR", "MONTH", "DAY"))
-                : "Expected functions year, month, day; got: " + Arrays.asList(val1.getSqlFunctions());
+        Assert.assertEquals(val1.getSqlFunctions(), Arrays.asList("YEAR", "MONTH", "DAY"),
+                "Expected functions year, month, day; got: " + Arrays.asList(val1.getSqlFunctions()));
     }
 
     @Test(groups = {"shared", "search"})
@@ -265,8 +266,8 @@ public class SqlParserTest {
                 "SELECT co.id FROM content co ORDER BY 1 DESC, 1 DESC"
         }) {
             final FxStatement stmt = parse(valid);
-            assert stmt.getOrderByValues().get(0).getColumnIndex() == 0
-                    : "Order by column index should be 0, was: " + stmt.getOrderByValues().get(0).getColumnIndex();
+            Assert.assertEquals(stmt.getOrderByValues().get(0).getColumnIndex(), 0,
+                    "Order by column index should be 0, was: " + stmt.getOrderByValues().get(0).getColumnIndex());
         }
         // some invalid queries
         for (String invalid : new String[]{
@@ -277,7 +278,7 @@ public class SqlParserTest {
         }) {
             try {
                 parse(invalid);
-                assert false : "Query " + invalid + " is invalid.";
+                Assert.fail("Query " + invalid + " is invalid.");
             } catch (SqlParserException e) {
                 // pass
             }
@@ -301,7 +302,7 @@ public class SqlParserTest {
         }) {
             try {
                 parse(invalid);
-                assert false : "Query " + invalid + " is invalid.";
+                Assert.fail("Query " + invalid + " is invalid.");
             } catch (SqlParserException e) {
                 // pass
             }
@@ -317,13 +318,13 @@ public class SqlParserTest {
     }
 
     private void checkStatementCondition(BraceElement element, PropertyValueComparator comp, String lvalue, String rvalue) {
-        assert element instanceof Condition : "First root child should be a condition, is: " + element;
+        Assert.assertTrue(element instanceof Condition, "First root child should be a condition, is: " + element);
         final Condition condition = (Condition) element;
-        assert condition.getLValueInfo().getValue().equals(lvalue);
-        assert !comp.isNeedsInput() || !condition.getRValueInfo().isNull();
-        assert !comp.isNeedsInput() || condition.getRValueInfo().getValue().equals(rvalue)
-                : "RValue should be " + rvalue + ", is: " + condition.getRValueInfo().getValue();
-        assert !comp.isNeedsInput() || condition.getConstant().getValue().equals(rvalue);
+        Assert.assertTrue(condition.getLValueInfo().getValue().equals(lvalue));
+        Assert.assertTrue(!comp.isNeedsInput() || !condition.getRValueInfo().isNull());
+        Assert.assertTrue(!comp.isNeedsInput() || condition.getRValueInfo().getValue().equals(rvalue),
+                "RValue should be " + rvalue + ", is: " + condition.getRValueInfo().getValue());
+        Assert.assertTrue(!comp.isNeedsInput() || condition.getConstant().getValue().equals(rvalue));
     }
 
     /**
@@ -362,15 +363,15 @@ public class SqlParserTest {
      * @return the statement
      */
     private FxStatement checkStatement(FxStatement statement, String[] selectedColumns) {
-        assert statement.getTables().length == 1 : "One table should be selected, got: " + statement.getTables().length;
-        assert statement.getTableByType(Table.TYPE.CONTENT) != null : "No content table selected";
-        assert statement.getParserExecutionTime() >= 0 : "Parser execution time not set.";
-        assert statement.getTableByAlias("co") != null;
-        assert statement.getTableByAlias("co").getType().equals(Table.TYPE.CONTENT);
+        Assert.assertTrue(statement.getTables().length == 1, "One table should be selected, got: " + statement.getTables().length);
+        Assert.assertTrue(statement.getTableByType(Table.TYPE.CONTENT) != null, "No content table selected");
+        Assert.assertTrue(statement.getParserExecutionTime() >= 0, "Parser execution time not set.");
+        Assert.assertTrue(statement.getTableByAlias("co") != null);
+        Assert.assertTrue(statement.getTableByAlias("co").getType().equals(Table.TYPE.CONTENT));
         if (selectedColumns != null) {
             for (int i = 0; i < statement.getSelectedValues().size(); i++) {
                 final SelectedValue value = statement.getSelectedValues().get(i);
-                assert value.getAlias().equals(selectedColumns[i]) : "Unexpected column selected: " + value;
+                Assert.assertTrue(value.getAlias().equals(selectedColumns[i]), "Unexpected column selected: " + value);
             }
         }
         return statement;

@@ -48,6 +48,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 /**
  * Tests for the unique mode
@@ -164,7 +165,7 @@ public class UniqueModeTest extends StructureTestBase {
             try {
                 //save on C violates A
                 co.save(c);
-                assert false : "Constraint violation C on A expected!";
+                Assert.fail("Constraint violation C on A expected!");
             } catch (FxCreateException e) {
                 //ok
             }
@@ -173,7 +174,7 @@ public class UniqueModeTest extends StructureTestBase {
             try {
                 //save on A violates A
                 co.save(c);
-                assert false : "Constraint violation A on A expected!";
+                Assert.fail("Constraint violation A on A expected!");
             } catch (FxCreateException e) {
                 //ok
             }
@@ -182,7 +183,7 @@ public class UniqueModeTest extends StructureTestBase {
             try {
                 //save on D violates A
                 co.save(c);
-                assert false : "Constraint violation D on A expected!";
+                Assert.fail("Constraint violation D on A expected!");
             } catch (FxCreateException e) {
                 //ok
             }
@@ -217,7 +218,7 @@ public class UniqueModeTest extends StructureTestBase {
             try {
                 //save on A violates A
                 co.save(c);
-                assert false : "Constraint violation expected!";
+                Assert.fail("Constraint violation expected!");
             } catch (FxCreateException e) {
                 //ok
             }
@@ -241,7 +242,7 @@ public class UniqueModeTest extends StructureTestBase {
             try {
                 //save on C violates B
                 co.save(c);
-                assert false : "Constraint violation C on B expected!";
+                Assert.fail("Constraint violation C on B expected!");
             } catch (FxCreateException e) {
                 //ok
             }
@@ -250,7 +251,7 @@ public class UniqueModeTest extends StructureTestBase {
             try {
                 //save on C violates A
                 co.save(c);
-                assert false : "Constraint violation C on A expected!";
+                Assert.fail("Constraint violation C on A expected!");
             } catch (FxCreateException e) {
                 //ok
             }
@@ -284,7 +285,7 @@ public class UniqueModeTest extends StructureTestBase {
             try {
                 //save on [2] violates [1]
                 co.save(c);
-                assert false : "Constraint violation [2] on [1] expected!";
+                Assert.fail("Constraint violation [2] on [1] expected!");
             } catch (FxCreateException e) {
                 //ok
             }

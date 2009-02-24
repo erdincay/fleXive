@@ -179,37 +179,37 @@ public class FxTreeTest {
     private void treeCRUD(FxTreeMode mode) throws FxApplicationException {
         //clear the tree
         tree.clear(mode);
-        assert tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() == 0 :
-                "Expected to have 0 children, got: [" + tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() + "]";
+        Assert.assertTrue(tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() == 0,
+                "Expected to have 0 children, got: [" + tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() + "]");
         //create new node
         FxTreeNodeEdit node1 = FxTreeNodeEdit.createNew(getNodeName(1));
         node1.setLabel(getNodeLabel(1));
         node1.setMode(mode);
         long id1 = tree.save(node1);
-        assert tree.exist(mode, id1);
-        assert tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() == 1 :
-                "Expected to have 1 child, got: [" + tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() + "]";
+        Assert.assertTrue(tree.exist(mode, id1));
+        Assert.assertTrue(tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() == 1,
+                "Expected to have 1 child, got: [" + tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() + "]");
         //load and check if all well
         FxTreeNode node1_loaded = tree.getNode(mode, id1);
-        assert node1_loaded.getName().equals(node1.getName());
+        Assert.assertTrue(node1_loaded.getName().equals(node1.getName()));
         Assert.assertEquals(node1_loaded.getLabel(), node1.getLabel());
         //rename name
         tree.save(new FxTreeNodeEdit(node1_loaded).setName("abcd"));
         node1_loaded = tree.getNode(mode, id1);
-        assert node1_loaded.getName().equals("abcd") : "Expected [abcd] - got [" + node1_loaded.getName() + "]";
+        Assert.assertTrue(node1_loaded.getName().equals("abcd"), "Expected [abcd] - got [" + node1_loaded.getName() + "]");
         Assert.assertEquals(node1_loaded.getLabel(), node1.getLabel());
         //rename label
         tree.save(new FxTreeNodeEdit(node1_loaded).setLabel(getNodeLabel(42)));
         node1_loaded = tree.getNode(mode, id1);
-        assert node1_loaded.getName().equals("abcd");
-        assert node1_loaded.getLabel().equals(getNodeLabel(42));
+        Assert.assertTrue(node1_loaded.getName().equals("abcd"));
+        Assert.assertTrue(node1_loaded.getLabel().equals(getNodeLabel(42)));
         //create child
         FxTreeNodeEdit node1_1 = FxTreeNodeEdit.createNewChildNode(node1_loaded).setName("1").setLabel(getNodeLabel(1)).setMode(mode);
         long id1_1 = tree.save(node1_1);
         FxTreeNode node1_1_loaded = tree.getNode(mode, id1_1);
-        assert node1_1_loaded.getParentNodeId() == node1_loaded.getId();
+        Assert.assertTrue(node1_1_loaded.getParentNodeId() == node1_loaded.getId());
         //verify path
-        assert node1_1_loaded.getPath().equals("/abcd/1");
+        Assert.assertTrue(node1_1_loaded.getPath().equals("/abcd/1"));
         //verify label
         Assert.assertEquals(tree.getLabels(mode, node1_1_loaded.getId()).get(0), "/" + getNodeLabel(42).getBestTranslation() + "/" + getNodeLabel(1).getBestTranslation());
         //create 2 other children for positioning tests
@@ -217,12 +217,12 @@ public class FxTreeTest {
         long id1_2 = tree.save(node1_2);
         FxTreeNode node1_2_loaded = tree.getNode(mode, id1_2);
         //verify path
-        assert node1_2_loaded.getPath().equals("/abcd/2") : "Expected [/abcd/2] got: [" + node1_2_loaded.getPath() + "]";
+        Assert.assertTrue(node1_2_loaded.getPath().equals("/abcd/2"), "Expected [/abcd/2] got: [" + node1_2_loaded.getPath() + "]");
         //verify label
-        assert ("/" + getNodeLabel(42).getBestTranslation() + "/" + getNodeLabel(2).getBestTranslation()).
-                equals(tree.getLabels(mode, node1_2_loaded.getId()).get(0)) :
+        Assert.assertTrue( ("/" + getNodeLabel(42).getBestTranslation() + "/" + getNodeLabel(2).getBestTranslation()).
+                equals(tree.getLabels(mode, node1_2_loaded.getId()).get(0)),
                 "Expected [/" + getNodeLabel(42).getBestTranslation() + "/" + getNodeLabel(2).getBestTranslation() + "] got: [" +
-                        tree.getLabels(mode, node1_2_loaded.getId()).get(0) + "]";
+                        tree.getLabels(mode, node1_2_loaded.getId()).get(0) + "]");
         // verify unknown id return value
         final int invalidId = 999999;
         final String expectedOutcome = "/<unknown:" + invalidId + ">";
@@ -230,12 +230,12 @@ public class FxTreeTest {
         FxTreeNodeEdit node1_3 = FxTreeNodeEdit.createNewChildNode(node1_loaded).setName("3").setLabel(getNodeLabel(3)).setMode(mode);
         long id1_3 = tree.save(node1_3);
         FxTreeNode node1_3_loaded = tree.getNode(mode, id1_3);
-        assert tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() == 4 :
-                "Expected to have 4 children, got: [" + tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() + "]";
+        Assert.assertTrue(tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() == 4,
+                "Expected to have 4 children, got: [" + tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() + "]");
         //verify positions - should be 1-2-3
-        assert node1_1_loaded.getPosition() == 0 : "Expected [0] got: [" + node1_1_loaded.getPosition() + "]";
-        assert node1_2_loaded.getPosition() == 1 : "Expected [1] got: [" + node1_2_loaded.getPosition() + "]";
-        assert node1_3_loaded.getPosition() == 2 : "Expected [2] got: [" + node1_3_loaded.getPosition() + "]";
+        Assert.assertTrue(node1_1_loaded.getPosition() == 0, "Expected [0] got: [" + node1_1_loaded.getPosition() + "]");
+        Assert.assertTrue(node1_2_loaded.getPosition() == 1, "Expected [1] got: [" + node1_2_loaded.getPosition() + "]");
+        Assert.assertTrue(node1_3_loaded.getPosition() == 2, "Expected [2] got: [" + node1_3_loaded.getPosition() + "]");
 
         //swap positions of 1 and 3 to net 3-2-1
         tree.save(new FxTreeNodeEdit(node1_3_loaded).setPosition(-1));
@@ -243,54 +243,54 @@ public class FxTreeTest {
         node1_1_loaded = tree.getNode(mode, id1_1);
         node1_2_loaded = tree.getNode(mode, id1_2);
         node1_3_loaded = tree.getNode(mode, id1_3);
-        assert node1_1_loaded.getPosition() == 2 : "Expected [2] got: [" + node1_1_loaded.getPosition() + "]";
-        assert node1_2_loaded.getPosition() == 1 : "Expected [1] got: [" + node1_2_loaded.getPosition() + "]";
-        assert node1_3_loaded.getPosition() == 0 : "Expected [0] got: [" + node1_3_loaded.getPosition() + "]";
+        Assert.assertTrue(node1_1_loaded.getPosition() == 2, "Expected [2] got: [" + node1_1_loaded.getPosition() + "]");
+        Assert.assertTrue(node1_2_loaded.getPosition() == 1, "Expected [1] got: [" + node1_2_loaded.getPosition() + "]");
+        Assert.assertTrue(node1_3_loaded.getPosition() == 0, "Expected [0] got: [" + node1_3_loaded.getPosition() + "]");
         //3-2-1 => 3-1-2
         tree.save(new FxTreeNodeEdit(node1_1_loaded).setPosition(1));
         node1_1_loaded = tree.getNode(mode, id1_1);
         node1_2_loaded = tree.getNode(mode, id1_2);
         node1_3_loaded = tree.getNode(mode, id1_3);
-        assert node1_1_loaded.getPosition() == 1 : "Expected [1] got: [" + node1_1_loaded.getPosition() + "]";
-        assert node1_2_loaded.getPosition() == 2 : "Expected [2] got: [" + node1_2_loaded.getPosition() + "]";
-        assert node1_3_loaded.getPosition() == 0 : "Expected [0] got: [" + node1_3_loaded.getPosition() + "]";
+        Assert.assertTrue(node1_1_loaded.getPosition() == 1, "Expected [1] got: [" + node1_1_loaded.getPosition() + "]");
+        Assert.assertTrue(node1_2_loaded.getPosition() == 2, "Expected [2] got: [" + node1_2_loaded.getPosition() + "]");
+        Assert.assertTrue(node1_3_loaded.getPosition() == 0, "Expected [0] got: [" + node1_3_loaded.getPosition() + "]");
         //3-1-2 => 1-2-3
         tree.save(new FxTreeNodeEdit(node1_3_loaded).setPosition(4));
         node1_1_loaded = tree.getNode(mode, id1_1);
         node1_2_loaded = tree.getNode(mode, id1_2);
         node1_3_loaded = tree.getNode(mode, id1_3);
-        assert node1_1_loaded.getPosition() == 0 : "Expected [0] got: [" + node1_1_loaded.getPosition() + "]";
-        assert node1_2_loaded.getPosition() == 1 : "Expected [1] got: [" + node1_2_loaded.getPosition() + "]";
-        assert node1_3_loaded.getPosition() == 2 : "Expected [2] got: [" + node1_3_loaded.getPosition() + "]";
+        Assert.assertTrue(node1_1_loaded.getPosition() == 0, "Expected [0] got: [" + node1_1_loaded.getPosition() + "]");
+        Assert.assertTrue(node1_2_loaded.getPosition() == 1, "Expected [1] got: [" + node1_2_loaded.getPosition() + "]");
+        Assert.assertTrue(node1_3_loaded.getPosition() == 2, "Expected [2] got: [" + node1_3_loaded.getPosition() + "]");
         //delete 1_2 and check positions
         tree.remove(new FxTreeNodeEdit(node1_2_loaded), true, false);
-        assert !tree.exist(mode, id1_2);
+        Assert.assertTrue(!tree.exist(mode, id1_2));
         node1_1_loaded = tree.getNode(mode, id1_1);
         node1_3_loaded = tree.getNode(mode, id1_3);
-        assert node1_1_loaded.getPosition() == 0 : "Expected [0] got: [" + node1_1_loaded.getPosition() + "]";
-        assert node1_3_loaded.getPosition() == 1 : "Expected [1] got: [" + node1_3_loaded.getPosition() + "]";
-        assert tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() == 3 :
-                "Expected to have 3 children, got: [" + tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() + "]";
+        Assert.assertTrue(node1_1_loaded.getPosition() == 0, "Expected [0] got: [" + node1_1_loaded.getPosition() + "]");
+        Assert.assertTrue(node1_3_loaded.getPosition() == 1, "Expected [1] got: [" + node1_3_loaded.getPosition() + "]");
+        Assert.assertTrue(tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() == 3,
+                "Expected to have 3 children, got: [" + tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() + "]");
         if (mode == FxTreeMode.Live)
             return; //children are to be removed in live mode
         //delete parent but not children and check if they moved up in hierarchy
         tree.remove(new FxTreeNodeEdit(node1_loaded), true, false);
         node1_1_loaded = tree.getNode(mode, id1_1);
         node1_3_loaded = tree.getNode(mode, id1_3);
-        assert node1_1_loaded.getParentNodeId() == FxTreeNode.ROOT_NODE;
-        assert node1_3_loaded.getParentNodeId() == FxTreeNode.ROOT_NODE;
+        Assert.assertTrue(node1_1_loaded.getParentNodeId() == FxTreeNode.ROOT_NODE);
+        Assert.assertTrue(node1_3_loaded.getParentNodeId() == FxTreeNode.ROOT_NODE);
         //attach 1_3 as child to 1_2
         tree.save(new FxTreeNodeEdit(node1_3_loaded).setParentNodeId(node1_1_loaded.getId()));
         node1_1_loaded = tree.getTree(mode, id1_1, 3);
         node1_3_loaded = tree.getNode(mode, id1_3);
-        assert node1_1_loaded.getChildren().size() == 1;
-        assert node1_1_loaded.getChildren().get(0).getId() == node1_3_loaded.getId();
-        assert node1_3_loaded.getPath().equals("/1/3") : "Expected [/1/3] got: [" + node1_3_loaded.getPath() + "]";
+        Assert.assertTrue(node1_1_loaded.getChildren().size() == 1);
+        Assert.assertTrue(node1_1_loaded.getChildren().get(0).getId() == node1_3_loaded.getId());
+        Assert.assertTrue(node1_3_loaded.getPath().equals("/1/3"), "Expected [/1/3] got: [" + node1_3_loaded.getPath() + "]");
         //delete 1_1 with children and check that 1_3 is gone too
         tree.remove(new FxTreeNodeEdit(node1_1_loaded), true, true);
-        assert !tree.exist(mode, id1_3);
-        assert tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() == 0 :
-                "Expected to have 0 children, got: [" + tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() + "]";
+        Assert.assertTrue(!tree.exist(mode, id1_3));
+        Assert.assertTrue(tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() == 0,
+                "Expected to have 0 children, got: [" + tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() + "]");
         tree.clear(mode);
 
         //test changing a referenced content
@@ -573,7 +573,7 @@ public class FxTreeTest {
         final long[] nodes = tree.createNodes(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, 0, StringUtils.join(names, "/"));
         int index = 0;
         for (FxTreeNode node : tree.getTree(FxTreeMode.Edit, nodes[0], 5)) {
-            assert node.getName().equals(names[index]) : "Expected node name: " + names[index] + ", got: " + node.getName();
+            Assert.assertTrue(node.getName().equals(names[index]), "Expected node name: " + names[index] + ", got: " + node.getName());
             index++;
         }
 
@@ -589,7 +589,7 @@ public class FxTreeTest {
          */
         index = 0;
         for (FxTreeNode node : tree.getTree(FxTreeMode.Edit, nodes[0], 5)) {
-            assert node.getName().equals(expected[index]) : "Expected node name: " + expected[index] + ", got: " + node.getName();
+            Assert.assertTrue(node.getName().equals(expected[index]), "Expected node name: " + expected[index] + ", got: " + node.getName());
             index++;
         }
     }
@@ -601,12 +601,12 @@ public class FxTreeTest {
         tn.setLabel(new FxString(false, "NodeLabel"));
         tn.setParentNodeId(FxTreeNode.ROOT_NODE);
         long nodeId = tree.save(tn);
-        assert tree.getIdByLabelPath(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, "/NodeLabel") == nodeId;
+        Assert.assertTrue(tree.getIdByLabelPath(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, "/NodeLabel") == nodeId);
         FxTreeNodeEdit tn2 = FxTreeNodeEdit.createNew("NodeName2");
         tn2.setLabel(new FxString(false, "NodeLabel2"));
         tn2.setParentNodeId(nodeId);
         long nodeId2 = tree.save(tn2);
-        assert tree.getIdByLabelPath(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, "/NodeLabel/NodeLabel2") == nodeId2;
+        Assert.assertTrue(tree.getIdByLabelPath(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, "/NodeLabel/NodeLabel2") == nodeId2);
     }
 
     /**

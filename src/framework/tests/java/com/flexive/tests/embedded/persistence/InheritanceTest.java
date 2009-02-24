@@ -47,6 +47,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 /**
  * Tests for structure inheritance
@@ -191,16 +192,16 @@ public class InheritanceTest extends StructureTestBase {
             fxa_d.setEnabled(false);
             ass.save(fxa_d, false);
             derived = CacheAdmin.getEnvironment().getType(DERIVED_NAME);
-            assert !derived.getAssignment(TEST_XPATH).isEnabled() : "Expected [" + TEST_XPATH + "] to be disabled!";
+            Assert.assertTrue(!derived.getAssignment(TEST_XPATH).isEnabled(), "Expected [" + TEST_XPATH + "] to be disabled!");
             FxContent dc_dis = co.load(pk_d);
             pc = co.load(pk_p);
             try {
                 dc_dis.getPropertyData(TEST_XPATH);
-                assert false : TEST_XPATH + " should not exist after being disabled!";
+                Assert.fail(TEST_XPATH + " should not exist after being disabled!");
             } catch (FxNotFoundException e) {
                 //expected!
             }
-            assert pc.getPropertyData(TEST_XPATH).getValue().equals(data) : "Wrong data for parent instance!";
+            Assert.assertTrue(pc.getPropertyData(TEST_XPATH).getValue().equals(data), "Wrong data for parent instance!");
             //disable /B and subgroups
             FxGroupAssignmentEdit fxg_d = new FxGroupAssignmentEdit((FxGroupAssignment) derived.getAssignment("/B"));
             fxg_d.setEnabled(false);
@@ -208,14 +209,14 @@ public class InheritanceTest extends StructureTestBase {
             derived = CacheAdmin.getEnvironment().getType(DERIVED_NAME);
             String[] tests = {"/B", "/B/B_P1", "/B/B_P2"};
             for (String xpath : tests)
-                assert !derived.getAssignment(xpath).isEnabled() : "Expected [" + xpath + "] to be disabled!";
+                Assert.assertTrue(!derived.getAssignment(xpath).isEnabled(), "Expected [" + xpath + "] to be disabled!");
             //enable again
             fxg_d = new FxGroupAssignmentEdit((FxGroupAssignment) derived.getAssignment("/B"));
             fxg_d.setEnabled(true);
             ass.save(fxg_d, false);
             derived = CacheAdmin.getEnvironment().getType(DERIVED_NAME);
             for (String xpath : tests)
-                assert derived.getAssignment(xpath).isEnabled() : "Expected [" + xpath + "] to be enabled!";
+                Assert.assertTrue(derived.getAssignment(xpath).isEnabled(), "Expected [" + xpath + "] to be enabled!");
         } finally {
             if (derivedId != -1) {
                 co.removeForType(derivedId);
@@ -273,9 +274,9 @@ public class InheritanceTest extends StructureTestBase {
             ass.removeAssignment(ap3_id, true, false);
             FxPropertyAssignment pa_d1 = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(DERIVED1_NAME + "/A_P3");
             FxPropertyAssignment pa_d2 = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(DERIVED2_NAME + "/A_P3");
-            assert !pa_d1.isDerivedAssignment() : DERIVED1_NAME + "/A_P3 must not be a derived assignment!";
-            assert pa_d2.isDerivedAssignment() : DERIVED2_NAME + "/A_P3 expected be a derived assignment!";
-            assert pa_d2.getBaseAssignmentId() == pa_d1.getId() : "Expected " + DERIVED2_NAME + "/A_P3 to be derived from " + DERIVED1_NAME + "/A_P3!";
+            Assert.assertTrue(!pa_d1.isDerivedAssignment(), DERIVED1_NAME + "/A_P3 must not be a derived assignment!");
+            Assert.assertTrue(pa_d2.isDerivedAssignment(), DERIVED2_NAME + "/A_P3 expected be a derived assignment!");
+            Assert.assertTrue(pa_d2.getBaseAssignmentId() == pa_d1.getId(), "Expected " + DERIVED2_NAME + "/A_P3 to be derived from " + DERIVED1_NAME + "/A_P3!");
             removeAndCheckDerived(CacheAdmin.getEnvironment().getType(DERIVED2_NAME), "/A_P3");
         } finally {
             if (derived2Id != -1) {
@@ -304,9 +305,9 @@ public class InheritanceTest extends StructureTestBase {
                 testProperty.substring(0, (testProperty.lastIndexOf("/") > 0 ? testProperty.lastIndexOf("/") : 1)));
         FxType derived1 = CacheAdmin.getEnvironment().getType(DERIVED1_NAME);
         try {
-            assert derived1.getAssignment(testProperty) instanceof FxPropertyAssignment : "Expected " + testProperty + " to be a property assignment!";
+            Assert.assertTrue(derived1.getAssignment(testProperty) instanceof FxPropertyAssignment, "Expected " + testProperty + " to be a property assignment!");
         } catch (Exception e) {
-            assert false : "Failed to lookup " + testProperty + " in derived1 type! msg=" + e.getClass() + ":" + e.getMessage();
+            Assert.fail("Failed to lookup " + testProperty + " in derived1 type! msg=" + e.getClass() + ":" + e.getMessage());
         }
         FxType derived2 = CacheAdmin.getEnvironment().getType(DERIVED2_NAME);
         checkDerived(derived2, testProperty); //should exist for derived2 as well!
@@ -322,10 +323,10 @@ public class InheritanceTest extends StructureTestBase {
     private void checkDerived(FxType derived, String... xpaths) throws FxApplicationException {
         for (String xpath : xpaths) {
             FxAssignment fxa = derived.getAssignment(xpath);
-            assert fxa.isDerivedAssignment() : "Expected [" + xpath + "] to be a derived assignment!";
+            Assert.assertTrue(fxa.isDerivedAssignment(), "Expected [" + xpath + "] to be a derived assignment!");
             try {
                 ass.removeAssignment(fxa.getId(), true, false);
-                assert false : "Removal of derived assignment [" + xpath + "] should not be possible!";
+                Assert.fail("Removal of derived assignment [" + xpath + "] should not be possible!");
             } catch (FxApplicationException e) {
                 if (!(e instanceof FxRemoveException))
                     throw e;
@@ -343,10 +344,10 @@ public class InheritanceTest extends StructureTestBase {
     private void removeAndCheckDerived(FxType derived, String... xpaths) throws FxApplicationException {
         for (String xpath : xpaths) {
             FxAssignment fxa = derived.getAssignment(xpath);
-            assert fxa.isDerivedAssignment() : "Expected [" + xpath + "] to be a derived assignment!";
+            Assert.assertTrue(fxa.isDerivedAssignment(), "Expected [" + xpath + "] to be a derived assignment!");
             try {
                 ass.removeAssignment(fxa.getId(), true, false);
-                assert false : "Removal of derived assignment [" + xpath + "] should not be possible!";
+                Assert.fail("Removal of derived assignment [" + xpath + "] should not be possible!");
             } catch (FxApplicationException e) {
                 if (!(e instanceof FxRemoveException))
                     throw e;
@@ -354,7 +355,7 @@ public class InheritanceTest extends StructureTestBase {
             ass.removeAssignment(fxa.getId());
             try {
                 CacheAdmin.getEnvironment().getType(derived.getId()).getAssignment(xpath);
-                assert false : "Expected that [" + xpath + "] has been removed!";
+                Assert.fail("Expected that [" + xpath + "] has been removed!");
             } catch (FxRuntimeException e) {
                 //expected
             }

@@ -34,6 +34,7 @@
 package com.flexive.tests.embedded.jsf.util;
 
 import com.flexive.faces.FxJsfUtils;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import javax.faces.model.SelectItem;
@@ -41,16 +42,15 @@ import java.util.Arrays;
 
 /**
  * Tests for the FxJsfUtils utility class.
- * 
- * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  *
+ * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 @Test(groups = {"jsf"})
 public class JsfUtilTest {
-	@Test
-	public void testEvalInt() {
-		assert FxJsfUtils.evalInt("3") == 3;
-	}
+    @Test
+    public void testEvalInt() {
+        Assert.assertTrue(FxJsfUtils.evalInt("3") == 3);
+    }
 
     @Test
     public void testSelectItemSorter() {
@@ -61,9 +61,9 @@ public class JsfUtilTest {
                 new SelectItem(-1, "a")
         };
         Arrays.sort(items, new FxJsfUtils.SelectItemSorter());
-        assert items[0].getLabel() == null;
-        assert items[1].getLabel() == null;
-        assert "a".equals(items[2].getLabel());
-        assert "b".equals(items[3].getLabel());
+        Assert.assertNull(items[0].getLabel());
+        Assert.assertNull(items[1].getLabel());
+        Assert.assertEquals("a", items[2].getLabel());
+        Assert.assertEquals("b", items[3].getLabel());
     }
 }

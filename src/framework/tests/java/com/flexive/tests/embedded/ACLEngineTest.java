@@ -49,6 +49,7 @@ import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
 import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 import java.util.List;
 import java.util.Arrays;
@@ -70,7 +71,7 @@ public class ACLEngineTest {
         try {
                 getAclEngine().create("create-acl-test", new FxString("first label"), TestUsers.getTestMandator(),
                 "#000000", "", ACLCategory.INSTANCE);
-                assert false:"ACL's must have unique names";
+                Assert.fail("ACL's must have unique names");
             }
             catch (Exception e) {
                 //ok
@@ -83,7 +84,7 @@ public class ACLEngineTest {
             assertEquals(acl.getColor(), "#000000");
             assertEquals(acl.getLabel(), new FxString("first label"));
 
-            assert getUserTicket().getGroups().length > 0;
+            Assert.assertTrue(getUserTicket().getGroups().length > 0);
             final long groupId = getUserTicket().getGroups()[0];
 
             getAclEngine().update(aclId, "new-acl-test", new FxString("test"), null, "new description",
@@ -108,7 +109,7 @@ public class ACLEngineTest {
                 "#000000", "", ACLCategory.INSTANCE);
         try {
             final UserTicket ticket = getUserTicket();
-            assert ticket.getGroups().length > 0;
+            Assert.assertTrue(ticket.getGroups().length > 0);
             for (long group: ticket.getGroups()) {
                 aclEngine.assign(aclId, group, ACLPermission.EDIT, ACLPermission.CREATE);
             }
@@ -117,16 +118,16 @@ public class ACLEngineTest {
                 boolean found = false;
                 for (ACLAssignment assignment : assignments) {
                     if (assignment.getGroupId() == group) {
-                        assert assignment.getMayEdit() : "Expected edit permissions";
-                        assert assignment.getMayCreate() : "Expected create permissions";
-                        assert !assignment.getMayDelete();
-                        assert !assignment.getMayRead();
-                        assert !assignment.getMayExport();
-                        assert !assignment.getMayRelate();
+                        Assert.assertTrue(assignment.getMayEdit(), "Expected edit permissions");
+                        Assert.assertTrue(assignment.getMayCreate(), "Expected create permissions");
+                        Assert.assertTrue(!assignment.getMayDelete());
+                        Assert.assertTrue(!assignment.getMayRead());
+                        Assert.assertTrue(!assignment.getMayExport());
+                        Assert.assertTrue(!assignment.getMayRelate());
                         found = true;
                     }
                 }
-                assert found : "Group " + group + " not found in assignments: " + assignments;
+                Assert.assertTrue(found, "Group " + group + " not found in assignments: " + assignments);
 
                 final List<ACLAssignment> groupAssignments = aclEngine.loadGroupAssignments(group);
                 boolean foundOurAcl = false;
@@ -135,7 +136,7 @@ public class ACLEngineTest {
                         foundOurAcl = true;
                     }
                 }
-                assert foundOurAcl : "Didn't find ACL " + aclId + " in group assignments for group " + group;
+                Assert.assertTrue(foundOurAcl, "Didn't find ACL " + aclId + " in group assignments for group " + group);
             }
         } finally {
             aclEngine.remove(aclId);
@@ -148,7 +149,7 @@ public class ACLEngineTest {
      */
     @Test(groups = {"ejb", "security"})
     public void guestAssignmentUpdateTest_FX349() throws FxApplicationException {
-        assert getUserTicket().isGuest() : "Not logged in, expected guest ticket";
+        Assert.assertTrue(getUserTicket().isGuest(), "Not logged in, expected guest ticket");
         final long aclId;
         final long typeId;
         try {
@@ -168,8 +169,8 @@ public class ACLEngineTest {
         }
 
         try {
-            assert getUserTicket().isAssignedToACL(aclId) : "Guest user ticket should be assigned to " + aclId;
-            assert !getUserTicket().mayCreateACL(aclId, -1) : "Guest user should not have create permissions on acl " + aclId;
+            Assert.assertTrue(getUserTicket().isAssignedToACL(aclId), "Guest user ticket should be assigned to " + aclId);
+            Assert.assertTrue(!getUserTicket().mayCreateACL(aclId, -1), "Guest user should not have create permissions on acl " + aclId);
             tryCreateInstanceAsGuest(typeId, false);
 
             // remove create perm
@@ -179,8 +180,8 @@ public class ACLEngineTest {
             } finally {
                 FxContext.get().stopRunAsSystem();
             }
-            assert getUserTicket().isAssignedToACL(aclId) : "Guest user ticket should be assigned to " + aclId;
-            assert getUserTicket().mayCreateACL(aclId, -1) : "Guest user should now have create permissions on acl " + aclId;
+            Assert.assertTrue(getUserTicket().isAssignedToACL(aclId), "Guest user ticket should be assigned to " + aclId);
+            Assert.assertTrue(getUserTicket().mayCreateACL(aclId, -1), "Guest user should now have create permissions on acl " + aclId);
             tryCreateInstanceAsGuest(typeId, true);
         } finally {
             try {
@@ -205,7 +206,7 @@ public class ACLEngineTest {
             } finally {
                 FxContext.get().stopRunAsSystem();
             }
-            assert hasPerms : "User should not be able to create folder instance";
+            Assert.assertTrue(hasPerms, "User should not be able to create folder instance");
         } catch (FxApplicationException e) {
             if (!hasPerms && (e instanceof FxNoAccessException)) {
                 // pass

@@ -48,6 +48,7 @@ import com.flexive.tests.embedded.FxTestUtils;
 import static com.flexive.tests.embedded.benchmark.FxBenchmarkUtils.getResultLogger;
 import static com.flexive.tests.embedded.FxTestUtils.login;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 import java.util.List;
 
@@ -79,14 +80,14 @@ public class SearchBenchmark {
             }
 
             final List<FxTreeNode> children = EJBLookup.getTreeEngine().getTree(FxTreeMode.Edit, rootNode, 1).getChildren();
-            assert children.size() == numNodes : "Expected " + numNodes + " children of our root node, got: " + children.size();
+            Assert.assertTrue(children.size() == numNodes, "Expected " + numNodes + " children of our root node, got: " + children.size());
 
             // select the tree paths of all linked contents
             final SqlQueryBuilder builder = new SqlQueryBuilder().select("@pk", "@path").maxRows(numNodes).isChild(rootNode);
             final long startSearch = System.currentTimeMillis();
             final FxResultSet result = builder.timeout(1000).getResult();
             getResultLogger().logTime("selectTreePath", startSearch, numNodes, "row");
-            assert result.getRowCount() == numNodes : "Expected " + numNodes + " rows, got: " + result.getRowCount();
+            Assert.assertTrue(result.getRowCount() == numNodes, "Expected " + numNodes + " rows, got: " + result.getRowCount());
         } finally {
             if (rootNode != -1) {
                 EJBLookup.getTreeEngine().remove(FxTreeNodeEdit.createNew("").setId(rootNode), true, true);

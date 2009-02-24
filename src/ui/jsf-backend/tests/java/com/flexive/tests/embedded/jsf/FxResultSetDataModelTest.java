@@ -44,6 +44,7 @@ import com.flexive.shared.search.query.SqlQueryBuilder;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 /**
  * Tests for the FxResultSetDataModel class, including basic SQL searches.
@@ -73,7 +74,7 @@ public class FxResultSetDataModelTest extends AbstractSqlQueryTest {
 	@Test
 	public void findTestData() throws FxApplicationException {
 		FxResultSet rs = EJBLookup.getSearchEngine().search(SELECT_ALL);
-		assert rs.getRowCount() == TOTALROWS : "Unexpected number of results: " + rs.getRowCount();
+		Assert.assertTrue(rs.getRowCount() == TOTALROWS, "Unexpected number of results: " + rs.getRowCount());
 		assertTotalRowCount(rs);
 	}
 
@@ -108,17 +109,17 @@ public class FxResultSetDataModelTest extends AbstractSqlQueryTest {
 		FxResultSet refResult = getRows(startIndex, maxRows);
         // trigger load
 //		model.setRowIndex(startIndex - 1);
-//		assert startIndex == 0 || model.isRowAvailable() : "Row before first row should be available";
+//		Assert.assertTrue(startIndex == 0 || model.isRowAvailable(), "Row before first row should be available");
         model.setRowIndex(startIndex);
-        assert model.isRowAvailable() : "First row should be available";
+        Assert.assertTrue(model.isRowAvailable(), "First row should be available");
 		model.setRowIndex(startIndex + maxRows - 1);
-		assert model.isRowAvailable() : "Last row should be available";
+		Assert.assertTrue(model.isRowAvailable(), "Last row should be available");
 		model.setRowIndex(startIndex + maxRows);
-		assert !model.isRowAvailable() : "Row after last row should not be available";
-        assert model.getRowCount() == TOTALROWS : "Total row count should be " + TOTALROWS + ", got: " + model.getRowCount();
-        assert model.getResult() != null;
-        assert model.getWrappedData() == model.getResult() : "Result set should be wrapped data";
-        assert model.getFetchRows() == maxRows : "FetchRows should be " + maxRows + ", got: " + model.getFetchRows();
+		Assert.assertTrue(!model.isRowAvailable(), "Row after last row should not be available");
+        Assert.assertTrue(model.getRowCount() == TOTALROWS, "Total row count should be " + TOTALROWS + ", got: " + model.getRowCount());
+        Assert.assertNotNull(model.getResult());
+        Assert.assertTrue(model.getWrappedData() == model.getResult(), "Result set should be wrapped data");
+        Assert.assertTrue(model.getFetchRows() == maxRows, "FetchRows should be " + maxRows + ", got: " + model.getFetchRows());
         assertEqualResults(model, refResult, startIndex, maxRows);
     }
 
@@ -130,7 +131,7 @@ public class FxResultSetDataModelTest extends AbstractSqlQueryTest {
 	public void oneRowResult() throws FxApplicationException {
 		FxResultSetDataModel model = new FxResultSetDataModel(getRows(TOTALROWS - 1, 1));
 		model.setRowIndex(TOTALROWS - 1);
-		assert model.isRowAvailable() : "Row should be available";
+		Assert.assertTrue(model.isRowAvailable(), "Row should be available");
 		model.getRowData();
 	}
 
@@ -141,7 +142,7 @@ public class FxResultSetDataModelTest extends AbstractSqlQueryTest {
     public void testWrappedData() throws FxApplicationException {
         FxResultSet refResult = getRows(0, 10);
         FxResultSetDataModel model = new FxResultSetDataModel(refResult);
-        assert model.getWrappedData() == refResult : "Original result set should not be wrapped.";
+        Assert.assertTrue(model.getWrappedData() == refResult, "Original result set should not be wrapped.");
         assertEqualResults(model, refResult, 0, 10);
         model.setWrappedData(getRows(10, 10));
         assertEqualResults(model, (FxResultSet) model.getWrappedData(), 10, 10);
@@ -150,13 +151,13 @@ public class FxResultSetDataModelTest extends AbstractSqlQueryTest {
     private void testPreloadedPartialResult(int startRow) throws FxApplicationException {
 		FxResultSetDataModel model = new FxResultSetDataModel(getRows(startRow, 10));
 		model.setRowIndex(startRow - 1);
-		assert !model.isRowAvailable() : "No rows before startRow should be available.";
+		Assert.assertTrue(!model.isRowAvailable(), "No rows before startRow should be available.");
 		for (int i = 0; i < 10; i++) {
 			model.setRowIndex(startRow + i);
-			assert model.isRowAvailable() : "Expected more rows, current row: " + (startRow+i+1);
+			Assert.assertTrue(model.isRowAvailable(), "Expected more rows, current row: " + (startRow+i+1));
 			model.getRowData();
 		}
 		model.setRowIndex(startRow + 10);
-		assert !model.isRowAvailable() : "No more rows should be available";
+		Assert.assertTrue(!model.isRowAvailable(), "No more rows should be available");
 	}
 }

@@ -31,7 +31,6 @@
  ***************************************************************/
 package com.flexive.tests.embedded;
 
-import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.CacheAdmin;
 import static com.flexive.shared.EJBLookup.getResultPreferencesEngine;
@@ -44,10 +43,10 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.ArrayList;
 
 /**
  * Basic unit tests for the result preferences EJB.
@@ -99,20 +98,20 @@ public class ResultPreferencesEngineTest {
         final ResultViewType viewType = ResultViewType.LIST;
         final AdminResultLocations location = AdminResultLocations.ADMIN;
         try {
-            assert !rpi.isCustomized(typeId, viewType, location);
+            Assert.assertTrue(!rpi.isCustomized(typeId, viewType, location));
             rpi.load(typeId, viewType, location);
-            assert false : "Should not be able to load configuration for typeId=" + typeId;
+            Assert.fail("Should not be able to load configuration for typeId=" + typeId);
         } catch (FxNotFoundException e) {
             // pass
         }
         try {
             rpi.save(rp, typeId, viewType, location);
             final ResultPreferences rpdb = rpi.load(typeId, viewType, location);
-            assert rp.equals(rpdb) && rpdb.equals(rp) : "ResultPreferences should be equal: " + rp + " / " + rpdb;
-            assert rpi.isCustomized(typeId, viewType, location);
+            Assert.assertTrue(rp.equals(rpdb) && rpdb.equals(rp), "ResultPreferences should be equal: " + rp + " / " + rpdb);
+            Assert.assertTrue(rpi.isCustomized(typeId, viewType, location));
         } finally {
             rpi.remove(typeId, viewType, location);
-            assert !rpi.isCustomized(typeId, viewType, location);
+            Assert.assertTrue(!rpi.isCustomized(typeId, viewType, location));
         }
     }
 
@@ -120,18 +119,18 @@ public class ResultPreferencesEngineTest {
     public void resultPreferencesTimestamp() throws FxApplicationException {
         ResultPreferences rp = createResultPreferences();
         final ResultPreferencesEngine rpi = getResultPreferencesEngine();
-        assert rp.getLastChecked() == -1;
+        Assert.assertTrue(rp.getLastChecked() == -1);
         final ResultViewType viewType = ResultViewType.LIST;
         final AdminResultLocations location = AdminResultLocations.ADMIN;
         final int typeId = -2;
         try {
             rpi.save(rp, typeId, viewType, location);
             // assert that check has been performed at least once
-            assert rpi.load(typeId, viewType, location).getLastChecked() > 0;
+            Assert.assertTrue(rpi.load(typeId, viewType, location).getLastChecked() > 0);
             // TODO add test for environment timestamp
         } finally {
             rpi.remove(typeId, viewType, location);
-            assert !rpi.isCustomized(typeId, viewType, location);
+            Assert.assertTrue(!rpi.isCustomized(typeId, viewType, location));
         }
     }
 
@@ -142,9 +141,9 @@ public class ResultPreferencesEngineTest {
         try {
             getResultPreferencesEngine().saveSystemDefault(rp, -10,
                     ResultViewType.LIST, AdminResultLocations.ADMIN);
-            assert ticket.isGlobalSupervisor() : "Only global supervisors might update the default result preferences.";
+            Assert.assertTrue(ticket.isGlobalSupervisor(), "Only global supervisors might update the default result preferences.");
         } catch (FxNoAccessException e) {
-            assert !ticket.isGlobalSupervisor() : "Global supervisors should be able to update the default result preferences.";
+            Assert.assertTrue(!ticket.isGlobalSupervisor(), "Global supervisors should be able to update the default result preferences.");
         }
     }
 
@@ -154,8 +153,8 @@ public class ResultPreferencesEngineTest {
         try {
             createFolderPreferences(folderTypeId);
             final FxResultSet result = new SqlQueryBuilder().select("@*").type("folder").getResult();
-            assert result.getColumnCount() == 1 : "Expected one column, got: " + Arrays.toString(result.getColumnNames());
-            assert result.getColumnName(1).equals("folder/caption") : "Invalid column name: " + result.getColumnName(1);
+            Assert.assertTrue(result.getColumnCount() == 1, "Expected one column, got: " + Arrays.toString(result.getColumnNames()));
+            Assert.assertTrue(result.getColumnName(1).equals("folder/caption"), "Invalid column name: " + result.getColumnName(1));
         } finally {
             getResultPreferencesEngine().remove(folderTypeId, ResultViewType.LIST, AdminResultLocations.DEFAULT);
         }
@@ -166,9 +165,9 @@ public class ResultPreferencesEngineTest {
         final long folderTypeId = CacheAdmin.getEnvironment().getType("folder").getId();
         try {
             createFolderPreferences(folderTypeId);
-            assert getResultPreferencesEngine()
+            Assert.assertTrue(getResultPreferencesEngine()
                     .load(folderTypeId, ResultViewType.LIST, AdminResultLocations.DEFAULT)
-                    .getOrderByColumns().size() > 0 : "OrderBy with assignment removed by internal check routine";
+                    .getOrderByColumns().size() > 0, "OrderBy with assignment removed by internal check routine");
         } finally {
             getResultPreferencesEngine().remove(folderTypeId, ResultViewType.LIST, AdminResultLocations.DEFAULT);
         }

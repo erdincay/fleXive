@@ -48,6 +48,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.Assert;
 
 /**
  * Test for relations
@@ -113,7 +114,7 @@ public class RelationTest extends StructureTestBase {
 
     @Test
     public void verifyRelationMode() {
-        assert CacheAdmin.getEnvironment().getType(relId).isRelation() : "Expected a relation but found a type";
+        Assert.assertTrue(CacheAdmin.getEnvironment().getType(relId).isRelation(), "Expected a relation but found a type");
     }
 
     @Test
@@ -124,49 +125,49 @@ public class RelationTest extends StructureTestBase {
         type.save(rel);
 
         rel = CacheAdmin.getEnvironment().getType(relId).asEditable();
-        assert rel.getRelations().size() == 1 : "One relation expected!";
-        assert rel.getRemovedRelations().size() == 0;
-        assert rel.getUpdatedRelations().size() == 0;
-        assert rel.getAddedRelations().size() == 0;
+        Assert.assertTrue(rel.getRelations().size() == 1, "One relation expected!");
+        Assert.assertTrue(rel.getRemovedRelations().size() == 0);
+        Assert.assertTrue(rel.getUpdatedRelations().size() == 0);
+        Assert.assertTrue(rel.getAddedRelations().size() == 0);
 
         String assMsg = "No changes expected";
         rel.addRelation(buildRel(0, 0, 0, 0));
-        assert rel.getRemovedRelations().size() == 0 : assMsg;
-        assert rel.getUpdatedRelations().size() == 0 : assMsg;
-        assert rel.getAddedRelations().size() == 0 : assMsg;
+        Assert.assertTrue(rel.getRemovedRelations().size() == 0, assMsg);
+        Assert.assertTrue(rel.getUpdatedRelations().size() == 0, assMsg);
+        Assert.assertTrue(rel.getAddedRelations().size() == 0, assMsg);
 
         assMsg = "One update expected";
         rel.updateRelation(buildRel(0, 0, 1, 0));
-        assert rel.getRemovedRelations().size() == 0 : assMsg;
-        assert rel.getUpdatedRelations().size() == 1 : assMsg;
-        assert rel.getAddedRelations().size() == 0 : assMsg;
+        Assert.assertTrue(rel.getRemovedRelations().size() == 0, assMsg);
+        Assert.assertTrue(rel.getUpdatedRelations().size() == 1, assMsg);
+        Assert.assertTrue(rel.getAddedRelations().size() == 0, assMsg);
 
         assMsg = "One update, one added expected";
         rel.addRelation(buildRel(0, 1, 0, 10));
-        assert rel.getRemovedRelations().size() == 0 : assMsg;
-        assert rel.getUpdatedRelations().size() == 1 : assMsg;
-        assert rel.getAddedRelations().size() == 1 : assMsg;
+        Assert.assertTrue(rel.getRemovedRelations().size() == 0, assMsg);
+        Assert.assertTrue(rel.getUpdatedRelations().size() == 1, assMsg);
+        Assert.assertTrue(rel.getAddedRelations().size() == 1, assMsg);
 
         assMsg = "One removed, one added expected";
         rel.removeRelation(buildRel(0, 0, 1, 0));
-        assert rel.getRemovedRelations().size() == 1 : assMsg;
-        assert rel.getUpdatedRelations().size() == 0 : assMsg;
-        assert rel.getAddedRelations().size() == 1 : assMsg;
+        Assert.assertTrue(rel.getRemovedRelations().size() == 1, assMsg);
+        Assert.assertTrue(rel.getUpdatedRelations().size() == 0, assMsg);
+        Assert.assertTrue(rel.getAddedRelations().size() == 1, assMsg);
 
         type.save(rel);
         rel = CacheAdmin.getEnvironment().getType(relId).asEditable();
-        assert rel.getRelations().size() == 1;
+        Assert.assertTrue(rel.getRelations().size() == 1);
         FxTypeRelation check = rel.getRelations().get(0);
-        assert check.getSource().getId() == srcId[0];
-        assert !check.isSourceLimited();
-        assert check.getDestination().getId() == dstId[1];
-        assert check.isDestinationLimited();
-        assert check.getMaxDestination() == 10;
+        Assert.assertTrue(check.getSource().getId() == srcId[0]);
+        Assert.assertTrue(!check.isSourceLimited());
+        Assert.assertTrue(check.getDestination().getId() == dstId[1]);
+        Assert.assertTrue(check.isDestinationLimited());
+        Assert.assertTrue(check.getMaxDestination() == 10);
 
         rel.removeRelation(buildRel(0, 1, 0, 0));
         rel.setRemoveInstancesWithRelationTypes(true);
         type.save(rel);
-        assert CacheAdmin.getEnvironment().getType(relId).getRelations().size() == 0;
+        Assert.assertTrue(CacheAdmin.getEnvironment().getType(relId).getRelations().size() == 0);
     }
 
     @Test
@@ -182,13 +183,13 @@ public class RelationTest extends StructureTestBase {
         r.setRelatedSource(src).setRelatedDestination(dst);
         FxPK pkr = co.save(r);
         r = co.load(pkr);
-        assert r.getRelatedSource().equals(src) : "Source does not match!";
-        assert r.getRelatedDestination().equals(dst) : "Destination does not match!";
+        Assert.assertTrue(r.getRelatedSource().equals(src), "Source does not match!");
+        Assert.assertTrue(r.getRelatedDestination().equals(dst), "Destination does not match!");
         rel.removeRelation(rel.getRelations().get(0));
         rel.setRemoveInstancesWithRelationTypes(false);
         try {
             type.save(rel);
-            assert false : "Exception expected!";
+            Assert.fail("Exception expected!");
         } catch (FxApplicationException e) {
             //ok
         }
@@ -196,10 +197,10 @@ public class RelationTest extends StructureTestBase {
         try {
             type.save(rel);
         } catch (FxApplicationException e) {
-            assert false : "No exception expected, relation instances should have been removed. msg: " + e.getMessage();
+            Assert.fail("No exception expected, relation instances should have been removed. msg: " + e.getMessage());
         }
         rel = CacheAdmin.getEnvironment().getType(relId).asEditable();
-        assert rel.getRelations().size() == 0 : "Expected 0 relations for rel!";
+        Assert.assertTrue(rel.getRelations().size() == 0, "Expected 0 relations for rel!");
     }
 
     private FxTypeRelation buildRel(int src, int dst, int maxSrc, int maxDst) {

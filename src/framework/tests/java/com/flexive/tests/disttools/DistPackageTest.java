@@ -190,13 +190,13 @@ public class DistPackageTest {
 
     private ZipFile getDistFile() throws IOException {
         final String name = System.getProperty("flexive.test.dist.file");
-        assert StringUtils.isNotBlank(name) : "flexive.test.dist.file property not set.";
+        Assert.assertTrue(StringUtils.isNotBlank(name), "flexive.test.dist.file property not set.");
         return new ZipFile(name);
     }
 
     private File createTempDir() {
         final String tempDir = System.getProperty("java.io.tmpdir");
-        assert StringUtils.isNotBlank(tempDir);
+        Assert.assertTrue(StringUtils.isNotBlank(tempDir));
         final File dir = new File(tempDir + File.separator + "flexive-dist-tests-temp-" + RandomStringUtils.randomAlphanumeric(32));
         dir.deleteOnExit();
         dir.mkdirs();
