@@ -107,7 +107,6 @@
     </macrodef>
 
     <macrodef name="globalconfig-setup" description="The global configuration setup.">
-        <attribute name="database" description="The database name"/>
         <sequential >
             <groovy>
                 <arg value="@{database}"/>
