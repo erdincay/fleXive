@@ -849,10 +849,10 @@ public class ContentEditorBean implements ActionBean, Serializable {
                     initTreeData(pk.getId());
                 } else {
                     // Create a new empty content
-                    content = co.initialize(type);
+                    treeNodes = new ArrayList<FxTreeNode>(5);
                     versionInfo = FxContentVersionInfo.createEmpty();
                     version = FxPK.MAX;
-                    treeNodes = new ArrayList<FxTreeNode>(5);
+                    content = co.initialize(type);
                 }
                 _initVariables();
                 return true;
