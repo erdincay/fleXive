@@ -83,23 +83,22 @@ final FxType manufacturerType = CacheAdmin.environment.getType("manufacturer")
 new GroovyTypeBuilder().product(description: new FxString("Product")) {
 
     name         (assignment: "ROOT/CAPTION",
-                  multilang: true,
                   description: new FxString(FxLanguage.ENGLISH, "Name"))
 
     // create a group "Variant" to store the actual article numbers
     Variant      (description: new FxString(FxLanguage.ENGLISH, "Variant"),
                   multiplicity: FxMultiplicity.MULT_0_N) {
 
-        articleNumber   (description: new FxString(FxLanguage.ENGLISH, "Article number"),
-                         uniqueMode: UniqueMode.Type)
+    articleNumber   (description: new FxString(FxLanguage.ENGLISH, "Article number"),
+                     uniqueMode: UniqueMode.Type)
 
-        color           (dataType: FxDataType.SelectOne,
-                         referencedList: colors,
-                         description: new FxString(FxLanguage.ENGLISH, "Color"),
-                         uniqueMode: UniqueMode.Instance)
+    color           (dataType: FxDataType.SelectOne,
+                     referencedList: colors,
+                     description: new FxString(FxLanguage.ENGLISH, "Color"),
+                     uniqueMode: UniqueMode.Instance)
 
-        image       (dataType: FxDataType.Binary,
-                      multiplicity: FxMultiplicity.MULT_0_N,
+    image       (dataType: FxDataType.Binary,
+                    multiplicity: FxMultiplicity.MULT_0_N,
                       description: new FxString(FxLanguage.ENGLISH, "Images"))
 
     }

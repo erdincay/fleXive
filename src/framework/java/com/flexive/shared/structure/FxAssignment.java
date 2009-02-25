@@ -359,9 +359,9 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
     public FxString getDisplayLabel() {
         if (label != null && !label.isEmpty()) {
             return label;
-        } else if (assignedType != null && assignedType.getDescription() != null
-                && !assignedType.getDescription().isEmpty()) {
-            return assignedType.getDescription();
+        } else if (assignedType != null && assignedType.getLabel() != null
+                && !assignedType.getLabel().isEmpty()) {
+            return assignedType.getLabel();
         } else {
             return new FxString(alias);
         }

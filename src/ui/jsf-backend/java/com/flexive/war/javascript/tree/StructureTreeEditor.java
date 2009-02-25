@@ -368,7 +368,7 @@ public class StructureTreeEditor implements Serializable {
      */
     public long createDerivedType(long parentId, String alias) throws FxApplicationException {
         FxType parent = CacheAdmin.getEnvironment().getType(parentId);
-        FxTypeEdit derived = FxTypeEdit.createNew(alias, new FxString(parent.getDescription().isMultiLanguage(),alias), parent.getACL(), parent);
+        FxTypeEdit derived = FxTypeEdit.createNew(alias, new FxString(parent.getLabel().isMultiLanguage(),alias), parent.getACL(), parent);
         derived.setIcon(parent.getIcon());
         return EJBLookup.getTypeEngine().save(derived);
     }
@@ -386,7 +386,7 @@ public class StructureTreeEditor implements Serializable {
                 || StructureTreeWriter.NODE_TYPE_GROUP.equals(nodeType)) {   
             return CacheAdmin.getEnvironment().getAssignment(id).getDisplayName();
         }
-        else return CacheAdmin.getEnvironment().getType(id).getDescription().getBestTranslation();
+        else return CacheAdmin.getEnvironment().getType(id).getLabel().getBestTranslation();
     }
 
 }

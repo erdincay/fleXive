@@ -238,7 +238,7 @@ public class FxTypeConverter implements Converter {
                     throw e.asRuntimeException();
                 }
             } else if ("label".equals(node)) {
-                typeEdit.setDescription((FxString) ctx.convertAnother(this, FxValue.class));
+                typeEdit.setLabel((FxString) ctx.convertAnother(this, FxValue.class));
             } else if (ConversionEngine.KEY_LCI.equals(node)) {
                 ctx.convertAnother(this, LifeCycleInfo.class);
             } else if ("scriptEvents".equals(node)) {

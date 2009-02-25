@@ -523,11 +523,11 @@ public class TypeEditorBean {
     }
 
     public void setDescription(FxString desc) {
-        this.type.setDescription(desc);
+        this.type.setLabel(desc);
     }
 
     public FxString getDescription() {
-        return this.type.getDescription();
+        return this.type.getLabel();
     }
 
     public void setHistoryAge(long age) {

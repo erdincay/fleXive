@@ -138,7 +138,7 @@ public class StructureTest {
         testEdit.setName("TestCDNewName");
         testEdit.setPermissions((byte) 0); //clear permissions
         testEdit.setUseInstancePermissions(true);
-        testEdit.setDescription(new FxString("Changed description"));
+        testEdit.setLabel(new FxString("Changed label"));
         testEdit.setState(TypeState.Unavailable);
         te.save(testEdit);
         FxType testType = CacheAdmin.getEnvironment().getType("TestCDNewName");

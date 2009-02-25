@@ -120,9 +120,10 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
     private static final Map<Object, Object> EMPTYATTRIBUTES = Collections.unmodifiableMap(new HashMap<Object, Object>());
 
     /**
-     * List of key that are not used for options and are "real" parameters
+     * List of keys that are not used for options and are "real" parameters
+     * when creating a new property
      */
-    private final static String[] NONOPTION_KEYS = {
+    private final static String[] PROPERTY_NONOPTION_KEYS = {
             "ACL",
             "NAME",
             "HINT",
@@ -135,15 +136,44 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
 
     };
 
+     /**
+     * List of keys that are not used for options and are "real" parameters
+     * when creating a reused property assignment
+     */
+    private final static String[] ASSIGNMENT_NONOPTION_KEYS = {
+        "DEFAULTMULTIPLICITY",
+        "DESCRIPTION",
+        "LABEL",
+        "HINT",
+        "ACL",
+        "DEFAULTVALUE",
+        "MULTIPLICITY",
+        "ASSIGNMENT"
+    };
+
     /**
-     * Check if the given key is a non-option key (=not used for property or group options)
+     * Check if the given key is a non-property-option key (=not used for property options)
      *
      * @param key the key to check
      * @return if its a non-option key
      */
-    private static boolean isNonOptionKey(String key) {
+    private static boolean isNonPropertyOptionKey(String key) {
         String uKey = key.toUpperCase();
-        for (String check : NONOPTION_KEYS)
+        for (String check : PROPERTY_NONOPTION_KEYS)
+            if (check.equals(uKey))
+                return true;
+        return false;
+    }
+
+     /**
+     * Check if the given key is a non-assignment-option key (=not used for property assignment options)
+     *
+     * @param key the key to check
+     * @return if its a non-option key
+     */
+    private static boolean isNonAssignmentOptionKey(String key) {
+        String uKey = key.toUpperCase();
+        for (String check : ASSIGNMENT_NONOPTION_KEYS)
             if (check.equals(uKey))
                 return true;
         return false;
@@ -355,6 +385,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             // root node, create type
             final ACL acl = (ACL) FxSharedUtils.get(attributes, "acl", CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()));
             final FxString description = (FxString) FxSharedUtils.get(attributes, "description", new FxString(structureName));
+            final FxString label = (FxString) FxSharedUtils.get(attributes, "label", new FxString(structureName));
             final String parentTypeName = (String) FxSharedUtils.get(attributes, "parentTypeName", null);
             final Boolean useInstancePermissions = (Boolean) FxSharedUtils.get(attributes, "useInstancePermissions", null);
             final Boolean usePropertyPermissions = (Boolean) FxSharedUtils.get(attributes, "usePropertyPermissions", null);
@@ -362,7 +393,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             final Boolean useTypePermissions = (Boolean) FxSharedUtils.get(attributes, "useTypePermissions", null);
             final Boolean usePermissions = (Boolean) FxSharedUtils.get(attributes, "usePermissions", null);
             try {
-                final FxTypeEdit type = FxTypeEdit.createNew(structureName, description, acl,
+                final FxTypeEdit type = FxTypeEdit.createNew(structureName, attributes.containsKey(label) ? label : description, acl,
                         parentTypeName != null ? CacheAdmin.getEnvironment().getType(parentTypeName) : null);
                 if (useInstancePermissions != null) {
                     type.setUseInstancePermissions(useInstancePermissions);
@@ -390,6 +421,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
         final FxMultiplicity multiplicity = (FxMultiplicity) FxSharedUtils.get(attributes, "multiplicity", FxMultiplicity.MULT_0_1);
         final String elementName = (String) FxSharedUtils.get(attributes, "name", StringUtils.capitalize(structureName));
         final FxString description = (FxString) FxSharedUtils.get(attributes, "description", new FxString(elementName));
+        final FxString label = (FxString) FxSharedUtils.get(attributes, "label", new FxString(elementName));
         final FxString hint = (FxString) FxSharedUtils.get(attributes, "hint", new FxString(""));
         final ACL acl = (ACL) FxSharedUtils.get(attributes, "acl", CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()));
         final String assignment = (String) FxSharedUtils.get(attributes, "assignment", null);
@@ -408,9 +440,13 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                 try {
                     final FxPropertyAssignmentEdit pa = FxPropertyAssignmentEdit.createNew((FxPropertyAssignment) fxAssignment,
                             type, alias, "/");
-                    if( attributes.containsKey("defaultMultiplicity"))
+                    //set generic property-assignment attributes
+                     if( attributes.containsKey("defaultMultiplicity"))
                         pa.setDefaultMultiplicity(defaultMultiplicity);
-                    if( attributes.containsKey("description"))
+                    if( attributes.containsKey("label"))
+                        pa.setLabel(label);
+                    //fallback to description attribute (backwards compatibility)if label is not explicitly set
+                    if( attributes.containsKey("description") && !attributes.containsKey("label"))
                         pa.setLabel(description);
                     if( attributes.containsKey("hint"))
                         pa.setHint(hint);
@@ -420,6 +456,22 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                         pa.setDefaultValue(defaultValue);
                     if( attributes.containsKey("multiplicity"))
                         pa.setMultiplicity(multiplicity);
+
+                    // set non-generic property-assignment options
+                    for (Object oEntry : attributes.entrySet()) {
+                        final Map.Entry entry = (Map.Entry) oEntry;
+                        final Object key = entry.getKey();
+                        if (isNonAssignmentOptionKey((String) key))
+                            continue;
+                        final Object optionValue = entry.getValue();
+                        final String optionKey = ((String) key).toUpperCase();
+                        // set generic options
+                        if (optionValue instanceof Boolean) {
+                            pa.setOption(optionKey, (Boolean) optionValue);
+                        } else if (optionValue != null) {
+                            pa.setOption(optionKey, optionValue.toString());
+                        }
+                    }
                     return new PropertyAssignmentNode(pa);
                 } catch (FxApplicationException e) {
                     throw e.asRuntimeException();
@@ -427,13 +479,13 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             } else {
                 // create a new property
                 final FxPropertyEdit property = FxPropertyEdit.createNew(StringUtils.capitalize(elementName),
-                        description, hint, multiplicity, acl, dataType);
+                        attributes.containsKey("label") ? label: description, hint, multiplicity, acl, dataType);
                 property.setAutoUniquePropertyName(true);
                 property.setAssignmentDefaultMultiplicity(defaultMultiplicity);
                 for (Object oEntry : attributes.entrySet()) {
                     final Map.Entry entry = (Map.Entry) oEntry;
                     final Object key = entry.getKey();
-                    if (isNonOptionKey((String) key))
+                    if (isNonPropertyOptionKey((String) key))
                         continue;
                     final Object optionValue = entry.getValue();
                     final String optionKey = ((String) key).toUpperCase();
@@ -473,7 +525,8 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                 try {
                     final FxGroupAssignmentEdit ga = FxGroupAssignmentEdit.createNew((FxGroupAssignment) fxAssignment,
                             type, alias, "/");
-                    ga.setLabel(description);
+                    //backwards compatibility
+                    ga.setLabel(attributes.containsKey("label") ? label : description);
                     ga.setHint(hint);
                     ga.setAlias(alias);
                     ga.setDefaultMultiplicity(defaultMultiplicity);

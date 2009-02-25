@@ -167,7 +167,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             else
                 ps.setLong(21, type.getIcon().getDefaultTranslation().getId());
             ps.executeUpdate();
-            Database.storeFxString(type.getDescription(), con, TBL_STRUCT_TYPES, "DESCRIPTION", "ID", newId);
+            Database.storeFxString(type.getLabel(), con, TBL_STRUCT_TYPES, "DESCRIPTION", "ID", newId);
 
             StructureLoader.reload(con);
             FxType thisType = CacheAdmin.getEnvironment().getType(newId);
@@ -381,9 +381,9 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             //end name change
 
             //start description change
-            if (!orgType.getDescription().equals(type.getDescription())) {
-                Database.storeFxString(type.getDescription(), con, TBL_STRUCT_TYPES, "DESCRIPTION", "ID", type.getId());
-                htracker.track(orgType, "history.type.update.description", orgType.getDescription(), type.getDescription());
+            if (!orgType.getLabel().equals(type.getLabel())) {
+                Database.storeFxString(type.getLabel(), con, TBL_STRUCT_TYPES, "DESCRIPTION", "ID", type.getId());
+                htracker.track(orgType, "history.type.update.description", orgType.getLabel(), type.getLabel());
             }
             //end description change
 

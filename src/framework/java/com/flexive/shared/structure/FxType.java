@@ -213,10 +213,11 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
 
     /**
      * Get the description (=label) of this FxType
+     * @deprecated replaced by {@link #getLabel()}
      *
      * @return description (=label)
      */
-    public FxString getDescription() {
+    @Deprecated public FxString getDescription() {
         return getLabel();
     }
 

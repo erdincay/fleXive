@@ -1039,7 +1039,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
     }
 
     public String getTypeDisplay() {
-        String display = environment.getType(type).getDescription().getBestTranslation();
+        String display = environment.getType(type).getLabel().getBestTranslation();
         if (display == null || display.trim().length() == 0) {
             display = environment.getType(type).getName();
         }

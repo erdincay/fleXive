@@ -108,7 +108,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      */
     public FxTypeEdit(FxType type) {
         super(type.getId(), type.getACL(), type.getWorkflow(),
-                type.getName(), type.getDescription(), type.getParent(), type.getStorageMode(), type.getCategory(),
+                type.getName(), type.getLabel(), type.getParent(), type.getStorageMode(), type.getCategory(),
                 type.getMode(), type.getLanguage(), type.getState(), type.permissions,
                 type.isTrackHistory(), type.getHistoryAge(), type.getMaxVersions(), type.getMaxRelSource(),
                 type.getMaxRelDestination(), type.getLifeCycleInfo(), type.getDerivedTypes(), type.getRelations());
@@ -312,15 +312,27 @@ public class FxTypeEdit extends FxType implements Serializable {
         return this;
     }
 
+    
     /**
-     * Set the types description
+     * Set the description (=label) of this type
+     * @deprecated replaced by {@link #setLabel(com.flexive.shared.value.FxString)}
      *
      * @param description description
      * @return the type itself, useful for chained calls
      */
-    public FxTypeEdit setDescription(FxString description) {
+    @Deprecated public FxTypeEdit setDescription(FxString description) {
+        return setLabel(description);    
+    }
+
+    /**
+     * Set the label of this type
+     *
+     * @param label label
+     * @return the type itself, useful for chained calls
+     */
+    public FxTypeEdit setLabel(FxString label) {
         FxSharedUtils.checkParameterMultilang(description, "description");
-        this.description = description;
+        this.description = label;
         this.changed = true;
         return this;
     }
