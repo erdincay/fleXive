@@ -514,6 +514,31 @@ public class ContentEngineTest {
     }
 
     @Test
+    public void getValues() throws Exception {
+        FxType testType = CacheAdmin.getEnvironment().getType(TEST_TYPE);
+        Assert.assertTrue(testType != null);
+        FxContent test = co.initialize(testType.getId());
+        final String XP = "/TestProperty3";
+        Assert.assertEquals(test.getValues(XP).size(), 1); //initialized with 1 empty entry
+        test.setValue(XP+"[1]", new FxString(true, "1"));
+        Assert.assertEquals(test.getValues(XP).size(), 1);
+        test.setValue(XP+"[2]", new FxString(true, "2"));
+        Assert.assertEquals(test.getValues(XP).size(), 2);
+        test.setValue(XP+"[3]", new FxString(true, "3"));
+        Assert.assertEquals(test.getValues(XP).size(), 3);
+        List<FxValue> values = test.getValues(XP);
+        Assert.assertEquals(values.get(0).getBestTranslation(), "1");
+        Assert.assertEquals(values.get(1).getBestTranslation(), "2");
+        Assert.assertEquals(values.get(2).getBestTranslation(), "3");
+        test.getPropertyData(XP+"[2]").setPos(3); //1,2,3 -> 1,3,2
+        values = test.getValues(XP);
+        //positions should be sorted
+        Assert.assertEquals(values.get(0).getBestTranslation(), "1");
+        Assert.assertEquals(values.get(1).getBestTranslation(), "2");
+        Assert.assertEquals(values.get(2).getBestTranslation(), "3");
+    }
+
+    @Test
     public void contentInitialize() throws Exception {
         try {
             FxType article = CacheAdmin.getEnvironment().getType(TYPE_ARTICLE);

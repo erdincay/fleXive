@@ -498,14 +498,13 @@ public class FxContentView extends UIOutput {
                 final FxType type = CacheAdmin.getEnvironment().getType(content.getTypeId());
                 // add property
                 newPath.append("/").append(groups[groups.length - 1]);
-                try {
-                    return content.getValue(newPath.toString());
-                } catch (FxNotFoundException e) {
-                    // xpath not set yet
-                    final FxValue value = ((FxPropertyAssignment) type.getAssignment(path)).getEmptyValue();
-                    content.setValue(newPath.toString(), value);
-                    return content.getValue(newPath.toString());
-                }
+                FxValue ret = content.getValue(newPath.toString());
+                if (ret != null)
+                    return ret;
+                // xpath not set yet
+                final FxValue value = ((FxPropertyAssignment) type.getAssignment(path)).getEmptyValue();
+                content.setValue(newPath.toString(), value);
+                return content.getValue(newPath.toString());
             } catch (FxNotFoundException e) {
                 return new FxString("");
             } catch (FxApplicationException e) {

@@ -55,7 +55,7 @@ import java.util.Formatter;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @see com.flexive.shared.search.query.SqlQueryBuilder
  */
-@Test(groups = "shared")
+@Test(groups = "search")
 public class SqlQueryBuilderTest {
     /**
      * A very basic query test with one condition.

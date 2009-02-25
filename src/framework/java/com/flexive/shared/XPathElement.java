@@ -270,7 +270,7 @@ public class XPathElement implements Serializable {
             else
                 xpc.append(xpcurr).append("[1]");
         }
-        if( type != null )
+        if (type != null)
             return type + xpc.toString();
         return xpc.toString();
     }
@@ -368,12 +368,28 @@ public class XPathElement implements Serializable {
     }
 
     /**
+     * Strip the last element (usually property) from an XPath
+     *
+     * @param XPath the XPath
+     * @return XPath without the last element
+     * @throws FxInvalidParameterException for invalid XPath's
+     */
+    public static String stripLastElement(String XPath) throws FxInvalidParameterException {
+        if (XPath != null && ("/".equals(XPath.trim()) || XPath.trim().lastIndexOf('/') == 0))
+            return "/";
+        if (StringUtils.isEmpty(XPath) || !isValidXPath(XPath.toUpperCase()))
+            throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", XPath);
+        return XPath.substring(0, XPath.lastIndexOf('/')).toUpperCase();
+    }
+
+    /**
      * Extract the primary key stored in the given XPath. If no PK is contained
      * in the XPath, a FxRuntimeException is thrown.
      *
      * @param xPath the xpath
-     * @return  the primary key stored in the given XPath
-     * @throws com.flexive.shared.exceptions.FxRuntimeException   if the given xpath is invalid or contains no PK
+     * @return the primary key stored in the given XPath
+     * @throws com.flexive.shared.exceptions.FxRuntimeException
+     *          if the given xpath is invalid or contains no PK
      */
     public static FxPK getPK(String xPath) {
         FxSharedUtils.checkParameterEmpty(xPath, "xpath");

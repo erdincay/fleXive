@@ -48,10 +48,7 @@ import com.flexive.shared.value.*;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * A content instance
@@ -685,6 +682,40 @@ public class FxContent implements Serializable {
             if( isXPathValid(XPath, true))
                 return null; //just not set, see FX-473
             throw e.asRuntimeException();
+        }
+    }
+
+    /**
+     * Get all values of a given XPath, ordered by multiplicty.
+     * If the assignment has a max. multiplicity of 1 return a list with a single entry
+     *
+     * @param XPath requested XPath
+     * @return all values of a given XPath, ordered by multiplicty
+     * @since 3.1
+     */
+    public List<FxValue> getValues(String XPath) {
+        if (!isXPathValid(XPath, true))
+            //noinspection ThrowableInstanceNeverThrown
+            throw new FxInvalidParameterException("XPATH", "ex.xpath.element.noProperty", XPath).asRuntimeException();
+        try {
+            final FxEnvironment env = CacheAdmin.getEnvironment();
+            long assignmentId = env.getType(getTypeId()).getAssignment(XPath).getId();
+            FxGroupData group = getGroupData(XPathElement.stripLastElement(XPath));
+            List<String> paths = new ArrayList<String>(10);
+            for (FxData data : group.getChildren()) {
+                if (data.isGroup())
+                    continue;
+                if (data.getAssignmentId() == assignmentId)
+                    paths.add(data.getXPathFull());
+            }
+            String[] p = paths.toArray(new String[paths.size()]);
+            Arrays.sort(p);
+            List<FxValue> values = new ArrayList<FxValue>(p.length);
+            for (String xp : p)
+                values.add(getValue(xp));
+            return values;
+        } catch (FxApplicationException e) {
+            return new ArrayList<FxValue>(0);
         }
     }
 

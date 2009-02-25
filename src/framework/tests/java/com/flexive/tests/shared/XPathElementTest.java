@@ -57,9 +57,9 @@ public class XPathElementTest {
 
     @Test
     public void lastElement() throws FxInvalidParameterException {
-        Assert.assertTrue("C[1]".equals(XPathElement.lastElement("/A/B/C").toString()));
-        Assert.assertTrue("C[123]".equals(XPathElement.lastElement("/A/B/C[123]").toString()));
-        Assert.assertTrue("C[2]".equals(XPathElement.lastElement("/C[2]").toString()));
+        Assert.assertEquals("C[1]", XPathElement.lastElement("/A/B/C").toString());
+        Assert.assertEquals("C[123]", XPathElement.lastElement("/A/B/C[123]").toString());
+        Assert.assertEquals("C[2]", XPathElement.lastElement("/C[2]").toString());
         try {
             XPathElement.lastElement("/A/B/C[123]s");
             Assert.fail("expected exception");
@@ -78,6 +78,27 @@ public class XPathElementTest {
         } catch (FxInvalidParameterException e) {
             //ok
         }
+    }
+
+    @Test
+    public void stripLastElement() throws FxInvalidParameterException {
+        try {
+            XPathElement.stripLastElement(null);
+            Assert.fail("expected exception");
+        } catch (FxInvalidParameterException e) {
+            //expected
+        }
+        try {
+            XPathElement.stripLastElement("foobar");
+            Assert.fail("expected exception");
+        } catch (FxInvalidParameterException e) {
+            //expected
+        }
+        Assert.assertEquals("/", XPathElement.stripLastElement("/"));
+        Assert.assertEquals("/", XPathElement.stripLastElement(" / "));
+        Assert.assertEquals("/", XPathElement.stripLastElement("/abc"));
+        Assert.assertEquals("/ABC", XPathElement.stripLastElement("/abc/def"));
+        Assert.assertEquals("/ABC/DEF", XPathElement.stripLastElement("/abc/def/ghi"));
     }
 
     @Test
