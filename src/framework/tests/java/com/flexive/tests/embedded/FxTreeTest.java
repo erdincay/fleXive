@@ -625,6 +625,8 @@ public class FxTreeTest {
         final String testData = "testdata, default lang 1234567890";
         mode1 = FxTreeMode.Edit;
         mode2 = FxTreeMode.Live;
+        tree.clear(mode1);
+        tree.clear(mode2);
         long[] nodes = createTestTree(mode1);
 
         // find by name
@@ -704,8 +706,8 @@ public class FxTreeTest {
      */
     @Test
     public void getPathsTest() throws FxApplicationException {
-        FxTreeMode mode;
-        mode = FxTreeMode.Edit;
+        FxTreeMode mode= FxTreeMode.Edit;
+        tree.clear(mode);
         long[] nodes = createTestTree(mode);
         final String node2_2 = "node_2_2";
         final String expectedPath1 = "/node_1/node_2/node_2_2";
@@ -808,6 +810,7 @@ public class FxTreeTest {
     public void populateTest() throws FxApplicationException {
         // create the testdata in the live tree, assert that names of the root nodes
         FxTreeMode mode = FxTreeMode.Live;
+        tree.clear(mode);
         FxTreeNode n1, n2, n3;
         int maxLevel = 1;
         final String node1 = "Level2_0_";
@@ -840,6 +843,7 @@ public class FxTreeTest {
     @Test
     public void genericTreeStorageSetDataTest() throws FxApplicationException {
         FxTreeMode mode = FxTreeMode.Edit;
+        tree.clear(mode);
         long[] nodes = createTestTree(mode);
         String data = "TEMPLATE A";
         TreeStorage treeStorage = new TreeStorage();
@@ -870,6 +874,7 @@ public class FxTreeTest {
     @Test
     public void genericTreeStorageGetCopyOfCountTest() throws FxApplicationException {
         FxTreeMode mode = FxTreeMode.Edit;
+        tree.clear(mode);
         long[] nodes = createTestTree(mode);
         long typeId = createTestType();
         FxTreeNode node = tree.getNode(mode, nodes[0]);
@@ -911,6 +916,7 @@ public class FxTreeTest {
     public void genericTreeStorageFlagDirtyTest() throws FxApplicationException {
         TreeStorage treeStorage = new TreeStorage();
         FxTreeMode mode = FxTreeMode.Edit;
+        tree.clear(mode);
         long nodeId = createTestTree(mode)[0];
 
         Connection con = null;
