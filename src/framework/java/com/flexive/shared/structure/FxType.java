@@ -272,10 +272,39 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     /**
      * Get all FxTypes that are derived from this Type
      *
-     * @return Iterator of all derived types
+     * @return Iterator of all directly derived types
      */
     public List<FxType> getDerivedTypes() {
-        return derivedTypes;
+        return Collections.unmodifiableList(derivedTypes);
+    }
+
+    /**
+     * Get all FxTypes that are derived from this type.
+     *
+     * @param transitive    if transitive dependencies (derived types of derived types) should be resolved
+     * @return              all FxTypes that are derived from this type.
+     * @since 3.1
+     */
+    public List<FxType> getDerivedTypes(boolean transitive) {
+        if (!transitive) {
+            return getDerivedTypes();
+        }
+        final List<FxType> result = new ArrayList<FxType>();
+        addDerivedTypes(result);
+        return result;
+    }
+
+    /**
+     * Add the derived types (direct and through transitive dependency) of this type to the result list.
+     *
+     * @param result    the result list to be populated
+     * @since 3.1
+     */
+    protected void addDerivedTypes(List<FxType> result) {
+        for (FxType type : derivedTypes) {
+            result.add(type);
+            type.addDerivedTypes(result);
+        }
     }
 
     /**

@@ -265,6 +265,32 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
     }
 
     /**
+     * Returns true if this assignment is a (direct or indirect) descendant of the given assignment.
+     *
+     * @param environment   the current environment
+     * @param assignmentId  the parent assignment ID to be checked
+     * @return  true if this assignment is a (direct or indirect) descendant of the given assignment.
+     * @since 3.1
+     */
+    public boolean isDerivedFrom(FxEnvironment environment, long assignmentId) {
+        if (!isDerivedAssignment()) {
+            return false;
+        }
+        if (baseAssignment == assignmentId) {
+            return true;
+        }
+        // walk up in hierarchy
+        FxAssignment assignment = environment.getAssignment(baseAssignment);
+        if (!assignment.getAlias().equals(getAlias())) {
+            return false;   // different alias --> breaks inheritance chain
+        }
+        while (assignment.getId() != assignmentId && assignment.isDerivedAssignment()) {
+            assignment = environment.getAssignment(assignment.getBaseAssignmentId());
+        }
+        return assignment.getId() == assignmentId;
+    }
+
+    /**
      * The FxType this assignment is associated with
      *
      * @return FxType this assignment is associated with
