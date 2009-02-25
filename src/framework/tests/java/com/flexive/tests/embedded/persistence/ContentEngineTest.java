@@ -493,6 +493,23 @@ public class ContentEngineTest {
         Assert.assertTrue(1 == co.removeForType(testType.getId()), "Only one instance should be removed!");
         Assert.assertTrue(0 == co.removeForType(testType.getId()), "No instance should be left to remove!");
 
+        // /TestNumberSL has a max. multiplicity of 2
+        //since FX-473 null should be returned if not set
+        Assert.assertNull(testLoad3.getValue("/TestNumberSL[2]"));
+        try {
+            //should throw unchecked exception since multiplicity 3 is out of range
+            testLoad3.getValue("/TestNumberSL[3]");
+            Assert.fail("Accessing an invalid XPath should have failed. Multiplicity out of range.");
+        } catch(FxRuntimeException re) {
+            //expected
+        }
+        try {
+            //should throw unchecked exception since multiplicity 3 is out of range
+            testLoad3.getValue("/TestNumberSLXXX[1]");
+            Assert.fail("Accessing an invalid XPath should have failed.");
+        } catch(FxRuntimeException re) {
+            //expected
+        }
         co.initialize(testType.getId()).randomize();
     }
 

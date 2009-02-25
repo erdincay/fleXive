@@ -671,16 +671,21 @@ public class FxContent implements Serializable {
 
     /**
      * Get the value of a (property) XPath.
-     * This is actually a convenience method that internally calls <code>getPropertyData(XPath).getValuXDEPTHe()</code>
+     * This is actually a convenience method that internally calls <code>getPropertyData(XPath).getValue()</code>.
+     * If the XPath is valid but no value is set, <code>null</code> will be returned
      *
      * @param XPath requested XPath
-     * @return FxValue
-     * @throws FxNotFoundException         on errors
-     * @throws FxInvalidParameterException on errors
+     * @return FxValue or <code>null</code> if no value is set
      * @see #getPropertyData(String)
      */
-    public FxValue getValue(String XPath) throws FxNotFoundException, FxInvalidParameterException {
-        return getPropertyData(XPath).getValue();
+    public FxValue getValue(String XPath)  {
+        try {
+            return getPropertyData(XPath).getValue();
+        } catch (FxApplicationException e) {
+            if( isXPathValid(XPath, true))
+                return null; //just not set, see FX-473
+            throw e.asRuntimeException();
+        }
     }
 
     /**
