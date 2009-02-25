@@ -139,7 +139,7 @@ public class FxPermissionUtils {
                 //property permissions are only checked for delete operations since no
                 //exception should be thrown when ie loading as properties are wrapped in
                 //FxNoAccess values or set to read only
-                if (si.usePermissions() && si.getUsedPropertyACL().size() > 0 && assignment.getACLCategory() == ACLCategory.STRUCTURE) {
+                if (si.usePermissions() && si.getUsedPropertyACL().length > 0 && assignment.getACLCategory() == ACLCategory.STRUCTURE) {
                     for (long propertyACL : si.getUsedPropertyACL())
                         if (propertyACL == assignment.getAclId())
                             if (!assignment.getPermission(permission, si.getOwnerId(), ticket.getUserId())) {

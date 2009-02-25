@@ -31,12 +31,8 @@
  ***************************************************************/
 package com.flexive.shared.content;
 
-import org.apache.commons.lang.ArrayUtils;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Security related information about a content (primary key)
@@ -101,7 +97,7 @@ public class FxContentSecurityInfo implements Serializable {
      * All used and relevant property ACL's. will be empty if property permissions are disabled for
      * the type
      */
-    private List<Long> usedPropertyACL;
+    private long[] usedPropertyACL;
 
     /**
      * Constructor
@@ -131,7 +127,8 @@ public class FxContentSecurityInfo implements Serializable {
         this.stepACL = stepACL;
         this.contentACL = contentACL;
         this.previewACL = previewACL;
-        this.usedPropertyACL = Collections.unmodifiableList(Arrays.asList(ArrayUtils.toObject(usedPropertyACL)));
+        this.usedPropertyACL = new long[usedPropertyACL.length];
+        System.arraycopy(usedPropertyACL, 0, this.usedPropertyACL, 0, usedPropertyACL.length);
     }
 
     /**
@@ -203,7 +200,7 @@ public class FxContentSecurityInfo implements Serializable {
      *
      * @return relevant property ACL's
      */
-    public List<Long> getUsedPropertyACL() {
+    public long[] getUsedPropertyACL() {
         return usedPropertyACL;
     }
 
