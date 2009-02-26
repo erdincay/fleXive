@@ -34,6 +34,7 @@ package com.flexive.tests.embedded.persistence;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPermissionUtils;
@@ -238,6 +239,16 @@ public class ContentPropertySecurityTest {
         Assert.assertTrue(comp.getPropertyData("/" + PROP2_NAME).mayCreateMore());
         co.save(comp); //re-save with original prop1 value
         FxContext.get().stopRunAsSystem();
+    }
+
+    @Test
+    public void searchWithPropertyPermissions_FX479() throws FxApplicationException {
+        TestUsers.assignACL(user, contentACL, ACLPermission.READ, ACLPermission.EDIT);
+        co.load(refpk); // assert that we can load the content
+        final FxResultSet result = EJBLookup.getSearchEngine().search(
+                "SELECT caption, " + PROP1_NAME + " WHERE typedef=" + typeId
+        );
+        Assert.assertTrue(result.getRowCount() > 0, "Expected at least one row");
     }
 
     @AfterClass

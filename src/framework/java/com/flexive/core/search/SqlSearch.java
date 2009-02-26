@@ -285,7 +285,7 @@ public class SqlSearch {
 
                     //in case we have types with property permissions enabled, inaccessible
                     //properties have to be wrapped with with FxNoAccess objects
-                    if (val instanceof FxValue && propertyPermTypes.size() > 0) {
+                    if (val instanceof FxValue && !((FxValue) val).isEmpty() && propertyPermTypes.size() > 0) {
                         if (allowedAssignment == null)
                             allowedAssignment = new ArrayList<String>(20);
                         if (deniedAssignment == null)
