@@ -221,10 +221,10 @@ public class StoredProcedures {
     private static String permissionHelper(Connection con, Long contentId, Long contentVer, Long userId, boolean mandatorSupervisor, long userMandator) throws SQLException {
         ResultSet rs;//fetch the actual permissions
         PreparedStatement ps = con.prepareStatement("select " +
-                //   1              2             3         4           5           6        7         8           9            10
-                "dat.created_by,ass.usergroup,ass.PEDIT,ass.PREMOVE,ass.PEXPORT,ass.PREL,ass.PREAD,ass.PCREATE,acl.cat_type,dat.mandator" +
+                //   1              2             3         4           5           6        7         8           9            10        11
+                "dat.created_by,ass.usergroup,ass.PEDIT,ass.PREMOVE,ass.PEXPORT,ass.PREL,ass.PREAD,ass.PCREATE,acl.cat_type,dat.mandator,dat.securityMode" +
                 " from" +
-                "    (select con.mandator,con.step,con.created_by,con.id,con.ver,con.tdef,con.acl,stp.acl stepAcl,typ.acl typeAcl" +
+                "    (select con.mandator,con.step,con.created_by,con.id,con.ver,con.tdef,con.acl,stp.acl stepAcl,typ.acl typeAcl,typ.security_mode securityMode" +
                 " from FX_CONTENT con,FXS_TYPEDEF typ, FXS_WF_STEPS stp where con.id=? and con.ver=? and " +
                 " con.tdef=typ.id and stp.id=con.step) dat, FXS_ACLASSIGNMENTS ass, FXS_ACL acl " +
                 "where" +
@@ -263,6 +263,19 @@ public class StoredProcedures {
         while (rs != null && rs.next()) {
             if (instanceMandator == -1)
                 instanceMandator = rs.getLong(10);
+            final int typeSecurityMode = rs.getInt(11);
+            if ((typeSecurityMode & 0x01) == 0) {
+                // content permissions are disabled
+                IPREMOVE = IPEDIT = IPEXPORT = IPREL = IPREAD = IPCREATE = true;
+            }
+            if ((typeSecurityMode & 0x08) == 0) {
+                // type permissions are disabled
+                TPREMOVE = TPEDIT = TPEXPORT = TPREL = TPREAD = TPCREATE = true;
+            }
+            if ((typeSecurityMode & 0x04) == 0) {
+                // workflow step permissions are disabled
+                SPREMOVE = SPEDIT = SPEXPORT = SPREL = SPREAD = SPCREATE = true;
+            }
             switch (rs.getInt(9)) { //cat_type
                 case 1: //content
                     if (rs.getLong(2) != GRP_OWNER || (rs.getLong(2) == GRP_OWNER && rs.getLong(1) == userId)) {

@@ -24,6 +24,7 @@ BEGIN
   DECLARE _role INTEGER UNSIGNED;
   DECLARE _type INTEGER UNSIGNED;
   DECLARE _read BOOLEAN;
+  DECLARE _securityMode INTEGER UNSIGNED;
   -- Instance
   DECLARE IPREAD BOOLEAN DEFAULT FALSE;
   -- Step
@@ -34,9 +35,9 @@ BEGIN
   -- Permission cursor
   DECLARE cur CURSOR FOR
   select
-    dat.created_by,ass.usergroup,ass.PREAD,acl.cat_type,dat.mandator
+    dat.created_by,ass.usergroup,ass.PREAD,acl.cat_type,dat.mandator,dat.securityMode
   from
-    (select con.mandator,con.step,con.created_by,con.id,con.ver,con.tdef,con.acl,stp.acl stepAcl,typ.acl typeAcl
+    (select con.mandator,con.step,con.created_by,con.id,con.ver,con.tdef,con.acl,stp.acl stepAcl,typ.acl typeAcl,typ.security_mode securityMode
 	from FX_CONTENT con,FXS_TYPEDEF typ, FXS_WF_STEPS stp where con.id=_contentId and con.ver=_contentVersion and
 	con.tdef=typ.id and stp.id=con.step) dat,
     FXS_ACLASSIGNMENTS ass,
@@ -60,10 +61,19 @@ BEGIN
   set done=false;
   OPEN cur;
   WHILE NOT done DO
-    FETCH cur INTO _createdBy,_userGroup,_read,_type,_instanceMandator;
+    FETCH cur INTO _createdBy,_userGroup,_read,_type,_instanceMandator,_securityMode;
+      IF (_securityMode & 0x01 = 0) THEN
+        SET IPREAD=true;    /* content permissions are disabled */
+      END IF;
+      IF (_securityMode & 0x08 = 0) THEN
+        SET TPREAD=true;  /* type permissions are disabled */
+      END IF;
+      IF (_securityMode & 0x04 = 0) THEN
+        SET SPREAD=true;  /* workflow step permissions are disabled */
+      END IF;
       CASE _type
           WHEN 1 /*Content*/ THEN
-            IF (_userGroup!=GRP_OWNER or (_userGroup=GRP_OWNER and _createdBy=_userId)) THEN
+            IF (_userGroup!=GRP_OWNER OR (_userGroup=GRP_OWNER AND _createdBy=_userId)) THEN
               IF (_read)   THEN set IPREAD=true;   END IF;
             END IF;
           WHEN 2 /*Type*/ THEN
@@ -73,6 +83,10 @@ BEGIN
           ELSE
   	    set done=true;
       END CASE;
+      IF (IPREAD and TPREAD and SPREAD) THEN
+        CLOSE cur;
+        RETURN TRUE;    /* break out early */
+      END IF;
   END WHILE;
   CLOSE cur;
 
