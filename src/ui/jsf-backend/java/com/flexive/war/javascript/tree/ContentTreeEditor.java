@@ -34,9 +34,11 @@
 package com.flexive.war.javascript.tree;
 
 import com.flexive.shared.FxContext;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxUpdateException;
 import static com.flexive.shared.EJBLookup.getTreeEngine;
+import static com.flexive.shared.EJBLookup.getContentEngine;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.interfaces.TreeEngine;
 import com.flexive.shared.tree.FxTreeMode;
@@ -177,8 +179,17 @@ public class ContentTreeEditor implements Serializable {
      */
     public String remove(long nodeId, boolean removeContent, boolean live, boolean deleteChildren) throws Exception {
         try {
-            FxTreeNode node = getTreeEngine().getNode(live ? Live : Edit, nodeId);
-            getTreeEngine().remove(node, removeContent, deleteChildren);
+            final FxTreeMode treeMode = live ? Live : Edit;
+            FxTreeNode node = getTreeEngine().getNode(treeMode, nodeId);
+            getTreeEngine().remove(node, false, deleteChildren);
+            if (removeContent) {
+                // need to manually remove all other nodes where this content is referenced
+                for (FxTreeNode refNode : getTreeEngine().getNodesWithReference(treeMode, node.getReference().getId())) {
+                    getTreeEngine().remove(refNode, false, deleteChildren);
+                }
+                // remove content
+                getContentEngine().remove(node.getReference());
+            }
         } catch (Exception e) {
             LOG.error("Failed to delete node: " + e, e);
             throw e;
