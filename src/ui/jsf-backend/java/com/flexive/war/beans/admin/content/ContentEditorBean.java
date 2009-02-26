@@ -1242,6 +1242,10 @@ public class ContentEditorBean implements ActionBean, Serializable {
                 }
             }
             // Reload changes
+            // TODO: only call when tree node labels need to be manually updated
+            // (i.e. after an existing content is edited and caption changed)
+            FxContext.get().setTreeWasModified();
+
             setPk(pk);
             reload();
             FxJsfUtils.resetFaceletsComponent("frm:all");
