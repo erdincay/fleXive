@@ -1452,6 +1452,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                     FxContent contactData = co.initialize(CacheAdmin.getEnvironment().getType(FxType.CONTACTDATA).getId());
                     contactData.setAclId(ACL.ACL_CONTACTDATA);
                     contactData.setValue("/SURNAME", new FxString(false, a.getName()));
+                    //contactData.setValue("/DISPLAYNAME", new FxString(true, a.getName()));
                     contactData.setValue("/EMAIL", new FxString(false, a.getEmail()));
                     FxPK contactDataPK = co.save(contactData);
                     update(a.getId(), null, null, null, null, null, null, null, null, null, null, null, null, contactDataPK.getId());

@@ -56,7 +56,8 @@ builder {
     name(description: label("First Name", "Vorname"))
     surname(description: label("Surname", "Nachname"))
     title(description: label("Title", "Titel"))
-    displayName(description: label("Display Name", "Dargestellter Name"))
+    displayName(assignment: "ROOT/CAPTION", description: label("Display Name", "Dargestellter Name"))
+    //displayName(description: label("Display Name", "Dargestellter Name"))
     email(description: label("email", "email"))
     Address(description: label("Address", "Adresse"), multiplicity: FxMultiplicity.MULT_0_1) {
         street(description: label("Street", "Strasse"))
@@ -84,7 +85,7 @@ if( display.length() > 1024 )
 // TODO: get multilang info from content value
 if( !("".equals(display) ) ) {
     content.setValue("/FQN", new FxString(false, display))
-    content.setValue("/DISPLAYNAME", new FxString(false, display))
+    content.setValue("/DISPLAYNAME", new FxString(true, display))
 }
 return content
 ''')
