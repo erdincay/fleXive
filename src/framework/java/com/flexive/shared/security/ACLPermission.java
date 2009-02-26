@@ -39,6 +39,7 @@ import com.flexive.shared.value.FxString;
  * ACL permissions
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @since 3.1
  */
 public enum ACLPermission implements ObjectWithLabel {
     CREATE, READ, EDIT, DELETE, RELATE, EXPORT,

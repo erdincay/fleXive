@@ -790,6 +790,18 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         throw new FxNotFoundException("ex.structure.assignment.notFound.xpath", xPath).asRuntimeException();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public FxPropertyAssignment getPropertyAssignment(String xpath) {
+        final FxAssignment assignment = getAssignment(xpath);
+        try {
+            return (FxPropertyAssignment) assignment;
+        } catch (ClassCastException e) {
+            throw new FxInvalidParameterException(xpath, "ex.structure.assignment.property.type",
+                    xpath, assignment.getClass()).asRuntimeException();
+        }
+    }
 
     /**
      * {@inheritDoc}

@@ -314,12 +314,7 @@ public class PropertyEntry {
             this.assignment = null;
             this.property = CacheAdmin.getEnvironment().getProperty(searchProperty.getPropertyName());
         }
-        if (FxDataType.Date.equals(this.property.getDataType()) || FxDataType.DateTime.equals(this.property.getDataType())) {
-            // hardcoded: use only first column, otherwise date functions cannot be appliaed
-            this.readColumns = new String[] { storage.getColumns(this.property)[0] };
-        } else {
-            this.readColumns = storage.getColumns(this.property);
-        }
+        this.readColumns = getReadColumns(storage, property);
         String fcol = ignoreCase ? storage.getQueryUppercaseColumn(this.property) : this.readColumns[0];
         if (fcol == null) {
             fcol = this.readColumns == null ? null : this.readColumns[0];
@@ -362,6 +357,16 @@ public class PropertyEntry {
         this.tableName = tbl != null ? tbl.getTableName() : null;
     }
 
+    public static String[] getReadColumns(ContentStorage storage, FxProperty property) {
+        if (FxDataType.Date.equals(property.getDataType()) || FxDataType.DateTime.equals(property.getDataType())
+                || FxDataType.HTML.equals(property.getDataType())) {
+            // date values: use only first column, otherwise date functions cannot be appliaed
+            // HTML values: don't need boolean and upper case columns for search result
+            return new String[] { storage.getColumns(property)[0] };
+        } else {
+            return storage.getColumns(property);
+        }
+    }
     /**
      * Return the result value of this property entry in a given result set.
      *

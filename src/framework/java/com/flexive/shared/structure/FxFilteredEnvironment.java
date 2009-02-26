@@ -538,4 +538,11 @@ public final class FxFilteredEnvironment implements FxEnvironment {
     public String getDeactivatedTypesList() {
         return environment.getDeactivatedTypesList();
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public FxPropertyAssignment getPropertyAssignment(String xpath) {
+        return environment.getPropertyAssignment(xpath);
+    }
 }

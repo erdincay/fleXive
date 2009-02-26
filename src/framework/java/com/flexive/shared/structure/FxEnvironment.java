@@ -318,6 +318,15 @@ public interface FxEnvironment extends Serializable {
     FxAssignment getAssignment(String xPath);
 
     /**
+     * Return the property assignment that matches the given XPath (has to include the type/relation name as root)
+     *
+     * @param xpath requested xpath
+     * @return  the property assignment that matches the given XPath
+     * @since 3.1
+     */
+    FxPropertyAssignment getPropertyAssignment(String xpath);
+
+    /**
      * Get an assignment by its id
      *
      * @param assignmentId assignment id
