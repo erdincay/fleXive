@@ -384,7 +384,10 @@ div.tooltip:hover div.tooltipContent {
     z-index: 100;
     color: #000000;
     border: 1px solid #000000;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
     background-color: #FFFFCC;
+    padding: 3px;
 }
 
 

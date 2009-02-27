@@ -11,6 +11,7 @@
     <link rel="shortcut icon" href="#{fxSystemBean.contextPath}/pub/images/favicon.ico" type="image/vnd.microsoft.icon" />
     <title>#{fxSystemBean.header}</title>
     <link rel="stylesheet" type="text/css" href="#{fxSystemBean.contextPath}/pub/css/login.css" />
+    <fx:includes/>
     <script type="text/javascript" src="js/shared.js"> </script>
     <script language='JavaScript' type='text/javascript'>
         if (this.parent.frames[1]) {
@@ -54,18 +55,18 @@
                     </div>
                 </td></tr>
                 <tr>
-                    <td align="right" id="username"><label for="loginForm:username">#{fxMessageBean['Login.field.name']}</label></td>
+                    <td align="right" id="username"><label for="fxLoginForm:username">#{fxMessageBean['Login.field.name']}</label></td>
                     <td align="left" colspan="2" width="241">
                         <h:inputText id="username" styleClass="inputs" value="#{fxAuthenticationBean.username}"
-                                onkeypress="return onReturnEval(event, 'document.getElementById(\'loginForm:loginButton\').onclick()')"/>
+                                onkeypress="return onReturnEval(event, 'document.getElementById(\'fxLoginForm:loginButton\').onclick()')"/>
                     </td>
                 </tr>
                 <tr><td colspan="3" height="11"></td></tr>
                 <tr>
-                    <td align="right" id="password"><label for="loginForm:password">#{fxMessageBean['Login.field.password']}</label></td>
+                    <td align="right" id="password"><label for="fxLoginForm:password">#{fxMessageBean['Login.field.password']}</label></td>
                     <td align="left" colspan="2">
                         <h:inputSecret id="password" styleClass="inputs" value="#{fxAuthenticationBean.password}"
-                                onkeypress="return onReturnEval(event, 'document.getElementById(\'loginForm:loginButton\').onclick()')"/>
+                                onkeypress="return onReturnEval(event, 'document.getElementById(\'fxLoginForm:loginButton\').onclick()')"/>
                     </td>
                 </tr>
                 <tr><td colspan="3" height="11"></td></tr>
@@ -74,7 +75,14 @@
                     <td align="left" >
                         <h:selectBooleanCheckbox type="text" id="takeOver" value="#{fxAuthenticationBean.takeover}"/>
                     </td>
-                    <td align="left" valign="middle" width="220"><label for="loginForm:takeOver">#{fxMessageBean['Login.field.takeOver']}</label></td>
+                    <td align="left" valign="middle" width="220">
+                        <div class="tooltip">
+                            <label for="fxLoginForm:takeOver">#{fxMessageBean['Login.field.takeOver']}</label>
+                            <div class="tooltipContent">
+                                <h:outputText value="#{fxMessageBean['Login.field.takeOver.tooltip']}" escape="false"/>
+                            </div>
+                        </div>
+                    </td>
                 </tr>
                 <tr><td colspan="3" height="11"></td></tr>
                 <tr>
