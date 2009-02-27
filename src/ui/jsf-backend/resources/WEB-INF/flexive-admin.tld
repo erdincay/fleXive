@@ -26,6 +26,18 @@
             <description>message key for the button label (overrides label when specified)</description>
         </attribute>
         <attribute>
+            <name>title</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>the button title (used by browsers to display tooltip)</description>
+        </attribute>
+        <attribute>
+            <name>titleKey</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>message key for the button title (overrides title when specified)</description>
+        </attribute>
+        <attribute>
             <name>confirmKey</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
@@ -121,6 +133,18 @@
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
             <description>message key for the button label (overrides label when specified)</description>
+        </attribute>
+        <attribute>
+            <name>title</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>the button title (used by browsers to display tooltip)</description>
+        </attribute>
+        <attribute>
+            <name>titleKey</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>message key for the button title (overrides title when specified)</description>
         </attribute>
         <attribute>
             <name>confirmKey</name>
