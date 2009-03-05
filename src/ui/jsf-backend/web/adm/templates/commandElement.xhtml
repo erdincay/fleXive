@@ -15,7 +15,8 @@ Parameters:
  label - the button label
  labelKey - message key for the button label (overrides label when specified)
  title - [optional] the button title (used by browsers to display tooltip on mouseover)
- titleKey - [optional]  message key for the button title (overrides title when specified)
+titleKey - [optional]  message key for the button title (overrides title when specified).
+                       if not specified and labelKey is set, it defaults to #{labelKey}.title
  confirmKey - [optional] message key for a confirm dialog that will be displayed before the action is called
  bean - the bean that the action belongs to
  action - the action to call
@@ -44,11 +45,20 @@ Parameters:
             <c:set var="label" value="CommandButton.err.missingLabel" />
         </c:if>
 
-         <c:if test="#{empty titleKey and empty title}">
-            <c:set var="title" value="#{label}"/>
-        </c:if>
         <c:if test="#{!empty titleKey}">
             <c:set var="title" value="#{fxMessageBean[titleKey]}"/>
+        </c:if>
+
+        <c:if test="#{empty title and empty titleKey and not empty labelKey}">
+            <c:set var="titleKey" value="#{labelKey}.title"/>
+        </c:if>
+
+        <c:if test="#{!empty titleKey and fxSystemBean.messageExists[titleKey]}">
+            <c:set var="title" value="#{fxMessageBean[titleKey]}"/>
+        </c:if>
+
+        <c:if test="#{empty title}">
+            <c:set var="title" value="#{label}"/>
         </c:if>
 
         <c:if test="${empty location}">

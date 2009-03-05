@@ -35,7 +35,9 @@
             <name>titleKey</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>message key for the button title (overrides title when specified)</description>
+            <description>message key for the button title (overrides title when specified).
+                        if not specified and labelKey is set, it defaults to #{labelKey}.title
+            </description>
         </attribute>
         <attribute>
             <name>confirmKey</name>
@@ -144,7 +146,9 @@
             <name>titleKey</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>message key for the button title (overrides title when specified)</description>
+            <description>message key for the button title (overrides title when specified).
+                        if not specified and labelKey is set, it defaults to #{labelKey}.title
+            </description>
         </attribute>
         <attribute>
             <name>confirmKey</name>
