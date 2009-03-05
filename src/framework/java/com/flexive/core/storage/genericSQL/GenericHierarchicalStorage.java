@@ -3129,5 +3129,24 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             }
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public long getTypeInstanceCount(Connection con, long typeId) throws SQLException {
+                PreparedStatement ps = null;
+        long count = 0;
+        try {
+            ps = con.prepareStatement("SELECT COUNT(*) FROM " + TBL_CONTENT + " WHERE TDEF=?");
+            ps.setLong(1, typeId);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            count = rs.getLong(1);
+        } finally {
+            if (ps != null)
+                ps.close();
+        }
+        return count;
+    }
 }
 

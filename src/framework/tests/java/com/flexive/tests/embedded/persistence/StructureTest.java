@@ -34,23 +34,27 @@ package com.flexive.tests.embedded.persistence;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxLanguage;
+import com.flexive.shared.content.FxPK;
+import com.flexive.shared.content.FxContent;
 import com.flexive.shared.exceptions.*;
-import com.flexive.shared.interfaces.ACLEngine;
-import com.flexive.shared.interfaces.AssignmentEngine;
-import com.flexive.shared.interfaces.TypeEngine;
+import com.flexive.shared.interfaces.*;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
+import com.flexive.shared.value.FxSelectOne;
+import com.flexive.shared.value.FxValue;
 import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
 import com.flexive.tests.embedded.TestUsers;
 import org.testng.Assert;
+import static org.testng.Assert.fail;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
 import javax.naming.Context;
 import javax.transaction.UserTransaction;
 
@@ -65,13 +69,14 @@ public class StructureTest {
     private TypeEngine te;
     private AssignmentEngine ae;
     private ACLEngine acl;
-
+    private ContentEngine ce;
 
     @BeforeClass
     public void beforeClass() throws FxLookupException, FxLoginFailedException, FxAccountInUseException {
         te = EJBLookup.getTypeEngine();
         ae = EJBLookup.getAssignmentEngine();
         acl = EJBLookup.getAclEngine();
+        ce = EJBLookup.getContentEngine();
         login(TestUsers.SUPERVISOR);
     }
 
@@ -450,7 +455,7 @@ public class StructureTest {
         long baseAssId = ae.createProperty(testId, basePe, baseGrp.getXPath());
 
         //verify that property assignment is child of group
-        FxPropertyAssignment baseAss= (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(baseAssId);
+        FxPropertyAssignment baseAss = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(baseAssId);
         Assert.assertTrue(baseAss.getParentGroupAssignment().getId() == baseGrp.getId());
 
         //create derived group assignment with derived sub assignments
@@ -462,7 +467,7 @@ public class StructureTest {
 
         //verify that derived group contains derived assignment from base group
         boolean found = false;
-        long derivedAssId=-1;
+        long derivedAssId = -1;
         for (FxAssignment a : derivedGrp.getAssignments()) {
             if (a.isDerivedAssignment() && a.getBaseAssignmentId() == baseAss.getId()) {
                 found = true;
@@ -486,6 +491,12 @@ public class StructureTest {
         te.remove(testId);
     }
 
+    /**
+     * Tests overriding the multilanguage setting for a property
+     *
+     * @throws FxNotFoundException         on errors
+     * @throws FxInvalidParameterException on errors
+     */
     @Test
     public void overrideCaptionMultiLangTest() throws FxNotFoundException, FxInvalidParameterException {
         final FxPropertyAssignmentEdit property = FxPropertyAssignmentEdit.createNew(
@@ -503,6 +514,12 @@ public class StructureTest {
         }
     }
 
+    /**
+     * Tests setting the default language values f. properties
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test
     public void defaultValueLanguageTest() throws FxApplicationException {
         FxPropertyEdit prop = FxPropertyEdit.createNew("testDefLang",
                 new FxString("Test Priority"),
@@ -513,7 +530,7 @@ public class StructureTest {
 
         FxString defML = new FxString(true, "test");
         FxString defSL = new FxString(false, "test");
-        long asId = -1 ;
+        long asId = -1;
 
         try {
             prop.setMultiLang(false);
@@ -537,8 +554,426 @@ public class StructureTest {
             asId = ae.createProperty(FxType.ROOT_ID, prop, "/");
             //this should work
         } finally {
-            if( asId != -1)
+            if (asId != -1)
                 ae.removeAssignment(asId);
         }
+    }
+
+    /**
+     * AssignmentEngineBean: #getInstanceMultiplicity (implicitly), #getAssignmentInstanceCount,
+     * #getPropertyInstanceCount, #save(FxPropertyEdit), #updateProperty (implicitly), #updatePropertyOptions (implicitly)
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test
+    public void instanceMultiplicityTest() throws FxApplicationException {
+        SelectListEngine se = EJBLookup.getSelectListEngine();
+        long typeId = createTestTypeAndProp("STRUCTTESTTYPE", "Struct test type label", true);
+        long typeIdRefTest = createTestTypeAndProp("STRUCTTESTTYPE_TWO", "Struct test type label 2", false);
+        long selListId = -1;
+        try { // test setting some of property attributes (for db update coverage)
+            FxProperty p = CacheAdmin.getEnvironment().getProperty("TESTPROP");
+            FxPropertyEdit pEdit = p.asEditable();
+            ACL propACL = CacheAdmin.getEnvironment().getACL(ACLCategory.SELECTLIST.getDefaultId());
+            ACL defacl = CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId());
+            FxSelectListEdit testList = FxSelectListEdit.createNew("Test_selectlist111999", new FxString("test selectlist"), new FxString("test selectlist"), false, defacl, defacl);
+            FxSelectListItemEdit.createNew("ITEM1", defacl, testList, new FxString("item_1"), "value_1", "#000000");
+            FxSelectListItemEdit.createNew("ITEM2", defacl, testList, new FxString("item_2"), "value_2", "#000000");
+            selListId = se.save(testList);
+            testList = CacheAdmin.getEnvironment().getSelectList(selListId).asEditable();
+            FxSelectListItem defItem = CacheAdmin.getEnvironment().getSelectListItem(testList, "ITEM1");
+
+            pEdit.setDataType(FxDataType.SelectOne);
+            pEdit.setReferencedType(CacheAdmin.getEnvironment().getType(typeIdRefTest));
+            pEdit.setUniqueMode(UniqueMode.Type);
+            pEdit.setACL(propACL);
+            pEdit.setReferencedList(CacheAdmin.getEnvironment().getSelectList(selListId));
+            pEdit.setOverrideMultiLang(true); // also needed for assignment tests
+            ae.save(pEdit);
+
+            p = CacheAdmin.getEnvironment().getProperty("TESTPROP");
+            assertEquals(p.getDataType().getValueClass(), FxSelectOne.class);
+            assertEquals(p.getReferencedType().getId(), typeIdRefTest);
+            assertEquals(p.getUniqueMode(), UniqueMode.Type);
+            assertEquals(p.getACL().getCategory(), ACLCategory.SELECTLIST);
+            assertEquals(p.getReferencedList().getName(), "Test_selectlist111999");
+            assertTrue(p.mayOverrideMultiLang());
+
+            // test property assignments
+            FxPropertyAssignment assProp = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment("STRUCTTESTTYPE/TESTPROP");
+            FxPropertyAssignmentEdit assEdit = assProp.asEditable();
+            assEdit.setACL(propACL);
+            assEdit.setMultiLang(true);
+            assEdit.setLabel(new FxString(true, "assignment_label_123456"));
+            assEdit.setDefaultLanguage(FxLanguage.ENGLISH);
+            assEdit.setDefaultValue(new FxSelectOne(true, defItem));
+            ae.save(assEdit, false);
+
+            assProp = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment("STRUCTTESTTYPE/TESTPROP");
+            assertEquals(assProp.getACL(), propACL);
+            assertTrue(assProp.isMultiLang());
+            assertEquals(assProp.getLabel().toString(), "assignment_label_123456");
+            assertEquals(assProp.getDefaultLanguage(), FxLanguage.ENGLISH);
+            FxValue val = assProp.getDefaultValue();
+            assertEquals(val.getValueClass(), FxSelectListItem.class);
+            FxSelectOne selOne = (FxSelectOne)val;
+            FxSelectListItem item = CacheAdmin.getEnvironment().getSelectListItem(testList, "ITEM1");
+//            assertEquals(selOne.getStringValue(item), ""+item.getId());
+            assertEquals(selOne.fromString(""+item.getId()).getData(), "value_1");
+        } finally {
+            // clean up
+            te.remove(typeId);
+            te.remove(typeIdRefTest);
+            if(selListId != -1) {
+                se.remove(CacheAdmin.getEnvironment().getSelectList(selListId));
+            }
+        }
+        // remaining tests for multiplicity settings etc.
+        typeId = createTestTypeAndProp("STRUCTTESTTYPE", "Struct test type label", true);
+        FxPK contentPK1 = createTestContent(typeId, "/TESTPROP", "Testdata 1");
+        FxPK contentPK2 = createTestContent(typeId, "/TESTPROP", "Testdata 2");
+        try {
+            FxPropertyAssignmentEdit assEdit = ((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment("STRUCTTESTTYPE/TESTPROP")).asEditable();
+            FxProperty p = CacheAdmin.getEnvironment().getProperty("TESTPROP");
+            // we should have two assignments for our testprop
+            assertEquals(ae.getAssignmentInstanceCount(assEdit.getId()), 2);
+            // and two instances of testprop were created
+            assertEquals(ae.getPropertyInstanceCount(p.getId()), 2);
+
+            // alter the multiplicity to 0..2 and set some other properties
+            FxPropertyEdit pEdit = p.asEditable();
+            pEdit.setOverrideMultiplicity(false);
+            pEdit.setMultiplicity(new FxMultiplicity(0, 2));
+            boolean isFulltextIndexed = pEdit.isFulltextIndexed();
+            if (isFulltextIndexed) {
+                pEdit.setFulltextIndexed(false);
+            } else {
+                pEdit.setFulltextIndexed(true);
+            }
+            boolean mayOverrideACL = pEdit.mayOverrideACL();
+            if (mayOverrideACL) {
+                pEdit.setOverrideACL(false);
+            } else {
+                pEdit.setOverrideACL(true);
+            }
+            pEdit.setDefaultValue(new FxString(false, "DefaultValue_for_TESTPROP"));
+            ae.save(pEdit);
+
+            p = CacheAdmin.getEnvironment().getProperty("TESTPROP");
+            assertEquals(p.getMultiplicity().getMin(), 0);
+            assertEquals(p.getMultiplicity().getMax(), 2);
+            assertEquals(p.isFulltextIndexed(), !isFulltextIndexed);
+            assertEquals(p.mayOverrideACL(), !mayOverrideACL);
+            assertEquals(p.getDefaultValue().toString(), "DefaultValue_for_TESTPROP");
+
+            // modify the property and implicitly fire #getInstanceMultiplicity via #save
+            pEdit = p.asEditable();
+            pEdit.setMultiplicity(new FxMultiplicity(2, 2));
+            pEdit.setOverrideMultiplicity(false);
+            try {
+                ae.save(pEdit);
+                fail("Altering the minimum multiplicity of a property for which content exists should have thrown an exception");
+            } catch (FxUpdateException e) {
+                // expected
+            }
+
+            pEdit.setOverrideMultiplicity(true); // reset
+            pEdit.setMultiplicity(new FxMultiplicity(0,2));
+            ae.save(pEdit);
+            assEdit = ((FxPropertyAssignment)CacheAdmin.getEnvironment().getAssignment("STRUCTTESTTYPE/TESTPROP")).asEditable();
+            assEdit.setMultiplicity(new FxMultiplicity(0, 2));
+            ae.save(assEdit, false);
+            // create an additional content instance for the same assignment
+            FxContent co = ce.load(contentPK2);
+            co.setValue("/TESTPROP[2]", new FxString(false, "Testdata 2.2"));
+            ce.save(co);
+
+            pEdit = CacheAdmin.getEnvironment().getProperty("TESTPROP").asEditable();
+            pEdit.setOverrideMultiplicity(false);
+            pEdit.setMultiplicity(new FxMultiplicity(0,1));
+            try {
+                ae.save(pEdit);
+                fail("Changing the maximum property multiplicity for assignment counts > new set maximum should have failed");
+            } catch (FxUpdateException e) {
+                // expected
+            }
+
+            pEdit.setMultiplicity(new FxMultiplicity(3,3));
+            try {
+                ae.save(pEdit);
+                fail("Changing the minimum property multiplicity for assignment counts > new set minimum should have failed");
+            } catch (FxUpdateException e) {
+                // expected
+            }
+
+            // add another content instance
+            pEdit.setOverrideMultiplicity(false);
+            pEdit.setMultiplicity(new FxMultiplicity(0,3));
+            ae.save(pEdit);
+            co = ce.load(contentPK2);
+            co.setValue("/TESTPROP[3]", new FxString(false, "Testdata 2.3"));
+            ce.save(co);
+            
+            pEdit = CacheAdmin.getEnvironment().getProperty("TESTPROP").asEditable();
+            pEdit.setOverrideMultiplicity(false);
+            pEdit.setMultiplicity(new FxMultiplicity(0,2));
+            try {
+                ae.save(pEdit);
+                fail("Changing the maximum property multiplicity for assignment counts > new set maximum should have failed");
+            } catch (FxUpdateException e) {
+                // expected
+            }
+
+            pEdit.setOverrideMultiplicity(false); // reset
+            pEdit.setMultiplicity(new FxMultiplicity(0,3));
+            ae.save(pEdit);
+
+            // test multiplicity assignment via #save(FxAssignment)
+            assEdit.setMultiplicity(new FxMultiplicity(0,5));
+            try {
+                ae.save(assEdit, false);
+                fail("Overriding the base multiplicity should have failed due to setOverrideMultiplicity(false)");
+            } catch (FxUpdateException e) {
+                // expected
+            }
+            pEdit.setOverrideMultiplicity(true); // reset
+            pEdit.setMultiplicity(new FxMultiplicity(0,3));
+            ae.save(pEdit);
+
+            assEdit.setMultiplicity(new FxMultiplicity(0,5));
+            ae.save(assEdit, false);
+
+
+            assEdit = ((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment("STRUCTTESTTYPE/TESTPROP")).asEditable();
+            assertEquals(assEdit.getMultiplicity().getMin(), 0);
+            assertEquals(assEdit.getMultiplicity().getMax(), 5);
+
+            assEdit.setMultiplicity(new FxMultiplicity(4, 4));
+            try {
+                ae.save(assEdit, false);
+                fail("Assignment of an invalid minimum FxMultiplicity of a property assignment for which content exists should have failed");
+            } catch (FxUpdateException e) {
+                // expected
+            }
+
+            // call the #save function again w/ changes to the property's attributes
+            pEdit.setLabel(new FxString(true, FxLanguage.DEFAULT.getId(), "TESTPROP new label"));
+            pEdit.setMultiplicity(new FxMultiplicity(0, 5));
+            pEdit.setOverrideMultiplicity(true);
+            pEdit.setHint(new FxString(true, FxLanguage.DEFAULT.getId(), "TESTPROP hint"));
+            ae.save(pEdit);
+
+            p = CacheAdmin.getEnvironment().getProperty(p.getId()); // reload from cache
+            assertEquals(p.getLabel().toString(), "TESTPROP new label");
+            FxMultiplicity pMult = p.getMultiplicity();
+            assertEquals(pMult.getMin(), 0);
+            assertEquals(pMult.getMax(), 5);
+            assertEquals(p.getHint().toString(), "TESTPROP hint");
+            assertTrue(p.mayOverrideBaseMultiplicity());
+        } finally {
+            // clean up
+            ce.remove(contentPK1);
+            ce.remove(contentPK2);
+            te.remove(typeId);
+        }
+    }
+
+    /**
+     * AssignmentEngineBean: this method tests #save(FxGroupEdit), #updateGroup(..) [implicitly]
+     * #updateGroupOptions(..) [implicitly]
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test
+    public void groupAssignmentTests() throws FxApplicationException {
+        long typeId = createTestTypeAndProp("STRUCTTESTTYPE", "Struct test type label", true);
+        long anotherTypeId = createTestTypeAndProp("STRUCTTESTTYPE_TWO", "STRUCTTESTTYPE_TWO_LABEL", false);
+        // assign the group to our given type and also create a property for the group
+        FxGroupEdit ge = FxGroupEdit.createNew("STRUCTTESTGROUP", new FxString(true, "GROUPDESCR"), new FxString(true, "GROUPHINT"), false, new FxMultiplicity(0, 1));
+        ge.setAssignmentGroupMode(GroupMode.OneOf);
+        ae.createGroup(typeId, ge, "/");
+
+        ae.createProperty(typeId, FxPropertyEdit.createNew(
+                "TESTGROUPPROP", new FxString(true, FxLanguage.ENGLISH, "TESTGROUPPROP"), new FxString(true, FxLanguage.ENGLISH, "TESTPROP"),
+                new FxMultiplicity(0, 1), CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                FxDataType.String1024).setMultiLang(false), "/STRUCTTESTGROUP");
+        // create two content instances for our group (within the same assignment)
+        FxPK contentPK = createTestContent(typeId, "/STRUCTTESTGROUP/TESTGROUPPROP", "Testdata 111");
+        try {
+            // assert group properties
+            ge = CacheAdmin.getEnvironment().getGroup("STRUCTTESTGROUP").asEditable();
+            assertEquals(ge.getName(), "STRUCTTESTGROUP");
+            assertEquals(ge.getLabel().toString(), "GROUPDESCR");
+            assertEquals(ge.getHint().toString(), "GROUPHINT");
+
+            // make changes to the group and assert them
+            ge.setOverrideMultiplicity(true);
+            ge.setMultiplicity(new FxMultiplicity(0, 2));
+            ge.setHint(new FxString(true, "GROUPHINT_NEW"));
+            ge.setLabel(new FxString(true, "GROUPDESCR_NEW"));
+            ge.setName("STRUCTTESTGROUP_NEW");
+            long groupId = ae.save(ge);
+
+            ge = CacheAdmin.getEnvironment().getGroup("STRUCTTESTGROUP_NEW").asEditable();
+            assertEquals(ge.getId(), groupId);
+            assertEquals(ge.getLabel().toString(), "GROUPDESCR_NEW");
+            assertEquals(ge.getHint().toString(), "GROUPHINT_NEW");
+            assertEquals(ge.getMultiplicity().getMin(), 0);
+            assertEquals(ge.getMultiplicity().getMax(), 2);
+
+            // increase multiplicity of assignment as well in order to be able to add more content
+            FxGroupAssignmentEdit assEdit = ((FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment("STRUCTTESTTYPE/STRUCTTESTGROUP")).asEditable();
+            assEdit.getGroupEdit().setOverrideMultiplicity(true);
+            assEdit.setMultiplicity(new FxMultiplicity(0, 2));
+            ae.save(assEdit, false);
+
+            assEdit = ((FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment("STRUCTTESTTYPE/STRUCTTESTGROUP")).asEditable();
+            assertEquals(assEdit.getMultiplicity().getMin(), 0);
+            assertEquals(assEdit.getMultiplicity().getMax(), 2);
+            assertEquals(assEdit.getMode(), GroupMode.OneOf);
+
+            // create another group/content instance & change the multiplicity settings of both the group and the assignments
+            FxContent co = ce.load(contentPK);
+            co.setValue("/STRUCTTESTGROUP[2]/TESTGROUPPROP[1]", new FxString(false, "Testdata 222"));
+            ce.save(co);
+            ge = CacheAdmin.getEnvironment().getGroup("STRUCTTESTGROUP_NEW").asEditable();
+            ge.setOverrideMultiplicity(false);
+            ge.setMultiplicity(new FxMultiplicity(0, 1));
+            try {
+                ae.save(ge);
+                fail("Setting the override mult. flag and the maximum group multiplicity to a value less than the number of given content instances should have failed");
+            } catch (FxUpdateException e) {
+                // expected
+            }
+            ge.setOverrideMultiplicity(false);
+            ge.setMultiplicity(new FxMultiplicity(3, 3));
+            try {
+                ae.save(ge);
+                fail("Setting the override mult. flag and the minimum group multiplicity to a value greater than the number of given content instances should have failed");
+            } catch (FxUpdateException e) {
+                // expected
+            }
+
+            // test multiplicity setting failure code blocks
+            ge.setOverrideMultiplicity(false); // reset
+            ge.setMultiplicity(new FxMultiplicity(0,3));
+            ae.save(ge);
+            co = ce.load(contentPK);
+            co.setValue("/STRUCTTESTGROUP[3]/TESTGROUPPROP[1]", new FxString(false, "Testdata 333"));
+            ce.save(co);
+
+            ge = CacheAdmin.getEnvironment().getGroup("STRUCTTESTGROUP_NEW").asEditable();
+            ge.setMultiplicity(new FxMultiplicity(4,4));
+            try {
+                ae.save(ge);
+                fail("Setting the min. group multiplicity to a value > the current # of the assignment's content instances should have failed");
+            } catch (FxUpdateException e) {
+                // expected
+            }
+
+            ge.setMultiplicity(new FxMultiplicity(0,2));
+            try {
+                ae.save(ge);
+                fail("Setting the max. group multiplicity to a value < the current # of the assignment's content instances should have failed");
+            } catch (FxUpdateException e) {
+                // expected
+            }
+
+            ge.setMultiplicity(new FxMultiplicity(0,3)); // reset
+            ge.setOverrideMultiplicity(true);
+            ae.save(ge);
+
+            // test more group assignment code blocks
+            assEdit = ((FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment("STRUCTTESTTYPE/STRUCTTESTGROUP")).asEditable();
+            assEdit.setLabel(new FxString(true, "ASSIGNMENTLABEL_XX123456"));
+            assEdit.setHint(new FxString(true, "ASSIGNMENTHINT_XX123456"));
+            assEdit.setXPath("/STRUCTTESTGROUP_NEW_PATH");
+            assEdit.setMode(GroupMode.AnyOf);
+
+            ae.save(assEdit, false);
+
+            assEdit = ((FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment("/STRUCTTESTGROUP_NEW_PATH")).asEditable();
+            assertEquals(assEdit.getLabel().toString(), "ASSIGNMENTLABEL_XX123456");
+            assertEquals(assEdit.getHint().toString(), "ASSIGNMENTHINT_XX123456");
+            assertEquals(assEdit.getMode(), GroupMode.AnyOf);
+
+            // set the group mode and the alias
+            assEdit.setMode(GroupMode.OneOf);
+            try {
+                ae.save(assEdit, false);
+                fail("Changing the a group's mode from AnyOf to OneOf for existing content instance should have failed");
+            } catch (FxUpdateException e) {
+                // expected
+            }
+            assEdit.setMode(GroupMode.AnyOf);
+            assEdit.setAlias("STRUCTTESTGROUP_NEW_ALIAS");
+            ae.save(assEdit, false);
+
+            assEdit = ((FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment("/STRUCTTESTGROUP_NEW_ALIAS")).asEditable();
+            assertEquals(assEdit.getAlias(), "STRUCTTESTGROUP_NEW_ALIAS");
+
+            // disable the assignment
+            assEdit.setEnabled(false);
+            ae.save(assEdit, true);
+
+            assEdit = ((FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment("/STRUCTTESTGROUP_NEW_ALIAS")).asEditable();
+            assertTrue(!assEdit.isEnabled());
+            assertEquals(assEdit.getDefaultMultiplicity(), 1);
+
+            // test setting the default multiplicity to a higher value than the current
+            assEdit.setDefaultMultiplicity(assEdit.getMultiplicity().getMax() + 1);
+            ae.save(assEdit, false);
+
+            assEdit = ((FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment("/STRUCTTESTGROUP_NEW_ALIAS")).asEditable();
+            assertEquals(assEdit.getDefaultMultiplicity(), assEdit.getMultiplicity().getMax());
+
+            // TODO: test set position, updategroupassignmentoptions, updategroupoptions, systeminternal flag (prop and group)
+        } finally {
+            // clean up
+            ce.remove(contentPK);
+            te.remove(typeId);
+            te.remove(anotherTypeId);
+        }
+    }
+
+    /**
+     * Creates a test type and property
+     *
+     * @param typeName   the name for the type to be created
+     * @param typeLabel  the label of the type
+     * @param createProp if set to true, it will create a property called "TESTPROP" assigned to the type
+     * @return the ids of the test type (long[0]) and its property (long[1])
+     * @throws FxApplicationException on errors
+     */
+    private long createTestTypeAndProp(String typeName, String typeLabel, boolean createProp) throws FxApplicationException {
+        long typeId = te.save(FxTypeEdit.createNew(typeName, new FxString(typeLabel),
+                CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()), null));
+        if (createProp) {
+            ae.createProperty(typeId, FxPropertyEdit.createNew(
+                    "TESTPROP", new FxString(true, FxLanguage.ENGLISH, "TESTPROP"), new FxString(true, FxLanguage.ENGLISH, "TESTPROP"),
+                    new FxMultiplicity(0, 1), CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                    FxDataType.String1024).setMultiLang(false), "/");
+        }
+        return typeId;
+    }
+
+    /**
+     * Creates a test content instance for the "STRUCTTESTTYPE" and its assigned "TESTPROP"
+     *
+     * @param typeId       the id of the type for which the content instance will be created
+     * @param propertyPath the property's XPath
+     * @param testData     a String value for test data
+     * @return FxPK the content instance PK
+     * @throws FxApplicationException on errors
+     */
+    private FxPK createTestContent(long typeId, String propertyPath, String testData) throws FxApplicationException {
+        FxString data = new FxString(false, testData);
+        FxContent co = ce.initialize(typeId);
+        FxPK contentPK = ce.save(co);
+        co = ce.load(contentPK);
+        co.setValue(propertyPath, data);
+        contentPK = ce.save(co);
+
+        return contentPK;
     }
 }

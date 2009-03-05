@@ -325,4 +325,14 @@ public interface ContentStorage {
      * @throws FxApplicationException on errors
      */
     void prepareBinary(Connection con, FxBinary binary) throws SQLException, FxApplicationException;
+
+    /**
+     * Get the number of instances for a given type
+     *
+     * @param con an open and valid db connection
+     * @param typeId the type's id
+     * @return the number of content instances found for the given type id
+     * @throws SQLException on errors
+     */
+    long getTypeInstanceCount(Connection con, long typeId) throws SQLException;
 }

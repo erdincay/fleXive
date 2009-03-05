@@ -68,7 +68,7 @@ import java.util.List;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "AssignmentEngine", mappedName="AssignmentEngine")
+@Stateless(name = "AssignmentEngine", mappedName = "AssignmentEngine")
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineLocal {
@@ -122,12 +122,18 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             //parentXPath is valid, create the property, then assign it to root
             newPropertyId = seq.getId(FxSystemSequencer.TYPEPROP);
             FxValue defValue = property.getDefaultValue();
-            if( defValue instanceof FxBinary) {
-                ContentStorage storage = StorageManager.getContentStorage(type.getStorageMode());
-                storage.prepareBinary(con, (FxBinary)defValue);
+            ContentStorage storage = StorageManager.getContentStorage(type.getStorageMode());
+            if (defValue instanceof FxBinary) {
+                storage.prepareBinary(con, (FxBinary) defValue);
             }
             final String _def = defValue == null || defValue.isEmpty() ? null : ConversionEngine.getXStream().toXML(defValue);
             con = Database.getDbConnection();
+
+            // do not allow to add mandatory properties (i.e. min multiplicity > 0) to types for which content exists
+            if (storage.getTypeInstanceCount(con, typeId) > 0 && property.getMultiplicity().getMin() > 0) {
+                throw new FxCreateException("ex.structure.property.creation.existingContentMultiplicityError", property.getName(), property.getMultiplicity().getMin());
+            }
+
             //create property, no checks for existing names are performed as this is handled with unique keys
             sql.append("INSERT INTO ").append(TBL_STRUCT_PROPERTIES).
                     //               1  2    3          4          5               6        7
@@ -299,7 +305,6 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      *
      * @return if the options changed.
      */
-
     private boolean updatePropertyOptions(Connection con, FxPropertyEdit prop) throws SQLException, FxInvalidParameterException {
         boolean changed = false;
         FxPropertyEdit org = new FxPropertyEdit(CacheAdmin.getEnvironment().getProperty(prop.getId()));
@@ -328,7 +333,6 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     *
     * @return if the options changed.
     */
-
     private boolean updateGroupAssignmentOptions(Connection con, FxGroupAssignment ga) throws SQLException, FxInvalidParameterException {
         boolean changed = false;
         FxGroupAssignmentEdit org = ((FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(ga.getId())).asEditable();
@@ -358,7 +362,6 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      *
      * @return if the options changed.
      */
-
     private boolean updatePropertyAssignmentOptions(Connection con, FxPropertyAssignment original, FxPropertyAssignment modified) throws SQLException, FxInvalidParameterException {
         boolean changed = false;
         FxPropertyAssignmentEdit org = original.asEditable();
@@ -414,7 +417,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 else
                     ps.setNull(2, java.sql.Types.NUMERIC);
                 if (StringUtils.isEmpty(option.getKey()))
-                    throw new FxInvalidParameterException("key","ex.structure.option.key.empty", option.getValue());
+                    throw new FxInvalidParameterException("key", "ex.structure.option.key.empty", option.getValue());
                 ps.setString(3, option.getKey());
                 ps.setBoolean(4, option.isOverrideable());
                 ps.setString(5, option.getValue());
@@ -473,6 +476,16 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         //TODO
     }
 
+    /**
+     * Update a group's attributes
+     *
+     * @param _con  an sql connection (will be opened if null)
+     * @param ps    the sql prepared statement
+     * @param sql   the sql query
+     * @param group the instance of FxGroupEdit whose attributes should be changed
+     * @return true if changes were made to the group
+     * @throws FxApplicationException on errors
+     */
     private boolean updateGroup(Connection _con, PreparedStatement ps, StringBuilder sql,
                                 FxGroupEdit group) throws FxApplicationException {
         if (sql == null)
@@ -486,9 +499,37 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 con = Database.getDbConnection();
             sql.setLength(0);
 
-            //TODO: check valid multiplicity like in updateproperty
+            // change the group's override base multiplicity flag
+            if (org.mayOverrideBaseMultiplicity() != group.mayOverrideBaseMultiplicity()) {
+                if (!group.mayOverrideBaseMultiplicity()) {
+                    if (getGroupInstanceMultiplicity(con, org.getId(), true) < group.getMultiplicity().getMin())
+                        throw new FxUpdateException("ex.structure.modification.contentExists", "minimumMultiplicity");
+                    if (getGroupInstanceMultiplicity(con, org.getId(), false) > group.getMultiplicity().getMax())
+                        throw new FxUpdateException("ex.structure.modification.contentExists", "maximumMultiplicity");
+                }
+                if (ps != null) ps.close();
+                ps = con.prepareStatement("UPDATE " + TBL_STRUCT_GROUPS + " SET MAYOVERRIDEMULT=? WHERE ID=?");
+                ps.setBoolean(1, group.mayOverrideBaseMultiplicity());
+                ps.setLong(2, group.getId());
+                ps.executeUpdate();
+                if (changes)
+                    changesDesc.append(',');
+                changesDesc.append("mayOverrideMultiplicity=").append(group.mayOverrideBaseMultiplicity());
+                changes = true;
+            }
+            // check and change the group's minimum and/or maximum multiplicity
             if (org.getMultiplicity().getMin() != group.getMultiplicity().getMin() ||
                     org.getMultiplicity().getMax() != group.getMultiplicity().getMax()) {
+                if (!org.mayOverrideBaseMultiplicity()) {
+                    if (org.getMultiplicity().getMin() < group.getMultiplicity().getMin()) {
+                        if (getGroupInstanceMultiplicity(con, org.getId(), true) < group.getMultiplicity().getMin())
+                            throw new FxUpdateException("ex.structure.modification.group.contentExists", group.getId(), group.getMultiplicity().getMin(), group.getMultiplicity().getMax());
+                    }
+                    if (org.getMultiplicity().getMax() > group.getMultiplicity().getMax()) {
+                        if (getGroupInstanceMultiplicity(con, org.getId(), false) > group.getMultiplicity().getMax())
+                            throw new FxUpdateException("ex.structure.modification.group.contentExists", group.getId(), group.getMultiplicity().getMin(), group.getMultiplicity().getMax());
+                    }
+                }
                 if (ps != null) ps.close();
                 ps = con.prepareStatement("UPDATE " + TBL_STRUCT_GROUPS + " SET DEFMINMULT=? ,DEFMAXMULT=? WHERE ID=?");
                 ps.setInt(1, group.getMultiplicity().getMin());
@@ -500,7 +541,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 changesDesc.append("multiplicity=").append(group.getMultiplicity());
                 changes = true;
             }
-
+            // change the group's label
             if (org.getLabel() != null && !org.getLabel().equals(group.getLabel()) ||
                     org.getLabel() == null && group.getLabel() != null ||
                     org.getHint() != null && !org.getHint().equals(group.getHint()) ||
@@ -513,7 +554,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 changesDesc.append("hint=").append(group.getHint()).append(',');
                 changes = true;
             }
-            //TODO: thorw exceptipon that this is not supported yet
+            // change the group's name
             if (!org.getName().equals(group.getName())) {
                 if (ps != null) ps.close();
                 ps = con.prepareStatement("UPDATE " + TBL_STRUCT_GROUPS + " SET NAME=? WHERE ID=?");
@@ -525,18 +566,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 changesDesc.append("name=").append(group.getName());
                 changes = true;
             }
-            if (org.mayOverrideBaseMultiplicity() != group.mayOverrideBaseMultiplicity()) {
-                if (ps != null) ps.close();
-                ps = con.prepareStatement("UPDATE " + TBL_STRUCT_GROUPS + " SET MAYOVERRIDEMULT=? WHERE ID=?");
-                ps.setBoolean(1, group.mayOverrideBaseMultiplicity());
-                ps.setLong(2, group.getId());
-                ps.executeUpdate();
-                if (changes)
-                    changesDesc.append(',');
-                changesDesc.append("mayOverrideMultiplicity=").append(group.mayOverrideBaseMultiplicity());
-                changes = true;
-            }
-
+            // change the group options
             if (updateGroupOptions(con, group)) {
                 changesDesc.append(",options:");
                 List<FxStructureOption> options = group.getOptions();
@@ -548,15 +578,10 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             }
 
             if (changes) {
-                //TODO: invoke htracker with changeDesc
+                htracker.track("history.group.update.groupProperties", group.getName(), group.getId(), changesDesc.toString());
             }
-
         } catch (SQLException e) {
             ctx.setRollbackOnly();
-            /*TODO: Determine if this must be checked
-            if (Database.isUniqueConstraintViolation(e))
-                throw new FxEntryExistsException("ex.structure.assignment.property.exists", prop.getAlias(), prop.getXPath());
-            */
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
             if (_con == null) {
@@ -594,6 +619,12 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             //parentXPath is valid, create the group, then assign it to root
             newGroupId = seq.getId(FxSystemSequencer.TYPEGROUP);
             con = Database.getDbConnection();
+            ContentStorage storage = StorageManager.getContentStorage(type.getStorageMode());
+            // do not allow to add mandatory groups (i.e. min multiplicity > 0) to types for which content exists
+            if (storage.getTypeInstanceCount(con, typeId) > 0 && group.getMultiplicity().getMin() > 0) {
+                throw new FxCreateException("ex.structure.group.creation.exisitingContentMultiplicityError", group.getName(), group.getMultiplicity().getMin());
+            }
+
             //create group
             sql.append("INSERT INTO ").append(TBL_STRUCT_GROUPS).
                     append("(ID,NAME,DEFMINMULT,DEFMAXMULT,MAYOVERRIDEMULT)VALUES(?,?,?,?,?)");
@@ -761,6 +792,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             if (con == null)
                 con = Database.getDbConnection();
             sql.setLength(0);
+            // enable / disable an assignment
             if (org.isEnabled() != group.isEnabled()) {
                 if (changes)
                     changesDesc.append(',');
@@ -787,8 +819,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 }
                 changes = true;
             }
-
-            //TODO: check if multiplicity is in valid ranges
+            // change the assignment's default multiplicity (will be auto-adjusted to a valid value in FxGroupAssignmentEdit)
             if (org.getDefaultMultiplicity() != group.getDefaultMultiplicity()) {
                 if (ps != null) ps.close();
                 ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET DEFMULT=? WHERE ID=?");
@@ -800,22 +831,17 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 changesDesc.append("defaultMultiplicity=").append(group.getDefaultMultiplicity());
                 changes = true;
             }
-
-            //TODO: must not be changed
-            if (org.getAssignedType().getId() != group.getAssignedType().getId()) {
-                if (ps != null) ps.close();
-                ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET TYPEDEF=? WHERE ID=?");
-                ps.setLong(1, group.getAssignedType().getId());
-                ps.setLong(2, group.getId());
-                ps.executeUpdate();
-                if (changes)
-                    changesDesc.append(',');
-                changesDesc.append("assignedType=").append(group.getAssignedType());
-                changes = true;
-            }
-            //siehe prop
+            // change the assignment's multiplicity
             if (org.getMultiplicity().getMin() != group.getMultiplicity().getMin() ||
                     org.getMultiplicity().getMax() != group.getMultiplicity().getMax()) {
+                if (org.getGroup().mayOverrideBaseMultiplicity()) {
+                    if (getGroupInstanceMultiplicity(con, org.getGroup().getId(), true) < group.getMultiplicity().getMin())
+                        throw new FxUpdateException("ex.structure.modification.contentExists", "minimumMultiplicity");
+                    if (getGroupInstanceMultiplicity(con, org.getGroup().getId(), false) > group.getMultiplicity().getMax())
+                        throw new FxUpdateException("ex.structure.modification.contentExists", "maximumMultiplicity");
+                } else {
+                    throw new FxUpdateException("ex.structure.group.assignment.overrideBaseMultiplicityNotEnabled", org.getGroup().getId());
+                }
                 if (ps != null) ps.close();
                 ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET MINMULT=? ,MAXMULT=? WHERE ID=?");
                 ps.setInt(1, group.getMultiplicity().getMin());
@@ -827,6 +853,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 changesDesc.append("multiplicity=").append(group.getMultiplicity());
                 changes = true;
             }
+            // set the assignment's position
             if (org.getPosition() != group.getPosition()) {
                 int finalPos = setAssignmentPosition(con, group.getId(), group.getPosition());
                 if (changes)
@@ -834,6 +861,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 changesDesc.append("position=").append(finalPos);
                 changes = true;
             }
+            // set the XPath (and the alias) of a group assignment
             if (!org.getXPath().equals(group.getXPath()) || !org.getAlias().equals(group.getAlias())) {
                 if (!XPathElement.isValidXPath(XPathElement.stripType(group.getXPath())) ||
                         group.getAlias().equals(XPathElement.lastElement(XPathElement.stripType(org.getXPath())).getAlias()))
@@ -866,39 +894,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 changesDesc.append("xPath=").append(group.getXPath()).append(",alias=").append(group.getAlias());
                 changes = true;
             }
-
-            //TODO:may not be changed, throw exception
-            /*if (org.getBaseAssignmentId() != group.getBaseAssignmentId()) {
-                if (ps != null) ps.close();
-                ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET BASE=? WHERE ID=?");
-                ps.setLong(1, group.getBaseAssignmentId());
-                ps.setLong(2, group.getId());
-                ps.executeUpdate();
-                if (changes)
-                    changesDesc.append(',');
-                changesDesc.append("baseAssignment=").append(group.getBaseAssignmentId());
-                changes = true;
-            }*/
-
-            //TODO:may not be changed, throw exception
-            /*if (org.getParentGroupAssignment() != null &&
-                    !org.getParentGroupAssignment().equals(group.getParentGroupAssignment()) ||
-                    group.getParentGroupAssignment() != null &&
-                            !group.getParentGroupAssignment().equals(org.getParentGroupAssignment())) {
-                if (ps != null) ps.close();
-                ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET PARENTGROUP=? WHERE ID=?");
-                if (group.getParentGroupAssignment() != null)
-                    ps.setLong(1, group.getParentGroupAssignment().getId());
-                else
-                    ps.setLong(1, FxAssignment.NO_PARENT);
-                ps.setLong(2, group.getId());
-                ps.executeUpdate();
-                if (changes)
-                    changesDesc.append(',');
-                changesDesc.append("parentGroupAssignment=").append(group.getParentGroupAssignment());
-                changes = true;
-            }*/
-
+            // update label
             if (org.getLabel() != null && !org.getLabel().equals(group.getLabel()) ||
                     org.getLabel() == null && group.getLabel() != null ||
                     org.getHint() != null && !org.getHint().equals(group.getHint()) ||
@@ -911,7 +907,6 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 changesDesc.append("hint=").append(group.getHint()).append(',');
                 changes = true;
             }
-
             //update SystemInternal flag, this is a one way function, so it can only be set, but not reset!!
             if (!org.isSystemInternal() && group.isSystemInternal() && FxContext.getUserTicket().isGlobalSupervisor()) {
                 if (ps != null) ps.close();
@@ -924,9 +919,14 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 changesDesc.append("systemInternal=").append(group.isSystemInternal());
                 changes = true;
             }
-
-            //TODO: only make changable if no instances of this group exist, or if the mode is changed from one.of to any.of
+            // change GroupMode
+            // OneOf --> AnyOf always allowed, AnyOf --> OneOf not allowed if content exists
             if (org.getMode().getId() != group.getMode().getId()) {
+                if (org.getMode().equals(GroupMode.AnyOf) && group.getMode().equals(GroupMode.OneOf)) {
+                    if (getGroupInstanceMultiplicity(con, org.getGroup().getId(), true) > 0) {
+                        throw new FxUpdateException(LOG, "ex.structure.group.assignment.modeChangeError");
+                    }
+                }
                 if (ps != null) ps.close();
                 ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET GROUPMODE=? WHERE ID=?");
                 ps.setLong(1, group.getMode().getId());
@@ -937,7 +937,23 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 changesDesc.append("groupMode=").append(group.getMode().getId());
                 changes = true;
             }
-
+            // change the parentgroupassignment
+            // TODO: change the parent group assignment & failure conditions
+            /*
+            if (org.getParentGroupAssignment().getId() != group.getParentGroupAssignment().getId()) {
+                if (ps != null)
+                    ps.close();
+                ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET PARENTGROUP=? WHERE ID=?");
+                ps.setLong(1, group.getParentGroupAssignment().getId());
+                ps.setLong(2, group.getId());
+                ps.executeUpdate();
+                if (changes)
+                    changesDesc.append(',');
+                changesDesc.append("parentGroupAssignment=").append(group.getParentGroupAssignment().getId());
+                changes = true;
+            }
+            */
+            // change the group assignment options
             if (updateGroupAssignmentOptions(con, group)) {
                 changesDesc.append(",options:");
                 List<FxStructureOption> options = group.getOptions();
@@ -947,12 +963,13 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 }
                 changes = true;
             }
-            //TODO: compare all possible modifications
+
             if (changes)
                 htracker.track(group.getAssignedType(), "history.assignment.updateGroupAssignment", group.getXPath(), group.getAssignedType().getId(), group.getAssignedType().getName(),
                         group.getGroup().getId(), group.getGroup().getName(), changesDesc.toString());
 
-        } catch (SQLException e) {
+        } catch (SQLException
+                e) {
             final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(e);
             ctx.setRollbackOnly();
             if (uniqueConstraintViolation)
@@ -1183,12 +1200,12 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             sql.setLength(0);
 
             if (!org.isSystemInternal() || FxContext.getUserTicket().isGlobalSupervisor()) {
-
+                // change the multiplicity override prop
                 if (org.mayOverrideBaseMultiplicity() != prop.mayOverrideBaseMultiplicity()) {
                     if (!prop.mayOverrideBaseMultiplicity()) {
-                        if (getInstanceMultiplicity(con, org.getId(), true) < prop.getMultiplicity().getMin())
+                        if (getPropertyInstanceMultiplicity(con, org.getId(), true) < prop.getMultiplicity().getMin())
                             throw new FxUpdateException("ex.structure.modification.contentExists", "minimumMultiplicity");
-                        if (getInstanceMultiplicity(con, org.getId(), false) > prop.getMultiplicity().getMax())
+                        if (getPropertyInstanceMultiplicity(con, org.getId(), false) > prop.getMultiplicity().getMax())
                             throw new FxUpdateException("ex.structure.modification.contentExists", "maximumMultiplicity");
                     }
                     if (ps != null) ps.close();
@@ -1201,16 +1218,16 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     changesDesc.append("mayOverrideMultiplicity=").append(prop.mayOverrideBaseMultiplicity());
                     changes = true;
                 }
-
+                // change the props multiplicity
                 if (org.getMultiplicity().getMin() != prop.getMultiplicity().getMin() ||
                         org.getMultiplicity().getMax() != prop.getMultiplicity().getMax()) {
                     if (!prop.mayOverrideBaseMultiplicity()) {
                         if (org.getMultiplicity().getMin() < prop.getMultiplicity().getMin()) {
-                            if (getInstanceMultiplicity(con, org.getId(), true) < prop.getMultiplicity().getMin())
+                            if (getPropertyInstanceMultiplicity(con, org.getId(), true) < prop.getMultiplicity().getMin())
                                 throw new FxUpdateException("ex.structure.modification.contentExists", "minimumMultiplicity");
                         }
                         if (org.getMultiplicity().getMax() > prop.getMultiplicity().getMax()) {
-                            if (getInstanceMultiplicity(con, org.getId(), false) > prop.getMultiplicity().getMax())
+                            if (getPropertyInstanceMultiplicity(con, org.getId(), false) > prop.getMultiplicity().getMax())
                                 throw new FxUpdateException("ex.structure.modification.contentExists", "maximumMultiplicity");
                         }
                     }
@@ -1255,7 +1272,6 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     } else
                         throw new FxUpdateException("ex.structure.modification.contentExists", "dataType");
                 }
-
                 //may only change if there are no existing content instances that use this property already
                 if (org.getReferencedType() != null && prop.getReferencedType() != null &&
                         org.getReferencedType().getId() != prop.getReferencedType().getId() ||
@@ -1275,8 +1291,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     } else
                         throw new FxUpdateException("ex.structure.modification.contentExists", "referencedType");
                 }
-
-
+                // set fulltext indexing for the property
                 if (org.isFulltextIndexed() != prop.isFulltextIndexed()) {
                     if (ps != null) ps.close();
                     ps = con.prepareStatement("UPDATE " + TBL_STRUCT_PROPERTIES + " SET ISFULLTEXTINDEXED=? WHERE ID=?");
@@ -1288,6 +1303,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     changesDesc.append("isFulltextIndexed=").append(prop.isFulltextIndexed());
                     changes = true;
                 }
+                // set ACL override flag
                 if (org.mayOverrideACL() != prop.mayOverrideACL()) {
                     if (ps != null) ps.close();
                     ps = con.prepareStatement("UPDATE " + TBL_STRUCT_PROPERTIES + " SET MAYOVERRIDEACL=? WHERE ID=?");
@@ -1318,7 +1334,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     } else
                         throw new FxUpdateException("ex.structure.modification.contentExists", "referencedList");
                 }
-
+                // set the unique mode
                 if (org.getUniqueMode() != prop.getUniqueMode()) {
                     boolean allowChange = getPropertyInstanceCount(org.getId()) == 0 || prop.getUniqueMode().equals(UniqueMode.None);
                     if (!allowChange) {
@@ -1344,7 +1360,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     } else
                         throw new FxUpdateException("ex.structure.modification.contentExists", "uniqueMode");
                 }
-
+                // change the property's ACL
                 if (org.getACL().getId() != prop.getACL().getId()) {
                     if (ps != null) ps.close();
                     ps = con.prepareStatement("UPDATE " + TBL_STRUCT_PROPERTIES + " SET ACL=? WHERE ID=?");
@@ -1356,6 +1372,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     changesDesc.append("acl=").append(prop.getACL().getId());
                     changes = true;
                 }
+                // change the prop's label
                 if (org.getLabel() != null && !org.getLabel().equals(prop.getLabel()) ||
                         org.getLabel() == null && prop.getLabel() != null ||
                         org.getHint() != null && !org.getHint().equals(prop.getHint()) ||
@@ -1368,7 +1385,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     changesDesc.append("hint=").append(prop.getHint()).append(',');
                     changes = true;
                 }
-
+                // change the default label
                 if (org.getDefaultValue() != null && !org.getDefaultValue().equals(prop.getDefaultValue()) ||
                         org.getDefaultValue() == null && prop.getDefaultValue() != null) {
                     if (changes)
@@ -1390,7 +1407,6 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     changesDesc.append("defaultValue=").append(prop.getDefaultValue());
                     changes = true;
                 }
-
                 //update SystemInternal flag, this is a one way function, so it can only be set, but not reset!!
                 if (!org.isSystemInternal() && prop.isSystemInternal()) {
                     if (FxContext.getUserTicket().isGlobalSupervisor()) {
@@ -1463,6 +1479,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             sql.setLength(0);
 
             if (!original.isSystemInternal() || FxContext.getUserTicket().isGlobalSupervisor()) {
+                // enable or disable a property assignment, remove the assignment if set to false
                 if (original.isEnabled() != modified.isEnabled()) {
                     if (!modified.isEnabled())
                         removeAssignment(original.getId(), true, false, true, false);
@@ -1478,6 +1495,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     changesDesc.append("enabled=").append(modified.isEnabled());
                     changes = true;
                 }
+                // change the property assignment's default multiplicity
                 if (original.getDefaultMultiplicity() != modified.getDefaultMultiplicity()) {
                     if (ps != null) ps.close();
                     ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET DEFMULT=? WHERE ID=?");
@@ -1489,14 +1507,16 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     changesDesc.append("defaultMultiplicity=").append(modified.getDefaultMultiplicity());
                     changes = true;
                 }
-
+                // change the property assignment's multiplicity
                 if (original.getMultiplicity().getMin() != modified.getMultiplicity().getMin() ||
                         original.getMultiplicity().getMax() != modified.getMultiplicity().getMax()) {
-                    if (modified.getProperty().mayOverrideBaseMultiplicity()) {
-                        if (getInstanceMultiplicity(con, modified.getProperty().getId(), true) < modified.getMultiplicity().getMin())
+                    if (original.getProperty().mayOverrideBaseMultiplicity()) {
+                        if (getPropertyInstanceMultiplicity(con, original.getProperty().getId(), true) < modified.getMultiplicity().getMin())
                             throw new FxUpdateException("ex.structure.modification.contentExists", "minimumMultiplicity");
-                        if (getInstanceMultiplicity(con, modified.getProperty().getId(), false) > modified.getMultiplicity().getMax())
+                        if (getPropertyInstanceMultiplicity(con, original.getProperty().getId(), false) > modified.getMultiplicity().getMax())
                             throw new FxUpdateException("ex.structure.modification.contentExists", "maximumMultiplicity");
+                    } else {
+                        throw new FxUpdateException("ex.structure.property.assignment.overrideBaseMultiplicityNotEnabled", original.getProperty().getId());
                     }
                     if (ps != null) ps.close();
                     ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET MINMULT=? ,MAXMULT=? WHERE ID=?");
@@ -1509,6 +1529,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     changesDesc.append("multiplicity=").append(modified.getMultiplicity());
                     changes = true;
                 }
+                // set the assignment's position
                 if (original.getPosition() != modified.getPosition()) {
                     int finalPos = setAssignmentPosition(con, modified.getId(), modified.getPosition());
                     if (changes)
@@ -1547,54 +1568,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     changes = true;
                     */
                 }
-                //must not change
-                /*
-                if (org.getBaseAssignmentId() != prop.getBaseAssignmentId()) {
-                    if (ps != null) ps.close();
-                    ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET BASE=? WHERE ID=?");
-                    ps.setLong(1, prop.getBaseAssignmentId());
-                    ps.setLong(2, prop.getId());
-                    ps.executeUpdate();
-                    if (changes)
-                        changesDesc.append(',');
-                    changesDesc.append("baseAssignment=").append(prop.getBaseAssignmentId());
-                    changes = true;
-                }
-                */
-                //must not change
-                /*
-                if(org.getParentGroupAssignment() != null &&
-                        !org.getParentGroupAssignment().equals(prop.getParentGroupAssignment()) ||
-                        prop.getParentGroupAssignment() !=null &&
-                        !prop.getParentGroupAssignment().equals(org.getParentGroupAssignment())) {
-                    if (ps != null) ps.close();
-                    ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET PARENTGROUP=? WHERE ID=?");
-                    if (prop.getParentGroupAssignment() !=null)
-                        ps.setLong(1, prop.getParentGroupAssignment().getId());
-                    else
-                        ps.setLong(1, FxAssignment.NO_PARENT);
-                    ps.setLong(2, prop.getId());
-                    ps.executeUpdate();
-                    if (changes)
-                        changesDesc.append(',');
-                    changesDesc.append("parentGroupAssignment=").append(prop.getParentGroupAssignment());
-                    changes = true;
-                }
-                */
-                //must not change
-                /*
-                if(org.getProperty().getId() != prop.getProperty().getId()) {
-                    if (ps != null) ps.close();
-                    ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET APROPERTY=? WHERE ID=?");
-                    ps.setLong(1, prop.getProperty().getId());
-                    ps.setLong(2, prop.getId());
-                    ps.executeUpdate();
-                    if (changes)
-                        changesDesc.append(',');
-                    changesDesc.append("property=").append(prop.getProperty().getId());
-                    changes = true;
-                }
-                */
+                // change the assignment's ACL
                 if (original.getACL().getId() != modified.getACL().getId()) {
                     if (ps != null) ps.close();
                     ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET ACL=? WHERE ID=?");
@@ -1606,7 +1580,6 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     changesDesc.append("acl=").append(modified.getACL().getId());
                     changes = true;
                 }
-
                 // options are stored via storeOption method
                 if (original.isMultiLang() != modified.isMultiLang()) {
                     //Multi->Single: lang=system, values of the def. lang. are used, other are discarded
@@ -1621,7 +1594,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     changesDesc.append("multiLang=").append(modified.isMultiLang());
                     changes = true;
                 }
-
+                // change the assignment's label
                 if (original.getLabel() != null && !original.getLabel().equals(modified.getLabel()) ||
                         original.getLabel() == null && modified.getLabel() != null ||
                         original.getHint() != null && !original.getHint().equals(modified.getHint()) ||
@@ -1634,6 +1607,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     changesDesc.append("hint=").append(modified.getHint()).append(',');
                     changes = true;
                 }
+                // change the assigment's default value
                 if (original.getDefaultValue() != null && !original.getDefaultValue().equals(modified.getDefaultValue()) ||
                         original.getDefaultValue() == null && modified.getDefaultValue() != null) {
                     if (changes)
@@ -1641,9 +1615,9 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     if (ps != null) ps.close();
                     ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET DEFAULT_VALUE=? WHERE ID=?");
                     FxValue defValue = modified.getDefaultValue();
-                    if( defValue instanceof FxBinary) {
+                    if (defValue instanceof FxBinary) {
                         ContentStorage storage = StorageManager.getContentStorage(modified.getAssignedType().getStorageMode());
-                        storage.prepareBinary(con, (FxBinary)defValue);
+                        storage.prepareBinary(con, (FxBinary) defValue);
                     }
                     final String _def = defValue == null || defValue.isEmpty() ? null : ConversionEngine.getXStream().toXML(defValue);
                     if (_def == null)
@@ -1655,6 +1629,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     changesDesc.append("defaultValue=").append(original.getDefaultValue());
                     changes = true;
                 }
+                // change the default language
                 if (original.getDefaultLanguage() != modified.getDefaultLanguage()) {
                     if (ps != null) ps.close();
                     ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET DEFLANG=? WHERE ID=?");
@@ -1664,22 +1639,6 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     if (changes)
                         changesDesc.append(',');
                     changesDesc.append("defaultLanguage=").append(modified.getDefaultLanguage());
-                    changes = true;
-                }
-
-                if (original.getDefaultMultiplicity() != modified.getDefaultMultiplicity()) {
-                    if (modified.getMultiplicity().getMin() > modified.getDefaultMultiplicity() ||
-                            modified.getDefaultMultiplicity() > modified.getMultiplicity().getMax())
-                        throw new FxUpdateException("ex.structure.modificaiton.defaultMultiplicity.invalid");
-
-                    if (ps != null) ps.close();
-                    ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET DEFMULT=? WHERE ID=?");
-                    ps.setInt(1, modified.getDefaultMultiplicity());
-                    ps.setLong(2, original.getId());
-                    ps.executeUpdate();
-                    if (changes)
-                        changesDesc.append(',');
-                    changesDesc.append("defaultMultiplicity=").append(modified.getDefaultMultiplicity());
                     changes = true;
                 }
                 //update SystemInternal flag, this is a one way function, so it can only be set, but not reset!!
@@ -1798,9 +1757,9 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             ps.setInt(15, prop.hasDefaultLanguage() ? (int) prop.getDefaultLanguage() : (int) FxLanguage.SYSTEM_ID);
             ps.setBoolean(16, prop.isSystemInternal());
             FxValue defValue = prop.getDefaultValue();
-            if( defValue instanceof FxBinary) {
+            if (defValue instanceof FxBinary) {
                 ContentStorage storage = StorageManager.getContentStorage(prop.getAssignedType().getStorageMode());
-                storage.prepareBinary(con, (FxBinary)defValue);
+                storage.prepareBinary(con, (FxBinary) defValue);
             }
             final String _def = defValue == null || defValue.isEmpty() ? null : ConversionEngine.getXStream().toXML(defValue);
             if (_def == null)
@@ -1910,6 +1869,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      * @param assignmentId             assignment to remove
      * @param removeSubAssignments     if assignment is a group, remove all attached properties and groups?
      * @param removeDerivedAssignments if derivates of this assignment in derived types exist, remove them as well?
+     * @param disableAssignment        if false, find all derived assignments, flag them as 'regular' assignments and set them as new base
      * @param allowDerivedRemoval      allow removal of derived assignments
      * @throws FxApplicationException on errors
      */
@@ -2130,31 +2090,30 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * Find all (directly) derived assignments and flag them as 'regular' assignments and set them as new base
      *
-     * @param con        an open and valid connection
-     * @param ps         prepared statement
-     * @param sql        string builder
+     * @param con         an open and valid connection
+     * @param ps          prepared statement
+     * @param sql         string builder
      * @param assignments the assignments to 'break'
-     * @return used ps
      * @throws FxNotFoundException         on errors
      * @throws FxInvalidParameterException on errors
      * @throws java.sql.SQLException       on errors
      */
     private void breakAssignmentInheritance(Connection con, PreparedStatement ps,
-                                                         StringBuilder sql, FxAssignment... assignments) throws SQLException, FxNotFoundException, FxInvalidParameterException {
+                                            StringBuilder sql, FxAssignment... assignments) throws SQLException, FxNotFoundException, FxInvalidParameterException {
         sql.setLength(0);
         sql.append("UPDATE ").append(TBL_STRUCT_ASSIGNMENTS).append(" SET BASE=? WHERE BASE=?"); // AND TYPEDEF=?");
         if (ps != null && !ps.isClosed())
             ps.close();
         ps = con.prepareStatement(sql.toString());
         ps.setNull(1, Types.NUMERIC);
-        for(FxAssignment as: assignments) {
+        for (FxAssignment as : assignments) {
             ps.setLong(2, as.getId());
             int count = 0;
             //'toplevel' fix
-    //        for(FxType types: assignment.getAssignedType().getDerivedTypes() ) {
-    //            ps.setLong(3, types.getId());
+            //        for(FxType types: assignment.getAssignedType().getDerivedTypes() ) {
+            //            ps.setLong(3, types.getId());
             count += ps.executeUpdate();
-    //        }
+            //        }
             LOG.info("Updated " + count + " assignments to become the new base assignment");
             /* sql.setLength(0);
             //now fix 'deeper' inherited assignments
@@ -2248,7 +2207,6 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         return returnId;
     }
 
-
     /**
      * {@inheritDoc}
      */
@@ -2310,7 +2268,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      * @return minimum or maximum multiplicity of properties of instances
      * @throws SQLException on errors
      */
-    private long getInstanceMultiplicity(Connection con, long propertyId, boolean minimum) throws SQLException {
+    private long getPropertyInstanceMultiplicity(Connection con, long propertyId, boolean minimum) throws SQLException {
         PreparedStatement ps = null;
         long count = 0;
         try {
@@ -2329,5 +2287,51 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         }
         return count;
     }
-}
 
+    /**
+     * Get the minimum or maximum multiplicity of groups in content instances for a given group
+     *
+     * @param con     an open and valid connection
+     * @param groupId the requested groupId
+     * @param minimum true for minimum, false for maximum
+     * @return minium or maximum multiplicity of group instances
+     * @throws SQLException on errors
+     */
+    private long getGroupInstanceMultiplicity(Connection con, long groupId, boolean minimum) throws SQLException {
+        PreparedStatement ps = null;
+        long count = 0;
+        List<Long> assignmentIds = new ArrayList<Long>();
+        try { // retrieve the assignment ids, then the max / min xindex from the content table for the given ids
+            ps = con.prepareStatement("SELECT ID FROM " + TBL_STRUCT_ASSIGNMENTS + " WHERE AGROUP=?");
+            ps.setLong(1, groupId);
+            ResultSet rs = ps.executeQuery();
+            while (rs != null && rs.next()) {
+                assignmentIds.add(rs.getLong(1));
+            }
+
+            if (assignmentIds.size() > 0) {
+                String function = "MIN(XINDEX)";
+                if (!minimum)
+                    function = "MAX(XINDEX)";
+                StringBuilder query = new StringBuilder("SELECT " + function + " FROM " + TBL_CONTENT_DATA + " WHERE ASSIGN=");
+                for (int i = 0; i < assignmentIds.size(); i++) { // build the complete query
+                    query.append(assignmentIds.get(i).toString());
+                    if (i < assignmentIds.size() - 1) {
+                        query.append(" OR ASSIGN=");
+                    }
+                }
+                if (ps != null)
+                    ps.close();
+                ps = con.prepareStatement(query.toString());
+                rs = ps.executeQuery();
+                rs.next();
+                count = rs.getLong(1);
+            }
+        } finally {
+            if (ps != null) {
+                ps.close();
+            }
+        }
+        return count;
+    }
+}

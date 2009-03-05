@@ -146,8 +146,8 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
      * @return this
      */
     public FxPropertyAssignmentEdit setDefaultValue(FxValue defaultValue) {
-        if( defaultValue != null && defaultValue.isMultiLanguage() != this.isMultiLang() ) {
-            if( defaultValue.isMultiLanguage() )
+        if (defaultValue != null && defaultValue.isMultiLanguage() != this.isMultiLang()) {
+            if (defaultValue.isMultiLanguage())
                 throw new FxInvalidParameterException("value", "ex.content.value.invalid.multilanguage.prop.single", getXPath()).asRuntimeException();
             else
                 throw new FxInvalidParameterException("value", "ex.content.value.invalid.multilanguage.prop.multi", getXPath()).asRuntimeException();
@@ -337,17 +337,12 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
         if (this.getMultiplicity().isValid(defaultMultiplicity)) {
             this.defaultMultiplicity = defaultMultiplicity;
             return this;
-        } else
-            throw new FxInvalidParameterException("default multiplicity", "ex.structure.modificaiton.defaultMultiplicity.invalid");
-        /*
-         *If the set value is &lt; min or &gt; max multiplicity of this assignment it will
-         * be auto adjusted to the next valid value without throwing an exception
-
+        }
         if (defaultMultiplicity < this.getMultiplicity().getMin())
             this.defaultMultiplicity = this.getMultiplicity().getMin();
         if (defaultMultiplicity > this.getMultiplicity().getMax())
             this.defaultMultiplicity = this.getMultiplicity().getMax();
-        */
+        return this;
     }
 
     /**
