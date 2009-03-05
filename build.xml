@@ -26,7 +26,7 @@
     <property name="database.classpathref" value="classpath.build.framework"/>
 
     <property name="web.ui.dojo.baseName" value="dojo-flexive"/>
-    <property name="web.ui.yui.version" value="2.6.0"/>
+    <property name="web.ui.yui.version" value="2.7.0"/>
 
 	<property name="invalid.path" value="${flexive.base.build.dir}/temp"/>
 
