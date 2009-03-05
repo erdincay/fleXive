@@ -90,4 +90,6 @@ function preA4jAction(xpath,action) {
 function expandNode(nodeId, parentNodeId) {
     parent.gotoNavMenu(0);
     parent.getContentNavFrame().getFxController().expandToNode(nodeId > 0 ? nodeId : parentNodeId);
+    //scroll node into view
+    parent.getContentNavFrame().getFxController().getDomNode(nodeId > 0 ? nodeId : parentNodeId).scrollIntoView(true);
 }

@@ -82,13 +82,16 @@
                 var node = expandToNodeWithId(id, isType);
                 getFxSelector().deselectAll();
                 getFxSelector().select(node);
+                //scroll node into view
+                node.domNode.scrollIntoView(); 
                 return node;
             }
 
             /* expands the tree, selects node and performs click operation
              */
             function openNode(id, isType) {
-                structureTreeClickHandler(selectNode(id,isType), true);
+                var node = selectNode(id,isType);
+                structureTreeClickHandler(node, true);
             }
 
             /*

@@ -78,6 +78,10 @@ dojo.widget.defineWidget(
         return dojo.widget.TreeRpcControllerV3.prototype.expand.apply(this, arguments);
     },
 
+    getDomNode: function(nodeId) {
+        return dojo.widget.byId('node_' + nodeId).domNode;
+    },
+
     collapse: function(node) {
         if (node.children.length > 0) {
             // TODO: check why assignment to this.expandedNodes does not work
