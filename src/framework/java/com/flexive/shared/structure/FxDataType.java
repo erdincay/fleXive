@@ -345,7 +345,7 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
 
     private Date getRandomDate(Random rnd) {
         final Calendar cal = Calendar.getInstance();
-        cal.set(rnd.nextInt(3000), rnd.nextInt(12), rnd.nextInt(28));
+        cal.set(rnd.nextInt(3000), rnd.nextInt(12), 1 + rnd.nextInt(28));
         return cal.getTime();
     }
 
