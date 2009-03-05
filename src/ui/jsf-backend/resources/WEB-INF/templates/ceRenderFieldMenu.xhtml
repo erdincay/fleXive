@@ -13,70 +13,44 @@
 
 <ui:composition>
 
-<c:if test="#{srcEditor.readOnly==true}">
-    <t:graphicImage styleClass="icon" alt="menu" url="/adm/images/contentEditor/#{icon}.png"
-                    style="filter:alpha(opacity=50);-moz-opacity:.5;opacity:.5;"/>
-</c:if>
-
 <c:if test="#{srcEditor.readOnly==false}">
 
     <c:set var="selectListId" value="addElementsListBox#{srcEditor.idGenerator[element]}" />
-    <c:if test="#{group.property==false}">
+    <!--c:if test="#{group.property==false}">
         <c:set var="upDownStyle" value="border:0;margin-left:0px;" />
-    </c:if>
-    <c:if test="#{group.property==true}">
+    </c:if-->
+    <c:if test="#{group.property==true || group.group==true}">
         <c:set var="upDownStyle" value="border:0;float:left;margin-left:0px;" />
     </c:if>
     <c:set var="assignmentLabel" value="#{fxMapBean.assignments[group.assignmentId].label}" />
 
 
-    <t:graphicImage styleClass="icon" alt="menu" url="/adm/images/contentEditor/#{icon}.png"
+    <t:graphicImage styleClass="icon" alt="#{group.property ? fxMessageBean['Content.button.insert.property.title'] :
+                                             group.XPathFull ne '/' ? fxMessageBean['Content.button.insert.group.title'] :
+                                             fxMessageBean['Content.button.insert.root.title']}"
+                    title="#{group.property ? fxMessageBean['Content.button.insert.property.title'] :
+                                             group.XPathFull ne '/' ? fxMessageBean['Content.button.insert.group.title'] :
+                                             fxMessageBean['Content.button.insert.root.title']}"
+                    url="/adm/images/contentEditor/#{icon}.png"
                     onclick="showMenu(event,this,'#{group.XPathFull}')"  />
 
    <c:if test="#{element.XPath!=null}">
         <a4j:commandLink reRender="all" actionListener="#{srcEditor.moveElementUp}" eventsQueue="ceQueue"
                          onmouseover='ignoreEvent(event)'  onclick="if (!preA4jAction('#{group.XPathFull}','moveElementUp')) return false;">
             <f:setPropertyActionListener target="#{srcEditor.element}" value="#{group}"/>
-            <t:graphicImage alt="up" url="/adm/images/contentEditor/up.png" style="#{upDownStyle};margin-left:3px"/>
+            <t:graphicImage alt="#{fxMessageBean['Content.button.up.title']}" title="#{fxMessageBean['Content.button.up.title']}" url="/adm/images/contentEditor/up.png" style="#{upDownStyle};margin-left:3px"/>
         </a4j:commandLink>
 
         <a4j:commandLink reRender="all" actionListener="#{srcEditor.moveElementDown}" eventsQueue="ceQueue"
                          onmouseover='ignoreEvent(event)'  onclick="if (!preA4jAction('#{group.XPathFull}','moveElementDown')) return false;">
             <f:setPropertyActionListener target="#{srcEditor.element}" value="#{group}"/>
-            <t:graphicImage alt="down" url="/adm/images/contentEditor/down.png" style="#{upDownStyle}"/>
+            <t:graphicImage alt="#{fxMessageBean['Content.button.down.title']}" title="#{fxMessageBean['Content.button.down.title']}" url="/adm/images/contentEditor/down.png" style="#{upDownStyle}"/>
         </a4j:commandLink>
     </c:if>
 
 
     <div class="popupMenu" id="Menu_#{group.XPathFull}" onmouseover='ignoreEvent(event)' style="clear:both;">
-
         <c:set var="count" value="0"/>
-        <c:if test="#{group.removeableElements>0}">
-            <c:set var="count" value="#{count+1}"/>
-            <a4j:commandLink reRender="all" actionListener="#{srcEditor.removeElement}" eventsQueue="ceQueue"
-                             onmouseover='ignoreEvent(event)' onclick="if (!preA4jAction('#{group.XPathFull}','removeProperty')) return false;">
-                <f:setPropertyActionListener target="#{srcEditor.element}" value="#{group}"/>
-                <t:graphicImage styleClass="icon" alt="remove" url="/adm/images/contentEditor/remove.png"/>
-                <ui:repeat var="assignmentLabel" value="#{assignmentLabel}">
-                #{fxMessageBean['Content.field.elementmenu.remove,#{assignmentLabel}']}
-                </ui:repeat>
-                <br clear="all"/>
-            </a4j:commandLink>
-        </c:if>
-
-        <c:if test="#{group.createableElements>0}">
-            <c:set var="count" value="#{count+1}"/>
-            <a4j:commandLink reRender="all" actionListener="#{srcEditor.addElement}" eventsQueue="ceQueue"
-                             onmouseover='ignoreEvent(event)'  onclick="if (!preA4jAction('#{group.XPathFull}','addProperty')) return false;">
-                <f:setPropertyActionListener target="#{srcEditor.element}" value="#{group}"/>
-                <t:graphicImage styleClass="icon" alt="add" url="/adm/images/contentEditor/add.png"/>
-                <ui:repeat var="assignmentLabel" value="#{assignmentLabel}">
-                #{fxMessageBean['Content.field.elementmenu.add,#{assignmentLabel}']}
-                </ui:repeat>
-                <br clear="all"/>
-            </a4j:commandLink>
-        </c:if>
-
         <c:set var="items" value="#{srcEditor.addElementOptions[group]}"/>
         <c:if test="${!empty items}">
             <c:if test="${count>0}"><hr/></c:if>
@@ -100,21 +74,23 @@
         </c:if>
     </div>
 
-
-
-
-    <c:if test="#{group.property==true}">
+    <!-- render command links to add and remove properties and groups (exclude virtual root group)-->
+    <c:if test="#{group.property==true or (group.group==true and group.XPathFull ne '/')}">
         <!-- Add same element button -->
         <c:if test="#{group.createableElements>0}">
             <c:set var="count" value="#{count+1}"/>
             <a4j:commandLink reRender="all" actionListener="#{srcEditor.addElement}" eventsQueue="ceQueue"
                              onmouseover='ignoreEvent(event)'  onclick="if (!preA4jAction('#{group.XPathFull}','addProperty')) return false;">
                 <f:setPropertyActionListener target="#{srcEditor.element}" value="#{group}"/>
-                <t:graphicImage alt="add" url="/adm/images/contentEditor/add.png" style="border:0;float:left;margin-left:3px;"/>
+                <t:graphicImage alt="#{fxMessageBean['Content.button.add.title']} #{assignmentLabel}"
+                                title="#{fxMessageBean['Content.button.add.title']} #{assignmentLabel}" 
+                                url="/adm/images/contentEditor/add.png" style="border:0;float:left;margin-left:3px;"/>
             </a4j:commandLink>
         </c:if>
         <c:if test="#{group.createableElements==0}">
-            <t:graphicImage alt="add" url="/adm/images/contentEditor/add.png"
+            <t:graphicImage alt="#{fxMessageBean['Content.button.add.title']} #{assignmentLabel}"
+                            title="#{fxMessageBean['Content.button.add.title']} #{assignmentLabel}"
+                            url="/adm/images/contentEditor/add.png"
                             style="filter:alpha(opacity=25);-moz-opacity:.25;opacity:.25;float:left;margin-left:3px;"/>
         </c:if>
         <!-- Remove element button -->
@@ -122,11 +98,15 @@
             <a4j:commandLink reRender="all" actionListener="#{srcEditor.removeElement}" eventsQueue="ceQueue"
                              onmouseover='ignoreEvent(event)' onclick="if (!preA4jAction('#{group.XPathFull}','removeProperty')) return false;">
                 <f:setPropertyActionListener target="#{srcEditor.element}" value="#{group}"/>
-                <t:graphicImage alt="remove" url="/adm/images/contentEditor/remove.png" style="border:0;float:left;margin-left:3px;"/>
+                <t:graphicImage alt="#{fxMessageBean['Content.button.remove.title']} #{assignmentLabel}"
+                                title="#{fxMessageBean['Content.button.remove.title']} #{assignmentLabel}"
+                                url="/adm/images/contentEditor/remove.png" style="border:0;float:left;margin-left:3px;"/>
             </a4j:commandLink>
         </c:if>
         <c:if test="#{group.removeableElements==0}">
-            <t:graphicImage alt="remove" url="/adm/images/contentEditor/remove.png"
+            <t:graphicImage alt="#{fxMessageBean['Content.button.remove.title']} #{assignmentLabel}"
+                            title="#{fxMessageBean['Content.button.remove.title']} #{assignmentLabel}"
+                            url="/adm/images/contentEditor/remove.png"
                             style="filter:alpha(opacity=25);-moz-opacity:.25;opacity:.25;float:left;margin-left:3px;"/>
         </c:if>
     </c:if>

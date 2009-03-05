@@ -26,12 +26,6 @@
             <script type="text/javascript">
                 var isContentEditor = true; // flag for other frames/JS utility methods
             </script>
-
-            <ui:fragment rendered="#{!contentEditorBean.readOnly}">
-                <div style="float:right; padding: 5px;">
-                    <fx:fxValueInputLanguageSelect id="updateLanguage"/>
-                </div>
-            </ui:fragment>
             
             <!-- Include the content editor -->
             <adm:contentEditor srcEditor="#{contentEditorBean}"/>

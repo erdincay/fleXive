@@ -271,79 +271,73 @@
                             //-->
                         </script>
 
+                         <!--
+                         #{fxMessageBean['Content.field.type']}
+                          <ui:fragment rendered="#{not empty srcEditor.typeIcon}">
+                            <fx:thumbnail pk="#{srcEditor.typeIcon}" previewSize="original" width="16" height="16"/>
+                          </ui:fragment>
+                          #{srcEditor.typeDisplay}
+                          -->
+                        <div class="contentSettings">
 
-                        <!-- General fields -->
-                        <table class="contentOverview">
-                            <!-- FxType -->
-                            <tr>
-                                <th>
-                                    #{fxMessageBean['Content.field.type']}
-                                </th>
-                                <td class="contentData">
+                            <div style="float:left;padding-right:50px">
+                                <!-- Type name and small type icon -->
+                                <fx:formRow labelKey="Content.field.type">
                                     <ui:fragment rendered="#{not empty srcEditor.typeIcon}">
                                         <fx:thumbnail pk="#{srcEditor.typeIcon}" previewSize="original" width="16" height="16"/>
                                     </ui:fragment>
                                     #{srcEditor.typeDisplay}
-                                </td>
-                            </tr>
-                            <!-- PREVIEW -->
-                            <ui:fragment rendered="#{srcEditor.content.previewAvailable}">
-                                <tr>
-                                    <td colspan="2">
-                                        <img src="thumbnail/pk#{srcEditor.id}.#{srcEditor.version}/s2/ts#{fxSystemBean.currentTimeMillis}"
-                                             alt="Preview" title="Preview" border="0" style="border:1px solid gray"/>
-                                    </td>
-                                </tr>
-                            </ui:fragment>
-                            <!-- ACL -->
-                            <tr>
+                                </fx:formRow>
+
+                                <!-- ACL -->
                                 <ui:fragment rendered="#{not srcEditor.supportSecurity}">
-                                    <td colspan="2"><i>#{fxMessageBean['Content.msg.noSecurity']}</i></td>
+                                    <em>#{fxMessageBean['Content.msg.noSecurity']}</em>
                                 </ui:fragment>
                                 <ui:fragment rendered="#{srcEditor.supportSecurity}">
-                                    <th>
-                                        #{fxMessageBean['Content.field.ACL']}
-                                    </th>
-                                    <td class="contentData #{srcEditor.readOnly ? 'readonlyValue' : ''}">
-                                        <ui:fragment rendered="#{srcEditor.readOnly==false}">
-                                            <t:selectOneListbox size="1" id="acl" value="#{srcEditor.acl}"
-                                                                converter="SelectableConverter">
-                                                <f:selectItems value="#{fxSelectBean.contentACLs}"/>
-                                            </t:selectOneListbox>
-                                        </ui:fragment>
-                                        <ui:fragment rendered="#{srcEditor.readOnly==true}">
-                                            #{srcEditor.acl.name}
-                                        </ui:fragment>
-                                    </td>
-                                </ui:fragment>
-                            </tr>
-                            <!-- Workflow step -->
-                            <tr>
-                                <th>
-                                    #{fxMessageBean['Content.field.step']}
-                                </th>
-                                <td class="contentData #{srcEditor.readOnly ? 'readonlyValue' : ''}">
-                                    <ui:fragment rendered="#{srcEditor.readOnly==false}">
-                                        <t:selectOneListbox size="1" id="step" value="#{srcEditor.step}">
-                                            <f:selectItems value="#{srcEditor.possibleWorkflowSteps}"/>
+                                    <fx:formRow labelKey="Content.field.ACL" id="acl">
+                                         <t:selectOneListbox size="1" id="acl" value="#{srcEditor.acl}"
+                                                            converter="SelectableConverter" disabled="#{srcEditor.readOnly==true}">
+                                            <f:selectItems value="#{fxSelectBean.contentACLs}"/>
                                         </t:selectOneListbox>
-                                    </ui:fragment>
-                                    <ui:fragment rendered="#{srcEditor.readOnly==true}">
-                                        #{srcEditor.stepDescription}
-                                    </ui:fragment>
-                                </td>
-                            </tr>
-                            <!-- Tree nodes -->
-                            <tr>
-                                <th valign="top">
-                                    #{fxMessageBean['Content.field.nodes']}
-                                </th>
-                                <td class="contentData #{srcEditor.readOnly ? 'readonlyValue' : ''}">
-                                    <!-- Tree -->
-                                    <adm:ceRenderTreeNodes srcEditor="#{srcEditor}"/>
-                                </td>
-                            </tr>
-                        </table>
+                                    </fx:formRow>
+                                </ui:fragment>
+
+                                <!-- wf step -->
+                                <fx:formRow labelKey="Content.field.step" id="step">
+                                     <t:selectOneListbox size="1" id="step" value="#{srcEditor.step}"
+                                                         disabled="#{srcEditor.readOnly==true}">
+                                        <f:selectItems value="#{srcEditor.possibleWorkflowSteps}"/>
+                                    </t:selectOneListbox>
+                                </fx:formRow>
+                            </div>
+                            <!-- Preview Image -->
+                            <ui:fragment rendered="#{srcEditor.content.previewAvailable}">
+                                <div class="previewImage">
+                                    <div style="padding-top:6px">
+                                        <strong>#{fxMessageBean['Content.field.previewImage']}</strong>
+                                    </div>
+                                    <img src="thumbnail/pk#{srcEditor.id}.#{srcEditor.version}/s2/ts#{fxSystemBean.currentTimeMillis}"
+                                         alt="#{fxMessageBean['Content.preview.title']}" title="#{fxMessageBean['Content.preview.title']}"/>
+                                </div>
+                                <br clear="all"/>
+                            </ui:fragment>
+
+
+                            <fx:formRow labelKey="Content.field.nodes">
+                                <adm:ceRenderTreeNodes srcEditor="#{srcEditor}"/>
+                            </fx:formRow>
+                            <!--ie surrounding div height fix-->
+                             <div style="clear:both;height:0px"><!-- __ --></div>
+                        </div>
+
+                        <!-- input language switch -->
+                        <div class="languageSwitch">
+                            <div style="#{srcEditor.readOnly ? 'display:none' : ''}">
+                                <fx:formRow labelKey="Content.field.language" id="updateLanguage">
+                                    <fx:fxValueInputLanguageSelect id="updateLanguage"/>
+                                </fx:formRow>
+                            </div>
+                        </div>
 
                         <!-- binary support hack -->
                         <t:inputHidden value="#{srcEditor.editorActionName}"  id="editorActionName"/>

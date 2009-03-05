@@ -1,3 +1,44 @@
+.icon {
+    cursor: pointer;
+}
+
+.contentSettings {
+    background-color:#EFEFEF;
+    margin-right:15px;
+    border: 1px solid #CCCCCC;
+    height:100%;
+}
+
+.contentSettings .formLabel{
+    font-weight:bold;    
+}
+
+.contentSettings .formLabelContainer{
+    width:45px;
+}
+
+.contentSettings .formInputElement{
+    width:auto;
+}
+
+.previewImage {
+    font-weight:bold;
+    float:left;
+}
+
+.previewImage img {
+    height:50px;
+    border:none;
+}
+
+.languageSwitch .formLabel{
+    font-weight:bold;
+}
+
+.languageSwitch .formLabelContainer{
+    width:100px;
+}
+
 .group {
     margin-right:15px;
     border-left:1px solid #d3dcb7;
@@ -9,8 +50,8 @@
 }
 
 .group .header {
-    background-color:#bdbdbd;
-    background-image: url("../../pub/images/filteredTable/header.gif");
+    background: #bdbdbd url("../../pub/images/filteredTable/header.gif");
+
     border-bottom:1px solid #d3dcb7;
     color:black;
     padding:2px;
@@ -20,12 +61,18 @@
 }
 
 .group .header .display {
-    top:-4px;
     position:relative;
+    padding-left:5px;
+    font-style:italic;
 }
 
 .group .header .icon {
+    height:16px;
+    width:16px;
     border:0;
+    float:left;
+    margin-left:2px;
+    clear: both;
 }
 
 .group .end {
@@ -285,7 +332,7 @@ table.historyTable TR TD.action {
 }
 
 table.contentOverview {
-    margin-top: 15px;
+    /*margin-top: 15px;*/
 }
 
 table.contentOverview input, table.contentOverview select {
