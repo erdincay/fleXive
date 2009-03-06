@@ -131,7 +131,10 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
 
     @Override
     public void encodeBegin(FacesContext context) throws IOException {
-        createRenderer(context).renderTree(getTree());
+        final FxTreeNode tree = getTree();
+        if (tree != null) {
+            createRenderer(context).renderTree(tree);
+        }
     }
 
     @Override
@@ -196,6 +199,9 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
                 nodeId = getNodeId();
             } else {
                 nodeId = FxTreeNode.ROOT_NODE;
+            }
+            if (nodeId == -1) {
+                return null;
             }
             if (treeCache != null && treeCache.getId() == nodeId) {
                 return treeCache;
