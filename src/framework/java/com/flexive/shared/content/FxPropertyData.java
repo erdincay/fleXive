@@ -39,10 +39,10 @@ import com.flexive.shared.structure.FxMultiplicity;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.GroupMode;
 import com.flexive.shared.structure.FxStructureOption;
-import com.flexive.shared.value.FxNoAccess;
-import com.flexive.shared.value.FxValue;
-import com.flexive.shared.value.FxString;
+import com.flexive.shared.value.*;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +58,7 @@ public class FxPropertyData extends FxData {
     private long propertyId;
     private boolean containsDefaultValue;
     private FxStructureOption maxLength;
+    private static final Log LOG = LogFactory.getLog(FxPropertyData.class);
 
     public FxPropertyData(String xpPrefix, String alias, int index, String xPath, String xPathFull, int[] indices,
                           long assignmentId, long propertyId, FxMultiplicity assignmentMultiplicity, int pos, FxGroupData parent,
@@ -213,7 +214,13 @@ public class FxPropertyData extends FxData {
     public void checkMaxLength() throws FxInvalidParameterException {
         if (!this.getMaxLength().isSet() || value ==null || value.isEmpty())
             return;
-         for (long lang :value.getTranslatedLanguages()) {
+        //check for max-length compatible data types
+        if (this.getValue() instanceof FxHTML || !(this.getValue() instanceof FxString || this.getValue() instanceof FxNumber ||this.getValue() instanceof FxLargeNumber)) {
+            LOG.warn("Values of type "+this.getValue().getClass().getSimpleName()+" are not compatible with FxStructureOption.OPTION_MAXLENGTH, check omitted!");
+            return;
+        }
+
+        for (long lang :value.getTranslatedLanguages()) {
             if (value.getTranslation(lang).toString().length() >maxLength.getIntValue())
                 throw new FxInvalidParameterException(this.getAlias(), "ex.content.value.invalid.maxLength",
                         this.getXPath(), getMaxLength().getIntValue(), value.toString(), value.toString().length()).setAffectedXPath(this.getXPathFull());
