@@ -246,7 +246,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     TBL_STRUCT_ASSIGNMENTS, new String[]{"DESCRIPTION", "HINT"}, "ID", newAssignmentId);
             StructureLoader.reload(con);
             htracker.track(type, "history.assignment.createProperty", property.getName(), type.getId(), type.getName());
-            createInheritedAssignments(CacheAdmin.getEnvironment().getAssignment(newAssignmentId), con, ps, sql, type.getDerivedTypes());
+            createInheritedAssignments(CacheAdmin.getEnvironment().getAssignment(newAssignmentId), con, sql, type.getDerivedTypes());
         } catch (FxNotFoundException e) {
             ctx.setRollbackOnly();
             throw new FxCreateException(e);
@@ -435,16 +435,15 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      *
      * @param assignment the assignment processed
      * @param con        an open and valid connection
-     * @param ps         prepared statement being worked with
      * @param sb         StringBuilder
      * @param types      (derived) types to process - will recurse to derived types of these types
      * @throws FxApplicationException on errors
      */
-    private void createInheritedAssignments(FxAssignment assignment, Connection con, PreparedStatement ps,
+    private void createInheritedAssignments(FxAssignment assignment, Connection con,
                                             StringBuilder sb, List<FxType> types) throws FxApplicationException {
         for (FxType derivedType : types) {
             if (assignment instanceof FxPropertyAssignment) {
-                createPropertyAssignment(con, ps, sb,
+                createPropertyAssignment(con, sb,
                         FxPropertyAssignmentEdit.createNew((FxPropertyAssignment) assignment, derivedType,
                                 assignment.getAlias(),
                                 assignment.hasParentGroupAssignment()
@@ -452,7 +451,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                                         : "/")
                 );
             } else if (assignment instanceof FxGroupAssignment) {
-                createGroupAssignment(con, ps, sb,
+                createGroupAssignment(con, sb,
                         FxGroupAssignmentEdit.createNew((FxGroupAssignment) assignment, derivedType, assignment.getAlias(),
                                 assignment.hasParentGroupAssignment()
                                         ? assignment.getParentGroupAssignment().getXPath()
@@ -479,24 +478,19 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * Update a group's attributes
      *
-     * @param _con  an sql connection (will be opened if null)
-     * @param ps    the sql prepared statement
-     * @param sql   the sql query
+     * @param con  an existing sql connection
      * @param group the instance of FxGroupEdit whose attributes should be changed
      * @return true if changes were made to the group
      * @throws FxApplicationException on errors
      */
-    private boolean updateGroup(Connection _con, PreparedStatement ps, StringBuilder sql,
-                                FxGroupEdit group) throws FxApplicationException {
-        if (sql == null)
-            sql = new StringBuilder(1000);
-        Connection con = _con;
+    private boolean updateGroup(Connection con, FxGroupEdit group) throws FxApplicationException {
+        final StringBuilder sql = new StringBuilder(1000);
+        final StringBuilder changesDesc = new StringBuilder(200);
+        final FxGroup org = CacheAdmin.getEnvironment().getGroup(group.getId());
+        PreparedStatement ps = null;
         boolean changes = false;
-        StringBuilder changesDesc = new StringBuilder(200);
-        FxGroup org = CacheAdmin.getEnvironment().getGroup(group.getId());
+        boolean success = false;
         try {
-            if (con == null)
-                con = Database.getDbConnection();
             sql.setLength(0);
 
             // change the group's override base multiplicity flag
@@ -507,11 +501,11 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     if (getGroupInstanceMultiplicity(con, org.getId(), false) > group.getMultiplicity().getMax())
                         throw new FxUpdateException("ex.structure.modification.contentExists", "maximumMultiplicity");
                 }
-                if (ps != null) ps.close();
                 ps = con.prepareStatement("UPDATE " + TBL_STRUCT_GROUPS + " SET MAYOVERRIDEMULT=? WHERE ID=?");
                 ps.setBoolean(1, group.mayOverrideBaseMultiplicity());
                 ps.setLong(2, group.getId());
                 ps.executeUpdate();
+                ps.close();
                 if (changes)
                     changesDesc.append(',');
                 changesDesc.append("mayOverrideMultiplicity=").append(group.mayOverrideBaseMultiplicity());
@@ -530,12 +524,12 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                             throw new FxUpdateException("ex.structure.modification.group.contentExists", group.getId(), group.getMultiplicity().getMin(), group.getMultiplicity().getMax());
                     }
                 }
-                if (ps != null) ps.close();
                 ps = con.prepareStatement("UPDATE " + TBL_STRUCT_GROUPS + " SET DEFMINMULT=? ,DEFMAXMULT=? WHERE ID=?");
                 ps.setInt(1, group.getMultiplicity().getMin());
                 ps.setInt(2, group.getMultiplicity().getMax());
                 ps.setLong(3, group.getId());
                 ps.executeUpdate();
+                ps.close();
                 if (changes)
                     changesDesc.append(',');
                 changesDesc.append("multiplicity=").append(group.getMultiplicity());
@@ -556,11 +550,11 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             }
             // change the group's name
             if (!org.getName().equals(group.getName())) {
-                if (ps != null) ps.close();
                 ps = con.prepareStatement("UPDATE " + TBL_STRUCT_GROUPS + " SET NAME=? WHERE ID=?");
                 ps.setString(1, group.getName());
                 ps.setLong(2, group.getId());
                 ps.executeUpdate();
+                ps.close();
                 if (changes)
                     changesDesc.append(',');
                 changesDesc.append("name=").append(group.getName());
@@ -580,13 +574,15 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             if (changes) {
                 htracker.track("history.group.update.groupProperties", group.getName(), group.getId(), changesDesc.toString());
             }
+            success = true;
         } catch (SQLException e) {
             ctx.setRollbackOnly();
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
-            if (_con == null) {
-                Database.closeObjects(AssignmentEngineBean.class, con, ps);
+            if (!success) {
+                ctx.setRollbackOnly();
             }
+            Database.closeObjects(AssignmentEngineBean.class, null, ps);
         }
         return changes;
     }
@@ -688,7 +684,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     TBL_STRUCT_ASSIGNMENTS, new String[]{"DESCRIPTION", "HINT"}, "ID", newAssignmentId);
             StructureLoader.reload(con);
             htracker.track(type, "history.assignment.createGroup", group.getName(), type.getId(), type.getName());
-            createInheritedAssignments(CacheAdmin.getEnvironment().getAssignment(newAssignmentId), con, ps, sql, type.getDerivedTypes());
+            createInheritedAssignments(CacheAdmin.getEnvironment().getAssignment(newAssignmentId), con, sql, type.getDerivedTypes());
         } catch (FxNotFoundException e) {
             ctx.setRollbackOnly();
             throw new FxCreateException(e);
@@ -729,68 +725,73 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.StructureManagement);
         long returnId;
         boolean reload = false;
-        if (assignment instanceof FxPropertyAssignmentEdit) {
-            if (((FxPropertyAssignmentEdit) assignment).isNew()) {
-                returnId = createPropertyAssignment(null, null, null, (FxPropertyAssignmentEdit) assignment);
-            } else {
-                returnId = assignment.getId();
-                try {
-                    reload = updatePropertyAssignment(null, null, null, null, (FxPropertyAssignmentEdit) assignment);
-                } catch (FxLoadException e) {
-                    ctx.setRollbackOnly();
-                    throw new FxUpdateException(e);
-                } catch (FxNotFoundException e) {
-                    ctx.setRollbackOnly();
-                    throw new FxUpdateException(e);
-                }
-            }
-
-        } else if (assignment instanceof FxGroupAssignmentEdit) {
-            if (((FxGroupAssignmentEdit) assignment).isNew()) {
-                returnId = createGroupAssignment(null, null, null, (FxGroupAssignmentEdit) assignment, createSubAssignments);
-            } else {
-                returnId = assignment.getId();
-                try {
-                    reload = updateGroupAssignment(null, null, null, (FxGroupAssignmentEdit) assignment);
-                } catch (FxLoadException e) {
-                    ctx.setRollbackOnly();
-                    throw new FxUpdateException(e);
-                } catch (FxNotFoundException e) {
-                    ctx.setRollbackOnly();
-                    throw new FxUpdateException(e);
-                }
-            }
-        } else
-            throw new FxInvalidParameterException("ASSIGNMENT", "ex.structure.assignment.noEditAssignment");
+        Connection con = null;
         try {
-            if (reload) {
-                StructureLoader.reload(null);
-                //clear instance cache
-                CacheAdmin.expireCachedContents();
+            con = Database.getDbConnection();
+            if (assignment instanceof FxPropertyAssignmentEdit) {
+                if (((FxPropertyAssignmentEdit) assignment).isNew()) {
+                    returnId = createPropertyAssignment(con, null, (FxPropertyAssignmentEdit) assignment);
+                } else {
+                    returnId = assignment.getId();
+                    try {
+                        reload = updatePropertyAssignment(con, null, (FxPropertyAssignmentEdit) assignment);
+                    } catch (FxLoadException e) {
+                        ctx.setRollbackOnly();
+                        throw new FxUpdateException(e);
+                    } catch (FxNotFoundException e) {
+                        ctx.setRollbackOnly();
+                        throw new FxUpdateException(e);
+                    }
+                }
+
+            } else if (assignment instanceof FxGroupAssignmentEdit) {
+                if (((FxGroupAssignmentEdit) assignment).isNew()) {
+                    returnId = createGroupAssignment(con, null, (FxGroupAssignmentEdit) assignment, createSubAssignments);
+                } else {
+                    returnId = assignment.getId();
+                    try {
+                        reload = updateGroupAssignment(con, (FxGroupAssignmentEdit) assignment);
+                    } catch (FxLoadException e) {
+                        ctx.setRollbackOnly();
+                        throw new FxUpdateException(e);
+                    } catch (FxNotFoundException e) {
+                        ctx.setRollbackOnly();
+                        throw new FxUpdateException(e);
+                    }
+                }
+            } else
+                throw new FxInvalidParameterException("ASSIGNMENT", "ex.structure.assignment.noEditAssignment");
+            try {
+                if (reload) {
+                    StructureLoader.reload(con);
+                    //clear instance cache
+                    CacheAdmin.expireCachedContents();
+                }
+            } catch (FxCacheException e) {
+                ctx.setRollbackOnly();
+                throw new FxCreateException(e, "ex.cache", e.getMessage());
+            } catch (FxLoadException e) {
+                ctx.setRollbackOnly();
+                throw new FxCreateException(e);
             }
-        } catch (FxCacheException e) {
-            ctx.setRollbackOnly();
-            throw new FxCreateException(e, "ex.cache", e.getMessage());
-        } catch (FxLoadException e) {
-            ctx.setRollbackOnly();
-            throw new FxCreateException(e);
+            return returnId;
+        } catch (SQLException e) {
+            throw new FxUpdateException(LOG, e);
+        } finally {
+            Database.closeObjects(AssignmentEngineBean.class, con, null);
         }
-        return returnId;
     }
 
-    private boolean updateGroupAssignment(Connection _con, PreparedStatement ps, StringBuilder sql,
-                                          FxGroupAssignmentEdit group) throws FxApplicationException {
-        if (sql == null)
-            sql = new StringBuilder(1000);
+    private boolean updateGroupAssignment(Connection con, FxGroupAssignmentEdit group) throws FxApplicationException {
         if (group.isNew())
             throw new FxInvalidParameterException("ex.structure.assignment.update.new", group.getXPath());
-        Connection con = _con;
+        final StringBuilder sql = new StringBuilder(1000);
         boolean changes = false;
+        boolean success = false;
         StringBuilder changesDesc = new StringBuilder(200);
         FxGroupAssignment org = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(group.getId());
+        PreparedStatement ps = null;
         try {
-            if (con == null)
-                con = Database.getDbConnection();
             sql.setLength(0);
             // enable / disable an assignment
             if (org.isEnabled() != group.isEnabled()) {
@@ -812,20 +813,20 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     affectedAssignment.append(org.getId());
                     for (FxAssignment as : org.getAllChildAssignments())
                         affectedAssignment.append(",").append(as.getId());
-                    if (ps != null) ps.close();
                     ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET ENABLED=? WHERE ID IN (" + affectedAssignment + ")");
                     ps.setBoolean(1, true);
                     ps.executeUpdate();
+                    ps.close();
                 }
                 changes = true;
             }
             // change the assignment's default multiplicity (will be auto-adjusted to a valid value in FxGroupAssignmentEdit)
             if (org.getDefaultMultiplicity() != group.getDefaultMultiplicity()) {
-                if (ps != null) ps.close();
                 ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET DEFMULT=? WHERE ID=?");
                 ps.setInt(1, group.getDefaultMultiplicity());
                 ps.setLong(2, group.getId());
                 ps.executeUpdate();
+                ps.close();
                 if (changes)
                     changesDesc.append(',');
                 changesDesc.append("defaultMultiplicity=").append(group.getDefaultMultiplicity());
@@ -842,12 +843,12 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 } else {
                     throw new FxUpdateException("ex.structure.group.assignment.overrideBaseMultiplicityNotEnabled", org.getGroup().getId());
                 }
-                if (ps != null) ps.close();
                 ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET MINMULT=? ,MAXMULT=? WHERE ID=?");
                 ps.setInt(1, group.getMultiplicity().getMin());
                 ps.setInt(2, group.getMultiplicity().getMax());
                 ps.setLong(3, group.getId());
                 ps.executeUpdate();
+                ps.close();
                 if (changes)
                     changesDesc.append(',');
                 changesDesc.append("multiplicity=").append(group.getMultiplicity());
@@ -870,17 +871,16 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 if (org.getAssignedType().isXPathValid(group.getXPath(), true))
                     throw new FxUpdateException("ex.structure.assignment.exists", group.getXPath(), group.getAssignedType().getName());
                 //TODO: make sure just the alias changed
-                if (ps != null) ps.close();
                 ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET XPATH=?, XALIAS=? WHERE ID=?");
                 ps.setString(1, group.getXPath());
                 ps.setString(2, group.getAlias());
                 ps.setLong(3, group.getId());
                 ps.executeUpdate();
+                ps.close();
                 ContentStorage storage = StorageManager.getContentStorage(TypeStorageMode.Hierarchical);
                 storage.updateXPath(con, group.getId(), XPathElement.stripType(org.getXPath()),
                         XPathElement.stripType(group.getXPath()));
                 //update all child assignments
-                ps.close();
                 ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET XPATH=? WHERE ID=?");
                 for (FxAssignment child : org.getAllChildAssignments()) {
                     ps.setString(1, group.getXPath() + child.getXPath().substring(org.getXPath().length()));
@@ -889,6 +889,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     storage.updateXPath(con, child.getId(), XPathElement.stripType(child.getXPath()),
                             XPathElement.stripType(group.getXPath() + child.getXPath().substring(org.getXPath().length())));
                 }
+                ps.close();
                 if (changes)
                     changesDesc.append(',');
                 changesDesc.append("xPath=").append(group.getXPath()).append(",alias=").append(group.getAlias());
@@ -909,11 +910,11 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             }
             //update SystemInternal flag, this is a one way function, so it can only be set, but not reset!!
             if (!org.isSystemInternal() && group.isSystemInternal() && FxContext.getUserTicket().isGlobalSupervisor()) {
-                if (ps != null) ps.close();
                 ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET SYSINTERNAL=? WHERE ID=?");
                 ps.setBoolean(1, group.isSystemInternal());
                 ps.setLong(2, group.getId());
                 ps.executeUpdate();
+                ps.close();
                 if (changes)
                     changesDesc.append(',');
                 changesDesc.append("systemInternal=").append(group.isSystemInternal());
@@ -927,11 +928,11 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         throw new FxUpdateException(LOG, "ex.structure.group.assignment.modeChangeError");
                     }
                 }
-                if (ps != null) ps.close();
                 ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET GROUPMODE=? WHERE ID=?");
                 ps.setLong(1, group.getMode().getId());
                 ps.setLong(2, group.getId());
                 ps.executeUpdate();
+                ps.close();
                 if (changes)
                     changesDesc.append(',');
                 changesDesc.append("groupMode=").append(group.getMode().getId());
@@ -968,17 +969,18 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 htracker.track(group.getAssignedType(), "history.assignment.updateGroupAssignment", group.getXPath(), group.getAssignedType().getId(), group.getAssignedType().getName(),
                         group.getGroup().getId(), group.getGroup().getName(), changesDesc.toString());
 
-        } catch (SQLException
-                e) {
+            success = true;
+        } catch (SQLException e) {
             final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(e);
             ctx.setRollbackOnly();
             if (uniqueConstraintViolation)
                 throw new FxEntryExistsException("ex.structure.assignment.group.exists", group.getAlias(), group.getXPath());
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
-            if (_con == null) {
-                Database.closeObjects(AssignmentEngineBean.class, con, ps);
+            if (!success) {
+                ctx.setRollbackOnly();
             }
+            Database.closeObjects(AssignmentEngineBean.class, null, ps);
         }
         return changes;
     }
@@ -1084,16 +1086,15 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         return retPosition;
     }
 
-    private long createGroupAssignment(Connection _con, PreparedStatement ps, StringBuilder sql, FxGroupAssignmentEdit group, boolean createSubAssignments) throws FxApplicationException {
-        if (sql == null)
-            sql = new StringBuilder(1000);
+    private long createGroupAssignment(Connection con, StringBuilder sql, FxGroupAssignmentEdit group, boolean createSubAssignments) throws FxApplicationException {
         if (!group.isNew())
             throw new FxInvalidParameterException("ex.structure.assignment.create.existing", group.getXPath());
-        Connection con = _con;
+        if (sql == null) {
+            sql = new StringBuilder(1000);
+        }
+        PreparedStatement ps = null;
         long newAssignmentId;
         try {
-            if (con == null)
-                con = Database.getDbConnection();
             FxGroupAssignment thisGroupAssignment;
             String XPath;
             if (!group.getXPath().startsWith(group.getAssignedType().getName())) {
@@ -1109,8 +1110,6 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         //               1  2     3       4       5       6       7       8   9     10     11   12          13     14          15
                                 append("(ID,ATYPE,ENABLED,TYPEDEF,MINMULT,MAXMULT,DEFMULT,POS,XPATH,XALIAS,BASE,PARENTGROUP,AGROUP,SYSINTERNAL,GROUPMODE)" +
                                 "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-                if (ps != null)
-                    ps.close();
                 ps = con.prepareStatement(sql.toString());
                 newAssignmentId = seq.getId(FxSystemSequencer.ASSIGNMENT);
                 ps.setLong(1, newAssignmentId);
@@ -1133,6 +1132,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 ps.setBoolean(14, group.isSystemInternal());
                 ps.setInt(15, group.getMode().getId());
                 ps.executeUpdate();
+                ps.close();
                 Database.storeFxString(new FxString[]{group.getLabel(), group.getHint()}, con,
                         TBL_STRUCT_ASSIGNMENTS, new String[]{"DESCRIPTION", "HINT"}, "ID", newAssignmentId);
                 thisGroupAssignment = new FxGroupAssignment(newAssignmentId, true, group.getAssignedType(),
@@ -1151,12 +1151,12 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 for (FxGroupAssignment ga : baseGroup.getAssignedGroups()) {
                     FxGroupAssignmentEdit gae = new FxGroupAssignmentEdit(ga);
                     gae.setEnabled(group.isEnabled());
-                    createGroupAssignment(con, null, sql, FxGroupAssignmentEdit.createNew(gae, group.getAssignedType(), ga.getAlias(), XPath, thisGroupAssignment), createSubAssignments);
+                    createGroupAssignment(con, sql, FxGroupAssignmentEdit.createNew(gae, group.getAssignedType(), ga.getAlias(), XPath, thisGroupAssignment), createSubAssignments);
                 }
                 for (FxPropertyAssignment pa : baseGroup.getAssignedProperties()) {
                     FxPropertyAssignmentEdit pae = new FxPropertyAssignmentEdit(pa);
                     pae.setEnabled(group.isEnabled());
-                    createPropertyAssignment(con, null, sql, FxPropertyAssignmentEdit.createNew(pae, group.getAssignedType(), pa.getAlias(), XPath, thisGroupAssignment));
+                    createPropertyAssignment(con, sql, FxPropertyAssignmentEdit.createNew(pae, group.getAssignedType(), pa.getAlias(), XPath, thisGroupAssignment));
                 }
             }
             try {
@@ -1165,7 +1165,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 ctx.setRollbackOnly();
                 throw new FxCreateException(e, "ex.cache", e.getMessage());
             }
-            createInheritedAssignments(CacheAdmin.getEnvironment().getAssignment(newAssignmentId), con, ps, sql,
+            createInheritedAssignments(CacheAdmin.getEnvironment().getAssignment(newAssignmentId), con, sql,
                     group.getAssignedType().getDerivedTypes());
         } catch (SQLException e) {
             final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(e);
@@ -1176,29 +1176,21 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         } catch (FxNotFoundException e) {
             throw new FxCreateException(e);
         } finally {
-            if (_con == null) {
-                Database.closeObjects(AssignmentEngineBean.class, con, ps);
-            }
+            Database.closeObjects(AssignmentEngineBean.class, null, ps);
         }
         return newAssignmentId;
     }
 
-    private boolean updateProperty(Connection _con, PreparedStatement ps, StringBuilder sql,
-                                   FxPropertyEdit prop) throws FxApplicationException {
-        if (sql == null)
-            sql = new StringBuilder(1000);
+    private boolean updateProperty(Connection con, FxPropertyEdit prop) throws FxApplicationException {
         if (prop.isNew())
             throw new FxInvalidParameterException("ex.structure.property.update.new", prop.getName());
-        Connection con = _con;
         boolean changes = false;
+        boolean success = false;
         StringBuilder changesDesc = new StringBuilder(200);
         FxProperty org = CacheAdmin.getEnvironment().getProperty(prop.getId());
+        PreparedStatement ps = null;
 
         try {
-            if (con == null)
-                con = Database.getDbConnection();
-            sql.setLength(0);
-
             if (!org.isSystemInternal() || FxContext.getUserTicket().isGlobalSupervisor()) {
                 // change the multiplicity override prop
                 if (org.mayOverrideBaseMultiplicity() != prop.mayOverrideBaseMultiplicity()) {
@@ -1208,11 +1200,11 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         if (getPropertyInstanceMultiplicity(con, org.getId(), false) > prop.getMultiplicity().getMax())
                             throw new FxUpdateException("ex.structure.modification.contentExists", "maximumMultiplicity");
                     }
-                    if (ps != null) ps.close();
                     ps = con.prepareStatement("UPDATE " + TBL_STRUCT_PROPERTIES + " SET MAYOVERRIDEMULT=? WHERE ID=?");
                     ps.setBoolean(1, prop.mayOverrideBaseMultiplicity());
                     ps.setLong(2, prop.getId());
                     ps.executeUpdate();
+                    ps.close();
                     if (changes)
                         changesDesc.append(',');
                     changesDesc.append("mayOverrideMultiplicity=").append(prop.mayOverrideBaseMultiplicity());
@@ -1231,12 +1223,12 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                                 throw new FxUpdateException("ex.structure.modification.contentExists", "maximumMultiplicity");
                         }
                     }
-                    if (ps != null) ps.close();
                     ps = con.prepareStatement("UPDATE " + TBL_STRUCT_PROPERTIES + " SET DEFMINMULT=? ,DEFMAXMULT=? WHERE ID=?");
                     ps.setInt(1, prop.getMultiplicity().getMin());
                     ps.setInt(2, prop.getMultiplicity().getMax());
                     ps.setLong(3, prop.getId());
                     ps.executeUpdate();
+                    ps.close();
                     if (changes)
                         changesDesc.append(',');
                     changesDesc.append("multiplicity=").append(prop.getMultiplicity());
@@ -1260,11 +1252,11 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 //may only change if there are no existing content instances that use this property already
                 if (org.getDataType().getId() != prop.getDataType().getId()) {
                     if (getPropertyInstanceCount(org.getId()) == 0) {
-                        if (ps != null) ps.close();
                         ps = con.prepareStatement("UPDATE " + TBL_STRUCT_PROPERTIES + " SET DATATYPE=? WHERE ID=?");
                         ps.setLong(1, prop.getDataType().getId());
                         ps.setLong(2, prop.getId());
                         ps.executeUpdate();
+                        ps.close();
                         if (changes)
                             changesDesc.append(',');
                         changesDesc.append("dataType=").append(prop.getDataType().getName());
@@ -1284,6 +1276,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         } else
                             ps.setNull(1, java.sql.Types.NUMERIC);
                         ps.executeUpdate();
+                        ps.close();
                         if (changes)
                             changesDesc.append(',');
                         changesDesc.append("referencedType=").append(prop.getReferencedType());
@@ -1293,11 +1286,11 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 }
                 // set fulltext indexing for the property
                 if (org.isFulltextIndexed() != prop.isFulltextIndexed()) {
-                    if (ps != null) ps.close();
                     ps = con.prepareStatement("UPDATE " + TBL_STRUCT_PROPERTIES + " SET ISFULLTEXTINDEXED=? WHERE ID=?");
                     ps.setBoolean(1, prop.isFulltextIndexed());
                     ps.setLong(2, prop.getId());
                     ps.executeUpdate();
+                    ps.close();
                     if (changes)
                         changesDesc.append(',');
                     changesDesc.append("isFulltextIndexed=").append(prop.isFulltextIndexed());
@@ -1305,11 +1298,11 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 }
                 // set ACL override flag
                 if (org.mayOverrideACL() != prop.mayOverrideACL()) {
-                    if (ps != null) ps.close();
                     ps = con.prepareStatement("UPDATE " + TBL_STRUCT_PROPERTIES + " SET MAYOVERRIDEACL=? WHERE ID=?");
                     ps.setBoolean(1, prop.mayOverrideACL());
                     ps.setLong(2, prop.getId());
                     ps.executeUpdate();
+                    ps.close();
                     if (changes)
                         changesDesc.append(',');
                     changesDesc.append("mayOverrideACL=").append(prop.mayOverrideACL());
@@ -1327,6 +1320,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         } else
                             ps.setNull(1, java.sql.Types.NUMERIC);
                         ps.executeUpdate();
+                        ps.close();
                         if (changes)
                             changesDesc.append(',');
                         changesDesc.append("referencedList=").append(prop.getReferencedList());
@@ -1348,11 +1342,11 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         allowChange = check;
                     }
                     if (allowChange) {
-                        if (ps != null) ps.close();
                         ps = con.prepareStatement("UPDATE " + TBL_STRUCT_PROPERTIES + " SET UNIQUEMODE=? WHERE ID=?");
                         ps.setLong(1, prop.getUniqueMode().getId());
                         ps.setLong(2, prop.getId());
                         ps.executeUpdate();
+                        ps.close();
                         if (changes)
                             changesDesc.append(',');
                         changesDesc.append("uniqueMode=").append(prop.getUniqueMode().getId());
@@ -1362,11 +1356,11 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 }
                 // change the property's ACL
                 if (org.getACL().getId() != prop.getACL().getId()) {
-                    if (ps != null) ps.close();
                     ps = con.prepareStatement("UPDATE " + TBL_STRUCT_PROPERTIES + " SET ACL=? WHERE ID=?");
                     ps.setLong(1, prop.getACL().getId());
                     ps.setLong(2, prop.getId());
                     ps.executeUpdate();
+                    ps.close();
                     if (changes)
                         changesDesc.append(',');
                     changesDesc.append("acl=").append(prop.getACL().getId());
@@ -1390,7 +1384,6 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         org.getDefaultValue() == null && prop.getDefaultValue() != null) {
                     if (changes)
                         changesDesc.append(',');
-                    if (ps != null) ps.close();
                     ps = con.prepareStatement("UPDATE " + TBL_STRUCT_PROPERTIES + " SET DEFAULT_VALUE=? WHERE ID=?");
                     FxValue defValue = prop.getDefaultValue();
                     if (defValue instanceof FxBinary) {
@@ -1404,17 +1397,18 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         ps.setString(1, _def);
                     ps.setLong(2, prop.getId());
                     ps.executeUpdate();
+                    ps.close();
                     changesDesc.append("defaultValue=").append(prop.getDefaultValue());
                     changes = true;
                 }
                 //update SystemInternal flag, this is a one way function, so it can only be set, but not reset!!
                 if (!org.isSystemInternal() && prop.isSystemInternal()) {
                     if (FxContext.getUserTicket().isGlobalSupervisor()) {
-                        if (ps != null) ps.close();
                         ps = con.prepareStatement("UPDATE " + TBL_STRUCT_PROPERTIES + " SET SYSINTERNAL=? WHERE ID=?");
                         ps.setBoolean(1, prop.isSystemInternal());
                         ps.setLong(2, prop.getId());
                         ps.executeUpdate();
+                        ps.close();
                         if (changes)
                             changesDesc.append(',');
                         changesDesc.append("systemInternal=").append(prop.isSystemInternal());
@@ -1436,6 +1430,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             if (changes) {
                 //TODO: invoke htracker with changeDesc
             }
+            success = true;
         } catch (SQLException e) {
             ctx.setRollbackOnly();
             /*TODO: Determine if this must be checked
@@ -1444,35 +1439,33 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             */
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
-            if (_con == null) {
-                Database.closeObjects(AssignmentEngineBean.class, con, ps);
+            if (!success) {
+                ctx.setRollbackOnly();
             }
+            Database.closeObjects(AssignmentEngineBean.class, null, ps);
         }
         return changes;
     }
 
     /**
-     * @param _con     database conneciton
-     * @param ps       prepared statement
-     * @param sql      StringBuilder to cache query creation
+     * @param con an existing connection
      * @param original the original property assignment to compare changes
      *                 against and update. if==null, the original will be fetched from the cache
-     * @param modified the modified property assignment
-     * @return if any changes were found
+     * @param modified the modified property assignment   @return if any changes were found
      * @throws FxApplicationException on errors
+     * @return true if the original assignment was modified
      */
-
-    private boolean updatePropertyAssignment(Connection _con, PreparedStatement ps, StringBuilder sql, FxPropertyAssignment original,
+    private boolean updatePropertyAssignment(Connection con, FxPropertyAssignment original,
                                              FxPropertyAssignmentEdit modified) throws FxApplicationException {
-        if (sql == null)
-            sql = new StringBuilder(1000);
         if (modified.isNew())
             throw new FxInvalidParameterException("ex.structure.assignment.update.new", modified.getXPath());
-        Connection con = _con;
+        final StringBuilder sql = new StringBuilder(1000);
         boolean changes = false;
+        boolean success = false;
         StringBuilder changesDesc = new StringBuilder(200);
         if (original == null)
             original = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(modified.getId());
+        PreparedStatement ps = null;
         try {
             if (con == null)
                 con = Database.getDbConnection();
@@ -1484,11 +1477,11 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     if (!modified.isEnabled())
                         removeAssignment(original.getId(), true, false, true, false);
                     else {
-                        if (ps != null) ps.close();
                         ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET ENABLED=? WHERE ID=?");
                         ps.setBoolean(1, modified.isEnabled());
                         ps.setLong(2, original.getId());
                         ps.executeUpdate();
+                        ps.close();
                     }
                     if (changes)
                         changesDesc.append(',');
@@ -1497,11 +1490,11 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 }
                 // change the property assignment's default multiplicity
                 if (original.getDefaultMultiplicity() != modified.getDefaultMultiplicity()) {
-                    if (ps != null) ps.close();
                     ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET DEFMULT=? WHERE ID=?");
                     ps.setInt(1, modified.getDefaultMultiplicity());
                     ps.setLong(2, original.getId());
                     ps.executeUpdate();
+                    ps.close();
                     if (changes)
                         changesDesc.append(',');
                     changesDesc.append("defaultMultiplicity=").append(modified.getDefaultMultiplicity());
@@ -1518,12 +1511,12 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     } else {
                         throw new FxUpdateException("ex.structure.property.assignment.overrideBaseMultiplicityNotEnabled", original.getProperty().getId());
                     }
-                    if (ps != null) ps.close();
                     ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET MINMULT=? ,MAXMULT=? WHERE ID=?");
                     ps.setInt(1, modified.getMultiplicity().getMin());
                     ps.setInt(2, modified.getMultiplicity().getMax());
                     ps.setLong(3, original.getId());
                     ps.executeUpdate();
+                    ps.close();
                     if (changes)
                         changesDesc.append(',');
                     changesDesc.append("multiplicity=").append(modified.getMultiplicity());
@@ -1542,11 +1535,11 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     throw new FxUpdateException("ex.structure.modification.notSuppoerted", "xPath");
                     /*
                     //TODO:check for valid XPath
-                    if (ps != null) ps.close();
                     ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET XPATH=? WHERE ID=?");
                     ps.setString(1, prop.getXPath());
                     ps.setLong(2, prop.getId());
                     ps.executeUpdate();
+                    ps.close();
                     if (changes)
                         changesDesc.append(',');
                     changesDesc.append("xPath=").append(prop.getXPath());
@@ -1557,11 +1550,11 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 if (!original.getAlias().equals(modified.getAlias())) {
                     throw new FxUpdateException("ex.structure.modification.notSuppoerted", "alias");
                     /*
-                    if (ps != null) ps.close();
                     ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET XALIAS=? WHERE ID=?");
                     ps.setString(1, prop.getAlias());
                     ps.setLong(2, prop.getId());
                     ps.executeUpdate();
+                    ps.close();
                     if (changes)
                         changesDesc.append(',');
                     changesDesc.append("alias=").append(prop.getAlias());
@@ -1570,11 +1563,11 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 }
                 // change the assignment's ACL
                 if (original.getACL().getId() != modified.getACL().getId()) {
-                    if (ps != null) ps.close();
                     ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET ACL=? WHERE ID=?");
                     ps.setLong(1, modified.getACL().getId());
                     ps.setLong(2, original.getId());
                     ps.executeUpdate();
+                    ps.close();
                     if (changes)
                         changesDesc.append(',');
                     changesDesc.append("acl=").append(modified.getACL().getId());
@@ -1612,7 +1605,6 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         original.getDefaultValue() == null && modified.getDefaultValue() != null) {
                     if (changes)
                         changesDesc.append(',');
-                    if (ps != null) ps.close();
                     ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET DEFAULT_VALUE=? WHERE ID=?");
                     FxValue defValue = modified.getDefaultValue();
                     if (defValue instanceof FxBinary) {
@@ -1626,16 +1618,17 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         ps.setString(1, _def);
                     ps.setLong(2, original.getId());
                     ps.executeUpdate();
+                    ps.close();
                     changesDesc.append("defaultValue=").append(original.getDefaultValue());
                     changes = true;
                 }
                 // change the default language
                 if (original.getDefaultLanguage() != modified.getDefaultLanguage()) {
-                    if (ps != null) ps.close();
                     ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET DEFLANG=? WHERE ID=?");
                     ps.setInt(1, (int) modified.getDefaultLanguage());
                     ps.setLong(2, original.getId());
                     ps.executeUpdate();
+                    ps.close();
                     if (changes)
                         changesDesc.append(',');
                     changesDesc.append("defaultLanguage=").append(modified.getDefaultLanguage());
@@ -1644,11 +1637,11 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 //update SystemInternal flag, this is a one way function, so it can only be set, but not reset!!
                 if (!original.isSystemInternal() && modified.isSystemInternal()) {
                     if (FxContext.getUserTicket().isGlobalSupervisor()) {
-                        if (ps != null) ps.close();
                         ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET SYSINTERNAL=? WHERE ID=?");
                         ps.setBoolean(1, modified.isSystemInternal());
                         ps.setLong(2, original.getId());
                         ps.executeUpdate();
+                        ps.close();
                         if (changes)
                             changesDesc.append(',');
                         changesDesc.append("systemInternal=").append(modified.isSystemInternal());
@@ -1692,9 +1685,11 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             }
 
             //TODO: compare all possible modifications
-            if (changes)
+            if (changes) {
                 htracker.track(modified.getAssignedType(), "history.assignment.updatePropertyAssignment", original.getXPath(), modified.getAssignedType().getId(), modified.getAssignedType().getName(),
                         modified.getProperty().getId(), modified.getProperty().getName(), changesDesc.toString());
+            }
+            success = true;
         } catch (SQLException e) {
             final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(e);
             ctx.setRollbackOnly();
@@ -1702,24 +1697,23 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 throw new FxEntryExistsException("ex.structure.assignment.property.exists", original.getAlias(), original.getXPath());
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
-            if (_con == null) {
-                Database.closeObjects(AssignmentEngineBean.class, con, ps);
+            if (!success) {
+                ctx.setRollbackOnly();
             }
+            Database.closeObjects(AssignmentEngineBean.class, null, ps);
         }
         return changes;
     }
 
-    private long createPropertyAssignment(Connection _con, PreparedStatement ps, StringBuilder sql,
-                                          FxPropertyAssignmentEdit prop) throws FxApplicationException {
-        if (sql == null)
-            sql = new StringBuilder(1000);
+    private long createPropertyAssignment(Connection con, StringBuilder sql, FxPropertyAssignmentEdit prop) throws FxApplicationException {
         if (!prop.isNew())
             throw new FxInvalidParameterException("ex.structure.assignment.create.existing", prop.getXPath());
-        Connection con = _con;
+        if (sql == null) {
+            sql = new StringBuilder(1000);
+        }
+        PreparedStatement ps = null;
         long newAssignmentId;
         try {
-            if (con == null)
-                con = Database.getDbConnection();
             sql.setLength(0);
             sql.append("INSERT INTO ").append(TBL_STRUCT_ASSIGNMENTS).
                     //               1  2     3       4       5       6       7       8   9     10     11   12          13
@@ -1727,8 +1721,6 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                             //14 15      16          17
                             "ACL,DEFLANG,SYSINTERNAL,DEFAULT_VALUE)" +
                             "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-            if (ps != null)
-                ps.close();
             ps = con.prepareStatement(sql.toString());
             newAssignmentId = seq.getId(FxSystemSequencer.ASSIGNMENT);
             ps.setLong(1, newAssignmentId);
@@ -1767,6 +1759,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             else
                 ps.setString(17, _def);
             ps.executeUpdate();
+            ps.close();
             Database.storeFxString(new FxString[]{prop.getLabel(), prop.getHint()}, con,
                     TBL_STRUCT_ASSIGNMENTS, new String[]{"DESCRIPTION", "HINT"}, "ID", newAssignmentId);
             htracker.track(prop.getAssignedType(), "history.assignment.createPropertyAssignment", XPath, prop.getAssignedType().getId(), prop.getAssignedType().getName(),
@@ -1782,7 +1775,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     ctx.setRollbackOnly();
                     throw new FxCreateException(e, "ex.cache", e.getMessage());
                 }
-                createInheritedAssignments(CacheAdmin.getEnvironment().getAssignment(newAssignmentId), con, ps, sql,
+                createInheritedAssignments(CacheAdmin.getEnvironment().getAssignment(newAssignmentId), con, sql,
                         prop.getAssignedType().getDerivedTypes());
             }
         } catch (SQLException e) {
@@ -1792,7 +1785,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 throw new FxEntryExistsException("ex.structure.assignment.property.exists", prop.getAlias(), prop.getXPath());
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
-            Database.closeObjects(AssignmentEngineBean.class, (_con == null ? con : null), ps);
+            Database.closeObjects(AssignmentEngineBean.class, null, ps);
         }
         return newAssignmentId;
     }
@@ -1924,7 +1917,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 sql.setLength(0);
             } else if (!disableAssignment) {
                 //find all (directly) derived assignments, flag them as 'regular' assignments and set them as new base
-                breakAssignmentInheritance(con, ps, sql, affectedAssignments.toArray(new FxAssignment[affectedAssignments.size()]));
+                breakAssignmentInheritance(con, sql, affectedAssignments.toArray(new FxAssignment[affectedAssignments.size()]));
             }
 
             //security checks
@@ -2091,39 +2084,41 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      * Find all (directly) derived assignments and flag them as 'regular' assignments and set them as new base
      *
      * @param con         an open and valid connection
-     * @param ps          prepared statement
      * @param sql         string builder
      * @param assignments the assignments to 'break'
      * @throws FxNotFoundException         on errors
      * @throws FxInvalidParameterException on errors
      * @throws java.sql.SQLException       on errors
      */
-    private void breakAssignmentInheritance(Connection con, PreparedStatement ps,
+    private void breakAssignmentInheritance(Connection con,
                                             StringBuilder sql, FxAssignment... assignments) throws SQLException, FxNotFoundException, FxInvalidParameterException {
         sql.setLength(0);
         sql.append("UPDATE ").append(TBL_STRUCT_ASSIGNMENTS).append(" SET BASE=? WHERE BASE=?"); // AND TYPEDEF=?");
-        if (ps != null && !ps.isClosed())
+        PreparedStatement ps = null;
+        try {
+            ps = con.prepareStatement(sql.toString());
+            ps.setNull(1, Types.NUMERIC);
+            for (FxAssignment as : assignments) {
+                ps.setLong(2, as.getId());
+                int count = 0;
+                //'toplevel' fix
+                //        for(FxType types: assignment.getAssignedType().getDerivedTypes() ) {
+                //            ps.setLong(3, types.getId());
+                count += ps.executeUpdate();
+                //        }
+                LOG.info("Updated " + count + " assignments to become the new base assignment");
+                /* sql.setLength(0);
+                //now fix 'deeper' inherited assignments
+                for(FxType types: assignment.getAssignedType().getDerivedTypes() ) {
+                    for( FxType subderived: types.getDerivedTypes())
+                        _fixSubInheritance(ps, subderived, types.getAssignment(assignment.getXPath()).getId(), assignment.getId());
+                }*/
+            }
             ps.close();
-        ps = con.prepareStatement(sql.toString());
-        ps.setNull(1, Types.NUMERIC);
-        for (FxAssignment as : assignments) {
-            ps.setLong(2, as.getId());
-            int count = 0;
-            //'toplevel' fix
-            //        for(FxType types: assignment.getAssignedType().getDerivedTypes() ) {
-            //            ps.setLong(3, types.getId());
-            count += ps.executeUpdate();
-            //        }
-            LOG.info("Updated " + count + " assignments to become the new base assignment");
-            /* sql.setLength(0);
-            //now fix 'deeper' inherited assignments
-            for(FxType types: assignment.getAssignedType().getDerivedTypes() ) {
-                for( FxType subderived: types.getDerivedTypes())
-                    _fixSubInheritance(ps, subderived, types.getAssignment(assignment.getXPath()).getId(), assignment.getId());
-            }*/
+            sql.setLength(0);
+        } finally {
+            Database.closeObjects(AssignmentEngineBean.class, null, ps);
         }
-        ps.close();
-        sql.setLength(0);
     }
 
     /*private void _fixSubInheritance(PreparedStatement ps, FxType type, long newBase, long assignmentId) throws SQLException, FxInvalidParameterException, FxNotFoundException {
@@ -2160,7 +2155,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         Connection con = null;
         try {
             con = Database.getDbConnection();
-            reload = updateProperty(con, null, null, property);
+            reload = updateProperty(con, property);
             if (reload)
                 StructureLoader.reload(con);
         } catch (SQLException e) {
@@ -2189,7 +2184,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         Connection con = null;
         try {
             con = Database.getDbConnection();
-            reload = updateGroup(con, null, null, group);
+            reload = updateGroup(con, group);
             if (reload)
                 StructureLoader.reload(con);
         } catch (SQLException e) {
@@ -2210,6 +2205,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long getPropertyInstanceCount(long propertyId) throws FxDbException {
         Connection con = null;
         PreparedStatement ps = null;
@@ -2227,8 +2223,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage());
         }
         finally {
-            if (con != null)
-                Database.closeObjects(AssignmentEngineBean.class, con, ps);
+            Database.closeObjects(AssignmentEngineBean.class, con, ps);
         }
         return count;
     }
@@ -2236,6 +2231,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long getAssignmentInstanceCount(long assignmentId) throws FxApplicationException {
         Connection con = null;
         PreparedStatement ps = null;
@@ -2253,8 +2249,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage());
         }
         finally {
-            if (con != null)
-                Database.closeObjects(AssignmentEngineBean.class, con, ps);
+            Database.closeObjects(AssignmentEngineBean.class, con, ps);
         }
         return count;
     }
@@ -2282,8 +2277,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             rs.next();
             count = rs.getLong(1);
         } finally {
-            if (ps != null)
-                ps.close();
+            Database.closeObjects(AssignmentEngineBean.class, null, ps);
         }
         return count;
     }
@@ -2308,6 +2302,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             while (rs != null && rs.next()) {
                 assignmentIds.add(rs.getLong(1));
             }
+            ps.close();
 
             if (assignmentIds.size() > 0) {
                 String function = "MIN(XINDEX)";
@@ -2320,17 +2315,14 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         query.append(" OR ASSIGN=");
                     }
                 }
-                if (ps != null)
-                    ps.close();
                 ps = con.prepareStatement(query.toString());
                 rs = ps.executeQuery();
                 rs.next();
                 count = rs.getLong(1);
-            }
-        } finally {
-            if (ps != null) {
                 ps.close();
             }
+        } finally {
+            Database.closeObjects(AssignmentEngineBean.class, null, ps);
         }
         return count;
     }
