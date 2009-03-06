@@ -79,7 +79,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     protected ACL ACL;
     protected Workflow workflow;
     protected String name;
-    protected FxString description;
+    protected FxString label;
     protected FxType parent;
     protected TypeStorageMode storageMode;
     protected TypeCategory category;
@@ -102,7 +102,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     protected Map<FxScriptEvent, long[]> scriptMapping;
     protected FxReference icon;
 
-    public FxType(long id, ACL acl, Workflow workflow, String name, FxString description, FxType parent, TypeStorageMode storageMode,
+    public FxType(long id, ACL acl, Workflow workflow, String name, FxString label, FxType parent, TypeStorageMode storageMode,
                   TypeCategory category, TypeMode mode, LanguageMode language, TypeState state, byte permissions,
                   boolean trackHistory, long historyAge, long maxVersions, int maxRelSource, int maxRelDestination,
                   LifeCycleInfo lifeCycleInfo, List<FxType> derivedTypes, List<FxTypeRelation> relations) {
@@ -110,7 +110,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
         this.ACL = acl;
         this.workflow = workflow;
         this.name = name.toUpperCase();
-        this.description = description;
+        this.label = label;
         this.parent = parent;
         this.storageMode = storageMode;
         this.category = category;
@@ -225,7 +225,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * {@inheritDoc}
      */
     public FxString getLabel() {
-        return description != null && !description.isEmpty() ? description : new FxString(true, name);
+        return label != null && !label.isEmpty() ? label : new FxString(true, name);
     }
 
     /**
@@ -234,8 +234,8 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * @return a localized, human-readable name for the type.
      */
     public String getDisplayName() {
-        if (description != null && !description.isEmpty()) {
-            return description.getBestTranslation();
+        if (label != null && !label.isEmpty()) {
+            return label.getBestTranslation();
         } else {
             return name;
         }

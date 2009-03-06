@@ -93,7 +93,7 @@
                 <callout arearefs="BlogEntry_2">
                     <para>
                         Create a new property assignment for the blog entry type that is referenced with the path
-                        "/entryTitle". The multiplicity of 1..1 indicates a mandatory field, the description will
+                        "/entryTitle". The multiplicity of 1..1 indicates a mandatory field, the label will
                         be shown in the input forms.
                     </para>
                 </callout>

@@ -262,13 +262,13 @@
                             </td>
                         </tr>
                         <tr>
-                            <td>Description</td>
+                            <td>Label</td>
                             <td>
-                                <methodname>setDescription(String description)</methodname>
+                                <methodname>setLabel(String label)</methodname>
                             </td>
                             <td>&list_yes;</td>
                             <td>&list_yes;</td>
-                            <td>Set a description for the type. Of relevance only to user interfaces.</td>
+                            <td>Set a label for the type. Of relevance only to user interfaces.</td>
                         </tr>
                         <tr>
                             <td>Enable parent assignments</td>
@@ -279,7 +279,7 @@
                             <td>&list_no;</td>
                             <td>If a type is derived from another type, this flag decides if the derived assignments
                                 should be enabled. This is by default enabled when creating a derived type:
-                                <code>FxTypeEdit.createNew(String name, FxString description, ACL acl, FxType parent)
+                                <code>FxTypeEdit.createNew(String name, FxString label, ACL acl, FxType parent)
                                 </code>
                                 and can be disabled using this method before the derived type is saved.
                             </td>
@@ -537,7 +537,7 @@
         <section xml:id="core_structures_types_creating">
             <title>Creating a new type</title>
             <para>
-                In the following example we create a new type "Customer", provide a multilingual description and assign
+                In the following example we create a new type "Customer", provide a multilingual label and assign
                 an access control list:
                 <example xml:id="core_structre_ex_newType">
                     <title>Creating a new FxType</title>
@@ -553,13 +553,13 @@
                         <callout arearefs="cst_newtype_2">
                             <para>The multilingual
                                 <classname>FxString</classname>
-                                <varname>typeDesc</varname>
+                                <varname>typeLabel</varname>
                                 is initialized with support for multilingual values (first parameter set to
                                 <code>true</code>
                                 ) and is assigned the default translation. The default translation is by convention
                                 english.
                                 It would have been the same effect if we wrote
-                                <code>FxString typeDesc = new FxString(true, FxLanguage.ENGLISH, "A generic customer");
+                                <code>FxString typeLabel = new FxString(true, FxLanguage.ENGLISH, "A generic customer");
                                 </code>
                             </para>
                         </callout>
@@ -575,7 +575,7 @@
                         <callout arearefs="cst_newtype_5">
                             <para>A new type instance is created with most settings using default values, only setting
                                 the
-                                name, description and ACL.
+                                name, label and ACL.
                             </para>
                         </callout>
                         <callout arearefs="cst_newtype_6">

@@ -66,7 +66,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      * Constructor
      *
      * @param name                    name of the type
-     * @param description             description
+     * @param label                   label
      * @param acl                     type ACL
      * @param workflow                workflow to use
      * @param parent                  parent type or <code>null</code> if not derived
@@ -83,16 +83,16 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param maxRelSource            max. number of instance related as source
      * @param maxRelDestination       max. number of instances related as destination
      */
-    private FxTypeEdit(String name, FxString description, ACL acl, Workflow workflow, FxType parent,
+    private FxTypeEdit(String name, FxString label, ACL acl, Workflow workflow, FxType parent,
                        boolean enableParentAssignments,
                        TypeStorageMode storageMode, TypeCategory category, TypeMode mode,
                        LanguageMode language, TypeState state, byte permissions,
                        boolean trackHistory, long historyAge, long maxVersions, int maxRelSource,
                        int maxRelDestination) {
-        super(-1, acl, workflow, name, description, parent, storageMode,
+        super(-1, acl, workflow, name, label, parent, storageMode,
                 category, mode, language, state, permissions, trackHistory, historyAge,
                 maxVersions, maxRelSource, maxRelDestination, null, null, new ArrayList<FxTypeRelation>(5));
-        FxSharedUtils.checkParameterMultilang(description, "description");
+        FxSharedUtils.checkParameterMultilang(label, "label");
         this.enableParentAssignments = enableParentAssignments;
         this.isNew = true;
         this.changed = true;
@@ -112,7 +112,7 @@ public class FxTypeEdit extends FxType implements Serializable {
                 type.getMode(), type.getLanguage(), type.getState(), type.permissions,
                 type.isTrackHistory(), type.getHistoryAge(), type.getMaxVersions(), type.getMaxRelSource(),
                 type.getMaxRelDestination(), type.getLifeCycleInfo(), type.getDerivedTypes(), type.getRelations());
-        FxSharedUtils.checkParameterMultilang(description, "description");
+        FxSharedUtils.checkParameterMultilang(label, "label");
         this.isNew = false;
         this.scriptMapping = type.scriptMapping;
         //make lists editable again
@@ -140,25 +140,25 @@ public class FxTypeEdit extends FxType implements Serializable {
      * Create a new FxTypeEdit instance for creating a new FxType
      *
      * @param name        name of the type
-     * @param description description
+     * @param label       label
      * @param acl         type ACL
      * @return FxTypeEdit instance for creating a new FxType
      */
-    public static FxTypeEdit createNew(String name, FxString description, ACL acl) {
-        return createNew(name, description, acl, null);
+    public static FxTypeEdit createNew(String name, FxString label, ACL acl) {
+        return createNew(name, label, acl, null);
     }
 
     /**
      * Create a new FxTypeEdit instance derived from an existing FxType
      *
      * @param name        name of the type
-     * @param description description
+     * @param label       label
      * @param acl         type ACL
      * @param parent      parent type or <code>null</code> if not derived
      * @return FxTypeEdit instance for creating a new FxType
      */
-    public static FxTypeEdit createNew(String name, FxString description, ACL acl, FxType parent) {
-        return createNew(name, description, acl, CacheAdmin.getEnvironment().getWorkflows().get(0),
+    public static FxTypeEdit createNew(String name, FxString label, ACL acl, FxType parent) {
+        return createNew(name, label, acl, CacheAdmin.getEnvironment().getWorkflows().get(0),
                 parent, parent != null, TypeStorageMode.Hierarchical,
                 TypeCategory.User, TypeMode.Content, LanguageMode.Multiple, TypeState.Available,
                 getDefaultTypePermissions(), false, 0, -1, 0, 0);
@@ -172,7 +172,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      * Create a new FxTypeEdit instance for creating a new FxType
      *
      * @param name                    name of the type
-     * @param description             description
+     * @param label                   label
      * @param acl                     type ACL
      * @param workflow                workflow to use
      * @param parent                  parent type or <code>null</code> if not derived
@@ -190,13 +190,13 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param maxRelDestination       max. number of instance related as destination
      * @return FxTypeEdit instance for creating a new FxType
      */
-    public static FxTypeEdit createNew(String name, FxString description, ACL acl, Workflow workflow,
+    public static FxTypeEdit createNew(String name, FxString label, ACL acl, Workflow workflow,
                                        FxType parent, boolean enableParentAssignments,
                                        TypeStorageMode storageMode, TypeCategory category, TypeMode mode,
                                        LanguageMode language, TypeState state, byte permissions,
                                        boolean trackHistory, long historyAge, long maxVersions, int maxRelSource,
                                        int maxRelDestination) {
-        return new FxTypeEdit(name, description, acl, workflow, parent, enableParentAssignments,
+        return new FxTypeEdit(name, label, acl, workflow, parent, enableParentAssignments,
                 storageMode, category, mode, language, state, permissions, trackHistory, historyAge,
                 maxVersions, maxRelSource, maxRelDestination);
     }
@@ -331,8 +331,8 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @return the type itself, useful for chained calls
      */
     public FxTypeEdit setLabel(FxString label) {
-        FxSharedUtils.checkParameterMultilang(description, "description");
-        this.description = label;
+        FxSharedUtils.checkParameterMultilang(label, "label");
+        this.label = label;
         this.changed = true;
         return this;
     }

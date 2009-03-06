@@ -9,7 +9,7 @@ import com.flexive.shared.security.*
 import com.flexive.shared.*
 import com.flexive.shared.structure.*
 
-new GroovyTypeBuilder().person(description: new FxString("Person"),                     <co xml:id="cst_propassign_conc_1"/>
+new GroovyTypeBuilder().person(label: new FxString("Person"),                     <co xml:id="cst_propassign_conc_1"/>
         acl: CacheAdmin.environment.getACL(ACLCategory.STRUCTURE.defaultId),
         multilang: true) {
 }
@@ -19,15 +19,15 @@ def builder = new GroovyTypeBuilder("Person")                                   
 builder {
     firstname(dataType: FxDataType.String1024,                                          <co xml:id="cst_propassign_conc_3"/>
             multilang: false,
-            description: new FxString(FxLanguage.ENGLISH, "A person's first name"),     <co xml:id="cst_propassign_conc_4"/>
+            label: new FxString(FxLanguage.ENGLISH, "A person's first name"),     <co xml:id="cst_propassign_conc_4"/>
             multiplicity: FxMultiplicity.MULT_0_N)
 }
 
-new GroovyTypeBuilder().anotherperson(description: new FxString("Anotherperson"),       <co xml:id="cst_propassign_conc_5"/>
+new GroovyTypeBuilder().anotherperson(label: new FxString("Anotherperson"),       <co xml:id="cst_propassign_conc_5"/>
         acl: CacheAdmin.environment.getACL(ACLCategory.STRUCTURE.defaultId),
         multilang: true) {
             anotherfirstname(assignment: "PERSON/FIRSTNAME",                            <co xml:id="cst_propassign_conc_6"/>
-            description: new FxString(FxLanguage.ENGLISH, "Another's first name"))      <co xml:id="cst_propassign_conc_7"/>
+            label: new FxString(FxLanguage.ENGLISH, "Another's first name"))      <co xml:id="cst_propassign_conc_7"/>
 }
 
 def name = ""
