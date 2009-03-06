@@ -51,7 +51,8 @@
         </c:if>
             <fx:formRow labelKey="GroupEditor.label.name" id="name">
                 <h:inputText id="name" value="#{groupEditorBean.groupName}"
-                             disabled="#{not groupEditorBean.editMode or (groupEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
+                        disabled="#{not groupEditorBean.editMode or (groupEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
+                        onkeyup="transferInputValue('frm','name',document.getElementById('frm:label').fxValue.getFirstInputId());">
 			        <f:validator validatorId="flexive.FxNameForXPathValidator"/>
                 </h:inputText>
             </fx:formRow>

@@ -573,6 +573,23 @@ flexive.input.FxMultiLanguageValueInput.prototype = {
         }
     },
 
+    /**
+     * Returns the id of the first shown input element
+     */
+    getFirstInputId: function() {
+        for (var i in this.rowInfos) {
+            var rowId = this.rowInfos[i].rowId;
+            if (document.getElementById(rowId).style.display != "none") {
+                var inputId =this.id+'_input_'+i;
+                //eliminate form id from element id
+                var formIdx = inputId.indexOf(":");
+                if (formIdx >0)
+                    return inputId.substring(formIdx+1);
+                return inputId;
+            }
+        }
+    },
+
     showLanguage: function(languageId) {
         // show row for this language
         this.showRow(languageId >= 0 ? this.baseRowId + languageId : null);

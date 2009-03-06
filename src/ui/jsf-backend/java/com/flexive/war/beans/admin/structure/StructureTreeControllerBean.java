@@ -53,6 +53,7 @@ public class StructureTreeControllerBean {
     public static final String ACTION_RENAME_ASSIGNMENT = "RENAME_ASSIGNMENT";
     public static final String ACTION_RELOAD_SELECT_TYPE = "RELOAD_SELECT_TYPE";
     public static final String ACTION_RELOAD_SELECT_ASSIGNMENT = "RELOAD_SELECT_ASSIGNMENT";
+    public static final String ACTION_RELOAD_OPEN_ASSIGNMENT = "RELOAD_OPEN_ASSIGNMENT";
     public static final String ACTION_RELOAD_EXPAND_TYPE = "RELOAD_EXPAND_TYPE";
     public static final String ACTION_RELOAD_EXPAND_ASSIGNMENT = "RELOAD_EXPAND_ASSIGNMENT";
     public static final String ACTION_RENAME_SELECT_TYPE = "RENAME_SELECT_TYPE";
@@ -85,18 +86,6 @@ public class StructureTreeControllerBean {
     public void setAction(String action) {
         this.action = action;
     }
-
-    /*
-    public static final String KEY_ACTION="ACTION";
-    public static final String KEY_ID="ID";
-    public static final String KEY_VALUE="VALUE";
-
-    private static List<HashMap> treeActions = null;
-
-    public Object[] getTreeActions() {
-        return treeActions.toArray();
-    }
-    */
 
     public void addAction(String action, long id, String value) {
         this.action = action;

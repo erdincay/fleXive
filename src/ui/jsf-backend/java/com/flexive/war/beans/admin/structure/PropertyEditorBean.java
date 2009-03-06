@@ -971,7 +971,7 @@ public class PropertyEditorBean implements ActionBean {
                 else
                     assignmentId = EJBLookup.getAssignmentEngine().createProperty(property, parentXPath);
                 StructureTreeControllerBean s = (StructureTreeControllerBean) FxJsfUtils.getManagedBean("structureTreeControllerBean");
-                s.addAction(StructureTreeControllerBean.ACTION_RELOAD_SELECT_ASSIGNMENT, assignmentId, "");
+                s.addAction(StructureTreeControllerBean.ACTION_RELOAD_OPEN_ASSIGNMENT, assignmentId, "");
             } catch (Throwable t) {
                 new FxFacesMsgErr(t).addToContext();
             }

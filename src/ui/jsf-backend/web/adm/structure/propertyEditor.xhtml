@@ -55,7 +55,8 @@
         </c:if>
             <fx:formRow labelKey="PropertyEditor.label.name" id="name">
                     <h:inputText id="name" value="#{propertyEditorBean.propertyName}"
-                             disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
+                            disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
+                            onkeyup="transferInputValue('frm','name',document.getElementById('frm:label').fxValue.getFirstInputId());">
                         <f:validator validatorId="flexive.FxNameForXPathValidator"/>
                     </h:inputText>
             </fx:formRow>

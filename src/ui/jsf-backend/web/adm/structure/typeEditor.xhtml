@@ -58,7 +58,8 @@
                         bean="#{typeEditorBean}" action="showTypeScriptEditor"/>
             </ui:fragment>
              <fx:formRow labelKey="TypeEditor.label.name" id="name">
-                <h:inputText id="name" value="#{typeEditorBean.name}" disabled="#{not typeEditorBean.editMode}">
+                <h:inputText id="name" value="#{typeEditorBean.name}" disabled="#{not typeEditorBean.editMode}"
+                         onkeyup="transferInputValue('frm','name',document.getElementById('frm:description').fxValue.getFirstInputId());">
                     <f:validator validatorId="flexive.FxNameForXPathValidator"/>
                 </h:inputText>
             </fx:formRow>

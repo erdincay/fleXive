@@ -527,3 +527,16 @@ function linearSearch(searchItem, targetArray, regEx) {
     }
     return - 1;
 }
+
+/**
+ * Copies the value of the input source element to input destination element.
+ *
+ * @param formname name of the form
+ * @param inputSource id of the input source
+ * @param inputDest id of the input destination
+ */
+
+function transferInputValue(formname, inputSource, inputDest) {
+    var value = document.getElementById(formname+":"+inputSource).value;
+    document.getElementById(formname+":"+inputDest).value = value;
+}
