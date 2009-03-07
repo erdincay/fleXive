@@ -139,28 +139,37 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
 
     @Override
     public void processDecodes(FacesContext context) {
-        try {
-            new ItemPhaseRenderer(context, PhaseId.APPLY_REQUEST_VALUES).renderTree(getTree());
-        } catch (IOException e) {
-            LOG.warn(e.getMessage(), e);    // shouldn't happen
+        final FxTreeNode tree = getTree();
+        if (tree != null) {
+            try {
+                new ItemPhaseRenderer(context, PhaseId.APPLY_REQUEST_VALUES).renderTree(tree);
+            } catch (IOException e) {
+                LOG.warn(e.getMessage(), e);    // shouldn't happen
+            }
         }
     }
 
     @Override
     public void processUpdates(FacesContext context) {
-        try {
-            new ItemPhaseRenderer(context, PhaseId.UPDATE_MODEL_VALUES).renderTree(getTree());
-        } catch (IOException e) {
-            LOG.warn(e.getMessage(), e);    // shouldn't happen
+        final FxTreeNode tree = getTree();
+        if (tree != null) {
+            try {
+                new ItemPhaseRenderer(context, PhaseId.UPDATE_MODEL_VALUES).renderTree(tree);
+            } catch (IOException e) {
+                LOG.warn(e.getMessage(), e);    // shouldn't happen
+            }
         }
     }
 
     @Override
     public void processValidators(FacesContext context) {
-        try {
-            new ItemPhaseRenderer(context, PhaseId.PROCESS_VALIDATIONS).renderTree(getTree());
-        } catch (IOException e) {
-            LOG.warn(e.getMessage(), e);    // shouldn't happen
+        final FxTreeNode tree = getTree();
+        if (tree != null) {
+            try {
+                new ItemPhaseRenderer(context, PhaseId.PROCESS_VALIDATIONS).renderTree(tree);
+            } catch (IOException e) {
+                LOG.warn(e.getMessage(), e);    // shouldn't happen
+            }
         }
     }
 
