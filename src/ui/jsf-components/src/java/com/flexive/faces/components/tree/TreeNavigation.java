@@ -3,6 +3,7 @@ package com.flexive.faces.components.tree;
 import com.flexive.faces.FxJsfComponentUtils;
 import com.flexive.faces.javascript.FxJavascriptUtils;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxContext;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
@@ -212,7 +213,7 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
             if (nodeId == -1) {
                 return null;
             }
-            if (treeCache != null && treeCache.getId() == nodeId) {
+            if (treeCache != null && treeCache.getId() == nodeId && !FxContext.get().getTreeWasModified()) {
                 return treeCache;
             }
             return treeCache = EJBLookup.getTreeEngine().getTree(mode, nodeId, getDepth());
