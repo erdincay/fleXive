@@ -85,7 +85,7 @@
                                 </artifactItem>
 
                                 <artifactItem>
-                                    <groupId>mygroup</groupId>
+                                    <groupId>${groupId}</groupId>
                                     <artifactId>ejb-jar</artifactId>
                                     <version>${version}</version>
                                     <overWrite>true</overWrite>
