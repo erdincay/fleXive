@@ -131,7 +131,7 @@ public class SystemInfoBean {
             try {
                 final Class<?> cls = Class.forName("org.mortbay.jetty.Server");
                 jettyVersion = " (Jetty "
-                        + cls.getClass().getPackage().getImplementationVersion()
+                        + cls.getPackage().getImplementationVersion()
                         + ")";
             } catch (ClassNotFoundException e) {
                 // no Jetty version...
