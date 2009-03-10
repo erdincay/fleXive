@@ -183,7 +183,7 @@ function copy2clipboard(cliptext, errorMessage, successMessage) {
             document.body.appendChild(_div);
         }
         document.getElementById(fxClipboard).innerHTML = '';
-        document.getElementById(fxClipboard).innerHTML = '<embed src="'+getBase()+'/adm/js/fxClipCopy.swf" FlashVars="cliptext=' +
+        document.getElementById(fxClipboard).innerHTML = '<embed src="'+getBase()+'adm/js/fxClipCopy.swf" FlashVars="cliptext=' +
                                                          encodeURIComponent(cliptext) + '" width="0" height="0" type="application/x-shockwave-flash"></embed>';
     }
     if( successMessage ) alertDialog(successMessage);

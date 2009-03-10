@@ -152,7 +152,7 @@ public class FxFilter implements Filter {
 
                 response.setXPoweredBy(X_POWERED_BY_VALUE);
                 if (!request.isDynamicContent()) {
-                    if (!response.containsHeader("last-modified") && !response.containsHeader("expires")) {
+                    if (!response.containsHeader("last-modified") || !response.containsHeader("expires")) {
                         response.enableBrowserCache(FxResponseWrapper.CacheControl.PRIVATE, null, false);
                     }
                 } else {

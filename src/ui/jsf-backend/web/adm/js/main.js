@@ -113,7 +113,7 @@ function gotoNavMenu(id) {
     activeTabId = parseInt(id);
     if (getNavFrameObj().getAttribute("loaded") == "false") {
         // implement lazy loading of navigation tabs 
-        getNavFrameWnd().document.location.href = getBase() + "/" + getNavFrameObj().getAttribute("navigationSrc");
+        getNavFrameWnd().document.location.href = getBase() + getNavFrameObj().getAttribute("navigationSrc");
         getNavFrameObj().setAttribute("loaded", true)
         loaded = false;
     } else {
@@ -469,7 +469,7 @@ function addToolbarItem(responseId,caller,id,helpTxt,url,iconUrl) {
 //a separator can never be the first item (responseId wont match which is a desired sideffect!)
 function addToolbarSeparator() {
     var pos = toolbarImages.length;
-    toolbarImages[pos] = getBase()+'/adm/images/toolbar/separator.png';
+    toolbarImages[pos] = getBase()+'adm/images/toolbar/separator.png';
     toolbarHelp[pos] = '';
     toolbarClick[pos] = '';
     toolbarIds[pos] = '';
