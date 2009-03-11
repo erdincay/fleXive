@@ -374,6 +374,13 @@ public final class FxFilteredEnvironment implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
+    public List<FxGroupAssignment> getGroupAssignments(long groupId, boolean includeDisabled) {
+        return environment.getGroupAssignments(groupId, includeDisabled);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public List<FxType> getTypes() {
         return getTypes(true, true, true, true);
     }

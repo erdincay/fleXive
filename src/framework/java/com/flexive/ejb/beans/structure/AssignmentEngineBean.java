@@ -276,7 +276,6 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     *
     * @return if the options changed.
     */
-
     private boolean updateGroupOptions(Connection con, FxGroupEdit group) throws SQLException, FxInvalidParameterException {
         boolean changed = false;
         FxGroupEdit org = new FxGroupEdit(CacheAdmin.getEnvironment().getGroup(group.getId()));
@@ -465,20 +464,24 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     }
 
     /**
-     * Remove a property, all its assignments and all attributes in contents referencing this property
-     *
-     * @param propertyId id of the property to remove
-     * @throws FxApplicationException on errors
+     * {@inheritDoc}
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void removeProperty(long propertyId) throws FxApplicationException {
-        //TODO
+        List<FxPropertyAssignment> assignments = CacheAdmin.getEnvironment().getPropertyAssignments(propertyId, true);
+        if (assignments.size() == 0)
+            throw new FxNotFoundException(LOG, "ex.structure.assignment.notFound.id", propertyId);
+
+        for (FxPropertyAssignment a : assignments) {
+            if (!a.isDerivedAssignment()) {
+                removeAssignment(a.getId(), false, true, false, true);
+            }
+        }
     }
 
     /**
      * Update a group's attributes
      *
-     * @param con  an existing sql connection
+     * @param con   an existing sql connection
      * @param group the instance of FxGroupEdit whose attributes should be changed
      * @return true if changes were made to the group
      * @throws FxApplicationException on errors
@@ -707,14 +710,18 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     }
 
     /**
-     * Removes a group and all subgroups and properties assigned to it as well as all references in content instances
-     *
-     * @param groupId id of the group to remove
-     * @throws FxApplicationException on errors
+     * {@inheritDoc}
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void removeGroup(long groupId) throws FxApplicationException {
-        //TODO
+        List<FxGroupAssignment> assignments = CacheAdmin.getEnvironment().getGroupAssignments(groupId, true);
+        if (assignments.size() == 0)
+            throw new FxNotFoundException("ex.structure.assignment.notFound.id", groupId);
+
+        for (FxGroupAssignment a : assignments) {
+            if (!a.isDerivedAssignment()) {
+                removeAssignment(a.getId(), true, true, false, true);
+            }
+        }
     }
 
     /**
@@ -782,6 +789,14 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         }
     }
 
+    /**
+     * Updates a group assignment
+     *
+     * @param con a valid and open connection
+     * @param group the FxGroupAssignment to be changed
+     * @return returns true if changes were made to the group assignment
+     * @throws FxApplicationException on errors
+     */
     private boolean updateGroupAssignment(Connection con, FxGroupAssignmentEdit group) throws FxApplicationException {
         if (group.isNew())
             throw new FxInvalidParameterException("ex.structure.assignment.update.new", group.getXPath());
@@ -940,20 +955,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             }
             // change the parentgroupassignment
             // TODO: change the parent group assignment & failure conditions
-            /*
-            if (org.getParentGroupAssignment().getId() != group.getParentGroupAssignment().getId()) {
-                if (ps != null)
-                    ps.close();
-                ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET PARENTGROUP=? WHERE ID=?");
-                ps.setLong(1, group.getParentGroupAssignment().getId());
-                ps.setLong(2, group.getId());
-                ps.executeUpdate();
-                if (changes)
-                    changesDesc.append(',');
-                changesDesc.append("parentGroupAssignment=").append(group.getParentGroupAssignment().getId());
-                changes = true;
-            }
-            */
+//            if (org.getParentGroupAssignment().getId() != group.getParentGroupAssignment().getId()) {
+//            }
             // change the group assignment options
             if (updateGroupAssignmentOptions(con, group)) {
                 changesDesc.append(",options:");
@@ -1086,6 +1089,16 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         return retPosition;
     }
 
+    /**
+     * Creates a group assignment
+     *
+     * @param con a valid and open connection
+     * @param sql an instance of StringBuilder
+     * @param group an instance of the FxGroupAssignment to be persisted
+     * @param createSubAssignments if true calls createGroupAssignment is called recursively to create sub assignments
+     * @return returns the assignmentId
+     * @throws FxApplicationException on errors
+     */
     private long createGroupAssignment(Connection con, StringBuilder sql, FxGroupAssignmentEdit group, boolean createSubAssignments) throws FxApplicationException {
         if (!group.isNew())
             throw new FxInvalidParameterException("ex.structure.assignment.create.existing", group.getXPath());
@@ -1181,6 +1194,14 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         return newAssignmentId;
     }
 
+    /**
+     * Updates a property
+     *
+     * @param con a valid and open connection
+     * @param prop the instance of FxPropertyEdit to be changed
+     * @return returns true if changes were made to the property
+     * @throws FxApplicationException on errors
+     */
     private boolean updateProperty(Connection con, FxPropertyEdit prop) throws FxApplicationException {
         if (prop.isNew())
             throw new FxInvalidParameterException("ex.structure.property.update.new", prop.getName());
@@ -1448,12 +1469,12 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     }
 
     /**
-     * @param con an existing connection
+     * @param con      an existing connection
      * @param original the original property assignment to compare changes
      *                 against and update. if==null, the original will be fetched from the cache
      * @param modified the modified property assignment   @return if any changes were found
-     * @throws FxApplicationException on errors
      * @return true if the original assignment was modified
+     * @throws FxApplicationException on errors
      */
     private boolean updatePropertyAssignment(Connection con, FxPropertyAssignment original,
                                              FxPropertyAssignmentEdit modified) throws FxApplicationException {
@@ -1649,6 +1670,9 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     } else
                         throw new FxUpdateException("ex.structure.modification.systemInternal.notGlobalSupervisor", modified.getLabel());
                 }
+                // change the parentgroupassignment
+//                if (original.getParentGroupAssignment().getId() != modified.getParentGroupAssignment().getId()) {
+//                }
                 /*
                 if (changes) {
                     //propagate changes to derived assignments
@@ -1705,6 +1729,15 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         return changes;
     }
 
+    /**
+     * Creates a property assignment
+     *
+     * @param con a valid and open connection
+     * @param sql an instance of StringBuilder
+     * @param prop an instance of FxPropertyAssignmentEdit to be persisted
+     * @return the property assignmentId
+     * @throws FxApplicationException on errors
+     */
     private long createPropertyAssignment(Connection con, StringBuilder sql, FxPropertyAssignmentEdit prop) throws FxApplicationException {
         if (!prop.isNew())
             throw new FxInvalidParameterException("ex.structure.assignment.create.existing", prop.getXPath());

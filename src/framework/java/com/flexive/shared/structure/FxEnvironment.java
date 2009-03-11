@@ -310,6 +310,15 @@ public interface FxEnvironment extends Serializable {
     List<FxGroupAssignment> getGroupAssignments(boolean includeDisabled);
 
     /**
+     * Get all group assignments for a given id, optionally including disabled assignments
+     *
+     * @param groupId the group's id for which to get the assignments
+     * @param includeDisabled include disabled assignments?
+     * @return group assignments, optionally including disabled
+     */
+    List<FxGroupAssignment> getGroupAssignments(long groupId, boolean includeDisabled);
+
+    /**
      * Get a FxGroupAssignment or FxPropertyAssignment that matches for XPath (has to include the type/relation name as root)
      *
      * @param xPath requested XPath

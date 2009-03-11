@@ -209,4 +209,20 @@ public interface AssignmentEngine {
      * @throws com.flexive.shared.exceptions.FxDbException on errors
      */
     long getPropertyInstanceCount(long propertyId) throws FxDbException;
+
+    /**
+     * Convenience method to remove a property, all its (derived) assignments and all referenced content
+     *
+     * @param propertyId the property's id
+     * @throws com.flexive.shared.exceptions.FxApplicationException on errors
+     */
+    void removeProperty(long propertyId) throws FxApplicationException;
+
+    /**
+     * Convenience method to remove a group, all its (derived) assignments and all referenced content
+     * The group assignment's subassignments are also removed.
+     * @param groupId the group's id
+     * @throws com.flexive.shared.exceptions.FxApplicationException on errors
+     */
+    void removeGroup(long groupId) throws FxApplicationException;
 }

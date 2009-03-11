@@ -715,6 +715,20 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
+    public List<FxGroupAssignment> getGroupAssignments(long groupId, boolean includeDisabled) {
+        final List<FxGroupAssignment> assignments = includeDisabled ? groupAssignmentsAll : groupAssignmentsEnabled;
+        final List<FxGroupAssignment> result = new ArrayList<FxGroupAssignment>();
+        for (FxGroupAssignment assignment : assignments) {
+            if (assignment.getGroup().getId() == groupId) {
+                result.add(assignment);
+            }
+        }
+        return Collections.unmodifiableList(result);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public List<FxType> getTypes() {
         return getTypes(true, true, true, true);
     }
