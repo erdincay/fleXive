@@ -64,7 +64,7 @@ public class FxScriptMappingEntry implements Serializable {
         this.active = active;
         this.derivedUsage = derivedUsage;
         this.id = id;
-        this.derivedIds = derivedIds;
+        this.derivedIds = derivedIds.clone();
     }
 
     /**

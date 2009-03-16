@@ -166,12 +166,12 @@ public class RouteEngineBean implements RouteEngine, RouteEngineLocal {
                 throw new FxCreateException(LOG, "ex.routes.create", exc, routeString, exc.getMessage());
             }
         } finally {
+            Database.closeObjects(RouteEngineBean.class, con, stmt);
         	if (!success) {
         		ctx.setRollbackOnly();
         	} else {
                 StructureLoader.reloadWorkflows(FxContext.get().getDivisionId());
         	}
-            Database.closeObjects(RouteEngineBean.class, con, stmt);
         }
     }
 
@@ -202,12 +202,12 @@ public class RouteEngineBean implements RouteEngine, RouteEngineLocal {
         } catch (SQLException exc) {
             throw new FxRemoveException(LOG, "ex.routes.delete", exc, routeId, exc.getMessage());
         } finally {
+            Database.closeObjects(RouteEngineBean.class, con, stmt);
         	if (!success) {
         		ctx.setRollbackOnly();
         	} else {
                 StructureLoader.reloadWorkflows(FxContext.get().getDivisionId());
         	}
-            Database.closeObjects(RouteEngineBean.class, con, stmt);
         }
     }
 

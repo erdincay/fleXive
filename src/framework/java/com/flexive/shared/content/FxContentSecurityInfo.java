@@ -201,7 +201,7 @@ public class FxContentSecurityInfo implements Serializable {
      * @return relevant property ACL's
      */
     public long[] getUsedPropertyACL() {
-        return usedPropertyACL;
+        return usedPropertyACL.clone();
     }
 
     /**

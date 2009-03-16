@@ -119,12 +119,12 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
                         CacheAdmin.getEnvironment().getWorkflow(workflowId).getName(), workflowId);
             throw new FxRemoveException(LOG, "ex.workflow.delete", exc, workflowId, exc.getMessage());
         } finally {
+            Database.closeObjects(WorkflowEngineBean.class, con, stmt);
             if (!success) {
                 ctx.setRollbackOnly();
             } else {
                 StructureLoader.reloadWorkflows(FxContext.get().getDivisionId());
             }
-            Database.closeObjects(WorkflowEngineBean.class, con, stmt);
         }
     }
 
@@ -327,12 +327,12 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
         } catch (Exception exc) {
             throw new FxUpdateException(LOG, exc, "ex.workflow.update", workflow.getName(), exc.getMessage());
         } finally {
+            Database.closeObjects(WorkflowEngineBean.class, con, stmt);
             if (!success) {
                 ctx.setRollbackOnly();
             } else {
                 StructureLoader.reloadWorkflows(FxContext.get().getDivisionId());
             }
-            Database.closeObjects(WorkflowEngineBean.class, con, stmt);
         }
     }
 
@@ -414,12 +414,12 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
                 throw new FxCreateException(LOG, "ex.workflow.create", exc, exc.getMessage());
             }
         } finally {
+            Database.closeObjects(WorkflowEngineBean.class, con, stmt);
             if (!success) {
                 ctx.setRollbackOnly();
             } else {
                 StructureLoader.reloadWorkflows(FxContext.get().getDivisionId());
             }
-            Database.closeObjects(WorkflowEngineBean.class, con, stmt);
         }
         return id;
     }

@@ -419,10 +419,12 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
         FxCacheMBean cache = CacheAdmin.getInstance();
         try {
             // clear local cache
-            divisions = null;
-            domainCache.clear();
-            // clear tree cache
-            cache.globalRemove(getBeanPath(CACHE_DIVISIONS));
+            synchronized(this) {
+                divisions = null;
+                domainCache.clear();
+                // clear tree cache
+                cache.globalRemove(getBeanPath(CACHE_DIVISIONS));
+            }
         } catch (FxCacheException e) {
             LOG.error("Failed to clear cache: " + e.getMessage(), e);
         }

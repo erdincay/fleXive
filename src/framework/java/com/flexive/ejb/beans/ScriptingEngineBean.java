@@ -276,11 +276,11 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         } catch (SQLException exc) {
             throw new FxUpdateException(LOG, exc, "ex.scripting.update.failed", name, exc.getMessage());
         } finally {
+            Database.closeObjects(ScriptingEngineBean.class, con, ps);
             if (!success)
                 ctx.setRollbackOnly();
             else
                 StructureLoader.reloadScripting(FxContext.get().getDivisionId());
-            Database.closeObjects(ScriptingEngineBean.class, con, ps);
         }
     }
 
@@ -393,11 +393,11 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                 throw new FxEntryExistsException("ex.scripting.name.notUnique", name);
             throw new FxCreateException(LOG, exc, "ex.scripting.create.failed", name, exc.getMessage());
         } finally {
+            Database.closeObjects(ScriptingEngineBean.class, con, ps);
             if (!success)
                 ctx.setRollbackOnly();
             else
                 StructureLoader.reloadScripting(FxContext.get().getDivisionId());
-            Database.closeObjects(ScriptingEngineBean.class, con, ps);
         }
         return si;
     }
@@ -478,11 +478,11 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         } catch (SQLException exc) {
             throw new FxRemoveException(LOG, exc, "ex.scripting.remove.failed", scriptId, exc.getMessage());
         } finally {
+            Database.closeObjects(ScriptingEngineBean.class, con, ps);
             if (!success)
                 ctx.setRollbackOnly();
             else
                 StructureLoader.reloadScripting(FxContext.get().getDivisionId());
-            Database.closeObjects(ScriptingEngineBean.class, con, ps);
         }
     }
 
@@ -602,11 +602,11 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                 throw new FxEntryExistsException("ex.scripting.mapping.assign.notUnique", scriptId, assignmentId);
             throw new FxCreateException(LOG, exc, "ex.scripting.mapping.assign.create.failed", scriptId, assignmentId, exc.getMessage());
         } finally {
+            Database.closeObjects(ScriptingEngineBean.class, con, ps);
             if (!success)
                 ctx.setRollbackOnly();
             else
                 StructureLoader.reloadScripting(FxContext.get().getDivisionId());
-            Database.closeObjects(ScriptingEngineBean.class, con, ps);
         }
         return sm;
     }
@@ -664,11 +664,11 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                 throw new FxEntryExistsException("ex.scripting.mapping.types.notUnique", scriptId, typeId);
             throw new FxCreateException(LOG, exc, "ex.scripting.mapping.types.create.failed", scriptId, typeId, exc.getMessage());
         } finally {
+            Database.closeObjects(ScriptingEngineBean.class, con, ps);
             if (!success)
                 ctx.setRollbackOnly();
             else
                 StructureLoader.reloadScripting(FxContext.get().getDivisionId());
-            Database.closeObjects(ScriptingEngineBean.class, con, ps);
         }
         return sm;
     }
@@ -705,11 +705,11 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         } catch (SQLException exc) {
             throw new FxRemoveException(LOG, exc, "ex.scripting.mapping.assign.remove.failed", scriptId, assignmentId, exc.getMessage());
         } finally {
+            Database.closeObjects(ScriptingEngineBean.class, con, ps);
             if (!success)
                 ctx.setRollbackOnly();
             else
                 StructureLoader.reloadScripting(FxContext.get().getDivisionId());
-            Database.closeObjects(ScriptingEngineBean.class, con, ps);
         }
     }
 
@@ -737,11 +737,11 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         } catch (SQLException exc) {
             throw new FxRemoveException(LOG, exc, "ex.scripting.mapping.assign.remove.failed", scriptId, assignmentId, exc.getMessage());
         } finally {
+            Database.closeObjects(ScriptingEngineBean.class, con, ps);
             if (!success)
                 ctx.setRollbackOnly();
             else
                 StructureLoader.reloadScripting(FxContext.get().getDivisionId());
-            Database.closeObjects(ScriptingEngineBean.class, con, ps);
         }
     }
 
@@ -768,11 +768,11 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         } catch (SQLException exc) {
             throw new FxRemoveException(LOG, exc, "ex.scripting.mapping.type.remove.failed", scriptId, typeId, exc.getMessage());
         } finally {
+            Database.closeObjects(ScriptingEngineBean.class, con, ps);
             if (!success)
                 ctx.setRollbackOnly();
             else
                 StructureLoader.reloadScripting(FxContext.get().getDivisionId());
-            Database.closeObjects(ScriptingEngineBean.class, con, ps);
         }
     }
 
@@ -800,11 +800,11 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         } catch (SQLException exc) {
             throw new FxRemoveException(LOG, exc, "ex.scripting.mapping.type.remove.failed", scriptId, typeId, exc.getMessage());
         } finally {
+            Database.closeObjects(ScriptingEngineBean.class, con, ps);
             if (!success)
                 ctx.setRollbackOnly();
             else
                 StructureLoader.reloadScripting(FxContext.get().getDivisionId());
-            Database.closeObjects(ScriptingEngineBean.class, con, ps);
         }
     }
 
@@ -850,11 +850,11 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                 throw new FxEntryExistsException("ex.scripting.mapping.assign.notUnique", scriptId, assignmentId);
             throw new FxUpdateException(LOG, exc, "ex.scripting.mapping.assign.update.failed", scriptId, assignmentId, exc.getMessage());
         } finally {
+            Database.closeObjects(ScriptingEngineBean.class, con, ps);
             if (!success)
                 ctx.setRollbackOnly();
             else
                 StructureLoader.reloadScripting(FxContext.get().getDivisionId());
-            Database.closeObjects(ScriptingEngineBean.class, con, ps);
         }
         return sm;
     }
@@ -902,11 +902,11 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                 throw new FxEntryExistsException("ex.scripting.mapping.types.notUnique", scriptId, typeId);
             throw new FxUpdateException(LOG, exc, "ex.scripting.mapping.types.update.failed", scriptId, typeId, exc.getMessage());
         } finally {
+            Database.closeObjects(ScriptingEngineBean.class, con, ps);
             if (!success)
                 ctx.setRollbackOnly();
             else
                 StructureLoader.reloadScripting(FxContext.get().getDivisionId());
-            Database.closeObjects(ScriptingEngineBean.class, con, ps);
         }
         return sm;
     }

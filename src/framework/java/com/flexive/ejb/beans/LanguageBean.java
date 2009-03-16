@@ -241,8 +241,7 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
         } catch (FxCacheException e) {
             LOG.error(e, e);
         } finally {
-            if (con != null)
-                Database.closeObjects(LanguageBean.class, con, stmt);
+            Database.closeObjects(LanguageBean.class, con, stmt);
         }
         return alLang;
     }
@@ -298,8 +297,7 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
         } catch (FxCacheException e) {
             throw new FxApplicationException(LOG, e);
         } finally {
-            if (con != null)
-                Database.closeObjects(LanguageBean.class, con, ps);
+            Database.closeObjects(LanguageBean.class, con, ps);
         }
     }
 

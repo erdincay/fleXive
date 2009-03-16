@@ -582,10 +582,10 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             ctx.setRollbackOnly();
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
+            Database.closeObjects(AssignmentEngineBean.class, null, ps);
             if (!success) {
                 ctx.setRollbackOnly();
             }
-            Database.closeObjects(AssignmentEngineBean.class, null, ps);
         }
         return changes;
     }
@@ -980,10 +980,10 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 throw new FxEntryExistsException("ex.structure.assignment.group.exists", group.getAlias(), group.getXPath());
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
+            Database.closeObjects(AssignmentEngineBean.class, null, ps);
             if (!success) {
                 ctx.setRollbackOnly();
             }
-            Database.closeObjects(AssignmentEngineBean.class, null, ps);
         }
         return changes;
     }
@@ -1460,10 +1460,10 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             */
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
+            Database.closeObjects(AssignmentEngineBean.class, null, ps);
             if (!success) {
                 ctx.setRollbackOnly();
             }
-            Database.closeObjects(AssignmentEngineBean.class, null, ps);
         }
         return changes;
     }
@@ -1721,10 +1721,10 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 throw new FxEntryExistsException("ex.structure.assignment.property.exists", original.getAlias(), original.getXPath());
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
+            Database.closeObjects(AssignmentEngineBean.class, null, ps);
             if (!success) {
                 ctx.setRollbackOnly();
             }
-            Database.closeObjects(AssignmentEngineBean.class, null, ps);
         }
         return changes;
     }

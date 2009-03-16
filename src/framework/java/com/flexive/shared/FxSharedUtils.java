@@ -613,20 +613,22 @@ public final class FxSharedUtils {
                 error = error + "(" + err.getResult() + ")";
             return new ProcessResult(cmdline.toString(), (p == null ? -1 : p.exitValue()), (out == null ? "" : out.getResult()), error);
         } finally {
-            try {
-                p.getInputStream().close();
-            } catch (Exception e1) {
-                //bad luck
-            }
-            try {
-                p.getErrorStream().close();
-            } catch (Exception e1) {
-                //bad luck
-            }
-            try {
-                p.getOutputStream().close();
-            } catch (Exception e1) {
-                //bad luck
+            if (p != null) {
+                try {
+                    p.getInputStream().close();
+                } catch (Exception e1) {
+                    //bad luck
+                }
+                try {
+                    p.getErrorStream().close();
+                } catch (Exception e1) {
+                    //bad luck
+                }
+                try {
+                    p.getOutputStream().close();
+                } catch (Exception e1) {
+                    //bad luck
+                }
             }
         }
         return new ProcessResult(cmdline.toString(), p.exitValue(), out.getResult(), err.getResult());

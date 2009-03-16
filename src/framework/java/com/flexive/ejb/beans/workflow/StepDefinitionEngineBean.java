@@ -211,12 +211,12 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
                 throw ce;
             }
         } finally {
+            Database.closeObjects(StepDefinitionEngineBean.class, con, ps);
             if (!success) {
                 ctx.setRollbackOnly();
             } else {
                 StructureLoader.reloadWorkflows(FxContext.get().getDivisionId());
             }
-            Database.closeObjects(StepDefinitionEngineBean.class, con, ps);
         }
         return newId;
     }
@@ -327,12 +327,12 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
             }
             throw new FxUpdateException(LOG, exc, "ex.db.sqlError", exc.getMessage());
         } finally {
+            Database.closeObjects(StepDefinitionEngineBean.class, con, stmt);
             if (!success) {
                 ctx.setRollbackOnly();
             } else {
                 StructureLoader.reloadWorkflows(FxContext.get().getDivisionId());
             }
-            Database.closeObjects(StepDefinitionEngineBean.class, con, stmt);
         }
     }
 
@@ -395,12 +395,12 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
             throw new FxRemoveException(LOG, "ex.stepdefinition.delete", exc);
             //}
         } finally {
+            Database.closeObjects(StepDefinitionEngineBean.class, con, stmt);
             if (!success) {
                 ctx.setRollbackOnly();
             } else {
                 StructureLoader.reloadWorkflows(FxContext.get().getDivisionId());
             }
-            Database.closeObjects(StepDefinitionEngineBean.class, con, stmt);
         }
     }
 
