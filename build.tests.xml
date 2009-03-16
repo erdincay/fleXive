@@ -443,8 +443,9 @@
         <delete dir="${findbugs.report.dir}"/>
         <mkdir dir="${findbugs.report.dir}"/>
 		<findbugs output="xml:withMessages" home="${findbugs.dir}"
-		    outputFile="${findbugs.report.dir}/out.xml" workhard="true"
-		    jvmargs="-Xmx512M">
+		    outputFile="${findbugs.report.dir}/out.xml" workhard="false"
+            excludeFilter="${findbugs.dir}/excludeFilters.xml"
+		    jvmargs="-Xmx768M -server">
         	<sourcePath path="${flexive.src.framework.dir}"/>
         	<sourcePath path="${flexive.src.ui.jsf.dir}"/>
         	<sourcePath path="${flexive.src.ui.components.dir}"/>
