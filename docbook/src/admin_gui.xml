@@ -1902,6 +1902,10 @@
                 administration UI in the
                 <link linkend="adm_scripts_overview">script overview</link>.
             </para>
+            <para>The <emphasis>Syntax check</emphasis> button is available for all Groovy scripts (checking for a
+                .gy or .groovy extension. The <emphasis>Add default imports</emphasis> adds the most commonly used
+                flexive classes to the script.
+            </para>
             <para>
                 <table class="flexive">
                     <caption>FxScriptEvent list</caption>
@@ -2086,6 +2090,10 @@
                                    format="PNG" contentwidth="100%"/>
                     </imageobject>
                 </mediaobject>
+            </para>
+            <para>
+                Again, the most common default imports can be added (as can be seen in the above screenshot). A syntax check
+                for Groovy scripts is also available.
             </para>
             <para>You might want to copy paste the example and try it out:</para>
             <para>
