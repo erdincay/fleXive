@@ -687,8 +687,12 @@ public class FxContext implements Serializable {
      * @since 3.1
      */
     public static synchronized void initializeSystem(int divisionId, String applicationName) {
-        if (MANUAL_INIT_CALLED) {
-            throw new IllegalStateException("System already initialized");
+        if(MANUAL_INIT_CALLED && divisionId == -2) {
+            get().setDivisionId(divisionId);
+            get().setContextPath(applicationName);
+            get().setTicket(EJBLookup.getAccountEngine().getGuestTicket());
+            CacheAdmin.getEnvironment();
+            return;
         }
         get().setDivisionId(divisionId);
         get().setContextPath(applicationName);

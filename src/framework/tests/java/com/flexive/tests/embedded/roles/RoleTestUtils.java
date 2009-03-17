@@ -48,13 +48,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-@Test(groups={"security", "roles"})
+@Test(groups = {"security", "roles"})
 public class RoleTestUtils {
-    private static final List<TestUser> USERS = new CopyOnWriteArrayList<TestUser>();
+    private static List<TestUser> USERS = new CopyOnWriteArrayList<TestUser>();
 
     @Factory
     public Object[] createTestInstances() {
         final List<Object> result = new ArrayList<Object>();
+        USERS = new CopyOnWriteArrayList<TestUser>(); // init before call f. jsf testrunner
         // create test cases
         result.addAll(createTestCases(WorkflowManagementTest.class));
         result.addAll(createTestCases(ACLManagementTest.class));
@@ -67,7 +68,7 @@ public class RoleTestUtils {
 
     private static List<Object> createTestCases(Class<? extends AbstractRoleTest> testClass) {
         final List<Object> result = new ArrayList<Object>();
-        for (TestUser user: getTestUsers()) {
+        for (TestUser user : getTestUsers()) {
             final AbstractRoleTest test;
             try {
                 test = testClass.newInstance();
@@ -85,7 +86,7 @@ public class RoleTestUtils {
             // create one test user per role, and one without roles
             try {
                 USERS.add(TestUsers.createUser("RoleTest - no role"));
-                for (Role role: Role.values()) {
+                for (Role role : Role.values()) {
                     USERS.add(TestUsers.createUser("RoleTest " + role.name(), role));
                 }
             } catch (FxApplicationException e) {
@@ -110,7 +111,7 @@ public class RoleTestUtils {
     /**
      * Returns the test users as required by a TestNG dataprovider.
      *
-     * @return  the test users as required by a TestNG dataprovider.
+     * @return the test users as required by a TestNG dataprovider.
      */
     private static List<TestUser> getTestUsers() {
         setupRoles();

@@ -57,34 +57,40 @@ public class TestUsers {
      * System property that contains the enabled test users (or "all" for all users)
      */
     public static final String ENABLE_USERS_PROPERTY = "tests.users";
-
-    public static final TestUser SUPERVISOR = new TestUser("SUPERVISOR");
-    public static final TestUser MANDATOR_SUPERVISOR = new TestUser("MANDATOR-SUPERVISOR");
-    public static final TestUser GUEST = new TestUser("GUEST");
-    /** A "normal" test user who belongs to the shared test group but has no other roles/groups */
-    public static final TestUser REGULAR = new TestUser("REGULAR");
-
-    public static final List<TestUser> ALL_USERS = Collections.unmodifiableList(
-            Arrays.asList(SUPERVISOR, MANDATOR_SUPERVISOR, GUEST, REGULAR));
+    public static TestUser SUPERVISOR;
+    public static TestUser MANDATOR_SUPERVISOR;
+    public static TestUser GUEST;
+    /**
+     * A "normal" test user who belongs to the shared test group but has no other roles/groups
+     */
+    public static TestUser REGULAR;
+    public static List<TestUser> ALL_USERS;
     /**
      * Keeps track of user defined users
      */
-    private static List<TestUser> USER_DEFINED_USERS = new ArrayList<TestUser>();
-
-
+    private static List<TestUser> USER_DEFINED_USERS;
     private static final String MANDATOR_NAME = "UNIT_TEST_MANDATOR (automatically created)";
-
     private static boolean initialized = false;
     private static long mandatorId;
     private static long languageId;
     private static long sharedTestGroupId;
     private static long sharedInstanceAclId;
 
+    public TestUsers() {
+        SUPERVISOR = new TestUser("SUPERVISOR");
+        MANDATOR_SUPERVISOR = new TestUser("MANDATOR-SUPERVISOR");
+        GUEST = new TestUser("GUEST");
+        /** A "normal" test user who belongs to the shared test group but has no other roles/groups */
+        REGULAR = new TestUser("REGULAR");
+        ALL_USERS = new ArrayList<TestUser>(Arrays.asList(SUPERVISOR, MANDATOR_SUPERVISOR, GUEST, REGULAR));
+        USER_DEFINED_USERS = new ArrayList<TestUser>();
+    }
+
     public static synchronized void initializeUsers() throws FxApplicationException {
-        if (initialized) {
-            return;
+        if (!initialized) {
+            new TestUsers();
+            initialized = true;
         }
-        initialized = true;
         try {
             FxContext.get().runAsSystem();
             languageId = EJBLookup.getLanguageEngine().load("en").getId();
@@ -104,7 +110,6 @@ public class TestUsers {
 
             REGULAR.createUser(mandatorId, languageId);
 
-
             // create user-defined users
             for (TestUser user : USER_DEFINED_USERS) {
                 user.createUser(mandatorId, languageId);
@@ -121,8 +126,6 @@ public class TestUsers {
                 EJBLookup.getAccountEngine().addGroup(user.getUserId(), sharedTestGroupId);
             }
             createTestGroupAssignments();
-
-
         } catch (Exception e) {
             try {
                 deleteUsers();      // cleanup
@@ -138,7 +141,7 @@ public class TestUsers {
 
     private static synchronized void createTestGroupAssignments() throws FxApplicationException {
         // create a content ACL where test users have read/write access
-        sharedInstanceAclId = EJBLookup.getAclEngine().create("test content ACL", new FxString(FxLanguage.ENGLISH,  "Test content ACL"),
+        sharedInstanceAclId = EJBLookup.getAclEngine().create("test content ACL", new FxString(FxLanguage.ENGLISH, "Test content ACL"),
                 getTestMandator(), "", "", ACLCategory.INSTANCE);
         // assign all permissions
         EJBLookup.getAclEngine().assign(sharedInstanceAclId, sharedTestGroupId, ACLPermission.values());
@@ -146,7 +149,7 @@ public class TestUsers {
         // update search test type ACLs to include edit&create&delete permissions for the test user
         final long searchTypeAclId = CacheAdmin.getEnvironment().getType("SEARCHTEST").getACL().getId();
         final long workflowAclId = CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.WORKFLOW).getId();
-        for (long aclId: new long[] { searchTypeAclId, workflowAclId }) {
+        for (long aclId : new long[]{searchTypeAclId, workflowAclId}) {
             EJBLookup.getAclEngine().assign(aclId, sharedTestGroupId, true, true, false, true, false, true);
         }
     }
@@ -161,6 +164,10 @@ public class TestUsers {
     }
 
     public static synchronized TestUser createUser(String informalName, Role... roles) throws FxApplicationException {
+        if(!initialized) {
+            new TestUsers();
+            initialized = true;
+        }
         TestUser user = new TestUser(informalName);
         if (roles != null && roles.length > 0) {
             user.setRoles(roles);
@@ -219,6 +226,7 @@ public class TestUsers {
             // remove test mandator
             EJBLookup.getMandatorEngine().remove(mandatorId);
         } finally {
+            initialized = false;
             FxContext.get().stopRunAsSystem();
         }
     }
@@ -230,8 +238,13 @@ public class TestUsers {
      */
     public static synchronized List<TestUser> getConfiguredTestUsers() {
         String enableUsers = System.getProperty(ENABLE_USERS_PROPERTY);
+        if (!initialized) {
+            new TestUsers();
+            initialized = true;
+        }
         if (StringUtils.isBlank(enableUsers)) {
-            return Collections.unmodifiableList(Arrays.asList(new TestUser[]{SUPERVISOR}));
+//            return Collections.unmodifiableList(Arrays.asList(new TestUser[]{SUPERVISOR}));
+            return new ArrayList<TestUser>(Arrays.asList(new TestUser[]{SUPERVISOR}));
         } else if ("all".equalsIgnoreCase(enableUsers)) {
             return ALL_USERS;
         } else {

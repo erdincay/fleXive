@@ -51,7 +51,7 @@ public class TestRunnerBean implements FxTestRunnerCallback {
     protected int testSkipped = 0;
     protected ITestResult currentTest = null;
     private String outputPath = null;
-
+    protected boolean resultsAvailable = false;
 
     public void started(ITestResult iTestResult) {
         this.currentTest = iTestResult;
@@ -88,6 +88,10 @@ public class TestRunnerBean implements FxTestRunnerCallback {
         return running;
     }
 
+    public boolean isResultsAvailable() {
+        return resultsAvailable;
+    }
+
     public int getTestSuccess() {
         return testSuccess;
     }
@@ -105,13 +109,21 @@ public class TestRunnerBean implements FxTestRunnerCallback {
     }
 
     public void setOutputPath(String outputPath) {
+        if(outputPath.endsWith("/")) {
+            outputPath = outputPath.substring(0, outputPath.length() - 2);
+        }
         this.outputPath = outputPath;
+    }
+
+    public void setResultsAvailable(boolean resultsAvailable) {
+        this.resultsAvailable = resultsAvailable;
     }
 
     public String runTests() {
         if (!isRunning()) {
             if (!FxTestRunner.checkTestConditions(getOutputPath(), true))
                 return null;
+            setResultsAvailable(false);
             FxTestRunner.runTests(this, getOutputPath());
             new FxFacesMsgInfo("TestRunner.nfo.running").addToContext();
         } else

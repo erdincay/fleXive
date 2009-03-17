@@ -93,6 +93,7 @@ public class ScriptingTest {
         if (removeScript != null)
             EJBLookup.getScriptingEngine().remove(removeScript.getId());
         logout();
+        allowTearDown = false; // needed for jsf testrunner
     }
 
     @BeforeClass

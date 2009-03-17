@@ -80,4 +80,10 @@ public interface FxTestRunnerCallback {
      * Notification to reset gathered test data
      */
     void resetTestInfo();
+
+    /**
+     * Notification that results are available
+     * @param resultsAvailable true for available results
+     */
+    void setResultsAvailable(boolean resultsAvailable);
 }

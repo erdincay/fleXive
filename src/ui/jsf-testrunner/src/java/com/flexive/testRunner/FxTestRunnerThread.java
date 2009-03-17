@@ -137,10 +137,6 @@ public class FxTestRunnerThread extends Thread {
             } catch (IOException e) {
                 LOG.error(e);
             }
-//        System.out.println("Found classes: ");
-//        for (Class tc : testClasses)
-//            System.out.println("=> " + tc.getCanonicalName());
-
             TestNG testng = new TestNG();
             testng.setTestClasses(testClasses.toArray(new Class[testClasses.size()]));
             // skip.ear groups have to be excluded, else tests that include these will be skipped as well (like ContainerBootstrap which is needed)
@@ -166,8 +162,10 @@ public class FxTestRunnerThread extends Thread {
                 LOG.error(e);
                 new FxFacesMsgErr("TestRunner.err.testNG", e.getMessage()).addToContext();
             }
-            if (callback != null)
+            if (callback != null) {
                 callback.setRunning(false);
+                callback.setResultsAvailable(true);
+            }
         } finally {
             synchronized (lock) {
                 testInProgress = false;

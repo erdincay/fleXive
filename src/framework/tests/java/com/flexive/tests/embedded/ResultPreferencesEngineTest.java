@@ -67,6 +67,7 @@ public class ResultPreferencesEngineTest {
 
     @Factory
     public Object[] createTestInstances() throws FxApplicationException {
+        TestUsers.getConfiguredTestUsers(); // invoke initialization -  might be needed
         return new Object[]{
                 new ResultPreferencesEngineTest(TestUsers.MANDATOR_SUPERVISOR),
                 new ResultPreferencesEngineTest(TestUsers.SUPERVISOR)

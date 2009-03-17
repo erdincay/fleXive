@@ -83,7 +83,9 @@ public class TestUser {
                 .setLoginName(userName)
                 .setEmail(email)
                 .setLanguage(EJBLookup.getLanguageEngine().load(languageId))
-                .setMandatorId(mandatorId);
+                .setMandatorId(mandatorId)
+                .setValidTo(AccountEdit.VALID_FOREVER);
+
         userId = accounts.create(account, password);
         if (roles != null) {
             // set user-defined roles

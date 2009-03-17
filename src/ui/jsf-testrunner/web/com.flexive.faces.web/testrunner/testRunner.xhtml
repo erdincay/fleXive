@@ -1,4 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:f="http://java.sun.com/jsf/core"
@@ -14,43 +15,59 @@
 <ui:composition template="/adm/contentTemplate.xhtml">
 
     <ui:define name="body">
-        <a4j:region>
-            <h:form>
-                <a4j:poll id="poll" interval="1000" enabled="#{testRunnerBean.running}" reRender="info"/>
-            </h:form>
-        </a4j:region>
         <h:form id="frm">
+            <a4j:region>
+                <a4j:poll id="pollrunning" interval="1000" enabled="#{testRunnerBean.running}"
+                          reRender="pathpanel, info, runtestpanel, pollrunning" oncomplete="ajaxButtonRequest()"/>
 
-            <adm:tab label="#{fxMessageBean['TestRunner.tabtitle.main']}" active="true" id="tab1"/>
+                <a4j:poll id="pollresults" interval="1000" enabled="#{testRunnerBean.resultsAvailable}"
+                          reRender="resultpanel, pollresults"/>
 
-            <h:panelGrid columns="2" id="path" rendered="#{!testRunnerBean.running}">
-                <h:column>#{fxMessageBean['TestRunner.field.outputPath']}</h:column>
-                <h:column><h:inputText rendered="#{!testRunnerBean.running}" value="#{testRunnerBean.outputPath}"/></h:column>
-            </h:panelGrid>
+                <adm:tab label="#{fxMessageBean['TestRunner.tabtitle.main']}" active="true" id="tab1"/>
 
+                <a4j:outputPanel id="pathpanel" layout="block">
+                    <h:panelGrid columns="2" id="path" rendered="#{!testRunnerBean.running}">
+                        <h:column>#{fxMessageBean['TestRunner.field.outputPath']}</h:column>
+                        <h:column><h:inputText rendered="#{!testRunnerBean.running}"
+                                               value="#{testRunnerBean.outputPath}"/></h:column>
+                    </h:panelGrid>
+                </a4j:outputPanel>
+                <br/>
 
-            <h:panelGrid columns="2" id="info" rendered="#{testRunnerBean.running}">
-                <h:column>#{fxMessageBean['TestRunner.field.currentTest']}</h:column>
-                <h:column>#{testRunnerBean.currentTest}</h:column>
+                <a4j:outputPanel id="infopanel" layout="block">
+                    <h:panelGrid columns="2" id="info" rendered="#{testRunnerBean.running}">
+                        <h:column>#{fxMessageBean['TestRunner.field.currentTest']}</h:column>
+                        <h:column>#{testRunnerBean.currentTest}</h:column>
 
-                <h:column>#{fxMessageBean['TestRunner.field.success']}</h:column>
-                <h:column>#{testRunnerBean.testSuccess}</h:column>
+                        <h:column>#{fxMessageBean['TestRunner.field.success']}</h:column>
+                        <h:column>#{testRunnerBean.testSuccess}</h:column>
 
-                <h:column>#{fxMessageBean['TestRunner.field.failure']}</h:column>
-                <h:column>#{testRunnerBean.testFailure}</h:column>
+                        <h:column>#{fxMessageBean['TestRunner.field.failure']}</h:column>
+                        <h:column>#{testRunnerBean.testFailure}</h:column>
 
-                <h:column>#{fxMessageBean['TestRunner.field.skipped']}</h:column>
-                <h:column>#{testRunnerBean.testSkipped}</h:column>
-            </h:panelGrid>
-
-            <br/>
-            <br/>
-            <adm:commandButton id="runTests" bean="#{testRunnerBean}" action="runTests" rendered="#{!testRunnerBean.running}"
-                               labelKey="TestRunner.button.runTests" location="both" icon="search"/>
+                        <h:column>#{fxMessageBean['TestRunner.field.skipped']}</h:column>
+                        <h:column>#{testRunnerBean.testSkipped}</h:column>
+                    </h:panelGrid>
+                </a4j:outputPanel>
+                <br/>
+                <a4j:outputPanel id="resultpanel" layout="block" ajaxRendered="true">
+                    <h:outputText value="TestNG results can be found at "
+                                  rendered="#{testRunnerBean.resultsAvailable}"/>
+                    <br/>
+                    <h:outputText value="file://#{testRunnerBean.outputPath}/index.html"
+                                  style="font-style:italic; font-weight:bold; color:#83af00"
+                                  rendered="#{testRunnerBean.resultsAvailable}"/>
+                </a4j:outputPanel>
+                <br/>
+                <br/>
+                <a4j:outputPanel id="runtestpanel" layout="block">
+                    <adm:commandButton id="runTests" bean="#{testRunnerBean}" action="runTests"
+                                       rendered="#{!testRunnerBean.running}"
+                                       labelKey="TestRunner.button.runTests" location="both" icon="search"/>
+                </a4j:outputPanel>
+            </a4j:region>
         </h:form>
     </ui:define>
-
 </ui:composition>
-
 </body>
 </html>

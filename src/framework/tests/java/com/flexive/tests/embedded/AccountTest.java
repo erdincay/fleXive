@@ -97,8 +97,8 @@ public class AccountTest {
                 Assert.fail("Test user is not in role user management.");
             }
             Account account = accountEngine.load(accountId);
-            Assert.assertTrue(USERNAME.equals(account.getName().substring(1)), "Username not stored correctly.");
-            Assert.assertTrue(LOGINNAME.equals(account.getLoginName().substring(1)), "Login not stored correctly.");
+            Assert.assertTrue(USERNAME.equals(account.getName().substring(account.getName().length() - USERNAME.length(), account.getName().length())));
+            Assert.assertTrue(LOGINNAME.equals(account.getLoginName().substring(account.getLoginName().length() - LOGINNAME.length(), account.getLoginName().length())));
             Assert.assertTrue(account.isActive(), "Activation flag not set correctly.");
             Assert.assertTrue(!account.isValidated(), "Confirmation flag not set correctly.");
         } finally {

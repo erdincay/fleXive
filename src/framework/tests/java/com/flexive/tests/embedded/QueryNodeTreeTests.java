@@ -44,7 +44,6 @@ import com.flexive.shared.value.mapper.InputMapper;
 import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-import org.testng.annotations.BeforeClass;
 import org.testng.Assert;
 
 import java.util.Arrays;
