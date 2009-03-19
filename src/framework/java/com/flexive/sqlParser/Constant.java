@@ -31,11 +31,8 @@
  ***************************************************************/
 package com.flexive.sqlParser;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.collections.iterators.ArrayIterator;
-import org.apache.commons.collections.iterators.ObjectArrayIterator;
-
 import java.util.Iterator;
+import java.util.Arrays;
 
 /**
  * Class holding constant values.
@@ -62,6 +59,6 @@ public class Constant extends Value implements Iterable
      */
     @SuppressWarnings({"unchecked"})
     public Iterator<Constant> iterator() {
-        return new ObjectArrayIterator(new Constant[] { this });
+        return Arrays.asList(this).iterator();
     }
 }

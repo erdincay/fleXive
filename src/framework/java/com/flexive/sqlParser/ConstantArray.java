@@ -31,10 +31,9 @@
  ***************************************************************/
 package com.flexive.sqlParser;
 
-import org.apache.commons.collections.iterators.ObjectArrayIterator;
-
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Arrays;
 
 /**
  * Array of constants
@@ -120,7 +119,7 @@ public class ConstantArray extends Constant {
     @Override
     @SuppressWarnings({"unchecked"})
     public Iterator<Constant> iterator() {
-        return new ObjectArrayIterator(array);
+        return Arrays.asList(array).iterator();
     }
 
     /**

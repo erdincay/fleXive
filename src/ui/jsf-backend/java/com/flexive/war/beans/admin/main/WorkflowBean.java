@@ -44,7 +44,6 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.security.UserGroup;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.workflow.*;
-import org.apache.commons.collections.CollectionUtils;
 
 import javax.faces.event.ActionEvent;
 import javax.faces.model.SelectItem;
@@ -350,10 +349,13 @@ public class WorkflowBean {
      */
     @SuppressWarnings("unchecked")
     public List<SelectItem> getStepsForAdding() {
-        List<StepDefinition> stepDefinitions = CacheAdmin.getFilteredEnvironment().getStepDefinitions();
-        List<StepDefinition> available = (List<StepDefinition>) CollectionUtils.subtract(stepDefinitions,
-                FxSharedUtils.getUsedStepDefinitions(steps != null ? steps : workflow.getSteps(), stepDefinitions));
-        return FxJsfUtils.asSelectListWithLabel(available);
+        final List<StepDefinition> stepDefinitions = new ArrayList<StepDefinition>(
+                CacheAdmin.getFilteredEnvironment().getStepDefinitions()
+        );
+        stepDefinitions.removeAll(
+                FxSharedUtils.getUsedStepDefinitions(steps != null ? steps : workflow.getSteps(), stepDefinitions)
+        );
+        return FxJsfUtils.asSelectListWithLabel(stepDefinitions);
     }
 
     /**

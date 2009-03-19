@@ -35,7 +35,6 @@ import org.testng.annotations.Test;
 import org.testng.Assert;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.RandomStringUtils;
-import org.apache.commons.collections.EnumerationUtils;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
 import org.apache.tools.ant.MagicNames;

@@ -55,7 +55,6 @@ import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
 import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.testng.Assert;
@@ -856,12 +855,15 @@ public class SearchEngineTest {
         final List<FxPK> allVersions = getPksForVersion(VersionFilter.ALL);
         final List<FxPK> liveVersions = getPksForVersion(VersionFilter.LIVE);
         final List<FxPK> maxVersions = getPksForVersion(VersionFilter.MAX);
+        Collections.sort(allVersions);
+        Collections.sort(liveVersions);
+        Collections.sort(maxVersions);
         Assert.assertTrue(allVersions.size() > 0, "All versions result must not be empty");
         Assert.assertTrue(liveVersions.size() > 0, "Live versions result must not be empty");
         Assert.assertTrue(maxVersions.size() > 0, "Max versions result must not be empty");
         Assert.assertTrue(allVersions.size() > liveVersions.size(), "Expected more than only live versions");
         Assert.assertTrue(allVersions.size() > maxVersions.size(), "Expected more than only max versions");
-        Assert.assertTrue(!CollectionUtils.isEqualCollection(liveVersions, maxVersions), "Expected different results for max and live version filter");
+        Assert.assertTrue(!liveVersions.equals(maxVersions), "Expected different results for max and live version filter");
         for (FxPK pk : liveVersions) {
             final FxContent content = getContentEngine().load(pk);
             Assert.assertTrue(content.isLiveVersion(), "Expected live version for " + pk);

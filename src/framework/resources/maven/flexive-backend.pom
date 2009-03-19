@@ -36,7 +36,7 @@
         <dependency>
             <groupId>org.richfaces.ui</groupId>
             <artifactId>richfaces-ui</artifactId>
-            <version>3.2.1.GA</version>
+            <version>3.3.0.GA</version>
             <optional>false</optional>
         </dependency>
     </dependencies>
