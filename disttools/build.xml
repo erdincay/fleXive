@@ -19,13 +19,6 @@
     <import file="build.global-properties.xml"/>
     <import file="build.h2.xml"/>
 
-    <path id="lib.path">
-        <fileset dir="lib" includes="**/*.jar"/>
-        <fileset dir="extlib" includes="**/*.jar"/>
-    </path>
-
-    <taskdef name="groovy" classname="org.codehaus.groovy.ant.Groovy" classpathref="lib.path"/>
-
     <target name="check" description="Checks if the distribution contains all required files">
         <checkAvailable file="${template-component.dir}"/>
     </target>

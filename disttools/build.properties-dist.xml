@@ -41,9 +41,17 @@
         <fileset dir="${basedir}/lib" includes="**/*"/>
     </path>
 
+    <!-- Like dist.path, but includes only library JARs -->
+    <path id="dist.lib.path">
+        <fileset dir="${dist.lib.dir}" includes="**/*.jar"/>
+        <fileset dir="${dist.extlib.dir}" includes="**/*.jar"/>
+    </path>
+
     <!-- Task definitions -->
     <taskdef name="makeMessages" classname="com.flexive.tools.ant.MakeMessagesTask" classpath="${flexive.ant.jar}"/>
     <taskdef name="scriptIndexBuilder" classname="com.flexive.tools.ant.ScriptIndexBuilderTask" classpath="${flexive.ant.jar}"/>
     <taskdef name="applicationDescriptorBuilder" classname="com.flexive.tools.ant.ApplicationDescriptorBuilderTask" classpath="${flexive.ant.jar}"/>
+
+    <taskdef name="groovy" classname="org.codehaus.groovy.ant.Groovy" classpathref="dist.lib.path"/>
 
 </project>

@@ -131,9 +131,11 @@ db.config.create
 
     <target name="package.ear" unless="${fxProject}.ear.disabled">
         <collectApplications todir="${build.dir}/apps"/>
-        <copy todir="${build.dir}/apps">
+        <!-- Add our own application. This will overwrite applications with the same name -->
+        <copy todir="${build.dir}/apps" overwrite="true">
             <fileset file="${build.dist.dir}/${package.war}"/>
             <fileset file="${build.dist.dir}/${package.ejb}"/>
+            <fileset file="${build.dist.dir}/${package.shared}"/>
         </copy>
         <!-- Create a standalone EAR -->
         <applicationDescriptorBuilder dropDir="${build.dir}/apps"
@@ -143,10 +145,9 @@ db.config.create
         <jar jarfile="${build.dir}/flexive-drop-resources.jar">
             <fileset file="${build.dir}/apps/drops.archives"/>
         </jar>
-        <ear earfile="${build.dist.dir}/${package.ear}" appxml="${build.dir}/application.xml">
+        <ear earfile="${build.dist.dir}/${package.ear}" appxml="${build.dir}/application.xml" duplicate="fail">
             <zipfileset prefix="lib" dir="${dist.lib.dir}" includes="**/*" excludes="flexive-ejb.jar, flexive-tests.jar"/>
             <zipfileset prefix="lib" dir="${dist.extlib.dir}" includes="**/*" excludes="${extlib.excludes}"/>
-            <zipfileset prefix="lib" dir="${build.dist.dir}" includes="**/*.jar" excludes="${package.ejb}"/>
             <zipfileset prefix="lib" dir="${basedir}/lib" includes="**/*.jar"/>
             <zipfileset prefix="lib" dir="${build.dir}" includes="flexive-drop-resources.jar"/>
             <zipfileset prefix="META-INF" file="${dist.basedir}/META-INF/geronimo-application.xml"/>

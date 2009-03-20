@@ -4,7 +4,14 @@
         %global_entities;
         ]>
 <programlisting language="java" id="TutorialRetrievingData"
-                xmlns="http://docbook.org/ns/docbook">public class HelloWorldBean {
+                xmlns="http://docbook.org/ns/docbook">import com.flexive.faces.model.FxResultSetDataModel;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.search.FxResultSet;
+import com.flexive.shared.search.SortDirection;
+import com.flexive.shared.search.query.SqlQueryBuilder;
+import javax.faces.model.DataModel;
+
+public class HelloWorldBean {
     private DataModel blogEntries;
 
     public DataModel getBlogEntries() throws FxApplicationException {

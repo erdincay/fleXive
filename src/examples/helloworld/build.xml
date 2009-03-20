@@ -1,88 +1,22 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<project name="fxTracker" default="war" basedir=".">
+<!--
+    Basic flexive project buildfile.
+
+    @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+    @version $Rev$
+-->
+<project name="tutorial01-documentstore" basedir="." default="package">
     <property name="fxProject" value="helloworld"/>
-    <property name="flexive.basedir" value="../../.."/>
-    <import file="${flexive.basedir}/build.shared.xml"/>
-    <property name="drop.war" value="${fxProject}.war"/>
-    <property name="drop.shared" value="${fxProject}-shared.jar"/>
 
-    <property name="build.dir" value="${basedir}/build"/>
-    <property name="build.war.dir" value="${build.dir}/war"/>
-    <property name="src.java.dir" value="${basedir}/java"/>
-    <property name="web.dir" value="${basedir}/web"/>
-    <property name="meta.dir" value="${web.dir}/WEB-INF"/>
-    <property name="resources.dir" value="${basedir}/resources"/>
+    <!-- Adapt to your flexive-dist directory -->
+    <property name="flexive.dist.dir" value="${basedir}/../../../flexive-dist"/>
 
-    <!-- javac options -->
-	<property name="compiler.deprecation" value="on"/>
-	<property name="compiler.optimize" value="on"/>
-	<property name="compiler.debug" value="on"/>
-	<property name="compiler.source" value="1.5"/>
-	<property name="compiler.target" value="1.5"/>
+    <!-- Copy output packages to shared flexive drop dir - remove if you're compiling this project
+         outside the flexive source tree -->
+    <property name="build.dist.dir" value="${basedir}/../../../drop"/>
 
-    <taskdef name="scriptIndexBuilder"
-                 classname="com.flexive.tools.ant.ScriptIndexBuilderTask"
-                 classpath="${flexive.ant.jar}"/>
+    <!-- Don't build the EAR -->
+    <property name="helloworld.ear.disabled" value="true"/>
 
-    <macrodef name="javac-call">
-		<attribute name="srcdir"/>
-		<attribute name="destdir"/>
-		<attribute name="excludes" default="NONE"/>
-		<attribute name="includes" default="**/*.java"/>
-		<element name="args" optional="true" implicit="true"/>
-		<sequential>
-			<mkdir dir="@{destdir}"/>
-			<javac  srcdir="@{srcdir}"
-                    destdir="@{destdir}"
-                    debug="${compiler.debug}"
-                    deprecation="${compiler.deprecation}"
-                    optimize="${compiler.optimize}"
-                    includes="@{includes}"
-                    excludes="@{excludes}"
-                    source="${compiler.source}"
-                    target="${compiler.target}">
-				<args/>
-			</javac>
-		</sequential>
-	</macrodef>
-
-    <target name="clean">
-        <delete dir="${build.dir}" failonerror="false"/>
-        <delete file="${flexive.drop.dir}/${drop.war}" failonerror="false"/>
-    </target>
-
-    <target name="prepare" depends="clean">
-        <mkdir dir="${build.dir}"/>
-        <mkdir dir="${build.war.dir}"/>
-    </target>
-
-    <target name="compile" depends="prepare" description="Compile all java sources">
-        <javac-call
-                srcdir="${src.java.dir}"
-                destdir="${build.war.dir}">
-			<classpath refid="flexive.shared-environment.path"/>
-        </javac-call>
-    </target>
-
-    <target name="war" depends="compile">
-        <buildScriptIndex dir="${resources.dir}/scripts"/>
-        <jar jarfile="${flexive.drop.dir}/${drop.shared}">
-            <!-- Include scripts -->
-            <zipfileset dir="${resources.dir}/scripts" prefix="${fxProject}Resources/scripts" includes="**/*"/>
-        </jar>
-        <war warfile="${flexive.drop.dir}/${drop.war}" webxml="${meta.dir}/web.xml" keepcompression="yes">
-            <webinf dir="${meta.dir}">
-                <include name="faces-config.xml"/>
-            </webinf>
-            <fileset dir="${web.dir}">
-				<include name="**/*"/>
-                <exclude name="*.iml"/>
-                <exclude name="WEB-INF/**"/>
-            </fileset>
-            <zipfileset dir="${build.war.dir}" prefix="WEB-INF/classes">
-                <include name="**/*"/>
-            </zipfileset>
-        </war>
-    </target>
-
+    <import file="${flexive.dist.dir}/build.project.xml"/>
 </project>

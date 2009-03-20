@@ -11,26 +11,112 @@
 
     <xi:include href="includes/author_dlichtenberger.xml"/>
 
+    <para>
+        In this chapter we will get hands-on and create a few demo applications with &flexive;.
+        These applications are part of the binary and source distributions, but you
+        can also download them as separate projects:
+
+        <itemizedlist>
+            <listitem>
+                <ulink url="&filesBase;example-helloworld.zip">helloworld</ulink>
+                is our canonical hello-world application,
+            </listitem>
+            <listitem>
+                <ulink url="&filesBase;example-tutorial01-documentstore.zip">tutorial01-documentstore</ulink>
+                show some of the document-handling capabilities in &flexive;,
+            </listitem>
+            <listitem>
+                <ulink url="&filesBase;example-products.zip">products</ulink>
+                shows a localized frontend for a product database realized in &flexive; that also has
+                pretty URLs and a URL-based locale selector ("/de" and "/en"), and
+            </listitem>
+            <listitem>
+                <ulink url="&filesBase;example-announcement-submission.zip">announcement-submission</ulink>
+                shows a basic security setup of a publishing application with two usergroups ("editors" and "users").
+            </listitem>
+        </itemizedlist>
+
+        To run any of these, unzip them to a local directory. Unzip the &flexive; distribution from the
+        &downloadsPage; in the same directory, and execute
+        <command>ant</command>
+        in the example directory. You can then deploy the
+        <filename>dist/[example-name].ear</filename>
+        file to your application server. For example (using Linux):
+        <screen><![CDATA[$ unzip flexive-dist.zip
+$ unzip example-helloworld.zip
+$ ls
+flexive-dist helloworld
+
+$ cd helloworld
+$ ant
+$ ls dist
+helloworld.ear  helloworld-shared.jar  helloworld.war
+]]></screen>
+    </para>
+
+    <para>
+        Before setting out on your own, you might also want to read
+        <xref linkend="writing_applications"/>,
+        which also explains how to use &maven; as your build tool.
+    </para>
+
     <section xml:id="first_flexive_application">
         <title>Your first &flexive; application</title>
         <para>
-            For your first &flexive; application, we assume you have a flexive installation up and running on
-            your local or on a remote machine. If not, follow the instructions in
-            <xref linkend="installation"/>.
-            The complete source code can be found in &flexive; source packages or in the subversion repository under
-            <filename>src/examples</filename>.
-        </para>
-        <para>
             Our first &flexive; application implements a very simple blogging system
             with an input mask and a view for the submitted entries.
-            Looking at the source directory of the application, we find the following directory structure:
+            We assume you have a flexive installation up and running on
+            your local or on a remote machine. If not, follow the instructions in
+            <xref linkend="installation"/>.
+            The complete source code can be found
+            <ulink url="&filesBase;example-helloworld.zip">here</ulink>
+            or in the subversion repository under
+            <ulink url="http://source.flexive.org/browse/fleXive/trunk/src/examples/helloworld">
+                src/examples/helloworld</ulink>.
+        </para>
+        <para>
+            First we create a new &flexive; project: go to the directory where you unpacked the distribution,
+            and execute
+            <command>ant project.create</command>.
+            You will be prompted for the name of the new project. Enter
+            <userinput>helloworld</userinput>
+            and confirm your input. If all went well, the output should look like the following:
+            <screen><![CDATA[/tmp/flexive-dist$ ant project.create
+Buildfile: build.xml
+
+check:
+
+project.create:
+    [input] Name of the project you want to create:
+helloworld
+  [flexive]
+  [flexive] Please confirm your input:
+  [flexive] Project name:        helloworld
+  [flexive] Base directory:      ../helloworld
+  [flexive]
+    [input] Are these settings correct? ([y], n)
+y
+    [mkdir] Created dir: /tmp/helloworld
+     [copy] Copying 13 files to /tmp/helloworld
+     [copy] Copied 29 empty directories to 6 empty directories under /tmp/helloworld
+     [copy] Copying 1 file to /tmp/helloworld
+     [copy] Copying 1 file to /tmp/helloworld
+     [echo] Project helloworld created successfully. The project root directory is
+     [echo] ../helloworld
+
+BUILD SUCCESSFUL
+]]></screen>
+
+            The new project is created in the parent directory of the distribution, i.e. in
+            <filename>../helloworld</filename>,
+            and looks like this:
 
             <xi:include href="listings/tutorial_directory_structure.xml"/>
 
             <variablelist>
                 <varlistentry>
                     <term>
-                        <filename>java</filename>
+                        <filename>helloworld/src/java</filename>
                     </term>
                     <listitem>
                         <para>
@@ -41,7 +127,7 @@
 
                 <varlistentry>
                     <term>
-                        <filename>resources/scripts</filename>
+                        <filename>helloworld/resources/scripts</filename>
                     </term>
                     <listitem>
                         <para>
@@ -53,7 +139,7 @@
 
                 <varlistentry>
                     <term>
-                        <filename>web</filename>
+                        <filename>helloworld/web</filename>
                     </term>
                     <listitem>
                         <para>
@@ -62,6 +148,7 @@
                     </listitem>
                 </varlistentry>
             </variablelist>
+
         </para>
 
         <section xml:id="data_model">
@@ -69,15 +156,15 @@
             <para>
                 We start with defining the data model of the application. Our blog entry consists of a
                 posting title and the actual text. To set up the data model when deploying the application,
-                we use the
+                we create a
                 <glossterm>run-once script</glossterm>
-                <filename>hello001.groovy</filename>
-                located in the
+                in the
                 <filename>resources/scripts/runonce/</filename>
-                directory.
-                The easiest way of setting up &flexive; structures is by using the Groovy builder for
-                &flexive; types,
-                <classname>GroovyTypeBuilder</classname>.
+                directory,
+                <filename>hello001.groovy</filename>.
+                A straight-forward way of setting up &flexive; structures is by using the
+                <ulink url="&flexiveJavadocBase;shared/index.html?com/flexive/shared/scripting/groovy/GroovyTypeBuilder.html">GroovyTypeBuilder</ulink>
+                for &flexive; types, using the Groovy scripting language.
             </para>
 
             <xi:include href="listings/tutorial_blog_entry.xml"/>
@@ -111,7 +198,9 @@
 
             <para>
                 The next step is to define a JSF bean that provides the blog postings
-                to be shown on the front page of our application.
+                to be shown on the front page of our application. We create a managed bean under
+                <filename>src/java/war</filename>,
+                which will be automatically compiled and packaged into the WAR archive.
             </para>
 
             <xi:include href="listings/tutorial_retrieving_data.xml"/>
@@ -205,7 +294,9 @@
             </programlisting>
 
             <para>
-                The input form for creating new postings uses the
+                The input form for creating new postings is placed in
+                <filename>web/create.xhtml</filename>
+                and uses the
                 <code>&lt;fx:content/&gt;</code>
                 and
                 <code>&lt;fx:value/&gt;</code>
@@ -229,79 +320,66 @@
             <title>Deployment descriptor and JSF configuration</title>
             <para>
                 In the
-                <filename>web/WEB-INF</filename>
-                directory there are two files:
-                <itemizedlist>
-                    <listitem>
-                        <para>
-                            The web deployment descriptor in
-                            <filename>web.xml</filename>.
-                            Here we initialize the JSF runtime and add the
-                            <classname>FxFilter</classname>
-                            for pages handled by &flexive;.
-                            <classname>FxFilter</classname>
-                            is required for more advanced &flexive; functionality, but is not required
-                            for this application.
-                        </para>
-                        <programlisting language="xml">
-                            <xi:include href="../../src/examples/helloworld/web/WEB-INF/web.xml" parse="text"/>
-                        </programlisting>
-                    </listitem>
-                    <listitem>
-                        <para>
-                            The JSF configuration file in
-                            <filename>faces-config.xml</filename>.
-                            Here we register the
-                            <classname>HelloWorldBean</classname>
-                            and provide navigation rules between the overview and the create page.
-                        </para>
-                        <programlisting language="xml">
-                            <xi:include href="../../src/examples/helloworld/web/WEB-INF/faces-config.xml" parse="text"/>
-                        </programlisting>
-                    </listitem>
-                </itemizedlist>
+                <filename>resources/META-INF</filename>
+                directory you find the configuration files for the (web) application. Since the provided
+                <filename>web.xml</filename>
+                already uses sensible defaults for running &flexive; applications, all you need to do
+                is register your JSF bean in
+                <filename>resources/META-INF/faces-config.xml</filename>
+                and add navigation rules between the overview and the create page:
+
+                <programlisting language="xml"><![CDATA[    <managed-bean>
+        <managed-bean-name>helloWorldBean</managed-bean-name>
+        <managed-bean-class>HelloWorldBean</managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <!--  A navigation rule for our input mask, if the content is saved successfully,
+     "success" is returned, which leads to a direct rendering and response
+     of the index.xhtml view. The entries made via the input mask are shown
+     in this view. -->
+    <navigation-rule>
+        <from-view-id>/create.xhtml</from-view-id>
+        <navigation-case>
+            <display-name>success</display-name>
+            <from-outcome>success</from-outcome>
+            <to-view-id>/index.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+]]></programlisting>
+
             </para>
         </section>
         <section xml:id="deployment">
             <title>Compiling and deploying the application</title>
             <para>
-                To compile and deploy the framework and the example application run the following
-                <productname>ant</productname>
-                tasks in the given order (you need a full &flexive; source installation for this):
-                <orderedlist>
-                    <listitem>
-                        <para>
-                            <command>ant dist</command>
-                            in your
-                            <filename>${flexive.home}</filename>
-                            directory where the
-                            <filename>build.xml</filename>
-                            file resides if you don't
-                            already have a
-                            <filename>flexive-dist</filename>
-                            directory
-                        </para>
-                    </listitem>
-                    <listitem>
-                        <para>
-                            <command>ant</command>
-                            in the
-                            <filename>${flexive.home}/src/examples/helloworld/</filename>
-                            directory
-                        </para>
-                    </listitem>
-                    <listitem>
-                        <para>
-                            <command>ant deploy</command>
-                            in your
-                            <filename>${flexive.home}</filename>
-                            directory
-                        </para>
-                    </listitem>
-                </orderedlist>
-                Start your application server and point your browser to
-                <link href="http://localhost:8080/helloworld/index.xhtml">http://localhost:8080/helloworld/index.xhtml
+                To compile and deploy the framework and the example application simply run
+                <command>ant</command> in the project directory (helloworld). If the compilation was successful,
+                you find your application packaged under
+                <filename>dist/helloworld.ear</filename>.
+                You can then deploy this EAR to your application server, assuming that you followed the
+                <link linkend="installation">installation instructions</link>.
+                If you already have a &flexive; EAR deployed in this instance, be sure to undeploy it before
+                you deploy
+                <filename>helloworld.ear</filename>.
+            </para>
+            <para>
+                If you need to setup or reset the database schema, update your database connection settings in
+                <filename>hello-world/database.properties</filename>
+                or
+                <filename>flexive-dist/database.properties</filename>
+                and run
+                <command>ant db.create</command>
+                in the corresponding directory. 
+            </para>
+            <para>
+                After deploying the application, point your browser to
+                <link href="http://localhost:8080/flexive/adm/">http://localhost:8080/flexive/adm/
                 </link>
+                to open the &backendGui; (default credentials: supervisor/supervisor), or
+                <link href="http://localhost:8080/helloworld/">http://localhost:8080/helloworld/
+                </link>
+                to open the application.
 
                 Congratulations! You should see a link to the input mask.
             </para>
@@ -309,9 +387,9 @@
         <section xml:id="be_adm">
             <title>Preview of the Backend Administration</title>
             <para>
-                After the successful deployment of the application you can find the created datastructure in the backend
+                You can find the datastructures of the hello-world application in the backend
                 administration's structure editor. Log on to the backend administration and expand the tab named
-                "Structure".
+                "Structure".  flexive/adm/
                 You should be able to see the type Blog Entry in the tree. Expand it and click on one of the properties.
 
                 In the "Edit Property Assignment" tab in the right frame you can see the properties originally set in
@@ -377,16 +455,18 @@
             <title>Defining the data model</title>
 
             <para>
-                As in the
-                <application>helloworld</application>
-                example we start by defining our data model used for storing documents.
-                We assign the standard caption property
+                First we create new project called
+                <userinput>tutorial01-documentstore</userinput>.
+                Use your local installation of the &flexive; distribution as described in
+                <xref linkend="first_flexive_application"/>
+                to create a new project. The complete source code can be found
+                <ulink url="&filesBase;example-tutorial01-documentstore.zip">here</ulink>.
+                We start by defining our data model used for storing documents. We assign the standard caption property
                 <property>/caption</property>
                 for document captions, and add a
                 <type>Binary</type>
-                property. We create the type in a
-                <glossterm>run-once script</glossterm>,
-                found in
+                property. We create the type in the
+                <glossterm>run-once script</glossterm>
                 <filename>resources/scripts/runonce/tutorial001.groovy</filename>:
 
                 <programlisting language="groovy">
@@ -508,9 +588,9 @@
             </section>
 
             <para>
-                The following listing includes the whole page including the main menu entry and the document browser.
-                It can be found in the tutorial01 directory under
-                <filename>web/index.xhtml</filename>.
+                Our
+                <filename>web/index.xhtml</filename>
+                lists all available documents and adds a link to the upload form.
 
                 <programlisting language="xhtml">
                     <xi:include href="../../src/examples/tutorial01-documentstore/web/index.xhtml" parse="text"/>
@@ -570,9 +650,11 @@
                 </para>
 
                 <para>
-                    The following listing includes the whole edit page and can be found in the tutorial01 source
-                    directory under
-                    <filename>web/upload.xhtml</filename>.
+                    We then create the upload page under
+                    <filename>web/upload.xhtml</filename>
+                    and add a basic content editor for creating new documents. The input component
+                    supports binary properties, but you have to set the form encoding to
+                    <code>multipart/form-data</code>.
 
                     <programlisting language="xhtml">
                         <xi:include href="../../src/examples/tutorial01-documentstore/web/upload.xhtml" parse="text"/>
@@ -643,45 +725,33 @@
         <section xml:id="tutorial01_deployment">
             <title>Compiling and deploying the application</title>
             <para>
-                To compile and deploy the framework and the example application run the following
-                <productname>ant</productname>
-                tasks (you need a full &flexive; source installation for this):
-                <orderedlist>
-                    <listitem>
-                        <para>
-                            <command>ant dist</command>
-                            in your
-                            <filename>${flexive.home}</filename>
-                            directory where the
-                            <filename>build.xml</filename>
-                            file resides if you don't
-                            already have a
-                            <filename>flexive-dist/</filename>
-                            directory
-                        </para>
-                    </listitem>
-                    <listitem>
-                        <para>
-                            <command>ant</command>
-                            in the
-                            <filename>${flexive.home}/src/examples/tutorial01-documentstore/</filename>
-                            directory
-                        </para>
-                    </listitem>
-                    <listitem>
-                        <para>
-                            <command>ant deploy</command>
-                            in your
-                            <filename>${flexive.home}</filename>
-                            directory
-                        </para>
-                    </listitem>
-                </orderedlist>
-                Start your application server and point your browser to
-                <link href="http://localhost:8080/tutorial01-documentstore/">
-                    http://localhost:8080/tutorial01-documentstore/
+                To compile and deploy the framework and the example application simply run
+                <command>ant</command> in the project directory (tutorial01-documentstore). If the compilation was successful,
+                you find your application packaged under
+                <filename>dist/tutorial01-documentstore.ear</filename>.
+                You can then deploy this EAR to your application server, assuming that you followed the
+                <link linkend="installation">installation instructions</link>.
+                If you already have a &flexive; EAR deployed in this instance, be sure to undeploy it before
+                you deploy
+                <filename>tutorial01-documentstore.ear</filename>.
+            </para>
+            <para>
+                If you need to setup or reset the database schema, update your database connection settings in
+                <filename>tutorial01-documentstore/database.properties</filename>
+                or
+                <filename>flexive-dist/database.properties</filename>
+                and run
+                <command>ant db.create</command>
+                in the corresponding directory.
+            </para>
+            <para>
+                After deploying the application, point your browser to
+                <link href="http://localhost:8080/flexive/adm/">http://localhost:8080/flexive/adm/
                 </link>
-                You should see the document browser page with the upload link.
+                to open the &backendGui; (default credentials: supervisor/supervisor), or
+                <link href="http://localhost:8080/tutorial01-documentstore/">http://localhost:8080/tutorial01-documentstore/
+                </link>
+                to open the application.
             </para>
         </section>
 

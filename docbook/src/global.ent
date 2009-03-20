@@ -5,6 +5,7 @@
 <!ENTITY messagekey "message key">
 <!ENTITY flexiveJavadocBase "http://www.flexive.org/docs/3.1/javadoc/">
 <!ENTITY flexiveJavadoc "<ulink url='&flexiveJavadocBase;'>&flexive; JavaDoc</ulink>">
+<!ENTITY filesBase "../files/">
 <!ENTITY flexiveIssues "<ulink url='http://issuetracker.flexive.org/jira/secure/Dashboard.jspa'>issue tracker</ulink>">
 <!ENTITY fisheyeBase "http://source.flexive.org/browse/fleXive/trunk/">
 <!ENTITY flexiveApi "&flexive; API">
@@ -24,6 +25,7 @@
 <!ENTITY jdk6 "<ulink url='http://java.sun.com/javase/downloads/index.jsp'>JDK 6</ulink>">
 <!ENTITY ant "<ulink url='http://ant.apache.org/'>Apache Ant</ulink>">
 <!ENTITY maven "<ulink url='http://maven.apache.org/'>Apache Maven</ulink>">
+<!ENTITY groovy "<ulink url='http://groovy.codehaus.org/'>Groovy</ulink>">
 <!ENTITY mavenRepoUrl "http://repo.flexive.org/maven2/">
 <!ENTITY mavenRepo "<ulink url='&mavenRepoUrl;'>&mavenRepoUrl;</ulink>">
 <!ENTITY mavenVersion "3.1-SNAPSHOT">
