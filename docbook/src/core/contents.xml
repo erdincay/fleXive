@@ -18,7 +18,7 @@
         </para>
         <para>
             As a simple example lets consider the following XML file:
-            <programlisting xml:id="core_content_xml_intro" language="XML"><![CDATA[<?xml version=“1.0“ standalone=“yes“?>
+            <programlisting xml:id="core_content_xml_intro" language="xml"><![CDATA[<?xml version=“1.0“ standalone=“yes“?>
 <Person>
     <Name>Max Muster</Name>
     <Phone>+43 1 12345</Phone>
