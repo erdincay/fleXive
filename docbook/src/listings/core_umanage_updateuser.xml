@@ -8,5 +8,5 @@ import com.flexive.shared.EJBLookup;
 import com.flexive.shared.interfaces.AccountEngine;
 
 AccountEngine ae = EJBLookup.getAccountEngine();
-ae.update(1, null, “System administrator”, null, sysadmin@flexive.org, null);
+ae.update(1, null, “System administrator”, null, "sysadmin@flexive.org", null);
 </programlisting>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+
+xslthl - XSLT Syntax Highlighting
+http://sourceforge.net/projects/xslthl/
+Copyright (C) 2005-2008 Michal Molhanec, Jirka Kosek, Michiel Hendriks
+
+This software is provided 'as-is', without any express or implied
+warranty.  In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would be
+   appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be
+   misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+
+Michal Molhanec <mol1111 at users.sourceforge.net>
+Jirka Kosek <kosek at users.sourceforge.net>
+Michiel Hendriks <elmuerte at users.sourceforge.net>
+
+-->
+<xslthl-config>
+	<highlighter id="java" file="../../build/styles/highlighting/java-hl.xml" />
+
+    <!-- Custom language aliases -->
+	<highlighter id="groovy" file="../../build/styles/highlighting/java-hl.xml" />
+	<highlighter id="xhtml" file="../../build/styles/highlighting/myxml-hl.xml" />
+	<highlighter id="xml" file="../../build/styles/highlighting/myxml-hl.xml" />
+
+	<highlighter id="delphi" file="../../build/styles/highlighting/delphi-hl.xml" />
+	<highlighter id="pascal" file="../../build/styles/highlighting/delphi-hl.xml" />
+	<highlighter id="ini" file="../../build/styles/highlighting/ini-hl.xml" />
+	<highlighter id="php" file="../../build/styles/highlighting/php-hl.xml" />
+	<highlighter id="myxml" file="../../build/styles/highlighting/myxml-hl.xml" />
+	<highlighter id="m2" file="../../build/styles/highlighting/m2-hl.xml" />
+	<highlighter id="tcl" file="../../build/styles/highlighting/tcl-hl.xml" />
+	<highlighter id="c" file="../../build/styles/highlighting/c-hl.xml" />
+	<highlighter id="cpp" file="../../build/styles/highlighting/cpp-hl.xml" />
+	<highlighter id="csharp" file="../../build/styles/highlighting/csharp-hl.xml" />
+	<highlighter id="python" file="../../build/styles/highlighting/python-hl.xml" />
+	<highlighter id="ruby" file="../../build/styles/highlighting/ruby-hl.xml" />
+	<highlighter id="perl" file="../../build/styles/highlighting/perl-hl.xml" />
+	<highlighter id="javascript" file="../../build/styles/highlighting/javascript-hl.xml" />
+	<namespace prefix="xslthl" uri="http://xslthl.sf.net" />
+</xslthl-config>

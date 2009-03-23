@@ -7,7 +7,13 @@
      @version $Rev$
 -->
 <xsl:stylesheet
-        xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+        xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+        xmlns:xslthl="http://xslthl.sf.net"
+        xmlns="http://www.w3.org/1999/xhtml"
+        exclude-result-prefixes="xslthl"
+        version="1.0">
+
+    <xsl:import href="highlighting/common.xsl"/>
 
     <xsl:param name="ignore.image.scaling" select="1"/>
     <xsl:param name="toc.section.depth" select="3"/>
@@ -89,5 +95,88 @@
             </xsl:with-param>
         </xsl:call-template>
     </xsl:template>
+
+    <!-- Configure syntax highlighting -->
+
+    <!--<xsl:import href="xhtml/highlight.xsl"/>-->
+
+    <xsl:template match="xslthl:keyword" mode="xslthl">
+        <span class="hl-keyword">
+            <xsl:apply-templates mode="xslthl"/>
+        </span>
+    </xsl:template>
+
+    <xsl:template match="xslthl:string" mode="xslthl">
+        <span class="hl-string">
+            <xsl:apply-templates mode="xslthl"/>
+        </span>
+    </xsl:template>
+
+    <xsl:template match="xslthl:comment" mode="xslthl">
+        <span class="hl-comment">
+            <xsl:apply-templates mode="xslthl"/>
+        </span>
+    </xsl:template>
+
+    <xsl:template match="xslthl:directive" mode="xslthl">
+        <span class="hl-directive">
+            <xsl:apply-templates mode="xslthl"/>
+        </span>
+    </xsl:template>
+
+    <xsl:template match="xslthl:tag" mode="xslthl">
+        <span class="hl-tag">
+            <xsl:apply-templates mode="xslthl"/>
+        </span>
+    </xsl:template>
+
+    <xsl:template match="xslthl:attribute" mode="xslthl">
+        <span class="hl-attribute">
+            <xsl:apply-templates mode="xslthl"/>
+        </span>
+    </xsl:template>
+
+    <xsl:template match="xslthl:value" mode="xslthl">
+        <span class="hl-value">
+            <xsl:apply-templates mode="xslthl"/>
+        </span>
+    </xsl:template>
+
+    <xsl:template match="xslthl:html" mode="xslthl">
+        <span class="hl-tag">
+            <xsl:apply-templates mode="xslthl"/>
+        </span>
+    </xsl:template>
+
+    <xsl:template match="xslthl:xslt" mode="xslthl">
+        <span class="hl-xslt">
+            <xsl:apply-templates mode="xslthl"/>
+        </span>
+    </xsl:template>
+
+    <xsl:template match="xslthl:number" mode="xslthl">
+        <span class="hl-number">
+            <xsl:apply-templates mode="xslthl"/>
+        </span>
+    </xsl:template>
+
+    <xsl:template match="xslthl:doctype" mode="xslthl">
+        <span class="hl-doctype">
+            <xsl:apply-templates mode="xslthl"/>
+        </span>
+    </xsl:template>
+
+    <xsl:template match="xslthl:doccomment" mode="xslthl">
+        <span class="hl-doccomment">
+            <xsl:apply-templates mode="xslthl"/>
+        </span>
+    </xsl:template>
+
+    <xsl:template match="xslthl:annotation" mode="xslthl">
+        <span class="hl-annotation">
+            <xsl:apply-templates mode="xslthl"/>
+        </span>
+    </xsl:template>
+
 
 </xsl:stylesheet>

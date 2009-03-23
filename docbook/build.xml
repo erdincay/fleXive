@@ -84,6 +84,8 @@
         <mkdir dir="${book.website.dir}"/>
         <xslt-docbook out="${book.website.dir}/index.html" destdir="${book.website.dir}" style="custom-website.xsl"/>
         <copy-html-resources todir="${book.website.dir}"/>
+        <!-- Fix weird docbook/saxon bug (invalid header in index.html) -->
+        <replaceregexp file="${book.website.dir}/index.html" match="\?>tandalone=" replace="tandalone="/>
     </target>
 
     <!--
@@ -224,11 +226,14 @@
                 System.setProperty("javax.xml.parsers.DocumentBuilderFactory", "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
                 System.setProperty("javax.xml.parsers.SAXParserFactory", "org.apache.xerces.jaxp.SAXParserFactoryImpl");
                 System.setProperty("org.apache.xerces.xni.parser.XMLParserConfiguration", "org.apache.xerces.parsers.XIncludeParserConfiguration");
+
+                System.setProperty("xslthl.config", "file://" + properties["docbook.resources.dir"] + "/xslthl-config.xml");
             </groovy>
             <xslt style="${docbook.styles.dir}/@{style}" in="src/book.xml"
                 out="@{out}" force="true" >
                 <classpath path="${docbook.resources.dir}/saxon.jar"/>
                 <classpath path="${docbook.resources.dir}/xercesImpl.jar"/>
+                <classpath path="${docbook.resources.dir}/xslthl-2.0.1.jar"/>
                 <!--<classpath>-->
                     <!--<fileset dir="${docbook.styles.dir}/extensions" includes="saxon65.jar"/>-->
                 <!--</classpath>-->
@@ -237,6 +242,7 @@
                 <!--param name="chapter.autolabel" expression="1"/-->
                 <!--param name="section.autolabel" expression="1"/-->
                 <!--<param name="linenumbering.extension" expression="1"/>-->
+                <param name="highlight.source" expression="1"/>
                 <param name="html.stylesheet" expression="css/flexive_docbook.css"/>
                 <param name="base.dir" expression="@{destdir}"/>
                 <args/>

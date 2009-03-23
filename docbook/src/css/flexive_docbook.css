@@ -27,7 +27,7 @@ body {
     border: 1px outset #3D3D3D;
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
-    background-color: #F9FCF1;
+    background-color: #fafcf6;
     color: #000;
     overflow: auto;
     margin: 0.5em;
@@ -60,7 +60,7 @@ h5.title {
 
 div.warning, div.tip {
     border: 1px solid #a4aaa4;
-    padding: 0 1.5em 0 1.5em;
+    padding: 0 1.5em 0.5em 1.5em;
     margin: 1em 0 1em 0;
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
@@ -116,4 +116,65 @@ table.flexive tbody td {
     padding: 0.5em;
     border-bottom: 1px solid black;
     vertical-align: top;
+}
+
+/* Syntax highlighting */
+
+.hl-keyword {
+    color:#000080;
+    font-weight:bold;
+}
+
+.hl-string {
+    color: #008000;
+    font-weight: bold;
+}
+
+
+.hl-comment {
+    color:#808080;
+    font-style:italic;
+}
+
+
+.hl-directive {
+    color:#808080;
+}
+
+
+.hl-tag {
+    color:#000080;
+    font-weight:bold;
+}
+
+
+.hl-attribute {
+    color:#0000FF;
+    font-weight:bold;
+}
+
+
+.hl-value {
+    color: #008000;
+    font-weight: bold;
+}
+
+
+.hl-number {
+    color:#0000FF;
+}
+
+
+.hl-doctype {
+    color:#000080;
+    font-weight:bold;
+}
+
+
+.hl-doccomment {
+}
+
+
+.hl-annotation {
+    color:#808000;
 }
