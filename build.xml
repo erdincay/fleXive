@@ -843,10 +843,10 @@ database.vendor=MySQL
             <zipfileset prefix="flexive-dist" dir="${basedir}/legal" includes="LICENSE.txt,LGPL.txt,GPL.txt"/>
 
             <!-- Package examples in the applications folder -->
-            <zipfileset prefix="flexive-dist/applications/helloworld" dir="${flexive.drop.dir}" includes="helloworld*"/>
-            <zipfileset prefix="flexive-dist/applications/tutorial01-documentstore" dir="${flexive.drop.dir}" includes="tutorial01-documentstore*"/>
-            <zipfileset prefix="flexive-dist/applications/products" dir="${flexive.drop.dir}" includes="products*"/>
-            <zipfileset prefix="flexive-dist/applications/announcement-submission" dir="${flexive.drop.dir}" includes="announcement-submission*"/>
+            <zipfileset prefix="flexive-dist/applications/disabled/helloworld" dir="${flexive.drop.dir}" includes="helloworld*"/>
+            <zipfileset prefix="flexive-dist/applications/disabled/tutorial01-documentstore" dir="${flexive.drop.dir}" includes="tutorial01-documentstore*"/>
+            <zipfileset prefix="flexive-dist/applications/disabled/products" dir="${flexive.drop.dir}" includes="products*"/>
+            <zipfileset prefix="flexive-dist/applications/disabled/announcement-submission" dir="${flexive.drop.dir}" includes="announcement-submission*"/>
         </zip>
         <copy file="${flexive.base.build.dir}/${dist.bin-all.file}" toFile="${flexive.base.build.dir}/flexive-dist.zip"/>
         <!-- Create flexive distribution w/o backend and GPL'd files -->
