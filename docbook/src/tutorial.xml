@@ -37,7 +37,9 @@
         </itemizedlist>
 
         To run any of these, unzip them to a local directory. Unzip the &flexive; distribution from the
-        &downloadsPage; in the same directory, and execute
+        &downloadsPage; in the same directory, remove the precompiled examples from
+        <filename>flexive-dist/applications</filename>,
+        and execute
         <command>ant</command>
         in the example directory. You can then deploy the
         <filename>dist/[example-name].ear</filename>
