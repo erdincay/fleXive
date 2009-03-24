@@ -131,7 +131,7 @@ table.flexive tbody td {
 }
 
 
-.hl-comment {
+.hl-comment, .hl-doccomment {
     color:#808080;
     font-style:italic;
 }
@@ -168,10 +168,6 @@ table.flexive tbody td {
 .hl-doctype {
     color:#000080;
     font-weight:bold;
-}
-
-
-.hl-doccomment {
 }
 
 
