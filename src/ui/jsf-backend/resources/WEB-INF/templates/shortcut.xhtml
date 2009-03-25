@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:fx="http://www.flexive.com/jsf/core"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:jstl="http://java.sun.com/jsp/jstl/functions"
+      xmlns:weblet="http://weblets.dev.java.net/tags_jsp2">
+
+Adds a keyboard shortcut for a button. The keyboard listener is available on the entire page,
+so it is advisable to leave at least one modifier key (e.g. "ctrl") enabled.
+
+@since 3.1
+
+Parameters:
+elementId - the target DOM element ID
+elementAction - name of a (parameterless) method that should be invoked on the element (default: onclick)
+ctrl - whether the "ctrl" key must be pressed (default: true)
+keycode - the keycode of the shortcut key (default: 13 (=Enter))
+
+<ui:composition>
+
+    <c:if test="#{empty ctrl}">
+        <c:set var="ctrl" value="true"/>
+    </c:if>
+    <c:if test="#{empty keycode}">
+        <c:set var="keycode" value="13"/>
+    </c:if>
+    <c:if test="#{empty elementAction}">
+        <c:set var="elementAction" value="onclick"/>
+    </c:if>
+
+    <script type="text/javascript">
+    <!--
+        flexive.yui.require("event");
+
+        flexive.yui.onYahooLoaded(function() {
+
+            new YAHOO.util.KeyListener(document,
+                                   {  ctrl: #{ctrl}, keys: #{keycode} },
+                                   { fn: function() {
+                                       document.getElementById("#{elementId}").#{elementAction}(); 
+                                   } }
+            ).enable();
+
+        });
+    //-->
+    </script>
+
+</ui:composition>
+
+</html>

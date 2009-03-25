@@ -331,6 +331,35 @@
         </attribute>
     </tag>
     <tag>
+      <name>shortcut</name>
+      <body-content>JSP</body-content>
+      <description></description>
+      <attribute>
+        <name>elementId</name>
+        <required>false</required>
+        <rtexprvalue>false</rtexprvalue>
+        <description>the target DOM element ID</description>
+      </attribute>
+      <attribute>
+        <name>elementAction</name>
+        <required>false</required>
+        <rtexprvalue>false</rtexprvalue>
+        <description>name of a (parameterless) method that should be invoked on the element (default: onclick)</description>
+      </attribute>
+      <attribute>
+        <name>ctrl</name>
+        <required>false</required>
+        <rtexprvalue>false</rtexprvalue>
+        <description>whether the "ctrl" key must be pressed (default: true)</description>
+      </attribute>
+      <attribute>
+        <name>keycode</name>
+        <required>false</required>
+        <rtexprvalue>false</rtexprvalue>
+        <description>the keycode of the shortcut key (default: 13 (=Enter))</description>
+      </attribute>
+    </tag>
+    <tag>
         <name>fxValueInput</name>
         <body-content>JSP</body-content>
     </tag>

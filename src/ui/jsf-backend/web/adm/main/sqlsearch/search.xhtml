@@ -69,6 +69,7 @@
 
         <adm:commandButton labelKey="SqlSearch.button.start" location="both" icon="new"
                           bean="#{sqlSearchBean}" action="executeSearch" id="sqlSearchButton"/>
+        <adm:shortcut elementId="frm:sqlSearchButton"/>
 
         <br/><br/><br/><br/>
         <c:if test="#{sqlSearchBean.queryResult!=null}">
@@ -167,6 +168,8 @@
             function reload() {
                 document.getElementById("frm:refreshButton").onclick();
             }
+
+            document.getElementById("frm:query").focus();
         //-->
         </script>
 

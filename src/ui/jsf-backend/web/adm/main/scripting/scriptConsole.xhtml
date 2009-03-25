@@ -35,7 +35,8 @@
                     #{fxMessageBean['ScriptConsole.label.runAtWeb']}<br/><br/>
                     <a4j:commandButton id="executeButton" reRender="resultPanel"
                                        value="#{fxMessageBean['ScriptConsole.button.execute']}"
-                                       onclick="parent.lockScreen()" oncomplete="parent.unlockScreen()"/>
+                                       onclick="parent.lockScreen()" oncomplete="parent.unlockScreen();document.getElementById('frm:codeArea').focus();"/>
+                    <adm:shortcut elementId="frm:executeButton"/>
                     <a4j:commandButton id="defaultImports" value="#{fxMessageBean['Script.button.defaultImports']}"
                                        action="#{scriptConsoleBean.addDefaultImports}" reRender="codeArea"
                                        eventsQueue="main" requestDelay="300"

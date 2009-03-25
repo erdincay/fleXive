@@ -87,6 +87,10 @@
         <source>templates/sortableTable.xhtml</source>
     </tag>
     <tag>
+        <tag-name>shortcut</tag-name>
+        <source>templates/shortcut.xhtml</source>
+    </tag>
+    <tag>
         <tag-name>fxValueInput</tag-name>
         <component>
             <component-type>flexive.FxValueInput</component-type>
