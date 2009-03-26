@@ -49,7 +49,7 @@ import org.testng.annotations.Test;
 @Test(groups = {"bootstrap", "ejb", "configuration", "content", "structure", "jsf", "security",
         "workflow", "streaming", "scripting", "valuetest", "cache", "image", "tree", "relation",
         "search", "tutorial", "benchmark", "environment", "mandator", "importexport",
-        "roles"})
+        "roles", "reference"})
 public class ContainerBootstrap {
 
     /**
@@ -57,6 +57,7 @@ public class ContainerBootstrap {
      *
      * @return tests are run from within an application server (ear)
      */
+    @Test(enabled = false) //prevent to be run as testcase
     public static boolean runInEAR() {
         return System.getProperty("flexive.tests.ear") != null;
     }

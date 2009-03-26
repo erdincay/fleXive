@@ -2293,6 +2293,50 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         }
     }
 
+    /**
+     * Check if content(s) may be removed.
+     * This method handles referential integrity incase the used database does not support it
+     *
+     * @param con an open and valid connection
+     * @param type the contents structure type
+     * @param id id of the content (optional, used if allForType is <code>false</code>)
+     * @param version version of the content (optional, used if allForType is <code>false</code> and allVersions is <code>false</code>)
+     * @param allForType remove all instances of the given type?
+     * @param allVersions remove all versions or only the requested one?
+     * @throws FxRemoveException if referential integrity would be violated
+     */
+    public void checkContentRemoval(Connection con, long type, long id, int version, boolean allForType, boolean allVersions) throws FxRemoveException {
+        //to be implemented/overwritten for specific database implementations
+        if( LOG.isDebugEnabled() )
+            LOG.debug("Removing type:"+type+" id:"+id+" ver:"+version+" allForType:"+allForType+" allVersions:"+allVersions);
+        if( !allVersions && !allForType)
+            return;  //specific version may be removed if not all of the type are removed
+        try {
+            PreparedStatement ps = null;
+            try {
+                if (allForType) {
+                    ps = con.prepareStatement("SELECT COUNT(DISTINCT d.ID) FROM " + TBL_CONTENT + " c, " +
+                            TBL_CONTENT_DATA + " d, " + TBL_STRUCT_ASSIGNMENTS + " a, " + TBL_STRUCT_PROPERTIES + " p " +
+                            "WHERE c.TDEF=a.TYPEDEF AND a.APROPERTY=p.ID AND p.REFTYPE=? AND d.ASSIGN=a.ID AND d.TPROP=p.ID");
+                    ps.setLong(1, type);
+                } else {
+                    ps = con.prepareStatement("SELECT COUNT(*) FROM " + TBL_CONTENT_DATA + " WHERE FREF=?");
+                    ps.setLong(1, id);
+                }
+                ResultSet rs = ps.executeQuery();
+                if( rs.next() && rs.getLong(1) != 0 ) {
+                    if( allForType)
+                        throw new FxRemoveException("ex.content.reference.inUse.type", CacheAdmin.getEnvironment().getType(type), rs.getLong(1));
+                    else
+                        throw new FxRemoveException("ex.content.reference.inUse.instance", id, rs.getLong(1));
+                }
+            } finally {
+                if (ps != null) ps.close();
+            }
+        } catch (SQLException e) {
+            throw new FxRemoveException(e, "ex.db.sqlError", e.getMessage());
+        }
+    }
 
     /**
      * {@inheritDoc}
@@ -2300,6 +2344,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     public void contentRemove(Connection con, FxType type, FxPK pk) throws FxRemoveException {
         PreparedStatement ps = null;
         try {
+            checkContentRemoval(con, type.getId(), pk.getId(), -1, false, true);
             //sync with tree
             StorageManager.getTreeStorage().contentRemoved(con, pk.getId(), false);
             ps = con.prepareStatement(CONTENT_DATA_FT_REMOVE);
@@ -2362,6 +2407,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         int ver = pk.getVersion();
         if (!pk.isDistinctVersion())
             ver = cvi.getDistinctVersion(pk.getVersion());
+
+        checkContentRemoval(con, type.getId(), pk.getId(), ver, false, false);
+
         PreparedStatement ps = null;
         try {
             //if its the live version - sync with live tree
@@ -2411,6 +2459,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     public int contentRemoveForType(Connection con, FxType type) throws FxRemoveException {
         PreparedStatement ps = null;
         try {
+            checkContentRemoval(con, type.getId(), -1, -1, true, true);
             //FX-96 - select all contents that are referenced from the tree
             ps = con.prepareStatement("SELECT DISTINCT c.ID FROM " + DatabaseConst.TBL_CONTENT + " c, " +
                     DatabaseConst.TBL_TREE + " te, " + DatabaseConst.TBL_TREE +

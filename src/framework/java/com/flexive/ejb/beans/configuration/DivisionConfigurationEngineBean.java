@@ -289,7 +289,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
                         patching = false;
                         for (SQLPatchScript ps : scripts) {
                             if (ps.from == currentVersion) {
-                                LOG.info("Patching from version [" + ps.from + "] to [" + ps.to + "] ... ");
+                                LOG.info("Patching database schema from version [" + ps.from + "] to [" + ps.to + "] ... ");
                                 new SQLScriptExecutor(ps.script, stmt).execute();
                                 currentVersion = ps.to;
                                 patching = true;
