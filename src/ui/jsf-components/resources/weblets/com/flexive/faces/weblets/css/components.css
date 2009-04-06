@@ -20,15 +20,15 @@ div.fxValueInput {
 div.fxValueInputRow {
     /*position: relative;*/
     width: 225px;
-    /*clear: both;*/
     padding: 1px 1px 1px 0;
 }
 
 input.fxValueDefaultLanguageRadio {
+    float: right;
 }
 
-div.FxHTMLInput div.fxValueInputRow {
-    padding-top: 20px;
+.FxHTMLInput .fxValueInputRow .fxValueTextAreaContainer {
+    padding-top: 25px;  /* Move below language select */
 }
 
 /* Limit width of the month select list*/
@@ -53,11 +53,11 @@ select.fxValueSelectInput, .fxValueInputElementWidth, input.fxValueTextInput, te
     width: 100%; /* don't force with !important because it breaks standalone inputs outside a fx:formRow */
 }
 
-.FxReferenceInput input {
+.FxReferenceInput input[type=text] {
     width: 65% !important;     /* leave room for the browse references button, overrides yui-skin-sam autocomplete width */
 }
 
-.FxReferenceInput input.singleLanguage {
+.FxReferenceInput input[type=text].singleLanguage {
     width: 80% !important;     /* leave room for the browse references button, overrides yui-skin-sam autocomplete width */
 }
 
@@ -79,34 +79,29 @@ textarea.fxValueTextAreaHtml {
 }
 
 input.fxValueTextInput {
-    float: left;
+    /*float: left;*/
 }
 
 input.fxValueFileInput {
-    float: left;
+    /*float: left;*/
 }
 
 div.fxValueInput {
-    /*position: relative;*/
     display: block;
 }
 
 div.fxValueInput select.languages {
-    /*position: absolute;*/
-    /*right: 0;*/
-    /*top: 0;*/
     float: right;
     width: 70px;
 }
 
 div.fxValueInputLanguageIcon {
-    margin-left: 3px;
+    float: right;
+    padding-right: 5px;
     width: 15px;
-    display: inline;
 }
 
 div.fxValueInput img.findReferencesIcon {
-    float: left;
 }
 
 div.fxValueInputAutocomplete {

@@ -478,7 +478,7 @@ flexive.input = new function() {
             }
         }
         flexive.input.fxValueInputList = newList;     // store new list without defunct inputs
-        flexive.input._fixHtmlEditorsIE();
+        //flexive.input._fixHtmlEditorsIE();
     };
 
     // trigger tinyMCE repaint on IE
@@ -559,8 +559,17 @@ flexive.input.FxMultiLanguageValueInput = function(id, baseRowId, rowInfos, lang
 
 flexive.input.FxMultiLanguageValueInput.prototype = {
     onLanguageChanged: function(languageSelect) {
+        // save scrollbar position for IE
+        //var scrollY = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || -1;
+
         this.showLanguage(languageSelect.options[languageSelect.selectedIndex].value);
-        flexive.input._fixHtmlEditorsIE();
+        
+        //flexive.input._fixHtmlEditorsIE();
+
+        // restore scrollbar position in IE
+        //if (document.all && scrollY != -1) {
+        //    window.scrollTo(0, scrollY);
+        //}
     },
 
     showRow: function(showRowId) {

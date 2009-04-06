@@ -32,16 +32,19 @@
 package com.flexive.faces.components.input;
 
 import com.flexive.faces.FxJsfUtils;
-import com.flexive.faces.javascript.FxJavascriptUtils;
-import com.flexive.faces.beans.UserConfigurationBean;
 import com.flexive.faces.beans.MessageBean;
-import com.flexive.shared.*;
+import com.flexive.faces.beans.UserConfigurationBean;
+import com.flexive.faces.javascript.FxJavascriptUtils;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.FxLanguage;
+import com.flexive.shared.XPathElement;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.*;
-import com.flexive.war.servlet.ThumbnailServlet;
 import com.flexive.war.FxRequest;
 import com.flexive.war.JsonWriter;
+import com.flexive.war.servlet.ThumbnailServlet;
 import org.apache.commons.lang.StringUtils;
 import org.apache.myfaces.custom.date.HtmlInputDate;
 import org.apache.myfaces.custom.fileupload.HtmlInputFileUpload;
@@ -50,11 +53,10 @@ import javax.faces.component.UIComponent;
 import javax.faces.component.UIInput;
 import javax.faces.component.UISelectItems;
 import javax.faces.component.html.*;
-import javax.faces.context.ResponseWriter;
 import javax.faces.context.FacesContext;
+import javax.faces.context.ResponseWriter;
 import javax.faces.model.SelectItem;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
@@ -129,6 +131,7 @@ class EditModeHelper extends RenderHelper {
         final List<UIComponent> rows = new ArrayList<UIComponent>();
         final HashMap<Long, LanguageSelectWriter.InputRowInfo> rowInfos =
                 new HashMap<Long, LanguageSelectWriter.InputRowInfo>(languages.size());
+        boolean first = true;
         for (final FxLanguage language : languages) {
             final String containerId = clientId + FxValueInputRenderer.LANG_CONTAINER + language.getId();
             final String inputId = clientId + FxValueInputRenderer.INPUT + language.getId();
@@ -137,10 +140,12 @@ class EditModeHelper extends RenderHelper {
             final LanguageContainerWriter languageContainer = new LanguageContainerWriter();
             languageContainer.setContainerId(containerId);
             languageContainer.setLanguageId(language.getId());
+            languageContainer.setFirstRow(first);
             rows.add(languageContainer);
 
-            encodeField(languageContainer, inputId, language);
             encodeDefaultLanguageRadio(languageContainer, clientId, radioName, language);
+            encodeField(languageContainer, inputId, language);
+            first = false;
         }
 
         final LanguageSelectWriter languageSelect = new LanguageSelectWriter();
@@ -530,6 +535,7 @@ class EditModeHelper extends RenderHelper {
     public static class LanguageContainerWriter extends DeferredInputWriter {
         private long languageId;
         private String containerId;
+        private boolean firstRow;
 
         public long getLanguageId() {
             return languageId;
@@ -547,12 +553,24 @@ class EditModeHelper extends RenderHelper {
             this.containerId = containerId;
         }
 
+        public boolean isFirstRow() {
+            return firstRow;
+        }
+
+        public void setFirstRow(boolean firstRow) {
+            this.firstRow = firstRow;
+        }
+
         @Override
         public void encodeBegin(FacesContext facesContext) throws IOException {
             final ResponseWriter writer = facesContext.getResponseWriter();
             writer.startElement("div", null);
             writer.writeAttribute("id", containerId, null);
-            writer.writeAttribute("class", FxValueInputRenderer.CSS_LANG_CONTAINER, null);
+            writer.writeAttribute("class",
+                    FxValueInputRenderer.CSS_LANG_CONTAINER
+                    + (firstRow ? " " + FxValueInputRenderer.CSS_LANG_CONTAINER_FIRST : ""),
+                    null
+            );
             if (languageId != getInputValue().getDefaultLanguage()) {
                 writer.writeAttribute("style", "display:none", null);
             }
@@ -565,10 +583,11 @@ class EditModeHelper extends RenderHelper {
 
         @Override
         public Object saveState(FacesContext context) {
-            final Object[] state = new Object[3];
+            final Object[] state = new Object[4];
             state[0] = super.saveState(context);
             state[1] = languageId;
             state[2] = containerId;
+            state[3] = firstRow;
             return state;
         }
 
@@ -578,6 +597,7 @@ class EditModeHelper extends RenderHelper {
             super.restoreState(context, state[0]);
             this.languageId = (Long) state[1];
             this.containerId = (String) state[2];
+            this.firstRow = (Boolean) state[3];
         }
     }
 
@@ -747,6 +767,12 @@ class EditModeHelper extends RenderHelper {
         public void encodeBegin(FacesContext facesContext) throws IOException {
             final ResponseWriter writer = facesContext.getResponseWriter();
 
+            writer.startElement("div", null);
+            writer.writeAttribute("id", containerId + "_language", null);
+            writer.writeAttribute("class", FxValueInputRenderer.CSS_LANG_ICON, null);
+            writer.writeText(languageCode, null);
+            writer.endElement("div");
+
             writer.startElement("input", null);
             writer.writeAttribute("type", "checkbox", null);
             writer.writeAttribute("name", radioName, null);
@@ -758,12 +784,6 @@ class EditModeHelper extends RenderHelper {
             writer.writeAttribute("onclick", "document.getElementById('" + inputClientId
                     + "')." + JS_OBJECT + ".onDefaultLanguageChanged(this, " + languageId + ")", null);
             writer.endElement("input");
-
-            writer.startElement("div", null);
-            writer.writeAttribute("id", containerId + "_language", null);
-            writer.writeAttribute("class", FxValueInputRenderer.CSS_LANG_ICON, null);
-            writer.writeText(languageCode, null);
-            writer.endElement("div");
         }
 
         @Override
@@ -824,6 +844,10 @@ class EditModeHelper extends RenderHelper {
                 renderTextInput(getInputComponent(), this, value, inputClientId, languageId);
                 return;
             }
+            if (useHTMLEditor) {
+                writer.startElement("div", null);
+                writer.writeAttribute("class", FxValueInputRenderer.CSS_TEXTAREA_HTML_OUTER, null);
+            }
             writer.startElement("textarea", null);
             writer.writeAttribute("id", inputClientId, null);
             writeHtmlAttributes(getInputComponent(), writer);
@@ -833,6 +857,7 @@ class EditModeHelper extends RenderHelper {
                 writer.writeAttribute("class", FxValueInputRenderer.CSS_TEXTAREA_HTML + singleLanguageStyle(languageId), null);
                 writer.writeText(getTextValue(value, languageId), null);
                 writer.endElement("textarea");
+                writer.endElement("div");
                 final FxRequest request = FxJsfUtils.getRequest();
                 writer.startElement("script", null);
                 writer.writeAttribute("type", "text/javascript", null);

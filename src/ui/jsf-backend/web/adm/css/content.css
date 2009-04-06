@@ -134,7 +134,7 @@ input {
     font-family: Arial, Helvetica, sans-serif;
     color: black;
     font-size: 11px;
-    padding-left:2px;
+    padding:2px;
 }
 input[type="checkbox"]   {
     border:0;
