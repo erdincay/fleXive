@@ -123,11 +123,11 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             newPropertyId = seq.getId(FxSystemSequencer.TYPEPROP);
             FxValue defValue = property.getDefaultValue();
             ContentStorage storage = StorageManager.getContentStorage(type.getStorageMode());
+            con = Database.getDbConnection();
             if (defValue instanceof FxBinary) {
                 storage.prepareBinary(con, (FxBinary) defValue);
             }
             final String _def = defValue == null || defValue.isEmpty() ? null : ConversionEngine.getXStream().toXML(defValue);
-            con = Database.getDbConnection();
 
             // do not allow to add mandatory properties (i.e. min multiplicity > 0) to types for which content exists
             if (storage.getTypeInstanceCount(con, typeId) > 0 && property.getMultiplicity().getMin() > 0) {
@@ -1400,7 +1400,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     changesDesc.append("hint=").append(prop.getHint()).append(',');
                     changes = true;
                 }
-                // change the default label
+                // change the default value
                 if (org.getDefaultValue() != null && !org.getDefaultValue().equals(prop.getDefaultValue()) ||
                         org.getDefaultValue() == null && prop.getDefaultValue() != null) {
                     if (changes)
