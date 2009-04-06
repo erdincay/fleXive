@@ -231,7 +231,7 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
                 //but still possible, multiple non-optional childs will result in errors that are thrown in an exception
                 boolean hasRequired = false;
                 for (FxAssignment as : assignments) {
-                    if (as instanceof FxPropertyAssignment && as.getAssignedType().usePropertyPermissions() &&
+                    if (as instanceof FxPropertyAssignment && as.getAssignedType().isUsePropertyPermissions() &&
                             !ticket.mayCreateACL(((FxPropertyAssignment) as).getACL().getId(), ticket.getUserId()))
                         continue;
                     if (as.getMultiplicity().isRequired()) {
@@ -245,7 +245,7 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
                 }
             } else { // 'regular' Any-Of group
                 for (FxAssignment as : assignments) {
-                    if (as instanceof FxPropertyAssignment && as.getAssignedType().usePropertyPermissions() &&
+                    if (as instanceof FxPropertyAssignment && as.getAssignedType().isUsePropertyPermissions() &&
                             !ticket.mayCreateACL(((FxPropertyAssignment) as).getACL().getId(), ticket.getUserId()))
                         continue;
                     if (as.getMultiplicity().isOptional())
@@ -294,7 +294,7 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
             for (FxAssignment as : assignments) {
                 if (!as.isEnabled()
                     || as.isSystemInternal()
-                    || (as instanceof FxPropertyAssignment && as.getAssignedType().usePropertyPermissions() &&
+                    || (as instanceof FxPropertyAssignment && as.getAssignedType().isUsePropertyPermissions() &&
                             !ticket.mayCreateACL(((FxPropertyAssignment) as).getACL().getId(), ticket.getUserId()))    
                     || (as instanceof FxPropertyAssignment && ((FxPropertyAssignment) as).getProperty().getDataType() == FxDataType.Binary)
                     || (as instanceof FxPropertyAssignment && ((FxPropertyAssignment) as).getProperty().getDataType() == FxDataType.Reference)    )

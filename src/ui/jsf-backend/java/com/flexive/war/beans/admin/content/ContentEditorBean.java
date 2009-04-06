@@ -786,15 +786,15 @@ public class ContentEditorBean implements ActionBean, Serializable {
                 return;
             }
         }
-        FxContentSecurityInfo si = fxType.usePermissions() && id != -1
+        FxContentSecurityInfo si = fxType.isUsePermissions() && id != -1
                 ? co.getContentSecurityInfo(content.getPk())
                 : null;
         if (editAble && id != -1) {
-            if (fxType.usePermissions())
+            if (fxType.isUsePermissions())
                 editAble = FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACLPermission.EDIT,
                         si, false);
         }
-        if (fxType.usePermissions() && id != -1)
+        if (fxType.isUsePermissions() && id != -1)
             deleteAble = FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACLPermission.DELETE,
                     si, false);
         versionDeleteAble = deleteAble;
@@ -893,7 +893,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
         }
         ArrayList<SelectItem> result = new ArrayList<SelectItem>(steps.size());
         for (Step step : steps) {
-            if (!fxType.useStepPermissions() ||
+            if (!fxType.isUseStepPermissions() ||
                     (isNew
                             ? ticket.mayCreateACL(step.getAclId(), content.getLifeCycleInfo().getCreatorId())
                             : ticket.mayEditACL(step.getAclId(), content.getLifeCycleInfo().getCreatorId()))) {
@@ -1052,7 +1052,7 @@ public class ContentEditorBean implements ActionBean, Serializable {
     }
 
     public boolean isSupportSecurity() {
-        return environment.getType(type).useInstancePermissions();
+        return environment.getType(type).isUseInstancePermissions();
     }
 
     public CeDataWrapper getData() {

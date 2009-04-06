@@ -1850,7 +1850,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             original.getRootGroup().compactPositions(true);
 
             //unwrap all no access values so they can be saved
-            if (type.usePropertyPermissions() && !ticket.isGlobalSupervisor()) {
+            if (type.isUsePropertyPermissions() && !ticket.isGlobalSupervisor()) {
                 FxContext.get().runAsSystem();
                 try {
                     FxPermissionUtils.unwrapNoAccessValues(content, original);
@@ -1889,7 +1889,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             }
         }
 
-        if (type.usePropertyPermissions() && !ticket.isGlobalSupervisor())
+        if (type.isUsePropertyPermissions() && !ticket.isGlobalSupervisor())
             FxPermissionUtils.checkPropertyPermissions(content.getLifeCycleInfo().getCreatorId(), delta, ACLPermission.EDIT);
 
         if (delta.isInternalPropertyChanged())
@@ -1910,7 +1910,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             }
             //delta-deletes:
             for (FxDelta.FxDeltaChange change : delta.getRemoves()) {
-                if (type.usePropertyPermissions()) {
+                if (type.isUsePropertyPermissions()) {
                     if (!ticket.mayDeleteACL(type.getPropertyAssignment(change.getXPath()).getACL().getId(), content.getLifeCycleInfo().getCreatorId()))
                         throw new FxNoAccessException("ex.acl.noAccess.property.delete", change.getXPath());
                 }
@@ -1997,7 +1997,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
                 //delta-adds:
                 for (FxDelta.FxDeltaChange change : delta.getAdds()) {
-                    if (type.usePropertyPermissions()) {
+                    if (type.isUsePropertyPermissions()) {
                         if (!ticket.mayCreateACL(type.getPropertyAssignment(change.getXPath()).getACL().getId(), content.getLifeCycleInfo().getCreatorId()))
                             throw new FxNoAccessException("ex.acl.noAccess.property.create", change.getXPath());
                     }

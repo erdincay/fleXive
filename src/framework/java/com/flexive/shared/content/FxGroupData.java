@@ -576,7 +576,7 @@ public class FxGroupData extends FxData {
             if (!as.isEnabled() || as.isSystemInternal())
                 continue;
             count = 0;
-            if (as instanceof FxPropertyAssignment && type.usePropertyPermissions()) {
+            if (as instanceof FxPropertyAssignment && type.isUsePropertyPermissions()) {
                 UserTicket ticket = FxContext.getUserTicket();
                 long aclId = ((FxPropertyAssignment) as).getACL().getId();
                 //ignore owner in this checks since owner membership does not allow creation

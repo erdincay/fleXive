@@ -166,59 +166,59 @@ class GroovyTypeBuilderTest {
         try {
             new GroovyTypeBuilder().builderTest(usePermissions: false)
             final FxType type = getTestType()
-            Assert.assertFalse(type.usePermissions())
-            Assert.assertFalse(type.useInstancePermissions())
-            Assert.assertFalse(type.usePropertyPermissions())
-            Assert.assertFalse(type.useStepPermissions())
-            Assert.assertFalse(type.useTypePermissions())
+            Assert.assertFalse(type.isUsePermissions())
+            Assert.assertFalse(type.isUseInstancePermissions())
+            Assert.assertFalse(type.isUsePropertyPermissions())
+            Assert.assertFalse(type.isUseStepPermissions())
+            Assert.assertFalse(type.isUseTypePermissions())
         } finally {
             removeTestType()
         }
         try {
             new GroovyTypeBuilder().builderTest(useInstancePermissions: true)
-            Assert.assertTrue(getTestType().useInstancePermissions())
+            Assert.assertTrue(getTestType().isUseInstancePermissions())
         } finally {
             removeTestType()
         }
         try {
             new GroovyTypeBuilder().builderTest(useInstancePermissions: false)
-            Assert.assertFalse(getTestType().useInstancePermissions())
+            Assert.assertFalse(getTestType().isUseInstancePermissions())
         } finally {
             removeTestType()
         }
         try {
             new GroovyTypeBuilder().builderTest(usePropertyPermissions: true)
-            Assert.assertTrue(getTestType().usePropertyPermissions())
+            Assert.assertTrue(getTestType().isUsePropertyPermissions())
         } finally {
             removeTestType()
         }
         try {
             new GroovyTypeBuilder().builderTest(usePropertyPermissions: false)
-            Assert.assertFalse(getTestType().usePropertyPermissions())
+            Assert.assertFalse(getTestType().isUsePropertyPermissions())
         } finally {
             removeTestType()
         }
         try {
             new GroovyTypeBuilder().builderTest(useStepPermissions: true)
-            Assert.assertTrue(getTestType().useStepPermissions())
+            Assert.assertTrue(getTestType().isUseStepPermissions())
         } finally {
             removeTestType()
         }
         try {
             new GroovyTypeBuilder().builderTest(useStepPermissions: false)
-            Assert.assertFalse(getTestType().useStepPermissions())
+            Assert.assertFalse(getTestType().isUseStepPermissions())
         } finally {
             removeTestType()
         }
         try {
             new GroovyTypeBuilder().builderTest(useTypePermissions: true)
-            Assert.assertTrue(getTestType().useTypePermissions())
+            Assert.assertTrue(getTestType().isUseTypePermissions())
         } finally {
             removeTestType()
         }
         try {
             new GroovyTypeBuilder().builderTest(useTypePermissions: false)
-            Assert.assertFalse(getTestType().useTypePermissions())
+            Assert.assertFalse(getTestType().isUseTypePermissions())
         } finally {
             removeTestType()
         }

@@ -250,7 +250,7 @@ public class SqlSearch {
             if (!ticket.isGlobalSupervisor()) {
                 for (FxFoundType check : df.getContentTypes()) {
                     FxType c = environment.getType(check.getContentTypeId());
-                    if (c.usePropertyPermissions())
+                    if (c.isUsePropertyPermissions())
                         propertyPermTypes.add(c);
                 }
             }
@@ -295,7 +295,7 @@ public class SqlSearch {
                         if (!allowedAssignment.contains(xp)) {
                             if (!deniedAssignment.contains(xp)) {
                                 FxPropertyAssignment pa = (FxPropertyAssignment) environment.getAssignment(xp);
-                                if (pa.getAssignedType().usePropertyPermissions()
+                                if (pa.getAssignedType().isUsePropertyPermissions()
                                         && !ticket.mayReadACL(pa.getACL().getId(), rs.getLong(DataSelector.COL_CREATED_BY))) {
                                     deniedAssignment.add(xp);
                                     val = new FxNoAccess(ticket, (FxValue) val);

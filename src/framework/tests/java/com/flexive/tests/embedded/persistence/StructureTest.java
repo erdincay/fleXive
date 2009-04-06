@@ -148,11 +148,11 @@ public class StructureTest {
         Assert.assertTrue(testType.getAssignedProperties().size() == propCount, "Property count mismatch");
         Assert.assertEquals(testType.getAssignment("/TestDirectProperty2").getXPath(), "TESTCDNEWNAME/TESTDIRECTPROPERTY2",
                 "Expected [TESTCDNEWNAME/TESTDIRECTPROPERTY2] but got: [" + testType.getAssignment("/TestDirectProperty2").getXPath() + "]");
-        Assert.assertTrue(testType.usePermissions());
-        Assert.assertTrue(testType.useInstancePermissions());
-        Assert.assertTrue(!testType.usePropertyPermissions());
-        Assert.assertTrue(!testType.useStepPermissions());
-        Assert.assertTrue(!testType.useTypePermissions());
+        Assert.assertTrue(testType.isUsePermissions());
+        Assert.assertTrue(testType.isUseInstancePermissions());
+        Assert.assertTrue(!testType.isUsePropertyPermissions());
+        Assert.assertTrue(!testType.isUseStepPermissions());
+        Assert.assertTrue(!testType.isUseTypePermissions());
         Assert.assertTrue(testType.getState() == TypeState.Unavailable);
 
         try {

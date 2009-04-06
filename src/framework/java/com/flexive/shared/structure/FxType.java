@@ -320,8 +320,59 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * Use permissions at all?
      *
      * @return if permissions are used at all
+     * @deprecated will be removed in 3.1
      */
     public boolean usePermissions() {
+        return isUsePermissions();
+    }
+
+    /**
+     * Use content instance permissions?
+     *
+     * @return if content instance permissions are used
+     * @deprecated will be removed in 3.1
+     */
+    public boolean useInstancePermissions() {
+        return isUseInstancePermissions();
+    }
+
+    /**
+     * Use property permissions?
+     *
+     * @return if property permissions are used
+     * @deprecated will be removed in 3.1
+     */
+    public boolean usePropertyPermissions() {
+        return isUsePropertyPermissions();
+    }
+
+    /**
+     * Use step permissions?
+     *
+     * @return if step permissions are used
+     * @deprecated will be removed in 3.1
+     */
+    public boolean useStepPermissions() {
+        return isUseStepPermissions();
+    }
+
+    /**
+     * Use type permissions?
+     *
+     * @return if type permissions are used
+     * @deprecated will be removed in 3.1
+     */
+    public boolean useTypePermissions() {
+        return isUseTypePermissions();
+    }
+
+    /**
+     * Use permissions at all?
+     *
+     * @return if permissions are used at all
+     * @since 3.1
+     */
+    public boolean isUsePermissions() {
         return permissions != 0;
     }
 
@@ -329,8 +380,9 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * Use content instance permissions?
      *
      * @return if content instance permissions are used
+     * @since 3.1
      */
-    public boolean useInstancePermissions() {
+    public boolean isUseInstancePermissions() {
         return (permissions & FxPermissionUtils.PERM_MASK_INSTANCE) == FxPermissionUtils.PERM_MASK_INSTANCE;
     }
 
@@ -338,8 +390,9 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * Use property permissions?
      *
      * @return if property permissions are used
+     * @since 3.1
      */
-    public boolean usePropertyPermissions() {
+    public boolean isUsePropertyPermissions() {
         return (permissions & FxPermissionUtils.PERM_MASK_PROPERTY) == FxPermissionUtils.PERM_MASK_PROPERTY;
     }
 
@@ -347,8 +400,9 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * Use step permissions?
      *
      * @return if step permissions are used
+     * @since 3.1
      */
-    public boolean useStepPermissions() {
+    public boolean isUseStepPermissions() {
         return (permissions & FxPermissionUtils.PERM_MASK_STEP) == FxPermissionUtils.PERM_MASK_STEP;
     }
 
@@ -356,8 +410,9 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * Use type permissions?
      *
      * @return if type permissions are used
+     * @since 3.1
      */
-    public boolean useTypePermissions() {
+    public boolean isUseTypePermissions() {
         return (permissions & FxPermissionUtils.PERM_MASK_TYPE) == FxPermissionUtils.PERM_MASK_TYPE;
     }
 
@@ -647,7 +702,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
         }
         final UserTicket ticket = FxContext.getUserTicket();
         for (FxPropertyAssignment fxpa : assignedProperties) {
-            if (!fxpa.isEnabled() || (usePropertyPermissions() && !ticket.mayCreateACL(fxpa.getACL().getId(), ticket.getUserId())))
+            if (!fxpa.isEnabled() || (isUsePropertyPermissions() && !ticket.mayCreateACL(fxpa.getACL().getId(), ticket.getUserId())))
                 continue;
             /*if (fxpa.getMultiplicity().isOptional())
                 base.addChild(fxpa.createEmptyData(base, 1));

@@ -102,7 +102,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
         FxPermissionUtils.checkTypeAvailable(typeId, false);
         FxType type = environment.getType(typeId);
         //security check start
-        if (type.useTypePermissions() && !ticket.mayCreateACL(type.getACL().getId(), ticket.getUserId()))
+        if (type.isUseTypePermissions() && !ticket.mayCreateACL(type.getACL().getId(), ticket.getUserId()))
             throw new FxNoAccessException("ex.acl.noAccess.create", type.getACL().getName());
         //security check end
         long acl = prefACL;
@@ -110,7 +110,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             environment.getACL(acl);
         } catch (Exception e) {
             acl = ACLCategory.INSTANCE.getDefaultId();
-            if (!ticket.isGlobalSupervisor() && type.useInstancePermissions() &&
+            if (!ticket.isGlobalSupervisor() && type.isUseInstancePermissions() &&
                     !(ticket.mayCreateACL(acl, ticket.getUserId()) &&
                             ticket.mayReadACL(acl, ticket.getUserId()) &&
                             ticket.mayEditACL(acl, ticket.getUserId()))) {
@@ -220,7 +220,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                     cachedContent.getSecurityInfo().getContentACL(), true);
             FxPermissionUtils.checkMandatorExistance(content.getMandatorId());
             FxPermissionUtils.checkTypeAvailable(type.getId(), true);
-            if (type.usePropertyPermissions() && !ticket.isGlobalSupervisor()) {
+            if (type.isUsePropertyPermissions() && !ticket.isGlobalSupervisor()) {
                 //wrap with FxNoAccess or set to readonly when appropriate
                 FxPermissionUtils.wrapNoAccessValues(ticket, cachedContent.getSecurityInfo(),
                         content, type, env);
@@ -289,7 +289,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                 beforeAssignmentScript = FxScriptEvent.BeforeAssignmentDataSave;
                 afterAssignmentScript = FxScriptEvent.AfterAssignmentDataSave;
             }
-            if (type.usePropertyPermissions() && !ticket.isGlobalSupervisor() && content.getPk().isNew())
+            if (type.isUsePropertyPermissions() && !ticket.isGlobalSupervisor() && content.getPk().isNew())
                 FxPermissionUtils.checkPropertyPermissions(content, ACLPermission.CREATE);
             //security check end
 
@@ -799,7 +799,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             if (xpath.equals("/")) {
                 if (!ticket.isGlobalSupervisor()) {
                     FxType type = CacheAdmin.getEnvironment().getType(co.getTypeId());
-                    if (type.usePermissions()) {
+                    if (type.isUsePermissions()) {
                         FxContentSecurityInfo si = storage.getContentSecurityInfo(con, pk);
                         FxPermissionUtils.checkPermission(ticket, ACLPermission.READ, si, true);
                     }

@@ -425,7 +425,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @return the type itself, useful for chained calls
      */
     public FxTypeEdit setUseInstancePermissions(boolean use) {
-        if (use == this.useInstancePermissions())
+        if (use == this.isUseInstancePermissions())
             return this;
         this.permissions ^= FxPermissionUtils.PERM_MASK_INSTANCE;
         this.changed = true;
@@ -439,7 +439,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @return the type itself, useful for chained calls
      */
     public FxTypeEdit setUsePropertyPermissions(boolean use) {
-        if (use == this.usePropertyPermissions())
+        if (use == this.isUsePropertyPermissions())
             return this;
         this.permissions ^= FxPermissionUtils.PERM_MASK_PROPERTY;
         this.changed = true;
@@ -453,7 +453,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @return the type itself, useful for chained calls
      */
     public FxTypeEdit setUseStepPermissions(boolean use) {
-        if (use == this.useStepPermissions())
+        if (use == this.isUseStepPermissions())
             return this;
         this.permissions ^= FxPermissionUtils.PERM_MASK_STEP;
         this.changed = true;
@@ -467,7 +467,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @return the type itself, useful for chained calls
      */
     public FxTypeEdit setUseTypePermissions(boolean use) {
-        if (use == this.useTypePermissions())
+        if (use == this.isUseTypePermissions())
             return this;
         this.permissions ^= FxPermissionUtils.PERM_MASK_TYPE;
         this.changed = true;

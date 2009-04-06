@@ -152,11 +152,11 @@ public class ContentPropertySecurityTest {
     @Test
     public void checkTypePermissionSetup() throws FxApplicationException {
         FxType type = CacheAdmin.getEnvironment().getType(typeId);
-        Assert.assertTrue(type.usePermissions());
-        Assert.assertTrue(type.useInstancePermissions());
-        Assert.assertTrue(type.usePropertyPermissions());
-        Assert.assertTrue(!type.useStepPermissions());
-        Assert.assertTrue(!type.useTypePermissions());
+        Assert.assertTrue(type.isUsePermissions());
+        Assert.assertTrue(type.isUseInstancePermissions());
+        Assert.assertTrue(type.isUsePropertyPermissions());
+        Assert.assertTrue(!type.isUseStepPermissions());
+        Assert.assertTrue(!type.isUseTypePermissions());
     }
 
     public void securityLoad() throws FxApplicationException {

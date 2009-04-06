@@ -94,10 +94,10 @@ public class FxTypeConverter implements Converter {
             writer.addAttribute("state", type.getState().name());
             writer.addAttribute("storageMode", type.getStorageMode().name());
             writer.addAttribute("workflow", type.getWorkflow().getName());
-            writer.addAttribute("permType", String.valueOf(type.useTypePermissions()));
-            writer.addAttribute("permProp", String.valueOf(type.usePropertyPermissions()));
-            writer.addAttribute("permInst", String.valueOf(type.useInstancePermissions()));
-            writer.addAttribute("permStep", String.valueOf(type.useStepPermissions()));
+            writer.addAttribute("permType", String.valueOf(type.isUseTypePermissions()));
+            writer.addAttribute("permProp", String.valueOf(type.isUsePropertyPermissions()));
+            writer.addAttribute("permInst", String.valueOf(type.isUseInstancePermissions()));
+            writer.addAttribute("permStep", String.valueOf(type.isUseStepPermissions()));
 
             writer.addAttribute("trackHistory", String.valueOf(type.isTrackHistory()));
             if (type.isTrackHistory())

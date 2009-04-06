@@ -78,11 +78,11 @@ public class FxPermissionUtils {
      */
     public static boolean checkPermission(UserTicket ticket, long ownerId, ACLPermission permission, FxType type, long stepACL,
                                           long contentACL, boolean throwException) throws FxNoAccessException {
-        if (ticket.isGlobalSupervisor() || !type.usePermissions() || FxContext.get().getRunAsSystem())
+        if (ticket.isGlobalSupervisor() || !type.isUsePermissions() || FxContext.get().getRunAsSystem())
             return true;
-        boolean typeAllowed = !type.useTypePermissions();
-        boolean stepAllowed = !type.useStepPermissions();
-        boolean contentAllowed = !type.useInstancePermissions();
+        boolean typeAllowed = !type.isUseTypePermissions();
+        boolean stepAllowed = !type.isUseStepPermissions();
+        boolean contentAllowed = !type.isUseInstancePermissions();
         for (ACLAssignment assignment : ticket.getACLAssignments()) {
             if (!typeAllowed && assignment.getAclId() == type.getACL().getId())
                 typeAllowed = assignment.getPermission(permission, ownerId, ticket.getUserId());
@@ -198,7 +198,7 @@ public class FxPermissionUtils {
      * @throws FxNoAccessException         on errors
      */
     public static void wrapNoAccessValues(UserTicket ticket, FxContentSecurityInfo securityInfo, FxContent content, FxType type, FxEnvironment env) throws FxNotFoundException, FxInvalidParameterException, FxNoAccessException {
-        if (!type.usePropertyPermissions() || ticket.isGlobalSupervisor() || FxContext.get().getRunAsSystem())
+        if (!type.isUsePropertyPermissions() || ticket.isGlobalSupervisor() || FxContext.get().getRunAsSystem())
             return; //invalid call, nothing to process ...
         List<String> xpaths = content.getAllPropertyXPaths();
         FxPropertyData pdata;
@@ -375,7 +375,7 @@ public class FxPermissionUtils {
         checkPermission(ticket, createdBy, ACLPermission.READ, type, stepACL, acl, true);
         // check for supervisor permissions
         if (_system || ticket.isMandatorSupervisor() && mandator == ticket.getMandatorId() ||
-                !type.usePermissions() /*|| ticket.isInGroup((int) UserGroup.GROUP_OWNER) && createdBy == ticket.getUserId()*/) {
+                !type.isUsePermissions() /*|| ticket.isInGroup((int) UserGroup.GROUP_OWNER) && createdBy == ticket.getUserId()*/) {
             return new PermissionSet(true, true, true, true, true);
         }
         // get permission matrix from ACL assignments

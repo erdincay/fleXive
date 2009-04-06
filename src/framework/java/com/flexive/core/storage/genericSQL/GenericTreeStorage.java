@@ -699,7 +699,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 FxPermissionUtils.checkMandatorExistance(_mandator);
                 FxPermissionUtils.checkTypeAvailable(_type.getId(), true);
                 if (_system || ticket.isMandatorSupervisor() && _mandator == ticket.getMandatorId() ||
-                        !_type.usePermissions() || ticket.isInGroup((int) UserGroup.GROUP_OWNER) && _createdBy == ticket.getUserId()) {
+                        !_type.isUsePermissions() || ticket.isInGroup((int) UserGroup.GROUP_OWNER) && _createdBy == ticket.getUserId()) {
                     _edit = _create = _delete = _export = _relate = true;
                 } else {
                     //throw exception if read is forbidden
@@ -765,7 +765,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 final boolean _system = FxContext.get().getRunAsSystem() || ticket.isGlobalSupervisor();
                 FxPermissionUtils.checkPermission(ticket, _createdBy, ACLPermission.READ, _type, _stepACL, _acl, true);
                 if (_system || ticket.isMandatorSupervisor() && _mandator == ticket.getMandatorId() ||
-                        !_type.usePermissions() || ticket.isInGroup((int) UserGroup.GROUP_OWNER) && _createdBy == ticket.getUserId()) {
+                        !_type.isUsePermissions() || ticket.isInGroup((int) UserGroup.GROUP_OWNER) && _createdBy == ticket.getUserId()) {
                     _read = _edit = _create = _delete = _export = _relate = true;
                 } else {
                     //throw exception if read is forbidden
@@ -880,7 +880,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                     step2stepACLId.put(_step, _stepACL);
                 }
                 if (_system || ticket.isMandatorSupervisor() && _mandator == ticket.getMandatorId() ||
-                        !type.usePermissions() || ticket.isInGroup((int) UserGroup.GROUP_OWNER) && _createdBy == ticket.getUserId()) {
+                        !type.isUsePermissions() || ticket.isInGroup((int) UserGroup.GROUP_OWNER) && _createdBy == ticket.getUserId()) {
                     _read = _edit = _create = _delete = _export = _relate = true;
                 } else {
                     _read = FxPermissionUtils.checkPermission(ticket, _createdBy, ACLPermission.READ, type, _stepACL, _acl, false);

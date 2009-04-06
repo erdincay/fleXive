@@ -591,7 +591,7 @@ public class TypeEditorBean {
     }
 
     public boolean isUseInstancePermissions() {
-        return this.type.useInstancePermissions();
+        return this.type.isUseInstancePermissions();
     }
 
     public void setUsePropertyPermissions(boolean perm) {
@@ -599,7 +599,7 @@ public class TypeEditorBean {
     }
 
     public boolean isUsePropertyPermissions() {
-        return this.type.usePropertyPermissions();
+        return this.type.isUsePropertyPermissions();
     }
 
     public void setUseStepPermissions(boolean perm) {
@@ -607,7 +607,7 @@ public class TypeEditorBean {
     }
 
     public boolean isUseStepPermissions() {
-        return this.type.useStepPermissions();
+        return this.type.isUseStepPermissions();
     }
 
     public void setUseTypePermissions(boolean perm) {
@@ -615,7 +615,7 @@ public class TypeEditorBean {
     }
 
     public boolean isUseTypePermissions() {
-        return this.type.useTypePermissions();
+        return this.type.isUseTypePermissions();
     }
 
     /*
