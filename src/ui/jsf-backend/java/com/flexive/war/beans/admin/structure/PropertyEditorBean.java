@@ -690,14 +690,7 @@ public class PropertyEditorBean implements ActionBean {
      * @return a list of property assignments that are referencing this property.
      */
     public List<FxPropertyAssignment> getReferencingPropertyAssignments() {
-        List<FxPropertyAssignment> assignments = CacheAdmin.getFilteredEnvironment().getPropertyAssignments(true);
-        List<FxPropertyAssignment> result = new ArrayList<FxPropertyAssignment>();
-        for (FxPropertyAssignment assignment : assignments) {
-            if (assignment.getProperty().getId() == property.getId() && !assignment.isSystemInternal()) {
-                result.add(assignment);
-            }
-        }
-        return result;
+        return CacheAdmin.getFilteredEnvironment().getReferencingPropertyAssignments(property.getId());
     }
 
     /**

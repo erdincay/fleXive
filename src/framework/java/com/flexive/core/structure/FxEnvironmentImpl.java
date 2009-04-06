@@ -638,6 +638,8 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     public boolean assignmentExists(String xPath) {
         if (xPath != null && xPath.trim().length() > 0) {
             try {
+                if( !XPathElement.isValidXPath(xPath) )
+                    return false; //avoid exceptions on malformed xpath's
                 xPath = XPathElement.toXPathNoMult(xPath);
             } catch (FxInvalidParameterException e) {
                 throw e.asRuntimeException();
@@ -848,6 +850,20 @@ public final class FxEnvironmentImpl implements FxEnvironment {
             ret.addAll(ret2);
         }
         return ret;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public List<FxPropertyAssignment> getReferencingPropertyAssignments(long propertyId) {
+        List<FxPropertyAssignment> assignments = getPropertyAssignments(true);
+        List<FxPropertyAssignment> result = new ArrayList<FxPropertyAssignment>();
+        for (FxPropertyAssignment assignment : assignments) {
+            if (assignment.getProperty().getId() == propertyId && !assignment.isSystemInternal()) {
+                result.add(assignment);
+            }
+        }
+        return result;
     }
 
     /**

@@ -66,12 +66,7 @@ public class XPathElementTest {
         } catch (FxInvalidParameterException e) {
             //ok
         }
-        try {
-            XPathElement.lastElement("A/B/C[123]");
-            Assert.fail("expected exception");
-        } catch (FxInvalidParameterException e) {
-            //ok
-        }
+        Assert.assertEquals("C[123]", XPathElement.lastElement("A/B/C[123]").toString());
         try {
             XPathElement.lastElement("/A/B/C[a]");
             Assert.fail("expected exception");
@@ -116,7 +111,6 @@ public class XPathElementTest {
         String[] invalidPatterns = {
                 "/A/",
                 "/A[a]",
-                "A/B[1]",
                 "/AA[1]/B/",
                 "A[@pk=NEW.42]/A",
                 "A[@pk=LIVE]/A",

@@ -70,6 +70,7 @@
     <content url="file://$MODULE_DIR$/..">
       <sourceFolder url="file://$MODULE_DIR$/../java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../java6" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/fxresources/scripts" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/maven/archetypes/flexive-archetype-ear/src/main/resources/archetype-resources/ejb-jar/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/maven/archetypes/flexive-archetype-ear/src/main/resources/archetype-resources/shared/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/maven/archetypes/flexive-archetype-ear/src/main/resources/archetype-resources/war/src/main/java" isTestSource="false" />
@@ -338,6 +339,17 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../../lib/lucene/lucene-core-2.4.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/../../../../../install/lucene/lucene-2.4.0/src/java" />
+        </SOURCES>
       </library>
     </orderEntry>
   </component>

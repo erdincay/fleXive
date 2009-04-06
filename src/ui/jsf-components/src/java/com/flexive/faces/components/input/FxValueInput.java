@@ -39,7 +39,9 @@ import com.flexive.shared.value.mapper.InputMapper;
 import com.flexive.shared.value.mapper.NumberQueryInputMapper;
 import com.flexive.shared.value.renderer.FxValueFormatter;
 import com.flexive.shared.structure.FxPropertyAssignment;
+import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.XPathElement;
 
 import javax.faces.component.UIInput;
 import javax.faces.component.UIViewRoot;
@@ -280,8 +282,18 @@ public class FxValueInput extends UIInput {
                 final FxValue fxValue = FxValueInputRenderer.getFxValue(FacesContext.getCurrentInstance(), this);
                 if (fxValue instanceof FxReference && StringUtils.isNotBlank(fxValue.getXPath())) {
                     // force reference mapper with autocompletion
-                    final FxPropertyAssignment assignment = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(fxValue.getXPath());
-                    inputMapper = new NumberQueryInputMapper.ReferenceQueryInputMapper(assignment.getProperty());
+                    final FxProperty property;
+                    if (!XPathElement.isValidXPath(fxValue.getXPath())) {
+                        //if not a valid xpath, we might have a property
+                        if (CacheAdmin.getEnvironment().propertyExists(fxValue.getXPath()))
+                            property = CacheAdmin.getEnvironment().getProperty(fxValue.getXPath());
+                        else {
+                            inputMapper = new IdentityInputMapper();    // use dummy mapper
+                            return inputMapper;
+                        }
+                    } else
+                        property = ((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(fxValue.getXPath())).getProperty();
+                    inputMapper = new NumberQueryInputMapper.ReferenceQueryInputMapper(property);
                 } else {
                     inputMapper = new IdentityInputMapper();    // use dummy mapper
                 }

@@ -445,6 +445,7 @@ public class FxProperty extends FxStructureElement implements Serializable {
             default:
                 throw new FxNotFoundException("ex.structure.datatype.notImplemented", this.getDataType()).asRuntimeException();
         }
+        value.setXPath(getName()); //provide some dummy info for reference editors, etc.
         updateEnvironmentData(value);
         return value;
     }

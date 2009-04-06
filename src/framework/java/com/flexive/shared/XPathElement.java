@@ -54,7 +54,7 @@ public class XPathElement implements Serializable {
      * an XPath element must start with a letter followed by an optional letter/number/underscore combination
      * and may end with an optional multiplicity like [x] where x is a number
      */
-    private static Pattern XPathPattern = Pattern.compile("([A-Z][A-Z_0-9]{0,}\\[" + PK + "\\]){0,1}(\\/[A-Z][A-Z_0-9]{0,}(\\[[0-9]{1,}\\]){0,1}){1,}");
+    private static Pattern XPathPattern = Pattern.compile("([A-Z][A-Z_0-9]{0,}(\\[" + PK + "\\]){0,1}){0,1}(\\/[A-Z][A-Z_0-9]{0,}(\\[[0-9]{1,}\\]){0,1}){1,}");
     private static Pattern PKPattern = Pattern.compile(PK);
     private static Pattern doubleSlashPattern = Pattern.compile("[\\/]{2,}");
     private String alias;

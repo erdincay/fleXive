@@ -423,6 +423,13 @@ public final class FxFilteredEnvironment implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
+    public List<FxPropertyAssignment> getReferencingPropertyAssignments(long propertyId) {
+        return environment.getReferencingPropertyAssignments(propertyId);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public FxType getType(String name) {
         return environment.getType(name);
     }

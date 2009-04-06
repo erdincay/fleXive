@@ -352,6 +352,15 @@ public interface FxEnvironment extends Serializable {
     List<FxAssignment> getDerivedAssignments(long assignmentId);
 
     /**
+     * Returns all property assignments that are referencing this property which the
+     * current user may see, excluding the system internal assignments.
+     *
+     * @param propertyId the property which is referenced
+     * @return a list of property assignments that are referencing this property.
+     */
+    List<FxPropertyAssignment> getReferencingPropertyAssignments(long propertyId);
+
+    /**
      * Get a type or relation identified by its name
      *
      * @param name type name

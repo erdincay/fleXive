@@ -40,6 +40,7 @@ import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.*;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.content.FxPermissionUtils;
+import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.security.Role;
@@ -48,6 +49,7 @@ import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.FxBinary;
+import com.flexive.shared.value.FxReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.lang.StringUtils;
@@ -128,6 +130,11 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 storage.prepareBinary(con, (FxBinary) defValue);
             }
             final String _def = defValue == null || defValue.isEmpty() ? null : ConversionEngine.getXStream().toXML(defValue);
+
+            if (_def != null && (property.getDefaultValue() instanceof FxReference)) {
+                //check if the type matches the instance
+                checkReferencedType(con, (FxReference) property.getDefaultValue(), property.getReferencedType());
+            }
 
             // do not allow to add mandatory properties (i.e. min multiplicity > 0) to types for which content exists
             if (storage.getTypeInstanceCount(con, typeId) > 0 && property.getMultiplicity().getMin() > 0) {
@@ -1290,6 +1297,16 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         org.getReferencedType().getId() != prop.getReferencedType().getId() ||
                         org.hasReferencedType() != prop.hasReferencedType()) {
                     if (getPropertyInstanceCount(org.getId()) == 0) {
+                        if (prop.isDefaultValueSet() && (prop.getDefaultValue() instanceof FxReference)) {
+                            //check if the type matches the instance
+                            checkReferencedType(con, (FxReference) prop.getDefaultValue(), prop.getReferencedType());
+                            //check for referencing assignments
+                            final List<FxPropertyAssignment> refAssignments = CacheAdmin.getEnvironment().getReferencingPropertyAssignments(prop.getId());
+                            for(FxPropertyAssignment refAssignment: refAssignments) {
+                                if( refAssignment.hasAssignmentDefaultValue() && refAssignment.getDefaultValue() instanceof FxReference)
+                                    checkReferencedType(con, (FxReference)refAssignment.getDefaultValue(), prop.getReferencedType());
+                            }
+                        }
                         ps = con.prepareStatement("UPDATE " + TBL_STRUCT_PROPERTIES + " SET REFTYPE=? WHERE ID=?");
                         ps.setLong(2, prop.getId());
                         if (prop.hasReferencedType()) {
@@ -1411,6 +1428,16 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         ContentStorage storage = StorageManager.getContentStorage(TypeStorageMode.Hierarchical);
                         storage.prepareBinary(con, (FxBinary) defValue);
                     }
+                    if (prop.isDefaultValueSet() && (defValue instanceof FxReference)) {
+                        //check if the type matches the instance
+                        checkReferencedType(con, (FxReference) defValue, prop.getReferencedType());
+                        //check for referencing assignments
+                        final List<FxPropertyAssignment> refAssignments = CacheAdmin.getEnvironment().getReferencingPropertyAssignments(prop.getId());
+                        for (FxPropertyAssignment refAssignment : refAssignments) {
+                            if (refAssignment.hasAssignmentDefaultValue() && refAssignment.getDefaultValue() instanceof FxReference)
+                                checkReferencedType(con, (FxReference) refAssignment.getDefaultValue(), prop.getReferencedType());
+                        }
+                    }
                     final String _def = defValue == null || defValue.isEmpty() ? null : ConversionEngine.getXStream().toXML(defValue);
                     if (_def == null)
                         ps.setNull(1, java.sql.Types.VARCHAR);
@@ -1466,6 +1493,29 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             }
         }
         return changes;
+    }
+
+    /**
+     * Check if the type of the given references matches the given type
+     *
+     * @param con an open and valid connection
+     * @param value the value containing references
+     * @param type the type the references should match
+     * @throws FxNotFoundException on errors
+     * @throws FxLoadException on errors
+     * @throws FxUpdateException if type does not match
+     */
+    private void checkReferencedType(Connection con, FxReference value, FxType type) throws FxNotFoundException, FxLoadException, FxUpdateException {
+        ContentStorage storage = StorageManager.getContentStorage(TypeStorageMode.Hierarchical);
+        for (long lang : value.getTranslatedLanguages()) {
+            FxPK pk = value.getTranslation(lang);
+            if (pk.isNew())
+                continue;
+            final long pkRefType = storage.getContentSecurityInfo(con, pk).getTypeId();
+            if (pkRefType != type.getId())
+                throw new FxUpdateException(LOG, "ex.content.value.invalid.reftype", type,
+                        CacheAdmin.getEnvironment().getType(pkRefType));
+        }
     }
 
     /**
@@ -1633,6 +1683,10 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         storage.prepareBinary(con, (FxBinary) defValue);
                     }
                     final String _def = defValue == null || defValue.isEmpty() ? null : ConversionEngine.getXStream().toXML(defValue);
+                    if (_def != null && (modified.getDefaultValue() instanceof FxReference)) {
+                        //check if the type matches the instance
+                        checkReferencedType(con, (FxReference) modified.getDefaultValue(), modified.getProperty().getReferencedType());
+                    }
                     if (_def == null)
                         ps.setNull(1, java.sql.Types.VARCHAR);
                     else
