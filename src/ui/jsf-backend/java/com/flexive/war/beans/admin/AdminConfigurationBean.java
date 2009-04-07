@@ -37,6 +37,7 @@ import com.flexive.shared.EJBLookup;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.faces.messages.FxFacesMsgErr;
+import com.flexive.war.filter.VersionUrlFilter;
 
 /**
  * Provides access to miscellaneous backend configuration settings.
@@ -87,5 +88,18 @@ public class AdminConfigurationBean {
 
     public void setExportURLprefix(String exportURLprefix) {
         this.exportURLprefix = exportURLprefix;
+    }
+
+    /**
+     * Inserts the current flexive version into the given URL. Available in EL via
+     * {@code #{adm:versionedUrl(String)}.
+     *
+     * @return  the URL with the current version
+     */
+    public static String getVersionedUrl(String url) {
+        final int pos = Math.max(url.lastIndexOf('.'), url.lastIndexOf('/'));
+        return pos != -1
+                ? url.substring(0, pos) + VersionUrlFilter.URL_PATTERN + url.substring(pos)
+                : VersionUrlFilter.URL_PATTERN + url; 
     }
 }

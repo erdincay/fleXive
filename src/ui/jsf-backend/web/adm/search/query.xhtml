@@ -19,8 +19,8 @@
         <a4j:form id="frm">
             <adm:resultTabs activeTab="query"/>
 
-            <script type="text/javascript" src="pub/js/queryEditor.js"/>
-            <script type="text/javascript" src="adm/js/adminQueryEditor.js"/>
+            <script type="text/javascript" src="#{adm:versionedUrl('pub/js/queryEditor.js')}"/>
+            <script type="text/javascript" src="#{adm:versionedUrl('adm/js/adminQueryEditor.js')}"/>
 
             <a4j:region>
 	            <h:inputHidden id="addAssignmentId" value="#{fxQueryEditorBean.addAssignmentId}"/>

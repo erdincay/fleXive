@@ -12,8 +12,7 @@
 
 <ui:composition template="/adm/contentTemplate.xhtml">
       <ui:define name="head">
-        <t:stylesheet path="/adm/css/content.css"/>
-        <t:stylesheet path="/adm/css/structureEditor.css"/>
+        <t:stylesheet path="#{adm:versionedUrl('/adm/css/structureEditor.css')}"/>
         <script type="text/javascript">
             function exportType(type) {
                 try {

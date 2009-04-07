@@ -146,4 +146,10 @@
         <tag-name>toolbarPluginButtons</tag-name>
         <handler-class>com.flexive.faces.components.ToolbarPluginHandler</handler-class>
     </tag>
+
+    <function>
+        <function-name>versionedUrl</function-name>
+        <function-class>com.flexive.war.beans.admin.AdminConfigurationBean</function-class>
+        <function-signature>java.lang.String getVersionedUrl(java.lang.String)</function-signature>
+    </function>
 </facelet-taglib>

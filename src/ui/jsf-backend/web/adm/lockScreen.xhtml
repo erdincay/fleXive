@@ -2,11 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
       xmlns:t="http://myfaces.apache.org/tomahawk">
 <head>
     <title>Screen locked</title>
     <base href="#{fxSystemBean.documentBase}"/>
-    <t:stylesheet path="/adm/css/main.css"/>
+    <t:stylesheet path="#{adm:versionedUrl('/adm/css/main.css')}"/>
 </head>
 <body style="border:1px dotted black;height:48px">
 <center>

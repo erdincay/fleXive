@@ -13,16 +13,16 @@
 
 
 <head>
-    <t:stylesheet path="/adm/css/navigation.css"/>
-    <t:stylesheet path="/adm/css/treeDocIcons.css"/>
+    <t:stylesheet path="#{adm:versionedUrl('/adm/css/navigation.css')}"/>
+    <t:stylesheet path="#{adm:versionedUrl('/adm/css/treeDocIcons.css')}"/>
 
     <base href="#{fxSystemBean.documentBase}"/>
-    <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/shared.js"/>
-    <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/admin.js"/>
+    <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/#{adm:versionedUrl('shared.js')}"/>
+    <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/#{adm:versionedUrl('admin.js')}"/>
     <script type="text/javascript">
         djConfig.baseRelativePath = "pub/js/dojoNavigation/";
     </script>
-    <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/dojoNavigation/dojo.js"></script>
+    <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/dojoNavigation/#{adm:versionedUrl('dojo.js')}"></script>
     <fx:includes jsonRpc="true"/>
 
 

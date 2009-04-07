@@ -6,19 +6,20 @@
       xmlns:t="http://myfaces.apache.org/tomahawk"
       xmlns:a4j="http://richfaces.org/a4j"
       xmlns:fx="http://www.flexive.com/jsf/core"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
       xmlns:weblet="http://weblets.dev.java.net/tags_jsp2">
 <head>
     <base href="#{fxSystemBean.documentBase}"/>
-    <t:stylesheet path="/adm/css/main.css"/>
+    <t:stylesheet path="#{adm:versionedUrl('/adm/css/main.css')}"/>
     <c:if test="#{fxSystemBean.browserAsString=='IE'}">
-        <t:stylesheet path="/adm/css/mainIE.css"/>
+        <t:stylesheet path="#{adm:versionedUrl('/adm/css/mainIE.css')}"/>
     </c:if>
     <fx:includes yui="true"/>
     <link rel="stylesheet" type="text/css" href="#{weblet:url('com.flexive.faces.weblets','/css/lytebox.css')}"/>
-    <script type="text/javascript" src="pub/js/shared.js"> </script>
-    <script type="text/javascript" src="adm/js/commandElement.js"> </script>
-    <script type="text/javascript" src="adm/js/admin.js"> </script>
-    <script type="text/javascript" src="adm/js/main.js"> </script>
+    <script type="text/javascript" src="#{adm:versionedUrl('pub/js/shared.js')}"> </script>
+    <script type="text/javascript" src="#{adm:versionedUrl('adm/js/commandElement.js')}"> </script>
+    <script type="text/javascript" src="#{adm:versionedUrl('adm/js/admin.js')}"> </script>
+    <script type="text/javascript" src="#{adm:versionedUrl('adm/js/main.js')}"> </script>
 
     <script type="text/javascript">
         parent.beginPage();
@@ -49,7 +50,7 @@
             invokeContentAction("adm/content.jsf");
         }
     </script>
-    <link rel="shortcut icon" href="#{fxSystemBean.contextPath}/pub/images/favicon.ico" type="image/vnd.microsoft.icon" />
+    <link rel="shortcut icon" href="#{fxSystemBean.contextPath}/pub/images/#{adm:versionedUrl('favicon.ico')}" type="image/vnd.microsoft.icon" />
     <title>#{fxSystemBean.header}</title>
 </head>
 

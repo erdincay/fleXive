@@ -98,6 +98,18 @@
     </context-param>
 
     <filter>
+        <filter-name>VersionUrlFilter</filter-name>
+        <filter-class>com.flexive.war.filter.VersionUrlFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>VersionUrlFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+    </filter-mapping>
+
+    <filter>
         <display-name>Ajax4jsf Filter</display-name>
         <filter-name>ajax4jsf</filter-name>
         <!--filter-class>org.ajax4jsf.Filter</filter-class-->
@@ -133,11 +145,17 @@
     <filter-mapping>
         <filter-name>FlexFilter</filter-name>
         <url-pattern>/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
     </filter-mapping>
 
     <filter-mapping>
         <filter-name>BackendAuthorizationFilter</filter-name>
         <url-pattern>/adm/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
     </filter-mapping>
 
     <filter>

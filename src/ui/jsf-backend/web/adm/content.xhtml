@@ -11,9 +11,9 @@
       xmlns:rich="http://richfaces.org/rich"
       xmlns:fx="http://www.flexive.com/jsf/core">
 <head>
-    <t:stylesheet path="/adm/css/content.css"/>
+    <t:stylesheet path="#{adm:versionedUrl('/adm/css/content.css')}"/>
     <fx:includes/>
-    <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/admin.js"></script>
+    <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/#{adm:versionedUrl('admin.js')}"></script>
     <script type="text/javascript">
         <!--
         if( parent != null && parent.beginPage) {

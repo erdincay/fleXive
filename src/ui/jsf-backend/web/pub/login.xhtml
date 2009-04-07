@@ -10,9 +10,9 @@
 <head>
     <link rel="shortcut icon" href="#{fxSystemBean.contextPath}/pub/images/favicon.ico" type="image/vnd.microsoft.icon" />
     <title>#{fxSystemBean.header}</title>
-    <link rel="stylesheet" type="text/css" href="#{fxSystemBean.contextPath}/pub/css/login.css" />
+    <link rel="stylesheet" type="text/css" href="#{fxSystemBean.contextPath}/pub/css/#{adm:versionedUrl('login.css')}" />
     <fx:includes/>
-    <script type="text/javascript" src="js/shared.js"> </script>
+    <script type="text/javascript" src="#{adm:versionedUrl('js/shared.js')}"> </script>
     <script language='JavaScript' type='text/javascript'>
         if (this.parent.frames[1]) {
             this.parent.location.href = this.location.href;

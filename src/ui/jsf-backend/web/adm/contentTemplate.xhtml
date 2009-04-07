@@ -11,14 +11,14 @@
 <t:documentHead>
     <base href="#{fxSystemBean.documentBase}"/>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-    <t:stylesheet path="/adm/css/content.css"/>
+    <t:stylesheet path="#{adm:versionedUrl('/adm/css/content.css')}"/>
     <c:if test="#{fxSystemBean.browserAsString=='IE'}">
-        <t:stylesheet path="/adm/css/contentIE.css"/>
+        <t:stylesheet path="#{adm:versionedUrl('/adm/css/contentIE.css')}"/>
     </c:if>
     <fx:includes yui="true" jsonRpc="true"/>
 
-    <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/shared.js"/>
-    <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/admin.js"/>
+    <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/#{adm:versionedUrl('shared.js')}"/>
+    <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/#{adm:versionedUrl('admin.js')}"/>
     <script type="text/javascript">
         if (parent.beginPage) {
             parent.beginPage();

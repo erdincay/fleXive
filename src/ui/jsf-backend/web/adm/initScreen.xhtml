@@ -8,15 +8,16 @@
       xmlns:c="http://java.sun.com/jstl/core"
       xmlns:t="http://myfaces.apache.org/tomahawk"
       xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
       xmlns:fx="http://www.flexive.com/jsf/core">
 <head>
     <title>Initializing [fleXive] ...</title>
-    <t:stylesheet path="/adm/css/main.css"/>
+    <t:stylesheet path="#{adm:versionedUrl('/adm/css/main.css')}"/>
     <fx:includes all="true"/>
 </head>
 <body>
 
-<script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/shared.js"></script>
+<script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/#{adm:versionedUrl('shared.js')}"></script>
 
 <div id="initStatus" style="height:1000px;margin-right:auto;margin-left:auto;">
     <center>

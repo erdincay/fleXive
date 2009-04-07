@@ -8,9 +8,9 @@
       xmlns:adm="http://www.flexive.com/jsf/admin"
       xmlns:fx="http://www.flexive.com/jsf/core">
 <head>
-    <link rel="shortcut icon" href="#{fxSystemBean.contextPath}/pub/images/favicon.ico" type="image/vnd.microsoft.icon" />
+    <link rel="shortcut icon" href="#{fxSystemBean.contextPath}/pub/images/#{adm:versionedUrl('favicon.ico')}" type="image/vnd.microsoft.icon" />
     <title>#{fxSystemBean.header}</title>
-    <link rel="stylesheet" type="text/css" href="/flexive/pub/css/login.css" />
+    <link rel="stylesheet" type="text/css" href="#{fxSystemBean.contextPath}/pub/css/#{adm:versionedUrl('login.css')}" />
     <script language='JavaScript' type='text/javascript'>
         if (this.parent.frames[1]) {
             this.parent.location.href=this.location.href;

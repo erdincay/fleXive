@@ -12,8 +12,8 @@
 
 <ui:composition template="/adm/templates/navigation.xhtml">
     <ui:define name="head">
-        <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/briefcasePanel.js"/>
-        <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/searchQueryPanel.js"/>
+        <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/#{adm:versionedUrl('briefcasePanel.js')}"/>
+        <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/#{adm:versionedUrl('searchQueryPanel.js')}"/>
         <script type="text/javascript">
         <!--
             // search query methods

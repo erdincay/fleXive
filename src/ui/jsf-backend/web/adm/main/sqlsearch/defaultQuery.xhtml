@@ -16,8 +16,8 @@
         <a4j:form id="frm">
             <adm:tab labelKey="SqlSearch.defaultQuery.title" active="true" id="tab1"/>
 
-            <script type="text/javascript" src="pub/js/queryEditor.js"/>
-            <script type="text/javascript" src="adm/js/adminQueryEditor.js"/>
+            <script type="text/javascript" src="#{adm:versionedUrl('pub/js/queryEditor.js')}"/>
+            <script type="text/javascript" src="#{adm:versionedUrl('adm/js/adminQueryEditor.js')}"/>
 
             <adm:infoBox>
                 #{fxMessageBean['SqlSearch.defaultQuery.info']}

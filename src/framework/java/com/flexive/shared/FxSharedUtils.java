@@ -75,6 +75,7 @@ public final class FxSharedUtils {
     private static String fxBuildDate = "unknown";
     private static String fxBuildUser = "unknown";
     private static String fxHeader = "[fleXive]";
+    private static boolean fxSnapshotVersion = false;
     private static String bundledGroovyVersion = "unknown";
     private static List<String> translatedLocales = Arrays.asList("en");
 
@@ -118,6 +119,7 @@ public final class FxSharedUtils {
         try {
             PropertyResourceBundle bundle = (PropertyResourceBundle) PropertyResourceBundle.getBundle("flexive");
             fxVersion = bundle.getString("flexive.version");
+            fxSnapshotVersion = fxVersion != null && fxVersion.endsWith("-SNAPSHOT");
             fxEdition = bundle.getString("flexive.edition");
             fxProduct = bundle.getString("flexive.product");
             fxBuild = bundle.getString("flexive.buildnumber");
@@ -732,6 +734,16 @@ public final class FxSharedUtils {
      */
     public static String getFlexiveVersion() {
         return fxVersion;
+    }
+
+    /**
+     * Returns true if this instance is a -SNAPSHOT version.
+     *
+     * @return   true if this instance is a -SNAPSHOT version.
+     * @since 3.1
+     */
+    public static boolean isSnapshotVersion() {
+        return fxSnapshotVersion;
     }
 
     /**
