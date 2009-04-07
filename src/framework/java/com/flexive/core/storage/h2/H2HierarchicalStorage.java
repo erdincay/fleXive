@@ -34,6 +34,10 @@ package com.flexive.core.storage.h2;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.mySQL.MySQLHierarchicalStorage;
 import com.flexive.core.storage.genericSQL.GenericHierarchicalStorage;
+import com.flexive.shared.exceptions.FxDbException;
+import com.flexive.shared.exceptions.FxRuntimeException;
+
+import java.sql.Connection;
 
 /**
  * H2 implementation of hierarchical content handling
@@ -50,5 +54,12 @@ public class H2HierarchicalStorage extends GenericHierarchicalStorage {
      */
     public static ContentStorage getInstance() {
         return instance;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void lockTables(Connection con, long id, int version) throws FxRuntimeException {
+        //do nothing for H2 since we rely on MVCC
     }
 }

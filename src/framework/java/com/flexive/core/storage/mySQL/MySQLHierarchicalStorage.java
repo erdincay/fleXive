@@ -31,8 +31,17 @@
  ***************************************************************/
 package com.flexive.core.storage.mySQL;
 
+import com.flexive.core.DatabaseConst;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.genericSQL.GenericHierarchicalStorage;
+import com.flexive.shared.exceptions.FxDbException;
+import com.flexive.shared.exceptions.FxRuntimeException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
  * MySQL implementation of hierarchical content handling
@@ -40,6 +49,9 @@ import com.flexive.core.storage.genericSQL.GenericHierarchicalStorage;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class MySQLHierarchicalStorage extends GenericHierarchicalStorage {
+
+    private static final Log LOG = LogFactory.getLog(MySQLHierarchicalStorage.class);
+
     private static final MySQLHierarchicalStorage instance = new MySQLHierarchicalStorage();
 
     /**
@@ -49,5 +61,39 @@ public class MySQLHierarchicalStorage extends GenericHierarchicalStorage {
      */
     public static ContentStorage getInstance() {
         return instance;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void lockTables(Connection con, long id, int version) throws FxRuntimeException {
+        try {
+            PreparedStatement ps = null;
+            try {
+                String ver = version <= 0 ? "" : " AND VER=?";
+                ps = con.prepareStatement("SELECT * FROM " + DatabaseConst.TBL_CONTENT + " WHERE ID=?" + ver + " FOR UPDATE");
+                ps.setLong(1, id);
+                if (version > 0) ps.setInt(2, version);
+                ps.executeQuery();
+                ps.close();
+                ps = con.prepareStatement("SELECT * FROM " + DatabaseConst.TBL_CONTENT_DATA + " WHERE ID=?" + ver + " FOR UPDATE");
+                ps.setLong(1, id);
+                if (version > 0) ps.setInt(2, version);
+                ps.executeQuery();
+                ps.close();
+                ps = con.prepareStatement("SELECT * FROM " + DatabaseConst.TBL_CONTENT_BINARY + " WHERE ID=?" + ver + " FOR UPDATE");
+                ps.setLong(1, id);
+                if (version > 0) ps.setInt(2, version);
+                ps.executeQuery();
+                //fulltext table uses MyISAM engine and can not be locked
+            } finally {
+                if (ps != null)
+                    ps.close();
+            }
+            if (LOG.isDebugEnabled())
+                LOG.debug("Locked instances of id #" + id + (version > 0 ? " and version #" + version : " (all versions)"));
+        } catch (SQLException e) {
+            throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage()).asRuntimeException();
+        }
     }
 }

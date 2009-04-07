@@ -82,6 +82,8 @@ import java.util.*;
  */
 public abstract class GenericHierarchicalStorage implements ContentStorage {
 
+    private static final Log LOG = LogFactory.getLog(GenericHierarchicalStorage.class);
+
     /**
      * {@inheritDoc}
      */
@@ -110,8 +112,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     protected static int[] array(int... data) {
         return data;
     }
-
-    private static final Log LOG = LogFactory.getLog(GenericHierarchicalStorage.class);
 
     protected static final String CONTENT_MAIN_INSERT = "INSERT INTO " + TBL_CONTENT +
             // 1  2   3    4   5    6       7        8
@@ -282,6 +282,16 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         for (int i = startPos; i <= endPos; i++)
             ps.setNull(i, Types.NULL);
     }
+
+    /**
+     * Lock table needed for update operations for a content
+     *
+     * @param con an open and valid connection
+     * @param id id of the content
+     * @param version optional version, if <=0 all versions will be locked
+     * @throws FxDbException nested in a FxRuntimeException on errors
+     */
+    public abstract void lockTables(Connection con, long id, int version) throws FxRuntimeException;
 
 
     /**
@@ -551,6 +561,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         content.getRootGroup().removeEmptyEntries();
         content.getRootGroup().compactPositions(true);
         content.checkValidity();
+
+        //step dependencies will be updated, need to lock
+        lockTables(con, content.getPk().getId(), -1);
 
         FxPK pk;
         PreparedStatement ps = null;
@@ -1892,6 +1905,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         if (type.isUsePropertyPermissions() && !ticket.isGlobalSupervisor())
             FxPermissionUtils.checkPropertyPermissions(content.getLifeCycleInfo().getCreatorId(), delta, ACLPermission.EDIT);
 
+        lockTables(con, pk.getId(), pk.getVersion());
+
         if (delta.isInternalPropertyChanged())
             updateMainEntry(con, content);
         try {
@@ -2345,6 +2360,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         PreparedStatement ps = null;
         try {
             checkContentRemoval(con, type.getId(), pk.getId(), -1, false, true);
+
+            lockTables(con, pk.getId(), -1);
+
             //sync with tree
             StorageManager.getTreeStorage().contentRemoved(con, pk.getId(), false);
             ps = con.prepareStatement(CONTENT_DATA_FT_REMOVE);
@@ -2409,6 +2427,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ver = cvi.getDistinctVersion(pk.getVersion());
 
         checkContentRemoval(con, type.getId(), pk.getId(), ver, false, false);
+
+        lockTables(con, pk.getId(), pk.getVersion());
 
         PreparedStatement ps = null;
         try {
