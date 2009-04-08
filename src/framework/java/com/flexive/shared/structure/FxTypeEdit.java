@@ -139,6 +139,41 @@ public class FxTypeEdit extends FxType implements Serializable {
     /**
      * Create a new FxTypeEdit instance for creating a new FxType
      *
+     * @param name name of the type
+     * @param parentType the parent type ID
+     * @return FxTypeEdit instance for creating a new FxType
+     * @since 3.0.3
+     */
+    public static FxTypeEdit createNew(String name, FxType parentType) {
+        return createNew(
+                name,
+                new FxString(FxLanguage.DEFAULT_ID, name),
+                CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                parentType
+        );
+    }
+
+    /**
+     * Create a new FxTypeEdit instance for creating a new FxType
+     *
+     * @param name name of the type
+     * @param parentTypeId the parent type ID
+     * @return FxTypeEdit instance for creating a new FxType
+     * @since 3.0.3
+     */
+    public static FxTypeEdit createNew(String name, long parentTypeId) {
+        final FxEnvironment env = CacheAdmin.getEnvironment();
+        return createNew(
+                name,
+                new FxString(FxLanguage.DEFAULT_ID, name),
+                env.getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                env.getType(parentTypeId)
+        );
+    }
+
+    /**
+     * Create a new FxTypeEdit instance for creating a new FxType
+     *
      * @param name        name of the type
      * @param label       label
      * @param acl         type ACL
