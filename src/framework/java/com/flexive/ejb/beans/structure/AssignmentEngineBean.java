@@ -50,6 +50,7 @@ import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.FxBinary;
 import com.flexive.shared.value.FxReference;
+import com.sun.org.apache.xerces.internal.impl.dtd.XMLElementDecl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.lang.StringUtils;
@@ -683,7 +684,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             ps.setLong(8, pos);
             if (parentXPath == null || "/".equals(parentXPath))
                 parentXPath = "";
-            ps.setString(9, type.getName() + parentXPath + "/" + group.getName());
+            ps.setString(9, type.getName() + XPathElement.stripType(parentXPath) + "/" + group.getName());
             ps.setString(10, group.getName());
             ps.setNull(11, java.sql.Types.NUMERIC);
             ps.setLong(12, (tmp == null ? FxAssignment.NO_PARENT : tmp.getId()));
