@@ -35,12 +35,13 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxRuntimeException;
-import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.search.*;
 import com.flexive.shared.structure.FxEnvironment;
+import com.flexive.shared.structure.FxType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -71,8 +72,9 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
             preferences = configuration.get(SystemParameters.USER_RESULT_PREFERENCES, getKey(typeId, viewType, location));
         } catch (FxNotFoundException e) {
             if (typeId >= 0) {
-                // use global default
-                return load(-1, viewType, location);
+                final FxType type = CacheAdmin.getEnvironment().getType(typeId);
+                // use parent type or global default (FX-482)
+                return load(type.getParent() != null ? type.getParent().getId() : -1, viewType, location);
             } else if (typeId == -1) {
                 // if no global default is defined, use hardcoded default settings
                 preferences = new ResultPreferences(Arrays.asList(

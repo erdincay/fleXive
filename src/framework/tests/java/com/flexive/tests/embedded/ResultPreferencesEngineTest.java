@@ -32,8 +32,10 @@
 package com.flexive.tests.embedded;
 
 import com.flexive.shared.FxContext;
-import com.flexive.shared.CacheAdmin;
-import static com.flexive.shared.EJBLookup.getResultPreferencesEngine;
+import static com.flexive.shared.EJBLookup.*;
+import com.flexive.shared.content.FxPK;
+import static com.flexive.shared.CacheAdmin.getEnvironment;
+import com.flexive.shared.structure.FxTypeEdit;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.ResultPreferencesEngine;
 import com.flexive.shared.search.*;
@@ -44,9 +46,11 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
 import org.testng.Assert;
+import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Basic unit tests for the result preferences EJB.
@@ -150,7 +154,7 @@ public class ResultPreferencesEngineTest {
 
     @Test
     public void resultPreferencesWithAssignment() throws FxApplicationException {
-        final long folderTypeId = CacheAdmin.getEnvironment().getType("folder").getId();
+        final long folderTypeId = getEnvironment().getType("folder").getId();
         try {
             createFolderPreferences(folderTypeId);
             final FxResultSet result = new SqlQueryBuilder().select("@*").type("folder").getResult();
@@ -163,7 +167,7 @@ public class ResultPreferencesEngineTest {
 
     @Test
     public void resultPreferencesAssignmentChecked_FX430() throws FxApplicationException {
-        final long folderTypeId = CacheAdmin.getEnvironment().getType("folder").getId();
+        final long folderTypeId = getEnvironment().getType("folder").getId();
         try {
             createFolderPreferences(folderTypeId);
             Assert.assertTrue(getResultPreferencesEngine()
@@ -172,6 +176,71 @@ public class ResultPreferencesEngineTest {
         } finally {
             getResultPreferencesEngine().remove(folderTypeId, ResultViewType.LIST, AdminResultLocations.DEFAULT);
         }
+    }
+
+    @Test
+    public void resultPreferencesFallback_FX482() throws FxApplicationException {
+        long baseTypeId = -1;
+        long derivedTypeId = -1;
+        final List<FxPK> pks = new ArrayList<FxPK>();
+        try {
+            try {
+                FxContext.get().runAsSystem();
+                baseTypeId = getTypeEngine().save(FxTypeEdit.createNew("TEST_FX482"));
+                derivedTypeId = getTypeEngine().save(
+                        FxTypeEdit.createNew("TEST_FX482_DERIVED", baseTypeId)
+                );
+            } finally {
+                FxContext.get().stopRunAsSystem();
+            }
+            pks.add(getContentEngine().initialize(baseTypeId).save().getPk());
+            pks.add(getContentEngine().initialize(derivedTypeId).save().getPk());
+
+            // store result preferences for base type
+            getResultPreferencesEngine().save(
+                    new ResultPreferences(
+                            Arrays.asList(
+                                    new ResultColumnInfo("@pk"),
+                                    new ResultColumnInfo("acl"),
+                                    new ResultColumnInfo("created_at")
+                            ),
+                            new ArrayList<ResultOrderByInfo>(0),
+                            10,
+                            100
+                    ),
+                    baseTypeId,
+                    ResultViewType.LIST,
+                    AdminResultLocations.DEFAULT
+            );
+
+            // precondition: the result preferences are used for a result of the base type
+            assertBasePreferencesPresent(new SqlQueryBuilder().select("@*").type(baseTypeId).getResult());
+            // check if the result preferences are also used for a result of the derived type
+            assertBasePreferencesPresent(new SqlQueryBuilder().select("@*").type(derivedTypeId).getResult());
+        } finally {
+            try {
+                FxContext.get().runAsSystem();
+                for (FxPK pk : pks) {
+                    getContentEngine().remove(pk);
+                }
+                if (derivedTypeId != -1) {
+                    getTypeEngine().remove(derivedTypeId);
+                }
+                if (baseTypeId != -1) {
+                    getTypeEngine().remove(baseTypeId);
+                }
+            } finally {
+                FxContext.get().stopRunAsSystem();
+            }
+        }
+    }
+
+    private void assertBasePreferencesPresent(FxResultSet result) {
+        assertEquals(result.getRowCount(), 1);
+        assertEquals(result.getColumnCount(), 3);
+        assertEquals(result.getColumnName(1), "@pk");
+        assertEquals(result.getColumnName(2), "acl");
+        assertEquals(result.getColumnName(3), "created_at");
     }
 
     private void createFolderPreferences(long folderTypeId) throws FxApplicationException {
