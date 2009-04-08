@@ -466,6 +466,9 @@
         <scriptIndexBuilder indexFile="${build.framework.classes.dir}/fxresources/sql/MySQL/resourceindex.flexive"
                             scriptDir="${flexive.resources.framework.dir}/sql/MySQL/patch"
                             copyFiles="true"/>
+        <scriptIndexBuilder indexFile="${build.framework.classes.dir}/fxresources/sql/H2/resourceindex.flexive"
+                            scriptDir="${flexive.resources.framework.dir}/sql/H2/patch"
+                            copyFiles="true"/>
         <jar jarfile="${flexive.build.framework.jar.dir}/flexive-ejb.jar">
 			<fileset refid="jar.ejb.classes"/>
 			<fileset refid="jar.ejb.resources"/>
