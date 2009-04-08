@@ -50,7 +50,6 @@ import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.FxBinary;
 import com.flexive.shared.value.FxReference;
-import com.sun.org.apache.xerces.internal.impl.dtd.XMLElementDecl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.lang.StringUtils;
