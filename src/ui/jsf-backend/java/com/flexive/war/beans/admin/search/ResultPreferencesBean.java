@@ -42,7 +42,6 @@ import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.faces.messages.FxFacesMsgWarn;
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxSharedUtils;
 import static com.flexive.shared.EJBLookup.getResultPreferencesEngine;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -52,6 +51,11 @@ import com.flexive.shared.search.*;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
+import com.flexive.shared.structure.FxGroupAssignment;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimaps;
+import com.google.common.collect.HashMultimap;
 import org.apache.myfaces.component.html.ext.HtmlDataTable;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -105,7 +109,7 @@ public class ResultPreferencesBean {
     private Map<String, String> propertyLabelMap = null;
     private List<SelectItem> types;
 
-    // form components
+    // access current selected columns directly from datatable component 
     private WrappedHtmlDataTable selectedColumnsTable = null;
 
 
@@ -146,6 +150,17 @@ public class ResultPreferencesBean {
         return show();
     }
 
+    public String remove() {
+        try {
+            getResultPreferencesEngine().remove(type, viewType, location);
+            resultPreferences = null;
+            new FxFacesMsgInfo("ResultPreferences.nfo.removed").addToContext();
+        } catch (FxApplicationException e) {
+            new FxFacesMsgErr("ResultPreferences.err.remove", e).addToContext();
+        }
+        return show();
+    }
+
     public void saveSystemDefault() {
         try {
             getResultPreferencesEngine().saveSystemDefault(getResultPreferences(), type, viewType, location);
@@ -167,6 +182,7 @@ public class ResultPreferencesBean {
     public void addColumnProperty(ActionEvent event) {
         getResultPreferences().addSelectedColumn(new ResultColumnInfo(Table.CONTENT, addPropertyName, null));
         addPropertyName = null;
+        properties = null;  // refresh available properties
     }
 
     public void removeColumnProperty(ActionEvent event) {
@@ -185,6 +201,7 @@ public class ResultPreferencesBean {
             for (ResultOrderByInfo removeInfo : removeOrderByColumns) {
                 getResultPreferences().removeOrderByColumn(removeInfo);
             }
+            properties = null;  // refresh available properties
         } catch (FxRuntimeException e) {
             new FxFacesMsgErr("ResultPreferences.err.removeRow", e).addToContext();
         }
@@ -339,6 +356,8 @@ public class ResultPreferencesBean {
 
     public ResultPreferencesEdit getResultPreferences() {
         if (resultPreferences == null) {
+            // fetch result preferences from DB (the current value of ResultPreferences#selectedColumn is
+            // persisted by the t:dataTable, so we do not have to remember them inside the bean)
             try {
                 if (forceSystemDefault) {
                     resultPreferences = getResultPreferencesEngine().loadSystemDefault(type, viewType, location).getEditObject();
@@ -359,57 +378,152 @@ public class ResultPreferencesBean {
         if (properties == null || cachedTypeId != getType()) {
             final FxEnvironment environment = CacheAdmin.getFilteredEnvironment();
             final FxType type = environment.getType(getType() != -1 ? getType() : FxType.ROOT_ID);
-            final List<FxPropertyAssignment> contentProperties = type.getAssignedProperties();
-            properties = new ArrayList<SelectItem>(contentProperties.size() + 10);
-            final MessageBean messageBean = MessageBean.getInstance();
+            final List<FxPropertyAssignment> contentProperties = Lists.newArrayList(type.getAssignedProperties());
+            for (FxGroupAssignment groupAssignment : type.getAssignedGroups()) {
+                addGroupAssignments(groupAssignment, contentProperties);
+            }
+
             // add virtual properties...
+            final MessageBean messageBean = MessageBean.getInstance();
             final SelectItemGroup virtualGroup = new SelectItemGroup(messageBean.getMessage("ResultPreferences.label.group.virtual"));
             virtualGroup.setSelectItems(new SelectItem[]{
-                    new SelectItem("@pk", messageBean.getMessage("ResultPreferences.label.property.pk")),
-                    new SelectItem("@path", messageBean.getMessage("ResultPreferences.label.property.path")),
-                    new SelectItem("@permissions", messageBean.getMessage("ResultPreferences.label.property.permissions"))
+                    new SelectItem("@pk", messageBean.getMessage("ResultPreferences.label.property.pk"), null, columnSelected("@pk")),
+                    new SelectItem("@path", messageBean.getMessage("ResultPreferences.label.property.path"), null, columnSelected("@path")),
+                    new SelectItem("@permissions", messageBean.getMessage("ResultPreferences.label.property.permissions"), null, columnSelected("@permissions"))
             });
+            properties = new ArrayList<SelectItem>(contentProperties.size() + 10);
             properties.add(virtualGroup);
             // add type properties
-            properties.add(filteredPropertiesGroup(contentProperties, messageBean.getMessage("ResultPreferences.label.group.type", type.getLabel().getBestTranslation()), false));
+            properties.addAll(
+                    filteredPropertiesGroup(contentProperties, messageBean.getMessage("ResultPreferences.label.group.type", type.getLabel().getBestTranslation()), false)
+            );
             // add derived properties
-            properties.add(filteredPropertiesGroup(contentProperties, messageBean.getMessage("ResultPreferences.label.group.derived"), true));
+            properties.addAll(
+                    filteredPropertiesGroup(contentProperties, messageBean.getMessage("ResultPreferences.label.group.derived"), true)
+            );
 
             cachedTypeId = getType();
         }
         return properties;
     }
 
-    private SelectItemGroup filteredPropertiesGroup(List<FxPropertyAssignment> contentProperties, String title, boolean includeDerived) {
-        final SelectItemGroup group = new SelectItemGroup(title);
-        final List<SelectItem> properties = new ArrayList<SelectItem>();
-        for (FxPropertyAssignment assignment : contentProperties) {
-            if (includeDerived && assignment.isDerivedAssignment() || (!includeDerived && !assignment.isDerivedAssignment())) {
-                properties.add(new SelectItem(assignment.getProperty().getName(), assignment.getProperty().getLabel().getBestTranslation()));
+    private boolean columnSelected(String columnName) {
+        for (ResultColumnInfo columnInfo : getSelectedColumns()) {
+            if (columnInfo.getColumnName().equalsIgnoreCase(columnName)) {
+                return true;
             }
         }
-        // sort by label
-        Collections.sort(properties, new FxJsfUtils.SelectItemSorter());
-        group.setSelectItems(properties.toArray(new SelectItem[properties.size()]));
+        return false;
+    }
+
+    private void addGroupAssignments(FxGroupAssignment group, List<FxPropertyAssignment> contentProperties) {
+        contentProperties.addAll(group.getAssignedProperties());
+        for (FxGroupAssignment child : group.getAssignedGroups()) {
+            addGroupAssignments(child, contentProperties);
+        }
+    }
+
+    private List<SelectItemGroup> filteredPropertiesGroup(List<FxPropertyAssignment> contentProperties, String title, boolean includeDerived) {
+
+        // assign properties to the type that originally defined them
+        final HashMultimap<FxType, FxPropertyAssignment> byType = new HashMultimap<FxType, FxPropertyAssignment>();
+        final FxType rootType = CacheAdmin.getEnvironment().getType(FxType.ROOT_ID);
+        for (FxPropertyAssignment assignment : contentProperties) {
+            if (includeDerived && assignment.isDerivedAssignment()
+                    || (!includeDerived && !assignment.isDerivedAssignment())) {
+                // find type that first defined used or defined an assignment with our property
+                FxType type = assignment.getAssignedType();
+                while (type.getParent() != null && !type.getParent().getAssignmentsForProperty(assignment.getProperty().getId()).isEmpty()) {
+                    type = type.getParent();
+                }
+                // attach system-internal properties (ID, ACL, ...) to root type
+                byType.put(assignment.getProperty().isSystemInternal() ? rootType : type, assignment);
+            }
+        }
+
+        final List<SelectItemGroup> result;
+        if (!includeDerived) {
+            // just our type, return all properties in one group
+            result = Arrays.asList(createSelectItemGroup(title, byType.values()));
+        } else {
+            // all derived types, group by type
+            result = new ArrayList<SelectItemGroup>();
+
+            // root types come last
+            final List<FxType> types = Lists.newArrayList(byType.keys().elementSet());
+            Collections.sort(
+                    types,
+                    new Comparator<FxType>() {
+                        public int compare(FxType o1, FxType o2) {
+                            return o1.getParent() == null ? 1 : o1.getParent().equals(o2) ? -1 : 0;
+                        }
+                    }
+            );
+            for (FxType type : types) {
+                result.add(
+                        createSelectItemGroup(
+                                title + ": " + type.getLabel(),
+                                byType.get(type)
+                        )
+                );
+            }
+        }
+
+        return result;
+    }
+
+    private SelectItemGroup createSelectItemGroup(String title, Collection<FxPropertyAssignment> assignments) {
+        final SelectItemGroup group = new SelectItemGroup(title);
+        final List<SelectItem> items = new ArrayList<SelectItem>();
+        for (FxPropertyAssignment assignment : assignments) {
+            items.add(createSelectItem(assignment));
+        }
+        Collections.sort(items, new FxJsfUtils.SelectItemSorter());
+        group.setSelectItems(items.toArray(new SelectItem[items.size()]));
         return group;
+    }
+
+    private SelectItem createSelectItem(FxPropertyAssignment assignment) {
+        // add parent group path
+        final StringBuilder label = new StringBuilder();
+        FxGroupAssignment parent = assignment.getParentGroupAssignment();
+        while (parent != null) {
+            label.insert(0, parent.getLabel() + "/");
+            parent = parent.getParentGroupAssignment();
+        }
+        // add property label
+        label.append(assignment.getProperty().getLabel());
+
+        return new SelectItem(
+                assignment.getProperty().getName(),
+                label.toString(),
+                null,
+                // disable properties/assignments that are already selected
+                columnSelected(assignment.getProperty().getName()) || columnSelected("#" + assignment.getXPath())
+        );
     }
 
     public List<SelectItem> getSelectedProperties() {
         // caching this is not trivial because the selectedColumns list
         // is updated between phases by the datatable
         final FxEnvironment environment = CacheAdmin.getFilteredEnvironment();
-        final List<ResultColumnInfo> columns;
-        if (JsfPhaseListener.isInPhase(PhaseId.PROCESS_VALIDATIONS)) {
-            //noinspection unchecked
-            columns = (List) ((WrappedHtmlDataTable) getSelectedColumnsTable()).getDataModel().getWrappedData();
-        } else {
-            columns = getResultPreferences().getSelectedColumns();
-        }
+        final List<ResultColumnInfo> columns = getSelectedColumns();
         List<SelectItem> result = new ArrayList<SelectItem>(columns.size());
         for (ResultColumnInfo info : columns) {
             result.add(new SelectItem(info.getPropertyName(), info.getLabel(environment)));
         }
         return result;
+    }
+
+    @SuppressWarnings({"unchecked"})
+    private List<ResultColumnInfo> getSelectedColumns() {
+        final List<ResultColumnInfo> columns;
+        if (JsfPhaseListener.isInPhase(PhaseId.PROCESS_VALIDATIONS)) {
+            columns = (List) ((WrappedHtmlDataTable) getSelectedColumnsTable()).getDataModel().getWrappedData();
+        } else {
+            columns = getResultPreferences().getSelectedColumns();
+        }
+        return columns;
     }
 
     public HtmlDataTable getSelectedColumnsTable() {

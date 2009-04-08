@@ -1061,7 +1061,7 @@ BUILD SUCCESSFUL]]></screen>
                     <filename>pom.xml</filename>
                     file. By default, it is set to the current release required for all features
                     (currently this is
-                    <code>3.1-SNAPSHOT</code>).
+                    <code>&mavenVersion;</code>).
                     For a list of available versions, please look at the Maven repository
                     (e.g.
                     <ulink url="&mavenRepoUrl;com/flexive/flexive-shared/">here</ulink>).
