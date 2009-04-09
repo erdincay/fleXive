@@ -160,6 +160,16 @@ public class EJBLookup {
     }
 
     /**
+     * Lookup of the ApplicationConfigurationEngine EJB.
+     *
+     * @return a reference to the ApplicationConfigurationEngine EJB
+     * @since 3.1
+     */
+    public static ApplicationConfigurationEngine getApplicationConfigurationEngine() {
+        return getEngine(ApplicationConfigurationEngine.class);
+    }
+
+    /**
      * Lookup of the GlobalConfigurationBean EJB.
      *
      * @return a reference to the GlobalConfigurationBean EJB.
