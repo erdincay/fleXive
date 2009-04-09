@@ -114,4 +114,10 @@ public class SystemParameters {
      * The default input language for multilingual input fields
      */
     public static final Parameter<Long> USER_DEFAULTINPUTLANGUAGE = ParameterFactory.newInstance(Long.class, SystemParameterPaths.USER_CONFIG, "input.defaultLanguage", -1L);
+    /**
+     * Parameter for specifying the URL mapping for the thumbnail servlet. Set this to the prefix mapped to the thumbnail
+     * servlet as specified in your application's web.xml.
+     */
+    public static final Parameter<String> THUMBNAIL_MAPPING
+            = ParameterFactory.newInstance(String.class, APPLICATION_CONFIG, "thumbnailMapping", "/thumbnail/");
 }

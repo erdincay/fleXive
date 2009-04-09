@@ -32,6 +32,7 @@
 package com.flexive.war.servlet;
 
 import com.flexive.shared.*;
+import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.structure.FxAssignment;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxProperty;
@@ -101,8 +102,10 @@ import java.net.URLEncoder;
  * @version $Rev$
  */
 public class ThumbnailServlet implements Servlet {
+
     private static final Log LOG = LogFactory.getLog(ThumbnailServlet.class);
-    private static final String URI_BASE = "/thumbnail/";
+    /** Key for caching the thumbnail servlet mapping within the request */
+    private static final String REQ_MAPPING = "_ThumbnailServlet_mapping";
 
     private ServletConfig servletConfig = null;
 
@@ -274,7 +277,7 @@ public class ThumbnailServlet implements Servlet {
      */
     public static String getLink(FxPK pk, BinaryDescriptor.PreviewSizes size, String xpath, long timestamp, FxLanguage language) {
         try {
-            return URI_BASE + "pk" + (pk == null ? "TYPE" : pk) + (size != null ? "/s" + size.getBlobIndex() : "")
+            return getMappingURI() + "pk" + (pk == null ? "TYPE" : pk) + (size != null ? "/s" + size.getBlobIndex() : "")
                     + (StringUtils.isNotBlank(xpath) ? "/xp"
                     + URLEncoder.encode(FxSharedUtils.escapeXPath(xpath), "UTF-8") : "")
                     + "/ts" + timestamp
@@ -294,7 +297,7 @@ public class ThumbnailServlet implements Servlet {
     public static String getLink(FxMediaSelector selector) {
         try {
             StringBuilder sb = new StringBuilder(100);
-            sb.append(URI_BASE).
+            sb.append(getMappingURI()).
                     append("pk").append(selector.getPK()).
                     append("/s").append(selector.getSize().getBlobIndex());
             if (StringUtils.isNotBlank(selector.getXPath()))
@@ -314,6 +317,21 @@ public class ThumbnailServlet implements Servlet {
             // shouldn't happen with UTF-8
             throw new IllegalArgumentException(e);
         }
+    }
+
+    private static String getMappingURI() {
+        final FxContext ctx = FxContext.get();
+        if (ctx.getAttribute(REQ_MAPPING) == null) {
+            try {
+                ctx.setAttribute(
+                    REQ_MAPPING,
+                    EJBLookup.getConfigurationEngine().get(SystemParameters.THUMBNAIL_MAPPING)
+            );
+            } catch (FxApplicationException e) {
+                throw e.asRuntimeException();
+            }
+        }
+        return (String) ctx.getAttribute(REQ_MAPPING);
     }
 
     /**

@@ -58,6 +58,9 @@ public enum SystemParameterPaths implements ParameterPath {
     /** generic division specific parameters */
     DIVISION_CONFIG("/division/config", ParameterScope.DIVISION_ONLY),
 
+    /** Generic application configuration */
+    APPLICATION_CONFIG("/application/config", ParameterScope.APPLICATION),
+
     /** Path for storing user search queries */
     USER_QUERIES_CONTENT("/search/content", ParameterScope.USER),
     /** Search result preferences */
