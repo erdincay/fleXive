@@ -138,6 +138,7 @@ public class QueryEditorBean implements Serializable {
             } else if ("loadSystemDefault".equals(action)) {
                 setRootNode(EJBLookup.getSearchEngine().loadSystemDefault(AdminResultLocations.ADMIN));
             }
+            updateQueryStore();
             FxJsfUtils.resetFaceletsComponent(RESET_COMPONENT_ID);
         } catch (Exception e) {
             LOG.error("Failed to parse request parameters: " + e.getMessage(), e);

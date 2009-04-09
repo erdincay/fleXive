@@ -36,7 +36,7 @@
         function createQuery() {
             if( parent == null || !parent.invokeContentAction )
                 return;
-            parent.invokeContentAction("adm/search/query.jsf", "new");
+            parent.invokeContentAction("adm/search/query.jsf", '');
             parent.gotoNavMenu(1);
         }
 

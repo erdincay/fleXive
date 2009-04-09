@@ -45,6 +45,7 @@ import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.search.*;
 import com.flexive.shared.search.query.QueryRootNode;
+import com.google.common.collect.Lists;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -57,6 +58,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Collection;
+import java.util.List;
+import java.util.Iterator;
 
 @javax.ejb.TransactionManagement(javax.ejb.TransactionManagementType.CONTAINER)
 @Stateless(name = "SearchEngine", mappedName="SearchEngine")
@@ -185,7 +188,18 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public Collection<String> loadNames(ResultLocation location) throws FxApplicationException {
-        return configuration.getKeys(getConfigurationParameter(location));
+        final List<String> names = Lists.newArrayList(
+                configuration.getKeys(getConfigurationParameter(location))
+        );
+        // remove default query from list
+        final Iterator<String> iter = names.iterator();
+        while (iter.hasNext()) {
+            if (iter.next().equals(DEFAULT_QUERY_NAME)) {
+                iter.remove();
+            }
+        }
+
+        return names;
     }
 
     /**
