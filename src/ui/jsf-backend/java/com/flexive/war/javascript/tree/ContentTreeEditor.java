@@ -34,7 +34,6 @@
 package com.flexive.war.javascript.tree;
 
 import com.flexive.shared.FxContext;
-import com.flexive.shared.EJBLookup;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxUpdateException;
 import static com.flexive.shared.EJBLookup.getTreeEngine;
@@ -54,6 +53,8 @@ import org.apache.commons.logging.LogFactory;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Content tree edit actions invoked via JSON/RPC.
@@ -178,23 +179,42 @@ public class ContentTreeEditor implements Serializable {
      * @throws Exception if an error occured
      */
     public String remove(long nodeId, boolean removeContent, boolean live, boolean deleteChildren) throws Exception {
+        final FxTreeMode treeMode = live ? Live : Edit;
+        if (removeContent) {
+            removeWithContent(treeMode, nodeId, deleteChildren);
+        } else {
+            getTreeEngine().remove(treeMode, nodeId, false, deleteChildren);
+        }
+        return "[]";
+    }
+
+    private void removeWithContent(FxTreeMode treeMode, long nodeId, boolean deleteChildren) throws Exception {
         try {
-            final FxTreeMode treeMode = live ? Live : Edit;
-            FxTreeNode node = getTreeEngine().getNode(treeMode, nodeId);
-            getTreeEngine().remove(node, false, deleteChildren);
-            if (removeContent) {
-                // need to manually remove all other nodes where this content is referenced
-                for (FxTreeNode refNode : getTreeEngine().getNodesWithReference(treeMode, node.getReference().getId())) {
-                    getTreeEngine().remove(refNode, false, deleteChildren);
-                }
-                // remove content
-                getContentEngine().remove(node.getReference());
+            final FxTreeNode node = getTreeEngine().getTree(treeMode, nodeId, deleteChildren ? 999999 : 0);
+
+            // collect all content IDs
+            final List<FxPK> contents = new ArrayList<FxPK>();
+            contents.add(node.getReference());
+            for (FxTreeNode child : node) {
+                contents.add(child.getReference());
             }
+
+            // remove tree nodes
+            getTreeEngine().remove(node, false, deleteChildren);
+
+            for (FxPK pk : contents) {
+                // manually remove all other nodes (including their children) where this content is referenced
+                for (FxTreeNode refNode : getTreeEngine().getNodesWithReference(treeMode, pk.getId())) {
+                    getTreeEngine().remove(refNode, false, true);
+                }
+                // remove content instance
+                getContentEngine().remove(pk);
+            }
+            
         } catch (Exception e) {
             LOG.error("Failed to delete node: " + e, e);
             throw e;
         }
-        return "[]";
     }
 
     public String addReferences(long nodeId, long[] referenceIds) throws Exception {
