@@ -46,6 +46,8 @@ import javax.servlet.http.HttpSession;
 import java.io.Serializable;
 import java.net.URLDecoder;
 import java.util.Locale;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * The [fleXive] context - user session specific data like UserTickets, etc.
@@ -84,6 +86,7 @@ public class FxContext implements Serializable {
     private final boolean webDAV;
     private final String serverName;
     private final int serverPort;
+    private final Map<Object, Object> attributes = new HashMap<Object, Object>();
 
     private String sessionID;
     private boolean treeWasModified;
@@ -612,6 +615,44 @@ public class FxContext implements Serializable {
      */
     public void replace() {
         info.set(this);
+    }
+
+    /**
+     * Store a value under the given key in the current request's FxContext.
+     * <p>
+     * A value stored in the context exists for the entire time of the fleXive request, for a
+     * web request this is slightly shorter than request scope. The main advantage is that the
+     * fleXive context is available for any request, not just requests from a web application,
+     * and that no overhead for setting or retrieving values exists.
+     * </p>
+     *
+     * @param key   the attribute key
+     * @param value the attribute value. If null, the attribute will be removed.
+     * @since 3.1
+     */
+    public void setAttribute(Object key, Object value) {
+        if (value == null) {
+            attributes.remove(key);
+        } else {
+            attributes.put(key, value);
+        }
+    }
+
+    /**
+     * Return the value stored under the given key.
+     * <p>
+     * A value stored in the context exists for the entire time of the fleXive request, for a
+     * web request this is slightly shorter than request scope. The main advantage is that the
+     * fleXive context is available for any request, not just requests from a web application,
+     * and that no overhead for setting or retrieving values exists.
+     * </p>
+     *
+     * @param key   the attribute key
+     * @return      the value stored under the given key.
+     * @since 3.1
+     */
+    public Object getAttribute(Object key) {
+        return attributes.get(key);
     }
 
     /**
