@@ -84,7 +84,7 @@ public class ParameterTest {
      */
     @Test
     public void fallbackUser() throws Exception {
-        checkFallbacks(SystemParameterPaths.TEST_USER, ParameterScope.DIVISION_ONLY);
+        checkFallbacks(SystemParameterPaths.TEST_USER, ParameterScope.APPLICATION, ParameterScope.DIVISION_ONLY);
     }
 
     /**
@@ -108,7 +108,7 @@ public class ParameterTest {
         List<ParameterScope> fallbacks = path.getScope().getFallbacks();
         Assert.assertTrue(expected.length == fallbacks.size(), "Number of fallback scopes mismatch.");
         for (ParameterScope scope : expected) {
-            if (fallbacks.indexOf(scope) == -1) {
+            if (!fallbacks.contains(scope)) {
                 Assert.fail("Expected fallback scope not found: " + scope);
             }
         }

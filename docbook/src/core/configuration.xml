@@ -51,7 +51,7 @@
                             <term>global</term>
                             <listitem>
                                 <para>
-                                    for entries that are shared across the entire &flexive; installation
+                                    for entries that are shared across the entire &flexive; installation.
                                 </para>
                             </listitem>
                         </varlistentry>
@@ -59,7 +59,25 @@
                             <term>division</term>
                             <listitem>
                                 <para>
-                                    for entries that are shared across a &flexive; &division;
+                                    for entries that are shared across a &flexive; &division;.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>application</term>
+                            <listitem>
+                                <para>
+                                    for entries that are shared across a &flexive; application. The application
+                                    is identified using
+                                    <ulink url="&flexiveJavadocBase;shared/com/flexive/shared/FxContext.html#getApplicationId()">
+                                        FxContext#getApplicationId()
+                                    </ulink>,
+                                    which is initialized with the servlet context path (for web applications).
+                                    Thus, if the context path changes, the existing application-based configuration
+                                    entries will no longer be available.
+                                </para>
+                                <para>
+                                    The application scope was introduced in &flexive; 3.1.
                                 </para>
                             </listitem>
                         </varlistentry>
@@ -73,13 +91,29 @@
                         </varlistentry>
                     </variablelist>
                     <para>
-                        The scope also includes fallback scopes, for example a
+                        A
+                        <ulink url="&flexiveJavadocBase;shared/com/flexive/shared/configuration/ParameterScope.html">
+                            ParameterScope
+                        </ulink>
+                        also specifies a fallback scope, for example a
                         <emphasis>user</emphasis>
-                        parameter may use
-                        <emphasis>division</emphasis>
-                        for its fallback scope: the value stored in the division configuration acts as a default value
-                        for
-                        all users, who can (but do not have to) override this with their own setting.
+                        parameter uses
+                        <emphasis>application</emphasis>
+                        as its fallback scope: the value stored in the application configuration acts as a default value
+                        for all users, who can (but do not have to) override this with their own setting.
+                    </para>
+                    <para>
+                        Fallback scopes are applied recursively, so a parameter that uses
+                        <emphasis>application</emphasis>
+                        as a fallback scope will also use the fallback scopes of
+                        <application>application</application>,
+                        and so on. The global configuration is the exception to this rule, because it will never
+                        be used as a fallback: the global configuration is (by definition) outside the scope
+                        of a running &flexive; application, and cannot be updated without using the
+                        authentication methods of the
+                        <ulink url="&flexiveJavadocBase;shared/com/flexive/shared/interfaces/GlobalConfigurationEngine.html">
+                            GlobalConfigurationEngine
+                        </ulink>.
                     </para>
                 </listitem>
             </itemizedlist>
@@ -91,11 +125,11 @@
         <title>Working with configuration parameters</title>
 
         <para>
-            A parameter is usually defined using one of the
+            A parameter is defined using one of the
             <ulink url="&flexiveJavadocBase;shared/com/flexive/shared/configuration/parameters/ParameterFactory.html">
                 ParameterFactory
             </ulink>
-            factory methods. The parameter interface uses Java generics to provide typesafe manipulation of the
+            methods. The parameter interface uses Java generics to provide typesafe manipulation of the
             configuration values, for example it is not possible (using the configuration APIs) to store a String value
             in an Integer parameter. Let's start with declaring a configuration parameter of type Integer:
         </para>
@@ -108,13 +142,16 @@
         21                   /* default value */
     );]]></programlisting>
         <para>
-            Our new parameter uses
+            Our new parameter has
             <emphasis>user scope</emphasis>,
-            which (by definition) uses the division configuration as a fallback.
-            This means we can now store values both in the division and user configuration. Of course, unless
+            which (by definition) uses the application configuration as a fallback.
+            This means we can now store values both in the application and user configuration
+            (and because the fallback scopes of
+            <emphasis>application</emphasis>
+            are also used, also in the division configuration). Of course, unless
             we are logged in as a
             <glossterm>global supervisor</glossterm>,
-            we cannot update the division configuration, but any user can update his or her own configuration.
+            we cannot update the application configuration, but any user can update his or her own configuration.
             By default, the configuration engine uses the "least shared" scope, in our case the user scope.
             The following call puts a value in the configuration of the calling user and displays the new value:
         </para>

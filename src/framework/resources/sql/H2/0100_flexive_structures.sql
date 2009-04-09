@@ -1095,6 +1095,19 @@ CREATE TABLE FXS_DIVISIONCONFIGURATION (
 COMMENT ON TABLE FXS_DIVISIONCONFIGURATION IS 'Global division configuration table';
 
 -- -------------------------
+-- Application configuration table
+-- -------------------------
+
+CREATE TABLE FXS_APPLICATIONCONFIGURATION (
+    APPLICATION_ID VARCHAR(255) NOT NULL,
+	CPATH VARCHAR(255) NOT NULL,
+	CKEY VARCHAR(255) NOT NULL,
+	CVALUE LONGTEXT,
+	PRIMARY KEY (APPLICATION_ID, CPATH, CKEY)
+);
+COMMENT ON TABLE FXS_APPLICATIONCONFIGURATION IS 'Application configuration table';
+
+-- -------------------------
 -- References to FX_CONTENT
 -- -------------------------
 -- ALTER TABLE FXS_MANDATOR ADD FOREIGN KEY (METADATA) REFERENCES FX_CONTENT (ID)

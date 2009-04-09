@@ -1213,6 +1213,21 @@ DEFAULT CHARSET = LATIN1
 COMMENT = 'Global division configuration table';
 
 -- -------------------------
+-- Application configuration table
+-- -------------------------
+
+CREATE TABLE FXS_APPLICATIONCONFIGURATION (
+    APPLICATION_ID VARCHAR(255) NOT NULL,
+	CPATH VARCHAR(255) NOT NULL,
+	CKEY VARCHAR(255) CHARACTER SET UTF8 NOT NULL,
+	CVALUE LONGTEXT CHARACTER SET UTF8,
+	PRIMARY KEY (APPLICATION_ID, CPATH, CKEY)
+)
+ENGINE = InnoDB
+DEFAULT CHARSET = LATIN1
+COMMENT = 'Application configuration table';
+
+-- -------------------------
 -- References to FX_CONTENT
 -- -------------------------
 ALTER TABLE FXS_MANDATOR ADD FOREIGN KEY FK_MAND_META (METADATA) REFERENCES FX_CONTENT (ID)

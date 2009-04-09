@@ -62,6 +62,7 @@ public class ConfigurationTest {
     private GlobalConfigurationEngine globalConfiguration;
     private DivisionConfigurationEngine divisionConfiguration;
     private UserConfigurationEngine userConfiguration;
+    private ApplicationConfigurationEngine applicationConfiguration;
     private ConfigurationEngine configuration;
 
     public ConfigurationTest() {
@@ -90,6 +91,7 @@ public class ConfigurationTest {
         divisionConfiguration = EJBLookup.getDivisionConfigurationEngine();
         userConfiguration = EJBLookup.getUserConfigurationEngine();
         configuration = EJBLookup.getConfigurationEngine();
+        applicationConfiguration = EJBLookup.getApplicationConfigurationEngine();
     }
 
     @BeforeMethod
@@ -324,11 +326,14 @@ public class ConfigurationTest {
                     checkConfiguration = EJBLookup.getDivisionConfigurationEngine();
                 } else if (scope == ParameterScope.USER || scope == ParameterScope.USER_ONLY) {
                     checkConfiguration = EJBLookup.getUserConfigurationEngine();
+                } else if (scope == ParameterScope.APPLICATION || scope == ParameterScope.APPLICATION_ONLY) {
+                    checkConfiguration = EJBLookup.getApplicationConfigurationEngine();
                 }
             }
             return (checkConfiguration instanceof GlobalConfigurationEngine
                     && FxContext.get().isGlobalAuthenticated())
                     || (checkConfiguration instanceof DivisionConfigurationEngine && ticket.isGlobalSupervisor())
+                    || (checkConfiguration instanceof ApplicationConfigurationEngine && ticket.isGlobalSupervisor())
                     || (checkConfiguration instanceof UserConfigurationEngine);
         }
 
@@ -398,6 +403,16 @@ public class ConfigurationTest {
     @Test
     public void divisionConfiguration() throws Exception {
         testGenericConfiguration(divisionConfiguration);
+    }
+
+    /**
+     * Test the per-application configuration
+     *
+     * @throws Exception if an error occured
+     */
+    @Test
+    public void applicationConfiguration() throws Exception {
+        testGenericConfiguration(applicationConfiguration);
     }
 
     /**
