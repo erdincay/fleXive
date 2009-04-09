@@ -141,7 +141,7 @@ public class ReferencedContent extends FxPK implements Serializable {
         this.caption = other.caption;
         this.step = other.step;
         this.acl = other.acl;
-        this.content = other.getContent().copy();
+        this.content = other.hasContent() ? other.getContent().copy() : null;
         this.accessGranted = other.accessGranted;
         this.resolved = other.isResolved();
     }

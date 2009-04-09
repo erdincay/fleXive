@@ -363,8 +363,9 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
                 this.emptyTranslations = new HashMap<Long, Boolean>(this.translations.size());
             for (Long lang : this.translations.keySet())
                 this.emptyTranslations.put(lang, true);
-        } else
+        } else {
             this.singleValueEmpty = true;
+        }
         return (TDerived) this;
     }
 
@@ -378,8 +379,9 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
             if (this.emptyTranslations == null)
                 this.emptyTranslations = new HashMap<Long, Boolean>(this.translations.size());
             this.emptyTranslations.put(language, true);
-        } else
+        } else {
             this.singleValueEmpty = true;
+        }
     }
 
     /**
@@ -868,6 +870,9 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     public void removeLanguage(long language) {
         if (!multiLanguage) {
             setEmpty();
+            // ensure that the old value is not "leaked" to clients that don't check isEmpty()
+            // and that the behaviour is consistent with multi-language inputs (FX-485)
+            singleValue = getEmptyValue();
         } else {
             translations.remove(language);
             emptyTranslations.remove(language);
