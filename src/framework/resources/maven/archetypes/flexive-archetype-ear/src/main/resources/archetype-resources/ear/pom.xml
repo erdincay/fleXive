@@ -38,7 +38,15 @@
             <groupId>com.flexive</groupId>
             <artifactId>flexive-plugin-jsf-core</artifactId>
         </dependency>
-        
+
+        <!-- Add global configuration plugin for division setup (/flexive-backend-war/globalconfig/index.xhtml) -->
+<!--
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-plugin-globalconfig</artifactId>
+        </dependency>
+-->
+
 		<dependency>
 		    <groupId>com.flexive</groupId>
 		    <artifactId>flexive-backend</artifactId>

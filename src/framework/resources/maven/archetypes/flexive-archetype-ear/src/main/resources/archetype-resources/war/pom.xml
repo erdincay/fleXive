@@ -215,6 +215,15 @@
                         <version>${flexive.version}</version>
                     </dependency>
 
+                    <!-- Deploy global configuration for division setup (/flexive-backend-war/globalconfig/index.xhtml) -->
+<!--
+                    <dependency>
+                        <groupId>com.flexive</groupId>
+                        <artifactId>flexive-plugin-globalconfig</artifactId>
+                        <version>${flexive.version}</version>
+                    </dependency>
+-->
+
                     <!-- Deploy H2 database support -->
                     <dependency>
                         <groupId>com.h2database</groupId>

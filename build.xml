@@ -719,7 +719,7 @@ database.vendor=MySQL
 
         <maven-build-sources artifactId="flexive-web-shared" label="[fleXive] shared web classes" srcdir="${flexive.src.ui.shared.dir}"/>
         <maven-build-sources artifactId="flexive-plugin-jsf-core" label="[fleXive] JSF components" srcdir="${flexive.src.ui.components.dir}"/>
-        <maven-build-sources artifactId="flexive-plugin-jsf-globalconfig" label="[fleXive] global (division) configuration plugin" srcdir="${flexive.base.ui.dir}/jsf-globalconfig/src/java"/>
+        <maven-build-sources artifactId="flexive-plugin-globalconfig" label="[fleXive] global (division) configuration plugin" srcdir="${flexive.base.ui.dir}/jsf-globalconfig/src/java"/>
         <maven-build-sources artifactId="flexive-plugin-jsf-feedbackPlugin" label="[fleXive] backend feedback plugin" srcdir="${flexive.base.ui.dir}/jsf-feedbackPlugin/src/java"/>
         <maven-build-sources artifactId="flexive-backend" label="[fleXive] backend application" srcdir="${flexive.src.ui.jsf.dir}"/>
 
@@ -770,7 +770,7 @@ database.vendor=MySQL
 
         <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-web-shared"/>
         <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-plugin-jsf-core"/>
-        <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-plugin-jsf-globalconfig"/>
+        <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-plugin-globalconfig"/>
         <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-plugin-jsf-feedbackPlugin"/>
         <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-backend"/>
 
@@ -917,7 +917,7 @@ database.vendor=MySQL
         </jar>
 
         <buildPlugin name="jsf-testrunner" srcdir="${flexive.base.ui.dir}/jsf-testrunner"/>
-        <buildPlugin name="jsf-globalconfig" srcdir="${flexive.base.ui.dir}/jsf-globalconfig"/>
+        <buildPlugin name="globalconfig" srcdir="${flexive.base.ui.dir}/jsf-globalconfig"/>
         <buildPlugin name="jsf-feedbackPlugin" srcdir="${flexive.base.ui.dir}/jsf-feedbackPlugin"/>
         <emma enabled="${emma.enabled}">
 			<instr
