@@ -78,7 +78,9 @@ public class DownloadServlet implements Servlet {
     public void service(ServletRequest servletRequest, ServletResponse servletResponse) throws ServletException, IOException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
-        final String uri = URLDecoder.decode(request.getRequestURI().substring(request.getContextPath().length() + BASEURL.length()), "UTF-8");
+        String uri = FxServletUtils.stripSessionId(
+                URLDecoder.decode(request.getRequestURI().substring(request.getContextPath().length() + BASEURL.length()), "UTF-8")
+        );
         // get PK
         if (!uri.startsWith("pk")) {
             FxServletUtils.sendErrorMessage(response, "Invalid download getResult: " + uri);

@@ -35,6 +35,7 @@ import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.media.FxMediaSelector;
 import com.flexive.shared.value.BinaryDescriptor;
+import com.flexive.war.servlet.FxServletUtils;
 
 import java.awt.*;
 import java.util.regex.Matcher;
@@ -48,18 +49,17 @@ import java.util.regex.Pattern;
 public class FxThumbnailURIConfigurator extends FxMediaSelector {
     private static final long serialVersionUID = 6390146854535411006L;
 
-    private final static Pattern pPK = Pattern.compile("^pk(\\d+(\\.(\\d+|MAX|LIVE))?|TYPE)");
-    private final static Pattern pXPath = Pattern.compile("^xp.+");
-    private final static Pattern pSize = Pattern.compile("s[0123]");
-    private final static Pattern pWidth = Pattern.compile("w\\d+");
-    private final static Pattern pHeight = Pattern.compile("h\\d+");
-    private final static Pattern pFlipH = Pattern.compile("flip[Hh]");
-    private final static Pattern pFlipV = Pattern.compile("flip[Vv]");
-    private final static Pattern pRot = Pattern.compile("rot-?\\d+");
-    private final static Pattern pCrop = Pattern.compile("cropx(\\d+)y(\\d+)w(\\d+)h(\\d+)");
-    private final static Pattern pLang = Pattern.compile("^lang[a-zA-Z]{2}");
-    private final static Pattern pLangFallback = Pattern.compile("^lfb[01]");
-
+    private static final Pattern pPK = Pattern.compile("^pk(\\d+(\\.(\\d+|MAX|LIVE))?|TYPE)");
+    private static final Pattern pXPath = Pattern.compile("^xp.+");
+    private static final Pattern pSize = Pattern.compile("s[0123]");
+    private static final Pattern pWidth = Pattern.compile("w\\d+");
+    private static final Pattern pHeight = Pattern.compile("h\\d+");
+    private static final Pattern pFlipH = Pattern.compile("flip[Hh]");
+    private static final Pattern pFlipV = Pattern.compile("flip[Vv]");
+    private static final Pattern pRot = Pattern.compile("rot-?\\d+");
+    private static final Pattern pCrop = Pattern.compile("cropx(\\d+)y(\\d+)w(\\d+)h(\\d+)");
+    private static final Pattern pLang = Pattern.compile("^lang[a-zA-Z]{2}");
+    private static final Pattern pLangFallback = Pattern.compile("^lfb[01]");
 
     private String URI;
     private String err500 = null;
@@ -94,7 +94,7 @@ public class FxThumbnailURIConfigurator extends FxMediaSelector {
      * </ul>
      */
     private void parse() {
-        String[] elements = URI.split("\\/");
+        String[] elements = FxServletUtils.stripSessionId(URI).split("\\/");
         for (String element : elements) {
             if (getPK() == null && pPK.matcher(element).matches()) {
                 if( "TYPE".equals(element.substring(2)))

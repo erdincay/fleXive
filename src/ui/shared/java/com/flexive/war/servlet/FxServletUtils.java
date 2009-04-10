@@ -57,4 +57,16 @@ public final class FxServletUtils {
         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         response.getOutputStream().print(message);
     }
+
+    /**
+     * Strip the session ID (encoded as ";jsessionid=...") from the given URI.
+     *
+     * @param uri   the URI
+     * @return      the URI without a possibly existing session ID
+     * @since 3.0.3
+     */
+    public static String stripSessionId(String uri) {
+        final int pos = uri.toUpperCase().indexOf(";JSESSIONID");
+        return pos == -1 ? uri : uri.substring(0, pos);
+    }
 }
