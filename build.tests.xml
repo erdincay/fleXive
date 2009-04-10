@@ -55,6 +55,7 @@
         <fileset dir="${flexive.lib.dir}/xstream" includes="*.jar"/>
         <fileset dir="${flexive.lib.dir}/groovy" includes="*.jar"/>
         <fileset dir="${flexive.lib.dir}/jsf" includes="*.jar"/>
+        <fileset dir="${flexive.lib.dir}/antlr" includes="*.jar"/>
         <path refid="emma.lib"/>
     	<path path="${build.ui.classes.dir}"/>
         <path path="${build.ui.shared.classes.dir}"/>
@@ -254,6 +255,7 @@
 	<target name="tests.all.init">
         <groovy>
             properties.'tests.groups' = "shared,ejb,jsf,tree,dist"
+            //properties.'tests.groups' = "shared,ejb,configuration,content,structure,jsf,security,workflow,streaming,scripting,valuetest,cache,image,tree,relation,search,tutorial,environment,mandator,importexport,roles"
         </groovy>
     </target>
 
@@ -455,7 +457,7 @@
             <class location="${build.ui.jar.dir}/flexive-backend.jar"/>
             <class location="${build.ui.jar.dir}/flexive-web-shared.jar"/>
             <class location="${build.ui.jar.dir}/flexive-plugin-jsf-core.jar"/>
-            <class location="${build.ui.jar.dir}/flexive-plugin-jsf-globalconfig.jar"/>
+            <class location="${build.ui.jar.dir}/flexive-plugin-globalconfig.jar"/>
             <auxClasspath refid="classpath.build.framework"/>
         </findbugs>
 		<style in="${findbugs.report.dir}/out.xml" style="${findbugs.xsl}" destdir="${findbugs.report.dir}"
