@@ -60,6 +60,7 @@ public class EJBLookup {
         JAVA_COMP_ENV,
         APP_SIMPLENAME_REMOTE,
         COMPLEXNAME,
+        SIMPLENAME,
         SIMPLENAME_LOCAL,
         SIMPLENAME_REMOTE,
         GERONIMO_LOCAL,
@@ -567,6 +568,8 @@ public class EJBLookup {
                 return appName + "/" + type.getSimpleName() + "/remote";
             case COMPLEXNAME:
                 return type.getCanonicalName();
+            case SIMPLENAME:
+                return type.getSimpleName();
             case SIMPLENAME_LOCAL:
                 return type.getSimpleName() + "/local";
             case SIMPLENAME_REMOTE:
