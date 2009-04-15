@@ -28,7 +28,7 @@
     <!-- Configure FxFilter -->
     <filter>
         <filter-name>FxFilter</filter-name>
-        <filter-class>com.flexive.${artifactId}.filter.FxFilter</filter-class>
+        <filter-class>com.flexive.war.filter.FxFilter</filter-class>
     </filter>
 
     <filter-mapping>
@@ -98,13 +98,13 @@
     <!-- Configure thumbnail and download servlet -->
     <servlet>
         <servlet-name>Thumbnail</servlet-name>
-        <servlet-class>com.flexive.${artifactId}.servlet.ThumbnailServlet</servlet-class>
+        <servlet-class>com.flexive.war.servlet.ThumbnailServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>Download</servlet-name>
-        <servlet-class>com.flexive.${artifactId}.servlet.DownloadServlet</servlet-class>
+        <servlet-class>com.flexive.war.servlet.DownloadServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
 
@@ -133,7 +133,7 @@
     </welcome-file-list>
 
     <listener>
-        <listener-class>com.flexive.${artifactId}.listener.SessionTimeoutListener</listener-class>
+        <listener-class>com.flexive.war.listener.SessionTimeoutListener</listener-class>
     </listener>
 </web-app>
 

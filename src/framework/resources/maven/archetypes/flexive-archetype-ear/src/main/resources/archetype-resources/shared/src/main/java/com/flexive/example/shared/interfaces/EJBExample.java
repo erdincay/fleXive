@@ -3,8 +3,8 @@
 #set( $symbol_escape = '\' )
 package com.flexive.example.${artifactId}.interfaces;
 
-import com.flexive.${artifactId}.exceptions.FxApplicationException;
-import com.flexive.${artifactId}.structure.FxType;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.structure.FxType;
 
 import javax.ejb.Remote;
 import java.util.Map;
@@ -21,7 +21,7 @@ import java.util.Map;
  * </p>
  * <p>
  * The easiest way to do this is to extend the remote interface and tag it with the @Local annotation.
- * Flexive's {@link com.flexive.${artifactId}.EJBLookup EJBLookup} automatically uses the local interface
+ * Flexive's {@link com.flexive.shared.EJBLookup EJBLookup} automatically uses the local interface
  * if it's available.
  * </p>
  */
@@ -32,7 +32,7 @@ public interface EJBExample {
      * Return the instance counts for all registered {@link FxType FxTypes}.
      *
      * @return the instance counts for all registered {@link FxType FxTypes}.
-     * @throws com.flexive.${artifactId}.exceptions.FxApplicationException
+     * @throws com.flexive.shared.exceptions.FxApplicationException
      *          if the instance counts could not be determined
      */
     Map<FxType, Integer> getInstanceCounts() throws FxApplicationException;
