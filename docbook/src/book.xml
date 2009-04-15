@@ -35,6 +35,7 @@
     <xi:include href="jsfsupport.xml"/>
     <xi:include href="seam.xml"/>
     <xi:include href="admin_gui.xml"/>
+    <xi:include href="plugins.xml"/>
     <xi:include href="glossary.xml"/>
     <xi:include href="bibliography.xml"/>
 </book>

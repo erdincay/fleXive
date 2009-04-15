@@ -73,4 +73,15 @@
             </personname>
         </author>
     </biblioentry>
+
+    <biblioentry xml:id="bib_blog_globalconfig">
+        <abbrev>The Global Configuration Plugin</abbrev>
+        <title><link xlink:href="http://blog.flexive.org/2009/04/10/the-global-configuration-plugin-or-division-not-defined/">The Global Configuration Plugin (or: Division not defined)</link></title>
+        <author>
+            <personname>
+                <firstname>Daniel</firstname>
+                <surname>Lichtenberger</surname>
+            </personname>
+        </author>
+    </biblioentry>
 </bibliography>

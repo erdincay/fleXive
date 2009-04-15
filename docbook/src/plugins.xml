@@ -1,0 +1,146 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE chapter [
+        <!ENTITY % global_entities SYSTEM "global.ent">
+        %global_entities;
+        ]>
+<chapter xml:id="plugins" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink/namespace"
+         xmlns:xi="http://www.w3.org/2001/XInclude">
+    <title>&Flexive; Plugins</title>
+    <xi:include href="includes/author_dlichtenberger.xml"/>
+
+    <para>
+        Plugins provide additional functionality for &flexive; applications. Plugins can provide stand-alone
+        functionality (possibly with web frontends), or be integrated in the &backendGui;.
+    </para>
+    <para>
+        To enable a plugin when compiling a project using the &flexive; distribution, add it to the
+        <filename>lib</filename>
+        folder of your project. Plugins that are shared by all applications are stored in
+        <filename>flexive-dist/applications</filename>.
+        With &maven;, you only need to add the corresponding dependencies to your project.
+    </para>
+
+    <section xml:id="plugins_jsf_core">
+        <title>Core JSF components</title>
+        <para>
+            Core JSF components and managed beans that support working with &flexive; components
+            (as described in
+            <xref linkend="jsf_component_library"/>).
+        </para>
+        <itemizedlist>
+            <listitem>
+                <para>
+                    Package name:
+                    <emphasis>flexive-plugin-jsf-core.jar</emphasis>
+                </para>
+            </listitem>
+            <listitem>
+                <para>
+                    Maven package:
+                    <programlisting language="xml"><![CDATA[<dependency>
+    <groupId>com.flexive</groupId>
+    <artifactId>flexive-plugin-jsf-core</artifactId>
+    <version>]]>&mavenVersion;<![CDATA[</version>
+</dependency>
+]]></programlisting>
+                </para>
+            </listitem>
+        </itemizedlist>
+    </section>
+
+    <section xml:id="plugins_global_configuration">
+        <title>Global Configuration Plugin</title>
+        <para>
+            A web-based GUI for the
+            <link linkend="core_configuration">global configuration</link>.
+        </para>
+        <itemizedlist>
+            <listitem>
+                <para>
+                    Entry URL:
+                    <emphasis>/&lt;context>/globalconfig/index.xhtml</emphasis>
+                </para>
+            </listitem>
+            <listitem>
+                <para>
+                    Package name:
+                    <emphasis>flexive-plugin-globalconfig.jar</emphasis>
+                </para>
+            </listitem>
+            <listitem>
+                <para>
+                    Maven package:
+                    <programlisting language="xml"><![CDATA[<dependency>
+    <groupId>com.flexive</groupId>
+    <artifactId>flexive-plugin-globalconfig</artifactId>
+    <version>]]>&mavenVersion;<![CDATA[</version>
+</dependency>
+]]></programlisting>
+                </para>
+            </listitem>
+        </itemizedlist>
+
+        <section xml:id="plugins_global_configuration_usage">
+            <title>Usage</title>
+
+            <para>
+                When installed, the global configuration plugin provides a web application to manage the
+                global configuration (especially the
+                <link linkend="core_security_divisions">division table</link>)
+                through the web browser.
+            </para>
+            <para>
+                Login in your web application context under
+                <uri>globalconfig/index.xhtml</uri>.
+                The default login (which should be changed as soon as you logged in) is
+                <code>administrator</code>/<code>adminadmin</code>.
+            </para>
+            <para>
+                You can now define the URL mapping for each division as a regular expression. You can test
+                the mappings by entering example URLs before storing them to the database using the input box
+                after the division table.
+            </para>
+            <para>
+                More information on using the global configuration plugin can be found in
+                <biblioref linkend="bib_blog_globalconfig"/>.
+            </para>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/plugins/globalconfig_overview.png" format="PNG" scalefit="1" width="100%"
+                               contentdepth="66%"/>
+                </imageobject>
+                <caption>
+                    The global configuration plugin's main page. The division table specifies a mapping
+                    from requested URLs to &flexive; divisions.
+                </caption>
+            </mediaobject>
+        </section>
+    </section>
+
+    <section xml:id="plugins_backend_feedback">
+        <title>Backend Feedback Plugin</title>
+        <para>
+            Integrates feedback buttons on the pages of the backend application.
+        </para>
+
+        <itemizedlist>
+            <listitem>
+                <para>
+                    Package name:
+                    <emphasis>flexive-plugin-jsf-feedbackPlugin.jar</emphasis>
+                </para>
+            </listitem>
+            <listitem>
+                <para>
+                    Maven package:
+                    <programlisting language="xml"><![CDATA[<dependency>
+    <groupId>com.flexive</groupId>
+    <artifactId>flexive-plugin-jsf-feedback</artifactId>
+    <version>]]>&mavenVersion;<![CDATA[</version>
+</dependency>
+]]></programlisting>
+                </para>
+            </listitem>
+        </itemizedlist>
+    </section>
+</chapter>

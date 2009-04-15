@@ -83,15 +83,9 @@
             content - totally separated from other users of &flexive;.
         </para>
         <para>
-            Divisions are mapped to server names using regular expressions. A web based user interface can be reached
-            using the the URL
-            <uri>http://ip-address:port/flexive/globalconfig/index.faces</uri>
-            using the username
-            <constant>administrator</constant>
-            and default password
-            <constant>adminadmin</constant>
-            (which should be changed immediatly!). This configuration is stored in its own database called
-            <constant>flexiveConfiguration</constant>.
+            Divisions are mapped to server names using regular expressions. A web based user interface
+            is provided by the
+            <link linkend="plugins_global_configuration">Global Configuration Plugin</link>.
         </para>
     </section>
 
@@ -108,7 +102,7 @@
     </section>
 
     <section xml:id="core_security_acl">
-        <title>ACL's - Access Control Lists</title>
+        <title>ACLs - Access Control Lists</title>
         <para>
             Access control lists - which are assigned to user groups - define a list (Read, Edit, Create, etc.) of
             permissions attached to an arbitrary object like content instances, types, properties (and property
