@@ -41,6 +41,8 @@ import javax.faces.context.FacesContext;
  * @version $Rev$
  */
 public class JsonRpcCall extends UIOutput {
+    public static final String COMPONENT_TYPE = "flexive.JsonRpcCall";
+
     private String method;
     private String args;
 

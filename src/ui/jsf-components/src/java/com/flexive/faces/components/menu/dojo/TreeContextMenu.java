@@ -50,6 +50,8 @@ import java.util.List;
  * @version $Rev$
  */
 public class TreeContextMenu extends UIOutput implements MenuItemContainer<DojoMenuItemData> {
+    public static final String COMPONENT_TYPE = "flexive.DojoTreeContextMenu";
+
     private final List<DojoMenuItemData> menuItems = new ArrayList<DojoMenuItemData>();
     private String showHandler;
 

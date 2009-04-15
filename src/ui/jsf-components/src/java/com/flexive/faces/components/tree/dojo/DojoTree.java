@@ -50,6 +50,8 @@ import javax.faces.context.FacesContext;
  * @version $Rev$
  */
 public class DojoTree extends UIOutput {
+    public static final String COMPONENT_TYPE = "flexive.DojoTree";
+
     private static final Log LOG = LogFactory.getLog(DojoTree.class);
 
     private String name = null;

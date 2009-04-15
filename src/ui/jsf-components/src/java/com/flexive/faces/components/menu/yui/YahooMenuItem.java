@@ -17,6 +17,8 @@ import java.io.IOException;
  * @version $Rev$
  */
 public class YahooMenuItem extends UIOutput implements MenuItemContainer<YahooMenuItemData> {
+    public static final String COMPONENT_TYPE = "flexive.YahooMenuItem";
+
     private final List<YahooMenuItemData> menuItems = new ArrayList<YahooMenuItemData>();
     private String labelKey;
     private String label;

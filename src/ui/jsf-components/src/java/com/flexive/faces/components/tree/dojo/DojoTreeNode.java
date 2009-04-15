@@ -52,6 +52,8 @@ import java.util.List;
  * @version $Rev$
  */
 public class DojoTreeNode extends UIOutput {
+    public static final String COMPONENT_TYPE = "flexive.DojoTreeNode";
+
     private String title = null;
     private String icon = null;
     private String titleClass = null;

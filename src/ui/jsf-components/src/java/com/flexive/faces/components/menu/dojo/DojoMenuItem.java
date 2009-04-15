@@ -54,6 +54,8 @@ import java.util.Map;
  * @see DojoMenu
  */
 public class DojoMenuItem extends UIOutput implements MenuItemContainer<DojoMenuItemData> {
+    public static final String COMPONENT_TYPE = "flexive.DojoMenuItem";
+
     private final List<DojoMenuItemData> menuItems = new ArrayList<DojoMenuItemData>();
     private String labelKey;
     private String label;

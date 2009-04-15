@@ -57,6 +57,8 @@ import java.util.Arrays;
  * @version $Rev$
  */
 public class Thumbnail extends UIOutput {
+    public static final String COMPONENT_TYPE = "flexive.Thumbnail";
+    
     private FxPK pk;
     private FxBinary binary;
     private UIComponent body;

@@ -89,6 +89,8 @@ import java.util.Map;
  * @version $Rev$
  */
 public class FxContentView extends UIOutput {
+    public static final String COMPONENT_TYPE = "flexive.FxContentView";
+    
     private static final Log LOG = LogFactory.getLog(FxContentView.class);
 
     private FxPK pk;

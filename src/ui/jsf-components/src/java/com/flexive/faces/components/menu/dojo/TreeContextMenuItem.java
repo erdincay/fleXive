@@ -46,6 +46,8 @@ import java.util.Map;
  * @see com.flexive.faces.components.tree.dojo.DojoTree
  */
 public class TreeContextMenuItem extends DojoMenuItem {
+    public static final String COMPONENT_TYPE = "flexive.DojoTreeContextMenuItem";
+    
     private String treeActions;
 
     /**

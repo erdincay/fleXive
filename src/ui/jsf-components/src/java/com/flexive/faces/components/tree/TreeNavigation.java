@@ -82,6 +82,8 @@ import java.io.IOException;
  * @version $Rev$
  */
 public class TreeNavigation extends UIOutput implements NamingContainer {
+    public static final String COMPONENT_TYPE = "flexive.TreeNavigation";
+
     private static final Log LOG = LogFactory.getLog(TreeNavigation.class);
 
     private static enum OutputType {

@@ -53,6 +53,8 @@ import java.util.List;
  * @version $Rev$
  */
 public class DojoMenu extends UIOutput implements MenuItemContainer<DojoMenuItemData>, NamingContainer {
+    public static final String COMPONENT_TYPE = "flexive.DojoMenu";
+
     private static final String DOJO_MENU = "PopupMenu2";
     private static final String DOJO_ITEM = "MenuItem2";
 

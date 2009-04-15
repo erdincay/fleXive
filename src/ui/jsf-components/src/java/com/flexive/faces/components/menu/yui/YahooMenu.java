@@ -24,6 +24,8 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
  * @version $Rev$
  */
 public class YahooMenu extends UIOutput implements MenuItemContainer<YahooMenuItemData>, NamingContainer {
+    public static final String COMPONENT_TYPE = "flexive.YahooMenu";
+
     public static final String ICON_PATH = "adm/images/menu";
 
     private final List<YahooMenuItemData> menuItems = new ArrayList<YahooMenuItemData>();

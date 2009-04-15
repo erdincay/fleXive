@@ -43,6 +43,8 @@ import java.io.IOException;
  * @version $Rev$
  */
 public class DojoMenuItemSeparator extends UIOutput {
+    public static final String COMPONENT_TYPE = "flexive.DojoMenuSeparator";
+
     /**
      * {@inheritDoc}
      */

@@ -58,6 +58,8 @@ import net.java.dev.weblets.FacesWebletUtils;
  * @version $Rev$
  */
 public class WriteWebletIncludes extends UIOutput {
+    public static final String COMPONENT_TYPE = "flexive.WriteWebletIncludes";
+
     private static final String REQ_WEBLETS = WriteWebletIncludes.class.getName() + ".WEBLETS";
     private static final String REQ_RENDERED = WriteWebletIncludes.class.getName() + ".WEBLETS_RENDERED";
     private static final String WEBLET_TINYMCE = "com.flexive.faces.weblets/js/tiny_mce/tiny_mce.js";
