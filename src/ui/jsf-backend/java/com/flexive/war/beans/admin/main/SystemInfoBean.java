@@ -189,4 +189,19 @@ public class SystemInfoBean {
     public Long getDatabaseSchemaVersion() throws FxApplicationException {
         return EJBLookup.getDivisionConfigurationEngine().get(SystemParameters.DB_VERSION);
     }
+
+    /**
+     * Returns true if the global configuration plugin is installed.
+     *
+     * @return  true if the global configuration plugin is installed.
+     * @since 3.1
+     */
+    public boolean isGlobalConfigurationPluginInstalled() {
+        try {
+            Class.forName("com.flexive.faces.beans.GlobalConfigBean");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
 }

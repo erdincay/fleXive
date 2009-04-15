@@ -133,9 +133,11 @@
                                 </div>
                             </td>
                         </tr>
-                        <tr>
-                            <td><a href="#{fxSystemBean.documentBase}globalconfig/index.jsf" target="forum.flexive.org">#{fxMessageBean['Welcome.link.globalConfig']}</a></td>
-                        </tr>
+                        <c:if test="#{systemInfoBean.globalConfigurationPluginInstalled}">
+                            <tr>
+                                <td><a href="#{fxSystemBean.documentBase}globalconfig/index.jsf" target="forum.flexive.org">#{fxMessageBean['Welcome.link.globalConfig']}</a></td>
+                            </tr>
+                        </c:if>
                         </tbody>
                     </table>
                 </td>
