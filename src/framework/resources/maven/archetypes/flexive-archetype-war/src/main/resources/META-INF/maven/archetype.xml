@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?><archetype>
+  <id>webapp</id>
+  <sources>
+    <source>src/main/java/ExampleBean.java</source>
+  </sources>
+  <resources>
+    <resource>src/main/webapp/index.xhtml</resource>
+    <resource>src/main/webapp/WEB-INF/web.xml</resource>
+    <resource>src/main/webapp/WEB-INF/faces-config.xml</resource>
+  </resources>
+</archetype>

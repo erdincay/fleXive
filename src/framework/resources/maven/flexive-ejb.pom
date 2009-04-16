@@ -11,9 +11,9 @@
 
     <licenses>
         <license>
-              <name>GNU Lesser General Public License (LGPL)</name>
-              <url>http://www.fsf.org/licensing/licenses/lgpl.txt</url>
-           </license>
+            <name>GNU Lesser General Public License (LGPL)</name>
+            <url>http://www.fsf.org/licensing/licenses/lgpl.txt</url>
+        </license>
     </licenses>
 
     <dependencies>
@@ -37,7 +37,7 @@
             <version>@FLEXIVE_VERSION@</version>
             <optional>false</optional>
         </dependency>
-        
+
         <dependency>
             <groupId>quartz</groupId>
             <artifactId>quartz</artifactId>
@@ -50,6 +50,5 @@
             <artifactId>jtidy-r8</artifactId>
             <version>20060801</version>
         </dependency>
-
     </dependencies>
 </project>

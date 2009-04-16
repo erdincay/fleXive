@@ -1,0 +1,37 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+
+    <head>
+        <fx:includes yui="true"/>
+    </head>
+
+    <body class="yui-skin-sam">
+        <h1>Hello JSF world!</h1>
+
+        <p>
+            ${symbol_pound}{fxSystemBean.buildInfoVerbose}
+        </p>
+
+        <!-- Render instance counts as returned by the EJBExample engine using the JSF ManagedExampleBean -->
+        <table>
+            <caption style="white-space:nowrap">EJB example output - [fleXive] content instances (visible to the guest user)</caption>
+            <c:forEach items="${symbol_pound}{exampleBean.instanceCounts}" var="instanceCount">
+                <tr>
+                    <td>${symbol_pound}{instanceCount.value}</td>
+                    <td>${symbol_pound}{instanceCount.key.label}</td>
+                </tr>
+            </c:forEach>
+        </table>
+
+        <fx:yuiSetup/>
+    </body>
+</html>
