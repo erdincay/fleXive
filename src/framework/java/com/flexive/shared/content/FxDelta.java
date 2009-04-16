@@ -446,7 +446,7 @@ public class FxDelta implements Serializable {
             }
         }
         checkUpdated(null, ret, cache, org, checked);
-        ret.remove(null); //remove null entries
+        ret.removeAll(Collections.singleton(null)); //remove null entries
         return ret;
     }
 
