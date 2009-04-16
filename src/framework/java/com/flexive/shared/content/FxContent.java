@@ -270,9 +270,9 @@ public class FxContent implements Serializable {
     }
 
     /**
-     * Checks if the given PK matches this content. This allows to match a generic PK (i.e. without
-     * a distinct version, but {@link FxPK#LIVE} or {@link FxPK#MAX}), which the FxPK equals method
-     * cannot do.
+     * Checks if the given PK matches the content PK. This method allows to match PKs with generic
+     * version information (including {@link FxPK#LIVE} or {@link FxPK#MAX}), which the 
+     * {@link FxPK#equals(Object)} FxPK equals method cannot do.
      *
      * @param otherPk the PK to be matched
      * @return true if otherPk matches this content
@@ -406,7 +406,12 @@ public class FxContent implements Serializable {
     }
 
     /**
-     * Get all FxData (Group or Property) entries for the given XPath
+     * Get all FxData (Group or Property) entries for the given XPath.
+     *
+     * Note: If the XPath refers to a group, only its child entries are returned
+     * and not the FxData of the group itsself. For accessing the group data ittself
+     * use {@link #getGroupData(String)} instead.
+     *
      *
      * @param XPath requested XPath
      * @return FxData elements for the given XPath
@@ -812,6 +817,11 @@ public class FxContent implements Serializable {
         if (found.size() == 1) {
             if (found.get(0).getXPathFull().equals(XPath))
                 data = found.get(0); //property
+        }
+        //getData(String XPath) returns empty list for empty groups
+        if (data == null && found.isEmpty()) {
+            //fetch group
+            data = getGroupData(XPath);
         }
         if (data == null && found.get(0).getParent() != null && found.get(0).getParent().getXPathFull().equals(XPath))
             data = found.get(0).getParent(); //group with single or multiple properties->get parent
