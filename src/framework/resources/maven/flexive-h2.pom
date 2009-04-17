@@ -15,6 +15,19 @@
               <url>http://www.fsf.org/licensing/licenses/lgpl.txt</url>
            </license>
     </licenses>
+    <url>http://www.flexive.org/</url>
+    <issueManagement>
+        <system>Atlassian JIRA</system>
+        <url>http://issuetracker.flexive.org/jira/browse/FX</url>
+    </issueManagement>
+    <organization>
+        <name>unique computing solutions GmbH (UCS)</name>
+        <url>http://www.ucs.at/</url>
+    </organization>
+    <scm>
+        <connection>scm:svn:http://svn.flexive.org/repository/flexive/@FLEXIVE_BRANCH@</connection>
+        <url>http://source.flexive.org/browse/fleXive/@FLEXIVE_BRANCH@/src/framework/resources/sql/H2/StoredProcedures</url>
+    </scm>
 
     <dependencies>
     </dependencies>

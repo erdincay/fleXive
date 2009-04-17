@@ -823,6 +823,7 @@ database.vendor=MySQL
             <copy file="@{pomPath}/@{pom}" todir="${flexive.base.build.dir}" overwrite="true">
                 <filterset>
                     <filter token="FLEXIVE_VERSION" value="${flexive.maven.version}"/>
+                    <filter token="FLEXIVE_BRANCH" value="${flexive.maven.branch}"/>
                 </filterset>
             </copy>
             <!--artifact:install-provider groupid="org.apache.maven.wagon" artifactid="wagon-ssh" version="1.0-beta-1"/-->
